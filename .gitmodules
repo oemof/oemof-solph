@@ -4,3 +4,6 @@
 [submodule "guilib"]
 	path = guilib
 	url = ../guilib
+[submodule "feedinlib"]
+	path = feedinlib
+	url = ../feedinlib
