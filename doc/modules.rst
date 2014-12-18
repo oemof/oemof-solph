@@ -1,13 +1,11 @@
-pahesmf
-=======
+oemof
+=====
 
 .. toctree::
    :maxdepth: 4
 
-   basic_functions
    dblib
-   dinput
    feedinlib
-   init_pahesmf
+   input
    outputlib
    solph
