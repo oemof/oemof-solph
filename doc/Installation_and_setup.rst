@@ -158,13 +158,31 @@ Change <username> to your system username of "RoteMine"-Server (192.168.10.26)
 
 .. code::
 
-	git clone ssh://<username>@192.168.10.26/git/pahesmf.git
+	git clone git@vernetzen.uni-flensburg.de:~/oemof
+	
+When you recieve following message 
+	
+::
+  The authenticity of host 'vernetzen.uni-flensburg.de (193.174.11.235)' can't be established.
+  ECDSA key fingerprint is 03:ad:10:a6:dc:25:85:cf:e6:24:39:47:62:df:f0:0c.
+  Are you sure you want to continue connecting (yes/no)?
+
+answer with yes.
+
+get underlying repositories (submodules)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-You will find your repository in the following folder (if you did not change it):
+.. code::
+  cd oemof
+  git submodule update --recursive --init
 
-* Windows: "C:\Users\<username>\pahesmf"
-* Linux: "/home/user/pahesmf"
+add oemof to PYTHONPATH
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Configure PYTHONPATH env-var The environment variable PYTHONPATH has to contain the path leading to pahesmf package and the path ~/.python_local. Preferably PYTHONPATH is edited by your .profile. Just append a line similiar to
+
+export PYTHONPATH="${PYTHONPATH}:/your/new/path/"
 
 
 Personal config file
