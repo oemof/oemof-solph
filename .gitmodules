@@ -1,3 +1,6 @@
 [submodule "solph"]
 	path = solph
 	url = ../solph
+[submodule "guilib"]
+	path = guilib
+	url = ../guilib
