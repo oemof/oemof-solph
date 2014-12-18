@@ -13,3 +13,6 @@
 [submodule "dblib"]
 	path = dblib
 	url = ../dblib
+[submodule "outputlib"]
+	path = outputlib
+	url = ../outputlib
