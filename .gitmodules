@@ -7,3 +7,6 @@
 [submodule "feedinlib"]
 	path = feedinlib
 	url = ../feedinlib
+[submodule "reegis"]
+	path = reegis
+	url = ../reegis
