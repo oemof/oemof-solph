@@ -10,3 +10,6 @@
 [submodule "reegis"]
 	path = reegis
 	url = ../reegis
+[submodule "dblib"]
+	path = dblib
+	url = ../dblib
