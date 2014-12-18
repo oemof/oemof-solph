@@ -1,0 +1,3 @@
+[submodule "solph"]
+	path = solph
+	url = ../solph
