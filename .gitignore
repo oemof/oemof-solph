@@ -1,0 +1,9 @@
+/doc/Makefile
+*.py[cod]
+*.py.orig
+*.nja
+*.odb
+*.textile
+*.log
+*.lp
+doc/_build/
