@@ -16,6 +16,6 @@
 [submodule "outputlib"]
 	path = outputlib
 	url = ../outputlib
-[submodule "input"]
-	path = input
-	url = ../input
+[submodule "dinput"]
+	path = dinput
+	url = git@vernetzen.uni-flensburg.de:~/dinput
