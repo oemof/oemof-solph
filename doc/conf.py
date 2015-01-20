@@ -31,6 +31,7 @@ import os
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'numpydoc' 
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -46,8 +47,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pahesmf'
-copyright = u'2014, Author'
+project = u'oemof'
+copyright = u'2014, oemof-Team'
+author = u'oemof-Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -101,12 +103,16 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'agogo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+	"sidebarwidth": "25em",
+	"documentwidth":"50em",
+	"pagewidth": "75em",
+	}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -179,7 +185,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pahesmfdoc'
+htmlhelp_basename = 'oemof_doc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -199,8 +205,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'pahesmf.tex', u'pahesmf Documentation',
-   u'Author', 'manual'),
+  ('index', 'oemof.tex', u'oemof Documentation',
+   u'oemof-Team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -229,8 +235,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pahesmf', u'pahesmf Documentation',
-     [u'Author'], 1)
+    ('index', 'oemof', u'oemof Documentation',
+     [u'oemof-Team'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -243,8 +249,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'pahesmf', u'pahesmf Documentation',
-   u'Author', 'pahesmf', 'One line description of project.',
+  ('index', 'oemof', u'oemof Documentation',
+   u'Author', 'oemof', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -264,10 +270,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'pahesmf'
-epub_author = u'Author'
-epub_publisher = u'Author'
-epub_copyright = u'2014, Author'
+epub_title = u'oemof'
+epub_author = u'oemof-Team'
+epub_publisher = u'oemof-Team'
+epub_copyright = u'2014, oemof-Team'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'pahesmf'

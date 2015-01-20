@@ -5,7 +5,7 @@ oemof
    :maxdepth: 4
 
    dblib
+   dinput
    feedinlib
-   input
    outputlib
    solph
