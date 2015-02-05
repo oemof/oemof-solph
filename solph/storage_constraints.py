@@ -91,13 +91,4 @@ def storage_power_lim(main_dc, storage_type, prob):
                         ['installed_capacity']),
                     (m + 'storage charge limit SoC ' + s + '_' + r + '_' +
                         str(t)))
-
-                # Charge limitation by maximal power in the same building
-                if domestic:
-                    prob += (
-                        main_dc['lp'][m + '_storage_charge']['data'][s][t][r]
-                        <= main_dc['parameter']['component'][r][s][
-                            'installed_capacity'],
-                        (m + 'storage charge limit mpb ' + s + '_' + r + '_' +
-                            str(t)))
     return prob
