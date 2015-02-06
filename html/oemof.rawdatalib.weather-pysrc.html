@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>oemof.rawdatalib.weather</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="oemof-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="oemof-module.html">Package&nbsp;oemof</a> ::
+        <a href="oemof.rawdatalib-module.html">Package&nbsp;rawdatalib</a> ::
+        Module&nbsp;weather
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="oemof.rawdatalib.weather-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="oemof.rawdatalib.weather-module.html">Module oemof.rawdatalib.weather</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable oemof.ADT.__package__=oemof.ADT-module.html#__package__,Variable oemof.ADT.graph.__package__=oemof.ADT.graph-module.html#__package__,Variable oemof.__package__=oemof-module.html#__package__,Variable oemof.entities.__package__=oemof.entities-module.html#__package__,Variable oemof.feedinlib.__package__=oemof.feedinlib-module.html#__package__,Variable oemof.feedinlib.basefeed.__package__=oemof.feedinlib.basefeed-module.html#__package__,Variable oemof.feedinlib.feedin.__package__=oemof.feedinlib.feedin-module.html#__package__,Variable oemof.feedinlib.pvfeed.__package__=oemof.feedinlib.pvfeed-module.html#__package__,Variable oemof.feedinlib.windfeed.__package__=oemof.feedinlib.windfeed-module.html#__package__,Variable oemof.iolib.__package__=oemof.iolib-module.html#__package__,Variable oemof.iolib.config.__package__=oemof.iolib.config-module.html#__package__,Variable oemof.iolib.netcdf.__package__=oemof.iolib.netcdf-module.html#__package__,Variable oemof.iolib.postgis.__package__=oemof.iolib.postgis-module.html#__package__,Variable oemof.main.__package__=oemof.main-module.html#__package__,Variable oemof.outputlib.__package__=oemof.outputlib-module.html#__package__,Variable oemof.rawdatalib.__package__=oemof.rawdatalib-module.html#__package__,Variable oemof.rawdatalib.heat.__package__=oemof.rawdatalib.heat-module.html#__package__,Variable oemof.rawdatalib.prices.__package__=oemof.rawdatalib.prices-module.html#__package__,Variable oemof.rawdatalib.weather.__package__=oemof.rawdatalib.weather-module.html#__package__,Variable oemof.solverlib.__package__=oemof.solverlib-module.html#__package__"><a title="oemof.ADT.__package__
+oemof.ADT.graph.__package__
+oemof.__package__
+oemof.entities.__package__
+oemof.feedinlib.__package__
+oemof.feedinlib.basefeed.__package__
+oemof.feedinlib.feedin.__package__
+oemof.feedinlib.pvfeed.__package__
+oemof.feedinlib.windfeed.__package__
+oemof.iolib.__package__
+oemof.iolib.config.__package__
+oemof.iolib.netcdf.__package__
+oemof.iolib.postgis.__package__
+oemof.main.__package__
+oemof.outputlib.__package__
+oemof.rawdatalib.__package__
+oemof.rawdatalib.heat.__package__
+oemof.rawdatalib.prices.__package__
+oemof.rawdatalib.weather.__package__
+oemof.solverlib.__package__" class="py-name" href="#" onclick="return doclink('link-0', '__package__', 'link-0');">__package__</a></tt> <tt class="py-op">=</tt> <tt class="py-docstring">"rawdatalib"</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-1" class="py-name" targets="Package oemof.iolib=oemof.iolib-module.html"><a title="oemof.iolib" class="py-name" href="#" onclick="return doclink('link-1', 'iolib', 'link-1');">iolib</a></tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Module oemof.iolib.postgis=oemof.iolib.postgis-module.html"><a title="oemof.iolib.postgis" class="py-name" href="#" onclick="return doclink('link-2', 'postgis', 'link-2');">postgis</a></tt> <tt class="py-keyword">as</tt> <tt class="py-name">pg</tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"> </tt>
+<a name="Weather"></a><div id="Weather-def"><a name="L6"></a><tt class="py-lineno"> 6</tt> <a class="py-toggle" href="#" id="Weather-toggle" onclick="return toggle('Weather');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="oemof.rawdatalib.weather.Weather-class.html">Weather</a><tt class="py-op">:</tt> </tt>
+</div><div id="Weather-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="Weather-expanded"><a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line"><tt class="py-docstring">    Main-Interface for loading weather data.</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"> </tt>
+<a name="Weather.__init__"></a><div id="Weather.__init__-def"><a name="L12"></a><tt class="py-lineno">12</tt> <a class="py-toggle" href="#" id="Weather.__init__-toggle" onclick="return toggle('Weather.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.rawdatalib.weather.Weather-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">year</tt><tt class="py-op">,</tt> <tt class="py-param">region</tt><tt class="py-op">,</tt> <tt class="py-param">params</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Weather.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Weather.__init__-expanded"><a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line"><tt class="py-docstring">        constructor for the weather-object.</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line"><tt class="py-docstring">        Test for config, to set up which source shall be used</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_data</tt> <tt class="py-op">=</tt> <tt class="py-name">pg</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Function oemof.iolib.postgis.raw_query()=oemof.iolib.postgis-module.html#raw_query"><a title="oemof.iolib.postgis.raw_query" class="py-name" href="#" onclick="return doclink('link-3', 'raw_query', 'link-3');">raw_query</a></tt><tt class="py-op">(</tt><tt class="py-string">"year: "</tt> <tt class="py-op">+</tt> <tt class="py-name">year</tt> <tt class="py-op">+</tt> <tt class="py-string">", region: "</tt> <tt class="py-op">+</tt> <tt class="py-name">region</tt> <tt class="py-op">+</tt> <tt class="py-string">", params: "</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line"> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"> </tt>
+<a name="Weather.get_raw_data"></a><div id="Weather.get_raw_data-def"><a name="L21"></a><tt class="py-lineno">21</tt> <a class="py-toggle" href="#" id="Weather.get_raw_data-toggle" onclick="return toggle('Weather.get_raw_data');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.rawdatalib.weather.Weather-class.html#get_raw_data">get_raw_data</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Weather.get_raw_data-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Weather.get_raw_data-expanded"><a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"><tt class="py-docstring">        use this method to retrieve the whole raw dataset</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"><tt class="py-docstring">        :return: the weatherdata</tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_data</tt> </tt>
+</div></div><a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="oemof-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Feb  6 16:14:16 2015
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
