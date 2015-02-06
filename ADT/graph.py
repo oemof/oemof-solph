@@ -1,17 +1,17 @@
 """
-graph.py
-Author: steffen Peleikis
+graph.py.
+Author: steffen Peleikis.
 
 This module contains the Graph-ADT.
 
 L{Graphs<Graph>} can be used to implement grids.
-They are made of L{vertices>Vertex>} and L{edges<Edge>}
+They are made of L{vertices<Vertex>} and L{edges<Edge>}.
 """
 
 
 class Edge(object):
     """
-    defines and edge between to L{vertices<vertex>}.
+    defines and edge between to L{vertices<Vertex>}.
     inherit from here to implement further functionality.
     """
     def __init__(self, weight=0):
@@ -37,8 +37,8 @@ class Graph(object):
         """
         creates a new L{Vertex} and adds it to the graph.
         :param vertex_id: the vertex id.
-        :param vertex_type: the vertex-type
-        :return: the new L{Vertex}
+        :param vertex_type: the vertex-type.
+        :return: the new L{Vertex}.
         """
         self.num_vertices += 1
         new_vertex = Vertex(vertex_id, vertex_type)
@@ -108,9 +108,9 @@ class Vertex(object):
     """
     def __init__(self, vertex_id, vertex_type):
         """
-        default constructor of a vertex
-        :param vertex_id: vertex id
-        :param vertex_type: vertex type
+        default constructor of a vertex.
+        :param vertex_id: vertex id.
+        :param vertex_type: vertex type.
         """
         self.id = vertex_id
         self.connected_to = {}
@@ -128,27 +128,27 @@ class Vertex(object):
     def __str__(self):
         """
         to-string overload.
-        :return: the string
+        :return: the string.
         """
         return str(self.id) + ' connected_to: ' + str([x.id for x in self.connected_to])
 
     def get_connections(self):
         """
         get all vertices connected to this vertex.
-        :return: list of vertices
+        :return: list of vertices.
         """
         return self.connected_to.keys()
 
     def get_id(self):
         """
         get the own vertex-id.
-        :return: the vertex id
+        :return: the vertex id.
         """
         return self.id
 
     def get_edge(self, vertex):
         """
-        get an l{Edge} bewteen this vertex and the vertex provided.
+        get an L{Edge} between this vertex and the vertex provided.
         :param vertex: the vertex the get the L{Edge} to.
         :return: the edge.
         """

@@ -1,7 +1,7 @@
 __package__ = "rawdatalib"
 
-import iolib.config as cfg
 import iolib.postgis as pg
+
 
 class Weather:
     """
