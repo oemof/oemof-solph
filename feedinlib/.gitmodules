@@ -1,3 +1,0 @@
-[submodule "PVLIB_Python"]
-	path = PVLIB_Python
-	url = git@github.com:Sandia-Labs/PVLIB_Python.git
