@@ -1,4 +1,3 @@
-__author__ = 'stfn'
 """
 graph.py
 Author: steffen Peleikis
@@ -8,103 +7,113 @@ This module contains the Graph-ADT.
 Graphs can be used to implement grids.
 """
 
+
+class Edge(object):
+    """
+    defines and edge between to vertices.
+    inherit from here to implement further functionality.
+    """
+    def __init__(self, weight=0):
+        """
+        base constructor for an empty edge.
+        """
+        self._weight = weight
+
+
 class Graph(object):
     """
-    Implements Graphs made of Vertices and Edges.
-        Inherit from here to implement special graphs like grids.
+    Implements Graphs made of L{Vertices<ADT.Vertex>} and L{Edges<Edge>}.
+    Inherit from here to implement special graphs like grids.
     """
     def __init__(self):
         """
         Empty constructor. Creates an empty graph.
         """
-        self.vertList = {}
-        self.numVertices = 0
+        self.vertice_list = {}
+        self.num_vertices = 0
 
-    def create_vertex(self, id, type):
+    def create_vertex(self, vertex_id, vertex_type):
         """
         creates a new vertex and adds it to the graph.
-        :param id: the vertex id.
-        :param type: the vertex-type
+        :param vertex_id: the vertex id.
+        :param vertex_type: the vertex-type
         :return: the new vertex
         """
-        self.numVertices += 1
-        newVertex = Vertex(id, type)
-        self.vertList[id] = newVertex
-        return newVertex
+        self.num_vertices += 1
+        new_vertex = Vertex(vertex_id, vertex_type)
+        self.vertice_list[vertex_id] = new_vertex
+        return new_vertex
 
     def add_vertex(self, vertex):
         """
         adds an existing vertex to the graph.
         :param vertex: the vertex to be added.
         """
-        self.numVertices += 1
-        self.vertList[vertex.id] = vertex
+        self.num_vertices += 1
+        self.vertice_list[vertex.id] = vertex
 
-
-    def get_vertex(self, id):
+    def get_vertex(self, vertex_id):
         """
         finds a vertex with the given id in the graph.
-        :param id: the id to find.
+        :param vertex_id: the vertex id to find.
         :return: the found vertex.
         """
-        if id in self.vertList:
-            return self.vertList[id]
+        if vertex_id in self.vertice_list:
+            return self.vertice_list[vertex_id]
         else:
             return None
 
-    def __contains__(self, id):
+    def __contains__(self, vertex_id):
         """
         checks if the vertex with the given id exists within the graph.
-        :param id: the id to check.
+        :param vertex_id: the id to check.
         :return: true if found, false if not.
         """
-        return id in self.vertList
+        return vertex_id in self.vertice_list
 
-
-
-    def add_edge(self, f, t, edge=None):
+    def add_edge(self, source_vertex, target_vortex, edge=Edge()):
         """
         adds an edge between to vertices.
         if a vertex does not exist in the graph yet, it will be added.
-        :param f: the first vertex to connect the edge to.
-        :param t: the second vertex to connect the edge to.
+        :param source_vertex: the first vertex to connect the edge to.
+        :param target_vortex: the second vertex to connect the edge to.
         :param edge: the edge-object to add. None if just an abstract connection with no further information
-            will be added.
+        will be added.
         """
-        if f not in self.vertList:
-            nv = self.add_vertex(f)
-        if t not in self.vertList:
-            nv = self.add_vertex(t)
-        self.vertList[f].addNeighbor(self.vertList[t], edge)
+        if source_vertex not in self.vertice_list:
+            self.add_vertex(source_vertex)
+        if target_vortex not in self.vertice_list:
+            self.add_vertex(target_vortex)
+        self.vertice_list[source_vertex].addNeighbor(self.vertice_list[target_vortex], edge)
 
     def get_vertices(self):
         """
         get all vertices of this graph.
         :return: list of vertices.
         """
-        return self.vertList.values()
+        return self.vertice_list.values()
 
     def __iter__(self):
         """
         iterator.
         :return: next element.
         """
-        return iter(self.vertList.values())
+        return iter(self.vertice_list.values())
 
 
 class Vertex(object):
     """
     Implements a Vertex that can be added to a graph.
     """
-    def __init__(self, id, type):
+    def __init__(self, vertex_id, vertex_type):
         """
         default constructor of a vertex
-        :param id: vertex id
-        :param type: vertex type
+        :param vertex_id: vertex id
+        :param vertex_type: vertex type
         """
-        self.id = id
-        self.connectedTo = {}
-        self.type = type
+        self.id = vertex_id
+        self.connected_to = {}
+        self.type = vertex_type
 
     def add_neighbor(self, vertex, edge=Edge()):
         """
@@ -114,21 +123,21 @@ class Vertex(object):
         :return:
         """
 
-        self.connectedTo[vertex] = edge;
+        self.connected_to[vertex] = edge
 
     def __str__(self):
         """
-        to-string overload
+        to-string overload.
         :return: the string
         """
-        return str(self.id) + ' connectedTo: ' + str([x.id for x in self.connectedTo])
+        return str(self.id) + ' connected_to: ' + str([x.id for x in self.connected_to])
 
     def get_connections(self):
         """
         get all vertices connected to this vertex.
         :return: list of vertices
         """
-        return self.connectedTo.keys()
+        return self.connected_to.keys()
 
     def get_id(self):
         """
@@ -143,7 +152,7 @@ class Vertex(object):
         :param vertex: the vertex the get the edge to.
         :return: the edge.
         """
-        return self.connectedTo[vertex]
+        return self.connected_to[vertex]
 
     def get_type(self):
         """
@@ -152,28 +161,11 @@ class Vertex(object):
         """
         return self.type
 
-    def set_type(self, type):
+    def set_type(self, vertex_type):
         """
         sets the type of this vertex.
-        :param type: the type.
+        :param vertex_type: the type.
         """
-        self.type = type
+        self.type = vertex_type
 
 
-class Edge(object):
-    """
-    defines and edge between to vertices.
-    inherit from here to implement further functionality.
-    """
-    def __init__(self):
-        """
-        base constructor for an empty egde.
-        """
-        self._weight = 0;
-
-    def __init__(self, weight):
-        """
-        constructor for basic adges with weight.
-        :param weight: the weight of this edge.
-        """
-        self._weight = weight

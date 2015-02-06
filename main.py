@@ -6,9 +6,7 @@ def main():
     #use the Timeseries. factory to instantiate a new timeseries
     #implemented so far are "wind" and "pv"
 
-    wind = feed.create_timeseries("wind", "2012", "Hamburg")
-
-    print wind.get_timeseries()
+    test = feed.Feedin(Grid(params))
 
 if __name__ == "__main__":
     main()
