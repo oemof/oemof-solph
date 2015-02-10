@@ -3,8 +3,8 @@ from entities.base_entity import Entity
 
 class Producer(Entity):
 
-    def __init__(self, entity_id, production):
-        self._id = entity_id
+    def __init__(self, entity_id, position, production):
+        super(self).__init__(entity_id, position)
         self._production = production
 
     def get_production(self):
@@ -12,5 +12,3 @@ class Producer(Entity):
 
     def set_production(self, production):
         self._production = production
-
-
