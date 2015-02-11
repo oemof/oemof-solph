@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>oemof.feedinlib.base_feed</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="oemof-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="oemof-module.html">Package&nbsp;oemof</a> ::
+        <a href="oemof.feedinlib-module.html">Package&nbsp;feedinlib</a> ::
+        Module&nbsp;base_feed
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="oemof.feedinlib.base_feed-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="oemof.feedinlib.base_feed-module.html">Module oemof.feedinlib.base_feed</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Package oemof.rawdatalib=oemof.rawdatalib-module.html"><a title="oemof.rawdatalib" class="py-name" href="#" onclick="return doclink('link-0', 'rawdatalib', 'link-0');">rawdatalib</a></tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Module oemof.rawdatalib.weather=oemof.rawdatalib.weather-module.html"><a title="oemof.rawdatalib.weather" class="py-name" href="#" onclick="return doclink('link-1', 'weather', 'link-1');">weather</a></tt> <tt class="py-keyword">as</tt> <tt class="py-name">w</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"> </tt>
+<a name="Feed"></a><div id="Feed-def"><a name="L3"></a><tt class="py-lineno"> 3</tt> <a class="py-toggle" href="#" id="Feed-toggle" onclick="return toggle('Feed');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html">Feed</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="Feed-expanded"><a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line">    <tt class="py-comment">#init for basic data</tt> </tt>
+<a name="Feed.__init__"></a><div id="Feed.__init__-def"><a name="L6"></a><tt class="py-lineno"> 6</tt> <a class="py-toggle" href="#" id="Feed.__init__-toggle" onclick="return toggle('Feed.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">year</tt><tt class="py-op">,</tt> <tt class="py-param">region</tt><tt class="py-op">,</tt> <tt class="py-param">params</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed.__init__-expanded"><a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line"><tt class="py-docstring">        Timeseries-Class</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-docstring">        :param year: the year to get the data for</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-docstring">        :param region: the region to get the data for</tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-docstring">        :param params: list of strings to define which variables to load from the DB</tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeseries</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_year</tt> <tt class="py-op">=</tt> <tt class="py-name">year</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_region</tt> <tt class="py-op">=</tt> <tt class="py-name">region</tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_weatherObject</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Method oemof.feedinlib.base_feed.Feed._load_timeseries()=oemof.feedinlib.base_feed.Feed-class.html#_load_timeseries"><a title="oemof.feedinlib.base_feed.Feed._load_timeseries" class="py-name" href="#" onclick="return doclink('link-2', '_load_timeseries', 'link-2');">_load_timeseries</a></tt><tt class="py-op">(</tt><tt class="py-name">params</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"> </tt>
+<a name="Feed._load_timeseries"></a><div id="Feed._load_timeseries-def"><a name="L21"></a><tt class="py-lineno">21</tt> <a class="py-toggle" href="#" id="Feed._load_timeseries-toggle" onclick="return toggle('Feed._load_timeseries');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#_load_timeseries">_load_timeseries</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">params</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed._load_timeseries-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed._load_timeseries-expanded"><a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"><tt class="py-docstring">        sets the raw data from a weather object and calls the apply_model</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"><tt class="py-docstring">        if each data is not yet set. Maybe a "force recalculate" parameter?</tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line"><tt class="py-docstring">        :param params: List of Parameters to specify the variable to load</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line"><tt class="py-docstring">        :return: the timeseries of data</tt> </tt>
+<a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line"> </tt>
+<a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_weatherObject</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt> <tt class="py-keyword">or</tt> <tt class="py-op">(</tt><tt class="py-name">params</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Function oemof.iolib.config.get()=oemof.iolib.config-module.html#get"><a title="oemof.iolib.config.get" class="py-name" href="#" onclick="return doclink('link-3', 'get', 'link-3');">get</a></tt><tt class="py-op">(</tt><tt class="py-string">"recalculate"</tt><tt class="py-op">)</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_weatherObject</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name" targets="Method oemof.feedinlib.base_feed.Feed._get_weather_object_from_source()=oemof.feedinlib.base_feed.Feed-class.html#_get_weather_object_from_source"><a title="oemof.feedinlib.base_feed.Feed._get_weather_object_from_source" class="py-name" href="#" onclick="return doclink('link-4', '_get_weather_object_from_source', 'link-4');">_get_weather_object_from_source</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_year</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_region</tt><tt class="py-op">,</tt> <tt class="py-name">params</tt><tt class="py-op">)</tt> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeseries</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt> <tt class="py-keyword">or</tt> <tt class="py-op">(</tt><tt class="py-name">params</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name"><a title="oemof.iolib.config.get" class="py-name" href="#" onclick="return doclink('link-5', 'get', 'link-3');">get</a></tt><tt class="py-op">(</tt><tt class="py-string">"recalculate"</tt><tt class="py-op">)</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method oemof.feedinlib.base_feed.Feed._apply_model()=oemof.feedinlib.base_feed.Feed-class.html#_apply_model,Method oemof.feedinlib.pv_feed._PvFeed._apply_model()=oemof.feedinlib.pv_feed._PvFeed-class.html#_apply_model,Method oemof.feedinlib.wind_feed._WindFeed._apply_model()=oemof.feedinlib.wind_feed._WindFeed-class.html#_apply_model"><a title="oemof.feedinlib.base_feed.Feed._apply_model
+oemof.feedinlib.pv_feed._PvFeed._apply_model
+oemof.feedinlib.wind_feed._WindFeed._apply_model" class="py-name" href="#" onclick="return doclink('link-6', '_apply_model', 'link-6');">_apply_model</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line"> </tt>
+<a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeseries</tt> </tt>
+</div><a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line"> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line"> </tt>
+<a name="Feed._apply_model"></a><div id="Feed._apply_model-def"><a name="L37"></a><tt class="py-lineno">37</tt> <a class="py-toggle" href="#" id="Feed._apply_model-toggle" onclick="return toggle('Feed._apply_model');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#_apply_model">_apply_model</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed._apply_model-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed._apply_model-expanded"><a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line"><tt class="py-docstring">        calculates the timeseries from the input data</tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line"><tt class="py-docstring">        override this method for your implementation in the corresponding subclass (PV, Wind, ...)</tt> </tt>
+<a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line"><tt class="py-docstring">        :return:</tt> </tt>
+<a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line">        <tt class="py-comment"># TODO: change to actually working code</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-string">"using the model from the base class is useless. Implement the methods of the subclass first"</tt> </tt>
+<a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line"> </tt>
+<a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line">    <tt class="py-comment">#return the raw data by instantiating a raw_data object</tt> </tt>
+<a name="Feed._get_weather_object_from_source"></a><div id="Feed._get_weather_object_from_source-def"><a name="L48"></a><tt class="py-lineno">48</tt> <a class="py-toggle" href="#" id="Feed._get_weather_object_from_source-toggle" onclick="return toggle('Feed._get_weather_object_from_source');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#_get_weather_object_from_source">_get_weather_object_from_source</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">year</tt><tt class="py-op">,</tt> <tt class="py-param">region</tt><tt class="py-op">,</tt> <tt class="py-param">params</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed._get_weather_object_from_source-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed._get_weather_object_from_source-expanded"><a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L50"></a><tt class="py-lineno">50</tt>  <tt class="py-line"><tt class="py-docstring">        returns the weather object</tt> </tt>
+<a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line"><tt class="py-docstring">        :param year: the year to get the data for</tt> </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line"><tt class="py-docstring">        :param region: the year to get the data for</tt> </tt>
+<a name="L53"></a><tt class="py-lineno">53</tt>  <tt class="py-line"><tt class="py-docstring">        :param params: List of parameters</tt> </tt>
+<a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line"><tt class="py-docstring">        :return: the weather-timeseries</tt> </tt>
+<a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__class__</tt> </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line"> </tt>
+<a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">w</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Class oemof.rawdatalib.weather.Weather=oemof.rawdatalib.weather.Weather-class.html"><a title="oemof.rawdatalib.weather.Weather" class="py-name" href="#" onclick="return doclink('link-7', 'Weather', 'link-7');">Weather</a></tt><tt class="py-op">(</tt><tt class="py-name">year</tt><tt class="py-op">,</tt> <tt class="py-name">region</tt><tt class="py-op">,</tt> <tt class="py-name">params</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L59"></a><tt class="py-lineno">59</tt>  <tt class="py-line"> </tt>
+<a name="Feed.get_year"></a><div id="Feed.get_year-def"><a name="L60"></a><tt class="py-lineno">60</tt> <a class="py-toggle" href="#" id="Feed.get_year-toggle" onclick="return toggle('Feed.get_year');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#get_year">get_year</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed.get_year-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed.get_year-expanded"><a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line"><tt class="py-docstring">        :return: the year of this Time-Series-Instance</tt> </tt>
+<a name="L63"></a><tt class="py-lineno">63</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L64"></a><tt class="py-lineno">64</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_year</tt> </tt>
+</div><a name="L65"></a><tt class="py-lineno">65</tt>  <tt class="py-line"> </tt>
+<a name="Feed.get_region"></a><div id="Feed.get_region-def"><a name="L66"></a><tt class="py-lineno">66</tt> <a class="py-toggle" href="#" id="Feed.get_region-toggle" onclick="return toggle('Feed.get_region');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#get_region">get_region</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed.get_region-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed.get_region-expanded"><a name="L67"></a><tt class="py-lineno">67</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L68"></a><tt class="py-lineno">68</tt>  <tt class="py-line"><tt class="py-docstring">        :return: the region of this Time-Series-Instance</tt> </tt>
+<a name="L69"></a><tt class="py-lineno">69</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L70"></a><tt class="py-lineno">70</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_region</tt> </tt>
+</div><a name="L71"></a><tt class="py-lineno">71</tt>  <tt class="py-line"> </tt>
+<a name="Feed.get_timeseries"></a><div id="Feed.get_timeseries-def"><a name="L72"></a><tt class="py-lineno">72</tt> <a class="py-toggle" href="#" id="Feed.get_timeseries-toggle" onclick="return toggle('Feed.get_timeseries');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.feedinlib.base_feed.Feed-class.html#get_timeseries">get_timeseries</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Feed.get_timeseries-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Feed.get_timeseries-expanded"><a name="L73"></a><tt class="py-lineno">73</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L74"></a><tt class="py-lineno">74</tt>  <tt class="py-line"><tt class="py-docstring">        :return: the data-timeseries of this Time-Series-Instance</tt> </tt>
+<a name="L75"></a><tt class="py-lineno">75</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L76"></a><tt class="py-lineno">76</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeseries</tt> </tt>
+</div></div><a name="L77"></a><tt class="py-lineno">77</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="oemof-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Wed Feb 11 17:42:31 2015
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

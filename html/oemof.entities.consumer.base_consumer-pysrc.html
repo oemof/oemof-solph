@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>oemof.entities.consumer.base_consumer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="oemof-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="oemof-module.html">Package&nbsp;oemof</a> ::
+        <a href="oemof.entities-module.html">Package&nbsp;entities</a> ::
+        <a href="oemof.entities.consumer-module.html">Package&nbsp;consumer</a> ::
+        Module&nbsp;base_consumer
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="oemof.entities.consumer.base_consumer-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="oemof.entities.consumer.base_consumer-module.html">Module oemof.entities.consumer.base_consumer</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-0" class="py-name" targets="Package oemof.entities=oemof.entities-module.html"><a title="oemof.entities" class="py-name" href="#" onclick="return doclink('link-0', 'entities', 'link-0');">entities</a></tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Module oemof.entities.base_entity=oemof.entities.base_entity-module.html"><a title="oemof.entities.base_entity" class="py-name" href="#" onclick="return doclink('link-1', 'base_entity', 'link-1');">base_entity</a></tt> <tt class="py-keyword">import</tt> <tt id="link-2" class="py-name" targets="Class oemof.entities.base_entity.Entity=oemof.entities.base_entity.Entity-class.html"><a title="oemof.entities.base_entity.Entity" class="py-name" href="#" onclick="return doclink('link-2', 'Entity', 'link-2');">Entity</a></tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"> </tt>
+<a name="Consumer"></a><div id="Consumer-def"><a name="L4"></a><tt class="py-lineno"> 4</tt> <a class="py-toggle" href="#" id="Consumer-toggle" onclick="return toggle('Consumer');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="oemof.entities.consumer.base_consumer.Consumer-class.html">Consumer</a><tt class="py-op">(</tt><tt class="py-base-class">Entity</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Consumer-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="Consumer-expanded"><a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"> </tt>
+<a name="Consumer.__init__"></a><div id="Consumer.__init__-def"><a name="L6"></a><tt class="py-lineno"> 6</tt> <a class="py-toggle" href="#" id="Consumer.__init__-toggle" onclick="return toggle('Consumer.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="oemof.entities.consumer.base_consumer.Consumer-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">entity_id</tt><tt class="py-op">,</tt> <tt class="py-param">position</tt><tt class="py-op">,</tt> <tt class="py-param">consumption</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Consumer.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Consumer.__init__-expanded"><a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-3" class="py-name" targets="Class oemof.entities.consumer.base_consumer.Consumer=oemof.entities.consumer.base_consumer.Consumer-class.html"><a title="oemof.entities.consumer.base_consumer.Consumer" class="py-name" href="#" onclick="return doclink('link-3', 'Consumer', 'link-3');">Consumer</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name" targets="Method oemof.entities.base_entity.Entity.__init__()=oemof.entities.base_entity.Entity-class.html#__init__,Method oemof.entities.consumer.base_consumer.Consumer.__init__()=oemof.entities.consumer.base_consumer.Consumer-class.html#__init__,Method oemof.entities.consumer.city.City.__init__()=oemof.entities.consumer.city.City-class.html#__init__,Method oemof.entities.consumer.industrial_area.IndustrialArea.__init__()=oemof.entities.consumer.industrial_area.IndustrialArea-class.html#__init__,Method oemof.entities.producer.base_producer.Producer.__init__()=oemof.entities.producer.base_producer.Producer-class.html#__init__,Method oemof.entities.producer.nuclear_powerplant.NuclearPowerplant.__init__()=oemof.entities.producer.nuclear_powerplant.NuclearPowerplant-class.html#__init__,Method oemof.entities.producer.photovoltaic_powerplant.PhotovoltaicPowerplant.__init__()=oemof.entities.producer.photovoltaic_powerplant.PhotovoltaicPowerplant-class.html#__init__,Method oemof.entities.producer.powerplant.Powerplant.__init__()=oemof.entities.producer.powerplant.Powerplant-class.html#__init__,Method oemof.entities.producer.wind_powerplant.WindPowerplant.__init__()=oemof.entities.producer.wind_powerplant.WindPowerplant-class.html#__init__,Method oemof.feedinlib.base_feed.Feed.__init__()=oemof.feedinlib.base_feed.Feed-class.html#__init__,Method oemof.feedinlib.feedin.Feedin.__init__()=oemof.feedinlib.feedin.Feedin-class.html#__init__,Method oemof.feedinlib.pv_feed._PvFeed.__init__()=oemof.feedinlib.pv_feed._PvFeed-class.html#__init__,Method oemof.feedinlib.wind_feed._WindFeed.__init__()=oemof.feedinlib.wind_feed._WindFeed-class.html#__init__,Method oemof.grids.base_grid.Connection.__init__()=oemof.grids.base_grid.Connection-class.html#__init__,Method oemof.grids.base_grid.Grid.__init__()=oemof.grids.base_grid.Grid-class.html#__init__,Method oemof.grids.base_grid.Node.__init__()=oemof.grids.base_grid.Node-class.html#__init__,Method oemof.rawdatalib.weather.Weather.__init__()=oemof.rawdatalib.weather.Weather-class.html#__init__"><a title="oemof.entities.base_entity.Entity.__init__
+oemof.entities.consumer.base_consumer.Consumer.__init__
+oemof.entities.consumer.city.City.__init__
+oemof.entities.consumer.industrial_area.IndustrialArea.__init__
+oemof.entities.producer.base_producer.Producer.__init__
+oemof.entities.producer.nuclear_powerplant.NuclearPowerplant.__init__
+oemof.entities.producer.photovoltaic_powerplant.PhotovoltaicPowerplant.__init__
+oemof.entities.producer.powerplant.Powerplant.__init__
+oemof.entities.producer.wind_powerplant.WindPowerplant.__init__
+oemof.feedinlib.base_feed.Feed.__init__
+oemof.feedinlib.feedin.Feedin.__init__
+oemof.feedinlib.pv_feed._PvFeed.__init__
+oemof.feedinlib.wind_feed._WindFeed.__init__
+oemof.grids.base_grid.Connection.__init__
+oemof.grids.base_grid.Grid.__init__
+oemof.grids.base_grid.Node.__init__
+oemof.rawdatalib.weather.Weather.__init__" class="py-name" href="#" onclick="return doclink('link-4', '__init__', 'link-4');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-name">entity_id</tt><tt class="py-op">,</tt> <tt class="py-name">position</tt><tt class="py-op">)</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">consumption</tt> <tt class="py-op">=</tt> <tt class="py-name">consumption</tt> </tt>
+</div></div><a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="oemof-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Wed Feb 11 17:42:31 2015
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
