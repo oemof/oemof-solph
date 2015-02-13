@@ -5,7 +5,7 @@ version: 0.1
 This module is used to retrieve and calculate outputdata (feed-in - data) for the scientific models.
 
 """
-import ADT.graph as Graph
+
 
 class Feedin:
 

@@ -1,4 +1,4 @@
-from entities.producer.base_producer import Producer
+from oemof.entities.producer.base_producer import Producer
 
 
 class Powerplant(Producer):

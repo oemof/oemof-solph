@@ -1,4 +1,4 @@
-from entities.base_entity import Entity
+from oemof.entities.base_entity import Entity
 
 
 class Producer(Entity):

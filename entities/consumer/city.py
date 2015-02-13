@@ -1,4 +1,4 @@
-from entities.consumer.base_consumer import Consumer
+from oemof.entities.consumer.base_consumer import Consumer
 
 
 class City(Consumer):

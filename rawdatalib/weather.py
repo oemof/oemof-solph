@@ -1,6 +1,6 @@
 __package__ = "rawdatalib"
 
-import iolib.postgis as pg
+import oemof.iolib.postgis as pg
 
 
 class Weather:

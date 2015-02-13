@@ -1,4 +1,4 @@
-from entities.producer.powerplant import Powerplant
+from oemof.entities.producer.powerplant import Powerplant
 
 
 class WindPowerplant(Powerplant):

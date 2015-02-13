@@ -1,4 +1,4 @@
-import feedinlib.feedin as feed
+import oemof.feedinlib.feedin as feed
 
 
 def main():

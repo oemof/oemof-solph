@@ -31,10 +31,10 @@ Option2 = value2 \n
 """
 print("/iolib/config.py imported")
 
-import ConfigParser
+import configparser
 
 FILE = "config.cfg"
-cfg = ConfigParser.RawConfigParser()
+cfg = configparser.RawConfigParser()
 _loaded = False
 
 def main():
@@ -67,7 +67,7 @@ def get(section, key):
         init()
     try:
         return cfg.getfloat(section, key)
-    except:
+    except Exception:
         try:
             return cfg.getint(section, key)
         except: 
@@ -75,8 +75,8 @@ def get(section, key):
                 return cfg.getboolean(section, key)
             except:
                 return cfg.get(section, key)
-                
-                
+
+
 def set(section, key, value):
     """
     sets a value to a [section] key - pair.

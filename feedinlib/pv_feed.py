@@ -1,5 +1,5 @@
 
-from base_feed import Feed
+from oemof.feedinlib.base_feed import Feed
 
 
 class _PvFeed(Feed):

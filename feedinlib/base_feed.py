@@ -1,4 +1,5 @@
-import rawdatalib.weather as w
+import oemof.rawdatalib.weather as w
+
 
 class Feed(object):
 
@@ -33,7 +34,6 @@ class Feed(object):
 
         return self._timeseries
 
-
     def _apply_model(self):
         """
         calculates the timeseries from the input data
@@ -41,7 +41,7 @@ class Feed(object):
         :return:
         """
         # TODO: change to actually working code
-        print "using the model from the base class is useless. Implement the methods of the subclass first"
+        print("using the model from the base class is useless. Implement the methods of the subclass first")
         pass
 
     #return the raw data by instantiating a raw_data object
@@ -53,7 +53,7 @@ class Feed(object):
         :param params: List of parameters
         :return: the weather-timeseries
         """
-        print self.__class__
+        print(self.__class__)
 
         return w.Weather(year, region, params)
 
