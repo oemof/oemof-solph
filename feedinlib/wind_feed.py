@@ -18,4 +18,4 @@ class _WindFeed(Feed):
         :return:
         """
         self._timeseries = self._weatherObject.get_raw_data()
-        #TODO: setup the model
+        #TODO: setup the model, currently being done by clemens
