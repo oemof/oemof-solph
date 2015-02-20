@@ -30,6 +30,7 @@ class PvFeed(Feed):
         :return:
         """
         self._timeseries = "pv timeseries"
+        #TODO: setup the model, currently being done by caro
 
         # 3. Fetch module parameter from Sandia Database
         module_data = (pvlib.pvl_retreiveSAM('SandiaMod')[site['module_name']])
