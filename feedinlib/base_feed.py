@@ -8,6 +8,8 @@ class Feed(object):
         """
         Timeseries-Class
 
+        :param DIC: database parameters
+        :param site: site and plant parameters
         :param year: the year to get the data for
         :param region: the region to get the data for
         :param params: list of strings to define which variables to load from the DB
@@ -50,6 +52,8 @@ class Feed(object):
     def _get_weather_object_from_source(self, DIC, site, year, region, params):
         """
         returns the weather object
+        :param DIC: database parameters
+        :param site: site and plant parameters
         :param year: the year to get the data for
         :param region: the region to get the data for
         :param params: List of parameters

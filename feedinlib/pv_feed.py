@@ -14,6 +14,8 @@ class PvFeed(Feed):
     def __init__(self, DIC, site, year, region):
         """
         private class for the implementation of a Phovoltaic Feed as timeseries
+        :param DIC: database parameters
+        :param site: site and plant parameters
         :param year: the year to get the data for
         :param region: the region to get the data for
         """
