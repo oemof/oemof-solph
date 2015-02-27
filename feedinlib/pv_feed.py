@@ -4,13 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 sys.path.append('/home/caro/rlihome/Git/pahesmf')
-import src.output.write_file as out # vorrübergehend importiert für Output,
-#sollte ausgelagert werden
+import src.output.write_file as out # temporarily imported for output
 sys.path.append('/home/caro/rlihome/Git/PVLIB_Python')
 import pvlib
-from matplotlib import cm # vorrübergehend importiert für Output
-from mpl_toolkits.mplot3d.axes3d import Axes3D # vorrübergehend importiert für
-#Output
+from matplotlib import cm # temporarily imported for output
+from mpl_toolkits.mplot3d.axes3d import Axes3D # temporarily imported for
+#output
 
 
 class PvFeed(Feed):
@@ -38,91 +37,58 @@ class PvFeed(Feed):
         self._timeseries = "pv timeseries"
         #TODO: setup the model, currently being done by caro
 
-        # 3. Fetch module parameter from Sandia Database
+        # 1. Fetch module parameter from Sandia Database
         module_data = (pvlib.pvl_retrieveSAM('SandiaMod')[site['module_name']])
-        module_data['Area'] = 1.7
 
-        # Determines the postion of the sun
+        # 2. Overwriting module area (better: switch on and off this option)
+        module_data['Area'] = site['Area']
+
+        # 3. Determine the postion of the sun
         (data['SunAz'], data['SunEl'], data['AppSunEl'], data['SolarTime'],
-            data['SunZen']) = pvlib.pvl_ephemeris(Time=data.index, Location=site)
+            data['SunZen']) = pvlib.pvl_ephemeris(Time=data.index,
+            Location=site)
 
-
-        #date = data.index
-        #h, az = pv.position_sun(site['latitude'], site['longitude'], year,
-                #date.month, date.day, date.hour)
-        #h[h < 0] = 0
-
+        # 4. Determine the direct horizontal irradiation
         beam_hrz = data['GHI'] - data['DHI']
 
+        # 5. Determine the extraterrestrial radiation
         data['HExtra'] = pvlib.pvl_extraradiation(doy=data.index.dayofyear)
+
+        # 6. Determine the relative air mass
         data['AM'] = pvlib.pvl_relativeairmass(z=data['SunZen'])
 
-        #azimuth = np.array([
-                #-180., -170., -160., -150., -140., -130., -120., -110., -100.,
-                #-90., -80., -70., -60., -50., -40., -30., -20., -10., 0.,
-                #10., 20., 30., 40., 50., 60., 70., 80., 90.,
-                #100., 110., 120., 130., 140., 150., 160., 170., 180.])
+        # 7. Determine the angle of incidence
+        data['AOI'] = pvlib.pvl_getaoi(SunAz=data['SunAz'],
+            SunZen=data['SunZen'], SurfTilt=site['tilt'],
+            SurfAz=site['azimuth'])
 
-        ##azimuth = np.arange(0, 370, 10)
-        ##print(azimuth)
-
-        #tilt = np.array([0., 10., 20., 30., 40., 50., 60., 70., 80., 90.])
-
-        #results = np.zeros(((len(azimuth), len(tilt))))
-
-        #for i in range(len(azimuth)):
-            #site['azimuth'] = azimuth[i]
-            #for j in range(len(tilt)):
-                #site['tilt'] = tilt[j]
-
-        data['AOI'] = pvlib.pvl_getaoi(SunAz=data['SunAz'], SunZen=data['SunZen'],
-            SurfTilt=site['tilt'], SurfAz=site['azimuth'])
-
-        #theta = np.degrees(np.arccos(np.cos(np.radians(data['SunEl'])) * -1
-            #* np.sin(np.radians(site['tilt']))
-            #* np.cos(np.radians(data['SunAz']) - np.radians(180))
-            #+ np.sin(np.radians(data['SunEl'])) * np.cos(np.radians(site['tilt']))))
-
-        #plt.figure(1)
-        #plt.plot(data['AOI'], 'b.')
-
-        #plt.figure(2)
-        #plt.plot(theta, 'r.')
-
-        plt.figure(3)
-        plt.plot(data['SunAz'], '.')
-
-        plt.show()
-
+##########################################################################
         #data['AOI'][data['AOI'] > 90] = 90
 
-        # ??
+
         # Direktnormalstrahlung? AOI = 0?
+##########################################################################
+
+        # 8. Determine direct normal irradiation
         data['DNI'] = (beam_hrz) / np.cos(np.radians(data['SunZen']))
         #data['DNI'] = (data['GHI'] - data['DHI']) / np.sin(h)
 
+        # what for??
         data['DNI'][data['SunZen'] > 88] = beam_hrz
 
-        print(sum(data['GHI']))
-        print(sum(data['DHI']))
-        print(sum(beam_hrz))
-        print(sum(data['DNI']))
+        #print(sum(data['GHI']))
+        #print(sum(data['DHI']))
+        #print(sum(beam_hrz))
+        #print(sum(data['DNI']))
 
-
-        #plt.plot(data['DNI'])
-        #plt.plot(beam_hrz)
-        ##plt.plot(np.degrees(h)[2160:2180] * 10)
+        ## what is this??
         #plt.plot((90 - data['SunZen']) * 10)
-        ##plt.plot((data['GHI']))
-        ##plt.plot((data['GHI'] - data['DHI']))
-        ###plt.plot((data['GHI']))
-        ###plt.plot((data['DHI']))
-        ###plt.plot((data['SunZen']))
-        ###plt.plot((np.cos(data['SunZen'] / 180 * np.pi) * 100))
-
+        #plt.plot((data['SunZen']))
+        #plt.plot((np.cos(data['SunZen'] / 180 * np.pi) * 100))
         #plt.show()
 
-        # Klucher oder Perez, Schalter notwendig
+        # 9a. Determine the sky diffuse irradiation in plane
+        # with model of Perez (switch would be good, see 9b)
         data['In_Plane_SkyDiffuseP'] = pvlib.pvl_perez(SurfTilt=site['tilt'],
                                                     SurfAz=site['azimuth'],
                                                     DHI=data['DHI'],
@@ -132,49 +98,47 @@ class PvFeed(Feed):
                                                     SunAz=data['SunAz'],
                                                     AM=data['AM'])
 
-        # ??
-        data['In_Plane_SkyDiffuseP'][pd.isnull(data['In_Plane_SkyDiffuseP'])] = 0
+        # what for ??
+        data['In_Plane_SkyDiffuseP'][pd.isnull(data['In_Plane_SkyDiffuseP'])] \
+        = 0
 
+        # 9b. Determine the sky diffuse irradiation in plane
+        # with model of Perez (switch would be good)
         data['In_Plane_SkyDiffuse'] = pvlib.pvl_klucher1979(site['tilt'],
-            site['azimuth'], data['DHI'], data['GHI'], data['SunZen'], data['SunAz'])
+            site['azimuth'], data['DHI'], data['GHI'], data['SunZen'],
+            data['SunAz'])
 
-        #plt.plot(data['In_Plane_SkyDiffuse'])
-        #plt.plot(data['In_Plane_SkyDiffuseP'])
-        #plt.plot(data['DHI'])
-        #plt.show()
+        #print(sum(data['In_Plane_SkyDiffuse']))
+        #print(sum(data['In_Plane_SkyDiffuseP']))
+        #print(sum(data['DHI']))
 
-        data['GR'] = pvlib.pvl_grounddiffuse(GHI=data['GHI'], Albedo=site['albedo'],
-            SurfTilt=site['tilt'])
+        # 10. Determine the diffuse irradiation from ground reflection in plane
+        data['GR'] = pvlib.pvl_grounddiffuse(GHI=data['GHI'],
+            Albedo=site['albedo'], SurfTilt=site['tilt'])
 
-        #print data['DNI'][data['DNI'] < 0]
-        #print 'GR'
-        #print data['GR'][data['GR'] < 0]
-        #print 'dif'
-        #print data['In_Plane_SkyDiffuse'][data['In_Plane_SkyDiffuse'] < 0]
-        #print 'res'
+        # 11. Determine total in-plane irradiance
+        data['E'], data['Eb'], data['EDiff'] = pvlib.pvl_globalinplane(
+                                AOI=data['AOI'],
+                                DNI=data['DNI'],
+                                In_Plane_SkyDiffuse=data['In_Plane_SkyDiffuse'],
+                                GR=data['GR'],
+                                SurfTilt=site['tilt'],
+                                SurfAz=site['azimuth'])
 
-        data['E'], data['Eb'], data['EDiff'] = pvlib.pvl_globalinplane(AOI=data['AOI'],
-                                        DNI=data['DNI'],
-                                        In_Plane_SkyDiffuse=data['In_Plane_SkyDiffuse'],
-                                        GR=data['GR'],
-                                        SurfTilt=site['tilt'],
-                                        SurfAz=site['azimuth'])
-
-        #results[i, j] = sum(data['E'])
-
+        # warum wird E negativ?
+        #print(data['AOI'][data['AOI'] > 90])
         #print data['AOI'][data['E'] < 0]
-
-        #plt.plot(data['GHI'])
-        #plt.plot(data['temp'])
+        #plt.plot(data['E'])
         #plt.show()
 
-
+        # 12. Determine module and cell temperature
         data['Tcell'], data['Tmodule'] = pvlib.pvl_sapmcelltemp(E=data['E'],
                                     Wspd=data['v_wind'],
                                     Tamb=data['temp'],
                                     modelt='Open_rack_cell_polymerback')
 
-
+        # 13. Apply the Sandia PV Array Performance Model (SAPM) to get a
+        # dataframe with all relevant electric output parameters
         DFOut = pvlib.pvl_sapm(Eb=data['Eb'],
                             Ediff=data['EDiff'],
                             Tcell=data['Tcell'],
@@ -182,13 +146,13 @@ class PvFeed(Feed):
                             AOI=data['AOI'],
                             Module=module_data)
 
-
-        data['Pmp'] = DFOut['Vmp'] * DFOut['Imp']
-
+##############################################################################
+        # DIVERSE AUSWERTUNGEN
 
         #print sum(data['E'])
         #print sum(data['GHI'])
-        #print sum(data['Pmp'])
+        #print sum(DFOut['Pmp'])
+
         #Data['Imp']=DFOut['Imp']*meta['parallelStrings']
         #Data['Voc']=DFOut['Voc']
         #Data['Vmp']=DFOut['Vmp']*meta['seriesModules']
@@ -196,63 +160,51 @@ class PvFeed(Feed):
         #Data['Ix']=DFOut['Ix']
         #Data['Ixx']=DFOut['Ixx']
 
-
-        ## Wenn die Sonne untergegangen ist entstehen NaN-Werte im Diffus-Vektor
-        ## Entweder auf Null setzen oder in der entsprechenden Funktion korrigieren.
-        #blubb = Data.as_blocks()['float64'].as_blocks()['float64']['Imp'].values
-        #bla = Data.as_blocks()['float64'].as_blocks()['float64']['Vmp'].values
-
-        #blubber = blubb * bla
-
-        #print blubb
-
-        #plt.plot(data['Pmp'])
-        ##plt.plot(data['E'])
-        ##plt.plot(bla)
-        ##plt.plot(blubber)
-        #plt.show()
-
-        # Einfallswinkel
-        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
-        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'aoi.csv',
-        data['AOI'])
-
-        # Direktstrahlung auf geneigte Ebene
-        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
-        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'eb.csv',
-        data['Eb'])
+        # Ist Outputleistung auf den Quadratmeter bezogen?
+        return DFOut['Pmp']
 
 
-        # Diffusstrahlung auf geneigte Ebene (gesamt)
-        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
-        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'ediff.csv',
-        data['EDiff'])
-
-        # Globalstrahlung auf geneigte Ebene
-        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
-        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'e.csv',
-        data['E'])
-
+        ## Einfallswinkel
         #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
-        #'04-Projektinhalte/PV_Modell_Vergleich/PVLIB_Python/results', 'pmp.csv',
-        #data['Pmp'])
+        #'04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'aoi.csv',
+        #data['AOI'])
 
-        #print(module_data['Area'])
+        ## Direktstrahlung auf geneigte Ebene
+        #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        #'04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'eb.csv',
+        #data['Eb'])
 
 
-        #results = db.read_data_from_file('3d_3.csv',
-            #'/home/likewise-open/RL-INSTITUT/birgit.schachler')
+        ## Diffusstrahlung auf geneigte Ebene (gesamt)
+        #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        #'04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'ediff.csv',
+        #data['EDiff'])
 
-        #fig = plt.figure()
+        ## Globalstrahlung auf geneigte Ebene
+        #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        #'04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'e.csv',
+        #data['E'])
 
-        #tilt, azimuth = np.meshgrid(tilt, azimuth)
-        #print(results)
+        ##out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        ##'04-Projektinhalte/PV_Modell_Vergleich/PVLIB_Python/results', 'pmp.csv',
+        ##data['Pmp'])
 
-        #fig = plt.figure()
-        #ax = Axes3D(fig)
+        ##print(module_data['Area'])
 
-        #surf = ax.plot_surface(tilt, azimuth, results,
-            #rstride=1, cstride=1, cmap=cm.jet, linewidth=0, antialiased=False)
-        #fig.colorbar(surf)
 
-        #plt.show()
+        ##results = db.read_data_from_file('3d_3.csv',
+            ##'/home/likewise-open/RL-INSTITUT/birgit.schachler')
+
+        ##fig = plt.figure()
+
+        ##tilt, azimuth = np.meshgrid(tilt, azimuth)
+        ##print(results)
+
+        ##fig = plt.figure()
+        ##ax = Axes3D(fig)
+
+        ##surf = ax.plot_surface(tilt, azimuth, results,
+            ##rstride=1, cstride=1, cmap=cm.jet, linewidth=0, antialiased=False)
+        ##fig.colorbar(surf)
+
+        ##plt.show()
