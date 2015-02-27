@@ -4,9 +4,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 sys.path.append('/home/caro/rlihome/Git/pahesmf')
-import src.basic.postgresql_db as db
+import src.output.write_file as out # vorrübergehend importiert für Output,
+#sollte ausgelagert werden
 sys.path.append('/home/caro/rlihome/Git/PVLIB_Python')
 import pvlib
+from matplotlib import cm # vorrübergehend importiert für Output
+from mpl_toolkits.mplot3d.axes3d import Axes3D # vorrübergehend importiert für
+#Output
 
 
 class PvFeed(Feed):
@@ -25,17 +29,17 @@ class PvFeed(Feed):
         self.year = year
         self.region = region
 
-
     def _apply_model(self, DIC, site, year, region, data):
         """
-        implementation of the model to generate the _timeseries data from the _weatherdata
+        implementation of the model to generate the _timeseries data from the
+        weatherdata
         :return:
         """
         self._timeseries = "pv timeseries"
         #TODO: setup the model, currently being done by caro
 
         # 3. Fetch module parameter from Sandia Database
-        module_data = (pvlib.pvl_retreiveSAM('SandiaMod')[site['module_name']])
+        module_data = (pvlib.pvl_retrieveSAM('SandiaMod')[site['module_name']])
         module_data['Area'] = 1.7
 
         # Determines the postion of the sun
@@ -52,13 +56,32 @@ class PvFeed(Feed):
 
         data['HExtra'] = pvlib.pvl_extraradiation(doy=data.index.dayofyear)
         data['AM'] = pvlib.pvl_relativeairmass(z=data['SunZen'])
+
+        #azimuth = np.array([
+                #-180., -170., -160., -150., -140., -130., -120., -110., -100.,
+                #-90., -80., -70., -60., -50., -40., -30., -20., -10., 0.,
+                #10., 20., 30., 40., 50., 60., 70., 80., 90.,
+                #100., 110., 120., 130., 140., 150., 160., 170., 180.])
+
+        ##azimuth = np.arange(0, 370, 10)
+        ##print(azimuth)
+
+        #tilt = np.array([0., 10., 20., 30., 40., 50., 60., 70., 80., 90.])
+
+        #results = np.zeros(((len(azimuth), len(tilt))))
+
+        #for i in range(len(azimuth)):
+            #site['azimuth'] = azimuth[i]
+            #for j in range(len(tilt)):
+                #site['tilt'] = tilt[j]
+
         data['AOI'] = pvlib.pvl_getaoi(SunAz=data['SunAz'], SunZen=data['SunZen'],
             SurfTilt=site['tilt'], SurfAz=site['azimuth'])
 
-        theta = np.degrees(np.arccos(np.cos(np.radians(data['SunEl'])) * -1
-            * np.sin(np.radians(site['tilt']))
-            * np.cos(np.radians(data['SunAz']) - np.radians(180))
-            + np.sin(np.radians(data['SunEl'])) * np.cos(np.radians(site['tilt']))))
+        #theta = np.degrees(np.arccos(np.cos(np.radians(data['SunEl'])) * -1
+            #* np.sin(np.radians(site['tilt']))
+            #* np.cos(np.radians(data['SunAz']) - np.radians(180))
+            #+ np.sin(np.radians(data['SunEl'])) * np.cos(np.radians(site['tilt']))))
 
         #plt.figure(1)
         #plt.plot(data['AOI'], 'b.')
@@ -71,12 +94,19 @@ class PvFeed(Feed):
 
         plt.show()
 
-        data['AOI'][data['AOI'] > 90] = 90
+        #data['AOI'][data['AOI'] > 90] = 90
 
+        # ??
+        # Direktnormalstrahlung? AOI = 0?
         data['DNI'] = (beam_hrz) / np.cos(np.radians(data['SunZen']))
         #data['DNI'] = (data['GHI'] - data['DHI']) / np.sin(h)
 
         data['DNI'][data['SunZen'] > 88] = beam_hrz
+
+        print(sum(data['GHI']))
+        print(sum(data['DHI']))
+        print(sum(beam_hrz))
+        print(sum(data['DNI']))
 
 
         #plt.plot(data['DNI'])
@@ -92,6 +122,7 @@ class PvFeed(Feed):
 
         #plt.show()
 
+        # Klucher oder Perez, Schalter notwendig
         data['In_Plane_SkyDiffuseP'] = pvlib.pvl_perez(SurfTilt=site['tilt'],
                                                     SurfAz=site['azimuth'],
                                                     DHI=data['DHI'],
@@ -101,6 +132,7 @@ class PvFeed(Feed):
                                                     SunAz=data['SunAz'],
                                                     AM=data['AM'])
 
+        # ??
         data['In_Plane_SkyDiffuseP'][pd.isnull(data['In_Plane_SkyDiffuseP'])] = 0
 
         data['In_Plane_SkyDiffuse'] = pvlib.pvl_klucher1979(site['tilt'],
@@ -128,6 +160,8 @@ class PvFeed(Feed):
                                         SurfTilt=site['tilt'],
                                         SurfAz=site['azimuth'])
 
+        #results[i, j] = sum(data['E'])
+
         #print data['AOI'][data['E'] < 0]
 
         #plt.plot(data['GHI'])
@@ -150,6 +184,7 @@ class PvFeed(Feed):
 
 
         data['Pmp'] = DFOut['Vmp'] * DFOut['Imp']
+
 
         #print sum(data['E'])
         #print sum(data['GHI'])
@@ -177,9 +212,47 @@ class PvFeed(Feed):
         ##plt.plot(blubber)
         #plt.show()
 
+        # Einfallswinkel
+        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'aoi.csv',
+        data['AOI'])
+
+        # Direktstrahlung auf geneigte Ebene
+        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'eb.csv',
+        data['Eb'])
+
+
+        # Diffusstrahlung auf geneigte Ebene (gesamt)
+        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'ediff.csv',
+        data['EDiff'])
+
+        # Globalstrahlung auf geneigte Ebene
+        out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
+        '04-Projektinhalte/PV_Modell_Vergleich/2015_PV_Modell_Vergleich_3/PVLIB_Python/results', 'e.csv',
+        data['E'])
+
         #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
         #'04-Projektinhalte/PV_Modell_Vergleich/PVLIB_Python/results', 'pmp.csv',
         #data['Pmp'])
 
         #print(module_data['Area'])
 
+
+        #results = db.read_data_from_file('3d_3.csv',
+            #'/home/likewise-open/RL-INSTITUT/birgit.schachler')
+
+        #fig = plt.figure()
+
+        #tilt, azimuth = np.meshgrid(tilt, azimuth)
+        #print(results)
+
+        #fig = plt.figure()
+        #ax = Axes3D(fig)
+
+        #surf = ax.plot_surface(tilt, azimuth, results,
+            #rstride=1, cstride=1, cmap=cm.jet, linewidth=0, antialiased=False)
+        #fig.colorbar(surf)
+
+        #plt.show()

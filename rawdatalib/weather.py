@@ -33,8 +33,8 @@ class Weather:
 
         #temporary: Infos for DB-Call
         schema = 'weather'
-        tables = ['solar_direct_timeseries_dlr_osna',
-            'solar_diffus_pvmodelcomparison', 'solar_global_pvmodelcomparison']
+        tables = ['solar_diffus_pvmodelcomparison',
+            'solar_global_pvmodelcomparison']
         columns = ['solar_radiation']
         orderby = 'hour'
 
