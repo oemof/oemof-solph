@@ -8,7 +8,7 @@ sys.path.append('/home/caro/rlihome/Git/pahesmf') # temporär: Einbinden meines
 # lokalen pahesmf-Pfads, notwendig zur Erstellung von DIC
 import src.dinput.read_pahesmf as din
 
-from oemof.feedinlib.pv_feed import *
+from feedinlib.pv_feed import *
 
 DIC = din.read_basic_dc()
 

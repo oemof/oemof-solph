@@ -48,8 +48,8 @@ class PvFeed(Feed):
             data['SunZen']) = pvlib.pvl_ephemeris(Time=data.index,
             Location=site)
 
-        # 4. Determine the direct horizontal irradiation
-        beam_hrz = data['GHI'] - data['DHI']
+        # 4. Determine the global horizontal irradiation
+        data['GHI'] = data['DirHI'] + data['DHI']
 
         # 5. Determine the extraterrestrial radiation
         data['HExtra'] = pvlib.pvl_extraradiation(doy=data.index.dayofyear)
@@ -70,16 +70,19 @@ class PvFeed(Feed):
 ##########################################################################
 
         # 8. Determine direct normal irradiation
-        data['DNI'] = (beam_hrz) / np.cos(np.radians(data['SunZen']))
+        data['DNI'] = (data['DirHI']) / np.cos(np.radians(data['SunZen']))
         #data['DNI'] = (data['GHI'] - data['DHI']) / np.sin(h)
 
         # what for??
-        data['DNI'][data['SunZen'] > 88] = beam_hrz
+        data['DNI'][data['SunZen'] > 88] = data['DirHI']
 
-        #print(sum(data['GHI']))
-        #print(sum(data['DHI']))
-        #print(sum(beam_hrz))
-        #print(sum(data['DNI']))
+        print(sum(data['GHI']))
+        print(sum(data['DHI']))
+        print(sum(data['DirHI']))
+        print(sum(data['DNI']))
+
+        plt.plot(data['SunAz'], '.')
+        plt.show()
 
         ## what is this??
         #plt.plot((90 - data['SunZen']) * 10)
