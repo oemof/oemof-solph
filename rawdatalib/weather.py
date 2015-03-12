@@ -2,7 +2,7 @@ __package__ = "rawdatalib"
 
 import oemof.iolib.postgis as pg
 import sys
-import dblib as db
+from dblib import read_data_pg as rdb
 import pandas as pd
 from datetime import datetime
 import numpy as np
@@ -96,14 +96,14 @@ class Weather:
 
         #datatype = 'ASWDIFD_S'
         select_str = "select name from coastdat.datatype;"
-        types = db.execute_read_db(DIC, select_str)
+        types = rdb.execute_read_db(DIC, select_str)
 
         # Connect the two strings
         #sql += self.sql_join_string(year, types, datatype)
         sql += self.sql_join_string(year, types)
 
         # Execute sql commands
-        data = db.execute_read_db(DIC, sql)
+        data = rdb.execute_read_db(DIC, sql)
 
         self.data_dc = {}
         count = 0
@@ -124,7 +124,7 @@ class Weather:
         schema = 'weather'
         table = 'solar_raster_register'
         #columns = ['longitude', 'latitude', 'site_id', 'idx_lat', 'idx_lon']
-        site.update(db.fetch_row(DIC, schema, table, where_column='raster_id',
+        site.update(rdb.fetch_row(DIC, schema, table, where_column='raster_id',
             where_condition=int(region)))
 
         # 2. Create an empty data frame
