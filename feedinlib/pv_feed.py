@@ -1,4 +1,4 @@
-from base_feed import Feed
+from .base_feed import Feed
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
