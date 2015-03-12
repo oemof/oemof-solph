@@ -3,13 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
-sys.path.append('/home/caro/rlihome/Git/pahesmf')
-import src.output.write_file as out # temporarily imported for output
-sys.path.append('/home/caro/rlihome/Git/PVLIB_Python')
+import os.path as path
+sys.path.append(path.join(path.dirname(__file__), 'PVLIB_Python'))
 import pvlib
-from matplotlib import cm # temporarily imported for output
-from mpl_toolkits.mplot3d.axes3d import Axes3D # temporarily imported for
-#output
 
 
 class PvFeed(Feed):

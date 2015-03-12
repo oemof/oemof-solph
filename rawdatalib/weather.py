@@ -2,11 +2,10 @@ __package__ = "rawdatalib"
 
 import oemof.iolib.postgis as pg
 import sys
+import dblib as db
 import pandas as pd
 from datetime import datetime
 import numpy as np
-sys.path.append('/home/caro/rlihome/Git/pahesmf')
-import src.basic.postgresql_db as db
 
 
 class Weather:
