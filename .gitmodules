@@ -1,0 +1,3 @@
+[submodule "feedinlib/PVLIB_Python"]
+	path = feedinlib/PVLIB_Python
+	url = https://github.com/Sandia-Labs/PVLIB_Python.git
