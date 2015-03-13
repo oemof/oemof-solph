@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 import os.path as path
-sys.path.append(path.join(path.dirname(__file__), 'PVLIB_Python'))
+sys.path.append(path.join(path.dirname(__file__), 'pvlib-python'))
 import pvlib
 
 

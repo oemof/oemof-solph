@@ -2,7 +2,7 @@ __package__ = "rawdatalib"
 
 import oemof.iolib.postgis as pg
 import sys
-from dblib import read_data_pg as rdb
+from oemof.dblib import read_data_pg as rdb
 import pandas as pd
 from datetime import datetime
 import numpy as np
