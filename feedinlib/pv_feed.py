@@ -34,29 +34,44 @@ class PvFeed(Feed):
         #TODO: setup the model, currently being done by caro
 
         # 1. Fetch module parameter from Sandia Database
-        module_data = (pvlib.pvl_retrieveSAM('SandiaMod')[site['module_name']])
+        module_data = (pvlib.pvsystem.retrieve_sam('SandiaMod')
+            [site['module_name']])
 
         # 2. Overwriting module area (better: switch on and off this option)
         module_data['Area'] = site['Area']
 
+        ## temporary fix of site information (changed from struct to object in
+        ## pvlib-python
+        location = pvlib.location.Location(site['latitude'], site['longitude'],
+            site['TZ'])
+
         # 3. Determine the postion of the sun
-        (data['SunAz'], data['SunEl'], data['AppSunEl'], data['SolarTime'],
-            data['SunZen']) = pvlib.pvl_ephemeris(Time=data.index,
-            Location=site)
+        DaFrOut = pvlib.solarposition.ephemeris(time=data.index,
+            location=location)
+
+        ## temporary: changed new data structure of pvlib-python to that one
+        ## which was used so far to ensure functionality
+        data['SunAz'] = DaFrOut['azimuth']
+        data['SunEl'] = DaFrOut['elevation']
+        data['AppSunEl'] = DaFrOut['apparent_elevation']
+        data['SolarTime'] = DaFrOut['solar_time']
+        data['SunZen'] = DaFrOut['zenith']
+        # DaFrOut['apparent_zenith']  # unused?
 
         # 4. Determine the global horizontal irradiation
         data['GHI'] = data['DirHI'] + data['DHI']
 
         # 5. Determine the extraterrestrial radiation
-        data['HExtra'] = pvlib.pvl_extraradiation(doy=data.index.dayofyear)
+        data['HExtra'] = pvlib.irradiance.extraradiation(
+            datetime_or_doy=data.index.dayofyear)
 
         # 6. Determine the relative air mass
-        data['AM'] = pvlib.pvl_relativeairmass(z=data['SunZen'])
+        data['AM'] = pvlib.atmosphere.relativeairmass(z=data['SunZen'])
 
         # 7. Determine the angle of incidence
-        data['AOI'] = pvlib.pvl_getaoi(SunAz=data['SunAz'],
-            SunZen=data['SunZen'], SurfTilt=site['tilt'],
-            SurfAz=site['azimuth'])
+        data['AOI'] = pvlib.irradiance.aoi(sun_az=data['SunAz'],
+            sun_zen=data['SunZen'], surf_tilt=site['tilt'],
+            surf_az=site['azimuth'])
 
 ##########################################################################
         #data['AOI'][data['AOI'] > 90] = 90
@@ -88,14 +103,15 @@ class PvFeed(Feed):
 
         # 9a. Determine the sky diffuse irradiation in plane
         # with model of Perez (switch would be good, see 9b)
-        data['In_Plane_SkyDiffuseP'] = pvlib.pvl_perez(SurfTilt=site['tilt'],
-                                                    SurfAz=site['azimuth'],
-                                                    DHI=data['DHI'],
-                                                    DNI=data['DNI'],
-                                                    HExtra=data['HExtra'],
-                                                    SunZen=data['SunZen'],
-                                                    SunAz=data['SunAz'],
-                                                    AM=data['AM'])
+        data['In_Plane_SkyDiffuseP'] = pvlib.irradiance.perez(
+            surf_tilt=site['tilt'],
+            surf_az=site['azimuth'],
+            DHI=data['DHI'],
+            DNI=data['DNI'],
+            DNI_ET=data['HExtra'],
+            sun_zen=data['SunZen'],
+            sun_az=data['SunAz'],
+            AM=data['AM'])
 
         # what for ??
         data['In_Plane_SkyDiffuseP'][pd.isnull(data['In_Plane_SkyDiffuseP'])] \
@@ -103,7 +119,7 @@ class PvFeed(Feed):
 
         # 9b. Determine the sky diffuse irradiation in plane
         # with model of Perez (switch would be good)
-        data['In_Plane_SkyDiffuse'] = pvlib.pvl_klucher1979(site['tilt'],
+        data['In_Plane_SkyDiffuse'] = pvlib.irradiance.klucher(site['tilt'],
             site['azimuth'], data['DHI'], data['GHI'], data['SunZen'],
             data['SunAz'])
 
@@ -112,17 +128,23 @@ class PvFeed(Feed):
         #print(sum(data['DHI']))
 
         # 10. Determine the diffuse irradiation from ground reflection in plane
-        data['GR'] = pvlib.pvl_grounddiffuse(GHI=data['GHI'],
-            Albedo=site['albedo'], SurfTilt=site['tilt'])
+        data['GR'] = pvlib.irradiance.grounddiffuse(ghi=data['GHI'],
+            albedo=site['albedo'], surf_tilt=site['tilt'])
 
         # 11. Determine total in-plane irradiance
-        data['E'], data['Eb'], data['EDiff'] = pvlib.pvl_globalinplane(
+        DFr = pvlib.irradiance.globalinplane(
                                 AOI=data['AOI'],
                                 DNI=data['DNI'],
                                 In_Plane_SkyDiffuse=data['In_Plane_SkyDiffuse'],
                                 GR=data['GR'],
                                 SurfTilt=site['tilt'],
                                 SurfAz=site['azimuth'])
+
+        ## method pvlib.irradiance.globalinplane is not working yet
+        ## (PVLIB Issue)
+        data['E'] = DFr['E']
+        data['Eb'] = DFr['Eb']
+        data['EDiff'] = DFr['EDiff']
 
         # warum wird E negativ?
         #print(data['AOI'][data['AOI'] > 90])
