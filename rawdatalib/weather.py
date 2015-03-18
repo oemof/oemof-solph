@@ -109,7 +109,7 @@ class Weather:
         count = 0
         for t in types:
             t = data[count][6]
-            for n in range(len(data) / 6):
+            for n in range(int(len(data) / 6)):
                 self.data_dc.setdefault(data[n][0], {})
                 self.data_dc[data[n][0]][t] = np.array(data[count][3])
                 count += 1
