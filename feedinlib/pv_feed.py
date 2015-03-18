@@ -144,7 +144,7 @@ class PvFeed(Feed):
         ## (PVLIB Issue)
         data['E'] = DFr['E']
         data['Eb'] = DFr['Eb']
-        data['EDiff'] = DFr['EDiff']
+        data['EDiff'] = DFr['Ediff']
 
         # warum wird E negativ?
         #print(data['AOI'][data['AOI'] > 90])
