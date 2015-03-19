@@ -153,16 +153,18 @@ class PvFeed(Feed):
         #plt.show()
 
         # 12. Determine module and cell temperature
-        data['Tcell'], data['Tmodule'] = pvlib.pvl_sapmcelltemp(E=data['E'],
-                                    Wspd=data['v_wind'],
-                                    Tamb=data['temp'],
-                                    modelt='Open_rack_cell_polymerback')
+        data['temp_C'] = data['temp'] - 273.15
+        DataFrame = pvlib.pvsystem.sapm_celltemp(
+                                    irrad=data['E'],
+                                    wind=data['v_wind'],
+                                    temp=data['temp_C'],
+                                    model='Open_rack_cell_polymerback')
 
         # 13. Apply the Sandia PV Array Performance Model (SAPM) to get a
         # dataframe with all relevant electric output parameters
-        DFOut = pvlib.pvl_sapm(Eb=data['Eb'],
+        DFOut = pvlib.pvsystem.sapm(Eb=data['Eb'],
                             Ediff=data['EDiff'],
-                            Tcell=data['Tcell'],
+                            Tcell=DataFrame['tcell'],
                             AM=data['AM'],
                             AOI=data['AOI'],
                             Module=module_data)
