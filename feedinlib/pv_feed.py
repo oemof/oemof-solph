@@ -133,12 +133,10 @@ class PvFeed(Feed):
 
         # 11. Determine total in-plane irradiance
         DFr = pvlib.irradiance.globalinplane(
-                                AOI=data['AOI'],
-                                DNI=data['DNI'],
-                                In_Plane_SkyDiffuse=data['In_Plane_SkyDiffuse'],
-                                GR=data['GR'],
-                                SurfTilt=site['tilt'],
-                                SurfAz=site['azimuth'])
+            AOI=data['AOI'],
+            DNI=data['DNI'],
+            In_Plane_SkyDiffuse=data['In_Plane_SkyDiffuse'],
+            GR=data['GR'])
 
         ## method pvlib.irradiance.globalinplane is not working yet
         ## (PVLIB Issue)
