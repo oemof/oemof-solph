@@ -46,7 +46,7 @@ class PvFeed(Feed):
             site['TZ'])
 
         # 3. Determine the postion of the sun
-        DaFrOut = pvlib.solarposition.ephemeris(time=data.index,
+        DaFrOut = pvlib.solarposition.get_solarposition(time=data.index,
             location=location)
 
         ## temporary: changed new data structure of pvlib-python to that one
@@ -54,7 +54,7 @@ class PvFeed(Feed):
         data['SunAz'] = DaFrOut['azimuth']
         data['SunEl'] = DaFrOut['elevation']
         data['AppSunEl'] = DaFrOut['apparent_elevation']
-        data['SolarTime'] = DaFrOut['solar_time']
+        #data['SolarTime'] = DaFrOut['solar_time']
         data['SunZen'] = DaFrOut['zenith']
         # DaFrOut['apparent_zenith']  # unused?
 
@@ -92,8 +92,8 @@ class PvFeed(Feed):
         print(sum(data['DirHI']))
         print(sum(data['DNI']))
 
-        plt.plot(data['SunAz'], '.')
-        plt.show()
+        #plt.plot(data['SunAz'], 90 - data['SunZen'], '.')
+        #plt.show()
 
         ## what is this??
         #plt.plot((90 - data['SunZen']) * 10)
@@ -182,8 +182,16 @@ class PvFeed(Feed):
         #Data['Ixx']=DFOut['Ixx']
 
         # Ist Outputleistung auf den Quadratmeter bezogen?
-        return DFOut['Pmp']
 
+        X = X = np.arange(0, 8760)
+        print(np.shape(X))
+        plt.bar(X, DFOut['Pmp'])
+        plt.xlabel('Hours of the year')
+        plt.ylabel('Output power in Watts ')
+        plt.xlim([0, len(X)])
+        plt.show()
+
+        return DFOut['Pmp']
 
         ## Einfallswinkel
         #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
