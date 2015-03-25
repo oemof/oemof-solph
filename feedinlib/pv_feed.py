@@ -1,3 +1,32 @@
+"""
+#!/usr/bin/python
+# -*- coding: utf-8
+
+from oemof.feedinlib import pv_feed
+import logging
+logging.getLogger('pvlib').setLevel(logging.DEBUG)  # or at least INFO
+
+# Database connection parameter
+DIC = {
+    'ip': 'IP address',
+    'db': 'DB name',
+    'user': 'username',
+    'password': 'password',
+    'port': 'port'}
+
+# Plant and site parameter
+site = {'module_name': 'Advent_Solar_Ventura_210___2008_',
+        'Area': 1,
+        'azimuth': 0,
+        'tilt': 30,
+        'parallelStrings': 1,
+        'seriesModules': 1,
+        'TZ': 'Europe/Berlin',
+        'albedo': 0.2}
+
+obj = pv_feed.PvFeed(DIC, site, '2010', '201')
+"""
+
 from .base_feed import Feed
 import numpy as np
 import matplotlib.pyplot as plt
@@ -87,10 +116,10 @@ class PvFeed(Feed):
         # what for??
         data['DNI'][data['SunZen'] > 88] = data['DirHI']
 
-        print(sum(data['GHI']))
-        print(sum(data['DHI']))
-        print(sum(data['DirHI']))
-        print(sum(data['DNI']))
+        #print(sum(data['GHI']))
+        #print(sum(data['DHI']))
+        #print(sum(data['DirHI']))
+        #print(sum(data['DNI']))
 
         #plt.plot(data['SunAz'], 90 - data['SunZen'], '.')
         #plt.show()
