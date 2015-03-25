@@ -68,14 +68,10 @@ class Weather:
 
     def get_data(self, DIC, site, year, region):
         """
-        use this method to retrieve the whole raw dataset
-        :return: the weatherdata
+        Creates an sql-string to define a temporary view with a polygon.
         """
-
-        sql = 'DROP VIEW IF EXISTS coastdat.tmpview;'
-
-        # Creates an sql-string to define a temporary view with a polygon.
         # TODO: Regionsinformationen, muessen ausgelagert werden
+        sql = 'DROP VIEW IF EXISTS coastdat.tmpview;'
 
         # a) Uebergabe Polygon, mehrere Datenpunkte, funktioniert noch nicht
         #sql += '''
@@ -87,6 +83,8 @@ class Weather:
         #'''
 
         # b) Uebergabe ein Datenpunkt
+        # FEHLER: Datenpunkt hier hardcoded! Muss mit region-ID verknüpft
+        # werden
         sql += '''
         CREATE VIEW coastdat.tmpview AS
         SELECT sp.gid, sp.geom
@@ -121,11 +119,14 @@ class Weather:
         # 1. Update site information with information from database
         # TODO: this information must be also found in the coastdat schema,
         # maybe this operation can also be somewhere else
-        schema = 'weather'
-        table = 'solar_raster_register'
+        #schema = 'weather'
+        #table = 'solar_raster_register'
+
         #columns = ['longitude', 'latitude', 'site_id', 'idx_lat', 'idx_lon']
-        site.update(rdb.fetch_row(DIC, schema, table, where_column='raster_id',
-            where_condition=int(region)))
+        #site.update(rdb.fetch_row(DIC, schema, table, where_column='raster_id',
+            #where_condition=int(region)))
+        site['latitude'] = 52.1438
+        site['longitude'] = 8.07932
 
         # 2. Create an empty data frame
         self.data = pd.DataFrame(
@@ -135,7 +136,7 @@ class Weather:
         # 3. Get weather timeseries from database
 
         # Required datatypes for PV calculation
-        regions = data_dc.keys()
+        regions = list(data_dc.keys())
         keys = ['ASWDIFD_S', 'ASWDIR_S', 'T_2M', 'WSS_10M']
 
         tmp = {}
@@ -151,7 +152,10 @@ class Weather:
         return self.data
 
     def get_raw_data(self, DIC, site, year, region):
-
+        """
+        use this method to retrieve the whole raw dataset
+        :return: the weatherdata
+        """
         data_dc = self.get_data(DIC, site, year, region)
         data = self.get_data_for_pv(data_dc, DIC, site, year, region)
 
