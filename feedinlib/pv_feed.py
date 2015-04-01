@@ -22,9 +22,11 @@ site = {'module_name': 'Advent_Solar_Ventura_210___2008_',
         'parallelStrings': 1,
         'seriesModules': 1,
         'TZ': 'Europe/Berlin',
-        'albedo': 0.2}
+        'albedo': 0.2,
+        'latitude': 52.1438,
+        'longitude': 8.07932}
 
-obj = pv_feed.PvFeed(DIC, site, '2010', '201')
+obj = pv_feed.PvFeed(DIC, site, '2010')
 """
 
 from .base_feed import Feed
@@ -39,21 +41,19 @@ import pvlib
 
 class PvFeed(Feed):
 
-    def __init__(self, DIC, site, year, region):
+    def __init__(self, DIC, site, year):
         """
         private class for the implementation of a Phovoltaic Feed as timeseries
         :param DIC: database parameters
         :param site: site and plant parameters
         :param year: the year to get the data for
-        :param region: the region to get the data for
         """
-        super(PvFeed, self).__init__(DIC, site, year, region, ["WSS", "T"])
+        super(PvFeed, self).__init__(DIC, site, year, ["WSS", "T"])
 
         self.DIC = DIC
         self.year = year
-        self.region = region
 
-    def _apply_model(self, DIC, site, year, region, data):
+    def _apply_model(self, DIC, site, year, data):
         """
         implementation of the model to generate the _timeseries data from the
         weatherdata
