@@ -32,8 +32,20 @@ class Grid(object):
         Adds a node-object to this Node.
         :param node_object: the node to be added.
         """
-        node_object.set_parent(self)
+        node_object._set_parent(self)
         self.node_list[node_object.id] = node_object
+
+
+    def get_node_by_id(self, node_id):
+        return self.node_list[node_id]
+
+    def find_node_by_id(self, node_id):
+        try:
+            return self.node_list[node_id]
+        except:
+            for (k,n) in self.node_list.items():
+                return n.find_node_by_id(node_id)
+
 
     def remove_node_by_id(self, node_id):
         """
@@ -78,12 +90,19 @@ class Grid(object):
         """
         return self.parent
 
-    def set_parent(self, parent):
+    def _set_parent(self, parent):
         """
         changes the currents parent-pointer
         :param parent: the new parent
         """
         self.parent = parent
+
+    def set_parent(self, parent):
+        """
+        changes the currents parent-pointer
+        :param parent: the new parent
+        """
+        parent.add_node(self)
 
     def remove_from_parent(self):
         """
@@ -98,7 +117,7 @@ class Grid(object):
         adds an entity to this node.
         :param entity_object:  the entity to add.
         """
-        entity_object.set_parent(self)
+        entity_object._set_parent(self)
         self.entity_list[entity_object.id] = entity_object
 
     def get_own_entities(self):

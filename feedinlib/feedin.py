@@ -7,7 +7,14 @@ This module is used to retrieve and calculate outputdata (feed-in - data) for th
 """
 
 
-class Feedin:
+def feed(Grid, Scenario):
+    entities = Grid.get_all_entities()
+
+
+
+
+
+"""class Feedin:
 
     def __init__(self, grid):
         self._grid = grid
@@ -22,7 +29,7 @@ class Feedin:
         pass
 
     def _retrieve_info_from_data(self):
-        pass
+        pass"""
 
 
 """def create_timeseries(feedin_type, year, region):
@@ -48,4 +55,7 @@ class Feedin:
 def get_instance_list():
     return _instance_list
 """
+
+
+
 
