@@ -14,7 +14,7 @@ class Weather:
 
     """
 
-    def __init__(self, year, region, params):
+    def __init__(self, year, params):
         """
         constructor for the weather-object.
         Test for config, to set up which source shall be used
@@ -66,7 +66,7 @@ class Weather:
         where y.year = {1}
         ;'''.format(where_str, year)
 
-    def get_data(self, DIC, site, year, region):
+    def get_data(self, DIC, site, year):
         """
         Creates an sql-string to define a temporary view with a polygon.
         """
@@ -89,7 +89,13 @@ class Weather:
         CREATE VIEW coastdat.tmpview AS
         SELECT sp.gid, sp.geom
         FROM coastdat.cosmoclmgrid sp
-        WHERE st_contains(sp.geom, ST_GeomFromText('POINT(12.63 51.85)',4326));
+        WHERE st_contains(sp.geom, ST_GeomFromText('POINT(
+        '''
+
+        sql += str(site['longitude']) + ' ' + str(site['latitude'])
+
+        sql += '''
+        )',4326));
         '''
 
         #datatype = 'ASWDIFD_S'
@@ -114,26 +120,14 @@ class Weather:
 
         return self.data_dc
 
-    def get_data_for_pv(self, data_dc, DIC, site, year, region):
+    def get_data_for_pv(self, data_dc, DIC, site, year):
 
-        # 1. Update site information with information from database
-        # TODO: this information must be also found in the coastdat schema,
-        # maybe this operation can also be somewhere else
-        #schema = 'weather'
-        #table = 'solar_raster_register'
-
-        #columns = ['longitude', 'latitude', 'site_id', 'idx_lat', 'idx_lon']
-        #site.update(rdb.fetch_row(DIC, schema, table, where_column='raster_id',
-            #where_condition=int(region)))
-        site['latitude'] = 52.1438
-        site['longitude'] = 8.07932
-
-        # 2. Create an empty data frame
+        # 1. Create an empty data frame
         self.data = pd.DataFrame(
                 index=pd.date_range(datetime(int(year), 1, 1, 0, 0, 0),
                 periods=8760, freq='H', tz='Europe/Berlin'))
 
-        # 3. Get weather timeseries from database
+        # 2. Get weather timeseries from database
 
         # Required datatypes for PV calculation
         regions = list(data_dc.keys())
@@ -151,12 +145,12 @@ class Weather:
 
         return self.data
 
-    def get_raw_data(self, DIC, site, year, region):
+    def get_raw_data(self, DIC, site, year):
         """
         use this method to retrieve the whole raw dataset
         :return: the weatherdata
         """
-        data_dc = self.get_data(DIC, site, year, region)
-        data = self.get_data_for_pv(data_dc, DIC, site, year, region)
+        data_dc = self.get_data(DIC, site, year)
+        data = self.get_data_for_pv(data_dc, DIC, site, year)
 
         return data
