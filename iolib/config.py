@@ -31,10 +31,10 @@ Option2 = value2 \n
 """
 print("/iolib/config.py imported")
 
-import configparser
+import ConfigParser as cp
 
-FILE = "config.cfg"
-cfg = configparser.RawConfigParser()
+FILE = "oemof/config.cfg"
+cfg = cp.RawConfigParser()
 _loaded = False
 
 def main():
