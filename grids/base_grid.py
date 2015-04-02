@@ -40,6 +40,8 @@ class Grid(object):
         return self.node_list[node_id]
 
     def find_node_by_id(self, node_id):
+        if self.id == node_id:
+            return self
         try:
             return self.node_list[node_id]
         except:
@@ -117,7 +119,7 @@ class Grid(object):
         adds an entity to this node.
         :param entity_object:  the entity to add.
         """
-        entity_object._set_parent(self)
+        entity_object.set_parent(self)
         self.entity_list[entity_object.id] = entity_object
 
     def get_own_entities(self):
@@ -126,7 +128,10 @@ class Grid(object):
         TODO: is it smarter to return a copy of the list instead of the original object=.
         :return: entity-List.
         """
-        return self.entity_list
+        try:
+            return self.entity_list
+        except:
+            None
 
     def get_all_entities(self):
         """
