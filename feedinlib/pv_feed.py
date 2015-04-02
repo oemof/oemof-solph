@@ -188,12 +188,15 @@ class PvFeed(Feed):
 
         # 13. Apply the Sandia PV Array Performance Model (SAPM) to get a
         # dataframe with all relevant electric output parameters
-        DFOut = pvlib.pvsystem.sapm(Eb=data['Eb'],
-                            Ediff=data['EDiff'],
-                            Tcell=DataFrame['tcell'],
-                            AM=data['AM'],
-                            AOI=data['AOI'],
-                            Module=module_data)
+        data_tmp = pvlib.pvsystem.sapm(
+            Eb=data['Eb'],
+            Ediff=data['EDiff'],
+            Tcell=DataFrame['tcell'],
+            AM=data['AM'],
+            AOI=data['AOI'],
+            Module=module_data)
+
+        data['Pmp'] = data_tmp['Pmp']
 
 ##############################################################################
         # DIVERSE AUSWERTUNGEN
@@ -209,7 +212,7 @@ class PvFeed(Feed):
         #Data['Ix']=DFOut['Ix']
         #Data['Ixx']=DFOut['Ixx']
 
-        return DFOut['Pmp']
+#        return DFOut['Pmp']
 
         ## Einfallswinkel
         #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
