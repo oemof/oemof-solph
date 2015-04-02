@@ -29,9 +29,14 @@ def load_grid_from_csv(scenario):
     file_name = cfg.get("csv", "root") + "grid.csv"
     grid_csv = csv.load_from_csv(file_name)
     grid = Grid("0")
+    fields = grid_csv.fieldnames
 
     for line in grid_csv:
         g = Grid(line["id"])
+        for field in fields:
+            g[field] = line[field]
+
+
         if line["parent_id"] == "0":
             grid.add_node(g)
         else:
@@ -43,11 +48,15 @@ def load_entities_from_csv_to_grid(grid, scenario):
 
     file_name = cfg.get("csv", "root") + "entity.csv"
     entity_csv = csv.load_from_csv(file_name)
+    fields = entity_csv.fieldnames[2:]
 
     for line in entity_csv:
         e = Entity(line["id"])
+
+        # TODO: Add all other properties
+        for field in fields:
+            e[field] = line[field]
+
         g = grid.find_node_by_id(line["parent_id"])
         g.add_entity(e)
-        print e
-        print line["parent_id"]
-        print g
+
