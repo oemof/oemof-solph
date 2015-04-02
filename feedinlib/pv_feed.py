@@ -75,15 +75,19 @@ class PvFeed(Feed):
 
         # 3. Determine the postion of the sun
         DaFrOut = pvlib.solarposition.get_solarposition(time=data.index,
-            location=location)
-
+            location=location, method='pyephem')
+        DaFrOut_b = pvlib.solarposition.get_solarposition(time=data.index,
+            location=location, method='ephemeris')
+            
         ## temporary: changed new data structure of pvlib-python to that one
         ## which was used so far to ensure functionality
+        data['SunAz'] = DaFrOut['azimuth']
         data['SunAz'] = DaFrOut['azimuth']
         data['SunEl'] = DaFrOut['elevation']
         data['AppSunEl'] = DaFrOut['apparent_elevation']
         #data['SolarTime'] = DaFrOut['solar_time']
         data['SunZen'] = DaFrOut['zenith']
+        data['SunZen_b'] = DaFrOut_b['zenith']
         # DaFrOut['apparent_zenith']  # unused?
 
         # 4. Determine the global horizontal irradiation
