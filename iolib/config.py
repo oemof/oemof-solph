@@ -29,6 +29,8 @@ Option2 = value2 \n
 
 
 """
+import os.path as path
+
 print("/iolib/config.py imported")
 
 try:
@@ -37,7 +39,10 @@ except:
     # to be compatible with Python2.7
     import ConfigParser as cp
 
-FILE = "oemof/config.cfg"
+FILENAME = "config.cfg"
+FILE = path.join(path.expanduser("~"), '.oemof', FILENAME)
+
+#FILE = "oemof/config.cfg"
 cfg = cp.RawConfigParser()
 _loaded = False
 
