@@ -27,12 +27,13 @@ def create_grid(scenario):
 def load_grid_from_csv(scenario):
 
     file_name = cfg.get("csv", "root") + "grid.csv"
-    grid_csv = csv.load_from_csv(file_name)
+    grid_csv = csv.load_dict_from_csv(file_name)
     grid = Grid("0")
-    fields = grid_csv.fieldnames
 
-    for line in grid_csv:
+    for k, line in grid_csv.items():
         g = Grid(line["id"])
+        fields = line.keys()
+
         for field in fields:
             g[field] = line[field]
 
@@ -47,12 +48,12 @@ def load_grid_from_csv(scenario):
 def load_entities_from_csv_to_grid(grid, scenario):
 
     file_name = cfg.get("csv", "root") + "entity.csv"
-    entity_csv = csv.load_from_csv(file_name)
-    fields = entity_csv.fieldnames[2:]
+    entity_csv = csv.load_dict_from_csv(file_name)
 
-    for line in entity_csv:
+
+    for k, line in entity_csv.items():
         e = Entity(line["id"])
-
+        fields = line.keys()
         # TODO: Add all other properties
         for field in fields:
             e[field] = line[field]
