@@ -31,7 +31,11 @@ Option2 = value2 \n
 """
 print("/iolib/config.py imported")
 
-import ConfigParser as cp
+try:
+    import configparser as cp
+except:
+    # to be compatible with Python2.7
+    import ConfigParser as cp
 
 FILE = "oemof/config.cfg"
 cfg = cp.RawConfigParser()
