@@ -31,7 +31,6 @@ obj = pv_feed.PvFeed(DIC, site, '2010')
 
 from .base_feed import Feed
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 import os.path as path
