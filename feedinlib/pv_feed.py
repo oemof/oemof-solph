@@ -210,16 +210,6 @@ class PvFeed(Feed):
         #Data['Ix']=DFOut['Ix']
         #Data['Ixx']=DFOut['Ixx']
 
-        # Ist Outputleistung auf den Quadratmeter bezogen?
-
-        X = X = np.arange(0, 8760)
-        print(np.shape(X))
-        plt.bar(X, DFOut['Pmp'])
-        plt.xlabel('Hours of the year')
-        plt.ylabel('Output power in Watts ')
-        plt.xlim([0, len(X)])
-        plt.show()
-
         return DFOut['Pmp']
 
         ## Einfallswinkel
