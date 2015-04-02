@@ -31,7 +31,6 @@ obj = pv_feed.PvFeed(DIC, site, '2010')
 
 from .base_feed import Feed
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 import os.path as path
@@ -76,15 +75,19 @@ class PvFeed(Feed):
 
         # 3. Determine the postion of the sun
         DaFrOut = pvlib.solarposition.get_solarposition(time=data.index,
-            location=location)
-
+            location=location, method='pyephem')
+        DaFrOut_b = pvlib.solarposition.get_solarposition(time=data.index,
+            location=location, method='ephemeris')
+            
         ## temporary: changed new data structure of pvlib-python to that one
         ## which was used so far to ensure functionality
+        data['SunAz'] = DaFrOut['azimuth']
         data['SunAz'] = DaFrOut['azimuth']
         data['SunEl'] = DaFrOut['elevation']
         data['AppSunEl'] = DaFrOut['apparent_elevation']
         #data['SolarTime'] = DaFrOut['solar_time']
         data['SunZen'] = DaFrOut['zenith']
+        data['SunZen_b'] = DaFrOut_b['zenith']
         # DaFrOut['apparent_zenith']  # unused?
 
         # 4. Determine the global horizontal irradiation
@@ -189,12 +192,15 @@ class PvFeed(Feed):
 
         # 13. Apply the Sandia PV Array Performance Model (SAPM) to get a
         # dataframe with all relevant electric output parameters
-        DFOut = pvlib.pvsystem.sapm(Eb=data['Eb'],
-                            Ediff=data['EDiff'],
-                            Tcell=DataFrame['tcell'],
-                            AM=data['AM'],
-                            AOI=data['AOI'],
-                            Module=module_data)
+        data_tmp = pvlib.pvsystem.sapm(
+            Eb=data['Eb'],
+            Ediff=data['EDiff'],
+            Tcell=DataFrame['tcell'],
+            AM=data['AM'],
+            AOI=data['AOI'],
+            Module=module_data)
+
+        data['Pmp'] = data_tmp['Pmp']
 
 ##############################################################################
         # DIVERSE AUSWERTUNGEN
@@ -210,17 +216,7 @@ class PvFeed(Feed):
         #Data['Ix']=DFOut['Ix']
         #Data['Ixx']=DFOut['Ixx']
 
-        # Ist Outputleistung auf den Quadratmeter bezogen?
-
-        X = X = np.arange(0, 8760)
-        print(np.shape(X))
-        plt.bar(X, DFOut['Pmp'])
-        plt.xlabel('Hours of the year')
-        plt.ylabel('Output power in Watts ')
-        plt.xlim([0, len(X)])
-        plt.show()
-
-        return DFOut['Pmp']
+#        return DFOut['Pmp']
 
         ## Einfallswinkel
         #out.write_csv('/home/caro/rliserver/04_Projekte/026_Berechnungstool/' +
