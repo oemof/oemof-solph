@@ -5,14 +5,22 @@ version: 0.1
 This module is used to retrieve and calculate outputdata (feed-in - data) for the scientific models.
 
 """
+from oemof.rawdatalib.weather import CsvWeather
+from oemof.feedinlib.wind_feed import WindFeed
+weather = None
 
 
 def feed(Grid, Scenario):
     entities = Grid.get_all_entities()
+    wind_entities = {k:v for (k,v) in entities.iteritems() if v["type"] == "wind"}
+    pv_entities = {k:v for (k,v) in entities.iteritems() if v["type"] == "pv"}
 
+    print wind_entities
+    print pv_entities
 
-
-
+    weather = CsvWeather(0)
+    wind_feed = WindFeed(weather)
+    wind_feed.feed(wind_entities)
 
 """class Feedin:
 
