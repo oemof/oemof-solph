@@ -1,22 +1,24 @@
 from oemof.scenariolib.base_scenario import Scenario
 from oemof.grids.base_grid import Grid
-from oemof.feedinlib.feedin import Feedin
 from oemof.solverlib.base_solph import Solph
+import oemof.feedinlib.feedin as f
+import oemof.grids.grid_factory as gf
+
 
 class Handler(object):
 
-    def __init__(self, **parameters):
+    def __init__(self, parameters):
         self.parameters = parameters
+        self.grid = gf.create_grid(parameters)
+        print self.grid
 
-        self.scenario = Scenario(**self.parameters)
-        self.grid = Grid("Germany")
-        Feedin(self.grid)                           # TODO: komischer aufruf
+    def run(self):
+        f.feed(self.grid, self.parameters)
         solph = Solph()                             # TODO: echt alles komoisch, sollte nich so laufen
         self.results = solph.solph(self.grid)
 
-
-    def run(self):
-        print(self.scenario.name)
-
     def get_results(self):
         return self.results
+
+    def get_grid(self):
+        return self.grid
