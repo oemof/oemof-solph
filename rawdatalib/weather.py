@@ -1,8 +1,9 @@
-__package__ = "rawdatalib"
+#__package__ = "rawdatalib"
 
 import oemof.iolib.postgis as pg
 import sys
 from oemof.dblib import read_data_pg as rdb
+import oemof.iolib.csv_io as csv
 import pandas as pd
 from datetime import datetime
 import numpy as np
@@ -83,7 +84,7 @@ class Weather:
         #'''
 
         # b) Uebergabe ein Datenpunkt
-        # FEHLER: Datenpunkt hier hardcoded! Muss mit region-ID verknüpft
+        # FEHLER: Datenpunkt hier hardcoded! Muss mit region-ID verknuepft
         # werden
         sql += '''
         CREATE VIEW coastdat.tmpview AS
@@ -154,3 +155,19 @@ class Weather:
         data = self.get_data_for_pv(data_dc, DIC, site, year)
 
         return data
+
+
+
+class CsvWeather(object):
+
+    def __init__(self, scenario):
+        self.weather = csv.load_dict_from_csv("weather.csv")
+
+    def get_timeseries(self, parameter):
+        ts = {}
+
+        for k,v in self.weather.items():
+            ts[k] = v[parameter]
+
+        return ts
+
