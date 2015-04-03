@@ -26,7 +26,7 @@ def create_grid(scenario):
 
 def load_grid_from_csv(scenario):
 
-    file_name = cfg.get("csv", "root") + "grid.csv"
+    file_name = "grid.csv"
     grid_csv = csv.load_dict_from_csv(file_name)
     grid = Grid("0")
 
@@ -47,7 +47,7 @@ def load_grid_from_csv(scenario):
 
 def load_entities_from_csv_to_grid(grid, scenario):
 
-    file_name = cfg.get("csv", "root") + "entity.csv"
+    file_name = "entity.csv"
     entity_csv = csv.load_dict_from_csv(file_name)
 
 
