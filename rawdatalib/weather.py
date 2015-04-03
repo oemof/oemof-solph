@@ -161,7 +161,7 @@ class Weather:
 class CsvWeather(object):
 
     def __init__(self, scenario):
-        self.weather = csv.load_dict_from_csv("weather.csv")
+        self.weather = csv.load_dict_from_csv(scenario["name"] + "/" + scenario["year"] + "/weather.csv")
 
     def get_timeseries(self, parameter):
         ts = {}
