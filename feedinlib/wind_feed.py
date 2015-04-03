@@ -1,21 +1,27 @@
-from oemof.feedinlib.base_feed import Feed
+from oemof.feedinlib.base_feed import Feeder
 
 
-class _WindFeed(Feed):
+class WindFeed(Feeder):
 
-    def __init__(self, year, region):
+    def __init__(self, weather_object):
         """
         private class for the implementation of a Wind Feed as timeseries
         :param year: the year to get the data for
         :param region: the region to get the data for
         """
-        super(_WindFeed, self).__init__(year, region, ["WSS"])
+        super(WindFeed, self).__init__(weather_object, ["wss"])
 
 
-    def _apply_model(self):
+    def _apply_model(self, entity):
         """
         implementation of the model to generate the _timeseries data from the _weatherdata
         :return:
         """
-        self._timeseries = self._weatherObject.get_raw_data()
         #TODO: setup the model, currently being done by clemens
+        print "yeha"
+        e = entity
+
+        e["output"] = {}
+
+        for k,v in e["wss"].items():
+            e["output"][k] = int(v)*200
