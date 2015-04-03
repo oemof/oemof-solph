@@ -88,4 +88,20 @@ class Feed(object):
 
 
 class Feeder(object):
-    pass
+
+    def __init__(self, weather_object, params):
+        self.weather = weather_object
+        self.params = params
+        self.fields = {}
+        for p in params:
+            self.fields[p] = self.weather.get_timeseries(p)
+
+    def feed (self, entities):
+
+        for k,e in entities.items():
+            for (field, series) in self.fields.items():
+                e[field] = series
+            self._apply_model(e)
+
+    def _apply_model(self, entity):
+        e = entity
