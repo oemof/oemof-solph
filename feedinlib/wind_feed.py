@@ -18,7 +18,6 @@ class WindFeed(Feeder):
         :return:
         """
         #TODO: setup the model, currently being done by clemens
-        print "yeha"
         e = entity
 
         e["output"] = {}
