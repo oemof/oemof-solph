@@ -88,8 +88,20 @@ class Feed(object):
 
 
 class Feeder(object):
-
+    """
+    This class is the newly written Feeder-structure for the "first-example"-implementation"
+    To avoid incompatibility with existing code, a new class has been constructed.
+    You always want to inherit from this class, changes in this class will affect all other feeders.
+    """
     def __init__(self, weather_object, params):
+        """
+        instantiate the feeder object with the weather_object from rawdatalib and the weatherpamaters-list
+        Override this constructor within your inherited class, define the fields needed ["wss", "T", "radiation"]...
+        and call this consctructor (see wind_feed.py for an example)
+
+        :param weather_object: The weatherobject.
+        :param params: the parameter-list
+        """
         self.weather = weather_object
         self.params = params
         self.fields = {}
@@ -97,6 +109,12 @@ class Feeder(object):
             self.fields[p] = self.weather.get_timeseries(p)
 
     def feed (self, entities):
+        """
+        call this method to start thefeeding process for the entities provided.
+        :param entities: dict of entities, HAS TO CHANGE!!!
+        :return:
+        """
+        #TODO: has to be a list of entites, not a dict
 
         for k,e in entities.items():
             for (field, series) in self.fields.items():
@@ -104,4 +122,9 @@ class Feeder(object):
             self._apply_model(e)
 
     def _apply_model(self, entity):
+        """
+        everride this method and implement your scientific model for single-entities inside.
+        :param entity: the entity to calculate
+        """
+
         e = entity

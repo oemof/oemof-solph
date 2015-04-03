@@ -1,3 +1,8 @@
+"""
+This module ist just a stub for the "first-example"implementation. Don't rely on it in any way!
+"""
+
+
 __package__ = "rawdatalib"
 
 import oemof.iolib.csv_io as csv

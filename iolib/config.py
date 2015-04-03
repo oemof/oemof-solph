@@ -40,9 +40,9 @@ except:
     import ConfigParser as cp
 
 FILENAME = "config.cfg"
-FILE = path.join(path.expanduser("~"), '.oemof', FILENAME)
+#FILE = path.join(path.expanduser("~"), '.oemof', FILENAME)
 
-#FILE = "oemof/config.cfg"
+FILE = "oemof/config.cfg"
 cfg = cp.RawConfigParser()
 _loaded = False
 

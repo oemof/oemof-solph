@@ -1,3 +1,9 @@
+"""
+Module created for the "first-example"-implementation.
+It is just a demonstration on how to correctly define the data needed for calculation in the constructor
+and how to access its datafields inside the _apply_model.
+
+"""
 from oemof.feedinlib.base_feed import Feeder
 
 

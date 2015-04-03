@@ -13,22 +13,31 @@ DELIMITER = ','
 ROOT = ''
 
 
+
 def load_dict_from_csv(file_name):
+    """
+    loads a list of dicts from a csv file.
+    :param file_name: the filename.
+    :return:the list of dicts.
+    """
     _load_config()
     with open(ROOT + file_name) as f:
         reader = csv.DictReader(f, delimiter=DELIMITER)
-        d = {}
+        d = []
         i=0
         for line in reader:
-            try:
-                d[line["id"]] = dict(line)
-            except:
-                d[i] = dict(line)
-                i+=1
+            d.append(dict(line))
+            i+=1
     return d
 
 
 def write_dict_to_csv(file_name, dict):
+    """
+    writes a dict of dicts to a csv file.
+    use with care or better not at all!
+    :param file_name: the filename.
+    :param dict: the dict of dicts.
+    """
     _load_config()
 
     with open(ROOT + file_name, 'wf') as f:
@@ -39,6 +48,10 @@ def write_dict_to_csv(file_name, dict):
 
 
 def _load_config():
+    """
+    loads the config
+    :return:
+    """
     global DELIMITER
     global ROOT
     #DELIMITER = cfg.get('csv', 'delimiter')

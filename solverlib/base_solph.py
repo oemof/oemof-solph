@@ -1,8 +1,13 @@
+"""
+This module contains a minimal solver for the "first-example"-implementation.
+It doesn't do anything interesting fpr now.
+"""
+
 class Solph(object):
     def __init__(self):
         pass
 
-    def solph(self, grid):
+    def solve(self, grid):
 
         #calculates sum of all entities
 
@@ -10,7 +15,7 @@ class Solph(object):
 
         l = 8760
 
-        r = [None] * l
+        r = {}
 
         for i in range(0,l):
             t = 0
