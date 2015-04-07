@@ -36,16 +36,15 @@ class Handler(object):
         """
         self.parameters = parameters
 
-        #call the grid-factory, will return the grid defined in the exampledata
+        # call the grid-factory, will return the grid defined in the exampledata
         self.grid = gf.create_grid(parameters)
-        print self.grid
 
     def run(self):
         """
         starts the simulation.
         """
 
-        #passes the scenario-parameters and the greed to the feeder.
+        # passes the scenario-parameters and the greed to the feeder.
         f.feed(self.grid, self.parameters)
 
 
