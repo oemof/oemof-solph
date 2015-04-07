@@ -46,7 +46,9 @@ class Grid(object):
             return self.node_list[node_id]
         except:
             for (k,n) in self.node_list.items():
-                return n.find_node_by_id(node_id)
+                grid = n.find_node_by_id(node_id)
+                if not grid is None:
+                    return grid
 
 
     def remove_node_by_id(self, node_id):

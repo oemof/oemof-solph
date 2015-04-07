@@ -19,9 +19,9 @@ def feed(Grid, scenario):
     #get all entities
     entities = Grid.get_all_entities()
     #filter for wind_entities
-    wind_entities = {k:v for (k,v) in entities.iteritems() if v["type"] == "wind"}
+    wind_entities = {k:v for (k,v) in entities.items() if v["type"] == "wind"}
     #filter for pv-entites
-    pv_entities = {k:v for (k,v) in entities.iteritems() if v["type"] == "pv"}
+    pv_entities = {k:v for (k,v) in entities.items() if v["type"] == "pv"}
 
     #create the weatherobject
     weather = CsvWeather(scenario)
