@@ -192,13 +192,14 @@ class PvFeed(Feed):
 
         # 13. Apply the Sandia PV Array Performance Model (SAPM) to get a
         # dataframe with all relevant electric output parameters
+        print(data.keys())
         data_tmp = pvlib.pvsystem.sapm(
-            Eb=data['Eb'],
-            Ediff=data['EDiff'],
-            Tcell=DataFrame['tcell'],
-            AM=data['AM'],
-            AOI=data['AOI'],
-            Module=module_data)
+            poa_direct=data['Eb'],
+            poa_diffuse=data['EDiff'],
+            temp_cell=DataFrame['tcell'],
+            airmass_absolute=data['AM'],
+            aoi=data['AOI'],
+            module=module_data)
 
         data['Pmp'] = data_tmp['Pmp']
 
