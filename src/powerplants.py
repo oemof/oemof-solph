@@ -47,14 +47,15 @@ if __name__ == "__main__":
             parallelStrings = 1,
             seriesModules = 1,
             albedo = 0.2)
+    
 
-    class CM:
+    class ConstantModell:
         def __init__(self, required = ["nominal_power", "steps"]):
           self.required = required
         def feedin(self, **ks): return [ks["nominal_power"]] * ks["steps"]
     
-    pvc = Photovoltaic(nominal_power = 100000000, steps = 3, model = CM())
-    pvc2 = Photovoltaic(nominal_power = 100000000, stps = 3, model = models.CM2())
+    pvc = Photovoltaic(nominal_power = 100000000, steps = 3, model = ConstantModell())
+    pvc2 = Photovoltaic(nominal_power = 100000000, steps = 3, model = models.ConstantModell())
     # pv_plant.weather = oemof.geolib.weather(pv_plant)
     # or
     # pv_plant.get_my_weatherdata(mode = "standard_database")
