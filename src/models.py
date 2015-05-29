@@ -10,16 +10,72 @@ from random import random
 import pvlib
 
 class Photovoltaic:
-  def __init__(self, required):
-    self.required = required
+    def __init__(self, required):
+        self.required = required
 
-  def feedin(self, **kwargs):
-      
-   module_data = (pvlib.pvsystem.retrieve_sam('SandiaMod')
-            [kwargs['module_name']])
-   return [module_data]
+    def feedin(self, **kwargs):
         
+        time = pd.DataFrame(
+                index=pd.date_range(datetime(int(year), 1, 1, 0, 0, 0),
+                periods=site['hoy'], freq='H', tz=site['TZ']))
+        
+        return time
 
+
+    def module_data_and_location(self, **kwargs):
+        
+        module_data = (pvlib.pvsystem.retrieve_sam('SandiaMod')
+            [kwargs['module_name']])
+            
+        # area
+
+        TZ = 'Europe/Berlin' # temp
+
+        location = pvlib.location.Location(kwargs['latitude'],
+                                                kwargs['longitude'],
+                                                TZ)
+            
+        return [module_data, location]
+    
+    
+    def solarposition(time, location):
+
+        DaFrOut = pvlib.solarposition.get_solarposition(time=time,
+            location=location, method='pyephem')  # method ephemeris
+
+        sun_azimuth = DaFrOut['azimuth']
+        sun_elevation = DaFrOut['elevation']
+        app_sun_elevation = DaFrOut['apparent_elevation']
+        solar_time = DaFrOut['solar_time']
+        sun_zenith = DaFrOut['zenith']
+#        data['SunZen_b'] = DaFrOut_b['zenith']
+#        data['SunEl_b'] = DaFrOut_b['elevation']
+        
+        return [sun_azimuth, sun_elevation, sun_zenith]
+
+
+    def irradiation_and_atmosphere(data, time, sun_zenith):
+        
+         # 4. Determine the global horizontal irradiation
+        data['GHI'] = data['DirHI'] + data['DHI']
+
+        # 5. Determine the extraterrestrial radiation
+        H_extra = pvlib.irradiance.extraradiation(
+            datetime_or_doy=time.dayofyear)
+
+        # 6. Determine the relative air mass
+        relative_airmass = pvlib.atmosphere.relativeairmass(z=data['SunZen'])
+        
+        return [H_extra, relative_airmass]
+        
+        
+    def angle_of_incidence(sun_azimuth, sun_zenith, **kwargs):
+        
+        aoi = pvlib.irradiance.aoi(sun_az=sun_azimuth,
+            sun_zen=sun_zenith, surf_tilt=kwargs['tilt'],
+            surf_az=kwargs['azimuth'])
+            
+        return aoi
 
 
 class ConstantModell:
