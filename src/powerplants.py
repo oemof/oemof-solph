@@ -20,6 +20,7 @@ class Photovoltaic:
         Calculating the powerplants feed then calls into the model with the
         given parameters. """
         self.nominal_power = nominal_power
+        model.powerplant = self
         self.model = model
         for k in attributes: setattr(self, k, attributes[k])
         for k in model.required:
@@ -29,15 +30,18 @@ class Photovoltaic:
                     " but it's not provided as an argument."
                 )
 
-    @property
-    def feedin(self):
-        return list(self.model.feedin(**{k: getattr(self, k)
-                                         for k in self.model.required}))
+    def feedin(self, **kwargs):
+        # TODO: add docstring documenting the attribute overriding behaviour
+        #       of this function.
+        combined = {k: getattr(self, k) for k in self.model.required}
+        combined.update(kwargs)
+        return list(self.model.feedin(**combined))
 
 class Wind: pass
 
 if __name__ == "__main__":
 
+    site = {'hoy': 1, 'TZ': 2}
     pv_plant = Photovoltaic(0,
             latitude = 52.52437,
             longitude = 13.41053,
@@ -46,7 +50,8 @@ if __name__ == "__main__":
             tilt = 30,
             parallelStrings = 1,
             seriesModules = 1,
-            albedo = 0.2)
+            albedo = 0.2,
+            site = site)
     
 
     class ConstantModell:
@@ -54,8 +59,10 @@ if __name__ == "__main__":
           self.required = required
         def feedin(self, **ks): return [ks["nominal_power"]] * ks["steps"]
     
-    pvc = Photovoltaic(nominal_power = 100000000, steps = 3, model = ConstantModell())
-    pvc2 = Photovoltaic(nominal_power = 100000000, steps = 3, model = models.ConstantModell())
+    pvc = Photovoltaic(nominal_power = 100000000, steps = 3, site = site,
+                       model = ConstantModell())
+    pvc2 = Photovoltaic(nominal_power = 100000000, steps = 3, site = site,
+                        model = models.ConstantModell())
     # pv_plant.weather = oemof.geolib.weather(pv_plant)
     # or
     # pv_plant.get_my_weatherdata(mode = "standard_database")
@@ -63,9 +70,9 @@ if __name__ == "__main__":
 
     # oemof.timeseries_plot(my_pv_plant.feedin)
     # We don't have a plotter so just mock stuff by printing.
-    print(pv_plant.feedin)
+    print(pv_plant.feedin(year = 1999))
     print()
-    print(pvc.feedin)
+    print(pvc.feedin(year = 2001))
     print()
-    print(pvc2.feedin)
+    print(pvc2.feedin(year = 2031))
 

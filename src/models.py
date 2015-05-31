@@ -5,8 +5,11 @@ Created on Wed May 13 08:43:54 2015
 @author: dozeumwic
 """
 
+from datetime import datetime
 from functools import reduce
 from random import random
+
+import pandas as pd
 import pvlib
 
 class Photovoltaic:
@@ -16,8 +19,19 @@ class Photovoltaic:
     def feedin(self, **kwargs):
         
         time = pd.DataFrame(
-                index=pd.date_range(datetime(int(year), 1, 1, 0, 0, 0),
-                periods=site['hoy'], freq='H', tz=site['TZ']))
+                # TODO: the year variable in the line below is not defined
+                #   index=pd.date_range(datetime(int(year), 1, 1, 0, 0, 0),
+                # Somebody should check whether getting this from the 'kwargs'
+                # is correct.
+                index=pd.date_range(datetime(int(kwargs["year"]),
+                                             1, 1, 0, 0, 0),
+                # TODO: check whether 'site' should really be an attribute of
+                #       the 'powerplant'. Again, it was a standalone variable
+                #       which was never defined. As this looks like something
+                #       which should belong to 'powrplant', I put it there.
+                                    periods=self.powerplant.site['hoy'],
+                                    freq='H',
+                                    tz=self.powerplant.site['TZ']))
         
         return time
 
