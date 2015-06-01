@@ -27,8 +27,7 @@ class Photovoltaic:
             if not hasattr(self, k):
                 raise AttributeError(
                     "Your model requires {k}".format(k = k) +
-                    " but it's not provided as an argument."
-                )
+                    " but it's not provided as an argument.")
 
     def feedin(self, **kwargs):
         # TODO: add docstring documenting the attribute overriding behaviour
