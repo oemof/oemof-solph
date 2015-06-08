@@ -8,8 +8,6 @@
 Definitions 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<<<<<<< HEAD
-=======
 * **Sets** should be named in capitals, e.g. :math:`T` for the timesteps 
 * **Params** should be named in capitals, e.g. :math:`C` for costs
 * **Variables** should be named in lower case, e.g. :math:`p` for power
@@ -38,14 +36,13 @@ omoef/solph specific definitions.
 
 An arbitrary energy system will consist of the following elements: 
 
-* **Component**: a component that produces, converts, consumes energy
-* **Energy bus** : a combination of energy input/output of components and input/output connections between energy busses 
-* **Resource bus**: a combination of resource input/output of components and input/output of connections between resource busses 
-* **Connection**: a connection between busses of same type (el, th, or resource)
+* **Component**: a component that stores, converts, produces or consumes energy
+* **Busses** : a combination of sinks and sources, transformers, input/output of storages, input/output connections between busses which add up to a bus balance 
+* **Connection**: a connection between busses of same type
 
 *Components*
 
-	The input and the ouput side of a component will connected to a energy or a resource bus. Connections between components and
+	The input and the ouput side of a component will connected to a bus. Connections between components and
 	busses are defined without loss. If the component has electrical and thermal output the component is virtually splitted
 	in two using two variables in the mathematical model. One variable for el. output and one for the th. output.  
 
@@ -53,19 +50,15 @@ An arbitrary energy system will consist of the following elements:
 
 	* The input of PowerToGas or PowerToHeat-units will be connected to a energy bus while the output will be connected to a resource 	(gas) or a energy bus (thermal)
 
-*Energy busses* 
+*Busses* 
 
-	Energy busses will have a associated demand and/or components and connections to 
-	other enery busses. For every energy bus the enery balance must hold.
-	This is for example the electrical demand of a electrical bus must equal electrical output 
-	of the components, the electrical input of components and the electrical netto exchange. 
+	Busses will have an associated sink, source and/or components and connections to 
+	other busses. For every bus the bus energy(carrier)-balance must hold.
+	This is for example the electrical demand(sink) of a electrical bus must equal electrical output 
+	of the components(transformers), and the electrical netto exchange. 
 	The same can be applied for thermal busses. 
-
-*Resource busses* 
-
-	Resource busses can be used to define maximum capacities of a resource (e.g. biomass) or to model transformation from 
-	energy (e.g. electricity) to a resource (e.g. gas). 
-	Resource bus can be connected to the input or output side of components. 
+ 
+	A bus can be connected to the input or output side of components. 
 	
 	Examples:
     
@@ -81,7 +74,6 @@ An arbitrary energy system will consist of the following elements:
 	#. resource - resource
 	#. electricity - electricity 
 	#. thermal - thermal 
->>>>>>> eb05c6bf6703d7c76976c56a74f7e9e4b9bca978
 
 Sets 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
