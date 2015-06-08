@@ -4,6 +4,60 @@
 
 .. contents:: Table of Contents
 
+How to model energy systems using solph:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To understand how energy systems are modeled in solph we need to introduce some 
+omoef/solph specific definitions.
+
+An arbitrary energy system will consist of the following elements: 
+
+* **Component**: a component that produces, converts, consumes energy
+* **Energy bus** : a combination of energy input/output of components and input/output connections between energy busses 
+* **Resource bus**: a combination of resource input/output of components and input/output of connections between resource busses 
+* **Connection**: a connection between busses of same type (el, th, or resource)
+
+*Components*
+
+	The input and the ouput side of a component will connected to a energy or a resource bus. Connections between components and
+	busses are defined without loss. If the component has electrical and thermal output the component is virtually splitted
+	in two using two variables in the mathematical model. One variable for el. output and one for the th. output.  
+
+	Example: 
+
+	* The input of PowerToGas or PowerToHeat-units will be connected to a energy bus while the output will be connected to a resource 	(gas) or a energy bus (thermal)
+
+*Energy busses* 
+
+	Energy busses will have a associated demand and/or components and connections to 
+	other enery busses. For every energy bus the enery balance must hold.
+	This is for example the electrical demand of a electrical bus must equal electrical output 
+	of the components, the electrical input of components and the electrical netto exchange. 
+	The same can be applied for thermal busses. 
+
+*Resource busses* 
+
+	Resource busses can be used to define maximum capacities of a resource (e.g. biomass) or to model transformation from 
+	energy (e.g. electricity) to a resource (e.g. gas). 
+	Resource bus can be connected to the input or output side of components. 
+	
+	Examples:
+    
+	* Coal-(resource)bus on input side of Coal-powerplant 
+	* Gas-(resource)bus as ouput of PowerToGas-unit
+
+
+
+*Connections (between busses)* 
+
+	Generally the follwing connections may exist: 
+
+	#. resource - resource
+	#. electricity - electricity 
+	#. thermal - thermal 
+
+	Connections bewtween busses can be used to model electrical transmission-lines or gas-piplines. For this kind of connection
+	a loss can be specified. The exchange between two busses via a connection will be added to the energy balance in energy busses.
+
 
 Definitions 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
