@@ -22,29 +22,26 @@ All naming should be done in English which also applies to abbreviations and oth
 Notation Conventions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* **Sets** should be named in capitals, e.g. T (Time) or B (Bus).
-   * :math:`t \in T`
-   * :math:`b \in B`
-* **Params** should be named in capitals, e.g. C for costs.
-* **Variables** should be named in lower case
-   * **standard terms** should be used if possible, e.g. CAPEX.
-   * **dependencies of Variables** should be put in brackets, e.g.  :math:`x(t,b)`
+* **Sets** should be named in capitals, e.g. :math:`T` for the timesteps 
+* **Params** should be named in capitals, e.g. :math:`C` for costs
+* **Variables** should be named in lower case, e.g. :math:`p` for power
+   * **standard terms** should be used if possible, e.g. :math:`C_{capex}`
+   * **dependencies of Variables** should be put in brackets, e.g. :math:`V(t,b)`
 * **Grouping** (assuming only params. for variables it would be lower case)
-   * **costs** should be named C with a lower index, e.g.  :math:`C_{fuel}`.
-   * **revenues** should be named R with a lower index, e.g. R_spot.
-   * **electrical** capacities should be named P
-   * **thermal capacities** should be named Q_dot
-   * **energy flows** should be named E_dot
-   * **electrical or mechanical work** should be named W
-   * **heat quantities** should be named Q
-   * **energy quantities** should be named E
-* **Additional characters** should always be lower case and multiple indices devided by a comma, e.g. P_chp,max
-   * **subscripted characters** should be used for indices and general description, e.g. P_i or P_chp
-   * **superscripted characters** should be avoided since they cannot be expressed in the code, e.g. P_chp will work but P^chp not
+   * **costs** should be named :math:`C` with a lower index, e.g. :math:`C_{fuel}`
+   * **revenues** should be named :math:`R` with a lower index, e.g. :math:`R_{spot}`
+   * **electrical** capacities should be named :math:`P`
+   * **thermal capacities** should be named :math:`\dot Q`
+   * **energy flows** should be named :math:`\dot E`
+   * **electrical or mechanical work** should be named :math:`W`
+   * **heat quantities** should be named :math:`Q`
+   * **energy quantities** should be named :math:`E`
+* **Additional characters** should be lower case and multiple indices devided by a comma, e.g. :math:`P_{chp,max}`
+   * **subscripted characters** should be used for indices and general description, e.g. :math:`P_{i}` or :math:`P_{chp}`
+   * **superscripted characters** should be avoided since they cannot be expressed in the code, e.g. :math:`P_{chp}` will work but :math:`P^{chp}` does not
 * **Sums** should be written by putting the running index under the sign
 
-When transforming a mathematical model into code it should be understandable, too. Therefore, Variables and Params should be named as close as possible to the mathematical model, e.g. the model param P_chp,max should be named p_chp_max. In contrast, Objectives and Constraints should have „speaking names“ for easy debugging.
-
+When transforming a mathematical model into code it should be understandable, too. Therefore, Variables and Params should be named as close as possible to the mathematical model, e.g. the model param :math:`P_{chp,max}` should be named p_chp_max. In contrast, Objectives and Constraints should have „speaking names“ for easy debugging.
 
 How to model energy systems using solph:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
