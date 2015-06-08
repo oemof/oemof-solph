@@ -437,48 +437,6 @@ Examples
 Parameter
 ~~~~~~~~~~~
 
-Parameter for Demand
------------------------
-
-	.. math::
-	   :nowrap:
-
-		 \begin{align*}
-		 \text{Demand} & \\
-		  &D_{el}(b,t),\quad \forall b \in B_{el}, t \in T :\text{Demand for el. busses in $t$}\\
-		  &D_{th}(b,t),\quad \forall b \in B_{th}, t \in T :\text{Demand for th. busses in $t$}\\
-		 \end{align*}
-
-Parameter for Transformers
----------------------------
-	.. math::
-	   :nowrap:
-
-	 		\begin{align*}
-			 \text{Max. power output:} & \\
-			  &P_{max,el}(c,b,r),\quad \forall (c,b,r) \in P :\text{max. output for el. components}\\
-			  &Q_{max,el}(c,b,r),\quad \forall (c,b,r) \in Q :\text{max. output for th. components}\\
-		     \text{Efficiencies of transformers:} &\\
-			  &ETA_{el}(c,b,r), \quad \forall (c,b,r) \in P :\text{el. Efficiency of component $(c,b,r)$}\\
-			  &ETA_{th}(c,b,r), \quad \forall (c,b,r) \in Q :\text{th. Efficiency of component $(c,b,r)$}
-			 \end{align*}
-
-
-Variables 
-~~~~~~~~~~~~~
-
-Components
----------------
-
-.. math::
-   :nowrap:
-
-	\begin{align*}
-	 \text{Component output} & \\
-	  &p(c,b,r,t),\quad \forall (c,b,r) \in P, t \in T :\text{Output of all el. components}\\
-	  &q(c,b,r,t),\quad \forall (c,b,r) \in Q, t \in T :\text{Output of all th. components}\\
-	 \end{align*}
-
 Resource and exchange
 ------------------------
 
@@ -490,17 +448,6 @@ Resource and exchange
 	  &ex(i,j,t), \quad \forall (i,j) \in C_{all}, t \in T:\text{Energy exchange in connection $(i,j)$}
 	 \end{align*}
 
-Storages 
-------------
-
-.. math::
-   :nowrap:
-
-	 \begin{align*}
-	 & s_{charge}(c,b,t), \quad \forall (c,b) \in S, t \in T\\
-	 & s_{discharge}(c,b,t), \quad \forall (c,b) \in S, t \in T\\
-	 & s_{soc}(c,b,t), \quad \forall (c,b) \in S, t \in T
-	 \end{align*}
 
 Constraints 
 ~~~~~~~~~~~~~~~~~~~~
@@ -517,7 +464,7 @@ Hier kommt nun wieder die Frage von oben zur Geltung. Speicher können einfach a
 		0 =\\
 		+ &\sum_{(i,j=b,k)\in P}p(i,j,k,t) 			&\text{Sum of all components feeding in the bus}\\
 		- &\sum_{(i=b,j,k)\in P}p(i,j,k,t) 			&\text{Sum of all components taking from the bus}\\
-		+ rcon(b,t)						&\text{Source}
+		+ & rcon(b,t)						&\text{Source}\\
 		- &\sum_{(i,j=b,k)\in P}D(b,t) 				&\text{Sum of all fix demand time series}\\
 		+ &\sum_{(i,j=b,k)\in P}D(b,t) 				&\text{Sum of all fix feed-in time series}\\	
 		- &\sum_{(i=b,j) \in (C_{all} \cap C_{b})} ex(i,j,t) 	&\text{Sum of all exports to other buses}\\
