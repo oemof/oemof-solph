@@ -48,15 +48,23 @@ An arbitrary energy system will consist of the following elements:
 
 	Example: 
 
-	* The input of PowerToGas or PowerToHeat-units will be connected to a energy bus while the output will be connected to a resource 	(gas) or a energy bus (thermal)
+	* The input of a PowerToGas-unit will be connected to an electrical bus while the output will be connected to a gas-bus
+    * The input of a PowerToHeat-unit will be connected to an electrical bus and the output will be connected to a thermal-bus
 
 *Busses* 
 
-	Busses will have an associated sink, source and/or components and connections to 
-	other busses. For every bus the bus energy(carrier)-balance must hold.
+	Busses can have an associated components which can be of types: 
+    
+    * Sink: can be a consumer or a demand 
+    * Source: can be feedin of renewable energies 
+    * Storage: can be electrical Storage 
+    * Transformer: can be an powerplant
+  
+	More over busses can have connections to other busses of same type. For every bus the bus energy(carrier)-balance must hold.
 	This is for example the electrical demand(sink) of a electrical bus must equal electrical output 
-	of the components(transformers), and the electrical netto exchange. 
-	The same can be applied for thermal busses. 
+	of the components (e.g.transformers), and the electrical netto exchange with other busses connected. 
+	The same can be applied for thermal busses or gas busses. Note that this definition holds for coal or biomass busses as well, even if 
+    there are no storages and connections to other busses. If components do not exist they can be omitted.  
  
 	A bus can be connected to the input or output side of components. 
 	
@@ -111,6 +119,19 @@ Sets for connections
 		 &(i,j) \in C: \text{Set for all existing connections}\\
 		\end{align*}
 
+This is the set for all existing connections. All possible connections for busses of same type can be calculated by 
+the cartesian product e.g. :math:`C_{all} = (i,j) = B_{el} x B_{el},~i \neq j`  
+
+Sets for Sinks and Sources
+---------------------
+.. math::
+	   :nowrap:
+
+		\begin{align*}
+		 &(c,b) \in IN: \text{Set for Sources}
+		 &(c,b) \in OUT: \text{Set for Sinks}\\
+		\end{align*}
+
 Sets transformers:
 ---------------------------------
 
@@ -118,9 +139,9 @@ Sets transformers:
 	   :nowrap:
 
 			\begin{align*}
-			 &(c,b,r) \in P: \text{Set for all components with el. output, } b \in B_{el}, r \in B_r\\
-			 &(c,b,r) \in Q: \text{Set for all components with th. output, } b \in B_{th}, r \in B_r\\
-		     &(c,b,r) \in TRANSF: \text{Set of all Transformers, } b \in B
+			 &(c,b,r) \in P: \text{Set for all transformers with el. output, } b \in B_{el}, r \in B_r\\
+			 &(c,b,r) \in Q: \text{Set for all transformers with th. output, } b \in B_{th}, r \in B_r\\
+		     &(c,b,r) \in TRANSF= P \cup Q: \text{Set of all Transformers, } b \in B
 			\end{align*}
 
 Examples
@@ -157,8 +178,8 @@ Parameter for Source and Sink
 
 		 \begin{align*}
 		 \text{Demand} & \\
-		  &SINK(b,t),\quad \forall b \in B, t \in T :\text{Sink for bus $b$ in $t$}\\
-		  &SOURCE(b,t),\quad \forall b \in B, t \in T :\text{Source for bus $b$ in $t$}\\
+		  &SINK(c,b,t),\quad \forall (c,b) \in IN, t \in T :\text{Sink (c,b) in $t$}\\
+		  &SOURCE(c,b,t),\quad \forall (c,b) \in OUT, t \in T :\text{Source (c,b) in $t$}\\
 		 \end{align*}
 
 Parameter for Transformers
@@ -185,7 +206,7 @@ Transformer
 
 	\begin{align*}
 	 \text{Component output} & \\
-	  &p_{trans}(c,b,r,t),\quad \forall (c,b,r) \in TRANSF, t \in T :\text{Output of all transformer components}\\
+	  &p(c,b,r,t),\quad \forall (c,b,r) \in TRANSF, t \in T :\text{Output of all transformer components}\\
 	 \end{align*}
 
 Resource and exchange
@@ -222,9 +243,9 @@ Bus Balance
 	
 	\begin{align*}
 		0 = \\
-		& + SOURCE(b,t) \\
-		&- SINK(b,t) \\
-		&+ \sum_{(i,j=b,k)\in TRANSF} p_{transf}(i,j,k,t) \\
+		& + \sum_{c,i=b \in IN} SOURCE(c,i,t) \\
+		&-  \sum_{c,i=b \in OUT} SINK(c,i,t) \\
+		&+ \sum_{(i,j=b,k)\in TRANSF} p(i,j,k,t) \\
 		&- \sum_{(i=b,j) \in C} ex(i,j,t) \\
 		&+ \sum_{(i,j=b) \in C} ex(i,j,t)\\ 
     	&- \sum_{i,j=b,t \in S} s_{charge}(i,j,t) \\
@@ -243,6 +264,7 @@ Resource consumption
 		 & & \forall b \in B, t \in T
 	\end{align*}
 
+Sum of resource consumption for every bus in every timestep that ends up in the bus-balance. 
 
 Storages 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
