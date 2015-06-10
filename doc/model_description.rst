@@ -448,11 +448,10 @@ Hier kommt nun wieder die Frage von oben zur Geltung. Speicher können einfach a
 		- &\sum_{(i=b,j,k)\in P}p(i,j,k,t) 			&\text{Sum of all components taking from the bus}\\
 		+ & rcon(b,t)						&\text{Source}\\
 		- &\sum_{(i,j=b,k)\in P}D(b,t) 				&\text{Sum of all fix demand time series}\\
-		+ &\sum_{(i,j=b,k)\in P}D(b,t) 				&\text{Sum of all fix feed-in time series}\\	
+		+ &\sum_{(i,j=b,k)\in P}F(b,t) 				&\text{Sum of all fix feed-in time series}\\	
 		- &\sum_{(i=b,j) \in (C_{all} \cap C_{b})} ex(i,j,t) 	&\text{Sum of all exports to other buses}\\
 		+ &\sum_{(i,j=b) \in (C_{all} \cap C_{b})} ex(i,j,t) 	&\text{Sum of all imports from other buses}\\
     		- &\sum_{i,j=b,t \in S} s_{charge}(i,j,t) 		&\text{Sum of all storage chargings}\\	
 	    	+ &\sum_{i,j=b,t \in S} s_{discharge}(i,j,t) 		&\text{Sum of all storage dischargings}\\
-	    	+ &
 		& &  \forall b \in B_{el}, t \in T\\
 	\end{align*}
