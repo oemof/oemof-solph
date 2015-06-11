@@ -87,7 +87,7 @@ Sets
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set for Timeseries
--------------
+--------------------
 
 	.. math::
 	   :nowrap:
@@ -123,7 +123,7 @@ This is the set for all existing connections. All possible connections for busse
 the cartesian product e.g. :math:`C_{all} = (i,j) = B_{el} x B_{el},~i \neq j`  
 
 Sets for Sinks and Sources
----------------------
+--------------------------
 .. math::
 	   :nowrap:
 
@@ -171,7 +171,7 @@ Parameter
 ~~~~~~~~~~~
 
 Parameter for Source and Sink
------------------------
+-----------------------------
 
 	.. math::
 	   :nowrap:
@@ -333,22 +333,28 @@ Maximal SOC
  Uwes Mathematical description
 =========================================
 
-
-Definitions 
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 Sets 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set for Timeseries
--------------
+-------------------
 
 	.. math::
 	   :nowrap:
 
 		\begin{align*}
 		 & t \in T \\
+		\end{align*}
+
+Set for Components
+-------------------
+
+	.. math::
+	   :nowrap:
+
+		\begin{align*}
+		 &ct \in CT :\text{Sets for all component types}\\
+		 &c \in C(CT) :\text{Sets for all components of type ct}\\
 		\end{align*}
 	
 Set for Busses:
@@ -359,9 +365,9 @@ Set for Busses:
 
 		\begin{align*}
 		 &bt \in BT :\text{Sets for all bus types}\\
-		 &b(bt) \in B :\text{Sets for all buses of type bt}\\
+		 &b \in B(BT) :\text{Sets for all buses of type bt}\\
 		\end{align*}
-
+		
 Sets for connections
 ---------------------
 
@@ -372,86 +378,284 @@ Sets for connections
 		 &(i(bt),j(bt)) \in C_{all} : \text{Sets for all existing connections between buses of the same type } i \in B, j \in B, bt \in BT\\
 		\end{align*}
 
-Weiß jemand die Notation um deutlich zu machen, dass innerhalb einer Connection gilt: :math:`i \neq j` bzw. müssen wir das überhaupt. Es ist ja nur sinnlos, aber nicht falsch wenn eine Verbindung von B1 nach B1 existiert.
+.. _components:
 
-Sets of components:
----------------------------------
+Components
+~~~~~~~~~~
 
-	.. math::
-	   :nowrap:
+.. raw:: html
 
-		\begin{align*}
-		 &(c,b,r) \in P: \text{Sets for all components } b \in B, r \in B\\
-		 &(c(b),r)\text{Sets of all transformer with the same output b } b \in B\\
-		 &(c(r),b)\text{Sets of all transformer with the same input b } b \in B\\
-		 &(c(b))\text{Sets of all storages with the same connection b } b \in B\\ 	 
-		\end{align*}
-		
-Ich bin mir unsicher mit der Notation.		
-Weiß nicht ob wir alle Komponenten gleich definieren sollen. Dann wäre ein Speicher eine Kompente bei der b und r gleich wäre also der input und der output in den selben Bus gehen.
-
-Examples
-^^^^^^^^^^ 
-	Timeseries: 
-
-		:math:`T = \{1,2,\dots, 8760\}`
+    <font color="blue">
     
-	Busses:
+**Parameter:**
+    
+.. raw:: html
 
-		To model 3 el. busses and three th. busses initialize the sets as follows:
+    </font>
+    
+.. raw:: html
 
-			:math:`B_{el}` = \{'bel1','bel2','bel3'\}, :math:`B_{el}` = \{'bth1','bth2','bth3'\}
+    <font color="green">
+    
+**Variables:**
 
-		If there exist an connection between two busses, this will be defined via elements (tuples) in set :math:`C_{all}`:
+in(c,b,t)
+            input into a component c from a branch b at a timestep t
+    
+out(c,b,t)
+            output of a component c into a branch b at a timestep t
+    
+.. raw:: html
 
-			:math:`C_{all}` = \{('bel1','bel2'),('bel2','bel1'),('bel2','bel2'),('bth1','bth3')\}
+    </font>
 
-	Power and Heat: 
-	
-    	To model the electrical output of two components both connected to the same el. and resource bus do:
+Balances around buses
+~~~~~~~~~~~~~~~~~~~~~
 
-				:math:`P` = {('p1','outbus_el4','inbus_ngas3'), ('p2','outbus_el4','inbus_ngas3')}
-
-	A power2gas component would be the opposite:
-				:math:`P` = {('p3','outbus_ngas3','inbus_el4')}
-
-	
-Parameter
-~~~~~~~~~~~
-
-Resource and exchange
-------------------------
-
-.. math::
-   :nowrap:
-
-	 \begin{align*}
-	  &rcon(b,t),\quad \forall b \in B_r, t \in T     : \text{Resource consumption}\\
-	  &ex(i,j,t), \quad \forall (i,j) \in C_{all}, t \in T:\text{Energy exchange in connection $(i,j)$}
-	 \end{align*}
-
-
-Constraints 
-~~~~~~~~~~~~~~~~~~~~
-
-Balances
---------------------
-
-Hier kommt nun wieder die Frage von oben zur Geltung. Speicher können einfach als Komponenten definiert werden, die den selben Bus als input und output haben. Oder wir betrachten sie extra. Ich stehe übrigens auf Kriegsfuß mit der Notation. Im Zweifel lieber den Text lesen.
+Full balance around all buses. Could differ according to the bus type
 
 .. math::
+   :label: balance_bus
    :nowrap:
 	
 	\begin{align*}
 		0 =\\
-		+ &\sum_{(i,j=b,k)\in P}p(i,j,k,t) 			&\text{Sum of all components feeding in the bus}\\
-		- &\sum_{(i=b,j,k)\in P}p(i,j,k,t) 			&\text{Sum of all components taking from the bus}\\
-		+ & rcon(b,t)						&\text{Source}\\
-		- &\sum_{(i,j=b,k)\in P}D(b,t) 				&\text{Sum of all fix demand time series}\\
-		+ &\sum_{(i,j=b,k)\in P}F(b,t) 				&\text{Sum of all fix feed-in time series}\\	
-		- &\sum_{(i=b,j) \in (C_{all} \cap C_{b})} ex(i,j,t) 	&\text{Sum of all exports to other buses}\\
-		+ &\sum_{(i,j=b) \in (C_{all} \cap C_{b})} ex(i,j,t) 	&\text{Sum of all imports from other buses}\\
-    		- &\sum_{i,j=b,t \in S} s_{charge}(i,j,t) 		&\text{Sum of all storage chargings}\\	
-	    	+ &\sum_{i,j=b,t \in S} s_{discharge}(i,j,t) 		&\text{Sum of all storage dischargings}\\
-		& &  \forall b \in B_{el}, t \in T\\
+		+ &\sum_{c \in C}out(c,b,t) 			&\text{Sum of all flows into the bus}\\
+		- &\sum_{c\in C}in(c,b,t) 			&\text{Sum of all flows from the bus}\\
+		&  & \forall c\in C,b \in B, t \in T\\
 	\end{align*}
+	
+Basic Constraints
+~~~~~~~~~~~~~~~~~
+
+These constraints are use in more than one type and are referenced from these types.
+
+.. _max_power_generic:
+
+Maximal Power (generic)
+-----------------------
+
+The generic maximal output is set by its capacity parameter and its additional capacity variable.
+
+.. math::
+   :label: power_max
+   :nowrap:
+
+	\begin{align*}
+   		out(c,b,t) \leq capacity(c) + capacity_{additional}(c,b,t)&\\
+		& \forall c\in C, b\in B, t\in T\\
+	\end{align*}
+	
+Resources
+~~~~~~~~~~~~~~~~~
+
+A fossil resource is a flow into a bus from outside the energy-system. The source is not defined.
+
+Fossil resource
+---------------
+
+**Type: resource_fossil**
+
+A fossil resource can be limited by a yearly energy amount.
+
+Maximal Energy
+^^^^^^^^^^^^^^
+
+Maximal energy amount of a resource. Could be skipped if unbounded.
+
+.. math::
+   :nowrap:
+
+	\begin{align*}
+		energy_{max}(c,b) \geq	 &\sum_{t \in T} out(c,b,t)\\
+		 & & \forall b \in B, t \in T
+	\end{align*}
+
+.. _transformer:
+
+Transformer
+~~~~~~~~~~~
+
+*inherits* :ref:`components`
+
+Transformer (generic)
+---------------------
+
+**Type: transformer_generic**
+
+*inherits* :ref:`transformer`
+
+Transformer with one input and one output flow and a constant efficiency.
+
+Connection of input and output
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The output variable is connected to the input variable through a constant efficiency.
+
+.. math::
+   :label: transformer_generic_in_out
+   :nowrap:
+
+	\begin{align*}
+   		out(c,b1,t) = \eta(c) \cdot in(c,b0,t)&\\
+		& \forall c\in C, b0,b1\in B, t\in T\\
+	\end{align*}
+		
+Maximal Power (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Maximal output of a transformer is set by its capacity parameter and its additional capacity variable.
+If not set the maximal capacity if infinite.
+
+See equation :eq:`power_max` in chapter :ref:`max_power_generic`
+
+
+Ramps (optional)
+^^^^^^^^^^^^^^^^
+
+blabla.....
+
+Combined Transformer (fixed ratio)
+-----------------------------------
+
+**Type: transformer_combined_fixed_ratio**
+
+*inherits* :ref:`transformer`
+
+Transformers with one input and two output flows and a constant efficiency for both flows (e.g. CHP with a fixed power-heat-rate).
+
+Connection between the two output streams
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The output variable of the different flows are connected through a constant efficiency for each flow.
+
+.. math::
+   :label: transformer_combined_fixed_out_connect
+   :nowrap:
+
+	\begin{align*}
+   		\frac{out(c,b1,t)}{\eta(c,b1)} = \frac{out(c,b2,t)}{\eta(c,b2)}&\\
+		& \forall c\in C, b1,b2\in B, b1\neq b2, t\in T\\
+	\end{align*}
+
+Connection between input and outputs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The output variables are connected to the input variable through a constant efficiency for each flow.
+
+.. math::
+   :label: transformer_combined_fixed_in_out
+   :nowrap:
+
+	\begin{align*}
+   		out(c,b1,t) = \eta(c,b1) \cdot in(c,b0,t)&\\
+   		out(c,b2,t) = \eta(c,b2) \cdot in(c,b0,t)&\\
+		& \forall c\in C, b0,b1,b2\in B, t\in T\\
+	\end{align*}
+	
+Maximal Power (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Maximal output of a combined transformer is set by its capacity parameter and its additional capacity variable of the primary flow.
+The primary flow is set by a parameter. If not set the maximal capacity if infinite. (Example: The primary flow of a CHP plant is typically power)
+
+See equation :eq:`power_max` in chapter :ref:`max_power_generic`
+
+Combined Transformer (variable ratio)
+--------------------------------------
+
+**Type: transformer_combined_variable_ratio**
+
+Under construction....
+
+.. _storages:
+
+Storages
+~~~~~~~~~
+
+*inherits* :ref:`components`
+
+.. raw:: html
+
+    <font color="green">
+    
+**Variables:**
+
+soc(c,t)
+            state of charge of a component c from a branch b at a timestep t
+    
+.. raw:: html
+
+    </font>
+
+Storages get the input and the output from the same bus.
+
+Storage (generic)
+-----------------
+
+**Type: storage_generic**
+
+*inherits* :ref:`storages`
+
+Connection of one state with the previous
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+still missing -> Uwe
+
+Maximal state of charge
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. math::
+   :label: storage_generic_max_soc
+   :nowrap:
+   
+   \begin{align*}
+      soc(c,t) & \leq capacity(c)+capacity_{additional}\\
+      & \forall c \in C,t\in T\\
+   \end{align*}
+
+Minimal state of charge
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The minimal SOC is set to zero. Should be changed in future versions.
+
+.. math::
+   :label: storage_generic_min_soc
+   :nowrap:
+   
+   \begin{align*}
+      soc(c,t)  & \geq0\\
+      & \forall c \in C,t\in T\\ 
+   \end{align*}
+
+Maximal charge
+^^^^^^^^^^^^^^
+
+.. math::
+   :label: storage_generic_max_charge
+   :nowrap:
+   
+   \begin{align*}
+      in(c,b,t) & \leq\frac{capacity(c)+capacity_{additional}}{EPR_{in}(c)}\\
+      & \forall c \in C,b \in B,t\in T\\ 
+   \end{align*}
+
+Maximal discharge
+^^^^^^^^^^^^^^^^^
+
+.. math::
+   :label: storage_generic_max_discharge
+   :nowrap:
+
+   \begin{align*}
+      out(c,b,t) & \leq\frac{capacity(c)+capacity_{additional}}{EPR_{out}(c)}\\
+      & \forall c \in C,b \in B,t\in T\\ 
+   \end{align*}
+
+Connectors
+~~~~~~~~~~~
+
+Connector (generic)
+-------------------
+
+to be continued
