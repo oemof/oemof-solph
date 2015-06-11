@@ -170,15 +170,16 @@ When you recieve following message
 answer with yes.
 
 get underlying repositories (submodules)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------------------------
 
 
-.. code::
+.. code::bash
+
   cd oemof
   git submodule update --recursive --init
 
 add oemof to PYTHONPATH
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------
 
 Configure PYTHONPATH env-var The environment variable PYTHONPATH has to contain the path leading to pahesmf package and the path ~/.python_local. Preferably PYTHONPATH is edited by your .profile. Just append a line similiar to
 
