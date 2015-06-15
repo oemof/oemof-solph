@@ -10,3 +10,9 @@ class ModelsPowerplantsInteraction_Tests:
         plant.Photovoltaic(nominal_power = 0,
                            model = model.Photovoltaic(["missing"]))
                                                       
+                                                     
+class Component_Test:
+    """
+    test to check if instance variables are overwritten in child classes
+    """
+    pass                                                     
