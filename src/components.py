@@ -26,12 +26,12 @@ class Transformer(Component):
   """
   """
   super().__init__(**kwargs)
-    if not self.inputs:
-      raise ArgumentError("Transformer must have at least one input.\n" +
-                          "Got: {0!r}".format(inputs))
-    if not self.outputs:
-      raise ArgumentError("Transformer must have at least one output.\n" +
-                          "Got: {0!r}".format(outputs))
+  if not self.inputs:
+    raise ArgumentError("Transformer must have at least one input.\n" +
+                        "Got: {0!r}".format(inputs))
+  if not self.outputs:
+    raise ArgumentError("Transformer must have at least one output.\n" +
+                        "Got: {0!r}".format(outputs))
 
 class Sink(Component):
   def __init__(self, **kwargs):
