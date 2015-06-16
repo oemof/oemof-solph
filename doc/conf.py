@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pahesmf documentation build configuration file, created by
+# oemof documentation build configuration file, created by
 # sphinx-quickstart on Thu Dec 18 16:57:35 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../src'))
 
 # -- General configuration ------------------------------------------------
 
@@ -34,6 +34,9 @@ extensions = [
     'sphinx.ext.pngmath',
     'numpydoc' 
 ]
+
+# 
+autoclass_content = 'both'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -1,9 +1,9 @@
-.. pahesmf documentation master file, created by
+.. oemof documentation master file, created by
    sphinx-quickstart on Thu Dec 18 16:57:35 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pahesmf's documentation!
+Welcome to oemof's documentation!
 ===================================
 
 Contents:
@@ -11,8 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   blabu
-   Installation_and_setup
+   installation_and_setup
    model_description
 
 
