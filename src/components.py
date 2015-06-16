@@ -18,7 +18,8 @@ class Transformer(Component):
         """
         super().__init__(**kwargs)
         self.busses = kwargs["busses"]
-        # TODO: Günni schreibt transformer in busse
+        for bus in (self.busses["from"] + self.busses["to"]):
+          if self not in bus.transformers: bus.transformers.append(self)
         
 class Connection(Component):
     """
