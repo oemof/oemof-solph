@@ -40,16 +40,18 @@ An arbitrary energy system will consist of the following elements:
 * **Busses** : a combination of sinks and sources, transformers, input/output of storages, input/output connections between busses which add up to a bus balance 
 * **Connection**: a connection between busses of same type
 
-*Components*
 
-	The input and the ouput side of a component will connected to a bus. Connections between components and
+*Components*
+  
+  The input and the ouput side of a component will connected to a bus. Connections between components and
 	busses are defined without loss. If the component has electrical and thermal output the component is virtually splitted
 	in two using two variables in the mathematical model. One variable for el. output and one for the th. output.  
 
 	Example: 
 
-	* The input of a PowerToGas-unit will be connected to an electrical bus while the output will be connected to a gas-bus
+    * The input of a PowerToGas-unit will be connected to an electrical bus while the output will be connected to a gas-bus
     * The input of a PowerToHeat-unit will be connected to an electrical bus and the output will be connected to a thermal-bus
+
 
 *Busses* 
 
@@ -63,9 +65,9 @@ An arbitrary energy system will consist of the following elements:
 	More over busses can have connections to other busses of same type. For every bus the bus energy(carrier)-balance must hold.
 	This is for example the electrical demand(sink) of a electrical bus must equal electrical output 
 	of the components (e.g.transformers), and the electrical netto exchange with other busses connected. 
-	The same can be applied for thermal busses or gas busses. Note that this definition holds for coal or biomass busses as well, even if 
-    there are no storages and connections to other busses. If components do not exist they can be omitted.  
- 
+	The same can be applied for thermal busses or gas busses. Note that this definition holds for coal or biomass busses as well, even if
+  there are no storages and connections to other busses. If components do not exist they can be omitted.
+
 	A bus can be connected to the input or output side of components. 
 	
 	Examples:
@@ -659,3 +661,74 @@ Connector (generic)
 -------------------
 
 to be continued
+
+Simons, Günnis and Clemens' formulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*not regarding timesteps so far...*
+
+Very  generic formulation
+-------------------------
+
+Set of entities :math:`E` as a union of sets of buses, transformers, sources, sinks and transports respectively, which are the vertices:
+
+.. math::
+   E := \{ E_B, E_F, E_O, E_I, E_P \}
+
+Set of directed edges...:
+
+.. math::
+   \vec{E} := \{(e_i, e_j),...\}
+
+Function :math:`f` as "Uebertragunsfunktion" for each entity used in constraints:
+
+.. math::
+   f(I_e, O_e) = \vec{0}, \quad \forall e \in E
+
+:math:`I_e` and :math:`O_e` as subsets of :math:`E`:
+
+.. math::
+   I_e & := \{ i \in E | (i,e) \in \vec{E} \}\\
+   O_e & := \{ o \in E | (e,o) \in \vec{E} \}
+
+And additional constraint for outflow :math:`o` and inflow :math:`i` for each edge:
+
+.. math::
+   o_{e_1} - i_{e_2} = 0, \quad \forall (e_1, e_2) \in \vec{E}
+
+Examples for less generic formulation
+-------------------------------------
+
+**Buses**
+
+.. math::
+   \sum_{i \in I_e} i - \sum_{o \in O_e} o = 0, \quad \forall e \in E_B
+
+**Transformers**
+
+.. math::
+   f(I_e) - \sum_{o \in O_e} o = 0, \quad \forall e \in E_F
+
+e.g. simple gas power plant with efficiency :math:`\eta` and one inflow :math:`i` (gas) and one output :math:`o` (electricity).
+
+.. math::
+   \eta_e \cdot i_e - o_e = 0, \quad \forall e \in E_{simple gas power plant}
+
+**Sinks**
+
+.. math::
+   i_e - v_e = 0, \quad \forall e \in E_I
+   
+with :math:`v` being the value of the sink, e.g. the electric demand in MWh of a household.
+
+**Sources**
+
+.. math::
+   o_e - v_e = 0, \quad \forall e \in E_O
+   
+with :math:`v` being the value of the source, e.g. the electric supply in MWh of a wind turbine.
+
+**Transports**
+
+*still missing*
+
