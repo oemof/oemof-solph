@@ -43,21 +43,21 @@ class Component(Entity):
   pass
 
 class Transformer(Component):
- """
- A Transformer is a specific type of Component which transforms
- (possibly m) inputs into (possibly n) outputs. As such neither its list
- of inputs, nor its list of outputs are allowed to be empty.
- """
- def __init__(self, **kwargs):
   """
+  A Transformer is a specific type of Component which transforms
+  (possibly m) inputs into (possibly n) outputs. As such neither its
+  list of inputs, nor its list of outputs are allowed to be empty.
   """
-  super().__init__(**kwargs)
-  if not self.inputs:
-    raise ArgumentError("Transformer must have at least one input.\n" +
-                        "Got: {0!r}".format(inputs))
-  if not self.outputs:
-    raise ArgumentError("Transformer must have at least one output.\n" +
-                        "Got: {0!r}".format(outputs))
+  def __init__(self, **kwargs):
+    """
+    """
+    super().__init__(**kwargs)
+    if not self.inputs:
+      raise ArgumentError("Transformer must have at least one input.\n" +
+                          "Got: {0!r}".format(inputs))
+    if not self.outputs:
+      raise ArgumentError("Transformer must have at least one output.\n" +
+                          "Got: {0!r}".format(outputs))
 
 class Sink(Component):
   """
