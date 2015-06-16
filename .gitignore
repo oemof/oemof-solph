@@ -12,3 +12,4 @@
 *.pdf
 .idea
 doc/_build/
+doc/api/*.rst

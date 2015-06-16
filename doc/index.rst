@@ -10,9 +10,11 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
+   :glob:
    
    installation_and_setup
    model_description
+   api/*
 
 
 Indices and tables
