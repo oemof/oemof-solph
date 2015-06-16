@@ -7,6 +7,8 @@ class Component:
         """
         self.uid = kwargs["uid"]
 
+    def __str__(self): return "<{0} #{1}>".format(type(self), self.uid)
+
 class Transformer(Component):
     """
     """
