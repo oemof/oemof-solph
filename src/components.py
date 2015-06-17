@@ -92,15 +92,22 @@ if __name__ == "__main__":
   wind = Source(uid="The only wind turbine on the planet.", outputs=[power])
   city = Sink(uid="Neverwhere", inputs=[heat])
 
-  from graph_tool import Graph
-  from graph_tool.draw import graph_draw as draw
+  import networkx as nx
 
-  g = Graph()
+  g = nx.DiGraph()
   es = [coal, power, heat, heatpump, chp, wind, city]
-  vs = {e: g.add_vertex() for e in es}
-  names = g.new_vertex_property("string")
+  buses = [e for e in es if type(e) == Bus]
+  components = [e for e in es if type(e) != Bus]
+  g.add_nodes_from(es)
   for e in es:
-    names[e] = str(e)
-    for o in e.outputs:
-      g.add_edge(vs[e], vs[o])
-
+    for e_in in e.inputs:
+      a, b = e_in, e
+      g.add_edge(a, b)
+  graph_pos=nx.spectral_layout(g)
+  nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
+                         node_size = 900)
+  nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
+                         node_color="b", node_size=300)
+  nx.draw_networkx_edges(g, graph_pos)
+  nx.draw_networkx_labels(g, graph_pos)
+  # or simply nx.draw(g) but then without different node shapes etc
