@@ -81,10 +81,13 @@ class Transport(Component):
 
 
 if __name__ == "__main__":
-  my_bus1 = Bus(uid="b1", type="electricity")
-  my_bus2 = Bus(uid="b2", type="electricity")
-  my_trans = Transformer(uid="t1", inputs=[my_bus1], outputs=[my_bus2])
-  my_connections = Transport(uid="c1", inputs=[my_bus1], outputs=[my_bus2])
-  print(my_trans.uid)
-  print(my_trans.inputs[0])
-  print(my_bus1.outputs[0])
+  #TODO: This example is missing a Transport. (Needs more escalation error.)
+  coal = Bus(uid="Coal", type="coal")
+  power = Bus(uid="Electricity", type="electricity")
+  heat = Bus(uid="Thermal", type="thermal")
+  heatpump = Transformer(uid="Heatpump", inputs=[power],
+                         outputs=[heat])
+  chp = Transformer(uid="CHP", inputs=[coal], outputs=[heat, power])
+  wind = Source(uid="The only wind turbine on the planet.", outputs=[power])
+  city = Sink(uid="Neverwhere", inputs=[heat])
+
