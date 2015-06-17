@@ -21,18 +21,18 @@ class Entity:
 class Component(Entity): pass
 
 class Transformer(Component):
- """
- """
- def __init__(self, **kwargs):
   """
   """
-  super().__init__(**kwargs)
-  if not self.inputs:
-    raise ValueError("Transformer must have at least one input.\n" +
-                     "Got: {0!r}".format([str(x) for x in self.inputs]))
-  if not self.outputs:
-    raise ValueError("Transformer must have at least one output.\n" +
-                     "Got: {0!r}".format([str(x) for x in self.outputs]))
+  def __init__(self, **kwargs):
+    """
+    """
+    super().__init__(**kwargs)
+    if not self.inputs:
+      raise ValueError("Transformer must have at least one input.\n" +
+                       "Got: {0!r}".format([str(x) for x in self.inputs]))
+    if not self.outputs:
+      raise ValueError("Transformer must have at least one output.\n" +
+                       "Got: {0!r}".format([str(x) for x in self.outputs]))
 
 class Sink(Component):
   def __init__(self, **kwargs):
