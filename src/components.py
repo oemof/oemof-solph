@@ -51,7 +51,7 @@ class Source(Component):
     """
     super().__init__(**kwargs)
     if self.inputs:
-      raise ValueError("Sink must not have inputs.\n" +
+      raise ValueError("Source must not have inputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.inputs]))
 
 class Bus(Entity):
