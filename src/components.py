@@ -27,11 +27,11 @@ class Transformer(Component):
   """
   super().__init__(**kwargs)
   if not self.inputs:
-    raise ArgumentError("Transformer must have at least one input.\n" +
-                        "Got: {0!r}".format(inputs))
+    raise ValueError("Transformer must have at least one input.\n" +
+                     "Got: {0!r}".format(inputs))
   if not self.outputs:
-    raise ArgumentError("Transformer must have at least one output.\n" +
-                        "Got: {0!r}".format(outputs))
+    raise ValueError("Transformer must have at least one output.\n" +
+                     "Got: {0!r}".format(outputs))
 
 class Sink(Component):
   def __init__(self, **kwargs):
@@ -39,8 +39,8 @@ class Sink(Component):
     """
     super().__init__(**kwargs)
     if self.outputs:
-      raise ArgumentError("Sink must not have outputs.\n" +
-                          "Got: {0!r}".format(outputs))
+      raise ValueError("Sink must not have outputs.\n" +
+                       "Got: {0!r}".format(outputs))
 
 
 class Source(Component):
@@ -51,8 +51,8 @@ class Source(Component):
     """
     super().__init__(**kwargs)
     if self.inputs:
-      raise ArgumentError("Sink must not have inputs.\n" +
-                          "Got: {0!r}".format(inputs))
+      raise ValueError("Sink must not have inputs.\n" +
+                       "Got: {0!r}".format(inputs))
 
 class Bus(Entity):
   """
@@ -70,12 +70,12 @@ class Transport(Component):
     """
     super().__init__(**kwargs)
     if len(self.inputs) != 1:
-      raise ArgumentError("Transport must have exactly one input.\n" +
-                          "Got: {0!r}".format(inputs))
+      raise ValueError("Transport must have exactly one input.\n" +
+                       "Got: {0!r}".format(inputs))
 
     if len(self.outputs) != 1:
-      raise ArgumentError("Transport must have exactly one output.\n" +
-                          "Got: {0!r}".format(outputs))
+      raise ValueError("Transport must have exactly one output.\n" +
+                       "Got: {0!r}".format(outputs))
 
 
 
