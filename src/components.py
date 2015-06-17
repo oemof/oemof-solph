@@ -15,7 +15,7 @@ class Entity:
     for e_out in self.outputs:
       if self not in e_out.inputs: e_out.inputs.append(self)
 
-  def __str__(self): return "<{0} #{1}>".format(type(self), self.uid)
+  def __str__(self): return "<{0} #{1}>".format(type(self).__name__, self.uid)
 
 class Component(Entity): pass
 
