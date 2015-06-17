@@ -28,10 +28,10 @@ class Transformer(Component):
   super().__init__(**kwargs)
   if not self.inputs:
     raise ValueError("Transformer must have at least one input.\n" +
-                     "Got: {0!r}".format(inputs))
+                     "Got: {0!r}".format(self.inputs))
   if not self.outputs:
     raise ValueError("Transformer must have at least one output.\n" +
-                     "Got: {0!r}".format(outputs))
+                     "Got: {0!r}".format(self.outputs))
 
 class Sink(Component):
   def __init__(self, **kwargs):
@@ -40,7 +40,7 @@ class Sink(Component):
     super().__init__(**kwargs)
     if self.outputs:
       raise ValueError("Sink must not have outputs.\n" +
-                       "Got: {0!r}".format(outputs))
+                       "Got: {0!r}".format(self.outputs))
 
 
 class Source(Component):
@@ -52,7 +52,7 @@ class Source(Component):
     super().__init__(**kwargs)
     if self.inputs:
       raise ValueError("Sink must not have inputs.\n" +
-                       "Got: {0!r}".format(inputs))
+                       "Got: {0!r}".format(self.inputs))
 
 class Bus(Entity):
   """
@@ -71,11 +71,11 @@ class Transport(Component):
     super().__init__(**kwargs)
     if len(self.inputs) != 1:
       raise ValueError("Transport must have exactly one input.\n" +
-                       "Got: {0!r}".format(inputs))
+                       "Got: {0!r}".format(self.inputs))
 
     if len(self.outputs) != 1:
       raise ValueError("Transport must have exactly one output.\n" +
-                       "Got: {0!r}".format(outputs))
+                       "Got: {0!r}".format(self.outputs))
 
 
 
