@@ -91,3 +91,15 @@ if __name__ == "__main__":
   wind = Source(uid="The only wind turbine on the planet.", outputs=[power])
   city = Sink(uid="Neverwhere", inputs=[heat])
 
+  from graph_tool import Graph
+  from graph_tool.draw import graph_draw as draw
+
+  g = Graph()
+  es = [coal, power, heat, heatpump, chp, wind, city]
+  vs = {e: g.add_vertex() for e in es}
+  names = g.new_vertex_property("string")
+  for e in es:
+    names[e] = str(e)
+    for o in e.outputs:
+      g.add_edge(vs[e], vs[o])
+
