@@ -1,15 +1,16 @@
 class Entity:
   """
   """
-  def __init__(self, inputs = [], outputs = [], **kwargs):
+  def __init__(self, **kwargs):
+    #TODO: add default argument values to docstrings (if it's possible).
     """
     :param uid: unique component identifier
     :param inputs: list of Entities acting as input to this Entity.
     :param outputs: list of Entities acting as output from this Enity.
     """
     self.uid = kwargs["uid"]
-    self.inputs = inputs
-    self.outputs = outputs
+    self.inputs = kwargs.get("inputs", [])
+    self.outputs = kwargs.get("outputs", [])
     for e_in in self.inputs:
       if self not in e_in.outputs: e_in.outputs.append(self)
     for e_out in self.outputs:
