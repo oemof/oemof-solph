@@ -96,8 +96,8 @@ if __name__ == "__main__":
 
   g = nx.DiGraph()
   es = [coal, power, heat, heatpump, chp, wind, city]
-  buses = [e for e in es if type(e) == Bus]
-  components = [e for e in es if type(e) != Bus]
+  buses = [e for e in es if isinstance(e, Bus)]
+  components = [e for e in es if isinstance(e, Component)]
   g.add_nodes_from(es)
   for e in es:
     for e_in in e.inputs:
@@ -111,3 +111,4 @@ if __name__ == "__main__":
   nx.draw_networkx_edges(g, graph_pos)
   nx.draw_networkx_labels(g, graph_pos)
   # or simply nx.draw(g) but then without different node shapes etc
+
