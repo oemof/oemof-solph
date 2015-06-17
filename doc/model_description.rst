@@ -332,7 +332,7 @@ Maximal SOC
 
 
 =========================================
- Uwes Mathematical description
+Draft fo a Mathematical description
 =========================================
 
 Sets 
@@ -472,6 +472,26 @@ Maximal energy amount of a resource. Could be skipped if unbounded.
 		energy_{max}(c,b) \geq	 &\sum_{t \in T} out(c,b,t)\\
 		 & & \forall b \in B, t \in T
 	\end{align*}
+	
+Renewable resource
+------------------
+
+**Type: resource_renewable**
+
+A renewable resource is limited by its hourly production.
+
+Maximal Energy
+^^^^^^^^^^^^^^
+
+.. math::
+   :nowrap:
+
+	\begin{align*}
+        o_e - v_e = 0&\\
+        &\forall e \in E_O
+	\end{align*}
+	   
+with :math:`v` being the value of the source, e.g. the electric supply in MWh of a wind turbine.
 
 .. _transformer:
 
@@ -499,8 +519,8 @@ The output variable is connected to the input variable through a constant effici
    :nowrap:
 
 	\begin{align*}
-   		out(c,b1,t) = \eta(c) \cdot in(c,b0,t)&\\
-		& \forall c\in C, b0,b1\in B, t\in T\\
+   		\eta_e \cdot i_e - o_e = 0 \quad&\\
+		& \forall e \in E_{type}\\
 	\end{align*}
 		
 Maximal Power (optional)
