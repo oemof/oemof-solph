@@ -695,15 +695,20 @@ Set of entities :math:`E` as a union of sets of buses, transformers, sources, si
 .. math::
    E := \{ E_B, E_F, E_O, E_I, E_P \}
 
+Set of Components: 
+
+.. math::
+   E_C := E \setminus E_B
+
 Set of directed edges...:
 
 .. math::
    \vec{E} := \{(e_i, e_j),...\}
 
-Function :math:`f` as "Uebertragunsfunktion" for each entity used in constraints:
+Function :math:`f` as "Uebertragunsfunktion" for each component used in constraints:
 
 .. math::
-   f(I_e, O_e) = \vec{0}, \quad \forall e \in E
+   f(I_e, O_e) \leq \vec{0}, \quad \forall e \in E_C
 
 :math:`I_e` and :math:`O_e` as subsets of :math:`E`:
 
@@ -729,7 +734,7 @@ Examples for less generic formulation
 .. math::
    f(I_e) - \sum_{o \in O_e} o = 0, \quad \forall e \in E_F
 
-e.g. simple gas power plant with efficiency :math:`\eta` and one inflow :math:`i` (gas) and one output :math:`o` (electricity).
+e.g. simple gas power plant with efficiency :math:`\eta` and one inflow :math:`i` (gas) and one outflow :math:`o` (electricity).
 
 .. math::
    \eta_e \cdot i_e - o_e = 0, \quad \forall e \in E_{simple gas power plant}
@@ -751,4 +756,38 @@ with :math:`v` being the value of the source, e.g. the electric supply in MWh of
 **Transports**
 
 *still missing*
+
+Optimization problem
+-------------------------------------
+In the optimization problem the weight of a edge :math:`e \in \vec{E}` will correspond to a variable.
+
+**Sets** 
+
+Indexed Set that will exist for every component, containing their inputs and outputs which are :math:`\in E_B`.
+
+.. math::
+   I_e & := \{ i \in E_B | (i,e) \in \vec{E},\forall e \in E_{C} \}\\
+   O_e & := \{ o \in E_B | (e,o) \in \vec{E},\forall e \in E_{C} \}
+
+
+**Variables**
+
+.. math::
+  w(e_1,e_2),\quad \forall (e_1, e_2) \in \vec{E}
+
+Additional variables needed for specific components will come from their models. 
+For a simple storage the variable :math:`s_{soc}(e)` will be introduced using the index set :math:`e \in E_{simpleStorage}`.
+
+**Constraints**
+
+*Simple power plant*
+
+.. math::
+   \eta_e \cdot w(I_e,e) - w(e,O_e) = 0, \quad \forall e \in E_{simple gas power plant}
+
+*Simple combined heat and power plant*
+
+.. math::
+   \eta_e \cdot w(I_e,e) - \sum_{o \in O_e} w(e,o) = 0, \quad \forall e \in E_{simple chp}\\
+   w(e,o_1) = w(e,o_2) \cdot \sigma_e, \quad \forall e \in E_{simple chp},~ o_1,o_2 \in O_e
 
