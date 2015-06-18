@@ -34,6 +34,18 @@ class Transformer(Component):
       raise ValueError("Transformer must have at least one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
 
+class SimpleTransformer(Transformer):
+  """
+  Simple Transformers always have a simple input output relation with a
+  constant efficiency
+  """
+  def __init__(self,**kwargs):
+    """
+    :param eta: eta as constant efficiency for simple transformer
+    """
+    super().__init__(**kwargs)
+    self.eta = kwargs['eta']
+
 class Sink(Component):
   def __init__(self, **kwargs):
     """
@@ -85,6 +97,7 @@ if __name__ == "__main__":
   #TODO: This example is missing a Transport. (Needs more escalation error.)
   coal = Bus(uid="Coal", type="coal")
   power = Bus(uid="Electricity", type="electricity")
+  st = SimpleTransformer(uid="st1",inputs=[coal],outputs=[power], eta=0.4)
   heat = Bus(uid="Thermal", type="thermal")
   heatpump = Transformer(uid="Heatpump", inputs=[power],
                          outputs=[heat])
@@ -111,4 +124,3 @@ if __name__ == "__main__":
   nx.draw_networkx_edges(g, graph_pos)
   nx.draw_networkx_labels(g, graph_pos)
   # or simply nx.draw(g) but then without different node shapes etc
-
