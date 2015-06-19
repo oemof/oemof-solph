@@ -37,9 +37,10 @@ def opt_model(busses, s_transformers, s_chps):
     # set with output uids for every simple transformer e in s_transformers
     m.O = po.Set(m.s_transformers,
                   initialize={t.uid:[t.outputs[0].uid] for t in s_transformers})
+    m.eta = {t.uid:t.eta for t in s_transformers}
     def eta_rule(m, e):
       expr = 0
-      expr += m.w[m.I[e], e] * 0.9
+      expr += m.w[m.I[e], e] * m.eta[e]
       expr += - m.w[e, m.O[e]]
       return(expr,0)
     m.s_transformer_eta_constr = po.Constraint(m.s_transformers, rule=eta_rule)
@@ -88,20 +89,20 @@ if __name__ == "__main__":
   bus1 = cp.Bus(uid="b1", type="coal")
   bus2 = cp.Bus(uid="b2", type="elec")
   bus3  = cp.Bus(uid="b3", type="th")
-  t1 = cp.Transformer(uid="t1",inputs=[bus1], outputs=[bus2])
-  t2 = cp.Transformer(uid="t2",inputs=[bus1], outputs=[bus2])
+  t1 = cp.SimpleTransformer(uid="t1",inputs=[bus1], outputs=[bus2], eta=0.5)
+  t2 = cp.SimpleTransformer(uid="t2",inputs=[bus1], outputs=[bus2], eta=0.4)
   t3 = cp.Transformer(uid="t3",inputs=[bus1], outputs=[bus2,bus3])
   t4 = cp.Transformer(uid="t4",inputs=[bus1], outputs=[bus2,bus3])
-
+  t5 = cp.SimpleTransformer(uid="Boiler",inputs=[bus1],outputs=[bus3], eta=0.9)
   # store entities of same class in lists
   busses = [bus1, bus2, bus3]
-  s_transformers = [t1, t2]
+  s_transformers = [t1, t2, t5]
   s_chps = [t3, t4]
 
   # should be calculated automatically of course
   edges = [('b1','t1'),('b1','t2'),('b1','t3'), ('t1','b2'),('t2','b2'),
            ('t3','b2'),('t3','b3'),('b2','s1'),('b1','t4'),('t4','b2'),
-           ('t4','b3')]
+           ('t4','b3'),('b1','Boiler'),('Boiler','b3')]
 
   # create optimization model
   om = opt_model(busses=busses,s_transformers=s_transformers, s_chps=s_chps)
