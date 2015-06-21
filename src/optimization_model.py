@@ -2,7 +2,7 @@
 import pyomo.environ as po
 
 
-def opt_model(entities, timesteps=[t for t in range(1,8760)]):
+def opt_model(entities, edges, timesteps=[t for t in range(10)]):
   """
   :param entities: dictionary containing all entities grouped by classtypes
   """
@@ -10,6 +10,7 @@ def opt_model(entities, timesteps=[t for t in range(1,8760)]):
   busses = entities['busses']
   s_transformers = entities['s_transformers']
   s_chps = entities['s_chps']
+
   # create pyomo model instance
   m = po.ConcreteModel()
 
@@ -21,9 +22,13 @@ def opt_model(entities, timesteps=[t for t in range(1,8760)]):
   m.s_transformers = [t.uid for t in s_transformers]
   m.s_chps = [t.uid for t in s_chps]
   m.edges = po.Set(dimen=2, initialize=edges)
-
   # create variable for edges all >= 0 ?
-  m.w = po.Var(m.edges, m.timesteps, within=po.NonNegativeReals)
+
+  m.w_max = 100
+  def w_max_rule(m, i, j, t):
+    return(0, m.w_max)
+  m.w = po.Var(m.edges, m.timesteps, bounds=w_max_rule,
+               within=po.NonNegativeReals)
 
   ## bus balance forall b in busses
   def bus_rule(m, e, t):
@@ -51,7 +56,6 @@ def opt_model(entities, timesteps=[t for t in range(1,8760)]):
       return(expr,0)
     m.s_transformer_eta_constr = po.Constraint(m.s_transformers, m.timesteps,
                                                rule=eta_rule)
-    # to avoid pyomo warnings if m.I is already defined for other components
 
   # simple chp model containing the constraints for simple chps
   def simple_chp_model(m):
@@ -77,6 +81,7 @@ def opt_model(entities, timesteps=[t for t in range(1,8760)]):
       return(expr,0)
     m.s_chp_pth_constr = po.Constraint(m.s_chps, m.timesteps,
                                        rule=power_to_heat_rule)
+
   def objective(m):
 
     def obj_rule(m):
@@ -93,7 +98,7 @@ def opt_model(entities, timesteps=[t for t in range(1,8760)]):
   return(m)
 
 def solve_opt_model(model, solver='glpk',
-                      options={'stream':False}):
+                      options={'stream':False}, debug=False):
  """
  :param model: pyomo concreteModel() instance
  :param str solver: solver specification as string 'glpk','gurobi','clpex' ...
@@ -102,6 +107,10 @@ def solve_opt_model(model, solver='glpk',
  # create model instance
  instance = model.create()
  # solve instance
+ if(debug==True):
+   instance.write('problem.lp',
+                  io_options={'symbolic_solver_labels':True})
+
  opt = SolverFactory(solver, solver_io='lp')
  # store results
  results = opt.solve(instance, tee=options['stream'])
@@ -136,10 +145,9 @@ if __name__ == "__main__":
   # create optimization model
   from time import time
 
-  #print('building model')
   print('Building model...')
   t0 = time()
-  om = opt_model(entities=entities)
+  om = opt_model(entities=entities, edges=edges)
 
   t1= time()
   building_time = t1 - t0
@@ -148,8 +156,8 @@ if __name__ == "__main__":
   print('Solving model...')
   # solve model
   t0 = time()
-  instance = solve_opt_model(model=om, solver='gurobi',
-                             options={'stream':True})
+  instance = solve_opt_model(model=om, solver='glpk',
+                             options={'stream':True}, debug=True)
   t1 = time()
   solving_time = t1 - t0
   print('Solving time:', solving_time)
