@@ -132,22 +132,27 @@ if __name__ == "__main__":
   t4 = cp.Transformer(uid="t4",inputs=[bus1], outputs=[bus2,bus3])
   t5 = cp.SimpleTransformer(uid="Boiler",inputs=[bus1],outputs=[bus3], eta=0.9)
   # store entities of same class in lists
+  components = [t1, t2, t3, t4, t5]
 
-  entities = {'busses':[bus1, bus2, bus3],
-              's_transformers':[t1, t2, t5],
-              's_chps':[t3, t4]}
+  edges = []
+  for c in components:
+    for i in c.inputs:
+      e =  (i.uid, c.uid)
+      edges.append(e)
+    for o in c.outputs:
+      e = (c.uid, o.uid)
+      edges.append(e)
 
-  # should be calculated automatically of course
-  edges = [('b1','t1'),('b1','t2'),('b1','t3'), ('t1','b2'),('t2','b2'),
-           ('t3','b2'),('t3','b3'),('b2','s1'),('b1','t4'),('t4','b2'),
-           ('t4','b3'),('b1','Boiler'),('Boiler','b3')]
+
+  entities_dict = {'busses':[bus1, bus2, bus3],
+                   's_transformers':[t1, t2, t5],
+                   's_chps':[t3, t4]}
 
   # create optimization model
   from time import time
-
   print('Building model...')
   t0 = time()
-  om = opt_model(entities=entities, edges=edges)
+  om = opt_model(entities=entities_dict, edges=edges)
 
   t1= time()
   building_time = t1 - t0
