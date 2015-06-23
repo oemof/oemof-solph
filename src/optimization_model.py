@@ -13,7 +13,7 @@ def opt_model(entities, edges, timesteps, invest):
       w(I_{SF}(e), e,t) \cdot \eta_(e) - w(e,O_{SF}(e),t) = 0,
       \\forall e \\in E_{SF}, \\forall t \\in T
   """
-
+  # objects
   buses = entities['buses']
   s_transformers = entities['s_transformers']
   s_chps = entities['s_chps']
@@ -21,7 +21,7 @@ def opt_model(entities, edges, timesteps, invest):
   simple_storages = entities['simple_storages']
 
   # create pyomo model instance
-  m = po.ConcreteModel()
+  m = po.AbstractModel()
 
   # parameter simulation
   m.invest = invest
@@ -29,18 +29,20 @@ def opt_model(entities, edges, timesteps, invest):
   # timesteps
   m.timesteps = timesteps
 
-  # entity sets
+  # entity sets using uids
   m.buses = [b.uid for b in buses]
   m.s_transformers = [t.uid for t in s_transformers]
   m.s_chps = [t.uid for t in s_chps]
   m.sources = [s.uid for s in sources]
   m.simple_storages = [s.uid for s in simple_storages]
 
+  # could be calculated inside this function
   m.edges = edges
+
   # fixed values
   m.source_val = {s.uid:s.val for s in sources}
-  # create variable for edges all >= 0 ?
 
+  # create variables for all edges
   m.w_max = dict(zip(edges, [100]*len(edges)))
   if(m.invest==True):
       m.w = po.Var(m.edges, m.timesteps, within=po.NonNegativeReals)
@@ -59,7 +61,7 @@ def opt_model(entities, edges, timesteps, invest):
   def bus_rule(m, e, t):
     expr = 0
     expr += -sum(m.w[(i,j),t] for (i,j) in m.edges if i==e)
-    expr += +sum(m.w[(i,j),t] for (i,j) in m.edges if j==e)
+    expr +=  sum(m.w[(i,j),t] for (i,j) in m.edges if j==e)
     return(expr, 0)
   m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
 
@@ -89,7 +91,6 @@ def opt_model(entities, edges, timesteps, invest):
                                             rule=w_bound_investment)
 
   # simple chp model containing the constraints for simple chps
-
   def simple_chp_model(m):
     """
     """
@@ -171,21 +172,22 @@ def opt_model(entities, edges, timesteps, invest):
 
   return(m)
 
-def solve_opt_model(model, solver='glpk',
+
+
+def solve_opt_model(instance, solver='glpk',
                       options={'stream':False}, debug=False):
  """
  :param model: pyomo concreteModel() instance
  :param str solver: solver specification as string 'glpk','gurobi','clpex' ...
  """
  from pyomo.opt import SolverFactory
- # create model instance
- instance = model.create()
+
  # solve instance
  if(debug==True):
    instance.write('problem.lp',
                   io_options={'symbolic_solver_labels':True})
 
- opt = SolverFactory(solver, solver_io='lp')
+ opt = SolverFactory(solver, solver_io='python')
  # store results
  results = opt.solve(instance, tee=options['stream'])
  # load results back in instance
@@ -206,7 +208,7 @@ def get_edges(components):
 
 if __name__ == "__main__":
   # create energy system components
-  timesteps = [t for t in range(3)]
+  timesteps = [t for t in range(8760)]
   import components as cp
   import random
   bus1 = cp.Bus(uid="b1", type="coal")
@@ -218,11 +220,11 @@ if __name__ == "__main__":
   s22 = cp.Source(uid="s22", outputs=[bus22], val=[random.gauss(1,4) for i in timesteps])
 
   objs_sf = [cp.SimpleTransformer(uid='t'+str(i), inputs=[bus1],
-                                  outputs=[bus21], eta=0.5) for i in range(3)]
+                                  outputs=[bus21], eta=0.5) for i in range(10)]
   objs_schp = [cp.Transformer(uid='c'+str(i), inputs=[bus1],
-                              outputs=[bus21,bus3]) for i in range(2)]
+                              outputs=[bus21,bus3]) for i in range(10)]
   objs_sf2 = [cp.SimpleTransformer(uid='t2'+str(i), inputs=[bus1],
-                                   outputs=[bus22], eta=0.4) for i in range(5)]
+                                   outputs=[bus22], eta=0.4) for i in range(10)]
 
   ss = cp.SimpleStorage(uid="ss1", outputs=[bus21], inputs=[bus21],
                         soc_max=10, soc_min=1)
@@ -237,22 +239,23 @@ if __name__ == "__main__":
                    'sources':[s21,s22, s3],
                    'simple_storages':[ss]}
 
-  # create optimization model
   from time import time
-  print('Building model...')
-  t0 = time()
 
+  t0 = time()
+  # create optimization model
   om = opt_model(entities=entities_dict, edges=edges,
-                 timesteps=timesteps, invest=True)
-  om.pprint()
-  t1= time()
+                 timesteps=timesteps, invest=False)
+  t1 = time()
   building_time = t1 - t0
-  print('Building Time:', building_time)
+  print('Building time', building_time)
+  # create model instance
+  print('Creating instance...')
+  instance = om.create(report_timing=True)
+
 
   print('Solving model...')
-  # solve model
   t0 = time()
-  instance = solve_opt_model(model=om, solver='gurobi',
+  instance = solve_opt_model(instance=instance, solver='gurobi',
                              options={'stream':True}, debug=True)
   t1 = time()
   solving_time = t1 - t0
