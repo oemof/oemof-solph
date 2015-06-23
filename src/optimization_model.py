@@ -77,6 +77,7 @@ def opt_model(entities, edges, timesteps, invest):
                                             rule=w_bound_investment)
 
   # simple chp model containing the constraints for simple chps
+
   def simple_chp_model(m):
     """
     """
@@ -155,19 +156,19 @@ if __name__ == "__main__":
   bus1 = cp.Bus(uid="b1", type="coal")
   bus2 = cp.Bus(uid="b2", type="elec")
   bus3  = cp.Bus(uid="b3", type="th")
-  t1 = cp.SimpleTransformer(uid="t1",inputs=[bus1], outputs=[bus2], eta=0.5)
-  t2 = cp.SimpleTransformer(uid="t2",inputs=[bus1], outputs=[bus2], eta=0.4)
-  t3 = cp.Transformer(uid="t3",inputs=[bus1], outputs=[bus2,bus3])
-  t4 = cp.Transformer(uid="t4",inputs=[bus1], outputs=[bus2,bus3])
-  t5 = cp.SimpleTransformer(uid="Boiler",inputs=[bus1],outputs=[bus3], eta=0.9)
+  objs_sf = [cp.SimpleTransformer(uid='t'+str(i), inputs=[bus1],
+                                  outputs=[bus2], eta=0.5) for i in range(10)]
+  objs_schp = [cp.Transformer(uid='c'+str(i), inputs=[bus1],
+                              outputs=[bus2,bus3]) for i in range(10)]
+
   # store entities of same class in lists
-  components = [t1, t2, t3, t4, t5]
+  components = objs_sf + objs_schp
 
   edges = get_edges(components)
 
   entities_dict = {'buses':[bus1, bus2, bus3],
-                   's_transformers':[t1, t2, t5],
-                   's_chps':[t3, t4]}
+                   's_transformers':objs_sf,
+                   's_chps':objs_schp}
 
   # create optimization model
   from time import time
@@ -175,8 +176,8 @@ if __name__ == "__main__":
   t0 = time()
 
   om = opt_model(entities=entities_dict, edges=edges,
-                 timesteps=[t for t in range(10)], invest=False)
-
+                 timesteps=[t for t in range(8760)], invest=False)
+  #om.pprint()
   t1= time()
   building_time = t1 - t0
   print('Building Time:', building_time)
