@@ -5,6 +5,13 @@ import pyomo.environ as po
 def opt_model(entities, edges, timesteps, invest):
   """
   :param entities: dictionary containing all entities grouped by classtypes
+
+  **Mathematical equations:**
+    .. math::
+      I_{SF} = \\{ i | i \\subset E_B, (i,e) \\in \\vec{E}, e \\in E_{SF}\\} \\\\
+      O_{SF} = \\{ o | o \\subset E_B, (e,o) \\in \\vec{E}, e \\in E_{SF}\\} \\\\
+      w(I_{SF}(e), e,t) \cdot \eta_(e) - w(e,O_{SF}(e),t) = 0,
+      \\forall e \\in E_{SF}, \\forall t \\in T
   """
 
   buses = entities['buses']
@@ -48,12 +55,6 @@ def opt_model(entities, edges, timesteps, invest):
   def simple_transformer_model(m):
     """
     :param m: pyomo model instance
-
-    Mathematical equations:
-
-    .. math::
-
-      e_1 \leq 10
     """
     # temp set with input uids for every simple chp e in s_transformers
     I = {t.uid:t.inputs[0].uid for t in s_transformers}
@@ -172,8 +173,9 @@ if __name__ == "__main__":
   from time import time
   print('Building model...')
   t0 = time()
+
   om = opt_model(entities=entities_dict, edges=edges,
-                 timesteps=[t for t in range(10)], invest=True)
+                 timesteps=[t for t in range(10)], invest=False)
 
   t1= time()
   building_time = t1 - t0
@@ -182,7 +184,7 @@ if __name__ == "__main__":
   print('Solving model...')
   # solve model
   t0 = time()
-  instance = solve_opt_model(model=om, solver='glpk',
+  instance = solve_opt_model(model=om, solver='gurobi',
                              options={'stream':True}, debug=True)
   t1 = time()
   solving_time = t1 - t0
