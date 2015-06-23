@@ -18,20 +18,25 @@ def opt_model(entities, edges, timesteps, invest):
   s_transformers = entities['s_transformers']
   s_chps = entities['s_chps']
   sources = entities['sources']
+  #transporters = entities['transporters']
+
   # create pyomo model instance
   m = po.ConcreteModel()
 
+  # parameter simulation
   m.invest = invest
   # create pyomo sets
   # timesteps
   m.timesteps = timesteps
-  # entities
+
+  # entity sets
   m.buses = [b.uid for b in buses]
   m.s_transformers = [t.uid for t in s_transformers]
   m.s_chps = [t.uid for t in s_chps]
-  m.edges = edges
   m.sources = [s.uid for s in sources]
+  #m.transporters = [t.uid for t in transporters]
 
+  m.edges = edges
   # fixed values
   m.source_val = {s.uid:s.val for s in sources}
   # create variable for edges all >= 0 ?
@@ -113,12 +118,28 @@ def opt_model(entities, edges, timesteps, invest):
     """
     """
     if(m.invest is True):
-      m.sources = [s.uid for s in sources]
       m.source_val = {s.uid:s.val for s in sources}
       O = {s.uid:s.outputs[0].uid for s in sources}
       def source_rule(m, e, t):
         return(m.w[e,O[e],t] == (m.w_max[e,O[e]] + m.w_add[e,O[e]]) * m.source_val[e][t])
       m.source_constr = po.Constraint(m.sources, m.timesteps, rule=source_rule)
+
+  def transporter(m):
+    """
+    """
+    # temp set with input uids for every simple chp e in s_transformers
+    I = {t.uid:t.inputs[0].uid for t in transporters}
+    # set with output uids for every simple transformer e in s_transformers
+    O = {t.uid:t.outputs[0].uid for t in transporters}
+    eta = {t.uid:t.eta for t in transporters}
+
+    def transporter_rule(m, e, t):
+      expr = 0
+      expr += m.w[I[e], e, t] * eta[e]
+      expr += - m.w[e, O[e], t]
+      return(expr,0)
+    m.transporter_constr = po.Constraint(m.transporters, m.timesteps,
+                                         rule=transporter_rule)
 
   def objective(m):
 
@@ -175,25 +196,28 @@ if __name__ == "__main__":
   import components as cp
   import random
   bus1 = cp.Bus(uid="b1", type="coal")
-  bus2 = cp.Bus(uid="b2", type="elec")
+  bus21 = cp.Bus(uid="b21", type="elec")
+  bus22 = cp.Bus(uid="b22", type="elec")
   bus3  = cp.Bus(uid="b3", type="th")
-  s1 = cp.Source(uid="s1", outputs=[bus2], val=[random.gauss(10,4) for i in timesteps])
-  s2 = cp.Source(uid="s2", outputs=[bus3], val=[random.gauss(5,1) for i in timesteps])
+  s21 = cp.Source(uid="s21", outputs=[bus21], val=[random.gauss(10,4) for i in timesteps])
+  s3 = cp.Source(uid="s3", outputs=[bus3], val=[random.gauss(5,1) for i in timesteps])
+  s22 = cp.Source(uid="s22", outputs=[bus22], val=[random.gauss(1,4) for i in timesteps])
 
   objs_sf = [cp.SimpleTransformer(uid='t'+str(i), inputs=[bus1],
-                                  outputs=[bus2], eta=0.5) for i in range(5)]
+                                  outputs=[bus21], eta=0.5) for i in range(3)]
   objs_schp = [cp.Transformer(uid='c'+str(i), inputs=[bus1],
-                              outputs=[bus2,bus3]) for i in range(5)]
-
+                              outputs=[bus21,bus3]) for i in range(2)]
+  objs_sf2 = [cp.SimpleTransformer(uid='t2'+str(i), inputs=[bus1],
+                                   outputs=[bus22], eta=0.4) for i in range(5)]
   # store entities of same class in lists
-  components = objs_sf + objs_schp + [s1,s2]
+  components = objs_sf + objs_sf2 + objs_schp + [s21,s22, s3]
 
   edges = get_edges(components)
 
-  entities_dict = {'buses':[bus1, bus2, bus3],
-                   's_transformers':objs_sf,
+  entities_dict = {'buses':[bus1, bus21, bus22, bus3],
+                   's_transformers':objs_sf+objs_sf2,
                    's_chps':objs_schp,
-                   'sources':[s1, s2]}
+                   'sources':[s21,s22, s3]}
 
   # create optimization model
   from time import time
