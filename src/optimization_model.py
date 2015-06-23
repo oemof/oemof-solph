@@ -17,7 +17,7 @@ def opt_model(entities, edges, timesteps, invest):
   buses = entities['buses']
   s_transformers = entities['s_transformers']
   s_chps = entities['s_chps']
-
+  sources = entities['sources']
   # create pyomo model instance
   m = po.ConcreteModel()
 
@@ -30,6 +30,10 @@ def opt_model(entities, edges, timesteps, invest):
   m.s_transformers = [t.uid for t in s_transformers]
   m.s_chps = [t.uid for t in s_chps]
   m.edges = edges
+  m.sources = [s.uid for s in sources]
+
+  # fixed values
+  m.source_val = {s.uid:s.val for s in sources}
   # create variable for edges all >= 0 ?
 
   m.w_max = dict(zip(edges, [100]*len(edges)))
@@ -38,7 +42,11 @@ def opt_model(entities, edges, timesteps, invest):
       m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
   else:
     def w_max_rule(m, i, j, t):
-      return(0, m.w_max[i,j])
+      if(i in m.sources):
+        val = m.source_val[i][t] * m.w_max[i,j]
+        return(val, val)
+      else:
+        return(0, m.w_max[i,j])
     m.w = po.Var(m.edges, m.timesteps, bounds=w_max_rule,
                  within=po.NonNegativeReals)
 
@@ -101,6 +109,16 @@ def opt_model(entities, edges, timesteps, invest):
       return(expr,0)
     m.s_chp_pth_constr = po.Constraint(m.s_chps, m.timesteps,
                                        rule=power_to_heat_rule)
+  def source(m):
+    """
+    """
+    if(m.invest is True):
+      m.sources = [s.uid for s in sources]
+      m.source_val = {s.uid:s.val for s in sources}
+      O = {s.uid:s.outputs[0].uid for s in sources}
+      def source_rule(m, e, t):
+        return(m.w[e,O[e],t] == (m.w_max[e,O[e]] + m.w_add[e,O[e]]) * m.source_val[e][t])
+      m.source_constr = po.Constraint(m.sources, m.timesteps, rule=source_rule)
 
   def objective(m):
 
@@ -112,6 +130,7 @@ def opt_model(entities, edges, timesteps, invest):
 
   # "call" the models to add the constraints to opt-problem
   simple_chp_model(m)
+  source(m)
   simple_transformer_model(m)
   objective(m)
 
@@ -152,23 +171,29 @@ def get_edges(components):
 
 if __name__ == "__main__":
   # create energy system components
+  timesteps = [t for t in range(8760)]
   import components as cp
+  import random
   bus1 = cp.Bus(uid="b1", type="coal")
   bus2 = cp.Bus(uid="b2", type="elec")
   bus3  = cp.Bus(uid="b3", type="th")
+  s1 = cp.Source(uid="s1", outputs=[bus2], val=[random.gauss(10,4) for i in timesteps])
+  s2 = cp.Source(uid="s2", outputs=[bus3], val=[random.gauss(5,1) for i in timesteps])
+
   objs_sf = [cp.SimpleTransformer(uid='t'+str(i), inputs=[bus1],
-                                  outputs=[bus2], eta=0.5) for i in range(10)]
+                                  outputs=[bus2], eta=0.5) for i in range(5)]
   objs_schp = [cp.Transformer(uid='c'+str(i), inputs=[bus1],
-                              outputs=[bus2,bus3]) for i in range(10)]
+                              outputs=[bus2,bus3]) for i in range(5)]
 
   # store entities of same class in lists
-  components = objs_sf + objs_schp
+  components = objs_sf + objs_schp + [s1,s2]
 
   edges = get_edges(components)
 
   entities_dict = {'buses':[bus1, bus2, bus3],
                    's_transformers':objs_sf,
-                   's_chps':objs_schp}
+                   's_chps':objs_schp,
+                   'sources':[s1, s2]}
 
   # create optimization model
   from time import time
@@ -176,7 +201,7 @@ if __name__ == "__main__":
   t0 = time()
 
   om = opt_model(entities=entities_dict, edges=edges,
-                 timesteps=[t for t in range(8760)], invest=False)
+                 timesteps=timesteps, invest=False)
   #om.pprint()
   t1= time()
   building_time = t1 - t0
