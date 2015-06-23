@@ -46,6 +46,18 @@ class SimpleTransformer(Transformer):
     super().__init__(**kwargs)
     self.eta = kwargs['eta']
 
+class SimpleStorage(Transformer):
+  """
+  """
+  def __init__(self,**kwargs):
+    """
+    :param soc_max: maximal sate of charge
+    """
+    super().__init__(**kwargs)
+    self.soc_max = kwargs['soc_max']
+    self.soc_min = kwargs['soc_min']
+
+
 class Sink(Component):
   def __init__(self, **kwargs):
     """

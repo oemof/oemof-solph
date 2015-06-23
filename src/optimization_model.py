@@ -18,7 +18,7 @@ def opt_model(entities, edges, timesteps, invest):
   s_transformers = entities['s_transformers']
   s_chps = entities['s_chps']
   sources = entities['sources']
-  #transporters = entities['transporters']
+  simple_storages = entities['simple_storages']
 
   # create pyomo model instance
   m = po.ConcreteModel()
@@ -34,7 +34,7 @@ def opt_model(entities, edges, timesteps, invest):
   m.s_transformers = [t.uid for t in s_transformers]
   m.s_chps = [t.uid for t in s_chps]
   m.sources = [s.uid for s in sources]
-  #m.transporters = [t.uid for t in transporters]
+  m.simple_storages = [s.uid for s in simple_storages]
 
   m.edges = edges
   # fixed values
@@ -83,10 +83,9 @@ def opt_model(entities, edges, timesteps, invest):
                                                rule=eta_rule)
 
     if(m.invest==True):
-      m.ee = get_edges(s_transformers)
-      def w_bound_investment(m, i, j, t):
-        return(m.w[i,j,t] <= m.w_max[i,j] + m.w_add[i,j])
-      m.s_transformer_w_max = po.Constraint(m.ee, m.timesteps,
+      def w_bound_investment(m, e, t):
+        return(m.w[I[e],e,t] <= m.w_max[I[e],e] + m.w_add[I[e],e])
+      m.s_transformer_w_max = po.Constraint(m.s_transformers, m.timesteps,
                                             rule=w_bound_investment)
 
   # simple chp model containing the constraints for simple chps
@@ -124,22 +123,36 @@ def opt_model(entities, edges, timesteps, invest):
         return(m.w[e,O[e],t] == (m.w_max[e,O[e]] + m.w_add[e,O[e]]) * m.source_val[e][t])
       m.source_constr = po.Constraint(m.sources, m.timesteps, rule=source_rule)
 
-  def transporter(m):
+  def simple_storage_model(m):
     """
     """
-    # temp set with input uids for every simple chp e in s_transformers
-    I = {t.uid:t.inputs[0].uid for t in transporters}
-    # set with output uids for every simple transformer e in s_transformers
-    O = {t.uid:t.outputs[0].uid for t in transporters}
-    eta = {t.uid:t.eta for t in transporters}
+    m.soc_max = {e.uid:e.soc_max for e in simple_storages}
+    m.soc_min = {e.uid:e.soc_min for e in simple_storages}
 
-    def transporter_rule(m, e, t):
-      expr = 0
-      expr += m.w[I[e], e, t] * eta[e]
-      expr += - m.w[e, O[e], t]
-      return(expr,0)
-    m.transporter_constr = po.Constraint(m.transporters, m.timesteps,
-                                         rule=transporter_rule)
+    O = {e.uid:e.outputs[0].uid for e in simple_storages}
+    I = {e.uid:e.inputs[0].uid for e in simple_storages}
+
+    if(m.invest is True):
+      def soc_bounds(m, e, t):
+        return(0,  None)
+      m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
+      m.soc_add = po.Var(m.simple_storages, within=po.NonNegativeReals)
+      def soc_max_rule(m, e, t):
+        return(m.soc[e,t] <= m.soc_max[e] + m.soc_add[e])
+      m.soc_max_constr = po.Constraint(m.simple_storages, m.timesteps,
+                                       rule=soc_max_rule)
+    if(m.invest is False):
+      def soc_bounds(m, e, t):
+        return(m.soc_min[e], m.soc_max[e])
+      m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
+
+    def simple_storage_rule(m, e, t):
+      if(t==0):
+        return(m.soc[e,t] == 0.5 * m.soc_max[e])
+      else:
+        return(m.soc[e,t] == m.soc[e,t-1] - m.w[I[e],e,t] + m.w[e,O[e],t])
+    m.simple_storage_constr = po.Constraint(m.simple_storages, m.timesteps,
+                                              rule=simple_storage_rule)
 
   def objective(m):
 
@@ -153,6 +166,7 @@ def opt_model(entities, edges, timesteps, invest):
   simple_chp_model(m)
   source(m)
   simple_transformer_model(m)
+  simple_storage_model(m)
   objective(m)
 
   return(m)
@@ -192,7 +206,7 @@ def get_edges(components):
 
 if __name__ == "__main__":
   # create energy system components
-  timesteps = [t for t in range(8760)]
+  timesteps = [t for t in range(3)]
   import components as cp
   import random
   bus1 = cp.Bus(uid="b1", type="coal")
@@ -209,15 +223,19 @@ if __name__ == "__main__":
                               outputs=[bus21,bus3]) for i in range(2)]
   objs_sf2 = [cp.SimpleTransformer(uid='t2'+str(i), inputs=[bus1],
                                    outputs=[bus22], eta=0.4) for i in range(5)]
-  # store entities of same class in lists
-  components = objs_sf + objs_sf2 + objs_schp + [s21,s22, s3]
+
+  ss = cp.SimpleStorage(uid="ss1", outputs=[bus21], inputs=[bus21],
+                        soc_max=10, soc_min=1)
+
+  components = objs_sf + objs_sf2 + objs_schp + [s21,s22, s3] + [ss]
 
   edges = get_edges(components)
 
   entities_dict = {'buses':[bus1, bus21, bus22, bus3],
                    's_transformers':objs_sf+objs_sf2,
                    's_chps':objs_schp,
-                   'sources':[s21,s22, s3]}
+                   'sources':[s21,s22, s3],
+                   'simple_storages':[ss]}
 
   # create optimization model
   from time import time
@@ -225,8 +243,8 @@ if __name__ == "__main__":
   t0 = time()
 
   om = opt_model(entities=entities_dict, edges=edges,
-                 timesteps=timesteps, invest=False)
-  #om.pprint()
+                 timesteps=timesteps, invest=True)
+  om.pprint()
   t1= time()
   building_time = t1 - t0
   print('Building Time:', building_time)
