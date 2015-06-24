@@ -33,6 +33,7 @@ class Transformer(Component):
     if not self.outputs:
       raise ValueError("Transformer must have at least one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
+    self.opt_param = kwargs.get('opt_param', None)
 
 class SimpleTransformer(Transformer):
   """
@@ -44,9 +45,6 @@ class SimpleTransformer(Transformer):
     :param eta: eta as constant efficiency for simple transformer
     """
     super().__init__(**kwargs)
-    self.eta = kwargs['eta']
-    self.in_max = kwargs['in_max']
-    self.out_max = kwargs['out_max']
 
 class SimpleStorage(Transformer):
   """
@@ -56,8 +54,6 @@ class SimpleStorage(Transformer):
     :param soc_max: maximal sate of charge
     """
     super().__init__(**kwargs)
-    self.soc_max = kwargs['soc_max']
-    self.soc_min = kwargs['soc_min']
 
 
 class Sink(Component):
@@ -68,7 +64,7 @@ class Sink(Component):
     if self.outputs:
       raise ValueError("Sink must not have outputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
-
+    self.val = kwargs['val']
 
 class Source(Component):
   """
