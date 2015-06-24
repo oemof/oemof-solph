@@ -72,16 +72,22 @@ def opt_model(entities, edges, timesteps, invest):
     m.s_transformer_eta_constr = po.Constraint(m.s_transformers, m.timesteps,
                                                rule=eta_rule)
     # set variable bounds
+    m.i_max = {obj.uid:obj.in_max for obj in s_transformers}
+    m.o_max = {obj.uid:obj.out_max for obj in s_transformers}
+
     if(m.invest is False):
-      ij = get_edges(s_transformers)
-      for (i,j) in ij:
+      ee = get_edges(s_transformers)
+      for (e1,e2) in ee:
         for t in m.timesteps:
-          m.w[i,j,t].setub(99999)
+          if e1 in m.s_transformers:
+            m.w[e1,e2,t].setub(m.o_max[e1])
+          if e2 in m.s_transformers:
+            m.w[e1,e2,t].setub(m.i_max[e2])
     else:
-      def w_bound_investment(m, e, t):
-        return(m.w[I[e],e,t] <= 8888 + m.w_add[I[e],e])
+      def w_max_invest_rule(m, e, t):
+        return(m.w[I[e],e,t] <= m.i_max[e] + m.w_add[I[e],e])
       m.s_transformer_w_max = po.Constraint(m.s_transformers, m.timesteps,
-                                            rule=w_bound_investment)
+                                            rule=w_max_invest_rule)
 
   # simple chp model containing the constraints for simple chps
   def simple_chp_model(m):
@@ -124,7 +130,6 @@ def opt_model(entities, edges, timesteps, invest):
       ij = get_edges(sources)
       for (i,j) in ij:
         for t in m.timesteps:
-          print(i,j)
           m.w[(i,j),t].setub(m.source_val[i][t])
           m.w[(i,j),t].setlb(m.source_val[i][t])
     else:
@@ -228,7 +233,7 @@ def io_sets(components):
 
 if __name__ == "__main__":
   # create energy system components
-  timesteps = [t for t in range(3)]
+  timesteps = [t for t in range(5)]
   import components as cp
   import random
   bus1 = cp.Bus(uid="b1", type="coal")
@@ -240,11 +245,13 @@ if __name__ == "__main__":
   s22 = cp.Source(uid="s22", outputs=[bus22], val=[random.gauss(1,4) for i in timesteps])
 
   objs_sf = [cp.SimpleTransformer(uid='t'+str(i), inputs=[bus1],
-                                  outputs=[bus21], eta=0.5) for i in range(10)]
+                                  outputs=[bus21], eta=0.5, in_max=200,
+                                  out_max=100) for i in range(2)]
   objs_schp = [cp.Transformer(uid='c'+str(i), inputs=[bus1],
-                              outputs=[bus21,bus3]) for i in range(10)]
+                              outputs=[bus21,bus3]) for i in range(2)]
   objs_sf2 = [cp.SimpleTransformer(uid='t2'+str(i), inputs=[bus1],
-                                   outputs=[bus22], eta=0.4) for i in range(10)]
+                                   outputs=[bus22], eta=0.4, in_max=200,
+                                   out_max=None) for i in range(2)]
 
   ss = cp.SimpleStorage(uid="ss1", outputs=[bus21], inputs=[bus21],
                         soc_max=10, soc_min=1)

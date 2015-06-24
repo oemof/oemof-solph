@@ -45,6 +45,8 @@ class SimpleTransformer(Transformer):
     """
     super().__init__(**kwargs)
     self.eta = kwargs['eta']
+    self.in_max = kwargs['in_max']
+    self.out_max = kwargs['out_max']
 
 class SimpleStorage(Transformer):
   """
