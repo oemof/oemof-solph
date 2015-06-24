@@ -21,7 +21,7 @@ def opt_model(entities, edges, timesteps, invest):
   simple_storages = entities['simple_storages']
 
   # create pyomo model instance
-  m = po.AbstractModel()
+  m = po.ConcreteModel()
 
   # parameter simulation
   m.invest = invest
@@ -39,23 +39,9 @@ def opt_model(entities, edges, timesteps, invest):
   # could be calculated inside this function
   m.edges = edges
 
-  # fixed values
-  m.source_val = {s.uid:s.val for s in sources}
-
-  # create variables for all edges
-  m.w_max = dict(zip(edges, [100]*len(edges)))
+  m.w = po.Var(m.edges, m.timesteps, within=po.NonNegativeReals)
   if(m.invest==True):
-      m.w = po.Var(m.edges, m.timesteps, within=po.NonNegativeReals)
       m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
-  else:
-    def w_max_rule(m, i, j, t):
-      if(i in m.sources):
-        val = m.source_val[i][t] * m.w_max[i,j]
-        return(val, val)
-      else:
-        return(0, m.w_max[i,j])
-    m.w = po.Var(m.edges, m.timesteps, bounds=w_max_rule,
-                 within=po.NonNegativeReals)
 
   ## bus balance forall b in buses
   def bus_rule(m, e, t):
@@ -71,10 +57,12 @@ def opt_model(entities, edges, timesteps, invest):
     """
     :param m: pyomo model instance
     """
+
+
     # temp set with input uids for every simple chp e in s_transformers
-    I = {t.uid:t.inputs[0].uid for t in s_transformers}
+    I = {obj.uid:obj.inputs[0].uid for obj in s_transformers}
     # set with output uids for every simple transformer e in s_transformers
-    O = {t.uid:t.outputs[0].uid for t in s_transformers}
+    O = {obj.uid:obj.outputs[0].uid for obj in s_transformers}
     eta = {t.uid:t.eta for t in s_transformers}
     def eta_rule(m, e, t):
       expr = 0
@@ -83,10 +71,15 @@ def opt_model(entities, edges, timesteps, invest):
       return(expr,0)
     m.s_transformer_eta_constr = po.Constraint(m.s_transformers, m.timesteps,
                                                rule=eta_rule)
-
-    if(m.invest==True):
+    # set variable bounds
+    if(m.invest is False):
+      ij = get_edges(s_transformers)
+      for (i,j) in ij:
+        for t in m.timesteps:
+          m.w[i,j,t].setub(99999)
+    else:
       def w_bound_investment(m, e, t):
-        return(m.w[I[e],e,t] <= m.w_max[I[e],e] + m.w_add[I[e],e])
+        return(m.w[I[e],e,t] <= 8888 + m.w_add[I[e],e])
       m.s_transformer_w_max = po.Constraint(m.s_transformers, m.timesteps,
                                             rule=w_bound_investment)
 
@@ -94,10 +87,11 @@ def opt_model(entities, edges, timesteps, invest):
   def simple_chp_model(m):
     """
     """
+
     # temp set with input uids for every simple chp e in s_chps
-    I = {t.uid:t.inputs[0].uid for t in s_chps}
+    I = {obj.uid:obj.inputs[0].uid for obj in s_chps}
     # set with output uids for every simple chp e in s_chps
-    O = {t.uid : [o.uid for o in t.outputs[:]] for t in s_chps}
+    O = {obj.uid : [o.uid for o in obj.outputs[:]] for obj in s_chps}
     # constraint for transformer energy balance
     def eta_rule(m, e, t):
       expr = 0
@@ -114,39 +108,62 @@ def opt_model(entities, edges, timesteps, invest):
       return(expr,0)
     m.s_chp_pth_constr = po.Constraint(m.s_chps, m.timesteps,
                                        rule=power_to_heat_rule)
+    # set variable bounds
+    if(m.invest is False):
+      ij = get_edges(s_chps)
+      for (i,j) in ij:
+        for t in m.timesteps:
+          m.w[i,j,t].setub(1000)
+
   def source(m):
     """
     """
-    if(m.invest is True):
-      m.source_val = {s.uid:s.val for s in sources}
-      O = {s.uid:s.outputs[0].uid for s in sources}
+    m.source_val = {obj.uid:obj.val for obj in sources}
+    # set variable bounds
+    if(m.invest is False):
+      ij = get_edges(sources)
+      for (i,j) in ij:
+        for t in m.timesteps:
+          print(i,j)
+          m.w[(i,j),t].setub(m.source_val[i][t])
+          m.w[(i,j),t].setlb(m.source_val[i][t])
+    else:
+      O = {obj.uid:obj.outputs[0].uid for obj in sources}
       def source_rule(m, e, t):
-        return(m.w[e,O[e],t] == (m.w_max[e,O[e]] + m.w_add[e,O[e]]) * m.source_val[e][t])
+        return(m.w[e,O[e],t] == (888 + m.w_add[e,O[e]]) * m.source_val[e][t])
       m.source_constr = po.Constraint(m.sources, m.timesteps, rule=source_rule)
 
   def simple_storage_model(m):
     """
     """
-    m.soc_max = {e.uid:e.soc_max for e in simple_storages}
-    m.soc_min = {e.uid:e.soc_min for e in simple_storages}
+    m.soc_max = {obj.uid:obj.soc_max for obj in simple_storages}
+    m.soc_min = {obj.uid:obj.soc_min for obj in simple_storages}
 
-    O = {e.uid:e.outputs[0].uid for e in simple_storages}
-    I = {e.uid:e.inputs[0].uid for e in simple_storages}
+    O = {obj.uid:obj.outputs[0].uid for obj in simple_storages}
+    I = {obj.uid:obj.inputs[0].uid for obj in simple_storages}
 
-    if(m.invest is True):
-      def soc_bounds(m, e, t):
-        return(0,  None)
-      m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
-      m.soc_add = po.Var(m.simple_storages, within=po.NonNegativeReals)
-      def soc_max_rule(m, e, t):
-        return(m.soc[e,t] <= m.soc_max[e] + m.soc_add[e])
-      m.soc_max_constr = po.Constraint(m.simple_storages, m.timesteps,
-                                       rule=soc_max_rule)
     if(m.invest is False):
+      ij = get_edges(simple_storages)
+      for (i,j) in ij:
+        for t in m.timesteps:
+          m.w[i,j,t].setub(10)
+          m.w[i,j,t].setlb(1)
       def soc_bounds(m, e, t):
         return(m.soc_min[e], m.soc_max[e])
       m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
 
+    else:
+      def soc_bounds(m, e, t):
+        return(0,  None)
+      m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
+      m.soc_add = po.Var(m.simple_storages, within=po.NonNegativeReals)
+
+      def soc_max_rule(m, e, t):
+        return(m.soc[e,t] <= m.soc_max[e] + m.soc_add[e])
+      m.soc_max_constr = po.Constraint(m.simple_storages, m.timesteps,
+                                       rule=soc_max_rule)
+
+    # storage energy balance
     def simple_storage_rule(m, e, t):
       if(t==0):
         return(m.soc[e,t] == 0.5 * m.soc_max[e])
@@ -171,8 +188,6 @@ def opt_model(entities, edges, timesteps, invest):
   objective(m)
 
   return(m)
-
-
 
 def solve_opt_model(instance, solver='glpk',
                       options={'stream':False}, debug=False):
@@ -206,9 +221,14 @@ def get_edges(components):
       edges.append(ej)
   return(edges)
 
+def io_sets(components):
+  O = {obj.uid : [o.uid for o in obj.outputs[:]] for obj in components}
+  I = {obj.uid : [i.uid for i in obj.inputs[:]] for obj in components}
+  return(I,O)
+
 if __name__ == "__main__":
   # create energy system components
-  timesteps = [t for t in range(8760)]
+  timesteps = [t for t in range(3)]
   import components as cp
   import random
   bus1 = cp.Bus(uid="b1", type="coal")
@@ -232,26 +252,28 @@ if __name__ == "__main__":
   components = objs_sf + objs_sf2 + objs_schp + [s21,s22, s3] + [ss]
 
   edges = get_edges(components)
+  I,O = io_sets(components)
 
   entities_dict = {'buses':[bus1, bus21, bus22, bus3],
                    's_transformers':objs_sf+objs_sf2,
                    's_chps':objs_schp,
                    'sources':[s21,s22, s3],
                    'simple_storages':[ss]}
+  #I, O = io_sets(objs_schp)
 
   from time import time
 
   t0 = time()
   # create optimization model
   om = opt_model(entities=entities_dict, edges=edges,
-                 timesteps=timesteps, invest=False)
+                 timesteps=timesteps, invest=True)
   t1 = time()
   building_time = t1 - t0
   print('Building time', building_time)
   # create model instance
   print('Creating instance...')
   instance = om.create(report_timing=True)
-
+  #instance.pprint()
 
   print('Solving model...')
   t0 = time()
@@ -260,6 +282,11 @@ if __name__ == "__main__":
   t1 = time()
   solving_time = t1 - t0
   print('Solving time:', solving_time)
+
+  #instance.source_val['s1'] = [random.gauss(-10,4) for i in timesteps]
+  #instance.del_component('w')
+  #instance.w = po.Var(instance.edges, instance.timesteps, bounds=w_max_rule,
+  #                    within=po.NonNegativeReals)
 
   #for idx in instance.w:
   #  print('Edge:'+str(idx), ', weight:'+str(instance.w[idx].value))
