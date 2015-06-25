@@ -6,7 +6,7 @@ from optimization_model import *
 import components as cp
 import random
 
-timesteps = [t for t in range(10)]
+timesteps = [t for t in range(2)]
 
 # Busses (1 Coal, 2 Elec, 1 Thermal)
 bus_coal = cp.Bus(uid="coal_bus", type="coal")
@@ -15,16 +15,15 @@ bus_el2 = cp.Bus(uid="region_2", type="elec")
 bus_th1 = cp.Bus(uid="district_heating", type="th")
 
 # Renewable sources
-wind_r1 = cp.Source(uid="wind_r1", outputs=[bus_el1],
+wind_r1 = cp.RenewableSource(uid="wind_r1", outputs=[bus_el1],
                     val=[random.gauss(15,1) for i in timesteps])
-wind_r2 = cp.Source(uid="wind_r2", outputs=[bus_el2],
+wind_r2 = cp.RenewableSource(uid="wind_r2", outputs=[bus_el2],
                     val=[random.gauss(10,1) for i in timesteps])
-solar = cp.Source(uid="solar_heat", outputs=[bus_th1],
+solar = cp.RenewableSource(uid="solar_heat", outputs=[bus_th1],
                   val=[random.gauss(3,1) for i in timesteps])
 
 # Commodity sources
-r_coal = cp.Source(uid="r_coal", outputs=[bus_coal],
-                   val=[1000 for t in timesteps])
+r_coal = cp.Commodity(uid="r_coal", outputs=[bus_coal])
 
 # Sinks
 demand_r1 = cp.Sink(uid="demand_r1", inputs=[bus_el1],
@@ -61,7 +60,7 @@ components = [wind_r1, wind_r2, solar, r_coal] + [demand_r1, demand_r2] + \
 t0 = time()
 
 # create optimization model
-om = opt_model(buses, components, timesteps=timesteps, invest=True)
+om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
 t1 = time()
 building_time = t1 - t0

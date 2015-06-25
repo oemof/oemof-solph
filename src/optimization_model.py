@@ -17,10 +17,10 @@ def opt_model(buses, components, timesteps, invest):
 
   s_transformers = [e for e in components if isinstance(e, cp.SimpleTransformer)]
   s_chps = []#[e for e in components if isinstance(e, cp.Transformer)]
-  sources = [e for e in components if isinstance(e, cp.Source)]
+  renew_sources = [e for e in components if isinstance(e, cp.RenewableSource)]
   sinks = [e for e in components if isinstance(e, cp.Sink)]
   simple_storages = [e for e in components if isinstance(e, cp.SimpleStorage)]
-
+  commdity = [e for e in components if isinstance(e, cp.Commodity)]
   # create pyomo model instance
   m = po.ConcreteModel()
 
@@ -34,9 +34,11 @@ def opt_model(buses, components, timesteps, invest):
   m.buses = [b.uid for b in buses]
   m.s_transformers = [c.uid for c in s_transformers]
   m.s_chps = [c.uid for c in s_chps]
-  m.sources = [c.uid for c in sources]
+  m.renew_sources = [c.uid for c in renew_sources]
   m.simple_storages = [c.uid for c in simple_storages]
   m.sinks = [c.uid for c in sinks]
+  m.commdity = [c.uid for c in commdity]
+
   # could be calculated inside this function
   m.edges = get_edges(components)
 
@@ -120,22 +122,25 @@ def opt_model(buses, components, timesteps, invest):
         for t in m.timesteps:
           m.w[i,j,t].setub(1000)
 
-  def source(m):
+  def renewable_source(m):
     """
     """
-    m.source_val = {obj.uid:obj.val for obj in sources}
+    m.source_val = {obj.uid:obj.val for obj in renew_sources}
+    m.out_max = {obj.uid: obj.out_max for obj in renew_sources}
     # set variable bounds
     if(m.invest is False):
-      ee = get_edges(sources)
+      ee = get_edges(renew_sources)
       for (e1,e2) in ee:
         for t in m.timesteps:
-          m.w[(e1,e2),t].setub(m.source_val[e1][t])
-          m.w[(e1,e2),t].setlb(m.source_val[e1][t])
+          m.w[(e1,e2),t].setub(m.source_val[e1][t]*m.out_max[e1])
+          m.w[(e1,e2),t].setlb(m.source_val[e1][t]*m.out_max[e1])
     else:
-      O = {obj.uid:obj.outputs[0].uid for obj in sources}
+      O = {obj.uid:obj.outputs[0].uid for obj in renew_sources}
       def source_rule(m, e, t):
-        return(m.w[e,O[e],t] == (888 + m.w_add[e,O[e]]) * m.source_val[e][t])
-      m.source_constr = po.Constraint(m.sources, m.timesteps, rule=source_rule)
+        return(m.w[e,O[e],t] == (m.out_max[e] + m.w_add[e,O[e]]) * m.source_val[e][t])
+      m.source_constr = po.Constraint(m.renew_sources, m.timesteps, rule=source_rule)
+  def resource(m):
+    return(m)
 
   def sink(m):
     m.sink_val = {obj.uid:obj.val for obj in sinks}
@@ -203,7 +208,7 @@ def opt_model(buses, components, timesteps, invest):
 
   # "call" the models to add the constraints to opt-problem
   simple_chp_model(m)
-  source(m)
+  renewable_source(m)
   simple_transformer_model(m)
   simple_storage_model(m)
   objective(m)

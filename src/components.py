@@ -41,6 +41,10 @@ class Transformer(Component):
     self.in_max = kwargs.get('in_max', None)
     self.out_max = kwargs.get('out_max', None)
 
+    if(self.in_max is None):
+      self.in_max = self.out_max / self.eta
+    if(self.out_max is None):
+      self.out_max = self.in_max * self.eta
 class SimpleTransformer(Transformer):
   """
   Simple Transformers always have a simple input output relation with a
@@ -82,7 +86,25 @@ class Source(Component):
     if self.inputs:
       raise ValueError("Source must not have inputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.inputs]))
-    self.val = kwargs['val']
+
+class RenewableSource(Source):
+  """
+  """
+  def __init__(self, **kwargs):
+    """
+    """
+    super().__init__(**kwargs)
+    self.val = kwargs.get('val', None)
+    self.out_max = kwargs.get('out_max', 0)
+
+class Commodity(Source):
+  """
+  """
+  def __init__(self, **kwargs):
+    """
+    """
+    super().__init__(**kwargs)
+    self.limit = kwargs.get('yearly_limit', None)
 
 class Bus(Entity):
   """
