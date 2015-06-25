@@ -130,7 +130,7 @@ def opt_model(buses, components, timesteps, invest):
       for (e1,e2) in ee:
         for t in m.timesteps:
           m.w[(e1,e2),t].setub(m.source_val[e1][t])
-          m.w[(e1,e2),t].setlb(0)#m.source_val[e1][t])
+          m.w[(e1,e2),t].setlb(m.source_val[e1][t])
     else:
       O = {obj.uid:obj.outputs[0].uid for obj in sources}
       def source_rule(m, e, t):
@@ -185,10 +185,19 @@ def opt_model(buses, components, timesteps, invest):
                                               rule=simple_storage_rule)
 
   def objective(m):
+    objective_components = s_chps + s_transformers + simple_storages
+    m.objective_components = m.s_chps + m.s_transformers
+    I = {obj.uid:obj.inputs[0].uid for obj in objective_components}
+    m.opex_var = {obj.uid:obj.opex_var for obj in objective_components}
 
     def obj_rule(m):
       expr = 0
-      expr += sum(m.w[i,j,t] for (i,j) in m.edges for t in m.timesteps)
+      expr += sum(m.w[I[e],e,t]*m.opex_var[e] for e in m.objective_components
+                                              for t in m.timesteps)
+      if(m.invest==True):
+        m.capex = {obj.uid:obj.capex for obj in objective_components}
+        expr += sum(m.w_add[I[e],e] * m.capex[e] for e in m.objective_components)
+        expr += sum(m.soc_add[e] * m.capex[e] for e in m.simple_storages)
       return(expr)
     m.objective = po.Objective(rule=obj_rule)
 

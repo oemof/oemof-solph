@@ -6,7 +6,7 @@ from optimization_model import *
 import components as cp
 import random
 
-timesteps = [t for t in range(1)]
+timesteps = [t for t in range(10)]
 
 # Busses (1 Coal, 2 Elec, 1 Thermal)
 bus_coal = cp.Bus(uid="coal_bus", type="coal")
@@ -24,7 +24,7 @@ solar = cp.Source(uid="solar_heat", outputs=[bus_th1],
 
 # Commodity sources
 r_coal = cp.Source(uid="r_coal", outputs=[bus_coal],
-                   val=[float('inf') for t in timesteps])
+                   val=[1000 for t in timesteps])
 
 # Sinks
 demand_r1 = cp.Sink(uid="demand_r1", inputs=[bus_el1],
@@ -37,14 +37,15 @@ demand_th = cp.Sink(uid="demand_th", inputs=[bus_th1],
 # Simple Transformer for region_1
 SF_region_1 = cp.SimpleTransformer(uid='SFr1', inputs=[bus_coal],
                                    outputs=[bus_el2], in_max=200, out_max=100,
-                                   eta=0.5)
+                                   eta=0.5, opex_var=10)
 # Simple Transformer for region_2
 SF_region_2 = cp.SimpleTransformer(uid='SFr2', inputs=[bus_coal],
-                                   outputs=[bus_el2], in_max=200, out_max=100,
-                                   eta=0.5)
+                                   outputs=[bus_el1], in_max=200, out_max=100,
+                                   eta=0.4, opex_var=20)
 # Boiler for district heating
 SF_district_heating = cp.SimpleTransformer(uid='Boiler', inputs=[bus_coal],
-                                           outputs=[bus_th1], in_max=100, eta=0.9)
+                                           outputs=[bus_th1], in_max=200,
+                                           eta=0.9, opex_var=40)
 # Storage electric for region_1
 SS_region_1 = cp.SimpleStorage(uid="Storage", outputs=[bus_el1],
                                inputs=[bus_th1],
@@ -60,7 +61,7 @@ components = [wind_r1, wind_r2, solar, r_coal] + [demand_r1, demand_r2] + \
 t0 = time()
 
 # create optimization model
-om = opt_model(buses, components, timesteps=timesteps, invest=False)
+om = opt_model(buses, components, timesteps=timesteps, invest=True)
 
 t1 = time()
 building_time = t1 - t0
