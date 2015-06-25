@@ -34,6 +34,12 @@ class Transformer(Component):
       raise ValueError("Transformer must have at least one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
     self.opt_param = kwargs.get('opt_param', None)
+    self.opex_fix = kwargs.get('opex_fix', None)
+    self.opex_var = kwargs.get('opex_var', None)
+    self.capex = kwargs.get('capex', None)
+    self.eta = kwargs.get('eta', None)
+    self.in_max = kwargs.get('in_max', None)
+    self.out_max = kwargs.get('out_max', None)
 
 class SimpleTransformer(Transformer):
   """

@@ -52,7 +52,6 @@ def opt_model(buses, components, timesteps, invest):
     return(expr, 0)
   m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
 
-
   # simple transformer model containing the constraints for simple transformers
   def simple_transformer_model(m):
     """
@@ -63,7 +62,7 @@ def opt_model(buses, components, timesteps, invest):
     I = {obj.uid:obj.inputs[0].uid for obj in s_transformers}
     # set with output uids for every simple transformer e in s_transformers
     O = {obj.uid:obj.outputs[0].uid for obj in s_transformers}
-    eta = {obj.uid:obj.opt_param['eta'] for obj in s_transformers}
+    eta = {obj.uid:obj.eta for obj in s_transformers}
     def eta_rule(m, e, t):
       expr = 0
       expr += m.w[I[e], e, t] * eta[e]
@@ -72,8 +71,8 @@ def opt_model(buses, components, timesteps, invest):
     m.s_transformer_eta_constr = po.Constraint(m.s_transformers, m.timesteps,
                                                rule=eta_rule)
     # set variable bounds
-    m.i_max = {obj.uid:obj.opt_param['in_max'] for obj in s_transformers}
-    m.o_max = {obj.uid:obj.opt_param['out_max'] for obj in s_transformers}
+    m.i_max = {obj.uid:obj.in_max for obj in s_transformers}
+    m.o_max = {obj.uid:obj.out_max for obj in s_transformers}
 
     if(m.invest is False):
       ee = get_edges(s_transformers)
@@ -238,3 +237,4 @@ def io_sets(components):
   O = {obj.uid : [o.uid for o in obj.outputs[:]] for obj in components}
   I = {obj.uid : [i.uid for i in obj.inputs[:]] for obj in components}
   return(I,O)
+

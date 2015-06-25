@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 25 12:03:38 2015
 
-@author: simon
-"""
-import components as cp
+from time import time
 from optimization_model import *
+
+import components as cp
 import random
 
-timesteps = [t for t in range(5)]
+timesteps = [t for t in range(1)]
 
 # Busses (1 Coal, 2 Elec, 1 Thermal)
 bus_coal = cp.Bus(uid="coal_bus", type="coal")
@@ -24,8 +22,9 @@ wind_r2 = cp.Source(uid="wind_r2", outputs=[bus_el2],
 solar = cp.Source(uid="solar_heat", outputs=[bus_th1],
                   val=[random.gauss(3,1) for i in timesteps])
 
-# (Re) sources
-r_coal = cp.Source(uid="r_coal", outputs=[bus_coal], val=[float('inf') for t in timesteps])
+# Commodity sources
+r_coal = cp.Source(uid="r_coal", outputs=[bus_coal],
+                   val=[float('inf') for t in timesteps])
 
 # Sinks
 demand_r1 = cp.Sink(uid="demand_r1", inputs=[bus_el1],
@@ -36,18 +35,16 @@ demand_th = cp.Sink(uid="demand_th", inputs=[bus_th1],
                     val=[random.gauss(50,4) for i in timesteps])
 
 # Simple Transformer for region_1
-SF_region_1 = [cp.SimpleTransformer(uid='SFr1'+str(i), inputs=[bus_coal],
-                                    outputs=[bus_el1],
-                                    opt_param={'eta':0.5, 'in_max':200, 'out_max':100}) for i in range(2)]
+SF_region_1 = cp.SimpleTransformer(uid='SFr1', inputs=[bus_coal],
+                                   outputs=[bus_el2], in_max=200, out_max=100,
+                                   eta=0.5)
 # Simple Transformer for region_2
-SF_region_2 = [cp.SimpleTransformer(uid='SFr2'+str(i), inputs=[bus_coal],
-                                    outputs=[bus_el2],
-                                    opt_param={'eta':0.3, 'in_max':1000, 'out_max':300}) for i in range(2)]
-
+SF_region_2 = cp.SimpleTransformer(uid='SFr2', inputs=[bus_coal],
+                                   outputs=[bus_el2], in_max=200, out_max=100,
+                                   eta=0.5)
 # Boiler for district heating
-SF_district_heating = [cp.SimpleTransformer(uid='Boiler'+str(i),
-                                            inputs=[bus_coal], outputs=[bus_th1],
-                                            opt_param={'eta':0.9, 'in_max':200, 'out_max':None}) for i in range(2)]
+SF_district_heating = cp.SimpleTransformer(uid='Boiler', inputs=[bus_coal],
+                                           outputs=[bus_th1], in_max=100, eta=0.9)
 # Storage electric for region_1
 SS_region_1 = cp.SimpleStorage(uid="Storage", outputs=[bus_el1],
                                inputs=[bus_th1],
@@ -56,11 +53,12 @@ SS_region_1 = cp.SimpleStorage(uid="Storage", outputs=[bus_el1],
 # group all components
 buses = [bus_coal, bus_el1, bus_el2, bus_th1]
 components = [wind_r1, wind_r2, solar, r_coal] + [demand_r1, demand_r2] + \
-              SF_region_1 + SF_region_2 + SF_district_heating + [SS_region_1]
+              [SF_region_1] + [SF_region_2] + [SF_district_heating] + [SS_region_1]
 #I, O = io_sets(objs_schp)
 
-from time import time
+
 t0 = time()
+
 # create optimization model
 om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
