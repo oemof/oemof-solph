@@ -97,6 +97,7 @@ class Source(Component):
     if self.inputs:
       raise ValueError("Source must not have inputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.inputs]))
+    self.results = kwargs.get('results', {})
 
 class RenewableSource(Source):
   """

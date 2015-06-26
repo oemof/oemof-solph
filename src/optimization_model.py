@@ -52,13 +52,17 @@ def opt_model(buses, components, timesteps, invest):
     if(m.invest is True):
         m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
 
-    # bus balance forall b in buses
-    def bus_rule(m, e, t):
-        expr = 0
-        expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
-        expr += sum(m.w[(i, j), t] for (i, j) in m.edges if j == e)
-        return(0, expr, 0)
-    m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
+    def bus(m):
+        m.bus_slack = po.Var(m.buses, m.timesteps)
+        # bus balance forall b in buses
+
+        def bus_rule(m, e, t):
+            expr = 0
+            expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
+            expr += sum(m.w[(i, j), t] for (i, j) in m.edges if j == e)
+            expr += m.bus_slack[e, t]
+            return(0, expr, 0)
+        m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
 
     # simple transformer model containing the constraints for simple transf.
     def simple_transformer_model(m):
@@ -247,6 +251,7 @@ def opt_model(buses, components, timesteps, invest):
         m.objective = po.Objective(rule=obj_rule)
 
     # "call" the models to add the constraints to opt-problem
+    bus(m)
     simple_chp_model(m)
     renewable_source(m)
     simple_transformer_model(m)
