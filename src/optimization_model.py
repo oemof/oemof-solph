@@ -134,10 +134,18 @@ def opt_model(buses, components, timesteps, invest):
                                            rule=power_to_heat_rule)
         # set variable bounds
         if(m.invest is False):
-            ij = get_edges(s_chps)
-            for (i, j) in ij:
+            m.i_max = {obj.uid: obj.in_max for obj in s_chps}
+            # yields nested dict e.g: {'chp': {'home_th': 40, 'region_el': 30}}
+            m.o_max = {obj.uid: dict(zip(O[obj.uid], obj.out_max))
+                       for obj in s_chps}
+
+            ee = get_edges(s_chps)
+            for (e1, e2) in ee:
                 for t in m.timesteps:
-                    m.w[i, j, t].setub(1000)
+                    if e2 in m.s_chps:
+                        m.w[e1, e2, t].setub(m.i_max[e2])
+                    if e1 in m.s_chps:
+                        m.w[e1, e2, t].setub(m.o_max[e1][e2])
 
     def renewable_source(m):
         """
