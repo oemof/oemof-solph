@@ -53,14 +53,14 @@ def opt_model(buses, components, timesteps, invest):
         m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
 
     def bus(m):
-        m.bus_slack = po.Var(m.buses, m.timesteps)
+        m.bus_slack = po.Var(m.buses, m.timesteps, within=po.NonNegativeReals)
         # bus balance forall b in buses
 
         def bus_rule(m, e, t):
             expr = 0
             expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
             expr += sum(m.w[(i, j), t] for (i, j) in m.edges if j == e)
-            expr += m.bus_slack[e, t]
+            expr += -m.bus_slack[e, t]
             return(0, expr, 0)
         m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
 
@@ -218,7 +218,7 @@ def opt_model(buses, components, timesteps, invest):
         def simple_storage_rule(m, e, t):
             if(t == 0):
                 expr = 0
-                expr += m.soc[e, t] -0.5 * m.soc_max[e]
+                expr += m.soc[e, t] - 0.5 * m.soc_max[e]
                 return(expr, 0)
             else:
                 expr = m.soc[e, t]
@@ -240,6 +240,7 @@ def opt_model(buses, components, timesteps, invest):
             expr += sum(m.w[I[e], e, t] * m.opex_var[e]
                         for e in m.objective_components
                         for t in m.timesteps)
+            expr += sum(m.bus_slack[e, t]*10e4 for e in m.buses for t in m.timesteps)
             if(m.invest is True):
                 m.capex = {obj.uid: obj.capex for obj in objective_components}
 
