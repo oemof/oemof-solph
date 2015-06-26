@@ -149,7 +149,10 @@ def opt_model(buses, components, timesteps, invest):
             O = {obj.uid: obj.outputs[0].uid for obj in renew_sources}
 
             def source_rule(m, e, t):
-                return(m.w[e, O[e], t] == (m.out_max[e] + m.w_add[e, O[e]]) * m.source_val[e][t])
+                expr = 0
+                expr += m.w[e, O[e], t]
+                expr += -(m.out_max[e] + m.w_add[e, O[e]]) * m.source_val[e][t]
+                return(expr, 0)
             m.source_constr = po.Constraint(m.renew_sources, m.timesteps,
                                             rule=source_rule)
 
@@ -160,6 +163,7 @@ def opt_model(buses, components, timesteps, invest):
         def commodity_limit_rule(m, e):
             expr = 0
             expr += sum(m.w[e, o, t] for t in m.timesteps for o in O[e])
+            # set upper bound
             ub = m.yearly_limit[e]
             return(0, expr, ub)
         m.commodity_limit_constr = po.Constraint(m.commodities,
