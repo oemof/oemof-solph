@@ -57,7 +57,7 @@ def opt_model(buses, components, timesteps, invest):
         expr = 0
         expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
         expr += sum(m.w[(i, j), t] for (i, j) in m.edges if j == e)
-        return(expr, 0)
+        return(0, expr, 0)
     m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
 
     # simple transformer model containing the constraints for simple transf.
@@ -152,7 +152,7 @@ def opt_model(buses, components, timesteps, invest):
                 expr = 0
                 expr += m.w[e, O[e], t]
                 expr += -(m.out_max[e] + m.w_add[e, O[e]]) * m.source_val[e][t]
-                return(expr, 0)
+                return(0, expr, 0)
             m.source_constr = po.Constraint(m.renew_sources, m.timesteps,
                                             rule=source_rule)
 
