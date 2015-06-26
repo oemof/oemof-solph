@@ -2,7 +2,7 @@
 import pyomo.environ as po
 import components as cp
 
-
+#@profile
 def opt_model(buses, components, timesteps, invest):
     """
     :param entities: dictionary containing all entities grouped by classtypes
@@ -20,7 +20,7 @@ def opt_model(buses, components, timesteps, invest):
 
     s_transformers = [e for e in components
                       if isinstance(e, cp.SimpleTransformer)]
-    s_chps = []#[e for e in components if isinstance(e, cp.Transformer)]
+    s_chps = [e for e in components if isinstance(e, cp.SimpleCombinedHeatPower)]
     renew_sources = [e for e in components
                      if isinstance(e, cp.RenewableSource)]
     sinks = [e for e in components if isinstance(e, cp.Sink)]
@@ -114,10 +114,13 @@ def opt_model(buses, components, timesteps, invest):
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in s_chps}
         # constraint for transformer energy balance
 
+        eta_el = {obj.uid: obj.eta_el for obj in s_chps}
+        eta_th = {obj.uid: obj.eta_th for obj in s_chps}
+
         def eta_rule(m, e, t):
             expr = 0
             expr += m.w[I[e], e, t]
-            expr += -sum(m.w[e, o, t] for o in O[e]) / 0.8
+            expr += -sum(m.w[e, o, t] for o in O[e]) / (eta_el[e] + eta_th[e])
             return(expr, 0)
         m.s_chp_eta_constr = po.Constraint(m.s_chps, m.timesteps,
                                            rule=eta_rule)
@@ -125,8 +128,8 @@ def opt_model(buses, components, timesteps, invest):
         # additional constraint for power to heat ratio of simple chp comp
         def power_to_heat_rule(m, e, t):
             expr = 0
-            expr += m.w[e, O[e][0], t]
-            expr += -m.w[e, O[e][1], t] * 1
+            expr += m.w[e, O[e][0], t] / eta_el[e]
+            expr += -m.w[e, O[e][1], t] / eta_th[e]
             return(expr, 0)
         m.s_chp_pth_constr = po.Constraint(m.s_chps, m.timesteps,
                                            rule=power_to_heat_rule)
@@ -276,7 +279,7 @@ def solve_opt_model(instance, solver='glpk', options={'stream': False},
         instance.write('problem.lp',
                        io_options={'symbolic_solver_labels': True})
     # solve instance
-    opt = SolverFactory(solver, solver_io='lp')
+    opt = SolverFactory(solver, solver_io='python')
     # store results
     results = opt.solve(instance, tee=options['stream'])
     # load results back in instance

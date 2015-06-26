@@ -18,7 +18,10 @@ class Entity:
 
   def __str__(self): return "<{0} #{1}>".format(type(self).__name__, self.uid)
 
-class Component(Entity): pass
+
+class Component(Entity):
+  pass
+
 
 class Transformer(Component):
   """
@@ -60,6 +63,20 @@ class SimpleTransformer(Transformer):
       self.in_max = self.out_max / self.eta
     if(self.out_max is None and self.in_max is not None):
       self.out_max = self.in_max * self.eta
+
+
+class SimpleCombinedHeatPower(Transformer):
+  """
+  SimpleCombinedHeatPower always have a simple input output relation with a
+  constant efficiency
+  """
+  def __init__(self,**kwargs):
+    """
+    :param eta: eta as constant efficiency for simple transformer
+    """
+    super().__init__(**kwargs)
+    self.eta_el = kwargs.get('eta_el', None)
+    self.eta_th = kwargs.get('eta_th', None)
 
 
 class SimpleStorage(Transformer):
