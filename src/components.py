@@ -133,6 +133,7 @@ class Commodity(Source):
     """
     super().__init__(**kwargs)
     self.yearly_limit = kwargs.get('yearly_limit', float('+inf'))
+    self.emmision_factor = kwargs.get('emmission_factor', 0)
 
 class Bus(Entity):
   """
