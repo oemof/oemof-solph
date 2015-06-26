@@ -33,20 +33,17 @@ class Transformer(Component):
     if not self.outputs:
       raise ValueError("Transformer must have at least one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
-    self.opt_param = kwargs.get('opt_param', None)
-    self.opex_fix = kwargs.get('opex_fix', None)
-    self.opex_var = kwargs.get('opex_var', 0)
-    self.capex = kwargs.get('capex', 0)
-    self.eta = kwargs.get('eta', None)
+
     self.in_max = kwargs.get('in_max', None)
     self.out_max = kwargs.get('out_max', None)
+    self.capex = kwargs.get('capex', 0)
+    self.opex_fix = kwargs.get('opex_fix', None)
+    self.opex_var = kwargs.get('opex_var', 0)
     self.co2_var = kwargs.get('co2_var', None)
+
+    self.opt_param = kwargs.get('opt_param', None)
     self.results = kwargs.get('results', {})
 
-    if(self.in_max is None and self.out_max is not None):
-      self.in_max = self.out_max / self.eta
-    if(self.out_max is None and self.in_max is not None):
-      self.out_max = self.in_max * self.eta
 class SimpleTransformer(Transformer):
   """
   Simple Transformers always have a simple input output relation with a
@@ -57,6 +54,13 @@ class SimpleTransformer(Transformer):
     :param eta: eta as constant efficiency for simple transformer
     """
     super().__init__(**kwargs)
+    self.eta = kwargs.get('eta', None)
+
+    if(self.in_max is None and self.out_max is not None):
+      self.in_max = self.out_max / self.eta
+    if(self.out_max is None and self.in_max is not None):
+      self.out_max = self.in_max * self.eta
+
 
 class SimpleStorage(Transformer):
   """
@@ -67,6 +71,11 @@ class SimpleStorage(Transformer):
     """
     super().__init__(**kwargs)
 
+    self.soc_max = kwargs.get('soc_max', None)
+    self.soc_min = kwargs.get('soc_min', None)
+    self.eta_in = kwargs.get('eta_in', 1)
+    self.eta_out = kwargs.get('eta_out', 1)
+    self.cap_loss = kwargs.get('cap_loss', 0)
 
 class Sink(Component):
   def __init__(self, **kwargs):
