@@ -114,13 +114,12 @@ def opt_model(buses, components, timesteps, invest):
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in s_chps}
         # constraint for transformer energy balance
 
-        eta_el = {obj.uid: obj.eta_el for obj in s_chps}
-        eta_th = {obj.uid: obj.eta_th for obj in s_chps}
+        eta = {obj.uid: obj.eta for obj in s_chps}
 
         def eta_rule(m, e, t):
             expr = 0
             expr += m.w[I[e], e, t]
-            expr += -sum(m.w[e, o, t] for o in O[e]) / (eta_el[e] + eta_th[e])
+            expr += -sum(m.w[e, o, t] for o in O[e]) / (eta[e][0] + eta[e][1])
             return(expr, 0)
         m.s_chp_eta_constr = po.Constraint(m.s_chps, m.timesteps,
                                            rule=eta_rule)
@@ -128,8 +127,8 @@ def opt_model(buses, components, timesteps, invest):
         # additional constraint for power to heat ratio of simple chp comp
         def power_to_heat_rule(m, e, t):
             expr = 0
-            expr += m.w[e, O[e][0], t] / eta_el[e]
-            expr += -m.w[e, O[e][1], t] / eta_th[e]
+            expr += m.w[e, O[e][0], t] / eta[e][0]
+            expr += -m.w[e, O[e][1], t] / eta[e][1]
             return(expr, 0)
         m.s_chp_pth_constr = po.Constraint(m.s_chps, m.timesteps,
                                            rule=power_to_heat_rule)

@@ -75,8 +75,7 @@ class SimpleCombinedHeatPower(Transformer):
     :param eta: eta as constant efficiency for simple transformer
     """
     super().__init__(**kwargs)
-    self.eta_el = kwargs.get('eta_el', None)
-    self.eta_th = kwargs.get('eta_th', None)
+    self.eta = kwargs.get('eta', [])
 
 
 class SimpleStorage(Transformer):
