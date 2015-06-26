@@ -40,10 +40,12 @@ class Transformer(Component):
     self.eta = kwargs.get('eta', None)
     self.in_max = kwargs.get('in_max', None)
     self.out_max = kwargs.get('out_max', None)
+    self.co2_var = kwargs.get('co2_var', None)
+    self.results = kwargs.get('results', {})
 
-    if(self.in_max is None):
+    if(self.in_max is None and self.out_max is not None):
       self.in_max = self.out_max / self.eta
-    if(self.out_max is None):
+    if(self.out_max is None and self.in_max is not None):
       self.out_max = self.in_max * self.eta
 class SimpleTransformer(Transformer):
   """
@@ -104,7 +106,7 @@ class Commodity(Source):
     """
     """
     super().__init__(**kwargs)
-    self.limit = kwargs.get('yearly_limit', None)
+    self.yearly_limit = kwargs.get('yearly_limit', float('+inf'))
 
 class Bus(Entity):
   """
