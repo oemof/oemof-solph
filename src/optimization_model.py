@@ -203,10 +203,20 @@ def opt_model(buses, components, timesteps, invest):
                         m.w[e1, e2, t].setub(m.o_max[e1][e2])
 
     def renewable_source(m):
+        """Simple chp model containing the constraints for simple chps.
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m.source_constr : pyomo.Constraint for the source value
         """
-        """
+
         m.source_val = {obj.uid: obj.val for obj in renew_sources}
         m.out_max = {obj.uid: obj.out_max for obj in renew_sources}
+
         # set variable bounds
         if(m.invest is False):
             ee = get_edges(renew_sources)
