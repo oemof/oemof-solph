@@ -76,7 +76,7 @@ def opt_model(buses, components, timesteps, invest):
 
         Parameters
         ----------
-        m : Pyomo model instance
+        m : pyomo.ConcreteModel
 
         Returns
         -------
@@ -94,10 +94,19 @@ def opt_model(buses, components, timesteps, invest):
             return(0, expr, 0)
         m.bus_constr = po.Constraint(m.buses, m.timesteps, rule=bus_rule)
 
-    # simple transformer model containing the constraints for simple transf.
     def simple_transformer_model(m):
-        """
-        :param m: pyomo model instance
+        """Simple transformer model containing the constraints
+        for simple transformers.
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m.s_transformer_eta_constr : pyomo.Constraint for efficiency
+        m.s_transformer_w_max : pyomo.Constraint for additional capacity
+            if investment models are calculated
         """
 
         # temp set with input uids for every simple chp e in s_transformers
@@ -108,16 +117,19 @@ def opt_model(buses, components, timesteps, invest):
 
         def eta_rule(m, e, t):
             expr = 0
+            # input * efficiency = output
             expr += m.w[I[e], e, t] * eta[e]
             expr += - m.w[e, O[e], t]
             return(expr, 0)
         m.s_transformer_eta_constr = po.Constraint(m.s_transformers,
                                                    m.timesteps,
                                                    rule=eta_rule)
+
         # set variable bounds
         m.i_max = {obj.uid: obj.in_max for obj in s_transformers}
         m.o_max = {obj.uid: obj.out_max for obj in s_transformers}
 
+        # set bounds for basic/investment models
         if(m.invest is False):
             ee = get_edges(s_transformers)
             for (e1, e2) in ee:
