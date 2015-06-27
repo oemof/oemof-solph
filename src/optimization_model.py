@@ -87,6 +87,7 @@ def opt_model(buses, components, timesteps, invest):
         m.bus_slack = po.Var(m.buses, m.timesteps, within=po.NonNegativeReals)
         def bus_rule(m, e, t):
             expr = 0
+            # component inputs/outputs are negative/positive in the bus balance
             expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
             expr += sum(m.w[(i, j), t] for (i, j) in m.edges if j == e)
             expr += -m.bus_slack[e, t]
