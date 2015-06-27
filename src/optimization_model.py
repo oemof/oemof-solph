@@ -260,6 +260,17 @@ def opt_model(buses, components, timesteps, invest):
                                                  rule=commodity_limit_rule)
 
     def sink(m):
+        """Simple model containing the constraints for sinks.
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+
+        """
+
         m.sink_val = {obj.uid: obj.val for obj in sinks}
         ee = get_edges(sinks)
         for (e1, e2) in ee:
