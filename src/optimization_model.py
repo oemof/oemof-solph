@@ -203,7 +203,7 @@ def opt_model(buses, components, timesteps, invest):
                         m.w[e1, e2, t].setub(m.o_max[e1][e2])
 
     def renewable_source(m):
-        """Simple chp model containing the constraints for simple chps.
+        """Simple model containing the constraints for renewable sources.
 
         Parameters
         ----------
@@ -236,6 +236,17 @@ def opt_model(buses, components, timesteps, invest):
                                             rule=source_rule)
 
     def commodity(m):
+        """Simple model containing the constraints for commodities.
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m.commodity_limit_constr : pyomo.Constraint for yearly commodity limit
+        """
+
         m.yearly_limit = {obj.uid: obj.yearly_limit for obj in commodities}
         O = {obj.uid: [obj.outputs[0].uid] for obj in commodities}
 
