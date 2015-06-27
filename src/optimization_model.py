@@ -4,17 +4,33 @@ import components as cp
 
 #@profile
 def opt_model(buses, components, timesteps, invest):
-    """
-    :param entities: dictionary containing all entities grouped by classtypes
+    """Create Pyomo model of the energy system.
 
-    **Mathematical equations:**
-      .. math::
+    **Mathematical equations (should be a "sphinx-headline")**
+
+    The model equations are described as follows:
+
+    .. math::
+
         I_{SF} = \\{ i | i \\subset E_B, (i,e) \\in \\vec{E},
         e \\in E_{SF}\\} \\\\
+
         O_{SF} = \\{ o | o \\subset E_B, (e,o) \\in \\vec{E},
         e \\in E_{SF}\\} \\\\
+
         w(I_{SF}(e), e,t) \cdot \eta_(e) - w(e,O_{SF}(e),t) = 0,
         \\forall e \\in E_{SF}, \\forall t \\in T
+
+    Parameters
+    ----------
+    buses : list with all bus objects
+    components : list with all component objects
+    timesteps : list with all timesteps as integer values
+    invest : boolean
+
+    Returns
+    -------
+    m : pyomo.ConcreteModel()
     """
 
     # create lists with objects of component subclasses
@@ -56,9 +72,12 @@ def opt_model(buses, components, timesteps, invest):
         m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
 
     def bus(m):
-        m.bus_slack = po.Var(m.buses, m.timesteps, within=po.NonNegativeReals)
-        # bus balance forall b in buses
+        """
+        :param m: pyomo model instance
+        """
 
+        # slack variable that assures a feasible problem
+        m.bus_slack = po.Var(m.buses, m.timesteps, within=po.NonNegativeReals)
         def bus_rule(m, e, t):
             expr = 0
             expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
