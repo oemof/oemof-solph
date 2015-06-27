@@ -32,10 +32,10 @@ def opt_model(buses, components, timesteps, invest):
     # create pyomo model instance
     m = po.ConcreteModel()
 
-    # parameter simulation
+    # parameter flag for investment models
     m.invest = invest
-    # create pyomo sets
-    # timesteps
+
+    # set for timesteps
     m.timesteps = timesteps
 
     # entity sets using uids
