@@ -298,7 +298,12 @@ def solve_opt_model(instance, solver='glpk', options={'stream': False},
 
 
 def get_edges(components):
+    """
+    :param components: list of component objects
+    """
     edges = []
+    # creates a list of tuples
+    # e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
     for c in components:
         for i in c.inputs:
             ei = (i.uid, c.uid)
