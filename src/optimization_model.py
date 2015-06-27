@@ -286,7 +286,7 @@ def solve_opt_model(instance, solver='glpk', options={'stream': False},
         instance.write('problem.lp',
                        io_options={'symbolic_solver_labels': True})
     # solve instance
-    opt = SolverFactory(solver, solver_io='python')
+    opt = SolverFactory(solver, solver_io='lp')
     # store results
     results = opt.solve(instance, tee=options['stream'])
     # load results back in instance
