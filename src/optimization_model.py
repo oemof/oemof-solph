@@ -16,17 +16,19 @@ def opt_model(buses, components, timesteps, invest):
         w(I_{SF}(e), e,t) \cdot \eta_(e) - w(e,O_{SF}(e),t) = 0,
         \\forall e \\in E_{SF}, \\forall t \\in T
     """
-    # objects
 
+    # create lists with objects of component subclasses
     s_transformers = [e for e in components
                       if isinstance(e, cp.SimpleTransformer)]
-    s_chps = [e for e in components if isinstance(e, cp.SimpleCombinedHeatPower)]
+    s_chps = [e for e in components
+              if isinstance(e, cp.SimpleCombinedHeatPower)]
     renew_sources = [e for e in components
                      if isinstance(e, cp.RenewableSource)]
     sinks = [e for e in components if isinstance(e, cp.Sink)]
     simple_storages = [e for e in components
                        if isinstance(e, cp.SimpleStorage)]
     commodities = [e for e in components if isinstance(e, cp.Commodity)]
+
     # create pyomo model instance
     m = po.ConcreteModel()
 
