@@ -47,10 +47,11 @@ def opt_model(buses, components, timesteps, invest):
     m.sinks = [c.uid for c in sinks]
     m.commodities = [c.uid for c in commodities]
 
-    # could be calculated inside this function
+    # calculate all edges ([('coal', 'pp_coal'),...])
     m.edges = get_edges(components)
-
+    # variable for edges
     m.w = po.Var(m.edges, m.timesteps, within=po.NonNegativeReals)
+    # additional variable for investment models
     if(m.invest is True):
         m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
 
@@ -302,7 +303,7 @@ def get_edges(components):
     :param components: list of component objects
     """
     edges = []
-    # creates a list of tuples
+    # create a list of tuples
     # e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
     for c in components:
         for i in c.inputs:
