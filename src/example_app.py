@@ -14,7 +14,7 @@ import components as cp
 import random
 
 
-timesteps = [t for t in range(5)]
+timesteps = [t for t in range(1000)]
 
 # emission factors in t/MWh
 em_lig = 0.111 / 3.6
@@ -33,10 +33,10 @@ b_el = cp.Bus(uid="b_el", type="elec")
 b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
-wind_on = cp.RenewableSource(uid="wind", outputs=[b_el],
+wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],
                           val=[random.gauss(0.5, 0.1) for i in timesteps],
                           out_max=66300)
-wind_off = cp.RenewableSource(uid="wind", outputs=[b_el],
+wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el],
                               val=[random.gauss(0.5, 0.1) for i in timesteps],
                               out_max=25300)
 pv = cp.RenewableSource(uid="pv", outputs=[b_el],
