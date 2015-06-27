@@ -14,7 +14,7 @@ import components as cp
 import random
 
 
-timesteps = [t for t in range(1000)]
+timesteps = [t for t in range(10)]
 
 # emission factors in t/MWh
 em_lig = 0.111 / 3.6
@@ -107,20 +107,45 @@ for c in temp_comp:
 
 
 # plot results
-import pylab as pl
-import numpy as np
-import matplotlib as mpl
-
-fig, ax = pl.subplots()
-n = len([c for c in temp_comp])
-colors = mpl.cm.rainbow(np.linspace(0, 1, n))
-for color, c in zip(colors, [c for c in temp_comp]):
-    ax.step(timesteps, c.results['output'], color=color, label=c.uid)
-
-handles, labels = ax.get_legend_handles_labels()
-ax.legend(handles[::-1], labels[::-1])
-pl.grid()
-pl.xlabel('Timesteps in h')
-pl.ylabel('Power in MW')
+#import pylab as pl
+#import numpy as np
+#import matplotlib as mpl
+#
+#fig, ax = pl.subplots()
+#n = len([c for c in temp_comp])
+#colors = mpl.cm.rainbow(np.linspace(0, 1, n))
+#for color, c in zip(colors, [c for c in temp_comp]):
+#    ax.step(timesteps, c.results['output'], color=color, label=c.uid)
+#
+#handles, labels = ax.get_legend_handles_labels()
+#ax.legend(handles[::-1], labels[::-1])
+#pl.grid()
+#pl.xlabel('Timesteps in h')
+#pl.ylabel('Power in MW')
 #pl.show()
 
+
+def show_graph(buses=buses, components=components,
+               renew_sources=renew_sources, sinks=sinks,
+               commodities=commodities):
+  import networkx as nx
+  import matplotlib.pyplot as plt
+  g = nx.DiGraph()
+  es = components + buses
+  g.add_nodes_from([e.uid for e in es])
+  g.add_edges_from(get_edges(es))
+  graph_pos=nx.fruchterman_reingold_layout(g)
+  nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses], node_shape="o", node_color="r",
+                        node_size = 1200)
+  nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components], node_shape="s",
+                         node_color="b", node_size=1000)
+  nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources], node_shape="s",
+                         node_color="g", node_size=1000)
+  nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks], node_shape="s",
+                         node_color="y", node_size=1000)
+  nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities], node_shape="s",
+                         node_color="black", node_size=1000, alpha=0.8)
+  nx.draw_networkx_edges(g, graph_pos, width=1.5)
+  nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
+  plt.show()
+show_graph()
