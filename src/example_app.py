@@ -65,7 +65,7 @@ pp_gas = cp.SimpleTransformer(uid='pp_gas', inputs=[bgas],
                               eta=0.45, opex_var=35, co2_var=em_lig)
 pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil],
                               outputs=[b_el], in_max=None, out_max=1000,
-                              eta=0.3, opex_var=50, co2_var=em_pet)
+                              eta=0.3, opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
                                     out_max=[None, 30000], eta=[0.4, 0.3],
