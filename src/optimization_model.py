@@ -6,7 +6,7 @@ import components as cp
 def opt_model(buses, components, timesteps, invest):
     """Create Pyomo model of the energy system.
 
-    **Mathematical equations (should be a "sphinx-headline")**
+    **Mathematical equations (should be a "sphinx-headline") later**
 
     The model equations are described as follows:
 
@@ -30,7 +30,7 @@ def opt_model(buses, components, timesteps, invest):
 
     Returns
     -------
-    m : pyomo.ConcreteModel()
+    m : pyomo.ConcreteModel
     """
 
     # create lists with objects of component subclasses
@@ -72,8 +72,15 @@ def opt_model(buses, components, timesteps, invest):
         m.w_add = po.Var(m.edges, within=po.NonNegativeReals)
 
     def bus(m):
-        """
-        :param m: pyomo model instance
+        """Create bus balance for all buses.
+
+        Parameters
+        ----------
+        m : Pyomo model instance
+
+        Returns
+        -------
+        m.bus_constr : pyomo.Constraint
         """
 
         # slack variable that assures a feasible problem
