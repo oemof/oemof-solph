@@ -1,8 +1,9 @@
-
 import pyomo.environ as po
 import components as cp
 
 #@profile
+
+
 def opt_model(buses, components, timesteps, invest):
     """Create Pyomo model of the energy system.
 
@@ -85,6 +86,7 @@ def opt_model(buses, components, timesteps, invest):
 
         # slack variable that assures a feasible problem
         m.bus_slack = po.Var(m.buses, m.timesteps, within=po.NonNegativeReals)
+
         def bus_rule(m, e, t):
             expr = 0
             # component inputs/outputs are negative/positive in the bus balance
@@ -145,9 +147,17 @@ def opt_model(buses, components, timesteps, invest):
                                                   m.timesteps,
                                                   rule=w_max_invest_rule)
 
-    # simple chp model containing the constraints for simple chps
     def simple_chp_model(m):
-        """
+        """Simple chp model containing the constraints for simple chps.
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m.s_chp_eta_constr : pyomo.Constraint for efficiencies
+        m.s_chp_pth_constr : pyomo.Constraint for power to heat ratio
         """
 
         # temp set with input uids for every simple chp e in s_chps
@@ -160,6 +170,8 @@ def opt_model(buses, components, timesteps, invest):
 
         def eta_rule(m, e, t):
             expr = 0
+            # E = P + Q / (eta_el + eta_th) = P / eta_el = Q/ eta_th
+            # depending on the position of eta
             expr += m.w[I[e], e, t]
             expr += -sum(m.w[e, o, t] for o in O[e]) / (eta[e][0] + eta[e][1])
             return(expr, 0)
@@ -169,6 +181,7 @@ def opt_model(buses, components, timesteps, invest):
         # additional constraint for power to heat ratio of simple chp comp
         def power_to_heat_rule(m, e, t):
             expr = 0
+            # P/eta_el = Q/eta_th
             expr += m.w[e, O[e][0], t] / eta[e][0]
             expr += -m.w[e, O[e][1], t] / eta[e][1]
             return(expr, 0)
