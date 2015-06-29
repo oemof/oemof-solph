@@ -475,8 +475,8 @@ def results_to_objects(entities, instance):
             for o in O:
                 e.results['Output'][o] = []
                 for t in instance.timesteps:
-                    e.results['Output']
-                    [o].append(instance.w[e.uid, o, t].value)
+                    e.results['Output'][o].append(instance.w[e.uid,
+                                                  o, t].value)
         if isinstance(e, cp.SimpleStorage):
             for t in instance.timesteps:
                 e.results['Input'].append(instance.w[e.inputs[0].uid,

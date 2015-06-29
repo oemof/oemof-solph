@@ -91,8 +91,9 @@ results_to_objects(entities=transformers+commodities+renew_sources,
 
 if __name__ == "__main__":
 
-    for c in [c for c in transformers]:
+    for c in transformers:
         print(c.results['Output'])
+        print(c.uid)
 
 #    # plot results
 #    import pylab as pl
