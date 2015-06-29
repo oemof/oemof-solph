@@ -91,23 +91,26 @@ results_to_objects(entities=transformers+commodities+renew_sources,
 
 if __name__ == "__main__":
 
-    # plot results
-    import pylab as pl
-    import numpy as np
-    import matplotlib as mpl
+    for c in [c for c in transformers]:
+        print(c.results['Output'])
 
-    fig, ax = pl.subplots()
-    n = len([c for c in temp_comp])
-    colors = mpl.cm.rainbow(np.linspace(0, 1, n))
-    for color, c in zip(colors, [c for c in temp_comp]):
-        ax.step(timesteps, c.results['output'], color=color, label=c.uid)
-
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1])
-    pl.grid()
-    pl.xlabel('Timesteps in h')
-    pl.ylabel('Power in MW')
-    pl.show()
+#    # plot results
+#    import pylab as pl
+#    import numpy as np
+#    import matplotlib as mpl
+#
+#    fig, ax = pl.subplots()
+#    n = len([c for c in temp_comp])
+#    colors = mpl.cm.rainbow(np.linspace(0, 1, n))
+#    for color, c in zip(colors, [c for c in temp_comp]):
+#        ax.step(timesteps, c.results['output'], color=color, label=c.uid)
+#
+#    handles, labels = ax.get_legend_handles_labels()
+#    ax.legend(handles[::-1], labels[::-1])
+#    pl.grid()
+#    pl.xlabel('Timesteps in h')
+#    pl.ylabel('Power in MW')
+#    pl.show()
 
     def show_graph(buses=buses, components=components,
                    renew_sources=renew_sources, sinks=sinks,
