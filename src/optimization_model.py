@@ -361,13 +361,15 @@ def opt_model(buses, components, timesteps, invest):
     return(m)
 
 
-def solve(model, solver='glpk', options={'stream': False},
-          debug=False, write_results={'flag': False, 'objects': []}):
+def solve(model, solver='glpk', solver_io = 'lp', debug=False,
+          write_results={'flag': False, 'objects': []}, **kwargs):
     """
     :param model: pyomo concreteModel() instance
-    :param str solver: solver specification as string 'glpk','gurobi','clpex'
-    :param dict write_results: keywords flag,objects
-                               if results are written back into specifed 'objects'
+    :param (str) solver: solver specification as string 'glpk','gurobi','clpex'
+    :param (dict) write_results:
+                               Keywords: 'flag' ,'objects'
+                               if results are written back into specifed
+                               'objects'
     """
     from pyomo.opt import SolverFactory
 
@@ -375,12 +377,12 @@ def solve(model, solver='glpk', options={'stream': False},
     instance = model.create()
 
     if(debug is True):
-        instance.write('problem.lp',
-                       io_options={'symbolic_solver_labels': True})
+        instance.write('problem.lp', io_options={'symbolic_solver_labels':
+                                                 True})
     # solve instance
-    opt = SolverFactory(solver, solver_io='lp')
+    opt = SolverFactory(solver, solver_io=solver_io)
     # store results
-    results = opt.solve(instance, tee=options['stream'])
+    results = opt.solve(instance, **kwargs)
     # load results back in instance
     instance.load(results)
 

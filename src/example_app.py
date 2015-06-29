@@ -83,9 +83,9 @@ components = transformers + commodities + renew_sources + sinks
 
 om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
-instance = solve(model=om, solver='gurobi', options={'stream': True},
-                 debug=False, write_results={'flag': False,
-                                             'objects': transformers})
+instance = solve(model=om, solver='gurobi', debug=False,
+                 write_results={'flag': False, 'objects': transformers},
+                 tee=True)
 
 if __name__ == "__main__":
 
