@@ -81,15 +81,16 @@ def opt_model(buses, components, timesteps, invest):
 
         Returns
         -------
-        m.bus_constr : pyomo.Constraint
+        m : pyomo.ConcreteModel
         """
 
         # slack variable that assures a feasible problem
         m.bus_slack = po.Var(m.buses, m.timesteps, within=po.NonNegativeReals)
 
+        # constraint for bus balance:
+        # component inputs/outputs are negative/positive in the bus balance
         def bus_rule(m, e, t):
             expr = 0
-            # component inputs/outputs are negative/positive in the bus balance
             expr += -sum(m.w[(i, j), t] for (i, j) in m.edges if i == e)
             expr += sum(m.w[(i, j), t] for (i, j) in m.edges if j == e)
             expr += -m.bus_slack[e, t]
@@ -106,9 +107,7 @@ def opt_model(buses, components, timesteps, invest):
 
         Returns
         -------
-        m.s_transformer_eta_constr : pyomo.Constraint for efficiency
-        m.s_transformer_w_max : pyomo.Constraint for additional capacity
-            if investment models are calculated
+        m : pyomo.ConcreteModel
         """
 
         # temp set with input uids for every simple chp e in s_transformers
@@ -117,9 +116,9 @@ def opt_model(buses, components, timesteps, invest):
         O = {obj.uid: obj.outputs[0].uid for obj in s_transformers}
         eta = {obj.uid: obj.eta for obj in s_transformers}
 
+        # constraint for simple transformers: input * efficiency = output
         def eta_rule(m, e, t):
             expr = 0
-            # input * efficiency = output
             expr += m.w[I[e], e, t] * eta[e]
             expr += - m.w[e, O[e], t]
             return(expr, 0)
@@ -127,20 +126,26 @@ def opt_model(buses, components, timesteps, invest):
                                                    m.timesteps,
                                                    rule=eta_rule)
 
-        # set variable bounds
+        # set variable bounds (out_max = in_max * efficiency):
+        # m.i_max = {'pp_coal': 51794.8717948718, ... }
+        # m.o_max = {'pp_coal': 20200, ... }
         m.i_max = {obj.uid: obj.in_max for obj in s_transformers}
         m.o_max = {obj.uid: obj.out_max for obj in s_transformers}
 
         # set bounds for basic/investment models
         if(m.invest is False):
+            # edges for simple transformers ([('coal', 'pp_coal'),...])
             ee = get_edges(s_transformers)
             for (e1, e2) in ee:
                 for t in m.timesteps:
+                    # transformer output <= m.o_max
                     if e1 in m.s_transformers:
                         m.w[e1, e2, t].setub(m.o_max[e1])
+                    # transformer input <= m.i_max
                     if e2 in m.s_transformers:
                         m.w[e1, e2, t].setub(m.i_max[e2])
         else:
+            # constraint for additional capacity
             def w_max_invest_rule(m, e, t):
                 return(m.w[I[e], e, t] <= m.i_max[e] + m.w_add[I[e], e])
             m.s_transformer_w_max = po.Constraint(m.s_transformers,
@@ -156,32 +161,33 @@ def opt_model(buses, components, timesteps, invest):
 
         Returns
         -------
-        m.s_chp_eta_constr : pyomo.Constraint for efficiencies
-        m.s_chp_pth_constr : pyomo.Constraint for power to heat ratio
+        m : pyomo.ConcreteModel
         """
 
-        # temp set with input uids for every simple chp e in s_chps
+        # temp set with input uids for every simple chp e in s_chps:
+        # {'pp_chp': 'gas'}
         I = {obj.uid: obj.inputs[0].uid for obj in s_chps}
-        # set with output uids for every simple chp e in s_chps
+        # set with output uids for every simple chp e in s_chps:
+        # {'pp_chp': ['b_th', 'b_el']}
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in s_chps}
-        # constraint for transformer energy balance
-
+        # efficiencies for simple chps
         eta = {obj.uid: obj.eta for obj in s_chps}
 
+        # constraint for transformer energy balance:
+        # E = P + Q / (eta_el + eta_th) = P / eta_el = Q/ eta_th
+        # (depending on the position of the outputs and eta)
         def eta_rule(m, e, t):
             expr = 0
-            # E = P + Q / (eta_el + eta_th) = P / eta_el = Q/ eta_th
-            # depending on the position of eta
             expr += m.w[I[e], e, t]
             expr += -sum(m.w[e, o, t] for o in O[e]) / (eta[e][0] + eta[e][1])
             return(expr, 0)
         m.s_chp_eta_constr = po.Constraint(m.s_chps, m.timesteps,
                                            rule=eta_rule)
 
-        # additional constraint for power to heat ratio of simple chp comp
+        # additional constraint for power to heat ratio of simple chp comp:
+        # P/eta_el = Q/eta_th
         def power_to_heat_rule(m, e, t):
             expr = 0
-            # P/eta_el = Q/eta_th
             expr += m.w[e, O[e][0], t] / eta[e][0]
             expr += -m.w[e, O[e][1], t] / eta[e][1]
             return(expr, 0)
@@ -193,12 +199,14 @@ def opt_model(buses, components, timesteps, invest):
             # yields nested dict e.g: {'chp': {'home_th': 40, 'region_el': 30}}
             m.o_max = {obj.uid: dict(zip(O[obj.uid], obj.out_max))
                        for obj in s_chps}
-
+            # edges for simple chps ([('gas', 'pp_chp'), ('pp_chp', 'b_th'),..)
             ee = get_edges(s_chps)
             for (e1, e2) in ee:
                 for t in m.timesteps:
+                    # chp input <= m.i_max
                     if e2 in m.s_chps:
                         m.w[e1, e2, t].setub(m.i_max[e2])
+                    # chp outputs <= m.o_max
                     if e1 in m.s_chps:
                         m.w[e1, e2, t].setub(m.o_max[e1][e2])
 
@@ -211,22 +219,26 @@ def opt_model(buses, components, timesteps, invest):
 
         Returns
         -------
-        m.source_constr : pyomo.Constraint for the source value
+        m : pyomo.ConcreteModel
         """
 
         m.source_val = {obj.uid: obj.val for obj in renew_sources}
         m.out_max = {obj.uid: obj.out_max for obj in renew_sources}
 
-        # set variable bounds
+        # set bounds for basic/investment models
         if(m.invest is False):
+            # edges for renewables ([('wind_on', 'b_el'), ...)
             ee = get_edges(renew_sources)
+            # fixed value
             for (e1, e2) in ee:
                 for t in m.timesteps:
                     m.w[(e1, e2), t].setub(m.source_val[e1][t]*m.out_max[e1])
                     m.w[(e1, e2), t].setlb(m.source_val[e1][t]*m.out_max[e1])
         else:
+            # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
             O = {obj.uid: obj.outputs[0].uid for obj in renew_sources}
 
+            # constraint to allow additional capacity for renewables
             def source_rule(m, e, t):
                 expr = 0
                 expr += m.w[e, O[e], t]
@@ -244,16 +256,17 @@ def opt_model(buses, components, timesteps, invest):
 
         Returns
         -------
-        m.commodity_limit_constr : pyomo.Constraint for yearly commodity limit
+        m : pyomo.ConcreteModel
         """
 
         m.yearly_limit = {obj.uid: obj.yearly_limit for obj in commodities}
+        # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
         O = {obj.uid: [obj.outputs[0].uid] for obj in commodities}
 
+        # set upper bounds: sum(yearly commodity output) <= yearly_limit
         def commodity_limit_rule(m, e):
             expr = 0
             expr += sum(m.w[e, o, t] for t in m.timesteps for o in O[e])
-            # set upper bound
             ub = m.yearly_limit[e]
             return(0, expr, ub)
         m.commodity_limit_constr = po.Constraint(m.commodities,
@@ -268,19 +281,29 @@ def opt_model(buses, components, timesteps, invest):
 
         Returns
         -------
-
+        m : pyomo.ConcreteModel
         """
 
         m.sink_val = {obj.uid: obj.val for obj in sinks}
         ee = get_edges(sinks)
         for (e1, e2) in ee:
+            # fixed value
             for t in m.timesteps:
                 m.w[(e1, e2), t].setub(m.sink_val[e2][t])
                 m.w[(e1, e2), t].setlb(m.sink_val[e2][t])
 
     def simple_storage_model(m):
+        """Simple model containing the constraints for storages.
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m : pyomo.ConcreteModel
         """
-        """
+
         m.soc_max = {obj.uid: obj.opt_param['soc_max']
                      for obj in simple_storages}
         m.soc_min = {obj.uid: obj.opt_param['soc_min']
@@ -289,8 +312,10 @@ def opt_model(buses, components, timesteps, invest):
         O = {obj.uid: obj.outputs[0].uid for obj in simple_storages}
         I = {obj.uid: obj.inputs[0].uid for obj in simple_storages}
 
+        # set bounds for basic/investment models
         if(m.invest is False):
             ij = get_edges(simple_storages)
+            # installed input/output capacity
             for (i, j) in ij:
                 for t in m.timesteps:
                     m.w[i, j, t].setub(10)
@@ -299,13 +324,13 @@ def opt_model(buses, components, timesteps, invest):
             def soc_bounds(m, e, t):
                 return(m.soc_min[e], m.soc_max[e])
             m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
-
         else:
             def soc_bounds(m, e, t):
                 return(0,  None)
             m.soc = po.Var(m.simple_storages, m.timesteps, bounds=soc_bounds)
             m.soc_add = po.Var(m.simple_storages, within=po.NonNegativeReals)
 
+            # constraint for additional capacity in investment models
             def soc_max_rule(m, e, t):
                 return(m.soc[e, t] <= m.soc_max[e] + m.soc_add[e])
             m.soc_max_constr = po.Constraint(m.simple_storages, m.timesteps,
@@ -326,18 +351,32 @@ def opt_model(buses, components, timesteps, invest):
                                                     rule=simple_storage_rule)
 
     def objective(m):
+        """Function that creates the objective function of the LP model.
 
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m : pyomo.ConcreteModel
+        """
+
+        # create a combine list of all cost-related components
         objective_components = s_chps + s_transformers + simple_storages
         m.objective_components = m.s_chps + m.s_transformers
         I = {obj.uid: obj.inputs[0].uid for obj in objective_components}
+        # operational costs
         m.opex_var = {obj.uid: obj.opex_var for obj in objective_components}
 
+        # objective function
         def obj_rule(m):
             expr = 0
             expr += sum(m.w[I[e], e, t] * m.opex_var[e]
                         for e in m.objective_components
                         for t in m.timesteps)
             expr += sum(m.bus_slack[e, t]*10e4 for e in m.buses for t in m.timesteps)
+            # add additional capacity & capex for investment models
             if(m.invest is True):
                 m.capex = {obj.uid: obj.capex for obj in objective_components}
 
