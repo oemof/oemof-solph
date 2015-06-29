@@ -221,11 +221,33 @@ def opt_model(buses, components, timesteps, invest):
         -------
         m : pyomo.ConcreteModel
         """
-
+        # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
+        O = {obj.uid: obj.outputs[0].uid for obj in renew_sources}
+        # normed value of renewable source (0 <= value <=1)
         m.source_val = {obj.uid: obj.val for obj in renew_sources}
+        # maximal ouput of renewable source (in general installed capacity)
         m.out_max = {obj.uid: obj.out_max for obj in renew_sources}
+        # flag if dispatch is true or false for each object
+        m.dispatch = {obj.uid: obj.dispatch for obj in renew_sources}
 
+        # if one one RenewableSource() instance attribute is dispatch=True
+        if(True in m.dispatch.values()):
+            # get only the RenewableSource() instance that have dispatch
+            m.renew_sources_dispatch = [k for (k, v) in m.dispatch.items()
+                                        if v is True]
+            # Set to define dispatch variable
+            m.renew_dispatch = po.Var(m.renew_sources_dispatch, m.timesteps,
+                                      within=po.NonNegativeReals)
+
+            # constraint to determine how much renewable energy is dispatched
+            def renew_dispatch_rule(m, e, t):
+                return (m.renew_dispatch[e, t] == m.source_val[e][t] *
+                        m.out_max[e] - m.w[e, O[e], t])
+            m.renew_dispatch_constr = po.Constraint(m.renew_sources_dispatch,
+                                                    m.timesteps,
+                                                    rule=renew_dispatch_rule)
         # set bounds for basic/investment models
+        # TODO: include dispatch if invest=True
         if(m.invest is False):
             # edges for renewables ([('wind_on', 'b_el'), ...)
             ee = get_edges(renew_sources)
@@ -233,11 +255,14 @@ def opt_model(buses, components, timesteps, invest):
             for (e1, e2) in ee:
                 for t in m.timesteps:
                     m.w[(e1, e2), t].setub(m.source_val[e1][t]*m.out_max[e1])
-                    m.w[(e1, e2), t].setlb(m.source_val[e1][t]*m.out_max[e1])
-        else:
-            # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
-            O = {obj.uid: obj.outputs[0].uid for obj in renew_sources}
+                    m.w[(e1, e2), t].setlb(m.source_val[e1][t] * m.out_max[e1]
+                                           * (1-m.dispatch[e1]))
 
+        else:
+            if(True in m.dispatch.values()):
+                raise ValueError("Dispatchable renewables are not possible in"
+                                  "investment models.\n Please reset flag from "
+                                  "True to False")
             # constraint to allow additional capacity for renewables
             def source_rule(m, e, t):
                 expr = 0
@@ -368,6 +393,9 @@ def opt_model(buses, components, timesteps, invest):
         I = {obj.uid: obj.inputs[0].uid for obj in objective_components}
         # operational costs
         m.opex_var = {obj.uid: obj.opex_var for obj in objective_components}
+        # get dispatch expenditure for renewable energies with dispatch
+        m.dispatch_ex = {obj.uid: obj.dispatch_ex for obj in renew_sources
+                         if obj.dispatch is True}
 
         # objective function
         def obj_rule(m):
@@ -375,7 +403,13 @@ def opt_model(buses, components, timesteps, invest):
             expr += sum(m.w[I[e], e, t] * m.opex_var[e]
                         for e in m.objective_components
                         for t in m.timesteps)
-            expr += sum(m.bus_slack[e, t]*10e4 for e in m.buses for t in m.timesteps)
+            expr += sum(m.bus_slack[e, t] * 10e4 for e in m.buses
+                                                 for t in m.timesteps)
+            # costs for dispatchable renewables
+            if(True in m.dispatch.values()):
+                expr += sum(m.renew_dispatch[e, t] * m.dispatch_ex[e]
+                            for e in m.renew_sources_dispatch
+                            for t in m.timesteps)
             # add additional capacity & capex for investment models
             if(m.invest is True):
                 m.capex = {obj.uid: obj.capex for obj in objective_components}

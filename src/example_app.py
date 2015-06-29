@@ -14,7 +14,7 @@ import components as cp
 import pandas as pd
 
 data = pd.read_csv("example_data.csv",sep=",")
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(24)]
 
 # emission factors in t/MWh
 em_lig = 0.111 / 3.6
@@ -34,7 +34,7 @@ b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
 wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],  val=data['wind'],
-                          out_max=66300)
+                          out_max=66300, dispatch=True)
 wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
                               out_max=25300)
 pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
@@ -49,7 +49,7 @@ rlig = cp.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
 demand_el = cp.Sink(uid="demand_el", inputs=[b_el],
                     val=data['demand_el'])
 demand_th = cp.Sink(uid="demand_th", inputs=[b_th],
-                    val=data['demand_th']*10000)
+                    val=data['demand_th']*100000)
 # Simple Transformer for b_el
 pp_coal = cp.SimpleTransformer(uid='pp_coal', inputs=[bcoal],
                                outputs=[b_el], in_max=None, out_max=20200,
@@ -78,13 +78,19 @@ sinks = [demand_th, demand_el]
 
 components = transformers + commodities + renew_sources + sinks
 
-om = opt_model(buses, components, timesteps=timesteps, invest=False)
+om = opt_model(buses, components, timesteps=timesteps, invest=True)
 
 instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
 results_to_objects(entities=transformers+commodities+renew_sources,
                    instance=instance)
 
+# print dispatch of renewable source with dispatch = True (does not work with
+# invest at the moment)
+if(True in instance.dispatch.values()):
+    for t in instance.timesteps:
+        print('Wind Dispatch in MW:',
+              instance.renew_dispatch['wind_on', t].value)
 
 if __name__ == "__main__":
 

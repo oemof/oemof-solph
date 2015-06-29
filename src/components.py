@@ -120,10 +120,13 @@ class RenewableSource(Source):
   """
   def __init__(self, **kwargs):
     """
+    :param boolean dispatch: Flag if RenewableSource is dispatchable or not
     """
     super().__init__(**kwargs)
     self.val = kwargs.get('val', None)
     self.out_max = kwargs.get('out_max', 0)
+    self.dispatch = kwargs.get('dispatch', False)
+    self.dispatch_ex = kwargs.get('dispatch_ex', 0)
 
 class Commodity(Source):
   """
