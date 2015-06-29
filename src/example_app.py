@@ -11,10 +11,10 @@ are written back into the objects.
 
 from optimization_model import *
 import components as cp
-import random
+import pandas as pd
 
-
-timesteps = [t for t in range(10)]
+data = pd.read_csv("example_data.csv",sep=",")
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 / 3.6
@@ -33,14 +33,11 @@ b_el = cp.Bus(uid="b_el", type="elec")
 b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
-wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],
-                          val=[random.gauss(0.5, 0.1) for i in timesteps],
+wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],  val=data['wind'],
                           out_max=66300)
-wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el],
-                              val=[random.gauss(0.5, 0.1) for i in timesteps],
+wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
                               out_max=25300)
-pv = cp.RenewableSource(uid="pv", outputs=[b_el],
-                        val=[random.gauss(0.5, 0.1) for i in timesteps],
+pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
                         out_max=65300)
 # resources
 rcoal = cp.Commodity(uid="rcoal", outputs=[bcoal], emmission_factor=em_coal)
@@ -50,19 +47,19 @@ rlig = cp.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
 
 # demands
 demand_el = cp.Sink(uid="demand_el", inputs=[b_el],
-                    val=[random.gauss(100000, 5000) for i in timesteps])
+                    val=data['demand_el'])
 demand_th = cp.Sink(uid="demand_th", inputs=[b_th],
-                    val=[random.gauss(20000, 5000) for i in timesteps])
+                    val=data['demand_th']*10000)
 # Simple Transformer for b_el
 pp_coal = cp.SimpleTransformer(uid='pp_coal', inputs=[bcoal],
                                outputs=[b_el], in_max=None, out_max=20200,
-                               eta=0.39, opex_var=20, co2_var=em_coal)
+                               eta=0.39, opex_var=25, co2_var=em_coal)
 pp_lig = cp.SimpleTransformer(uid='pp_lig', inputs=[blig],
                               outputs=[b_el], in_max=None, out_max=11800,
                               eta=0.41, opex_var=19, co2_var=em_lig)
 pp_gas = cp.SimpleTransformer(uid='pp_gas', inputs=[bgas],
                               outputs=[b_el], in_max=None, out_max=41000,
-                              eta=0.45, opex_var=35, co2_var=em_lig)
+                              eta=0.45, opex_var=45, co2_var=em_lig)
 pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil],
                               outputs=[b_el], in_max=None, out_max=1000,
                               eta=0.3, opex_var=50, co2_var=em_oil)
@@ -81,7 +78,7 @@ sinks = [demand_th, demand_el]
 
 components = transformers + commodities + renew_sources + sinks
 
-om = opt_model(buses, components, timesteps=timesteps, invest=True)
+om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
 instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
