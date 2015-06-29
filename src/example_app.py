@@ -81,11 +81,13 @@ sinks = [demand_th, demand_el]
 
 components = transformers + commodities + renew_sources + sinks
 
-om = opt_model(buses, components, timesteps=timesteps, invest=False)
+om = opt_model(buses, components, timesteps=timesteps, invest=True)
 
-instance = solve(model=om, solver='gurobi', debug=False,
-                 write_results={'flag': False, 'objects': transformers},
-                 tee=True)
+instance = solve(model=om, solver='gurobi', debug=False, tee=True)
+
+results_to_objects(entities=transformers+commodities+renew_sources,
+                   instance=instance)
+
 
 if __name__ == "__main__":
 

@@ -361,15 +361,10 @@ def opt_model(buses, components, timesteps, invest):
     return(m)
 
 
-def solve(model, solver='glpk', solver_io = 'lp', debug=False,
-          write_results={'flag': False, 'objects': []}, **kwargs):
+def solve(model, solver='glpk', solver_io='lp', debug=False, **kwargs):
     """
     :param model: pyomo concreteModel() instance
     :param (str) solver: solver specification as string 'glpk','gurobi','clpex'
-    :param (dict) write_results:
-                               Keywords: 'flag' ,'objects'
-                               if results are written back into specifed
-                               'objects'
     """
     from pyomo.opt import SolverFactory
 
@@ -386,15 +381,6 @@ def solve(model, solver='glpk', solver_io = 'lp', debug=False,
     # load results back in instance
     instance.load(results)
 
-    if(write_results['flag'] is True):
-        entities = write_results['objects']
-        for e in entities:
-            e.results['output'] = {}
-            O = [o.uid for o in e.outputs[:]]
-            for o in O:
-                e.results['output'][o] = []
-                for t in model.timesteps:
-                    e.results['output'][o].append(instance.w[e.uid, o, t].value)
     return(instance)
 
 
@@ -414,6 +400,33 @@ def get_edges(components):
             edges.append(ej)
     return(edges)
 
+
+def results_to_objects(entities, instance):
+    for e in entities:
+        if isinstance(e, cp.Transformer) or isinstance(e, cp.Source):
+            e.results['Output'] = {}
+            O = [e.uid for e in e.outputs[:]]
+            for o in O:
+                e.results['Output'][o] = []
+                for t in instance.timesteps:
+                    e.results['Output'][o].append(instance.w[e.uid, o, t].value)
+        if isinstance(e, cp.SimpleStorage):
+            for t in instance.timesteps:
+                e.results['Input'].append(instance.w[e.inputs[0].uid, e.uid, o, t].value)
+        # write results to sinks (will be the value of Sink in general)
+        if isinstance(e, cp.Sink):
+          e.results['Input'] = {}
+          for t in instance.timesteps:
+              e.results['Input'].append(instance.w[e.inputs[0].uid, e.uid, t].value)
+
+    if(instance.invest is True):
+        for e in entities:
+            if isinstance(e, cp.Transformer):
+                e.results['Invest'] = instance.w_add[e.inputs[0].uid, e.uid].value
+            if isinstance(e, cp.Source):
+                e.results['Invest'] = instance.w_add[e.uid, e.outputs[0].uid].value
+            if isinstance(e, cp.SimpleStorage):
+                e.results['Invest'] = instance.soc_add[e.uid].value
 
 def io_sets(components):
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in components}
