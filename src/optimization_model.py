@@ -401,15 +401,24 @@ def opt_model(buses, components, timesteps, invest):
 
 
 def solve(model, solver='glpk', solver_io='lp', debug=False, **kwargs):
+    """Function that creates the objective function of the LP model.
+
+    Parameters
+    ----------
+    model : pyomo.ConcreteModel instance
+    solver : str solver to be used e.g. 'glpk','gurobi','cplex'
+
+    Returns
+    -------
+    m : pyomo.ConcreteModel
     """
-    :param model: pyomo concreteModel() instance
-    :param (str) solver: solver specification as string 'glpk','gurobi','clpex'
-    """
+
     from pyomo.opt import SolverFactory
 
     # create model instance
     instance = model.create()
 
+    # write lp-file
     if(debug is True):
         instance.write('problem.lp', io_options={'symbolic_solver_labels':
                                                  True})
@@ -424,9 +433,17 @@ def solve(model, solver='glpk', solver_io='lp', debug=False, **kwargs):
 
 
 def get_edges(components):
+    """Function that creates the objective function of the LP model.
+
+    Parameters
+    ----------
+    components : list of component objects
+
+    Returns
+    -------
+    edges : list with tupels that represent the edges
     """
-    :param components: list of component objects
-    """
+
     edges = []
     # create a list of tuples
     # e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
@@ -441,6 +458,16 @@ def get_edges(components):
 
 
 def results_to_objects(entities, instance):
+    """Function that converts the results.
+
+    Parameters
+    ----------
+    components : list of component objects
+
+    Returns
+    -------
+    edges : list with tupels that represent the edges
+    """
     for e in entities:
         if isinstance(e, cp.Transformer) or isinstance(e, cp.Source):
             e.results['Output'] = {}
@@ -448,27 +475,42 @@ def results_to_objects(entities, instance):
             for o in O:
                 e.results['Output'][o] = []
                 for t in instance.timesteps:
-                    e.results['Output'][o].append(instance.w[e.uid, o, t].value)
+                    e.results['Output']
+                    [o].append(instance.w[e.uid, o, t].value)
         if isinstance(e, cp.SimpleStorage):
             for t in instance.timesteps:
-                e.results['Input'].append(instance.w[e.inputs[0].uid, e.uid, o, t].value)
+                e.results['Input'].append(instance.w[e.inputs[0].uid,
+                                          e.uid, o, t].value)
         # write results to sinks (will be the value of Sink in general)
         if isinstance(e, cp.Sink):
-          e.results['Input'] = {}
-          for t in instance.timesteps:
-              e.results['Input'].append(instance.w[e.inputs[0].uid, e.uid, t].value)
+            e.results['Input'] = {}
+            for t in instance.timesteps:
+                e.results['Input'].append(instance.w[e.inputs[0].uid,
+                                          e.uid, t].value)
 
     if(instance.invest is True):
         for e in entities:
             if isinstance(e, cp.Transformer):
-                e.results['Invest'] = instance.w_add[e.inputs[0].uid, e.uid].value
+                e.results['Invest'] = instance.w_add[e.inputs[0].uid,
+                                                     e.uid].value
             if isinstance(e, cp.Source):
-                e.results['Invest'] = instance.w_add[e.uid, e.outputs[0].uid].value
+                e.results['Invest'] = instance.w_add[e.uid,
+                                                     e.outputs[0].uid].value
             if isinstance(e, cp.SimpleStorage):
                 e.results['Invest'] = instance.soc_add[e.uid].value
 
+
 def io_sets(components):
+    """Function that gets inputs and outputs for given components.
+
+    Parameters
+    ----------
+    components : list of component objects
+
+    Returns
+    -------
+    (I, O) : lists with tupels that represent the edges
+    """
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in components}
     I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in components}
     return(I, O)
-
