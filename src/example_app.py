@@ -81,71 +81,54 @@ sinks = [demand_th, demand_el]
 
 components = transformers + commodities + renew_sources + sinks
 
-om = opt_model(buses, components, timesteps=timesteps, invest=False)
+om = opt_model(buses, components, timesteps=timesteps, invest=True)
 
-# create model instance
-instance = om.create()
+instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
-
-instance = solve_opt_model(instance=instance, solver='gurobi',
-                           options={'stream': True}, debug=False)
+results_to_objects(entities=transformers+commodities+renew_sources,
+                   instance=instance)
 
 
-# post processing
-#for idx in instance.w_add:
-#    print('Add cap of '+ str(idx) + ': ' +str(instance.w_add[idx].value))
-#for idx in instance.bus_slack:
-#    print('Slack of '+str(idx[0])+': '+ str(instance.bus_slack[idx].value))
+if __name__ == "__main__":
 
-# get variable values and store in objects
-temp_comp = transformers + renew_sources + commodities
-for c in temp_comp:
-    c.results['output'] = []
-    for t in timesteps:
-        o = [o.uid for o in c.outputs[:]][0]
-        c.results['output'].append(instance.w[c.uid, o, t].value)
-
-
-# plot results
-#import pylab as pl
-#import numpy as np
-#import matplotlib as mpl
-#
-#fig, ax = pl.subplots()
-#n = len([c for c in temp_comp])
-#colors = mpl.cm.rainbow(np.linspace(0, 1, n))
-#for color, c in zip(colors, [c for c in temp_comp]):
-#    ax.step(timesteps, c.results['output'], color=color, label=c.uid)
-#
-#handles, labels = ax.get_legend_handles_labels()
-#ax.legend(handles[::-1], labels[::-1])
-#pl.grid()
-#pl.xlabel('Timesteps in h')
-#pl.ylabel('Power in MW')
-#pl.show()
-
-
-def show_graph(buses=buses, components=components,
-               renew_sources=renew_sources, sinks=sinks,
-               commodities=commodities):
-  import networkx as nx
-  import matplotlib.pyplot as plt
-  g = nx.DiGraph()
-  es = components + buses
-  g.add_nodes_from([e.uid for e in es])
-  g.add_edges_from(get_edges(es))
-  graph_pos=nx.fruchterman_reingold_layout(g)
-  nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses], node_shape="o", node_color="r",
-                        node_size = 1200)
-  nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components], node_shape="s",
-                         node_color="b", node_size=1000)
-  nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources], node_shape="s",
-                         node_color="g", node_size=1000)
-  nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks], node_shape="s",
-                         node_color="y", node_size=1000)
-  nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities], node_shape="s",
-                         node_color="black", node_size=1000, alpha=0.8)
-  nx.draw_networkx_edges(g, graph_pos, width=1.5)
-  nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
-  plt.show()
-show_graph()
+  # plot results
+  #import pylab as pl
+  #import numpy as np
+  #import matplotlib as mpl
+  #
+  #fig, ax = pl.subplots()
+  #n = len([c for c in temp_comp])
+  #colors = mpl.cm.rainbow(np.linspace(0, 1, n))
+  #for color, c in zip(colors, [c for c in temp_comp]):
+  #    ax.step(timesteps, c.results['output'], color=color, label=c.uid)
+  #
+  #handles, labels = ax.get_legend_handles_labels()
+  #ax.legend(handles[::-1], labels[::-1])
+  #pl.grid()
+  #pl.xlabel('Timesteps in h')
+  #pl.ylabel('Power in MW')
+  #pl.show()
+  def show_graph(buses=buses, components=components,
+                 renew_sources=renew_sources, sinks=sinks,
+                 commodities=commodities):
+    import networkx as nx
+    import matplotlib.pyplot as plt
+    g = nx.DiGraph()
+    es = components + buses
+    g.add_nodes_from([e.uid for e in es])
+    g.add_edges_from(get_edges(es))
+    graph_pos=nx.fruchterman_reingold_layout(g)
+    nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses], node_shape="o", node_color="r",
+                          node_size = 1200)
+    nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components], node_shape="s",
+                           node_color="b", node_size=1000)
+    nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources], node_shape="s",
+                           node_color="g", node_size=1000)
+    nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks], node_shape="s",
+                           node_color="y", node_size=1000)
+    nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities], node_shape="s",
+                           node_color="black", node_size=1000, alpha=0.8)
+    nx.draw_networkx_edges(g, graph_pos, width=1.5)
+    nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
+    plt.show()
+  #show_graph()
