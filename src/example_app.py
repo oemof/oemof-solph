@@ -91,27 +91,32 @@ results_to_objects(entities=transformers+commodities+renew_sources,
 
 if __name__ == "__main__":
 
-    for c in transformers:
-        print(c.results['Output'])
-        print(c.uid)
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+    import matplotlib.cm as cm
 
-#    # plot results
-#    import pylab as pl
-#    import numpy as np
-#    import matplotlib as mpl
-#
-#    fig, ax = pl.subplots()
-#    n = len([c for c in temp_comp])
-#    colors = mpl.cm.rainbow(np.linspace(0, 1, n))
-#    for color, c in zip(colors, [c for c in temp_comp]):
-#        ax.step(timesteps, c.results['output'], color=color, label=c.uid)
-#
-#    handles, labels = ax.get_legend_handles_labels()
-#    ax.legend(handles[::-1], labels[::-1])
-#    pl.grid()
-#    pl.xlabel('Timesteps in h')
-#    pl.ylabel('Power in MW')
-#    pl.show()
+    data = transformers+renew_sources
+
+    # data preparation
+    x = np.arange(len(timesteps))
+    y = []
+    labels = []
+    for c in data:
+        y.append(c.results['Output']['b_el'])
+        labels.append(c.uid)
+
+    # plotting
+    fig, ax = plt.subplots()
+    sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
+    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
+                                   facecolor=
+                                   pol.get_facecolor()[0]) for pol in sp]
+    ax.legend(proxy, labels)
+    ax.grid()
+    ax.set_xlabel('Timesteps in h')
+    ax.set_ylabel('Power in MW')
+    ax.set_title('Dispatch')
 
     def show_graph(buses=buses, components=components,
                    renew_sources=renew_sources, sinks=sinks,
