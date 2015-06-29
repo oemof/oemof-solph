@@ -361,13 +361,18 @@ def opt_model(buses, components, timesteps, invest):
     return(m)
 
 
-def solve_opt_model(instance, solver='glpk', options={'stream': False},
-                    debug=False):
+def solve(model, solver='glpk', options={'stream': False},
+          debug=False, write_results={'flag': False, 'objects': []}):
     """
     :param model: pyomo concreteModel() instance
     :param str solver: solver specification as string 'glpk','gurobi','clpex'
+    :param dict write_results: keywords flag,objects
+                               if results are written back into specifed 'objects'
     """
     from pyomo.opt import SolverFactory
+
+    # create model instance
+    instance = model.create()
 
     if(debug is True):
         instance.write('problem.lp',
@@ -379,6 +384,15 @@ def solve_opt_model(instance, solver='glpk', options={'stream': False},
     # load results back in instance
     instance.load(results)
 
+    if(write_results['flag'] is True):
+        entities = write_results['objects']
+        for e in entities:
+            e.results['output'] = {}
+            O = [o.uid for o in e.outputs[:]]
+            for o in O:
+                e.results['output'][o] = []
+                for t in model.timesteps:
+                    e.results['output'][o].append(instance.w[e.uid, o, t].value)
     return(instance)
 
 
