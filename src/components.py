@@ -161,6 +161,9 @@ class Transport(Component):
       raise ValueError("Transport must have exactly one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
 
+    self.in_max = kwargs.get('in_max', None)
+    self.out_max = kwargs.get('out_max', None)
+
 class SimpleTransport(Transport):
   """
   Simple Transport connects two busses with a constant efficiency
@@ -177,35 +180,39 @@ class SimpleTransport(Transport):
     if(self.out_max is None and self.in_max is not None):
       self.out_max = self.in_max * self.eta
 
-
 if __name__ == "__main__":
+
   #TODO: This example is missing a Transport. (Needs more escalation error.)
   coal = Bus(uid="Coal", type="coal")
-  power = Bus(uid="Electricity", type="electricity")
+  power1 = Bus(uid="Electricity1", type="electricity")
+  power2 = Bus(uid="Electricity1", type="electricity")
   st = SimpleTransformer(uid="st1",inputs=[coal],outputs=[power], eta=0.4)
   heat = Bus(uid="Thermal", type="thermal")
   heatpump = Transformer(uid="Heatpump", inputs=[power],
                          outputs=[heat])
   chp = Transformer(uid="CHP", inputs=[coal], outputs=[heat, power])
   wind = Source(uid="The only wind turbine on the planet.", outputs=[power])
-  city = Sink(uid="Neverwhere", inputs=[heat])
+  city = Sink(uid="Neverwhere", val=5)
+  cable = SimpleTransport(uid="NordLink", inputs=[power1], outputs=[power2],
+                          in_max=700, out_max=630, eta=0.9)
+  print(vars(cable))
 
-  import networkx as nx
-
-  g = nx.DiGraph()
-  es = [coal, power, heat, heatpump, chp, wind, city]
-  buses = [e for e in es if isinstance(e, Bus)]
-  components = [e for e in es if isinstance(e, Component)]
-  g.add_nodes_from(es)
-  for e in es:
-    for e_in in e.inputs:
-      a, b = e_in, e
-      g.add_edge(a, b)
-  graph_pos=nx.spectral_layout(g)
-  nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
-                         node_size = 900)
-  nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
-                         node_color="b", node_size=300)
-  nx.draw_networkx_edges(g, graph_pos)
-  nx.draw_networkx_labels(g, graph_pos)
-  # or simply nx.draw(g) but then without different node shapes etc
+#  import networkx as nx
+#
+#  g = nx.DiGraph()
+#  es = [coal, power, heat, heatpump, chp, wind, city]
+#  buses = [e for e in es if isinstance(e, Bus)]
+#  components = [e for e in es if isinstance(e, Component)]
+#  g.add_nodes_from(es)
+#  for e in es:
+#    for e_in in e.inputs:
+#      a, b = e_in, e
+#      g.add_edge(a, b)
+#  graph_pos=nx.spectral_layout(g)
+#  nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
+#                         node_size = 900)
+#  nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
+#                         node_color="b", node_size=300)
+#  nx.draw_networkx_edges(g, graph_pos)
+#  nx.draw_networkx_labels(g, graph_pos)
+#  # or simply nx.draw(g) but then without different node shapes etc
