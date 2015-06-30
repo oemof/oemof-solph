@@ -193,9 +193,9 @@ if __name__ == "__main__":
   chp = Transformer(uid="CHP", inputs=[coal], outputs=[heat, power])
   wind = Source(uid="The only wind turbine on the planet.", outputs=[power])
   city = Sink(uid="Neverwhere", val=5)
-  cable = SimpleTransport(uid="NordLink", inputs=[power1], outputs=[power2],
-                          in_max=700, out_max=630, eta=0.9)
-  print(vars(cable))
+#  cable = SimpleTransport(uid="NordLink", inputs=[power1], outputs=[power2],
+#                          in_max=700, out_max=630, eta=0.9)
+#  print(vars(cable))
 
 #  import networkx as nx
 #

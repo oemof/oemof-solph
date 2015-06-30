@@ -76,14 +76,16 @@ pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
 # transport
 cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
                         in_max=700, out_max=630, eta=0.9)
+cable2 = cp.SimpleTransport(uid="cable2", inputs=[b_el2], outputs=[b_el],
+                        in_max=700, out_max=630, eta=0.9)
 
 # group busses
-buses = [bcoal, bgas, boil, blig, b_el, b_th]
+buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
 
 # group components
 transformers = [pp_coal, pp_gas, pp_lig, pp_oil, pp_chp]
 commodities = [rcoal, rgas, roil, rlig]
-renew_sources = [wind_on, wind_off, pv]
+renew_sources = [wind_on, wind_on2, wind_off, pv]
 sinks = [demand_th, demand_el]
 transports = [cable1, cable2]
 
@@ -105,56 +107,56 @@ if(True in instance.dispatch.values()):
 
 if __name__ == "__main__":
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import matplotlib as mpl
-    import matplotlib.cm as cm
+#    import numpy as np
+#    import matplotlib.pyplot as plt
+#    import matplotlib as mpl
+#    import matplotlib.cm as cm
+#
+#    data = renew_sources+transformers
+#
+#    # data preparation
+#    x = np.arange(len(timesteps))
+#    y = []
+#    labels = []
+#    for c in data:
+#        y.append(c.results['Output']['b_el'])
+#        labels.append(c.uid)
+#
+#    # plotting
+#    fig, ax = plt.subplots()
+#    sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
+#    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
+#                                   facecolor=
+#                                   pol.get_facecolor()[0]) for pol in sp]
+#    ax.legend(proxy, labels)
+#    ax.grid()
+#    ax.set_xlabel('Timesteps in h')
+#    ax.set_ylabel('Power in MW')
+#    ax.set_title('Dispatch')
 
-    data = renew_sources+transformers
-
-    # data preparation
-    x = np.arange(len(timesteps))
-    y = []
-    labels = []
-    for c in data:
-        y.append(c.results['Output']['b_el'])
-        labels.append(c.uid)
-
-    # plotting
-    fig, ax = plt.subplots()
-    sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
-    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                   facecolor=
-                                   pol.get_facecolor()[0]) for pol in sp]
-    ax.legend(proxy, labels)
-    ax.grid()
-    ax.set_xlabel('Timesteps in h')
-    ax.set_ylabel('Power in MW')
-    ax.set_title('Dispatch')
-
-#    def show_graph(buses=buses, components=components,
-#                   renew_sources=renew_sources, sinks=sinks,
-#                   commodities=commodities):
-#        import networkx as nx
-#        import matplotlib.pyplot as plt
-#        g = nx.DiGraph()
-#        es = components + buses
-#        g.add_nodes_from([e.uid for e in es])
-#        g.add_edges_from(get_edges(es))
-#        graph_pos = nx.fruchterman_reingold_layout(g)
-#        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
-#                               node_shape="o", node_color="r",
-#                               node_size=1200)
-#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
-#                               node_shape="s", node_color="b", node_size=1000)
-#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
-#                               node_shape="s", node_color="g", node_size=1000)
-#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
-#                               node_shape="s", node_color="y", node_size=1000)
-#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
-#                               node_shape="s", node_color="black",
-#                               node_size=1000, alpha=0.8)
-#        nx.draw_networkx_edges(g, graph_pos, width=1.5)
-#        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
-#        plt.show()
+    def show_graph(buses=buses, components=components,
+                   renew_sources=renew_sources, sinks=sinks,
+                   commodities=commodities):
+        import networkx as nx
+        import matplotlib.pyplot as plt
+        g = nx.DiGraph()
+        es = components + buses
+        g.add_nodes_from([e.uid for e in es])
+        g.add_edges_from(get_edges(es))
+        graph_pos = nx.fruchterman_reingold_layout(g)
+        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
+                               node_shape="o", node_color="r",
+                               node_size=1200)
+        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
+                               node_shape="s", node_color="b", node_size=1000)
+        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
+                               node_shape="s", node_color="g", node_size=1000)
+        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
+                               node_shape="s", node_color="y", node_size=1000)
+        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
+                               node_shape="s", node_color="black",
+                               node_size=1000, alpha=0.8)
+        nx.draw_networkx_edges(g, graph_pos, width=1.5)
+        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
+        plt.show()
 #    show_graph()
