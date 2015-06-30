@@ -45,6 +45,9 @@ def opt_model(buses, components, timesteps, invest):
     simple_storages = [e for e in components
                        if isinstance(e, cp.SimpleStorage)]
     commodities = [e for e in components if isinstance(e, cp.Commodity)]
+    s_transport = [e for e in components
+                   if isinstance(e, cp.SimpleTransport)]
+
 
     # create pyomo model instance
     m = po.ConcreteModel()
@@ -389,10 +392,10 @@ def opt_model(buses, components, timesteps, invest):
         """
 
         # temp set with input uids for every simple transport e in s_transports
-        I = {obj.uid: obj.inputs[0].uid for obj in s_transports}
+        I = {obj.uid: obj.inputs[0].uid for obj in s_transport}
         # set with output uids for every simple transport e in s_transports
-        O = {obj.uid: obj.outputs[0].uid for obj in s_transports}
-        eta = {obj.uid: obj.eta for obj in s_transports}
+        O = {obj.uid: obj.outputs[0].uid for obj in s_transport}
+        eta = {obj.uid: obj.eta for obj in s_transport}
 
         # constraint for transformers: input * efficiency = output
         def eta_rule(m, e, t):
