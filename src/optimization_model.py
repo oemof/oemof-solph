@@ -375,6 +375,61 @@ def opt_model(buses, components, timesteps, invest):
                                                     m.timesteps,
                                                     rule=simple_storage_rule)
 
+    def simple_transport_model(m):
+        """Simple transport model containing the constraints
+        for simple transport facilities
+
+        Parameters
+        ----------
+        m : pyomo.ConcreteModel
+
+        Returns
+        -------
+        m : pyomo.ConcreteModel
+        """
+
+        # temp set with input uids for every simple transport e in s_transports
+        I = {obj.uid: obj.inputs[0].uid for obj in s_transports}
+        # set with output uids for every simple transport e in s_transports
+        O = {obj.uid: obj.outputs[0].uid for obj in s_transports}
+        eta = {obj.uid: obj.eta for obj in s_transports}
+
+        # constraint for transformers: input * efficiency = output
+        def eta_rule(m, e, t):
+            expr = 0
+            expr += m.w[I[e], e, t] * eta[e]
+            expr += - m.w[e, O[e], t]
+            return(expr, 0)
+        m.s_transport_eta_constr = po.Constraint(m.s_transport,
+                                                 m.timesteps,
+                                                 rule=eta_rule)
+
+        # set variable bounds (out_max = in_max * efficiency):
+        # m.i_max = {'pp_coal': 51794.8717948718, ... }
+        # m.o_max = {'pp_coal': 20200, ... }
+        m.i_max = {obj.uid: obj.in_max for obj in s_transport}
+        m.o_max = {obj.uid: obj.out_max for obj in s_transport}
+
+        # set bounds for basic/investment models
+        if(m.invest is False):
+            # edges for simple transport ([('b_el', 'b_el2'),...])
+            ee = get_edges(s_transport)
+            for (e1, e2) in ee:
+                for t in m.timesteps:
+                    # transport output <= m.o_max
+                    if e1 in m.s_transport:
+                        m.w[e1, e2, t].setub(m.o_max[e1])
+                    # transformer input <= m.i_max
+                    if e2 in m.s_transport:
+                        m.w[e1, e2, t].setub(m.i_max[e2])
+        else:
+            # constraint for additional capacity
+            def w_max_invest_rule(m, e, t):
+                return(m.w[I[e], e, t] <= m.i_max[e] + m.w_add[I[e], e])
+            m.s_transport_w_max = po.Constraint(m.s_transport,
+                                                m.timesteps,
+                                                rule=w_max_invest_rule)
+
     def objective(m):
         """Function that creates the objective function of the LP model.
 
