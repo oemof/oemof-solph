@@ -87,8 +87,9 @@ transformers = [pp_coal, pp_gas, pp_lig, pp_oil, pp_chp]
 commodities = [rcoal, rgas, roil, rlig]
 renew_sources = [wind_on, wind_off, pv]
 sinks = [demand_th, demand_el]
+transports = [cable1, cable2]
 
-components = transformers + commodities + renew_sources + sinks
+components = transformers + commodities + renew_sources + sinks + transports
 
 om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
