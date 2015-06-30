@@ -93,9 +93,9 @@ components = transformers + commodities + renew_sources + sinks + transports
 
 om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
-instance = solve(model=om, solver='gurobi', debug=True, tee=True)
+instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
-results_to_objects(entities=transformers+commodities+renew_sources,
+results_to_objects(entities=transformers+commodities+renew_sources+transports,
                    instance=instance)
 
 # print dispatch of renewable source with dispatch = True (does not work with

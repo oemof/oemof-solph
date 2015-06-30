@@ -565,8 +565,9 @@ def results_to_objects(entities, instance):
     edges : list with tupels that represent the edges
     """
     for e in entities:
-        if isinstance(e, cp.Transformer) or isinstance(e, cp.Source)
-            or isinstance(e, cp.Transport):
+        if (isinstance(e, cp.Transformer) or isinstance(e, cp.Source) or
+                isinstance(e, cp.SimpleTransport)):
+            print(e.uid)
             e.results['Output'] = {}
             O = [e.uid for e in e.outputs[:]]
             for o in O:
