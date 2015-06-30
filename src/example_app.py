@@ -30,10 +30,13 @@ blig = cp.Bus(uid="lignite", type="lignite")
 
 # electricity and heat
 b_el = cp.Bus(uid="b_el", type="elec")
+b_el2 = cp.Bus(uid="b_el2", type="elec")
 b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
 wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],  val=data['wind'],
+                          out_max=66300, dispatch=True)
+wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],  val=data['wind'],
                           out_max=66300, dispatch=True)
 wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
                               out_max=25300)
@@ -47,6 +50,8 @@ rlig = cp.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
 
 # demands
 demand_el = cp.Sink(uid="demand_el", inputs=[b_el],
+                    val=data['demand_el'])
+demand_el2 = cp.Sink(uid="demand_el2", inputs=[b_el2],
                     val=data['demand_el'])
 demand_th = cp.Sink(uid="demand_th", inputs=[b_th],
                     val=data['demand_th']*100000)
@@ -121,29 +126,29 @@ if __name__ == "__main__":
     ax.set_ylabel('Power in MW')
     ax.set_title('Dispatch')
 
-    def show_graph(buses=buses, components=components,
-                   renew_sources=renew_sources, sinks=sinks,
-                   commodities=commodities):
-        import networkx as nx
-        import matplotlib.pyplot as plt
-        g = nx.DiGraph()
-        es = components + buses
-        g.add_nodes_from([e.uid for e in es])
-        g.add_edges_from(get_edges(es))
-        graph_pos = nx.fruchterman_reingold_layout(g)
-        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
-                               node_shape="o", node_color="r",
-                               node_size=1200)
-        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
-                               node_shape="s", node_color="b", node_size=1000)
-        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
-                               node_shape="s", node_color="g", node_size=1000)
-        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
-                               node_shape="s", node_color="y", node_size=1000)
-        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
-                               node_shape="s", node_color="black",
-                               node_size=1000, alpha=0.8)
-        nx.draw_networkx_edges(g, graph_pos, width=1.5)
-        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
-        plt.show()
-      #show_graph()
+#    def show_graph(buses=buses, components=components,
+#                   renew_sources=renew_sources, sinks=sinks,
+#                   commodities=commodities):
+#        import networkx as nx
+#        import matplotlib.pyplot as plt
+#        g = nx.DiGraph()
+#        es = components + buses
+#        g.add_nodes_from([e.uid for e in es])
+#        g.add_edges_from(get_edges(es))
+#        graph_pos = nx.fruchterman_reingold_layout(g)
+#        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
+#                               node_shape="o", node_color="r",
+#                               node_size=1200)
+#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
+#                               node_shape="s", node_color="b", node_size=1000)
+#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
+#                               node_shape="s", node_color="g", node_size=1000)
+#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
+#                               node_shape="s", node_color="y", node_size=1000)
+#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
+#                               node_shape="s", node_color="black",
+#                               node_size=1000, alpha=0.8)
+#        nx.draw_networkx_edges(g, graph_pos, width=1.5)
+#        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
+#        plt.show()
+#    show_graph()
