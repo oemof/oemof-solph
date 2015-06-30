@@ -567,7 +567,6 @@ def results_to_objects(entities, instance):
     for e in entities:
         if (isinstance(e, cp.Transformer) or isinstance(e, cp.Source) or
                 isinstance(e, cp.SimpleTransport)):
-            print(e.uid)
             e.results['Output'] = {}
             O = [e.uid for e in e.outputs[:]]
             for o in O:

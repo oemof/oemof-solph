@@ -107,32 +107,35 @@ if(True in instance.dispatch.values()):
 
 if __name__ == "__main__":
 
-#    import numpy as np
-#    import matplotlib.pyplot as plt
-#    import matplotlib as mpl
-#    import matplotlib.cm as cm
-#
-#    data = renew_sources+transformers
-#
-#    # data preparation
-#    x = np.arange(len(timesteps))
-#    y = []
-#    labels = []
-#    for c in data:
-#        y.append(c.results['Output']['b_el'])
-#        labels.append(c.uid)
-#
-#    # plotting
-#    fig, ax = plt.subplots()
-#    sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
-#    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-#                                   facecolor=
-#                                   pol.get_facecolor()[0]) for pol in sp]
-#    ax.legend(proxy, labels)
-#    ax.grid()
-#    ax.set_xlabel('Timesteps in h')
-#    ax.set_ylabel('Power in MW')
-#    ax.set_title('Dispatch')
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+    import matplotlib.cm as cm
+
+    data = renew_sources+transformers
+
+    # data preparation
+    x = np.arange(len(timesteps))
+    y = []
+    labels = []
+    for c in data:
+        if c.results['Output']['b_el']:
+            y.append(c.results['Output']['b_el'])
+            labels.append(c.uid)
+        else:
+            pass
+
+    # plotting
+    fig, ax = plt.subplots()
+    sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
+    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
+                                   facecolor=
+                                   pol.get_facecolor()[0]) for pol in sp]
+    ax.legend(proxy, labels)
+    ax.grid()
+    ax.set_xlabel('Timesteps in h')
+    ax.set_ylabel('Power in MW')
+    ax.set_title('Dispatch')
 
     def show_graph(buses=buses, components=components,
                    renew_sources=renew_sources, sinks=sinks,
