@@ -74,7 +74,9 @@ pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
                                     outputs=[b_th, b_el])
 
 # transport
-cable = SimpleTransport(uid="NordLink", inputs=[b_el], outputs=[b_el2],
+cable1 = SimpleTransport(uid="NordLink", inputs=[b_el], outputs=[b_el2],
+                        in_max=700, out_max=630, eta=0.9)
+cable2 = SimpleTransport(uid="NordLink", inputs=[b_el2], outputs=[b_el],
                         in_max=700, out_max=630, eta=0.9)
 
 # group busses
