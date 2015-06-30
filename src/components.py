@@ -163,6 +163,7 @@ class Transport(Component):
 
     self.in_max = kwargs.get('in_max', None)
     self.out_max = kwargs.get('out_max', None)
+    self.results = kwargs.get('results', {})
 
 class SimpleTransport(Transport):
   """
