@@ -85,7 +85,7 @@ buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
 # group components
 transformers = [pp_coal, pp_gas, pp_lig, pp_oil, pp_chp]
 commodities = [rcoal, rgas, roil, rlig]
-renew_sources = [wind_on, wind_on2, wind_off, pv]
+renew_sources = [pv, wind_on, wind_on2, wind_off]
 sinks = [demand_th, demand_el]
 transports = [cable1, cable2]
 
@@ -100,10 +100,11 @@ results_to_objects(entities=transformers+commodities+renew_sources+transports,
 
 # print dispatch of renewable source with dispatch = True (does not work with
 # invest at the moment)
-if(True in instance.dispatch.values()):
-    for t in instance.timesteps:
-        print('Wind Dispatch in MW:',
-              instance.renew_dispatch['wind_on', t].value)
+
+#if(True in instance.dispatch.values()):
+#    for t in instance.timesteps:
+#        print('Wind Dispatch in MW:',
+#              instance.renew_dispatch['wind_on', t].value)
 
 if __name__ == "__main__":
 
@@ -112,18 +113,17 @@ if __name__ == "__main__":
     import matplotlib as mpl
     import matplotlib.cm as cm
 
-    data = renew_sources+transformers
+    data = renew_sources+transformers+transports
 
     # data preparation
     x = np.arange(len(timesteps))
     y = []
     labels = []
     for c in data:
-        if c.results['Output']['b_el']:
+        if 'b_el' in c.results['Output']:
             y.append(c.results['Output']['b_el'])
             labels.append(c.uid)
-        else:
-            pass
+            #print('foo')
 
     # plotting
     fig, ax = plt.subplots()
