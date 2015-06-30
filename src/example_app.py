@@ -78,7 +78,7 @@ sinks = [demand_th, demand_el]
 
 components = transformers + commodities + renew_sources + sinks
 
-om = opt_model(buses, components, timesteps=timesteps, invest=True)
+om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
 instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     import matplotlib as mpl
     import matplotlib.cm as cm
 
-    data = transformers+renew_sources
+    data = renew_sources+transformers
 
     # data preparation
     x = np.arange(len(timesteps))
