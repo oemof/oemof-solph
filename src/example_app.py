@@ -72,6 +72,11 @@ pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil],
 pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
                                     out_max=[None, 30000], eta=[0.4, 0.3],
                                     outputs=[b_th, b_el])
+
+# transport
+cable = SimpleTransport(uid="NordLink", inputs=[b_el], outputs=[b_el2],
+                        in_max=700, out_max=630, eta=0.9)
+
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_th]
 
