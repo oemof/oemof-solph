@@ -514,6 +514,8 @@ def solve(model, solver='glpk', solver_io='lp', debug=False, **kwargs):
     if(debug is True):
         instance.write('problem.lp', io_options={'symbolic_solver_labels':
                                                  True})
+        # print instance
+        instance.pprint()
     # solve instance
     opt = SolverFactory(solver, solver_io=solver_io)
     # store results
