@@ -66,6 +66,7 @@ def opt_model(buses, components, timesteps, invest):
     m.simple_storages = [c.uid for c in simple_storages]
     m.sinks = [c.uid for c in sinks]
     m.commodities = [c.uid for c in commodities]
+    m.s_transport = [c.uid for c in s_transport]
 
     # calculate all edges ([('coal', 'pp_coal'),...])
     m.edges = get_edges(components)
@@ -487,6 +488,7 @@ def opt_model(buses, components, timesteps, invest):
     simple_storage_model(m)
     commodity(m)
     objective(m)
+    simple_transport_model(m)
     sink(m)
 
     return(m)
