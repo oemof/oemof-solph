@@ -93,7 +93,7 @@ components = transformers + commodities + renew_sources + sinks + transports
 
 om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
-instance = solve(model=om, solver='gurobi', debug=True, tee=True)
+instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
 results_to_objects(entities=transformers + commodities + renew_sources +
                    transports + sinks, instance=instance)

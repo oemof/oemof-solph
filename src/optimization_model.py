@@ -7,7 +7,19 @@ import components as cp
 def opt_model(buses, components, timesteps, invest):
     """Create Pyomo model of the energy system.
 
-    **Mathematical equations (should be a "sphinx-headline") later**
+    Parameters
+    ----------
+    buses : list with all bus objects
+    components : list with all component objects
+    timesteps : list with all timesteps as integer values
+    invest : boolean
+
+    Returns
+    -------
+    m : pyomo.ConcreteModel
+
+    Mathematical equations
+    ----------------------
 
     The model equations are described as follows:
 
@@ -21,17 +33,6 @@ def opt_model(buses, components, timesteps, invest):
 
         w(I_{SF}(e), e,t) \cdot \eta_(e) - w(e,O_{SF}(e),t) = 0,
         \\forall e \\in E_{SF}, \\forall t \\in T
-
-    Parameters
-    ----------
-    buses : list with all bus objects
-    components : list with all component objects
-    timesteps : list with all timesteps as integer values
-    invest : boolean
-
-    Returns
-    -------
-    m : pyomo.ConcreteModel
     """
 
     # create lists with objects of component subclasses
