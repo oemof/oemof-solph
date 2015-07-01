@@ -52,7 +52,7 @@ rlig = cp.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
 demand_el = cp.Sink(uid="demand_el", inputs=[b_el],
                     val=data['demand_el'])
 demand_el2 = cp.Sink(uid="demand_el2", inputs=[b_el2],
-                    val=data['demand_el'])
+                     val=data['demand_el'])
 demand_th = cp.Sink(uid="demand_th", inputs=[b_th],
                     val=data['demand_th']*100000)
 # Simple Transformer for b_el

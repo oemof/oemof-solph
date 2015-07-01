@@ -164,6 +164,10 @@ class Transport(Component):
 
     self.in_max = kwargs.get('in_max', None)
     self.out_max = kwargs.get('out_max', None)
+    self.capex = kwargs.get('capex', 0)
+    self.opex_fix = kwargs.get('opex_fix', None)
+    self.opex_var = kwargs.get('opex_var', 0)
+    self.co2_var = kwargs.get('co2_var', None)
     self.results = kwargs.get('results', {})
 
 class SimpleTransport(Transport):
