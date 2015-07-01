@@ -75,9 +75,9 @@ pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
 
 # transport
 cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                        in_max=700, eta=0.9)
+                        in_max=10000, eta=0.9)
 cable2 = cp.SimpleTransport(uid="cable2", inputs=[b_el2], outputs=[b_el],
-                        in_max=700, eta=0.8)
+                        in_max=10000, eta=0.8)
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
@@ -91,7 +91,7 @@ transports = [cable1, cable2]
 
 components = transformers + commodities + renew_sources + sinks + transports
 
-om = opt_model(buses, components, timesteps=timesteps, invest=True)
+om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
 instance = solve(model=om, solver='gurobi', debug=True, tee=True)
 

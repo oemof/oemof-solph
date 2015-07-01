@@ -398,7 +398,7 @@ def opt_model(buses, components, timesteps, invest):
         O = {obj.uid: obj.outputs[0].uid for obj in s_transport}
         eta = {obj.uid: obj.eta for obj in s_transport}
 
-        # constraint for transformers: input * efficiency = output
+        # constraint for simple transports: input * efficiency = output
         def eta_rule(m, e, t):
             expr = 0
             expr += m.w[I[e], e, t] * eta[e]
@@ -409,8 +409,6 @@ def opt_model(buses, components, timesteps, invest):
                                                  rule=eta_rule)
 
         # set variable bounds (out_max = in_max * efficiency):
-        # m.i_max = {'pp_coal': 51794.8717948718, ... }
-        # m.o_max = {'pp_coal': 20200, ... }
         m.i_max = {obj.uid: obj.in_max for obj in s_transport}
         m.o_max = {obj.uid: obj.out_max for obj in s_transport}
 
@@ -423,7 +421,7 @@ def opt_model(buses, components, timesteps, invest):
                     # transport output <= m.o_max
                     if e1 in m.s_transport:
                         m.w[e1, e2, t].setub(m.o_max[e1])
-                    # transformer input <= m.i_max
+                    # transport input <= m.i_max
                     if e2 in m.s_transport:
                         m.w[e1, e2, t].setub(m.i_max[e2])
         else:
@@ -447,8 +445,9 @@ def opt_model(buses, components, timesteps, invest):
         """
 
         # create a combine list of all cost-related components
-        objective_components = s_chps + s_transformers + simple_storages
-        m.objective_components = m.s_chps + m.s_transformers
+        objective_components = s_chps + s_transformers + simple_storages + \
+                               s_transport
+        m.objective_components = m.s_chps + m.s_transformers + m.s_transport
         I = {obj.uid: obj.inputs[0].uid for obj in objective_components}
         # operational costs
         m.opex_var = {obj.uid: obj.opex_var for obj in objective_components}
