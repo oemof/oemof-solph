@@ -108,37 +108,38 @@ results_to_objects(entities=transformers+commodities+renew_sources+transports+
 
 if __name__ == "__main__":
 
+    def plot_dispatch(bus_to_plot):
+        # plotting: later as multiple pdf with pie-charts and topology?
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        import matplotlib.cm as cm
 
-    # plotting: later as multiple pdf with pie-charts and topology?
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import matplotlib as mpl
-    import matplotlib.cm as cm
+        data = renew_sources+transformers+transports
 
-    data = renew_sources+transformers+transports
-    bus_to_plot = 'b_el'
+        # data preparation
+        x = np.arange(len(timesteps))
+        y = []
+        labels = []
+        for c in data:
+            if bus_to_plot in c.results['Output']:
+                y.append(c.results['Output'][bus_to_plot])
+                labels.append(c.uid)
+                #print(c.uid)
 
-    # data preparation
-    x = np.arange(len(timesteps))
-    y = []
-    labels = []
-    for c in data:
-        if bus_to_plot in c.results['Output']:
-            y.append(c.results['Output'][bus_to_plot])
-            labels.append(c.uid)
-            #print(c.uid)
+        # plotting
+        fig, ax = plt.subplots()
+        sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
+        proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
+                                       facecolor=
+                                       pol.get_facecolor()[0]) for pol in sp]
+        ax.legend(proxy, labels)
+        ax.grid()
+        ax.set_xlabel('Timesteps in h')
+        ax.set_ylabel('Power in MW')
+        ax.set_title('Dispatch')
 
-    # plotting
-    fig, ax = plt.subplots()
-    sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
-    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                   facecolor=
-                                   pol.get_facecolor()[0]) for pol in sp]
-    ax.legend(proxy, labels)
-    ax.grid()
-    ax.set_xlabel('Timesteps in h')
-    ax.set_ylabel('Power in MW')
-    ax.set_title('Dispatch')
+    plot_dispatch('b_el')
 
     def show_graph(buses=buses, components=components,
                    renew_sources=renew_sources, sinks=sinks,
