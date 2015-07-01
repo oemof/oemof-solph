@@ -13,7 +13,7 @@ from optimization_model import *
 import components as cp
 import pandas as pd
 
-data = pd.read_csv("example_data.csv",sep=",")
+data = pd.read_csv("example_data.csv", sep=",")
 timesteps = [t for t in range(24)]
 
 # emission factors in t/MWh
@@ -34,10 +34,10 @@ b_el2 = cp.Bus(uid="b_el2", type="elec")
 b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
-wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],  val=data['wind'],
-                          out_max=66300, dispatch=False)
-wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],  val=data['wind'],
-                          out_max=66300, dispatch=False)
+wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el], val=data['wind'],
+                             out_max=66300, dispatch=False)
+wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],
+                              val=data['wind'], out_max=66300, dispatch=False)
 wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
                               out_max=25300)
 pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
@@ -75,9 +75,9 @@ pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
 
 # transport
 cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                        in_max=10000, eta=0.9)
+                            in_max=10000, eta=0.9)
 cable2 = cp.SimpleTransport(uid="cable2", inputs=[b_el2], outputs=[b_el],
-                        in_max=10000, eta=0.8)
+                            in_max=10000, eta=0.8)
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
@@ -95,8 +95,8 @@ om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
 instance = solve(model=om, solver='gurobi', debug=True, tee=True)
 
-results_to_objects(entities=transformers+commodities+renew_sources+transports+
-                   sinks, instance=instance)
+results_to_objects(entities=transformers + commodities + renew_sources +
+                   transports + sinks, instance=instance)
 
 # print dispatch of renewable source with dispatch = True (does not work with
 # invest at the moment)
@@ -129,7 +129,8 @@ if __name__ == "__main__":
 
         # plotting
         fig, ax = plt.subplots()
-        sp = ax.stackplot(x, y, colors=cm.rainbow(np.linspace(0, 1, len(data))))
+        sp = ax.stackplot(x, y,
+                          colors=cm.rainbow(np.linspace(0, 1, len(data))))
         proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
                                        facecolor=
                                        pol.get_facecolor()[0]) for pol in sp]
