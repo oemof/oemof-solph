@@ -35,9 +35,9 @@ b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
 wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el],  val=data['wind'],
-                          out_max=66300, dispatch=True)
+                          out_max=66300, dispatch=False)
 wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],  val=data['wind'],
-                          out_max=66300, dispatch=True)
+                          out_max=66300, dispatch=False)
 wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
                               out_max=25300)
 pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
@@ -91,9 +91,9 @@ transports = [cable1, cable2]
 
 components = transformers + commodities + renew_sources + sinks + transports
 
-om = opt_model(buses, components, timesteps=timesteps, invest=False)
+om = opt_model(buses, components, timesteps=timesteps, invest=True)
 
-instance = solve(model=om, solver='gurobi', debug=False, tee=True)
+instance = solve(model=om, solver='gurobi', debug=True, tee=True)
 
 results_to_objects(entities=transformers+commodities+renew_sources+transports+
                    sinks, instance=instance)
