@@ -95,8 +95,8 @@ om = opt_model(buses, components, timesteps=timesteps, invest=False)
 
 instance = solve(model=om, solver='gurobi', debug=False, tee=True)
 
-results_to_objects(entities=transformers+commodities+renew_sources+transports,
-                   instance=instance)
+results_to_objects(entities=transformers+commodities+renew_sources+transports+
+                   sinks, instance=instance)
 
 # print dispatch of renewable source with dispatch = True (does not work with
 # invest at the moment)
@@ -114,14 +114,15 @@ if __name__ == "__main__":
     import matplotlib.cm as cm
 
     data = renew_sources+transformers+transports
+    bus_to_plot = 'b_el2'
 
     # data preparation
     x = np.arange(len(timesteps))
     y = []
     labels = []
     for c in data:
-        if 'b_el' in c.results['Output']:
-            y.append(c.results['Output']['b_el'])
+        if bus_to_plot in c.results['Output']:
+            y.append(c.results['Output'][bus_to_plot])
             labels.append(c.uid)
             #print(c.uid)
 

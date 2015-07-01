@@ -580,7 +580,7 @@ def results_to_objects(entities, instance):
                                           e.uid, o, t].value)
         # write results to sinks (will be the value of Sink in general)
         if isinstance(e, cp.Sink):
-            e.results['Input'] = {}
+            e.results['Input'] = []
             for t in instance.timesteps:
                 e.results['Input'].append(instance.w[e.inputs[0].uid,
                                           e.uid, t].value)

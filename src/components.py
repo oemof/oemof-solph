@@ -102,6 +102,7 @@ class Sink(Component):
       raise ValueError("Sink must not have outputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
     self.val = kwargs['val']
+    self.results = kwargs.get('results', {})
 
 class Source(Component):
   """
