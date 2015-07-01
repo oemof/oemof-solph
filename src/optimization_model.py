@@ -562,7 +562,7 @@ def results_to_objects(entities, instance):
 
     Returns
     -------
-    edges : list with tupels that represent the edges
+    results : dictionary with results for every instance of a class
     """
     for e in entities:
         if (isinstance(e, cp.Transformer) or isinstance(e, cp.Source) or
