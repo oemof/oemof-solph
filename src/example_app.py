@@ -108,13 +108,15 @@ results_to_objects(entities=transformers+commodities+renew_sources+transports+
 
 if __name__ == "__main__":
 
+
+    # plotting: later as multiple pdf with pie-charts and topology?
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib as mpl
     import matplotlib.cm as cm
 
     data = renew_sources+transformers+transports
-    bus_to_plot = 'b_el2'
+    bus_to_plot = 'b_el'
 
     # data preparation
     x = np.arange(len(timesteps))
