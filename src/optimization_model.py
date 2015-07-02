@@ -119,21 +119,32 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
 
 
-        Mathematical equations
-        ----------------------
+        **Mathematical equations**
 
-        The model equations are described as follows:
+        Sets containing the inputs/outputs for all simple transformers:
 
         .. math::
 
-        I_{SF} = \\{ i | i \\subset E_B, (i,e) \\in \\vec{E},
-        e \\in E_{SF}\\} \\\\
+            &E_{SF}, \\quad \\text{Set with all simple transformers}\\\\
+            &I = \\{ i | i \\subset E_B, (i,e) \\in \\vec{E},
+            e \\in E_{SF}\\}, \\quad \\text{All inputs for } e \\in E_{SF}\\\\
+            &O = \\{ o | o \\subset E_B, (e,o) \\in \\vec{E},
+            e \\in E_{SF}\\}, \\quad \\text{All outputs for } e \\in E_{SF}\\\\
 
-        O_{SF} = \\{ o | o \\subset E_B, (e,o) \\in \\vec{E},
-        e \\in E_{SF}\\} \\\\
+        The model equations for operational models are described as follows.
+        Constraint for input/output relation:
 
-        w(I_{SF}(e), e,t) \cdot \eta_(e) - w(e,O_{SF}(e),t) = 0,
-        \\forall e \\in E_{SF}, \\forall t \\in T
+        .. math::
+
+            w(I(e), e,t) \cdot \eta_(e) - w(e,O(e),t) = 0, \\quad
+            \\forall e \\in E_{SF}, \\forall t \\in T\\\\
+
+        For investment models the additional constraint must hold:
+
+        .. math::
+
+            w(I(e), e, t) \\leq in_{max}(e1) + w_{add}(I(e), e), \\quad
+            \\forall t \\in T, \\forall e \\in E_{SF}\\\\
         """
 
         # temp set with input uids for every simple transformer
@@ -194,6 +205,7 @@ class OptimizationModel(po.ConcreteModel):
         Returns
         -------
         self : pyomo.ConcreteModel
+
         """
 
         # temp set with input uids for every simple chp
@@ -546,8 +558,8 @@ class OptimizationModel(po.ConcreteModel):
         Parameters
         ----------
         self : pyomo.ConcreteModel
-        solver : str solver to be used e.g. 'glpk','gurobi','cplex'
-        solver_io: str: str that defines the solver interaction
+        solver str: solver to be used e.g. 'glpk','gurobi','cplex'
+        solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
         **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
