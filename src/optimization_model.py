@@ -57,14 +57,10 @@ class OptimizationModel(po.ConcreteModel):
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.edges = self.get_edges([e for e in self.entities
                                     if isinstance(e, cp.Component)])
-        # variable for edges
-        self.w = po.Var(self.edges, self.timesteps, within=po.NonNegativeReals)
-        self.w.pprint()
-        # additional variable for investment models
-        if(self.invest is True):
-            self.w_add = po.Var(self.edges, within=po.NonNegativeReals)
 
-        # "call" the mehtods to add the constraints to optimization problem
+        # "call" the mehtods to add the constraints and variables
+        # to optimization problem
+        self.create_variables()
         self.bus_model()
         self.simple_chp_model()
         self.renewable_source_model()
@@ -74,6 +70,15 @@ class OptimizationModel(po.ConcreteModel):
         self.objective()
         self.simple_transport_model()
         self.sink_model()
+
+    def create_variables(self):
+        # variable for edges
+        self.w = po.Var(self.edges, self.timesteps, within=po.NonNegativeReals)
+        self.w.pprint()
+
+        # additional variable for investment models
+        if(self.invest is True):
+            self.w_add = po.Var(self.edges, within=po.NonNegativeReals)
 
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
