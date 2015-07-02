@@ -65,7 +65,7 @@ class SimpleTransformer(Transformer):
       self.out_max = self.in_max * self.eta
 
 
-class SimpleCombinedHeatPower(Transformer):
+class SimpleCHP(Transformer):
   """
   SimpleCombinedHeatPower always have a simple input output relation with a
   constant efficiency

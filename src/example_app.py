@@ -69,9 +69,9 @@ pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil],
                               outputs=[b_el], in_max=None, out_max=1000,
                               eta=0.3, opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
-pp_chp = cp.SimpleCombinedHeatPower(uid='pp_chp', inputs=[bgas], in_max=100000,
-                                    out_max=[None, 30000], eta=[0.4, 0.3],
-                                    outputs=[b_th, b_el])
+pp_chp = cp.SimpleCHP(uid='pp_chp', inputs=[bgas], in_max=100000,
+                      out_max=[None, 30000], eta=[0.4, 0.3],
+                      outputs=[b_th, b_el])
 
 # transport
 cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
@@ -90,10 +90,11 @@ sinks = [demand_th, demand_el]
 transports = [cable1, cable2]
 
 components = transformers + commodities + renew_sources + sinks + transports
+entities = components + buses
 
-om = opt_model(buses, components, timesteps=timesteps, invest=False)
+om = OptimizationModel(entities=entities, timesteps=timesteps, invest=False)
 
-instance = solve(model=om, solver='gurobi', debug=False, tee=True)
+instance = om.solve(solver='gurobi', debug=False, tee=True)
 
 results_to_objects(entities=transformers + commodities + renew_sources +
                    transports + sinks, instance=instance)
@@ -142,29 +143,29 @@ if __name__ == "__main__":
 
     plot_dispatch('b_el')
 
-    def show_graph(buses=buses, components=components,
-                   renew_sources=renew_sources, sinks=sinks,
-                   commodities=commodities):
-        import networkx as nx
-        import matplotlib.pyplot as plt
-        g = nx.DiGraph()
-        es = components + buses
-        g.add_nodes_from([e.uid for e in es])
-        g.add_edges_from(get_edges(es))
-        graph_pos = nx.fruchterman_reingold_layout(g)
-        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
-                               node_shape="o", node_color="r",
-                               node_size=1200)
-        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
-                               node_shape="s", node_color="b", node_size=1000)
-        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
-                               node_shape="s", node_color="g", node_size=1000)
-        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
-                               node_shape="s", node_color="y", node_size=1000)
-        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
-                               node_shape="s", node_color="black",
-                               node_size=1000, alpha=0.8)
-        nx.draw_networkx_edges(g, graph_pos, width=1.5)
-        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
-        plt.show()
-#    show_graph()
+#    def show_graph(buses=buses, components=components,
+#                   renew_sources=renew_sources, sinks=sinks,
+#                   commodities=commodities):
+#        import networkx as nx
+#        import matplotlib.pyplot as plt
+#        g = nx.DiGraph()
+#        es = components + buses
+#        g.add_nodes_from([e.uid for e in es])
+#        g.add_edges_from(get_edges(es))
+#        graph_pos = nx.fruchterman_reingold_layout(g)
+#        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
+#                               node_shape="o", node_color="r",
+#                               node_size=1200)
+#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
+#                               node_shape="s", node_color="b", node_size=1000)
+#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
+#                               node_shape="s", node_color="g", node_size=1000)
+#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
+#                               node_shape="s", node_color="y", node_size=1000)
+#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
+#                               node_shape="s", node_color="black",
+#                               node_size=1000, alpha=0.8)
+#        nx.draw_networkx_edges(g, graph_pos, width=1.5)
+#        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
+#        plt.show()
+##    show_graph()
