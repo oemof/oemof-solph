@@ -142,30 +142,3 @@ if __name__ == "__main__":
         ax.set_title('Dispatch')
 
     plot_dispatch('b_el')
-
-#    def show_graph(buses=buses, components=components,
-#                   renew_sources=renew_sources, sinks=sinks,
-#                   commodities=commodities):
-#        import networkx as nx
-#        import matplotlib.pyplot as plt
-#        g = nx.DiGraph()
-#        es = components + buses
-#        g.add_nodes_from([e.uid for e in es])
-#        g.add_edges_from(get_edges(es))
-#        graph_pos = nx.fruchterman_reingold_layout(g)
-#        nx.draw_networkx_nodes(g, graph_pos, [b.uid for b in buses],
-#                               node_shape="o", node_color="r",
-#                               node_size=1200)
-#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in components],
-#                               node_shape="s", node_color="b", node_size=1000)
-#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in renew_sources],
-#                               node_shape="s", node_color="g", node_size=1000)
-#        nx.draw_networkx_nodes(g, graph_pos, [s.uid for s in sinks],
-#                               node_shape="s", node_color="y", node_size=1000)
-#        nx.draw_networkx_nodes(g, graph_pos, [c.uid for c in commodities],
-#                               node_shape="s", node_color="black",
-#                               node_size=1000, alpha=0.8)
-#        nx.draw_networkx_edges(g, graph_pos, width=1.5)
-#        nx.draw_networkx_labels(g, graph_pos, font_color='w', font_size=10)
-#        plt.show()
-##    show_graph()

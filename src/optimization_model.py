@@ -55,7 +55,7 @@ class OptimizationModel(po.ConcreteModel):
                                       self.simple_transport_objs]
 
         # calculate all edges ([('coal', 'pp_coal'),...])
-        self.edges = self.get_edges([e for e in self.entities
+        self.all_edges = self.edges([e for e in self.entities
                                     if isinstance(e, cp.Component)])
 
         # "call" the mehtods to add the constraints and variables
@@ -73,12 +73,12 @@ class OptimizationModel(po.ConcreteModel):
 
     def create_variables(self):
         # variable for edges
-        self.w = po.Var(self.edges, self.timesteps, within=po.NonNegativeReals)
+        self.w = po.Var(self.all_edges, self.timesteps, within=po.NonNegativeReals)
         self.w.pprint()
 
         # additional variable for investment models
         if(self.invest is True):
-            self.w_add = po.Var(self.edges, within=po.NonNegativeReals)
+            self.w_add = po.Var(self.all_edges, within=po.NonNegativeReals)
 
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
@@ -100,16 +100,15 @@ class OptimizationModel(po.ConcreteModel):
         # component inputs/outputs are negative/positive in the bus balance
         def bus_rule(self, e, t):
             expr = 0
-            expr += -sum(self.w[(i, j), t] for (i, j) in self.edges if i == e)
-            expr += sum(self.w[(i, j), t] for (i, j) in self.edges if j == e)
+            expr += -sum(self.w[(i, j), t] for (i, j) in self.all_edges if i == e)
+            expr += sum(self.w[(i, j), t] for (i, j) in self.all_edges if j == e)
             expr += -self.bus_slack[e, t]
             return(0, expr, 0)
-        self.bus = po.Constraint(self.bus_uids, self.timesteps,
-                                        rule=bus_rule)
+        self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
 
     def simple_transformer_model(self):
         """Simple transformer model containing the constraints
-        for simple transformers.
+        for simple transformer components.
 
         Parameters
         ----------
@@ -166,7 +165,7 @@ class OptimizationModel(po.ConcreteModel):
         # set bounds for basic/investment models
         if(self.invest is False):
             # edges for simple transformers ([('coal', 'pp_coal'),...])
-            ee = self.get_edges(self.simple_transformer_objs)
+            ee = self.edges(self.simple_transformer_objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
                     # transformer output <= self.o_max
@@ -185,7 +184,8 @@ class OptimizationModel(po.ConcreteModel):
                                     rule=simple_transformer_invest_rule)
 
     def simple_chp_model(self):
-        """Simple chp model containing the constraints for simple chps.
+        """Simple chp model containing the constraints for simple chp
+        components.
 
         Parameters
         ----------
@@ -234,7 +234,7 @@ class OptimizationModel(po.ConcreteModel):
             self.o_max = {obj.uid: dict(zip(O[obj.uid], obj.out_max))
                           for obj in self.simple_chp_objs}
             # edges for simple chps ([('gas', 'pp_chp'), ('pp_chp', 'b_th'),..)
-            ee = self.get_edges(self.simple_chp_objs)
+            ee = self.edges(self.simple_chp_objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
                     # chp input <= self.i_max
@@ -245,7 +245,8 @@ class OptimizationModel(po.ConcreteModel):
                         self.w[e1, e2, t].setub(self.o_max[e1][e2])
 
     def renewable_source_model(self):
-        """Simple model containing the constraints for renewable sources.
+        """Simple renewable source model containing the constraints for
+        renewable source sources.
 
         Parameters
         ----------
@@ -291,7 +292,7 @@ class OptimizationModel(po.ConcreteModel):
         # TODO: include dispatch if invest=True
         if(self.invest is False):
             # edges for renewables ([('wind_on', 'b_el'), ...)
-            ee = self.get_edges(self.renewable_source_objs)
+            ee = self.edges(self.renewable_source_objs)
             # fixed value
             for (e1, e2) in ee:
                 for t in self.timesteps:
@@ -319,7 +320,8 @@ class OptimizationModel(po.ConcreteModel):
                                           rule=renewable_source_invest_rule)
 
     def commodity_model(self):
-        """Simple model containing the constraints for commodities.
+        """Simple commdity model containing the constraints for commodity
+        sources.
 
         Parameters
         ----------
@@ -345,7 +347,7 @@ class OptimizationModel(po.ConcreteModel):
                                                rule=commodity_limit_rule)
 
     def sink_model(self):
-        """Simple model containing the constraints for sinks.
+        """Sink model containing the constraints for sinks.
 
         Parameters
         ----------
@@ -357,7 +359,7 @@ class OptimizationModel(po.ConcreteModel):
         """
 
         self.sink_val = {obj.uid: obj.val for obj in self.sink_objs}
-        ee = self.get_edges(self.sink_objs)
+        ee = self.edges(self.sink_objs)
         for (e1, e2) in ee:
             # fixed value
             for t in self.timesteps:
@@ -365,7 +367,8 @@ class OptimizationModel(po.ConcreteModel):
                 self.w[(e1, e2), t].setlb(self.sink_val[e2][t])
 
     def simple_storage_model(self):
-        """Simple model containing the constraints for storages.
+        """Simple storage model containing the constraints for simple storage
+        components.
 
         Parameters
         ----------
@@ -386,7 +389,7 @@ class OptimizationModel(po.ConcreteModel):
 
         # set bounds for basic/investment models
         if(self.invest is False):
-            ee = self.get_edges(self.simple_storage_objs)
+            ee = self.edges(self.simple_storage_objs)
             # installed input/output capacity
             for (e1, e2) in ee:
                 for t in self.timesteps:
@@ -428,8 +431,8 @@ class OptimizationModel(po.ConcreteModel):
                                                   rule=simple_storage_rule)
 
     def simple_transport_model(self):
-        """Simple transport model containing the constraints
-        for simple transport facilities
+        """Simple transport model building the constraints
+        for simple transport components
 
         Parameters
         ----------
@@ -465,7 +468,7 @@ class OptimizationModel(po.ConcreteModel):
         # set bounds for basic/investment models
         if(self.invest is False):
             # edges for simple transport ([('b_el', 'b_el2'),...])
-            ee = self.get_edges(self.simple_transport_objs)
+            ee = self.edges(self.simple_transport_objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
                     # transport output <= self.o_max
@@ -484,7 +487,8 @@ class OptimizationModel(po.ConcreteModel):
                                                 rule=simple_transport_invest_rule)
 
     def objective(self):
-        """Function that creates the objective function of the LP model.
+        """Function that creates the objective function of the optimization
+        model.
 
         Parameters
         ----------
@@ -543,6 +547,10 @@ class OptimizationModel(po.ConcreteModel):
         ----------
         self : pyomo.ConcreteModel
         solver : str solver to be used e.g. 'glpk','gurobi','cplex'
+        solver_io: str: str that defines the solver interaction
+        (file or interface) 'lp','nl','python'
+        **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
+        method
 
         Returns
         -------
@@ -569,11 +577,13 @@ class OptimizationModel(po.ConcreteModel):
 
         return(instance)
 
-    def get_edges(self, components):
-        """Function that creates the objective function of the LP model.
+    def edges(self, components):
+        """Method that creates a list with all edges for the objects in
+        components.
 
         Parameters
         ----------
+        self :
         components : list of component objects
 
         Returns
