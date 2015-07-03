@@ -14,7 +14,7 @@ import components as cp
 import pandas as pd
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(24)]
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 / 3.6
@@ -35,13 +35,13 @@ b_th = cp.Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
 wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el], val=data['wind'],
-                             out_max=66300, dispatch=False)
+                             out_max=66300, dispatch=True)
 wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],
-                              val=data['wind'], out_max=66300, dispatch=False)
+                              val=data['wind'], out_max=66300, dispatch=True)
 wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
-                              out_max=25300)
+                              out_max=25300, dispatch=True)
 pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
-                        out_max=65300)
+                        out_max=65300, dispatch=True)
 # resources
 rcoal = cp.Commodity(uid="rcoal", outputs=[bcoal], emmission_factor=em_coal)
 rgas = cp.Commodity(uid="rgas", outputs=[bgas], emmission_factor=em_gas)
@@ -102,7 +102,7 @@ results_to_objects(entities=transformers + commodities + renew_sources +
 # print dispatch of renewable source with dispatch = True (does not work with
 # invest at the moment)
 
-#if(True in instance.dispatch.values()):
+# if(True in instance.dispatch.values()):
 #    for t in instance.timesteps:
 #        print('Wind Dispatch in MW:',
 #              instance.renew_dispatch['wind_on', t].value)
