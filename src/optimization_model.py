@@ -165,12 +165,12 @@ class OptimizationModel(po.ConcreteModel):
                                                   rule=in_out_rule)
 
         # set variable bounds (out_max = in_max * efficiency):
-        # m.i_max = {'pp_coal': 51794.8717948718, ... }
-        # m.o_max = {'pp_coal': 20200, ... }
-        self.i_max = {obj.uid: obj.in_max
-                      for obj in self.simple_transformer_objs}
-        self.o_max = {obj.uid: obj.out_max for obj in
-                      self.simple_transformer_objs}
+        # m.in_max = {'pp_coal': 51794.8717948718, ... }
+        # m.out_max = {'pp_coal': 20200, ... }
+        self.in_max = {obj.uid: obj.in_max
+                       for obj in self.simple_transformer_objs}
+        self.out_max = {obj.uid: obj.out_max for obj in
+                        self.simple_transformer_objs}
 
         # set bounds for basic/investment models
         if(self.invest is False):
@@ -178,18 +178,18 @@ class OptimizationModel(po.ConcreteModel):
             ee = self.edges(self.simple_transformer_objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
-                    # transformer output <= self.o_max
+                    # transformer output <= self.out_max
                     if e1 in self.simple_transformer_uids:
-                        self.w[e1, e2, t].setub(self.o_max[e1])
-                    # transformer input <= self.i_max
+                        self.w[e1, e2, t].setub(self.out_max[e1])
+                    # transformer input <= self.in_max
                     if e2 in self.simple_transformer_uids:
-                        self.w[e1, e2, t].setub(self.i_max[e2])
+                        self.w[e1, e2, t].setub(self.in_max[e2])
         else:
             # constraint for additional capacity
             def invest_rule(self, e, t):
                 expr = 0
                 expr += self.w[I[e], e, t]
-                rhs = self.i_max[e] + self.w_add[I[e], e]
+                rhs = self.in_max[e] + self.w_add[I[e], e]
                 return(expr <= rhs)
             self.simple_transformer_max_input_c = \
                 po.Constraint(self.simple_transformer_uids, self.timesteps,
@@ -243,21 +243,21 @@ class OptimizationModel(po.ConcreteModel):
                                            rule=chp_rule)
         # set variable bounds
         if(self.invest is False):
-            self.i_max = {obj.uid: obj.in_max for obj in self.simple_chp_objs}
+            self.in_max = {obj.uid: obj.in_max for obj in self.simple_chp_objs}
             # yields nested dict e.g: {'chp': {'home_th': 40, 'region_el': 30}}
-            self.o_max = {obj.uid: dict(zip(O[obj.uid], obj.out_max))
-                          for obj in self.simple_chp_objs}
+            self.out_max = {obj.uid: dict(zip(O[obj.uid], obj.out_max))
+                            for obj in self.simple_chp_objs}
 
             # edges for simple chps ([('gas', 'pp_chp'), ('pp_chp', 'b_th'),..)
             ee = self.edges(self.simple_chp_objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
-                    # chp input <= self.i_max
+                    # chp input <= self.in_max
                     if e2 in self.simple_chp_uids:
-                        self.w[e1, e2, t].setub(self.i_max[e2])
-                    # chp outputs <= self.o_max
+                        self.w[e1, e2, t].setub(self.in_max[e2])
+                    # chp outputs <= self.out_max
                     if e1 in self.simple_chp_uids:
-                        self.w[e1, e2, t].setub(self.o_max[e1][e2])
+                        self.w[e1, e2, t].setub(self.out_max[e1][e2])
 
     def renewable_source_model(self):
         """Simple renewable source model containing the constraints for
@@ -478,10 +478,10 @@ class OptimizationModel(po.ConcreteModel):
                                                     rule=in_out_rule)
 
         # set variable bounds (out_max = in_max * efficiency):
-        self.i_max = {obj.uid: obj.in_max
-                      for obj in self.simple_transport_objs}
-        self.o_max = {obj.uid: obj.out_max
-                      for obj in self.simple_transport_objs}
+        self.in_max = {obj.uid: obj.in_max
+                       for obj in self.simple_transport_objs}
+        self.out_max = {obj.uid: obj.out_max
+                        for obj in self.simple_transport_objs}
 
         # set bounds for basic/investment models
         if(self.invest is False):
@@ -489,16 +489,16 @@ class OptimizationModel(po.ConcreteModel):
             ee = self.edges(self.simple_transport_objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
-                    # transport output <= self.o_max
+                    # transport output <= self.out_max
                     if e1 in self.simple_transport_uids:
-                        self.w[e1, e2, t].setub(self.o_max[e1])
-                    # transport input <= self.i_max
+                        self.w[e1, e2, t].setub(self.out_max[e1])
+                    # transport input <= self.in_max
                     if e2 in self.simple_transport_uids:
-                        self.w[e1, e2, t].setub(self.i_max[e2])
+                        self.w[e1, e2, t].setub(self.in_max[e2])
         else:
             # constraint for additional capacity
             def invest_rule(self, e, t):
-                return(self.w[I[e], e, t] <= self.i_max[e] +
+                return(self.w[I[e], e, t] <= self.in_max[e] +
                        self.w_add[I[e], e])
             self.simple_transport_invest_c = \
                 po.Constraint(self.simple_transport_uids, self.timesteps,

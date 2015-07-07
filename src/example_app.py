@@ -121,13 +121,13 @@ if __name__ == "__main__":
         import matplotlib as mpl
         import matplotlib.cm as cm
 
-        data = renew_sources+transformers+transports
+        plot_data = renew_sources+transformers+transports
 
         # data preparation
         x = np.arange(len(timesteps))
         y = []
         labels = []
-        for c in data:
+        for c in plot_data:
             if bus_to_plot in c.results['Output']:
                 y.append(c.results['Output'][bus_to_plot])
                 labels.append(c.uid)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         # plotting
         fig, ax = plt.subplots()
         sp = ax.stackplot(x, y,
-                          colors=cm.rainbow(np.linspace(0, 1, len(data))))
+                          colors=cm.rainbow(np.linspace(0, 1, len(plot_data))))
         proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
                                        facecolor=
                                        pol.get_facecolor()[0]) for pol in sp]
