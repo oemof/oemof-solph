@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
-"""
-This example uses some data from BNetzA scenario 2033 B.
-(Germany as 1 "region")
 
-The demand-series are generated randomly
+""" Example application that models Germany as one region for the year 2033.
 
+Data
+----
+
+The application uses some data from BNetzA scenario 2033 B. Demand-series
+are generated randomly.
+
+Notes
+-----
 The energy system is build out of objects. It is solved and the results
 are written back into the objects.
-"""
 
+"""
 from optimization_model import *
 import components as cp
 import pandas as pd
