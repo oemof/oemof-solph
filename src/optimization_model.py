@@ -641,7 +641,8 @@ def results_to_objects(entities, instance):
     results : dictionary with results for every instance of a class
     """
     for e in entities:
-        if (isinstance(e, cp.Transformer) or isinstance(e, cp.SimpleTransport)):
+        if (isinstance(e, cp.Transformer) or isinstance(e, cp.SimpleTransport)
+           or isinstance(e, cp.Source)):
             # write outputs
             e.results['Output'] = {}
             O = [e.uid for e in e.outputs[:]]
@@ -650,11 +651,14 @@ def results_to_objects(entities, instance):
                 for t in instance.timesteps:
                     e.results['Output'][o].append(instance.w[e.uid,
                                                   o, t].value)
-            # write inputs
+
+        if (isinstance(e, cp.Transformer) or isinstance(e, cp.SimpleTransport)):
+        # write inputs
             e.results['Input'] = []
             for t in instance.timesteps:
                 e.results['Input'].append(
                     instance.w[e.inputs[0].uid, e.uid, t].value)
+
 
         if isinstance(e, cp.SimpleStorage):
             for t in instance.timesteps:
