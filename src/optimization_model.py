@@ -74,7 +74,6 @@ class OptimizationModel(po.ConcreteModel):
     def create_variables(self):
         # variable for edges
         self.w = po.Var(self.all_edges, self.timesteps, within=po.NonNegativeReals)
-        self.w.pprint()
 
         # additional variable for investment models
         if(self.invest is True):

@@ -139,6 +139,10 @@ class Commodity(Source):
     self.yearly_limit = kwargs.get('yearly_limit', float('+inf'))
     self.emmision_factor = kwargs.get('emmission_factor', 0)
 
+  def emissions(self):
+      self.emissions = [o * self.emmision_factor
+                        for o in self.results['Output'][self.outputs[0].uid]]
+
 class Bus(Entity):
   """
   """
