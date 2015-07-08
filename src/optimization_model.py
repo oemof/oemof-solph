@@ -41,6 +41,26 @@ class OptimizationModel(po.ConcreteModel):
         self.simple_transport_objs = [e for e in self.entities
                                       if isinstance(e, cp.SimpleTransport)]
 
+        # calculate all edges ([('coal', 'pp_coal'),...])
+        self.all_edges = self.edges([e for e in self.entities
+                                    if isinstance(e, cp.Component)])
+
+        # "call" the mehtods to add the constraints and variables
+        # to optimization problem
+        self.variables()
+        self.sets()
+        self.bus_model()
+        self.simple_chp_model()
+        self.renewable_source_model()
+        self.simple_transformer_model()
+        self.simple_storage_model()
+        self.commodity_model()
+        self.objective()
+        self.simple_transport_model()
+        self.sink_model()
+
+    def sets(self):
+
         # create lists of uids as math-sets for optimization model
         self.bus_uids = [b.uid for b in self.bus_objs]
         self.simple_transformer_uids = [c.uid for c in
@@ -54,24 +74,7 @@ class OptimizationModel(po.ConcreteModel):
         self.simple_transport_uids = [c.uid for c in
                                       self.simple_transport_objs]
 
-        # calculate all edges ([('coal', 'pp_coal'),...])
-        self.all_edges = self.edges([e for e in self.entities
-                                    if isinstance(e, cp.Component)])
-
-        # "call" the mehtods to add the constraints and variables
-        # to optimization problem
-        self.create_variables()
-        self.bus_model()
-        self.simple_chp_model()
-        self.renewable_source_model()
-        self.simple_transformer_model()
-        self.simple_storage_model()
-        self.commodity_model()
-        self.objective()
-        self.simple_transport_model()
-        self.sink_model()
-
-    def create_variables(self):
+    def variables(self):
         # variable for edges
         self.w = po.Var(self.all_edges, self.timesteps, within=po.NonNegativeReals)
 

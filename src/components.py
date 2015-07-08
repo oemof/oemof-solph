@@ -43,9 +43,11 @@ class Transformer(Component):
     self.opex_fix = kwargs.get('opex_fix', None)
     self.opex_var = kwargs.get('opex_var', 0)
     self.co2_var = kwargs.get('co2_var', None)
-
     self.opt_param = kwargs.get('opt_param', None)
     self.results = kwargs.get('results', {})
+
+  def emissions(self):
+    self.emissions =  [o * self.co2_var for o in self.results['Input']]
 
 class SimpleTransformer(Transformer):
   """
