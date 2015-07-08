@@ -1,6 +1,7 @@
 import pyomo.environ as po
 import components as cp
 
+
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
 
@@ -85,8 +86,10 @@ class OptimizationModel(po.ConcreteModel):
         # component inputs/outputs are negative/positive in the bus balance
         def bus_rule(self, e, t):
             expr = 0
-            expr += -sum(self.w[(i, j), t] for (i, j) in self.all_edges if i == e)
-            expr += sum(self.w[(i, j), t] for (i, j) in self.all_edges if j == e)
+            expr += -sum(self.w[(i, j), t]
+                         for (i, j) in self.all_edges if i == e)
+            expr += sum(self.w[(i, j), t]
+                        for (i, j) in self.all_edges if j == e)
             expr += -self.bus_slack[e, t]
             return(expr, 0)
         self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
@@ -271,6 +274,7 @@ class OptimizationModel(po.ConcreteModel):
         p = {obj.uid: obj.p for obj in self.simple_extraction_chp_objs}
         out_min = {obj.uid: obj.out_min
                    for obj in self.simple_extraction_chp_objs}
+
         # constraint for transformer energy balance:
         # 1) P <= p[0] - beta[0]*Q
         def c1_rule(self, e, t):
@@ -375,7 +379,7 @@ class OptimizationModel(po.ConcreteModel):
 
         else:
             if(True in self.dispatch.values()):
-                raise ValueError("Dispatchable renewables are not possible in"
+                raise ValueError("Dispatchable renewables not implemented for"
                                  "investment models.\n Please reset flag from"
                                  "True to False")
 
@@ -685,7 +689,8 @@ class OptimizationModel(po.ConcreteModel):
 
 
 def results_to_objects(entities, instance):
-    """Function that converts the results.
+    """Function that writes the results for po.ConcreteModel instance to
+    objects.
 
     Parameters
     ----------
@@ -707,13 +712,13 @@ def results_to_objects(entities, instance):
                     e.results['Output'][o].append(instance.w[e.uid,
                                                   o, t].value)
 
-        if (isinstance(e, cp.Transformer) or isinstance(e, cp.SimpleTransport)):
-        # write inputs
+        if (isinstance(e, cp.Transformer) or
+                isinstance(e, cp.SimpleTransport)):
+            # write inputs
             e.results['Input'] = []
             for t in instance.timesteps:
                 e.results['Input'].append(
                     instance.w[e.inputs[0].uid, e.uid, t].value)
-
 
         if isinstance(e, cp.SimpleStorage):
             for t in instance.timesteps:
