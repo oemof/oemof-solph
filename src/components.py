@@ -29,6 +29,7 @@ class Component(Entity):
 class Transformer(Component):
   """
   """
+  __lower_name__ = "transformer"
   def __init__(self, **kwargs):
     """
     """
@@ -57,6 +58,7 @@ class SimpleTransformer(Transformer):
   Simple Transformers always have a simple input output relation with a
   constant efficiency
   """
+  __lower_name__ = 'simple_transformer'
   def __init__(self,**kwargs):
     """
     :param eta: eta as constant efficiency for simple transformer
@@ -75,6 +77,7 @@ class SimpleCHP(Transformer):
   SimpleCombinedHeatPower always have a simple input output relation with a
   constant efficiency
   """
+  __lower_name__ = "simple_chp"
   def __init__(self,**kwargs):
     """
     :param eta: eta as constant efficiency for simple transformer
@@ -93,6 +96,7 @@ class SimpleExtractionCHP(Transformer):
    *1=(50,0) --
                 -- *3
   """
+  __lower_name__ = "simple_extraction_chp"
   def __init__(self, **kwargs):
     """
 
@@ -135,6 +139,7 @@ class SimpleExtractionCHP(Transformer):
 class SimpleStorage(Transformer):
   """
   """
+  __lower_name__ = "simple_storage"
   def __init__(self,**kwargs):
     """
     :param soc_max: maximal sate of charge
@@ -149,7 +154,9 @@ class SimpleStorage(Transformer):
 
 
 class Sink(Component):
-
+  """
+  """
+  __lower_name__ = "sink"
   def __init__(self, **kwargs):
     """
     """
@@ -163,6 +170,7 @@ class Sink(Component):
 class Source(Component):
   """
   """
+  __lower_name__ = "source"
   def __init__(self, **kwargs):
     """
     """
@@ -175,6 +183,7 @@ class Source(Component):
 class RenewableSource(Source):
   """
   """
+  __lower_name__ = "renewable_source"
   def __init__(self, **kwargs):
     """
     :param boolean dispatch: Flag if RenewableSource is dispatchable or not
@@ -188,6 +197,7 @@ class RenewableSource(Source):
 class Commodity(Source):
   """
   """
+  __lower_name__ = "commodity"
   def __init__(self, **kwargs):
     """
     """
@@ -202,6 +212,7 @@ class Commodity(Source):
 class Bus(Entity):
   """
   """
+  __lower_name__ = "bus"
   def __init__(self, **kwargs):
     """
     :param type: bus type could be electricity...BLARBLAR
@@ -210,6 +221,9 @@ class Bus(Entity):
     self.type = kwargs["type"]
 
 class Transport(Component):
+  """
+  """
+  __lower_name__ = "transport"
   def __init__(self, **kwargs):
     """
     """
@@ -234,6 +248,7 @@ class SimpleTransport(Transport):
   """
   Simple Transport connects two busses with a constant efficiency
   """
+  __lower_name__ = "simple_transport"
   def __init__(self,**kwargs):
     """
     :param eta: eta as constant efficiency for simple transport

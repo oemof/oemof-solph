@@ -1,6 +1,5 @@
 import pyomo.environ as po
 import components as cp
-import numpy as np
 
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
@@ -25,32 +24,21 @@ class OptimizationModel(po.ConcreteModel):
         self.timesteps = timesteps
         self.invest = invest
 
-        # create lists with objects of entitiy child-classes
-        self.bus_objs = [e for e in self.entities if isinstance(e, cp.Bus)]
-        self.simple_transformer_objs = [e for e in self.entities
-                                        if isinstance(e, cp.SimpleTransformer)]
-        self.simple_chp_objs = [e for e in self.entities
-                                if isinstance(e, cp.SimpleCHP)]
-        self.renewable_source_objs = [e for e in self.entities
-                                      if isinstance(e, cp.RenewableSource)]
-        self.sink_objs = [e for e in self.entities if isinstance(e, cp.Sink)]
-        self.simple_storage_objs = [e for e in self.entities
-                                    if isinstance(e, cp.SimpleStorage)]
-        self.commodity_objs = [e for e in self.entities
-                               if isinstance(e, cp.Commodity)]
-        self.simple_transport_objs = [e for e in self.entities
-                                      if isinstance(e, cp.SimpleTransport)]
-        self.simple_extraction_chp_objs = \
-            [e for e in self.entities if isinstance(e, cp.SimpleExtractionCHP)]
-
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
-                                    if isinstance(e, cp.Component)])
+                                     if isinstance(e, cp.Component)])
+        # list with all classes
+        classes = [cp.Bus] + [cp.Sink] + cp.Transformer.__subclasses__() + \
+            cp.Source.__subclasses__() + cp.Transport.__subclasses__()
+        # set attributes lists per class with objects and uids for opt model
+        for cls in classes:
+            objs = [e for e in self.entities if isinstance(e, cls)]
+            uids = [e.uid for e in objs]
+            setattr(self, cls.__lower_name__ + '_objs', objs)
+            setattr(self, cls.__lower_name__ + '_uids', uids)
 
-        # "call" the mehtods to add the constraints and variables
-        # to optimization problem
+        # "call" methods to add the constraints and variables to opt. problem
         self.variables()
-        self.sets()
         self.bus_model()
         self.simple_chp_model()
         self.simple_extraction_chp_model()
@@ -58,29 +46,17 @@ class OptimizationModel(po.ConcreteModel):
         self.simple_transformer_model()
         self.simple_storage_model()
         self.commodity_model()
-        self.objective()
         self.simple_transport_model()
         self.sink_model()
-
-    def sets(self):
-
-        # create lists of uids as math-sets for optimization model
-        self.bus_uids = [b.uid for b in self.bus_objs]
-        self.simple_transformer_uids = [c.uid for c in
-                                        self.simple_transformer_objs]
-        self.simple_chp_uids = [c.uid for c in self.simple_chp_objs]
-        self.renewable_source_uids = [c.uid for c in
-                                      self.renewable_source_objs]
-        self.simple_storage_uids = [c.uid for c in self.simple_storage_objs]
-        self.sink_uids = [c.uid for c in self.sink_objs]
-        self.commodity_uids = [c.uid for c in self.commodity_objs]
-        self.simple_transport_uids = [c.uid for c in
-                                      self.simple_transport_objs]
-        self.simple_extraction_chp_uids = \
-            [c.uid for c in self.simple_extraction_chp_objs]
+        # set objective function
+        self.objective()
 
     def variables(self):
-
+        """ variables creates all variables corresponding to the edges indexed
+        by t in timesteps, (e1,e2) in all_edges
+        if invest flag is set to true, an additional variable indexed by
+        (e1,e2) in all_edges is created.
+        """
         # variable for edges
         self.w = po.Var(self.all_edges, self.timesteps,
                         within=po.NonNegativeReals)
