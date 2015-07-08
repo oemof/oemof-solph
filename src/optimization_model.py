@@ -1,6 +1,6 @@
 import pyomo.environ as po
 import components as cp
-
+import numpy as np
 
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
@@ -40,6 +40,8 @@ class OptimizationModel(po.ConcreteModel):
                                if isinstance(e, cp.Commodity)]
         self.simple_transport_objs = [e for e in self.entities
                                       if isinstance(e, cp.SimpleTransport)]
+        self.simple_extraction_chp_objs = \
+            [e for e in self.entities if isinstance(e, cp.SimpleExtractionCHP)]
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
@@ -51,6 +53,7 @@ class OptimizationModel(po.ConcreteModel):
         self.sets()
         self.bus_model()
         self.simple_chp_model()
+        self.simple_extraction_chp_model()
         self.renewable_source_model()
         self.simple_transformer_model()
         self.simple_storage_model()
@@ -73,10 +76,14 @@ class OptimizationModel(po.ConcreteModel):
         self.commodity_uids = [c.uid for c in self.commodity_objs]
         self.simple_transport_uids = [c.uid for c in
                                       self.simple_transport_objs]
+        self.simple_extraction_chp_uids = \
+            [c.uid for c in self.simple_extraction_chp_objs]
 
     def variables(self):
+
         # variable for edges
-        self.w = po.Var(self.all_edges, self.timesteps, within=po.NonNegativeReals)
+        self.w = po.Var(self.all_edges, self.timesteps,
+                        within=po.NonNegativeReals)
 
         # additional variable for investment models
         if(self.invest is True):
@@ -262,6 +269,74 @@ class OptimizationModel(po.ConcreteModel):
                     if e1 in self.simple_chp_uids:
                         self.w[e1, e2, t].setub(self.out_max[e1][e2])
 
+    def simple_extraction_chp_model(self):
+        """Simple extraction chp model containing the constraints for
+        objects of class cp.SimpleExtractionCHP().
+
+        Parameters
+        ----------
+        self : pyomo.ConcreteModel
+
+        Returns
+        -------
+        self : pyomo.ConcreteModel
+
+        """
+        # {'pp_chp': 'gas'}
+        I = {obj.uid: obj.inputs[0].uid
+             for obj in self.simple_extraction_chp_objs}
+        # set with output uids for every simple chp
+        # {'pp_chp': ['b_th', 'b_el']}
+        O = {obj.uid: [o.uid for o in obj.outputs[:]]
+             for obj in self.simple_extraction_chp_objs}
+        k = {obj.uid: obj.k for obj in self.simple_extraction_chp_objs}
+        c = {obj.uid: obj.c for obj in self.simple_extraction_chp_objs}
+        beta = {obj.uid: obj.beta for obj in self.simple_extraction_chp_objs}
+        p = {obj.uid: obj.p for obj in self.simple_extraction_chp_objs}
+        out_min = {obj.uid: obj.out_min
+                   for obj in self.simple_extraction_chp_objs}
+        # constraint for transformer energy balance:
+        # 1) P <= p[0] - beta[0]*Q
+        def c1_rule(self, e, t):
+            expr = self.w[e, O[e][0], t]
+            rhs = p[e][0] - beta[e][0] * self.w[e, O[e][1], t]
+            return(expr <= rhs)
+        self.simple_extraction_chp_1 = \
+            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+                          rule=c1_rule)
+
+        # 2) P = c[0] + c[1] * Q
+        def c2_rule(self, e, t):
+            expr = self.w[e, O[e][1], t]
+            rhs = (self.w[e, O[e][0], t] - c[e][0]) / c[e][1]
+            return(expr <= rhs)
+        self.simple_extraction_chp_2 = \
+            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+                          rule=c2_rule)
+
+        # 3) P >= p[1] - beta[1]*Q
+        def c3_rule(self, e, t):
+            if out_min[e] > 0:
+                expr = self.w[e, O[e][0], t]
+                rhs = p[e][1] - beta[e][1] * self.w[e, O[e][1], t]
+                return(expr >= rhs)
+            else:
+                return(po.Constraint.Skip)
+        self.simple_extraction_chp_3 = \
+            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+                          rule=c3_rule)
+
+        # H = k[0] + k[1]*P + k[2]*Q
+        def in_out_rule(self, e, t):
+            expr = 0
+            expr += self.w[I[e], e, t]
+            expr += - (k[e][0] + k[e][1]*self.w[e, O[e][0], t] +
+                       k[e][2]*self.w[e, O[e][1], t])
+            return(expr, 0)
+        self.simple_extraction_chp_io = \
+            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+                          rule=in_out_rule)
+
     def renewable_source_model(self):
         """Simple renewable source model containing the constraints for
         renewable source sources.
@@ -353,13 +428,15 @@ class OptimizationModel(po.ConcreteModel):
 
         self.yearly_limit = {obj.uid: obj.yearly_limit
                              for obj in self.commodity_objs}
+
         # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
         O = {obj.uid: [obj.outputs[0].uid] for obj in self.commodity_objs}
 
         # set upper bounds: sum(yearly commodity output) <= yearly_limit
         def commodity_limit_rule(self, e):
             expr = 0
-            expr += sum(self.w[e, o, t] for t in self.timesteps for o in O[e])
+            expr += sum(self.w[e, o, t] for t in self.timesteps
+                        for o in O[e])
             ub = self.yearly_limit[e]
             return(0, expr, ub)
         self.commodity_limit_c = po.Constraint(self.commodity_uids,
