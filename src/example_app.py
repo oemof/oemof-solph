@@ -97,7 +97,8 @@ transports = [cable1, cable2]
 components = transformers + commodities + renew_sources + sinks + transports
 entities = components + buses
 
-om = OptimizationModel(entities=entities, timesteps=timesteps, invest=False)
+om = OptimizationModel(entities=entities, timesteps=timesteps,
+                       options={'invest': False, 'slack': False})
 
 instance = om.solve(solver='gurobi', debug=False, tee=True)
 

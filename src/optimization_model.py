@@ -17,13 +17,14 @@ class OptimizationModel(po.ConcreteModel):
 
     """
 
-    def __init__(self, entities, timesteps, invest):
+    def __init__(self, entities, timesteps, options=None):
 
         super().__init__()
 
         self.entities = entities
         self.timesteps = timesteps
-        self.invest = invest
+        self.invest = options['invest']
+        self.slack = options['slack']
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
@@ -78,9 +79,12 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        # slack variable that assures a feasible problem
-        self.bus_slack = po.Var(self.bus_uids, self.timesteps,
-                                within=po.NonNegativeReals)
+        # slack variables that assures a feasible problem
+        if self.slack is True:
+            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
+                                         within=po.NonNegativeReals)
+            self.excess_slack = po.Var(self.bus_uids, self.timesteps,
+                                       within=po.NonNegativeReals)
 
         # constraint for bus balance:
         # component inputs/outputs are negative/positive in the bus balance
@@ -90,7 +94,8 @@ class OptimizationModel(po.ConcreteModel):
                          for (i, j) in self.all_edges if i == e)
             expr += sum(self.w[(i, j), t]
                         for (i, j) in self.all_edges if j == e)
-            expr += -self.bus_slack[e, t]
+            if self.slack is True:
+                expr += -self.excess_slack[e, t] + self.shortage_slack[e, t]
             return(expr, 0)
         self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
 
@@ -602,9 +607,10 @@ class OptimizationModel(po.ConcreteModel):
             expr += sum(self.w[I[e], e, t] * self.opex_var[e]
                         for e in self.objective_uids
                         for t in self.timesteps)
-            expr += sum(self.bus_slack[e, t] * 10e4
-                        for e in self.bus_uids
-                        for t in self.timesteps)
+            if self.slack is True:
+                expr += sum((self.excess_slack[e, t] +
+                             self.shortage_slack[e, t]) * 10e4
+                            for e in self.bus_uids for t in self.timesteps)
 
             # costs for dispatchable renewables
             if(True in self.dispatch.values()):
