@@ -23,8 +23,8 @@ class OptimizationModel(po.ConcreteModel):
 
         self.entities = entities
         self.timesteps = timesteps
-        self.invest = options['invest']
-        self.slack = options['slack']
+        self.invest = options.get("invest", False)
+        self.slack = options.get("slack", True)
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
@@ -36,8 +36,8 @@ class OptimizationModel(po.ConcreteModel):
         for cls in classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
             uids = [e.uid for e in objs]
-            setattr(self, cls.__lower_name__ + '_objs', objs)
-            setattr(self, cls.__lower_name__ + '_uids', uids)
+            setattr(self, cls.__lower_name__ + "_objs", objs)
+            setattr(self, cls.__lower_name__ + "_uids", uids)
 
         # "call" methods to add the constraints and variables to opt. problem
         self.variables()
@@ -609,8 +609,7 @@ class OptimizationModel(po.ConcreteModel):
                         for e in self.objective_uids
                         for t in self.timesteps)
             if self.slack is True:
-                expr += sum((self.excess_slack[e, t] +
-                             self.shortage_slack[e, t]) * 10e4
+                expr += sum(self.shortage_slack[e, t] * 10e10
                             for e in self.bus_uids for t in self.timesteps)
 
             # costs for dispatchable renewables
