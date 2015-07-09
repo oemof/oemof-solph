@@ -22,10 +22,10 @@ data = pd.read_csv("example_data.csv", sep=",")
 timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
-em_lig = 0.111 / 3.6
-em_coal = 0.0917 / 3.6
-em_gas = 0.0556 / 3.6
-em_oil = 0.0750 / 3.6
+em_lig = 0.111 * 3.6
+em_coal = 0.0917 * 3.6
+em_gas = 0.0556 * 3.6
+em_oil = 0.0750 * 3.6
 
 # resources
 bcoal = cp.Bus(uid="coal", type="coal")
@@ -91,14 +91,14 @@ buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
 transformers = [pp_coal, pp_gas, pp_lig, pp_oil, pp_chp]
 commodities = [rcoal, rgas, roil, rlig]
 renew_sources = [pv, wind_on, wind_on2, wind_off]
-sinks = [demand_th, demand_el]
+sinks = [demand_th, demand_el, demand_el2]
 transports = [cable1, cable2]
 
 components = transformers + commodities + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'slack': False})
+                       options={'invest': False, 'slack': True})
 
 instance = om.solve(solver='gurobi', debug=False, tee=True)
 

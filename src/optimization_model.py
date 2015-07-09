@@ -86,14 +86,15 @@ class OptimizationModel(po.ConcreteModel):
             self.excess_slack = po.Var(self.bus_uids, self.timesteps,
                                        within=po.NonNegativeReals)
 
+
+        I = {b.uid: [i.uid for i in b.inputs] for b in self.bus_objs}
+        O = {b.uid: [o.uid for o in b.outputs] for b in self.bus_objs}
         # constraint for bus balance:
         # component inputs/outputs are negative/positive in the bus balance
         def bus_rule(self, e, t):
             expr = 0
-            expr += -sum(self.w[(i, j), t]
-                         for (i, j) in self.all_edges if i == e)
-            expr += sum(self.w[(i, j), t]
-                        for (i, j) in self.all_edges if j == e)
+            expr += -sum(self.w[e, o, t] for o in O[e])
+            expr += sum(self.w[i, e, t] for i in I[e])
             if self.slack is True:
                 expr += -self.excess_slack[e, t] + self.shortage_slack[e, t]
             return(expr, 0)
