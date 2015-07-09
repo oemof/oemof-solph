@@ -359,7 +359,6 @@ class OptimizationModel(po.ConcreteModel):
                 expr += - self.source_val[e][t] * self.out_max[e] + \
                     self.w[e, O[e], t]
                 return(expr, 0)
-
             self.renewable_source_dispatch_c = \
                 po.Constraint(self.renewable_sources_dispatch_uids,
                               self.timesteps, rule=dispatch_rule)
@@ -417,8 +416,8 @@ class OptimizationModel(po.ConcreteModel):
             expr = 0
             expr += sum(self.w[e, o, t] for t in self.timesteps
                         for o in O[e])
-            ub = self.yearly_limit[e]
-            return(0, expr, ub)
+            rhs = self.yearly_limit[e]
+            return(expr <= rhs)
         self.commodity_limit_c = po.Constraint(self.commodity_uids,
                                                rule=commodity_limit_rule)
 
