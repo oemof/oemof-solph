@@ -29,9 +29,13 @@ class OptimizationModel(po.ConcreteModel):
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
                                      if isinstance(e, cp.Component)])
-        # list with all classes
-        classes = [cp.Bus] + [cp.Sink] + cp.Transformer.__subclasses__() + \
-            cp.Source.__subclasses__() + cp.Transport.__subclasses__()
+        # list with all necessary classes
+        classes = ([cp.Bus] +
+                   cp.Transformer.__subclasses__() +
+                   cp.Sink.__subclasses__() +
+                   cp.Source.__subclasses__() +
+                   cp.Transport.__subclasses__())
+
         # set attributes lists per class with objects and uids for opt model
         for cls in classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
@@ -49,7 +53,7 @@ class OptimizationModel(po.ConcreteModel):
         self.simple_storage_model()
         self.commodity_model()
         self.simple_transport_model()
-        self.sink_model()
+        self.simple_sink_model()
         # set objective function
         self.objective()
 
@@ -215,13 +219,11 @@ class OptimizationModel(po.ConcreteModel):
         eta = {obj.uid: obj.eta for obj in self.simple_chp_objs}
 
         # constraint for transformer energy balance:
-        # E = P + Q / (eta_el + eta_th) = P / eta_el = Q/ eta_th
+        # E = P / (eta_el) = P / eta_el = Q/ eta_th
         # (depending on the position of the outputs and eta)
         def in_out_rule(self, e, t):
-            expr = 0
-            expr += self.w[I[e], e, t]
-            expr += -sum(self.w[e, o, t] for o in O[e]) / \
-                (eta[e][0] + eta[e][1])
+            expr = self.w[I[e], e, t]
+            expr += -self.w[e, O[e][0], t] / eta[e][0]
             return(expr, 0)
         self.simple_chp_c1 = po.Constraint(self.simple_chp_uids,
                                            self.timesteps, rule=in_out_rule)
@@ -427,9 +429,8 @@ class OptimizationModel(po.ConcreteModel):
         self.commodity_limit_c = po.Constraint(self.commodity_uids,
                                                rule=commodity_limit_rule)
 
-    def sink_model(self):
-        """Sink model containing the constraints for sinks.
-
+    def simple_sink_model(self):
+        """simple sink model containing the constraints for simple sinks
         Parameters
         ----------
         self : pyomo.ConcreteModel
@@ -439,14 +440,14 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        self.sink_val = {obj.uid: obj.val for obj in self.sink_objs}
-        ee = self.edges(self.sink_objs)
+        self.simple_sink_val = {obj.uid: obj.val for obj in self.simple_sink_objs}
+        ee = self.edges(self.simple_sink_objs)
         for (e1, e2) in ee:
             # setting upper and lower bounds for variable corresponding to
-            # edge from buses to sinks
+            # edge from buses to simple_sinks
             for t in self.timesteps:
-                self.w[(e1, e2), t].setub(self.sink_val[e2][t])
-                self.w[(e1, e2), t].setlb(self.sink_val[e2][t])
+                self.w[(e1, e2), t].setub(self.simple_sink_val[e2][t])
+                self.w[(e1, e2), t].setlb(self.simple_sink_val[e2][t])
 
     def simple_storage_model(self):
         """Simple storage model containing the constraints for simple storage
@@ -656,7 +657,7 @@ class OptimizationModel(po.ConcreteModel):
             instance.write('problem.lp',
                            io_options={'symbolic_solver_labels': True})
             # print instance
-            instance.pprint()
+            #instance.pprint()
         # solve instance
         opt = SolverFactory(solver, solver_io=solver_io)
         # store results
@@ -729,9 +730,9 @@ def results_to_objects(entities, instance):
             for t in instance.timesteps:
                 e.results['Input'].append(instance.w[e.inputs[0].uid,
                                           e.uid, o, t].value)
-        # write results to self.sink_objs
-        # (will be the value of Sink in general)
-        if isinstance(e, cp.Sink):
+        # write results to self.simple_sink_objs
+        # (will be the value of simple sink in general)
+        if isinstance(e, cp.SimpleSink):
             e.results['Input'] = []
             for t in instance.timesteps:
                 e.results['Input'].append(instance.w[e.inputs[0].uid,

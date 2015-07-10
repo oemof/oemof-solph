@@ -23,7 +23,24 @@ class Entity:
 
 
 class Component(Entity):
-  pass
+  """
+  """
+  __lower_name__ = "component"
+  def __init__(self, **kwargs):
+    """
+    """
+    super().__init__(**kwargs)
+
+    self.in_max = kwargs.get('in_max', None)
+    self.out_max = kwargs.get('out_max', None)
+    self.lifetime = kwargs.get('lifetime', 20)
+    self.wacc = kwargs.get('wacc', 0.05)
+    self.capex = kwargs.get('capex', 0)
+    self.opex_fix = kwargs.get('opex_fix', None)
+    self.opex_var = kwargs.get('opex_var', 0)
+    self.co2_var = kwargs.get('co2_var', None)
+    self.opt_param = kwargs.get('opt_param', None)
+    self.results = kwargs.get('results', {})
 
 
 class Transformer(Component):
@@ -41,14 +58,6 @@ class Transformer(Component):
       raise ValueError("Transformer must have at least one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
 
-    self.in_max = kwargs.get('in_max', None)
-    self.out_max = kwargs.get('out_max', None)
-    self.capex = kwargs.get('capex', 0)
-    self.opex_fix = kwargs.get('opex_fix', None)
-    self.opex_var = kwargs.get('opex_var', 0)
-    self.co2_var = kwargs.get('co2_var', None)
-    self.opt_param = kwargs.get('opt_param', None)
-    self.results = kwargs.get('results', {})
 
   def emissions(self):
     self.emissions =  [o * self.co2_var for o in self.results['Input']]
@@ -164,8 +173,17 @@ class Sink(Component):
     if self.outputs:
       raise ValueError("Sink must not have outputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
+
+class SimpleSink(Sink):
+  """
+  """
+  __lower_name__ = "simple_sink"
+  def __init__(self, **kwargs):
+    """
+    """
+    super().__init__(**kwargs)
     self.val = kwargs['val']
-    self.results = kwargs.get('results', {})
+
 
 class Source(Component):
   """
@@ -178,7 +196,6 @@ class Source(Component):
     if self.inputs:
       raise ValueError("Source must not have inputs.\n" +
                        "Got: {0!r}".format([str(x) for x in self.inputs]))
-    self.results = kwargs.get('results', {})
 
 class RenewableSource(Source):
   """
@@ -190,7 +207,6 @@ class RenewableSource(Source):
     """
     super().__init__(**kwargs)
     self.val = kwargs.get('val', None)
-    self.out_max = kwargs.get('out_max', 0)
     self.dispatch = kwargs.get('dispatch', False)
     self.dispatch_ex = kwargs.get('dispatch_ex', 0)
 
@@ -236,13 +252,6 @@ class Transport(Component):
       raise ValueError("Transport must have exactly one output.\n" +
                        "Got: {0!r}".format([str(x) for x in self.outputs]))
 
-    self.in_max = kwargs.get('in_max', None)
-    self.out_max = kwargs.get('out_max', None)
-    self.capex = kwargs.get('capex', 0)
-    self.opex_fix = kwargs.get('opex_fix', None)
-    self.opex_var = kwargs.get('opex_var', 0)
-    self.co2_var = kwargs.get('co2_var', None)
-    self.results = kwargs.get('results', {})
 
 class SimpleTransport(Transport):
   """
