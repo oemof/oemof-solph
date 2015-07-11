@@ -46,13 +46,16 @@ class OptimizationModel(po.ConcreteModel):
         # "call" methods to add the constraints and variables to opt. problem
         self.variables()
         self.bus_model()
-        self.simple_chp_model()
+        self.simple_chp_model(objs=self.simple_chp_objs,
+                              uids=self.simple_chp_uids)
         self.simple_extraction_chp_model()
         self.renewable_source_model()
-        self.simple_transformer_model()
+        self.generic_transformer_model(objs=self.simple_transformer_objs,
+                                       uids=self.simple_transformer_uids)
         self.simple_storage_model()
         self.commodity_model()
-        self.simple_transport_model()
+        self.simple_transport_model(objs=self.simple_transport_objs,
+                                    uids=self.simple_transport_uids)
         self.simple_sink_model()
         # set objective function
         self.objective()
@@ -90,9 +93,9 @@ class OptimizationModel(po.ConcreteModel):
             self.excess_slack = po.Var(self.bus_uids, self.timesteps,
                                        within=po.NonNegativeReals)
 
-
         I = {b.uid: [i.uid for i in b.inputs] for b in self.bus_objs}
         O = {b.uid: [o.uid for o in b.outputs] for b in self.bus_objs}
+
         # constraint for bus balance:
         # component inputs/outputs are negative/positive in the bus balance
         def bus_rule(self, e, t):
@@ -104,9 +107,9 @@ class OptimizationModel(po.ConcreteModel):
             return(expr, 0)
         self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
 
-    def simple_transformer_model(self):
-        """Simple transformer model containing the constraints
-        for simple transformer components.
+    def generic_transformer_model(self, objs, uids):
+        """Generic transformer model containing the constraints
+        for generic transformer components.
 
         Parameters
         ----------
@@ -115,86 +118,50 @@ class OptimizationModel(po.ConcreteModel):
         Returns
         -------
         self : pyomo.ConcreteModel
-
-
-        **Mathematical equations**
-
-        Sets containing the inputs/outputs for all simple transformers:
-
-        .. math::
-
-            &E_{SF}, \\quad \\text{Set with all simple transformers}\\\\
-            &I = \\{ i | i \\subset E_B, (i,e) \\in \\vec{E},
-            e \\in E_{SF}\\}, \\quad \\text{All inputs for } e \\in E_{SF}\\\\
-            &O = \\{ o | o \\subset E_B, (e,o) \\in \\vec{E},
-            e \\in E_{SF}\\}, \\quad \\text{All outputs for } e \\in E_{SF}\\\\
-
-        The model equations for operational models are described as follows.
-        Constraint for input/output relation:
-
-        .. math::
-
-            w(I(e), e,t) \cdot \eta_(e) - w(e,O(e),t) = 0, \\quad
-            \\forall e \\in E_{SF}, \\forall t \\in T\\\\
-
-        For investment models the additional constraint must hold:
-
-        .. math::
-
-            w(I(e), e, t) \\leq in_{max}(e1) + w_{add}(I(e), e), \\quad
-            \\forall t \\in T, \\forall e \\in E_{SF}\\\\
         """
 
         # temp set with input uids for every simple transformer
-        I = {obj.uid: obj.inputs[0].uid
-             for obj in self.simple_transformer_objs}
+        I = {obj.uid: obj.inputs[0].uid for obj in objs}
         # set with output uids for every simple transformer
-        O = {obj.uid: obj.outputs[0].uid
-             for obj in self.simple_transformer_objs}
-        eta = {obj.uid: obj.eta for obj in self.simple_transformer_objs}
+        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+        eta = {obj.uid: obj.param['eta'] for obj in objs}
 
         # constraint for simple transformers: input * efficiency = output
         def in_out_rule(self, e, t):
-            expr = 0
-            expr += self.w[I[e], e, t] * eta[e]
-            expr += - self.w[e, O[e], t]
-            return(expr, 0)
-        self.simple_transformer_c = po.Constraint(self.simple_transformer_uids,
-                                                  self.timesteps,
-                                                  rule=in_out_rule)
+            expr = self.w[I[e], e, t] * eta[e][0] - self.w[e, O[e][0], t]
+            return(expr == 0)
+        setattr(self, "generic_in_out_"+objs[0].__lower_name__,
+                po.Constraint(uids, self.timesteps, rule=in_out_rule))
 
         # set variable bounds (out_max = in_max * efficiency):
         # m.in_max = {'pp_coal': 51794.8717948718, ... }
         # m.out_max = {'pp_coal': 20200, ... }
-        self.in_max = {obj.uid: obj.in_max
-                       for obj in self.simple_transformer_objs}
-        self.out_max = {obj.uid: obj.out_max for obj in
-                        self.simple_transformer_objs}
+        in_max = {obj.uid: obj.param['in_max'] for obj in objs}
+        out_max = {obj.uid: obj.param['out_max'] for obj in objs}
 
         # set bounds for basic/investment models
         if(self.invest is False):
             # edges for simple transformers ([('coal', 'pp_coal'),...])
-            ee = self.edges(self.simple_transformer_objs)
+            ee = self.edges(objs)
             for (e1, e2) in ee:
                 for t in self.timesteps:
                     # transformer output <= self.out_max
-                    if e1 in self.simple_transformer_uids:
-                        self.w[e1, e2, t].setub(self.out_max[e1])
+                    if e1 in uids:
+                        self.w[e1, e2, t].setub(out_max[e1][e2])
                     # transformer input <= self.in_max
-                    if e2 in self.simple_transformer_uids:
-                        self.w[e1, e2, t].setub(self.in_max[e2])
+                    if e2 in uids:
+                        self.w[e1, e2, t].setub(in_max[e2][e1])
         else:
             # constraint for additional capacity
             def invest_rule(self, e, t):
-                expr = 0
-                expr += self.w[I[e], e, t]
-                rhs = self.in_max[e] + self.w_add[I[e], e]
-                return(expr <= rhs)
-            self.simple_transformer_max_input_c = \
-                po.Constraint(self.simple_transformer_uids, self.timesteps,
-                              rule=invest_rule)
+                expr = self.w[I[e], e, t] - in_max[e][I[e]] - \
+                    self.w_add[I[e], e]
+                return(expr <= 0)
+            setattr(self, "generic_invest_" + objs[0].__lower_name__,
+                    po.Constraint(uids, self.timesteps,
+                                  rule=invest_rule))
 
-    def simple_chp_model(self):
+    def simple_chp_model(self, objs, uids):
         """Simple chp model containing the constraints for simple chp
         components.
 
@@ -207,54 +174,24 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
 
         """
+        # use generic_transformer model for in-out relation and
+        # upper/lower bounds
+        self.generic_transformer_model(objs=objs, uids=uids)
 
-        # temp set with input uids for every simple chp
-        # {'pp_chp': 'gas'}
-        I = {obj.uid: obj.inputs[0].uid for obj in self.simple_chp_objs}
         # set with output uids for every simple chp
         # {'pp_chp': ['b_th', 'b_el']}
-        O = {obj.uid: [o.uid for o in obj.outputs[:]]
-             for obj in self.simple_chp_objs}
+        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
         # efficiencies for simple chps
-        eta = {obj.uid: obj.eta for obj in self.simple_chp_objs}
-
-        # constraint for transformer energy balance:
-        # E = P / (eta_el) = P / eta_el = Q/ eta_th
-        # (depending on the position of the outputs and eta)
-        def in_out_rule(self, e, t):
-            expr = self.w[I[e], e, t]
-            expr += -self.w[e, O[e][0], t] / eta[e][0]
-            return(expr, 0)
-        self.simple_chp_c1 = po.Constraint(self.simple_chp_uids,
-                                           self.timesteps, rule=in_out_rule)
+        eta = {obj.uid: obj.param['eta'] for obj in objs}
 
         # additional constraint for power to heat ratio of simple chp comp:
         # P/eta_el = Q/eta_th
         def chp_rule(self, e, t):
-            expr = 0
-            expr += self.w[e, O[e][0], t] / eta[e][0]
+            expr = self.w[e, O[e][0], t] / eta[e][0]
             expr += -self.w[e, O[e][1], t] / eta[e][1]
-            return(expr, 0)
-        self.simple_chp_c2 = po.Constraint(self.simple_chp_uids,
-                                           self.timesteps,
+            return(expr == 0)
+        self.simple_chp_c2 = po.Constraint(uids, self.timesteps,
                                            rule=chp_rule)
-        # set variable bounds
-        if(self.invest is False):
-            self.in_max = {obj.uid: obj.in_max for obj in self.simple_chp_objs}
-            # yields nested dict e.g: {'chp': {'home_th': 40, 'region_el': 30}}
-            self.out_max = {obj.uid: dict(zip(O[obj.uid], obj.out_max))
-                            for obj in self.simple_chp_objs}
-
-            # edges for simple chps ([('gas', 'pp_chp'), ('pp_chp', 'b_th'),..)
-            ee = self.edges(self.simple_chp_objs)
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    # chp input <= self.in_max
-                    if e2 in self.simple_chp_uids:
-                        self.w[e1, e2, t].setub(self.in_max[e2])
-                    # chp outputs <= self.out_max
-                    if e1 in self.simple_chp_uids:
-                        self.w[e1, e2, t].setub(self.out_max[e1][e2])
 
     def simple_extraction_chp_model(self):
         """Simple extraction chp model containing the constraints for
@@ -440,7 +377,8 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        self.simple_sink_val = {obj.uid: obj.val for obj in self.simple_sink_objs}
+        self.simple_sink_val = {obj.uid: obj.val
+                                for obj in self.simple_sink_objs}
         ee = self.edges(self.simple_sink_objs)
         for (e1, e2) in ee:
             # setting upper and lower bounds for variable corresponding to
@@ -514,7 +452,7 @@ class OptimizationModel(po.ConcreteModel):
                                                   self.timesteps,
                                                   rule=storage_balance_rule)
 
-    def simple_transport_model(self):
+    def simple_transport_model(self, objs, uids):
         """Simple transport model building the constraints
         for simple transport components
 
@@ -527,48 +465,7 @@ class OptimizationModel(po.ConcreteModel):
         m : pyomo.ConcreteModel
         """
 
-        # temp set with input uids for every simple transport
-        I = {obj.uid: obj.inputs[0].uid for obj in self.simple_transport_objs}
-        # set with output uids for every simple transport
-        O = {obj.uid: obj.outputs[0].uid for obj in self.simple_transport_objs}
-        eta = {obj.uid: obj.eta for obj in self.simple_transport_objs}
-
-        # constraint for simple transports: input * efficiency = output
-        def in_out_rule(self, e, t):
-            expr = 0
-            expr += self.w[I[e], e, t] * eta[e]
-            expr += - self.w[e, O[e], t]
-            return(expr, 0)
-        self.simple_transport_eta_c = po.Constraint(self.simple_transport_uids,
-                                                    self.timesteps,
-                                                    rule=in_out_rule)
-
-        # set variable bounds (out_max = in_max * efficiency):
-        self.in_max = {obj.uid: obj.in_max
-                       for obj in self.simple_transport_objs}
-        self.out_max = {obj.uid: obj.out_max
-                        for obj in self.simple_transport_objs}
-
-        # set bounds for basic/investment models
-        if(self.invest is False):
-            # edges for simple transport ([('b_el', 'b_el2'),...])
-            ee = self.edges(self.simple_transport_objs)
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    # transport output <= self.out_max
-                    if e1 in self.simple_transport_uids:
-                        self.w[e1, e2, t].setub(self.out_max[e1])
-                    # transport input <= self.in_max
-                    if e2 in self.simple_transport_uids:
-                        self.w[e1, e2, t].setub(self.in_max[e2])
-        else:
-            # constraint for additional capacity
-            def invest_rule(self, e, t):
-                return(self.w[I[e], e, t] <= self.in_max[e] +
-                       self.w_add[I[e], e])
-            self.simple_transport_invest_c = \
-                po.Constraint(self.simple_transport_uids, self.timesteps,
-                              rule=invest_rule)
+        self.generic_transformer_model(objs=objs, uids=uids)
 
     def objective(self):
         """Function that creates the objective function of the optimization

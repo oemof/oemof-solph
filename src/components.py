@@ -39,7 +39,7 @@ class Component(Entity):
     self.opex_fix = kwargs.get('opex_fix', None)
     self.opex_var = kwargs.get('opex_var', 0)
     self.co2_var = kwargs.get('co2_var', None)
-    self.opt_param = kwargs.get('opt_param', None)
+    self.param = kwargs.get('param', None)
     self.results = kwargs.get('results', {})
 
 
@@ -75,10 +75,10 @@ class SimpleTransformer(Transformer):
     super().__init__(**kwargs)
     self.eta = kwargs.get('eta', None)
 
-    if(self.in_max is None and self.out_max is not None):
-      self.in_max = self.out_max / self.eta
-    if(self.out_max is None and self.in_max is not None):
-      self.out_max = self.in_max * self.eta
+    if(self.param['in_max'][self.inputs[0].uid] is None and
+       self.param['out_max'][self.outputs[0].uid] is not None):
+      self.param['in_max'][self.inputs[0].uid] = \
+          self.param['out_max'][self.outputs[0].uid] / self.param['eta'][0]
 
 
 class SimpleCHP(Transformer):
@@ -92,7 +92,7 @@ class SimpleCHP(Transformer):
     :param eta: eta as constant efficiency for simple transformer
     """
     super().__init__(**kwargs)
-    self.eta = kwargs.get('eta', [])
+    self.eta = kwargs.get('eta', {'th': None, 'el': None})
 
 
 class SimpleExtractionCHP(Transformer):

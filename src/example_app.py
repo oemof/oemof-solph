@@ -61,34 +61,48 @@ demand_el2 = cp.SimpleSink(uid="demand_el2", inputs=[b_el2],
 demand_th = cp.SimpleSink(uid="demand_th", inputs=[b_th],
                           val=data['demand_th']*100000)
 # Simple Transformer for b_el
-pp_coal = cp.SimpleTransformer(uid='pp_coal', inputs=[bcoal],
-                               outputs=[b_el], in_max=None, out_max=20200,
-                               eta=0.39, opex_var=25, co2_var=em_coal)
-pp_lig = cp.SimpleTransformer(uid='pp_lig', inputs=[blig],
-                              outputs=[b_el], in_max=None, out_max=11800,
-                              eta=0.41, opex_var=19, co2_var=em_lig)
-pp_gas = cp.SimpleTransformer(uid='pp_gas', inputs=[bgas],
-                              outputs=[b_el], in_max=None, out_max=41000,
-                              eta=0.45, opex_var=45, co2_var=em_lig)
-pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil],
-                              outputs=[b_el], in_max=None, out_max=1000,
-                              eta=0.3, opex_var=50, co2_var=em_oil)
+pp_coal = cp.SimpleTransformer(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
+                               param={'in_max': {bcoal.uid: None},
+                                      'out_max': {b_el.uid: 20200},
+                                      'eta': [0.39]},
+                               opex_var=25, co2_var=em_coal)
+pp_lig = cp.SimpleTransformer(uid='pp_lig', inputs=[blig], outputs=[b_el],
+                              param={'in_max': {blig.uid: None},
+                                     'out_max': {b_el.uid: 11800},
+                                     'eta': [0.41]},
+                              opex_var=19, co2_var=em_lig)
+pp_gas = cp.SimpleTransformer(uid='pp_gas', inputs=[bgas], outputs=[b_el],
+                              param={'in_max': {bgas.uid: None},
+                                     'out_max': {b_el.uid: 41000},
+                                     'eta': [0.45]},
+                              opex_var=45, co2_var=em_lig)
+
+pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil], outputs=[b_el],
+                              param={'in_max': {boil.uid: None},
+                                     'out_max': {b_el.uid: 1000},
+                                     'eta': [0.3]},
+                              opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
-pp_chp = cp.SimpleCHP(uid='pp_chp', inputs=[bgas], in_max=100000,
-                      out_max=[None, 30000], eta=[0.4, 0.3],
-                      outputs=[b_th, b_el])
+pp_chp = cp.SimpleCHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
+                      param={'in_max': {bgas.uid: 100000},
+                             'out_max': {b_th.uid: None, b_el.uid: 30000},
+                             'eta': [0.4, 0.3]})
 
 # transport
 cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                            in_max=10000, eta=0.9)
+                            param={'in_max': {b_el.uid: 10000},
+                                   'out_max': {b_el2.uid: None},
+                                   'eta': [0.9]})
 cable2 = cp.SimpleTransport(uid="cable2", inputs=[b_el2], outputs=[b_el],
-                            in_max=10000, eta=0.8)
+                            param={'in_max': {b_el2.uid: 10000},
+                                   'out_max': {b_el.uid: None},
+                                   'eta': [0.8]})
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
 
 # group components
-transformers = [pp_coal, pp_gas, pp_lig, pp_oil, pp_chp]
+transformers = [pp_coal, pp_lig, pp_gas, pp_oil, pp_chp]
 commodities = [rcoal, rgas, roil, rlig]
 renew_sources = [pv, wind_on, wind_on2, wind_off]
 sinks = [demand_th, demand_el, demand_el2]
