@@ -19,7 +19,7 @@ import components as cp
 import pandas as pd
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(3)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -38,15 +38,17 @@ b_el = cp.Bus(uid="b_el", type="elec")
 b_el2 = cp.Bus(uid="b_el2", type="elec")
 b_th = cp.Bus(uid="b_th", type="th")
 
+dispatch_flag = False
 # renewable sources (only pv onshore)
 wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el], val=data['wind'],
-                             out_max=66300, dispatch=True)
+                             out_max=66300, dispatch=dispatch_flag)
 wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],
-                              val=data['wind'], out_max=66300, dispatch=True)
+                              val=data['wind'], out_max=66300,
+                              dispatch=dispatch_flag)
 wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
-                              out_max=25300, dispatch=True)
+                              out_max=25300, dispatch=dispatch_flag)
 pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
-                        out_max=65300, dispatch=True)
+                        out_max=65300, dispatch=dispatch_flag)
 # resources
 rcoal = cp.Commodity(uid="rcoal", outputs=[bcoal], emmission_factor=em_coal)
 rgas = cp.Commodity(uid="rgas", outputs=[bgas], emmission_factor=em_gas)
@@ -91,11 +93,11 @@ pp_chp = cp.SimpleCHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
 # transport
 cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
                             param={'in_max': {b_el.uid: 10000},
-                                   'out_max': {b_el2.uid: None},
+                                   'out_max': {b_el2.uid: 9000},
                                    'eta': [0.9]})
 cable2 = cp.SimpleTransport(uid="cable2", inputs=[b_el2], outputs=[b_el],
                             param={'in_max': {b_el2.uid: 10000},
-                                   'out_max': {b_el.uid: None},
+                                   'out_max': {b_el.uid: 8000},
                                    'eta': [0.8]})
 
 # group busses
@@ -112,7 +114,7 @@ components = transformers + commodities + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'slack': True})
+                       options={'invest': True, 'slack': True})
 
 instance = om.solve(solver='gurobi', debug=False, tee=True)
 
