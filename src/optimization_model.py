@@ -50,8 +50,8 @@ class OptimizationModel(po.ConcreteModel):
                               uids=self.simple_chp_uids)
         self.simple_extraction_chp_model()
         self.renewable_source_model()
-        self.generic_transformer_model(objs=self.simple_transformer_objs,
-                                       uids=self.simple_transformer_uids)
+        self.simple_transformer_model(objs=self.simple_transformer_objs,
+                                      uids=self.simple_transformer_uids)
         self.simple_storage_model()
         self.commodity_model()
         self.simple_transport_model(objs=self.simple_transport_objs,
@@ -73,6 +73,26 @@ class OptimizationModel(po.ConcreteModel):
         # additional variable for investment models
         if(self.invest is True):
             self.w_add = po.Var(self.all_edges, within=po.NonNegativeReals)
+
+    def generic_io_constraints(self, objs=None, uids=None,
+                               timesteps=None):
+        if objs is None:
+            raise ValueError("No objects defined. Please specify objects for \
+                             which the constraints should be build")
+        if uids is None:
+            uids = [e.uids for e in objs]
+
+        I = {obj.uid: obj.inputs[0].uid for obj in objs}
+        # set with output uids for every simple transformer
+        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+        eta = {obj.uid: obj.param['eta'] for obj in objs}
+
+        # constraint for simple transformers: input * efficiency = output
+        def __rule__(self, e, t):
+            expr = self.w[I[e], e, t] * eta[e][0] - self.w[e, O[e][0], t]
+            return(expr == 0)
+        setattr(self, "generic_io_"+objs[0].__lower_name__,
+                po.Constraint(uids, timesteps, rule=__rule__))
 
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
@@ -107,7 +127,7 @@ class OptimizationModel(po.ConcreteModel):
             return(expr, 0)
         self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
 
-    def generic_transformer_model(self, objs, uids):
+    def simple_transformer_model(self, objs, uids):
         """Generic transformer model containing the constraints
         for generic transformer components.
 
@@ -120,18 +140,8 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        # temp set with input uids for every simple transformer
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-        # set with output uids for every simple transformer
-        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-        eta = {obj.uid: obj.param['eta'] for obj in objs}
-
-        # constraint for simple transformers: input * efficiency = output
-        def in_out_rule(self, e, t):
-            expr = self.w[I[e], e, t] * eta[e][0] - self.w[e, O[e][0], t]
-            return(expr == 0)
-        setattr(self, "generic_in_out_"+objs[0].__lower_name__,
-                po.Constraint(uids, self.timesteps, rule=in_out_rule))
+        self.generic_io_constraints(objs=objs, uids=uids,
+                                    timesteps=self.timesteps)
 
         # set variable bounds (out_max = in_max * efficiency):
         # m.in_max = {'pp_coal': 51794.8717948718, ... }
@@ -176,7 +186,7 @@ class OptimizationModel(po.ConcreteModel):
         """
         # use generic_transformer model for in-out relation and
         # upper/lower bounds
-        self.generic_transformer_model(objs=objs, uids=uids)
+        self.simple_transformer_model(objs=objs, uids=uids)
 
         # set with output uids for every simple chp
         # {'pp_chp': ['b_th', 'b_el']}
@@ -358,11 +368,9 @@ class OptimizationModel(po.ConcreteModel):
 
         # set upper bounds: sum(yearly commodity output) <= yearly_limit
         def commodity_limit_rule(self, e):
-            expr = 0
-            expr += sum(self.w[e, o, t] for t in self.timesteps
-                        for o in O[e])
-            rhs = self.yearly_limit[e]
-            return(expr <= rhs)
+            expr = sum(self.w[e, o, t] for t in self.timesteps
+                       for o in O[e]) - self.yearly_limit[e]
+            return(expr <= 0)
         self.commodity_limit_c = po.Constraint(self.commodity_uids,
                                                rule=commodity_limit_rule)
 
@@ -465,7 +473,7 @@ class OptimizationModel(po.ConcreteModel):
         m : pyomo.ConcreteModel
         """
 
-        self.generic_transformer_model(objs=objs, uids=uids)
+        self.simple_transformer_model(objs=objs, uids=uids)
 
     def objective(self):
         """Function that creates the objective function of the optimization
@@ -554,7 +562,7 @@ class OptimizationModel(po.ConcreteModel):
             instance.write('problem.lp',
                            io_options={'symbolic_solver_labels': True})
             # print instance
-            #instance.pprint()
+            # instance.pprint()
         # solve instance
         opt = SolverFactory(solver, solver_io=solver_io)
         # store results
