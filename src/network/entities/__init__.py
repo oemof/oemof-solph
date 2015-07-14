@@ -1,4 +1,4 @@
-from network import Entity
+from .. import Entity
 
 
 class Bus(Entity):

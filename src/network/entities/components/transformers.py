@@ -1,6 +1,6 @@
 import numpy as np
 
-from network.entities.components import Transformer
+from . import Transformer
 
 
 class Simple(Transformer):
