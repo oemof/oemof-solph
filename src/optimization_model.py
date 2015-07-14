@@ -44,7 +44,8 @@ class OptimizationModel(po.ConcreteModel):
             setattr(self, cls.__lower_name__ + "_uids", uids)
 
         # "call" methods to add the constraints and variables to opt. problem
-        self.generic_variables()
+        self.generic_variables(edges=self.all_edges,
+                               timesteps=self.timesteps)
         self.bus_model()
         self.simple_chp_model(objs=self.simple_chp_objs,
                               uids=self.simple_chp_uids)
@@ -62,19 +63,20 @@ class OptimizationModel(po.ConcreteModel):
         # set objective function
         self.objective()
 
-    def generic_variables(self):
+    def generic_variables(self, edges, timesteps, var_name="w"):
         """ variables creates all variables corresponding to the edges indexed
         by t in timesteps, (e1,e2) in all_edges
         if invest flag is set to true, an additional variable indexed by
         (e1,e2) in all_edges is created.
         """
         # variable for edges
-        self.w = po.Var(self.all_edges, self.timesteps,
-                        within=po.NonNegativeReals)
+        setattr(self, "generic_"+var_name,
+                po.Var(edges, timesteps, within=po.NonNegativeReals))
 
         # additional variable for investment models
         if(self.invest is True):
-            self.w_add = po.Var(self.all_edges, within=po.NonNegativeReals)
+            setattr(self, "generic_add_"+var_name,
+                    po.Var(edges, within=po.NonNegativeReals))
 
     def generic_io_constraints(self, objs=None, uids=None,
                                timesteps=None):

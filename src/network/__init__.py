@@ -23,6 +23,8 @@ class Entity:
         :param uid: unique component identifier
         :param inputs: list of Entities acting as input to this Entity.
         :param outputs: list of Entities acting as output from this Enity.
+        :param geo_data: geo-spatial data with informations for
+        location/region-shape
         """
         self.uid = kwargs["uid"]
         self.inputs = kwargs.get("inputs", [])
@@ -33,6 +35,7 @@ class Entity:
         for e_out in self.outputs:
             if self not in e_out.inputs:
                 e_out.inputs.append(self)
+        self.geo_data = kwargs.get("geo_data", None)
 
     def __str__(self):
         return "<{0} #{1}>".format(type(self).__name__, self.uid)
