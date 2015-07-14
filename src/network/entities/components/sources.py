@@ -4,7 +4,7 @@ from network.entities.components import Source
 class Renewable(Source):
     """
     """
-    __lower_name__ = "renewable_source"
+    lower_name = "renewable_source"
 
     def __init__(self, **kwargs):
         """
@@ -19,13 +19,13 @@ class Renewable(Source):
 class Commodity(Source):
     """
     """
-    __lower_name__ = "commodity"
+    lower_name = "commodity"
 
     def __init__(self, **kwargs):
         """
         """
         super().__init__(**kwargs)
-        self.yearly_limit = kwargs.get('yearly_limit', float('+inf'))
+        self.sum_out_limit = kwargs.get('yearly_limit', float('+inf'))
         self.emmision_factor = kwargs.get('emmission_factor', 0)
 
     def emissions(self):

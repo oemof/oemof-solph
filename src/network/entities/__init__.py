@@ -8,7 +8,7 @@ class Bus(Entity):
     consumers of a commodity of the same kind. As such it has a type,
     which signifies what kind of commodity goes through the bus.
     """
-    __lower_name__ = "bus"
+    lower_name = "bus"
 
     def __init__(self, **kwargs):
         """
@@ -17,7 +17,10 @@ class Bus(Entity):
                      equality and is distinct for incompatible Buses.
         """
         super().__init__(**kwargs)
-        self.type = kwargs["type"]
+        self.type = kwargs.get("type", None)
+        self.price = kwargs.get("price", 0)
+        self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
+        self.emission_factor = kwargs.get("emission_factor", 0)
 
 
 class Component(Entity):
@@ -28,7 +31,7 @@ class Component(Entity):
     Components and not between Entities of equal subtypes. This class
     exists only to facilitate this distinction and is empty otherwise.
     """
-    __lower_name__ = "component"
+    lower_name = "component"
 
     def __init__(self, **kwargs):
         """

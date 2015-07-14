@@ -15,7 +15,12 @@ are written back into the objects.
 
 """
 from optimization_model import *
-import components as cp
+from network.entities import Bus
+from network.entities.components import sinks as sink
+from network.entities.components import sources as source
+from network.entities.components import transformers as transformer
+from network.entities.components import transports as transport
+
 import pandas as pd
 
 data = pd.read_csv("example_data.csv", sep=",")
@@ -28,74 +33,71 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bcoal = cp.Bus(uid="coal", type="coal")
-bgas = cp.Bus(uid="gas", type="gas")
-boil = cp.Bus(uid="oil", type="oil")
-blig = cp.Bus(uid="lignite", type="lignite")
+bcoal = Bus(uid="coal", type="coal")
+bgas = Bus(uid="gas", type="gas")
+boil = Bus(uid="oil", type="oil")
+blig = Bus(uid="lignite", type="lignite")
 
 # electricity and heat
-b_el = cp.Bus(uid="b_el", type="elec")
-b_el2 = cp.Bus(uid="b_el2", type="elec")
-b_th = cp.Bus(uid="b_th", type="th")
+b_el = Bus(uid="b_el", type="elec")
+b_el2 = Bus(uid="b_el2", type="elec")
+b_th = Bus(uid="b_th", type="th")
 
 dispatch_flag = False
 # renewable sources (only pv onshore)
-wind_on = cp.RenewableSource(uid="wind_on", outputs=[b_el], val=data['wind'],
-                             out_max=66300, dispatch=dispatch_flag)
-wind_on2 = cp.RenewableSource(uid="wind_on2", outputs=[b_el2],
-                              val=data['wind'], out_max=66300,
-                              dispatch=dispatch_flag)
-wind_off = cp.RenewableSource(uid="wind_off", outputs=[b_el], val=data['wind'],
-                              out_max=25300, dispatch=dispatch_flag)
-pv = cp.RenewableSource(uid="pv", outputs=[b_el], val=data['pv'],
-                        out_max=65300, dispatch=dispatch_flag)
+wind_on = source.Renewable(uid="wind_on", outputs=[b_el], val=data['wind'],
+                           out_max=66300, dispatch=dispatch_flag)
+wind_on2 = source.Renewable(uid="wind_on2", outputs=[b_el2],
+                            val=data['wind'], out_max=66300,
+                            dispatch=dispatch_flag)
+wind_off = source.Renewable(uid="wind_off", outputs=[b_el], val=data['wind'],
+                            out_max=25300, dispatch=dispatch_flag)
+pv = source.Renewable(uid="pv", outputs=[b_el], val=data['pv'],
+                      out_max=65300, dispatch=dispatch_flag)
 # resources
-rcoal = cp.Commodity(uid="rcoal", outputs=[bcoal], emmission_factor=em_coal)
-rgas = cp.Commodity(uid="rgas", outputs=[bgas], emmission_factor=em_gas)
-roil = cp.Commodity(uid="roil", outputs=[boil], emmission_factor=em_oil)
-rlig = cp.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
+rcoal = source.Commodity(uid="rcoal", outputs=[bcoal], emmission_factor=em_coal)
+rgas = source.Commodity(uid="rgas", outputs=[bgas], emmission_factor=em_gas)
+roil = source.Commodity(uid="roil", outputs=[boil], emmission_factor=em_oil)
+rlig = source.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
 
 # demands
-demand_el = cp.SimpleSink(uid="demand_el", inputs=[b_el],
-                          val=data['demand_el'])
-demand_el2 = cp.SimpleSink(uid="demand_el2", inputs=[b_el2],
-                           val=data['demand_el'])
-demand_th = cp.SimpleSink(uid="demand_th", inputs=[b_th],
-                          val=data['demand_th']*100000)
+demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
+                        val=data['demand_el'])
+demand_el2 = sink.Simple(uid="demand_el2", inputs=[b_el2],
+                         val=data['demand_el'])
+demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
+                        val=data['demand_th']*100000)
 # Simple Transformer for b_el
-pp_coal = cp.SimpleTransformer(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
-                               param={'in_max': {bcoal.uid: None},
-                                      'out_max': {b_el.uid: 20200},
-                                      'eta': [0.39]},
-                               opex_var=25, co2_var=em_coal)
-pp_lig = cp.SimpleTransformer(uid='pp_lig', inputs=[blig], outputs=[b_el],
-                              param={'in_max': {blig.uid: None},
-                                     'out_max': {b_el.uid: 11800},
-                                     'eta': [0.41]},
-                              opex_var=19, co2_var=em_lig)
-pp_gas = cp.SimpleTransformer(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                              param={'in_max': {bgas.uid: None},
-                                     'out_max': {b_el.uid: 41000},
-                                     'eta': [0.45]},
-                              opex_var=45, co2_var=em_lig)
+pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
+                            param={'in_max': {bcoal.uid: None},
+                            'out_max': {b_el.uid: 20200}, 'eta': [0.39]},
+                            opex_var=25, co2_var=em_coal)
+pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
+                            param={'in_max': {blig.uid: None},
+                           'out_max': {b_el.uid: 11800}, 'eta': [0.41]},
+                            opex_var=19, co2_var=em_lig)
+pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
+                            param={'in_max': {bgas.uid: None},
+                                   'out_max': {b_el.uid: 41000},
+                                   'eta': [0.45]},
+                            opex_var=45, co2_var=em_lig)
 
-pp_oil = cp.SimpleTransformer(uid='pp_oil', inputs=[boil], outputs=[b_el],
-                              param={'in_max': {boil.uid: None},
-                                     'out_max': {b_el.uid: 1000},
-                                     'eta': [0.3]},
-                              opex_var=50, co2_var=em_oil)
+pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
+                            param={'in_max': {boil.uid: None},
+                                  'out_max': {b_el.uid: 1000}, 'eta': [0.3]},
+                             opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
-pp_chp = cp.SimpleCHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
-                      param={'in_max': {bgas.uid: 100000},
-                             'out_max': {b_th.uid: None, b_el.uid: 30000},
-                             'eta': [0.4, 0.3]})
+pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
+                         param={'in_max': {bgas.uid: 100000},
+                                'out_max': {b_th.uid: None, b_el.uid: 30000},
+                                'eta': [0.4, 0.3]})
 
 # transport
-cable1 = cp.SimpleTransport(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                            param={'in_max': {b_el.uid: 10000},
-                                   'out_max': {b_el2.uid: 9000},
-                                   'eta': [0.9]})
-cable2 = cp.SimpleTransport(uid="cable2", inputs=[b_el2], outputs=[b_el],
+cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
+                         param={'in_max': {b_el.uid: 10000},
+                               'out_max': {b_el2.uid: 9000},
+                               'eta': [0.9]})
+cable2 = transformer.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
                             param={'in_max': {b_el2.uid: 10000},
                                    'out_max': {b_el.uid: 8000},
                                    'eta': [0.8]})

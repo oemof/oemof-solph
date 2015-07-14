@@ -4,7 +4,7 @@ from network.entities.components import Sink
 class Simple(Sink):
     """
     """
-    __lower_name__ = "simple_sink"
+    lower_name = "simple_sink"
     def __init__(self, **kwargs):
         """
         """

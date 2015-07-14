@@ -7,7 +7,7 @@ class Sink(Component):
     Therefore its list of outputs has to be either None or empty
     (i.e. logically False).
     """
-    __lower_name__ = "sink"
+    __lower_name = "sink"
 
     def __init__(self, **kwargs):
         """
@@ -24,7 +24,7 @@ class Source(Component):
     The opposite of a Sink, i.e. a Component which only produces and as a
     consequence has no input.
     """
-    __lower_name__ = "source"
+    __lower_name = "source"
 
     def __init__(self, **kwargs):
         """
@@ -42,7 +42,7 @@ class Transformer(Component):
     (possibly m) inputs into (possibly n) outputs. As such neither its
     list of inputs, nor its list of outputs are allowed to be empty.
     """
-    __lower_name__ = "transformer"
+    __lower_name = "transformer"
 
     def __init__(self, **kwargs):
         """
@@ -70,7 +70,7 @@ class Transport(Component):
     type (loss, gain, time delay, etc.) this class exists to encapsulate
     such changes.
     """
-    __lower_name__ = "transport"
+    __lower_name = "transport"
 
     def __init__(self, **kwargs):
         """

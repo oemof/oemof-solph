@@ -5,7 +5,7 @@ class Simple(Transport):
     """
     Simple Transport connects two busses with a constant efficiency
     """
-    __lower_name__ = "simple_transport"
+    lower_name = "simple_transport"
 
     def __init__(self, **kwargs):
         """

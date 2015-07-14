@@ -1,5 +1,6 @@
 import pyomo.environ as po
-import components as cp
+from network.entities import Bus, Component
+import network.entities.components as cp
 
 
 class OptimizationModel(po.ConcreteModel):
@@ -28,9 +29,9 @@ class OptimizationModel(po.ConcreteModel):
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
-                                     if isinstance(e, cp.Component)])
+                                     if isinstance(e, Component)])
         # list with all necessary classes
-        classes = ([cp.Bus] +
+        classes = ([Bus] +
                    cp.Transformer.__subclasses__() +
                    cp.Sink.__subclasses__() +
                    cp.Source.__subclasses__() +
@@ -40,8 +41,8 @@ class OptimizationModel(po.ConcreteModel):
         for cls in classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
             uids = [e.uid for e in objs]
-            setattr(self, cls.__lower_name__ + "_objs", objs)
-            setattr(self, cls.__lower_name__ + "_uids", uids)
+            setattr(self, cls.lower_name + "_objs", objs)
+            setattr(self, cls.lower_name + "_uids", uids)
 
         # "call" methods to add the constraints and variables to opt. problem
         self.generic_variables(edges=self.all_edges,
@@ -55,8 +56,8 @@ class OptimizationModel(po.ConcreteModel):
                                       uids=self.simple_transformer_uids)
         self.simple_storage_model(objs=self.simple_storage_objs,
                                   uids=self.simple_storage_uids)
-        self.commodity_model(objs=self.commodity_objs,
-                             uids=self.commodity_uids)
+        self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
+                   timesteps=self.timesteps)
         self.simple_transport_model(objs=self.simple_transport_objs,
                                     uids=self.simple_transport_uids)
         self.simple_sink_model(objs=self.simple_sink_objs)
@@ -70,13 +71,11 @@ class OptimizationModel(po.ConcreteModel):
         (e1,e2) in all_edges is created.
         """
         # variable for edges
-        setattr(self, "generic_"+var_name,
-                po.Var(edges, timesteps, within=po.NonNegativeReals))
+        self.w = po.Var(edges, timesteps, within=po.NonNegativeReals)
 
         # additional variable for investment models
         if(self.invest is True):
-            setattr(self, "generic_add_"+var_name,
-                    po.Var(edges, within=po.NonNegativeReals))
+            self.w_add = po.Var(edges, within=po.NonNegativeReals)
 
     def generic_io_constraints(self, objs=None, uids=None,
                                timesteps=None):
@@ -95,7 +94,7 @@ class OptimizationModel(po.ConcreteModel):
         def __rule__(self, e, t):
             expr = self.w[I[e], e, t] * eta[e][0] - self.w[e, O[e][0], t]
             return(expr == 0)
-        setattr(self, "generic_io_"+objs[0].__lower_name__,
+        setattr(self, "generic_io_"+objs[0].lower_name,
                 po.Constraint(uids, timesteps, rule=__rule__))
 
     def generic_w_ub(self, objs=None, uids=None, timesteps=None):
@@ -132,7 +131,7 @@ class OptimizationModel(po.ConcreteModel):
                 expr = self.w[e, O[e][0], t] - out_max[e][O[e][0]] - \
                     self.w_add[e, O[e][0]]
                 return(expr <= 0)
-            setattr(self, "generic_w_ub_" + objs[0].__lower_name__,
+            setattr(self, "generic_w_ub_" + objs[0].lower_name,
                     po.Constraint(uids, self.timesteps,
                                   rule=__w_ub_rule__))
 
@@ -148,17 +147,17 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        limit = {obj.uid: obj.yearly_limit for obj in objs}
+        limit = {obj.uid: obj.sum_out_limit for obj in objs}
 
         # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
-        O = {obj.uid: [obj.outputs[0].uid] for obj in objs}
+        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
 
         # set upper bounds: sum(yearly commodity output) <= yearly_limit
         def __limit_rule__(self, e):
             expr = sum(self.w[e, o, t] for t in timesteps for o in O[e]) -\
                 limit[e]
             return(expr <= 0)
-        setattr(self, "generic_limit_"+objs[0].__lower_name__,
+        setattr(self, "generic_limit_"+objs[0].lower_name,
                 po.Constraint(uids, rule=__limit_rule__))
 
     def bus_model(self):
@@ -193,6 +192,9 @@ class OptimizationModel(po.ConcreteModel):
                 expr += -self.excess_slack[e, t] + self.shortage_slack[e, t]
             return(expr, 0)
         self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
+
+        self.generic_limit(objs=self.bus_objs, uids=self.bus_uids,
+                           timesteps=self.timesteps)
 
     def simple_transformer_model(self, objs, uids):
         """Generic transformer model containing the constraints
@@ -388,20 +390,6 @@ class OptimizationModel(po.ConcreteModel):
             self.source_c = po.Constraint(self.renewable_source_uids,
                                           self.timesteps, rule=invest_rule)
 
-    def commodity_model(self, objs, uids):
-        """Simple commdity model containing the constraints for commodity
-        sources.
-
-        Parameters
-        ----------
-        self : pyomo.ConcreteModel
-
-        Returns
-        -------
-        self : pyomo.ConcreteModel
-        """
-
-        self.generic_limit(objs=objs, uids=uids, timesteps=self.timesteps)
 
     def simple_sink_model(self, objs):
         """simple sink model containing the constraints for simple sinks

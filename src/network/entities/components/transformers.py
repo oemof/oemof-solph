@@ -8,7 +8,7 @@ class Simple(Transformer):
     Simple Transformers always have a simple input output relation with a
     constant efficiency
     """
-    __lower_name__ = 'simple_transformer'
+    lower_name = 'simple_transformer'
 
     def __init__(self, **kwargs):
         """
@@ -29,7 +29,7 @@ class CHP(Transformer):
     A CombinedHeatPower Transformer always has a simple input output relation
     with a constant efficiency
     """
-    __lower_name__ = "simple_chp"
+    lower_name = "simple_chp"
 
     def __init__(self, **kwargs):
         """
@@ -49,7 +49,7 @@ class ExtractionCHP(Transformer):
      *1=(50,0) --
                   -- *3
     """
-    __lower_name__ = "simple_extraction_chp"
+    lower_name = "simple_extraction_chp"
 
     def __init__(self, **kwargs):
         """
@@ -94,7 +94,7 @@ class ExtractionCHP(Transformer):
 class Storage(Transformer):
     """
     """
-    __lower_name__ = "storage"
+    lower_name = "simple_storage"
 
     def __init__(self, **kwargs):
         """
