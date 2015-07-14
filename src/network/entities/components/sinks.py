@@ -2,12 +2,11 @@ from network.entities.components import Sink
 
 
 class Simple(Sink):
-  """
-  """
-  __lower_name__ = "simple_sink"
-  def __init__(self, **kwargs):
     """
     """
-    super().__init__(**kwargs)
-    self.val = kwargs['val']
-
+    __lower_name__ = "simple_sink"
+    def __init__(self, **kwargs):
+        """
+        """
+        super().__init__(**kwargs)
+        self.val = kwargs['val']
