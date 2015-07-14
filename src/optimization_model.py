@@ -75,7 +75,7 @@ class OptimizationModel(po.ConcreteModel):
 
         # additional variable for investment models
         if(self.invest is True):
-            self.w_add = po.Var(edges, within=po.NonNegativeReals)
+            self.add_cap = po.Var(edges, within=po.NonNegativeReals)
 
     def generic_io_constraints(self, objs=None, uids=None,
                                timesteps=None):
@@ -129,7 +129,7 @@ class OptimizationModel(po.ConcreteModel):
             # constraint for additional capacity
             def __w_ub_rule__(self, e, t):
                 expr = self.w[e, O[e][0], t] - out_max[e][O[e][0]] - \
-                    self.w_add[e, O[e][0]]
+                    self.add_cap[e, O[e][0]]
                 return(expr <= 0)
             setattr(self, "generic_w_ub_" + objs[0].lower_name,
                     po.Constraint(uids, self.timesteps,
@@ -368,6 +368,9 @@ class OptimizationModel(po.ConcreteModel):
             # fixed value
             for (e1, e2) in ee:
                 for t in self.timesteps:
+                    self.w[(e1, e2), t] = self.source_val[e1][t] * \
+                        self.out_max[e1]
+                    #self.w[e1, e2, t].fix()
                     self.w[(e1, e2), t].setub(self.source_val[e1][t] *
                                               self.out_max[e1])
                     self.w[(e1, e2), t].setlb(self.source_val[e1][t] *
@@ -384,12 +387,11 @@ class OptimizationModel(po.ConcreteModel):
             def invest_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, O[e], t]
-                rhs = (self.out_max[e] + self.w_add[e, O[e]]) * \
+                rhs = (self.out_max[e] + self.add_cap[e, O[e]]) * \
                     self.source_val[e][t]
                 return(expr <= rhs)
             self.source_c = po.Constraint(self.renewable_source_uids,
                                           self.timesteps, rule=invest_rule)
-
 
     def simple_sink_model(self, objs):
         """simple sink model containing the constraints for simple sinks
@@ -408,8 +410,12 @@ class OptimizationModel(po.ConcreteModel):
             # setting upper and lower bounds for variable corresponding to
             # edge from buses to simple_sinks
             for t in self.timesteps:
-                self.w[(e1, e2), t].setub(val[e2][t])
-                self.w[(e1, e2), t].setlb(val[e2][t])
+                # set variable value
+                self.w[(e1, e2), t] = val[e2][t]
+                # fix variable value for optimization problem
+                self.w[(e1, e2), t].fix()
+                # self.w[(e1, e2), t].setub(val[e2][t])
+                # self.w[(e1, e2), t].setlb(val[e2][t])
 
     def simple_storage_model(self, objs, uids):
         """Simple storage model containing the constraints for simple storage
@@ -539,14 +545,15 @@ class OptimizationModel(po.ConcreteModel):
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in objective_objs}
 
-                expr += sum(self.w_add[I[e], e] * self.capex[e]
+                expr += sum(self.add_cap[I[e], e] * self.capex[e]
                             for e in self.objective_uids)
                 expr += sum(self.soc_add[e] * self.capex[e]
                             for e in self.simple_storage_uids)
             return(expr)
         self.objective = po.Objective(rule=obj_rule)
 
-    def solve(self, solver='glpk', solver_io='lp', debug=False, **kwargs):
+    def solve(self, solver='glpk', solver_io='lp', debug=False,
+              results_to_objects=True, **kwargs):
         """Method that creates the instance of the model and solves it.
 
         Parameters
@@ -581,6 +588,52 @@ class OptimizationModel(po.ConcreteModel):
         # load results back in instance
         instance.load(results)
 
+        if results_to_objects is True:
+
+            for e in self.entities:
+                if (isinstance(e, cp.Transformer) or
+                    isinstance(e, cp.transformers.Simple) or
+                        isinstance(e, cp.Source)):
+                    # write outputs
+                    e.results['Output'] = {}
+                    O = [e.uid for e in e.outputs[:]]
+                    for o in O:
+                        e.results['Output'][o] = []
+                        for t in self.timesteps:
+                            e.results['Output'][o].append(self.w[e.uid,
+                                                          o, t].value)
+
+                if (isinstance(e, cp.Transformer) or
+                        isinstance(e, cp.transformers.Simple)):
+                    # write inputs
+                    e.results['Input'] = []
+                    for t in self.timesteps:
+                        e.results['Input'].append(
+                            self.w[e.inputs[0].uid, e.uid, t].value)
+
+                if isinstance(e, cp.transformers.Storage):
+                    for t in self.timesteps:
+                        e.results['Input'].append(self.w[e.inputs[0].uid,
+                                                  e.uid, o, t].value)
+                # write results to self.simple_sink_objs
+                # (will be the value of simple sink in general)
+                if isinstance(e, cp.sinks.Simple):
+                    e.results['Input'] = []
+                    for t in self.timesteps:
+                        e.results['Input'].append(self.w[e.inputs[0].uid,
+                                                  e.uid, t].value)
+
+            if(self.invest is True):
+                for e in self.entities:
+                    if isinstance(e, cp.Transformer):
+                        e.results['Invest'] = self.add_cap[e.inputs[0].uid,
+                                                         e.uid].value
+                    if isinstance(e, cp.Source):
+                        e.results['Invest'] = \
+                            self.add_cap[e.uid, e.outputs[0].uid].value
+                    if isinstance(e, cp.transformers.Storage):
+                        e.results['Invest'] = self.soc_add[e.uid].value
+
         return(instance)
 
     def edges(self, components):
@@ -610,60 +663,6 @@ class OptimizationModel(po.ConcreteModel):
         return(edges)
 
 
-def results_to_objects(entities, instance):
-    """Function that writes the results for po.ConcreteModel instance to
-    objects.
-
-    Parameters
-    ----------
-    components : list of component objects
-
-    Returns
-    -------
-    results : dictionary with results for every instance of a class
-    """
-    for e in entities:
-        if (isinstance(e, cp.Transformer) or isinstance(e, cp.SimpleTransport)
-           or isinstance(e, cp.Source)):
-            # write outputs
-            e.results['Output'] = {}
-            O = [e.uid for e in e.outputs[:]]
-            for o in O:
-                e.results['Output'][o] = []
-                for t in instance.timesteps:
-                    e.results['Output'][o].append(instance.w[e.uid,
-                                                  o, t].value)
-
-        if (isinstance(e, cp.Transformer) or
-                isinstance(e, cp.SimpleTransport)):
-            # write inputs
-            e.results['Input'] = []
-            for t in instance.timesteps:
-                e.results['Input'].append(
-                    instance.w[e.inputs[0].uid, e.uid, t].value)
-
-        if isinstance(e, cp.SimpleStorage):
-            for t in instance.timesteps:
-                e.results['Input'].append(instance.w[e.inputs[0].uid,
-                                          e.uid, o, t].value)
-        # write results to self.simple_sink_objs
-        # (will be the value of simple sink in general)
-        if isinstance(e, cp.SimpleSink):
-            e.results['Input'] = []
-            for t in instance.timesteps:
-                e.results['Input'].append(instance.w[e.inputs[0].uid,
-                                          e.uid, t].value)
-
-    if(instance.invest is True):
-        for e in entities:
-            if isinstance(e, cp.Transformer):
-                e.results['Invest'] = instance.w_add[e.inputs[0].uid,
-                                                     e.uid].value
-            if isinstance(e, cp.Source):
-                e.results['Invest'] = instance.w_add[e.uid,
-                                                     e.outputs[0].uid].value
-            if isinstance(e, cp.SimpleStorage):
-                e.results['Invest'] = instance.soc_add[e.uid].value
 
 
 def io_sets(components):

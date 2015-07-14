@@ -43,7 +43,7 @@ b_el = Bus(uid="b_el", type="elec")
 b_el2 = Bus(uid="b_el2", type="elec")
 b_th = Bus(uid="b_th", type="th")
 
-dispatch_flag = False
+dispatch_flag = True
 # renewable sources (only pv onshore)
 wind_on = source.Renewable(uid="wind_on", outputs=[b_el], val=data['wind'],
                            out_max=66300, dispatch=dispatch_flag)
@@ -94,9 +94,9 @@ pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
 
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                         param={'in_max': {b_el.uid: 10000},
-                               'out_max': {b_el2.uid: 9000},
-                               'eta': [0.9]})
+                          param={'in_max': {b_el.uid: 10000},
+                                 'out_max': {b_el2.uid: 9000},
+                                 'eta': [0.9]})
 cable2 = transformer.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
                             param={'in_max': {b_el2.uid: 10000},
                                    'out_max': {b_el.uid: 8000},
@@ -116,13 +116,11 @@ components = transformers + commodities + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': True, 'slack': True})
+                       options={'invest': False, 'slack': True})
+om.w.pprint()
+om.solve(solver='gurobi', debug=True, tee=False, results_to_objects=True)
 
-instance = om.solve(solver='gurobi', debug=False, tee=True)
-
-results_to_objects(entities=transformers + commodities + renew_sources +
-                   transports + sinks, instance=instance)
-
+print(pp_coal.results)
 # print dispatch of renewable source with dispatch = True (does not work with
 # invest at the moment)
 
