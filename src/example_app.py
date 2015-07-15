@@ -14,7 +14,7 @@ The energy system is build out of objects. It is solved and the results
 are written back into the objects.
 
 """
-from optimization_model import *
+from optimization_model import OptimizationModel
 from network.entities import Bus
 from network.entities.components import sinks as sink
 from network.entities.components import sources as source

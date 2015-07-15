@@ -48,19 +48,26 @@ class OptimizationModel(po.ConcreteModel):
         self.generic_variables(edges=self.all_edges,
                                timesteps=self.timesteps)
         self.bus_model()
-        self.simple_chp_model(objs=self.simple_chp_objs,
-                              uids=self.simple_chp_uids)
+
+        if self.simple_chp_objs:
+            self.simple_chp_model(objs=self.simple_chp_objs,
+                                  uids=self.simple_chp_uids)
         self.simple_extraction_chp_model()
-        self.renewable_source_model()
-        self.simple_transformer_model(objs=self.simple_transformer_objs,
-                                      uids=self.simple_transformer_uids)
+
+        if self.renewable_source_objs:
+            self.renewable_source_model()
+        if self.simple_transformer_objs:
+            self.simple_transformer_model(objs=self.simple_transformer_objs,
+                                          uids=self.simple_transformer_uids)
         self.simple_storage_model(objs=self.simple_storage_objs,
                                   uids=self.simple_storage_uids)
         #self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
         #                   timesteps=self.timesteps)
-        self.simple_transport_model(objs=self.simple_transport_objs,
-                                    uids=self.simple_transport_uids)
-        self.simple_sink_model(objs=self.simple_sink_objs)
+        if self.simple_transport_objs:
+            self.simple_transport_model(objs=self.simple_transport_objs,
+                                        uids=self.simple_transport_uids)
+        if self.simple_sink_objs:
+            self.simple_sink_model(objs=self.simple_sink_objs)
         # set objective function
         self.objective()
 
@@ -79,6 +86,11 @@ class OptimizationModel(po.ConcreteModel):
 
     def generic_io_constraints(self, objs=None, uids=None,
                                timesteps=None):
+        """ creates constraint for input output relation as
+        input * efficiency = output
+        param objs: list of component objects for which the constraint will be
+        build
+        """
         if objs is None:
             raise ValueError("No objects defined. Please specify objects for \
                              which the constraints should be build")
@@ -151,7 +163,6 @@ class OptimizationModel(po.ConcreteModel):
 
         # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-
         # set upper bounds: sum(yearly commodity output) <= yearly_limit
         def __limit_rule__(self, e):
             expr = sum(self.w[e, o, t] for t in timesteps for o in O[e]) -\
@@ -547,7 +558,7 @@ class OptimizationModel(po.ConcreteModel):
                             for e in self.bus_uids for t in self.timesteps)
 
             # costs for dispatchable renewables
-            if(True in self.dispatch.values()):
+            if(self.renewable_source_objs and True in self.dispatch.values()):
                 expr += sum(self.renewable_dispatch_v[e, t] *
                             self.dispatch_ex[e]
                             for e in self.renewable_sources_dispatch_uids
@@ -573,6 +584,8 @@ class OptimizationModel(po.ConcreteModel):
         solver str: solver to be used e.g. 'glpk','gurobi','cplex'
         solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
+        result_to_objects boolean: Flag if results from optimization problem
+        are written back to objects
         **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
