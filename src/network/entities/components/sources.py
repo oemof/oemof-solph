@@ -15,6 +15,9 @@ class Renewable(Source):
         self.dispatch = kwargs.get('dispatch', False)
         self.dispatch_ex = kwargs.get('dispatch_ex', 0)
 
+    def calc_emissions(self):
+        self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]
+
 
 class Commodity(Source):
     """
@@ -28,6 +31,6 @@ class Commodity(Source):
         self.sum_out_limit = kwargs.get('yearly_limit', float('+inf'))
         self.emmision_factor = kwargs.get('emmission_factor', 0)
 
-    def emissions(self):
+    def calc_emissions(self):
         self.emissions = [o * self.emmision_factor
-                          for o in self.results['Output'][self.outputs[0].uid]]
+                          for o in self.results['out'][self.outputs[0].uid]]

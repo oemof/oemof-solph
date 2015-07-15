@@ -56,8 +56,8 @@ class OptimizationModel(po.ConcreteModel):
                                       uids=self.simple_transformer_uids)
         self.simple_storage_model(objs=self.simple_storage_objs,
                                   uids=self.simple_storage_uids)
-        self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
-                   timesteps=self.timesteps)
+        #self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
+        #                   timesteps=self.timesteps)
         self.simple_transport_model(objs=self.simple_transport_objs,
                                     uids=self.simple_transport_uids)
         self.simple_sink_model(objs=self.simple_sink_objs)
@@ -171,16 +171,21 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
+        all_bus_objs = self.bus_objs
+        all_bus_uids = self.bus_uids
+        bus_objs = [obj for obj in all_bus_objs if
+                    any([obj.type is "el", obj.type is "th"])]
+        bus_uids = [obj.uid for obj in bus_objs]
 
         # slack variables that assures a feasible problem
         if self.slack is True:
-            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
+            self.shortage_slack = po.Var(all_bus_uids, self.timesteps,
                                          within=po.NonNegativeReals)
-            self.excess_slack = po.Var(self.bus_uids, self.timesteps,
+            self.excess_slack = po.Var(all_bus_uids, self.timesteps,
                                        within=po.NonNegativeReals)
 
-        I = {b.uid: [i.uid for i in b.inputs] for b in self.bus_objs}
-        O = {b.uid: [o.uid for o in b.outputs] for b in self.bus_objs}
+        I = {b.uid: [i.uid for i in b.inputs] for b in bus_objs}
+        O = {b.uid: [o.uid for o in b.outputs] for b in bus_objs}
 
         # constraint for bus balance:
         # component inputs/outputs are negative/positive in the bus balance
@@ -191,9 +196,15 @@ class OptimizationModel(po.ConcreteModel):
             if self.slack is True:
                 expr += -self.excess_slack[e, t] + self.shortage_slack[e, t]
             return(expr, 0)
-        self.bus = po.Constraint(self.bus_uids, self.timesteps, rule=bus_rule)
+        self.bus = po.Constraint(bus_uids, self.timesteps, rule=bus_rule)
 
-        self.generic_limit(objs=self.bus_objs, uids=self.bus_uids,
+        # select only buses that are resources (gas, oil, etc.)
+        rbus_objs = [obj for obj in all_bus_objs
+                     if all([obj.type is not "el", obj.type is not "th"])]
+        rbus_uids = [e.uid for e in rbus_objs]
+
+        # set limits for resource buses
+        self.generic_limit(objs=rbus_objs, uids=rbus_uids,
                            timesteps=self.timesteps)
 
     def simple_transformer_model(self, objs, uids):
@@ -589,50 +600,47 @@ class OptimizationModel(po.ConcreteModel):
         instance.load(results)
 
         if results_to_objects is True:
+            for entity in self.entities:
 
-            for e in self.entities:
-                if (isinstance(e, cp.Transformer) or
-                    isinstance(e, cp.transformers.Simple) or
-                        isinstance(e, cp.Source)):
+                if (isinstance(entity, cp.Transformer) or
+                        isinstance(entity, cp.Source)):
                     # write outputs
-                    e.results['Output'] = {}
-                    O = [e.uid for e in e.outputs[:]]
+                    O = [e.uid for e in entity.outputs[:]]
                     for o in O:
-                        e.results['Output'][o] = []
+                        entity.results['out'][o] = []
                         for t in self.timesteps:
-                            e.results['Output'][o].append(self.w[e.uid,
-                                                          o, t].value)
+                            entity.results['out'][o].append(
+                                self.w[entity.uid, o, t].value)
 
-                if (isinstance(e, cp.Transformer) or
-                        isinstance(e, cp.transformers.Simple)):
-                    # write inputs
-                    e.results['Input'] = []
-                    for t in self.timesteps:
-                        e.results['Input'].append(
-                            self.w[e.inputs[0].uid, e.uid, t].value)
+                    I = [i.uid for i in entity.inputs[:]]
+                    for i in I:
+                        entity.results['in'][i] = []
+                        for t in self.timesteps:
+                            entity.results['in'][i].append(
+                                self.w[i, entity.uid, t].value)
 
-                if isinstance(e, cp.transformers.Storage):
-                    for t in self.timesteps:
-                        e.results['Input'].append(self.w[e.inputs[0].uid,
-                                                  e.uid, o, t].value)
                 # write results to self.simple_sink_objs
                 # (will be the value of simple sink in general)
-                if isinstance(e, cp.sinks.Simple):
-                    e.results['Input'] = []
+                if isinstance(entity, cp.Sink):
+                    i = entity.inputs[0].uid
+                    entity.results['in'][i] = []
                     for t in self.timesteps:
-                        e.results['Input'].append(self.w[e.inputs[0].uid,
-                                                  e.uid, t].value)
+                        entity.results['in'][i].append(
+                            self.w[i, entity.uid, t].value)
 
             if(self.invest is True):
-                for e in self.entities:
-                    if isinstance(e, cp.Transformer):
-                        e.results['Invest'] = self.add_cap[e.inputs[0].uid,
-                                                         e.uid].value
-                    if isinstance(e, cp.Source):
-                        e.results['Invest'] = \
-                            self.add_cap[e.uid, e.outputs[0].uid].value
-                    if isinstance(e, cp.transformers.Storage):
-                        e.results['Invest'] = self.soc_add[e.uid].value
+                for entity in self.entities:
+                    if isinstance(entity, cp.Transformer):
+                        entity.results['add_cap_out'] = \
+                            self.add_cap[entity.uid,
+                                         entity.outputs[0].uid].value
+                    if isinstance(entity, cp.Source):
+                        entity.results['add_cap_out'] = \
+                            self.add_cap[entity.uid,
+                                         entity.outputs[0].uid].value
+                    if isinstance(entity, cp.transformers.Storage):
+                        entity.results['add_cap_soc'] = \
+                            self.soc_add[entity.uid].value
 
         return(instance)
 

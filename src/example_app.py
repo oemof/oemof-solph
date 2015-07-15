@@ -39,11 +39,11 @@ boil = Bus(uid="oil", type="oil")
 blig = Bus(uid="lignite", type="lignite")
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="elec")
-b_el2 = Bus(uid="b_el2", type="elec")
+b_el = Bus(uid="b_el", type="el")
+b_el2 = Bus(uid="b_el2", type="el")
 b_th = Bus(uid="b_th", type="th")
 
-dispatch_flag = True
+dispatch_flag = False
 # renewable sources (only pv onshore)
 wind_on = source.Renewable(uid="wind_on", outputs=[b_el], val=data['wind'],
                            out_max=66300, dispatch=dispatch_flag)
@@ -54,11 +54,6 @@ wind_off = source.Renewable(uid="wind_off", outputs=[b_el], val=data['wind'],
                             out_max=25300, dispatch=dispatch_flag)
 pv = source.Renewable(uid="pv", outputs=[b_el], val=data['pv'],
                       out_max=65300, dispatch=dispatch_flag)
-# resources
-rcoal = source.Commodity(uid="rcoal", outputs=[bcoal], emmission_factor=em_coal)
-rgas = source.Commodity(uid="rgas", outputs=[bgas], emmission_factor=em_gas)
-roil = source.Commodity(uid="roil", outputs=[boil], emmission_factor=em_oil)
-rlig = source.Commodity(uid="rlig", outputs=[blig], emmission_factor=em_lig)
 
 # demands
 demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
@@ -69,12 +64,12 @@ demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
                         val=data['demand_th']*100000)
 # Simple Transformer for b_el
 pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
-                            param={'in_max': {bcoal.uid: None},
-                            'out_max': {b_el.uid: 20200}, 'eta': [0.39]},
-                            opex_var=25, co2_var=em_coal)
+                             param={'in_max': {bcoal.uid: None},
+                             'out_max': {b_el.uid: 20200}, 'eta': [0.39]},
+                             opex_var=25, co2_var=em_coal)
 pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
                             param={'in_max': {blig.uid: None},
-                           'out_max': {b_el.uid: 11800}, 'eta': [0.41]},
+                            'out_max': {b_el.uid: 11800}, 'eta': [0.41]},
                             opex_var=19, co2_var=em_lig)
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
                             param={'in_max': {bgas.uid: None},
@@ -84,50 +79,62 @@ pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
                             param={'in_max': {boil.uid: None},
-                                  'out_max': {b_el.uid: 1000}, 'eta': [0.3]},
-                             opex_var=50, co2_var=em_oil)
+                                   'out_max': {b_el.uid: 1000}, 'eta': [0.3]},
+                            opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
                          param={'in_max': {bgas.uid: 100000},
                                 'out_max': {b_th.uid: None, b_el.uid: 30000},
-                                'eta': [0.4, 0.3]})
+                                'eta': [0.4, 0.3]},
+                         co2_var=em_gas)
 
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
                           param={'in_max': {b_el.uid: 10000},
                                  'out_max': {b_el2.uid: 9000},
                                  'eta': [0.9]})
-cable2 = transformer.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
-                            param={'in_max': {b_el2.uid: 10000},
-                                   'out_max': {b_el.uid: 8000},
-                                   'eta': [0.8]})
+cable2 = transport.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
+                          param={'in_max': {b_el2.uid: 10000},
+                                 'out_max': {b_el.uid: 8000}, 'eta': [0.8]})
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
 
 # group components
 transformers = [pp_coal, pp_lig, pp_gas, pp_oil, pp_chp]
-commodities = [rcoal, rgas, roil, rlig]
 renew_sources = [pv, wind_on, wind_on2, wind_off]
 sinks = [demand_th, demand_el, demand_el2]
 transports = [cable1, cable2]
 
-components = transformers + commodities + renew_sources + sinks + transports
+components = transformers + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': False, 'slack': True})
-om.w.pprint()
+
 om.solve(solver='gurobi', debug=True, tee=False, results_to_objects=True)
 
-print(pp_coal.results)
-# print dispatch of renewable source with dispatch = True (does not work with
-# invest at the moment)
+# write results to data frame for excel export
+components = transformers + renew_sources
+df = pd.DataFrame()
+writer = pd.ExcelWriter("results.xlsx")
 
-# if(True in instance.dispatch.values()):
-#    for t in instance.timesteps:
-#        print('Wind Dispatch in MW:',
-#              instance.renew_dispatch['wind_on', t].value)
+for c in components:
+    for k in c.results["out"].keys():
+        df[c.uid] = c.results["out"][k]
+df.to_excel(writer, "Input")
+
+for c in components:
+    for k in c.results["in"].keys():
+        df[c.uid] = c.results["in"][k]
+df.to_excel(writer, "Output")
+
+for c in components:
+    c.calc_emissions()
+    df[c.uid] = c.emissions
+df.to_excel(writer, "Emissions")
+writer.save()
+
 
 if __name__ == "__main__":
 
@@ -145,10 +152,10 @@ if __name__ == "__main__":
         y = []
         labels = []
         for c in plot_data:
-            if bus_to_plot in c.results['Output']:
-                y.append(c.results['Output'][bus_to_plot])
+            if bus_to_plot in c.results['out']:
+                y.append(c.results['out'][bus_to_plot])
                 labels.append(c.uid)
-                #print(c.uid)
+
 
         # plotting
         fig, ax = plt.subplots()

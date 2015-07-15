@@ -5,6 +5,7 @@ class Simple(Sink):
     """
     """
     lower_name = "simple_sink"
+
     def __init__(self, **kwargs):
         """
         """

@@ -57,8 +57,9 @@ class Transformer(Component):
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
 
-    def emissions(self):
-        self.emissions = [o * self.co2_var for o in self.results['Input']]
+    def calc_emissions(self):
+        self.emissions = [i * self.co2_var
+                          for i in self.results['in'][self.inputs[0].uid]]
 
 
 class Transport(Component):

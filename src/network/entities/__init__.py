@@ -47,4 +47,5 @@ class Component(Entity):
         self.opex_var = kwargs.get('opex_var', 0)
         self.co2_var = kwargs.get('co2_var', None)
         self.param = kwargs.get('param', None)
-        self.results = kwargs.get('results', {})
+        self.results = kwargs.get('results', {'in': {},
+                                              'out': {}})
