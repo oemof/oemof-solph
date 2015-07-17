@@ -52,15 +52,17 @@ class OptimizationModel(po.ConcreteModel):
         if self.simple_chp_objs:
             self.simple_chp_model(objs=self.simple_chp_objs,
                                   uids=self.simple_chp_uids)
-        self.simple_extraction_chp_model()
+        if self.simple_extraction_chp_objs:
+            self.simple_extraction_chp_model()
 
         if self.renewable_source_objs:
             self.renewable_source_model()
         if self.simple_transformer_objs:
             self.simple_transformer_model(objs=self.simple_transformer_objs,
                                           uids=self.simple_transformer_uids)
-        self.simple_storage_model(objs=self.simple_storage_objs,
-                                  uids=self.simple_storage_uids)
+        if self.simple_storage_objs:
+            self.simple_storage_model(objs=self.simple_storage_objs,
+                                      uids=self.simple_storage_uids)
         #self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
         #                   timesteps=self.timesteps)
         if self.simple_transport_objs:
@@ -100,7 +102,7 @@ class OptimizationModel(po.ConcreteModel):
         I = {obj.uid: obj.inputs[0].uid for obj in objs}
         # set with output uids for every simple transformer
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-        eta = {obj.uid: obj.param['eta'] for obj in objs}
+        eta = {obj.uid: obj.eta for obj in objs}
 
         # constraint for simple transformers: input * efficiency = output
         def __rule__(self, e, t):
@@ -120,8 +122,8 @@ class OptimizationModel(po.ConcreteModel):
         # set variable bounds (out_max = in_max * efficiency):
         # m.in_max = {'pp_coal': 51794.8717948718, ... }
         # m.out_max = {'pp_coal': 20200, ... }
-        in_max = {obj.uid: obj.param['in_max'] for obj in objs}
-        out_max = {obj.uid: obj.param['out_max'] for obj in objs}
+        in_max = {obj.uid: obj.in_max for obj in objs}
+        out_max = {obj.uid: obj.out_max for obj in objs}
 
         if self.invest is False:
             # edges for simple transformers ([('coal', 'pp_coal'),...])
@@ -163,6 +165,7 @@ class OptimizationModel(po.ConcreteModel):
 
         # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+
         # set upper bounds: sum(yearly commodity output) <= yearly_limit
         def __limit_rule__(self, e):
             expr = sum(self.w[e, o, t] for t in timesteps for o in O[e]) -\
@@ -184,8 +187,9 @@ class OptimizationModel(po.ConcreteModel):
         """
         all_bus_objs = self.bus_objs
         all_bus_uids = self.bus_uids
-        bus_objs = [obj for obj in all_bus_objs if
-                    any([obj.type is "el", obj.type is "th"])]
+        bus_objs = [obj for obj in all_bus_objs
+                    if any([obj.type == "el", obj.type == "th"])]
+        print(bus_objs)
         bus_uids = [obj.uid for obj in bus_objs]
 
         # slack variables that assures a feasible problem
@@ -211,7 +215,7 @@ class OptimizationModel(po.ConcreteModel):
 
         # select only buses that are resources (gas, oil, etc.)
         rbus_objs = [obj for obj in all_bus_objs
-                     if all([obj.type is not "el", obj.type is not "th"])]
+                     if all([obj.type != "el", obj.type != "th"])]
         rbus_uids = [e.uid for e in rbus_objs]
 
         # set limits for resource buses
@@ -258,7 +262,7 @@ class OptimizationModel(po.ConcreteModel):
         # {'pp_chp': ['b_th', 'b_el']}
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
         # efficiencies for simple chps
-        eta = {obj.uid: obj.param['eta'] for obj in objs}
+        eta = {obj.uid: obj.eta for obj in objs}
 
         # additional constraint for power to heat ratio of simple chp comp:
         # P/eta_el = Q/eta_th
@@ -542,6 +546,7 @@ class OptimizationModel(po.ConcreteModel):
         I = {obj.uid: obj.inputs[0].uid for obj in objective_objs}
         # operational costs
         self.opex_var = {obj.uid: obj.opex_var for obj in objective_objs}
+        self.fuel_costs = {obj.uid: obj.inputs[0].price for obj in objective_objs}
         # get dispatch expenditure for renewable energies with dispatch
         self.dispatch_ex = {obj.uid: obj.dispatch_ex
                             for obj in self.renewable_source_objs
@@ -550,7 +555,7 @@ class OptimizationModel(po.ConcreteModel):
         # objective function
         def obj_rule(self):
             expr = 0
-            expr += sum(self.w[I[e], e, t] * self.opex_var[e]
+            expr += sum(self.w[I[e], e, t] * (self.opex_var[e] + self.fuel_costs[e])
                         for e in self.objective_uids
                         for t in self.timesteps)
             if self.slack is True:
