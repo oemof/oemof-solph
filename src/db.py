@@ -14,11 +14,12 @@ if __name__ == "__main__":
     engine = create_engine(
         "postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}".format(
             user=cfg.get("postGIS", "username"),
-            passwd='luTHer',
+            passwd=keyring.get_password(
+                cfg.get("postGIS", "database"),
+                cfg.get("postGIS", "username")),
             host=cfg.get("postGIS", "host"),
             db=cfg.get("postGIS", "database"),
-            port=int(cfg.get("postGIS", "port"))
-            ))
+            port=int(cfg.get("postGIS", "port"))))
     Session = sessionmaker(bind=engine)
     session = Session()
 
