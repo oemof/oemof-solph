@@ -56,14 +56,16 @@ class OptimizationModel(po.ConcreteModel):
             self.simple_extraction_chp_model()
 
         if self.renewable_source_objs:
-            self.renewable_source_model()
+            self.renewable_source_model(objs=self.renewable_source_objs,
+                                        uids=self.renewable_source_uids)
         if self.simple_transformer_objs:
             self.simple_transformer_model(objs=self.simple_transformer_objs,
                                           uids=self.simple_transformer_uids)
         if self.simple_storage_objs:
             self.simple_storage_model(objs=self.simple_storage_objs,
                                       uids=self.simple_storage_uids)
-        #self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
+
+        # self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
         #                   timesteps=self.timesteps)
         if self.simple_transport_objs:
             self.simple_transport_model(objs=self.simple_transport_objs,
@@ -85,6 +87,8 @@ class OptimizationModel(po.ConcreteModel):
         # additional variable for investment models
         if(self.invest is True):
             self.add_cap = po.Var(edges, within=po.NonNegativeReals)
+
+        self.dispatch = po.Var(edges, timesteps, within=po.NonNegativeReals)
 
     def generic_io_constraints(self, objs=None, uids=None,
                                timesteps=None):
@@ -173,6 +177,65 @@ class OptimizationModel(po.ConcreteModel):
             return(expr <= 0)
         setattr(self, "generic_limit_"+objs[0].lower_name,
                 po.Constraint(uids, rule=__limit_rule__))
+
+    def generic_fix_source(self, objs, uids, timesteps):
+        """
+        """
+        # normed value of renewable source (0 <= value <=1)
+        val = {obj.uid: obj.val for obj in objs}
+        # maximal ouput of renewable source (in general installed capacity)
+        out_max = {obj.uid: obj.out_max for obj in objs}
+        # edges for renewables ([('wind_on', 'b_el'), ...)
+        ee = self.edges(objs)
+        # fixed values for every timestep
+        for (e1, e2) in ee:
+            for t in timesteps:
+                # set value of variable
+                self.w[e1, e2, t] = val[e1][t] * out_max[e1]
+                # fix variable value ("set variable to parameter" )
+                self.w[e1, e2, t].fix()
+
+    def generic_fix_source_invest(self, objs, uids, timesteps):
+        """
+        """
+        # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
+        O = {obj.uid: obj.outputs[0].uid for obj in objs}
+        # normed value of renewable source (0 <= value <=1)
+        val = {obj.uid: obj.val for obj in objs}
+        # maximal ouput of renewable source (in general installed capacity)
+        out_max = {obj.uid: obj.out_max for obj in objs}
+
+        def fix_ts_invest_rule(self, e, t):
+            expr = self.w[e, O[e], t]
+            rhs = (out_max[e] + self.add_cap[e, O[e]]) * val[e][t]
+            return(expr <= rhs)
+        setattr(self, "fix_ts_invest_"+objs[0].lower_name,
+                po.Constraint(uids, timesteps, rule=fix_ts_invest_rule))
+
+    def generic_dispatch_source(self, objs, uids, timesteps):
+        """
+        """
+        # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
+        O = {obj.uid: obj.outputs[0].uid for obj in objs}
+        # normed value of renewable source (0 <= value <=1)
+        val = {obj.uid: obj.val for obj in objs}
+        # maximal ouput of renewable source (in general installed capacity)
+        out_max = {obj.uid: obj.out_max for obj in objs}
+        # create dispatch variables
+
+        ee = self.edges(objs)
+        # fixed values for every timestep
+        for (e1, e2) in ee:
+            for t in timesteps:
+                # set upper bound of variable
+                self.w[e1, e2, t].setub(val[e1][t] * out_max[e1])
+
+        def dispatch_rule(self, e, t):
+            expr = self.dispatch[e, t]
+            expr += - val[e][t] * out_max[e] + self.w[e, O[e], t]
+            return(expr, 0)
+        setattr(self, "generic_dispatch_constr"+objs[0].lower_name,
+                po.Constraint(uids, timesteps, rule=dispatch_rule))
 
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
@@ -341,7 +404,7 @@ class OptimizationModel(po.ConcreteModel):
             po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
                           rule=in_out_rule)
 
-    def renewable_source_model(self):
+    def renewable_source_model(self, objs, uids):
         """Simple renewable source model containing the constraints for
         renewable source sources.
 
@@ -353,71 +416,12 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
-        # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
-        O = {obj.uid: obj.outputs[0].uid
-             for obj in self.renewable_source_objs}
-        # normed value of renewable source (0 <= value <=1)
-        self.source_val = {obj.uid: obj.val
-                           for obj in self.renewable_source_objs}
-        # maximal ouput of renewable source (in general installed capacity)
-        self.out_max = {obj.uid: obj.out_max
-                        for obj in self.renewable_source_objs}
-        # flag if dispatch is true or false for each object
-        self.dispatch = {obj.uid: obj.dispatch
-                         for obj in self.renewable_source_objs}
-
-        # if one one RenewableSource() instance attribute is dispatch=True
-        if(True in self.dispatch.values()):
-            # get only the RenewableSource() instance that have dispatch
-            self.renewable_sources_dispatch_uids = [k for (k, v) in
-                                                    self.dispatch.items()
-                                                    if v is True]
-            # Set to define dispatch variable
-            self.renewable_dispatch_v = \
-                po.Var(self.renewable_sources_dispatch_uids, self.timesteps,
-                       within=po.NonNegativeReals)
-
-            # constraint to determine how much renewable energy is dispatched
-            def dispatch_rule(self, e, t):
-                expr = self.renewable_dispatch_v[e, t]
-                expr += - self.source_val[e][t] * self.out_max[e] + \
-                    self.w[e, O[e], t]
-                return(expr, 0)
-            self.renewable_source_dispatch_c = \
-                po.Constraint(self.renewable_sources_dispatch_uids,
-                              self.timesteps, rule=dispatch_rule)
-        # set bounds for basic/investment models
-        # TODO: include dispatch if invest=True
-        if(self.invest is False):
-            # edges for renewables ([('wind_on', 'b_el'), ...)
-            ee = self.edges(self.renewable_source_objs)
-            # fixed value
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    self.w[(e1, e2), t] = self.source_val[e1][t] * \
-                        self.out_max[e1]
-                    #self.w[e1, e2, t].fix()
-                    self.w[(e1, e2), t].setub(self.source_val[e1][t] *
-                                              self.out_max[e1])
-                    self.w[(e1, e2), t].setlb(self.source_val[e1][t] *
-                                              self.out_max[e1] *
-                                              (1-self.dispatch[e1]))
-
+        if self.invest is False:
+            self.generic_fix_source(objs=objs, uids=uids,
+                                    timesteps=self.timesteps)
         else:
-            if(True in self.dispatch.values()):
-                raise ValueError("Dispatchable renewables not implemented for"
-                                 "investment models.\n Please reset flag from"
-                                 "True to False")
-
-            # constraint to allow additional capacity for renewables
-            def invest_rule(self, e, t):
-                expr = 0
-                expr += self.w[e, O[e], t]
-                rhs = (self.out_max[e] + self.add_cap[e, O[e]]) * \
-                    self.source_val[e][t]
-                return(expr <= rhs)
-            self.source_c = po.Constraint(self.renewable_source_uids,
-                                          self.timesteps, rule=invest_rule)
+            self.generic_fix_source_invest(objs=objs, uids=uids,
+                                           timesteps=self.timesteps)
 
     def simple_sink_model(self, objs):
         """simple sink model containing the constraints for simple sinks
@@ -562,12 +566,6 @@ class OptimizationModel(po.ConcreteModel):
                 expr += sum(self.shortage_slack[e, t] * 10e10
                             for e in self.bus_uids for t in self.timesteps)
 
-            # costs for dispatchable renewables
-            if(self.renewable_source_objs and True in self.dispatch.values()):
-                expr += sum(self.renewable_dispatch_v[e, t] *
-                            self.dispatch_ex[e]
-                            for e in self.renewable_sources_dispatch_uids
-                            for t in self.timesteps)
             # add additional capacity & capex for investment models
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in objective_objs}

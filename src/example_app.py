@@ -64,38 +64,36 @@ demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
                         val=data['demand_th']*100000)
 # Simple Transformer for b_el
 pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
-                             param={'in_max': {bcoal.uid: None},
-                             'out_max': {b_el.uid: 20200}, 'eta': [0.39]},
+                             in_max={bcoal.uid: None},
+                             out_max={b_el.uid: 20200}, eta= [0.39],
                              opex_var=25, co2_var=em_coal)
 pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
-                            param={'in_max': {blig.uid: None},
-                            'out_max': {b_el.uid: 11800}, 'eta': [0.41]},
+                            in_max= {blig.uid: None},
+                            out_max= {b_el.uid: 11800}, eta= [0.41],
                             opex_var=19, co2_var=em_lig)
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            param={'in_max': {bgas.uid: None},
-                                   'out_max': {b_el.uid: 41000},
-                                   'eta': [0.45]},
+                            in_max= {bgas.uid: None},
+                            out_max= {b_el.uid: 41000}, eta= [0.45],
                             opex_var=45, co2_var=em_lig)
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
-                            param={'in_max': {boil.uid: None},
-                                   'out_max': {b_el.uid: 1000}, 'eta': [0.3]},
+                            in_max= {boil.uid: None},
+                            out_max= {b_el.uid: 1000}, eta= [0.3],
                             opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
-                         param={'in_max': {bgas.uid: 100000},
-                                'out_max': {b_th.uid: None, b_el.uid: 30000},
-                                'eta': [0.4, 0.3]},
+                         in_max= {bgas.uid: 100000},
+                         out_max= {b_th.uid: None, b_el.uid: 30000},
+                         eta= [0.4, 0.3],
                          co2_var=em_gas)
 
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                          param={'in_max': {b_el.uid: 10000},
-                                 'out_max': {b_el2.uid: 9000},
-                                 'eta': [0.9]})
+                          in_max= {b_el.uid: 10000},
+                          out_max= {b_el2.uid: 9000}, eta= [0.9])
 cable2 = transport.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
-                          param={'in_max': {b_el2.uid: 10000},
-                                 'out_max': {b_el.uid: 8000}, 'eta': [0.8]})
+                          in_max= {b_el2.uid: 10000}, out_max= {b_el.uid: 8000},
+                          eta= [0.8])
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
@@ -110,30 +108,32 @@ components = transformers + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'slack': True})
+                       options={'invest': True, 'slack': True})
 
 om.solve(solver='gurobi', debug=True, tee=False, results_to_objects=True)
 
 # write results to data frame for excel export
+
 components = transformers + renew_sources
-df = pd.DataFrame()
-writer = pd.ExcelWriter("results.xlsx")
+def excel_export(components):
+    df = pd.DataFrame()
+    writer = pd.ExcelWriter("results.xlsx")
 
-for c in components:
-    for k in c.results["out"].keys():
-        df[c.uid] = c.results["out"][k]
-df.to_excel(writer, "Input")
+    for c in components:
+        for k in c.results["out"].keys():
+            df[c.uid] = c.results["out"][k]
+    df.to_excel(writer, "Input")
 
-for c in components:
-    for k in c.results["in"].keys():
-        df[c.uid] = c.results["in"][k]
-df.to_excel(writer, "Output")
+    for c in components:
+        for k in c.results["in"].keys():
+            df[c.uid] = c.results["in"][k]
+    df.to_excel(writer, "Output")
 
-for c in components:
-    c.calc_emissions()
-    df[c.uid] = c.emissions
-df.to_excel(writer, "Emissions")
-writer.save()
+    for c in components:
+        c.calc_emissions()
+        df[c.uid] = c.emissions
+    df.to_excel(writer, "Emissions")
+    writer.save()
 
 
 if __name__ == "__main__":
