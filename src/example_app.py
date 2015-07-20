@@ -24,7 +24,7 @@ from network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(3)]
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -45,15 +45,14 @@ b_th = Bus(uid="b_th", type="th")
 
 dispatch_flag = False
 # renewable sources (only pv onshore)
-wind_on = source.Renewable(uid="wind_on", outputs=[b_el], val=data['wind'],
-                           out_max=66300, dispatch=dispatch_flag)
-wind_on2 = source.Renewable(uid="wind_on2", outputs=[b_el2],
-                            val=data['wind'], out_max=66300,
-                            dispatch=dispatch_flag)
-wind_off = source.Renewable(uid="wind_off", outputs=[b_el], val=data['wind'],
-                            out_max=25300, dispatch=dispatch_flag)
-pv = source.Renewable(uid="pv", outputs=[b_el], val=data['pv'],
-                      out_max=65300, dispatch=dispatch_flag)
+wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el], val=data['wind'],
+                             out_max=66300, dispatch_ex = 10)
+wind_on2 = source.DispatchSource(uid="wind_on2", outputs=[b_el2],
+                              val=data['wind'], out_max=66300)
+wind_off = source.DispatchSource(uid="wind_off", outputs=[b_el],
+                                 val=data['wind'], out_max=25300)
+pv = source.DispatchSource(uid="pv", outputs=[b_el], val=data['pv'],
+                        out_max=65300)
 
 # demands
 demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
@@ -108,7 +107,7 @@ components = transformers + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': True, 'slack': True})
+                       options={'invest': False, 'slack': True})
 
 om.solve(solver='gurobi', debug=True, tee=False, results_to_objects=True)
 
