@@ -1,5 +1,5 @@
 =========================================
- Mathematical description
+ Model description
 =========================================
 
 .. contents:: Table of Contents
@@ -29,308 +29,158 @@ Definitions
 
 When transforming a mathematical model into code it should be understandable, too. Therefore, Variables and Params should be named as close as possible to the mathematical model, e.g. the model param :math:`P_{chp,max}` should be named p_chp_max. In contrast, Objectives and Constraints should have „speaking names“ for easy debugging.
 
-How to model energy systems using solph:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To understand how energy systems are modeled in solph we need to introduce some 
-omoef/solph specific definitions.
+=======================
+General description
+=======================
 
-An arbitrary energy system will consist of the following elements: 
+An arbitrary energy system modeled with oemof will consist of entities which are connected. The following basic two different elements exist: 
 
 * **Component**: a component that stores, converts, produces or consumes energy
-* **Busses** : a combination of sinks and sources, transformers, input/output of storages, input/output connections between busses which add up to a bus balance 
-* **Connection**: a connection between busses of same type
+* **Buses** : a combination components  
 
-*Components*
+  Entities are connected in such a way that buses are only connected to components and vice versa. In this way the energy system can be interpreted as a bipartite graph. 
+  In this graph the entities represent vertices. The inputs and the ouputs can be interpreted as directed edges. For every edge in this graph there will be a value which 
+  we will define as the weight of the edge. 
 
-	The input and the ouput side of a component will connected to a bus. Connections between components and
-	busses are defined without loss. If the component has electrical and thermal output the component is virtually splitted
-	in two using two variables in the mathematical model. One variable for el. output and one for the th. output.  
-
-	Example: 
-
-	* The input of a PowerToGas-unit will be connected to an electrical bus while the output will be connected to a gas-bus
-    * The input of a PowerToHeat-unit will be connected to an electrical bus and the output will be connected to a thermal-bus
-
-*Busses* 
-
-	Busses can have an associated components which can be of types: 
-    
-    * Sink: can be a consumer or a demand 
-    * Source: can be feedin of renewable energies 
-    * Storage: can be electrical Storage 
-    * Transformer: can be an powerplant
-  
-	More over busses can have connections to other busses of same type. For every bus the bus energy(carrier)-balance must hold.
-	This is for example the electrical demand(sink) of a electrical bus must equal electrical output 
-	of the components (e.g.transformers), and the electrical netto exchange with other busses connected. 
-	The same can be applied for thermal busses or gas busses. Note that this definition holds for coal or biomass busses as well, even if 
-    there are no storages and connections to other busses. If components do not exist they can be omitted.  
- 
-	A bus can be connected to the input or output side of components. 
-	
-	Examples:
-    
-	* Coal-(resource)bus on input side of Coal-powerplant 
-	* Gas-(resource)bus as ouput of PowerToGas-unit
+=========================================
+Mathematical description
+=========================================
 
 
+*not regarding timesteps so far...*
 
-*Connections (between busses)* 
+Generic formulation as graph
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	Generally the follwing connections may exist: 
-
-	#. resource - resource
-	#. electricity - electricity 
-	#. thermal - thermal 
-
-Sets 
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Set for Timeseries
---------------------
-
-	.. math::
-	   :nowrap:
-
-		\begin{align*}
-		 & t \in T \\
-		\end{align*}
-	
-Set for Busses:
--------------------
-
-	.. math::
-	   :nowrap:
-
-		\begin{align*}
-		 &b \in B_{el} :\text{Sets for electrical busses}\\
-		 &b \in B_{th} :\text{Sets for thermal busses}\\
-		 &b \in B_{r}  :\text{Sets for resource busses}\\
-		 &b \in B :    \text{Set of all busses}
-		\end{align*}
-
-Sets for connections
----------------------
-
-	.. math::
-	   :nowrap:
-
-		\begin{align*}
-		 &(i,j) \in C: \text{Set for all existing connections}\\
-		\end{align*}
-
-This is the set for all existing connections. All possible connections for busses of same type can be calculated by 
-the cartesian product e.g. :math:`C_{all} = (i,j) = B_{el} x B_{el},~i \neq j`  
-
-Sets for Sinks and Sources
---------------------------
-.. math::
-	   :nowrap:
-
-		\begin{align*}
-		 &(c,b) \in IN: \text{Set for Sources}
-		 &(c,b) \in OUT: \text{Set for Sinks}\\
-		\end{align*}
-
-Sets transformers:
----------------------------------
-
-	.. math::
-	   :nowrap:
-
-			\begin{align*}
-			 &(c,b,r) \in P: \text{Set for all transformers with el. output, } b \in B_{el}, r \in B_r\\
-			 &(c,b,r) \in Q: \text{Set for all transformers with th. output, } b \in B_{th}, r \in B_r\\
-		     &(c,b,r) \in TRANSF= P \cup Q: \text{Set of all Transformers, } b \in B
-			\end{align*}
-
-Examples
-^^^^^^^^^^ 
-	Timeseries: 
-
-		:math:`T = \{1,2,\dots, 8760\}`
-    
-	Busses:
-
-		To model 3 el. busses and three th. busses initialize the sets as follows:
-
-			:math:`B_{el}` = \{'bel1','bel2','bel3'\}, :math:`B_{el}` = \{'bth1','bth2','bth3'\}
-
-		If there exist an connection between two busses, this will be defined via elements (tuples) in set :math:`C`:
-
-			:math:`C` = \{('bel1','bel2'),('bel2','bel1'),('bel2','bel2'),('bth1','bth3')\}
-
-	Power and Heat: 
-	
-    	To model the electrical output of two components both connected to the same el. and resource bus do:
-
-				:math:`P` = {('p1','bus_el4','rngas3'), ('p2','bus_el4','rngas3')}
-
-	
-Parameter
-~~~~~~~~~~~
-
-Parameter for Source and Sink
------------------------------
-
-	.. math::
-	   :nowrap:
-
-		 \begin{align*}
-		 \text{Demand} & \\
-		  &SINK(c,b,t),\quad \forall (c,b) \in IN, t \in T :\text{Sink (c,b) in $t$}\\
-		  &SOURCE(c,b,t),\quad \forall (c,b) \in OUT, t \in T :\text{Source (c,b) in $t$}\\
-		 \end{align*}
-
-Parameter for Transformers
----------------------------
-	.. math::
-	   :nowrap:
-
-	 		\begin{align*}
-			 \text{Max. power output:} & \\
-			  &P_{max}(c,b,r),\quad \forall (c,b,r) \in TRANSF :\text{max. output of transformer $(c,b,r)$}\\
-		     \text{Efficiencies of transformers:} &\\
-			  &ETA(c,b,r), \quad \forall (c,b,r) \in TRANSF :\text{Conversion efficiency of transformer $(c,b,r)$}\\
-			 \end{align*}
-
-
-Variables 
-~~~~~~~~~~~~~
-
-Transformer
----------------
+Set of entities :math:`E` as a union of sets of buses, transformers, sources, sinks and transports respectively, which are the vertices:
 
 .. math::
-   :nowrap:
+   E := \{ E_B, E_F, E_O, E_I, E_P \}
 
-	\begin{align*}
-	 \text{Component output} & \\
-	  &p(c,b,r,t),\quad \forall (c,b,r) \in TRANSF, t \in T :\text{Output of all transformer components}\\
-	 \end{align*}
-
-Resource and exchange
-------------------------
+Set of Components: 
 
 .. math::
-   :nowrap:
+   E_C := E \setminus E_B
 
-	 \begin{align*}
-	  &rcon(b,t),\quad \forall b \in B, t \in T     : \text{Resource consumption from bus $b$}\\
-	  &ex(i,j,t), \quad \forall (i,j) \in C, t \in T:\text{Energy exchange in connection $(i,j)$}
-	 \end{align*}
-
-Storages 
-------------
+Set of directed edges...:
 
 .. math::
-   :nowrap:
+   \vec{E} := \{(e_i, e_j),...\}
 
-	 \begin{align*}
-	 & s_{charge}(c,b,t), \quad \forall (c,b) \in S, t \in T\\
-	 & s_{discharge}(c,b,t), \quad \forall (c,b) \in S, t \in T\\
-	 & s_{soc}(c,b,t), \quad \forall (c,b) \in S, t \in T
-	 \end{align*}
-
-Constraints 
-~~~~~~~~~~~~~~~~~~~~
-
-Bus Balance
---------------------
+Function :math:`f` as "Uebertragunsfunktion" for each component used in constraints:
 
 .. math::
-   :nowrap:
-	
-	\begin{align*}
-		0 = \\
-		& + \sum_{c,i=b \in IN} SOURCE(c,i,t) \\
-		&-  \sum_{c,i=b \in OUT} SINK(c,i,t) \\
-		&+ \sum_{(i,j=b,k)\in TRANSF} p(i,j,k,t) \\
-		&- \sum_{(i=b,j) \in C} ex(i,j,t) \\
-		&+ \sum_{(i,j=b) \in C} ex(i,j,t)\\ 
-    	&- \sum_{i,j=b,t \in S} s_{charge}(i,j,t) \\
-		&+ \sum_{i,j=b,t \in S} s_{discharge}(i,j,t)\\
-		&- \sum_{i=b \in B} rcon(i,t) \\	
-		&  & \forall b \in B, t \in T\\
-	\end{align*}	
+   f(I_e, O_e) \leq \vec{0}, \quad \forall e \in E_C
 
-Resource consumption 
----------------------
-.. math::
-   :nowrap:
-
-	\begin{align*}
-		rcon(b,t) \geq	 &\sum_{(i,j,k=b) \in TRANSF} \frac{p(i,j,k,t)}{ETA(i,j,k)}\\
-		 & & \forall b \in B, t \in T
-	\end{align*}
-
-Sum of resource consumption for every bus in every timestep that ends up in the bus-balance. 
-
-Storages 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-As used in  :py:func:`oemof.solph.storage_constraints.storage_power_lim`
-
-Discharge limitation by maximal discharge power
------------------------------------------------
+:math:`I_e` and :math:`O_e` as subsets of :math:`E`:
 
 .. math::
-   :nowrap:
+   I_e & := \{ i \in E | (i,e) \in \vec{E} \}\\
+   O_e & := \{ o \in E | (e,o) \in \vec{E} \}
 
-   \begin{align*}
-      S_{discharge}(r,t,c) & \leq\frac{S_{capacity}}{EPR_{out}}\\
-      & \forall r\in regions,t\in hoy,c\in storages\\
-      \intertext{with\, variable\, investment\,(if\, invest)} 
-      S_{discharge}(r,t,c) & \leq\frac{S_{capacity}+S_{installed}^{lp-var}}{EPR_{out}}\\
-      & \forall r\in regions,t\in hoy,c\in storages\\
-      \intertext{thermal\, storage\, in\, a\, domestic\, heating\, system\,(if\, domestic\, and\, invest)}S_{discharge}(r,t,c) & \leq\frac{S_{capacity}+S_{installed}^{lp-var}}{EPR_{out}}\cdot\frac{D(r,t,HS(c))}{HS_{capacity}(c)}\\
-      & \forall r\in regions,t\in hoy,c\in storages
-   \end{align*}
+And additional constraint for outflow :math:`o` and inflow :math:`i` for each edge:
+
+.. math::
+   o_{e_1} - i_{e_2} = 0, \quad \forall (e_1, e_2) \in \vec{E}
+
+Examples for less generic formulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Buses**
+
+.. math::
+   \sum_{i \in I_e} i - \sum_{o \in O_e} o = 0, \quad \forall e \in E_B
+
+**Transformers**
+
+.. math::
+   f(I_e) - \sum_{o \in O_e} o = 0, \quad \forall e \in E_F
+
+e.g. simple gas power plant with efficiency :math:`\eta` and one inflow :math:`i` (gas) and one outflow :math:`o` (electricity).
+
+.. math::
+   \eta_e \cdot i_e - o_e = 0, \quad \forall e \in E_{simple gas power plant}
+
+**Sinks**
+
+.. math::
+   i_e - v_e = 0, \quad \forall e \in E_I
    
-Charge limitation by maximal charge power
------------------------------------------
+with :math:`v` being the value of the sink, e.g. the electric demand in MWh of a household.
+
+**Sources**
 
 .. math::
-   :nowrap:
+   o_e - v_e = 0, \quad \forall e \in E_O
    
-   \begin{align*}
-      S_{charge}(r,t,c) & \leq\frac{S_{capacity}}{EPR_{in}}\\
-      & \forall r\in regions,t\in hoy,c\in storages\\
-      \intertext{with\, variable\, investment\,(if\, invest)}S_{charge}(r,t,c) & \leq\frac{S_{capacity}+S_{installed}^{lp-var}}{EPR_{in}}\\
-      & \forall r\in regions,t\in hoy,c\in storages\\
-      \intertext{thermal\, storage\, in\, a\, domestic\, heating\, system\,(if\, domestic\, and\, invest)}S_{charge}(r,t,c) & \leq\frac{S_{capacity}+S_{installed}^{lp-var}}{EPR_{out}}\cdot\frac{D(r,t,HS(c))}{HS_{capacity}(c)}\\
-      & \forall r\in regions,t\in hoy,c\in storages
-   \end{align*}
+with :math:`v` being the value of the source, e.g. the electric supply in MWh of a wind turbine.
+
+**Transports**
+
+*still missing*
 
 
+Optimization problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Minmal SOC
-----------
+In the optimization problem with timesteps the weight of a edge :math:`(e_1,e_2) \in \vec{E}` will correspond to a variable :math:`w(e_1,e_2,t)`.
+
+Sets
+-----
+
+**Timesteps**
 
 .. math::
-   :nowrap:
-   
-   \begin{align*}
-      SOC^{lp-var}(r,t,c) & \geq0\\
-      & \forall r\in regions,t\in hoy,c\in storages\\   
-   \end{align*}
+	t \in T \\
 
-Maximal SOC
------------
+
+**Input/Output sets**
+
+Indexed set that will exist for every component, containing their inputs and outputs which are elements of :math:`\in E_B`.
 
 .. math::
-   :nowrap:
-   
-   \begin{align*}
-      SOC^{lp-var}(r,t,c) & \leq S_{capacity}\\
-      & \forall r\in regions,t\in hoy,c\in storages\\
-      \intertext{with\, variable\, investment\,(if\, invest)}SOC^{lp-var}(r,t,c) & \leq S_{capacity}+S_{installed}^{lp-var}\\
-      & \forall r\in regions,t\in hoy,c\in storages
-   \end{align*}
+   I_e & := \{ i \in E_B | (i,e) \in \vec{E},\forall e \in E_{C} \}\\
+   O_e & := \{ o \in E_B | (e,o) \in \vec{E},\forall e \in E_{C} \}
+
+
+Variables
+--------------
+
+The maximum value of a edge will be modeled as the upper bound of the edge associated variable. 
+
+.. math::
+  0 \leq w(e_1,e_2,t) \leq w_{max}(e_1,e_2,t), \quad \forall (e_1, e_2) \in \vec{E}, \forall t \in T
+
+Additional variables needed for specific components will come from their models. 
+For a simple storage the variable :math:`s_{soc}(e)` will be introduced using the index set :math:`e \in E_{simpleStorage}`.
+
+
+Constraints
+-------------
+
+**Bus constraints**
+
+.. math:: 
+	\sum_{(e_1,e_2=b)} w(e_1,e_2,t) - \sum_{(e_1=b,e_2)} w(e_1,e_2,t) = 0, \quad \forall b \in E_B, \forall t \in T\\
+    \sum_{t \in T} \sum_{(e_1=b,e_2) \in \vec{E}} w(e_1,e_2,t) \leq O_{max}(b), \quad \forall b \in E_B
+
+**Simple power plant**
+
+.. math::
+   \eta_e \cdot w(I_e,e,t) - w(e,O_e,t) = 0, \quad \forall e \in E_{simple\_transformer}, \forall t \in T
+
+**Simple combined heat and power plant**
+
+.. math::
+   \eta_e \cdot w(I_e,e,t) - \sum_{o \in O_e} w(e,o,t) = 0, \quad \forall e \in E_{simple\_chp}, \forall t \in T\\
+   \frac{w(e,o_1,t)}{\eta_{el}(e)} = \frac{w(e,o_2,t)}{\eta_{th}(e)}, \quad \forall e \in E_{simple\_chp},\forall t \in T,~ o_1,o_2 \in O_e
+
+**Storage**
+.. math::
 
 
 =========================================
- Uwes Mathematical description
+Draft fo a Mathematical description
 =========================================
 
 Sets 
@@ -470,6 +320,26 @@ Maximal energy amount of a resource. Could be skipped if unbounded.
 		energy_{max}(c,b) \geq	 &\sum_{t \in T} out(c,b,t)\\
 		 & & \forall b \in B, t \in T
 	\end{align*}
+	
+Renewable resource
+------------------
+
+**Type: resource_renewable**
+
+A renewable resource is limited by its hourly production.
+
+Maximal Energy
+^^^^^^^^^^^^^^
+
+.. math::
+   :nowrap:
+
+	\begin{align*}
+        o_e - v_e = 0&\\
+        &\forall e \in E_O
+	\end{align*}
+	   
+with :math:`v` being the value of the source, e.g. the electric supply in MWh of a wind turbine.
 
 .. _transformer:
 
@@ -497,8 +367,8 @@ The output variable is connected to the input variable through a constant effici
    :nowrap:
 
 	\begin{align*}
-   		out(c,b1,t) = \eta(c) \cdot in(c,b0,t)&\\
-		& \forall c\in C, b0,b1\in B, t\in T\\
+   		\eta_e \cdot i_e - o_e = 0 \quad&\\
+		& \forall e \in E_{type}\\
 	\end{align*}
 		
 Maximal Power (optional)
@@ -659,3 +529,6 @@ Connector (generic)
 -------------------
 
 to be continued
+
+
+
