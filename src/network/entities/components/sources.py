@@ -1,10 +1,26 @@
 from network.entities.components import Source
 
 
-class Renewable(Source):
+class FixedSource(Source):
     """
     """
-    lower_name = "renewable_source"
+    lower_name = "fixed_source"
+
+    def __init__(self, **kwargs):
+        """
+        :param boolean dispatch: Flag if RenewableSource is dispatchable or not
+        """
+        super().__init__(**kwargs)
+        self.val = kwargs.get('val', None)
+
+    def calc_emissions(self):
+        self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]
+
+
+class DispatchSource(Source):
+    """
+    """
+    lower_name = "dispatch_source"
 
     def __init__(self, **kwargs):
         """

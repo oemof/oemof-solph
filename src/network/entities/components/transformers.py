@@ -17,11 +17,10 @@ class Simple(Transformer):
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', None)
 
-        if(self.param['in_max'][self.inputs[0].uid] is None and
-           self.param['out_max'][self.outputs[0].uid] is not None):
-            self.param['in_max'][self.inputs[0].uid] = \
-                self.param['out_max'][self.outputs[0].uid] / \
-                self.param['eta'][0]
+        if(self.in_max[self.inputs[0].uid] is None and
+           self.out_max[self.outputs[0].uid] is not None):
+            self.in_max[self.inputs[0].uid] = \
+                self.out_max[self.outputs[0].uid] / self.eta[0]
 
 
 class CHP(Transformer):

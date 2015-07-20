@@ -43,9 +43,8 @@ class Component(Entity):
         self.lifetime = kwargs.get('lifetime', 20)
         self.wacc = kwargs.get('wacc', 0.05)
         self.capex = kwargs.get('capex', 0)
-        self.opex_fix = kwargs.get('opex_fix', None)
+        self.opex_fix = kwargs.get('opex_fix', 0)
         self.opex_var = kwargs.get('opex_var', 0)
-        self.co2_var = kwargs.get('co2_var', None)
-        self.param = kwargs.get('param', None)
+        self.co2_var = kwargs.get('co2_var', 0)
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})

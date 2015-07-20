@@ -1,4 +1,5 @@
 import pyomo.environ as po
+import generic as gc
 from network.entities import Bus, Component
 import network.entities.components as cp
 
@@ -30,135 +31,30 @@ class OptimizationModel(po.ConcreteModel):
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
                                      if isinstance(e, Component)])
+
+        gc.generic_variables(model=self, edges=self.all_edges,
+                             timesteps=self.timesteps)
+
         # list with all necessary classes
-        classes = ([Bus] +
-                   cp.Transformer.__subclasses__() +
-                   cp.Sink.__subclasses__() +
-                   cp.Source.__subclasses__() +
-                   cp.Transport.__subclasses__())
+        component_classes = (cp.Transformer.__subclasses__() +
+                             cp.Sink.__subclasses__() +
+                             cp.Source.__subclasses__() +
+                             cp.Transport.__subclasses__())
 
         # set attributes lists per class with objects and uids for opt model
-        for cls in classes:
+        for cls in component_classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
             uids = [e.uid for e in objs]
             setattr(self, cls.lower_name + "_objs", objs)
             setattr(self, cls.lower_name + "_uids", uids)
+            # "call" methods to add the constraints opt. problem
+            if objs:
+                getattr(self, cls.lower_name + "_model")(objs=objs, uids=uids)
 
-        # "call" methods to add the constraints and variables to opt. problem
-        self.generic_variables(edges=self.all_edges,
-                               timesteps=self.timesteps)
         self.bus_model()
-        self.simple_chp_model(objs=self.simple_chp_objs,
-                              uids=self.simple_chp_uids)
-        self.simple_extraction_chp_model()
-        self.renewable_source_model()
-        self.simple_transformer_model(objs=self.simple_transformer_objs,
-                                      uids=self.simple_transformer_uids)
-        self.simple_storage_model(objs=self.simple_storage_objs,
-                                  uids=self.simple_storage_uids)
-        #self.generic_limit(objs=self.commodity_objs, uids=self.commodity_uids,
-        #                   timesteps=self.timesteps)
-        self.simple_transport_model(objs=self.simple_transport_objs,
-                                    uids=self.simple_transport_uids)
-        self.simple_sink_model(objs=self.simple_sink_objs)
-        # set objective function
         self.objective()
 
-    def generic_variables(self, edges, timesteps, var_name="w"):
-        """ variables creates all variables corresponding to the edges indexed
-        by t in timesteps, (e1,e2) in all_edges
-        if invest flag is set to true, an additional variable indexed by
-        (e1,e2) in all_edges is created.
-        """
-        # variable for edges
-        self.w = po.Var(edges, timesteps, within=po.NonNegativeReals)
 
-        # additional variable for investment models
-        if(self.invest is True):
-            self.add_cap = po.Var(edges, within=po.NonNegativeReals)
-
-    def generic_io_constraints(self, objs=None, uids=None,
-                               timesteps=None):
-        if objs is None:
-            raise ValueError("No objects defined. Please specify objects for \
-                             which the constraints should be build")
-        if uids is None:
-            uids = [e.uids for e in objs]
-
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-        # set with output uids for every simple transformer
-        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-        eta = {obj.uid: obj.param['eta'] for obj in objs}
-
-        # constraint for simple transformers: input * efficiency = output
-        def __rule__(self, e, t):
-            expr = self.w[I[e], e, t] * eta[e][0] - self.w[e, O[e][0], t]
-            return(expr == 0)
-        setattr(self, "generic_io_"+objs[0].lower_name,
-                po.Constraint(uids, timesteps, rule=__rule__))
-
-    def generic_w_ub(self, objs=None, uids=None, timesteps=None):
-
-        if objs is None:
-            raise ValueError("No objects defined. Please specify objects for \
-                             which bounds should be set")
-        if uids is None:
-            uids = [e.uids for e in objs]
-
-        # set variable bounds (out_max = in_max * efficiency):
-        # m.in_max = {'pp_coal': 51794.8717948718, ... }
-        # m.out_max = {'pp_coal': 20200, ... }
-        in_max = {obj.uid: obj.param['in_max'] for obj in objs}
-        out_max = {obj.uid: obj.param['out_max'] for obj in objs}
-
-        if self.invest is False:
-            # edges for simple transformers ([('coal', 'pp_coal'),...])
-            ee = self.edges(objs)
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    # transformer output <= self.out_max
-                    if e1 in uids:
-                        self.w[e1, e2, t].setub(out_max[e1][e2])
-                    # transformer input <= self.in_max
-                    if e2 in uids:
-                        self.w[e1, e2, t].setub(in_max[e2][e1])
-        else:
-
-            O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-
-            # constraint for additional capacity
-            def __w_ub_rule__(self, e, t):
-                expr = self.w[e, O[e][0], t] - out_max[e][O[e][0]] - \
-                    self.add_cap[e, O[e][0]]
-                return(expr <= 0)
-            setattr(self, "generic_w_ub_" + objs[0].lower_name,
-                    po.Constraint(uids, self.timesteps,
-                                  rule=__w_ub_rule__))
-
-    def generic_limit(self, objs=None, uids=None, timesteps=None):
-        """generic limit constraints.
-
-        Parameters
-        ----------
-        self : pyomo.ConcreteModel
-
-        Returns
-        -------
-        self : pyomo.ConcreteModel
-        """
-
-        limit = {obj.uid: obj.sum_out_limit for obj in objs}
-
-        # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
-        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-
-        # set upper bounds: sum(yearly commodity output) <= yearly_limit
-        def __limit_rule__(self, e):
-            expr = sum(self.w[e, o, t] for t in timesteps for o in O[e]) -\
-                limit[e]
-            return(expr <= 0)
-        setattr(self, "generic_limit_"+objs[0].lower_name,
-                po.Constraint(uids, rule=__limit_rule__))
 
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
@@ -171,17 +67,18 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
-        all_bus_objs = self.bus_objs
-        all_bus_uids = self.bus_uids
-        bus_objs = [obj for obj in all_bus_objs if
-                    any([obj.type is "el", obj.type is "th"])]
+        self.bus_objs = [e for e in self.entities if isinstance(e, Bus)]
+        self.bus_uids = [e.uid for e in self.bus_objs]
+
+        bus_objs = [obj for obj in self.bus_objs
+                    if any([obj.type == "el", obj.type == "th"])]
         bus_uids = [obj.uid for obj in bus_objs]
 
         # slack variables that assures a feasible problem
         if self.slack is True:
-            self.shortage_slack = po.Var(all_bus_uids, self.timesteps,
+            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
                                          within=po.NonNegativeReals)
-            self.excess_slack = po.Var(all_bus_uids, self.timesteps,
+            self.excess_slack = po.Var(self.bus_uids, self.timesteps,
                                        within=po.NonNegativeReals)
 
         I = {b.uid: [i.uid for i in b.inputs] for b in bus_objs}
@@ -199,13 +96,13 @@ class OptimizationModel(po.ConcreteModel):
         self.bus = po.Constraint(bus_uids, self.timesteps, rule=bus_rule)
 
         # select only buses that are resources (gas, oil, etc.)
-        rbus_objs = [obj for obj in all_bus_objs
-                     if all([obj.type is not "el", obj.type is not "th"])]
+        rbus_objs = [obj for obj in self.bus_objs
+                     if all([obj.type != "el", obj.type != "th"])]
         rbus_uids = [e.uid for e in rbus_objs]
 
         # set limits for resource buses
-        self.generic_limit(objs=rbus_objs, uids=rbus_uids,
-                           timesteps=self.timesteps)
+        gc.generic_limit(model=self, objs=rbus_objs, uids=rbus_uids,
+                         timesteps=self.timesteps)
 
     def simple_transformer_model(self, objs, uids):
         """Generic transformer model containing the constraints
@@ -220,11 +117,12 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        self.generic_io_constraints(objs=objs, uids=uids,
-                                    timesteps=self.timesteps)
+        gc.generic_io_constraints(model=self, objs=objs, uids=uids,
+                                  timesteps=self.timesteps)
 
         # set bounds for variables  models
-        self.generic_w_ub(objs=objs, uids=uids, timesteps=self.timesteps)
+        gc.generic_w_ub(model=self, objs=objs, uids=uids,
+                        timesteps=self.timesteps)
 
     def simple_chp_model(self, objs, uids):
         """Simple chp model containing the constraints for simple chp
@@ -247,7 +145,7 @@ class OptimizationModel(po.ConcreteModel):
         # {'pp_chp': ['b_th', 'b_el']}
         O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
         # efficiencies for simple chps
-        eta = {obj.uid: obj.param['eta'] for obj in objs}
+        eta = {obj.uid: obj.eta for obj in objs}
 
         # additional constraint for power to heat ratio of simple chp comp:
         # P/eta_el = Q/eta_th
@@ -257,7 +155,7 @@ class OptimizationModel(po.ConcreteModel):
             return(expr == 0)
         self.simple_chp = po.Constraint(uids, self.timesteps, rule=chp_rule)
 
-    def simple_extraction_chp_model(self):
+    def simple_extraction_chp_model(self, objs, uids):
         """Simple extraction chp model containing the constraints for
         objects of class cp.SimpleExtractionCHP().
 
@@ -271,18 +169,17 @@ class OptimizationModel(po.ConcreteModel):
 
         """
         # {'pp_chp': 'gas'}
-        I = {obj.uid: obj.inputs[0].uid
-             for obj in self.simple_extraction_chp_objs}
+        I = {obj.uid: obj.inputs[0].uid for obj in objs}
         # set with output uids for every simple chp
         # {'pp_chp': ['b_th', 'b_el']}
         O = {obj.uid: [o.uid for o in obj.outputs[:]]
-             for obj in self.simple_extraction_chp_objs}
-        k = {obj.uid: obj.k for obj in self.simple_extraction_chp_objs}
-        c = {obj.uid: obj.c for obj in self.simple_extraction_chp_objs}
-        beta = {obj.uid: obj.beta for obj in self.simple_extraction_chp_objs}
-        p = {obj.uid: obj.p for obj in self.simple_extraction_chp_objs}
+             for obj in objs}
+        k = {obj.uid: obj.k for obj in objs}
+        c = {obj.uid: obj.c for obj in objs}
+        beta = {obj.uid: obj.beta for obj in objs}
+        p = {obj.uid: obj.p for obj in objs}
         out_min = {obj.uid: obj.out_min
-                   for obj in self.simple_extraction_chp_objs}
+                   for obj in objs}
 
         # constraint for transformer energy balance:
         # 1) P <= p[0] - beta[0]*Q
@@ -291,7 +188,7 @@ class OptimizationModel(po.ConcreteModel):
             rhs = p[e][0] - beta[e][0] * self.w[e, O[e][1], t]
             return(expr <= rhs)
         self.simple_extraction_chp_1 = \
-            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+            po.Constraint(uids, self.timesteps,
                           rule=c1_rule)
 
         # 2) P = c[0] + c[1] * Q
@@ -300,7 +197,7 @@ class OptimizationModel(po.ConcreteModel):
             rhs = (self.w[e, O[e][0], t] - c[e][0]) / c[e][1]
             return(expr <= rhs)
         self.simple_extraction_chp_2 = \
-            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+            po.Constraint(uids, self.timesteps,
                           rule=c2_rule)
 
         # 3) P >= p[1] - beta[1]*Q
@@ -312,7 +209,7 @@ class OptimizationModel(po.ConcreteModel):
             else:
                 return(po.Constraint.Skip)
         self.simple_extraction_chp_3 = \
-            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+            po.Constraint(uids, self.timesteps,
                           rule=c3_rule)
 
         # H = k[0] + k[1]*P + k[2]*Q
@@ -323,12 +220,12 @@ class OptimizationModel(po.ConcreteModel):
                        k[e][2]*self.w[e, O[e][1], t])
             return(expr, 0)
         self.simple_extraction_chp_io = \
-            po.Constraint(self.simple_extraction_chp_uids, self.timesteps,
+            po.Constraint(uids, self.timesteps,
                           rule=in_out_rule)
 
-    def renewable_source_model(self):
-        """Simple renewable source model containing the constraints for
-        renewable source sources.
+    def fixed_source_model(self, objs, uids):
+        """fixed source model containing the constraints for
+        fixed sources.
 
         Parameters
         ----------
@@ -338,73 +235,21 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
-        # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
-        O = {obj.uid: obj.outputs[0].uid
-             for obj in self.renewable_source_objs}
-        # normed value of renewable source (0 <= value <=1)
-        self.source_val = {obj.uid: obj.val
-                           for obj in self.renewable_source_objs}
-        # maximal ouput of renewable source (in general installed capacity)
-        self.out_max = {obj.uid: obj.out_max
-                        for obj in self.renewable_source_objs}
-        # flag if dispatch is true or false for each object
-        self.dispatch = {obj.uid: obj.dispatch
-                         for obj in self.renewable_source_objs}
-
-        # if one one RenewableSource() instance attribute is dispatch=True
-        if(True in self.dispatch.values()):
-            # get only the RenewableSource() instance that have dispatch
-            self.renewable_sources_dispatch_uids = [k for (k, v) in
-                                                    self.dispatch.items()
-                                                    if v is True]
-            # Set to define dispatch variable
-            self.renewable_dispatch_v = \
-                po.Var(self.renewable_sources_dispatch_uids, self.timesteps,
-                       within=po.NonNegativeReals)
-
-            # constraint to determine how much renewable energy is dispatched
-            def dispatch_rule(self, e, t):
-                expr = self.renewable_dispatch_v[e, t]
-                expr += - self.source_val[e][t] * self.out_max[e] + \
-                    self.w[e, O[e], t]
-                return(expr, 0)
-            self.renewable_source_dispatch_c = \
-                po.Constraint(self.renewable_sources_dispatch_uids,
-                              self.timesteps, rule=dispatch_rule)
-        # set bounds for basic/investment models
-        # TODO: include dispatch if invest=True
-        if(self.invest is False):
-            # edges for renewables ([('wind_on', 'b_el'), ...)
-            ee = self.edges(self.renewable_source_objs)
-            # fixed value
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    self.w[(e1, e2), t] = self.source_val[e1][t] * \
-                        self.out_max[e1]
-                    #self.w[e1, e2, t].fix()
-                    self.w[(e1, e2), t].setub(self.source_val[e1][t] *
-                                              self.out_max[e1])
-                    self.w[(e1, e2), t].setlb(self.source_val[e1][t] *
-                                              self.out_max[e1] *
-                                              (1-self.dispatch[e1]))
-
+        if self.invest is False:
+            gc.generic_fixed_source(model=self, objs=objs, uids=uids,
+                                    timesteps=self.timesteps)
         else:
-            if(True in self.dispatch.values()):
-                raise ValueError("Dispatchable renewables not implemented for"
-                                 "investment models.\n Please reset flag from"
-                                 "True to False")
+            gc.generic_fixed_source_invest(model=self, objs=objs, uids=uids,
+                                           timesteps=self.timesteps)
 
-            # constraint to allow additional capacity for renewables
-            def invest_rule(self, e, t):
-                expr = 0
-                expr += self.w[e, O[e], t]
-                rhs = (self.out_max[e] + self.add_cap[e, O[e]]) * \
-                    self.source_val[e][t]
-                return(expr <= rhs)
-            self.source_c = po.Constraint(self.renewable_source_uids,
-                                          self.timesteps, rule=invest_rule)
+    def dispatch_source_model(self, objs, uids):
+        """
+        """
+        if self.invest is False:
+            gc.generic_dispatch_source(model=self, objs=objs, uids=uids,
+                                       timesteps=self.timesteps)
 
-    def simple_sink_model(self, objs):
+    def simple_sink_model(self, objs, uids):
         """simple sink model containing the constraints for simple sinks
         Parameters
         ----------
@@ -414,19 +259,8 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
-
-        val = {obj.uid: obj.val for obj in objs}
-        ee = self.edges(objs)
-        for (e1, e2) in ee:
-            # setting upper and lower bounds for variable corresponding to
-            # edge from buses to simple_sinks
-            for t in self.timesteps:
-                # set variable value
-                self.w[(e1, e2), t] = val[e2][t]
-                # fix variable value for optimization problem
-                self.w[(e1, e2), t].fix()
-                # self.w[(e1, e2), t].setub(val[e2][t])
-                # self.w[(e1, e2), t].setlb(val[e2][t])
+        gc.generic_fixed_sink(model=self, objs=objs, uids=uids,
+                              timesteps=self.timesteps)
 
     def simple_storage_model(self, objs, uids):
         """Simple storage model containing the constraints for simple storage
@@ -441,9 +275,6 @@ class OptimizationModel(po.ConcreteModel):
         m : pyomo.ConcreteModel
         """
 
-        soc_max = {obj.uid: obj.soc_max for obj in objs}
-        soc_min = {obj.uid: obj.soc_min for obj in objs}
-
         O = {obj.uid: obj.outputs[0].uid for obj in objs}
         I = {obj.uid: obj.inputs[0].uid for obj in objs}
 
@@ -455,19 +286,7 @@ class OptimizationModel(po.ConcreteModel):
                 for t in self.timesteps:
                     self.w[e1, e2, t].setub(10)
                     self.w[e1, e2, t].setlb(1)
-
-            # rule for creating upper and lower bounds for
-            # storage state of charge variable (soc_v) for operational mode
-            def soc_var_bounds(self, e, t):
-                return(soc_min[e], soc_max[e])
-            self.soc_v = po.Var(uids, self.timesteps, bounds=soc_var_bounds)
-
         else:
-            self.soc_v = po.Var(uids, self.timesteps,
-                                within=po.NonNegativeReals)
-            # creating additional variable for planning models used
-            self.soc_add_v = po.Var(uids, within=po.NonNegativeReals)
-
             # constraint for additional capacity in investment models
             def invest_rule(self, e, t):
                 return(self.soc_v[e, t] <= self.soc_max[e] + self.soc_add_v[e])
@@ -478,7 +297,7 @@ class OptimizationModel(po.ConcreteModel):
         def storage_balance_rule(self, e, t):
             if(t == 0):
                 expr = 0
-                expr += self.soc_v[e, t] - 0.5 * soc_max[e]
+                expr += self.soc_v[e, t]
                 return(expr, 0)
             else:
                 expr = self.soc_v[e, t]
@@ -531,27 +350,26 @@ class OptimizationModel(po.ConcreteModel):
         I = {obj.uid: obj.inputs[0].uid for obj in objective_objs}
         # operational costs
         self.opex_var = {obj.uid: obj.opex_var for obj in objective_objs}
+        self.fuel_costs = {obj.uid: obj.inputs[0].price
+                           for obj in objective_objs}
         # get dispatch expenditure for renewable energies with dispatch
         self.dispatch_ex = {obj.uid: obj.dispatch_ex
-                            for obj in self.renewable_source_objs
-                            if obj.dispatch is True}
+                            for obj in self.dispatch_source_objs}
 
         # objective function
         def obj_rule(self):
             expr = 0
-            expr += sum(self.w[I[e], e, t] * self.opex_var[e]
+            expr += sum(self.w[I[e], e, t] * (self.opex_var[e] +
+                                              self.fuel_costs[e])
                         for e in self.objective_uids
                         for t in self.timesteps)
             if self.slack is True:
                 expr += sum(self.shortage_slack[e, t] * 10e10
                             for e in self.bus_uids for t in self.timesteps)
 
-            # costs for dispatchable renewables
-            if(True in self.dispatch.values()):
-                expr += sum(self.renewable_dispatch_v[e, t] *
-                            self.dispatch_ex[e]
-                            for e in self.renewable_sources_dispatch_uids
-                            for t in self.timesteps)
+            expr += sum(self.dispatch[e, t] * self.dispatch_ex[e]
+                        for e in self.dispatch_source_uids
+                        for t in self.timesteps)
             # add additional capacity & capex for investment models
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in objective_objs}
@@ -573,6 +391,8 @@ class OptimizationModel(po.ConcreteModel):
         solver str: solver to be used e.g. 'glpk','gurobi','cplex'
         solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
+        result_to_objects boolean: Flag if results from optimization problem
+        are written back to objects
         **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
