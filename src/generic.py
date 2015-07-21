@@ -38,7 +38,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
         soc_max = {obj.uid: obj.soc_max for obj in objs}
         soc_min = {obj.uid: obj.soc_min for obj in objs}
 
-        def soc_bound_rule(e, t):
+        def soc_bound_rule(model, e, t):
             return(soc_min[e], soc_max[e])
         model.soc = po.Var(uids, timesteps, bounds=soc_bound_rule)
 
@@ -70,9 +70,25 @@ def generic_io_constraints(model, objs=None, uids=None,
     setattr(model, "generic_io_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=io_rule))
 
+def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
+    # set with output uids for every simple chp
+    # {'pp_chp': ['b_th', 'b_el']}
+    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+    # efficiencies for simple chps
+    eta = {obj.uid: obj.eta for obj in objs}
+
+    # additional constraint for power to heat ratio of simple chp comp:
+    # P/eta_el = Q/eta_th
+    def rule(model, e, t):
+        expr = model.w[e, O[e][0], t] / eta[e][0]
+        expr += -model.w[e, O[e][1], t] / eta[e][1]
+        return(expr == 0)
+    setattr(model, "generic_"+objs[0].lower_name,
+            po.Constraint(uids, timesteps, rule=rule))
 
 def generic_w_ub(model, objs=None, uids=None, timesteps=None):
-
+    """
+    """
     if objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                          which bounds should be set.")
@@ -89,25 +105,37 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
         # edges for simple transformers ([('coal', 'pp_coal'),...])
         ee = model.edges(objs)
         for (e1, e2) in ee:
-            for t in model.timesteps:
+            for t in timesteps:
                 # transformer output <= model.out_max
                 if e1 in uids:
                     model.w[e1, e2, t].setub(out_max[e1][e2])
                 # transformer input <= model.in_max
                 if e2 in uids:
                     model.w[e1, e2, t].setub(in_max[e2][e1])
-    else:
 
-        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
 
-        # constraint for additional capacity
-        def __w_ub_rule__(model, e, t):
-            expr = model.w[e, O[e][0], t] - out_max[e][O[e][0]] - \
-                model.add_cap[e, O[e][0]]
-            return(expr <= 0)
-        setattr(model, "generic_w_ub_" + objs[0].lower_name,
-                po.Constraint(uids, model.timesteps,
-                              rule=__w_ub_rule__))
+def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
+    """
+    """
+    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+    out_max = {obj.uid: obj.out_max for obj in objs}
+
+    # constraint for additional capacity
+    def rule(model, e, t):
+        expr = model.w[e, O[e][0], t] - out_max[e][O[e][0]] - \
+            model.add_cap[e, O[e][0]]
+        return(expr <= 0)
+    setattr(model, "generic_w_ub_" + objs[0].lower_name,
+            po.Constraint(uids, timesteps, rule=rule))
+
+
+def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
+
+    # constraint for additional capacity in investment models
+    def rule(model, e, t):
+        return(model.soc[e, t] <= model.soc_max[e] + model.soc_add[e])
+    setattr(model, "generic_soc_ub_invest_"+objs[0].lower_name,
+            po.Constraint(uids, timesteps, rule=rule))
 
 
 def generic_limit(model, objs=None, uids=None, timesteps=None):
@@ -128,12 +156,17 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
 
     # set upper bounds: sum(yearly commodity output) <= yearly_limit
-    def __limit_rule__(model, e):
+    def limit_rule(model, e):
         expr = sum(model.w[e, o, t] for t in timesteps for o in O[e]) -\
             limit[e]
-        return(expr <= 0)
+        # if bus is defined but has not outputs Constraint is skipped
+        # (should be logged as well)
+        if isinstance(expr, (int, float)):
+            return(po.Constraint.Skip)
+        else:
+            return(expr <= 0)
     setattr(model, "generic_limit_"+objs[0].lower_name,
-            po.Constraint(uids, rule=__limit_rule__))
+            po.Constraint(uids, rule=limit_rule))
 
 
 def generic_fixed_source(model, objs, uids, timesteps):

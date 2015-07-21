@@ -54,8 +54,6 @@ class OptimizationModel(po.ConcreteModel):
         self.bus_model()
         self.objective()
 
-
-
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
 
@@ -121,8 +119,12 @@ class OptimizationModel(po.ConcreteModel):
                                   timesteps=self.timesteps)
 
         # set bounds for variables  models
-        gc.generic_w_ub(model=self, objs=objs, uids=uids,
-                        timesteps=self.timesteps)
+        if self.invest is False:
+            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+                            timesteps=self.timesteps)
+        else:
+            gc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
+                                   timesteps=self.timesteps)
 
     def simple_chp_model(self, objs, uids):
         """Simple chp model containing the constraints for simple chp
@@ -141,87 +143,9 @@ class OptimizationModel(po.ConcreteModel):
         # upper/lower bounds
         self.simple_transformer_model(objs=objs, uids=uids)
 
-        # set with output uids for every simple chp
-        # {'pp_chp': ['b_th', 'b_el']}
-        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-        # efficiencies for simple chps
-        eta = {obj.uid: obj.eta for obj in objs}
-
-        # additional constraint for power to heat ratio of simple chp comp:
-        # P/eta_el = Q/eta_th
-        def chp_rule(self, e, t):
-            expr = self.w[e, O[e][0], t] / eta[e][0]
-            expr += -self.w[e, O[e][1], t] / eta[e][1]
-            return(expr == 0)
-        self.simple_chp = po.Constraint(uids, self.timesteps, rule=chp_rule)
-
-    def simple_extraction_chp_model(self, objs, uids):
-        """Simple extraction chp model containing the constraints for
-        objects of class cp.SimpleExtractionCHP().
-
-        Parameters
-        ----------
-        self : pyomo.ConcreteModel
-
-        Returns
-        -------
-        self : pyomo.ConcreteModel
-
-        """
-        # {'pp_chp': 'gas'}
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-        # set with output uids for every simple chp
-        # {'pp_chp': ['b_th', 'b_el']}
-        O = {obj.uid: [o.uid for o in obj.outputs[:]]
-             for obj in objs}
-        k = {obj.uid: obj.k for obj in objs}
-        c = {obj.uid: obj.c for obj in objs}
-        beta = {obj.uid: obj.beta for obj in objs}
-        p = {obj.uid: obj.p for obj in objs}
-        out_min = {obj.uid: obj.out_min
-                   for obj in objs}
-
-        # constraint for transformer energy balance:
-        # 1) P <= p[0] - beta[0]*Q
-        def c1_rule(self, e, t):
-            expr = self.w[e, O[e][0], t]
-            rhs = p[e][0] - beta[e][0] * self.w[e, O[e][1], t]
-            return(expr <= rhs)
-        self.simple_extraction_chp_1 = \
-            po.Constraint(uids, self.timesteps,
-                          rule=c1_rule)
-
-        # 2) P = c[0] + c[1] * Q
-        def c2_rule(self, e, t):
-            expr = self.w[e, O[e][1], t]
-            rhs = (self.w[e, O[e][0], t] - c[e][0]) / c[e][1]
-            return(expr <= rhs)
-        self.simple_extraction_chp_2 = \
-            po.Constraint(uids, self.timesteps,
-                          rule=c2_rule)
-
-        # 3) P >= p[1] - beta[1]*Q
-        def c3_rule(self, e, t):
-            if out_min[e] > 0:
-                expr = self.w[e, O[e][0], t]
-                rhs = p[e][1] - beta[e][1] * self.w[e, O[e][1], t]
-                return(expr >= rhs)
-            else:
-                return(po.Constraint.Skip)
-        self.simple_extraction_chp_3 = \
-            po.Constraint(uids, self.timesteps,
-                          rule=c3_rule)
-
-        # H = k[0] + k[1]*P + k[2]*Q
-        def in_out_rule(self, e, t):
-            expr = 0
-            expr += self.w[I[e], e, t]
-            expr += - (k[e][0] + k[e][1]*self.w[e, O[e][0], t] +
-                       k[e][2]*self.w[e, O[e][1], t])
-            return(expr, 0)
-        self.simple_extraction_chp_io = \
-            po.Constraint(uids, self.timesteps,
-                          rule=in_out_rule)
+        # use generic constraint to model PQ relation (P/eta_el = Q/eta_th)
+        gc.generic_chp_constraint(model=self, objs=objs, uids=uids,
+                                  timesteps=self.timesteps)
 
     def fixed_source_model(self, objs, uids):
         """fixed source model containing the constraints for
@@ -275,37 +199,30 @@ class OptimizationModel(po.ConcreteModel):
         m : pyomo.ConcreteModel
         """
 
-        O = {obj.uid: obj.outputs[0].uid for obj in objs}
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-
         # set bounds for basic/investment models
         if(self.invest is False):
-            ee = self.edges(objs)
-            # installed input/output capacity
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    self.w[e1, e2, t].setub(10)
-                    self.w[e1, e2, t].setlb(1)
+            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+                            timesteps=self.timesteps)
         else:
-            # constraint for additional capacity in investment models
-            def invest_rule(self, e, t):
-                return(self.soc_v[e, t] <= self.soc_max[e] + self.soc_add_v[e])
-            self.soc_max_c = po.Constraint(uids, self.timesteps,
-                                           rule=invest_rule)
+            gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
+                                     timesteps=self.timesteps)
+
+        O = {obj.uid: obj.outputs[0].uid for obj in objs}
+        I = {obj.uid: obj.inputs[0].uid for obj in objs}
 
         # storage energy balance
         def storage_balance_rule(self, e, t):
             if(t == 0):
                 expr = 0
-                expr += self.soc_v[e, t]
+                expr += self.soc[e, t]
                 return(expr, 0)
             else:
-                expr = self.soc_v[e, t]
-                expr += - self.soc_v[e, t-1] - self.w[I[e], e, t] + \
+                expr = self.soc[e, t]
+                expr += - self.soc[e, t-1] - self.w[I[e], e, t] + \
                     self.w[e, O[e], t]
                 return(expr, 0)
-            self.simple_storage_c = po.Constraint(uids, self.timesteps,
-                                                  rule=storage_balance_rule)
+        self.simple_storage_c = po.Constraint(uids, self.timesteps,
+                                              rule=storage_balance_rule)
 
     def simple_transport_model(self, objs, uids):
         """Simple transport model building the constraints
@@ -447,6 +364,11 @@ class OptimizationModel(po.ConcreteModel):
                     for t in self.timesteps:
                         entity.results['in'][i].append(
                             self.w[i, entity.uid, t].value)
+                if isinstance(entity, cp.transformers.Storage):
+                    entity.results['soc'] = []
+                    for t in self.timesteps:
+                        entity.results['soc'].append(
+                            self.soc[entity.uid, t].value)
 
             if(self.invest is True):
                 for entity in self.entities:
