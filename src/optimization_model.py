@@ -31,7 +31,6 @@ class OptimizationModel(po.ConcreteModel):
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
                                      if isinstance(e, Component)])
-
         gc.generic_variables(model=self, edges=self.all_edges,
                              timesteps=self.timesteps)
 
@@ -40,7 +39,6 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
-
         # set attributes lists per class with objects and uids for opt model
         for cls in component_classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
@@ -253,22 +251,38 @@ class OptimizationModel(po.ConcreteModel):
         """
 
         # create a combine list of all cost-related components
-        objective_objs = (
+        cost_objs = (
             self.simple_chp_objs +
             self.simple_transformer_objs +
             self.simple_storage_objs +
             self.simple_transport_objs)
 
-        self.objective_uids = (
-            self.simple_chp_uids +
-            self.simple_transformer_uids +
-            self.simple_transport_uids)
+        self.cost_uids = {obj.uid for obj in cost_objs}
 
-        I = {obj.uid: obj.inputs[0].uid for obj in objective_objs}
+        I = {obj.uid: obj.inputs[0].uid for obj in cost_objs}
+
+        # create a combined list of all revenue related components
+        revenue_objs = (
+            self.simple_chp_objs +
+            self.simple_transformer_objs)
+
+        self.revenue_uids = {obj.uid for obj in revenue_objs}
+
+        O = {obj.uid: obj.outputs[0].uid for obj in revenue_objs}
+
         # operational costs
-        self.opex_var = {obj.uid: obj.opex_var for obj in objective_objs}
-        self.fuel_costs = {obj.uid: obj.inputs[0].price
-                           for obj in objective_objs}
+        self.opex_var = {obj.uid: obj.opex_var for obj in cost_objs}
+        self.input_costs = {obj.uid: obj.inputs[0].price
+                            for obj in cost_objs}
+
+        self.output_revenues = {}
+        for obj in revenue_objs:
+            if isinstance(obj.outputs[0].price, (float, int)):
+                price = [obj.outputs[0].price] * len(self.timesteps)
+                self.output_revenues[obj.uid] = price
+            else:
+                self.output_revenues[obj.uid] = obj.outputs[0].price
+
         # get dispatch expenditure for renewable energies with dispatch
         self.dispatch_ex = {obj.uid: obj.dispatch_ex
                             for obj in self.dispatch_source_objs}
@@ -276,20 +290,28 @@ class OptimizationModel(po.ConcreteModel):
         # objective function
         def obj_rule(self):
             expr = 0
+            # costs for inputs of components
             expr += sum(self.w[I[e], e, t] * (self.opex_var[e] +
-                                              self.fuel_costs[e])
-                        for e in self.objective_uids
-                        for t in self.timesteps)
+                                              self.input_costs[e])
+                        for e in self.cost_uids for t in self.timesteps)
+
+            # revenues from outputs of components
+            expr += - sum(self.w[e, O[e], t] * self.output_revenues[e][t]
+                          for e in self.revenue_uids for t in self.timesteps)
+
+            # dispatch costs
+            if self.dispatch_source_objs:
+                expr += sum(self.dispatch[e, t] * self.dispatch_ex[e]
+                            for e in self.dispatch_source_uids
+                            for t in self.timesteps)
+
             if self.slack is True:
                 expr += sum(self.shortage_slack[e, t] * 10e10
                             for e in self.bus_uids for t in self.timesteps)
 
-            expr += sum(self.dispatch[e, t] * self.dispatch_ex[e]
-                        for e in self.dispatch_source_uids
-                        for t in self.timesteps)
             # add additional capacity & capex for investment models
             if(self.invest is True):
-                self.capex = {obj.uid: obj.capex for obj in objective_objs}
+                self.capex = {obj.uid: obj.capex for obj in cost_objs}
 
                 expr += sum(self.add_cap[I[e], e] * self.capex[e]
                             for e in self.objective_uids)
@@ -299,7 +321,7 @@ class OptimizationModel(po.ConcreteModel):
         self.objective = po.Objective(rule=obj_rule)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
-              results_to_objects=True, **kwargs):
+              results_to_objects=True, duals=False, **kwargs):
         """Method that creates the instance of the model and solves it.
 
         Parameters
@@ -323,6 +345,10 @@ class OptimizationModel(po.ConcreteModel):
         # create model instance
         instance = self.create()
 
+        # Create a 'dual' suffix component on the instance
+        # so the solver plugin will know which suffixes to collect
+        if duals is True:
+            self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if(debug is True):
             instance.write('problem.lp',
@@ -336,9 +362,17 @@ class OptimizationModel(po.ConcreteModel):
         # load results back in instance
         instance.load(results)
 
+        # store dual variables for bus-balance constraints (el and th)
+        if duals is True:
+            for b in self.bus_objs:
+                if b.type == "el" or b.type == "th":
+                    b.results["duals"] = []
+                    for t in self.timesteps:
+                        b.results["duals"].append(
+                            self.dual[getattr(self, "bus")[(b.uid, t)]])
+
         if results_to_objects is True:
             for entity in self.entities:
-
                 if (isinstance(entity, cp.Transformer) or
                         isinstance(entity, cp.Source)):
                     # write outputs
@@ -411,8 +445,6 @@ class OptimizationModel(po.ConcreteModel):
                 ej = (c.uid, o.uid)
                 edges.append(ej)
         return(edges)
-
-
 
 
 def io_sets(components):

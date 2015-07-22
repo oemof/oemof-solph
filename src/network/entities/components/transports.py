@@ -1,4 +1,4 @@
-from network.entities.components import Transport
+from . import Transport
 
 
 class Simple(Transport):

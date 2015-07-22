@@ -68,9 +68,13 @@ def generic_io_constraints(model, objs=None, uids=None,
         expr = model.w[I[e], e, t] * eta[e][0] - model.w[e, O[e][0], t]
         return(expr == 0)
     setattr(model, "generic_io_"+objs[0].lower_name,
-            po.Constraint(uids, timesteps, rule=io_rule))
+            po.Constraint(uids, timesteps, rule=io_rule,
+                          doc="Input * Efficiency = Output"))
+
 
 def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
+    """
+    """
     # set with output uids for every simple chp
     # {'pp_chp': ['b_th', 'b_el']}
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
@@ -84,7 +88,9 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
         expr += -model.w[e, O[e][1], t] / eta[e][1]
         return(expr == 0)
     setattr(model, "generic_"+objs[0].lower_name,
-            po.Constraint(uids, timesteps, rule=rule))
+            po.Constraint(uids, timesteps, rule=rule,
+                          doc="P/eta_el - Q/eta_th = 0"))
+
 
 def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     """
@@ -182,7 +188,7 @@ def generic_fixed_source(model, objs, uids, timesteps):
     for (e1, e2) in ee:
         for t in timesteps:
             # set value of variable
-            model.w[e1, e2, t] = val[e1][t] * out_max[e1]
+            model.w[e1, e2, t] = val[e1][t] * out_max[e1][e2]
             # fix variable value ("set variable to parameter" )
             model.w[e1, e2, t].fix()
 
@@ -236,11 +242,11 @@ def generic_dispatch_source(model, objs, uids, timesteps):
     for (e1, e2) in ee:
         for t in timesteps:
             # set upper bound of variable
-            model.w[e1, e2, t].setub(val[e1][t] * out_max[e1])
+            model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][e2])
 
     def dispatch_rule(model, e, t):
         expr = model.dispatch[e, t]
-        expr += - val[e][t] * out_max[e] + model.w[e, O[e], t]
+        expr += - val[e][t] * out_max[e][O[e]] + model.w[e, O[e], t]
         return(expr, 0)
     setattr(model, "generic_constr_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=dispatch_rule))
