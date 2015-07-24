@@ -170,9 +170,8 @@ class region():
                 patch = PolygonPatch(polygon, fc=GRAY, ec=BLUE, alpha=0.5)
                 ax.add_patch(patch)
         else:
-            patch = PolygonPatch(
-                self.__geometry__, fc=GRAY, ec=BLUE, alpha=0.5)
-            ax.add_patch(patch)
+            ax.add_patch(PolygonPatch(
+                self.__geometry__, fc=GRAY, ec=BLUE, alpha=0.5))
         ax.set_xlim(self.__geometry__.bounds[0], self.__geometry__.bounds[2])
         ax.set_ylim(self.__geometry__.bounds[1], self.__geometry__.bounds[3])
 
