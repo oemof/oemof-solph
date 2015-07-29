@@ -2,12 +2,13 @@ from sqlalchemy import (create_engine, Column, MetaData, Numeric, String,
                         Table, engine)
 from sqlalchemy.orm import mapper, sessionmaker
 import keyring
-
+import logging
 import config as cfg
 from network.entities import components
 
 
 CONN = None
+ENG = None
 
 
 def __engine__():
@@ -38,11 +39,13 @@ def connection():
 def db_engine():
     return ENG
 
-
-if not isinstance(CONN, engine.base.Connection):
-    print(isinstance(CONN, engine.base.Connection))
+if not isinstance(ENG, engine.base.Engine):
+    logging.debug('Database engin exist: ', isinstance(
+        ENG, engine.base.Engine))
     ENG = __engine__()
-    CONN = __internal_connection__(ENG)
+else:
+    logging.debug('Database engin exist: ', isinstance(
+        ENG, engine.base.Engine))
 
 if __name__ == "__main__":
     print(connection())
