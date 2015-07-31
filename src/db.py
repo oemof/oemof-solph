@@ -1,51 +1,23 @@
 from sqlalchemy import (create_engine, Column, MetaData, Numeric, String,
-                        Table, engine)
+                        Table)
 from sqlalchemy.orm import mapper, sessionmaker
 import keyring
-import logging
 import config as cfg
 from network.entities import components
 
 
-CONN = None
-ENG = None
-
-
-def __engine__():
-    engine = create_engine(
-        "postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}".format(
-            user=cfg.get("postGIS", "username"),
-            passwd=keyring.get_password(
-                cfg.get("postGIS", "database"),
-                cfg.get("postGIS", "username")),
-            host=cfg.get("postGIS", "host"),
-            db=cfg.get("postGIS", "database"),
-            port=int(cfg.get("postGIS", "port"))))
-    return engine
-
-
-def __internal_connection__(engine):
-
-    conn = engine.connect()
-#    Session = sessionmaker(bind=engine)
-#    session = Session()
-    return conn
-
-
 def connection():
-    return CONN
+    engine = create_engine(
+    "postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}".format(
+        user=cfg.get("postGIS", "username"),
+        passwd=keyring.get_password(
+            cfg.get("postGIS", "database"),
+            cfg.get("postGIS", "username")),
+        host=cfg.get("postGIS", "host"),
+        db=cfg.get("postGIS", "database"),
+        port=int(cfg.get("postGIS", "port"))))
+    return engine.connect()
 
-
-def db_engine():
-    return ENG
-
-if not isinstance(ENG, engine.base.Engine):
-    logging.debug('Database engin exist: ', isinstance(
-        ENG, engine.base.Engine))
-    ENG = __engine__()
-else:
-    logging.debug('Database engin exist: ', isinstance(
-        ENG, engine.base.Engine))
 
 if __name__ == "__main__":
     print(connection())
