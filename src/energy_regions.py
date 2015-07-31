@@ -193,7 +193,8 @@ class region():
 
 
 if __name__ == "__main__":
-    geo = shape.Polygon([(0, 0), (1, 1), (1, 0), (2, 5)])
+    geo = shape.Polygon(
+        [(12.0, 50.0), (12.1, 50.1), (12.1, 50.0), (12.2, 50.5)])
     a = region(2007, geometry=geo)
 #    b = region(2007, nuts=['1234', '1236'])
     c = region(2007, file='/home/uwe/Wittenberg.shp')
