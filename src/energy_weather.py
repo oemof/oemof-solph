@@ -99,7 +99,6 @@ class Weather:
         """
         sql = self.sql_join_string()
 
-        print(sql)
         return pd.DataFrame(self.connection.execute(sql).fetchall(),
                             columns=['gid', 'wkb', 'data_id', 'time_series',
                                      'dat_id', 'type_id', 'type', 'year',
