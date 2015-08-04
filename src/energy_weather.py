@@ -11,7 +11,6 @@ import pandas as pd
 import logging
 from shapely import geometry as shape
 from shapely.wkt import loads as wkt_loads
-from shapely import geos
 
 
 class Weather:
@@ -20,7 +19,7 @@ class Weather:
 
     """
 
-    def __init__(self, conn, geometry, year, datatypes):
+    def __init__(self, conn, geometry, year, datatypes=None):
         """
         constructor for the weather-object.
         Test for config, to set up which source shall be used
@@ -40,25 +39,19 @@ class Weather:
         # TODO@Günni. Replace sql-String with alchemy/GeoAlchemy
         # Decide wether datatype is one type or a list
         where_str1 = ""
-        if isinstance(self.datatypes, list):
-            for t in self.datatypes:
-                where_str1 += "dt.name = '{0}' or ".format(t)
-            where_str1 = where_str1[:-3]
-        elif isinstance(self.datatypes, str):
-            where_str1 += "dt.name = '{0}'".format(self.datatypes)
-        else:
-            logging.error("Wrong data type: {0}".format(type(self.datatypes)))
+        if isinstance(self.datatypes, str):
+            self.datatypes = list([self.datatypes])
+        for t in self.datatypes:
+            where_str1 += "dt.name = '{0}' or ".format(t)
+        where_str1 = where_str1[:-3]
 
         # Decide wether year is one type or a list
+        if isinstance(self.year, int):
+            self.year = list([self.year])
         where_str2 = ""
-        if isinstance(self.year, list):
-            for y in self.year:
-                where_str2 += "y.year = '{0}' or ".format(y)
-            where_str2 = where_str2[:-3]
-        elif isinstance(self.year, int):
-            where_str2 += "y.year = '{0}'".format(self.year)
-        else:
-            logging.error("Wrong year type: {0}".format(type(self.year)))
+        for y in self.year:
+            where_str2 += "y.year = '{0}' or ".format(y)
+        where_str2 = where_str2[:-3]
 
         # Decide wether geometry is of type Polygon or point
         if self.geometry.geom_type == 'Polygon':
@@ -116,18 +109,18 @@ class Weather:
         """
         tmp_dc = {}
         sql = self.sql_join_string()
-        weather_df = pd.DataFrame(self.connection.execute(sql).fetchall(),
-                            columns=['gid', 'geom', 'data_id', 'time_series',
-                                     'dat_id', 'type_id', 'type', 'year',
-                                     'leap_year']).drop('dat_id', 1)
-
+        weather_df = pd.DataFrame(
+            self.connection.execute(sql).fetchall(), columns=[
+                'gid', 'geom', 'data_id', 'time_series', 'dat_id', 'type_id',
+                'type', 'year', 'leap_year']).drop('dat_id', 1)
         for ix in weather_df.index:
             weather_df.loc[ix, 'geom'] = wkt_loads(weather_df['geom'][ix])
             db_year = weather_df.loc[ix, 'year']
-            tmp_dc[ix] = pd.Series(weather_df['time_series'][ix],
-                index=pd.date_range(
-                    pd.datetime(db_year, 1, 1, 0), periods=8760, freq='H'))
-        weather_df['time_series']=pd.Series(tmp_dc)
+            db_len = len(weather_df['time_series'][ix])
+            tmp_dc[ix] = pd.Series(
+                weather_df['time_series'][ix], index=pd.date_range(
+                    pd.datetime(db_year, 1, 1, 0), periods=db_len, freq='H'))
+        weather_df['time_series'] = pd.Series(tmp_dc)
         return weather_df
 
     def grouped_by_gid(self):
@@ -166,11 +159,15 @@ class Weather:
 if __name__ == "__main__":
     conn = db.connection()
     geo = shape.Polygon(
-        [(12.0, 50.0), (12.0, 50.5), (12.5, 50.5), (12.5, 50)])
-    a = Weather(conn, geo, [2007, 2010], ['T_2M', 'WSS_10M', 'PS'])
-    for row in a.raw_data[a.raw_data.type == 'T_2M'].geom.iteritems():
-        print(row[1])
+        [(12.0, 50.0), (12.0, 50.3), (12.5, 50.3), (12.5, 50)])
+    a = Weather(conn, geo, 2012, 'ASWDIR_S')
+    for k in a.grouped_by_datatype().keys():
+        a.grouped_by_datatype()[k].plot()
     plt.show()
+
+#    for row in a.raw_data[a.raw_data.type == 'T_2M'].time_series.iteritems():
+#        row[1].plot()
+#    plt.show()
 #    print(a.raw_data[a.raw_data.type == 'T_2M'])
 #    print(a.raw_data['geom'][0].x)
 #    print(type(a.raw_data['time_series'][0]))
