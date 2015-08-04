@@ -2,8 +2,8 @@ from sqlalchemy import (create_engine, Column, MetaData, Numeric, String,
                         Table)
 from sqlalchemy.orm import mapper, sessionmaker
 import keyring
-import config as cfg
-from network.entities import components
+from . import config as cfg
+from .network.entities import components
 
 
 def connection():
