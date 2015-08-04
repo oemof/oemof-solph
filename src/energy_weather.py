@@ -19,7 +19,7 @@ class Weather:
 
     """
 
-    def __init__(self, conn, geometry, year, tz=None, datatypes=None):
+    def __init__(self, conn, geometry, year, datatypes=None):
         """
         constructor for the weather-object.
         Test for config, to set up which source shall be used
@@ -27,7 +27,6 @@ class Weather:
         self.connection = conn
         self.year = self.check_year(year)
         self.datatypes = self.check_datatypes(datatypes)
-        self.tz = self.get_tz() if tz is None else tz
         self.geometry = geometry
         self.raw_data = self.get_raw_data()
         self.data = None
@@ -50,21 +49,6 @@ class Weather:
         if isinstance(year, int):
             year = list([year])
         return year
-
-    def get_tz(self):
-        ''
-        # TODO Hier sollte die Datenbank abgefragt werden.
-        # Die DB sollte schneller sein als tzwhere
-
-        # from tzwhere import tzwhere
-        # tz = tzwhere.tzwhere()
-        # try:
-        #     coords = self.geometry.centroid
-        # except:
-        #     coords = self.geometry
-        # timezone = tz.tzNameAt(coords.y, coords.x))
-        timezone = "Europe/Prague"
-        return timezone
 
     def sql_join_string(self):
         '''
@@ -152,7 +136,7 @@ class Weather:
             tmp_dc[ix] = pd.Series(
                 weather_df['time_series'][ix], index=pd.date_range(
                     pd.datetime(db_year, 1, 1, 0), periods=db_len, freq='H',
-                    tz=self.tz))
+                    tz='utc'))
         weather_df['time_series'] = pd.Series(tmp_dc)
         return weather_df
 
