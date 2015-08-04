@@ -6,7 +6,7 @@ Created on Mon Jul 31 15:53:14 2015
 """
 
 from matplotlib import pyplot as plt
-import db
+from . import db
 import pandas as pd
 import logging
 from shapely import geometry as shape
@@ -19,16 +19,52 @@ class Weather:
 
     """
 
-    def __init__(self, conn, geometry, year, datatypes=None):
+    def __init__(self, conn, geometry, year, tz=None, datatypes=None):
         """
         constructor for the weather-object.
         Test for config, to set up which source shall be used
         """
         self.connection = conn
-        self.year = year
-        self.datatypes = datatypes
+        self.year = self.check_year(year)
+        self.datatypes = self.check_datatypes(datatypes)
+        self.tz = self.get_tz() if tz is None else tz
         self.geometry = geometry
         self.raw_data = self.get_raw_data()
+        self.data = None
+
+    def check_datatypes(self, datatypes):
+        '''
+        Convert datatypes to a list if it is not a list.
+        If datatypes is None all possible types are used.
+        '''
+        if isinstance(datatypes, str):
+            datatypes = list([datatypes])
+        elif datatypes is None:
+            datatypes = []
+            sql = 'SELECT name FROM coastdat.datatype;'
+            for x in self.connection.execute(sql).fetchall():
+                datatypes.append(x[0])
+        return datatypes
+
+    def check_year(self, year):
+        if isinstance(year, int):
+            year = list([year])
+        return year
+
+    def get_tz(self):
+        ''
+        # TODO Hier sollte die Datenbank abgefragt werden.
+        # Die DB sollte schneller sein als tzwhere
+
+        # from tzwhere import tzwhere
+        # tz = tzwhere.tzwhere()
+        # try:
+        #     coords = self.geometry.centroid
+        # except:
+        #     coords = self.geometry
+        # timezone = tz.tzNameAt(coords.y, coords.x))
+        timezone = "Europe/Prague"
+        return timezone
 
     def sql_join_string(self):
         '''
@@ -37,17 +73,12 @@ class Weather:
         '''
 
         # TODO@Günni. Replace sql-String with alchemy/GeoAlchemy
-        # Decide wether datatype is one type or a list
+        # Create string parts for where conditions
         where_str1 = ""
-        if isinstance(self.datatypes, str):
-            self.datatypes = list([self.datatypes])
         for t in self.datatypes:
             where_str1 += "dt.name = '{0}' or ".format(t)
         where_str1 = where_str1[:-3]
 
-        # Decide wether year is one type or a list
-        if isinstance(self.year, int):
-            self.year = list([self.year])
         where_str2 = ""
         for y in self.year:
             where_str2 += "y.year = '{0}' or ".format(y)
@@ -55,21 +86,22 @@ class Weather:
 
         # Decide wether geometry is of type Polygon or point
         if self.geometry.geom_type == 'Polygon':
-            print('Polygon')
+            logging.debug('Polygon')
             sql_part = """
                 SELECT sp.gid, ST_AsText(sp.geom)
                 FROM coastdat.spatial as sp
                 WHERE st_contains(ST_GeomFromText('{wkt}',4326), sp.geom)
                 """.format(wkt=self.geometry.wkt)
         elif self.geometry.geom_type == 'Point':
-            print('Point')
+            logging.debug('Point')
             sql_part = """
                 SELECT sp.gid, ST_AsText(sp.geom)
                 FROM coastdat.cosmoclmgrid sp
                 WHERE st_contains(sp.geom, ST_GeomFromText('{wkt}',4326))
                 """.format(wkt=self.geometry.wkt)
         else:
-            print('Häääh')
+            logging.error('Unknown geometry type: {0}'.format(
+                self.geometry.geom_type))
 
         return '''
         SELECT tsptyti.*, y.leap
@@ -119,7 +151,8 @@ class Weather:
             db_len = len(weather_df['time_series'][ix])
             tmp_dc[ix] = pd.Series(
                 weather_df['time_series'][ix], index=pd.date_range(
-                    pd.datetime(db_year, 1, 1, 0), periods=db_len, freq='H'))
+                    pd.datetime(db_year, 1, 1, 0), periods=db_len, freq='H',
+                    tz=self.tz))
         weather_df['time_series'] = pd.Series(tmp_dc)
         return weather_df
 
@@ -154,6 +187,18 @@ class Weather:
         if len(res) == 1:
             res = res[0]
         return res
+
+    def get_feedin_data(self):
+        coastdat_name_dc = {
+            'ASWDIFD_S': 'dhi',
+            'ASWDIR_S': 'dirhi',
+            'PS': 'pressure',
+            'T_2M': 'temp_air',
+            'WSS_10M': 'v_wind',
+            'Z0': 'roughness'}
+        self.data = self.grouped_by_gid()
+        self.data = self.data[list(self.data.keys())[0]]
+        self.data.rename(columns=coastdat_name_dc, inplace=True)
 
 
 if __name__ == "__main__":
