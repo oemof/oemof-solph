@@ -130,6 +130,38 @@ class Weather:
         weather_df['time_series']=pd.Series(tmp_dc)
         return weather_df
 
+    def grouped_by_gid(self):
+        res = []
+        for year in self.year:
+            dic = {}
+            for gid in self.raw_data.gid.unique():
+                dic[gid] = {}
+                tmp = self.raw_data[
+                    (self.raw_data.year == year) & (self.raw_data.gid == gid)]
+                for t in tmp.time_series.iteritems():
+                    dic[gid][tmp.type[t[0]]] = t[1]
+                dic[gid] = pd.DataFrame(dic[gid])
+            res.append(dic)
+        if len(res) == 1:
+            res = res[0]
+        return res
+
+    def grouped_by_datatype(self):
+        res = []
+        for year in self.year:
+            dic = {}
+            for typ in self.raw_data.type.unique():
+                dic[typ] = {}
+                tmp = self.raw_data[
+                    (self.raw_data.year == year) & (self.raw_data.type == typ)]
+                for t in tmp.time_series.iteritems():
+                    dic[typ][tmp.gid[t[0]]] = t[1]
+                dic[typ] = pd.DataFrame(dic[typ])
+            res.append(dic)
+        if len(res) == 1:
+            res = res[0]
+        return res
+
 
 if __name__ == "__main__":
     conn = db.connection()
