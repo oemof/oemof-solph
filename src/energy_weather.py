@@ -5,12 +5,12 @@ Created on Mon Jul 31 15:53:14 2015
 @author: uwe
 """
 
-from matplotlib import pyplot as plt
-from . import db
 import pandas as pd
 import logging
-from shapely import geometry as shape
+import numpy as np
 from shapely.wkt import loads as wkt_loads
+from pytz import timezone
+from datetime import datetime
 
 
 class Weather:
@@ -19,11 +19,22 @@ class Weather:
 
     """
 
-    def __init__(self, conn, geometry, year, datatypes=None):
+    def __init__(self, conn, geometry, year, dataset='CoastDat2',
+                 tz=None, datatypes=None):
         """
         constructor for the weather-object.
         Test for config, to set up which source shall be used
         """
+        if dataset == 'CoastDat2':
+            self.dataset = dataset
+            self.name_dc = {
+                'ASWDIFD_S': 'dhi',
+                'ASWDIR_S': 'dirhi',
+                'PS': 'pressure',
+                'T_2M': 'temp_air',
+                'WSS_10M': 'v_wind',
+                'Z0': 'z0'}
+
         self.connection = conn
         self.year = self.check_year(year)
         self.datatypes = self.check_datatypes(datatypes)
@@ -50,6 +61,17 @@ class Weather:
             year = list([year])
         return year
 
+    def tz_from_geom(self, geom):
+        if geom.geom_type in ['Polygon', 'MultiPolygon']:
+            coords = geom.centroid
+        else:
+            coords = geom.geometry
+        sql = """
+            SELECT tzid FROM world.tz_world
+            WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
+            """.format(wkt=coords.wkt)
+        return self.connection.execute(sql).fetchone()[0]
+
     def sql_join_string(self):
         '''
         Creates an sql-string to read all datasets within a given polygon.
@@ -69,7 +91,7 @@ class Weather:
         where_str2 = where_str2[:-3]
 
         # Decide wether geometry is of type Polygon or point
-        if self.geometry.geom_type == 'Polygon':
+        if self.geometry.geom_type in ['Polygon', 'MultiPolygon']:
             logging.debug('Polygon')
             sql_part = """
                 SELECT sp.gid, ST_AsText(sp.geom)
@@ -130,13 +152,31 @@ class Weather:
                 'gid', 'geom', 'data_id', 'time_series', 'dat_id', 'type_id',
                 'type', 'year', 'leap_year']).drop('dat_id', 1)
         for ix in weather_df.index:
+            # Convert the point of the weather location to a shapely object
             weather_df.loc[ix, 'geom'] = wkt_loads(weather_df['geom'][ix])
+
+            # Get the timezone of the weather location
+            tz = self.tz_from_geom(weather_df.loc[ix, 'geom'])
+
+            # Roll the dataset forward according to the timezone, because the
+            # dataset is based on utc (Berlin +1, Kiev +2, London +0)
+            utc = timezone('utc')
+            offset = int(utc.localize(datetime(2002, 1, 1)).astimezone(
+                timezone(tz)).strftime("%z")[:-2])
+
+            # Roll the dataset backwards because the first value (1. Jan, 0:00)
+            # contains the measurements of the hour before (coasDat2).
+            roll_value = offset - 1
+
+            # Get the year and the length of the data array
             db_year = weather_df.loc[ix, 'year']
             db_len = len(weather_df['time_series'][ix])
+
+            # Set absolute time index for the data sets to avoid errors.
             tmp_dc[ix] = pd.Series(
-                weather_df['time_series'][ix], index=pd.date_range(
-                    pd.datetime(db_year, 1, 1, 0), periods=db_len, freq='H',
-                    tz='utc'))
+                np.roll(np.array(weather_df['time_series'][ix]), roll_value),
+                index=pd.date_range(pd.datetime(db_year, 1, 1, 0),
+                                    periods=db_len, freq='H', tz=tz))
         weather_df['time_series'] = pd.Series(tmp_dc)
         return weather_df
 
@@ -173,31 +213,13 @@ class Weather:
         return res
 
     def get_feedin_data(self):
-        coastdat_name_dc = {
-            'ASWDIFD_S': 'dhi',
-            'ASWDIR_S': 'dirhi',
-            'PS': 'pressure',
-            'T_2M': 'temp_air',
-            'WSS_10M': 'v_wind',
-            'Z0': 'roughness'}
         self.data = self.grouped_by_gid()
         self.data = self.data[list(self.data.keys())[0]]
-        self.data.rename(columns=coastdat_name_dc, inplace=True)
+        self.data.rename(columns=self.name_dc, inplace=True)
 
-
-if __name__ == "__main__":
-    conn = db.connection()
-    geo = shape.Polygon(
-        [(12.0, 50.0), (12.0, 50.3), (12.5, 50.3), (12.5, 50)])
-    a = Weather(conn, geo, 2012, 'ASWDIR_S')
-    for k in a.grouped_by_datatype().keys():
-        a.grouped_by_datatype()[k].plot()
-    plt.show()
-
-#    for row in a.raw_data[a.raw_data.type == 'T_2M'].time_series.iteritems():
-#        row[1].plot()
-#    plt.show()
-#    print(a.raw_data[a.raw_data.type == 'T_2M'])
-#    print(a.raw_data['geom'][0].x)
-#    print(type(a.raw_data['time_series'][0]))
-#    print(a.raw_data['time_series'][0])
+    def get_data_heigth(self, name):
+        ''
+        internal_name = [k for k, v in self.name_dc.items() if v == name][0]
+        sql = "Select height from coastdat.datatype where name='{0}';".format(
+            internal_name)
+        return self.connection.execute(sql).fetchone()[0]

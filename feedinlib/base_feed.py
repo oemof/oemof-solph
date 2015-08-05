@@ -3,7 +3,7 @@ from ..src import energy_weather as w
 
 class Feed(object):
 
-    def __init__(self, conn, geo, site, year, params, elevation_mean):
+    def __init__(self, conn, geo, site, year, params=None, elevation_mean=None):
         """
         Timeseries-Class
 
@@ -36,7 +36,7 @@ class Feed(object):
                 self.conn, self.geo, self._site, self._year, params)
         if (self._timeseries is None) or (params.get("recalculate")
                                           is not None):
-            self._apply_model(self.conn, site, year, self._weatherObject,
+            self._apply_model(site, year, self._weatherObject,
                               elevation_mean=elevation_mean)
 
         return self._timeseries
@@ -51,10 +51,10 @@ class Feed(object):
         :return: the weather-timeseries
         """
 
-        obj = w.Weather(conn, geom, year, params)
+        obj = w.Weather(conn, geom, year)
         print(obj)
         obj.get_feedin_data()
-        return obj.data
+        return obj
 
     def get_year(self):
         """

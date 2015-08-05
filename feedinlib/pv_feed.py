@@ -28,7 +28,7 @@ site = {'module_name': 'Advent_Solar_Ventura_210___2008_',
 
 obj = pv_feed.PvFeed(DIC, site, '2010')
 """
-
+from matplotlib import pyplot as plt
 from .base_feed import Feed
 import numpy as np
 import pandas as pd
@@ -54,12 +54,13 @@ class PvFeed(Feed):
         self.conn = conn
         self.year = year
 
-    def _apply_model(self, DIC, site, year, data, elevation_mean):
+    def _apply_model(self, site, year, weather, elevation_mean):
         """
         implementation of the model to generate the _timeseries data from the
         weatherdata
         :return:
         """
+        data = weather.data
         self._timeseries = "pv timeseries"
         # TODO: setup the model, currently being done by caro
 
@@ -86,7 +87,7 @@ class PvFeed(Feed):
         if elevation_mean:
             data_5min = pd.DataFrame(
                 index=pd.date_range(DaFrOut_b.index[0],
-                                    periods=site['hoy'], freq='5Min',
+                                    periods=site['hoy']*12, freq='5Min',
                                     tz=site['TZ']))
             DFrOut_5min = pvlib.solarposition.get_solarposition(
                 time=data_5min.index, location=location, method='ephemeris')
@@ -100,7 +101,6 @@ class PvFeed(Feed):
         data['SunAz'] = DaFrOut['azimuth']
         data['SunEl'] = DaFrOut['elevation']
         data['AppSunEl'] = DaFrOut['apparent_elevation']
-        # data['SolarTime'] = DaFrOut['solar_time']
         data['SunZen'] = DaFrOut['zenith']
         data['SunZen_b'] = DaFrOut_b['zenith']
         data['SunEl_b'] = DaFrOut_b['elevation']
@@ -113,6 +113,8 @@ class PvFeed(Feed):
         data['HExtra'] = pvlib.irradiance.extraradiation(
             datetime_or_doy=data.index.dayofyear)
 
+        data['SunZen'][data['SunZen'] > 90] = 90
+
         # 6. Determine the relative air mass
         data['AM'] = pvlib.atmosphere.relativeairmass(data['SunZen'])
 
@@ -121,8 +123,8 @@ class PvFeed(Feed):
             solar_zenith=data['SunZen'], surface_tilt=site['tilt'],
             surface_azimuth=site['azimuth'])
 
-##########################################################################
-        #data['AOI'][data['AOI'] > 90] = 90
+#########################################################################
+#        data['AOI'][data['AOI'] > 90] = 90
 
 
         # Direktnormalstrahlung? AOI = 0?
@@ -138,15 +140,17 @@ class PvFeed(Feed):
         #data['DNI'] = (data['GHI'] - data['DHI']) / np.sin(h)
 
         # what for??
-        #data['DNI'][data['SunZen'] > 88] = data['DirHI']
+        data['dni'][data['SunZen'] > 88] = data['dirhi']
+#        plt.plot(data['ghi'])
+        plt.show()
 
         #print(sum(data['GHI']))
         #print(sum(data['DHI']))
         #print(sum(data['DirHI']))
         #print(sum(data['DNI']))
 
-        #plt.plot(data['SunAz'], 90 - data['SunZen'], '.')
-        #plt.show()
+#        plt.plot(data['SunAz'], 90 - data['SunZen'], '.')
+#        plt.show()
 
         ## what is this??
         #plt.plot((90 - data['SunZen']) * 10)
@@ -206,10 +210,10 @@ class PvFeed(Feed):
         # 12. Determine module and cell temperature
         data['temp_C'] = data['temp_air'] - 273.15
         DataFrame = pvlib.pvsystem.sapm_celltemp(
-                                    irrad=data['E'],
-                                    wind=data['v_wind'],
-                                    temp=data['temp_C'],
-                                    model='Open_rack_cell_polymerback')
+            irrad=data['E'],
+            wind=data['v_wind'],
+            temp=data['temp_C'],
+            model='Open_rack_cell_polymerback')
 
         # 13. Apply the Sandia PV Array Performance Model (SAPM) to get a
         # dataframe with all relevant electric output parameters
