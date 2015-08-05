@@ -26,7 +26,8 @@ class OptimizationModel(po.ConcreteModel):
         self.entities = entities
         self.timesteps = timesteps
         self.invest = options.get("invest", False)
-        self.slack = options.get("slack", True)
+        self.slack = options.get("slack", {"excess": True,
+                                           "shortage": False})
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
@@ -71,12 +72,12 @@ class OptimizationModel(po.ConcreteModel):
         bus_uids = [obj.uid for obj in bus_objs]
 
         # slack variables that assures a feasible problem
-        if self.slack is True:
-            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
-                                         within=po.NonNegativeReals)
+        if self.slack["excess"] is True:
             self.excess_slack = po.Var(self.bus_uids, self.timesteps,
                                        within=po.NonNegativeReals)
-
+        if self.slack["shortage"] is True:
+            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
+                                         within=po.NonNegativeReals)
         I = {b.uid: [i.uid for i in b.inputs] for b in bus_objs}
         O = {b.uid: [o.uid for o in b.outputs] for b in bus_objs}
 
@@ -86,8 +87,10 @@ class OptimizationModel(po.ConcreteModel):
             expr = 0
             expr += -sum(self.w[e, o, t] for o in O[e])
             expr += sum(self.w[i, e, t] for i in I[e])
-            if self.slack is True:
-                expr += -self.excess_slack[e, t] + self.shortage_slack[e, t]
+            if self.slack["excess"] is True:
+                expr += -self.excess_slack[e, t]
+            if self.slack["shortage"] is True:
+                expr += self.shortage_slack[e, t]
             return(expr, 0)
         self.bus = po.Constraint(bus_uids, self.timesteps, rule=bus_rule)
 
@@ -305,8 +308,11 @@ class OptimizationModel(po.ConcreteModel):
                             for e in self.dispatch_source_uids
                             for t in self.timesteps)
 
-            if self.slack is True:
-                expr += sum(self.shortage_slack[e, t] * 10e10
+            if self.slack["excess"] is True:
+                expr += sum(self.excess_slack[e, t] * 3000
+                            for e in self.bus_uids for t in self.timesteps)
+            if self.slack["shortage"] is True:
+                expr += sum(self.shortage_slack[e, t] * 3000
                             for e in self.bus_uids for t in self.timesteps)
 
             # add additional capacity & capex for investment models
@@ -348,7 +354,10 @@ class OptimizationModel(po.ConcreteModel):
         # Create a 'dual' suffix component on the instance
         # so the solver plugin will know which suffixes to collect
         if duals is True:
+            # dual variables
             self.dual = po.Suffix(direction=po.Suffix.IMPORT)
+            # reduced costs
+            self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if(debug is True):
             instance.write('problem.lp',
@@ -389,6 +398,13 @@ class OptimizationModel(po.ConcreteModel):
                         for t in self.timesteps:
                             entity.results['in'][i].append(
                                 self.w[i, entity.uid, t].value)
+
+                if isinstance(entity, cp.sources.DispatchSource):
+                    entity.results['in'][entity.uid] = []
+                    for t in self.timesteps:
+                        entity.results['in'][entity.uid].append(
+                            self.w[entity.uid,
+                                   entity.outputs[0].uid, t].bounds[1])
 
                 # write results to self.simple_sink_objs
                 # (will be the value of simple sink in general)

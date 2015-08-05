@@ -45,6 +45,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
         if model.invest is True:
             model.soc_add = po.Var(uids, within=po.NonNegativeReals)
 
+
 def generic_io_constraints(model, objs=None, uids=None,
                            timesteps=None):
     """ creates constraint for input output relation as
