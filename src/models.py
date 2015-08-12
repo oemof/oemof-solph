@@ -287,6 +287,9 @@ class WindPowerPlant():
 
 
 class ConstantModell:
-  def __init__(self, required = ["nominal_power", "steps"]):
-   self.required = required
-  def feedin(self, **ks): return [ks["nominal_power"]*0.9] * ks["steps"]
+    ''
+    def __init__(self, required=["nominal_power", "steps"]):
+        self.required = required
+
+    def feedin(self, **ks):
+        return [ks["nominal_power"]*0.9] * ks["steps"]
