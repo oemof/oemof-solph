@@ -180,6 +180,7 @@ class Weather:
                 index=pd.date_range(pd.datetime(db_year, 1, 1, 0),
                                     periods=db_len, freq='H', tz=tz))
         weather_df['time_series'] = pd.Series(tmp_dc)
+        self.data = weather_df
         return weather_df
 
     def grouped_by_gid(self):
@@ -211,7 +212,6 @@ class Weather:
         # one year is given.
         if len(res) == 1:
             res = res[0]
-        self.data = res
         return res
 
     def grouped_by_datatype(self):

@@ -18,9 +18,9 @@ class Photovoltaic:
 
     def feedin(self, **kwargs):
 
-        feedin_df = self.feedin_as_df(**kwargs)
+        feedin_pd = self.feedin_as_pd(**kwargs)
 
-        return list(feedin_df)
+        return list(feedin_pd)
 
     def feedin_as_pd(self, **kwargs):
 
@@ -176,9 +176,9 @@ class WindPowerPlant():
 
     def feedin(self, **kwargs):
 
-        feedin_df = self.feedin_as_df(**kwargs)
+        feedin_pd = self.feedin_as_pd(**kwargs)
 
-        return list(feedin_df)
+        return list(feedin_pd)
 
     def feedin_as_pd(self, **kwargs):
 

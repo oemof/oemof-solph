@@ -170,10 +170,12 @@ class region():
 
     def get_weather_raster(self, conn):
         self.weather = w.Weather(conn, self.geometry, self.year)
+        return self
 
     def get_power_plants(self, conn):
         self.power_plants = pp.Power_Plants().get_all_power_plants(
             conn, self.geometry)
+        return self
 
     def get_ee_feedin(self, conn, **site):
         wind_model = models.WindPowerPlant(required=[])
