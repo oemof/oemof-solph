@@ -42,6 +42,8 @@ class Weather:
         self.raw_data = self.get_raw_data()
         self.data = None
         self.gid_geom = None
+        self.data_by_datatype = None
+        self.data_by_gid = None
 
     def check_datatypes(self, datatypes):
         '''
@@ -183,10 +185,9 @@ class Weather:
         self.data = weather_df
         return weather_df
 
-    def grouped_by_gid(self):
+    def create_grouped_by_gid_dict(self):
         # Hier caching einfügen? Wenn es schon gibt, dann nicht neu berechnen?
         res = []
-        self.gid_geom = {}
         for year in self.year:
             dic = {}
             for gid in self.raw_data.gid.unique():
@@ -200,21 +201,15 @@ class Weather:
                 for t in tmp.time_series.iteritems():
                     dic[gid][tmp.type[t[0]]] = t[1]
                 dic[gid] = pd.DataFrame(dic[gid])
-
-                # Create the gid-geom dictionary
-                tmp_geo = self.raw_data.geom[
-                    (self.raw_data.year == year) &
-                    (self.raw_data.gid == gid)]
-                self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
             res.append(dic)
 
         # Return a list of dictionaries for all years or a dictionary if only
         # one year is given.
         if len(res) == 1:
             res = res[0]
-        return res
+        self.data_by_gid = res
 
-    def grouped_by_datatype(self):
+    def create_grouped_by_datatype_dict(self):
         res = []
         for year in self.year:
             dic = {}
@@ -228,7 +223,17 @@ class Weather:
             res.append(dic)
         if len(res) == 1:
             res = res[0]
-        return res
+        self.data_by_datatype = res
+
+    def grouped_by_gid(self):
+        if self.data_by_gid is None:
+            self.create_grouped_by_gid_dict()
+        return self.data_by_gid
+
+    def grouped_by_datatype(self):
+        if self.data_by_datatype is None:
+            self.create_grouped_by_datatype_dict()
+        return self.data_by_datatype
 
     def get_feedin_data(self, gid=None):
         data_dict = self.grouped_by_gid()
@@ -238,7 +243,18 @@ class Weather:
             data = data_dict[gid]
         return data.rename(columns=self.name_dc)
 
+    def create_gid_geometry_dict(self):
+        'Create the gid-geom dictionary'
+        self.gid_geom = {}
+        for gid in self.raw_data.gid.unique():
+            tmp_geo = self.raw_data.geom[
+                (self.raw_data.year == self.year[0]) &
+                (self.raw_data.gid == gid)]
+            self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
+
     def get_geometry_from_gid(self, gid):
+        if self.gid_geom is None:
+            self.create_gid_geometry_dict()
         return self.gid_geom[gid]
 
     def get_data_heigth(self, name):
