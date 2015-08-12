@@ -41,6 +41,7 @@ class Weather:
         self.geometry = geometry
         self.raw_data = self.get_raw_data()
         self.data = None
+        self.gid_geom = None
 
     def check_datatypes(self, datatypes):
         '''
@@ -65,7 +66,7 @@ class Weather:
         if geom.geom_type in ['Polygon', 'MultiPolygon']:
             coords = geom.centroid
         else:
-            coords = geom.geometry
+            coords = geom
         sql = """
             SELECT tzid FROM world.tz_world
             WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
@@ -95,8 +96,8 @@ class Weather:
             logging.debug('Polygon')
             sql_part = """
                 SELECT sp.gid, ST_AsText(sp.geom)
-                FROM coastdat.spatial as sp
-                WHERE st_contains(ST_GeomFromText('{wkt}',4326), sp.geom)
+                FROM coastdat.cosmoclmgrid as sp
+                WHERE st_intersects(ST_GeomFromText('{wkt}',4326), sp.geom)
                 """.format(wkt=self.geometry.wkt)
         elif self.geometry.geom_type == 'Point':
             logging.debug('Point')
@@ -151,6 +152,7 @@ class Weather:
             self.connection.execute(sql).fetchall(), columns=[
                 'gid', 'geom', 'data_id', 'time_series', 'dat_id', 'type_id',
                 'type', 'year', 'leap_year']).drop('dat_id', 1)
+
         for ix in weather_df.index:
             # Convert the point of the weather location to a shapely object
             weather_df.loc[ix, 'geom'] = wkt_loads(weather_df['geom'][ix])
@@ -181,19 +183,35 @@ class Weather:
         return weather_df
 
     def grouped_by_gid(self):
+        # Hier caching einfügen? Wenn es schon gibt, dann nicht neu berechnen?
         res = []
+        self.gid_geom = {}
         for year in self.year:
             dic = {}
             for gid in self.raw_data.gid.unique():
                 dic[gid] = {}
+                # Get the data for the given year and gid.
                 tmp = self.raw_data[
                     (self.raw_data.year == year) & (self.raw_data.gid == gid)]
+
+                # Write the data to pandas.Series within in the
+                # pandas.DataFrame.
                 for t in tmp.time_series.iteritems():
                     dic[gid][tmp.type[t[0]]] = t[1]
                 dic[gid] = pd.DataFrame(dic[gid])
+
+                # Create the gid-geom dictionary
+                tmp_geo = self.raw_data.geom[
+                    (self.raw_data.year == year) &
+                    (self.raw_data.gid == gid)]
+                self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
             res.append(dic)
+
+        # Return a list of dictionaries for all years or a dictionary if only
+        # one year is given.
         if len(res) == 1:
             res = res[0]
+        self.data = res
         return res
 
     def grouped_by_datatype(self):
@@ -212,10 +230,16 @@ class Weather:
             res = res[0]
         return res
 
-    def get_feedin_data(self):
-        self.data = self.grouped_by_gid()
-        self.data = self.data[list(self.data.keys())[0]]
-        self.data.rename(columns=self.name_dc, inplace=True)
+    def get_feedin_data(self, gid=None):
+        data_dict = self.grouped_by_gid()
+        if gid is None:
+            data = data_dict[list(data_dict.keys())[0]]
+        else:
+            data = data_dict[gid]
+        return data.rename(columns=self.name_dc)
+
+    def get_geometry_from_gid(self, gid):
+        return self.gid_geom[gid]
 
     def get_data_heigth(self, name):
         ''

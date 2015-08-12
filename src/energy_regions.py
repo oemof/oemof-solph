@@ -5,15 +5,22 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 import logging
-import holiday
-import pandas as pd
-from matplotlib import pyplot as plt
-from shapely import geometry as shape
-from descartes import PolygonPatch
 import fiona
-from shapely.ops import cascaded_union
 import urllib
+import pandas as pd
 import xml.etree.ElementTree as ET
+
+from . import holiday
+from . import energy_weather as w
+from . import energy_power_plants as pp
+from . import powerplants as plants
+from . import models
+
+from matplotlib import pyplot as plt
+from descartes import PolygonPatch
+
+from shapely import geometry as shape
+from shapely.ops import cascaded_union
 
 
 class region():
@@ -31,33 +38,34 @@ class region():
             # dann gibt es keinen Fehler. Ist die Geometry fehlerhaft wird
             # False zurückgegeben, aber das hat keine Auswirkung. Ei
             if geometry.is_valid:
-                self.__geometry__ = geometry
+                self.geometry = geometry
             else:
                 raise TypeError('No valid geometry given.')
         except:
             if isinstance(nuts, list):
-                self.__geometry__ = self.get_polygon_from_nuts(nuts)
+                self.geometry = self.get_polygon_from_nuts(nuts)
             elif isinstance(file, str):
-                    self.__geometry__ = self.get_polygon_from_shp_file(file)
+                    self.geometry = self.get_polygon_from_shp_file(file)
             else:
                 logging.error('No valid geometry given.')
                 raise
 
         # Initialise the DataFrame for the demand time series.
-        self.__place__ = self.fetch_admin_from_coord(self.centroid().coords[0])
+        self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
+        self.year = year
+        self.demand = self.create_basic_dataframe()
+        self.weather = None
 
-        self.__demand__ = self.create_basic_dataframe(year)
-
-    def create_basic_dataframe(self, year):
+    def create_basic_dataframe(self):
         '''Create a basic hourly dataframe for the given year.'''
-
+        # TODO: Replace hard coded "hour of the year".
         # Create a temporary DataFrame to calculate the heat demand
         time_df = pd.DataFrame(
             index=pd.date_range(
-                pd.datetime(year, 1, 1, 0), periods=8760, freq='H'),
+                pd.datetime(self.year, 1, 1, 0), periods=8760, freq='H'),
             columns=['weekday', 'hour', 'date'])
 
-        holidays = holiday.get_german_holidays(year, self.__place__)
+        holidays = holiday.get_german_holidays(self.year, self.place)
 
         # Add a column 'hour of the day to the DataFrame
         time_df['hour'] = time_df.index.hour + 1
@@ -158,58 +166,83 @@ class region():
 
     def centroid(self):
         'Returns the centroid of the given geometry as a shapely point-object.'
-        return self.__geometry__.centroid
+        return self.geometry.centroid
+
+    def get_weather_raster(self, conn):
+        self.weather = w.Weather(conn, self.geometry, self.year)
+
+    def get_power_plants(self, conn):
+        self.power_plants = pp.Power_Plants().get_all_power_plants(
+            conn, self.geometry)
+
+    def get_ee_feedin(self, conn, **site):
+        wind_model = models.WindPowerPlant(required=[])
+        pv_model = models.Photovoltaic(required=[])
+        site['connection'] = conn
+        site['tz'] = self.weather.tz_from_geom(self.geometry)
+        pv_df = 0
+        wind_df = 0
+        for gid in self.weather.grouped_by_gid():
+            # Get the geometry for the given weather raster field
+            tmp_geom = self.weather.get_geometry_from_gid(gid)
+
+            # Get all Power Plants for raster field
+            ee_pp = pp.Power_Plants().get_all_ee_power_plants(conn, tmp_geom)
+
+            site['weather'] = self.weather
+            site['gid'] = gid
+            site['latitude'] = tmp_geom.centroid.y
+            site['longitude'] = tmp_geom.centroid.x
+
+            # Determine the feedin time series for the weather field
+            # Wind energy
+            wind_peak_power = ee_pp[ee_pp.type == 'Windkraft'].p_kw_peak.sum()
+            wind_power_plant = plants.WindPowerPlant(
+                wind_peak_power, model=wind_model)
+            wind_series = wind_power_plant.feedin_as_pd(**site)
+
+            # PV
+            pv_peak_power = ee_pp[ee_pp.type == 'Solarstrom'].p_kw_peak.sum()
+            pv_plant = plants.Photovoltaic(pv_peak_power, model=pv_model)
+            pv_series = pv_plant.feedin_as_pd(**site)
+            pv_series.name = gid
+
+            # Combine the results to a DataFrame
+            try:
+                pv_df = pd.concat([pv_df, pv_series], axis=1)
+                wind_df = pd.concat([wind_df, wind_series], axis=1)
+            except:
+                pv_df = pv_series.to_frame()
+                wind_df = wind_series.to_frame()
+
+        # Summerize the results to one column for pv and one for wind
+        df = pd.concat([pv_df.sum(axis=1), wind_df.sum(axis=1)], axis=1)
+        self.feedin = df.rename(columns={0: 'pv_norm_pwr', 1: 'wind_norm_pwr'})
+        return self.feedin
 
     def plot(self):
         'Simple plot to check the geometry'
         BLUE = '#6699cc'
         GRAY = '#9FF999'
         fig, ax = plt.subplots()
-        if self.__geometry__.geom_type == 'MultiPolygon':
-            for polygon in self.__geometry__:
+        if self.geometry.geom_type == 'MultiPolygon':
+            for polygon in self.geometry:
                 patch = PolygonPatch(polygon, fc=GRAY, ec=BLUE, alpha=0.5)
                 ax.add_patch(patch)
         else:
             ax.add_patch(PolygonPatch(
-                self.__geometry__, fc=GRAY, ec=BLUE, alpha=0.5))
-        ax.set_xlim(self.__geometry__.bounds[0], self.__geometry__.bounds[2])
-        ax.set_ylim(self.__geometry__.bounds[1], self.__geometry__.bounds[3])
-
-    @property
-    def demand(self):
-        return self.__demand__
+                self.geometry, fc=GRAY, ec=BLUE, alpha=0.5))
+        ax.set_xlim(self.geometry.bounds[0], self.geometry.bounds[2])
+        ax.set_ylim(self.geometry.bounds[1], self.geometry.bounds[3])
 
     @property
     def elec_demand(self):
-        return self.__demand__['elec']
+        return self.demand['elec']
 
     @property
     def country(self):
-        return self.__place__[0]
+        return self.place[0]
 
     @property
     def state(self):
-        return self.abbreviation_of_state(self.__place__[1])
-
-
-if __name__ == "__main__":
-    geo = shape.Polygon(
-        [(12.0, 50.0), (12.1, 50.1), (12.1, 50.0), (12.2, 50.5)])
-    a = region(2007, geometry=geo)
-#    b = region(2007, nuts=['1234', '1236'])
-    c = region(2007, file='/home/uwe/Wittenberg.shp')
-
-    c.plot()
-    plt.plot(c.centroid().x, c.centroid().y, 'x', color='r')
-    plt.show()
-    print(c.state)
-    print(c.country)
-    print(c.elec_demand)
-
-    a.plot()
-    plt.plot(a.centroid().x, a.centroid().y, 'x', color='r')
-    plt.show()
-
-    print(a.state)
-    print(a.country)
-    print(a.elec_demand)
+        return self.abbreviation_of_state(self.place[1])
