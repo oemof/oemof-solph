@@ -186,8 +186,15 @@ class WindPowerPlant():
 
         return df.p_wpp_norm
 
-    def get_wind_pp_types(self, **kwargs):
-        pass
+    def get_wind_pp_types(self, conn):
+        # TODO@Günni
+        sql = 'SELECT rli_anlagen_id, p_nenn FROM ee_komponenten.wea_cpcurves;'
+        df = pd.DataFrame(conn.execute(sql).fetchall(), columns=[
+            'type', 'p_peak']).sort(columns='type').reset_index(drop=True)
+        pd.set_option('display.max_rows', len(df))
+        print(df)
+        pd.reset_option('display.max_rows')
+        return df
 
     def rho_hub(self, **kwargs):
         '''
