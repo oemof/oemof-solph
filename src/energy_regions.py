@@ -51,9 +51,9 @@ class region():
                 raise
 
         # Initialise the DataFrame for the demand time series.
-        self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
+        self.place = None
         self.year = year
-        self.demand = self.create_basic_dataframe()
+        self.demand = None  # self.create_basic_dataframe()
         self.weather = None
 
     def create_basic_dataframe(self):
@@ -64,6 +64,9 @@ class region():
             index=pd.date_range(
                 pd.datetime(self.year, 1, 1, 0), periods=8760, freq='H'),
             columns=['weekday', 'hour', 'date'])
+
+        if self.place is None:
+            self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
 
         holidays = holiday.get_german_holidays(self.year, self.place)
 
@@ -219,8 +222,8 @@ class region():
 
         # Summerize the results to one column for pv and one for wind
         df = pd.concat([pv_df.sum(axis=1), wind_df.sum(axis=1)], axis=1)
-        self.feedin = df.rename(columns={0: 'pv_norm_pwr', 1: 'wind_norm_pwr'})
-        return self.feedin
+        self.feedin = df.rename(columns={0: 'pv_pwr', 1: 'wind_pwr'})
+        return self
 
     def plot(self):
         'Simple plot to check the geometry'
@@ -243,8 +246,12 @@ class region():
 
     @property
     def country(self):
+        if self.place is None:
+            self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
         return self.place[0]
 
     @property
     def state(self):
+        if self.place is None:
+            self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
         return self.abbreviation_of_state(self.place[1])
