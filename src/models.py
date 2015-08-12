@@ -4,37 +4,23 @@ Created on Wed May 13 08:43:54 2015
 
 @author: dozeumwic
 """
-
-from datetime import datetime
-from functools import reduce
-from random import random
-
+import numpy as np
 import pandas as pd
 import pvlib
+from scipy.interpolate import interp1d
+
 
 class Photovoltaic:
-  def __init__(self, required):
-    self.required = required
+    ''
 
-  def feedin(self, **kwargs):
+    def __init__(self, required):
+        self.required = required
 
-    time = pd.DataFrame(
-        # TODO: the year variable in the line below is not defined
-        #  index=pd.date_range(datetime(int(year), 1, 1, 0, 0, 0),
-        # Somebody should check whether getting this from the 'kwargs'
-        # is correct.
-             index=pd.date_range(datetime(int(kwargs["year"]),
-                            1, 1, 0, 0, 0),
-        # TODO: check whether 'site' should really be an attribute of
-        #    the 'powerplant'. Again, it was a standalone variable
-        #    which was never defined. As this looks like something
-        #    which should belong to 'powrplant', I put it there.
-                                 periods=self.powerplant.site['hoy'],
-                                 freq='H',
-                                 tz=self.powerplant.site['TZ']))
+    def feedin(self, **kwargs):
 
-    return time
+        feedin_df = self.feedin_as_df(**kwargs)
 
+        return list(feedin_df)
 
     def feedin_as_pd(self, **kwargs):
 
