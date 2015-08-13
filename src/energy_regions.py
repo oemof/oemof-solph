@@ -57,6 +57,7 @@ class region():
         self.demand = None  # self.create_basic_dataframe()
         self.weather = None
         self.name = name
+        self._df = None
 
     def create_basic_dataframe(self):
         '''Create a basic hourly dataframe for the given year.'''
@@ -76,13 +77,11 @@ class region():
         time_df['hour'] = time_df.index.hour + 1
         time_df['weekday'] = time_df.index.weekday + 1
         time_df['date'] = time_df.index.date
-        time_df['elec'] = 0
-        time_df['heat'] = 0
 
         # Set weekday to Holiday (0) for all holidays
         time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
             pd.to_datetime(list(holidays.keys()))), 0, True)
-        return time_df
+        self._df = time_df
 
     def fetch_admin_from_coord(self, coord):
         """
@@ -243,6 +242,12 @@ class region():
         ax.set_xlim(self.geometry.bounds[0], self.geometry.bounds[2])
         ax.set_ylim(self.geometry.bounds[1], self.geometry.bounds[3])
         fig.suptitle(self.name, fontsize='20')
+
+    @property
+    def df(self):
+        if self._df is None:
+            self.create_basic_dataframe()
+        return self._df
 
     @property
     def elec_demand(self):
