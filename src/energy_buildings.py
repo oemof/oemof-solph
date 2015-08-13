@@ -4,10 +4,7 @@ Created on Tue Jul 28 12:04:21 2015
 
 @author: uwe
 """
-from matplotlib import pyplot as plt
-import db
 import numpy as np
-import holiday
 import logging
 import pandas as pd
 from math import ceil as round_up
@@ -23,6 +20,8 @@ class electric_building():
             bdew.slp[kwargs['selp_type']] /
             bdew.slp[kwargs['selp_type']].sum(0) *
             kwargs['annual_elec_demand'])
+        self.type = kwargs['selp_type']
+        self.annual_load = kwargs['annual_elec_demand']
 
     @property
     def load(self):
@@ -31,15 +30,14 @@ class electric_building():
 
 class heat_building():
     ''
-    def __init__(self, conn, time_df, **kwargs):
+    def __init__(self, conn, time_df, temp, **kwargs):
         self.year = time_df.index.year[1000]
-        self.time_df = time_df
-        self.time_df['weekday'].mask(self.time_df['weekday'] == 0, 7, True)
-        self.connection = conn
-        self.temp_int = self.temp_interval()
-        self.heat_demand = self.create_slp(**kwargs)
+        time_df['temp'] = (temp - 273)
+        self.heat_demand = self.create_slp(conn, time_df, **kwargs)
+        self.type = kwargs['shlp_type']
+        self.annual_load = kwargs['annual_heat_demand']
 
-    def temp_geo_series(self):
+    def temp_geo_series(self, time_df):
         '''
         A new temperature vector is generated containing a multy-day
         average temperature as needed in the load profile function.
@@ -58,21 +56,17 @@ class heat_building():
         ----------
         .. [1] `BDEW <https://www.avacon.de/cps/rde/xbcr/avacon/Netze_Lieferanten_Netznutzung_Lastprofilverfahren_Leitfaden_SLP_Gas.pdf>`_, BDEW Documentation for heat profiles.
         '''
-        self.time_df['temp'] = pd.read_csv(
-            filepath_or_buffer='/home/uwe/chiba/test.csv').set_index(
-                self.time_df.index)['temp']
-
-        tem = self.time_df['temp'].resample('D', how='mean').reindex(
-            self.time_df.index).fillna(method="ffill")
+        tem = time_df['temp'].resample('D', how='mean').reindex(
+            time_df.index).fillna(method="ffill")
         return (tem + 0.5 * np.roll(tem, 24) + 0.25 * np.roll(tem, 48) +
                 0.125 * np.roll(tem, 72)) / 1.875
 
-    def temp_interval(self):
+    def temp_interval(self, time_df):
         '''
         Appoints the corresponding temperature interval to each temperature in
         the temperature vector.
         '''
-        temp = self.temp_geo_series()
+        temp = self.temp_geo_series(time_df)
         temp_dict = ({
             -20: 1, -19: 1, -18: 1, -17: 1, -16: 1, -15: 1, -14: 2,
             -13: 2, -12: 2, -11: 2, -10: 2, -9: 3, -8: 3, -7: 3, -6: 3, -5: 3,
@@ -85,7 +79,7 @@ class heat_building():
         temp_int = [temp_dict[i] for i in temp_rounded]
         return np.transpose(np.array(temp_int))
 
-    def get_h_values(self, **kwargs):
+    def get_h_values(self, conn, time_df, **kwargs):
         '''Determine the h-values'''
 
         # TODO@Günni: Replace sql-string by sqlalchemy
@@ -99,7 +93,7 @@ class heat_building():
 
         # Create DataFrame from sql-query results.
         hour_factors = pd.DataFrame(
-            self.connection.execute(sql).fetchall(),
+            conn.execute(sql).fetchall(),
             columns=(
                 ['hour_of_day', 'weekday'] +
                 ['temp_intervall_{0:02.0f}'.format(x) for x in range(1, 11)]))
@@ -119,10 +113,10 @@ class heat_building():
 
         # Determine the h values
         h = np.array(SF_mat)[np.array(range(0, 8760))[:], (
-            self.temp_int - 1)[:]]
+            self.temp_interval(time_df) - 1)[:]]
         return np.array(list(map(float, h[:])))
 
-    def get_sigmoid_parameter(self, **kwargs):
+    def get_sigmoid_parameter(self, conn, **kwargs):
         ''' Retrieve the sigmoid parameters from the database'''
 
         # TODO@Günni: Replace sql-string by sqlalchemy
@@ -134,7 +128,7 @@ class heat_building():
 
         # Create DataFrame from sql-query results.
         sigmoid = pd.DataFrame(
-            self.connection.execute(sql).fetchall(),
+            conn.execute(sql).fetchall(),
             columns=[
                 'parameter_{0}'.format(x) for x in ['a', 'b', 'c', 'd']])
 
@@ -145,7 +139,7 @@ class heat_building():
             'ww_incl', True) else 0
         return A, B, C, D
 
-    def get_weekday_parameter(self, **kwargs):
+    def get_weekday_parameter(self, conn, time_df, **kwargs):
         ''' Retrieve the weekdayparameter from the database'''
 
         # TODO@Günni: Replace sql-string by sqlalchemy
@@ -156,7 +150,7 @@ class heat_building():
 
         # Create DataFrame from sql-query results.
         F_df = pd.DataFrame(
-            self.connection.execute(sql).fetchall(),
+            conn.execute(sql).fetchall(),
             columns=['wochentagsfaktor'])
 
         F_df['weekdays'] = F_df.index + 1
@@ -165,13 +159,14 @@ class heat_building():
             F_df, time_df, left_on='weekdays', right_on='weekday', how='outer',
             left_index=True).sort()['wochentagsfaktor'])))
 
-    def create_slp(self, **kwargs):
+    def create_slp(self, conn, time_df, **kwargs):
         '''Calculation of the hourly heat demand using the bdew-equations'''
-        SF = self.get_h_values(**kwargs)
-        [A, B, C, D] = self.get_sigmoid_parameter(**kwargs)
-        F = self.get_weekday_parameter(**kwargs)
+        time_df['weekday'].mask(time_df['weekday'] == 0, 7, True)
+        SF = self.get_h_values(conn, time_df, **kwargs)
+        [A, B, C, D] = self.get_sigmoid_parameter(conn, **kwargs)
+        F = self.get_weekday_parameter(conn, time_df, **kwargs)
 
-        h = (A / (1 + (B / (self.time_df['temp'] - 40)) ** C) + D)
+        h = (A / (1 + (B / (time_df['temp'] - 40)) ** C) + D)
         KW = (kwargs['annual_heat_demand'] /
               (sum(h * F) / 24))
         return (KW * h * F * SF)
@@ -194,27 +189,24 @@ class bdew_elec_slp():
                 'winter2': [11, 1, 12, 31],  # winter2: 01.11. to 31.12
                 }
         else:
-            self.__periods__ = periods
+            self.periods = periods
+        self._year = time_df.index.year[1000]
+        self.slp_frame = self.all_load_profiles(conn, time_df)
 
-        self.year = time_df.index.year[1000]
-        self.connection = conn
-        self.time_df = time_df
-        self.slp_frame = self.all_load_profiles()
-
-    def all_load_profiles(self):
+    def all_load_profiles(self, conn, time_df):
         slp_types = ['h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'l0',
                      'l1', 'l2']
-        new_df = self.create_bdew_load_profiles(slp_types)
+        new_df = self.create_bdew_load_profiles(conn, time_df, slp_types)
 
         # Add the slp for the industrial group
-        new_df['i0'] = self.simple_industrial_heat_profile(self.time_df)
+        new_df['i0'] = self.simple_industrial_heat_profile(time_df)
 
         new_df.drop(['hour', 'weekday'], 1, inplace=True)
         # TODO: Gleichmäßig normalisieren der i0-Lastgang hat höhere
         # Jahressumme als die anderen.
         return new_df
 
-    def create_bdew_load_profiles(self, slp_types):
+    def create_bdew_load_profiles(self, conn, time_df, slp_types):
         '''
         Calculates the hourly electricity load profile in MWh/h of a region.
         '''
@@ -230,16 +222,13 @@ class bdew_elec_slp():
 
         # Create DataFrame from sql-query results.
         tmp_df = pd.DataFrame(
-            self.connection.execute(sql).fetchall(),
+            conn.execute(sql).fetchall(),
             index=pd.date_range(
                 pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min'),
             columns=['period', 'weekday'] + slp_types)
 
-        # Create a new DataFrame to collect the slp series
-        time_df = self.time_df
-
         # All holidays(0) are set to sunday(7)
-        time_df.weekday = self.time_df.weekday.replace(0, 7)
+        time_df.weekday = time_df.weekday.replace(0, 7)
         new_df = time_df.copy()
 
         # Create an empty column for all slp types and calculate the hourly
@@ -259,9 +248,9 @@ class bdew_elec_slp():
         tmp_df.pop('index')
 
         for p in self.periods.keys():
-            a = pd.datetime(self.year, self.periods[p][0],
+            a = pd.datetime(self._year, self.periods[p][0],
                             self.periods[p][1], 0, 0)
-            b = pd.datetime(self.year, self.periods[p][2],
+            b = pd.datetime(self._year, self.periods[p][2],
                             self.periods[p][3], 23, 59)
             new_df.update(pd.DataFrame.merge(
                 tmp_df[tmp_df['period'] == p[:-1]], time_df[a:b],
@@ -301,27 +290,6 @@ class bdew_elec_slp():
     def slp(self):
         return self.slp_frame
 
-
-def create_basic_dataframe(year, place):
-    '''This function is just for testing later on the dataframe is passed.'''
-
-    # Create a temporary DataFrame to calculate the heat demand
-    time_df = pd.DataFrame(
-        index=pd.date_range(
-            pd.datetime(year, 1, 1, 0), periods=8760, freq='H'),
-        columns=['weekday', 'hour', 'date'])
-
-    holidays = holiday.get_german_holidays(year, place)
-
-    # Add a column 'hour of the day to the DataFrame
-    time_df['hour'] = time_df.index.hour + 1
-    time_df['weekday'] = time_df.index.weekday + 1
-    time_df['date'] = time_df.index.date
-    time_df['elec'] = 0
-    time_df['heat'] = 0
-
-    # Set weekday to Holiday (0) for all holidays
-    time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
-        pd.to_datetime(list(holidays.keys()))), 0, True)
-    return time_df
-
+    @property
+    def year(self):
+        return self._year
