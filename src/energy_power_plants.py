@@ -23,17 +23,25 @@ class Power_Plants:
             conn, geometry)], ignore_index=True)
         return self.plants
 
-    def get_all_ee_power_plants(self, conn, geometry,):
+    def get_all_ee_power_plants(self, conn, geometry1, geometry2=None):
+        # TODO@Günni
         sql = """
             SELECT anlagentyp, anuntertyp, p_nenn_kwp
             FROM deutschland.eeg_03_2013 as ee
             WHERE st_contains(ST_GeomFromText('{wkt}',4326), ee.geom)
-            """.format(wkt=geometry.wkt)
+            """.format(wkt=geometry1.wkt)
+
+        if geometry2 is None:
+            sql += ';'
+        else:
+            sql += '''AND st_contains(ST_GeomFromText('{wkt}',4326),
+                ee.geom);'''.format(wkt=geometry2.wkt)
         return pd.DataFrame(
             conn.execute(sql).fetchall(), columns=[
                 'type', 'subtype', 'p_kw_peak'])
 
     def get_all_fossil_power_plants(self, conn, geometry):
+        # TODO@Günni
         sql = """
             SELECT auswertung, ersatzbrennstoff, el_nennleistung
             FROM vn.geo_power_plant_bnetza_2014 as pp

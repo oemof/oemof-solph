@@ -192,7 +192,8 @@ class region():
             tmp_geom = self.weather.get_geometry_from_gid(gid)
 
             # Get all Power Plants for raster field
-            ee_pp = pp.Power_Plants().get_all_ee_power_plants(conn, tmp_geom)
+            ee_pp = pp.Power_Plants().get_all_ee_power_plants(
+                conn, tmp_geom, self.geometry)
 
             site['weather'] = self.weather
             site['gid'] = gid
