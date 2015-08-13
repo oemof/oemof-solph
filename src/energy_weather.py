@@ -39,7 +39,7 @@ class Weather:
         self.year = self.check_year(year)
         self.datatypes = self.check_datatypes(datatypes)
         self.geometry = geometry
-        self.data = self.get_raw_data()
+        self.data = self.fetch_raw_data()
         self.gid_geom = None
         self.data_by_datatype = None
         self.data_by_gid = None
@@ -143,7 +143,7 @@ class Weather:
         ;'''.format(where_string1=where_str1, year=self.year,
                     sql_part=sql_part, where_string2=where_str2)
 
-    def get_raw_data(self):
+    def fetch_raw_data(self):
         """
         Creates an sql-string to define a temporary view with a polygon.
         """
@@ -181,22 +181,21 @@ class Weather:
                 index=pd.date_range(pd.datetime(db_year, 1, 1, 0),
                                     periods=db_len, freq='H', tz=tz))
         weather_df['time_series'] = pd.Series(tmp_dc)
-        self.data = weather_df
         self.gid_geom = None
         self.data_by_datatype = None
         self.data_by_gid = None
         return weather_df
 
-    def create_grouped_by_gid_dict(self):
+    def _create_grouped_by_gid_dict(self):
         # Hier caching einfügen? Wenn es schon gibt, dann nicht neu berechnen?
         res = []
         for year in self.year:
             dic = {}
-            for gid in self.raw_data.gid.unique():
+            for gid in self.data.gid.unique():
                 dic[gid] = {}
                 # Get the data for the given year and gid.
-                tmp = self.raw_data[
-                    (self.raw_data.year == year) & (self.raw_data.gid == gid)]
+                tmp = self.data[
+                    (self.data.year == year) & (self.data.gid == gid)]
 
                 # Write the data to pandas.Series within in the
                 # pandas.DataFrame.
@@ -211,14 +210,14 @@ class Weather:
             res = res[0]
         self.data_by_gid = res
 
-    def create_grouped_by_datatype_dict(self):
+    def _create_grouped_by_datatype_dict(self):
         res = []
         for year in self.year:
             dic = {}
-            for typ in self.raw_data.type.unique():
+            for typ in self.data.type.unique():
                 dic[typ] = {}
-                tmp = self.raw_data[
-                    (self.raw_data.year == year) & (self.raw_data.type == typ)]
+                tmp = self.data[
+                    (self.data.year == year) & (self.data.type == typ)]
                 for t in tmp.time_series.iteritems():
                     dic[typ][tmp.gid[t[0]]] = t[1]
                 dic[typ] = pd.DataFrame(dic[typ])
@@ -227,14 +226,23 @@ class Weather:
             res = res[0]
         self.data_by_datatype = res
 
+    def create_gid_geometry_dict(self):
+        'Create the gid-geom dictionary'
+        self.gid_geom = {}
+        for gid in self.data.gid.unique():
+            tmp_geo = self.data.geom[
+                (self.data.year == self.year[0]) &
+                (self.data.gid == gid)]
+            self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
+
     def grouped_by_gid(self):
         if self.data_by_gid is None:
-            self.create_grouped_by_gid_dict()
+            self._create_grouped_by_gid_dict()
         return self.data_by_gid
 
     def grouped_by_datatype(self):
         if self.data_by_datatype is None:
-            self.create_grouped_by_datatype_dict()
+            self._create_grouped_by_datatype_dict()
         return self.data_by_datatype
 
     def get_feedin_data(self, gid=None):
@@ -244,15 +252,6 @@ class Weather:
         else:
             data = data_dict[gid]
         return data.rename(columns=self.name_dc)
-
-    def create_gid_geometry_dict(self):
-        'Create the gid-geom dictionary'
-        self.gid_geom = {}
-        for gid in self.raw_data.gid.unique():
-            tmp_geo = self.raw_data.geom[
-                (self.raw_data.year == self.year[0]) &
-                (self.raw_data.gid == gid)]
-            self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
 
     def get_geometry_from_gid(self, gid):
         if self.gid_geom is None:
