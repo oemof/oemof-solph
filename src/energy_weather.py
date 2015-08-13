@@ -235,6 +235,10 @@ class Weather:
                 (self.data.gid == gid)]
             self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
 
+    def spatial_average(self, datatype):
+        df = self.grouped_by_datatype()[datatype]
+        return df.sum(axis=1) / len(df.columns)
+
     def grouped_by_gid(self):
         if self.data_by_gid is None:
             self._create_grouped_by_gid_dict()
