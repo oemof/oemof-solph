@@ -25,7 +25,8 @@ from shapely.ops import cascaded_union
 
 class region():
 
-    def __init__(self, year, geometry=None, nuts=None, file=None):
+    def __init__(self, year, geometry=None, nuts=None, file=None,
+                 name='No Name'):
 
         # Das muss noch schlauer gemacht werden
         # 3 Möglichkeiten entweder wird ein fertiges shapely-Objekt übergeben
@@ -55,6 +56,7 @@ class region():
         self.year = year
         self.demand = None  # self.create_basic_dataframe()
         self.weather = None
+        self.name = name
 
     def create_basic_dataframe(self):
         '''Create a basic hourly dataframe for the given year.'''
@@ -240,6 +242,7 @@ class region():
                 self.geometry, fc=GRAY, ec=BLUE, alpha=0.5))
         ax.set_xlim(self.geometry.bounds[0], self.geometry.bounds[2])
         ax.set_ylim(self.geometry.bounds[1], self.geometry.bounds[3])
+        fig.suptitle(self.name, fontsize='20')
 
     @property
     def elec_demand(self):
