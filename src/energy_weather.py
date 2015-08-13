@@ -39,8 +39,7 @@ class Weather:
         self.year = self.check_year(year)
         self.datatypes = self.check_datatypes(datatypes)
         self.geometry = geometry
-        self.raw_data = self.get_raw_data()
-        self.data = None
+        self.data = self.get_raw_data()
         self.gid_geom = None
         self.data_by_datatype = None
         self.data_by_gid = None
@@ -183,6 +182,9 @@ class Weather:
                                     periods=db_len, freq='H', tz=tz))
         weather_df['time_series'] = pd.Series(tmp_dc)
         self.data = weather_df
+        self.gid_geom = None
+        self.data_by_datatype = None
+        self.data_by_gid = None
         return weather_df
 
     def create_grouped_by_gid_dict(self):
