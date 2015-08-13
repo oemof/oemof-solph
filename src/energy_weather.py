@@ -39,6 +39,7 @@ class Weather:
         self.year = self.check_year(year)
         self.datatypes = self.check_datatypes(datatypes)
         self.geometry = geometry
+        self.tz = None
         self.data = self.fetch_raw_data()
         self.gid_geom = None
         self.data_by_datatype = None
@@ -63,16 +64,17 @@ class Weather:
             year = list([year])
         return year
 
-    def tz_from_geom(self, geom):
-        if geom.geom_type in ['Polygon', 'MultiPolygon']:
-            coords = geom.centroid
+    def tz_from_geom(self):
+        if self.geometry.geom_type in ['Polygon', 'MultiPolygon']:
+            coords = self.geometry.centroid
         else:
-            coords = geom
+            coords = self.geometry
         sql = """
             SELECT tzid FROM world.tz_world
             WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
             """.format(wkt=coords.wkt)
-        return self.connection.execute(sql).fetchone()[0]
+        self.tz = self.connection.execute(sql).fetchone()[0]
+        return self
 
     def sql_join_string(self):
         '''
@@ -154,18 +156,18 @@ class Weather:
                 'gid', 'geom', 'data_id', 'time_series', 'dat_id', 'type_id',
                 'type', 'year', 'leap_year']).drop('dat_id', 1)
 
+        # Get the timezone of the geometry
+        self.tz_from_geom()
+
         for ix in weather_df.index:
             # Convert the point of the weather location to a shapely object
             weather_df.loc[ix, 'geom'] = wkt_loads(weather_df['geom'][ix])
-
-            # Get the timezone of the weather location
-            tz = self.tz_from_geom(weather_df.loc[ix, 'geom'])
 
             # Roll the dataset forward according to the timezone, because the
             # dataset is based on utc (Berlin +1, Kiev +2, London +0)
             utc = timezone('utc')
             offset = int(utc.localize(datetime(2002, 1, 1)).astimezone(
-                timezone(tz)).strftime("%z")[:-2])
+                timezone(self.tz)).strftime("%z")[:-2])
 
             # Roll the dataset backwards because the first value (1. Jan, 0:00)
             # contains the measurements of the hour before (coasDat2).
@@ -179,7 +181,7 @@ class Weather:
             tmp_dc[ix] = pd.Series(
                 np.roll(np.array(weather_df['time_series'][ix]), roll_value),
                 index=pd.date_range(pd.datetime(db_year, 1, 1, 0),
-                                    periods=db_len, freq='H', tz=tz))
+                                    periods=db_len, freq='H', tz=self.tz))
         weather_df['time_series'] = pd.Series(tmp_dc)
         self.gid_geom = None
         self.data_by_datatype = None
