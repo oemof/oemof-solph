@@ -9,6 +9,7 @@ import fiona
 import urllib
 import pandas as pd
 import xml.etree.ElementTree as ET
+import calendar
 
 from . import holiday
 from . import energy_weather as w
@@ -25,7 +26,7 @@ from shapely.ops import cascaded_union
 
 class region():
 
-    def __init__(self, year, geometry=None, nuts=None, file=None,
+    def __init__(self, year, geometry=None, nuts=None, file=None, conn=None,
                  name='No Name'):
 
         # Das muss noch schlauer gemacht werden
@@ -58,14 +59,30 @@ class region():
         self.weather = None
         self.name = name
         self._df = None
+        self.tz = None
+        self.connection = conn
 
-    def create_basic_dataframe(self):
+    def create_basic_dataframe(self, conn=None):
         '''Create a basic hourly dataframe for the given year.'''
-        # TODO: Replace hard coded "hour of the year".
-        # Create a temporary DataFrame to calculate the heat demand
+        if conn is None:
+            conn = self.connection
+            if conn is None:
+                try:
+                    conn = self.weather.connection
+                except AttributeError:
+                    print('No connection. Use set_connection to get one.')
+                    raise
+        self.connection = conn
+        if self.tz is None:
+            self.tz_from_geom(conn)
+        if calendar.isleap(self.year):
+            hoy = 8784
+        else:
+            hoy = 8760
+
         time_df = pd.DataFrame(
-            index=pd.date_range(
-                pd.datetime(self.year, 1, 1, 0), periods=8760, freq='H'),
+            index=pd.date_range(pd.datetime(self.year, 1, 1, 0), periods=hoy,
+                                freq='H', tz=self.tz),
             columns=['weekday', 'hour', 'date'])
 
         if self.place is None:
@@ -82,6 +99,9 @@ class region():
         time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
             pd.to_datetime(list(holidays.keys()))), 0, True)
         self._df = time_df
+
+    def set_connection(self, conn):
+        self.connection = conn
 
     def fetch_admin_from_coord(self, coord):
         """
@@ -168,6 +188,18 @@ class region():
             [shape.shape(pol['geometry']) for pol in fiona.open(file)])
         return cascaded_union(multi)
 
+    def tz_from_geom(self, connection):
+        if self.geometry.geom_type in ['Polygon', 'MultiPolygon']:
+            coords = self.geometry.centroid
+        else:
+            coords = self.geometry
+        sql = """
+            SELECT tzid FROM world.tz_world
+            WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
+            """.format(wkt=coords.wkt)
+        self.tz = self.connection.execute(sql).fetchone()[0]
+        return self
+
     def centroid(self):
         'Returns the centroid of the given geometry as a shapely point-object.'
         return self.geometry.centroid
@@ -185,7 +217,7 @@ class region():
         wind_model = models.WindPowerPlant(required=[])
         pv_model = models.Photovoltaic(required=[])
         site['connection'] = conn
-        site['tz'] = self.weather.tz_from_geom(self.geometry)
+        site['tz'] = self.weather.tz
         pv_df = 0
         wind_df = 0
         for gid in self.weather.grouped_by_gid():
