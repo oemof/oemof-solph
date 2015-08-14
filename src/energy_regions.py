@@ -145,13 +145,18 @@ class region():
     b
 
     """
+
+    def __init__(self, year, geometry, **kwargs):
+
+        self.geometry = geometry
+        self.place = kwargs.get('place', None)
         self.year = year
         self.demand = None  # self.create_basic_dataframe()
         self.weather = None
-        self.name = name
+        self.name = kwargs.get('name', 'No name')
         self._df = None
-        self.tz = None
-        self.connection = conn
+        self.tz = kwargs.get('tz', None)
+        self.connection = kwargs.get('conn', None)
 
     def create_basic_dataframe(self, conn=None):
         '''Create a basic hourly dataframe for the given year.'''
