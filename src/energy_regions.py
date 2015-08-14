@@ -194,7 +194,7 @@ class region():
         query += "&lon={lon}".format(lon=lon)
         query += "&zoom=18"
         query += "&addressdetails=1"
-        print(query)
+
         conn = urllib.request.urlopen(query)
         rev_geocode = conn.read()
         address_parts = parse_result(rev_geocode)
