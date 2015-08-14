@@ -4,19 +4,39 @@ from sqlalchemy.orm import mapper, sessionmaker
 import keyring
 from . import config as cfg
 from .network.entities import components
+import logging
+try:
+    import fiona
+    from shapely import geometry as shape
+    from shapely.ops import cascaded_union
+except:
+    pass
 
 
 def connection():
     engine = create_engine(
-    "postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}".format(
-        user=cfg.get("postGIS", "username"),
-        passwd=keyring.get_password(
-            cfg.get("postGIS", "database"),
-            cfg.get("postGIS", "username")),
-        host=cfg.get("postGIS", "host"),
-        db=cfg.get("postGIS", "database"),
-        port=int(cfg.get("postGIS", "port"))))
+        "postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}".format(
+            user=cfg.get("postGIS", "username"),
+            passwd=keyring.get_password(
+                cfg.get("postGIS", "database"),
+                cfg.get("postGIS", "username")),
+            host=cfg.get("postGIS", "host"),
+            db=cfg.get("postGIS", "database"),
+            port=int(cfg.get("postGIS", "port"))))
     return engine.connect()
+
+
+def get_polygon_from_nuts(nuts):
+    'If at least one nuts-id is given, the polygon is loaded from the db.'
+    logging.debug('Getting polygon from DB')
+
+
+def get_polygon_from_shp_file(file):
+    'If a file name is given the polygon is loaded from the file.'
+    logging.debug('Loading polygon from file: {0}'.format(file))
+    multi = shape.MultiPolygon(
+        [shape.shape(pol['geometry']) for pol in fiona.open(file)])
+    return cascaded_union(multi)
 
 
 if __name__ == "__main__":

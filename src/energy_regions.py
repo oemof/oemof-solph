@@ -5,7 +5,6 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 import logging
-import fiona
 import urllib
 import pandas as pd
 import xml.etree.ElementTree as ET
@@ -20,41 +19,10 @@ from . import models
 from matplotlib import pyplot as plt
 from descartes import PolygonPatch
 
-from shapely import geometry as shape
-from shapely.ops import cascaded_union
-
 
 class region():
     r"""A class to define a region of an energy system.
 
-    def __init__(self, year, geometry=None, nuts=None, file=None, conn=None,
-                 name='No Name'):
-
-        # Das muss noch schlauer gemacht werden
-        # 3 Möglichkeiten entweder wird ein fertiges shapely-Objekt übergeben
-        # oder eine List mit mindestens einem Nuts-Code oder ein Pfad zu
-        # einer shp-Datei.
-        try:
-            # Der Ausdruck ist irreführend, denn ein Fehler wird ausgeworfen,
-            # wenn 'geometry kein shapely-Objekt ist, denn dann gibt es die
-            # Methode 'is_valid' nicht. Wenn es aber ein shaply-Objekt ist
-            # dann gibt es keinen Fehler. Ist die Geometry fehlerhaft wird
-            # False zurückgegeben, aber das hat keine Auswirkung. Ei
-            if geometry.is_valid:
-                self.geometry = geometry
-            else:
-                raise TypeError('No valid geometry given.')
-        except:
-            if isinstance(nuts, list):
-                self.geometry = self.get_polygon_from_nuts(nuts)
-            elif isinstance(file, str):
-                    self.geometry = self.get_polygon_from_shp_file(file)
-            else:
-                logging.error('No valid geometry given.')
-                raise
-
-        # Initialise the DataFrame for the demand time series.
-        self.place = None
     Several sentences providing an extended description. Refer to
     variables using back-ticks, e.g. `var`.
 
@@ -226,7 +194,7 @@ class region():
         query += "&lon={lon}".format(lon=lon)
         query += "&zoom=18"
         query += "&addressdetails=1"
-
+        print(query)
         conn = urllib.request.urlopen(query)
         rev_geocode = conn.read()
         address_parts = parse_result(rev_geocode)
@@ -272,17 +240,6 @@ class region():
             except:
                 value = None
         return value
-
-    def get_polygon_from_nuts(self, nuts):
-        'If at least one nuts-id is given, the polygon is loaded from the db.'
-        logging.debug('Getting polygon from DB')
-
-    def get_polygon_from_shp_file(self, file):
-        'If a file name is given the polygon is loaded from the file.'
-        logging.debug('Loading polygon from file: {0}'.format(file))
-        multi = shape.MultiPolygon(
-            [shape.shape(pol['geometry']) for pol in fiona.open(file)])
-        return cascaded_union(multi)
 
     def tz_from_geom(self, connection):
         if self.geometry.geom_type in ['Polygon', 'MultiPolygon']:
