@@ -4,14 +4,6 @@ from sqlalchemy.orm import mapper, sessionmaker
 import keyring
 from . import config as cfg
 from .network.entities import components
-import logging
-try:
-    import fiona
-    from shapely import geometry as shape
-    from shapely.ops import cascaded_union
-    from shapely.wkt import loads as wkt_loads
-except:
-    pass
 
 
 def connection():
@@ -25,25 +17,6 @@ def connection():
             db=cfg.get("postGIS", "database"),
             port=int(cfg.get("postGIS", "port"))))
     return engine.connect()
-
-
-def get_polygon_from_nuts(conn, nuts):
-    'If at least one nuts-id is given, the polygon is loaded from the db.'
-    logging.debug('Getting polygon from DB')
-    sql = '''
-        SELECT st_astext(ST_Transform(st_union(geom), 4326))
-        FROM oemof.geo_nuts_rg_2013
-        WHERE nuts_id in {0};
-    '''.format(tuple(nuts))
-    return wkt_loads(conn.execute(sql).fetchone()[0])
-
-
-def get_polygon_from_shp_file(file):
-    'If a file name is given the polygon is loaded from the file.'
-    logging.debug('Loading polygon from file: {0}'.format(file))
-    multi = shape.MultiPolygon(
-        [shape.shape(pol['geometry']) for pol in fiona.open(file)])
-    return cascaded_union(multi)
 
 
 if __name__ == "__main__":

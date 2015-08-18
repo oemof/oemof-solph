@@ -5,12 +5,10 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 import logging
-import urllib
 import pandas as pd
-import xml.etree.ElementTree as ET
 import calendar
 
-from . import holiday
+from . import helpers
 from . import energy_weather as w
 from . import energy_power_plants as pp
 from . import powerplants as plants
@@ -127,7 +125,29 @@ class region():
         self.connection = kwargs.get('conn', None)
 
     def create_basic_dataframe(self, conn=None):
-        '''Create a basic hourly dataframe for the given year.'''
+        r"""Giving back a DataFrame containing weekdays and holidays for the
+        given year and region.
+
+
+        Parameters
+        ----------
+        conn: sqlalchemy.connection object
+            Only needed if not already present as an attribute.
+
+        Returns
+        -------
+        pandas.DataFrame : DataFrame with a time index containing the time zone
+
+        See Also
+        --------
+        fetch_admin_from_coord : provides the names of the state and country
+        set_connection : can be used to set the connection attribute
+
+        Notes
+        -----
+        Using Pandas > 0.16
+
+        """
         if conn is None:
             conn = self.connection
             if conn is None:
@@ -152,7 +172,7 @@ class region():
         if self.place is None:
             self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
 
-        holidays = holiday.get_german_holidays(self.year, self.place)
+        holidays = helpers.get_german_holidays(self.year, self.place)
 
         # Add a column 'hour of the day to the DataFrame
         time_df['hour'] = time_df.index.hour + 1
@@ -176,81 +196,21 @@ class region():
         :param zoom: detail level of information
         :return: list: [country, state]
         """
-        def parse_result(res):
-            root = ET.fromstring(res)
-            address_parts = {}
-
-            for a in root[1]:
-                address_parts[a.tag] = a.text
-
-            return address_parts
-
-        lon = coord[0]
-        lat = coord[1]
-
-        query = "http://nominatim.openstreetmap.org/reverse?"
-        query += "format=xml"
-        query += "&lat={lat}".format(lat=lat)
-        query += "&lon={lon}".format(lon=lon)
-        query += "&zoom=18"
-        query += "&addressdetails=1"
-
-        conn = urllib.request.urlopen(query)
-        rev_geocode = conn.read()
-        address_parts = parse_result(rev_geocode)
-
+        print(coord)
         try:
-            state = self.abbreviation_of_state(address_parts['state'])
-        except KeyError:
-            logging.error(
-                "Didn't get the name of the state. " +
-                "Maybe the coordinates ({0}) are outside of Germany.".format(
-                    str([lat, lon])))
-            state = ''
-        try:
-            country = address_parts['country']
+            self.place = helpers.fetch_admin_from_coord_osm(coord)
         except:
-            country = None
-        return [country, state]
-
-    def abbreviation_of_state(self, statename):
-        abbr_dict = {
-            'Baden-Württemberg': 'BW',
-            'Bayern': 'BY',
-            'Berlin': 'BE',
-            'Brandenburg': 'BB',
-            'Bremen': 'HB',
-            'Hamburg': 'HH',
-            'Hessen': 'HE',
-            'Mecklenburg-Vorpommern': 'MV',
-            'Niedersachsen': 'NI',
-            'Nordrhein-Westfalen': 'NW',
-            'Rheinland-Pfalz': 'RP',
-            'Saarland': 'SL',
-            'Sachsen': 'SN',
-            'Sachsen-Anhalt': 'ST',
-            'Schleswig-Holstein': 'SH',
-            'Thüringen': 'TH'}
-        try:
-            value = abbr_dict[statename]
-        except:
+            logging.debug('Cannot fetch admin names from OSM.')
             try:
-                value = list(abbr_dict.keys())[list(abbr_dict.values()).index(
-                    statename)]
+                self.place = helpers.fetch_admin_from_coord_google(coord)
             except:
-                value = None
-        return value
+                logging.debug('Cannot fetch admin names from Google.')
+
+        return self
 
     def tz_from_geom(self, connection):
-        if self.geometry.geom_type in ['Polygon', 'MultiPolygon']:
-            coords = self.geometry.centroid
-        else:
-            coords = self.geometry
-        sql = """
-            SELECT tzid FROM world.tz_world
-            WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
-            """.format(wkt=coords.wkt)
-        self.tz = self.connection.execute(sql).fetchone()[0]
+        'Docstring'
+        self.tz = helpers.tz_from_geom(connection, self.geometry)
         return self
 
     def centroid(self):
@@ -273,7 +233,7 @@ class region():
         site['tz'] = self.weather.tz
         pv_df = 0
         wind_df = 0
-        for gid in self.weather.grouped_by_gid():
+        for gid in self.weather.grouped_by_gid().keys():
             # Get the geometry for the given weather raster field
             tmp_geom = self.weather.get_geometry_from_gid(gid)
 
@@ -341,11 +301,12 @@ class region():
     @property
     def country(self):
         if self.place is None:
-            self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
+            self.fetch_admin_from_coord(self.centroid().coords[0])
         return self.place[0]
 
     @property
     def state(self):
         if self.place is None:
-            self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
-        return self.abbreviation_of_state(self.place[1])
+            self.fetch_admin_from_coord(self.centroid().coords[0])
+        print(self.place)
+        return helpers.abbreviation_of_state(self.place[1])

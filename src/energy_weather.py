@@ -11,6 +11,7 @@ import numpy as np
 from shapely.wkt import loads as wkt_loads
 from pytz import timezone
 from datetime import datetime
+from . import helpers
 
 
 class Weather:
@@ -65,15 +66,8 @@ class Weather:
         return year
 
     def tz_from_geom(self):
-        if self.geometry.geom_type in ['Polygon', 'MultiPolygon']:
-            coords = self.geometry.centroid
-        else:
-            coords = self.geometry
-        sql = """
-            SELECT tzid FROM world.tz_world
-            WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
-            """.format(wkt=coords.wkt)
-        self.tz = self.connection.execute(sql).fetchone()[0]
+        'Docstring'
+        self.tz = helpers.tz_from_geom(self.connection, self.geometry)
         return self
 
     def sql_join_string(self):
