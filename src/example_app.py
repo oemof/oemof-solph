@@ -107,7 +107,8 @@ components = transformers + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'slack': True})
+                       options={'invest': False, 'slack': {
+                           'excess': True, 'shortage': True}})
 
 om.solve(solver='gurobi', debug=True, tee=False,
          results_to_objects=True, duals=True)
