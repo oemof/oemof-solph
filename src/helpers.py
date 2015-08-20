@@ -17,8 +17,9 @@ hlp_fkt = 'get_polygon_from_nuts'
 try:
     from shapely.wkt import loads as wkt_loads
 except:
-    logging.debug(
-        'You will not be able to use the helper function: {0}').format(hlp_fkt)
+    logging.info(
+        'You will not be able to use the helper function: {0}'.format(hlp_fkt))
+    logging.info('Install shapely to use it.')
 
 # get_polygon_from_shp_file
 hlp_fkt = 'get_polygon_from_shp_file'
@@ -27,16 +28,18 @@ try:
     from shapely import geometry as shape
     from shapely.ops import cascaded_union
 except:
-    logging.debug(
-        'You will not be able to use the helper function: {0}').format(hlp_fkt)
+    logging.info(
+        'You will not be able to use the helper function: {0}'.format(hlp_fkt))
+    logging.info('Install fiona, shapely to use it.')
 
 # get_german_holidays
 hlp_fkt = 'get_german_holidays'
 try:
     from dateutil import easter
 except:
-    logging.debug(
-        'You will not be able to use the helper function: {0}').format(hlp_fkt)
+    logging.info(
+        'You will not be able to use the helper function: {0}'.format(hlp_fkt))
+    logging.info('Install dateutil to use it.')
 
 # fetch_admin_from_coord_osm
 hlp_fkt = 'fetch_admin_from_coord_osm'
@@ -44,16 +47,18 @@ try:
     import urllib
     import xml.etree.ElementTree as ET
 except:
-    logging.debug(
-        'You will not be able to use the helper function: {0}').format(hlp_fkt)
+    logging.info(
+        'You will not be able to use the helper function: {0}'.format(hlp_fkt))
+    logging.info('Install urllib, xml to use it.')
 
 # fetch_admin_from_coord_google
-hlp_fkt = 'fetch_admin_from_coord_osm'
+hlp_fkt = 'fetch_admin_from_coord_google'
 try:
     import geocoder
 except:
-    logging.debug(
-        'You will not be able to use the helper function: {0}').format(hlp_fkt)
+    logging.info(
+        'You will not be able to use the helper function: {0}'.format(hlp_fkt))
+    logging.info('Install geocoder to use it.')
 
 
 def get_polygon_from_nuts(conn, nuts):
