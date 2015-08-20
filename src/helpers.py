@@ -146,6 +146,8 @@ def get_polygon_from_nuts(conn, nuts):
 
     """
     # TODO@Günni
+    if isinstance(nuts, str):
+        nuts = [nuts, 'xyz']
     logging.debug('Getting polygon from DB')
     sql = '''
         SELECT st_astext(ST_Transform(st_union(geom), 4326))
