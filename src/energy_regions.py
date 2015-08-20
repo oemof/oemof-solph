@@ -234,25 +234,27 @@ class region():
 
         # TODO @ Birgit, Caro
         # Nur temporär, damit es funktioniert. Wird ersetzt durch demandlib.
-        sql = 'select * from pahesmf_dat.heat_load order by hoy;'
+        sql = 'select * from pahesmf_dat.reegis_load_pot order by hoy;'
         table = conn.execute(sql)
 
         self.demand = pd.DataFrame(
             table.fetchall(), index=self._df.index, columns=table.keys())
-        self.demand.drop('hoy', inplace=True, axis=1)
+        self.demand.drop(['hoy', 'id', 'Biogas Cog unit', 'Gas Cog unit',
+                          'rwin_lk_wtb_2013', 'rpvo_lk_wtb_2013'],
+                         inplace=True, axis=1)
 
         # Spaltennamen brauchen dann aber weder das Jahr noch die Region
         # Können wir noch diskutieren, der Name ist noch vollkommen offen.
         self.demand.rename(columns={
-            'lk_wtb_tmgc_2013': 'oil_hs_0',
-            'lk_wtb_tgcb_2013': 'gas_cond_hs_0',
-            'lk_wtb_twcb_2013': 'wood_hs_0',
-            'lk_wtb_dst0_2013': 'distric_0',
-            'lk_wtb_thhp_2013': 'heat_pump_0',
+            'lk_wtb_2013': 'electrical',
+            'thoi_lk_wtb_2013': 'oil_hs_0',
+            'thng_lk_wtb_2013': 'gas_hs_0',
+            'twcb_lk_wtb_2013': 'wood_hs_0',
+            'dst0_lk_wtb_2013': 'distric_0',
             }, inplace=True)
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
-
+        # print(self.demand)
         return self
 
     def fetch_ee_feedin(self, conn, **site):
