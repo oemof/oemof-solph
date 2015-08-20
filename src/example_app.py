@@ -14,6 +14,7 @@ The energy system is build out of objects. It is solved and the results
 are written back into the objects.
 
 """
+import matplotlib.pyplot as plt
 from optimization_model import OptimizationModel
 from network.entities import Bus
 from network.entities.components import sinks as sink
@@ -116,6 +117,8 @@ om.solve(solver='gurobi', debug=True, tee=False,
 # write results to data frame for excel export
 
 components = transformers + renew_sources
+
+
 def excel_export(components):
     df = pd.DataFrame()
     writer = pd.ExcelWriter("results.xlsx")
@@ -138,11 +141,9 @@ def excel_export(components):
 
 
 if __name__ == "__main__":
-
     def plot_dispatch(bus_to_plot):
         # plotting: later as multiple pdf with pie-charts and topology?
         import numpy as np
-        import matplotlib.pyplot as plt
         import matplotlib as mpl
         import matplotlib.cm as cm
 
@@ -172,3 +173,4 @@ if __name__ == "__main__":
         ax.set_title('Dispatch')
 
     plot_dispatch('b_el')
+    plt.show()
