@@ -26,12 +26,12 @@ class OptimizationModel(po.ConcreteModel):
         self.entities = entities
         self.timesteps = timesteps
         self.invest = options.get("invest", False)
-        self.slack = options.get("slack", True)
+        self.slack = options.get("slack", {"excess": True,
+                                           "shortage": False})
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
                                      if isinstance(e, Component)])
-
         gc.generic_variables(model=self, edges=self.all_edges,
                              timesteps=self.timesteps)
 
@@ -40,7 +40,6 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
-
         # set attributes lists per class with objects and uids for opt model
         for cls in component_classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
@@ -53,8 +52,6 @@ class OptimizationModel(po.ConcreteModel):
 
         self.bus_model()
         self.objective()
-
-
 
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
@@ -75,12 +72,12 @@ class OptimizationModel(po.ConcreteModel):
         bus_uids = [obj.uid for obj in bus_objs]
 
         # slack variables that assures a feasible problem
-        if self.slack is True:
-            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
-                                         within=po.NonNegativeReals)
+        if self.slack["excess"] is True:
             self.excess_slack = po.Var(self.bus_uids, self.timesteps,
                                        within=po.NonNegativeReals)
-
+        if self.slack["shortage"] is True:
+            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
+                                         within=po.NonNegativeReals)
         I = {b.uid: [i.uid for i in b.inputs] for b in bus_objs}
         O = {b.uid: [o.uid for o in b.outputs] for b in bus_objs}
 
@@ -90,8 +87,10 @@ class OptimizationModel(po.ConcreteModel):
             expr = 0
             expr += -sum(self.w[e, o, t] for o in O[e])
             expr += sum(self.w[i, e, t] for i in I[e])
-            if self.slack is True:
-                expr += -self.excess_slack[e, t] + self.shortage_slack[e, t]
+            if self.slack["excess"] is True:
+                expr += -self.excess_slack[e, t]
+            if self.slack["shortage"] is True:
+                expr += self.shortage_slack[e, t]
             return(expr, 0)
         self.bus = po.Constraint(bus_uids, self.timesteps, rule=bus_rule)
 
@@ -121,8 +120,12 @@ class OptimizationModel(po.ConcreteModel):
                                   timesteps=self.timesteps)
 
         # set bounds for variables  models
-        gc.generic_w_ub(model=self, objs=objs, uids=uids,
-                        timesteps=self.timesteps)
+        if self.invest is False:
+            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+                            timesteps=self.timesteps)
+        else:
+            gc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
+                                   timesteps=self.timesteps)
 
     def simple_chp_model(self, objs, uids):
         """Simple chp model containing the constraints for simple chp
@@ -141,87 +144,9 @@ class OptimizationModel(po.ConcreteModel):
         # upper/lower bounds
         self.simple_transformer_model(objs=objs, uids=uids)
 
-        # set with output uids for every simple chp
-        # {'pp_chp': ['b_th', 'b_el']}
-        O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
-        # efficiencies for simple chps
-        eta = {obj.uid: obj.eta for obj in objs}
-
-        # additional constraint for power to heat ratio of simple chp comp:
-        # P/eta_el = Q/eta_th
-        def chp_rule(self, e, t):
-            expr = self.w[e, O[e][0], t] / eta[e][0]
-            expr += -self.w[e, O[e][1], t] / eta[e][1]
-            return(expr == 0)
-        self.simple_chp = po.Constraint(uids, self.timesteps, rule=chp_rule)
-
-    def simple_extraction_chp_model(self, objs, uids):
-        """Simple extraction chp model containing the constraints for
-        objects of class cp.SimpleExtractionCHP().
-
-        Parameters
-        ----------
-        self : pyomo.ConcreteModel
-
-        Returns
-        -------
-        self : pyomo.ConcreteModel
-
-        """
-        # {'pp_chp': 'gas'}
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-        # set with output uids for every simple chp
-        # {'pp_chp': ['b_th', 'b_el']}
-        O = {obj.uid: [o.uid for o in obj.outputs[:]]
-             for obj in objs}
-        k = {obj.uid: obj.k for obj in objs}
-        c = {obj.uid: obj.c for obj in objs}
-        beta = {obj.uid: obj.beta for obj in objs}
-        p = {obj.uid: obj.p for obj in objs}
-        out_min = {obj.uid: obj.out_min
-                   for obj in objs}
-
-        # constraint for transformer energy balance:
-        # 1) P <= p[0] - beta[0]*Q
-        def c1_rule(self, e, t):
-            expr = self.w[e, O[e][0], t]
-            rhs = p[e][0] - beta[e][0] * self.w[e, O[e][1], t]
-            return(expr <= rhs)
-        self.simple_extraction_chp_1 = \
-            po.Constraint(uids, self.timesteps,
-                          rule=c1_rule)
-
-        # 2) P = c[0] + c[1] * Q
-        def c2_rule(self, e, t):
-            expr = self.w[e, O[e][1], t]
-            rhs = (self.w[e, O[e][0], t] - c[e][0]) / c[e][1]
-            return(expr <= rhs)
-        self.simple_extraction_chp_2 = \
-            po.Constraint(uids, self.timesteps,
-                          rule=c2_rule)
-
-        # 3) P >= p[1] - beta[1]*Q
-        def c3_rule(self, e, t):
-            if out_min[e] > 0:
-                expr = self.w[e, O[e][0], t]
-                rhs = p[e][1] - beta[e][1] * self.w[e, O[e][1], t]
-                return(expr >= rhs)
-            else:
-                return(po.Constraint.Skip)
-        self.simple_extraction_chp_3 = \
-            po.Constraint(uids, self.timesteps,
-                          rule=c3_rule)
-
-        # H = k[0] + k[1]*P + k[2]*Q
-        def in_out_rule(self, e, t):
-            expr = 0
-            expr += self.w[I[e], e, t]
-            expr += - (k[e][0] + k[e][1]*self.w[e, O[e][0], t] +
-                       k[e][2]*self.w[e, O[e][1], t])
-            return(expr, 0)
-        self.simple_extraction_chp_io = \
-            po.Constraint(uids, self.timesteps,
-                          rule=in_out_rule)
+        # use generic constraint to model PQ relation (P/eta_el = Q/eta_th)
+        gc.generic_chp_constraint(model=self, objs=objs, uids=uids,
+                                  timesteps=self.timesteps)
 
     def fixed_source_model(self, objs, uids):
         """fixed source model containing the constraints for
@@ -275,37 +200,30 @@ class OptimizationModel(po.ConcreteModel):
         m : pyomo.ConcreteModel
         """
 
-        O = {obj.uid: obj.outputs[0].uid for obj in objs}
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-
         # set bounds for basic/investment models
         if(self.invest is False):
-            ee = self.edges(objs)
-            # installed input/output capacity
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    self.w[e1, e2, t].setub(10)
-                    self.w[e1, e2, t].setlb(1)
+            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+                            timesteps=self.timesteps)
         else:
-            # constraint for additional capacity in investment models
-            def invest_rule(self, e, t):
-                return(self.soc_v[e, t] <= self.soc_max[e] + self.soc_add_v[e])
-            self.soc_max_c = po.Constraint(uids, self.timesteps,
-                                           rule=invest_rule)
+            gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
+                                     timesteps=self.timesteps)
+
+        O = {obj.uid: obj.outputs[0].uid for obj in objs}
+        I = {obj.uid: obj.inputs[0].uid for obj in objs}
 
         # storage energy balance
         def storage_balance_rule(self, e, t):
             if(t == 0):
                 expr = 0
-                expr += self.soc_v[e, t]
+                expr += self.soc[e, t]
                 return(expr, 0)
             else:
-                expr = self.soc_v[e, t]
-                expr += - self.soc_v[e, t-1] - self.w[I[e], e, t] + \
+                expr = self.soc[e, t]
+                expr += - self.soc[e, t-1] - self.w[I[e], e, t] + \
                     self.w[e, O[e], t]
                 return(expr, 0)
-            self.simple_storage_c = po.Constraint(uids, self.timesteps,
-                                                  rule=storage_balance_rule)
+        self.simple_storage_c = po.Constraint(uids, self.timesteps,
+                                              rule=storage_balance_rule)
 
     def simple_transport_model(self, objs, uids):
         """Simple transport model building the constraints
@@ -336,22 +254,38 @@ class OptimizationModel(po.ConcreteModel):
         """
 
         # create a combine list of all cost-related components
-        objective_objs = (
+        cost_objs = (
             self.simple_chp_objs +
             self.simple_transformer_objs +
             self.simple_storage_objs +
             self.simple_transport_objs)
 
-        self.objective_uids = (
-            self.simple_chp_uids +
-            self.simple_transformer_uids +
-            self.simple_transport_uids)
+        self.cost_uids = {obj.uid for obj in cost_objs}
 
-        I = {obj.uid: obj.inputs[0].uid for obj in objective_objs}
+        I = {obj.uid: obj.inputs[0].uid for obj in cost_objs}
+
+        # create a combined list of all revenue related components
+        revenue_objs = (
+            self.simple_chp_objs +
+            self.simple_transformer_objs)
+
+        self.revenue_uids = {obj.uid for obj in revenue_objs}
+
+        O = {obj.uid: obj.outputs[0].uid for obj in revenue_objs}
+
         # operational costs
-        self.opex_var = {obj.uid: obj.opex_var for obj in objective_objs}
-        self.fuel_costs = {obj.uid: obj.inputs[0].price
-                           for obj in objective_objs}
+        self.opex_var = {obj.uid: obj.opex_var for obj in cost_objs}
+        self.input_costs = {obj.uid: obj.inputs[0].price
+                            for obj in cost_objs}
+
+        self.output_revenues = {}
+        for obj in revenue_objs:
+            if isinstance(obj.outputs[0].price, (float, int)):
+                price = [obj.outputs[0].price] * len(self.timesteps)
+                self.output_revenues[obj.uid] = price
+            else:
+                self.output_revenues[obj.uid] = obj.outputs[0].price
+
         # get dispatch expenditure for renewable energies with dispatch
         self.dispatch_ex = {obj.uid: obj.dispatch_ex
                             for obj in self.dispatch_source_objs}
@@ -359,20 +293,31 @@ class OptimizationModel(po.ConcreteModel):
         # objective function
         def obj_rule(self):
             expr = 0
+            # costs for inputs of components
             expr += sum(self.w[I[e], e, t] * (self.opex_var[e] +
-                                              self.fuel_costs[e])
-                        for e in self.objective_uids
-                        for t in self.timesteps)
-            if self.slack is True:
-                expr += sum(self.shortage_slack[e, t] * 10e10
+                                              self.input_costs[e])
+                        for e in self.cost_uids for t in self.timesteps)
+
+            # revenues from outputs of components
+            expr += - sum(self.w[e, O[e], t] * self.output_revenues[e][t]
+                          for e in self.revenue_uids for t in self.timesteps)
+
+            # dispatch costs
+            if self.dispatch_source_objs:
+                expr += sum(self.dispatch[e, t] * self.dispatch_ex[e]
+                            for e in self.dispatch_source_uids
+                            for t in self.timesteps)
+
+            if self.slack["excess"] is True:
+                expr += sum(self.excess_slack[e, t] * 3000
+                            for e in self.bus_uids for t in self.timesteps)
+            if self.slack["shortage"] is True:
+                expr += sum(self.shortage_slack[e, t] * 3000
                             for e in self.bus_uids for t in self.timesteps)
 
-            expr += sum(self.dispatch[e, t] * self.dispatch_ex[e]
-                        for e in self.dispatch_source_uids
-                        for t in self.timesteps)
             # add additional capacity & capex for investment models
             if(self.invest is True):
-                self.capex = {obj.uid: obj.capex for obj in objective_objs}
+                self.capex = {obj.uid: obj.capex for obj in cost_objs}
 
                 expr += sum(self.add_cap[I[e], e] * self.capex[e]
                             for e in self.objective_uids)
@@ -382,7 +327,7 @@ class OptimizationModel(po.ConcreteModel):
         self.objective = po.Objective(rule=obj_rule)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
-              results_to_objects=True, **kwargs):
+              results_to_objects=True, duals=False, **kwargs):
         """Method that creates the instance of the model and solves it.
 
         Parameters
@@ -406,6 +351,13 @@ class OptimizationModel(po.ConcreteModel):
         # create model instance
         instance = self.create()
 
+        # Create a 'dual' suffix component on the instance
+        # so the solver plugin will know which suffixes to collect
+        if duals is True:
+            # dual variables
+            self.dual = po.Suffix(direction=po.Suffix.IMPORT)
+            # reduced costs
+            self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if(debug is True):
             instance.write('problem.lp',
@@ -419,9 +371,17 @@ class OptimizationModel(po.ConcreteModel):
         # load results back in instance
         instance.load(results)
 
+        # store dual variables for bus-balance constraints (el and th)
+        if duals is True:
+            for b in self.bus_objs:
+                if b.type == "el" or b.type == "th":
+                    b.results["duals"] = []
+                    for t in self.timesteps:
+                        b.results["duals"].append(
+                            self.dual[getattr(self, "bus")[(b.uid, t)]])
+
         if results_to_objects is True:
             for entity in self.entities:
-
                 if (isinstance(entity, cp.Transformer) or
                         isinstance(entity, cp.Source)):
                     # write outputs
@@ -439,6 +399,13 @@ class OptimizationModel(po.ConcreteModel):
                             entity.results['in'][i].append(
                                 self.w[i, entity.uid, t].value)
 
+                if isinstance(entity, cp.sources.DispatchSource):
+                    entity.results['in'][entity.uid] = []
+                    for t in self.timesteps:
+                        entity.results['in'][entity.uid].append(
+                            self.w[entity.uid,
+                                   entity.outputs[0].uid, t].bounds[1])
+
                 # write results to self.simple_sink_objs
                 # (will be the value of simple sink in general)
                 if isinstance(entity, cp.Sink):
@@ -447,6 +414,11 @@ class OptimizationModel(po.ConcreteModel):
                     for t in self.timesteps:
                         entity.results['in'][i].append(
                             self.w[i, entity.uid, t].value)
+                if isinstance(entity, cp.transformers.Storage):
+                    entity.results['soc'] = []
+                    for t in self.timesteps:
+                        entity.results['soc'].append(
+                            self.soc[entity.uid, t].value)
 
             if(self.invest is True):
                 for entity in self.entities:
@@ -489,8 +461,6 @@ class OptimizationModel(po.ConcreteModel):
                 ej = (c.uid, o.uid)
                 edges.append(ej)
         return(edges)
-
-
 
 
 def io_sets(components):
