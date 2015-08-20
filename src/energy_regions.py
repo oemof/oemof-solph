@@ -170,7 +170,8 @@ class region():
             columns=['weekday', 'hour', 'date'])
 
         if self.place is None:
-            self.place = self.fetch_admin_from_coord(self.centroid().coords[0])
+            self.place = self.fetch_admin_from_coord(
+                self.centroid().coords[0]).place
 
         holidays = helpers.get_german_holidays(self.year, self.place)
 
@@ -196,7 +197,7 @@ class region():
         :param zoom: detail level of information
         :return: list: [country, state]
         """
-        print(coord)
+
         try:
             self.place = helpers.fetch_admin_from_coord_osm(coord)
         except:
@@ -217,16 +218,16 @@ class region():
         'Returns the centroid of the given geometry as a shapely point-object.'
         return self.geometry.centroid
 
-    def get_weather_raster(self, conn):
+    def fetch_weather_raster(self, conn):
         self.weather = w.Weather(conn, self.geometry, self.year)
         return self
 
-    def get_power_plants(self, conn):
+    def fetch_power_plants(self, conn):
         self.power_plants = pp.Power_Plants().get_all_power_plants(
             conn, self.geometry)
         return self
 
-    def get_ee_feedin(self, conn, **site):
+    def fetch_ee_feedin(self, conn, **site):
         wind_model = models.WindPowerPlant(required=[])
         pv_model = models.Photovoltaic(required=[])
         site['connection'] = conn
@@ -308,5 +309,4 @@ class region():
     def state(self):
         if self.place is None:
             self.fetch_admin_from_coord(self.centroid().coords[0])
-        print(self.place)
         return helpers.abbreviation_of_state(self.place[1])
