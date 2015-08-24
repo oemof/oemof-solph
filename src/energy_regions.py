@@ -126,6 +126,8 @@ class region():
         self._df = None
         self.tz = kwargs.get('tz', None)
         self.connection = kwargs.get('conn', None)
+        self.power_plants = {}
+
 
     def create_basic_dataframe(self, conn=None):
         r"""Giving back a DataFrame containing weekdays and holidays for the
@@ -225,9 +227,14 @@ class region():
         self.weather = w.Weather(conn, self.geometry, self.year)
         return self
 
-    def fetch_power_plants(self, conn):
-        self.power_plants = pp.Power_Plants().get_all_power_plants(
-            conn, self.geometry)
+    def fetch_ee_plants(self, conn):
+        self.power_plants['re'] = (
+            pp.Power_Plants().get_all_re_power_plants(conn, self.geometry))
+        return self
+
+    def fetch_fossil_power_plants(self, conn):
+        self.power_plants['fossil'] = (
+            pp.Power_Plants().get_all_fossil_power_plants(conn, self.geometry))
         return self
 
     def fetch_demand_series(self, conn):
@@ -253,7 +260,7 @@ class region():
             'thoi_lk_wtb_2013': 'oil_hs_0',
             'thng_lk_wtb_2013': 'gas_hs_0',
             'twcb_lk_wtb_2013': 'wood_hs_0',
-            'dst0_lk_wtb_2013': 'distric_0',
+            'dst0_lk_wtb_2013': 'district_0',
             }, inplace=True)
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
@@ -267,13 +274,20 @@ class region():
         site['tz'] = self.weather.tz
         pv_df = 0
         wind_df = 0
+        if self.power_plants.get('re', None) is None:
+            self.power_plants['re'] = (
+                pp.Power_Plants().get_empty_power_plant_df())
+
         for gid in self.weather.grouped_by_gid().keys():
             # Get the geometry for the given weather raster field
             tmp_geom = self.weather.get_geometry_from_gid(gid)
 
             # Get all Power Plants for raster field
-            ee_pp = pp.Power_Plants().get_all_ee_power_plants(
+            ee_pp = pp.Power_Plants().get_all_re_power_plants(
                 conn, tmp_geom, self.geometry)
+
+            self.power_plants['re'] = pd.concat(
+                [ee_pp, self.power_plants['re']], ignore_index=True)
 
             site['weather'] = self.weather
             site['gid'] = gid
