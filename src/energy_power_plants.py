@@ -18,6 +18,8 @@ class Power_Plants:
         self.plants = None
         self.columns = ['type', 'subtype', 'p_kw_peak']
 
+    def get_empty_power_plant_df(self):
+        return pd.DataFrame(columns=self.columns)
 
     def get_all_power_plants(self, conn, geometry):
         self.plants = self.get_all_ee_power_plants(conn, geometry)
