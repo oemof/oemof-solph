@@ -122,6 +122,7 @@ class region():
         self.demand = None  # self.create_basic_dataframe()
         self.weather = None
         self.name = kwargs.get('name', 'No name')
+        self._code = kwargs.get('code', None)
         self._df = None
         self.tz = kwargs.get('tz', None)
         self.connection = kwargs.get('conn', None)
@@ -351,6 +352,15 @@ class region():
         ax.set_xlim(self.geometry.bounds[0], self.geometry.bounds[2])
         ax.set_ylim(self.geometry.bounds[1], self.geometry.bounds[3])
         fig.suptitle(self.name, fontsize='20')
+
+    @property
+    def code(self):
+        if self._code is None:
+            name_parts = self.name.replace('_', ' ').split(' ', 1)
+            self._code = ''
+            for part in name_parts:
+                self._code += part[:1].upper() + part[1:3]
+        return self._code
 
     @property
     def df(self):
