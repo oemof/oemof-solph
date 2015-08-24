@@ -7,6 +7,7 @@ Created on Mon Jul 20 15:53:14 2015
 import logging
 import pandas as pd
 import calendar
+import pickle
 
 from . import helpers
 from . import energy_weather as w
@@ -16,6 +17,7 @@ from . import models
 
 from matplotlib import pyplot as plt
 from descartes import PolygonPatch
+import os.path as path
 
 
 class region():
@@ -302,6 +304,37 @@ class region():
         df = pd.concat([pv_df.sum(axis=1), wind_df.sum(axis=1)], axis=1)
         self.feedin = df.rename(columns={0: 'pv_pwr', 1: 'wind_pwr'})
         return self
+
+    def dump(self, dpath=None, filename=None):
+        ''
+
+        # Remove database connections, which cannot be dumped.
+        self.connection = None
+        self.weather.connection = None
+
+        if dpath is None:
+            dpath = path.join(path.expanduser("~"), '.oemof')
+
+        if filename is None:
+            filename = self.name + '.oemof'
+
+        pickle.dump(self.__dict__, open(path.join(dpath, filename), 'wb'))
+
+        return('Attributes dumped to: {0}'.format(path.join(dpath, filename)))
+
+    def restore(self, conn=None, dpath=None, filename=None):
+        ''
+        if dpath is None:
+            dpath = path.join(path.expanduser("~"), '.oemof')
+
+        if filename is None:
+            filename = self.name + '.oemof'
+
+        self.__dict__ = pickle.load(open(path.join(dpath, filename), "rb"))
+
+        if conn is not None:
+            self.connection = conn
+            self.weather.connection = conn
 
     def plot(self):
         'Simple plot to check the geometry'
