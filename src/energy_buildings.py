@@ -22,13 +22,13 @@ class electric_building():
             kwargs['annual_elec_demand'])
         self.profile_type = kwargs['selp_type']
         
-        if kwargs['annual_elec_demand'] = True:
+        if kwargs['annual_elec_demand'] == True:
             self.annual_demand = kwargs['annual_elec_demand']
         else:
             self.calculate_annual_demand
             
             
-    def calculate_annual_demand:
+    def calculate_annual_demand():
         '''
         calculate annual demand from statistic data
         '''
