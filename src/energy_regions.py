@@ -128,7 +128,6 @@ class region():
         self.connection = kwargs.get('conn', None)
         self.power_plants = {}
 
-
     def create_basic_dataframe(self, conn=None):
         r"""Giving back a DataFrame containing weekdays and holidays for the
         given year and region.
@@ -257,10 +256,10 @@ class region():
         # Können wir noch diskutieren, der Name ist noch vollkommen offen.
         self.demand.rename(columns={
             'lk_wtb_2013': 'electrical',
-            'thoi_lk_wtb_2013': 'oil_hs_0',
+            'thoi_lk_wtb_2013': 'district_0',
             'thng_lk_wtb_2013': 'gas_hs_0',
             'twcb_lk_wtb_2013': 'wood_hs_0',
-            'dst0_lk_wtb_2013': 'district_0',
+            'dst0_lk_wtb_2013': 'oil_hs_0',
             }, inplace=True)
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
