@@ -6,7 +6,10 @@ Created on Mon Jul 20 10:27:00 2015
 """
 
 import pyomo.environ as po
-import network.entities.components as cp
+try:
+    from network.entities import components as cp
+except:
+    from .network.entities import components as cp
 
 
 def generic_variables(model, edges, timesteps, var_name="w"):

@@ -1,7 +1,12 @@
 import pyomo.environ as po
-import generic as gc
-from network.entities import Bus, Component
-import network.entities.components as cp
+try:
+    import generic as gc
+    from network.entities import Bus, Component
+    from network.entities import components as cp
+except:
+    from . import generic as gc
+    from .network.entities import Bus, Component
+    from .network.entities import components as cp
 
 
 class OptimizationModel(po.ConcreteModel):
