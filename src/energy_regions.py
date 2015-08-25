@@ -11,6 +11,7 @@ import calendar
 from . import helpers
 from . import energy_weather as w
 from . import energy_power_plants as pp
+from . import energy_buildings as eb
 from . import powerplants as plants
 from . import models
 
