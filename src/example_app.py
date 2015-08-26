@@ -116,6 +116,8 @@ om.solve(solver='gurobi', debug=True, tee=False,
 # write results to data frame for excel export
 
 components = transformers + renew_sources
+
+
 def excel_export(components):
     df = pd.DataFrame()
     writer = pd.ExcelWriter("results.xlsx")
