@@ -159,7 +159,6 @@ if __name__ == "__main__":
                 y.append(c.results['out'][bus_to_plot])
                 labels.append(c.uid)
 
-
         # plotting
         fig, ax = plt.subplots()
         sp = ax.stackplot(x, y,
