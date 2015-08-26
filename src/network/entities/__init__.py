@@ -21,6 +21,7 @@ class Bus(Entity):
         self.price = kwargs.get("price", 0)
         self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
         self.emission_factor = kwargs.get("emission_factor", 0)
+        self.results = {}
 
 
 class Component(Entity):

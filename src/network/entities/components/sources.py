@@ -1,4 +1,4 @@
-from network.entities.components import Source
+from . import Source
 
 
 class FixedSource(Source):

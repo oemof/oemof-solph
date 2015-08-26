@@ -7,6 +7,7 @@ Created on Mon Jul 20 15:53:14 2015
 import logging
 import pandas as pd
 import calendar
+import pickle
 
 from . import helpers
 from . import energy_weather as w
@@ -17,6 +18,7 @@ from . import models
 
 from matplotlib import pyplot as plt
 from descartes import PolygonPatch
+import os.path as path
 
 
 class region():
@@ -121,9 +123,11 @@ class region():
         self.demand = None  # self.create_basic_dataframe()
         self.weather = None
         self.name = kwargs.get('name', 'No name')
+        self._code = kwargs.get('code', None)
         self._df = None
         self.tz = kwargs.get('tz', None)
         self.connection = kwargs.get('conn', None)
+        self.power_plants = {}
 
     def create_basic_dataframe(self, conn=None):
         r"""Giving back a DataFrame containing weekdays and holidays for the
@@ -223,9 +227,14 @@ class region():
         self.weather = w.Weather(conn, self.geometry, self.year)
         return self
 
-    def fetch_power_plants(self, conn):
-        self.power_plants = pp.Power_Plants().get_all_power_plants(
-            conn, self.geometry)
+    def fetch_ee_plants(self, conn):
+        self.power_plants['re'] = (
+            pp.Power_Plants().get_all_re_power_plants(conn, self.geometry))
+        return self
+
+    def fetch_fossil_power_plants(self, conn):
+        self.power_plants['fossil'] = (
+            pp.Power_Plants().get_all_fossil_power_plants(conn, self.geometry))
         return self
 
     def fetch_demand_series(self, conn):
@@ -248,14 +257,14 @@ class region():
         # Können wir noch diskutieren, der Name ist noch vollkommen offen.
         self.demand.rename(columns={
             'lk_wtb_2013': 'electrical',
-            'thoi_lk_wtb_2013': 'oil_hs_0',
+            'thoi_lk_wtb_2013': 'district_0',
             'thng_lk_wtb_2013': 'gas_hs_0',
             'twcb_lk_wtb_2013': 'wood_hs_0',
-            'dst0_lk_wtb_2013': 'distric_0',
+            'dst0_lk_wtb_2013': 'oil_hs_0',
             }, inplace=True)
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
-        # print(self.demand)
+
         return self
 
     def fetch_ee_feedin(self, conn, **site):
@@ -265,13 +274,20 @@ class region():
         site['tz'] = self.weather.tz
         pv_df = 0
         wind_df = 0
+        if self.power_plants.get('re', None) is None:
+            self.power_plants['re'] = (
+                pp.Power_Plants().get_empty_power_plant_df())
+
         for gid in self.weather.grouped_by_gid().keys():
             # Get the geometry for the given weather raster field
             tmp_geom = self.weather.get_geometry_from_gid(gid)
 
             # Get all Power Plants for raster field
-            ee_pp = pp.Power_Plants().get_all_ee_power_plants(
+            ee_pp = pp.Power_Plants().get_all_re_power_plants(
                 conn, tmp_geom, self.geometry)
+
+            self.power_plants['re'] = pd.concat(
+                [ee_pp, self.power_plants['re']], ignore_index=True)
 
             site['weather'] = self.weather
             site['gid'] = gid
@@ -304,6 +320,37 @@ class region():
         self.feedin = df.rename(columns={0: 'pv_pwr', 1: 'wind_pwr'})
         return self
 
+    def dump(self, dpath=None, filename=None):
+        ''
+
+        # Remove database connections, which cannot be dumped.
+        self.connection = None
+        self.weather.connection = None
+
+        if dpath is None:
+            dpath = path.join(path.expanduser("~"), '.oemof')
+
+        if filename is None:
+            filename = self.name + '.oemof'
+
+        pickle.dump(self.__dict__, open(path.join(dpath, filename), 'wb'))
+
+        return('Attributes dumped to: {0}'.format(path.join(dpath, filename)))
+
+    def restore(self, conn=None, dpath=None, filename=None):
+        ''
+        if dpath is None:
+            dpath = path.join(path.expanduser("~"), '.oemof')
+
+        if filename is None:
+            filename = self.name + '.oemof'
+
+        self.__dict__ = pickle.load(open(path.join(dpath, filename), "rb"))
+
+        if conn is not None:
+            self.connection = conn
+            self.weather.connection = conn
+
     def plot(self):
         'Simple plot to check the geometry'
         BLUE = '#6699cc'
@@ -319,6 +366,15 @@ class region():
         ax.set_xlim(self.geometry.bounds[0], self.geometry.bounds[2])
         ax.set_ylim(self.geometry.bounds[1], self.geometry.bounds[3])
         fig.suptitle(self.name, fontsize='20')
+
+    @property
+    def code(self):
+        if self._code is None:
+            name_parts = self.name.replace('_', ' ').split(' ', 1)
+            self._code = ''
+            for part in name_parts:
+                self._code += part[:1].upper() + part[1:3]
+        return self._code
 
     @property
     def df(self):

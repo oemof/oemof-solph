@@ -1,4 +1,4 @@
-from network.entities.components import Sink
+from . import Sink
 
 
 class Simple(Sink):

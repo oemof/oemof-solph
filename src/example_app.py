@@ -14,6 +14,7 @@ The energy system is build out of objects. It is solved and the results
 are written back into the objects.
 
 """
+import matplotlib.pyplot as plt
 from optimization_model import OptimizationModel
 from network.entities import Bus
 from network.entities.components import sinks as sink
@@ -46,13 +47,13 @@ b_th = Bus(uid="b_th", type="th")
 dispatch_flag = False
 # renewable sources (only pv onshore)
 wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el], val=data['wind'],
-                             out_max=66300, dispatch_ex = 10)
+                                out_max={b_el.uid: 66300}, dispatch_ex=10)
 wind_on2 = source.DispatchSource(uid="wind_on2", outputs=[b_el2],
-                              val=data['wind'], out_max=66300)
+                                 val=data['wind'], out_max={b_el2.uid: 66300})
 wind_off = source.DispatchSource(uid="wind_off", outputs=[b_el],
-                                 val=data['wind'], out_max=25300)
+                                 val=data['wind'], out_max={b_el.uid: 25300})
 pv = source.DispatchSource(uid="pv", outputs=[b_el], val=data['pv'],
-                        out_max=65300)
+                           out_max={b_el.uid: 65300})
 
 # demands
 demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
@@ -64,15 +65,15 @@ demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
 # Simple Transformer for b_el
 pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
                              in_max={bcoal.uid: None},
-                             out_max={b_el.uid: 20200}, eta= [0.39],
+                             out_max={b_el.uid: 20200}, eta=[0.39],
                              opex_var=25, co2_var=em_coal)
 pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
                             in_max= {blig.uid: None},
-                            out_max= {b_el.uid: 11800}, eta= [0.41],
+                            out_max= {b_el.uid: 11800}, eta=[0.41],
                             opex_var=19, co2_var=em_lig)
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
                             in_max= {bgas.uid: None},
-                            out_max= {b_el.uid: 41000}, eta= [0.45],
+                            out_max= {b_el.uid: 41000}, eta=[0.45],
                             opex_var=45, co2_var=em_lig)
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
@@ -107,13 +108,17 @@ components = transformers + renew_sources + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'slack': True})
+                       options={'invest': False, 'slack': {
+                           'excess': True, 'shortage': True}})
 
-om.solve(solver='gurobi', debug=True, tee=False, results_to_objects=True)
+om.solve(solver='gurobi', debug=True, tee=False,
+         results_to_objects=True, duals=True)
 
 # write results to data frame for excel export
 
 components = transformers + renew_sources
+
+
 def excel_export(components):
     df = pd.DataFrame()
     writer = pd.ExcelWriter("results.xlsx")
@@ -136,11 +141,9 @@ def excel_export(components):
 
 
 if __name__ == "__main__":
-
     def plot_dispatch(bus_to_plot):
         # plotting: later as multiple pdf with pie-charts and topology?
         import numpy as np
-        import matplotlib.pyplot as plt
         import matplotlib as mpl
         import matplotlib.cm as cm
 
@@ -170,3 +173,4 @@ if __name__ == "__main__":
         ax.set_title('Dispatch')
 
     plot_dispatch('b_el')
+    plt.show()
