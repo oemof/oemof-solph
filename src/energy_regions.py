@@ -228,7 +228,7 @@ class region():
             conn, self.geometry)
         return self
 
-def fetch_demand_series(self, conn):
+    def fetch_demand_series(self, conn):
         ''
         if self._df is None:
             self.create_basic_dataframe(conn=conn)
