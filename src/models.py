@@ -188,7 +188,7 @@ class WindPowerPlant():
 
     def get_wind_pp_types(self, conn):
         # TODO@Günni
-        sql = 'SELECT rli_anlagen_id, p_nenn FROM ee_komponenten.wea_cpcurves;'
+        sql = 'SELECT rli_anlagen_id, p_nenn FROM oemof_test.wea_cpcurves;'
         df = pd.DataFrame(conn.execute(sql).fetchall(), columns=[
             'type', 'p_peak']).sort(columns='type').reset_index(drop=True)
         pd.set_option('display.max_rows', len(df))
@@ -229,7 +229,7 @@ class WindPowerPlant():
         data obtained from the power curve of the specified wind turbine type.
         '''
         # TODO@Günni
-        sql = '''SELECT * FROM ee_komponenten.wea_cpcurves
+        sql = '''SELECT * FROM oemof_test.wea_cpcurves
             WHERE rli_anlagen_id = '{0}'
             '''.format(kwargs['wka_model'])
         ncols = ['rli_anlagen_id', 'p_nenn', 'source', 'modificationtimestamp']
