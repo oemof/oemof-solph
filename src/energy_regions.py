@@ -243,14 +243,12 @@ class region():
 
         # TODO @ Birgit, Caro
         # Nur temporär, damit es funktioniert. Wird ersetzt durch demandlib.
-        sql = 'select * from pahesmf_dat.reegis_load_pot order by hoy;'
+        sql = 'select * from oemof_test.demand_test order by id;'
         table = conn.execute(sql)
 
         self.demand = pd.DataFrame(
             table.fetchall(), index=self._df.index, columns=table.keys())
-        self.demand.drop(['hoy', 'id', 'Biogas Cog unit', 'Gas Cog unit',
-                          'rwin_lk_wtb_2013', 'rpvo_lk_wtb_2013'],
-                         inplace=True, axis=1)
+        self.demand.drop(['id'], inplace=True, axis=1)
 
         # Spaltennamen brauchen dann aber weder das Jahr noch die Region
         # Können wir noch diskutieren, der Name ist noch vollkommen offen.

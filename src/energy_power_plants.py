@@ -31,7 +31,7 @@ class Power_Plants:
         # TODO@Günni
         sql = """
             SELECT anlagentyp, anuntertyp, p_nenn_kwp
-            FROM deutschland.eeg_03_2013 as ee
+            FROM oemof_test.energy_map as ee
             WHERE st_contains(ST_GeomFromText('{wkt}',4326), ee.geom)
             """.format(wkt=geometry1.wkt)
 
@@ -47,7 +47,7 @@ class Power_Plants:
         # TODO@Günni
         sql = """
             SELECT auswertung, ersatzbrennstoff, el_nennleistung
-            FROM vn.geo_power_plant_bnetza_2014 as pp
+            FROM oemof_test.geo_power_plant_bnetza_2014 as pp
             WHERE st_contains(
             ST_GeomFromText('{wkt}',4326), ST_Transform(pp.geom, 4326))
             """.format(wkt=geometry.wkt)

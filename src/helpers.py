@@ -473,7 +473,7 @@ def tz_from_geom(connection, geometry):
     else:
         coords = geometry
     sql = """
-        SELECT tzid FROM world.tz_world
+        SELECT tzid FROM oemof_test.tz_world
         WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
         """.format(wkt=coords.wkt)
     return connection.execute(sql).fetchone()[0]
