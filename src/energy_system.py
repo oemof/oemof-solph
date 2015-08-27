@@ -112,5 +112,7 @@ class region2solph():
 
     """
 
-    def __init__(self, year, geometry, **kwargs):
-        pass
+    def __init__(self, **kwargs):
+        ''
+        self.regions = kwargs.get('regions', None)  # list of region objects
+        self.multi_geom
