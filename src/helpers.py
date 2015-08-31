@@ -490,4 +490,12 @@ def tz_from_geom(connection, geometry):
         SELECT tzid FROM oemof_test.tz_world
         WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
         """.format(wkt=coords.wkt)
-    return connection.execute(sql).fetchone()[0]
+    timezone = connection.execute(sql).fetchone()
+    if timezone is not None:
+        timezone = timezone[0]
+    else:
+        timezone = 'Europe/Berlin'
+        logging.error("Timezonefunction doesn't work for offshore regions.")
+        logging.warning("Set timezone to {0} to avoid further errors".format(
+            timezone))
+    return timezone
