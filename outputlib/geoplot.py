@@ -8,8 +8,6 @@ numpy, matplotlib, basemap and psycopg2
 '''
 import matplotlib.pyplot as plt
 import sys
-#from oemof.dblib import basic_pg as bdb
-#from oemof.dblib import read_data_pg as rdb
 import numpy as np
 from os.path import expanduser
 from matplotlib.collections import LineCollection
@@ -117,8 +115,8 @@ def fetch_geometries(main_dt):
         sql += order_str
 
         # Reads the geometry and the id and writes it to the 'geom'-key
-        main_dt['geo_tables'][key]['geom'] = rdb.execute_read_db(
-            main_dt['db'], sql.format(**main_dt['geo_tables'][key]))
+        main_dt['geo_tables'][key]['geom'] = main_dt['conn'].execute(
+            sql.format(**main_dt['geo_tables'][key])).fetchall()
 
 
 def create_vectors_multipolygon(main_dt, multipolygon):
@@ -687,8 +685,6 @@ def gplot(main_dt):
 
         geo.gplot(main_dt)
     """
-    main_dt['db'] = bdb.get_db_dict()
-
     # Sets the default values
     set_default_values(main_dt)
 
