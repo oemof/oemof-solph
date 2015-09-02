@@ -317,12 +317,15 @@ class region():
         self.feedin = df.rename(columns={0: 'pv_pwr', 1: 'wind_pwr'})
         return self
 
-    def dump(self, dpath=None, filename=None):
+    def dump(self, dpath=None, filename=None, keep_weather=True):
         ''
 
         # Remove database connections, which cannot be dumped.
         self.connection = None
-        self.weather.connection = None
+        if keep_weather:
+            self.weather.connection = None
+        else:
+            self.weather = None
 
         if dpath is None:
             dpath = path.join(path.expanduser("~"), '.oemof')
