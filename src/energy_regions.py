@@ -297,6 +297,7 @@ class region():
             wind_power_plant = plants.WindPowerPlant(
                 wind_peak_power, model=wind_model)
             wind_series = wind_power_plant.feedin_as_pd(**site)
+            wind_series.name = gid
 
             # PV
             pv_peak_power = ee_pp[ee_pp.type == 'Solarstrom'].p_kw_peak.sum()
@@ -311,6 +312,20 @@ class region():
             except:
                 pv_df = pv_series.to_frame()
                 wind_df = wind_series.to_frame()
+
+        if site.get('store'):
+            dpath = site.get(
+                'dpath', path.join(path.expanduser("~"), '.oemof'))
+            filename = site.get('filename', self.name)
+            fullpath = path.join(dpath, filename)
+
+            if site['store'] == 'hf5':
+                pv_df.to_hdf(fullpath + '.hf5', 'pv_pwr')
+                wind_df.to_hdf(fullpath + '.hf5', 'wind_pwr')
+
+            if site['store'] == 'csv':
+                pv_df.to_csv(fullpath + '_pv.csv')
+                wind_df.to_csv(fullpath + '_wind.csv')
 
         # Summerize the results to one column for pv and one for wind
         df = pd.concat([pv_df.sum(axis=1), wind_df.sum(axis=1)], axis=1)
