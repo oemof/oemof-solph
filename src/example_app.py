@@ -87,10 +87,18 @@ pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
                          eta= [0.4, 0.3],
                          co2_var=em_gas)
 
+# storage
+sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
+                                 outputs=[b_el], in_max={b_el.uid: 100000},
+                                 out_max={b_el.uid: 200000},
+                                 soc_max=700000, soc_min=0, eta_in=[0.8],
+                                 eta_out=[0.8], cap_loss=None, co2_var=None)
+
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
                           in_max= {b_el.uid: 10000},
                           out_max= {b_el2.uid: 9000}, eta= [0.9])
+
 cable2 = transport.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
                           in_max= {b_el2.uid: 10000}, out_max= {b_el.uid: 8000},
                           eta= [0.8])
@@ -101,10 +109,11 @@ buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
 # group components
 transformers = [pp_coal, pp_lig, pp_gas, pp_oil, pp_chp]
 renew_sources = [pv, wind_on, wind_on2, wind_off]
+storages = [sto_simple]
 sinks = [demand_th, demand_el, demand_el2]
 transports = [cable1, cable2]
 
-components = transformers + renew_sources + sinks + transports
+components = transformers + renew_sources + storages + sinks + transports
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
@@ -147,7 +156,7 @@ if __name__ == "__main__":
         import matplotlib as mpl
         import matplotlib.cm as cm
 
-        plot_data = renew_sources+transformers+transports
+        plot_data = renew_sources+storages+transformers+transports
 
         # data preparation
         x = np.arange(len(timesteps))
