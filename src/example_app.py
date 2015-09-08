@@ -44,7 +44,6 @@ b_el = Bus(uid="b_el", type="el")
 b_el2 = Bus(uid="b_el2", type="el")
 b_th = Bus(uid="b_th", type="th")
 
-dispatch_flag = False
 # renewable sources (only pv onshore)
 wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el], val=data['wind'],
                                 out_max={b_el.uid: 66300}, dispatch_ex=10)
@@ -68,23 +67,23 @@ pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
                              out_max={b_el.uid: 20200}, eta=[0.39],
                              opex_var=25, co2_var=em_coal)
 pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
-                            in_max= {blig.uid: None},
-                            out_max= {b_el.uid: 11800}, eta=[0.41],
+                            in_max={blig.uid: None},
+                            out_max={b_el.uid: 11800}, eta=[0.41],
                             opex_var=19, co2_var=em_lig)
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            in_max= {bgas.uid: None},
-                            out_max= {b_el.uid: 41000}, eta=[0.45],
+                            in_max={bgas.uid: None},
+                            out_max={b_el.uid: 41000}, eta=[0.45],
                             opex_var=45, co2_var=em_lig)
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
-                            in_max= {boil.uid: None},
-                            out_max= {b_el.uid: 1000}, eta= [0.3],
+                            in_max={boil.uid: None},
+                            out_max={b_el.uid: 1000}, eta=[0.3],
                             opex_var=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
-                         in_max= {bgas.uid: 100000},
-                         out_max= {b_th.uid: None, b_el.uid: 30000},
-                         eta= [0.4, 0.3],
+                         in_max={bgas.uid: 100000},
+                         out_max={b_th.uid: None, b_el.uid: 30000},
+                         eta=[0.4, 0.3],
                          co2_var=em_gas)
 
 # storage
@@ -96,12 +95,12 @@ sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
 
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
-                          in_max= {b_el.uid: 10000},
-                          out_max= {b_el2.uid: 9000}, eta= [0.9])
+                          in_max={b_el.uid: 10000},
+                          out_max={b_el2.uid: 9000}, eta=[0.9])
 
 cable2 = transport.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
-                          in_max= {b_el2.uid: 10000}, out_max= {b_el.uid: 8000},
-                          eta= [0.8])
+                          in_max={b_el2.uid: 10000}, out_max={b_el.uid: 8000},
+                          eta=[0.8])
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]
@@ -166,7 +165,6 @@ if __name__ == "__main__":
             if bus_to_plot in c.results['out']:
                 y.append(c.results['out'][bus_to_plot])
                 labels.append(c.uid)
-
 
         # plotting
         fig, ax = plt.subplots()
