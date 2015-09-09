@@ -325,7 +325,7 @@ class OptimizationModel(po.ConcreteModel):
                 self.capex = {obj.uid: obj.capex for obj in cost_objs}
 
                 expr += sum(self.add_cap[I[e], e] * self.capex[e]
-                            for e in self.objective_uids)
+                            for e in self.cost_uids)
                 expr += sum(self.soc_add[e] * self.capex[e]
                             for e in self.simple_storage_uids)
             return(expr)

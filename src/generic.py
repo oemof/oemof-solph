@@ -47,6 +47,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
 
         if model.invest is True:
             model.soc_add = po.Var(uids, within=po.NonNegativeReals)
+            model.soc_max = po.Param(uids, initialize=soc_max)
 
 
 def generic_io_constraints(model, objs=None, uids=None,
