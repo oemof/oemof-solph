@@ -27,6 +27,19 @@ class Power_Plants:
             conn, geometry)], ignore_index=True)
         return self.plants
 
+    def geth_windzone(self, conn, geometry):
+        'Find windzone from map.'
+           # TODO@Günni
+        if geometry.geom_type in ['Polygon', 'MultiPolygon']:
+            coords = geometry.centroid
+        else:
+            coords = geometry
+        sql = """
+            SELECT windzone FROM oemof_test.windzones
+            WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
+            """.format(wkt=coords.wkt)
+        return conn.execute(sql).fetchone()[0]
+
     def get_all_re_power_plants(self, conn, geometry1, geometry2=None):
         # TODO@Günni
         sql = """
