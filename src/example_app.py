@@ -34,10 +34,10 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bcoal = Bus(uid="coal", type="coal")
-bgas = Bus(uid="gas", type="gas")
-boil = Bus(uid="oil", type="oil")
-blig = Bus(uid="lignite", type="lignite")
+bcoal = Bus(uid="coal", type="coal", price=60)
+bgas = Bus(uid="gas", type="gas", price=70)
+boil = Bus(uid="oil", type="oil", price=80)
+blig = Bus(uid="lignite", type="lignite", price=30)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el")

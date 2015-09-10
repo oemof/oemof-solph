@@ -282,14 +282,15 @@ class OptimizationModel(po.ConcreteModel):
         self.opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
         self.input_costs = {obj.uid: obj.inputs[0].price
                             for obj in cost_objs}
-#        print(self.opex_fix)
-#        print(self.input_costs)
+        print(self.opex_fix)
+        print(self.input_costs)
 
         self.output_revenues = {}
         for obj in revenue_objs:
             if isinstance(obj.outputs[0].price, (float, int)):
                 price = [obj.outputs[0].price] * len(self.timesteps)
                 self.output_revenues[obj.uid] = price
+#                print(obj.uid + " " + str(obj.outputs[0].price))
             else:
                 self.output_revenues[obj.uid] = obj.outputs[0].price
 
