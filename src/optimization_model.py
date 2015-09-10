@@ -279,9 +279,11 @@ class OptimizationModel(po.ConcreteModel):
         O = {obj.uid: obj.outputs[0].uid for obj in revenue_objs}
 
         # operational costs
-        self.opex_var = {obj.uid: obj.opex_var for obj in cost_objs}
+        self.opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
         self.input_costs = {obj.uid: obj.inputs[0].price
                             for obj in cost_objs}
+#        print(self.opex_fix)
+#        print(self.input_costs)
 
         self.output_revenues = {}
         for obj in revenue_objs:
@@ -299,7 +301,7 @@ class OptimizationModel(po.ConcreteModel):
         def obj_rule(self):
             expr = 0
             # costs for inputs of components
-            expr += sum(self.w[I[e], e, t] * (self.opex_var[e] +
+            expr += sum(self.w[I[e], e, t] * (self.opex_fix[e] +
                                               self.input_costs[e])
                         for e in self.cost_uids for t in self.timesteps)
 

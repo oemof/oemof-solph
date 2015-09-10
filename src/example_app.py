@@ -65,20 +65,20 @@ demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
 pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
                              in_max={bcoal.uid: None},
                              out_max={b_el.uid: 20200}, eta=[0.39],
-                             opex_var=25, co2_var=em_coal)
+                             opex_fix=25, co2_var=em_coal)
 pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
                             in_max={blig.uid: None},
                             out_max={b_el.uid: 11800}, eta=[0.41],
-                            opex_var=19, co2_var=em_lig)
+                            opex_fix=19, co2_var=em_lig)
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
                             in_max={bgas.uid: None},
                             out_max={b_el.uid: 41000}, eta=[0.45],
-                            opex_var=45, co2_var=em_lig)
+                            opex_fix=45, co2_var=em_lig)
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
                             in_max={boil.uid: None},
                             out_max={b_el.uid: 1000}, eta=[0.3],
-                            opex_var=50, co2_var=em_oil)
+                            opex_fix=50, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
                          in_max={bgas.uid: 100000},
