@@ -359,7 +359,7 @@ class OptimizationModel(po.ConcreteModel):
         # Create a 'dual' suffix component on the instance
         # so the solver plugin will know which suffixes to collect
         if duals is True:
-            # dual variables
+            # dual variables (= shadow prices)
             self.dual = po.Suffix(direction=po.Suffix.IMPORT)
             # reduced costs
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
@@ -384,6 +384,7 @@ class OptimizationModel(po.ConcreteModel):
                     for t in self.timesteps:
                         b.results["duals"].append(
                             self.dual[getattr(self, "bus")[(b.uid, t)]])
+#                    print(b.results["duals"])
 
         if results_to_objects is True:
             for entity in self.entities:
