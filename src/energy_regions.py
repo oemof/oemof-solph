@@ -287,9 +287,13 @@ class region():
             ee_pp = pp.Power_Plants().get_all_re_power_plants(
                 conn, tmp_geom, self.geometry)
 
+            # Add the powerplants to the power plant table of the region
             self.power_plants['re'] = pd.concat(
                 [ee_pp, self.power_plants['re']], ignore_index=True)
 
+            # Find type of wind turbine from windzones
+            site['wka_model'] = (site['wka_model'].get(helpers.get_windzone(
+                conn, tmp_geom), site['wka_model'][0]))
             site['weather'] = self.weather
             site['gid'] = gid
             site['latitude'] = tmp_geom.centroid.y
