@@ -692,3 +692,20 @@ def dict2textfile(dic, filename=None, path=None):
     f1 = open(os.path.join(path, filename), 'w+')
     pp.pprint(dic, f1)
     f1.close()
+
+
+def get_windzone(conn, geometry):
+    'Find windzone from map.'
+       # TODO@Günni
+    if geometry.geom_type in ['Polygon', 'MultiPolygon']:
+        coords = geometry.centroid
+    else:
+        coords = geometry
+    sql = """
+        SELECT zone FROM oemof_test.windzones
+        WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
+        """.format(wkt=coords.wkt)
+    zone = conn.execute(sql).fetchone()
+    if zone is not None:
+        zone = zone[0]
+    return zone
