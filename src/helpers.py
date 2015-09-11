@@ -696,7 +696,7 @@ def dict2textfile(dic, filename=None, path=None):
 
 def get_windzone(conn, geometry):
     'Find windzone from map.'
-       # TODO@Günni
+    # TODO@Günni
     if geometry.geom_type in ['Polygon', 'MultiPolygon']:
         coords = geometry.centroid
     else:
@@ -708,4 +708,6 @@ def get_windzone(conn, geometry):
     zone = conn.execute(sql).fetchone()
     if zone is not None:
         zone = zone[0]
+    else:
+        zone = 0
     return zone
