@@ -136,13 +136,13 @@ class Photovoltaic:
         # Determine the peak power of one module
         p_peak = module_data.Impo * module_data.Vmpo
 
-        # Normalize the time series to 1 MW_peak
-        data['p_pv_norm'] = data['p_mp'] * 10 ** 6 / p_peak
+        # Normalize the time series to 1 kW_peak
+        data['p_pv_norm'] = data['p_mp'] * 10 ** 3 / p_peak
 
         return data
 
     def get_normalized_pv_time_series(self, **kwargs):
-        'Normalized to one MW_peak'
+        'Normalized to one kW_peak'
         data = kwargs['weather'].get_feedin_data(gid=kwargs.get('gid', None))
 
         # Create a location object
@@ -267,14 +267,14 @@ class WindPowerPlant():
             upper=(self.nominal_power_wind_turbine * 10 ** 3))
 
     def get_normalized_wind_pp_time_series(self, **kwargs):
-        'Normalized to one MW.'
+        'Normalized to one kW installed capacity.'
         kwargs['data'] = kwargs['weather'].get_feedin_data(
             gid=kwargs.get('gid', None))
 
         kwargs['data']['p_wpp'] = np.array(list(map(
             float, self.turbine_power_output(**kwargs))))
 
-        kwargs['data']['p_wpp_norm'] = (kwargs['data']['p_wpp'] * 1000 /
+        kwargs['data']['p_wpp_norm'] = (kwargs['data']['p_wpp'] /
                                         float(self.nominal_power_wind_turbine))
         return kwargs['data']
 
