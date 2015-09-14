@@ -40,6 +40,7 @@ class Storage(Transformer):
     def __init__(self, **kwargs):
         """
         :param soc_max: maximal sate of charge
+        :param cap_loss: capacity loss per timestep in p/100
         """
         super().__init__(**kwargs)
 

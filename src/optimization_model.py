@@ -218,6 +218,7 @@ class OptimizationModel(po.ConcreteModel):
 
         soc_initial = {obj.uid: obj.soc_initial
                        for obj in self.simple_storage_objs}
+        cap_loss = {obj.uid: obj.cap_loss for obj in self.simple_storage_objs}
         eta_in = {obj.uid: obj.eta_in[0] for obj in self.simple_storage_objs}
         eta_out = {obj.uid: obj.eta_out[0] for obj in self.simple_storage_objs}
 
@@ -234,7 +235,7 @@ class OptimizationModel(po.ConcreteModel):
                 expr += self.soc[e, t] - soc_initial[e]
                 return(expr, 0)
             else:
-                expr = self.soc[e, t]
+                expr = self.soc[e, t] * (1 - cap_loss[e])
                 expr += - self.soc[e, t-1]
                 expr += - self.w[I[e], e, t] * eta_in[e]
                 expr += + self.w[e, O[e], t] / eta_out[e]
