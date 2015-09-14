@@ -62,7 +62,8 @@ def generic_io_constraints(model, objs=None, uids=None,
                          which the constraints should be build")
     if uids is None:
         uids = [e.uids for e in objs]
-
+    #TODO:
+    #  - add possibility of multiple input busses (e.g. for syn + nat. gas)
     I = {obj.uid: obj.inputs[0].uid for obj in objs}
     # set with output uids for every simple transformer
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
@@ -80,6 +81,8 @@ def generic_io_constraints(model, objs=None, uids=None,
 def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
     """
     """
+    #TODO:
+    #  - add possibility of multiple output busses (e.g. for heat and power)
     # set with output uids for every simple chp
     # {'pp_chp': ['b_th', 'b_el']}
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
@@ -112,17 +115,16 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     in_max = {obj.uid: obj.in_max for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
 
-    if model.invest is False:
-        # edges for simple transformers ([('coal', 'pp_coal'),...])
-        ee = model.edges(objs)
-        for (e1, e2) in ee:
-            for t in timesteps:
-                # transformer output <= model.out_max
-                if e1 in uids:
-                    model.w[e1, e2, t].setub(out_max[e1][e2])
-                # transformer input <= model.in_max
-                if e2 in uids:
-                    model.w[e1, e2, t].setub(in_max[e2][e1])
+    # edges for simple transformers ([('coal', 'pp_coal'),...])
+    ee = model.edges(objs)
+    for (e1, e2) in ee:
+        for t in timesteps:
+            # transformer output <= model.out_max
+            if e1 in uids:
+                model.w[e1, e2, t].setub(out_max[e1][e2])
+            # transformer input <= model.in_max
+            if e2 in uids:
+                model.w[e1, e2, t].setub(in_max[e2][e1])
 
 
 def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
