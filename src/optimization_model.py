@@ -335,11 +335,12 @@ class OptimizationModel(po.ConcreteModel):
             # add additional capacity & capex for investment models
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in cost_objs}
+                self.crf = {obj.uid: obj.crf for obj in cost_objs}
 
-                expr += sum(self.add_cap[I[e], e] *
+                expr += sum(self.add_cap[I[e], e] * self.crf[e] *
                             (self.capex[e] + self.opex_fix[e])
                             for e in self.cost_uids)
-                expr += sum(self.soc_add[e] *
+                expr += sum(self.soc_add[e] * self.crf[e] *
                             (self.capex[e] + self.opex_fix[e])
                             for e in self.simple_storage_uids)
             return(expr)
