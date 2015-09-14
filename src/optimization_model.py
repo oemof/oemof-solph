@@ -223,12 +223,15 @@ class OptimizationModel(po.ConcreteModel):
 
         # storage energy balance
         def storage_balance_rule(self, e, t):
+            # TODO:
+            #   - not sure, if the old pahesmf storage equation is valid!
+            #     Cord would prefer something like this:
+            #     http://publica.fraunhofer.de/documents/N-300374.html
+            #   - check this against pahesmf equations for soc in first/last
+            #     and keep one of both solutions
             if(t == 0 or t == len(self.timesteps)-1):
                 expr = 0
                 expr += self.soc[e, t] - soc_initial[e]
-                # TODO:
-                #   - check this against Guidos pahesmf equation and keep one
-                #     of both solutions
                 return(expr, 0)
             else:
                 expr = self.soc[e, t]

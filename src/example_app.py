@@ -90,7 +90,7 @@ pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
 sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  outputs=[b_el], in_max={b_el.uid: 100000},
                                  out_max={b_el.uid: 200000},
-                                 soc_max=700000, soc_min=0, soc_initial=1000,
+                                 soc_max=700000, soc_min=0, soc_initial=350000,
                                  eta_in=[0.8], eta_out=[0.8], cap_loss=None,
                                  opex_fix=35, opex_var=2, co2_var=None)
 
