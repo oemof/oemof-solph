@@ -65,25 +65,25 @@ demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
 pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
                              in_max={bcoal.uid: None},
                              out_max={b_el.uid: 20200}, eta=[0.39],
-                             opex_fix=25, co2_var=em_coal)
+                             opex_fix=25, opex_var=2, co2_var=em_coal)
 pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
                             in_max={blig.uid: None},
                             out_max={b_el.uid: 11800}, eta=[0.41],
-                            opex_fix=19, co2_var=em_lig)
+                            opex_fix=19, opex_var=2, co2_var=em_lig)
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
                             in_max={bgas.uid: None},
                             out_max={b_el.uid: 41000}, eta=[0.45],
-                            opex_fix=45, co2_var=em_lig)
+                            opex_fix=45, opex_var=2, co2_var=em_lig)
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
                             in_max={boil.uid: None},
                             out_max={b_el.uid: 1000}, eta=[0.3],
-                            opex_fix=50, co2_var=em_oil)
+                            opex_fix=50, opex_var=2, co2_var=em_oil)
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
                          in_max={bgas.uid: 100000},
                          out_max={b_th.uid: None, b_el.uid: 30000},
-                         eta=[0.4, 0.3],
+                         eta=[0.4, 0.3], opex_fix=20, opex_var=2,
                          co2_var=em_gas)
 
 # storage
@@ -91,16 +91,18 @@ sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  outputs=[b_el], in_max={b_el.uid: 100000},
                                  out_max={b_el.uid: 200000},
                                  soc_max=700000, soc_min=0, eta_in=[0.8],
-                                 eta_out=[0.8], cap_loss=None, co2_var=None)
+                                 eta_out=[0.8], cap_loss=None,
+                                 opex_fix=35, opex_var=2, co2_var=None)
 
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
                           in_max={b_el.uid: 10000},
-                          out_max={b_el2.uid: 9000}, eta=[0.9])
+                          out_max={b_el2.uid: 9000}, eta=[0.9],
+                          opex_fix=5)
 
 cable2 = transport.Simple(uid="cable2", inputs=[b_el2], outputs=[b_el],
                           in_max={b_el2.uid: 10000}, out_max={b_el.uid: 8000},
-                          eta=[0.8])
+                          eta=[0.8], opex_fix=5)
 
 # group busses
 buses = [bcoal, bgas, boil, blig, b_el, b_el2, b_th]

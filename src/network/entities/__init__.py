@@ -15,6 +15,7 @@ class Bus(Entity):
         :param type: the type of the bus. Can be a meaningful value like e.g.
                      "electricity" but may be anything that can be tested for
                      equality and is distinct for incompatible Buses.
+        :param price: price per unit of type
         """
         super().__init__(**kwargs)
         self.type = kwargs.get("type", None)
@@ -36,6 +37,9 @@ class Component(Entity):
 
     def __init__(self, **kwargs):
         """
+        :param capex: CAPEX of component
+        :param opex_fix: fixed OPEX of component (e.g. expenses for staff)
+        :param opex_var: variable OPEX of component (e.g. spare parts)
         """
         super().__init__(**kwargs)
 

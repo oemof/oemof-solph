@@ -268,6 +268,7 @@ class OptimizationModel(po.ConcreteModel):
         self.cost_uids = {obj.uid for obj in cost_objs}
 
         I = {obj.uid: obj.inputs[0].uid for obj in cost_objs}
+#        print("I: " + str(I))
 
         # create a combined list of all revenue related components
         revenue_objs = (
@@ -279,18 +280,21 @@ class OptimizationModel(po.ConcreteModel):
         O = {obj.uid: obj.outputs[0].uid for obj in revenue_objs}
 
         # operational costs
-        self.opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
+        self.opex_var = {obj.uid: obj.opex_var for obj in cost_objs}
         self.input_costs = {obj.uid: obj.inputs[0].price
                             for obj in cost_objs}
-        print(self.opex_fix)
-        print(self.input_costs)
+        self.opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
+        # installed electrical/thermal capacity: {'pp_chp': 30000,...}
+        self.cap_installed = {obj.uid: obj.out_max for obj in cost_objs}
+        self.cap_installed = {k: sum(filter(None, v.values()))
+                              for k, v in self.cap_installed.items()}
 
+        # why do we need revenues? price=0, so we just leave this code here..
         self.output_revenues = {}
         for obj in revenue_objs:
             if isinstance(obj.outputs[0].price, (float, int)):
                 price = [obj.outputs[0].price] * len(self.timesteps)
                 self.output_revenues[obj.uid] = price
-#                print(obj.uid + " " + str(obj.outputs[0].price))
             else:
                 self.output_revenues[obj.uid] = obj.outputs[0].price
 
@@ -301,10 +305,15 @@ class OptimizationModel(po.ConcreteModel):
         # objective function
         def obj_rule(self):
             expr = 0
-            # costs for inputs of components
-            expr += sum(self.w[I[e], e, t] * (self.opex_fix[e] +
-                                              self.input_costs[e])
+
+            # variable opex including ressource consumption
+            expr += sum(self.w[I[e], e, t] *
+                        (self.input_costs[e] + self.opex_var[e])
                         for e in self.cost_uids for t in self.timesteps)
+
+            # fixed opex of components
+            expr += sum(self.cap_installed[e] * (self.opex_fix[e])
+                        for e in self.cost_uids)
 
             # revenues from outputs of components
             expr += - sum(self.w[e, O[e], t] * self.output_revenues[e][t]
@@ -327,9 +336,11 @@ class OptimizationModel(po.ConcreteModel):
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in cost_objs}
 
-                expr += sum(self.add_cap[I[e], e] * self.capex[e]
+                expr += sum(self.add_cap[I[e], e] *
+                            (self.capex[e] + self.opex_fix[e])
                             for e in self.cost_uids)
-                expr += sum(self.soc_add[e] * self.capex[e]
+                expr += sum(self.soc_add[e] *
+                            (self.capex[e] + self.opex_fix[e])
                             for e in self.simple_storage_uids)
             return(expr)
         self.objective = po.Objective(rule=obj_rule)
