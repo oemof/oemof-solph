@@ -41,6 +41,8 @@ class Storage(Transformer):
         """
         :param soc_max: maximal sate of charge
         :param cap_loss: capacity loss per timestep in p/100
+        :param c_rate_in: c-rate for charging with (unit is s^-1)
+        :param c_rate_out: c-rate for discharging with (unit is s^-1)
         """
         super().__init__(**kwargs)
 
@@ -50,3 +52,5 @@ class Storage(Transformer):
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)
+        self.c_rate_in = next(iter(self.in_max.values())) / self.soc_max
+        self.c_rate_out = next(iter(self.out_max.values())) / self.soc_max

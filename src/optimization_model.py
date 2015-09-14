@@ -24,6 +24,9 @@ class OptimizationModel(po.ConcreteModel):
 
     """
 
+    # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
+    #            dict has to be selected
+
     def __init__(self, entities, timesteps, options=None):
 
         super().__init__()
@@ -226,16 +229,9 @@ class OptimizationModel(po.ConcreteModel):
         def storage_balance_rule(self, e, t):
             # TODO:
             #   - include time increment
-            #   - not sure, if the old pahesmf storage equation is valid!
-            #     Cord would prefer something like this:
-            #     http://publica.fraunhofer.de/documents/N-300374.html
-            #   - check this against pahesmf equations for soc in first/last
-            #     and keep one of both solutions
-#            if(t == 0 or t == len(self.timesteps)-1):
             if(t == 0):
                 expr = 0
-#                expr += self.soc[e, t] - soc_initial[e]
-                expr += self.soc[e, t]
+                expr += self.soc[e, t] + soc_initial[e]
                 expr += - self.soc[e, t+len(self.timesteps)-1]
                 expr += - self.w[I[e], e, t] * eta_in[e]
                 expr += + self.w[e, O[e], t] / eta_out[e]
