@@ -41,8 +41,8 @@ class Storage(Transformer):
         """
         :param soc_max: maximal sate of charge
         :param cap_loss: capacity loss per timestep in p/100
-        :param c_rate_in: c-rate for charging with (unit is s^-1)
-        :param c_rate_out: c-rate for discharging with (unit is s^-1)
+        :param c_rate_in: c-rate for charging (unit is s^-1)
+        :param c_rate_out: c-rate for discharging (unit is s^-1)
         """
         super().__init__(**kwargs)
 
