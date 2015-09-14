@@ -115,10 +115,6 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     in_max = {obj.uid: obj.in_max for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
 
-#    # c-rates for charge and discharge
-#    c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
-#    print(c_rate_in)
-
     # edges for simple transformers ([('coal', 'pp_coal'),...])
     ee = model.edges(objs)
     for (e1, e2) in ee:

@@ -210,8 +210,31 @@ class OptimizationModel(po.ConcreteModel):
 
         # set bounds for basic/investment models
         if(self.invest is False):
-            gc.generic_w_ub(model=self, objs=objs, uids=uids,
-                            timesteps=self.timesteps)
+###########################
+            # set variable bounds (out_max = in_max * efficiency):
+            # m.in_max = {'pp_coal': 51794.8717948718, ... }
+            # m.out_max = {'pp_coal': 20200, ... }
+            in_max = {obj.uid: obj.in_max for obj in objs}
+            out_max = {obj.uid: obj.out_max for obj in objs}
+
+            # c-rates for charge and discharge
+            c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
+            print(c_rate_in)
+
+            # edges for simple transformers ([('coal', 'pp_coal'),...])
+            ee = self.edges(objs)
+            for (e1, e2) in ee:
+                for t in self.timesteps:
+                    # transformer output <= model.out_max
+                    if e1 in uids:
+                        self.w[e1, e2, t].setub(out_max[e1][e2])
+                    # transformer input <= model.in_max
+                    if e2 in uids:
+                        self.w[e1, e2, t].setub(in_max[e2][e1])
+##########################
+
+#            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+#                            timesteps=self.timesteps)
         else:
             gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
