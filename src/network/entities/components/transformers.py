@@ -45,6 +45,7 @@ class Storage(Transformer):
 
         self.soc_max = kwargs.get('soc_max', None)
         self.soc_min = kwargs.get('soc_min', None)
+        self.soc_initial = kwargs.get('soc_initial', None)
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)
