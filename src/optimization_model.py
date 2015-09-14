@@ -216,6 +216,9 @@ class OptimizationModel(po.ConcreteModel):
         O = {obj.uid: obj.outputs[0].uid for obj in objs}
         I = {obj.uid: obj.inputs[0].uid for obj in objs}
 
+        eta_in = {obj.uid: obj.eta_in[0] for obj in self.simple_storage_objs}
+        eta_out = {obj.uid: obj.eta_out[0] for obj in self.simple_storage_objs}
+
         # storage energy balance
         def storage_balance_rule(self, e, t):
             if(t == 0):
@@ -224,8 +227,8 @@ class OptimizationModel(po.ConcreteModel):
                 return(expr, 0)
             else:
                 expr = self.soc[e, t]
-                expr += - self.soc[e, t-1] - self.w[I[e], e, t] + \
-                    self.w[e, O[e], t]
+                expr += - self.soc[e, t-1] - self.w[I[e], e, t] * eta_in[e] + \
+                    self.w[e, O[e], t] / eta_out[e]
                 return(expr, 0)
         self.simple_storage_c = po.Constraint(uids, self.timesteps,
                                               rule=storage_balance_rule)
