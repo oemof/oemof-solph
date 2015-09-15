@@ -24,6 +24,9 @@ class OptimizationModel(po.ConcreteModel):
 
     """
 
+    # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
+    #            dict has to be selected
+
     def __init__(self, entities, timesteps, options=None):
 
         super().__init__()
@@ -213,19 +216,64 @@ class OptimizationModel(po.ConcreteModel):
             gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
 
+            # constraint that limits discharge power by using the c-rate
+            c_rate_out = {obj.uid: obj.c_rate_out
+                          for obj in self.simple_storage_objs}
+            out_max = {obj.uid: obj.out_max for obj in objs}
+            O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+
+            def storage_discharge_limit_rule(self, e, t):
+                expr = 0
+                expr += self.w[e, O[e][0], t]
+                expr += -(out_max[e][O[e][0]] + self.add_cap[e, O[e][0]]) \
+                    * c_rate_out[e]
+                return(expr <= 0)
+            setattr(self, "simple_storage_w_ub_discharge_invest" +
+                    objs[0].lower_name,
+                    po.Constraint(uids, self.timesteps,
+                                  rule=storage_discharge_limit_rule))
+
+            # constraint that limits charging power by using the c-rate
+            c_rate_in = {obj.uid: obj.c_rate_in
+                         for obj in self.simple_storage_objs}
+            in_max = {obj.uid: obj.in_max for obj in objs}
+            I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in objs}
+
+            def storage_charge_limit_rule(self, e, t):
+                expr = 0
+                expr += self.w[e, I[e][0], t]
+                expr += -(in_max[e][I[e][0]] + self.add_cap[e, I[e][0]]) \
+                    * c_rate_in[e]
+                return(expr <= 0)
+            setattr(self, "simple_storage_w_ub_charge_invest" +
+                    objs[0].lower_name,
+                    po.Constraint(uids, self.timesteps,
+                                  rule=storage_charge_limit_rule))
+
+        # constraint for storage energy balance
         O = {obj.uid: obj.outputs[0].uid for obj in objs}
         I = {obj.uid: obj.inputs[0].uid for obj in objs}
+        soc_initial = {obj.uid: obj.soc_initial
+                       for obj in self.simple_storage_objs}
+        cap_loss = {obj.uid: obj.cap_loss for obj in self.simple_storage_objs}
+        eta_in = {obj.uid: obj.eta_in[0] for obj in self.simple_storage_objs}
+        eta_out = {obj.uid: obj.eta_out[0] for obj in self.simple_storage_objs}
 
-        # storage energy balance
         def storage_balance_rule(self, e, t):
+            # TODO:
+            #   - include time increment
             if(t == 0):
                 expr = 0
-                expr += self.soc[e, t]
+                expr += self.soc[e, t] + soc_initial[e]
+                expr += - self.soc[e, t+len(self.timesteps)-1]
+                expr += - self.w[I[e], e, t] * eta_in[e]
+                expr += + self.w[e, O[e], t] / eta_out[e]
                 return(expr, 0)
             else:
-                expr = self.soc[e, t]
-                expr += - self.soc[e, t-1] - self.w[I[e], e, t] + \
-                    self.w[e, O[e], t]
+                expr = self.soc[e, t] * (1 - cap_loss[e])
+                expr += - self.soc[e, t-1]
+                expr += - self.w[I[e], e, t] * eta_in[e]
+                expr += + self.w[e, O[e], t] / eta_out[e]
                 return(expr, 0)
         self.simple_storage_c = po.Constraint(uids, self.timesteps,
                                               rule=storage_balance_rule)
@@ -268,6 +316,7 @@ class OptimizationModel(po.ConcreteModel):
         self.cost_uids = {obj.uid for obj in cost_objs}
 
         I = {obj.uid: obj.inputs[0].uid for obj in cost_objs}
+#        print("I: " + str(I))
 
         # create a combined list of all revenue related components
         revenue_objs = (
@@ -282,7 +331,13 @@ class OptimizationModel(po.ConcreteModel):
         self.opex_var = {obj.uid: obj.opex_var for obj in cost_objs}
         self.input_costs = {obj.uid: obj.inputs[0].price
                             for obj in cost_objs}
+        self.opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
+        # installed electrical/thermal capacity: {'pp_chp': 30000,...}
+        self.cap_installed = {obj.uid: obj.out_max for obj in cost_objs}
+        self.cap_installed = {k: sum(filter(None, v.values()))
+                              for k, v in self.cap_installed.items()}
 
+        # why do we need revenues? price=0, so we just leave this code here..
         self.output_revenues = {}
         for obj in revenue_objs:
             if isinstance(obj.outputs[0].price, (float, int)):
@@ -298,10 +353,15 @@ class OptimizationModel(po.ConcreteModel):
         # objective function
         def obj_rule(self):
             expr = 0
-            # costs for inputs of components
-            expr += sum(self.w[I[e], e, t] * (self.opex_var[e] +
-                                              self.input_costs[e])
+
+            # variable opex including ressource consumption
+            expr += sum(self.w[I[e], e, t] *
+                        (self.input_costs[e] + self.opex_var[e])
                         for e in self.cost_uids for t in self.timesteps)
+
+            # fixed opex of components
+            expr += sum(self.cap_installed[e] * (self.opex_fix[e])
+                        for e in self.cost_uids)
 
             # revenues from outputs of components
             expr += - sum(self.w[e, O[e], t] * self.output_revenues[e][t]
@@ -323,10 +383,13 @@ class OptimizationModel(po.ConcreteModel):
             # add additional capacity & capex for investment models
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in cost_objs}
+                self.crf = {obj.uid: obj.crf for obj in cost_objs}
 
-                expr += sum(self.add_cap[I[e], e] * self.capex[e]
+                expr += sum(self.add_cap[I[e], e] * self.crf[e] *
+                            (self.capex[e] + self.opex_fix[e])
                             for e in self.cost_uids)
-                expr += sum(self.soc_add[e] * self.capex[e]
+                expr += sum(self.soc_add[e] * self.crf[e] *
+                            (self.capex[e] + self.opex_fix[e])
                             for e in self.simple_storage_uids)
             return(expr)
         self.objective = po.Objective(rule=obj_rule)
