@@ -135,15 +135,17 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
 
     # constraint for additional capacity
     def rule(model, e, t):
-        expr = model.w[e, O[e][0], t] - out_max[e][O[e][0]] - \
-            model.add_cap[e, O[e][0]]
+        expr = 0
+        expr += model.w[e, O[e][0], t]
+        expr += - (out_max[e][O[e][0]] + model.add_cap[e, O[e][0]])
         return(expr <= 0)
     setattr(model, "generic_w_ub_" + objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=rule))
 
 
 def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
-
+    """
+    """
     # constraint for additional capacity in investment models
     def rule(model, e, t):
         return(model.soc[e, t] <= model.soc_max[e] + model.soc_add[e])

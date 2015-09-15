@@ -210,45 +210,55 @@ class OptimizationModel(po.ConcreteModel):
 
         # set bounds for basic/investment models
         if(self.invest is False):
-###########################
-            # set variable bounds (out_max = in_max * efficiency):
-            # m.in_max = {'pp_coal': 51794.8717948718, ... }
-            # m.out_max = {'pp_coal': 20200, ... }
-            in_max = {obj.uid: obj.in_max for obj in objs}
-            out_max = {obj.uid: obj.out_max for obj in objs}
-
-            # c-rates for charge and discharge
-            c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
-            print(c_rate_in)
-
-            # edges for simple transformers ([('coal', 'pp_coal'),...])
-            ee = self.edges(objs)
-            for (e1, e2) in ee:
-                for t in self.timesteps:
-                    # transformer output <= model.out_max
-                    if e1 in uids:
-                        self.w[e1, e2, t].setub(out_max[e1][e2])
-                    # transformer input <= model.in_max
-                    if e2 in uids:
-                        self.w[e1, e2, t].setub(in_max[e2][e1])
-##########################
-
-#            gc.generic_w_ub(model=self, objs=objs, uids=uids,
-#                            timesteps=self.timesteps)
+            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+                            timesteps=self.timesteps)
         else:
             gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
 
+            # constraint that limits discharge power by using the c-rate
+            c_rate_out = {obj.uid: obj.c_rate_out
+                          for obj in self.simple_storage_objs}
+            out_max = {obj.uid: obj.out_max for obj in objs}
+            O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+
+            def storage_discharge_limit_rule(self, e, t):
+                expr = 0
+                expr += self.w[e, O[e][0], t]
+                expr += -(out_max[e][O[e][0]] + self.add_cap[e, O[e][0]]) \
+                    * c_rate_out[e]
+                return(expr <= 0)
+            setattr(self, "simple_storage_w_ub_discharge_invest" +
+                    objs[0].lower_name,
+                    po.Constraint(uids, self.timesteps,
+                                  rule=storage_discharge_limit_rule))
+
+            # constraint that limits charging power by using the c-rate
+            c_rate_in = {obj.uid: obj.c_rate_in
+                         for obj in self.simple_storage_objs}
+            in_max = {obj.uid: obj.in_max for obj in objs}
+            I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in objs}
+
+            def storage_charge_limit_rule(self, e, t):
+                expr = 0
+                expr += self.w[e, I[e][0], t]
+                expr += -(in_max[e][I[e][0]] + self.add_cap[e, I[e][0]]) \
+                    * c_rate_in[e]
+                return(expr <= 0)
+            setattr(self, "simple_storage_w_ub_charge_invest" +
+                    objs[0].lower_name,
+                    po.Constraint(uids, self.timesteps,
+                                  rule=storage_charge_limit_rule))
+
+        # constraint for storage energy balance
         O = {obj.uid: obj.outputs[0].uid for obj in objs}
         I = {obj.uid: obj.inputs[0].uid for obj in objs}
-
         soc_initial = {obj.uid: obj.soc_initial
                        for obj in self.simple_storage_objs}
         cap_loss = {obj.uid: obj.cap_loss for obj in self.simple_storage_objs}
         eta_in = {obj.uid: obj.eta_in[0] for obj in self.simple_storage_objs}
         eta_out = {obj.uid: obj.eta_out[0] for obj in self.simple_storage_objs}
 
-        # storage energy balance
         def storage_balance_rule(self, e, t):
             # TODO:
             #   - include time increment
