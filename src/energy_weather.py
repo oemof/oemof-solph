@@ -183,7 +183,7 @@ class Weather:
         return weather_df
 
     def _create_grouped_by_gid_dict(self):
-        # Hier caching einfügen? Wenn es schon gibt, dann nicht neu berechnen?
+        ''
         res = []
         for year in self.year:
             dic = {}
