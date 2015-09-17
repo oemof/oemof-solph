@@ -35,7 +35,7 @@ class Photovoltaic:
         above the horizon.'''
         data_5min = pd.DataFrame(
             index=pd.date_range(data.index[0],
-                                periods=kwargs['hoy']*12, freq='5Min',
+                                periods=data.shape[0]*12, freq='5Min',
                                 tz=kwargs['tz']))
 
         data_5min = pvlib.solarposition.get_solarposition(
