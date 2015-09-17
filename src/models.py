@@ -242,24 +242,27 @@ class WindPowerPlant():
         Interpolates the cp value as a function of the wind velocity between
         data obtained from the power curve of the specified wind turbine type.
         '''
-        # TODO@Günni
-        sql = '''SELECT * FROM oemof_test.wea_cpcurves
-            WHERE rli_anlagen_id = '{0}'
-            '''.format(kwargs['wka_model'])
         ncols = ['rli_anlagen_id', 'p_nenn', 'source', 'modificationtimestamp']
+        if kwargs.get('connection', None) is None:
+            df = pd.read_hdf(
+                join(expanduser("~"), '.oemof', 'cp_values.hf5'), 'cp')
+            res_ls = df[df.rli_anlagen_id == kwargs[
+                'wind_conv_type']].reset_index(drop=True)
+        else:
+            sql = '''SELECT * FROM oemof_test.wea_cpcurves
+                WHERE rli_anlagen_id = '{0}';
+                '''.format(kwargs['wka_model'])
+            db_res = kwargs['connection'].execute(sql)
+            res_ls = pd.DataFrame(db_res.fetchall(), columns=db_res.keys())
 
-        db_res = kwargs['connection'].execute(sql)
-        res_ls = db_res.fetchall()[0]
-        n = 0
         cp_data = np.array([0, 0])
-        for col in db_res.keys():
+        for col in res_ls.keys():
             if col not in ncols:
-                if res_ls[n] is not None:
+                if res_ls[col][0] is not None:
                     cp_data = np.vstack((cp_data, np.array(
-                        [float(col), float(res_ls[n])])))
-            n += 1
+                        [float(col), float(res_ls[col])])))
         cp_data = np.delete(cp_data, 0, 0)
-        self.nominal_power_wind_turbine = res_ls[1]
+        self.nominal_power_wind_turbine = res_ls['p_nenn'][0]
         v_wind[v_wind > np.max(cp_data[:, 0])] = np.max(cp_data[:, 0])
         return interp1d(cp_data[:, 0], cp_data[:, 1])(v_wind)
 
