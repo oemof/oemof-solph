@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pvlib
 from scipy.interpolate import interp1d
+from os.path import expanduser, join
 
 
 class Photovoltaic:
