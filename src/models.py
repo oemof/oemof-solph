@@ -143,7 +143,12 @@ class Photovoltaic:
 
     def get_normalized_pv_time_series(self, **kwargs):
         'Normalized to one kW_peak'
-        data = kwargs['weather'].get_feedin_data(gid=kwargs.get('gid', None))
+        # If no DataFrame is given, try to get the data from a weather object
+        if kwargs.get('data', None) is None:
+            data = kwargs['weather'].get_feedin_data(
+                gid=kwargs.get('gid', None))
+        else:
+            data = kwargs.pop('data')
 
         # Create a location object
         location = pvlib.location.Location(kwargs['latitude'],
@@ -196,6 +201,15 @@ class WindPowerPlant():
         pd.reset_option('display.max_rows')
         return df
 
+    def fetch_data_heights_from_weather_object(self, **kwargs):
+        ''
+        dic = {}
+        for key in kwargs['data'].keys():
+            dic[key] = kwargs['weather'].get_data_heigth(key)
+            if dic[key] is None:
+                dic[key] = 0
+        return dic
+
     def rho_hub(self, **kwargs):
         '''
         Calculates the density of air in kg/m³ at hub height.
@@ -204,8 +218,9 @@ class WindPowerPlant():
             Temperature gradient of -6.5 K/km
             Density gradient of -1/8 hPa/m
         '''
-        h_temperature_data = kwargs['weather'].get_data_heigth('temp_air')
-        h_pressure_data = 0  # heigth of pressure measurement
+        print(kwargs['data_height'])
+        h_temperature_data = kwargs['data_height']['temp_air']
+        h_pressure_data = kwargs['data_height']['pressure']
         T_hub = kwargs['data'].temp_air - 0.0065 * (
             kwargs['h_hub'] - h_temperature_data)
         return (
@@ -220,8 +235,7 @@ class WindPowerPlant():
         '''
         return (kwargs['data'].v_wind * np.log(kwargs['h_hub'] /
                 kwargs['data'].z0)
-                / np.log(kwargs['weather'].get_data_heigth('v_wind')
-                / kwargs['data'].z0))
+                / np.log(kwargs['data_height']['v_wind'] / kwargs['data'].z0))
 
     def cp_values(self, v_wind, **kwargs):
         '''
@@ -268,8 +282,12 @@ class WindPowerPlant():
 
     def get_normalized_wind_pp_time_series(self, **kwargs):
         'Normalized to one kW installed capacity.'
-        kwargs['data'] = kwargs['weather'].get_feedin_data(
-            gid=kwargs.get('gid', None))
+        # If no DataFrame is given, try to get the data from a weather object
+        if kwargs.get('data', None) is None:
+            kwargs['data'] = kwargs['weather'].get_feedin_data(
+                gid=kwargs.get('gid', None))
+            kwargs['data_height'] = (
+                self.fetch_data_heights_from_weather_object(**kwargs))
 
         kwargs['data']['p_wpp'] = np.array(list(map(
             float, self.turbine_power_output(**kwargs))))
