@@ -266,6 +266,7 @@ class region():
 
     def fetch_ee_feedin(self, conn, **site):
         wind_model = models.WindPowerPlant(required=[])
+        wind_model.get_wind_pp_types(conn)  # remove this output
         pv_model = models.Photovoltaic(required=[])
         site['connection'] = conn
         site['tz'] = self.weather.tz
@@ -275,7 +276,10 @@ class region():
             self.power_plants['re'] = (
                 pp.Power_Plants().get_empty_power_plant_df())
 
+        laenge = len(list(self.weather.grouped_by_gid().keys()))
+
         for gid in self.weather.grouped_by_gid().keys():
+            logging.debug(laenge)
             # Get the geometry for the given weather raster field
             tmp_geom = self.weather.get_geometry_from_gid(gid)
 
@@ -283,8 +287,17 @@ class region():
             ee_pp = pp.Power_Plants().get_all_re_power_plants(
                 conn, tmp_geom, self.geometry)
 
+            # Add the powerplants to the power plant table of the region
             self.power_plants['re'] = pd.concat(
                 [ee_pp, self.power_plants['re']], ignore_index=True)
+
+            # Find type of wind turbine and its parameters according to the
+            # windzone.
+            wz = helpers.get_windzone(conn, tmp_geom)
+            site['wka_model'] = (site['wka_model_dc'].get(
+                wz, site['wka_model']))
+            site['d_rotor'] = (site['d_rotor_dc'].get(wz, site['d_rotor']))
+            site['h_hub'] = (site['h_hub_dc'].get(wz, site['h_hub']))
 
             site['weather'] = self.weather
             site['gid'] = gid
@@ -312,6 +325,8 @@ class region():
             except:
                 pv_df = pv_series.to_frame()
                 wind_df = wind_series.to_frame()
+
+            laenge -= 1
 
         if site.get('store'):
             dpath = site.get(
