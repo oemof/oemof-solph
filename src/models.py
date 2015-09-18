@@ -219,7 +219,6 @@ class WindPowerPlant():
             Temperature gradient of -6.5 K/km
             Density gradient of -1/8 hPa/m
         '''
-        print(kwargs['data_height'])
         h_temperature_data = kwargs['data_height']['temp_air']
         h_pressure_data = kwargs['data_height']['pressure']
         T_hub = kwargs['data'].temp_air - 0.0065 * (
