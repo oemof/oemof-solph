@@ -21,13 +21,10 @@ class electric_building():
             bdew.slp[kwargs['selp_type']].sum(0) *
             kwargs['annual_elec_demand'])
         self.profile_type = kwargs['selp_type']
-        
-        if kwargs['annual_elec_demand'] == True:
-            self.annual_demand = kwargs['annual_elec_demand']
-        else:
-            self.calculate_annual_demand
-            
-            
+        self.annual_demand = kwargs.get('annual_elec_demand',
+                                        self.calculate_annual_demand)
+
+
     def calculate_annual_demand():
         '''
         calculate annual demand from statistic data
