@@ -11,6 +11,11 @@ All special import should be in try/except loops to avoid import errors.
 
 import logging
 from datetime import date, timedelta
+import os
+import pickle
+import time
+import pprint as pp
+
 
 # get_polygon_from_nuts
 hlp_fkt = 'get_polygon_from_nuts'
@@ -154,6 +159,104 @@ def get_polygon_from_nuts(conn, nuts):
         FROM oemof.geo_nuts_rg_2013
         WHERE nuts_id in {0};
     '''.format(tuple(nuts))
+    return wkt_loads(conn.execute(sql).fetchone()[0])
+
+
+def get_polygon_from_postgis(conn, schema, table, gcol='geom', union=False):
+    r"""A one-line summary that does not use variable names or the
+    function name.
+
+    Several sentences providing an extended description. Refer to
+    variables using back-ticks, e.g. `var`.
+
+    Parameters
+    ----------
+    var1 : array_like
+        Array_like means all those objects -- lists, nested lists, etc. --
+        that can be converted to an array.  We can also refer to
+        variables like `var1`.
+    var2 : int
+        The type above can either refer to an actual Python type
+        (e.g. ``int``), or describe the type of the variable in more
+        detail, e.g. ``(N,) ndarray`` or ``array_like``.
+    Long_variable_name : {'hi', 'ho'}, optional
+        Choices in brackets, default first when optional.
+
+    Returns
+    -------
+    type
+        Explanation of anonymous return value of type ``type``.
+    describe : type
+        Explanation of return value named `describe`.
+    out : type
+        Explanation of `out`.
+
+    Other Parameters
+    ----------------
+    only_seldom_used_keywords : type
+        Explanation
+    common_parameters_listed_above : type
+        Explanation
+
+    Raises
+    ------
+    BadException
+        Because you shouldn't have done that.
+
+    See Also
+    --------
+    otherfunc : relationship (optional)
+    newfunc : Relationship (optional), which could be fairly long, in which
+              case the line wraps here.
+    thirdfunc, fourthfunc, fifthfunc
+
+    Notes
+    -----
+    Notes about the implementation algorithm (if needed).
+
+    This can have multiple paragraphs.
+
+    You may include some math:
+
+    .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+
+    And even use a greek symbol like :math:`omega` inline.
+
+    References
+    ----------
+    Cite the relevant literature, e.g. [1]_.  You may also cite these
+    references in the notes section above.
+
+    .. [1] O. McNoleg, "The integration of GIS, remote sensing,
+       expert systems and adaptive co-kriging for environmental habitat
+       modelling of the Highland Haggis using object-oriented, fuzzy-logic
+       and neural-network techniques," Computers & Geosciences, vol. 22,
+       pp. 585-588, 1996.
+
+    Examples
+    --------
+    These are written in doctest format, and should illustrate how to
+    use the function.
+
+    >>> a=[1,2,3]
+    >>> print [x + 3 for x in a]
+    [4, 5, 6]
+    >>> print "a\n\nb"
+    a
+    b
+
+    """
+    # TODO@Günni
+    logging.debug('Getting polygon from DB table')
+    if union:
+        geo_string = 'st_union({0})'.format(gcol)
+    else:
+        geo_string = '{0}'.format(gcol)
+
+    sql = '''
+        SELECT st_astext(ST_Transform({geo_string}, 4326))
+        FROM {schema}.{table};
+    '''.format(**{'geo_string': geo_string, 'schema': schema, 'table': table})
     return wkt_loads(conn.execute(sql).fetchone()[0])
 
 
@@ -477,3 +580,134 @@ def tz_from_geom(connection, geometry):
         WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
         """.format(wkt=coords.wkt)
     return connection.execute(sql).fetchone()[0]
+
+
+def remove_from_list(orig_list, remove_list):
+    '''
+    Removes the values inside the remove_list from the orig_list.
+    '''
+    for item in remove_list:
+        if item in orig_list:
+            try:
+                orig_list.remove(item)
+            except:
+                logging.debug('Cannot remove %s from list %s' % (
+                    item, orig_list))
+    return orig_list
+
+
+def cut_lists(list_a, list_b):
+    '''
+    Returns a list with the values of list_a AND list_b.
+    '''
+    return [x for x in list(list_a) if x in set(list_b)]
+
+
+def unique_list(seq):
+    '''
+    Returns a unique list without preserving the order
+    '''
+    return list({}.fromkeys(seq).keys())
+
+
+def time_logging(start, text, logging_level='debug'):
+    '''
+    Logs the time between the given start time and the actual time. A text
+    and the debug level is variable.
+
+    Uwe Krien (uwe.krien@rl-institut.de)
+
+    Parameters
+        start : start time : float
+        text : text to describe the log : string
+
+    Keyword arguments
+        logging_level : logging_level [default='debug'] : string
+    '''
+    import time
+    end_time = time.time() - start
+    hours = int(end_time / 3600)
+    minutes = int(end_time / 60 - hours * 60)
+    seconds = int(end_time - hours * 3600 - minutes * 60)
+    time_string = ' %0d:%02d:%02d hours' % (hours, minutes, seconds)
+    log_str = text + time_string
+    if logging_level == 'debug':
+        logging.debug(log_str)
+    elif logging_level == 'info':
+        logging.info(log_str)
+
+
+def mkdir_if_not_exist(path):
+    '''Creates directory if not exist'''
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+
+def unlist(val):
+    '''Returns single value if a single value in a list is given'''
+    if isinstance(val, list):
+        if len(val) == 1:
+            new_val = val[0]
+    else:
+        new_val = val
+    return new_val
+
+
+def dict2pickle(dic, filename=None, path=None):
+    'Dumping a python dictionary into a pickle file.'
+    if filename is None:
+        filename = 'dict.pkl'
+    if path is None:
+        path = os.path.expanduser("~")
+    logging.info('Writing parameters to {0}...'.format(
+        os.path.join(path, filename)))
+    outputfile = open(os.path.join(path, filename), 'wb')
+    pickle.dump(dic, outputfile)
+    outputfile.close()
+
+
+def pickle2dict(filename=None, path=None):
+    'Reading a python dictionary from a pickle file.'
+    if filename is None:
+        filename = 'dict.pkl'
+    if path is None:
+        path = os.path.expanduser("~")
+    fullname = os.path.join(path, filename)
+    logging.info('Reading parameters from {0} (created: {1})...'.format(
+        fullname, time.ctime(os.path.getmtime(fullname))))
+    inputfile = open(fullname, 'rb')
+    dic = pickle.load(inputfile)
+    inputfile.close()
+    return dic
+
+
+def dict2textfile(dic, filename=None, path=None):
+    'Writing a dictionary to textfile in a readable and clearly formatted way.'
+    if filename is None:
+        filename = 'dict2text.txt'
+    if path is None:
+        path = os.path.expanduser("~")
+    logging.info('Writing formatted dictionary to {0}...'.format(
+        os.path.join(path, filename)))
+    f1 = open(os.path.join(path, filename), 'w+')
+    pp.pprint(dic, f1)
+    f1.close()
+
+
+def get_windzone(conn, geometry):
+    'Find windzone from map.'
+    # TODO@Günni
+    if geometry.geom_type in ['Polygon', 'MultiPolygon']:
+        coords = geometry.centroid
+    else:
+        coords = geometry
+    sql = """
+        SELECT zone FROM oemof_test.windzones
+        WHERE st_contains(geom, ST_PointFromText('{wkt}', 4326));
+        """.format(wkt=coords.wkt)
+    zone = conn.execute(sql).fetchone()
+    if zone is not None:
+        zone = zone[0]
+    else:
+        zone = 0
+    return zone

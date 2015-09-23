@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pvlib
 from scipy.interpolate import interp1d
+from os.path import expanduser, join
 
 
 class Photovoltaic:
@@ -34,7 +35,7 @@ class Photovoltaic:
         above the horizon.'''
         data_5min = pd.DataFrame(
             index=pd.date_range(data.index[0],
-                                periods=kwargs['hoy']*12, freq='5Min',
+                                periods=data.shape[0]*12, freq='5Min',
                                 tz=kwargs['tz']))
 
         data_5min = pvlib.solarposition.get_solarposition(
@@ -136,14 +137,19 @@ class Photovoltaic:
         # Determine the peak power of one module
         p_peak = module_data.Impo * module_data.Vmpo
 
-        # Normalize the time series to 1 MW_peak
-        data['p_pv_norm'] = data['p_mp'] * 10 ** 6 / p_peak
+        # Normalize the time series to 1 kW_peak
+        data['p_pv_norm'] = data['p_mp'] * 10 ** 3 / p_peak
 
         return data
 
     def get_normalized_pv_time_series(self, **kwargs):
-        'Normalized to one MW_peak'
-        data = kwargs['weather'].get_feedin_data(gid=kwargs.get('gid', None))
+        'Normalized to one kW_peak'
+        # If no DataFrame is given, try to get the data from a weather object
+        if kwargs.get('data', None) is None:
+            data = kwargs['weather'].get_feedin_data(
+                gid=kwargs.get('gid', None))
+        else:
+            data = kwargs.pop('data')
 
         # Create a location object
         location = pvlib.location.Location(kwargs['latitude'],
@@ -196,6 +202,15 @@ class WindPowerPlant():
         pd.reset_option('display.max_rows')
         return df
 
+    def fetch_data_heights_from_weather_object(self, **kwargs):
+        ''
+        dic = {}
+        for key in kwargs['data'].keys():
+            dic[key] = kwargs['weather'].get_data_heigth(key)
+            if dic[key] is None:
+                dic[key] = 0
+        return dic
+
     def rho_hub(self, **kwargs):
         '''
         Calculates the density of air in kg/m³ at hub height.
@@ -204,8 +219,8 @@ class WindPowerPlant():
             Temperature gradient of -6.5 K/km
             Density gradient of -1/8 hPa/m
         '''
-        h_temperature_data = kwargs['weather'].get_data_heigth('temp_air')
-        h_pressure_data = 0  # heigth of pressure measurement
+        h_temperature_data = kwargs['data_height']['temp_air']
+        h_pressure_data = kwargs['data_height']['pressure']
         T_hub = kwargs['data'].temp_air - 0.0065 * (
             kwargs['h_hub'] - h_temperature_data)
         return (
@@ -220,32 +235,34 @@ class WindPowerPlant():
         '''
         return (kwargs['data'].v_wind * np.log(kwargs['h_hub'] /
                 kwargs['data'].z0)
-                / np.log(kwargs['weather'].get_data_heigth('v_wind')
-                / kwargs['data'].z0))
+                / np.log(kwargs['data_height']['v_wind'] / kwargs['data'].z0))
 
     def cp_values(self, v_wind, **kwargs):
         '''
         Interpolates the cp value as a function of the wind velocity between
         data obtained from the power curve of the specified wind turbine type.
         '''
-        # TODO@Günni
-        sql = '''SELECT * FROM oemof_test.wea_cpcurves
-            WHERE rli_anlagen_id = '{0}'
-            '''.format(kwargs['wka_model'])
         ncols = ['rli_anlagen_id', 'p_nenn', 'source', 'modificationtimestamp']
+        if kwargs.get('connection', None) is None:
+            df = pd.read_hdf(
+                join(expanduser("~"), '.oemof', 'cp_values.hf5'), 'cp')
+            res_ls = df[df.rli_anlagen_id == kwargs[
+                'wind_conv_type']].reset_index(drop=True)
+        else:
+            sql = '''SELECT * FROM oemof_test.wea_cpcurves
+                WHERE rli_anlagen_id = '{0}';
+                '''.format(kwargs['wka_model'])
+            db_res = kwargs['connection'].execute(sql)
+            res_ls = pd.DataFrame(db_res.fetchall(), columns=db_res.keys())
 
-        db_res = kwargs['connection'].execute(sql)
-        res_ls = db_res.fetchall()[0]
-        n = 0
         cp_data = np.array([0, 0])
-        for col in db_res.keys():
+        for col in res_ls.keys():
             if col not in ncols:
-                if res_ls[n] is not None:
+                if res_ls[col][0] is not None:
                     cp_data = np.vstack((cp_data, np.array(
-                        [float(col), float(res_ls[n])])))
-            n += 1
+                        [float(col), float(res_ls[col])])))
         cp_data = np.delete(cp_data, 0, 0)
-        self.nominal_power_wind_turbine = res_ls[1]
+        self.nominal_power_wind_turbine = res_ls['p_nenn'][0]
         v_wind[v_wind > np.max(cp_data[:, 0])] = np.max(cp_data[:, 0])
         return interp1d(cp_data[:, 0], cp_data[:, 1])(v_wind)
 
@@ -267,14 +284,18 @@ class WindPowerPlant():
             upper=(self.nominal_power_wind_turbine * 10 ** 3))
 
     def get_normalized_wind_pp_time_series(self, **kwargs):
-        'Normalized to one MW.'
-        kwargs['data'] = kwargs['weather'].get_feedin_data(
-            gid=kwargs.get('gid', None))
+        'Normalized to one kW installed capacity.'
+        # If no DataFrame is given, try to get the data from a weather object
+        if kwargs.get('data', None) is None:
+            kwargs['data'] = kwargs['weather'].get_feedin_data(
+                gid=kwargs.get('gid', None))
+            kwargs['data_height'] = (
+                self.fetch_data_heights_from_weather_object(**kwargs))
 
         kwargs['data']['p_wpp'] = np.array(list(map(
             float, self.turbine_power_output(**kwargs))))
 
-        kwargs['data']['p_wpp_norm'] = (kwargs['data']['p_wpp'] * 1000 /
+        kwargs['data']['p_wpp_norm'] = (kwargs['data']['p_wpp'] /
                                         float(self.nominal_power_wind_turbine))
         return kwargs['data']
 
