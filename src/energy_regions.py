@@ -237,31 +237,36 @@ class region():
             pp.Power_Plants().get_all_fossil_power_plants(conn, self.geometry))
         return self
 
-    def fetch_demand_series(self, conn):
+    def fetch_demand_series(self, conn, **kwargs):
         ''
         if self._df is None:
             self.create_basic_dataframe(conn=conn)
 
-        # TODO @ Birgit, Caro
-        # Nur temporär, damit es funktioniert. Wird ersetzt durch demandlib.
-        sql = 'select * from oemof_test.demand_test order by id;'
-        table = conn.execute(sql)
-
-        self.demand = pd.DataFrame(
-            table.fetchall(), index=self._df.index, columns=table.keys())
-        self.demand.drop(['id'], inplace=True, axis=1)
-
-        # Spaltennamen brauchen dann aber weder das Jahr noch die Region
-        # Können wir noch diskutieren, der Name ist noch vollkommen offen.
-        self.demand.rename(columns={
-            'lk_wtb_2013': 'electrical',
-            'thoi_lk_wtb_2013': 'district_0',
-            'thng_lk_wtb_2013': 'gas_hs_0',
-            'twcb_lk_wtb_2013': 'wood_hs_0',
-            'dst0_lk_wtb_2013': 'oil_hs_0',
-            }, inplace=True)
+#        # TODO @ Birgit, Caro
+#        # Nur temporär, damit es funktioniert. Wird ersetzt durch demandlib.
+#        sql = 'select * from oemof_test.demand_test order by id;'
+#        table = conn.execute(sql)
+#        print(table.keys)
+#
+#        self.demand = pd.DataFrame(
+#            table.fetchall(), index=self._df.index, columns=table.keys())
+#        self.demand.drop(['id'], inplace=True, axis=1)
+#
+#        # Spaltennamen brauchen dann aber weder das Jahr noch die Region
+#        # Können wir noch diskutieren, der Name ist noch vollkommen offen.
+#        self.demand.rename(columns={
+#            'lk_wtb_2013': 'electrical',
+#            'thoi_lk_wtb_2013': 'district_0',
+#            'thng_lk_wtb_2013': 'gas_hs_0',
+#            'twcb_lk_wtb_2013': 'wood_hs_0',
+#            'dst0_lk_wtb_2013': 'oil_hs_0',
+#            }, inplace=True)
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
+
+        self.demand = eb.electric_building(
+                    annual_elec_demand=kwargs.get('ann_el_demand'),
+                    selp_type=kwargs.get('selp_type'))
 
         return self
 
