@@ -6,6 +6,7 @@ import logging
 #logging.getLogger().setLevel(logging.DEBUG)
 #logging.getLogger().setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.WARNING)
+import shapely.geometry as shape
 from oemof.src import db
 from oemof.src import helpers
 from oemof.src import models
