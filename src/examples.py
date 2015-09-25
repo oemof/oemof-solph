@@ -7,6 +7,7 @@ import logging
 #logging.getLogger().setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.WARNING)
 import shapely.geometry as shape
+import pandas as pd
 from oemof.src import db
 from oemof.src import helpers
 from oemof.src import models
@@ -16,6 +17,8 @@ from oemof.src import energy_buildings as b
 
 import warnings
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
+
+data_profile_entsoe = pd.read_csv("example_data_entsoe.csv", sep=",")
 
 # Plant and site parameter
 site = {'module_name': 'Yingli_YL210__2008__E__',
@@ -75,6 +78,10 @@ define_heat_buildings = [
      'shlp_type': 'ghd'}]
 
 year = 2010
+# for the electric profile of entsoe years from 2006 to 2011
+# do exist in the example data
+# (and only for Germany), more countries are in old oemof's database
+
 
 conn = db.connection()
 
@@ -100,7 +107,12 @@ geo = shape.Polygon([(12.2, 52.2), (12.2, 51.6), (13.2, 51.6), (13.2, 52.2)])
 
 lk_wtb = reg.region(year, geometry=geo)
 
-lk_wtb.fetch_demand_series(conn)
+lk_wtb.fetch_demand_series(conn,
+            ann_el_demand=define_elec_buildings[0]['annual_elec_demand'],
+            selp_type=define_elec_buildings[0]['selp_type'],
+            profile=data_profile_entsoe,
+            year=year)
+
 
 # Die Region holt sich ihr Wetter
 lk_wtb.fetch_weather_raster(conn)
