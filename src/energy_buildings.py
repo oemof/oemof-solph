@@ -15,31 +15,30 @@ class electric_building():
     ''
 
     def __init__(self, bdew=None, **kwargs):
-        # slp is of type bdew_elec_slp!
-#        self.elec_demand = (
-#            bdew.slp[kwargs['selp_type']] /
-#            bdew.slp[kwargs['selp_type']].sum(0) *
-#            kwargs['annual_elec_demand'])
-#        self.profile_type = kwargs['selp_type']
-        self.annual_demand = kwargs.get('annual_elec_demand',
-                                        self.calculate_annual_demand)
 
+        self.annual_demand = kwargs.get('annual_elec_demand')
 #        self.annual_demand = kwargs.get('annual_elec_demand',
-#                                        120)
-
-        print(self.annual_demand)
+#                                        self.calculate_annual_demand())
+        self.year = kwargs.get('year')
+        self.profile = kwargs.get('profile')['deu_' + str(self.year)]
+        self.elec_demand = (self.profile /
+                            self.profile.sum() *
+                            self.annual_demand)
+        print(self.elec_demand.sum())
 
 
     def calculate_annual_demand(self):
         '''
         calculate annual demand from statistic data
         '''
+        # alternativer Aufruf zum Berechnen des annual_demand, falls
+        # keiner übergeben wird, funktioniert bisher nicht
         print('hallo')
         self.annual_demand = 50 + 50
         # hier muss es drei Funktionen geben: Haushalte, Gewerbe, Industrie
         # damit auch drei Properties annual_demand_households,
         # annual_demand_commerce, annual_demand_industry
-
+        print(self.annual_demand)
 
         return self
 

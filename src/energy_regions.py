@@ -266,7 +266,9 @@ class region():
 
         self.demand = eb.electric_building(
                     annual_elec_demand=kwargs.get('ann_el_demand'),
-                    selp_type=kwargs.get('selp_type'))
+                    selp_type=kwargs.get('selp_type'),
+                    profile=kwargs.get('profile'),
+                    year=kwargs.get('year'))
 
         return self
 
