@@ -171,26 +171,26 @@ print('Derzeitiges WKA-Modell: {0}'.format(site['wka_model']))
 print('Mögliche WKA-Modelle')
 models.WindPowerPlant([]).get_wind_pp_types(conn)
 
-# Erstellen der Standardlastprofile des BDEW als Objekt
-# Dafür nutzen wir das DataFrame der Region, das bereits die Feiertage enthält.
-e_slp = b.bdew_elec_slp(conn, lk_wtb.df)
-
-# Das BDEW-Objekt wird jetzt immer übergeben, wenn eine Gebäudeinstant erstellt
-# wird.
-
-# Eine Möglichkeit: Sammeln aller E-Gebäudeinstanzen in einer Liste
-elec_buildings = []
-for building_def in define_elec_buildings:
-    elec_buildings.append(b.electric_building(bdew=e_slp, **building_def))
-
-# Danach (oder dabei): Sammeln aller Lastkurven in einem Dataframe
-e_building_df = lk_wtb.df.drop(lk_wtb.df.columns[:], axis=1)
-for building in elec_buildings:
-    e_building_df[building.type] = building.load
-
-# Jetzt plotten
-e_building_df.plot(title='Electrical standardized load profiles')
-plt.show()
+## Erstellen der Standardlastprofile des BDEW als Objekt
+## Dafür nutzen wir das DataFrame der Region, das bereits die Feiertage enthält.
+#e_slp = b.bdew_elec_slp(conn, lk_wtb.df)
+#
+## Das BDEW-Objekt wird jetzt immer übergeben, wenn eine Gebäudeinstant erstellt
+## wird.
+#
+## Eine Möglichkeit: Sammeln aller E-Gebäudeinstanzen in einer Liste
+#elec_buildings = []
+#for building_def in define_elec_buildings:
+#    elec_buildings.append(b.electric_building(bdew=e_slp, **building_def))
+#
+## Danach (oder dabei): Sammeln aller Lastkurven in einem Dataframe
+#e_building_df = lk_wtb.df.drop(lk_wtb.df.columns[:], axis=1)
+#for building in elec_buildings:
+#    e_building_df[building.type] = building.load
+#
+## Jetzt plotten
+#e_building_df.plot(title='Electrical standardized load profiles')
+#plt.show()
 
 # Für die Wärme wird im Unterschied zum Strom noch eine Temperaturzeitreihe
 # benötigt. Die holen wird aus dem Wetterobjekt der Region. Da die Region
@@ -218,4 +218,4 @@ plt.show()
 # Wenn die Rundungsfehler zu groß sind, dann muss nochmal überlegt werden.
 print('')
 print(h_building_df.sum())
-print(e_building_df.sum())
+#print(e_building_df.sum())
