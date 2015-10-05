@@ -1,6 +1,6 @@
 import pyomo.environ as po
 try:
-    import constraints as gc
+    import linear_constraints as gc
     from network.entities import Bus, Component
     from network.entities import components as cp
 except:
@@ -415,10 +415,6 @@ class OptimizationModel(po.ConcreteModel):
         """
 
         from pyomo.opt import SolverFactory
-
-        # create model instance
-        instance = self.create()
-
         # Create a 'dual' suffix component on the instance
         # so the solver plugin will know which suffixes to collect
         if duals is True:
@@ -428,18 +424,33 @@ class OptimizationModel(po.ConcreteModel):
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if(debug is True):
-            instance.write('problem.lp',
-                           io_options={'symbolic_solver_labels': True})
+            self.write('problem.lp',
+                       io_options={'symbolic_solver_labels': True})
             # print instance
             # instance.pprint()
+
         # solve instance
         opt = SolverFactory(solver, solver_io=solver_io)
         # store results
-        results = opt.solve(instance, **kwargs)
-        # load results back in instance
-        instance.load(results)
+        results = opt.solve(self, **kwargs)
 
-        return(instance)
+        if (results.solver.status == "ok") and \
+           (results.solver.termination_condition == "optimal"):
+            # Do something when the solution in optimal and feasible
+            self.solutions.load_from(results)
+
+        elif (results.solver.termination_condition == "infeasible"):
+            print("Model is infeasible",
+                  "Solver Status: ", results.solver.status)
+        else:
+            # Something else is wrong
+            print ("Solver Status: ",  results.solver.status, "\n"
+                   "Termination condition: ",
+                   results.solver.termination_condition)
+
+
+
+
 
     def edges(self, components):
         """Method that creates a list with all edges for the objects in

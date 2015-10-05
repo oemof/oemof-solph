@@ -13,7 +13,7 @@ except:
     from .network.entities import components as cp
 
 
-def results_to_objects(instance, entities):
+def results_to_objects(instance):
     """ write the results from a pyomo optimization problem back to the
     oemof-objects
 
