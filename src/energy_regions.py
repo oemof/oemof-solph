@@ -276,13 +276,21 @@ class region():
 #            not implemented yet
 
         elif method == 'profile_csv':
-
             self.demand = eb.electric_building(
                         annual_elec_demand=kwargs.get('ann_el_demand'),
                         profile=pd.read_csv(kwargs.get('path') +
                                           kwargs.get('filename'),
                                           sep=","),
-                        year=kwargs.get('year'))
+                        year=kwargs.get('year')) # year muss noch raus
+
+        elif method == 'profile_db':
+            conn = kwargs.get('conn')
+            self.demand = 67890
+#           not implemented yet
+
+        elif method == 'calculate_profile':
+            self.demand = 666
+#           not implemented yet
 
         print(self.demand)
 

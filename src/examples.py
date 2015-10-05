@@ -119,6 +119,13 @@ lk_wtb_3.fetch_demand_series(method='profile_csv',
                          year=year,
                          ann_el_demand=3000)
 
+lk_wtb_4 = reg.region(year, geo)
+lk_wtb_4.fetch_demand_series(method='profile_db',
+                         conn=conn)
+
+lk_wtb_5 = reg.region(year, geo)
+lk_wtb_5.fetch_demand_series(method='calculate_profile')
+
 # Die Region holt sich ihr Wetter
 lk_wtb.fetch_weather_raster(conn)
 
