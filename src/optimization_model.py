@@ -1,10 +1,10 @@
 import pyomo.environ as po
 try:
-    import generic as gc
+    import constraints as gc
     from network.entities import Bus, Component
     from network.entities import components as cp
 except:
-    from . import generic as gc
+    from . import constraints as gc
     from .network.entities import Bus, Component
     from .network.entities import components as cp
 
@@ -16,7 +16,8 @@ class OptimizationModel(po.ConcreteModel):
     ----------
     entities : list with all entity objects
     timesteps : list with all timesteps as integer values
-    invest : boolean
+    options : nested dictionary with options to set. possible options are:
+      invest, slack
 
     Returns
     -------
@@ -201,11 +202,11 @@ class OptimizationModel(po.ConcreteModel):
 
         Parameters
         ----------
-        m : pyomo.ConcreteModel
+        self : pyomo.ConcreteModel
 
         Returns
         -------
-        m : pyomo.ConcreteModel
+        self : pyomo.ConcreteModel
         """
 
         # set bounds for basic/investment models
@@ -395,23 +396,22 @@ class OptimizationModel(po.ConcreteModel):
         self.objective = po.Objective(rule=obj_rule)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
-              results_to_objects=True, duals=False, **kwargs):
+              duals=False, **kwargs):
         """Method that creates the instance of the model and solves it.
 
         Parameters
         ----------
+
         self : pyomo.ConcreteModel
         solver str: solver to be used e.g. 'glpk','gurobi','cplex'
         solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
-        result_to_objects boolean: Flag if results from optimization problem
-        are written back to objects
         **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
         Returns
         -------
-        self : solved pyomo.ConcreteModel instance
+        self : solved pyomo.ConcreteModel() instance
         """
 
         from pyomo.opt import SolverFactory
@@ -438,70 +438,6 @@ class OptimizationModel(po.ConcreteModel):
         results = opt.solve(instance, **kwargs)
         # load results back in instance
         instance.load(results)
-
-        # store dual variables for bus-balance constraints (el and th)
-        if duals is True:
-            for b in self.bus_objs:
-                if b.type == "el" or b.type == "th":
-                    b.results["duals"] = []
-                    for t in self.timesteps:
-                        b.results["duals"].append(
-                            self.dual[getattr(self, "bus")[(b.uid, t)]])
-#                    print(b.results["duals"])
-
-        if results_to_objects is True:
-            for entity in self.entities:
-                if (isinstance(entity, cp.Transformer) or
-                        isinstance(entity, cp.Source)):
-                    # write outputs
-                    O = [e.uid for e in entity.outputs[:]]
-                    for o in O:
-                        entity.results['out'][o] = []
-                        for t in self.timesteps:
-                            entity.results['out'][o].append(
-                                self.w[entity.uid, o, t].value)
-
-                    I = [i.uid for i in entity.inputs[:]]
-                    for i in I:
-                        entity.results['in'][i] = []
-                        for t in self.timesteps:
-                            entity.results['in'][i].append(
-                                self.w[i, entity.uid, t].value)
-
-                if isinstance(entity, cp.sources.DispatchSource):
-                    entity.results['in'][entity.uid] = []
-                    for t in self.timesteps:
-                        entity.results['in'][entity.uid].append(
-                            self.w[entity.uid,
-                                   entity.outputs[0].uid, t].bounds[1])
-
-                # write results to self.simple_sink_objs
-                # (will be the value of simple sink in general)
-                if isinstance(entity, cp.Sink):
-                    i = entity.inputs[0].uid
-                    entity.results['in'][i] = []
-                    for t in self.timesteps:
-                        entity.results['in'][i].append(
-                            self.w[i, entity.uid, t].value)
-                if isinstance(entity, cp.transformers.Storage):
-                    entity.results['soc'] = []
-                    for t in self.timesteps:
-                        entity.results['soc'].append(
-                            self.soc[entity.uid, t].value)
-
-            if(self.invest is True):
-                for entity in self.entities:
-                    if isinstance(entity, cp.Transformer):
-                        entity.results['add_cap_out'] = \
-                            self.add_cap[entity.uid,
-                                         entity.outputs[0].uid].value
-                    if isinstance(entity, cp.Source):
-                        entity.results['add_cap_out'] = \
-                            self.add_cap[entity.uid,
-                                         entity.outputs[0].uid].value
-                    if isinstance(entity, cp.transformers.Storage):
-                        entity.results['add_cap_soc'] = \
-                            self.soc_add[entity.uid].value
 
         return(instance)
 
