@@ -16,6 +16,7 @@ are written back into the objects.
 """
 import matplotlib.pyplot as plt
 from optimization_model import OptimizationModel
+from postprocessing import results_to_objects as r2o
 from network.entities import Bus
 from network.entities.components import sinks as sink
 from network.entities.components import sources as source
@@ -25,7 +26,7 @@ from network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(3)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -34,10 +35,10 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bcoal = Bus(uid="coal", type="coal", price=60)
-bgas = Bus(uid="gas", type="gas", price=70)
-boil = Bus(uid="oil", type="oil", price=80)
-blig = Bus(uid="lignite", type="lignite", price=30)
+bcoal = Bus(uid="coal", type="coal", price=60, sum_out_limit=10e10)
+bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=10e10)
+boil = Bus(uid="oil", type="oil", price=80,  sum_out_limit=10e10)
+blig = Bus(uid="lignite", type="lignite", price=30,  sum_out_limit=10e10)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el")
@@ -114,18 +115,16 @@ storages = [sto_simple]
 sinks = [demand_th, demand_el, demand_el2]
 transports = [cable1, cable2]
 
-components = transformers + renew_sources + storages + sinks + transports
+components = transformers + renew_sources  + sinks + transports + storages
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': False, 'slack': {
                            'excess': True, 'shortage': True}})
 
-om.solve(solver='gurobi', debug=True, tee=False,
-         results_to_objects=True, duals=True)
-
+om.solve(solver='glpk', debug=True, tee=True, duals=False)
+r2o(om)
 # write results to data frame for excel export
-
 components = transformers + renew_sources
 
 
