@@ -265,9 +265,8 @@ class region():
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
 
         if method == 'csv':
-            path = kwargs.get('path')
-            filename = kwargs.get('filename')
-            self.demand = pd.read_csv(path + filename,
+            self.demand = pd.read_csv(kwargs.get('path') +
+                                      kwargs.get('filename'),
                                       sep=",")
 
         elif method == 'db':
