@@ -237,10 +237,10 @@ class region():
             pp.Power_Plants().get_all_fossil_power_plants(conn, self.geometry))
         return self
 
-    def fetch_demand_series(self, conn, **kwargs):
+    def fetch_demand_series(self, method, **kwargs):
         ''
-        if self._df is None:
-            self.create_basic_dataframe(conn=conn)
+#        if self._df is None:
+#            self.create_basic_dataframe(conn=conn)
 
 #        # TODO @ Birgit, Caro
 #        # Nur temporär, damit es funktioniert. Wird ersetzt durch demandlib.
@@ -264,11 +264,27 @@ class region():
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
 
-        self.demand = eb.electric_building(
-                    annual_elec_demand=kwargs.get('ann_el_demand'),
-                    selp_type=kwargs.get('selp_type'),
-                    profile=kwargs.get('profile'),
-                    year=kwargs.get('year'))
+        if method == 'csv':
+            path = kwargs.get('path')
+            filename = kwargs.get('filename')
+            self.demand = pd.read_csv(path + filename,
+                                      sep=",")
+
+        elif method == 'db':
+            conn = kwargs.get('conn')
+            self.demand = 12345
+#            not implemented yet
+
+        elif method == 'profile_csv':
+
+            self.demand = eb.electric_building(
+                        annual_elec_demand=kwargs.get('ann_el_demand'),
+                        profile=pd.read_csv(kwargs.get('path') +
+                                          kwargs.get('filename'),
+                                          sep=","),
+                        year=kwargs.get('year'))
+
+        print(self.demand)
 
         return self
 

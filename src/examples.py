@@ -18,7 +18,6 @@ from oemof.src import energy_buildings as b
 import warnings
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
 
-data_profile_entsoe = pd.read_csv("example_data_entsoe.csv", sep=",")
 
 # Plant and site parameter
 site = {'module_name': 'Yingli_YL210__2008__E__',
@@ -106,13 +105,19 @@ geo = shape.Polygon([(12.2, 52.2), (12.2, 51.6), (13.2, 51.6), (13.2, 52.2)])
 #    logging.error('Reverse geocoding does not work!')
 
 lk_wtb = reg.region(year, geometry=geo)
+lk_wtb.fetch_demand_series(method='csv',
+                         path='/home/caro/rlihome/Git/oemof/src/',
+                         filename='example_data_entsoe.csv')
 
-lk_wtb.fetch_demand_series(conn,
-            ann_el_demand=define_elec_buildings[0]['annual_elec_demand'],
-            selp_type=define_elec_buildings[0]['selp_type'],
-            profile=data_profile_entsoe,
-            year=year)
+lk_wtb_2 = reg.region(year, geo)
+lk_wtb_2.fetch_demand_series(method='db', conn=conn)
 
+lk_wtb_3 = reg.region(year, geo)
+lk_wtb_3.fetch_demand_series(method='profile_csv',
+                         path='/home/caro/rlihome/Git/oemof/src/',
+                         filename='example_data_entsoe.csv',
+                         year=year,
+                         ann_el_demand=3000)
 
 # Die Region holt sich ihr Wetter
 lk_wtb.fetch_weather_raster(conn)
