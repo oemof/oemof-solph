@@ -12,6 +12,26 @@ except:
     from .network.entities import components as cp
 
 
+def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
+    """
+    """
+    I = {b.uid: [i.uid for i in b.inputs] for b in objs}
+    O = {b.uid: [o.uid for o in b.outputs] for b in objs}
+
+    # constraint for bus balance:
+    # component inputs/outputs are negative/positive in the bus balance
+    def bus_rule(model, e, t):
+        expr = 0
+        expr += -sum(model.w[e, o, t] for o in O[e])
+        expr += sum(model.w[i, e, t] for i in I[e])
+        if model.slack["excess"] is True:
+            expr += -model.excess_slack[e, t]
+        if model.slack["shortage"] is True:
+            expr += model.shortage_slack[e, t]
+        return(expr, 0)
+    model.bus = po.Constraint(uids, timesteps, rule=bus_rule)
+
+
 def generic_variables(model, edges, timesteps, var_name="w"):
     """ Creates all variables corresponding to the edges of the bi-partite graph
     for all timesteps.
@@ -80,8 +100,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
             model.soc_add = po.Var(uids, within=po.NonNegativeReals)
 
 
-def generic_io_constraints(model, objs=None, uids=None,
-                           timesteps=None):
+def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
     """ Creates constraint for input-output relation as simple function
 
 

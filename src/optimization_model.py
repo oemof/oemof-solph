@@ -1,10 +1,10 @@
 import pyomo.environ as po
 try:
-    import linear_constraints as gc
+    import linear_constraints as lc
     from network.entities import Bus, Component
     from network.entities import components as cp
 except:
-    from . import constraints as gc
+    from . import constraints as lc
     from .network.entities import Bus, Component
     from .network.entities import components as cp
 
@@ -27,13 +27,14 @@ class OptimizationModel(po.ConcreteModel):
 
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
-
     def __init__(self, entities, timesteps, options=None):
 
         super().__init__()
 
         self.entities = entities
         self.timesteps = timesteps
+
+        # get options
         self.invest = options.get("invest", False)
         self.slack = options.get("slack", {"excess": True,
                                            "shortage": False})
@@ -41,7 +42,8 @@ class OptimizationModel(po.ConcreteModel):
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.all_edges = self.edges([e for e in self.entities
                                      if isinstance(e, Component)])
-        gc.generic_variables(model=self, edges=self.all_edges,
+
+        lc.generic_variables(model=self, edges=self.all_edges,
                              timesteps=self.timesteps)
 
         # list with all necessary classes
@@ -65,6 +67,11 @@ class OptimizationModel(po.ConcreteModel):
     def bus_model(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
 
+        The bus model creates all full balance around all buses using
+        the `linear_constraints.generic_bus_constraint()` function.
+        Additionally it sets constraints to model limits over the timehorizon
+        for resource buses using `linear_constraints.generic_limit()
+
         Parameters
         ----------
         self : pyomo.ConcreteModel
@@ -73,12 +80,10 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
+        # get all bus objects
         self.bus_objs = [e for e in self.entities if isinstance(e, Bus)]
+        # get uids from bus objects
         self.bus_uids = [e.uid for e in self.bus_objs]
-
-        bus_objs = [obj for obj in self.bus_objs
-                    if any([obj.type == "el", obj.type == "th"])]
-        bus_uids = [obj.uid for obj in bus_objs]
 
         # slack variables that assures a feasible problem
         if self.slack["excess"] is True:
@@ -87,30 +92,25 @@ class OptimizationModel(po.ConcreteModel):
         if self.slack["shortage"] is True:
             self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
                                          within=po.NonNegativeReals)
-        I = {b.uid: [i.uid for i in b.inputs] for b in bus_objs}
-        O = {b.uid: [o.uid for o in b.outputs] for b in bus_objs}
 
-        # constraint for bus balance:
-        # component inputs/outputs are negative/positive in the bus balance
-        def bus_rule(self, e, t):
-            expr = 0
-            expr += -sum(self.w[e, o, t] for o in O[e])
-            expr += sum(self.w[i, e, t] for i in I[e])
-            if self.slack["excess"] is True:
-                expr += -self.excess_slack[e, t]
-            if self.slack["shortage"] is True:
-                expr += self.shortage_slack[e, t]
-            return(expr, 0)
-        self.bus = po.Constraint(bus_uids, self.timesteps, rule=bus_rule)
+        # select only "energy"-bus objects for bus balance constraint
+        energy_bus_objs = [obj for obj in self.bus_objs
+                           if any([obj.type == "el", obj.type == "th"])]
+        energy_bus_uids = [obj.uid for obj in energy_bus_objs]
+
+        # bus balance constraint for energy bus objects
+        lc.generic_bus_constraint(self, objs=energy_bus_objs,
+                                  uids=energy_bus_uids,
+                                  timesteps=self.timesteps)
 
         # select only buses that are resources (gas, oil, etc.)
-        rbus_objs = [obj for obj in self.bus_objs
-                     if all([obj.type != "el", obj.type != "th"])]
-        rbus_uids = [e.uid for e in rbus_objs]
+        resource_bus_objs = [obj for obj in self.bus_objs
+                             if all([obj.type != "el", obj.type != "th"])]
+        resource_bus_uids = [e.uid for e in resource_bus_objs]
 
         # set limits for resource buses
-        gc.generic_limit(model=self, objs=rbus_objs, uids=rbus_uids,
-                         timesteps=self.timesteps)
+        lc.generic_limit(model=self, objs=resource_bus_objs,
+                         uids=resource_bus_uids, timesteps=self.timesteps)
 
     def simple_transformer_model(self, objs, uids):
         """Generic transformer model containing the constraints
@@ -125,20 +125,20 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
 
-        gc.generic_io_constraints(model=self, objs=objs, uids=uids,
+        lc.generic_io_constraints(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
 
         # set bounds for variables  models
         if self.invest is False:
-            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+            lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
         else:
-            gc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
+            lc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
                                    timesteps=self.timesteps)
 
     def simple_chp_model(self, objs, uids):
-        """Simple chp model containing the constraints for simple chp
-        components.
+        """Simple combined heat and power model containing the constraints
+        for simple chp components.
 
         Parameters
         ----------
@@ -150,11 +150,11 @@ class OptimizationModel(po.ConcreteModel):
 
         """
         # use generic_transformer model for in-out relation and
-        # upper/lower bounds
+        # upper / lower bounds
         self.simple_transformer_model(objs=objs, uids=uids)
 
         # use generic constraint to model PQ relation (P/eta_el = Q/eta_th)
-        gc.generic_chp_constraint(model=self, objs=objs, uids=uids,
+        lc.generic_chp_constraint(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
 
     def fixed_source_model(self, objs, uids):
@@ -170,17 +170,17 @@ class OptimizationModel(po.ConcreteModel):
         self : pyomo.ConcreteModel
         """
         if self.invest is False:
-            gc.generic_fixed_source(model=self, objs=objs, uids=uids,
+            lc.generic_fixed_source(model=self, objs=objs, uids=uids,
                                     timesteps=self.timesteps)
         else:
-            gc.generic_fixed_source_invest(model=self, objs=objs, uids=uids,
+            lc.generic_fixed_source_invest(model=self, objs=objs, uids=uids,
                                            timesteps=self.timesteps)
 
     def dispatch_source_model(self, objs, uids):
         """
         """
         if self.invest is False:
-            gc.generic_dispatch_source(model=self, objs=objs, uids=uids,
+            lc.generic_dispatch_source(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
 
     def simple_sink_model(self, objs, uids):
@@ -193,7 +193,7 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
-        gc.generic_fixed_sink(model=self, objs=objs, uids=uids,
+        lc.generic_fixed_sink(model=self, objs=objs, uids=uids,
                               timesteps=self.timesteps)
 
     def simple_storage_model(self, objs, uids):
@@ -211,7 +211,7 @@ class OptimizationModel(po.ConcreteModel):
 
         # set bounds for basic/investment models
         if(self.invest is False):
-            gc.generic_w_ub(model=self, objs=objs, uids=uids,
+            lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
         else:
             gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
@@ -355,7 +355,7 @@ class OptimizationModel(po.ConcreteModel):
         def obj_rule(self):
             expr = 0
 
-            # variable opex including ressource consumption
+            # variable opex including resource consumption
             expr += sum(self.w[I[e], e, t] *
                         (self.input_costs[e] + self.opex_var[e])
                         for e in self.cost_uids for t in self.timesteps)
@@ -374,13 +374,6 @@ class OptimizationModel(po.ConcreteModel):
                             for e in self.dispatch_source_uids
                             for t in self.timesteps)
 
-            if self.slack["excess"] is True:
-                expr += sum(self.excess_slack[e, t] * 3000
-                            for e in self.bus_uids for t in self.timesteps)
-            if self.slack["shortage"] is True:
-                expr += sum(self.shortage_slack[e, t] * 3000
-                            for e in self.bus_uids for t in self.timesteps)
-
             # add additional capacity & capex for investment models
             if(self.invest is True):
                 self.capex = {obj.uid: obj.capex for obj in cost_objs}
@@ -392,12 +385,20 @@ class OptimizationModel(po.ConcreteModel):
                 expr += sum(self.soc_add[e] * self.crf[e] *
                             (self.capex[e] + self.opex_fix[e])
                             for e in self.simple_storage_uids)
+
+            # artificial costs for excess or shortage
+            if self.slack["excess"] is True:
+                expr += sum(self.excess_slack[e, t] * 3000
+                            for e in self.bus_uids for t in self.timesteps)
+            if self.slack["shortage"] is True:
+                expr += sum(self.shortage_slack[e, t] * 3000
+                            for e in self.bus_uids for t in self.timesteps)
             return(expr)
         self.objective = po.Objective(rule=obj_rule)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
-        """Method that creates the instance of the model and solves it.
+        """ Method that solves the optimization model
 
         Parameters
         ----------
@@ -448,10 +449,6 @@ class OptimizationModel(po.ConcreteModel):
                    "Termination condition: ",
                    results.solver.termination_condition)
 
-
-
-
-
     def edges(self, components):
         """Method that creates a list with all edges for the objects in
         components.
@@ -479,17 +476,17 @@ class OptimizationModel(po.ConcreteModel):
         return(edges)
 
 
-def io_sets(components):
-    """Function that gets inputs and outputs for given components.
-
-    Parameters
-    ----------
-    components : list of component objects
-
-    Returns
-    -------
-    (I, O) : lists with tupels that represent the edges
-    """
-    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in components}
-    I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in components}
-    return(I, O)
+#def io_sets(components):
+#    """Function that gets inputs and outputs for given components.
+#
+#    Parameters
+#    ----------
+#    components : list of component objects
+#
+#    Returns
+#    -------
+#    (I, O) : lists with tupels that represent the edges
+#    """
+#    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in components}
+#    I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in components}
+#    return(I, O)
