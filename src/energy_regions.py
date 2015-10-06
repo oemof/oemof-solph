@@ -274,7 +274,7 @@ class region():
             self.demand = 12345
 #            not implemented yet
 
-        elif method == 'profile_csv':
+        elif method == 'scale_profile_csv':
             self.demand = dm.electrical_demand(
                             annual_elec_demand=kwargs.get('ann_el_demand'),
                             profile=pd.read_csv(kwargs.get('path') +
@@ -292,10 +292,13 @@ class region():
 #            print(eb.electric_building().annual_demand)
 #            print(eb.electric_building(annual_elec_demand=200).annual_demand)
 
-        elif method == 'profile_db':
+        elif method == 'scale_profile_db':
             conn = kwargs.get('conn')
             self.demand = 67890
 #           not implemented yet
+
+        elif method == 'scale_entsoe':
+            conn = kwargs.get('conn')
 
         elif method == 'calculate_profile':
             self.demand = 666

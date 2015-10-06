@@ -113,17 +113,21 @@ lk_wtb_2 = reg.region(year, geo)
 lk_wtb_2.fetch_demand_series(method='db', conn=conn)
 
 lk_wtb_3 = reg.region(year, geo)
-lk_wtb_3.fetch_demand_series(method='profile_csv',
+lk_wtb_3.fetch_demand_series(method='scale_profile_csv',
                          path='/home/caro/rlihome/Git/oemof/src/',
                          filename='example_data_entsoe.csv',
                          ann_el_demand=3000)
 
 lk_wtb_4 = reg.region(year, geo)
-lk_wtb_4.fetch_demand_series(method='profile_db',
+lk_wtb_4.fetch_demand_series(method='scale_profile_db',
                          conn=conn)
 
 lk_wtb_5 = reg.region(year, geo)
-lk_wtb_5.fetch_demand_series(method='calculate_profile')
+lk_wtb_5.fetch_demand_series(method='scale_entsoe',
+                         conn=conn)
+
+lk_wtb_6 = reg.region(year, geo)
+lk_wtb_6.fetch_demand_series(method='calculate_profile')
 
 # Die Region holt sich ihr Wetter
 lk_wtb.fetch_weather_raster(conn)
