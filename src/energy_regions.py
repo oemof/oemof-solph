@@ -12,7 +12,7 @@ import pickle
 from . import helpers
 from . import energy_weather as w
 from . import energy_power_plants as pp
-from . import energy_buildings as eb
+from . import demand as dm
 from . import powerplants as plants
 from . import models
 
@@ -275,12 +275,22 @@ class region():
 #            not implemented yet
 
         elif method == 'profile_csv':
-            self.demand = eb.electric_building(
-                        annual_elec_demand=kwargs.get('ann_el_demand'),
-                        profile=pd.read_csv(kwargs.get('path') +
-                                          kwargs.get('filename'),
-                                          sep=","),
-                        year=kwargs.get('year')) # year muss noch raus
+            self.demand = dm.electrical_demand(
+                            annual_elec_demand=kwargs.get('ann_el_demand'),
+                            profile=pd.read_csv(kwargs.get('path') +
+                                              kwargs.get('filename'),
+                                              sep=","))
+
+            print(self.demand.elec_demand.sum())
+
+
+
+
+#                         year muss noch raus
+#            print(self.demand)
+
+#            print(eb.electric_building().annual_demand)
+#            print(eb.electric_building(annual_elec_demand=200).annual_demand)
 
         elif method == 'profile_db':
             conn = kwargs.get('conn')
@@ -291,7 +301,7 @@ class region():
             self.demand = 666
 #           not implemented yet
 
-        print(self.demand)
+#        print(self.demand.sum())
 
         return self
 

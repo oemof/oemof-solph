@@ -116,7 +116,6 @@ lk_wtb_3 = reg.region(year, geo)
 lk_wtb_3.fetch_demand_series(method='profile_csv',
                          path='/home/caro/rlihome/Git/oemof/src/',
                          filename='example_data_entsoe.csv',
-                         year=year,
                          ann_el_demand=3000)
 
 lk_wtb_4 = reg.region(year, geo)
