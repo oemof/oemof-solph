@@ -122,7 +122,7 @@ om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': False, 'slack': {
                            'excess': True, 'shortage': True}})
 
-om.solve(solver='glpk', debug=True, tee=True, duals=False)
+om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 r2o(om)
 # write results to data frame for excel export
 components = transformers + renew_sources

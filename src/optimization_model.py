@@ -1,10 +1,12 @@
 import pyomo.environ as po
 try:
     import linear_constraints as lc
+    import linear_objectives as lo
     from network.entities import Bus, Component
     from network.entities import components as cp
 except:
-    from . import constraints as lc
+    from . import linear_constraints as lc
+    from . import linear_objectives as lo
     from .network.entities import Bus, Component
     from .network.entities import components as cp
 
@@ -314,87 +316,12 @@ class OptimizationModel(po.ConcreteModel):
             self.simple_storage_objs +
             self.simple_transport_objs)
 
-        self.cost_uids = {obj.uid for obj in cost_objs}
-
-        I = {obj.uid: obj.inputs[0].uid for obj in cost_objs}
-#        print("I: " + str(I))
-
-        # create a combined list of all revenue related components
         revenue_objs = (
             self.simple_chp_objs +
             self.simple_transformer_objs)
 
-        self.revenue_uids = {obj.uid for obj in revenue_objs}
-
-        O = {obj.uid: obj.outputs[0].uid for obj in revenue_objs}
-
-        # operational costs
-        self.opex_var = {obj.uid: obj.opex_var for obj in cost_objs}
-        self.input_costs = {obj.uid: obj.inputs[0].price
-                            for obj in cost_objs}
-        self.opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
-        # installed electrical/thermal capacity: {'pp_chp': 30000,...}
-        self.cap_installed = {obj.uid: obj.out_max for obj in cost_objs}
-        self.cap_installed = {k: sum(filter(None, v.values()))
-                              for k, v in self.cap_installed.items()}
-
-        # why do we need revenues? price=0, so we just leave this code here..
-        self.output_revenues = {}
-        for obj in revenue_objs:
-            if isinstance(obj.outputs[0].price, (float, int)):
-                price = [obj.outputs[0].price] * len(self.timesteps)
-                self.output_revenues[obj.uid] = price
-            else:
-                self.output_revenues[obj.uid] = obj.outputs[0].price
-
-        # get dispatch expenditure for renewable energies with dispatch
-        self.dispatch_ex = {obj.uid: obj.dispatch_ex
-                            for obj in self.dispatch_source_objs}
-
-        # objective function
-        def obj_rule(self):
-            expr = 0
-
-            # variable opex including resource consumption
-            expr += sum(self.w[I[e], e, t] *
-                        (self.input_costs[e] + self.opex_var[e])
-                        for e in self.cost_uids for t in self.timesteps)
-
-            # fixed opex of components
-            expr += sum(self.cap_installed[e] * (self.opex_fix[e])
-                        for e in self.cost_uids)
-
-            # revenues from outputs of components
-            expr += - sum(self.w[e, O[e], t] * self.output_revenues[e][t]
-                          for e in self.revenue_uids for t in self.timesteps)
-
-            # dispatch costs
-            if self.dispatch_source_objs:
-                expr += sum(self.dispatch[e, t] * self.dispatch_ex[e]
-                            for e in self.dispatch_source_uids
-                            for t in self.timesteps)
-
-            # add additional capacity & capex for investment models
-            if(self.invest is True):
-                self.capex = {obj.uid: obj.capex for obj in cost_objs}
-                self.crf = {obj.uid: obj.crf for obj in cost_objs}
-
-                expr += sum(self.add_cap[I[e], e] * self.crf[e] *
-                            (self.capex[e] + self.opex_fix[e])
-                            for e in self.cost_uids)
-                expr += sum(self.soc_add[e] * self.crf[e] *
-                            (self.capex[e] + self.opex_fix[e])
-                            for e in self.simple_storage_uids)
-
-            # artificial costs for excess or shortage
-            if self.slack["excess"] is True:
-                expr += sum(self.excess_slack[e, t] * 3000
-                            for e in self.bus_uids for t in self.timesteps)
-            if self.slack["shortage"] is True:
-                expr += sum(self.shortage_slack[e, t] * 3000
-                            for e in self.bus_uids for t in self.timesteps)
-            return(expr)
-        self.objective = po.Objective(rule=obj_rule)
+        lo.objective_cost_min(model=self, cost_objs=cost_objs,
+                              revenue_objs=revenue_objs)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
