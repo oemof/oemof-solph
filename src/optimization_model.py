@@ -121,6 +121,8 @@ class OptimizationModel(po.ConcreteModel):
         Parameters
         ----------
         self : pyomo.ConcreteModel
+        objs : oemof objects for which the model (constraints etc.) is created
+        uids : unique ids of `objs`
 
         Returns
         -------
@@ -216,7 +218,7 @@ class OptimizationModel(po.ConcreteModel):
             lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
         else:
-            gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
+            lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
 
             # constraint that limits discharge power by using the c-rate

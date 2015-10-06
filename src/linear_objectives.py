@@ -6,6 +6,7 @@ Created on Tue Oct  6 11:34:27 2015
 """
 import pyomo.environ as po
 
+
 def objective_cost_min(model, cost_objs=None, revenue_objs=None):
     """Function that creates the objective function of the optimization
     model.
@@ -14,7 +15,8 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
     ----------
     model : pyomo.ConcreteModel
     cost_objects : oemof objects that are related with costs in the objective
-    revenue_objs: oemof objects that are related with revenues in the objective
+    revenue_objs : oemof objects that are related with revenues in
+    the objective
 
     Returns
     -------
@@ -87,7 +89,7 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
 
             expr += sum(model.add_cap[I[e], e] * model.crf[e] *
                         (model.capex[e] + model.opex_fix[e])
-                        for e in model.cost_uids)
+                        for e in cost_uids)
             expr += sum(model.soc_add[e] * model.crf[e] *
                         (model.capex[e] + model.opex_fix[e])
                         for e in model.simple_storage_uids)
@@ -101,5 +103,3 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
                         for e in model.bus_uids for t in model.timesteps)
         return(expr)
     model.objective = po.Objective(rule=obj_rule)
-
-

@@ -16,7 +16,7 @@ are written back into the objects.
 """
 import matplotlib.pyplot as plt
 from optimization_model import OptimizationModel
-from postprocessing import results_to_objects as r2o
+import postprocessing as pp
 from network.entities import Bus
 from network.entities.components import sinks as sink
 from network.entities.components import sources as source
@@ -26,7 +26,7 @@ from network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(3)]
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -46,7 +46,8 @@ b_el2 = Bus(uid="b_el2", type="el")
 b_th = Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
-wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el], val=data['wind'],
+wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el],
+                                val=data['wind'],
                                 out_max={b_el.uid: 66300}, dispatch_ex=10)
 wind_on2 = source.DispatchSource(uid="wind_on2", outputs=[b_el2],
                                  val=data['wind'], out_max={b_el2.uid: 66300})
@@ -115,15 +116,16 @@ storages = [sto_simple]
 sinks = [demand_th, demand_el, demand_el2]
 transports = [cable1, cable2]
 
-components = transformers + renew_sources  + sinks + transports + storages
+components = transformers + renew_sources + sinks + transports + storages
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': False, 'slack': {
-                           'excess': True, 'shortage': True}})
+                           'excess': False, 'shortage': True}})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
-r2o(om)
+pp.results_to_objects(om)
+pp.results_to_excel(om)
 # write results to data frame for excel export
 components = transformers + renew_sources
 
@@ -156,7 +158,7 @@ if __name__ == "__main__":
         import matplotlib as mpl
         import matplotlib.cm as cm
 
-        plot_data = renew_sources+storages+transformers+transports
+        plot_data = renew_sources+transformers+transports+storages
 
         # data preparation
         x = np.arange(len(timesteps))
