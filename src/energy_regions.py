@@ -281,7 +281,7 @@ class region():
                                               kwargs.get('filename'),
                                               sep=","))
 
-            print(self.demand.elec_demand.sum())
+            print('self.demand: ', self.demand.elec_demand.sum())
 
 
 
