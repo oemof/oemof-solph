@@ -61,12 +61,12 @@ class OptimizationModel(po.ConcreteModel):
             setattr(self, cls.lower_name + "_uids", uids)
             # "call" methods to add the constraints opt. problem
             if objs:
-                getattr(self, cls.lower_name + "_model")(objs=objs, uids=uids)
+                getattr(self, cls.lower_name + "_assembler")(objs=objs, uids=uids)
 
-        self.bus_model()
-        self.objective()
+        self.bus_assembler()
+        self.objective_assembler()
 
-    def bus_model(self):
+    def bus_assembler(self):
         """bus model creates bus balance for all buses using pyomo.Constraint
 
         The bus model creates all full balance around all buses using
@@ -114,7 +114,7 @@ class OptimizationModel(po.ConcreteModel):
         lc.generic_limit(model=self, objs=resource_bus_objs,
                          uids=resource_bus_uids, timesteps=self.timesteps)
 
-    def simple_transformer_model(self, objs, uids):
+    def simple_transformer_assembler(self, objs, uids):
         """Generic transformer model containing the constraints
         for generic transformer components.
 
@@ -140,7 +140,7 @@ class OptimizationModel(po.ConcreteModel):
             lc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
                                    timesteps=self.timesteps)
 
-    def simple_chp_model(self, objs, uids):
+    def simple_chp_assembler(self, objs, uids):
         """Simple combined heat and power model containing the constraints
         for simple chp components.
 
@@ -155,13 +155,13 @@ class OptimizationModel(po.ConcreteModel):
         """
         # use generic_transformer model for in-out relation and
         # upper / lower bounds
-        self.simple_transformer_model(objs=objs, uids=uids)
+        self.simple_transformer_assembler(objs=objs, uids=uids)
 
         # use generic constraint to model PQ relation (P/eta_el = Q/eta_th)
         lc.generic_chp_constraint(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
 
-    def fixed_source_model(self, objs, uids):
+    def fixed_source_assembler(self, objs, uids):
         """fixed source model containing the constraints for
         fixed sources.
 
@@ -180,14 +180,14 @@ class OptimizationModel(po.ConcreteModel):
             lc.generic_fixed_source_invest(model=self, objs=objs, uids=uids,
                                            timesteps=self.timesteps)
 
-    def dispatch_source_model(self, objs, uids):
+    def dispatch_source_assembler(self, objs, uids):
         """
         """
         if self.invest is False:
             lc.generic_dispatch_source(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
 
-    def simple_sink_model(self, objs, uids):
+    def simple_sink_assembler(self, objs, uids):
         """simple sink model containing the constraints for simple sinks
         Parameters
         ----------
@@ -200,7 +200,7 @@ class OptimizationModel(po.ConcreteModel):
         lc.generic_fixed_sink(model=self, objs=objs, uids=uids,
                               timesteps=self.timesteps)
 
-    def simple_storage_model(self, objs, uids):
+    def simple_storage_assembler(self, objs, uids):
         """Simple storage model containing the constraints for simple storage
         components.
 
@@ -283,7 +283,7 @@ class OptimizationModel(po.ConcreteModel):
         self.simple_storage_c = po.Constraint(uids, self.timesteps,
                                               rule=storage_balance_rule)
 
-    def simple_transport_model(self, objs, uids):
+    def simple_transport_assembler(self, objs, uids):
         """Simple transport model building the constraints
         for simple transport components
 
@@ -296,9 +296,9 @@ class OptimizationModel(po.ConcreteModel):
         m : pyomo.ConcreteModel
         """
 
-        self.simple_transformer_model(objs=objs, uids=uids)
+        self.simple_transformer_assembler(objs=objs, uids=uids)
 
-    def objective(self):
+    def objective_assembler(self):
         """Function that creates the objective function of the optimization
         model.
 
