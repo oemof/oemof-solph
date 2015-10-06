@@ -66,6 +66,20 @@ except:
     logging.info('Install geocoder to use it.')
 
 
+def get_polygons_from_table(conn, schema, table, g_col='geom', n_col='name'):
+    sql = '''
+        SELECT {n_col}, st_astext({g_col})
+        FROM {schema}.{table};
+    '''.format(
+        **{'n_col': n_col, 'g_col': g_col, 'schema': schema, 'table': table})
+    logging.debug(sql)
+    raw_data = conn.execute(sql).fetchall()
+    polygon_dc = {}
+    for d in raw_data:
+        polygon_dc[d[0]] = [d[0], wkt_loads(d[1])]
+    return polygon_dc
+
+
 def get_polygon_from_nuts(conn, nuts):
     r"""A one-line summary that does not use variable names or the
     function name.
