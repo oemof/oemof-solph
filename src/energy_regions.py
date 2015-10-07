@@ -265,9 +265,11 @@ class region():
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
 
         if method == 'csv':
-            self.demand = pd.read_csv(kwargs.get('path') +
-                                      kwargs.get('filename'),
-                                      sep=",")
+            self.demand = dm.electrical_demand()
+            self.demand.read_from_csv(path=kwargs.get('path'),
+                                      filename=kwargs.get('filename'))
+
+            print('self.demand: ', self.demand.profile.sum())
 
         elif method == 'db':
             conn = kwargs.get('conn')
@@ -275,22 +277,13 @@ class region():
 #            not implemented yet
 
         elif method == 'scale_profile_csv':
-            self.demand = dm.electrical_demand(
-                            annual_elec_demand=kwargs.get('ann_el_demand'),
-                            profile=pd.read_csv(kwargs.get('path') +
-                                              kwargs.get('filename'),
-                                              sep=","))
+            self.demand = dm.electrical_demand(annual_elec_demand=
+                                               kwargs.get('ann_el_demand'))
+            self.demand.read_from_csv(path=kwargs.get('path'),
+                                      filename=kwargs.get('filename'))
+            self.demand.scale_profile()
 
             print('self.demand: ', self.demand.elec_demand.sum())
-
-
-
-
-#                         year muss noch raus
-#            print(self.demand)
-
-#            print(eb.electric_building().annual_demand)
-#            print(eb.electric_building(annual_elec_demand=200).annual_demand)
 
         elif method == 'scale_profile_db':
             conn = kwargs.get('conn')
