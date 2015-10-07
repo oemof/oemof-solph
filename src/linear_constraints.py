@@ -22,13 +22,13 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
     # component inputs/outputs are negative/positive in the bus balance
     def bus_rule(model, e, t):
         expr = 0
-        expr += -sum(model.w[e, o, t] for o in O[e])
         expr += sum(model.w[i, e, t] for i in I[e])
+        rhs  = sum(model.w[e, o, t] for o in O[e])
         if model.slack["excess"] is True:
-            expr += -model.excess_slack[e, t]
+            rhs += model.excess_slack[e, t]
         if model.slack["shortage"] is True:
             expr += model.shortage_slack[e, t]
-        return(expr, 0)
+        return(expr >= rhs)
     model.bus = po.Constraint(uids, timesteps, rule=bus_rule)
 
 
