@@ -239,6 +239,14 @@ class region():
 
     def fetch_demand_series(self, method, **kwargs):
         ''
+        self.demand = dm.electrical_demand(method,
+                                           annual_elec_demand=
+                                           kwargs.get('ann_el_demand'),
+                                           path=kwargs.get('path'),
+                                           filename=kwargs.get('filename'),
+                                           conn=kwargs.get('conn'))
+
+        print('self.demand: ', self.demand.elec_demand.sum())
 #        if self._df is None:
 #            self.create_basic_dataframe(conn=conn)
 
@@ -263,41 +271,6 @@ class region():
 #            }, inplace=True)
 
         # Am Ende soll ein DataFrame rauskommen, dass wie self.demand ist.
-
-        if method == 'csv':
-            self.demand = dm.electrical_demand()
-            self.demand.read_from_csv(path=kwargs.get('path'),
-                                      filename=kwargs.get('filename'))
-
-            print('self.demand: ', self.demand.profile.sum())
-
-        elif method == 'db':
-            conn = kwargs.get('conn')
-            self.demand = 12345
-#            not implemented yet
-
-        elif method == 'scale_profile_csv':
-            self.demand = dm.electrical_demand(annual_elec_demand=
-                                               kwargs.get('ann_el_demand'))
-            self.demand.read_from_csv(path=kwargs.get('path'),
-                                      filename=kwargs.get('filename'))
-            self.demand.scale_profile()
-
-            print('self.demand: ', self.demand.elec_demand.sum())
-
-        elif method == 'scale_profile_db':
-            conn = kwargs.get('conn')
-            self.demand = 67890
-#           not implemented yet
-
-        elif method == 'scale_entsoe':
-            conn = kwargs.get('conn')
-
-        elif method == 'calculate_profile':
-            self.demand = 666
-#           not implemented yet
-
-#        print(self.demand.sum())
 
         return self
 

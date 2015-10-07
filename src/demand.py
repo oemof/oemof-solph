@@ -2,24 +2,59 @@
 """
 Created on Fri Jul 24 19:11:38 2015
 
-@author: uwe
+@author: caro
 """
 
+import numpy as np
 import pandas as pd
 
 
 class electrical_demand():
     '''
     '''
-    def __init__(self, **kwargs):
+    def __init__(self, method, **kwargs):
         self.annual_demand = kwargs.get('annual_elec_demand')
         if self.annual_demand is None:
             self.annual_demand = self.calculate_annual_demand()
-#        self.profile = kwargs.get('profile')['deu_' + str(self.year)]
-#        self.profile = self.read_from_csv(path=kwargs.get('path'),
-#                                          filename=kwargs.get('filename'))
-#
-#        self.elec_demand = self.scale_profile()
+
+        self.decider(method, **kwargs)
+
+    def decider(self, method, **kwargs):
+        '''
+        '''
+        if method == 'csv':
+            self.elec_demand = self.read_from_csv(path=
+                                                  kwargs.get('path'),
+                                                  filename=
+                                                  kwargs.get('filename'))
+
+        #TODO: implement
+        elif method == 'db':
+            conn = kwargs.get('conn')
+            self.elec_demand = np.array([111, 222])
+
+        elif method == 'scale_profile_csv':
+            self.profile = self.read_from_csv(path=
+                                              kwargs.get('path'),
+                                              filename=
+                                              kwargs.get('filename'))
+            self.elec_demand = self.scale_profile()
+
+        #TODO: implement
+        elif method == 'scale_profile_db':
+            conn = kwargs.get('conn')
+            self.elec_demand = np.array([111, 222])
+
+        #TODO: implement
+        elif method == 'scale_entsoe':
+            conn = kwargs.get('conn')
+            self.elec_demand = np.array([111, 222])
+
+        #TODO: implement
+        elif method == 'calculate_profile':
+            self.elec_demand = np.array([111, 222])
+
+        return self.elec_demand
 
     def read_from_csv(self, **kwargs):
         '''
@@ -30,7 +65,7 @@ class electrical_demand():
                                    kwargs.get('filename'),
                                    sep=",")
 
-        self.year = 2010  # temporarily
+        self.year = 2010  # TODO: year temporarily
 
         self.profile = self.profile['deu_' + str(self.year)]
 
