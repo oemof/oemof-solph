@@ -81,6 +81,9 @@ class electrical_demand():
     def read_entsoe(self):
         return
 
+    def read_selp(self):
+        return
+
     def scale_profile(self):
         '''
         scale a given profile to a given annual demand, which is the sum
@@ -97,6 +100,15 @@ class electrical_demand():
         '''
         self.annual_demand = 50 + 50
         return self.annual_demand
+
+    def households_calc_ann_dem(self):
+        return
+
+    def commerce_calc_ann_dem(self):
+        return
+
+    def industry_calc_ann_dem(self):
+        return
 
 
 class heat_demand():
