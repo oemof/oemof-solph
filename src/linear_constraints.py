@@ -23,7 +23,7 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
     def bus_rule(model, e, t):
         expr = 0
         expr += sum(model.w[i, e, t] for i in I[e])
-        rhs  = sum(model.w[e, o, t] for o in O[e])
+        rhs = sum(model.w[e, o, t] for o in O[e])
         if model.slack["excess"] is True:
             rhs += model.excess_slack[e, t]
         if model.slack["shortage"] is True:
@@ -33,8 +33,8 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
 
 
 def generic_variables(model, edges, timesteps, var_name="w"):
-    """ Creates all variables corresponding to the edges of the bi-partite graph
-    for all timesteps.
+    """ Creates all variables corresponding to the edges of the bi-partite
+    graph for all timesteps.
 
     The function uses the pyomo class `Var()` to create the optimization
     variables. As index-sets the provided edges of the graph
@@ -159,13 +159,15 @@ def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
 
 
 def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
-    """ Creates constraint for input-output relation for a simple representation
-    of combined heat an power units.
+    """ Creates constraint for input-output relation for a simple
+    representation of combined heat an power units.
 
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation
 
-    .. math:: \\frac{output_1(e,O_1[e],t)}{eta_1(e,t)} = \\frac{output_2(e,O_2[e], t)}{eta_2(e,t)} \\forall e \\in uids \\forall t \\in T
+    .. math:: \\frac{output_1(e,O_1[e],t)}{eta_1(e,t)} =
+    \\frac{output_2(e,O_2[e], t)}{eta_2(e,t)}
+    \\forall e \\in uids \\forall t \\in T
 
     The constraint is indexed with all unique ids of objects and timesteps.
 
@@ -218,8 +220,10 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     """ Alters/sets upper and lower bounds for variables that represent the
     weight of the edges of the graph.
 
-    .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad  \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
-    .. math:: w(e_1, e_2, t) \\geq lb_w(e_1, e_2), \\qquad  \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
+    .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad
+    \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
+    .. math:: w(e_1, e_2, t) \\geq lb_w(e_1, e_2), \\qquad
+    \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
 
     Parameters
     ------------
@@ -280,7 +284,8 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows
 
-    .. math::  w(e, O_1[e], t) \\leq out_{max}(e,O_1[e]) + Add\\_Cap(e,O_1[e]), \\qquad \\forall e \\in uids, \\forall t \\in T
+    .. math::  w(e, O_1[e], t) \\leq out_{max}(e,O_1[e]) +
+    Add\\_Cap(e,O_1[e]), \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
     ------------
@@ -328,7 +333,8 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows:
 
-    .. math:: soc(e, t) \\leq soc_{max}(e) + soc\\_add(e), \\qquad \\forall e \\in uids, \\forall t \\in T
+    .. math:: soc(e, t) \\leq soc_{max}(e) + soc\\_add(e),
+    \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
     ------------
@@ -505,7 +511,9 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
 
     The mathemathical fomulation for the constraint is as follows:
 
-    .. math::  w(e, O[e], t) \\leq (out_{max}(e) + Add\\_Cap(e, O[e]) ) value(e), \\qquad \\forall e \\in uids, \\forall t \\in T
+    .. math::  w(e, O[e], t) \\leq (out_{max}(e) +
+    Add\\_Cap(e, O[e]) ) value(e), \\qquad \\forall e \\in uids,
+    \\forall t \\in T
 
     Parameters
     ------------

@@ -31,8 +31,8 @@ class OptimizationModel(po.ConcreteModel):
     #            dict has to be selected
     def __init__(self, entities, timesteps, options=None):
         """
-        
-        """ 
+
+        """
         super().__init__()
 
         self.entities = entities
@@ -63,7 +63,8 @@ class OptimizationModel(po.ConcreteModel):
             setattr(self, cls.lower_name + "_uids", uids)
             # "call" methods to add the constraints opt. problem
             if objs:
-                getattr(self, cls.lower_name + "_assembler")(objs=objs, uids=uids)
+                getattr(self, cls.lower_name + "_assembler")(objs=objs,
+                                                             uids=uids)
 
         self.bus_assembler()
         self.objective_assembler()
@@ -119,7 +120,7 @@ class OptimizationModel(po.ConcreteModel):
     def simple_transformer_assembler(self, objs, uids):
         """Method containing the constraints for simple transformer components.
 
-        
+
         Parameters
         ----------
         self : OptimizationModel() instance
@@ -167,7 +168,7 @@ class OptimizationModel(po.ConcreteModel):
     def fixed_source_assembler(self, objs, uids):
         """Method containing the constraints for
         fixed sources.
-        
+
         Parameters
         ----------
         self : OptimizationModel() instance
@@ -194,10 +195,10 @@ class OptimizationModel(po.ConcreteModel):
 
     def simple_sink_assembler(self, objs, uids):
         """Method containing the constraints for simple sinks
-     
-        Simple sinks are modeled with a fixed output value set for the 
-        variable of the output.  
-        
+
+        Simple sinks are modeled with a fixed output value set for the
+        variable of the output.
+
         Parameters
         ----------
         self : OptimizationModel() instance
@@ -212,7 +213,7 @@ class OptimizationModel(po.ConcreteModel):
                               timesteps=self.timesteps)
 
     def simple_storage_assembler(self, objs, uids):
-        """Simple storage assembler containing the constraints for simple 
+        """Simple storage assembler containing the constraints for simple
         storage components.
 
          Parameters
@@ -301,7 +302,7 @@ class OptimizationModel(po.ConcreteModel):
         for simple transport components
 
         The method uses the simple_transformer_assembler() method.
-        
+
         Parameters
         ----------
         self : OptimizationModel() instance
@@ -316,7 +317,7 @@ class OptimizationModel(po.ConcreteModel):
         self.simple_transformer_assembler(objs=objs, uids=uids)
 
     def objective_assembler(self):
-        """Objective assembler creates builds objective function of the 
+        """Objective assembler creates builds objective function of the
         optimization model.
 
         Parameters
@@ -344,8 +345,8 @@ class OptimizationModel(po.ConcreteModel):
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
-        """ Method that takes care of the communication with the solver to solve 
-        the optimization model
+        """ Method that takes care of the communication with the solver
+        to solve the optimization model
 
         Parameters
         ----------
@@ -392,9 +393,9 @@ class OptimizationModel(po.ConcreteModel):
                   "Solver Status: ", results.solver.status)
         else:
             # Something else is wrong
-            print ("Solver Status: ",  results.solver.status, "\n"
-                   "Termination condition: ",
-                   results.solver.termination_condition)
+            print("Solver Status: ", results.solver.status, "\n"
+                  "Termination condition: ",
+                  results.solver.termination_condition)
 
     def edges(self, components):
         """Method that creates a list with all edges for the objects in

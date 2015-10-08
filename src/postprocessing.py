@@ -124,7 +124,7 @@ def results_to_excel(instance=None, filename="/home/simon/results.xls", ):
             for i in I:
                 temp_lst = []
                 for t in instance.timesteps:
-                   temp_lst.append(
+                    temp_lst.append(
                         instance.w[i, entity.uid, t].value)
                 input[entity.uid+"_"+i] = temp_lst
 
