@@ -274,8 +274,8 @@ class OptimizationModel(po.ConcreteModel):
         soc_initial = {obj.uid: obj.soc_initial
                        for obj in self.simple_storage_objs}
         cap_loss = {obj.uid: obj.cap_loss for obj in self.simple_storage_objs}
-        eta_in = {obj.uid: obj.eta_in[0] for obj in self.simple_storage_objs}
-        eta_out = {obj.uid: obj.eta_out[0] for obj in self.simple_storage_objs}
+        eta_in = {obj.uid: obj.eta_in for obj in self.simple_storage_objs}
+        eta_out = {obj.uid: obj.eta_out for obj in self.simple_storage_objs}
 
         def storage_balance_rule(self, e, t):
             # TODO:

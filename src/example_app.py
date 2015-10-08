@@ -125,7 +125,7 @@ om = OptimizationModel(entities=entities, timesteps=timesteps,
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
-pp.results_to_excel(om)
+#pp.results_to_excel(om)
 # write results to data frame for excel export
 components = transformers + renew_sources
 
