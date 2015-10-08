@@ -239,16 +239,33 @@ class region():
 
     def fetch_demand_series(self, method, **kwargs):
         ''
+#        if 'csv' in ('db', 'profile_db', 'calculate_profile'):
+#            if self._df is None:
+#                self.set_connection(conn=kwargs.get('conn'))
+#                self.create_basic_dataframe(conn=kwargs.get('conn'))
+
         self.demand = dm.electrical_demand(method,
+                                           dataframe=self.df,
                                            annual_elec_demand=
                                            kwargs.get('ann_el_demand'),
                                            path=kwargs.get('path'),
                                            filename=kwargs.get('filename'),
-                                           conn=kwargs.get('conn'))
+                                           conn=kwargs.get('conn'),
+                                           hh_ann_el_demand=
+                                           kwargs.get('hh_ann_el_demand'),
+                                           comm_ann_el_demand=
+                                           kwargs.get('comm_ann_el_demand'),
+                                           ind_ann_el_demand=
+                                           kwargs.get('ind_ann_el_demand'),
+                                           population=
+                                           kwargs.get('population'),
+                                           comm_number_of_employees=kwargs.get(
+                                           'comm_number_of_employees'),
+                                           ind_number_of_employees=kwargs.get(
+                                           'ind_number_of_employees'))
 
         print('self.demand: ', self.demand.elec_demand.sum())
-#        if self._df is None:
-#            self.create_basic_dataframe(conn=conn)
+
 
 #        # TODO @ Birgit, Caro
 #        # Nur temporär, damit es funktioniert. Wird ersetzt durch demandlib.

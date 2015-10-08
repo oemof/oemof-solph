@@ -7,6 +7,7 @@ Created on Fri Jul 24 19:11:38 2015
 
 import numpy as np
 import pandas as pd
+from . import energy_buildings as eb
 
 
 class electrical_demand():
@@ -15,7 +16,9 @@ class electrical_demand():
     def __init__(self, method, **kwargs):
         self.annual_demand = kwargs.get('annual_elec_demand')
         if self.annual_demand is None:
-            self.annual_demand = self.calculate_annual_demand()
+            self.annual_demand = self.calculate_annual_demand_region()
+
+        self.dataframe = kwargs.get('dataframe')
 
         self.decider(method, **kwargs)
 
@@ -52,7 +55,27 @@ class electrical_demand():
 
         #TODO: implement
         elif method == 'calculate_profile':
-            self.elec_demand = np.array([111, 222])
+            self.conn = kwargs.get('conn')
+            self.e_slp = self.read_selp().slp
+
+            self.hh_e_slp = self.e_slp['h0']
+            self.comm_e_slp = self.e_slp['g0']
+            self.ind_e_slp = self.e_slp['i0']
+
+            if kwargs.get('hh_ann_el_demand') is None:
+                #kwargs.get('define_elec_building')
+                self.elec_demand = (
+                    self.calculate_annual_demand_sectors(**kwargs) *
+                    self.hh_e_slp / self.hh_e_slp.sum())
+
+            else:
+
+                self.elec_demand = (self.hh_e_slp / self.hh_e_slp.sum() *
+                                    kwargs.get('hh_ann_el_demand') +
+                                    self.comm_e_slp / self.comm_e_slp.sum() *
+                                    kwargs.get('comm_ann_el_demand') +
+                                    self.ind_e_slp / self.ind_e_slp.sum() *
+                                    kwargs.get('ind_ann_el_demand'))
 
         return self.elec_demand
 
@@ -82,7 +105,8 @@ class electrical_demand():
         return
 
     def read_selp(self):
-        return
+        self.e_slp = eb.bdew_elec_slp(self.conn, self.dataframe)
+        return self.e_slp
 
     def scale_profile(self):
         '''
@@ -94,12 +118,17 @@ class electrical_demand():
                             self.annual_demand)
         return self.elec_demand
 
-    def calculate_annual_demand(self):
+    def calculate_annual_demand_region(self):
         '''
         calculate annual demand from statistic data
         '''
         self.annual_demand = 50 + 50
         return self.annual_demand
+
+    def calculate_annual_demand_sectors(self, **kwargs):
+        ann_el_demand_per_inhabitant = 10
+        population = kwargs.get('population')
+        return population * ann_el_demand_per_inhabitant
 
     def households_calc_ann_dem(self):
         return
