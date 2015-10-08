@@ -20,31 +20,39 @@ class Weather:
 
     """
 
-    def __init__(self, conn, geometry, year, dataset='CoastDat2',
-                 tz=None, datatypes=None):
+    def __init__(self, connection=None, geometry=None, year=None, **kwargs):
         """
         constructor for the weather-object.
         Test for config, to set up which source shall be used
         """
-        if dataset == 'CoastDat2':
-            self.dataset = dataset
-            self.name_dc = {
-                'ASWDIFD_S': 'dhi',
-                'ASWDIR_S': 'dirhi',
-                'PS': 'pressure',
-                'T_2M': 'temp_air',
-                'WSS_10M': 'v_wind',
-                'Z0': 'z0'}
+        # These if clauses are necessary to be compatible with older version
+        # They can be removed in future versions, together with the optional
+        # parameters above.
+        if connection is not None:
+            kwargs['connection'] = connection
+        if connection is not None:
+            kwargs['geometry'] = geometry
+        if connection is not None:
+            kwargs['year'] = year
 
-        self.connection = conn
-        self.year = self.check_year(year)
-        self.datatypes = self.check_datatypes(datatypes)
-        self.geometry = geometry
-        self.tz = None
+        self.dataset = kwargs.get('dataset', 'CoastDat2')
+        self.name_dc = kwargs.get('name_dc', {
+                                  'ASWDIFD_S': 'dhi',
+                                  'ASWDIR_S': 'dirhi',
+                                  'PS': 'pressure',
+                                  'T_2M': 'temp_air',
+                                  'WSS_10M': 'v_wind',
+                                  'Z0': 'z0'})
+
+        self.connection = kwargs.get('connection', None)
+        self.year = self.check_year(kwargs.get('year', None))
+        self.datatypes = self.check_datatypes(kwargs.get('datatypes', None))
+        self.geometry = kwargs.get('geometry', None)
+        self.tz = kwargs.get('tz', None)
         self.data = self.fetch_raw_data()
-        self.gid_geom = None
-        self.data_by_datatype = None
-        self.data_by_gid = None
+        self.gid_geom = kwargs.get('gid_geom', None)
+        self.data_by_datatype = kwargs.get('data_by_datatype', None)
+        self.data_by_gid = kwargs.get('data_by_gid', None)
 
     def check_datatypes(self, datatypes):
         '''

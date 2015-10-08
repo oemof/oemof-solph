@@ -223,7 +223,8 @@ class region():
         return self.geometry.centroid
 
     def fetch_weather_raster(self, conn):
-        self.weather = w.Weather(conn, self.geometry, self.year)
+        self.weather = w.Weather(connection=conn, geometry=self.geometry,
+                                 year=self.year)
         return self
 
     def fetch_ee_plants(self, conn):
