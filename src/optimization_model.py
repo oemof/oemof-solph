@@ -231,6 +231,8 @@ class OptimizationModel(po.ConcreteModel):
         if(self.invest is False):
             lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
+            lc.generic_soc_bounds(model=self, objs=objs, uids=uids,
+                                  timesteps=self.timesteps)
         else:
             lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
@@ -278,22 +280,27 @@ class OptimizationModel(po.ConcreteModel):
         eta_in = {obj.uid: obj.eta_in for obj in self.simple_storage_objs}
         eta_out = {obj.uid: obj.eta_out for obj in self.simple_storage_objs}
 
+        # set soc of last timesteps to fixed value of soc_initial
+        t_last = len(self.timesteps)-1
+        for e in uids:
+          self.soc[e, t_last] = soc_initial[e]
+          self.soc[e, t_last].fix()
+
         def storage_balance_rule(self, e, t):
             # TODO:
             #   - include time increment
+            expr = 0
             if(t == 0):
-                expr = 0
-                expr += self.soc[e, t] + soc_initial[e]
-                expr += - self.soc[e, t+len(self.timesteps)-1]
+                expr += self.soc[e, t] - soc_initial[e]
                 expr += - self.w[I[e], e, t] * eta_in[e]
                 expr += + self.w[e, O[e], t] / eta_out[e]
-                return(expr, 0)
             else:
-                expr = self.soc[e, t] * (1 - cap_loss[e])
-                expr += - self.soc[e, t-1]
+                expr += self.soc[e, t] 
+                expr += - self.soc[e, t-1] * (1 - cap_loss[e])
                 expr += - self.w[I[e], e, t] * eta_in[e]
                 expr += + self.w[e, O[e], t] / eta_out[e]
-                return(expr, 0)
+            return(expr, 0)
+
         self.simple_storage_c = po.Constraint(uids, self.timesteps,
                                               rule=storage_balance_rule)
 

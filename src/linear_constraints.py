@@ -217,7 +217,7 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
 
 
 def generic_w_ub(model, objs=None, uids=None, timesteps=None):
-    """ Alters/sets upper and lower bounds for variables that represent the
+    """ Alters/sets upper bounds for variables that represent the
     weight of the edges of the graph.
 
     .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad
@@ -277,7 +277,7 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
 
 
 def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
-    """ Sets upper and lower bounds for variables that represent the weight
+    """ Sets upper bounds for variables that represent the weight
     of the edges of the graph if investment models are calculated.
 
     For investment  models upper and lower bounds will be modeled via
@@ -324,6 +324,52 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     setattr(model, "generic_w_ub_" + objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=rule))
 
+def generic_soc_bounds(model, objs=None, uids=None, timesteps=None):
+    """ Alters/sets upper and lower bounds for variables that represent the
+    state of charge e.g. filling level of a storage component.
+
+    Parameters
+    ------------
+
+    model : pyomo.ConcreteModel()
+        A pyomo-object to be solved containing all Variables, Constraints, Data
+        Bounds are altered at model attributes (variables) of `model`
+
+    objs : array like
+        list of component objects for which the bounds will be
+        altered
+
+    uids : array linke
+        list of component uids corresponding to the objects
+
+    timesteps : array_like (list)
+        will be a list with timesteps representing the time-horizon
+        of the optimization problem.
+        (e.g. `timesteps` =  [t for t in range(168)])
+
+    Returns
+    -------
+
+    There is no return value. The upper and lower bounds of the variables are
+    altered in the optimization model object `model` of type
+    pyomo.ConcreteModel()
+
+    """
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which bounds should be set.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+    # extract values for storages m.soc_max = {'storge': 120.5, ... }
+    soc_max = {obj.uid: obj.soc_max for obj in objs}
+    soc_min = {obj.uid: obj.soc_min for obj in objs}
+
+    # loop over all uids (storages) and timesteps to set the upper bound
+    for e in uids:
+        for t in timesteps:
+            model.soc[e, t].setub(soc_max[e])
+            model.soc[e, t].setlb(soc_min[e])
 
 def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     """ Sets upper and lower bounds for variables that represent the state
@@ -367,6 +413,7 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
         return(model.soc[e, t] <= model.soc_max[e] + model.soc_add[e])
     setattr(model, "generic_soc_ub_invest_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=rule))
+
 
 
 def generic_limit(model, objs=None, uids=None, timesteps=None):
