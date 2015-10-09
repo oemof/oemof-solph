@@ -53,7 +53,7 @@ class electrical_demand():
             conn = kwargs.get('conn')
             self.elec_demand = np.array([111, 222])
 
-        #TODO: implement
+        #TODO: implement industry
         elif method == 'calculate_profile':
             self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
@@ -73,9 +73,9 @@ class electrical_demand():
                     'ann_el_demand'] is 'calculate':
                 self.elec_demand = (
                     self.hh_e_slp / self.hh_e_slp.sum() *
-                    self.calculate_annual_demand_households(**kwargs))# +
-#                    self.comm_e_slp / self.comm_e_slp.sum()) *
-#                    self.calculate_annual_demand_sectors(**kwargs) +
+                    self.calculate_annual_demand_households(**kwargs) +
+                    self.comm_e_slp / self.comm_e_slp.sum() *
+                    self.calculate_annual_demand_commerce(**kwargs)) #+
 #                    self.ind_e_slp / self.ind_e_slp.sum()) *
 #                    self.calculate_annual_demand_sectors(**kwargs))
 
@@ -157,6 +157,11 @@ class electrical_demand():
             kwargs.get('ann_el_demand_per_person')[3]['ann_el_demand'])
 
         return  kwargs.get('population') * hh_ann_el_demand_per_person
+
+    def calculate_annual_demand_commerce(self, **kwargs):
+        return (kwargs.get('comm_ann_el_demand_state') /
+                    kwargs.get('comm_number_of_employees_state') *
+                    kwargs.get('comm_number_of_employees_region'))
 
     def households_calc_ann_dem(self):
         return

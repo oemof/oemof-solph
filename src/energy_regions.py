@@ -261,8 +261,14 @@ class region():
                                            'household_structure'),
                                            household_members_all=kwargs.get(
                                            'household_members_all'),
-                                           comm_number_of_employees=kwargs.get(
-                                           'comm_number_of_employees'),
+                                           comm_ann_el_demand_state=kwargs.get(
+                                           'comm_ann_el_demand_state'),
+                                           comm_number_of_employees_state=
+                                           kwargs.get(
+                                           'comm_number_of_employees_state'),
+                                           comm_number_of_employees_region=
+                                           kwargs.get(
+                                           'comm_number_of_employees_region'),
                                            ind_number_of_employees=kwargs.get(
                                            'ind_number_of_employees'))
 
