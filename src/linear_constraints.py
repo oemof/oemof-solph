@@ -15,10 +15,12 @@ except:
 def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
     """ creates constraint for the input-ouput balance of bus objects
 
-    .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \
-    \\qquad with: \\quad I = all inputs of bus `e`, O = all outputs of bus `e`
+    .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \\\ \
+    \\qquad \\text{with:}
+    .. math:: I = \\text{all inputs of bus } e 
+    .. math:: O = \\text{all outputs of bus } e
 
-    Parameter
+    Parameters
     -----------
     model : OptimizationModel() instance
     objs : objects for which the constraints are created (object type `bus`)
@@ -636,3 +638,46 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
         return(expr, 0)
     setattr(model, "generic_constr_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=dispatch_rule))
+
+
+def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
+    """ Creates constraint for storage blanace
+
+    Parameters
+    -------------
+    
+    
+    Returns
+    ----------
+
+    """
+    # constraint for storage energy balance
+    O = {obj.uid: obj.outputs[0].uid for obj in objs}
+    I = {obj.uid: obj.inputs[0].uid for obj in objs}
+    soc_initial = {obj.uid: obj.soc_initial for obj in objs}
+    cap_loss = {obj.uid: obj.cap_loss for obj in objs}
+    eta_in = {obj.uid: obj.eta_in for obj in objs}
+    eta_out = {obj.uid: obj.eta_out for obj in objs}
+
+    # set soc of last timesteps to fixed value of soc_initial
+    t_last = len(model.timesteps)-1
+    for e in uids:
+      model.soc[e, t_last] = soc_initial[e]
+      model.soc[e, t_last].fix()
+
+    def storage_balance_rule(model, e, t):
+        # TODO:
+        #   - include time increment
+        expr = 0
+        if(t == 0):
+            expr += model.soc[e, t] - soc_initial[e]
+            expr += - model.w[I[e], e, t] * eta_in[e]
+            expr += + model.w[e, O[e], t] / eta_out[e]
+        else:
+            expr += model.soc[e, t]
+            expr += - model.soc[e, t-1] * (1 - cap_loss[e])
+            expr += - model.w[I[e], e, t] * eta_in[e]
+            expr += + model.w[e, O[e], t] / eta_out[e]
+        return(expr, 0)
+    setattr(model, "simple_storage_c", po.Constraint(uids, timesteps,
+            rule=storage_balance_rule))

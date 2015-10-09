@@ -227,12 +227,16 @@ class OptimizationModel(po.ConcreteModel):
         self : OptimizationModel() instance
         """
 
-        # set bounds for basic/investment models
+        # optimization model with no investment
         if(self.invest is False):
             lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
             lc.generic_soc_bounds(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
+            lc.generic_storage_balance(model=self, objs=objs, uids=uids,
+                                       timesteps=self.timesteps)
+        
+        # investment 
         else:
             lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
@@ -270,39 +274,6 @@ class OptimizationModel(po.ConcreteModel):
                     objs[0].lower_name,
                     po.Constraint(uids, self.timesteps,
                                   rule=storage_charge_limit_rule))
-
-        # constraint for storage energy balance
-        O = {obj.uid: obj.outputs[0].uid for obj in objs}
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-        soc_initial = {obj.uid: obj.soc_initial
-                       for obj in self.simple_storage_objs}
-        cap_loss = {obj.uid: obj.cap_loss for obj in self.simple_storage_objs}
-        eta_in = {obj.uid: obj.eta_in for obj in self.simple_storage_objs}
-        eta_out = {obj.uid: obj.eta_out for obj in self.simple_storage_objs}
-
-        # set soc of last timesteps to fixed value of soc_initial
-        t_last = len(self.timesteps)-1
-        for e in uids:
-          self.soc[e, t_last] = soc_initial[e]
-          self.soc[e, t_last].fix()
-
-        def storage_balance_rule(self, e, t):
-            # TODO:
-            #   - include time increment
-            expr = 0
-            if(t == 0):
-                expr += self.soc[e, t] - soc_initial[e]
-                expr += - self.w[I[e], e, t] * eta_in[e]
-                expr += + self.w[e, O[e], t] / eta_out[e]
-            else:
-                expr += self.soc[e, t] 
-                expr += - self.soc[e, t-1] * (1 - cap_loss[e])
-                expr += - self.w[I[e], e, t] * eta_in[e]
-                expr += + self.w[e, O[e], t] / eta_out[e]
-            return(expr, 0)
-
-        self.simple_storage_c = po.Constraint(uids, self.timesteps,
-                                              rule=storage_balance_rule)
 
     def simple_transport_assembler(self, objs, uids):
         """Simple transport assembler grouping the constraints
