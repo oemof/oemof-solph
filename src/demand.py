@@ -135,6 +135,7 @@ class electrical_demand():
                             self.annual_demand)
         return self.elec_demand
 
+    #TODO: implement??
     def calculate_annual_demand_region(self):
         '''
         calculate annual demand from statistic data
@@ -162,15 +163,6 @@ class electrical_demand():
         return (kwargs.get('comm_ann_el_demand_state') /
                     kwargs.get('comm_number_of_employees_state') *
                     kwargs.get('comm_number_of_employees_region'))
-
-    def households_calc_ann_dem(self):
-        return
-
-    def commerce_calc_ann_dem(self):
-        return
-
-    def industry_calc_ann_dem(self):
-        return
 
 
 class heat_demand():
