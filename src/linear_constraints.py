@@ -13,8 +13,28 @@ except:
 
 
 def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
+    """ creates constraint for the input-ouput balance of bus objects
+
+    .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \
+    \\qquad with: \\quad I = all inputs of bus `e`, O = all outputs of bus `e`
+
+    Parameter
+    -----------
+    model : OptimizationModel() instance
+    objs : objects for which the constraints are created (object type `bus`)
+    uids : unique ids of bus object in `objs`
+    timesteps : array_like (list)
+        will be a list with timesteps representing the time-horizon
+        of the optimization problem.
+        (e.g. `timesteps` =  [t for t in range(168)])
+
+    Returns
+    ----------
+    The constraints are added as a
+    attribute to the optimization model object `model` of type
+    OptimizationModel()
     """
-    """
+
     I = {b.uid: [i.uid for i in b.inputs] for b in objs}
     O = {b.uid: [o.uid for o in b.outputs] for b in objs}
 
@@ -48,9 +68,8 @@ def generic_variables(model, edges, timesteps, var_name="w"):
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        A object to be solved containing all Variables, Constraints, Data
         Variables are added as attributes to the `model`
     edges : array_like (list)
         `edges` will be a list containing tuples representing the directed
@@ -63,10 +82,8 @@ def generic_variables(model, edges, timesteps, var_name="w"):
 
     Returns
     --------
-
-    There is no return value. The variables are added as a
-    attribute to the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    The variables are added as a attribute to the optimization model object
+    `model` of type OptimizationModel()
 
 
     """
@@ -107,23 +124,21 @@ def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation
 
-    .. math:: input \cdot efficiency = output
+    .. math:: w(I[e], e, t) \cdot \\eta[e] = w(e, O[e], t), \
+    \\qquad \\forall e \\in uids, \\forall t \\in T
 
     The constraint is indexed with all unique ids of objects and timesteps.
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
     objs : array like
         list of component objects for which the constraint will be
         build
-
     uids : array like
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -131,10 +146,9 @@ def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
 
     Returns
     -------
-
-    There is no return value. The constraints are added as a
+    The constraints are added as a
     attribute to the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    OptimizationModel()
 
     """
     if objs is None:
@@ -165,22 +179,20 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation
 
-    .. math:: \\frac{output_1(e,O_1[e],t)}{eta_1(e,t)} =
-    \\frac{output_2(e,O_2[e], t)}{eta_2(e,t)}
+    .. math:: \\frac{w_1(e,O_1[e],t)}{eta_1(e,t)} = \
+    \\frac{w_2(e,O_2[e], t)}{eta_2(e,t)} \
     \\forall e \\in uids \\forall t \\in T
 
     The constraint is indexed with all unique ids of objects and timesteps.
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
     objs : array like
         list of component objects for which the constraint will be
         build
-
     uids : array linke
         list of component uids corresponding to the objects
 
@@ -191,10 +203,9 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
 
     Returns
     -------
-
-    There is no return value. The constraints are added as a
+    The constraints are added as a
     attribute to the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    OptimizationModel()
 
     """
     #TODO:
@@ -220,25 +231,21 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     """ Alters/sets upper bounds for variables that represent the
     weight of the edges of the graph.
 
-    .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad
+    .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad \
     \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
-    .. math:: w(e_1, e_2, t) \\geq lb_w(e_1, e_2), \\qquad
+    .. math:: w(e_1, e_2, t) \\geq lb_w(e_1, e_2), \\qquad \
     \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
-
     objs : array like
         list of component objects for which the bounds will be
         altered
-
-    uids : array linke
+    uids : array like
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -246,10 +253,9 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
 
     Returns
     -------
-
-    There is no return value. The upper and lower bounds of the variables are
-    altered in the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    The upper and lower bounds of the variables are
+    altered at attributes (variables) of the optimization model object 
+    `model` of type OptimizationModel()
 
     """
     if objs is None:
@@ -284,33 +290,28 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows
 
-    .. math::  w(e, O_1[e], t) \\leq out_{max}(e,O_1[e]) +
-    Add\\_Cap(e,O_1[e]), \\qquad \\forall e \\in uids, \\forall t \\in T
+    .. math::  w(e, O_1[e], t) \\leq out_{max}(e,O_1[e]) + \
+    add\\_cap(e,O_1[e]), \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
     objs : array like
         list of component objects for which the bounds will be
         altered
-
     uids : array linke
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
         (e.g. `timesteps` =  [t for t in range(168)])
-
+    
     Returns
     -------
-
-    There is no return value. The constraints are added as attributes
-    to the optimization model object `model` of type pyomo.ConcreteModel()
-
+    The constraints are added as attributes
+    to the optimization model object `model` of type OptimizationModel()
     """
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
@@ -330,18 +331,14 @@ def generic_soc_bounds(model, objs=None, uids=None, timesteps=None):
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
-
     objs : array like
         list of component objects for which the bounds will be
         altered
-
     uids : array linke
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -349,10 +346,9 @@ def generic_soc_bounds(model, objs=None, uids=None, timesteps=None):
 
     Returns
     -------
-
-    There is no return value. The upper and lower bounds of the variables are
+    The upper and lower bounds of the variables are
     altered in the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    OptimizationModel()
 
     """
     if objs is None:
@@ -379,23 +375,19 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows:
 
-    .. math:: soc(e, t) \\leq soc_{max}(e) + soc\\_add(e),
+    .. math:: soc(e, t) \\leq soc_{max}(e) + soc\\_add(e), \
     \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
        Constraints are added as attribtes to the `model`
-
     objs : array like
         list of component objects for which the bounds will be
         altered e.g. constraints will be created
-
     uids : array linke
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -403,10 +395,8 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
 
     Returns
     -------
-
-    There is no return value. The constraints are added as attributes
-    to the optimization model object `model` of type pyomo.ConcreteModel()
-
+    The constraints are added as attributes
+    to the optimization model object `model` of type OptimizationModel()
     """
     # constraint for additional capacity in investment models
     def rule(model, e, t):
@@ -420,19 +410,18 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
     """ Creates constraint to set limit for variables as sum over the total
     timehorizon
 
+    .. math:: \sum_{t \\in T} \sum_{o \\in O[e]} w(e, o, t) \\leq limit[e], \
+    \\qquad \\forall e \\in uids
+
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
        Constraints are added as attribtes to the `model`
-
     objs : array like
         list of component objects for which the constraints will be created
-
     uids : array linke
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -440,9 +429,8 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
 
     Returns
     -------
-
-    There is no return value. The constraints are added as attributes
-    to the optimization model object `model` of type pyomo.ConcreteModel()
+    The constraints are added as attributes
+    to the optimization model object `model` of type OptimizationModel()
     """
 
     limit = {obj.uid: obj.sum_out_limit for obj in objs}
@@ -471,18 +459,14 @@ def generic_fixed_source(model, objs, uids, timesteps):
 
     Parameters
     ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Attributes are altered of the `model`
-
     objs : array like
         list of component objects for which the variables representing the
         output edges values will be set to a certain value and then fixed.
-
     uids : array like
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -490,9 +474,8 @@ def generic_fixed_source(model, objs, uids, timesteps):
 
     Returns
     -------
-
-    There is no return value. The variables as attributes of
-    the optimization model object `model` of type pyomo.ConcreteModel() will
+    The variables as attributes of
+    the optimization model object `model` of type OptimizationModel() will
     be altered.
     """
     # normed value of renewable source (0 <= value <=1)
@@ -518,17 +501,14 @@ def generic_fixed_sink(model, objs, uids, timesteps):
     Parameters
     ------------
 
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model :OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
        Attributes are altered of the `model`
-
     objs : array like
         list of component objects for which the variables representing the
         input edges values will be set to a certain value and then fixed.
-
     uids : array like
         list of component uids corresponding to the objects
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -537,8 +517,8 @@ def generic_fixed_sink(model, objs, uids, timesteps):
     Returns
     -------
 
-    There is no return value. The variables as attributes of
-    the optimization model object `model` of type pyomo.ConcreteModel() will
+    The variables as attributes to
+    the optimization model object `model` of type OptimizationModel() will
     be altered.
     """
 
@@ -558,16 +538,16 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
 
     The mathemathical fomulation for the constraint is as follows:
 
-    .. math::  w(e, O[e], t) \\leq (out_{max}(e) +
-    Add\\_Cap(e, O[e]) ) value(e), \\qquad \\forall e \\in uids,
-    \\forall t \\in T
+    *Definition:*
+    .. math:: O : \\text{Array with indices for all outputs of objs (index set)}
+    .. math::  w(e, O[e], t) \\leq (out_{max}(e) + add\\_cap(e, O[e]) ) \
+    \cdot val[e], \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
     ------------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
-
     objs : array like
         list of component objects for which the constraints will be created.
 
@@ -581,9 +561,8 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
 
     Returns
     -------
-
-    There is no return value. The constraints will be added as attributes of
-    the optimization model object `model` of type pyomo.ConcreteModel().
+    There is no return value. The constraints will be added as attributes to
+    the optimization model object `model` of typeOptimizationModel().
     """
     # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
     O = {obj.uid: obj.outputs[0].uid for obj in objs}
@@ -602,7 +581,7 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
             po.Constraint(uids, timesteps, rule=invest_rule))
 
 
-def generic_dispatch_source(model, objs, uids, timesteps):
+def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
     """ Creates dispatchable source models by setting bounds and
        adding constraints
 
@@ -618,17 +597,14 @@ def generic_dispatch_source(model, objs, uids, timesteps):
 
     Parameters
     ------------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model` and bounds are
         altered for attributes of `model`
-
     objs : array like
         list of component objects for which the constraints will be created.
-
     uids : array like
         list of component uids corresponding to the objects.
-
     timesteps : array_like (list)
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
@@ -636,9 +612,8 @@ def generic_dispatch_source(model, objs, uids, timesteps):
 
     Returns
     -------
-
     There is no return value. The constraints will be added as attributes of
-    the optimization model object `model` of type pyomo.ConcreteModel().
+    the optimization model object `model` of type OptimizationModel().
     """
     # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
     O = {obj.uid: obj.outputs[0].uid for obj in objs}
