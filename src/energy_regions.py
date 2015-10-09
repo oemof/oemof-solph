@@ -251,14 +251,16 @@ class region():
                                            path=kwargs.get('path'),
                                            filename=kwargs.get('filename'),
                                            conn=kwargs.get('conn'),
-                                           hh_ann_el_demand=
-                                           kwargs.get('hh_ann_el_demand'),
-                                           comm_ann_el_demand=
-                                           kwargs.get('comm_ann_el_demand'),
-                                           ind_ann_el_demand=
-                                           kwargs.get('ind_ann_el_demand'),
                                            population=
                                            kwargs.get('population'),
+                                           ann_el_demand_per_sector=kwargs.get(
+                                           'ann_el_demand_per_sector'),
+                                           ann_el_demand_per_person=kwargs.get(
+                                           'ann_el_demand_per_person'),
+                                           household_structure=kwargs.get(
+                                           'household_structure'),
+                                           household_members_all=kwargs.get(
+                                           'household_members_all'),
                                            comm_number_of_employees=kwargs.get(
                                            'comm_number_of_employees'),
                                            ind_number_of_employees=kwargs.get(

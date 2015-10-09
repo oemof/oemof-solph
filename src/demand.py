@@ -58,24 +58,41 @@ class electrical_demand():
             self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
 
-            self.hh_e_slp = self.e_slp['h0']
-            self.comm_e_slp = self.e_slp['g0']
-            self.ind_e_slp = self.e_slp['i0']
+#            self.hh_e_slp = self.e_slp['h0']
+            self.hh_e_slp = self.e_slp[kwargs.get(
+                                       'ann_el_demand_per_sector')[0][
+                                       'selp_type']]
+            self.comm_e_slp = self.e_slp[kwargs.get(
+                                         'ann_el_demand_per_sector')[1][
+                                         'selp_type']]
+            self.ind_e_slp = self.e_slp[kwargs.get(
+                                        'ann_el_demand_per_sector')[2][
+                                        'selp_type']]
 
-            if kwargs.get('hh_ann_el_demand') is None:
-                #kwargs.get('define_elec_building')
+            if kwargs.get('ann_el_demand_per_sector')[0][
+                    'ann_el_demand'] is 'calculate':
                 self.elec_demand = (
-                    self.calculate_annual_demand_sectors(**kwargs) *
-                    self.hh_e_slp / self.hh_e_slp.sum())
+                    self.hh_e_slp / self.hh_e_slp.sum() *
+                    self.calculate_annual_demand_households(**kwargs))# +
+#                    self.comm_e_slp / self.comm_e_slp.sum()) *
+#                    self.calculate_annual_demand_sectors(**kwargs) +
+#                    self.ind_e_slp / self.ind_e_slp.sum()) *
+#                    self.calculate_annual_demand_sectors(**kwargs))
 
             else:
 
                 self.elec_demand = (self.hh_e_slp / self.hh_e_slp.sum() *
-                                    kwargs.get('hh_ann_el_demand') +
+                                    kwargs.get(
+                                        'ann_el_demand_per_sector')[0][
+                                        'ann_el_demand'] +
                                     self.comm_e_slp / self.comm_e_slp.sum() *
-                                    kwargs.get('comm_ann_el_demand') +
+                                    kwargs.get(
+                                        'ann_el_demand_per_sector')[1][
+                                        'ann_el_demand'] +
                                     self.ind_e_slp / self.ind_e_slp.sum() *
-                                    kwargs.get('ind_ann_el_demand'))
+                                    kwargs.get(
+                                        'ann_el_demand_per_sector')[2][
+                                        'ann_el_demand'])
 
         return self.elec_demand
 
@@ -125,10 +142,21 @@ class electrical_demand():
         self.annual_demand = 50 + 50
         return self.annual_demand
 
-    def calculate_annual_demand_sectors(self, **kwargs):
-        ann_el_demand_per_inhabitant = 10
-        population = kwargs.get('population')
-        return population * ann_el_demand_per_inhabitant
+    def calculate_annual_demand_households(self, **kwargs):
+        hh_ann_el_demand_per_person = (kwargs.get('household_structure')[0][
+            'household_members'] / kwargs.get('household_members_all') *
+            kwargs.get('ann_el_demand_per_person')[0]['ann_el_demand'] +
+            kwargs.get('household_structure')[1][
+                'household_members'] / kwargs.get('household_members_all') *
+            kwargs.get('ann_el_demand_per_person')[1]['ann_el_demand'] +
+            kwargs.get('household_structure')[2][
+                'household_members'] / kwargs.get('household_members_all') *
+            kwargs.get('ann_el_demand_per_person')[2]['ann_el_demand'] +
+            kwargs.get('household_structure')[3][
+                'household_members'] / kwargs.get('household_members_all') *
+            kwargs.get('ann_el_demand_per_person')[3]['ann_el_demand'])
+
+        return  kwargs.get('population') * hh_ann_el_demand_per_person
 
     def households_calc_ann_dem(self):
         return
