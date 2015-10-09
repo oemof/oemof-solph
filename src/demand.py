@@ -53,7 +53,7 @@ class electrical_demand():
             conn = kwargs.get('conn')
             self.elec_demand = np.array([111, 222])
 
-        #TODO: implement industry
+        #TODO: implement industry + def scale_profile() verwenden
         elif method == 'calculate_profile':
             self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
