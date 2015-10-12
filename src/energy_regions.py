@@ -14,6 +14,7 @@ from . import energy_weather as w
 from . import energy_power_plants as pp
 from feedinlib import powerplants as plants
 from feedinlib import models
+from feedinlib import weather as fweather
 
 from matplotlib import pyplot as plt
 from descartes import PolygonPatch
@@ -276,15 +277,22 @@ class region():
         wind_model = models.WindPowerPlant(required=[
             'h_hub', 'd_rotor', 'wind_conv_type'])
         pv_model = models.Photovoltaic(required=[
-            'latitude', 'longitude', 'tz', 'albedo', 'tilt', 'azimuth',
-            'module_name'])
+            'albedo', 'tilt', 'azimuth', 'module_name'])
         site['connection'] = conn
-        site['tz'] = self.weather.tz
+        tz = self.weather.tz
         pv_df = 0
         wind_df = 0
         if self.power_plants.get('re', None) is None:
             self.power_plants['re'] = (
                 pp.Power_Plants().get_empty_power_plant_df())
+
+        # Define height dict
+        data_height = {}
+        for key in self.weather.datatypes:
+            name = self.weather.name_dc[key]
+            data_height[name] = self.weather.get_data_heigth(name)
+            if data_height[name] is None:
+                data_height[name] = 0
 
         laenge = len(list(self.weather.grouped_by_gid().keys()))
 
@@ -309,23 +317,28 @@ class region():
             site['d_rotor'] = (site['d_rotor_dc'].get(wz, site['d_rotor']))
             site['h_hub'] = (site['h_hub_dc'].get(wz, site['h_hub']))
 
-            site['gid'] = gid
-            site['latitude'] = tmp_geom.centroid.y
-            site['longitude'] = tmp_geom.centroid.x
+            # Define weather object of the feedinlib
+            feedinlib_weather_object = fweather.FeedinWeather(
+                data=self.weather.get_feedin_data(gid=gid),
+                timezone=tz,
+                latitude=tmp_geom.centroid.y,
+                longitude=tmp_geom.centroid.x,
+                data_height=data_height)
 
             # Determine the feedin time series for the weather field
             # Wind energy
             wind_peak_power = ee_pp[ee_pp.type == 'Windkraft'].p_kw_peak.sum()
             wind_power_plant = plants.WindPowerPlant(model=wind_model, **site)
             wind_series = wind_power_plant.feedin(
-                weather=self.weather, installed_capacity=wind_peak_power)
+                weather=feedinlib_weather_object,
+                installed_capacity=wind_peak_power)
             wind_series.name = gid
 
             # PV
             pv_peak_power = ee_pp[ee_pp.type == 'Solarstrom'].p_kw_peak.sum()
             pv_plant = plants.Photovoltaic(model=pv_model, **site)
             pv_series = pv_plant.feedin(
-                weather=self.weather, peak_power=pv_peak_power)
+                weather=feedinlib_weather_object, peak_power=pv_peak_power)
             pv_series.name = gid
 
             # Combine the results to a DataFrame
