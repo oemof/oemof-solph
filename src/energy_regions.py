@@ -211,6 +211,8 @@ class region():
                 self.place = helpers.fetch_admin_from_coord_google(coord)
             except:
                 logging.debug('Cannot fetch admin names from Google.')
+                logging.warning('Cannot fetch admin names from both, Google ' +
+                    'or OSM. Please check your server connections.')
 
         return self
 
