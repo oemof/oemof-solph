@@ -39,14 +39,18 @@ The basic components are:
 * *Sink*  represents an energy flow out of a single bus
 * *Transformer*  represents an energy flow from one bus to another
 
+
+Example 
+------------------------------------------
+
 An example of a simple energy system shows the usage of the entities for real world representations. 
 
-Region1:
+*Region1:*
 
 components: wind turbine (wt1), electrical demand (dm1), gas turbine (gt1), cable to region2 (cb1)
 busses: gas pipeline (r1_gas), electrical grid (r1_el)
 
-Region2:
+*Region2:*
 
 components: coal plant (cp2), chp plant (chp2), electrical demand (dm2), cable to region2 (cb2), p2g-facility (ptg2)
 busses: electrical grid (r2_el), local heat network (r2_th), coal reservoir (r2_coal), gas pipeline (r2_gas)
@@ -80,7 +84,10 @@ In oemof this would look as follows::
                      |---------------------------------------------------->|
 
 
-All energy system entities are represented in a class hierarchy that can be easily extended.
+Classes and modules
+------------------------------------------
+
+All energy system entities (busses and components) are represented in a class hierarchy that can be easily extended.
 These classes form the basis for so so-called framework modules, that operate on top of them.
 
 The framework consists of various modules that provide different functionalities.
@@ -93,6 +100,7 @@ oemof's current modules:
 * *solph* creates and solves a (mixed-integer) linear optimization problem for a given energy system
 
 All modules may interact with each other but can also be used stand-alone.
+A detailed description can be found in the following sections.
 
 
 
@@ -132,7 +140,7 @@ problems. The optimization problem is build based on a energy system defined via
 oemof-entities. These entities are instances of 
 oemof base classes (e. g. buses or components). For the definition of variables, 
 constraints and an objective function as well as for communication with solvers 
-etc. the python packages *pyomo* (http://www.pyomo.org/) is used.
+etc. the python packages `Pyomo <http://www.pyomo.org/>`_ is used.
 
 Structure of solph 
 ------------------------------------------
