@@ -55,12 +55,14 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
+        self.objs = {}
+        self.uids = {}
         # set attributes lists per class with objects and uids for opt model
         for cls in component_classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
             uids = [e.uid for e in objs]
-            setattr(self, cls.lower_name + "_objs", objs)
-            setattr(self, cls.lower_name + "_uids", uids)
+            self.objs[cls.lower_name] = objs
+            self.uids[cls.lower_name] = uids
             # "call" methods to add the constraints opt. problem
             if objs:
                 getattr(self, cls.lower_name + "_assembler")(objs=objs,
@@ -309,14 +311,14 @@ class OptimizationModel(po.ConcreteModel):
 
         # create a combine list of all cost-related components
         cost_objs = (
-            self.simple_chp_objs +
-            self.simple_transformer_objs +
-            self.simple_storage_objs +
-            self.simple_transport_objs)
+            self.objs['simple_chp'] +
+            self.objs['simple_transformer'] +
+            self.objs['simple_storage'] +
+            self.objs['simple_transport'])
 
         revenue_objs = (
-            self.simple_chp_objs +
-            self.simple_transformer_objs)
+            self.objs['simple_chp'] +
+            self.objs['simple_transformer'])
 
         lo.objective_cost_min(model=self, cost_objs=cost_objs,
                               revenue_objs=revenue_objs)

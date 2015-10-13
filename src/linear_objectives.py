@@ -85,16 +85,13 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         """ cost termn for dispatchable sources in linear objective
 
         """
-        if model.dispatch_source_objs:
-            # get dispatch expenditure for renewable energies with dispatch
-            model.dispatch_ex = {obj.uid: obj.dispatch_ex
-                                 for obj in model.dispatch_source_objs}
-            expr = sum(model.dispatch[e, t] * model.dispatch_ex[e]
-                            for e in model.dispatch_source_uids
-                            for t in model.timesteps)
-            return(expr)
-        else:
-            return(0)
+        # get dispatch expenditure for renewable energies with dispatch
+        model.dispatch_ex = {obj.uid: obj.dispatch_ex
+                             for obj in model.objs['dispatch_source']}
+        expr = sum(model.dispatch[e, t] * model.dispatch_ex[e]
+                   for e in model.uids['dispatch_source']
+                   for t in model.timesteps)
+        return(expr)
 
     def sum_excess_slack_costs(model):
         """ artificial cost term for excess slack variables
@@ -127,8 +124,9 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         # revenues from outputs of components
         expr += - sum_output_revenues(model)
 
-        # disptach cost for sources
-        expr += sum_dispatch_source_costs(model)
+        if model.objs['dispatch_source']:
+            # disptach cost for sources
+            expr += sum_dispatch_source_costs(model)
 
         # add additional capacity & capex for investment models
         if(model.invest is True):
