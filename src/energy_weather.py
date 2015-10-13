@@ -50,12 +50,14 @@ class Weather:
         self.geometry = kwargs.get('geometry', None)
         self.tz = kwargs.get('tz', None)
         self.rawdata = self.fetch_raw_data()
+        self.gid = list(self.rawdata.gid.unique())
         self.gid_geom = kwargs.get('gid_geom', None)
         self.data_by_datatype = kwargs.get('data_by_datatype', None)
         self.data_by_gid = kwargs.get('data_by_gid', None)
         self._data_height = {}
-        self.feedin_data = kwargs.get('feedin_data', None)
-        self.timezone = self.tz
+        self._feedin_data = kwargs.get('feedin_data', None)
+        self._feedin_longitude = kwargs.get('feedin_longitude', None)
+        self._feedin_latitude = kwargs.get('feedin_latitude', None)
 
     def check_datatypes(self, datatypes):
         '''
@@ -198,7 +200,7 @@ class Weather:
         res = []
         for year in self.year:
             dic = {}
-            for gid in self.rawdata.gid.unique():
+            for gid in self.gid:
                 dic[gid] = {}
                 # Get the data for the given year and gid.
                 tmp = self.rawdata[
@@ -236,43 +238,27 @@ class Weather:
     def create_gid_geometry_dict(self):
         'Create the gid-geom dictionary'
         self.gid_geom = {}
-        for gid in self.rawdata.gid.unique():
+        for gid in self.gid:
             tmp_geo = self.rawdata.geom[
                 (self.rawdata.year == self.year[0]) &
                 (self.rawdata.gid == gid)]
             self.gid_geom[gid] = tmp_geo[tmp_geo.index[0]]
 
     def spatial_average(self, datatype):
-        df = self.grouped_by_datatype()[datatype]
+        df = self.grouped_by_datatype[datatype]
         return df.sum(axis=1) / len(df.columns)
 
-    def grouped_by_gid(self):
-        if self.data_by_gid is None:
-            self._create_grouped_by_gid_dict()
-        return self.data_by_gid
-
-    def grouped_by_datatype(self):
-        if self.data_by_datatype is None:
-            self._create_grouped_by_datatype_dict()
-        return self.data_by_datatype
-
-    def get_feedin_data(self, gid=None):
-        data_dict = self.grouped_by_gid()
+    def get_one_df(self, gid=None):
         if gid is None:
-            if len(list(data_dict.keys())) == 1:
-                gid = list(data_dict.keys())[0]
-            else:
-                # TODO: Better error message
-                raise IOError('Too manx keys...')
-        data = data_dict[gid]
-        self.latitude = None
-        self.longitude = None
-        self.timezone = self.tz_from_geom()
+            gid = self.gid[0]
+        data = self.grouped_by_gid[gid]
         return data.rename(columns=self.name_dc)
 
-    def get_geometry_from_gid(self, gid):
+    def get_geometry_from_gid(self, gid=None):
         if self.gid_geom is None:
             self.create_gid_geometry_dict()
+        if gid is None:
+            gid = self.gid[0]
         return self.gid_geom[gid]
 
     def get_data_heigth(self, name):
@@ -285,6 +271,25 @@ class Weather:
             height = 0
         return float(height)
 
+    def set_feedin_dataset(self, gid):
+        'Sets the feedin variables to one value for a multiset weather object.'
+        self._feedin_data = self.get_one_df(gid)
+        geo = self.get_geometry_from_gid()
+        self._feedin_longitude = geo.centroid.x
+        self._feedin_latitude = geo.centroid.y
+
+    @property
+    def grouped_by_gid(self):
+        if self.data_by_gid is None:
+            self._create_grouped_by_gid_dict()
+        return self.data_by_gid
+
+    @property
+    def grouped_by_datatype(self):
+        if self.data_by_datatype is None:
+            self._create_grouped_by_datatype_dict()
+        return self.data_by_datatype
+
     @property
     def data_height(self):
         for key in self.datatypes:
@@ -295,6 +300,44 @@ class Weather:
 
     @property
     def data(self):
-        if self.feedin_data is None:
-            self.feedin_data = self.get_feedin_data()
-        return self.feedin_data
+        if self._feedin_data is None:
+            self._feedin_data = self.get_one_df()
+        return self._feedin_data
+
+    @property
+    def longitude(self):
+        if self._feedin_longitude is None:
+            if len(self.gid) > 1:
+                logging.warning(
+                    'It is not possible to set the longitude of a weather'
+                    + 'object containing more than one sets.')
+                self._feedin_longitude = None
+            else:
+                geo = self.get_geometry_from_gid()
+                try:
+                    self._feedin_longitude = geo.centroid.x
+                except:
+                    self._feedin_longitude = geo.x
+        return self._feedin_longitude
+
+    @property
+    def latitude(self):
+        if self._feedin_latitude is None:
+            if len(self.gid) > 1:
+                logging.warning(
+                    'It is not possible to set the latitude of a weather'
+                    + 'object containing more than one sets.')
+                self._feedin_latitude = None
+            else:
+                geo = self.get_geometry_from_gid()
+                try:
+                    self._feedin_latitude = geo.centroid.y
+                except:
+                    self._feedin_latitude = geo.y
+        return self._feedin_latitude
+
+    @property
+    def timezone(self):
+        if self.tz is None:
+            self.tz = self.tz_from_geom()
+        return self.tz

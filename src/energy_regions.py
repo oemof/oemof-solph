@@ -294,9 +294,9 @@ class region():
             if data_height[name] is None:
                 data_height[name] = 0
 
-        laenge = len(list(self.weather.grouped_by_gid().keys()))
+        laenge = len(self.weather.gid)
 
-        for gid in self.weather.grouped_by_gid().keys():
+        for gid in self.weather.gid:
             logging.debug(laenge)
             # Get the geometry for the given weather raster field
             tmp_geom = self.weather.get_geometry_from_gid(gid)
@@ -318,19 +318,14 @@ class region():
             site['h_hub'] = (site['h_hub_dc'].get(wz, site['h_hub']))
 
             # Define weather object of the feedinlib
-            feedinlib_weather_object = fweather.FeedinWeather(
-                data=self.weather.get_feedin_data(gid=gid),
-                timezone=tz,
-                latitude=tmp_geom.centroid.y,
-                longitude=tmp_geom.centroid.x,
-                data_height=data_height)
+            self.weather.set_feedin_dataset(gid)
 
             # Determine the feedin time series for the weather field
             # Wind energy
             wind_peak_power = ee_pp[ee_pp.type == 'Windkraft'].p_kw_peak.sum()
             wind_power_plant = plants.WindPowerPlant(model=wind_model, **site)
             wind_series = wind_power_plant.feedin(
-                weather=feedinlib_weather_object,
+                weather=self.weather,
                 installed_capacity=wind_peak_power)
             wind_series.name = gid
 
@@ -338,7 +333,7 @@ class region():
             pv_peak_power = ee_pp[ee_pp.type == 'Solarstrom'].p_kw_peak.sum()
             pv_plant = plants.Photovoltaic(model=pv_model, **site)
             pv_series = pv_plant.feedin(
-                weather=feedinlib_weather_object, peak_power=pv_peak_power)
+                weather=self.weather, peak_power=pv_peak_power)
             pv_series.name = gid
 
             # Combine the results to a DataFrame
