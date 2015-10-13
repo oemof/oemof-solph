@@ -5,7 +5,7 @@ Created on Tue Oct  6 11:34:27 2015
 @author: simon
 """
 import pyomo.environ as po
-
+import numpy as np
 
 def objective_cost_min(model, cost_objs=None, revenue_objs=None):
     """Function that creates the objective function of the optimization
@@ -70,7 +70,7 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         #  if price is already a vector (array) this vector is taken
         model.output_revenues = {}
         for obj in revenue_objs:
-            if isinstance(obj.outputs[0].price, (float, int)):
+            if isinstance(obj.outputs[0].price, (float, int, np.integer)):
                 price = [obj.outputs[0].price] * len(model.timesteps)
                 model.output_revenues[obj.uid] = price
             else:
