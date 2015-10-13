@@ -30,7 +30,9 @@ class OptimizationModel(po.ConcreteModel):
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
     def __init__(self, entities, timesteps, options=None):
+        """
 
+        """
         super().__init__()
 
         self.entities = entities
@@ -53,23 +55,26 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
+        self.objs = {}
+        self.uids = {}
         # set attributes lists per class with objects and uids for opt model
         for cls in component_classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
             uids = [e.uid for e in objs]
-            setattr(self, cls.lower_name + "_objs", objs)
-            setattr(self, cls.lower_name + "_uids", uids)
+            self.objs[cls.lower_name] = objs
+            self.uids[cls.lower_name] = uids
             # "call" methods to add the constraints opt. problem
             if objs:
-                getattr(self, cls.lower_name + "_model")(objs=objs, uids=uids)
+                getattr(self, cls.lower_name + "_assembler")(objs=objs,
+                                                             uids=uids)
 
-        self.bus_model()
-        self.objective()
+        self.bus_assembler()
+        self.objective_assembler()
 
-    def bus_model(self):
-        """bus model creates bus balance for all buses using pyomo.Constraint
+    def bus_assembler(self):
+        """Meethod creates bus balance for all buses using pyomo.Constraint
 
-        The bus model creates all full balance around all buses using
+        The bus model creates all full balance around the energy buses using
         the `linear_constraints.generic_bus_constraint()` function.
         Additionally it sets constraints to model limits over the timehorizon
         for resource buses using `linear_constraints.generic_limit()
@@ -114,17 +119,19 @@ class OptimizationModel(po.ConcreteModel):
         lc.generic_limit(model=self, objs=resource_bus_objs,
                          uids=resource_bus_uids, timesteps=self.timesteps)
 
-    def simple_transformer_model(self, objs, uids):
-        """Generic transformer model containing the constraints
-        for generic transformer components.
+    def simple_transformer_assembler(self, objs, uids):
+        """Method containing the constraints for simple transformer components.
+
 
         Parameters
         ----------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
 
         Returns
         -------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
         """
 
         lc.generic_io_constraints(model=self, objs=objs, uids=uids,
@@ -138,38 +145,41 @@ class OptimizationModel(po.ConcreteModel):
             lc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
                                    timesteps=self.timesteps)
 
-    def simple_chp_model(self, objs, uids):
-        """Simple combined heat and power model containing the constraints
-        for simple chp components.
+    def simple_chp_assembler(self, objs, uids):
+        """Method grouping the constraints for simple chp components.
 
         Parameters
         ----------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
 
         Returns
         -------
-        self : pyomo.ConcreteModel
-
+        self : OptimizationModel() instance
         """
+
         # use generic_transformer model for in-out relation and
         # upper / lower bounds
-        self.simple_transformer_model(objs=objs, uids=uids)
+        self.simple_transformer_assembler(objs=objs, uids=uids)
 
         # use generic constraint to model PQ relation (P/eta_el = Q/eta_th)
         lc.generic_chp_constraint(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
 
-    def fixed_source_model(self, objs, uids):
-        """fixed source model containing the constraints for
+    def fixed_source_assembler(self, objs, uids):
+        """Method containing the constraints for
         fixed sources.
 
         Parameters
         ----------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
 
         Returns
         -------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
         """
         if self.invest is False:
             lc.generic_fixed_source(model=self, objs=objs, uids=uids,
@@ -178,45 +188,59 @@ class OptimizationModel(po.ConcreteModel):
             lc.generic_fixed_source_invest(model=self, objs=objs, uids=uids,
                                            timesteps=self.timesteps)
 
-    def dispatch_source_model(self, objs, uids):
+    def dispatch_source_assembler(self, objs, uids):
         """
         """
         if self.invest is False:
             lc.generic_dispatch_source(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
 
-    def simple_sink_model(self, objs, uids):
-        """simple sink model containing the constraints for simple sinks
+    def simple_sink_assembler(self, objs, uids):
+        """Method containing the constraints for simple sinks
+
+        Simple sinks are modeled with a fixed output value set for the
+        variable of the output.
+
         Parameters
         ----------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
 
         Returns
         -------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
         """
         lc.generic_fixed_sink(model=self, objs=objs, uids=uids,
                               timesteps=self.timesteps)
 
-    def simple_storage_model(self, objs, uids):
-        """Simple storage model containing the constraints for simple storage
-        components.
+    def simple_storage_assembler(self, objs, uids):
+        """Simple storage assembler containing the constraints for simple
+        storage components.
 
-        Parameters
+         Parameters
         ----------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
 
         Returns
         -------
-        self : pyomo.ConcreteModel
+        self : OptimizationModel() instance
         """
 
-        # set bounds for basic/investment models
+        # optimization model with no investment
         if(self.invest is False):
             lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
+            lc.generic_soc_bounds(model=self, objs=objs, uids=uids,
+                                  timesteps=self.timesteps)
+            lc.generic_storage_balance(model=self, objs=objs, uids=uids,
+                                       timesteps=self.timesteps)
+        
+        # investment 
         else:
-            gc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
+            lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
 
             # constraint that limits discharge power by using the c-rate
@@ -253,79 +277,56 @@ class OptimizationModel(po.ConcreteModel):
                     po.Constraint(uids, self.timesteps,
                                   rule=storage_charge_limit_rule))
 
-        # constraint for storage energy balance
-        O = {obj.uid: obj.outputs[0].uid for obj in objs}
-        I = {obj.uid: obj.inputs[0].uid for obj in objs}
-        soc_initial = {obj.uid: obj.soc_initial
-                       for obj in self.simple_storage_objs}
-        cap_loss = {obj.uid: obj.cap_loss for obj in self.simple_storage_objs}
-        eta_in = {obj.uid: obj.eta_in[0] for obj in self.simple_storage_objs}
-        eta_out = {obj.uid: obj.eta_out[0] for obj in self.simple_storage_objs}
-
-        def storage_balance_rule(self, e, t):
-            # TODO:
-            #   - include time increment
-            if(t == 0):
-                expr = 0
-                expr += self.soc[e, t] + soc_initial[e]
-                expr += - self.soc[e, t+len(self.timesteps)-1]
-                expr += - self.w[I[e], e, t] * eta_in[e]
-                expr += + self.w[e, O[e], t] / eta_out[e]
-                return(expr, 0)
-            else:
-                expr = self.soc[e, t] * (1 - cap_loss[e])
-                expr += - self.soc[e, t-1]
-                expr += - self.w[I[e], e, t] * eta_in[e]
-                expr += + self.w[e, O[e], t] / eta_out[e]
-                return(expr, 0)
-        self.simple_storage_c = po.Constraint(uids, self.timesteps,
-                                              rule=storage_balance_rule)
-
-    def simple_transport_model(self, objs, uids):
-        """Simple transport model building the constraints
+    def simple_transport_assembler(self, objs, uids):
+        """Simple transport assembler grouping the constraints
         for simple transport components
 
+        The method uses the simple_transformer_assembler() method.
+
         Parameters
         ----------
-        m : pyomo.ConcreteModel
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
 
         Returns
         -------
-        m : pyomo.ConcreteModel
+        self : OptimizationModel() instance
         """
 
-        self.simple_transformer_model(objs=objs, uids=uids)
+        self.simple_transformer_assembler(objs=objs, uids=uids)
 
-    def objective(self):
-        """Function that creates the objective function of the optimization
-        model.
+    def objective_assembler(self):
+        """Objective assembler creates builds objective function of the
+        optimization model.
 
         Parameters
         ----------
-        m : pyomo.ConcreteModel
+        self : OptimizationModel() instance
 
         Returns
         -------
-        m : pyomo.ConcreteModel
+        self : OptimizationModel() instance
         """
 
         # create a combine list of all cost-related components
         cost_objs = (
-            self.simple_chp_objs +
-            self.simple_transformer_objs +
-            self.simple_storage_objs +
-            self.simple_transport_objs)
+            self.objs['simple_chp'] +
+            self.objs['simple_transformer'] +
+            self.objs['simple_storage'] +
+            self.objs['simple_transport'])
 
         revenue_objs = (
-            self.simple_chp_objs +
-            self.simple_transformer_objs)
+            self.objs['simple_chp'] +
+            self.objs['simple_transformer'])
 
         lo.objective_cost_min(model=self, cost_objs=cost_objs,
                               revenue_objs=revenue_objs)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
-        """ Method that solves the optimization model
+        """ Method that takes care of the communication with the solver
+        to solve the optimization model
 
         Parameters
         ----------
@@ -372,9 +373,9 @@ class OptimizationModel(po.ConcreteModel):
                   "Solver Status: ", results.solver.status)
         else:
             # Something else is wrong
-            print ("Solver Status: ",  results.solver.status, "\n"
-                   "Termination condition: ",
-                   results.solver.termination_condition)
+            print("Solver Status: ", results.solver.status, "\n"
+                  "Termination condition: ",
+                  results.solver.termination_condition)
 
     def edges(self, components):
         """Method that creates a list with all edges for the objects in

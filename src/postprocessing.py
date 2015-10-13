@@ -4,6 +4,7 @@ Created on Mon Oct  5 17:22:56 2015
 
 @author: simon
 """
+import pandas as pd
 
 try:
     from network.entities import Bus, Component
@@ -97,3 +98,43 @@ def dual_variables_to_objects(instance):
                 b.results["duals"].append(
                     instance.dual[getattr(instance, "bus")[(b.uid, t)]])
     # print(b.results["duals"])
+
+
+def results_to_excel(instance=None, filename="/home/simon/results.xls", ):
+    """ Write results from pyomo.ConcreteModel() instance to excel file
+    """
+    writer = pd.ExcelWriter(filename)
+
+    input = pd.DataFrame()
+    output = pd.DataFrame()
+    storages = pd.DataFrame()
+
+    for entity in instance.entities:
+        if (isinstance(entity, cp.Transformer) or
+                isinstance(entity, cp.Source)):
+            # write outputs
+            O = [e.uid for e in entity.outputs[:]]
+            for o in O:
+                temp_lst = []
+                for t in instance.timesteps:
+                    temp_lst.append(instance.w[entity.uid, o, t].value)
+                output[entity.uid+"_"+o] = temp_lst
+
+            I = [i.uid for i in entity.inputs[:]]
+            for i in I:
+                temp_lst = []
+                for t in instance.timesteps:
+                    temp_lst.append(
+                        instance.w[i, entity.uid, t].value)
+                input[entity.uid+"_"+i] = temp_lst
+
+        if isinstance(entity, cp.transformers.Storage):
+            temp_lst = []
+            for t in instance.timesteps:
+                temp_lst.append(instance.soc[entity.uid, t].value)
+            storages[entity.uid] = temp_lst
+
+    output.to_excel(writer, "Output")
+    input.to_excel(writer, "Input")
+    storages.to_excel(writer, "Storages_SOC")
+    writer.save()
