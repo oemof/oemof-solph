@@ -12,6 +12,27 @@ from . import energy_buildings as eb
 
 class electrical_demand():
     '''
+    This class calculates the electrical demand for region. Therefore
+    several different methods can be applied.
+
+
+    Select a method to calculate the demand for a region.
+
+    'csv': read from csv; additional parameter values: path, filename
+    'db': read from DB; additional parameter values: conn
+    'scale_profile_csv': Read profile from csv; additional parameter values:
+        path, filename, ann_el_demand (if not given ann_el_demand will be
+        calculated, but therefore additional parameters are required)
+    'scale_profile_db': Read profile from DB; additional parameter values:
+        conn, ann_el_demand (if not given ann_el_demand will be calculated,
+        but therefore additional parameters are required)
+    'scale_entsoe': Read entsoe profile from DB; additional parameter values:
+        conn, ann_el_demand (if not given ann_el_demand will be calculated,
+        but therefore additional parameters are required)
+    'calculate_profile: Calculate profile from the profiles for the
+        three demand sectors (households, service, industry); additional
+        parameter values: define_elec_buildings (ann_el_demand and selp_type
+        for each sector)
     '''
     def __init__(self, method, **kwargs):
         self.annual_demand = kwargs.get('annual_elec_demand')
