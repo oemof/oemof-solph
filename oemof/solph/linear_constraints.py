@@ -7,7 +7,7 @@ Created on Mon Jul 20 10:27:00 2015
 
 import pyomo.environ as po
 try:
-    from network.entities import components as cp
+    from oemof.core.network.entities import components as cp
 except:
     from .network.entities import components as cp
 
@@ -17,7 +17,7 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
 
     .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \\\ \
     \\qquad \\text{with:}
-    .. math:: I = \\text{all inputs of bus } e 
+    .. math:: I = \\text{all inputs of bus } e
     .. math:: O = \\text{all outputs of bus } e
 
     Parameters
@@ -256,7 +256,7 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     Returns
     -------
     The upper and lower bounds of the variables are
-    altered at attributes (variables) of the optimization model object 
+    altered at attributes (variables) of the optimization model object
     `model` of type OptimizationModel()
 
     """
@@ -309,7 +309,7 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
         will be a list with timesteps representing the time-horizon
         of the optimization problem.
         (e.g. `timesteps` =  [t for t in range(168)])
-    
+
     Returns
     -------
     The constraints are added as attributes
@@ -645,8 +645,8 @@ def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
 
     Parameters
     -------------
-    
-    
+
+
     Returns
     ----------
 

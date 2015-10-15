@@ -2,13 +2,13 @@ import pyomo.environ as po
 try:
     import linear_constraints as lc
     import linear_objectives as lo
-    from network.entities import Bus, Component
-    from network.entities import components as cp
+    from oemof.core.network.entities import Bus, Component
+    from oemof.core.network.entities import components as cp
 except:
     from . import linear_constraints as lc
     from . import linear_objectives as lo
-    from .network.entities import Bus, Component
-    from .network.entities import components as cp
+    from ..core.network.entities import Bus, Component
+    from ..core.network.entities import components as cp
 
 
 class OptimizationModel(po.ConcreteModel):
@@ -237,8 +237,8 @@ class OptimizationModel(po.ConcreteModel):
                                   timesteps=self.timesteps)
             lc.generic_storage_balance(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
-        
-        # investment 
+
+        # investment
         else:
             lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)

@@ -11,7 +11,7 @@ import numpy as np
 from shapely.wkt import loads as wkt_loads
 from pytz import timezone
 from datetime import datetime
-from . import helpers
+from ..tools import helpers
 
 
 class Weather:

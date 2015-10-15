@@ -3,17 +3,17 @@
 
 import matplotlib.pyplot as plt
 import logging
+
+from feedinlib import models
 #logging.getLogger().setLevel(logging.DEBUG)
 #logging.getLogger().setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.WARNING)
 import shapely.geometry as shape
 import pandas as pd
-from oemof.src import db
-from oemof.src import helpers
-from oemof.src import models
-from oemof.src import energy_weather as w
-from oemof.src import energy_regions as reg
-from oemof.src import energy_buildings as b
+from oemof.tools import db
+from oemof.core import energy_weather as w
+from oemof.core import energy_regions as reg
+from oemof.core import energy_buildings as b
 
 import warnings
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
@@ -150,12 +150,12 @@ print("Nochmal Zeizone: {0}".format(wetter.tz))
 
 # Jetzt würde ich gerne mal sehen wie unterschiedlich der Wind an den
 # verschiedenen Messstellen weht. Dazu nutze ich das eben erstellte Wetterobj.
-wetter.grouped_by_datatype()['WSS_10M'].plot(
+wetter.grouped_by_datatype['WSS_10M'].plot(
     title='Windgeschwindigkeiten mit Geo-ID des Datenpunktes')
 plt.show()
 
 # Natürlich kann ich dafür auch wieder über die Region gehen (hier: Temperatur)
-df_temp = lk_wtb.weather.grouped_by_datatype()['T_2M']
+df_temp = lk_wtb.weather.grouped_by_datatype['T_2M']
 df_temp['average'] = lk_wtb.weather.spatial_average('T_2M')
 df_temp.plot(title='Temperaturen mit Geo-ID des Datenpunktes')
 plt.show()
@@ -171,26 +171,26 @@ print('Derzeitiges WKA-Modell: {0}'.format(site['wka_model']))
 print('Mögliche WKA-Modelle')
 models.WindPowerPlant([]).get_wind_pp_types(conn)
 
-## Erstellen der Standardlastprofile des BDEW als Objekt
-## Dafür nutzen wir das DataFrame der Region, das bereits die Feiertage enthält.
-#e_slp = b.bdew_elec_slp(conn, lk_wtb.df)
-#
-## Das BDEW-Objekt wird jetzt immer übergeben, wenn eine Gebäudeinstant erstellt
-## wird.
-#
-## Eine Möglichkeit: Sammeln aller E-Gebäudeinstanzen in einer Liste
-#elec_buildings = []
-#for building_def in define_elec_buildings:
-#    elec_buildings.append(b.electric_building(bdew=e_slp, **building_def))
-#
-## Danach (oder dabei): Sammeln aller Lastkurven in einem Dataframe
-#e_building_df = lk_wtb.df.drop(lk_wtb.df.columns[:], axis=1)
-#for building in elec_buildings:
-#    e_building_df[building.type] = building.load
-#
-## Jetzt plotten
-#e_building_df.plot(title='Electrical standardized load profiles')
-#plt.show()
+# Erstellen der Standardlastprofile des BDEW als Objekt
+# Dafür nutzen wir das DataFrame der Region, das bereits die Feiertage enthält.
+e_slp = b.bdew_elec_slp(conn, lk_wtb.df)
+
+# Das BDEW-Objekt wird jetzt immer übergeben, wenn eine Gebäudeinstant erstellt
+# wird.
+
+# Eine Möglichkeit: Sammeln aller E-Gebäudeinstanzen in einer Liste
+elec_buildings = []
+for building_def in define_elec_buildings:
+    elec_buildings.append(b.electric_building(bdew=e_slp, **building_def))
+
+# Danach (oder dabei): Sammeln aller Lastkurven in einem Dataframe
+e_building_df = lk_wtb.df.drop(lk_wtb.df.columns[:], axis=1)
+for building in elec_buildings:
+    e_building_df[building.type] = building.load
+
+# Jetzt plotten
+e_building_df.plot(title='Electrical standardized load profiles')
+plt.show()
 
 # Für die Wärme wird im Unterschied zum Strom noch eine Temperaturzeitreihe
 # benötigt. Die holen wird aus dem Wetterobjekt der Region. Da die Region

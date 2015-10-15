@@ -10,8 +10,8 @@ try:
     from network.entities import Bus, Component
     from network.entities import components as cp
 except:
-    from .network.entities import Bus, Component
-    from .network.entities import components as cp
+    from ..core.network.entities import Bus, Component
+    from ..core.network.entities import components as cp
 
 
 def results_to_objects(instance):
