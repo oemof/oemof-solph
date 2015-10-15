@@ -11,28 +11,85 @@ from . import energy_buildings as eb
 
 
 class electrical_demand():
-    '''
-    This class calculates the electrical demand for region. Therefore
+    '''Calculate the electrical demand for a region with different methods.
+
+    This class calculates the electrical demand for a region. Therefore
     several different methods can be applied.
 
+    Parameters
+    ----------
+    method : {'csv', 'db', 'scale_profile_csv', scale_profile_db',
+                  scale_entsoe', calculate_profile'}, required
+        Method to calculate the demand for a region.
+        Explanation:
 
-    Select a method to calculate the demand for a region.
+        'csv' : read from csv
 
-    'csv': read from csv; additional parameter values: path, filename
-    'db': read from DB; additional parameter values: conn
-    'scale_profile_csv': Read profile from csv; additional parameter values:
-        path, filename, ann_el_demand (if not given ann_el_demand will be
-        calculated, but therefore additional parameters are required)
-    'scale_profile_db': Read profile from DB; additional parameter values:
-        conn, ann_el_demand (if not given ann_el_demand will be calculated,
-        but therefore additional parameters are required)
-    'scale_entsoe': Read entsoe profile from DB; additional parameter values:
-        conn, ann_el_demand (if not given ann_el_demand will be calculated,
-        but therefore additional parameters are required)
-    'calculate_profile: Calculate profile from the profiles for the
-        three demand sectors (households, service, industry); additional
-        parameter values: define_elec_buildings (ann_el_demand and selp_type
-        for each sector)
+        'db' : read from database
+
+        'scale_profile_csv': read only profile from csv and scale it with
+            given or calculated demand
+
+        'scale_profile_db': read only profile from database and scale it with
+            given or calculated demand
+
+        'scale_entsoe': read entsoe profile from database and scale it with
+            given or calculated demand
+
+        'calculate_profile: Calculate profile from the profiles of the
+            three demand sectors (households, service, industry)
+
+    Other Parameters
+    ----------------
+    'csv' :
+        path :
+        filename :
+
+    'db' :
+        conn :
+
+    'scale_profile_csv' :
+        path :
+        filename :
+        ann_el_demand :
+
+    'scale_profile_db' and 'scale_profile_entsoe' :
+        conn :
+        ann_el_demand :
+
+    'calculate_profile' :
+        define_elec_buildings : ann_el_demand and selp_type for each sector
+
+
+    Attributes
+    ----------
+    annual_demand : int
+        Included in **kwargs. Given with initialization or calculated or
+        to be calculated within this class according to selected method.
+
+    dataframe : pandas dataframe
+
+    elec_demand : array_like
+
+    profile :
+
+    e_slp :
+
+    Returns
+    -------
+
+    Notes
+    -----
+    .. math::
+
+    References
+    ----------
+    statistics ...
+
+    Examples
+    --------
+    Examples?
+
     '''
     def __init__(self, method, **kwargs):
         self.annual_demand = kwargs.get('annual_elec_demand')
@@ -187,6 +244,5 @@ class electrical_demand():
 
 
 class heat_demand():
-    # Das Gebäudeprofil kommt aus der Datenbank einer Datei oder einer anderen
-    # Funktion.
+    # not implemented yet
     pass
