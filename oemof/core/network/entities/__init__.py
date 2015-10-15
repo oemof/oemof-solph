@@ -53,5 +53,6 @@ class Component(Entity):
         self.opex_var = kwargs.get('opex_var', 0)
         self.crf = kwargs.get('crf', 0)
         self.co2_var = kwargs.get('co2_var', 0)
+        self.max_cap = kwargs.get('max_cap', float("+inf"))
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})

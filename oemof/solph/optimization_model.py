@@ -242,6 +242,7 @@ class OptimizationModel(po.ConcreteModel):
         else:
             lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
+            
             lc.generic_storage_balance(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
             # constraint that limits discharge power by using the c-rate
@@ -252,7 +253,7 @@ class OptimizationModel(po.ConcreteModel):
             def storage_discharge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, O[e][0], t]
-                expr += -(out_max[e][O[e][0]] + self.add_cap[e, O[e][0]]) \
+                expr += -(out_max[e][O[e][0]] + self.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
             setattr(self, "simple_storage_w_ub_discharge_invest" +
@@ -268,7 +269,7 @@ class OptimizationModel(po.ConcreteModel):
             def storage_charge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, I[e][0], t]
-                expr += -(in_max[e][I[e][0]] + self.add_cap[e, I[e][0]]) \
+                expr += -(in_max[e][I[e][0]] + self.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
             setattr(self, "simple_storage_w_ub_charge_invest" +

@@ -69,10 +69,10 @@ def results_to_objects(instance):
         for entity in instance.entities:
             if isinstance(entity, cp.Transformer):
                 entity.results['add_cap_out'] = \
-                    instance.add_cap[entity.uid, entity.outputs[0].uid].value
+                    instance.add_cap[entity.uid].value
             if isinstance(entity, cp.Source):
                 entity.results['add_cap_out'] = \
-                    instance.add_cap[entity.uid, entity.outputs[0].uid].value
+                    instance.add_cap[entity.uid].value
             if isinstance(entity, cp.transformers.Storage):
                 entity.results['add_cap_soc'] = \
                     instance.soc_add[entity.uid].value

@@ -8,6 +8,7 @@ Created on Mon Jul 20 10:27:00 2015
 import pyomo.environ as po
 try:
     from oemof.core.network.entities import components as cp
+    from oemof.core.network.entities import Component
 except:
     from .network.entities import components as cp
 
@@ -94,7 +95,9 @@ def generic_variables(model, edges, timesteps, var_name="w"):
 
     # additional variable for investment models
     if model.invest is True:
-        model.add_cap = po.Var(edges, within=po.NonNegativeReals)
+        objs = [e for e in model.entities if isinstance(e, Component)]
+        uids = [e.uid for e in objs]
+        model.add_cap = po.Var(uids, within=po.NonNegativeReals)
 
     # dispatch variables for dispatchable sources
     objs = [e for e in model.entities
@@ -320,11 +323,17 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
 
+    # set maximum of addiational storage capacity 
+    max_cap = {obj.uid: obj.max_cap for obj in objs}
+    # loop over all uids (storages) set the upper bound
+    for e in uids:
+        model.add_cap[e].setub(max_cap[e])
+        
     # constraint for additional capacity
     def rule(model, e, t):
         expr = 0
         expr += model.w[e, O[e][0], t]
-        rhs = out_max[e][O[e][0]] + model.add_cap[e, O[e][0]]
+        rhs = out_max[e][O[e][0]] + model.add_cap[e]
         return(expr <= rhs)
     setattr(model, "generic_w_ub_" + objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=rule))
@@ -407,6 +416,12 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
                          which bounds should be set.")
     if uids is None:
         uids = [e.uids for e in objs]
+
+    # set maximum of addiational storage capacity 
+    max_cap = {obj.uid: obj.max_cap for obj in objs}
+    # loop over all uids (storages) set the upper bound
+    for e in uids:
+        model.soc_add[e].setub(max_cap[e])
 
     # extract values for storages m.soc_max = {'storge': 120.5, ... }
     soc_max = {obj.uid: obj.soc_max for obj in objs}
@@ -587,7 +602,7 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
 
     def invest_rule(model, e, t):
         expr = model.w[e, O[e], t]
-        rhs = (out_max[e][O[e]] + model.add_cap[e, O[e]]) * val[e][t]
+        rhs = (out_max[e][O[e]] + model.add_cap[e]) * val[e][t]
         return(expr == rhs)
     setattr(model, "generic_invest_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=invest_rule))
