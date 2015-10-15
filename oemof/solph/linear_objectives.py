@@ -138,7 +138,7 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
                         for e in cost_uids)
             expr += sum(model.soc_add[e] * model.crf[e] *
                         (model.capex[e] + model.opex_fix[e])
-                        for e in model.simple_storage_uids)
+                        for e in model.uids['simple_storage'])
 
         if model.slack["shortage"] is True:
             expr += sum_shortage_slack_costs(model)

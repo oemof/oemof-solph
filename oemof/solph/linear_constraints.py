@@ -271,7 +271,9 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     # m.out_max = {'pp_coal': 20200, ... }
     in_max = {obj.uid: obj.in_max for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
-
+    
+    # TODO: Throw warning if in and out_max are both None
+    
     # edges for simple transformers ([('coal', 'pp_coal'),...])
     ee = model.edges(objs)
     for (e1, e2) in ee:
@@ -400,9 +402,17 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     The constraints are added as attributes
     to the optimization model object `model` of type OptimizationModel()
     """
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which bounds should be set.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+    # extract values for storages m.soc_max = {'storge': 120.5, ... }
+    soc_max = {obj.uid: obj.soc_max for obj in objs}
     # constraint for additional capacity in investment models
     def rule(model, e, t):
-        return(model.soc[e, t] <= model.soc_max[e] + model.soc_add[e])
+        return(model.soc[e, t] <= soc_max[e] + model.soc_add[e])
     setattr(model, "generic_soc_ub_invest_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=rule))
 
@@ -577,7 +587,7 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
 
     def invest_rule(model, e, t):
         expr = model.w[e, O[e], t]
-        rhs = (out_max[e] + model.add_cap[e, O[e]]) * val[e][t]
+        rhs = (out_max[e][O[e]] + model.add_cap[e, O[e]]) * val[e][t]
         return(expr <= rhs)
     setattr(model, "generic_invest_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=invest_rule))

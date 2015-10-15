@@ -245,7 +245,7 @@ class OptimizationModel(po.ConcreteModel):
 
             # constraint that limits discharge power by using the c-rate
             c_rate_out = {obj.uid: obj.c_rate_out
-                          for obj in self.simple_storage_objs}
+                          for obj in self.objs['simple_storage']}
             out_max = {obj.uid: obj.out_max for obj in objs}
             O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
 
@@ -262,7 +262,7 @@ class OptimizationModel(po.ConcreteModel):
 
             # constraint that limits charging power by using the c-rate
             c_rate_in = {obj.uid: obj.c_rate_in
-                         for obj in self.simple_storage_objs}
+                         for obj in self.objs['simple_storage']}
             in_max = {obj.uid: obj.in_max for obj in objs}
             I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in objs}
 
