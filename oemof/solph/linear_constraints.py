@@ -588,7 +588,7 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
     def invest_rule(model, e, t):
         expr = model.w[e, O[e], t]
         rhs = (out_max[e][O[e]] + model.add_cap[e, O[e]]) * val[e][t]
-        return(expr <= rhs)
+        return(expr == rhs)
     setattr(model, "generic_invest_"+objs[0].lower_name,
             po.Constraint(uids, timesteps, rule=invest_rule))
 
