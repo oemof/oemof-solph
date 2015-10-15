@@ -12,9 +12,9 @@ import pickle
 from . import helpers
 from . import energy_weather as w
 from . import energy_power_plants as pp
-from . import energy_buildings as eb
-from . import powerplants as plants
-from . import models
+from feedinlib import powerplants as plants
+from feedinlib import models
+from feedinlib import weather as fweather
 
 from matplotlib import pyplot as plt
 from descartes import PolygonPatch
@@ -224,7 +224,8 @@ class region():
         return self.geometry.centroid
 
     def fetch_weather_raster(self, conn):
-        self.weather = w.Weather(conn, self.geometry, self.year)
+        self.weather = w.Weather(connection=conn, geometry=self.geometry,
+                                 year=self.year)
         return self
 
     def fetch_ee_plants(self, conn):
@@ -273,20 +274,29 @@ class region():
         return self
 
     def fetch_ee_feedin(self, conn, **site):
-        wind_model = models.WindPowerPlant(required=[])
-        wind_model.get_wind_pp_types(conn)  # remove this output
-        pv_model = models.Photovoltaic(required=[])
+        wind_model = models.WindPowerPlant(required=[
+            'h_hub', 'd_rotor', 'wind_conv_type'])
+        pv_model = models.Photovoltaic(required=[
+            'albedo', 'tilt', 'azimuth', 'module_name'])
         site['connection'] = conn
-        site['tz'] = self.weather.tz
+        tz = self.weather.tz
         pv_df = 0
         wind_df = 0
         if self.power_plants.get('re', None) is None:
             self.power_plants['re'] = (
                 pp.Power_Plants().get_empty_power_plant_df())
 
-        laenge = len(list(self.weather.grouped_by_gid().keys()))
+        # Define height dict
+        data_height = {}
+        for key in self.weather.datatypes:
+            name = self.weather.name_dc[key]
+            data_height[name] = self.weather.get_data_heigth(name)
+            if data_height[name] is None:
+                data_height[name] = 0
 
-        for gid in self.weather.grouped_by_gid().keys():
+        laenge = len(self.weather.gid)
+
+        for gid in self.weather.gid:
             logging.debug(laenge)
             # Get the geometry for the given weather raster field
             tmp_geom = self.weather.get_geometry_from_gid(gid)
@@ -302,28 +312,28 @@ class region():
             # Find type of wind turbine and its parameters according to the
             # windzone.
             wz = helpers.get_windzone(conn, tmp_geom)
-            site['wka_model'] = (site['wka_model_dc'].get(
+            site['wind_conv_type'] = (site['wka_model_dc'].get(
                 wz, site['wka_model']))
             site['d_rotor'] = (site['d_rotor_dc'].get(wz, site['d_rotor']))
             site['h_hub'] = (site['h_hub_dc'].get(wz, site['h_hub']))
 
-            site['weather'] = self.weather
-            site['gid'] = gid
-            site['latitude'] = tmp_geom.centroid.y
-            site['longitude'] = tmp_geom.centroid.x
+            # Define weather object of the feedinlib
+            self.weather.set_feedin_dataset(gid)
 
             # Determine the feedin time series for the weather field
             # Wind energy
             wind_peak_power = ee_pp[ee_pp.type == 'Windkraft'].p_kw_peak.sum()
-            wind_power_plant = plants.WindPowerPlant(
-                wind_peak_power, model=wind_model)
-            wind_series = wind_power_plant.feedin_as_pd(**site)
+            wind_power_plant = plants.WindPowerPlant(model=wind_model, **site)
+            wind_series = wind_power_plant.feedin(
+                weather=self.weather,
+                installed_capacity=wind_peak_power)
             wind_series.name = gid
 
             # PV
             pv_peak_power = ee_pp[ee_pp.type == 'Solarstrom'].p_kw_peak.sum()
-            pv_plant = plants.Photovoltaic(pv_peak_power, model=pv_model)
-            pv_series = pv_plant.feedin_as_pd(**site)
+            pv_plant = plants.Photovoltaic(model=pv_model, **site)
+            pv_series = pv_plant.feedin(
+                weather=self.weather, peak_power=pv_peak_power)
             pv_series.name = gid
 
             # Combine the results to a DataFrame
