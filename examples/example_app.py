@@ -15,13 +15,13 @@ are written back into the objects.
 
 """
 import matplotlib.pyplot as plt
-from optimization_model import OptimizationModel
-import postprocessing as pp
-from network.entities import Bus
-from network.entities.components import sinks as sink
-from network.entities.components import sources as source
-from network.entities.components import transformers as transformer
-from network.entities.components import transports as transport
+from oemof.solph.optimization_model import OptimizationModel
+from oemof.solph import postprocessing as pp
+from oemof.core.network.entities import Bus
+from oemof.core.network.entities.components import sinks as sink
+from oemof.core.network.entities.components import sources as source
+from oemof.core.network.entities.components import transformers as transformer
+from oemof.core.network.entities.components import transports as transport
 
 import pandas as pd
 
