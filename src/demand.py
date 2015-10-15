@@ -20,7 +20,7 @@ class electrical_demand():
     ----------
     method : {'csv', 'db', 'scale_profile_csv', scale_profile_db',
                   scale_entsoe', calculate_profile'}, required
-        Method to calculate the demand for a region.
+        Method to calculate the demand for your region.
         Explanation:
 
         'csv' : read from csv
@@ -36,29 +36,72 @@ class electrical_demand():
         'scale_entsoe': read entsoe profile from database and scale it with
             given or calculated demand
 
-        'calculate_profile: Calculate profile from the profiles of the
-            three demand sectors (households, service, industry)
+        'calculate_profile: Calculate profile from the standard load profiles
+            of the three demand sectors (households, service, industry) and
+            the corresponding annual electric demand.
 
     Other Parameters
     ----------------
-    'csv' :
-        path :
-        filename :
+    Required according to chosen method.
 
-    'db' :
+    {'csv', 'scale_profile_csv'} :
+        path : str
+            '/path/to/file'
+        filename : str
+            'filename.csv'
+
+    {'db', 'scale_profile_db', 'scale_profile_entsoe'} :
         conn :
 
-    'scale_profile_csv' :
-        path :
-        filename :
-        ann_el_demand :
+    {'scale_profile_csv', 'scale_profile_db', 'scale_profile_entsoe'} :
+        annual_elec_demand : int
+            Annual demand of your region. Works so far only with a given
+            value. Calculating the demand from statistic data for the whole
+            region can be an option for further development.
 
-    'scale_profile_db' and 'scale_profile_entsoe' :
-        conn :
-        ann_el_demand :
+    {'calculate_profile'} :
+        ann_el_demand_per_sector : list of dictionaries
+            Specification of annual electric demand and the corresponding
+            standard load profile type (selp_type) for every sector, e.g.
+                ann_el_demand_per_sector = [
+                    {'ann_el_demand': int or None,
+                     'selp_type: {'h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5',
+                                  'g6', 'i0'}},
+                                  ...]
+            if ann_el_demand is None, more parameters to calculate the demand
+            are necessary: (works so far only if ann_el_demand for every or
+                no sector is specified)
 
-    'calculate_profile' :
-        define_elec_buildings : ann_el_demand and selp_type for each sector
+        population : int
+            Population of your region.
+
+        ann_el_demand_per_person : list of dictionaries
+            Specification of the annual electric demand for one household
+            according to the household type (from single to four-person
+            households), e.g.
+                ann_el_demand_per_person = [
+                    {'ann_el_demand': int,
+                     'household_type': {'one', 'two', 'three', 'four'}},
+                     ...]
+
+        household_structure : list of dictionaries
+            Number of people living in every household type. Specification
+            for your region, e.g.
+                household_structure = [
+                    {household_members': int,
+                     'household_type': {'one', 'two', 'three', 'four'}},
+                     ...]
+
+        comm_ann_el_demand_state : int
+            Annual electric demand of the service sector of the next bigger
+            region, if not given for your region.
+
+        comm_number_of_employees_state : int
+            Number of employees in the service sector of the next bigger
+            region.
+
+        comm_number_of_employees_region : int
+            Number of employees in the service sector of your region.
 
 
     Attributes
@@ -85,10 +128,15 @@ class electrical_demand():
     References
     ----------
     statistics ...
+    Masterarbeit Birgit
 
     Examples
     --------
-    Examples?
+    These are written in doctest format, and should illustrate how to
+    use the function.
+
+    z. B. Summe bilden von elec_demand und abgleichen mit ann_el_demand
+
 
     '''
     def __init__(self, method, **kwargs):
