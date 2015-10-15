@@ -75,7 +75,7 @@ pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
                             in_max={bgas.uid: None},
                             out_max={b_el.uid: 41000}, eta=[0.45],
-                            opex_fix=45, opex_var=2, co2_var=em_lig)
+                            opex_fix=45, opex_var=2, co2_var=em_gas)
 
 pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
                             in_max={boil.uid: None},
