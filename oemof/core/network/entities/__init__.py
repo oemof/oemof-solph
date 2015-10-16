@@ -37,22 +37,45 @@ class Component(Entity):
 
     def __init__(self, **kwargs):
         """
-        :param capex: capex for new installed capacity
-        :param opex_fix: fixed opex (e.g. expenses for staff)
-        :param opex_var: variable opex (e.g. spare parts)
-        :param crf: capital recovery factor: (p*(1+p)^n)/(((1+p)^n)-1)
+        Parameters:
+        ------------
+        in_max : maximum input of component (e.g. in MW)
+        out_max : maximum output of component (e.g. in MW)
+        add_out_limit : limit on additional output "capacity"
+
+        capex : capital expenditure
+        lifetime : lifetime of component
+        wacc : weigted average cost of capital (dimensionless)
+        crf: capital recovery factor: (p*(1+p)^n)/(((1+p)^n)-1)
+
+        opex_fix : fixed operational expenditure (e.g. expenses for staff)
+        opex_var : variable operational expenditure (e.g. spare parts)
+        ramp_costs : costs du to ramping
+        start_costs : costs due to start of component
+
+        co2_fix : fixed co2 emissions
+        co2_var : variable co2 emissions
+        co2_cap : co2 emissions due to installed capacity
         """
         super().__init__(**kwargs)
 
         self.in_max = kwargs.get('in_max', None)
         self.out_max = kwargs.get('out_max', None)
+        self.add_out_limit = kwargs.get('add_out', None)
+
+        self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
         self.wacc = kwargs.get('wacc', 0.05)
-        self.capex = kwargs.get('capex', 0)
-        self.opex_fix = kwargs.get('opex_fix', 0)
+
         self.opex_var = kwargs.get('opex_var', 0)
-        self.crf = kwargs.get('crf', 0)
+        self.opex_fix = kwargs.get('opex_fix', 0)
+        self.ramp_costs = kwargs.get('rampex', 0)
+        self.start_costs = kwargs.get('start_costs', 0)
+
         self.co2_var = kwargs.get('co2_var', 0)
-        self.max_cap = kwargs.get('max_cap', float("+inf"))
+        self.co2_fix = kwargs.get('co2_fix', 0)
+        self.co2_cap = kwargs.get('co2_cap', 0)
+
+        self.crf = kwargs.get('crf', 0)
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})

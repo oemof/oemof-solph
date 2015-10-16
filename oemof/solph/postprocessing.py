@@ -68,14 +68,14 @@ def results_to_objects(instance):
     if(instance.invest is True):
         for entity in instance.entities:
             if isinstance(entity, cp.Transformer):
-                entity.results['add_cap_out'] = \
-                    instance.add_cap[entity.uid].value
+                entity.results['add_out'] = \
+                    instance.add_out[entity.uid].value
             if isinstance(entity, cp.Source):
-                entity.results['add_cap_out'] = \
-                    instance.add_cap[entity.uid].value
+                entity.results['add_out'] = \
+                    instance.add_out[entity.uid].value
             if isinstance(entity, cp.transformers.Storage):
-                entity.results['add_cap_soc'] = \
-                    instance.soc_add[entity.uid].value
+                entity.results['add_cap'] = \
+                    instance.add_cap[entity.uid].value
 
 
 def dual_variables_to_objects(instance):

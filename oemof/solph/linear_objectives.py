@@ -133,10 +133,10 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
             model.capex = {obj.uid: obj.capex for obj in cost_objs}
             model.crf = {obj.uid: obj.crf for obj in cost_objs}
 
-            expr += sum(model.add_cap[e] * model.crf[e] *
+            expr += sum(model.add_out[e] * model.crf[e] *
                         (model.capex[e] + model.opex_fix[e])
                         for e in cost_uids)
-            expr += sum(model.soc_add[e] * model.crf[e] *
+            expr += sum(model.add_cap[e] * model.crf[e] *
                         (model.capex[e] + model.opex_fix[e])
                         for e in model.uids['simple_storage'])
 

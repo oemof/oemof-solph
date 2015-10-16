@@ -52,7 +52,8 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
         if model.slack["shortage"] is True:
             expr += model.shortage_slack[e, t]
         return(expr >= rhs)
-    model.bus = po.Constraint(uids, timesteps, rule=bus_rule)
+    setattr(model, objs[0].lower_name+"_balance_gc",
+            po.Constraint(uids, timesteps, rule=bus_rule))
 
 
 def generic_variables(model, edges, timesteps, var_name="w"):
@@ -97,7 +98,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
     if model.invest is True:
         objs = [e for e in model.entities if isinstance(e, Component)]
         uids = [e.uid for e in objs]
-        model.add_cap = po.Var(uids, within=po.NonNegativeReals)
+        model.add_out = po.Var(uids, within=po.NonNegativeReals)
 
     # dispatch variables for dispatchable sources
     objs = [e for e in model.entities
@@ -119,7 +120,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
 
         # create additional variable for investment models
         if model.invest is True:
-            model.soc_add = po.Var(uids, within=po.NonNegativeReals)
+            model.add_cap = po.Var(uids, within=po.NonNegativeReals)
 
 
 def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
@@ -172,7 +173,7 @@ def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
     def io_rule(model, e, t):
         expr = model.w[I[e], e, t] * eta[e][0] - model.w[e, O[e][0], t]
         return(expr == 0)
-    setattr(model, "generic_io_"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+"_in_out_gc",
             po.Constraint(uids, timesteps, rule=io_rule,
                           doc="Input * Efficiency = Output"))
 
@@ -227,7 +228,7 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
         expr = model.w[e, O[e][0], t] / eta[e][0]
         expr += -model.w[e, O[e][1], t] / eta[e][1]
         return(expr == 0)
-    setattr(model, "generic_"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+"_gc",
             po.Constraint(uids, timesteps, rule=rule,
                           doc="P/eta_el - Q/eta_th = 0"))
 
@@ -274,9 +275,9 @@ def generic_w_ub(model, objs=None, uids=None, timesteps=None):
     # m.out_max = {'pp_coal': 20200, ... }
     in_max = {obj.uid: obj.in_max for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
-    
+
     # TODO: Throw warning if in and out_max are both None
-    
+
     # edges for simple transformers ([('coal', 'pp_coal'),...])
     ee = model.edges(objs)
     for (e1, e2) in ee:
@@ -323,19 +324,19 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
 
-    # set maximum of addiational storage capacity 
-    max_cap = {obj.uid: obj.max_cap for obj in objs}
+    # set maximum of addiational storage capacity
+    add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
     # loop over all uids (storages) set the upper bound
     for e in uids:
-        model.add_cap[e].setub(max_cap[e])
-        
+        model.add_out[e].setub(add_out_limit[e])
+
     # constraint for additional capacity
     def rule(model, e, t):
         expr = 0
         expr += model.w[e, O[e][0], t]
-        rhs = out_max[e][O[e][0]] + model.add_cap[e]
+        rhs = out_max[e][O[e][0]] + model.add_out[e]
         return(expr <= rhs)
-    setattr(model, "generic_w_ub_" + objs[0].lower_name,
+    setattr(model, objs[0].lower_name+"_w_ub_invest_gc",
             po.Constraint(uids, timesteps, rule=rule))
 
 def generic_soc_bounds(model, objs=None, uids=None, timesteps=None):
@@ -417,20 +418,29 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     if uids is None:
         uids = [e.uids for e in objs]
 
-    # set maximum of addiational storage capacity 
-    max_cap = {obj.uid: obj.max_cap for obj in objs}
+    # set maximum of addiational storage capacity
+    add_cap_limit = {obj.uid: obj.add_cap_limit for obj in objs}
     # loop over all uids (storages) set the upper bound
     for e in uids:
-        model.soc_add[e].setub(max_cap[e])
+        model.add_cap[e].setub(add_cap_limit[e])
 
     # extract values for storages m.soc_max = {'storge': 120.5, ... }
     soc_max = {obj.uid: obj.soc_max for obj in objs}
-    # constraint for additional capacity in investment models
-    def rule(model, e, t):
-        return(model.soc[e, t] <= soc_max[e] + model.soc_add[e])
-    setattr(model, "generic_soc_ub_invest_"+objs[0].lower_name,
-            po.Constraint(uids, timesteps, rule=rule))
+    #soc_initial = {obj.uid: obj.soc_initial for obj in objs}
 
+    # constraint for additional capacity in investment models
+    def add_cap_rule(model, e, t):
+        return(model.soc[e, t] <= soc_max[e] + model.add_cap[e])
+    setattr(model,objs[0].lower_name+"_add_cap_ub_gc",
+            po.Constraint(uids, timesteps, rule=add_cap_rule))
+
+    # TODO : discuss vs. c-rate modeling
+    #def add_out_rule(model, e, t):
+    #    expr = model.add_out[e]
+    #    rhs = (soc_initial[e] / soc_max[e]) * (model.add_cap[e] + soc_max[e])
+    #    return(expr == rhs)
+    #setattr(model, objs[0].lower_name+"_add_out_gc",
+    #        po.Constraint(uids, timesteps, rule=add_out_rule))
 
 
 def generic_limit(model, objs=None, uids=None, timesteps=None):
@@ -475,7 +485,7 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
             return(po.Constraint.Skip)
         else:
             return(expr <= 0)
-    setattr(model, "generic_limit_"+objs[0].lower_name,
+    setattr(model,objs[0].lower_name+"_limit_gc",
             po.Constraint(uids, rule=limit_rule))
 
 
@@ -600,11 +610,17 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
     if out_max is None:
         out_max = {obj.uid: obj.out_max for obj in objs}
 
+    # set maximum of addiational storage capacity
+    add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
+    # loop over all uids (storages) set the upper bound
+    for e in uids:
+        model.add_out[e].setub(add_out_limit[e])
+
     def invest_rule(model, e, t):
         expr = model.w[e, O[e], t]
-        rhs = (out_max[e][O[e]] + model.add_cap[e]) * val[e][t]
+        rhs = (out_max[e][O[e]] + model.add_out[e]) * val[e][t]
         return(expr == rhs)
-    setattr(model, "generic_invest_"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+"_invest_gc",
             po.Constraint(uids, timesteps, rule=invest_rule))
 
 
@@ -661,7 +677,7 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
         expr = model.dispatch[e, t]
         expr += - val[e][t] * out_max[e][O[e]] + model.w[e, O[e], t]
         return(expr, 0)
-    setattr(model, "generic_constr_"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+"_gc",
             po.Constraint(uids, timesteps, rule=dispatch_rule))
 
 
@@ -704,5 +720,5 @@ def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
             expr += - model.w[I[e], e, t] * eta_in[e]
             expr += + model.w[e, O[e], t] / eta_out[e]
         return(expr, 0)
-    setattr(model, "simple_storage_c", po.Constraint(uids, timesteps,
-            rule=storage_balance_rule))
+    setattr(model, objs[0].lower_name+"_balance_gc",
+            po.Constraint(uids, timesteps, rule=storage_balance_rule))

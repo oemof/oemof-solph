@@ -256,8 +256,7 @@ class OptimizationModel(po.ConcreteModel):
                 expr += -(out_max[e][O[e][0]] + self.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
-            setattr(self, "simple_storage_w_ub_discharge_invest" +
-                    objs[0].lower_name,
+            setattr(self, objs[0].lower_name+"_discharge_limit_invest",
                     po.Constraint(uids, self.timesteps,
                                   rule=storage_discharge_limit_rule))
 
@@ -272,8 +271,7 @@ class OptimizationModel(po.ConcreteModel):
                 expr += -(in_max[e][I[e][0]] + self.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
-            setattr(self, "simple_storage_w_ub_charge_invest" +
-                    objs[0].lower_name,
+            setattr(self,objs[0].lower_name+"_charge_limit_invest",
                     po.Constraint(uids, self.timesteps,
                                   rule=storage_charge_limit_rule))
 
