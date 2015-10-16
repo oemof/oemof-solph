@@ -242,7 +242,7 @@ class OptimizationModel(po.ConcreteModel):
         else:
             lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
-            
+
             lc.generic_storage_balance(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
             # constraint that limits discharge power by using the c-rate
