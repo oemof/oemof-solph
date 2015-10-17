@@ -116,7 +116,7 @@ def generic_variables(model, edges, timesteps, var_name="w"):
     if objs:
         uids = [e.uid for e in objs]
 
-        model.soc = po.Var(uids, timesteps, within=po.NonNegativeReals)
+        model.cap = po.Var(uids, timesteps, within=po.NonNegativeReals)
 
         # create additional variable for investment models
         if model.invest is True:
@@ -339,7 +339,7 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     setattr(model, objs[0].lower_name+"_w_ub_invest_gc",
             po.Constraint(uids, timesteps, rule=rule))
 
-def generic_soc_bounds(model, objs=None, uids=None, timesteps=None):
+def generic_sto_cap_bounds(model, objs=None, uids=None, timesteps=None):
     """ Alters/sets upper and lower bounds for variables that represent the
     state of charge e.g. filling level of a storage component.
 
@@ -371,17 +371,17 @@ def generic_soc_bounds(model, objs=None, uids=None, timesteps=None):
     if uids is None:
         uids = [e.uids for e in objs]
 
-    # extract values for storages m.soc_max = {'storge': 120.5, ... }
-    soc_max = {obj.uid: obj.soc_max for obj in objs}
-    soc_min = {obj.uid: obj.soc_min for obj in objs}
+    # extract values for storages m.cap_max = {'storge': 120.5, ... }
+    cap_max = {obj.uid: obj.cap_max for obj in objs}
+    cap_min = {obj.uid: obj.cap_min for obj in objs}
 
     # loop over all uids (storages) and timesteps to set the upper bound
     for e in uids:
         for t in timesteps:
-            model.soc[e, t].setub(soc_max[e])
-            model.soc[e, t].setlb(soc_min[e])
+            model.cap[e, t].setub(cap_max[e])
+            model.cap[e, t].setlb(cap_min[e])
 
-def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
+def generic_sto_cap_ub_invest(model, objs=None, uids=None, timesteps=None):
     """ Sets upper and lower bounds for variables that represent the state
     of charge of storages if investment models are calculated.
 
@@ -389,7 +389,7 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows:
 
-    .. math:: soc(e, t) \\leq soc_{max}(e) + soc\\_add(e), \
+    .. math:: cap(e, t) \\leq cap_{max}(e) + cap_{add}(e), \
     \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
@@ -424,20 +424,20 @@ def generic_soc_ub_invest(model, objs=None, uids=None, timesteps=None):
     for e in uids:
         model.add_cap[e].setub(add_cap_limit[e])
 
-    # extract values for storages m.soc_max = {'storge': 120.5, ... }
-    soc_max = {obj.uid: obj.soc_max for obj in objs}
-    #soc_initial = {obj.uid: obj.soc_initial for obj in objs}
+    # extract values for storages m.cap_max = {'storge': 120.5, ... }
+    cap_max = {obj.uid: obj.cap_max for obj in objs}
+    #cap_initial = {obj.uid: obj.cap_initial for obj in objs}
 
     # constraint for additional capacity in investment models
     def add_cap_rule(model, e, t):
-        return(model.soc[e, t] <= soc_max[e] + model.add_cap[e])
+        return(model.cap[e, t] <= cap_max[e] + model.add_cap[e])
     setattr(model,objs[0].lower_name+"_add_cap_ub_gc",
             po.Constraint(uids, timesteps, rule=add_cap_rule))
 
     # TODO : discuss vs. c-rate modeling
     #def add_out_rule(model, e, t):
     #    expr = model.add_out[e]
-    #    rhs = (soc_initial[e] / soc_max[e]) * (model.add_cap[e] + soc_max[e])
+    #    rhs = (cap_initial[e] / cap_max[e]) * (model.add_cap[e] + cap_max[e])
     #    return(expr == rhs)
     #setattr(model, objs[0].lower_name+"_add_out_gc",
     #        po.Constraint(uids, timesteps, rule=add_out_rule))
@@ -695,28 +695,28 @@ def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
     # constraint for storage energy balance
     O = {obj.uid: obj.outputs[0].uid for obj in objs}
     I = {obj.uid: obj.inputs[0].uid for obj in objs}
-    soc_initial = {obj.uid: obj.soc_initial for obj in objs}
+    cap_initial = {obj.uid: obj.cap_initial for obj in objs}
     cap_loss = {obj.uid: obj.cap_loss for obj in objs}
     eta_in = {obj.uid: obj.eta_in for obj in objs}
     eta_out = {obj.uid: obj.eta_out for obj in objs}
 
-    # set soc of last timesteps to fixed value of soc_initial
+    # set cap of last timesteps to fixed value of cap_initial
     t_last = len(model.timesteps)-1
     for e in uids:
-      model.soc[e, t_last] = soc_initial[e]
-      model.soc[e, t_last].fix()
+      model.cap[e, t_last] = cap_initial[e]
+      model.cap[e, t_last].fix()
 
     def storage_balance_rule(model, e, t):
         # TODO:
         #   - include time increment
         expr = 0
         if(t == 0):
-            expr += model.soc[e, t] - soc_initial[e]
+            expr += model.cap[e, t] - cap_initial[e]
             expr += - model.w[I[e], e, t] * eta_in[e]
             expr += + model.w[e, O[e], t] / eta_out[e]
         else:
-            expr += model.soc[e, t]
-            expr += - model.soc[e, t-1] * (1 - cap_loss[e])
+            expr += model.cap[e, t]
+            expr += - model.cap[e, t-1] * (1 - cap_loss[e])
             expr += - model.w[I[e], e, t] * eta_in[e]
             expr += + model.w[e, O[e], t] / eta_out[e]
         return(expr, 0)

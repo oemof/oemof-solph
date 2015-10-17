@@ -41,9 +41,9 @@ class Storage(Transformer):
         """
         Parameters:
         -----------
-        soc_max : maximal sate of charge
-        soc_min : minimum state of charge
-        soc_initial : state of charge at timestep 0 (default soc_max*0.5)
+        cap_max : maximal sate of charge
+        cap_min : minimum state of charge
+        cap_initial : state of charge at timestep 0 (default cap_max*0.5)
         add_cap_limit : limit of additional installed capacity (only investment
         models)
         eta_in : efficiency at charging
@@ -54,12 +54,12 @@ class Storage(Transformer):
         """
         super().__init__(**kwargs)
 
-        self.soc_max = kwargs.get('soc_max', None)
-        self.soc_min = kwargs.get('soc_min', None)
-        self.add_cap_limit = kwargs.get('cap_limit', None)
-        self.soc_initial = kwargs.get('soc_initial', self.soc_max*0.5)
+        self.cap_max = kwargs.get('cap_max', None)
+        self.cap_min = kwargs.get('cap_min', None)
+        self.add_cap_limit = kwargs.get('add_cap_limit', None)
+        self.cap_initial = kwargs.get('cap_initial', self.cap_max*0.5)
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)
-        self.c_rate_in = next(iter(self.in_max.values())) / self.soc_max
-        self.c_rate_out = next(iter(self.out_max.values())) / self.soc_max
+        self.c_rate_in = next(iter(self.in_max.values())) / self.cap_max
+        self.c_rate_out = next(iter(self.out_max.values())) / self.cap_max

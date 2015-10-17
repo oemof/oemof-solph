@@ -60,10 +60,10 @@ def results_to_objects(instance):
                 entity.results['in'][i].append(
                     instance.w[i, entity.uid, t].value)
         if isinstance(entity, cp.transformers.Storage):
-            entity.results['soc'] = []
+            entity.results['cap'] = []
             for t in instance.timesteps:
-                entity.results['soc'].append(
-                    instance.soc[entity.uid, t].value)
+                entity.results['cap'].append(
+                    instance.cap[entity.uid, t].value)
 
     if(instance.invest is True):
         for entity in instance.entities:
@@ -131,10 +131,10 @@ def results_to_excel(instance=None, filename="/home/simon/results.xls", ):
         if isinstance(entity, cp.transformers.Storage):
             temp_lst = []
             for t in instance.timesteps:
-                temp_lst.append(instance.soc[entity.uid, t].value)
+                temp_lst.append(instance.cap[entity.uid, t].value)
             storages[entity.uid] = temp_lst
 
     output.to_excel(writer, "Output")
     input.to_excel(writer, "Input")
-    storages.to_excel(writer, "Storages_SOC")
+    storages.to_excel(writer, "Storages")
     writer.save()

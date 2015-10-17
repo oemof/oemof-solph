@@ -92,7 +92,7 @@ pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
 sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  outputs=[b_el], in_max={b_el.uid: 100000},
                                  out_max={b_el.uid: 200000},
-                                 soc_max=700000, soc_min=0, soc_initial=350000,
+                                 cap_max=700000, cap_min=0, cap_initial=350000,
                                  eta_in=0.8, eta_out=0.8, cap_loss=0.01,
                                  opex_fix=35, opex_var=2, co2_var=None)
 
@@ -128,27 +128,6 @@ pp.results_to_objects(om)
 #pp.results_to_excel(om)
 # write results to data frame for excel export
 components = transformers + renew_sources
-
-
-def excel_export(components):
-    df = pd.DataFrame()
-    writer = pd.ExcelWriter("results.xlsx")
-
-    for c in components:
-        for k in c.results["out"].keys():
-            df[c.uid] = c.results["out"][k]
-    df.to_excel(writer, "Input")
-
-    for c in components:
-        for k in c.results["in"].keys():
-            df[c.uid] = c.results["in"][k]
-    df.to_excel(writer, "Output")
-
-    for c in components:
-        c.calc_emissions()
-        df[c.uid] = c.emissions
-    df.to_excel(writer, "Emissions")
-    writer.save()
 
 
 if __name__ == "__main__":

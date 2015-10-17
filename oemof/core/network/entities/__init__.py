@@ -61,7 +61,7 @@ class Component(Entity):
 
         self.in_max = kwargs.get('in_max', None)
         self.out_max = kwargs.get('out_max', None)
-        self.add_out_limit = kwargs.get('add_out', None)
+        self.add_out_limit = kwargs.get('add_out_limit', None)
 
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
@@ -76,6 +76,11 @@ class Component(Entity):
         self.co2_fix = kwargs.get('co2_fix', 0)
         self.co2_cap = kwargs.get('co2_cap', 0)
 
-        self.crf = kwargs.get('crf', 0)
+        self.crf = kwargs.get('crf', None)
+        if self.crf is None:
+            p = self.wacc
+            n = self.lifetime
+            self.crf = (p*(1+p)**n)/(((1+p)**n)-1)
+
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})

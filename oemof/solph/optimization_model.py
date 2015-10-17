@@ -233,14 +233,14 @@ class OptimizationModel(po.ConcreteModel):
         if(self.invest is False):
             lc.generic_w_ub(model=self, objs=objs, uids=uids,
                             timesteps=self.timesteps)
-            lc.generic_soc_bounds(model=self, objs=objs, uids=uids,
+            lc.generic_sto_cap_bounds(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
             lc.generic_storage_balance(model=self, objs=objs, uids=uids,
                                        timesteps=self.timesteps)
 
         # investment
         else:
-            lc.generic_soc_ub_invest(model=self, objs=objs, uids=uids,
+            lc.generic_sto_cap_ub_invest(model=self, objs=objs, uids=uids,
                                      timesteps=self.timesteps)
 
             lc.generic_storage_balance(model=self, objs=objs, uids=uids,

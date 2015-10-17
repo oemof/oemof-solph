@@ -54,7 +54,7 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
         # installed electrical/thermal capacity: {'pp_chp': 30000,...}
         out_max = {obj.uid: obj.out_max for obj in cost_objs}
-        soc_max = {obj.uid: obj.soc_max
+        cap_max = {obj.uid: obj.cap_max
                    for obj in model.objs['simple_storage']}
 
         out_max = {k: sum(filter(None, v.values()))
@@ -62,13 +62,13 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         if model.invest is False:
             # create expression term
             expr = sum(out_max[e] * opex_fix[e] for e in cost_uids)
-            expr += sum(soc_max[e] * opex_fix[e] for e in
+            expr += sum(cap_max[e] * opex_fix[e] for e in
                         model.uids['simple_storage'])
         else:
             expr = 0
             expr = sum((out_max[e] + model.add_out[e]) * opex_fix[e]
                         for e in cost_uids)
-            expr += sum((soc_max[e] + model.add_cap[e]) * opex_fix[e]
+            expr += sum((cap_max[e] + model.add_cap[e]) * opex_fix[e]
                        for e in model.uids['simple_storage'])
         return(expr)
 
@@ -95,7 +95,7 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         return(expr)
 
     def sum_dispatch_source_costs(model):
-        """ cost termn for dispatchable sources in linear objective
+        """ cost term for dispatchable sources in linear objective
 
         """
         # get dispatch expenditure for renewable energies with dispatch
