@@ -44,8 +44,8 @@ class OptimizationModel(po.ConcreteModel):
                                            "shortage": False})
 
         # calculate all edges ([('coal', 'pp_coal'),...])
-        self.all_edges = self.edges([e for e in self.entities
-                                     if isinstance(e, Component)])
+        components = [e for e in self.entities if isinstance(e, Component)]
+        self.all_edges = self.edges(components)
 
         lc.generic_variables(model=self, edges=self.all_edges,
                              timesteps=self.timesteps)
@@ -55,6 +55,12 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
+        components
+        self.I = {c.uid: c.inputs[0].uid for c in components
+                  if not isinstance(c, cp.Source)}
+        self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in components
+                  if not isinstance(c, cp.Sink)}
+
         self.objs = {}
         self.uids = {}
         # set attributes lists per class with objects and uids for opt model
@@ -122,7 +128,6 @@ class OptimizationModel(po.ConcreteModel):
     def simple_transformer_assembler(self, objs, uids):
         """Method containing the constraints for simple transformer components.
 
-
         Parameters
         ----------
         self : OptimizationModel() instance
@@ -133,7 +138,6 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-
         lc.generic_io_constraints(model=self, objs=objs, uids=uids,
                                   timesteps=self.timesteps)
 
@@ -248,12 +252,11 @@ class OptimizationModel(po.ConcreteModel):
             # constraint that limits discharge power by using the c-rate
             c_rate_out = {obj.uid: obj.c_rate_out for obj in objs}
             out_max = {obj.uid: obj.out_max for obj in objs}
-            O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
 
             def storage_discharge_limit_rule(self, e, t):
                 expr = 0
-                expr += self.w[e, O[e][0], t]
-                expr += -(out_max[e][O[e][0]] + self.add_cap[e]) \
+                expr += self.w[e, self.O[e][0], t]
+                expr += -(out_max[e][self.O[e][0]] + self.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
             setattr(self, objs[0].lower_name+"_discharge_limit_invest",
@@ -263,12 +266,11 @@ class OptimizationModel(po.ConcreteModel):
             # constraint that limits charging power by using the c-rate
             c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
             in_max = {obj.uid: obj.in_max for obj in objs}
-            I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in objs}
 
             def storage_charge_limit_rule(self, e, t):
                 expr = 0
-                expr += self.w[e, I[e][0], t]
-                expr += -(in_max[e][I[e][0]] + self.add_cap[e]) \
+                expr += self.w[e, self.I[e], t]
+                expr += -(in_max[e][self.I[e]] + self.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
             setattr(self,objs[0].lower_name+"_charge_limit_invest",
@@ -400,19 +402,3 @@ class OptimizationModel(po.ConcreteModel):
                 ej = (c.uid, o.uid)
                 edges.append(ej)
         return(edges)
-
-
-#def io_sets(components):
-#    """Function that gets inputs and outputs for given components.
-#
-#    Parameters
-#    ----------
-#    components : list of component objects
-#
-#    Returns
-#    -------
-#    (I, O) : lists with tupels that represent the edges
-#    """
-#    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in components}
-#    I = {obj.uid: [i.uid for i in obj.inputs[:]] for obj in components}
-#    return(I, O)

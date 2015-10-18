@@ -123,12 +123,12 @@ def generic_variables(model, edges, timesteps, var_name="w"):
             model.add_cap = po.Var(uids, within=po.NonNegativeReals)
 
 
-def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
+def generic_io_constraints(model, objs, uids, timesteps):
     """ Creates constraint for input-output relation as simple function
 
 
     The function uses the `pyomo.Constraint()` class to build the constraint
-    with the following relation
+    with the following relation.
 
     .. math:: w(I[e], e, t) \cdot \\eta[e] = w(e, O[e], t), \
     \\qquad \\forall e \\in uids, \\forall t \\in T
@@ -162,16 +162,13 @@ def generic_io_constraints(model, objs=None, uids=None, timesteps=None):
                          which the constraints should be build")
     if uids is None:
         uids = [e.uids for e in objs]
+
     #TODO:
-    #  - add possibility of multiple input busses (e.g. for syn + nat. gas)
-    I = {obj.uid: obj.inputs[0].uid for obj in objs}
-    # set with output uids for every simple transformer
-    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
     eta = {obj.uid: obj.eta for obj in objs}
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(model, e, t):
-        expr = model.w[I[e], e, t] * eta[e][0] - model.w[e, O[e][0], t]
+        expr = model.w[model.I[e], e, t] * eta[e][0] - model.w[e, model.O[e][0], t]
         return(expr == 0)
     setattr(model, objs[0].lower_name+"_in_out_gc",
             po.Constraint(uids, timesteps, rule=io_rule,
@@ -216,17 +213,14 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
     """
     #TODO:
     #  - add possibility of multiple output busses (e.g. for heat and power)
-    # set with output uids for every simple chp
-    # {'pp_chp': ['b_th', 'b_el']}
-    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
     # efficiencies for simple chps
     eta = {obj.uid: obj.eta for obj in objs}
 
     # additional constraint for power to heat ratio of simple chp comp:
     # P/eta_el = Q/eta_th
     def rule(model, e, t):
-        expr = model.w[e, O[e][0], t] / eta[e][0]
-        expr += -model.w[e, O[e][1], t] / eta[e][1]
+        expr = model.w[e, model.O[e][0], t] / eta[e][0]
+        expr += -model.w[e, model.O[e][1], t] / eta[e][1]
         return(expr == 0)
     setattr(model, objs[0].lower_name+"_gc",
             po.Constraint(uids, timesteps, rule=rule,
@@ -321,7 +315,6 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     The constraints are added as attributes
     to the optimization model object `model` of type OptimizationModel()
     """
-    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
     out_max = {obj.uid: obj.out_max for obj in objs}
 
     # set maximum of addiational storage capacity
@@ -333,8 +326,8 @@ def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
     # constraint for additional capacity
     def rule(model, e, t):
         expr = 0
-        expr += model.w[e, O[e][0], t]
-        rhs = out_max[e][O[e][0]] + model.add_out[e]
+        expr += model.w[e, model.O[e][0], t]
+        rhs = out_max[e][model.O[e][0]] + model.add_out[e]
         return(expr <= rhs)
     setattr(model, objs[0].lower_name+"_w_ub_invest_gc",
             po.Constraint(uids, timesteps, rule=rule))
@@ -617,8 +610,8 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
         model.add_out[e].setub(add_out_limit[e])
 
     def invest_rule(model, e, t):
-        expr = model.w[e, O[e], t]
-        rhs = (out_max[e][O[e]] + model.add_out[e]) * val[e][t]
+        expr = model.w[e, model.O[e][0], t]
+        rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
         return(expr == rhs)
     setattr(model, objs[0].lower_name+"_invest_gc",
             po.Constraint(uids, timesteps, rule=invest_rule))
@@ -658,8 +651,7 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
     There is no return value. The constraints will be added as attributes of
     the optimization model object `model` of type OptimizationModel().
     """
-    # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
-    O = {obj.uid: obj.outputs[0].uid for obj in objs}
+
     # normed value of renewable source (0 <= value <=1)
     val = {obj.uid: obj.val for obj in objs}
     # maximal ouput of renewable source (in general installed capacity)
@@ -675,7 +667,8 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
 
     def dispatch_rule(model, e, t):
         expr = model.dispatch[e, t]
-        expr += - val[e][t] * out_max[e][O[e]] + model.w[e, O[e], t]
+        expr += - val[e][t] * out_max[e][model.O[e][0]] + \
+           model.w[e, model.O[e][0], t]
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_gc",
             po.Constraint(uids, timesteps, rule=dispatch_rule))
@@ -693,8 +686,6 @@ def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
 
     """
     # constraint for storage energy balance
-    O = {obj.uid: obj.outputs[0].uid for obj in objs}
-    I = {obj.uid: obj.inputs[0].uid for obj in objs}
     cap_initial = {obj.uid: obj.cap_initial for obj in objs}
     cap_loss = {obj.uid: obj.cap_loss for obj in objs}
     eta_in = {obj.uid: obj.eta_in for obj in objs}
@@ -712,13 +703,13 @@ def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
         expr = 0
         if(t == 0):
             expr += model.cap[e, t] - cap_initial[e]
-            expr += - model.w[I[e], e, t] * eta_in[e]
-            expr += + model.w[e, O[e], t] / eta_out[e]
+            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += model.cap[e, t]
             expr += - model.cap[e, t-1] * (1 - cap_loss[e])
-            expr += - model.w[I[e], e, t] * eta_in[e]
-            expr += + model.w[e, O[e], t] / eta_out[e]
+            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_balance_gc",
             po.Constraint(uids, timesteps, rule=storage_balance_rule))
