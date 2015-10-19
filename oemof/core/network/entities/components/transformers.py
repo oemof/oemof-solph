@@ -15,7 +15,9 @@ class Simple(Transformer):
         """
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', None)
-
+        self.opex_var = kwargs.get('opex_var', None)
+        if self.opex_var is None:
+            self.opex_var = self.inputs[0].price
 
 class CHP(Transformer):
     """

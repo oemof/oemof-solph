@@ -51,25 +51,24 @@ def objective_cost_min(model, cost_objs=None, revenue_objs=None):
         """ fixed operation expenditure term for linear objective function
 
         """
-        opex_fix = {obj.uid: obj.opex_fix for obj in cost_objs}
+        opex_fix = {obj.uid: obj.opex_fix
+                    for obj in cost_objs+model.objs['simple_storage']}
         # installed electrical/thermal capacity: {'pp_chp': 30000,...}
         out_max = {obj.uid: obj.out_max for obj in cost_objs}
-        cap_max = {obj.uid: obj.cap_max
-                   for obj in model.objs['simple_storage']}
-
+        cap_max = {obj.uid: obj.cap_max for obj in model.objs['simple_storage']}
         out_max = {k: sum(filter(None, v.values()))
-                               for k, v in out_max.items()}
+                                 for k, v in out_max.items()}
         if model.invest is False:
             # create expression term
             expr = sum(out_max[e] * opex_fix[e] for e in cost_uids)
-            expr += sum(cap_max[e] * opex_fix[e] for e in
-                        model.uids['simple_storage'])
+            expr += sum(cap_max[e] * opex_fix[e]
+                       for e in model.uids['simple_storage'])
         else:
             expr = 0
             expr = sum((out_max[e] + model.add_out[e]) * opex_fix[e]
                         for e in cost_uids)
             expr += sum((cap_max[e] + model.add_cap[e]) * opex_fix[e]
-                       for e in model.uids['simple_storage'])
+                         for e in model.uids['simple_storage'])
         return(expr)
 
     def sum_output_revenues(model):

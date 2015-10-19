@@ -96,7 +96,7 @@ def dual_variables_to_objects(instance):
             b.results["duals"] = []
             for t in instance.timesteps:
                 b.results["duals"].append(
-                    instance.dual[getattr(instance, "bus")[(b.uid, t)]])
+                    instance.dual[getattr(instance, "bus_balance")[(b.uid, t)]])
     # print(b.results["duals"])
 
 

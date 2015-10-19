@@ -8,13 +8,12 @@ Created on Mon Jul 20 10:27:00 2015
 import pyomo.environ as po
 try:
     from oemof.core.network.entities import components as cp
-    from oemof.core.network.entities import Component
 except:
     from .network.entities import components as cp
 
 
-def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
-    """ creates constraint for the input-ouput balance of bus objects
+def add_bus_balance(model, objs=None, uids=None):
+    """ Adds constraint for the input-ouput balance of bus objects
 
     .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \\\ \
     \\qquad \\text{with:}
@@ -26,10 +25,7 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
     model : OptimizationModel() instance
     objs : objects for which the constraints are created (object type `bus`)
     uids : unique ids of bus object in `objs`
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
+
 
     Returns
     ----------
@@ -43,7 +39,7 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
 
     # constraint for bus balance:
     # component inputs/outputs are negative/positive in the bus balance
-    def bus_rule(model, e, t):
+    def bus_balance_rule(model, e, t):
         expr = 0
         expr += sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
@@ -52,81 +48,12 @@ def generic_bus_constraint(model, objs=None, uids=None, timesteps=None):
         if model.slack["shortage"] is True:
             expr += model.shortage_slack[e, t]
         return(expr >= rhs)
-    setattr(model, objs[0].lower_name+"_balance_gc",
-            po.Constraint(uids, timesteps, rule=bus_rule))
+    setattr(model, objs[0].lower_name+"_balance",
+            po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
 
 
-def generic_variables(model, edges, timesteps, var_name="w"):
-    """ Creates all variables corresponding to the edges of the bi-partite
-    graph for all timesteps.
-
-    The function uses the pyomo class `Var()` to create the optimization
-    variables. As index-sets the provided edges of the graph
-    (in general all edges) and the defined timesteps are used.
-    If an invest model is used an additional optimization variable indexed by
-    the edges is created to handle "flexible" upper bounds of the edge variable
-    by using an additional constraint.
-    The following variables are created: Variables for all the edges, variables
-    for dispatchable sources, variables for the state of charge of storages.
-    (If specific components such as disptach sources and storages exist.)
-
-    Parameters
-    ------------
-    model : OptimizationModel() instance
-        A object to be solved containing all Variables, Constraints, Data
-        Variables are added as attributes to the `model`
-    edges : array_like (list)
-        `edges` will be a list containing tuples representing the directed
-        edges of the graph by using unique ids of components and buses.
-        e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    --------
-    The variables are added as a attribute to the optimization model object
-    `model` of type OptimizationModel()
-
-
-    """
-    # variable for all edges
-    model.w = po.Var(edges, timesteps, within=po.NonNegativeReals)
-
-    # additional variable for investment models
-    if model.invest is True:
-        objs = [e for e in model.entities if isinstance(e, Component)]
-        uids = [e.uid for e in objs]
-        model.add_out = po.Var(uids, within=po.NonNegativeReals)
-
-    # dispatch variables for dispatchable sources
-    objs = [e for e in model.entities
-            if isinstance(e, cp.sources.DispatchSource)]
-    # if disptachable sources exist, create pyomo variables
-    if objs:
-        uids = [e.uid for e in objs]
-        model.dispatch = po.Var(uids, timesteps,
-                                within=po.NonNegativeReals)
-
-    # storage state of charge variables
-    objs = [e for e in model.entities
-            if isinstance(e, cp.transformers.Storage)]
-    # if storages exist, create pyomo variables
-    if objs:
-        uids = [e.uid for e in objs]
-
-        model.cap = po.Var(uids, timesteps, within=po.NonNegativeReals)
-
-        # create additional variable for investment models
-        if model.invest is True:
-            model.add_cap = po.Var(uids, within=po.NonNegativeReals)
-
-
-def generic_io_constraints(model, objs, uids, timesteps):
-    """ Creates constraint for input-output relation as simple function
-
-
+def add_simple_io_relation(model, objs=None, uids=None):
+    """ Adds constraint for input-output relation as simple function
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation.
 
@@ -145,10 +72,6 @@ def generic_io_constraints(model, objs, uids, timesteps):
         build
     uids : array like
         list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
 
     Returns
     -------
@@ -168,15 +91,15 @@ def generic_io_constraints(model, objs, uids, timesteps):
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(model, e, t):
-        expr = model.w[model.I[e], e, t] * eta[e][0] - model.w[e, model.O[e][0], t]
+        expr = model.w[model.I[e], e, t] * eta[e][0] - \
+            model.w[e, model.O[e][0], t]
         return(expr == 0)
     setattr(model, objs[0].lower_name+"_in_out_gc",
-            po.Constraint(uids, timesteps, rule=io_rule,
+            po.Constraint(uids, model.timesteps, rule=io_rule,
                           doc="Input * Efficiency = Output"))
 
-
-def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
-    """ Creates constraint for input-output relation for a simple
+def add_simple_chp_relation(model, objs=None, uids=None):
+    """ Adds constraint for input-output relation for a simple
     representation of combined heat an power units.
 
     The function uses the `pyomo.Constraint()` class to build the constraint
@@ -196,13 +119,8 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
     objs : array like
         list of component objects for which the constraint will be
         build
-    uids : array linke
+    uids : array like
         list of component uids corresponding to the objects
-
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
 
     Returns
     -------
@@ -218,226 +136,16 @@ def generic_chp_constraint(model, objs=None, uids=None, timesteps=None):
 
     # additional constraint for power to heat ratio of simple chp comp:
     # P/eta_el = Q/eta_th
-    def rule(model, e, t):
+    def simple_chp_rule(model, e, t):
         expr = model.w[e, model.O[e][0], t] / eta[e][0]
         expr += -model.w[e, model.O[e][1], t] / eta[e][1]
         return(expr == 0)
     setattr(model, objs[0].lower_name+"_gc",
-            po.Constraint(uids, timesteps, rule=rule,
+            po.Constraint(uids, model.timesteps, rule=simple_chp_rule,
                           doc="P/eta_el - Q/eta_th = 0"))
 
-
-def generic_w_ub(model, objs=None, uids=None, timesteps=None):
-    """ Alters/sets upper bounds for variables that represent the
-    weight of the edges of the graph.
-
-    .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad \
-    \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
-    .. math:: w(e_1, e_2, t) \\geq lb_w(e_1, e_2), \\qquad \
-    \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
-
-    Parameters
-    ------------
-    model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Bounds are altered at model attributes (variables) of `model`
-    objs : array like
-        list of component objects for which the bounds will be
-        altered
-    uids : array like
-        list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    -------
-    The upper and lower bounds of the variables are
-    altered at attributes (variables) of the optimization model object
-    `model` of type OptimizationModel()
-
-    """
-    if objs is None:
-        raise ValueError("No objects defined. Please specify objects for \
-                         which bounds should be set.")
-    if uids is None:
-        uids = [e.uids for e in objs]
-
-    # set variable bounds (out_max = in_max * efficiency):
-    # m.in_max = {'pp_coal': 51794.8717948718, ... }
-    # m.out_max = {'pp_coal': 20200, ... }
-    in_max = {obj.uid: obj.in_max for obj in objs}
-    out_max = {obj.uid: obj.out_max for obj in objs}
-
-    # TODO: Throw warning if in and out_max are both None
-
-    # edges for simple transformers ([('coal', 'pp_coal'),...])
-    ee = model.edges(objs)
-    for (e1, e2) in ee:
-        for t in timesteps:
-            # transformer output <= model.out_max
-            if e1 in uids:
-                model.w[e1, e2, t].setub(out_max[e1][e2])
-            # transformer input <= model.in_max
-            if e2 in uids:
-                model.w[e1, e2, t].setub(in_max[e2][e1])
-
-
-def generic_w_ub_invest(model, objs=None, uids=None, timesteps=None):
-    """ Sets upper bounds for variables that represent the weight
-    of the edges of the graph if investment models are calculated.
-
-    For investment  models upper and lower bounds will be modeled via
-    additional constraints of type pyomo.Constraint(). The mathematical
-    description for the constraint is as follows
-
-    .. math::  w(e, O_1[e], t) \\leq out_{max}(e,O_1[e]) + \
-    add\\_cap(e,O_1[e]), \\qquad \\forall e \\in uids, \\forall t \\in T
-
-    Parameters
-    ------------
-    model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model`
-    objs : array like
-        list of component objects for which the bounds will be
-        altered
-    uids : array linke
-        list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    -------
-    The constraints are added as attributes
-    to the optimization model object `model` of type OptimizationModel()
-    """
-    out_max = {obj.uid: obj.out_max for obj in objs}
-
-    # set maximum of addiational storage capacity
-    add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
-    # loop over all uids (storages) set the upper bound
-    for e in uids:
-        model.add_out[e].setub(add_out_limit[e])
-
-    # constraint for additional capacity
-    def rule(model, e, t):
-        expr = 0
-        expr += model.w[e, model.O[e][0], t]
-        rhs = out_max[e][model.O[e][0]] + model.add_out[e]
-        return(expr <= rhs)
-    setattr(model, objs[0].lower_name+"_w_ub_invest_gc",
-            po.Constraint(uids, timesteps, rule=rule))
-
-def generic_sto_cap_bounds(model, objs=None, uids=None, timesteps=None):
-    """ Alters/sets upper and lower bounds for variables that represent the
-    state of charge e.g. filling level of a storage component.
-
-    Parameters
-    ------------
-    model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Bounds are altered at model attributes (variables) of `model`
-    objs : array like
-        list of component objects for which the bounds will be
-        altered
-    uids : array linke
-        list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    -------
-    The upper and lower bounds of the variables are
-    altered in the optimization model object `model` of type
-    OptimizationModel()
-
-    """
-    if objs is None:
-        raise ValueError("No objects defined. Please specify objects for \
-                         which bounds should be set.")
-    if uids is None:
-        uids = [e.uids for e in objs]
-
-    # extract values for storages m.cap_max = {'storge': 120.5, ... }
-    cap_max = {obj.uid: obj.cap_max for obj in objs}
-    cap_min = {obj.uid: obj.cap_min for obj in objs}
-
-    # loop over all uids (storages) and timesteps to set the upper bound
-    for e in uids:
-        for t in timesteps:
-            model.cap[e, t].setub(cap_max[e])
-            model.cap[e, t].setlb(cap_min[e])
-
-def generic_sto_cap_ub_invest(model, objs=None, uids=None, timesteps=None):
-    """ Sets upper and lower bounds for variables that represent the state
-    of charge of storages if investment models are calculated.
-
-    For investment  models upper and lower bounds will be modeled via
-    additional constraints of type pyomo.Constraint(). The mathematical
-    description for the constraint is as follows:
-
-    .. math:: cap(e, t) \\leq cap_{max}(e) + cap_{add}(e), \
-    \\qquad \\forall e \\in uids, \\forall t \\in T
-
-    Parameters
-    ------------
-    model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-       Constraints are added as attribtes to the `model`
-    objs : array like
-        list of component objects for which the bounds will be
-        altered e.g. constraints will be created
-    uids : array linke
-        list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    -------
-    The constraints are added as attributes
-    to the optimization model object `model` of type OptimizationModel()
-    """
-    if objs is None:
-        raise ValueError("No objects defined. Please specify objects for \
-                         which bounds should be set.")
-    if uids is None:
-        uids = [e.uids for e in objs]
-
-    # set maximum of addiational storage capacity
-    add_cap_limit = {obj.uid: obj.add_cap_limit for obj in objs}
-    # loop over all uids (storages) set the upper bound
-    for e in uids:
-        model.add_cap[e].setub(add_cap_limit[e])
-
-    # extract values for storages m.cap_max = {'storge': 120.5, ... }
-    cap_max = {obj.uid: obj.cap_max for obj in objs}
-    #cap_initial = {obj.uid: obj.cap_initial for obj in objs}
-
-    # constraint for additional capacity in investment models
-    def add_cap_rule(model, e, t):
-        return(model.cap[e, t] <= cap_max[e] + model.add_cap[e])
-    setattr(model,objs[0].lower_name+"_add_cap_ub_gc",
-            po.Constraint(uids, timesteps, rule=add_cap_rule))
-
-    # TODO : discuss vs. c-rate modeling
-    #def add_out_rule(model, e, t):
-    #    expr = model.add_out[e]
-    #    rhs = (cap_initial[e] / cap_max[e]) * (model.add_cap[e] + cap_max[e])
-    #    return(expr == rhs)
-    #setattr(model, objs[0].lower_name+"_add_out_gc",
-    #        po.Constraint(uids, timesteps, rule=add_out_rule))
-
-
-def generic_limit(model, objs=None, uids=None, timesteps=None):
-    """ Creates constraint to set limit for variables as sum over the total
+def add_bus_output_limit(model, objs=None, uids=None):
+    """ Adds constraint to set limit for variables as sum over the total
     timehorizon
 
     .. math:: \sum_{t \\in T} \sum_{o \\in O[e]} w(e, o, t) \\leq limit[e], \
@@ -450,12 +158,8 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
        Constraints are added as attribtes to the `model`
     objs : array like
         list of component objects for which the constraints will be created
-    uids : array linke
+    uids : array like
         list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
 
     Returns
     -------
@@ -469,8 +173,8 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
     O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
 
     # set upper bounds: sum(yearly commodity output) <= yearly_limit
-    def limit_rule(model, e):
-        expr = sum(model.w[e, o, t] for t in timesteps for o in O[e]) -\
+    def output_limit_rule(model, e):
+        expr = sum(model.w[e, o, t] for t in model.timesteps for o in O[e]) -\
             limit[e]
         # if bus is defined but has not outputs Constraint is skipped
         # (should be logged as well)
@@ -479,92 +183,10 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
         else:
             return(expr <= 0)
     setattr(model,objs[0].lower_name+"_limit_gc",
-            po.Constraint(uids, rule=limit_rule))
+            po.Constraint(uids, rule=output_limit_rule))
 
-
-def generic_fixed_source(model, objs, uids, timesteps):
-    """ Creates fixed source from standard edges variables by setting the value
-    of variables and fixing variables to that value
-
-
-    Parameters
-    ------------
-    model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Attributes are altered of the `model`
-    objs : array like
-        list of component objects for which the variables representing the
-        output edges values will be set to a certain value and then fixed.
-    uids : array like
-        list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    -------
-    The variables as attributes of
-    the optimization model object `model` of type OptimizationModel() will
-    be altered.
-    """
-    # normed value of renewable source (0 <= value <=1)
-    val = {obj.uid: obj.val for obj in objs}
-    # maximal ouput of renewable source (in general installed capacity)
-    out_max = {obj.uid: obj.out_max for obj in objs}
-    # edges for renewables ([('wind_on', 'b_el'), ...)
-    ee = model.edges(objs)
-    # fixed values for every timestep
-    for (e1, e2) in ee:
-        for t in timesteps:
-            # set value of variable
-            model.w[e1, e2, t] = val[e1][t] * out_max[e1][e2]
-            # fix variable value ("set variable to parameter" )
-            model.w[e1, e2, t].fix()
-
-
-def generic_fixed_sink(model, objs, uids, timesteps):
-    """ Creates fixed sink from standard edges / variables by setting the value
-    of variables and fixing variables to that value.
-
-
-    Parameters
-    ------------
-
-    model :OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-       Attributes are altered of the `model`
-    objs : array like
-        list of component objects for which the variables representing the
-        input edges values will be set to a certain value and then fixed.
-    uids : array like
-        list of component uids corresponding to the objects
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
-
-    Returns
-    -------
-
-    The variables as attributes to
-    the optimization model object `model` of type OptimizationModel() will
-    be altered.
-    """
-
-    val = {obj.uid: obj.val for obj in objs}
-    ee = model.edges(objs)
-    for (e1, e2) in ee:
-        for t in timesteps:
-            # set variable value
-            model.w[(e1, e2), t] = val[e2][t]
-            # fix variable value for optimization problem
-            model.w[(e1, e2), t].fix()
-
-
-def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
-                                out_max=None):
-    """ Creates fixed source with investment models by adding constraints
+def add_fixed_source(model, objs, uids, val=None, out_max=None):
+    """ Adds fixed source with investment models by adding constraints
 
     The mathemathical fomulation for the constraint is as follows:
 
@@ -580,22 +202,14 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
         Constraints are added as attributes to the `model`
     objs : array like
         list of component objects for which the constraints will be created.
-
     uids : array like
         list of component uids corresponding to the objects.
-
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
 
     Returns
     -------
     There is no return value. The constraints will be added as attributes to
     the optimization model object `model` of typeOptimizationModel().
     """
-    # outputs: {'pv': 'b_el', 'wind_off': 'b_el', ... }
-    O = {obj.uid: obj.outputs[0].uid for obj in objs}
     # normed value of renewable source (0 <= value <=1)
     if val is None:
         val = {obj.uid: obj.val for obj in objs}
@@ -603,21 +217,36 @@ def generic_fixed_source_invest(model, objs, uids, timesteps, val=None,
     if out_max is None:
         out_max = {obj.uid: obj.out_max for obj in objs}
 
-    # set maximum of addiational storage capacity
-    add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
-    # loop over all uids (storages) set the upper bound
-    for e in uids:
-        model.add_out[e].setub(add_out_limit[e])
+    # normed value of renewable source (0 <= value <=1)
+    val = {obj.uid: obj.val for obj in objs}
+    if model.invest is False:
 
-    def invest_rule(model, e, t):
-        expr = model.w[e, model.O[e][0], t]
-        rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
-        return(expr == rhs)
-    setattr(model, objs[0].lower_name+"_invest_gc",
-            po.Constraint(uids, timesteps, rule=invest_rule))
+        # maximal ouput of renewable source (in general installed capacity)
+        out_max = {obj.uid: obj.out_max for obj in objs}
+        # edges for renewables ([('wind_on', 'b_el'), ...)
+        ee = model.edges(objs)
+        # fixed values for every timestep
+        for (e1, e2) in ee:
+            for t in model.timesteps:
+                # set value of variable
+                model.w[e1, e2, t] = val[e1][t] * out_max[e1][e2]
+                # fix variable value ("set variable to parameter" )
+                model.w[e1, e2, t].fix()
+    else:
+        # set maximum of additional output
+        add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
+        # loop over all uids (storages) set the upper bound
+        for e in uids:
+            model.add_out[e].setub(add_out_limit[e])
 
+        def invest_rule(model, e, t):
+            expr = model.w[e, model.O[e][0], t]
+            rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
+            return(expr == rhs)
+        setattr(model, objs[0].lower_name+"_invest_gc",
+                po.Constraint(uids, model.timesteps, rule=invest_rule))
 
-def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
+def add_dispatch_source(model, objs=None, uids=None):
     """ Creates dispatchable source models by setting bounds and
        adding constraints
 
@@ -641,15 +270,11 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
         list of component objects for which the constraints will be created.
     uids : array like
         list of component uids corresponding to the objects.
-    timesteps : array_like (list)
-        will be a list with timesteps representing the time-horizon
-        of the optimization problem.
-        (e.g. `timesteps` =  [t for t in range(168)])
 
     Returns
     -------
-    There is no return value. The constraints will be added as attributes of
-    the optimization model object `model` of type OptimizationModel().
+    The constraints will be added as attributes of
+    the optimization model object `model` of class OptimizationModel().
     """
 
     # normed value of renewable source (0 <= value <=1)
@@ -661,7 +286,7 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
     ee = model.edges(objs)
     # fixed values for every timestep
     for (e1, e2) in ee:
-        for t in timesteps:
+        for t in model.timesteps:
             # set upper bound of variable
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][e2])
 
@@ -671,11 +296,10 @@ def generic_dispatch_source(model, objs=None, uids=None, timesteps=None):
            model.w[e, model.O[e][0], t]
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_gc",
-            po.Constraint(uids, timesteps, rule=dispatch_rule))
+            po.Constraint(uids, model.timesteps, rule=dispatch_rule))
 
-
-def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
-    """ Creates constraint for storage blanace
+def add_storage_balance(model, objs=None, uids=None):
+    """ Creates constraint for storage balance
 
     Parameters
     -------------
@@ -712,4 +336,4 @@ def generic_storage_balance(model, objs=None, uids=None, timesteps=None):
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_balance_gc",
-            po.Constraint(uids, timesteps, rule=storage_balance_rule))
+            po.Constraint(uids, model.timesteps, rule=storage_balance_rule))

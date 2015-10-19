@@ -1,10 +1,12 @@
 import pyomo.environ as po
 try:
+    import linear_variables as lv
     import linear_constraints as lc
     import linear_objectives as lo
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
+    from . import linear_variables as lv
     from . import linear_constraints as lc
     from . import linear_objectives as lo
     from ..core.network.entities import Bus, Component
@@ -47,8 +49,7 @@ class OptimizationModel(po.ConcreteModel):
         components = [e for e in self.entities if isinstance(e, Component)]
         self.all_edges = self.edges(components)
 
-        lc.generic_variables(model=self, edges=self.all_edges,
-                             timesteps=self.timesteps)
+        lv.add(model=self, edges=self.all_edges)
 
         # list with all necessary classes
         component_classes = (cp.Transformer.__subclasses__() +
@@ -95,6 +96,7 @@ class OptimizationModel(po.ConcreteModel):
         """
         # get all bus objects
         self.bus_objs = [e for e in self.entities if isinstance(e, Bus)]
+
         # get uids from bus objects
         self.bus_uids = [e.uid for e in self.bus_objs]
 
@@ -112,9 +114,7 @@ class OptimizationModel(po.ConcreteModel):
         energy_bus_uids = [obj.uid for obj in energy_bus_objs]
 
         # bus balance constraint for energy bus objects
-        lc.generic_bus_constraint(self, objs=energy_bus_objs,
-                                  uids=energy_bus_uids,
-                                  timesteps=self.timesteps)
+        lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids)
 
         # select only buses that are resources (gas, oil, etc.)
         resource_bus_objs = [obj for obj in self.bus_objs
@@ -122,8 +122,8 @@ class OptimizationModel(po.ConcreteModel):
         resource_bus_uids = [e.uid for e in resource_bus_objs]
 
         # set limits for resource buses
-        lc.generic_limit(model=self, objs=resource_bus_objs,
-                         uids=resource_bus_uids, timesteps=self.timesteps)
+        lc.add_bus_output_limit(model=self, objs=resource_bus_objs,
+                                uids=resource_bus_uids)
 
     def simple_transformer_assembler(self, objs, uids):
         """Method containing the constraints for simple transformer components.
@@ -138,16 +138,10 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        lc.generic_io_constraints(model=self, objs=objs, uids=uids,
-                                  timesteps=self.timesteps)
+        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
 
-        # set bounds for variables  models
-        if self.invest is False:
-            lc.generic_w_ub(model=self, objs=objs, uids=uids,
-                            timesteps=self.timesteps)
-        else:
-            lc.generic_w_ub_invest(model=self, objs=objs, uids=uids,
-                                   timesteps=self.timesteps)
+        lv.set_output_bounds(model=self, objs=objs, uids=uids)
+
 
     def simple_chp_assembler(self, objs, uids):
         """Method grouping the constraints for simple chp components.
@@ -163,13 +157,12 @@ class OptimizationModel(po.ConcreteModel):
         self : OptimizationModel() instance
         """
 
-        # use generic_transformer model for in-out relation and
+        # use simple_transformer assebmler for in-out relation and
         # upper / lower bounds
         self.simple_transformer_assembler(objs=objs, uids=uids)
 
-        # use generic constraint to model PQ relation (P/eta_el = Q/eta_th)
-        lc.generic_chp_constraint(model=self, objs=objs, uids=uids,
-                                  timesteps=self.timesteps)
+        # use linear constraint to model PQ relation (P/eta_el = Q/eta_th)
+        lc.add_simple_chp_relation(model=self, objs=objs, uids=uids)
 
     def fixed_source_assembler(self, objs, uids):
         """Method containing the constraints for
@@ -185,19 +178,14 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        if self.invest is False:
-            lc.generic_fixed_source(model=self, objs=objs, uids=uids,
-                                    timesteps=self.timesteps)
-        else:
-            lc.generic_fixed_source_invest(model=self, objs=objs, uids=uids,
-                                           timesteps=self.timesteps)
+        lc.add_fixed_source(model=self, objs=objs, uids=uids)
+
 
     def dispatch_source_assembler(self, objs, uids):
         """
         """
         if self.invest is False:
-            lc.generic_dispatch_source(model=self, objs=objs, uids=uids,
-                                       timesteps=self.timesteps)
+            lc.add_dispatch_source(model=self, objs=objs, uids=uids)
 
     def simple_sink_assembler(self, objs, uids):
         """Method containing the constraints for simple sinks
@@ -215,8 +203,7 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        lc.generic_fixed_sink(model=self, objs=objs, uids=uids,
-                              timesteps=self.timesteps)
+        lv.set_fixed_sink_value(model=self, objs=objs, uids=uids)
 
     def simple_storage_assembler(self, objs, uids):
         """Simple storage assembler containing the constraints for simple
@@ -235,20 +222,14 @@ class OptimizationModel(po.ConcreteModel):
 
         # optimization model with no investment
         if(self.invest is False):
-            lc.generic_w_ub(model=self, objs=objs, uids=uids,
-                            timesteps=self.timesteps)
-            lc.generic_sto_cap_bounds(model=self, objs=objs, uids=uids,
-                                  timesteps=self.timesteps)
-            lc.generic_storage_balance(model=self, objs=objs, uids=uids,
-                                       timesteps=self.timesteps)
+            lv.set_output_bounds(model=self, objs=objs, uids=uids)
+            lv.set_storage_cap_bounds(model=self, objs=objs, uids=uids)
+            lc.add_storage_balance(model=self, objs=objs, uids=uids)
 
         # investment
         else:
-            lc.generic_sto_cap_ub_invest(model=self, objs=objs, uids=uids,
-                                     timesteps=self.timesteps)
+            lc.add_storage_balance(model=self, objs=objs, uids=uids)
 
-            lc.generic_storage_balance(model=self, objs=objs, uids=uids,
-                                       timesteps=self.timesteps)
             # constraint that limits discharge power by using the c-rate
             c_rate_out = {obj.uid: obj.c_rate_out for obj in objs}
             out_max = {obj.uid: obj.out_max for obj in objs}
@@ -310,11 +291,10 @@ class OptimizationModel(po.ConcreteModel):
         """
 
         # create a combine list of all cost-related components
-        cost_objs = (
-            self.objs['simple_chp'] +
-            self.objs['simple_transformer'] +
-            self.objs['simple_storage'] +
-            self.objs['simple_transport'])
+        cost_objs = \
+            self.objs['simple_chp'] + \
+            self.objs['simple_transformer'] + \
+            self.objs['simple_transport']
 
         revenue_objs = (
             self.objs['simple_chp'] +
