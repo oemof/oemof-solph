@@ -118,8 +118,11 @@ def set_output_bounds(model, objs=None, uids=None):
     # set variable bounds (out_max = in_max * efficiency):
     # m.in_max = {'pp_coal': 51794.8717948718, ... }
     # m.out_max = {'pp_coal': 20200, ... }
-    in_max = {obj.uid: obj.in_max for obj in objs}
-    out_max = {obj.uid: obj.out_max for obj in objs}
+    in_max = {}
+    out_max = {}
+    for e in objs:
+        in_max[e.uid] = e.in_max
+        out_max[e.uid] = e.out_max
 
     if model.invest is False:
 
@@ -143,11 +146,10 @@ def set_output_bounds(model, objs=None, uids=None):
 
         # constraint for additional capacity
         def add_output_rule(model, e, t):
-            expr = 0
-            expr += model.w[e, model.O[e][0], t]
+            lhs = model.w[e, model.O[e][0], t]
             rhs = out_max[e][model.O[e][0]] + model.add_out[e]
-            return(expr <= rhs)
-        setattr(model, objs[0].lower_name+"_w_ub_invest_gc",
+            return(lhs <= rhs)
+        setattr(model, objs[0].lower_name+"_output_bound",
                 po.Constraint(uids, model.timesteps, rule=add_output_rule))
 
 def set_storage_cap_bounds(model, objs=None, uids=None):
@@ -205,8 +207,10 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
 
         # constraint for additional capacity in investment models
         def add_cap_rule(model, e, t):
-            return(model.cap[e, t] <= cap_max[e] + model.add_cap[e])
-        setattr(model,objs[0].lower_name+"_add_cap_ub_gc",
+            lhs = model.cap[e, t]
+            rhs = cap_max[e] + model.add_cap[e]
+            return(lhs <= rhs)
+        setattr(model,objs[0].lower_name+"_cap_bound",
                 po.Constraint(uids, model.timesteps, rule=add_cap_rule))
 
 def set_fixed_sink_value(model, objs=None, uids=None):

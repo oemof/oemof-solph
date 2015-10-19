@@ -40,14 +40,14 @@ def add_bus_balance(model, objs=None, uids=None):
     # constraint for bus balance:
     # component inputs/outputs are negative/positive in the bus balance
     def bus_balance_rule(model, e, t):
-        expr = 0
-        expr += sum(model.w[i, e, t] for i in I[e])
+        lhs = 0
+        lhs += sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
         if model.slack["excess"] is True:
             rhs += model.excess_slack[e, t]
         if model.slack["shortage"] is True:
-            expr += model.shortage_slack[e, t]
-        return(expr >= rhs)
+            lhs += model.shortage_slack[e, t]
+        return(lhs >= rhs)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
 
@@ -91,10 +91,10 @@ def add_simple_io_relation(model, objs=None, uids=None):
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(model, e, t):
-        expr = model.w[model.I[e], e, t] * eta[e][0] - \
+        lhs = model.w[model.I[e], e, t] * eta[e][0] - \
             model.w[e, model.O[e][0], t]
-        return(expr == 0)
-    setattr(model, objs[0].lower_name+"_in_out_gc",
+        return(lhs == 0)
+    setattr(model, objs[0].lower_name+"_io_relation",
             po.Constraint(uids, model.timesteps, rule=io_rule,
                           doc="Input * Efficiency = Output"))
 
@@ -137,9 +137,9 @@ def add_simple_chp_relation(model, objs=None, uids=None):
     # additional constraint for power to heat ratio of simple chp comp:
     # P/eta_el = Q/eta_th
     def simple_chp_rule(model, e, t):
-        expr = model.w[e, model.O[e][0], t] / eta[e][0]
-        expr += -model.w[e, model.O[e][1], t] / eta[e][1]
-        return(expr == 0)
+        lhs = model.w[e, model.O[e][0], t] / eta[e][0]
+        lhs += -model.w[e, model.O[e][1], t] / eta[e][1]
+        return(lhs == 0)
     setattr(model, objs[0].lower_name+"_gc",
             po.Constraint(uids, model.timesteps, rule=simple_chp_rule,
                           doc="P/eta_el - Q/eta_th = 0"))
@@ -174,14 +174,14 @@ def add_bus_output_limit(model, objs=None, uids=None):
 
     # set upper bounds: sum(yearly commodity output) <= yearly_limit
     def output_limit_rule(model, e):
-        expr = sum(model.w[e, o, t] for t in model.timesteps for o in O[e]) -\
+        lhs = sum(model.w[e, o, t] for t in model.timesteps for o in O[e]) -\
             limit[e]
         # if bus is defined but has not outputs Constraint is skipped
         # (should be logged as well)
-        if isinstance(expr, (int, float)):
+        if isinstance(lhs, (int, float)):
             return(po.Constraint.Skip)
         else:
-            return(expr <= 0)
+            return(lhs <= 0)
     setattr(model,objs[0].lower_name+"_limit_gc",
             po.Constraint(uids, rule=output_limit_rule))
 
@@ -204,6 +204,10 @@ def add_fixed_source(model, objs, uids, val=None, out_max=None):
         list of component objects for which the constraints will be created.
     uids : array like
         list of component uids corresponding to the objects.
+    val : dict()
+        dict with objs uids as keys and normed values of source (0<=val<=1)
+        as items
+    out_max : dict
 
     Returns
     -------
@@ -211,11 +215,11 @@ def add_fixed_source(model, objs, uids, val=None, out_max=None):
     the optimization model object `model` of typeOptimizationModel().
     """
     # normed value of renewable source (0 <= value <=1)
-    if val is None:
-        val = {obj.uid: obj.val for obj in objs}
-    # maximal ouput of renewable source (in general installed capacity)
-    if out_max is None:
-        out_max = {obj.uid: obj.out_max for obj in objs}
+    val = {}
+    out_max = {}
+    for e in objs:
+         out_max[e.uid] = e.out_max
+         val[e.uid] = e.val
 
     # normed value of renewable source (0 <= value <=1)
     val = {obj.uid: obj.val for obj in objs}
@@ -240,13 +244,13 @@ def add_fixed_source(model, objs, uids, val=None, out_max=None):
             model.add_out[e].setub(add_out_limit[e])
 
         def invest_rule(model, e, t):
-            expr = model.w[e, model.O[e][0], t]
+            lhs = model.w[e, model.O[e][0], t]
             rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
-            return(expr == rhs)
-        setattr(model, objs[0].lower_name+"_invest_gc",
+            return(lhs == rhs)
+        setattr(model, objs[0].lower_name+"_invest",
                 po.Constraint(uids, model.timesteps, rule=invest_rule))
 
-def add_dispatch_source(model, objs=None, uids=None):
+def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
     """ Creates dispatchable source models by setting bounds and
        adding constraints
 
@@ -278,10 +282,11 @@ def add_dispatch_source(model, objs=None, uids=None):
     """
 
     # normed value of renewable source (0 <= value <=1)
-    val = {obj.uid: obj.val for obj in objs}
-    # maximal ouput of renewable source (in general installed capacity)
-    out_max = {obj.uid: obj.out_max for obj in objs}
-    # create dispatch variables
+    val = {}
+    out_max = {}
+    for e in objs:
+         out_max[e.uid] = e.out_max
+         val[e.uid] = e.val
 
     ee = model.edges(objs)
     # fixed values for every timestep
@@ -291,11 +296,11 @@ def add_dispatch_source(model, objs=None, uids=None):
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][e2])
 
     def dispatch_rule(model, e, t):
-        expr = model.dispatch[e, t]
-        expr += - val[e][t] * out_max[e][model.O[e][0]] + \
+        lhs = model.dispatch[e, t]
+        rhs = val[e][t] * out_max[e][model.O[e][0]] - \
            model.w[e, model.O[e][0], t]
-        return(expr, 0)
-    setattr(model, objs[0].lower_name+"_gc",
+        return(lhs == rhs)
+    setattr(model, objs[0].lower_name+"_calc",
             po.Constraint(uids, model.timesteps, rule=dispatch_rule))
 
 def add_storage_balance(model, objs=None, uids=None):
@@ -310,10 +315,16 @@ def add_storage_balance(model, objs=None, uids=None):
 
     """
     # constraint for storage energy balance
-    cap_initial = {obj.uid: obj.cap_initial for obj in objs}
-    cap_loss = {obj.uid: obj.cap_loss for obj in objs}
-    eta_in = {obj.uid: obj.eta_in for obj in objs}
-    eta_out = {obj.uid: obj.eta_out for obj in objs}
+    cap_initial = {}
+    cap_loss = {}
+    eta_in = {}
+    eta_out = {}
+
+    for e in objs:
+        cap_initial[e.uid] = e.cap_initial
+        cap_loss[e.uid] = e.cap_loss
+        eta_in[e.uid] = e.eta_in
+        eta_out[e.uid] = e.eta_out
 
     # set cap of last timesteps to fixed value of cap_initial
     t_last = len(model.timesteps)-1
@@ -335,5 +346,5 @@ def add_storage_balance(model, objs=None, uids=None):
             expr += - model.w[model.I[e], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
-    setattr(model, objs[0].lower_name+"_balance_gc",
+    setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=storage_balance_rule))

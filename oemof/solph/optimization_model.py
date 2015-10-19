@@ -2,13 +2,13 @@ import pyomo.environ as po
 try:
     import linear_variables as lv
     import linear_constraints as lc
-    import linear_objectives as lo
+    import objectives as objfunc
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
     from . import linear_variables as lv
     from . import linear_constraints as lc
-    from . import linear_objectives as lo
+    from . import objectives as objfunc
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
 
@@ -277,7 +277,7 @@ class OptimizationModel(po.ConcreteModel):
 
         self.simple_transformer_assembler(objs=objs, uids=uids)
 
-    def objective_assembler(self):
+    def objective_assembler(self, objective_type="min_costs"):
         """Objective assembler creates builds objective function of the
         optimization model.
 
@@ -289,19 +289,8 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-
-        # create a combine list of all cost-related components
-        cost_objs = \
-            self.objs['simple_chp'] + \
-            self.objs['simple_transformer'] + \
-            self.objs['simple_transport']
-
-        revenue_objs = (
-            self.objs['simple_chp'] +
-            self.objs['simple_transformer'])
-
-        lo.objective_cost_min(model=self, cost_objs=cost_objs,
-                              revenue_objs=revenue_objs)
+        if objective_type == "min_costs":
+            objfunc.minimize_cost(self)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):

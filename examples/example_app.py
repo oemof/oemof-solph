@@ -95,7 +95,6 @@ sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  cap_max=700000, cap_min=0, cap_initial=350000,
                                  eta_in=0.8, eta_out=0.8, cap_loss=0.01,
                                  opex_fix=35, opex_var=2, co2_var=None)
-
 # transport
 cable1 = transport.Simple(uid="cable1", inputs=[b_el], outputs=[b_el2],
                           in_max={b_el.uid: 10000},
@@ -120,7 +119,7 @@ components = transformers + renew_sources + sinks + transports + storages
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': True, 'slack': {
+                       options={'invest': False, 'slack': {
                            'excess': False, 'shortage': True}})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
