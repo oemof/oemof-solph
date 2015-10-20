@@ -106,7 +106,7 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
             return(model.w[e, model.O[e][0], t] - model.w[e, model.O[e][0], t-1] <=  \
                grad_pos[e] + out_min[e][model.O[e][0]] * (1 -model.y[e, t]))
         else:
-            return(0)
+            return(po.Constraint.Skip())
 
     grad_neg = {obj.uid: obj.gradient_neg for obj in objs}
     # TODO: Define correct boundary conditions for t-1 of time horizon
@@ -118,7 +118,7 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
             return(lhs <=  rhs)
 
         else:
-            return 0
+            return(po.Constraint.Skip())
 
     # positive gradient
     if grad_direc == "positive" or grad_direc == "both":

@@ -6,11 +6,6 @@ Created on Mon Jul 20 10:27:00 2015
 """
 
 import pyomo.environ as po
-try:
-    from oemof.core.network.entities import components as cp
-except:
-    from .network.entities import components as cp
-
 
 def add_bus_balance(model, objs=None, uids=None):
     """ Adds constraint for the input-ouput balance of bus objects
@@ -179,7 +174,7 @@ def add_bus_output_limit(model, objs=None, uids=None):
         # if bus is defined but has not outputs Constraint is skipped
         # (should be logged as well)
         if isinstance(lhs, (int, float)):
-            return(po.Constraint.Skip())
+            return(po.Constraint.Skip)
         else:
             return(lhs <= 0)
     setattr(model,objs[0].lower_name+"_limit_gc",
@@ -348,3 +343,36 @@ def add_storage_balance(model, objs=None, uids=None):
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=storage_balance_rule))
+
+def add_gradient_calc(model, objs=None, uids=None):
+    """ Add constraint to calculate the gradient between two timesteps
+
+    Parameters
+    ------------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
+        Constraints are added as attributes to the `model` and bounds are
+        altered for attributes of `model`
+    objs : array like
+        list of component objects for which the constraints will be created.
+    uids : array like
+        list of component uids corresponding to the objects.
+
+    Returns
+    -------
+    The constraints will be added as attributes of
+    the optimization model object `model` of class OptimizationModel().
+    """
+
+    # normed value of renewable source (0 <= value <=1)
+    def grad_pos_calc_rule(model, e, t):
+        if t > 0:
+            lhs = model.w[e, model.O[e][0], t] - model.w[e,model.O[e][0], t-1]
+            rhs = model.w_grad_pos[e, t]
+            return(lhs <= rhs)
+        else:
+            return(po.Constraint.Skip)
+
+    setattr(model, objs[0].lower_name+"_grad_pos_calc",
+            po.Constraint(uids, model.timesteps, rule=grad_pos_calc_rule))
+

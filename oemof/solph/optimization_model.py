@@ -141,11 +141,13 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        if self.milp is False:
-            # input output relation for simple transformer
-            lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
-            # pmax constraint/bounds
-            var.set_output_bounds(model=self, objs=objs, uids=uids)
+
+        # input output relation for simple transformer
+        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+        # pmax constraint/bounds
+        var.set_output_bounds(model=self, objs=objs, uids=uids)
+        # gradient calculation dGrad for objective function
+        lc.add_gradient_calc(model=self, objs=objs, uids=uids)
 
         # set bounds for milp-models
         if self.invest is False and self.milp is True:

@@ -13,7 +13,9 @@ import pyomo.environ as po
 
 
 def minimize_cost(self):
-    """
+    """ Builds objective function that minimises the total costs.
+
+
     """
 
     # create a combine list of all cost-related components
@@ -66,5 +68,6 @@ def minimize_cost(self):
     self.objective = po.Objective(expr=expr)
 
 def minimize_co2_emissions(self):
-    """
+    """ Builds objective function that minimises the total costs.
+
     """

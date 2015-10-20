@@ -145,6 +145,17 @@ def add_startup_costs(model, objs=None, uids=None):
                start_costs[e] for e in uids for t in model.timesteps)
     return(expr)
 
+def add_gradient_costs(model, objs=None, uids=None):
+    """ Add gradient costs for components to objective expression
+
+    """
+    if uids is None:
+        uids = [obj.uid for obj in objs]
+    grad_costs = {obj.uid: obj.grad_costs for obj in objs}
+    expr = sum(model.w_grad_pos[e, t] * grad_costs[e]
+               for e in uids for t in model.timesteps)
+    return(expr)
+
 def add_excess_slack_costs(model, uids=None):
     """ artificial cost term for excess slack variables
 

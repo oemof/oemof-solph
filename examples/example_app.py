@@ -29,7 +29,7 @@ import logging
 logging.basicConfig(filename='example_app.log', level=logging.DEBUG)
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(4)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -124,7 +124,7 @@ entities = components + buses
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': False,
                                 'slack': {'excess': False, 'shortage': True},
-                                'milp' : True})
+                                'milp' : False})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)

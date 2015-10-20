@@ -84,11 +84,17 @@ def add_continuous(model, edges):
     # variable for all edges
     model.w = po.Var(edges, model.timesteps, within=po.NonNegativeReals)
 
+    # gradient variable for components
+    objs = [e for e in model.entities if isinstance(e, cp.Transformer)]
+    uids = [e.uid for e in objs]
+    model.w_grad_pos = po.Var(uids, model.timesteps,
+                              within=po.NonNegativeReals)
     # additional variable for investment models
     if model.invest is True:
         objs = [e for e in model.entities if isinstance(e, Component)]
         uids = [e.uid for e in objs]
         model.add_out = po.Var(uids, within=po.NonNegativeReals)
+
 
     # dispatch variables for dispatchable sources
     objs = [e for e in model.entities
