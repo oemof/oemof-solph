@@ -1,12 +1,14 @@
 import pyomo.environ as po
 try:
     import linear_variables as lv
+    import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
     import objectives as objfunc
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
     from . import linear_variables as lv
+    from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
     from . import objectives as objfunc
     from ..core.network.entities import Bus, Component
@@ -41,9 +43,10 @@ class OptimizationModel(po.ConcreteModel):
         self.timesteps = timesteps
 
         # get options
-        self.invest = options.get("invest", False)
-        self.slack = options.get("slack", {"excess": True,
-                                           "shortage": False})
+        self.invest = options.get('invest', False)
+        self.milp = options.get('milp', False)
+        self.slack = options.get('slack', {'excess': True,
+                                           'shortage': False})
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         components = [e for e in self.entities if isinstance(e, Component)]
@@ -72,7 +75,7 @@ class OptimizationModel(po.ConcreteModel):
             self.uids[cls.lower_name] = uids
             # "call" methods to add the constraints opt. problem
             if objs:
-                getattr(self, cls.lower_name + "_assembler")(objs=objs,
+                getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
 
         self.bus_assembler()
@@ -138,10 +141,25 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+        if self.milp is False:
+            # input output relation for simple transformer
+            lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+            # pmax constraint/bounds
+            lv.set_output_bounds(model=self, objs=objs, uids=uids)
 
-        lv.set_output_bounds(model=self, objs=objs, uids=uids)
+        # set bounds for milp-models
+        if self.invest is False and self.milp is True:
+            # binary status variables
+            milc.add_status_variables(model=self, objs=objs, uids=uids)
+            # pmax/pmin constraints
+            milc.add_output_bounds(model=self, objs=objs, uids=uids)
+            # pmin constraints
+            milc.add_startup_constraints(model=self, objs=objs, uids=uids)
 
+        if self.invest is True and self.milp is True:
+           raise ValueError("Investment models can not be calculated as \
+                            mixed integer problems. \n  \
+                            Please set options 'milp' = False")
 
     def simple_chp_assembler(self, objs, uids):
         """Method grouping the constraints for simple chp components.
@@ -275,7 +293,10 @@ class OptimizationModel(po.ConcreteModel):
         self : OptimizationModel() instance
         """
 
-        self.simple_transformer_assembler(objs=objs, uids=uids)
+        # input output relation for simple transport
+        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+        # bounds
+        lv.set_output_bounds(model=self, objs=objs, uids=uids)
 
     def objective_assembler(self, objective_type="min_costs"):
         """Objective assembler creates builds objective function of the

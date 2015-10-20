@@ -1,6 +1,6 @@
 
 from . import Transformer
-
+import logging
 
 class Simple(Transformer):
     """
@@ -15,9 +15,7 @@ class Simple(Transformer):
         """
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', None)
-        self.opex_var = kwargs.get('opex_var', None)
-        if self.opex_var is None:
-            self.opex_var = self.inputs[0].price
+
 
 class CHP(Transformer):
     """
@@ -59,7 +57,11 @@ class Storage(Transformer):
         self.cap_max = kwargs.get('cap_max', None)
         self.cap_min = kwargs.get('cap_min', None)
         self.add_cap_limit = kwargs.get('add_cap_limit', None)
-        self.cap_initial = kwargs.get('cap_initial', self.cap_max*0.5)
+        self.cap_initial = kwargs.get('cap_initial', None)
+        if self.cap_initial is None:
+            self.cap_initial = self.cap_max*0.5
+        logging.info('No initial storage capacity set. Setting capacity to' +
+                     ' 0.5 of max. capacity for component: %s', self.uid)
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)

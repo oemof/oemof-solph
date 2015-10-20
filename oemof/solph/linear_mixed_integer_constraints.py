@@ -1,0 +1,264 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 20 11:31:11 2015
+
+@author: simon
+"""
+import pyomo.environ as po
+
+
+def add_status_variables(model, objs, uids=None):
+    """ Creates all variables status variables (binary) for `objs`
+
+    The function uses the pyomo class `Var()` to create the status variables of
+    components. E.g. if a transformer is switched on/off -> y=1/0
+    As index-sets the provided unique ids of the objects and the defined
+    timesteps are used.
+
+    Parameters
+    ------------
+
+    model : pyomo.ConcreteModel()
+        A pyomo-object to be solved containing all Variables, Constraints, Data
+        Variables are added as attributes to the `model`
+    objs : array_like (list)
+        all components for which the status variable is created
+    uids : unique ids of `ojbs`
+
+    Returns
+    --------
+
+    There is no return value. The variables are added as a
+    attribute to the optimization model object `model` of type
+    pyomo.ConcreteModel()
+
+
+    """
+    # check
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                          which the status variable should be created.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+
+    # add binary variables to model
+    setattr(model, "status_"+objs[0].lower_name,
+            po.Var(uids, model.timesteps, within=po.Binary))
+
+def add_output_bounds(model, objs=None, uids=None):
+    """ Set upper/lower bounds on all output variables via constraints
+
+    The bounds are set with constraints using the binary status variable `y`
+    of components. The bounds are only set for the ouput of variables.
+    E.g. p_max constraints for transformers in milp problems
+    can be set with this function.
+    If you want to model e.g. p_max-constraints via the input side of a
+    component (i.e. fuel) use milp_in_max_bound()
+    Parameters
+    ------------
+
+    model : pyomo.ConcreteModel()
+        A pyomo-object to be solved containing all Variables, Constraints, Data
+        Bounds are altered at model attributes (variables) of `model`
+    objs : array like
+        list of component objects for which the bounds will be
+        altered
+    uids : array like
+        list of component uids corresponding to the objects
+
+    Returns
+    -------
+
+    There is no return value. The upper and lower bounds of the variables are
+    set with constraints in the optimization model object `model` of type
+    pyomo.ConcreteModel()
+
+    """
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which bounds should be set.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+    out_max = {obj.uid: obj.out_max for obj in objs}
+
+    # set upper bounds
+    def ub_rule(model, e, t):
+        return(model.w[e, model.O[e][0], t] <=
+                   getattr(model, "status_"+objs[0].lower_name)[e, t]
+                    * out_max[e][model.O[e][0]])
+    setattr(model, objs[0].lower_name+"_maximum_output",
+            po.Constraint(uids, model.timesteps, rule=ub_rule))
+
+
+    out_min = {obj.uid: obj.out_min for obj in objs}
+    # set lower bounds
+    def lb_rule(model, e, t):
+        lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] * \
+                  out_min[e][model.O[e][0]]
+        rhs = model.w[e, model.O[e][0], t]
+        return(lhs <= rhs)
+    setattr(model, objs[0].lower_name+"_minimum_output",
+            po.Constraint(uids, model.timesteps, rule=lb_rule))
+
+def add_output_gradient_constraints(model, objs=None, uids=None,
+                                   grad_direc="both"):
+    """ Creates constraints to model the output positive gradient
+
+    Parameter
+    ------------
+    model : pyomo.ConcreteModel()
+        A pyomo-object to be solved containing all Variables, Constraints, Data
+
+    objs : array like
+        list of component objects for which the bounds will be
+        altered
+    uids : array linke
+        list of component uids corresponding to the objects
+    grad_direc : string
+         direction of gradient ("both", "positive", "negative")
+    Returns
+    -------
+
+
+    References
+    ----------
+    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+       Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
+       TU Munich, p.38
+
+    """
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                          which bounds should be set.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+    out_min = {obj.uid: obj.out_min for obj in objs}
+    grad_pos = {obj.uid: obj.gradient_pos for obj in objs}
+
+
+    # TODO: Define correct boundary conditions for t-1 of time
+    def grad_pos_rule(model, e, t):
+        if t > 1:
+            return(model.w[e, model.O[e][0], t] - model.w[e, model.O[e][0], t-1] <=  \
+               grad_pos[e] + out_min[e][model.O[e][0]] * (1 -model.y[e, t]))
+        else:
+            return(0)
+
+    grad_neg = {obj.uid: obj.gradient_neg for obj in objs}
+    # TODO: Define correct boundary conditions for t-1 of time horizon
+    def grad_neg_rule(model, e, t):
+        if t > 1:
+            lhs = model.w[e, model.O[e][0], t-1] - model.w[e, model.O[e][0], t]
+            rhs =  grad_neg[e] + \
+                   out_min[e][model.O[e][0]] * (1 -model.y[e, t-1])
+            return(lhs <=  rhs)
+
+        else:
+            return 0
+
+    # positive gradient
+    if grad_direc == "positive" or grad_direc == "both":
+        setattr(model, objs[0].lower_name+"milp_gradient_pos",
+                po.Constraint(uids, model.timesteps, rule=grad_pos_rule))
+    # negative gradient
+    if grad_direc == "negative" or grad_direc == "both":
+        setattr(model, objs[0].lower_name+"_milp_gradient_neg",
+                po.Constraint(uids, model.timesteps, rule=grad_neg_rule))
+
+
+def add_startup_constraints(model, objs=None, uids=None):
+    """ Creates constraints to model the start up of a component
+
+    Parameter
+    ------------
+    model : pyomo.ConcreteModel()
+        A pyomo-object to be solved containing all Variables, Constraints, Data
+    objs : array like
+        list of component objects for which the bounds will be
+        altered
+    uids : array like
+        list of component uids corresponding to the objects
+
+    Returns
+    -------
+
+    References
+    ----------
+    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+       Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
+       TU Munich, p.38
+    """
+
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                          which constraints should be set.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+    # create binary start-up variables for objects
+    setattr(model, "start_"+objs[0].lower_name,
+            po.Var(uids, model.timesteps, within=po.Binary))
+
+    def start_up_rule(model, e, t):
+        if t > 1:
+            try:
+                lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] - \
+                       getattr(model,'status_'+objs[0].lower_name)[e, t-1]
+                rhs = getattr(model, "start_"+objs[0].lower_name)[e, t]
+                return(lhs <= rhs)
+            except:
+                raise AttributeError('Constructing startup constraints for' +
+                                     ' component with uid: %s went wrong', e)
+
+        else:
+            # TODO: Define correct boundary conditions
+            return(po.Constraint.Skip)
+    setattr(model, objs[0].lower_name+"_start_up",
+            po.Constraint(uids, model.timesteps, rule=start_up_rule))
+
+
+def add_shutdown_constraints(model, objs=None, uids=None):
+    """ Creates constraints to model the shut down of a component
+
+    Parameter
+    ------------
+    model : pyomo.ConcreteModel()
+        A pyomo-object to be solved containing all Variables, Constraints, Data
+    objs : array like
+        list of component objects for which the bounds will be
+        altered
+    uids : array like
+        list of component uids corresponding to the objects
+
+    Returns
+    -------
+
+    References
+    ----------
+    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+       Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
+       TU Munich, p.38
+    """
+
+    if objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                          which constraints should be set.")
+    if uids is None:
+        uids = [e.uids for e in objs]
+
+    # create binary start-up variables for objects
+    setattr(model, "stop"+objs[0].lower_name,
+            po.Var(uids, model.timesteps, within=po.Binary))
+
+    def shutdown_rule(model, e, t):
+        if t > 1:
+            return(model.w[e, t-1] - model.y[e, t] <=
+                   getattr(model, "stop"+objs[0].lower_name)[e, t])
+        else:
+            # TODO: Define correct boundary conditions
+            return(0)
+    setattr(model, objs[0].lower_name+"_shut_down",
+            po.Constraint(uids, model.timesteps, rule=shutdown_rule))

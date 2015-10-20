@@ -69,8 +69,6 @@ class Component(Entity):
 
         self.opex_var = kwargs.get('opex_var', 0)
         self.opex_fix = kwargs.get('opex_fix', 0)
-        self.ramp_costs = kwargs.get('rampex', 0)
-        self.start_costs = kwargs.get('start_costs', 0)
 
         self.co2_var = kwargs.get('co2_var', 0)
         self.co2_fix = kwargs.get('co2_fix', 0)

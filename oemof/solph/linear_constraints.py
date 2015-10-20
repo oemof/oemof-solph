@@ -179,7 +179,7 @@ def add_bus_output_limit(model, objs=None, uids=None):
         # if bus is defined but has not outputs Constraint is skipped
         # (should be logged as well)
         if isinstance(lhs, (int, float)):
-            return(po.Constraint.Skip)
+            return(po.Constraint.Skip())
         else:
             return(lhs <= 0)
     setattr(model,objs[0].lower_name+"_limit_gc",

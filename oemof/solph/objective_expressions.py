@@ -132,7 +132,18 @@ def add_capex(model, objs, uids=None, ref=None):
         print('No reference defined. Please specificy in `add_capex()`')
     return(expr)
 
+def add_startup_costs(model, objs=None, uids=None):
+    """ Adds startup costs for components to objective expression
 
+    .. math:: \\sum_{e,t} su(e,t) \\cdot su_costs(e)
+    """
+    if uids is None:
+        uids = [obj.uid for obj in objs]
+
+    start_costs = {obj.uid: obj.start_costs for obj in objs}
+    expr = sum(getattr(model, "start_"+objs[0].lower_name)[e, t] *
+               start_costs[e] for e in uids for t in model.timesteps)
+    return(expr)
 
 def add_excess_slack_costs(model, uids=None):
     """ artificial cost term for excess slack variables

@@ -44,7 +44,11 @@ def minimize_cost(self):
     # costs for dispatchable sources
     expr += objexpr.add_dispatch_source_costs(self,
                                          objs=self.objs['dispatch_source'])
-
+    if self.milp is True:
+        expr += objexpr.add_startup_costs(self,
+                                          objs=self.objs['simple_transformer'])
+        expr += objexpr.add_startup_costs(self,
+                                          objs=self.objs['simple_chp'])
     # add capex for investment models
     if(self.invest is True):
         # capital expenditure for output objects
