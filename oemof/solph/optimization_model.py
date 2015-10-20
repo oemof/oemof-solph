@@ -1,13 +1,13 @@
 import pyomo.environ as po
 try:
-    import linear_variables as lv
+    import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
     import objectives as objfunc
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
-    from . import linear_variables as lv
+    from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
     from . import objectives as objfunc
@@ -52,7 +52,7 @@ class OptimizationModel(po.ConcreteModel):
         components = [e for e in self.entities if isinstance(e, Component)]
         self.all_edges = self.edges(components)
 
-        lv.add(model=self, edges=self.all_edges)
+        var.add_continuous(model=self, edges=self.all_edges)
 
         # list with all necessary classes
         component_classes = (cp.Transformer.__subclasses__() +
@@ -145,12 +145,12 @@ class OptimizationModel(po.ConcreteModel):
             # input output relation for simple transformer
             lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
             # pmax constraint/bounds
-            lv.set_output_bounds(model=self, objs=objs, uids=uids)
+            var.set_output_bounds(model=self, objs=objs, uids=uids)
 
         # set bounds for milp-models
         if self.invest is False and self.milp is True:
             # binary status variables
-            milc.add_status_variables(model=self, objs=objs, uids=uids)
+            var.add_binary(model=self, objs=objs, uids=uids)
             # pmax/pmin constraints
             milc.add_output_bounds(model=self, objs=objs, uids=uids)
             # pmin constraints
@@ -221,7 +221,7 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        lv.set_fixed_sink_value(model=self, objs=objs, uids=uids)
+        var.set_fixed_sink_value(model=self, objs=objs, uids=uids)
 
     def simple_storage_assembler(self, objs, uids):
         """Simple storage assembler containing the constraints for simple
@@ -240,8 +240,8 @@ class OptimizationModel(po.ConcreteModel):
 
         # optimization model with no investment
         if(self.invest is False):
-            lv.set_output_bounds(model=self, objs=objs, uids=uids)
-            lv.set_storage_cap_bounds(model=self, objs=objs, uids=uids)
+            var.set_output_bounds(model=self, objs=objs, uids=uids)
+            var.set_storage_cap_bounds(model=self, objs=objs, uids=uids)
             lc.add_storage_balance(model=self, objs=objs, uids=uids)
 
         # investment
@@ -296,7 +296,7 @@ class OptimizationModel(po.ConcreteModel):
         # input output relation for simple transport
         lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
         # bounds
-        lv.set_output_bounds(model=self, objs=objs, uids=uids)
+        var.set_output_bounds(model=self, objs=objs, uids=uids)
 
     def objective_assembler(self, objective_type="min_costs"):
         """Objective assembler creates builds objective function of the

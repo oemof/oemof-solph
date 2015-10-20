@@ -126,7 +126,7 @@ def add_capex(model, objs, uids=None, ref=None):
 
     if ref == 'output':
         expr = sum(model.add_out[e] * crf[e] * capex[e] for e in uids)
-    if ref == 'capacity':
+    elif ref == 'capacity':
         expr = sum(model.add_cap[e] * crf[e] * capex[e] for e in uids)
     else:
         print('No reference defined. Please specificy in `add_capex()`')

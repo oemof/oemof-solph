@@ -7,45 +7,6 @@ Created on Tue Oct 20 11:31:11 2015
 import pyomo.environ as po
 
 
-def add_status_variables(model, objs, uids=None):
-    """ Creates all variables status variables (binary) for `objs`
-
-    The function uses the pyomo class `Var()` to create the status variables of
-    components. E.g. if a transformer is switched on/off -> y=1/0
-    As index-sets the provided unique ids of the objects and the defined
-    timesteps are used.
-
-    Parameters
-    ------------
-
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
-        Variables are added as attributes to the `model`
-    objs : array_like (list)
-        all components for which the status variable is created
-    uids : unique ids of `ojbs`
-
-    Returns
-    --------
-
-    There is no return value. The variables are added as a
-    attribute to the optimization model object `model` of type
-    pyomo.ConcreteModel()
-
-
-    """
-    # check
-    if objs is None:
-        raise ValueError("No objects defined. Please specify objects for \
-                          which the status variable should be created.")
-    if uids is None:
-        uids = [e.uids for e in objs]
-
-
-    # add binary variables to model
-    setattr(model, "status_"+objs[0].lower_name,
-            po.Var(uids, model.timesteps, within=po.Binary))
-
 def add_output_bounds(model, objs=None, uids=None):
     """ Set upper/lower bounds on all output variables via constraints
 
