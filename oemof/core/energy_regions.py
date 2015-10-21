@@ -10,6 +10,8 @@ import calendar
 import pickle
 
 from ..tools import helpers
+from ..tools import pg_helpers
+
 from . import energy_weather as w
 from . import energy_power_plants as pp
 from feedinlib import powerplants as plants
@@ -215,7 +217,7 @@ class region():
 
     def tz_from_geom(self, connection):
         'Docstring'
-        self.tz = helpers.tz_from_geom(connection, self.geometry)
+        self.tz = pg_helpers.tz_from_geom(connection, self.geometry)
         return self
 
     def centroid(self):
@@ -273,12 +275,7 @@ class region():
         return self
 
     def fetch_ee_feedin(self, conn, **site):
-        wind_model = models.WindPowerPlant(required=[
-            'h_hub', 'd_rotor', 'wind_conv_type'])
-        pv_model = models.Photovoltaic(required=[
-            'albedo', 'tilt', 'azimuth', 'module_name'])
         site['connection'] = conn
-        tz = self.weather.tz
         pv_df = 0
         wind_df = 0
         if self.power_plants.get('re', None) is None:
@@ -310,7 +307,7 @@ class region():
 
             # Find type of wind turbine and its parameters according to the
             # windzone.
-            wz = helpers.get_windzone(conn, tmp_geom)
+            wz = pg_helpers.get_windzone(conn, tmp_geom)
             site['wind_conv_type'] = (site['wka_model_dc'].get(
                 wz, site['wka_model']))
             site['d_rotor'] = (site['d_rotor_dc'].get(wz, site['d_rotor']))
@@ -322,7 +319,7 @@ class region():
             # Determine the feedin time series for the weather field
             # Wind energy
             wind_peak_power = ee_pp[ee_pp.type == 'Windkraft'].p_kw_peak.sum()
-            wind_power_plant = plants.WindPowerPlant(model=wind_model, **site)
+            wind_power_plant = plants.WindPowerPlant(**site)
             wind_series = wind_power_plant.feedin(
                 weather=self.weather,
                 installed_capacity=wind_peak_power)
@@ -330,7 +327,7 @@ class region():
 
             # PV
             pv_peak_power = ee_pp[ee_pp.type == 'Solarstrom'].p_kw_peak.sum()
-            pv_plant = plants.Photovoltaic(model=pv_model, **site)
+            pv_plant = plants.Photovoltaic(**site)
             pv_series = pv_plant.feedin(
                 weather=self.weather, peak_power=pv_peak_power)
             pv_series.name = gid

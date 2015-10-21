@@ -98,20 +98,19 @@ geo = shape.Polygon([(12.2, 52.2), (12.2, 51.6), (13.2, 51.6), (13.2, 52.2)])
 # Variante 3 - Landkreis Wittenberg und Dessau aus der Datenbank
 # geo = helpers.get_polygon_from_nuts(conn, ['DEE0E', 'DEE01'])
 
-#try:
-#    lk_wtb = reg.region(year, geometry=geo, name='Landkreis Wittenberg')
-#except:
-#    lk_wtb = reg.region(year, geometry=geo, name='Landkreis Wittenberg',
-#                        place=['Deutschland', 'ST'])
-#    logging.error('Reverse geocoding does not work!')
+try:
+    lk_wtb = reg.region(year, geometry=geo, name='Landkreis Wittenberg')
+except:
+    lk_wtb = reg.region(year, geometry=geo, name='Landkreis Wittenberg',
+                        place=['Deutschland', 'ST'])
+    logging.error('Reverse geocoding does not work!')
 
-lk_wtb = reg.region(year, geometry=geo)
-
-lk_wtb.fetch_demand_series(conn,
-            ann_el_demand=define_elec_buildings[0]['annual_elec_demand'],
-            selp_type=define_elec_buildings[0]['selp_type'],
-            profile=data_profile_entsoe,
-            year=year)
+lk_wtb.fetch_demand_series(
+    conn,
+    ann_el_demand=define_elec_buildings[0]['annual_elec_demand'],
+    selp_type=define_elec_buildings[0]['selp_type'],
+    profile=data_profile_entsoe,
+    year=year)
 
 
 # Die Region holt sich ihr Wetter
@@ -169,7 +168,7 @@ print('Derzeitiges WKA-Modell: {0}'.format(site['wka_model']))
 # Dafür initialisiere ich das Modell "models.WindPowerPlant([])" und wende
 # dann die entsprechende Methode darauf an. Das geht auch in einer Zeile.
 print('Mögliche WKA-Modelle')
-models.WindPowerPlant([]).get_wind_pp_types(conn)
+models.SimpleWindTurbine().get_wind_pp_types(conn)
 
 # Erstellen der Standardlastprofile des BDEW als Objekt
 # Dafür nutzen wir das DataFrame der Region, das bereits die Feiertage enthält.
