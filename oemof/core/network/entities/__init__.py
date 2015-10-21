@@ -41,21 +41,19 @@ class Component(Entity):
         ------------
         in_max : maximum input of component (e.g. in MW)
         out_max : maximum output of component (e.g. in MW)
-        add_out_limit : limit on additional output "capacity"
+        add_out_limit : limit on additional output "capacity" (e.g. in MW)
 
-        capex : capital expenditure
-        lifetime : lifetime of component
+        capex : capital expenditure (e.g. in Euro / MW )
+        lifetime : lifetime of component (e.g. years)
         wacc : weigted average cost of capital (dimensionless)
         crf: capital recovery factor: (p*(1+p)^n)/(((1+p)^n)-1)
 
         opex_fix : fixed operational expenditure (e.g. expenses for staff)
-        opex_var : variable operational expenditure (e.g. spare parts)
-        ramp_costs : costs du to ramping
-        start_costs : costs due to start of component
+        opex_var : variable operational expenditure (e.g. spare parts + fuelcosts)
 
-        co2_fix : fixed co2 emissions
-        co2_var : variable co2 emissions
-        co2_cap : co2 emissions due to installed capacity
+        co2_fix : fixed co2 emissions (e.g. t / MW)
+        co2_var : variable co2 emissions (e.g. t / MWh)
+        co2_cap : co2 emissions due to installed power (e.g. t/ MW)
         """
         super().__init__(**kwargs)
 

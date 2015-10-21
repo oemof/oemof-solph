@@ -41,11 +41,20 @@ class Transformer(Component):
     A Transformer is a specific type of Component which transforms
     (possibly m) inputs into (possibly n) outputs. As such neither its
     list of inputs, nor its list of outputs are allowed to be empty.
+
+
     """
     lower_name = "transformer"
 
     def __init__(self, **kwargs):
         """
+        Parameters:
+        ------------
+
+        out_min : minimal output of transformer (e.g. pmin for powerplants)
+        start_cost: cost per start up of transformer (only milp models)
+        ramping_costs: costs for ramping
+
         """
         super().__init__(**kwargs)
         if not self.inputs:
