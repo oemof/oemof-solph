@@ -144,22 +144,25 @@ Description of demandlib.
 The *solph* module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The solph module of oemof allows to create and solve linear optimization 
-problems. The optimization problem is build based on a energy system defined via 
-oemof-entities. These entities are instances of 
-oemof base classes (e. g. buses or components). For the definition of variables, 
-constraints and an objective function as well as for communication with solvers 
+The solph module of oemof allows to create and solve linear (and mixed-integer)
+ optimization problems. The optimization problem is build based on a energy
+system defined via oemof-entities. These entities are instances of
+oemof base classes (e. g. buses or components). For the definition of variables,
+constraints and an objective function as well as for communication with solvers
 etc. the python packages `Pyomo <http://www.pyomo.org/>`_ is used.
 
 Structure of solph 
 ------------------------------------------
-At its core solph has a class called *OptimizationModel()* which is a child of 
+At its core solph has a class called *OptimizationModel()* which is a child of
 the pyomo class *ConcreteModel()*. This class contains different methods.
-An important type of methods are so called *assembler* methods. These methods 
-correspond exactly to one oemof-class. For example the *transfomer.Simple()* 
-class of oemof will have a associated method called 
-simple_transformer_assembler(). This method exctracts information from oemof 
-objects and groups all necessary constraints to model a simple transformer. 
+An important type of methods are so called *assembler* methods. These methods
+correspond exactly to one oemof-base-class. For example the
+*transfomer.Simple()* class of oemof will have a associated method called
+simple_transformer_assembler(). This method groups all necessary constraints
+to model a simple transformer. The constraints expressions are defined in
+extra module (*linear_constraints.py*, *linear_mixed_integer_constraints.py*).
+All necessary constraints related with variables are defined in *variables.py*.
+ 
 
 Constructor
 ************
@@ -181,24 +184,28 @@ The general procedure is as basically follows:
 Assembler methods 
 ******************
 The *assembler* methods can be specified in two different ways. Firstly, functions 
-from the solph-library called *linear_constraints.py* can be used to add 
-constraints to the *assembler*. Secondly, *assembler* methods can use other 
-*assembler* methods and then be extended by functions from the library. 
-The same holds for the objective *assembler*. The objective function uses 
-pre-defined objectives from the solph-library called *linear_objectives.py*.
+from the solph-library called *linear_constraints.py* can be used to add
+constraints to the *assembler*. Secondly, *assembler* methods can use other
+*assembler* methods and then be extended by functions from the library.
+The same holds for the objective *assembler*. The objective function uses
+pre-defined objectives from the solph-library called *objectives.py*. These
+pre-defined objectives are build by the use of objective expressions defined
+in *objective_expressions*. Different objectives for optimization models
+can be selected by setting the option *objective_types* inside the
+*objective_assembler* method.
+
 
 If necessary, the two libraries used be *assemlber* methods can be extended 
 and used in methods of *OptimizationModel()* afterwards.  
 
-
 Solve and other
 ****************
-Moreover, the *OptimizationModel()* class contains methods for setting options 
-and solving the optimization model. 
+Moreover, the *OptimizationModel()* class contains a method for solving 
+the optimization model. 
 
 
 Postprocessing of results
-------------------------------------------
+----------------------------
 To extract values from the optimization problem variables their exist a
 postprossing module containing different functions. 
 Results can be written back to the oemof-objects or

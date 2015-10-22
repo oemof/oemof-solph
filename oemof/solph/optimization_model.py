@@ -78,7 +78,7 @@ class OptimizationModel(po.ConcreteModel):
                                                              uids=uids)
 
         self.bus_assembler()
-        self.objective_assembler()
+        self.objective_assembler(objective_type="min_costs")
 
     def bus_assembler(self):
         """Meethod creates bus balance for all buses using pyomo.Constraint
