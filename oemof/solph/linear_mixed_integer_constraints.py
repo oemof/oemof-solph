@@ -7,7 +7,7 @@ Created on Tue Oct 20 11:31:11 2015
 import pyomo.environ as po
 
 
-def add_output_bounds(model, objs=None, uids=None):
+def set_bounds(model, objs=None, uids=None, side="output"):
     """ Set upper/lower bounds on all output variables via constraints
 
     The bounds are set with constraints using the binary status variable `y`
@@ -42,26 +42,47 @@ def add_output_bounds(model, objs=None, uids=None):
     if uids is None:
         uids = [e.uids for e in objs]
 
-    out_max = {obj.uid: obj.out_max for obj in objs}
+    if side == "output":
+        out_max = {obj.uid: obj.out_max for obj in objs}
 
-    # set upper bounds
-    def ub_rule(model, e, t):
-        return(model.w[e, model.O[e][0], t] <=
-                   getattr(model, "status_"+objs[0].lower_name)[e, t]
-                    * out_max[e][model.O[e][0]])
-    setattr(model, objs[0].lower_name+"_maximum_output",
-            po.Constraint(uids, model.timesteps, rule=ub_rule))
+        # set upper bounds
+        def ub_rule(model, e, t):
+            return(model.w[e, model.O[e][0], t] <=
+                       getattr(model, "status_"+objs[0].lower_name)[e, t]
+                        * out_max[e][model.O[e][0]])
+        setattr(model, objs[0].lower_name+"_maximum_output",
+                po.Constraint(uids, model.timesteps, rule=ub_rule))
 
+        out_min = {obj.uid: obj.out_min for obj in objs}
+        # set lower bounds
+        def lb_rule(model, e, t):
+            lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] * \
+                      out_min[e][model.O[e][0]]
+            rhs = model.w[e, model.O[e][0], t]
+            return(lhs <= rhs)
+        setattr(model, objs[0].lower_name+"_minimum_output",
+                po.Constraint(uids, model.timesteps, rule=lb_rule))
 
-    out_min = {obj.uid: obj.out_min for obj in objs}
-    # set lower bounds
-    def lb_rule(model, e, t):
-        lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] * \
-                  out_min[e][model.O[e][0]]
-        rhs = model.w[e, model.O[e][0], t]
-        return(lhs <= rhs)
-    setattr(model, objs[0].lower_name+"_minimum_output",
-            po.Constraint(uids, model.timesteps, rule=lb_rule))
+    if side == "input":
+        in_max = {obj.uid: obj.in_max for obj in objs}
+
+        # set upper bounds
+        def ub_rule(model, e, t):
+            return(model.w[model.I[e], e, t] <=
+                       getattr(model, "status_"+objs[0].lower_name)[e, t]
+                        * in_max[e][model.I[e]])
+        setattr(model, objs[0].lower_name+"_maximum_input",
+                po.Constraint(uids, model.timesteps, rule=ub_rule))
+
+        in_min = {obj.uid: obj.in_min for obj in objs}
+        # set lower bounds
+        def lb_rule(model, e, t):
+            lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] * \
+                      in_min[e][model.I[e]]
+            rhs = model.w[model.I[e], e, t]
+            return(lhs <= rhs)
+        setattr(model, objs[0].lower_name+"_minimum_input",
+                po.Constraint(uids, model.timesteps, rule=lb_rule))
 
 def add_output_gradient_constraints(model, objs=None, uids=None,
                                    grad_direc="both"):

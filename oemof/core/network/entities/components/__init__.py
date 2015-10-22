@@ -52,6 +52,7 @@ class Transformer(Component):
         ------------
 
         out_min : minimal output of transformer (e.g. pmin for powerplants)
+        in_min : minimal input of transformer (e.g. pmin for powerplants)
         start_cost: cost per start up of transformer (only milp models)
         ramping_costs: costs for ramping
 
@@ -72,12 +73,20 @@ class Transformer(Component):
             self.opex_var = self.inputs[0].price
             logging.info('No opex defined. Setting bus price as opex for:' +
                          ' component %s', self.uid)
-
+        # minimal output
         self.out_min = kwargs.get('out_min', None)
         if self.out_min is None:
-            # set default output to 0.5*outmax
-            self.out_min = {self.outputs[0].uid:
-                            self.out_max[self.outputs[0].uid]*0.5}
+            # set default output to 0.5*out_max
+            self.out_min = {self.outputs[0].uid: 0}
+            logging.info('No minimum output defined. Setting min output to' +
+                         ' 0 of component%s', self.uid)
+        # minimal input
+        self.in_min = kwargs.get('in_min', None)
+        if self.in_min is None:
+            # set default input to 0.5*in_max
+            self.in_min = {self.inputs[0].uid: 0}
+            logging.info('No minimum input defined. Setting min output to' +
+                         ' 0 of component%s', self.uid)
 
         self.start_costs = kwargs.get('start_costs', None)
         if self.start_costs is None:

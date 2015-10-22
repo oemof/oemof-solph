@@ -29,7 +29,28 @@ class CHP(Transformer):
         :param eta: eta as constant efficiency for simple transformer
         """
         super().__init__(**kwargs)
-        self.eta = kwargs.get('eta', {'th': None, 'el': None})
+        self.eta = kwargs.get('eta', [None, None])
+
+class ExtracCHPConst(Transformer):
+    """
+    Class for combined heat and power unit with extraction turbine and constant
+    efficiencies
+
+    """
+    lower_name = "extrac_chp_const"
+
+    def __init__(self, **kwargs):
+        """
+        Parameters:
+        -----------
+        eta : eta as constant efficiency for transformer output
+        beta : power loss index (max: at full load, min: at minimal load)
+        sigma : power to heat ratio P/Q
+        """
+        super().__init__(**kwargs)
+        self.eta = kwargs.get('eta', [None, None])
+        self.beta = kwargs.get('beta', None)
+        self.sigma = kwargs.get('sigma', None)
 
 
 class Storage(Transformer):

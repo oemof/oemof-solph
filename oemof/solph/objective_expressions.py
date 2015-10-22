@@ -5,21 +5,32 @@ Created on Tue Oct  6 11:34:27 2015
 @author: simon
 """
 import numpy as np
+import logging
 
-def add_opex_var(model, objs=None, uids=None):
+def add_opex_var(model, objs=None, uids=None, ref='output'):
     """ variable operation expenditure term for linear objective function
+    Parameters:
+    ------------
+
+    ref : reference side on which opex are based on
+        (e.g. powerplant MWhth -> input or MWhel -> output)
 
     """
     if uids is None:
         uids = [obj.uid for obj in objs]
 
-    opex_var = {obj.uid: obj.opex_var for obj in objs}
-    # outputs for cost objs
-    O = {obj.uid: obj.outputs[0].uid for obj in objs}
 
-    expr = sum(model.w[e, O[e], t] * opex_var[e]
-               for e in uids
-               for t in model.timesteps)
+    opex_var = {obj.uid: obj.opex_var for obj in objs}
+
+    # outputs for cost objs
+    if ref == 'output':
+        expr = sum(model.w[e, model.O[e][0], t] * opex_var[e]
+                   for e in uids
+                   for t in model.timesteps)
+    elif ref == 'input':
+        expr = sum(model.w[model.I[e], e, t] * opex_var[e]
+                   for e in uids
+                   for t in model.timesteps)
 
     return(expr)
 
@@ -98,14 +109,15 @@ def add_dispatch_source_costs(model, objs=[], uids=None):
             uids = [obj.uid for obj in objs]
         # get dispatch expenditure for renewable energies with dispatch
         model.dispatch_ex = {obj.uid: obj.dispatch_ex for obj in objs}
-
         expr = sum(model.dispatch[e, t] * model.dispatch_ex[e]
                    for e in uids for t in model.timesteps)
+        return(expr)
     else:
-        print('Warning: No dispatch source objects defined.  \
-              No action for objective take.')
+        expr = 0
+        logging.info('No dispatch source objects defined. ' +
+                     'No action for objective taken.')
 
-    return(expr)
+        return(expr)
 
 def add_capex(model, objs, uids=None, ref=None):
     """ add capital expenditure to objective

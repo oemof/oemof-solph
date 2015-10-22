@@ -22,7 +22,8 @@ def minimize_cost(self):
     cost_objs = \
         self.objs['simple_chp'] + \
         self.objs['simple_transformer'] + \
-        self.objs['simple_transport']
+        self.objs['simple_transport'] + \
+        self.objs['extrac_chp_const']
 
     revenue_objs = (
         self.objs['simple_chp'] +

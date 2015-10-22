@@ -6,6 +6,8 @@ Created on Sun Oct 18 18:41:08 2015
 """
 
 import pyomo.environ as po
+import logging
+
 try:
     from oemof.core.network.entities import components as cp
     from oemof.core.network.entities import Component
@@ -83,7 +85,6 @@ def add_continuous(model, edges):
     """
     # variable for all edges
     model.w = po.Var(edges, model.timesteps, within=po.NonNegativeReals)
-
     # gradient variable for components
     objs = [e for e in model.entities if isinstance(e, cp.Transformer)]
     uids = [e.uid for e in objs]
@@ -119,8 +120,8 @@ def add_continuous(model, edges):
             model.add_cap = po.Var(uids, within=po.NonNegativeReals)
 
 
-def set_output_bounds(model, objs=None, uids=None):
-    """ Sets upper bounds for variables that represent the weight
+def set_bounds(model, objs=None, uids=None, side='output'):
+    """ Sets bounds for variables that represent the weight
     of the edges of the graph if investment models are calculated.
 
     For investment  models upper and lower bounds will be modeled via
@@ -145,6 +146,7 @@ def set_output_bounds(model, objs=None, uids=None):
         altered
     uids : array linke
         list of component uids corresponding to the objects
+    side : side of component for which the bounds are set('input' or 'output')
 
     Returns
     -------
@@ -168,32 +170,44 @@ def set_output_bounds(model, objs=None, uids=None):
         out_max[e.uid] = e.out_max
 
     if model.invest is False:
-
         # edges for simple transformers ([('coal', 'pp_coal'),...])
         ee = model.edges(objs)
         for (e1, e2) in ee:
             for t in model.timesteps:
                 # transformer output <= model.out_max
-                if e1 in uids:
+                if e1 in uids and side == 'output':
                     model.w[e1, e2, t].setub(out_max[e1][e2])
                 # transformer input <= model.in_max
-                if e2 in uids:
-                    model.w[e1, e2, t].setub(in_max[e2][e1])
+                if e2 in uids and side == 'input':
+                    try:
+                        model.w[e1, e2, t].setub(in_max[e2][e1])
+                    except:
+                        logging.warning("No upper bound for input (%s,%s)",
+                                        e1, e2)
+                        pass
 
     else:
-        # set maximum of addiational storage capacity
-        add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
-        # loop over all uids (storages) set the upper bound
-        for e in uids:
-            model.add_out[e].setub(add_out_limit[e])
+        if side == 'output':
+            # set maximum of addiational storage capacity
+            add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
+            # loop over all uids (storages) set the upper bound
+            for e in uids:
+                model.add_out[e].setub(add_out_limit[e])
 
-        # constraint for additional capacity
-        def add_output_rule(model, e, t):
-            lhs = model.w[e, model.O[e][0], t]
-            rhs = out_max[e][model.O[e][0]] + model.add_out[e]
-            return(lhs <= rhs)
-        setattr(model, objs[0].lower_name+"_output_bound",
-                po.Constraint(uids, model.timesteps, rule=add_output_rule))
+            # constraint for additional capacity
+            def add_output_rule(model, e, t):
+                lhs = model.w[e, model.O[e][0], t]
+                rhs = out_max[e][model.O[e][0]] + model.add_out[e]
+                return(lhs <= rhs)
+            setattr(model, objs[0].lower_name+"_output_bound",
+                    po.Constraint(uids, model.timesteps, rule=add_output_rule))
+
+        # TODO: Implement upper bound constraint for investment models
+        if side == 'input':
+            raise ValueError('Setting upper bounds on inputs of components' +
+                              ' not possible for investment models')
+
+
 
 def set_storage_cap_bounds(model, objs=None, uids=None):
     """ Alters/sets upper and lower bounds for variables that represent the

@@ -53,13 +53,12 @@ class OptimizationModel(po.ConcreteModel):
         self.all_edges = self.edges(components)
 
         var.add_continuous(model=self, edges=self.all_edges)
-
         # list with all necessary classes
         component_classes = (cp.Transformer.__subclasses__() +
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
-        components
+
         self.I = {c.uid: c.inputs[0].uid for c in components
                   if not isinstance(c, cp.Source)}
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in components
@@ -145,7 +144,7 @@ class OptimizationModel(po.ConcreteModel):
         # input output relation for simple transformer
         lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
         # pmax constraint/bounds
-        var.set_output_bounds(model=self, objs=objs, uids=uids)
+        var.set_bounds(model=self, objs=objs, uids=uids, side='output')
         # gradient calculation dGrad for objective function
         lc.add_gradient_calc(model=self, objs=objs, uids=uids)
 
@@ -154,7 +153,7 @@ class OptimizationModel(po.ConcreteModel):
             # binary status variables
             var.add_binary(model=self, objs=objs, uids=uids)
             # pmax/pmin constraints
-            milc.add_output_bounds(model=self, objs=objs, uids=uids)
+            milc.set_bounds(model=self, objs=objs, uids=uids, side='output')
             # pmin constraints
             milc.add_startup_constraints(model=self, objs=objs, uids=uids)
 
@@ -183,6 +182,63 @@ class OptimizationModel(po.ConcreteModel):
 
         # use linear constraint to model PQ relation (P/eta_el = Q/eta_th)
         lc.add_simple_chp_relation(model=self, objs=objs, uids=uids)
+
+    def extrac_chp_const_assembler(self, objs, uids):
+        """Method grouping the constraints for simple chp components.
+
+        Parameters
+        ----------
+        self : OptimizationModel() instance
+        objs : oemof objects for which the constraints etc. are created
+        uids : unique ids of `objs`
+
+        Returns
+        -------
+        self : OptimizationModel() instance
+        """
+        if self.invest is True:
+           raise ValueError('Investment models can not be calculated' +
+                            'with extraction chps.')
+        else:
+            # use simple_transformer assebmler for in-out relation and
+            # upper / lower bounds
+            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
+            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+            # gradient calculation dGrad for objective function
+            lc.add_gradient_calc(model=self, objs=objs, uids=uids)
+
+            out_max = {}
+            beta = {}
+            sigma = {}
+            eta = {}
+            for e in objs:
+                out_max[e.uid] = e.out_max
+                beta[e.uid] = e.beta
+                sigma[e.uid] = e.sigma
+                eta[e.uid] = e.eta
+
+            def equiv_out_rule(model, e, t):
+                lhs = model.w[model.I[e], e, t]
+                rhs = (model.w[e, model.O[e][0], t] +
+                      beta[e] * model.w[e, model.O[e][1], t]) / eta[e][0]
+                return(lhs == rhs)
+            self.extrac_chp_const_equ_out = po.Constraint(uids,self.timesteps,
+                                                          rule=equiv_out_rule)
+
+            def power_heat_rule(model, e, t):
+                lhs = model.w[e, model.O[e][1], t]
+                rhs = model.w[e, model.O[e][0], t] / sigma[e]
+                return(lhs <= rhs)
+            self.extrac_chp_const_pth = po.Constraint(uids, self.timesteps,
+                                                      rule=power_heat_rule)
+        # set bounds for milp-models
+        if self.milp is True:
+            # binary status variables
+            var.add_binary(model=self, objs=objs, uids=uids)
+            # pmax/pmin constraints
+            milc.set_bounds(model=self, objs=objs, uids=uids, side="input")
+            # pmin constraints
+            milc.add_startup_constraints(model=self, objs=objs, uids=uids)
 
     def fixed_source_assembler(self, objs, uids):
         """Method containing the constraints for
@@ -242,7 +298,8 @@ class OptimizationModel(po.ConcreteModel):
 
         # optimization model with no investment
         if(self.invest is False):
-            var.set_output_bounds(model=self, objs=objs, uids=uids)
+            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
             var.set_storage_cap_bounds(model=self, objs=objs, uids=uids)
             lc.add_storage_balance(model=self, objs=objs, uids=uids)
 
@@ -298,7 +355,7 @@ class OptimizationModel(po.ConcreteModel):
         # input output relation for simple transport
         lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
         # bounds
-        var.set_output_bounds(model=self, objs=objs, uids=uids)
+        var.set_bounds(model=self, objs=objs, uids=uids, side='output')
 
     def objective_assembler(self, objective_type="min_costs"):
         """Objective assembler creates builds objective function of the
