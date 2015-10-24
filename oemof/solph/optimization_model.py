@@ -3,14 +3,14 @@ try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import objectives as objfunc
+    import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
-    from . import objectives as objfunc
+    from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
 
@@ -58,7 +58,7 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Sink.__subclasses__() +
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
-
+        self.objfuncexpr = 0
         self.I = {c.uid: c.inputs[0].uid for c in components
                   if not isinstance(c, cp.Source)}
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in components
@@ -77,7 +77,7 @@ class OptimizationModel(po.ConcreteModel):
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
         self.bus_assembler()
-        self.objective_assembler(objective_type="min_costs")
+        self.objective = po.Objective(expr=self.objfuncexpr)
 
     def bus_assembler(self):
         """Meethod creates bus balance for all buses using pyomo.Constraint
@@ -126,6 +126,11 @@ class OptimizationModel(po.ConcreteModel):
         lc.add_bus_output_limit(model=self, objs=resource_bus_objs,
                                 uids=resource_bus_uids)
 
+        if self.slack['shortage']:
+            self.objfuncexpr += objfuncexprs.add_shortage_slack_costs(self)
+        if self.slack['excess']:
+             self.objfuncexpr += objfuncexprs.add_excess_slack_costs(self)
+
     def simple_transformer_assembler(self, objs, uids):
         """Method containing the constraints for simple transformer components.
 
@@ -139,19 +144,20 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        param = cp.transformers.Simple.model_param
+        constr = cp.transformers.Simple.constr
+        objfunc = cp.transformers.Simple.objfunc
 
         # input output relation for simple transformer
-        if param['io_relation']:
+        if constr['io_relation']:
             lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
         # 'pmax' constraint/bounds for output of component
-        if param['out_max']:
+        if constr['out_max']:
             var.set_bounds(model=self, objs=objs, uids=uids, side='output')
         #'pmax' constraint/bounds for input of component
-        if param['in_max']:
+        if constr['in_max']:
             var.set_bounds(model=self, objs=objs, uids=uids, side='input')
         # gradient calculation dGrad for objective function
-        if param['ramping_up']:
+        if constr['ramping_up']:
             lc.add_gradient_calc(model=self, objs=objs, uids=uids)
 
         # set bounds for milp-models
@@ -159,15 +165,23 @@ class OptimizationModel(po.ConcreteModel):
             # binary status variables
             var.add_binary(model=self, objs=objs, uids=uids)
             # pmax/pmin constraints
-            if param['out_min']:
+            if constr['out_min']:
                 milc.set_bounds(model=self, objs=objs, uids=uids,
                                 side='output')
-            if param['in_min']:
+            if constr['in_min']:
                 milc.set_bounds(model=self, objs=objs, uids=uids,
                                 side='input')
             # pmin constraints
-            if param['startup']:
+            if constr['startup']:
                 milc.add_startup_constraints(model=self, objs=objs, uids=uids)
+
+        if objfunc['opex_var']:
+            self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
+                                                          uids=uids)
+        if objfunc['opex_fix']:
+            self.objfuncexpr += objfuncexprs.add_opex_fix(self, objs=objs,
+                                                          uids=uids,
+                                                          ref='output')
 
         if self.invest is True and self.milp is True:
            raise ValueError("Investment models can not be calculated as \
@@ -368,20 +382,6 @@ class OptimizationModel(po.ConcreteModel):
         # bounds
         var.set_bounds(model=self, objs=objs, uids=uids, side='output')
 
-    def objective_assembler(self, objective_type="min_costs"):
-        """Objective assembler creates builds objective function of the
-        optimization model.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        if objective_type == "min_costs":
-            objfunc.minimize_cost(self)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
