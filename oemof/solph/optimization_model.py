@@ -76,7 +76,6 @@ class OptimizationModel(po.ConcreteModel):
             if objs:
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
-
         self.bus_assembler()
         self.objective_assembler(objective_type="min_costs")
 
@@ -140,22 +139,35 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
+        param = cp.transformers.Simple.model_param
 
         # input output relation for simple transformer
-        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
-        # pmax constraint/bounds
-        var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+        if param['io_relation']:
+            lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+        # 'pmax' constraint/bounds for output of component
+        if param['out_max']:
+            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+        #'pmax' constraint/bounds for input of component
+        if param['in_max']:
+            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
         # gradient calculation dGrad for objective function
-        lc.add_gradient_calc(model=self, objs=objs, uids=uids)
+        if param['ramping_up']:
+            lc.add_gradient_calc(model=self, objs=objs, uids=uids)
 
         # set bounds for milp-models
         if self.invest is False and self.milp is True:
             # binary status variables
             var.add_binary(model=self, objs=objs, uids=uids)
             # pmax/pmin constraints
-            milc.set_bounds(model=self, objs=objs, uids=uids, side='output')
+            if param['out_min']:
+                milc.set_bounds(model=self, objs=objs, uids=uids,
+                                side='output')
+            if param['in_min']:
+                milc.set_bounds(model=self, objs=objs, uids=uids,
+                                side='input')
             # pmin constraints
-            milc.add_startup_constraints(model=self, objs=objs, uids=uids)
+            if param['startup']:
+                milc.add_startup_constraints(model=self, objs=objs, uids=uids)
 
         if self.invest is True and self.milp is True:
            raise ValueError("Investment models can not be calculated as \

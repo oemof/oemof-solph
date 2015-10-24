@@ -32,7 +32,6 @@ def add_bus_balance(model, objs=None, uids=None):
     I = {b.uid: [i.uid for i in b.inputs] for b in objs}
     O = {b.uid: [o.uid for o in b.outputs] for b in objs}
 
-    # constraint for bus balance:
     # component inputs/outputs are negative/positive in the bus balance
     def bus_balance_rule(model, e, t):
         lhs = 0
