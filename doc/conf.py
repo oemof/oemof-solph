@@ -36,6 +36,8 @@ extensions = [
     'numpydoc'
 ]
 
+numpydoc_show_class_members = False
+
 #
 autoclass_content = 'both'
 
