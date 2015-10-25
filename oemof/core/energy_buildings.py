@@ -38,7 +38,7 @@ class heat_building():
         self.annual_load = kwargs['annual_heat_demand']
 
     def temp_geo_series(self, time_df):
-        '''
+        r'''
         A new temperature vector is generated containing a multy-day
         average temperature as needed in the load profile function.
 
