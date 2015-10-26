@@ -38,17 +38,17 @@ class CablePypo(Transport):
 
 
 # electricity bus initialization
-b_el1 = BusPypo(uid="b_el1", type="el", voltage_level=220000)
-b_el2 = Bus(uid="b_el2", type="el", voltage_level=220000)
-b_el3 = Bus(uid="b_el3", type="el", voltage_level=220000)
+b_el1 = BusPypo(uid="b_el1", type="PQ", voltage_level=220000)
+b_el2 = BusPypo(uid="b_el2", type="PV", voltage_level=220000)
+b_el3 = BusPypo(uid="b_el3", type="REF", voltage_level=220000)
 
 # transport initialization
 cable1 = CablePypo(uid="cable1", inputs=[b_el1], outputs=[b_el2],
-                   maimal_current=1000)
+                   maximal_current=1000)
 cable2 = CablePypo(uid="cable2", inputs=[b_el2], outputs=[b_el3],
-                   maimal_current=1000)
+                   maximal_current=1000)
 cable3 = CablePypo(uid="cable3", inputs=[b_el3], outputs=[b_el1],
-                   maimal_current=1000)
+                   maximal_current=1000)
 
 # plot topology
 import networkx as nx
@@ -67,4 +67,4 @@ nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
 nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
                        node_color="b", node_size=300)
 nx.draw_networkx_edges(g, graph_pos)
-nx.draw_networkx_labels(g, graph_pos)
+#nx.draw_networkx_labels(g, graph_pos)
