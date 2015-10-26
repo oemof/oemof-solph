@@ -531,7 +531,7 @@ def generic_fixed_sink(model, objs, uids, timesteps):
     Parameters
     ------------
 
-    model :OptimizationModel() instance
+    model : OptimizationModel() instance
        An object to be solved containing all Variables, Constraints, Data
        Attributes are altered of the `model`
     objs : array like
