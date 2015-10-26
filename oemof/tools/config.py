@@ -15,7 +15,7 @@ The file has to be of the following structure to be imported correctly.
  \n
 [netCDF] \n
 RootFolder = c://netCDF \n
-FilePrefix = cd2_ \n
+FilePrefix = cd2- \n
  \n
 [mySQL] \n
 host = localhost \n
