@@ -10,8 +10,9 @@ import pandas as pd
 logging.getLogger().setLevel(logging.WARNING)
 from oemof.tools import config
 from oemof.tools import db
-from oemof.tools import pg_helpers
+from oemof_pg import tools
 from oemof.core import energy_regions as reg
+from oemof.core import energy_system as es
 from oemof.solph import postprocessing
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
@@ -107,17 +108,21 @@ overwrite = False
 overwrite = True
 conn = db.connection()
 
+# Create an energy system
+TwoRegExample = es.EnergySystem()
 
-# 2 Regionen werden initialisiert (Landkreis Wittenberg, Stadt Dessau-Roßlau)
+# Add regions to the energy system
+TwoRegExample.add_region(es.EnergyRegion(
+    year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE0E'),
+    name='Landkreis Wittenberg'))
 
-lk_wtb = reg.region(year,
-                    geometry=pg_helpers.get_polygon_from_nuts(conn, 'DEE0E'),
-                    name='Landkreis Wittenberg')
+TwoRegExample.add_region(es.EnergyRegion(
+    year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE01'),
+    name='Stadt Dessau-Roßlau'))
 
-std_dr = reg.region(year,
-                    geometry=pg_helpers.get_polygon_from_nuts(conn, 'DEE01'),
-                    name='Stadt Dessau-Roßlau')
-
+for region in TwoRegExample.regions.values():
+    print(region.code)
+exit(0)
 regions = [lk_wtb, std_dr]
 busses = {}
 demand = {}
