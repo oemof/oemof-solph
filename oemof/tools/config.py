@@ -68,7 +68,7 @@ def get(section, key):
     :type key: str.
 
     :returns: the value which will be casted to float, int or boolean.
-    if no cast is successfull, the raw string will be returned.
+              if no cast is successfull, the raw string will be returned.
 
     """
     if not _loaded:
