@@ -144,6 +144,8 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
+        # TODO: This should be dependent on objs classes not fixed if assembler
+        # method is used by another assemlber method...
         constr = cp.transformers.Simple.constr
         objfunc = cp.transformers.Simple.objfunc
 
@@ -182,6 +184,9 @@ class OptimizationModel(po.ConcreteModel):
             self.objfuncexpr += objfuncexprs.add_opex_fix(self, objs=objs,
                                                           uids=uids,
                                                           ref='output')
+        if objfunc['input_costs']:
+            self.objfuncexpr += objfuncexprs.add_input_costs(self, objs=objs,
+                                                             uids=uids)
 
         if self.invest is True and self.milp is True:
            raise ValueError("Investment models can not be calculated as \

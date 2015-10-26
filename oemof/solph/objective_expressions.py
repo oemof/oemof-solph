@@ -33,6 +33,26 @@ def add_opex_var(model, objs=None, uids=None, ref='output'):
 
     return(expr)
 
+def add_input_costs(model, objs=None, uids=None):
+    """ Adds costs for usage of input (fuel, elec, etc. ) if not included in
+    opex
+
+    Parameters:
+    ------------
+
+    """
+    if uids is None:
+        uids = [obj.uid for obj in objs]
+
+
+    input_costs = {obj.uid: obj.inputs[0].price for obj in objs}
+    # outputs for cost objs
+
+    expr = sum(model.w[model.I[e], e, t] * input_costs[e]
+                for e in uids for t in model.timesteps)
+
+    return(expr)
+
 def add_opex_fix(model, objs=None, uids=None, ref=None):
     """ Fixed operation expenditure term for linear objective function
 

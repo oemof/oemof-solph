@@ -172,11 +172,11 @@ def add_bus_output_limit(model, objs=None, uids=None):
             limit[e]
         # if bus is defined but has not outputs Constraint is skipped
         # (should be logged as well)
-        if isinstance(lhs, (int, float)):
+        if isinstance(lhs, (int, float)) or limit[e] == float('inf'):
             return(po.Constraint.Skip)
         else:
             return(lhs <= 0)
-    setattr(model,objs[0].lower_name+"_limit_gc",
+    setattr(model,objs[0].lower_name+"_limit",
             po.Constraint(uids, rule=output_limit_rule))
 
 def add_fixed_source(model, objs, uids, val=None, out_max=None):

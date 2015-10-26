@@ -29,7 +29,7 @@ import logging
 logging.basicConfig(filename='example_app.log', level=logging.DEBUG)
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(2)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -38,10 +38,10 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bcoal = Bus(uid="coal", type="coal", price=60, sum_out_limit=10e10)
-bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=10e10)
-boil = Bus(uid="oil", type="oil", price=80,  sum_out_limit=10e10)
-blig = Bus(uid="lignite", type="lignite", price=30,  sum_out_limit=10e10)
+bcoal = Bus(uid="coal", type="coal", price=20, sum_out_limit=10e10)
+bgas = Bus(uid="gas", type="gas", price=35, sum_out_limit=10e10)
+boil = Bus(uid="oil", type="oil", price=40,  sum_out_limit=10e10)
+blig = Bus(uid="lignite", type="lignite", price=15,  sum_out_limit=10e10)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el")
