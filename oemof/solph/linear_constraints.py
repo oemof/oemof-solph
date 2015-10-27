@@ -343,7 +343,7 @@ def add_storage_balance(model, objs=None, uids=None):
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=storage_balance_rule))
 
-def add_gradient_calc(model, objs=None, uids=None):
+def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
     """ Add constraint to calculate the gradient between two timesteps
 
     Parameters
@@ -367,11 +367,47 @@ def add_gradient_calc(model, objs=None, uids=None):
     def grad_pos_calc_rule(model, e, t):
         if t > 0:
             lhs = model.w[e, model.O[e][0], t] - model.w[e,model.O[e][0], t-1]
-            rhs = model.w_grad_pos[e, t]
+            rhs = var_pos[e, t]
             return(lhs <= rhs)
         else:
             return(po.Constraint.Skip)
 
-    setattr(model, objs[0].lower_name+"_grad_pos_calc",
-            po.Constraint(uids, model.timesteps, rule=grad_pos_calc_rule))
+    def grad_neg_calc_rule(model, e, t):
+        if t > 0:
+            lhs = model.w[e, model.O[e][0], t-1] - model.w[e,model.O[e][0], t]
+            rhs = var_neg[e, t]
+            return(lhs <= rhs)
+        else:
+            return(po.Constraint.Skip)
+
+    def grad_pos_bound_rule(model, e, t):
+        return((0, grad_pos[e]))
+
+    def grad_neg_bound_rule(model, e, t):
+        return((0, grad_neg[e]))
+
+    # negative gradient
+    if grad_direc == 'positive' or grad_direc == "both":
+        # create variable
+        grad_pos = {obj.uid: obj.grad_pos for obj in objs}
+        setattr(model, 'grad_pos_'+objs[0].lower_name,
+                po.Var(uids, model.timesteps, within=po.NonNegativeReals,
+                       bounds=grad_pos_bound_rule))
+
+        var_pos = getattr(model, 'grad_pos_'+objs[0].lower_name)
+        # set constraint
+        setattr(model, objs[0].lower_name+"_grad_pos_calc",
+                po.Constraint(uids, model.timesteps, rule=grad_pos_calc_rule))
+
+    # positive gradient
+    if grad_direc == 'negative' or grad_direc == "both":
+        # create variable
+        grad_neg = {obj.uid: obj.grad_neg for obj in objs}
+        setattr(model, 'grad_neg_'+objs[0].lower_name,
+                po.Var(uids, model.timesteps, within=po.NonNegativeReals,
+                       bounds=grad_neg_bound_rule))
+        var_neg = getattr(model, 'grad_neg_'+objs[0].lower_name)
+        # set constraint
+        setattr(model, objs[0].lower_name+"_grad_neg_calc",
+                po.Constraint(uids, model.timesteps, rule=grad_neg_calc_rule))
 

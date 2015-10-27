@@ -76,8 +76,12 @@ class OptimizationModel(po.ConcreteModel):
             if objs:
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
+
         self.bus_assembler()
+
+        print('Creating objective ...')
         self.objective = po.Objective(expr=self.objfuncexpr)
+        print('Model created!')
 
     def bus_assembler(self):
         """Meethod creates bus balance for all buses using pyomo.Constraint
@@ -114,6 +118,7 @@ class OptimizationModel(po.ConcreteModel):
                            if any([obj.type == "el", obj.type == "th"])]
         energy_bus_uids = [obj.uid for obj in energy_bus_objs]
 
+        print('Creating bus balance constraints ...')
         # bus balance constraint for energy bus objects
         lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids)
 
@@ -151,7 +156,10 @@ class OptimizationModel(po.ConcreteModel):
 
         # input output relation for simple transformer
         if constr['io_relation']:
+            print('Creating simple input-output linear constraints for',
+                  objs[0].lower_name, '...')
             lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+
         # 'pmax' constraint/bounds for output of component
         if constr['out_max']:
             var.set_bounds(model=self, objs=objs, uids=uids, side='output')
@@ -159,9 +167,9 @@ class OptimizationModel(po.ConcreteModel):
         if constr['in_max']:
             var.set_bounds(model=self, objs=objs, uids=uids, side='input')
         # gradient calculation dGrad for objective function
-        if constr['ramping_up']:
-            lc.add_gradient_calc(model=self, objs=objs, uids=uids)
-
+        if constr['ramping']:
+            lc.add_output_gradient_calc(model=self, objs=objs, uids=uids,
+                                        grad_direc="both")
         # set bounds for milp-models
         if self.invest is False and self.milp is True:
             # binary status variables
@@ -171,12 +179,23 @@ class OptimizationModel(po.ConcreteModel):
                 milc.set_bounds(model=self, objs=objs, uids=uids,
                                 side='output')
             if constr['in_min']:
+                print('Creating minimum input milp constraints for',
+                      objs[0].lower_name, '...')
                 milc.set_bounds(model=self, objs=objs, uids=uids,
                                 side='input')
+            if constr['ramping']:
+                print('Creating ramping milp constraints for',
+                      objs[0].lower_name, '...')
+                milc.add_output_gradient_constraints(model=self, objs=objs,
+                                                     uids=uids,
+                                                     grad_direc='both')
             # pmin constraints
             if constr['startup']:
                 milc.add_startup_constraints(model=self, objs=objs, uids=uids)
-
+                # add start costs
+                self.objfuncexpr += objfuncexprs.add_startup_costs(self,
+                                                                 objs=objs,
+                                                                 uids=uids)
         if objfunc['opex_var']:
             self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
                                                           uids=uids)

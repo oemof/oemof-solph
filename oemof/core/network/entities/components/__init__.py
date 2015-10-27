@@ -55,6 +55,9 @@ class Transformer(Component):
         in_min : minimal input of transformer (e.g. pmin for powerplants)
         start_cost: cost per start up of transformer (only milp models)
         ramping_costs: costs for ramping
+        grad: gradient
+        t_min_off :
+        t_min_on :
 
         """
         super().__init__(**kwargs)
@@ -66,8 +69,6 @@ class Transformer(Component):
             raise ValueError("Transformer must have at least one output.\n" +
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
-
-        self.opex_var = kwargs.get('opex_var', None)
         # minimal output
         self.out_min = kwargs.get('out_min', None)
         if self.out_min is None:
@@ -89,6 +90,11 @@ class Transformer(Component):
             logging.info('No startcosts defined. Setting default costs of 1' +
                          ' for component %s', self.uid)
         self.ramp_costs = kwargs.get('ramp_costs', 0)
+
+        self.grad_pos = kwargs.get('grad_pos', 0)
+        self.grad_neg  = kwargs.get('grad_neg', 0)
+        self.t_min_off = kwargs.get('t_min_off', 0)
+        self.t_min_on = kwargs.get('t_min_on', 0)
 
     def calc_emissions(self):
         self.emissions = [i * self.co2_var

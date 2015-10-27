@@ -172,8 +172,10 @@ def add_startup_costs(model, objs=None, uids=None):
         uids = [obj.uid for obj in objs]
 
     start_costs = {obj.uid: obj.start_costs for obj in objs}
-    expr = sum(getattr(model, "start_"+objs[0].lower_name)[e, t] *
-               start_costs[e] for e in uids for t in model.timesteps)
+
+    start_var = getattr(model, "start_"+objs[0].lower_name)
+    expr = sum(start_var[e, t] * start_costs[e]
+               for e in uids for t in model.timesteps)
     return(expr)
 
 def add_gradient_costs(model, objs=None, uids=None):
