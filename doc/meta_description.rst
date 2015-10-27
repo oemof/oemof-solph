@@ -145,7 +145,7 @@ The *solph* module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The solph module of oemof allows to create and solve linear (and mixed-integer)
- optimization problems. The optimization problem is build based on a energy
+optimization problems. The optimization problem is build based on a energy
 system defined via oemof-entities. These entities are instances of
 oemof base classes (e. g. buses or components). For the definition of variables,
 constraints and an objective function as well as for communication with solvers

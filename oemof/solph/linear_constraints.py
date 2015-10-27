@@ -148,7 +148,7 @@ def add_bus_output_limit(model, objs=None, uids=None):
     Parameters
     ------------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
+       An object to be solved containing all Variables, Constraints, Data
        Constraints are added as attribtes to the `model`
     objs : array like
         list of component objects for which the constraints will be created
