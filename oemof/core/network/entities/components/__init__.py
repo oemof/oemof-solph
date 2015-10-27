@@ -68,11 +68,6 @@ class Transformer(Component):
                                                  for x in self.outputs]))
 
         self.opex_var = kwargs.get('opex_var', None)
-        # if no opex are give use price information of bus
-        if self.opex_var is None:
-            self.opex_var = self.inputs[0].price
-            logging.info('No opex defined. Setting bus price as opex for:' +
-                         ' component %s', self.uid)
         # minimal output
         self.out_min = kwargs.get('out_min', None)
         if self.out_min is None:
