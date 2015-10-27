@@ -30,9 +30,6 @@ class OptimizationModel(po.ConcreteModel):
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
     def __init__(self, entities, timesteps, options=None):
-        """
-
-        """
         super().__init__()
 
         self.entities = entities
@@ -81,9 +78,9 @@ class OptimizationModel(po.ConcreteModel):
         """Meethod creates bus balance for all buses using pyomo.Constraint
 
         The bus model creates all full balance around the energy buses using
-        the `linear_constraints.generic_bus_constraint()` function.
+        the :func:`lc.generic_bus_constraint` function.
         Additionally it sets constraints to model limits over the timehorizon
-        for resource buses using `linear_constraints.generic_limit()
+        for resource buses using :func:`lc.generic_limit`
 
         Parameters
         ----------

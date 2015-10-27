@@ -388,7 +388,7 @@ def generic_sto_cap_ub_invest(model, objs=None, uids=None, timesteps=None):
     Parameters
     ------------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
+       An object to be solved containing all Variables, Constraints, Data
        Constraints are added as attribtes to the `model`
     objs : array like
         list of component objects for which the bounds will be
@@ -446,7 +446,7 @@ def generic_limit(model, objs=None, uids=None, timesteps=None):
     Parameters
     ------------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
+       An object to be solved containing all Variables, Constraints, Data
        Constraints are added as attribtes to the `model`
     objs : array like
         list of component objects for which the constraints will be created
@@ -531,8 +531,8 @@ def generic_fixed_sink(model, objs, uids, timesteps):
     Parameters
     ------------
 
-    model :OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+       An object to be solved containing all Variables, Constraints, Data
        Attributes are altered of the `model`
     objs : array like
         list of component objects for which the variables representing the
