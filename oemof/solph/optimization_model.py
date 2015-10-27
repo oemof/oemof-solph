@@ -140,7 +140,6 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-
         # input output relation for simple transformer
         lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
         # pmax constraint/bounds
@@ -295,7 +294,6 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-
         # optimization model with no investment
         if(self.invest is False):
             var.set_bounds(model=self, objs=objs, uids=uids, side='output')
@@ -310,11 +308,14 @@ class OptimizationModel(po.ConcreteModel):
             # constraint that limits discharge power by using the c-rate
             c_rate_out = {obj.uid: obj.c_rate_out for obj in objs}
             out_max = {obj.uid: obj.out_max for obj in objs}
+            cap_max = {obj.uid: obj.cap_max for obj in objs}
+            print(out_max)
+            print(cap_max)
 
             def storage_discharge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, self.O[e][0], t]
-                expr += -(out_max[e][self.O[e][0]] + self.add_cap[e]) \
+                expr += -(cap_max[e] + self.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
             setattr(self, objs[0].lower_name+"_discharge_limit_invest",
@@ -323,12 +324,12 @@ class OptimizationModel(po.ConcreteModel):
 
             # constraint that limits charging power by using the c-rate
             c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
-            in_max = {obj.uid: obj.in_max for obj in objs}
+#            in_max = {obj.uid: obj.in_max for obj in objs}
 
             def storage_charge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, self.I[e], t]
-                expr += -(in_max[e][self.I[e]] + self.add_cap[e]) \
+                expr += -(cap_max[e] + self.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
             setattr(self,objs[0].lower_name+"_charge_limit_invest",
