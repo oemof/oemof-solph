@@ -7,6 +7,18 @@ class Simple(Transformer):
     Simple Transformers always have a simple input output relation with a
     constant efficiency
     """
+    model_param = {'io_relation': True,
+                   'out_max': True,
+                   'in_max': False,
+                   'out_min': False,
+                   'in_min': False,
+                   'ramping_up': False,
+                   'ramping_down': False,
+                   'startup': False,
+                   'shutdown': False,
+                   't_min_off': False,
+                   't_min_on': False
+                   }
     lower_name = 'simple_transformer'
 
     def __init__(self, **kwargs):
@@ -22,6 +34,18 @@ class CHP(Transformer):
     A CombinedHeatPower Transformer always has a simple input output relation
     with a constant efficiency
     """
+    model_param = {'io_relation': True,
+                   'out_max': True,
+                   'in_max': False,
+                   'out_min': False,
+                   'in_min': False,
+                   'ramping_up': False,
+                   'ramping_down': False,
+                   'startup': False,
+                   'shutdown': False,
+                   't_min_off': False,
+                   't_min_on': False
+                   }
     lower_name = "simple_chp"
 
     def __init__(self, **kwargs):

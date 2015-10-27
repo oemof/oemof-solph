@@ -10,7 +10,7 @@ import pandas as pd
 logging.getLogger().setLevel(logging.WARNING)
 from oemof.tools import config
 from oemof.tools import db
-from oemof.tools import helpers
+from oemof.tools import pg_helpers
 from oemof.core import energy_regions as reg
 from oemof.solph import postprocessing
 from oemof.core.network.entities import Bus
@@ -111,11 +111,11 @@ conn = db.connection()
 # 2 Regionen werden initialisiert (Landkreis Wittenberg, Stadt Dessau-Roßlau)
 
 lk_wtb = reg.region(year,
-                    geometry=helpers.get_polygon_from_nuts(conn, 'DEE0E'),
+                    geometry=pg_helpers.get_polygon_from_nuts(conn, 'DEE0E'),
                     name='Landkreis Wittenberg')
 
 std_dr = reg.region(year,
-                    geometry=helpers.get_polygon_from_nuts(conn, 'DEE01'),
+                    geometry=pg_helpers.get_polygon_from_nuts(conn, 'DEE01'),
                     name='Stadt Dessau-Roßlau')
 
 regions = [lk_wtb, std_dr]

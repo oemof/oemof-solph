@@ -21,7 +21,6 @@ def add_opex_var(model, objs=None, uids=None, ref='output'):
 
 
     opex_var = {obj.uid: obj.opex_var for obj in objs}
-
     # outputs for cost objs
     if ref == 'output':
         expr = sum(model.w[e, model.O[e][0], t] * opex_var[e]

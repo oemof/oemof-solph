@@ -34,9 +34,6 @@ class OptimizationModel(po.ConcreteModel):
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
     def __init__(self, entities, timesteps, options=None):
-        """
-
-        """
         super().__init__()
 
         self.entities = entities
@@ -76,7 +73,6 @@ class OptimizationModel(po.ConcreteModel):
             if objs:
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
-
         self.bus_assembler()
         self.fixed_source_assembler(objs=objs, uids=uids)
         self.objective_assembler(objective_type="min_costs")
@@ -85,9 +81,9 @@ class OptimizationModel(po.ConcreteModel):
         """Meethod creates bus balance for all buses using pyomo.Constraint
 
         The bus model creates all full balance around the energy buses using
-        the `linear_constraints.generic_bus_constraint()` function.
+        the :func:`lc.generic_bus_constraint` function.
         Additionally it sets constraints to model limits over the timehorizon
-        for resource buses using `linear_constraints.generic_limit()
+        for resource buses using :func:`lc.generic_limit`
 
         Parameters
         ----------
@@ -141,21 +137,35 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
+        param = cp.transformers.Simple.model_param
+
         # input output relation for simple transformer
-        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
-        # pmax constraint/bounds
-        var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+        if param['io_relation']:
+            lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+        # 'pmax' constraint/bounds for output of component
+        if param['out_max']:
+            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+        #'pmax' constraint/bounds for input of component
+        if param['in_max']:
+            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
         # gradient calculation dGrad for objective function
-        lc.add_gradient_calc(model=self, objs=objs, uids=uids)
+        if param['ramping_up']:
+            lc.add_gradient_calc(model=self, objs=objs, uids=uids)
 
         # set bounds for milp-models
         if self.invest is False and self.milp is True:
             # binary status variables
             var.add_binary(model=self, objs=objs, uids=uids)
             # pmax/pmin constraints
-            milc.set_bounds(model=self, objs=objs, uids=uids, side='output')
+            if param['out_min']:
+                milc.set_bounds(model=self, objs=objs, uids=uids,
+                                side='output')
+            if param['in_min']:
+                milc.set_bounds(model=self, objs=objs, uids=uids,
+                                side='input')
             # pmin constraints
-            milc.add_startup_constraints(model=self, objs=objs, uids=uids)
+            if param['startup']:
+                milc.add_startup_constraints(model=self, objs=objs, uids=uids)
 
         if self.invest is True and self.milp is True:
            raise ValueError("Investment models can not be calculated as \
@@ -295,6 +305,7 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
+
         # optimization model with no investment
         if(self.invest is False):
             var.set_bounds(model=self, objs=objs, uids=uids, side='output')
@@ -316,7 +327,7 @@ class OptimizationModel(po.ConcreteModel):
             def storage_discharge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, self.O[e][0], t]
-                expr += -(cap_max[e] + self.add_cap[e]) \
+                expr += -(cap_max[e][self.O[e][0]] + self.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
             setattr(self, objs[0].lower_name+"_discharge_limit_invest",
@@ -325,12 +336,11 @@ class OptimizationModel(po.ConcreteModel):
 
             # constraint that limits charging power by using the c-rate
             c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
-#            in_max = {obj.uid: obj.in_max for obj in objs}
 
             def storage_charge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, self.I[e], t]
-                expr += -(cap_max[e] + self.add_cap[e]) \
+                expr += -(cap_max[e][self.I[e]] + self.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
             setattr(self,objs[0].lower_name+"_charge_limit_invest",
