@@ -49,9 +49,9 @@ b_el2 = Bus(uid="b_el2", type="el")
 b_th = Bus(uid="b_th", type="th")
 
 # renewable sources (only pv onshore)
-wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el],
+wind_on = source.FixedSource(uid="wind_on", outputs=[b_el],
                                 val=data['wind'],
-                                out_max={b_el.uid: 66300}, dispatch_ex=10)
+                                out_max={b_el.uid: 66300}, opex_var=999)
 wind_on2 = source.DispatchSource(uid="wind_on2", outputs=[b_el2],
                                  val=data['wind'], out_max={b_el2.uid: 66300})
 wind_off = source.DispatchSource(uid="wind_off", outputs=[b_el],

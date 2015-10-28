@@ -3,6 +3,7 @@ try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
+    import objectives as predefined_objectives
     import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
@@ -10,6 +11,7 @@ except:
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
+    from . import objectives as predefined_objectives
     from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
@@ -76,8 +78,13 @@ class OptimizationModel(po.ConcreteModel):
 
         self.bus_assembler()
 
-        print('Creating objective ...')
-        self.objective = po.Objective(expr=self.objfuncexpr)
+
+        if True:
+            print('Creating predefined objective ...')
+            self.objective_assembler()
+        if False:
+            self.objective = po.Objective(expr=self.objfuncexpr)
+
         print('Model created!')
 
     def bus_assembler(self):
@@ -406,6 +413,12 @@ class OptimizationModel(po.ConcreteModel):
         # bounds
         var.set_bounds(model=self, objs=objs, uids=uids, side='output')
 
+    def objective_assembler(self, objective_name="minimize_costs"):
+        """ calls functions to add predefined objective functions
+
+        """
+        if objective_name == "minimize_costs":
+            predefined_objectives.minimize_cost(self)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
