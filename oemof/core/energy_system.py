@@ -5,14 +5,7 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
-from matplotlib import pyplot as plt
-from descartes import PolygonPatch
 import logging
-import pandas as pd
-from oemof.core.network.entities import Bus
-from oemof.core.network.entities.components import sinks as sink
-from oemof.core.network.entities.components import sources as source
-from oemof.core.network.entities.components import transformers as transformer
 from oemof.core.network.entities.components import transports as transport
 
 
@@ -23,7 +16,7 @@ class EnergySystem:
     def __init__(self, **kwargs):
         ''
         self.regions = kwargs.get('regions', {})  # list of region objects
-        self.global_busses = kwargs.get('regions', [])  # list of busses
+        self.global_busses = kwargs.get('regions', {})  # list of busses
         self.sim = kwargs.get('sim')  # simulation object
         self.connections = kwargs.get('connections', [])
 
@@ -34,6 +27,8 @@ class EnergySystem:
     def connect(self, code1, code2, media, in_max, out_max, eta, classtype):
         ''
         def trans_simp(self, reg_out, reg_in, media, in_max, out_max, eta):
+            logging.debug('Creating simple connection from {0} to {1}'.format(
+                code1, code2))
             return transport.Simple(
                 uid='_'.join([reg_out, reg_in, media]),
                 outputs=[self.regions[reg_out].busses['_'.join(code1, media)]],
@@ -58,13 +53,17 @@ class EnergyRegion:
 
     def __init__(self, **kwargs):
         ''
-        self.geom = kwargs.get('geoms', [])
-        self.year = kwargs.get('year', [])
-        self.renew_pps = kwargs.get('renew_pps', [])  # list of enteties
-        self.conv_pss = kwargs.get('conv_pss', [])  # list of enteties
+        # Diese Attribute müssen definitiv vorhanden sein, damit solph läuft.
+        self.renew_pps = kwargs.get('renew_pps', [])  # list of entities
+        self.conv_pps = kwargs.get('conv_pss', [])  # list of entities
         self.busses = kwargs.get('busses', {})  # list of busses
+
+        # Diese Attribute enthalten Hilfsgrößen, die beim Erstellen oder bei
+        # der Auswertung von Nutzen sind.
         self.name = kwargs.get('name')
         self._code = kwargs.get('code')
+        self.geom = kwargs.get('geom')
+        self.year = kwargs.get('year')
 
     @property
     def code(self):
