@@ -4,13 +4,15 @@
 import matplotlib.pyplot as plt
 import logging
 import pandas as pd
+import numpy as np
 
-#logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.DEBUG)
 #logging.getLogger().setLevel(logging.INFO)
-logging.getLogger().setLevel(logging.WARNING)
+#logging.getLogger().setLevel(logging.WARNING)
 from oemof.tools import config
 from oemof.tools import db
 from oemof_pg import tools
+from oemof_pg import powerplants as db_pps
 from oemof.core import energy_regions as reg
 from oemof.core import energy_system as es
 from oemof.solph import postprocessing
@@ -95,13 +97,127 @@ opex_var['lignite'] = 22
 opex_var['hard_coal'] = 25
 opex_var['natural_gas'] = 22
 opex_var['oil'] = 22
+opex_var['solar_power'] = 1
+opex_var['wind_power'] = 1
+
+capex = {}
+capex['lignite'] = 22
+capex['hard_coal'] = 25
+capex['natural_gas'] = 22
+capex['oil'] = 22
+capex['solar_power'] = 1
+capex['wind_power'] = 1
+
+de_en = {
+    'Braunkohle': 'lignite',
+    'Steinkohle': 'hard_coal',
+    'Erdgas': 'natural_gas',
+    'Öl': 'oil',
+    'Solarstrom': 'solar_power',
+    'Windkraft': 'wind_power',
+    'Biomasse': 'biomass',
+    'Wasserkraft': 'hydro_power',
+    'Gas': 'methan'}
+
+en_de = {
+    'lignite': 'Braunkohle',
+    'hard_coal': 'Steinkohle',
+    'natural_gas': 'Erdgas',
+    'oil': 'Öl'}
 
 opex_fix = {}
-capex = {}
 
 resource_busses = {
     'global': ['hard_coal', 'lignite', 'oil'],
     'local': ['natural_gas']}
+
+
+translator = lambda x: de_en[x]
+
+
+def get_pp_data_from_type(row):
+    row['eta'] = eta_elec.get(row['type'], np.nan)
+    row['capex'] = capex.get(row['type'], 0)
+    row['opex_fix'] = opex_fix.get(row['type'], 0)
+    row['opex_var'] = opex_var.get(row['type'], 0)
+    row['co2_var'] = co2_emissions.get(row['type'], 0)
+    row['uid'] = row['type']
+    return row
+
+
+def get_feedin():
+    'Dummy function until real function exists.'
+    feedin_df = pd.DataFrame()
+    feedin_df['wind_power'] = np.random.rand(8760) / 2.3 * 1000
+    feedin_df['solar_power'] = np.random.rand(8760) / 4.5 * 1000
+    return feedin_df
+
+
+def get_demand():
+    'Dummy function until real function exists.'
+    demand_df = pd.DataFrame()
+    demand_df['elec'] = np.random.rand(8760) * 10
+    return demand_df
+
+
+def create_bus(region, pp, global_busses):
+    r'''
+    Maybe it is more stable to ask for the type of the bus object instead of
+    checking the uid.
+    '''
+    if '_'.join(['b', 'glob', pp[1].type]) not in global_busses:
+        uid = '_'.join(['b', region.code, pp[1].type])
+        if uid not in region.busses:
+            logging.debug('Creating bus {0}.'.format(uid))
+            Bus(uid=uid, type=pp[1].type, price=60, sum_out_limit=10e10)
+            bus_reg = region.code
+        else:
+            logging.debug('Local bus {0} exists. Nothing done.'.format(
+                '_'.join(['b', region.code, pp[1].type])))
+            bus_reg = region.code
+    else:
+        logging.debug('Global bus {0} exists. Nothing done.'.format(
+            '_'.join(['b', 'glob', pp[1].type])))
+        bus_reg = 'glob'
+    return region, bus_reg
+
+
+def create_solph_objects(region, pp, esystem, feedin):
+    # Dispatch Sources
+    print('Create:', pp[1].type)
+    if pp[1].type in ['wind_power', 'solar_power']:
+        # renewables get their data from time_series dataframe
+        # Hier fände ich eine Typ noch gut (Wind, PV...)
+        region.renew_pps.append(source.DispatchSource(
+            uid='_'.join(['DispSrc', region.code, str(len(region.renew_pps))]),
+            outputs=[region.busses['_'.join(['b', region.code, 'elec'])]],
+            val=feedin[pp[1].type],
+            out_max={'_'.join(['b', region.code, 'elec']): pp[1].cap}))
+
+    elif pp[1].type in ['lignite', 'natural_gas', 'hard_coal']:
+        print('FOSSIL', pp[1].type)
+        [region, bus_reg] = create_bus(region, pp, esystem.global_busses)
+        print(region.busses)
+        print(bus_reg)
+        if bus_reg == region.code:
+            resource_bus = region.busses['_'.join(['b', bus_reg, pp[1].type])]
+        elif bus_reg == 'glob':
+            resource_bus = esystem.global_busses['_'.join(['b', bus_reg,
+                                                           pp[1].type])]
+        print(resource_bus)
+        # Hier fände ich eine Typ noch gut (lignite, natural_gas,...)
+
+        region.conv_pps.append(transformer.Simple(
+            uid='_'.join(['TransSimp', region.code,
+                          str(len(region.conv_pps))]),
+            inputs=resource_bus,
+            outputs=region.busses['_'.join(['b', region.code, 'elec'])],
+            in_max={'_'.join(['b', region.code, pp[1].type]): None},
+            out_max={'_'.join(['b', region.code, 'elec']): pp[1].cap},
+            eta=[eta_elec[pp[1].type]]))
+    else:
+        logging.warning("Power plant type unknown")
+
 
 year = 2010
 overwrite = False
@@ -120,8 +236,37 @@ TwoRegExample.add_region(es.EnergyRegion(
     year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE01'),
     name='Stadt Dessau-Roßlau'))
 
+# Create global busses
+uid = "b_glob_hard_coal"
+TwoRegExample.global_busses[uid] = Bus(uid=uid, type="coal", price=60,
+                                       sum_out_limit=10e10)
+uid = "b_glob_lignite"
+TwoRegExample.global_busses[uid] = Bus(uid=uid, type="coal", price=60,
+                                       sum_out_limit=10e10)
+
+# Create entity objects for each region
 for region in TwoRegExample.regions.values():
-    print(region.code)
+    print('Region: {0} ({1})'.format(region.name, region.code))
+    # Get feedin time series
+    feedin = get_feedin()
+
+    # Get demand time series and create busses. One bus for each demand series.
+    demand = get_demand()
+    for bustype in demand.keys():
+        uid = '_'.join(['b', region.code, bustype])
+    region.busses[uid] = Bus(uid=uid, type=bustype, price=60,
+                             sum_out_limit=10e10)
+
+    # Get power plants from database
+    pps_df = (
+        pd.concat([db_pps.get_bnetza_pps(conn, region.geom),
+                   db_pps.get_energymap_pps(conn, region.geom)],
+                  ignore_index=True))
+    pps_df.loc[len(pps_df)] = 10 ** 6, np.nan, 'natural_gas'
+#    pps_df = pps_df.apply(get_pp_data_from_type, axis=1)
+    for pp in pps_df.iterrows():
+        create_solph_objects(region, pp, TwoRegExample, feedin)
+
 exit(0)
 regions = [lk_wtb, std_dr]
 busses = {}
@@ -130,17 +275,7 @@ feedin = {}
 transformers = {}
 transmission = {}
 
-de_en = {
-    'Braunkohle': 'lignite',
-    'Steinkohle': 'hard_coal',
-    'Erdgas': 'natural_gas',
-    'Öl': 'oil'}
 
-en_de = {
-    'lignite': 'Braunkohle',
-    'hard_coal': 'Steinkohle',
-    'natural_gas': 'Erdgas',
-    'oil': 'Öl'}
 
 for region in regions:
     if overwrite:
