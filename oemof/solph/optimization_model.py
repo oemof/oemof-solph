@@ -74,7 +74,6 @@ class OptimizationModel(po.ConcreteModel):
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
         self.bus_assembler()
-        self.fixed_source_assembler(objs=objs, uids=uids)
         self.objective_assembler(objective_type="min_costs")
 
     def bus_assembler(self):
