@@ -34,9 +34,6 @@ class OptimizationModel(po.ConcreteModel):
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
     def __init__(self, entities, timesteps, options=None):
-        """
-
-        """
         super().__init__()
 
         self.entities = entities
@@ -87,9 +84,9 @@ class OptimizationModel(po.ConcreteModel):
         """Meethod creates bus balance for all buses using pyomo.Constraint
 
         The bus model creates all full balance around the energy buses using
-        the `linear_constraints.generic_bus_constraint()` function.
+        the :func:`lc.generic_bus_constraint` function.
         Additionally it sets constraints to model limits over the timehorizon
-        for resource buses using `linear_constraints.generic_limit()
+        for resource buses using :func:`lc.generic_limit`
 
         Parameters
         ----------
@@ -359,12 +356,15 @@ class OptimizationModel(po.ConcreteModel):
 
             # constraint that limits discharge power by using the c-rate
             c_rate_out = {obj.uid: obj.c_rate_out for obj in objs}
+            out_max = {obj.uid: obj.out_max for obj in objs}
             cap_max = {obj.uid: obj.cap_max for obj in objs}
+            print(out_max)
+            print(cap_max)
 
             def storage_discharge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, self.O[e][0], t]
-                expr += -(cap_max[e][self.O[e][0]] + self.add_cap[e]) \
+                expr += -(cap_max[e] + self.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
             setattr(self, objs[0].lower_name+"_discharge_limit_invest",
@@ -377,7 +377,7 @@ class OptimizationModel(po.ConcreteModel):
             def storage_charge_limit_rule(self, e, t):
                 expr = 0
                 expr += self.w[e, self.I[e], t]
-                expr += -(cap_max[e][self.I[e]] + self.add_cap[e]) \
+                expr += -(cap_max[e] + self.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
             setattr(self,objs[0].lower_name+"_charge_limit_invest",

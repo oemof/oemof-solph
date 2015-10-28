@@ -277,7 +277,7 @@ def set_fixed_sink_value(model, objs=None, uids=None):
 
     model :OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
-       Attributes are altered of the `model`
+        Attributes are altered of the `model`
     objs : array like
         list of component objects for which the variables representing the
         input edges values will be set to a certain value and then fixed.

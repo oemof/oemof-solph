@@ -12,7 +12,7 @@ from shapely.wkt import loads as wkt_loads
 from pytz import timezone
 from datetime import datetime
 from ..tools import helpers
-
+from ..tools import pg_helpers
 
 class Weather:
     """
@@ -80,7 +80,7 @@ class Weather:
 
     def tz_from_geom(self):
         'Docstring'
-        self.tz = helpers.tz_from_geom(self.connection, self.geometry)
+        self.tz = pg_helpers.tz_from_geom(self.connection, self.geometry)
         return self
 
     def sql_join_string(self):

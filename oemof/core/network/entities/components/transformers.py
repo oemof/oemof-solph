@@ -111,5 +111,9 @@ class Storage(Transformer):
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)
-        self.c_rate_in = next(iter(self.in_max.values())) / self.cap_max
-        self.c_rate_out = next(iter(self.out_max.values())) / self.cap_max
+        self.c_rate_in = kwargs.get('c_rate_in', None)
+#        if self.c_rate_in is None:
+#            self.c_rate_in = next(iter(self.in_max.values())) / self.cap_max
+        self.c_rate_out = kwargs.get('c_rate_out', None)
+#        if self.c_rate_out is None:
+#            self.c_rate_out = next(iter(self.out_max.values())) / self.cap_max
