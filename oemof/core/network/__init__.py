@@ -24,7 +24,7 @@ class Entity:
         :param inputs: list of Entities acting as input to this Entity.
         :param outputs: list of Entities acting as output from this Enity.
         :param geo_data: geo-spatial data with informations for
-        location/region-shape
+                         location/region-shape
         """
         self.uid = kwargs["uid"]
         self.inputs = kwargs.get("inputs", [])

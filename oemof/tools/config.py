@@ -15,7 +15,7 @@ The file has to be of the following structure to be imported correctly.
  \n
 [netCDF] \n
 RootFolder = c://netCDF \n
-FilePrefix = cd2_ \n
+FilePrefix = cd2- \n
  \n
 [mySQL] \n
 host = localhost \n
@@ -68,7 +68,7 @@ def get(section, key):
     :type key: str.
 
     :returns: the value which will be casted to float, int or boolean.
-    if no cast is successfull, the raw string will be returned.
+              if no cast is successfull, the raw string will be returned.
 
     """
     if not _loaded:
