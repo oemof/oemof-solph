@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(2)]
+timesteps = [t for t in range(8760)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -41,23 +41,23 @@ bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=10e10)
 b_el = Bus(uid="b_el", type="el")
 
 # renewable sources (only pv onshore)
-wind_on = source.DispatchSource(uid="wind_on",outputs=[b_el],
+wind_on = source.FixedSource(uid="wind_on",outputs=[b_el],
                                 val=data['wind'],
                                 cap_max={b_el.uid: 1000000},
                                 out_max={b_el.uid: 1000000},
-                                capex={b_el.uid: 1000},
-                                opex_fix={b_el.uid: 20},
-                                lifetime={b_el.uid: 25},
-                                crf={b_el.uid: 0.08})
+                                capex=1000,
+                                opex_fix=20,
+                                lifetime=25,
+                                crf=0.08)
 #                                wacc={b_el.uid: 0.07})
 
-pv = source.DispatchSource(uid="pv", outputs=[b_el], val=data['pv'],
+pv = source.FixedSource(uid="pv", outputs=[b_el], val=data['pv'],
                            cap_max={b_el.uid: 582000},
                            out_max={b_el.uid: 582000},
-                           capex={b_el.uid: 900},
-                           opex_fix={b_el.uid: 15},
-                           lifetime={b_el.uid: 25},
-                           crf={b_el.uid: 0.08})
+                           capex=900,
+                           opex_fix=15,
+                           lifetime=25,
+                           crf=0.08)
 #                           wacc={b_el.uid: 0.07})
 
 # demands
@@ -110,7 +110,7 @@ entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': True, 'slack': {
-                           'excess': False, 'shortage': True}})
+                           'excess': True, 'shortage': False}})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
