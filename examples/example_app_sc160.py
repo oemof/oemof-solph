@@ -110,7 +110,8 @@ entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': True, 'slack': {
-                           'excess': False, 'shortage': True}})
+                           'excess': False, 'shortage': True},
+                           'objective_name': 'minimize_costs'})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
