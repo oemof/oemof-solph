@@ -18,7 +18,7 @@ class EnergySystem:
         self.regions = kwargs.get('regions', {})  # list of region objects
         self.global_busses = kwargs.get('regions', {})  # list of busses
         self.sim = kwargs.get('sim')  # simulation object
-        self.connections = kwargs.get('connections', [])
+        self.connections = kwargs.get('connections', {})
 
     def add_region(self, region):
         ''
@@ -31,15 +31,17 @@ class EnergySystem:
                 code1, code2))
             return transport.Simple(
                 uid='_'.join([reg_out, reg_in, media]),
-                outputs=[self.regions[reg_out].busses['_'.join(code1, media)]],
-                inputs=[self.regions[reg_in].busses['_'.join(code2, media)]],
-                out_max={'_'.join(['bus', reg_out, media]): out_max},
-                in_max={'_'.join(['bus', reg_in, media]): in_max},
+                outputs=[self.regions[reg_out].busses['_'.join(
+                    ['b', reg_out, media])]],
+                inputs=[self.regions[reg_in].busses['_'.join(
+                    ['b', reg_in, media])]],
+                out_max={'_'.join(['b', reg_out, media]): out_max},
+                in_max={'_'.join(['b', reg_in, media]): in_max},
                 eta=[eta]
                 )
         if classtype == 'simple':
-            c1 = trans_simp(code1, code2, media, in_max, out_max, eta)
-            c2 = trans_simp(code2, code1, media, in_max, out_max, eta)
+            c1 = trans_simp(self, code1, code2, media, in_max, out_max, eta)
+            c2 = trans_simp(self, code2, code1, media, in_max, out_max, eta)
         else:
             raise('error')
 
@@ -56,7 +58,8 @@ class EnergyRegion:
         # Diese Attribute müssen definitiv vorhanden sein, damit solph läuft.
         self.renew_pps = kwargs.get('renew_pps', [])  # list of entities
         self.conv_pps = kwargs.get('conv_pss', [])  # list of entities
-        self.busses = kwargs.get('busses', {})  # list of busses
+        self.sinks = kwargs.get('sinks', [])  # list of sinks
+        self.busses = kwargs.get('busses', {})  # dict of busses
 
         # Diese Attribute enthalten Hilfsgrößen, die beim Erstellen oder bei
         # der Auswertung von Nutzen sind.
