@@ -41,7 +41,7 @@ def add_bus_balance(model, objs=None, uids=None):
             rhs += model.excess_slack[e, t]
         if model.slack["shortage"] is True:
             lhs += model.shortage_slack[e, t]
-        return(lhs >= rhs)
+        return(lhs == rhs)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
 

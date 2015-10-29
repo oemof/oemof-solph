@@ -157,11 +157,13 @@ def add_capex(model, objs, uids=None, ref=None):
 
     if ref == 'output':
         expr = sum(model.add_out[e] * crf[e] * capex[e] for e in uids)
+        return(expr)
     elif ref == 'capacity':
         expr = sum(model.add_cap[e] * crf[e] * capex[e] for e in uids)
+        return(expr)
     else:
         print('No reference defined. Please specificy in `add_capex()`')
-    return(expr)
+
 
 def add_startup_costs(model, objs=None, uids=None):
     """ Adds startup costs for components to objective expression
@@ -196,7 +198,7 @@ def add_excess_slack_costs(model, uids=None):
     if uids is None:
         uids = model.bus_uids
 
-    expr = sum(model.excess_slack[e, t] * 3000
+    expr = sum(model.excess_slack[e, t] * 10e10
                for e in uids for t in model.timesteps)
     return(expr)
 
@@ -208,7 +210,7 @@ def add_shortage_slack_costs(model, uids=None):
     if uids is None:
         uids = model.bus_uids
 
-    expr = sum(model.shortage_slack[e, t] * 3000
+    expr = sum(model.shortage_slack[e, t] * 10e10
                 for e in uids for t in model.timesteps)
     return(expr)
 

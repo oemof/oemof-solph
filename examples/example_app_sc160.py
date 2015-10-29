@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(2)]
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -35,7 +35,7 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=10e10)
+bgas = Bus(uid="gas", type="gas", price=70)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el")
@@ -48,6 +48,7 @@ wind_on = source.FixedSource(uid="wind_on",outputs=[b_el],
                                 capex=1000,
                                 opex_fix=20,
                                 lifetime=25,
+                                add_out_limit=0,
                                 crf=0.08)
 #                                wacc={b_el.uid: 0.07})
 
@@ -81,8 +82,9 @@ sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  outputs=[b_el],
                                  eta_in=0.8, eta_out=0.8, cap_loss=0.00,
                                  opex_fix=35, opex_var=2, co2_var=None,
+                                 capex=1000,
                                  cap_initial=100000,
-                                 cap_max=10,
+                                 cap_max=10000,
                                  in_max={b_el.uid: 100000},
                                  out_max={b_el.uid: 200000},
                                  c_rate_in = 1/6,
@@ -110,7 +112,7 @@ entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': True, 'slack': {
-                           'excess': False, 'shortage': True},
+                           'excess': True, 'shortage': False},
                            'objective_name': 'minimize_costs'})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
@@ -167,8 +169,17 @@ if __name__ == "__main__":
         proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
                                        facecolor=
                                        pol.get_facecolor()[0]) for pol in sp]
+        # demand
+        ax.step(x, demand_el.results['in'][demand_el.inputs[0].uid],
+                c="black", lw=2)
+        # storage soc (capacity at every timestep)
+        ax.step(x, sto_simple.results['cap'], c='green', lw=2.4)
+        # storage input
+        ax.step(x, sto_simple.results['in'][sto_simple.inputs[0].uid], c='green',ls='--', lw=2)
+
         ax.legend(proxy, labels)
         ax.grid()
+
         ax.set_xlabel('Timesteps in h')
         ax.set_ylabel('Power in kW')
         ax.set_title('Dispatch')

@@ -61,10 +61,12 @@ def minimize_cost(self):
     # add capex for investment models
     if(self.invest is True):
         # capital expenditure for output objects
-        objexpr.add_capex(self, objs=cost_objs, ref='output')
+        expr += objexpr.add_capex(self, objs=cost_objs, ref='output')
         # capital expenditure for storages
-        objexpr.add_capex(self, objs=self.objs['simple_storage'],
-                          ref='capacity')
+        expr += objexpr.add_capex(self, objs=self.objs['simple_storage'],
+                                  ref='capacity')
+        expr += objexpr.add_capex(self, objs=self.objs['fixed_source'],
+                                  ref='output')
 
     if self.slack["shortage"] is True:
         expr += objexpr.add_shortage_slack_costs(self)
