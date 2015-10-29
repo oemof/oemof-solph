@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(8760)]
+timesteps = [t for t in range(2)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -110,7 +110,8 @@ entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': True, 'slack': {
-                           'excess': True, 'shortage': False}})
+                           'excess': False, 'shortage': True},
+                           'objective_name': 'minimize_costs'})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)

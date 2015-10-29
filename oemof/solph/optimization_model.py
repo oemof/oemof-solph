@@ -41,6 +41,7 @@ class OptimizationModel(po.ConcreteModel):
         self.entities = entities
         self.timesteps = timesteps
 
+
         # get options
         self.invest = options.get('invest', False)
         self.milp = options.get('milp', False)
@@ -75,14 +76,15 @@ class OptimizationModel(po.ConcreteModel):
             if objs:
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
-
         self.bus_assembler()
 
 
-        if True:
-            print('Creating predefined objective ...')
-            self.objective_assembler()
-        if False:
+        if options.get('objective_name', None) is not None:
+            self.objective_assembler(objective_name=
+                                     options.get('objective_name'))
+
+        else:
+            print('Creating individual objective ...')
             self.objective = po.Objective(expr=self.objfuncexpr)
 
         print('Model created!')
@@ -314,6 +316,7 @@ class OptimizationModel(po.ConcreteModel):
     def dispatch_source_assembler(self, objs, uids):
         """
         """
+
         if self.invest is False:
             lc.add_dispatch_source(model=self, objs=objs, uids=uids)
 
@@ -363,10 +366,7 @@ class OptimizationModel(po.ConcreteModel):
 
             # constraint that limits discharge power by using the c-rate
             c_rate_out = {obj.uid: obj.c_rate_out for obj in objs}
-            out_max = {obj.uid: obj.out_max for obj in objs}
             cap_max = {obj.uid: obj.cap_max for obj in objs}
-            print(out_max)
-            print(cap_max)
 
             def storage_discharge_limit_rule(self, e, t):
                 expr = 0
@@ -418,6 +418,7 @@ class OptimizationModel(po.ConcreteModel):
 
         """
         if objective_name == "minimize_costs":
+            print('Creating predefined objective with name:', objective_name)
             predefined_objectives.minimize_cost(self)
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
