@@ -334,13 +334,13 @@ def add_storage_balance(model, objs=None, uids=None):
         expr = 0
         if(t == 0):
             expr += model.cap[e, t] - cap_initial[e]
-            expr += - model.w[model.I[e], e, t] * eta_in[e]
-            expr += + model.w[e, model.O[e][0], t] / eta_out[e]
+            expr += + model.w[model.I[e], e, t] * eta_in[e]
+            expr += - model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += model.cap[e, t]
             expr += - model.cap[e, t-1] * (1 - cap_loss[e])
-            expr += - model.w[model.I[e], e, t] * eta_in[e]
-            expr += + model.w[e, model.O[e][0], t] / eta_out[e]
+            expr += + model.w[model.I[e], e, t] * eta_in[e]
+            expr += - model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=storage_balance_rule))
