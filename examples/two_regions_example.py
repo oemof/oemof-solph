@@ -309,6 +309,9 @@ for region in TwoRegExample.regions.values():
     for pp in region.renew_pps:
         entities.append(pp)
         components.append(pp)
+    for pp in region.sinks:
+        entities.append(pp)
+        components.append(pp)
 
 timesteps = [t for t in range(8760)]
 
