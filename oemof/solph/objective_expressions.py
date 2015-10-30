@@ -196,7 +196,7 @@ def add_excess_slack_costs(model, uids=None):
 
     """
     if uids is None:
-        uids = model.bus_uids
+        uids = model.uids['excess']
 
     expr = sum(model.excess_slack[e, t] * 10e10
                for e in uids for t in model.timesteps)
@@ -208,7 +208,7 @@ def add_shortage_slack_costs(model, uids=None):
 
     """
     if uids is None:
-        uids = model.bus_uids
+        uids = model.uids['shortage']
 
     expr = sum(model.shortage_slack[e, t] * 10e10
                 for e in uids for t in model.timesteps)

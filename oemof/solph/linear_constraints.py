@@ -37,9 +37,9 @@ def add_bus_balance(model, objs=None, uids=None):
         lhs = 0
         lhs += sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
-        if model.slack["excess"] is True:
+        if e in model.uids["excess"]:
             rhs += model.excess_slack[e, t]
-        if model.slack["shortage"] is True:
+        if e in model.uids["shortage"]:
             lhs += model.shortage_slack[e, t]
         return(lhs == rhs)
     setattr(model, objs[0].lower_name+"_balance",

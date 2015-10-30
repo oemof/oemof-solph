@@ -45,8 +45,6 @@ class OptimizationModel(po.ConcreteModel):
         # get options
         self.invest = options.get('invest', False)
         self.milp = options.get('milp', False)
-        self.slack = options.get('slack', {'excess': True,
-                                           'shortage': False})
 
         # calculate all edges ([('coal', 'pp_coal'),...])
         components = [e for e in self.entities if isinstance(e, Component)]
@@ -77,7 +75,6 @@ class OptimizationModel(po.ConcreteModel):
                 getattr(self, cls.lower_name + '_assembler')(objs=objs,
                                                              uids=uids)
         self.bus_assembler()
-
 
         if options.get('objective_name', None) is not None:
             self.objective_assembler(objective_name=
@@ -111,12 +108,22 @@ class OptimizationModel(po.ConcreteModel):
         # get uids from bus objects
         self.bus_uids = [e.uid for e in self.bus_objs]
 
+
         # slack variables that assures a feasible problem
-        if self.slack["excess"] is True:
-            self.excess_slack = po.Var(self.bus_uids, self.timesteps,
+        # get uids for busses that allow excess
+        self.uids.update({'excess': [b.uid for b in self.bus_objs
+                                     if b.excess == True]})
+        # get uids for busses that allow shortage
+        self.uids.update({'shortage': [b.uid for b in self.bus_objs
+                                       if b.shortage == True]})
+        # create variables for 'slack' of shortage and excess
+        if self.uids['excess']:
+            self.excess_slack = po.Var(self.uids['excess'],
+                                       self.timesteps,
                                        within=po.NonNegativeReals)
-        if self.slack["shortage"] is True:
-            self.shortage_slack = po.Var(self.bus_uids, self.timesteps,
+        if self.uids['shortage']:
+            self.shortage_slack = po.Var(self.uids['shortage'],
+                                         self.timesteps,
                                          within=po.NonNegativeReals)
 
         # select only "energy"-bus objects for bus balance constraint
@@ -137,9 +144,9 @@ class OptimizationModel(po.ConcreteModel):
         lc.add_bus_output_limit(model=self, objs=resource_bus_objs,
                                 uids=resource_bus_uids)
 
-        if self.slack['shortage']:
+        if self.uids['shortage']:
             self.objfuncexpr += objfuncexprs.add_shortage_slack_costs(self)
-        if self.slack['excess']:
+        if self.uids['excess']:
              self.objfuncexpr += objfuncexprs.add_excess_slack_costs(self)
 
     def simple_transformer_assembler(self, objs, uids):

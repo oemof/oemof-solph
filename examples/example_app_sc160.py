@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(24)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -35,10 +35,10 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bgas = Bus(uid="gas", type="gas", price=70)
+bgas = Bus(uid="gas", type="gas", price=70, excess=False)
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="el")
+b_el = Bus(uid="b_el", type="el", excess=True)
 
 # renewable sources (only pv onshore)
 wind_on = source.FixedSource(uid="wind_on",outputs=[b_el],
@@ -111,36 +111,13 @@ components = transformers + renew_sources + storages + sinks
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': True, 'slack': {
-                           'excess': True, 'shortage': False},
-                           'objective_name': 'minimize_costs'})
+                       options={'invest': True,
+                                'objective_name': 'minimize_costs'})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
-#pp.results_to_excel(om)
 # write results to data frame for excel export
 components = transformers + renew_sources
-
-
-def excel_export(components):
-    df = pd.DataFrame()
-    writer = pd.ExcelWriter("results.xlsx")
-
-    for c in components:
-        for k in c.results["out"].keys():
-            df[c.uid] = c.results["out"][k]
-    df.to_excel(writer, "Input")
-
-    for c in components:
-        for k in c.results["in"].keys():
-            df[c.uid] = c.results["in"][k]
-    df.to_excel(writer, "Output")
-
-    for c in components:
-        c.calc_emissions()
-        df[c.uid] = c.emissions
-    df.to_excel(writer, "Emissions")
-    writer.save()
 
 
 if __name__ == "__main__":

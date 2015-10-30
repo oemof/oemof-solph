@@ -23,6 +23,8 @@ class Bus(Entity):
         self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
         self.emission_factor = kwargs.get("emission_factor", 0)
         self.results = {}
+        self.excess = kwargs.get('excess', True)
+        self.shortage = kwargs.get('shortage', False)
 
 
 class Component(Entity):

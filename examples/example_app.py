@@ -38,15 +38,15 @@ em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
 # resources
-bcoal = Bus(uid="coal", type="coal", price=20, sum_out_limit=10e10)
-bgas = Bus(uid="gas", type="gas", price=35, sum_out_limit=10e10)
-boil = Bus(uid="oil", type="oil", price=40,  sum_out_limit=10e10)
-blig = Bus(uid="lignite", type="lignite", price=15,  sum_out_limit=10e10)
+bcoal = Bus(uid="coal", type="coal", price=20, sum_out_limit=10e10, excess=False)
+bgas = Bus(uid="gas", type="gas", price=35, sum_out_limit=10e10, excess=False)
+boil = Bus(uid="oil", type="oil", price=40,  sum_out_limit=10e10, excess=False)
+blig = Bus(uid="lignite", type="lignite", price=15, excess=False)
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="el")
-b_el2 = Bus(uid="b_el2", type="el")
-b_th = Bus(uid="b_th", type="th")
+b_el = Bus(uid="b_el", type="el", excess=True, shortage=True)
+b_el2 = Bus(uid="b_el2", type="el", excess=True, shortage=True)
+b_th = Bus(uid="b_th", type="th", excess=True, shortage=True)
 
 # renewable sources (only pv onshore)
 wind_on = source.FixedSource(uid="wind_on", outputs=[b_el],
@@ -122,9 +122,7 @@ components = transformers + renew_sources + sinks + transports + storages
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False,
-                                'slack': {'excess': False, 'shortage': True},
-                                'milp' : False})
+                       options={'invest': False, 'milp' : False})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)

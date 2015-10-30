@@ -68,10 +68,10 @@ def minimize_cost(self):
         expr += objexpr.add_capex(self, objs=self.objs['fixed_source'],
                                   ref='output')
 
-    if self.slack["shortage"] is True:
+    if self.uids['shortage']:
         expr += objexpr.add_shortage_slack_costs(self)
     # artificial costs for excess or shortage
-    if self.slack["excess"] is True:
+    if self.uids['excess']:
         expr += objexpr.add_excess_slack_costs(self)
 
     self.objective = po.Objective(expr=expr)
