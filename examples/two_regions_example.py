@@ -18,7 +18,6 @@ from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
-from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel
 
 import warnings
@@ -154,7 +153,7 @@ def get_feedin():
 def get_demand():
     'Dummy function until real function exists.'
     demand_df = pd.DataFrame()
-    demand_df['el'] = np.random.rand(8760) * 10
+    demand_df['el'] = np.random.rand(8760) * 10 ** 8
     return demand_df
 
 
@@ -313,7 +312,7 @@ for region in TwoRegExample.regions.values():
         entities.append(pp)
         components.append(pp)
 
-timesteps = [t for t in range(8760)]
+timesteps = [t for t in range(876)]
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
                        options={'invest': False, 'slack': {
@@ -376,7 +375,7 @@ def plot_dispatch(bus_to_plot):
         ax.set_ylabel('Power in MW')
         ax.set_title('Dispatch')
 
-plot_dispatch('bus_LanWit_electrical')
+plot_dispatch('b_LanWit_el')
 plt.show()
 # write results to data frame for excel export
 
