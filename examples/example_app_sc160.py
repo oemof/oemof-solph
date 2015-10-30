@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(20)]
+timesteps = [t for t in range(8760)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -36,8 +36,8 @@ em_oil = 0.0750 * 3.6
 
 # resources
 #bgas = Bus(uid="gas", type="gas", price=70, excess=False)
-#bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=0)
-bgas = Bus(uid="gas", type="gas", price=70)
+bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=194397000)
+#bgas = Bus(uid="gas", type="gas", price=70)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el", excess=True)
@@ -171,7 +171,7 @@ if __name__ == "__main__":
             sto_simple.results['in'][sto_simple.inputs[0].uid])
             + np.asarray(
                 demand_el.results['in'][demand_el.inputs[0].uid])),
-            c='red', ls='-', lw=2)
+            c='red', ls='-', lw=1)
 
         ax.legend(proxy, labels)
         ax.grid()
@@ -206,6 +206,7 @@ if __name__ == "__main__":
 
         # autarky degree
         print(sum_production.sum())
+        # need excess results to calculate autarky degree
 
     plot_dispatch('b_el')
     plt.show()
