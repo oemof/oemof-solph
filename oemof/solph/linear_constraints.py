@@ -314,6 +314,8 @@ def add_storage_balance(model, objs=None, uids=None):
     eta_in = {}
     eta_out = {}
 
+    cap_max = {obj.uid: obj.cap_max for obj in objs}
+
     for e in objs:
         cap_initial[e.uid] = e.cap_initial
         cap_loss[e.uid] = e.cap_loss
@@ -342,6 +344,16 @@ def add_storage_balance(model, objs=None, uids=None):
         return(expr, 0)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=storage_balance_rule))
+
+    def storage_charge_limit_rule_soc(model, e, t):
+         expr = 0
+         expr += model.cap[e, t]
+         expr += - (cap_max[e] + model.add_cap[e])
+         return(expr <= 0)
+    setattr(model, objs[0].lower_name+"charge_limit_soc",
+            po.Constraint(uids, model.timesteps,
+                           rule=storage_charge_limit_rule_soc))
+
 
 def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
     """ Add constraint to calculate the gradient between two timesteps
