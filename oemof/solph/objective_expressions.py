@@ -102,21 +102,21 @@ def add_output_revenues(model, objs=None, uids=None):
     # @ CORD: the idea is that if price is constant over time-horizon,
     # a vector (array) is created
     #  if price is already a vector (array) this vector is taken
-    model.output_revenues = {}
+    revenues = {}
     for e in objs:
         if isinstance(e.outputs[0].price, (float, int, np.integer)):
             price = [e.outputs[0].price] * len(model.timesteps)
-            model.output_revenues[e.uid] = price
+            revenues[e.uid] = price
         else:
-            model.output_revenues[e.uid] = e.outputs[0].price
+            revenues[e.uid] = e.outputs[0].price
 
     # outputs for revemue objs (powerplant output e.g. electricty creates
     # revenues in objective function)
     O = {obj.uid: obj.outputs[0].uid for obj in objs}
 
     # create expression term
-    expr = sum(model.w[e, O[e], t] * model.output_revenues[e][t]
-               for e in uids for t in model.timesteps)
+    expr = -sum(model.w[e, O[e], t] * revenues[e][t]
+                for e in uids for t in model.timesteps)
     return(expr)
 
 def add_dispatch_source_costs(model, objs=[], uids=None):

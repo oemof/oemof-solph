@@ -7,7 +7,7 @@ Created on Mon Jul 20 10:27:00 2015
 
 import pyomo.environ as po
 
-def add_bus_balance(model, objs=None, uids=None):
+def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
     """ Adds constraint for the input-ouput balance of bus objects
 
     .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \\\ \
@@ -28,6 +28,10 @@ def add_bus_balance(model, objs=None, uids=None):
     attribute to the optimization model object `model` of type
     OptimizationModel()
     """
+    if balance_type == ">=":
+        upper = float('+inf')
+    if balance_type == "==":
+        upper = 0;
 
     I = {b.uid: [i.uid for i in b.inputs] for b in objs}
     O = {b.uid: [o.uid for o in b.outputs] for b in objs}
@@ -41,7 +45,7 @@ def add_bus_balance(model, objs=None, uids=None):
             rhs += model.excess_slack[e, t]
         if e in model.uids["shortage"]:
             lhs += model.shortage_slack[e, t]
-        return(lhs == rhs)
+        return(0, lhs - rhs, upper)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
 

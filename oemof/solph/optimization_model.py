@@ -133,7 +133,8 @@ class OptimizationModel(po.ConcreteModel):
 
         print('Creating bus balance constraints ...')
         # bus balance constraint for energy bus objects
-        lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids)
+        lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids,
+                           balance_type=">=")
 
         # select only buses that are resources (gas, oil, etc.)
         resource_bus_objs = [obj for obj in self.bus_objs
@@ -219,6 +220,10 @@ class OptimizationModel(po.ConcreteModel):
         if objfunc['input_costs']:
             self.objfuncexpr += objfuncexprs.add_input_costs(self, objs=objs,
                                                              uids=uids)
+        if objfunc['revenues']:
+            self.objfuncexpr += objfuncexprs.add_output_revenues(self,
+                                                                 objs=objs,
+                                                                 uids=uids)
 
         if self.invest is True and self.milp is True:
            raise ValueError("Investment models can not be calculated as \

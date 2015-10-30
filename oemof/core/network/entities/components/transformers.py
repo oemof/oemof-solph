@@ -19,7 +19,8 @@ class Simple(Transformer):
          't_min_on': False}
     objfunc = {'opex_var': True,
                'opex_fix': True,
-               'input_costs': True}
+               'input_costs': True,
+               'revenues': True}
 
     lower_name = 'simple_transformer'
 
