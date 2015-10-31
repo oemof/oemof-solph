@@ -198,7 +198,7 @@ def add_excess_slack_costs(model, uids=None):
     if uids is None:
         uids = model.uids['excess']
 
-    expr = sum(model.excess_slack[e, t] * 10e10
+    expr = sum(model.excess_slack[e, t] * 0
                for e in uids for t in model.timesteps)
     return(expr)
 
