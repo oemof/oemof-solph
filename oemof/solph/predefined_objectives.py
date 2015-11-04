@@ -29,7 +29,7 @@ def minimize_cost(self):
         self.objs['simple_transformer'])
 
     # objective function
-    #def obj_rule(self):
+    # def obj_rule(self):
     expr = 0
 
     expr += objexpr.add_opex_var(self, objs=cost_objs, ref='output')
@@ -39,16 +39,15 @@ def minimize_cost(self):
                                  ref='input')
     expr += objexpr.add_opex_var(self, objs=self.objs['fixed_source'],
                                  ref='output')
+    expr += objexpr.add_input_costs(self, objs=cost_objs)
     # fixed opex of components
     expr += objexpr.add_opex_fix(self, objs=cost_objs, ref='output')
     # fixed opex of storages
     expr += objexpr.add_opex_fix(self, objs=self.objs['simple_storage'],
                                  ref='capacity')
 
-
-
     # revenues from outputs of components
-    expr += - objexpr.add_output_revenues(self, revenue_objs)
+    expr += objexpr.add_output_revenues(self, revenue_objs)
 
     # costs for dispatchable sources
     expr += objexpr.add_dispatch_source_costs(self,
@@ -75,8 +74,3 @@ def minimize_cost(self):
         expr += objexpr.add_excess_slack_costs(self)
 
     self.objective = po.Objective(expr=expr)
-
-def minimize_co2_emissions(self):
-    """ Builds objective function that minimises the total costs.
-
-    """
