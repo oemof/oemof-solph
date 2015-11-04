@@ -134,7 +134,7 @@ class OptimizationModel(po.ConcreteModel):
         print('Creating bus balance constraints ...')
         # bus balance constraint for energy bus objects
         lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids,
-                           balance_type=">=")
+                           balance_type="==")
 
         # select only buses that are resources (gas, oil, etc.)
         resource_bus_objs = [obj for obj in self.bus_objs
@@ -458,7 +458,7 @@ class OptimizationModel(po.ConcreteModel):
             # reduced costs
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
-        if(debug is True):
+        if debug == True:
             self.write('problem.lp',
                        io_options={'symbolic_solver_labels': True})
             # print instance
@@ -468,20 +468,20 @@ class OptimizationModel(po.ConcreteModel):
         opt = SolverFactory(solver, solver_io=solver_io)
         # store results
         results = opt.solve(self, **kwargs)
+        if debug == True:
+            if (results.solver.status == "ok") and \
+               (results.solver.termination_condition == "optimal"):
+                # Do something when the solution in optimal and feasible
+                self.solutions.load_from(results)
 
-        if (results.solver.status == "ok") and \
-           (results.solver.termination_condition == "optimal"):
-            # Do something when the solution in optimal and feasible
-            self.solutions.load_from(results)
-
-        elif (results.solver.termination_condition == "infeasible"):
-            print("Model is infeasible",
-                  "Solver Status: ", results.solver.status)
-        else:
-            # Something else is wrong
-            print("Solver Status: ", results.solver.status, "\n"
-                  "Termination condition: ",
-                  results.solver.termination_condition)
+            elif (results.solver.termination_condition == "infeasible"):
+                print("Model is infeasible",
+                      "Solver Status: ", results.solver.status)
+            else:
+                # Something else is wrong
+                print("Solver Status: ", results.solver.status, "\n"
+                      "Termination condition: ",
+                      results.solver.termination_condition)
 
     def edges(self, components):
         """Method that creates a list with all edges for the objects in

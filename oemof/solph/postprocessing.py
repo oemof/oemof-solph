@@ -78,7 +78,7 @@ def results_to_objects(instance):
                     instance.add_cap[entity.uid].value
 
 
-def dual_variables_to_objects(instance):
+def bus_duals_to_objects(instance):
     """ Extracts values from dual variables of `instance` and writes
     values back to bus-objects.
 
@@ -93,9 +93,9 @@ def dual_variables_to_objects(instance):
     """
     for b in instance.bus_objs:
         if b.type == "el" or b.type == "th":
-            b.results["duals"] = []
+            b.results["shadowprice"] = []
             for t in instance.timesteps:
-                b.results["duals"].append(
+                b.results["shadowprice"].append(
                     instance.dual[getattr(instance, "bus_balance")[(b.uid, t)]])
     # print(b.results["duals"])
 
