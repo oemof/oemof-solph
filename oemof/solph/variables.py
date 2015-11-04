@@ -253,7 +253,7 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
                 model.cap[e, t].setub(cap_max[e])
                 model.cap[e, t].setlb(cap_min[e])
     else:
-        # set maximum of addiational storage capacity
+        # set maximum of additional storage capacity
         add_cap_limit = {obj.uid: obj.add_cap_limit for obj in objs}
         # loop over all uids (storages) set the upper bound
         for e in uids:

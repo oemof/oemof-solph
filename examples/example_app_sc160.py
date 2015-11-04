@@ -183,9 +183,12 @@ if __name__ == "__main__":
     def print_results(bus_to_print):
         import numpy as np
 
-        print_data = renew_sources+transformers+storages
+        # demand results
+        print('sum elec demand: ',
+              np.asarray(demand_el.results['in'][bus_to_print]).sum())
 
         # production results
+        print_data = renew_sources+transformers+storages
         sum_production = np.array([])
         for c in print_data:
             print(c)
@@ -194,8 +197,16 @@ if __name__ == "__main__":
             print('sum: ', res.sum())
             print('maximum value: ', res.max())
 
+        # only non renewable production results
+        transf = np.array([])
+        for t in transformers:
+            res = np.asarray(t.results['out'][bus_to_print])
+            transf = np.append(transf, res)
+            print('sum non renewable: ', transf.sum())
+
         # storage state and capacity
         storage_soc = np.asarray(sto_simple.results['cap'])
+        print('sum storage content: ', storage_soc.sum())
         print('storage capacity: ', storage_soc.max())
 
         # storage load
@@ -204,9 +215,21 @@ if __name__ == "__main__":
         print('sum storage load: ', storage_load.sum())
         print('maximum storage load: ', storage_load.max())
 
+        # excess
+        excess = list()
+        for t in om.timesteps:
+            excess.append(om.excess_slack['b_el', t].value)
+
+        print('sum excess: ', np.asarray(excess).sum())
+
         # autarky degree
-        print(sum_production.sum())
-        # need excess results to calculate autarky degree
+        print('autarky degree: ', (sum_production.sum()  # production
+                                   - transf.sum()  # minus non renewable prod.
+                                   - np.asarray(excess).sum() # minus excess
+                                   - storage_load.sum()) /  # minus stor. load
+                                   np.asarray(demand_el.results['in']
+                                              [bus_to_print]).sum())  #  in
+                                              # proportion to the demand
 
     plot_dispatch('b_el')
     plt.show()
