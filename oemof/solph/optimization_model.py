@@ -134,7 +134,7 @@ class OptimizationModel(po.ConcreteModel):
         print('Creating bus balance constraints ...')
         # bus balance constraint for energy bus objects
         lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids,
-                           balance_type=">=")
+                           balance_type="==")
 
         # select only buses that are resources (gas, oil, etc.)
         resource_bus_objs = [obj for obj in self.bus_objs
@@ -165,70 +165,66 @@ class OptimizationModel(po.ConcreteModel):
         """
         # TODO: This should be dependent on objs classes not fixed if assembler
         # method is used by another assemlber method...
-        constr = cp.transformers.Simple.constr
-        objfunc = cp.transformers.Simple.objfunc
+        param = cp.transformers.Simple.model_param
+
 
         # input output relation for simple transformer
-        if constr['io_relation']:
+        if 'io_relation' in param['linear_constr']:
             print('Creating simple input-output linear constraints for',
                   objs[0].lower_name, '...')
             lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
 
         # 'pmax' constraint/bounds for output of component
-        if constr['out_max']:
+        if 'out_max' in param['linear_constr']:
             var.set_bounds(model=self, objs=objs, uids=uids, side='output')
         #'pmax' constraint/bounds for input of component
-        if constr['in_max']:
+        if 'in_max' in param['linear_constr']:
             var.set_bounds(model=self, objs=objs, uids=uids, side='input')
         # gradient calculation dGrad for objective function
-        if constr['ramping']:
+        if 'ramping' in param['linear_constr']:
             lc.add_output_gradient_calc(model=self, objs=objs, uids=uids,
                                         grad_direc="both")
-        # set bounds for milp-models
-        if self.invest is False and self.milp is True:
+
+        if param['investment'] == False:
             # binary status variables
             var.add_binary(model=self, objs=objs, uids=uids)
             # pmax/pmin constraints
-            if constr['out_min']:
+            if 'out_min' in param['milp_constr']:
                 milc.set_bounds(model=self, objs=objs, uids=uids,
                                 side='output')
-            if constr['in_min']:
+            if 'in_min' in param['milp_constr']:
                 print('Creating minimum input milp constraints for',
                       objs[0].lower_name, '...')
                 milc.set_bounds(model=self, objs=objs, uids=uids,
                                 side='input')
-            if constr['ramping']:
+            if 'ramping' in param['milp_constr']:
                 print('Creating ramping milp constraints for',
                       objs[0].lower_name, '...')
                 milc.add_output_gradient_constraints(model=self, objs=objs,
                                                      uids=uids,
                                                      grad_direc='both')
             # pmin constraints
-            if constr['startup']:
+            if 'startup' in param['milp_constr']:
                 milc.add_startup_constraints(model=self, objs=objs, uids=uids)
                 # add start costs
                 self.objfuncexpr += objfuncexprs.add_startup_costs(self,
                                                                  objs=objs,
                                                                  uids=uids)
-        if objfunc['opex_var']:
+
+        if 'cvar' in param['objective']:
             self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
                                                           uids=uids)
-        if objfunc['opex_fix']:
+        if 'cfix' in param['objective']:
             self.objfuncexpr += objfuncexprs.add_opex_fix(self, objs=objs,
                                                           uids=uids,
                                                           ref='output')
-        if objfunc['input_costs']:
+        if 'cfuel' in param['objective']:
             self.objfuncexpr += objfuncexprs.add_input_costs(self, objs=objs,
                                                              uids=uids)
-        if objfunc['revenues']:
+        if 'rsell' in param['objective']:
             self.objfuncexpr += objfuncexprs.add_output_revenues(self,
                                                                  objs=objs,
                                                                  uids=uids)
-
-        if self.invest is True and self.milp is True:
-           raise ValueError("Investment models can not be calculated as \
-                            mixed integer problems. \n  \
-                            Please set options 'milp' = False")
 
     def simple_chp_assembler(self, objs, uids):
         """Method grouping the constraints for simple chp components.
@@ -462,7 +458,7 @@ class OptimizationModel(po.ConcreteModel):
             # reduced costs
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
-        if(debug is True):
+        if debug == True:
             self.write('problem.lp',
                        io_options={'symbolic_solver_labels': True})
             # print instance
@@ -472,20 +468,20 @@ class OptimizationModel(po.ConcreteModel):
         opt = SolverFactory(solver, solver_io=solver_io)
         # store results
         results = opt.solve(self, **kwargs)
+        if debug == True:
+            if (results.solver.status == "ok") and \
+               (results.solver.termination_condition == "optimal"):
+                # Do something when the solution in optimal and feasible
+                self.solutions.load_from(results)
 
-        if (results.solver.status == "ok") and \
-           (results.solver.termination_condition == "optimal"):
-            # Do something when the solution in optimal and feasible
-            self.solutions.load_from(results)
-
-        elif (results.solver.termination_condition == "infeasible"):
-            print("Model is infeasible",
-                  "Solver Status: ", results.solver.status)
-        else:
-            # Something else is wrong
-            print("Solver Status: ", results.solver.status, "\n"
-                  "Termination condition: ",
-                  results.solver.termination_condition)
+            elif (results.solver.termination_condition == "infeasible"):
+                print("Model is infeasible",
+                      "Solver Status: ", results.solver.status)
+            else:
+                # Something else is wrong
+                print("Solver Status: ", results.solver.status, "\n"
+                      "Termination condition: ",
+                      results.solver.termination_condition)
 
     def edges(self, components):
         """Method that creates a list with all edges for the objects in
