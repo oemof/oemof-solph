@@ -142,6 +142,37 @@ def add_simple_chp_relation(model, objs=None, uids=None):
             po.Constraint(uids, model.timesteps, rule=simple_chp_rule,
                           doc="P/eta_el - Q/eta_th = 0"))
 
+def add_simple_extraction_chp_relation(model, objs=None, uids=None):
+    """
+    """
+    if uids is None:
+        uids = [e.uid for e in objs]
+
+    out_max = {}
+    beta = {}
+    sigma = {}
+    eta = {}
+    for e in objs:
+        out_max[e.uid] = e.out_max
+        beta[e.uid] = e.beta
+        sigma[e.uid] = e.sigma
+        eta[e.uid] = e.eta
+
+    def equivalent_output_rule(model, e, t):
+        lhs = model.w[model.I[e], e, t]
+        rhs = (model.w[e, model.O[e][0], t] +
+              beta[e] * model.w[e, model.O[e][1], t]) / eta[e][0]
+        return(lhs == rhs)
+    setattr(model, objs[0].lower_name+'_equivalent_output',
+            po.Constraint(uids, model.timesteps, rule=equivalent_output_rule))
+
+    def power_heat_rule(model, e, t):
+        lhs = model.w[e, model.O[e][1], t]
+        rhs = model.w[e, model.O[e][0], t] / sigma[e]
+        return(lhs <= rhs)
+    setattr(model, objs[0].lower_name+ '_pth',
+            po.Constraint(uids, model.timesteps, rule=power_heat_rule))
+
 def add_bus_output_limit(model, objs=None, uids=None):
     """ Adds constraint to set limit for variables as sum over the total
     timehorizon
@@ -411,11 +442,11 @@ def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
     if grad_direc == 'positive' or grad_direc == "both":
         # create variable
         grad_pos = {obj.uid: obj.grad_pos for obj in objs}
-        setattr(model, 'grad_pos_'+objs[0].lower_name,
+        setattr(model, objs[0].lower_name+'_grad_pos_var',
                 po.Var(uids, model.timesteps, within=po.NonNegativeReals,
                        bounds=grad_pos_bound_rule))
 
-        var_pos = getattr(model, 'grad_pos_'+objs[0].lower_name)
+        var_pos = getattr(model,  objs[0].lower_name+'_grad_pos_var')
         # set constraint
         setattr(model, objs[0].lower_name+"_grad_pos_calc",
                 po.Constraint(uids, model.timesteps, rule=grad_pos_calc_rule))
@@ -424,10 +455,10 @@ def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
     if grad_direc == 'negative' or grad_direc == "both":
         # create variable
         grad_neg = {obj.uid: obj.grad_neg for obj in objs}
-        setattr(model, 'grad_neg_'+objs[0].lower_name,
+        setattr(model,  objs[0].lower_name+'_grad_neg_var',
                 po.Var(uids, model.timesteps, within=po.NonNegativeReals,
                        bounds=grad_neg_bound_rule))
-        var_neg = getattr(model, 'grad_neg_'+objs[0].lower_name)
+        var_neg = getattr(model,  objs[0].lower_name+'_grad_neg_var')
         # set constraint
         setattr(model, objs[0].lower_name+"_grad_neg_calc",
                 po.Constraint(uids, model.timesteps, rule=grad_neg_calc_rule))

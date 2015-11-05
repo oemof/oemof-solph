@@ -48,7 +48,7 @@ def add_input_costs(model, objs=None, uids=None):
     input_costs = {obj.uid: obj.inputs[0].price for obj in objs}
     # outputs for cost objs
 
-    expr = sum(model.w[model.I[e], e, t] * input_costs[e]
+    expr = -sum(model.w[model.I[e], e, t] * input_costs[e]
                 for e in uids for t in model.timesteps)
 
     return(expr)
@@ -173,19 +173,37 @@ def add_startup_costs(model, objs=None, uids=None):
 
     start_costs = {obj.uid: obj.start_costs for obj in objs}
 
-    start_var = getattr(model, "start_"+objs[0].lower_name)
+    start_var = getattr(model, objs[0].lower_name+'_start_var')
     expr = sum(start_var[e, t] * start_costs[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
-def add_gradient_costs(model, objs=None, uids=None):
+def add_shutdown_costs(model, objs=None, uids=None):
+    """ Adds shutdown costs for components to objective expression
+
+    .. math:: \\sum_{e,t} sd(e,t) \\cdot sd_{costs}(e)
+    """
+    if uids is None:
+        uids = [obj.uid for obj in objs]
+
+    stop_costs = {obj.uid: obj.stop_costs for obj in objs}
+
+    stop_var = getattr(model, objs[0].lower_name+'_stop_var')
+    expr = sum(stop_var[e, t] * stop_costs[e]
+               for e in uids for t in model.timesteps)
+    return(expr)
+
+def add_ramping_costs(model, objs=None, uids=None):
     """ Add gradient costs for components to objective expression
 
     """
     if uids is None:
         uids = [obj.uid for obj in objs]
-    grad_costs = {obj.uid: obj.grad_costs for obj in objs}
-    expr = sum(model.w_grad_pos[e, t] * grad_costs[e]
+
+
+    ramp_costs = {obj.uid: obj.ramp_costs for obj in objs}
+    grad_var = getattr(model, objs[0].lower_name+'_grad_pos_var' )
+    expr = sum(grad_var[e, t] * ramp_costs[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
@@ -195,8 +213,8 @@ def add_excess_slack_costs(model, uids=None):
     """
     if uids is None:
         uids = model.uids['excess']
-
-    expr = sum(model.excess_slack[e, t] * 0
+    excess_costs = {b.uid:b.excess_costs for b in model.bus_objs}
+    expr = sum(model.excess_slack[e, t] * excess_costs[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
@@ -207,9 +225,9 @@ def add_shortage_slack_costs(model, uids=None):
     """
     if uids is None:
         uids = model.uids['shortage']
-
-    expr = sum(model.shortage_slack[e, t] * 10e10
-                for e in uids for t in model.timesteps)
+    shortage_costs = {b.uid: b.shortage_costs for b in model.bus_objs}
+    expr = sum(model.shortage_slack[e, t] * shortage_costs[e]
+               for e in uids for t in model.timesteps)
     return(expr)
 
 

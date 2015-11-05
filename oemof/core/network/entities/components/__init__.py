@@ -89,6 +89,8 @@ class Transformer(Component):
             self.start_costs = 1
             logging.info('No startcosts defined. Setting default costs of 1' +
                          ' for component %s', self.uid)
+        self.stop_costs = kwargs.get('stop_costs', None)
+
         self.ramp_costs = kwargs.get('ramp_costs', 0)
 
         self.grad_pos = kwargs.get('grad_pos', 0)

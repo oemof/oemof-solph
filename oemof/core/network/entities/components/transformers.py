@@ -26,7 +26,11 @@ class CHP(Transformer):
     A CombinedHeatPower Transformer always has a simple input output relation
     with a constant efficiency
     """
-
+    model_param = {'linear_constr': ('io_relation', 'out_max',
+                                     'simple_chp_relation'),
+                   'milp_constr' : (),
+                   'objective' : ('cvar', 'cfix', 'cfuel', 'rsell'),
+                   'investment': False}
     lower_name = "simple_chp"
 
     def __init__(self, **kwargs):
@@ -36,13 +40,18 @@ class CHP(Transformer):
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', [None, None])
 
-class ExtracCHPConst(Transformer):
+class SimpleExtractionCHP(Transformer):
     """
     Class for combined heat and power unit with extraction turbine and constant
     efficiencies
 
     """
-    lower_name = "extrac_chp_const"
+    model_param = {'linear_constr': ('in_max', 'out_max',
+                                     'simple_extraction_relation'),
+                   'milp_constr' : (),
+                   'objective' : ('cvar', 'cfix', 'cfuel', 'rsell'),
+                   'investment': False}
+    lower_name = "simple_extraction_chp"
 
     def __init__(self, **kwargs):
         """

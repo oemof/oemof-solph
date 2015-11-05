@@ -85,7 +85,7 @@ def set_bounds(model, objs=None, uids=None, side="output"):
                 po.Constraint(uids, model.timesteps, rule=lb_rule))
 
 def add_output_gradient_constraints(model, objs=None, uids=None,
-                                   grad_direc="both"):
+                                    grad_direc="both"):
     """ Creates constraints to model the output gradient
 
     Parameter
@@ -132,7 +132,6 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
 
     grad_neg = {obj.uid: obj.grad_neg for obj in objs}
     # TODO: Define correct boundary conditions for t-1 of time horizon
-
     def grad_neg_rule(model, e, t):
         if t > 1:
             lhs = model.w[e, model.O[e][0], t-1] - model.w[e, model.O[e][0], t]
@@ -145,7 +144,7 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
 
     # positive gradient
     if grad_direc == "positive" or grad_direc == "both":
-        setattr(model, objs[0].lower_name+"milp_gradient_pos",
+        setattr(model, objs[0].lower_name+"_milp_gradient_pos",
                 po.Constraint(uids, model.timesteps, rule=grad_pos_rule))
     # negative gradient
     if grad_direc == "negative" or grad_direc == "both":
@@ -183,7 +182,7 @@ def add_startup_constraints(model, objs=None, uids=None):
         uids = [e.uids for e in objs]
 
     # create binary start-up variables for objects
-    setattr(model, "start_"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+'_start_var',
             po.Var(uids, model.timesteps, within=po.Binary))
 
     def start_up_rule(model, e, t):
@@ -191,7 +190,7 @@ def add_startup_constraints(model, objs=None, uids=None):
             try:
                 lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] - \
                        getattr(model,'status_'+objs[0].lower_name)[e, t-1]
-                rhs = getattr(model, "start_"+objs[0].lower_name)[e, t]
+                rhs = getattr(model, objs[0].lower_name+'_start_var')[e, t]
                 return(lhs <= rhs)
             except:
                 raise AttributeError('Constructing startup constraints for' +
@@ -234,15 +233,18 @@ def add_shutdown_constraints(model, objs=None, uids=None):
         uids = [e.uids for e in objs]
 
     # create binary start-up variables for objects
-    setattr(model, "stop"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+'_stop_var',
             po.Var(uids, model.timesteps, within=po.Binary))
 
     def shutdown_rule(model, e, t):
         if t > 1:
-            return(model.w[e, t-1] - model.y[e, t] <=
-                   getattr(model, "stop"+objs[0].lower_name)[e, t])
+            lhs = getattr(model,'status_'+objs[0].lower_name)[e, t-1] - \
+                  getattr(model,'status_'+objs[0].lower_name)[e, t] - \
+                  getattr(model, objs[0].lower_name+'_stop_var')[e, t]
+            rhs = 0
+            return(lhs <= rhs)
         else:
             # TODO: Define correct boundary conditions
-            return(0)
+            return(po.Constraint.Skip)
     setattr(model, objs[0].lower_name+"_shut_down",
             po.Constraint(uids, model.timesteps, rule=shutdown_rule))
