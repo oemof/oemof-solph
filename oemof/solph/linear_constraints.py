@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 20 10:27:00 2015
+The linear_contraints module contains the coded pyomo constraint that
+are used by the '*_assembler' methods of OptimizationModel()-class
 
-@author: simon
+The module frequently uses the dictionaries I and O for the construction of
+constraints. I,E contain all uids of components as the keys of the dict and
+the input/output uids as items of the dict corresponding to the key.
+
+In mathematical notation I,O can be seen as indexed index sets The
+elements of the sets are the uids of all components (index: `e`). The the
+inputs/outputs uids are the elements of the accessed set by the
+component index `e`.
+Generally the index `e` is the index for the uids-sets containing the uids
+of objects for which the constraints are build.
+
+Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
 import pyomo.environ as po
@@ -10,23 +22,20 @@ import pyomo.environ as po
 def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
     """ Adds constraint for the input-ouput balance of bus objects
 
-    .. math:: \\sum_{i \\in I[e]} w(i, e, t) \\geq \\sum_{o \\in O[e]} w(e, o, t), \\\ \
-    \\qquad \\text{with:}
-    .. math:: I = \\text{all inputs of bus } e
-    .. math:: O = \\text{all outputs of bus } e
+    .. math:: \\sum_{i \\in I(e)} w(i, e, t) = \\sum_{o \\in O(e)} \
+    w(e, o, t), \\qquad \\forall t
 
     Parameters
     -----------
     model : OptimizationModel() instance
-    objs : objects for which the constraints are created (object type `bus`)
-    uids : unique ids of bus object in `objs`
-
+    objs : bus objects for which the constraints are created
+    uids : unique ids of bus object in `objs` (math. index 'e')
+    balance_type : type of constraint ("==" or ">=" )
 
     Returns
     ----------
-    The constraints are added as a
-    attribute to the optimization model object `model` of type
-    OptimizationModel()
+    The constraints are added to as a attribute to the optimization model
+    object `model` of type OptimizationModel()
     """
     if balance_type == ">=":
         upper = float('+inf')
@@ -55,8 +64,8 @@ def add_simple_io_relation(model, objs=None, uids=None):
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation.
 
-    .. math:: w(I[e], e, t) \cdot \\eta[e] = w(e, O[e], t), \
-    \\qquad \\forall e \\in uids, \\forall t \\in T
+    .. math:: w(I(e), e, t) \cdot \\eta(e) = w(e, O(e), t), \
+    \\qquad \\forall e, \\forall t
 
     The constraint is indexed with all unique ids of objects and timesteps.
 
@@ -101,13 +110,14 @@ def add_simple_chp_relation(model, objs=None, uids=None):
     representation of combined heat an power units.
 
     The function uses the `pyomo.Constraint()` class to build the constraint
-    with the following relation
+    with the following relation:
 
-    .. math:: \\frac{w_1(e,O_1[e],t)}{eta_1(e,t)} = \
-    \\frac{w_2(e,O_2[e], t)}{eta_2(e,t)} \
-    \\forall e \\in uids \\forall t \\in T
+    .. math:: \\frac{w_1(e,O_1(e),t)}{\\eta_1(e,t)} = \
+    \\frac{w_2(e,O_2(e), t)}{\\eta_2(e,t)}, \
+    \\qquad \\forall e, \\forall t
 
-    The constraint is indexed with all unique ids of objects and timesteps.
+    The constraint is indexed with all unique ids 'e' of objects and
+    timesteps 't'.
 
     Parameters
     ------------
@@ -143,8 +153,33 @@ def add_simple_chp_relation(model, objs=None, uids=None):
                           doc="P/eta_el - Q/eta_th = 0"))
 
 def add_simple_extraction_chp_relation(model, objs=None, uids=None):
+    """ Adds constraint for power to heat relation and equivalent output
+    for a simple extraction combined heat an power units. The constraints
+    represent the PQ-region of the extraction unit.
+
+    The function uses the `pyomo.Constraint()` class to build the constraint
+    with the following relation:
+
+    Power/Heat ratio:
+
+    .. math:: w(e,O_1(e),t) = w(e, O_2(e), t) \\cdot \\sigma(e), \
+    \\qquad \\forall e, \\forall t
+
+    Equivalent power:
+
+    .. math:: w(I(e),e,t) = \\frac{(w(e,O_1(e),t) + \\beta(e) \\cdot \
+    w(e, O_2(e), t))}{\\eta_1(e)}
+
+    The constraint is indexed with all unique ids 'e' of objects and
+    timesteps 't'.
+
+    Parameters
+    ------------
+    model : OptimizationModel() instance
+    objs : array like
+    uids : array like
     """
-    """
+
     if uids is None:
         uids = [e.uid for e in objs]
 
@@ -177,8 +212,8 @@ def add_bus_output_limit(model, objs=None, uids=None):
     """ Adds constraint to set limit for variables as sum over the total
     timehorizon
 
-    .. math:: \sum_{t \\in T} \sum_{o \\in O[e]} w(e, o, t) \\leq limit[e], \
-    \\qquad \\forall e \\in uids
+    .. math:: \sum_{t} \sum_{o \\in O(e)} w(e, o, t) \
+    \\leq out_{sumlimit}(e), \\qquad \\forall e
 
     Parameters
     ------------
@@ -214,15 +249,13 @@ def add_bus_output_limit(model, objs=None, uids=None):
     setattr(model,objs[0].lower_name+"_limit",
             po.Constraint(uids, rule=output_limit_rule))
 
-def add_fixed_source(model, objs, uids, val=None, out_max=None):
+def add_fixed_source(model, objs, uids,):
     """ Adds fixed source with investment models by adding constraints
 
     The mathemathical fomulation for the constraint is as follows:
 
-    *Definition:*
-    .. math:: O : \\text{Array with indices for all outputs of objs (index set)}
-    .. math::  w(e, O[e], t) \\leq (out_{max}(e) + add\\_cap(e, O[e]) ) \
-    \cdot val[e], \\qquad \\forall e \\in uids, \\forall t \\in T
+    .. math::  w(e, O(e), t) \\leq (out_{max}(e) + add_{out}(e, O(e) ) \
+    \cdot v(e,t), \\qquad \\forall e, \\forall t
 
     Parameters
     ------------
@@ -233,14 +266,10 @@ def add_fixed_source(model, objs, uids, val=None, out_max=None):
         list of component objects for which the constraints will be created.
     uids : array like
         list of component uids corresponding to the objects.
-    val : dict()
-        dict with objs uids as keys and normed values of source (0<=val<=1)
-        as items
-    out_max : dict
 
     Returns
     -------
-    There is no return value. The constraints will be added as attributes to
+    The constraints will be added as attributes to
     the optimization model object `model` of typeOptimizationModel().
     """
     # normed value of renewable source (0 <= value <=1)
@@ -289,9 +318,9 @@ def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
     of sources.
 
     The mathemathical fomulation for the constraint is as follows:
-    # TODO: write mathematical eq.
 
-    .. math:: MISSING!
+    .. math:: var_{dispatchsource}(e,t) = val(e,t) \\cdot out_{max}(e) - \
+    w(e,O(e),t),  \\qquad \\forall e, \\forall t
 
     Parameters
     ------------
@@ -355,8 +384,6 @@ def add_storage_balance(model, objs=None, uids=None):
     eta_in = {}
     eta_out = {}
 
-    cap_max = {obj.uid: obj.cap_max for obj in objs}
-
     for e in objs:
         cap_initial[e.uid] = e.cap_initial
         cap_loss[e.uid] = e.cap_loss
@@ -389,6 +416,17 @@ def add_storage_balance(model, objs=None, uids=None):
 
 def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
     """ Add constraint to calculate the gradient between two timesteps
+    (positive and negative)
+
+    Positive gradient:
+
+    .. math::  w(e,O(e),t) - w(e,O(e),t-1) \\leq var_{gradpos}(e,t)\
+    \\qquad \\forall e, \\forall t / t=1
+
+    Negative gradient:
+
+        .. math::  w(e,O(e),t-1) - w(e,O(e),t) \\leq var_{gradneg}(e,t)\
+    \\qquad \\forall e, \\forall t / t=1
 
     Parameters
     ------------
@@ -400,6 +438,9 @@ def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
         list of component objects for which the constraints will be created.
     uids : array like
         list of component uids corresponding to the objects.
+    grad_direc: string
+        string defining the direction of the gradient constraint.
+        ('positive', negative', 'both')
 
     Returns
     -------

@@ -8,10 +8,21 @@ import numpy as np
 import logging
 
 def add_opex_var(model, objs=None, uids=None, ref='output'):
-    """ variable operation expenditure term for linear objective function
+    """ Variable operation expenditure term for linear objective function
+
+    If reference of opex is 'output':
+
+    .. math:: \\sum_e \\sum_t w(e,O(e),t) \\cdot opex_{var}(e)
+
+    If reference of opex is 'input':
+
+    .. math:: \\sum_e \\sum_t w(I(e),e,t) \\cdot opex_{var}(e)
+
     Parameters:
     ------------
-
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     ref : reference side on which opex are based on
         (e.g. powerplant MWhth -> input or MWhel -> output)
 
@@ -37,9 +48,14 @@ def add_input_costs(model, objs=None, uids=None):
     """ Adds costs for usage of input (fuel, elec, etc. ) if not included in
     opex
 
+    .. math:: \\sum_e \\sum_t w(I(e), e, t) \\cdot costs_{input}(e)
+
     Parameters:
     ------------
 
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     """
     if uids is None:
         uids = [obj.uid for obj in objs]
@@ -56,8 +72,26 @@ def add_input_costs(model, objs=None, uids=None):
 def add_opex_fix(model, objs=None, uids=None, ref=None):
     """ Fixed operation expenditure term for linear objective function
 
+    If reference is 'output' (e.g. powerplants):
+
+    .. math:: \\sum_e out_{max}(e) \\cdot opex_{fix}(e)
+
+    If reference is 'capacity' (e.g. storages):
+
+    .. math:: \\sum_e cap_{max}(e) \\cdot opex_{fix}(e)
+
+    If investment:
+
+    .. math:: \\sum_e (out_{max}(e) + add_{out}(e)) \\cdot opex_{fix}(e)
+
+    .. math:: \\sum_e (out_{max}(e) + add_{cap}(e)) \\cdot opex_{fix}(e)
+
     Parameters
     ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     ref : string
         string to check if capex is referred to capacity (storage) or output
         (e.g. powerplant)
@@ -95,7 +129,14 @@ def add_opex_fix(model, objs=None, uids=None, ref=None):
 def add_output_revenues(model, objs=None, uids=None):
     """ revenue term for linear objective function
 
+    .. math:: \\sum_e \\sum_t w(e,O(e),t) \\cdot price(e,t)
 
+    Parameters
+    ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     """
     if uids is None:
         uids = [obj.uid for obj in objs]
@@ -122,9 +163,19 @@ def add_output_revenues(model, objs=None, uids=None):
     return(expr)
 
 def add_dispatch_source_costs(model, objs=[], uids=None):
-    """ cost term for dispatchable sources in linear objective
+    """ Cost term for dispatchable sources in linear objective.
 
+    .. math:: \\sum_e \\sum_ t var_{dispatchsource}(e,t) \\cdot \
+    ex_{dispatch}(e)
+
+    Parameters
+    ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     """
+
     if objs:
         if uids is None:
             uids = [obj.uid for obj in objs]
@@ -139,10 +190,22 @@ def add_dispatch_source_costs(model, objs=[], uids=None):
     return(expr)
 
 def add_capex(model, objs, uids=None, ref=None):
-    """ add capital expenditure to objective
+    """ Add capital expenditure to linear objective.
+
+    If reference is 'output' (e.g. powerplants):
+
+    .. math:: \\sum_e add_{out}(e) \\cdot crf(e) \\cdot capex(e)
+
+    If reference is 'capacity' (e.g. storages):
+
+    .. math:: \\sum_e add_{cap}(e) \\cdot crf(e) \\cdot capex(e)
 
     Parameters
     ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     ref : string
         string to check if capex is referred to capacity (storage) or output
         (e.g. powerplant)
@@ -168,7 +231,14 @@ def add_capex(model, objs, uids=None, ref=None):
 def add_startup_costs(model, objs=None, uids=None):
     """ Adds startup costs for components to objective expression
 
-    .. math:: \\sum_{e,t} su(e,t) \\cdot su_costs(e)
+    .. math:: \\sum_{e} \\sum_{t} var_{start}(e,t) \\cdot costs_{start}(e)
+
+    Parameters
+    ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     """
     if uids is None:
         uids = [obj.uid for obj in objs]
@@ -183,8 +253,16 @@ def add_startup_costs(model, objs=None, uids=None):
 def add_shutdown_costs(model, objs=None, uids=None):
     """ Adds shutdown costs for components to objective expression
 
-    .. math:: \\sum_{e,t} sd(e,t) \\cdot sd_{costs}(e)
+    .. math:: \\sum_{e} \\sum_t var_{stop}(e,t) \\cdot costs_{stop}(e)
+
+    Parameters
+    ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     """
+
     if uids is None:
         uids = [obj.uid for obj in objs]
 
@@ -196,8 +274,16 @@ def add_shutdown_costs(model, objs=None, uids=None):
     return(expr)
 
 def add_ramping_costs(model, objs=None, uids=None):
-    """ Add gradient costs for components to objective expression
+    """ Add gradient costs for components to linear objective expression.
 
+    .. math::  \\sum_e \\sum_t var_{gradpos}(e,t) \\cdot costs_{ramp}(e)
+
+    Parameters
+    ------------
+
+    model : OptimizationModel() instance
+    objs : objects for which term should be set
+    uids : corresponding uids
     """
     if uids is None:
         uids = [obj.uid for obj in objs]
@@ -210,8 +296,14 @@ def add_ramping_costs(model, objs=None, uids=None):
     return(expr)
 
 def add_excess_slack_costs(model, uids=None):
-    """ artificial cost term for excess slack variables
+    """ Artificial cost term for excess slack variables.
 
+    .. math:: \\sum_e \\sum_t var_{excess}(e,t) \\cdot costs_{excess}(e)
+
+    Parameters:
+    ------------
+
+    uids : unique ids of bus objects
     """
     if uids is None:
         uids = model.uids['excess']
@@ -222,7 +314,14 @@ def add_excess_slack_costs(model, uids=None):
 
 
 def add_shortage_slack_costs(model, uids=None):
-    """ artificial cost term for shortage slack variables
+    """ Artificial cost term for shortage slack variables.
+
+    .. math:: \\sum_e \\sum_t var_{shortage}(e,t) \\cdot costs_{shortage}(e)
+
+    Parameters:
+    ------------
+
+    uids : unique ids of bus objects
 
     """
     if uids is None:
