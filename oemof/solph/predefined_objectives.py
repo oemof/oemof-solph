@@ -38,7 +38,6 @@ def minimize_cost(self):
                                  ref='output')
     expr += objexpr.add_opex_var(self, objs=self.objs['simple_storage'],
                                  ref='input')
-    expr += objexpr.add_input_costs(self, objs=cost_objs)
     # fixed opex of components
     expr += objexpr.add_opex_fix(self, objs=cost_objs, ref='output')
     # fixed opex of storages

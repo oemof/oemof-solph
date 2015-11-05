@@ -65,18 +65,6 @@ def results_to_objects(instance):
                 entity.results['cap'].append(
                     instance.cap[entity.uid, t].value)
 
-    if(instance.invest is True):
-        for entity in instance.entities:
-            if isinstance(entity, cp.Transformer):
-                entity.results['add_out'] = \
-                    instance.add_out[entity.uid].value
-            if isinstance(entity, cp.Source):
-                entity.results['add_out'] = \
-                    instance.add_out[entity.uid].value
-            if isinstance(entity, cp.transformers.Storage):
-                entity.results['add_cap'] = \
-                    instance.add_cap[entity.uid].value
-
 
 def bus_duals_to_objects(instance):
     """ Extracts values from dual variables of `instance` and writes

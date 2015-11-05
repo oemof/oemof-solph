@@ -26,13 +26,16 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(8760)]
+timesteps = [t for t in range(12)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
 em_coal = 0.0917 * 3.6
 em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
+
+source.FixedSource.model_param.update({'investment': False})
+transformer.Storage.model_param.update({'investment': True})
 
 # resources
 #bgas = Bus(uid="gas", type="gas", price=70, excess=False)
@@ -62,7 +65,7 @@ pv = source.FixedSource(uid="pv", outputs=[b_el], val=data['pv'],
                            opex_fix=15,
                            lifetime=25,
                            crf=0.08)
-#                           wacc={b_el.uid: 0.07})
+#                          wacc={b_el.uid: 0.07})
 
 # demands
 demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
@@ -70,7 +73,7 @@ demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
 
 # Simple Transformer for b_el
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            in_max={bgas.uid: None},
+                            in_max={bgas.uid: None}, opex_var=40,
                             out_max={b_el.uid: 10e10}, eta=[0.58])
 
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3

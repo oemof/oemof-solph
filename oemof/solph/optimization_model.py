@@ -366,10 +366,12 @@ class OptimizationModel(po.ConcreteModel):
         # add objective expressions
         if 'cvar' in param ['objective']:
             self.objfuncexpr = \
-                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+                objfuncexprs.add_opex_var(self, objs=objs, uids=uids,
+                                          ref='output')
         if 'cfix' in param ['objective']:
             self.objfuncexpr = \
-                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+                objfuncexprs.add_opex_fix(self, objs=objs, uids=uids,
+                                          ref='output')
         if 'cinv' in param['objective'] and param['investment'] == True:
             self.objfuncexpr = \
                 objfuncexprs.add_capex(self, objs=objs, uids=uids, ref='output')
@@ -440,9 +442,10 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
+        param = objs[0].model_param
 
         # optimization model with no investment
-        if(self.invest is False):
+        if param['investment'] == False:
             var.set_bounds(model=self, objs=objs, uids=uids, side='output')
             var.set_bounds(model=self, objs=objs, uids=uids, side='input')
             var.set_storage_cap_bounds(model=self, objs=objs, uids=uids)

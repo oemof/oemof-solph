@@ -70,6 +70,8 @@ class SimpleExtractionCHP(Transformer):
 class Storage(Transformer):
     """
     """
+    model_param = {'investment': False}
+
     lower_name = "simple_storage"
 
     def __init__(self, **kwargs):
