@@ -3,16 +3,22 @@ from . import Source
 
 class FixedSource(Source):
     """
+    A fixed source only has one output always. The value of the output is fixed
+    for all timesteps in the timehorizon of the optimization problem.
+
+    For individual modeling of the objective function the items of
+    model_param['objective'] can be altered. Following options are possible:
+
+    'opex_var', 'opex_fix', 'rsell'
     """
     model_param = {'linear_constr': ('fixvalue'),
                    'milp_constr' : (),
-                   'objective' : ('cvar', 'cfix'),
+                   'objective' : ('opex_var', 'opex_fix'),
                    'investment': False}
     lower_name = "fixed_source"
 
     def __init__(self, **kwargs):
         """
-        :param boolean dispatch: Flag if RenewableSource is dispatchable or not
         """
         super().__init__(**kwargs)
         self.val = kwargs.get('val', None)
@@ -22,11 +28,19 @@ class FixedSource(Source):
 
 
 class DispatchSource(Source):
-    """
+    """ Dispatch sources only have one output (like FixedSource) but the
+    output can be reduced inside the optimization problem.
+
+    For individual modeling of the objective function the items of
+    model_param['objective'] can be altered. Following options are possible:
+
+    'opex_var', 'opex_fix', 'dispatch_ex', 'rsell'
+
+    Dispatch sources are not implemented for investment at the moment.
     """
     model_param = {'linear_constr': ('dispatch'),
                    'milp_constr' : (),
-                   'objective' : ('cvar', 'cfix','cdispatch'),
+                   'objective' : ('opex_var', 'opex_fix','dispatch_ex'),
                    'investment': False}
     lower_name = "dispatch_source"
 
@@ -41,19 +55,15 @@ class DispatchSource(Source):
     def calc_emissions(self):
         self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]
 
-
+# TODO: Implement constraints etc. for Commodity()
 class Commodity(Source):
-    """
+    """ The commodity component can be used to model inputs to resource busses.
+    At the moment no constraint etc. are implemented for this component.
+
     """
     lower_name = "commodity"
-
     def __init__(self, **kwargs):
         """
         """
         super().__init__(**kwargs)
-        self.sum_out_limit = kwargs.get('yearly_limit', float('+inf'))
-        self.emmision_factor = kwargs.get('emmission_factor', 0)
 
-    def calc_emissions(self):
-        self.emissions = [o * self.emmision_factor
-                          for o in self.results['out'][self.outputs[0].uid]]
