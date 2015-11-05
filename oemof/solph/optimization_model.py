@@ -1,3 +1,11 @@
+"""
+
+@contact Simon Hilpert (simon.hilpert@fh-flensburg.de)
+"""
+
+
+
+
 import pyomo.environ as po
 try:
     import variables as var
@@ -20,12 +28,12 @@ except:
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
 
-    Parameters
+    Parameter
     ----------
     entities : list with all entity objects
     timesteps : list with all timesteps as integer values
-    options : nested dictionary with options to set. possible options are:
-      invest, slack
+    options : nested dictionary with options to set.
+
 
     Returns
     -------
@@ -82,7 +90,7 @@ class OptimizationModel(po.ConcreteModel):
         print('Model created!')
 
     def bus_assembler(self):
-        """Meethod creates bus balance for all buses using pyomo.Constraint
+        """ Method creates bus balance for all buses.
 
         The bus model creates all full balance around the energy buses using
         the :func:`lc.generic_bus_constraint` function.
@@ -146,9 +154,14 @@ class OptimizationModel(po.ConcreteModel):
              self.objfuncexpr += objfuncexprs.add_excess_slack_costs(self)
 
     def simple_transformer_assembler(self, objs, uids):
-        """Method containing the constraints for simple transformer components.
+        """ Method containing the constraints functions for simple
+        transformer components.
 
-        Parameters
+        Constraints are selected by the `model_param` variable of
+        transformer.Simple().
+
+
+        Parameter
         ----------
         self : OptimizationModel() instance
         objs : oemof objects for which the constraints etc. are added to self
@@ -208,7 +221,7 @@ class OptimizationModel(po.ConcreteModel):
             if 'shutdown' in param['milp_constr']:
                 milc.add_shutdown_constraints(model=self, objs=objs, uids=uids)
 
-        # objective expressions ###############################################
+        # objective expressions
 
         # add variable costs (opex_var)
         if 'opex_var' in param['objective']:
@@ -246,7 +259,10 @@ class OptimizationModel(po.ConcreteModel):
                                         ref='output')
 
     def simple_chp_assembler(self, objs, uids):
-        """Method grouping the constraints for simple chp components.
+        """ Method grouping the constraints for simple chp components.
+
+        The methdo uses the simple_transformer_assembler() method. The
+        model_param comes from the transfomer.CHP()
 
         Parameters
         ----------
@@ -386,7 +402,7 @@ class OptimizationModel(po.ConcreteModel):
     def dispatch_source_assembler(self, objs, uids):
         """
         """
-        param = cp.sources.DisptachSource.model_param
+        param = objs[0].model_param
         # add constraints
         if param['investment'] == True:
             raise ValueError('Dispatch source investment is not possible')
@@ -396,15 +412,16 @@ class OptimizationModel(po.ConcreteModel):
 
         if 'opex_var' in param ['objective']:
             self.objfuncexpr = \
-                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+                objfuncexprs.add_opex_var(self, objs=objs, uids=uids,
+                                          ref='output')
         if 'opex_fix' in param ['objective']:
             self.objfuncexpr = \
-                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+                objfuncexprs.add_opex_fix(self, objs=objs, uids=uids,
+                                          ref='output')
         # add dispatch costs (dispatch_ex) to objective
         if 'dispatch_ex' in param['objective']:
             self.objfuncexpr = \
-                objfuncexprs.add_disptach_source_costs(self, objs=objs,
-                                                       uids=uids, ref='output')
+                objfuncexprs.add_curtailment_costs(self, objs=objs, uids=uids)
         if 'rsell' in param ['objective']:
             self.objfuncexpr = \
                 objfuncexprs.add_output_revenues(self, objs=objs, uids=uids,

@@ -1,21 +1,34 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct 20 11:31:11 2015
+The module contains linear mixed integer constraints.
 
-@author: simon
+@author: Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 import pyomo.environ as po
 
 
 def set_bounds(model, objs=None, uids=None, side="output"):
-    """ Set upper/lower bounds on all output variables via constraints
+    """ Set upper and lower bounds via constraints
 
-    The bounds are set with constraints using the binary status variable `y`
-    of components. The bounds are only set for the ouput of variables.
-    E.g. p_max constraints for transformers in milp problems
-    can be set with this function.
-    If you want to model e.g. p_max-constraints via the input side of a
-    component (i.e. fuel) use milp_in_max_bound()
+    The bounds are set with constraints using the binary status variable
+    of the components.
+
+    If side is `output`:
+
+    .. math::  W(e, O(e), t) \\leq out_{max}(e) \\cdot X_{on}(e, t), \
+    \\qquad \\forall e, \\forall t
+
+    .. math:: W(e, O(e), t) \\geq out_{min}(e) \\cdot X_{on}(e, t), \
+    \\qquad \\forall e, \\forall t
+
+    If side is `input`:
+
+    .. math::  W(I(e), e, t) \\leq in_{max}(e) \\cdot X_{on}(e, t), \
+    \\qquad \\forall e, \\forall t
+
+    .. math:: W(I(e), e, t) \\geq in_{min}(e) \\cdot X_{on}(e, t), \
+    \\qquad \\forall e, \\forall t
+
     Parameters
     ------------
 
@@ -27,13 +40,15 @@ def set_bounds(model, objs=None, uids=None, side="output"):
         altered
     uids : array like
         list of component uids corresponding to the objects
+    side : string
+       string to select on which side the bounds should be set
+       (`ìnput`, `output`)
 
     Returns
     -------
 
-    There is no return value. The upper and lower bounds of the variables are
-    set with constraints in the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    The upper and lower bounds of the variables are
+    set via constraints in the optimization model object `model`
 
     """
     if objs is None:
@@ -86,9 +101,19 @@ def set_bounds(model, objs=None, uids=None, side="output"):
 
 def add_output_gradient_constraints(model, objs=None, uids=None,
                                     grad_direc="both"):
-    """ Creates constraints to model the output gradient
+    """ Creates constraints to model the output gradient.
 
-    Parameter
+    If gradient direction is positive:
+
+    .. math:: W(e,O(e),t) - W(e,O(e),t-1) \\leq gradpos(e) + out_{min}(e) \
+    \\cdot (1 - X_{on}(e,t))
+
+    If gradient direction is negative:
+
+    .. math:: W(e,O(e),t-1) - W(e,O(e),t) \\leq gradneg(e) + out_{min}(e) \
+    \\cdot (1 - X_{on}(e,t-1))
+
+    Parameters
     ------------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
@@ -120,13 +145,13 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
     out_min = {obj.uid: obj.out_min for obj in objs}
     grad_pos = {obj.uid: obj.grad_pos for obj in objs}
 
-    y = getattr(model, objs[0].lower_name+'_status_var')
+    x = getattr(model, objs[0].lower_name+'_status_var')
 
     # TODO: Define correct boundary conditions for t-1 of time
     def grad_pos_rule(model, e, t):
         if t > 1:
             return(model.w[e, model.O[e][0], t] - model.w[e, model.O[e][0], t-1] <=  \
-               grad_pos[e] + out_min[e][model.O[e][0]] * (1 -y[e, t]))
+               grad_pos[e] + out_min[e][model.O[e][0]] * (1 -x[e, t]))
         else:
             return(po.Constraint.Skip)
 
@@ -155,7 +180,10 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
 def add_startup_constraints(model, objs=None, uids=None):
     """ Creates constraints to model the start up of a component
 
-    Parameter
+    .. math::  X_on(e,t) - X_on(e,t-1) \\leq Z_{start}(e,t), \\qquad \
+        \\forall e, \\forall t
+
+    Parameters
     ------------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
@@ -166,7 +194,7 @@ def add_startup_constraints(model, objs=None, uids=None):
         list of component uids corresponding to the objects
 
     Returns
-    -------
+    ---------
 
     References
     ----------
@@ -206,7 +234,10 @@ def add_startup_constraints(model, objs=None, uids=None):
 def add_shutdown_constraints(model, objs=None, uids=None):
     """ Creates constraints to model the shut down of a component
 
-    Parameter
+    .. math::  X_on(e,t-1) - X_on(e,t) \\leq Z_{stop}(e,t), \\qquad \
+    \\forall e, \\forall t
+
+    Parameters
     ------------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data

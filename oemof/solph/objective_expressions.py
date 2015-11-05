@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct  6 11:34:27 2015
+The module contains different objective expression terms.
 
-@author: simon
+@author: Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 import numpy as np
 import logging
@@ -10,13 +10,13 @@ import logging
 def add_opex_var(model, objs=None, uids=None, ref='output'):
     """ Variable operation expenditure term for linear objective function
 
-    If reference of opex is 'output':
+    If reference of opex is `output`:
 
-    .. math:: \\sum_e \\sum_t w(e,O(e),t) \\cdot opex_{var}(e)
+    .. math:: \\sum_e \\sum_t W(e,O(e),t) \\cdot c_{var}(e)
 
-    If reference of opex is 'input':
+    If reference of opex is `input`:
 
-    .. math:: \\sum_e \\sum_t w(I(e),e,t) \\cdot opex_{var}(e)
+    .. math:: \\sum_e \\sum_t W(I(e),e,t) \\cdot c_{var}(e)
 
     Parameters:
     ------------
@@ -48,7 +48,7 @@ def add_input_costs(model, objs=None, uids=None):
     """ Adds costs for usage of input (fuel, elec, etc. ) if not included in
     opex
 
-    .. math:: \\sum_e \\sum_t w(I(e), e, t) \\cdot costs_{input}(e)
+    .. math:: \\sum_e \\sum_t W(I(e), e, t) \\cdot c_{input}(e)
 
     Parameters:
     ------------
@@ -72,19 +72,19 @@ def add_input_costs(model, objs=None, uids=None):
 def add_opex_fix(model, objs=None, uids=None, ref=None):
     """ Fixed operation expenditure term for linear objective function
 
-    If reference is 'output' (e.g. powerplants):
+    If reference is `output` (e.g. powerplants):
 
-    .. math:: \\sum_e out_{max}(e) \\cdot opex_{fix}(e)
+    .. math:: \\sum_e out_{max}(e) \\cdot c_{fix}(e)
 
-    If reference is 'capacity' (e.g. storages):
+    If reference is `capacity` (e.g. storages):
 
-    .. math:: \\sum_e cap_{max}(e) \\cdot opex_{fix}(e)
+    .. math:: \\sum_e cap_{max}(e) \\cdot c_{fix}(e)
 
     If investment:
 
-    .. math:: \\sum_e (out_{max}(e) + add_{out}(e)) \\cdot opex_{fix}(e)
+    .. math:: \\sum_e (out_{max}(e) + ADDOUT(e)) \\cdot c_{fix}(e)
 
-    .. math:: \\sum_e (out_{max}(e) + add_{cap}(e)) \\cdot opex_{fix}(e)
+    .. math:: \\sum_e (out_{max}(e) + ADDCAP(e)) \\cdot c_{fix}(e)
 
     Parameters
     ------------
@@ -129,7 +129,7 @@ def add_opex_fix(model, objs=None, uids=None, ref=None):
 def add_output_revenues(model, objs=None, uids=None):
     """ revenue term for linear objective function
 
-    .. math:: \\sum_e \\sum_t w(e,O(e),t) \\cdot price(e,t)
+    .. math:: \\sum_e \\sum_t W(e,O(e),t) \\cdot r_{out}(e,t)
 
     Parameters
     ------------
@@ -162,11 +162,10 @@ def add_output_revenues(model, objs=None, uids=None):
                 for e in uids for t in model.timesteps)
     return(expr)
 
-def add_dispatch_source_costs(model, objs=[], uids=None):
+def add_curtailment_costs(model, objs=[], uids=None):
     """ Cost term for dispatchable sources in linear objective.
 
-    .. math:: \\sum_e \\sum_ t var_{dispatchsource}(e,t) \\cdot \
-    ex_{dispatch}(e)
+    .. math:: \\sum_e \\sum_ t CURTAIL(e,t) \\cdot c_{curt}(e)
 
     Parameters
     ------------
@@ -180,8 +179,8 @@ def add_dispatch_source_costs(model, objs=[], uids=None):
         if uids is None:
             uids = [obj.uid for obj in objs]
         # get dispatch expenditure for renewable energies with dispatch
-        dispatch_ex = {obj.uid: obj.dispatch_ex for obj in objs}
-        expr = sum(model.dispatch_source_var[e, t] * dispatch_ex[e]
+        c_curtail = {obj.uid: obj.dispatch_ex for obj in objs}
+        expr = sum(model.curtailment_var[e, t] * c_curtail[e]
                    for e in uids for t in model.timesteps)
     else:
         expr = 0
@@ -192,13 +191,13 @@ def add_dispatch_source_costs(model, objs=[], uids=None):
 def add_capex(model, objs, uids=None, ref=None):
     """ Add capital expenditure to linear objective.
 
-    If reference is 'output' (e.g. powerplants):
+    If reference is `output` (e.g. powerplants):
 
-    .. math:: \\sum_e add_{out}(e) \\cdot crf(e) \\cdot capex(e)
+    .. math:: \\sum_e ADDOUT(e) \\cdot crf(e) \\cdot c_{inv}(e)
 
-    If reference is 'capacity' (e.g. storages):
+    If reference is `capacity` (e.g. storages):
 
-    .. math:: \\sum_e add_{cap}(e) \\cdot crf(e) \\cdot capex(e)
+    .. math:: \\sum_e ADDCAP(e) \\cdot crf(e) \\cdot c_{inv}(e)
 
     Parameters
     ------------
@@ -215,14 +214,14 @@ def add_capex(model, objs, uids=None, ref=None):
     if uids is None:
         uids = [obj.uid for obj in objs]
 
-    capex = {obj.uid: obj.capex for obj in objs}
+    c_inv = {obj.uid: obj.capex for obj in objs}
     crf = {obj.uid: obj.crf for obj in objs}
 
     if ref == 'output':
-        expr = sum(model.add_out[e] * crf[e] * capex[e] for e in uids)
+        expr = sum(model.add_out[e] * crf[e] * c_inv[e] for e in uids)
         return(expr)
     elif ref == 'capacity':
-        expr = sum(model.add_cap[e] * crf[e] * capex[e] for e in uids)
+        expr = sum(model.add_cap[e] * crf[e] * c_inv[e] for e in uids)
         return(expr)
     else:
         print('No reference defined. Please specificy in `add_capex()`')
@@ -231,7 +230,7 @@ def add_capex(model, objs, uids=None, ref=None):
 def add_startup_costs(model, objs=None, uids=None):
     """ Adds startup costs for components to objective expression
 
-    .. math:: \\sum_{e} \\sum_{t} var_{start}(e,t) \\cdot costs_{start}(e)
+    .. math:: \\sum_{e} \\sum_{t} Z_{start}(e,t) \\cdot c_{start}(e)
 
     Parameters
     ------------
@@ -243,17 +242,16 @@ def add_startup_costs(model, objs=None, uids=None):
     if uids is None:
         uids = [obj.uid for obj in objs]
 
-    start_costs = {obj.uid: obj.start_costs for obj in objs}
-
-    start_var = getattr(model, objs[0].lower_name+'_start_var')
-    expr = sum(start_var[e, t] * start_costs[e]
+    c_start = {obj.uid: obj.start_costs for obj in objs}
+    z_start = getattr(model, objs[0].lower_name+'_start_var')
+    expr = sum(z_start[e, t] * c_start[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
 def add_shutdown_costs(model, objs=None, uids=None):
     """ Adds shutdown costs for components to objective expression
 
-    .. math:: \\sum_{e} \\sum_t var_{stop}(e,t) \\cdot costs_{stop}(e)
+    .. math:: \\sum_{e} \\sum_t Z_{stop}(e,t) \\cdot c_{stop}(e)
 
     Parameters
     ------------
@@ -266,17 +264,16 @@ def add_shutdown_costs(model, objs=None, uids=None):
     if uids is None:
         uids = [obj.uid for obj in objs]
 
-    stop_costs = {obj.uid: obj.stop_costs for obj in objs}
-
-    stop_var = getattr(model, objs[0].lower_name+'_stop_var')
-    expr = sum(stop_var[e, t] * stop_costs[e]
+    c_stop = {obj.uid: obj.stop_costs for obj in objs}
+    z_stop = getattr(model, objs[0].lower_name+'_stop_var')
+    expr = sum(z_stop[e, t] * c_stop[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
 def add_ramping_costs(model, objs=None, uids=None):
     """ Add gradient costs for components to linear objective expression.
 
-    .. math::  \\sum_e \\sum_t var_{gradpos}(e,t) \\cdot costs_{ramp}(e)
+    .. math::  \\sum_e \\sum_t GRADPOS(e,t) \\cdot c_{ramp}(e)
 
     Parameters
     ------------
@@ -289,16 +286,16 @@ def add_ramping_costs(model, objs=None, uids=None):
         uids = [obj.uid for obj in objs]
 
 
-    ramp_costs = {obj.uid: obj.ramp_costs for obj in objs}
-    grad_var = getattr(model, objs[0].lower_name+'_grad_pos_var' )
-    expr = sum(grad_var[e, t] * ramp_costs[e]
+    c_ramp = {obj.uid: obj.ramp_costs for obj in objs}
+    grad_pos = getattr(model, objs[0].lower_name+'_grad_pos_var' )
+    expr = sum(grad_pos[e, t] * c_ramp[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
 def add_excess_slack_costs(model, uids=None):
     """ Artificial cost term for excess slack variables.
 
-    .. math:: \\sum_e \\sum_t var_{excess}(e,t) \\cdot costs_{excess}(e)
+    .. math:: \\sum_e \\sum_t EXCESS(e,t) \\cdot c_{excess}(e)
 
     Parameters:
     ------------
@@ -307,8 +304,8 @@ def add_excess_slack_costs(model, uids=None):
     """
     if uids is None:
         uids = model.uids['excess']
-    excess_costs = {b.uid:b.excess_costs for b in model.bus_objs}
-    expr = sum(model.excess_slack[e, t] * excess_costs[e]
+    c_excess = {b.uid:b.excess_costs for b in model.bus_objs}
+    expr = sum(model.excess_slack[e, t] * c_excess[e]
                for e in uids for t in model.timesteps)
     return(expr)
 
@@ -316,7 +313,7 @@ def add_excess_slack_costs(model, uids=None):
 def add_shortage_slack_costs(model, uids=None):
     """ Artificial cost term for shortage slack variables.
 
-    .. math:: \\sum_e \\sum_t var_{shortage}(e,t) \\cdot costs_{shortage}(e)
+    .. math:: \\sum_e \\sum_t SHORTAGE(e,t) \\cdot c_{shortage}(e)
 
     Parameters:
     ------------
@@ -326,8 +323,8 @@ def add_shortage_slack_costs(model, uids=None):
     """
     if uids is None:
         uids = model.uids['shortage']
-    shortage_costs = {b.uid: b.shortage_costs for b in model.bus_objs}
-    expr = sum(model.shortage_slack[e, t] * shortage_costs[e]
+    c_shortage = {b.uid: b.shortage_costs for b in model.bus_objs}
+    expr = sum(model.shortage_slack[e, t] * c_shortage[e]
                for e in uids for t in model.timesteps)
     return(expr)
 

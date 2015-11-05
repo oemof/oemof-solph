@@ -22,8 +22,8 @@ import pyomo.environ as po
 def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
     """ Adds constraint for the input-ouput balance of bus objects
 
-    .. math:: \\sum_{i \\in I(e)} w(i, e, t) = \\sum_{o \\in O(e)} \
-    w(e, o, t), \\qquad \\forall t
+    .. math:: \\sum_{i \\in I(e)} W(i, e, t) = \\sum_{o \\in O(e)} \
+    W(e, o, t), \\qquad \\forall t
 
     Parameters
     -----------
@@ -64,7 +64,7 @@ def add_simple_io_relation(model, objs=None, uids=None):
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation.
 
-    .. math:: w(I(e), e, t) \cdot \\eta(e) = w(e, O(e), t), \
+    .. math:: W(I(e), e, t) \cdot \\eta(e) = W(e, O(e), t), \
     \\qquad \\forall e, \\forall t
 
     The constraint is indexed with all unique ids of objects and timesteps.
@@ -112,8 +112,8 @@ def add_simple_chp_relation(model, objs=None, uids=None):
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation:
 
-    .. math:: \\frac{w_1(e,O_1(e),t)}{\\eta_1(e,t)} = \
-    \\frac{w_2(e,O_2(e), t)}{\\eta_2(e,t)}, \
+    .. math:: \\frac{W_1(e,O_1(e),t)}{\\eta_1(e,t)} = \
+    \\frac{W_2(e,O_2(e), t)}{\\eta_2(e,t)}, \
     \\qquad \\forall e, \\forall t
 
     The constraint is indexed with all unique ids 'e' of objects and
@@ -162,13 +162,17 @@ def add_simple_extraction_chp_relation(model, objs=None, uids=None):
 
     Power/Heat ratio:
 
-    .. math:: w(e,O_1(e),t) = w(e, O_2(e), t) \\cdot \\sigma(e), \
+    .. math:: W(e,O_1(e),t) = W(e, O_2(e), t) \\cdot \\sigma(e), \
     \\qquad \\forall e, \\forall t
+
+    .. math:: \\sigma = \\text{Power to heat ratio}
 
     Equivalent power:
 
-    .. math:: w(I(e),e,t) = \\frac{(w(e,O_1(e),t) + \\beta(e) \\cdot \
-    w(e, O_2(e), t))}{\\eta_1(e)}
+    .. math:: W(I(e),e,t) = \\frac{(W(e,O_1(e),t) + \\beta(e) \\cdot \
+    W(e, O_2(e), t))}{\\eta_1(e)}
+
+    .. math:: \\beta = \\text{Power loss index}
 
     The constraint is indexed with all unique ids 'e' of objects and
     timesteps 't'.
@@ -212,8 +216,8 @@ def add_bus_output_limit(model, objs=None, uids=None):
     """ Adds constraint to set limit for variables as sum over the total
     timehorizon
 
-    .. math:: \sum_{t} \sum_{o \\in O(e)} w(e, o, t) \
-    \\leq out_{sumlimit}(e), \\qquad \\forall e
+    .. math:: \sum_{t} \sum_{o \\in O(e)} W(e, o, t) \
+    \\leq sumlimit_{out}(e), \\qquad \\forall e
 
     Parameters
     ------------
@@ -250,12 +254,17 @@ def add_bus_output_limit(model, objs=None, uids=None):
             po.Constraint(uids, rule=output_limit_rule))
 
 def add_fixed_source(model, objs, uids,):
-    """ Adds fixed source with investment models by adding constraints
+    """ Add fixed source
 
-    The mathemathical fomulation for the constraint is as follows:
+     .. math::  W(e,O(e),t) = val_{norm}(e,t) \\cdot out_{max}(e), \
+     \\qquad \\forall e, \\forall t
 
-    .. math::  w(e, O(e), t) \\leq (out_{max}(e) + add_{out}(e, O(e) ) \
-    \cdot v(e,t), \\qquad \\forall e, \\forall t
+    If investment for component:
+    .. math::  W(e, O(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
+    \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
+
+    .. math:: ADDOUT(e)  \\leq addout_{max}(e), \\qquad \\forall e
+
 
     Parameters
     ------------
@@ -308,7 +317,7 @@ def add_fixed_source(model, objs, uids,):
         setattr(model, objs[0].lower_name+"_invest",
                 po.Constraint(uids, model.timesteps, rule=invest_rule))
 
-def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
+def add_dispatch_source(model, objs=None, uids=None):
     """ Creates dispatchable source models by setting bounds and
        adding constraints
 
@@ -319,8 +328,8 @@ def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
 
     The mathemathical fomulation for the constraint is as follows:
 
-    .. math:: var_{dispatchsource}(e,t) = val(e,t) \\cdot out_{max}(e) - \
-    w(e,O(e),t),  \\qquad \\forall e, \\forall t
+    .. math:: CURTAIL(e,t) = val_{norm}(e,t) \\cdot out_{max}(e) - \
+    W(e,O(e),t),  \\qquad \\forall e, \\forall t
 
     Parameters
     ------------
@@ -342,8 +351,8 @@ def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
         uids = [e.uid for e in objs]
 
     # create dispatch var
-    model.dispatch_source_var = po.Var(uids, model.timesteps,
-                                       within=po.NonNegativeReals)
+    model.curtailment_var = po.Var(uids, model.timesteps,
+                                   within=po.NonNegativeReals)
 
     # normed value of renewable source (0 <= value <=1)
     val = {}
@@ -359,13 +368,13 @@ def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
             # set upper bound of variable
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][e2])
 
-    def dispatch_source_rule(model, e, t):
-        lhs = model.dispatch_source_var[e, t]
+    def curtailment_source_rule(model, e, t):
+        lhs = model.curtailment_var[e, t]
         rhs = val[e][t] * out_max[e][model.O[e][0]] - \
            model.w[e, model.O[e][0], t]
         return(lhs == rhs)
     setattr(model, objs[0].lower_name+"_calc",
-            po.Constraint(uids, model.timesteps, rule=dispatch_source_rule))
+            po.Constraint(uids, model.timesteps, rule=curtailment_source_rule))
 
 def add_storage_balance(model, objs=None, uids=None):
     """ Creates constraint for storage balance
@@ -420,13 +429,17 @@ def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
 
     Positive gradient:
 
-    .. math::  w(e,O(e),t) - w(e,O(e),t-1) \\leq var_{gradpos}(e,t)\
+    .. math::  W(e,O(e),t) - W(e,O(e),t-1) \\leq GRADPOS(e,t)\
     \\qquad \\forall e, \\forall t / t=1
+
+    .. math:: GRADPOS(e,t) \\leq gradpos_{max}(e), \\qquad \\forall e, \\forall t
 
     Negative gradient:
 
-        .. math::  w(e,O(e),t-1) - w(e,O(e),t) \\leq var_{gradneg}(e,t)\
+        .. math::  W(e,O(e),t-1) - W(e,O(e),t) \\leq GRADNEG(e,t)\
     \\qquad \\forall e, \\forall t / t=1
+
+    .. math:: GRADNEG(e,t) \\leq gradneg_{max}(e), \\qquad \\forall e, \\forall t
 
     Parameters
     ------------

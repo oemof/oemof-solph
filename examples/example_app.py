@@ -29,7 +29,7 @@ import logging
 logging.basicConfig(filename='example_app.log', level=logging.DEBUG)
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(2)]
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -51,7 +51,7 @@ b_th = Bus(uid="b_th", type="th", excess=True, shortage=True)
 # renewable sources (only pv onshore)
 wind_on = source.FixedSource(uid="wind_on", outputs=[b_el],
                                 val=data['wind'],
-                                out_max={b_el.uid: 66300}, opex_var=999)
+                                out_max={b_el.uid: 66300}, opex_var=0)
 wind_on2 = source.DispatchSource(uid="wind_on2", outputs=[b_el2],
                                  val=data['wind'], out_max={b_el2.uid: 66300})
 wind_off = source.DispatchSource(uid="wind_off", outputs=[b_el],
@@ -122,7 +122,7 @@ components = transformers + renew_sources + sinks + transports + storages
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'milp' : False})
+                       options={'objective_name': 'minimize_costs'})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)

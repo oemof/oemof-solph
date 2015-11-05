@@ -15,7 +15,7 @@ except:
     from .network.entities import components as cp
 
 def add_binary(model, objs=None, uids=None):
-    """ Creates all variables status variables (binary) for `objs`
+    """ Creates all status variables (binary) for `objs`
 
     The function uses the pyomo class `Var()` to create the status variables of
     components. E.g. if a transformer is switched on/off -> y=1/0
@@ -36,8 +36,7 @@ def add_binary(model, objs=None, uids=None):
     --------
 
     There is no return value. The variables are added as a
-    attribute to the optimization model object `model` of type
-    pyomo.ConcreteModel()
+    attribute to the optimization model object `model`.
 
 
     """
@@ -63,7 +62,7 @@ def add_continuous(model, edges):
     the edges is created to handle "flexible" upper bounds of the edge variable
     by using an additional constraint.
     The following variables are created: Variables for all the edges, variables
-    for dispatchable sources, variables for the state of charge of storages.
+    for the state of charge of storages.
     (If specific components such as disptach sources and storages exist.)
 
     Parameters
@@ -79,7 +78,7 @@ def add_continuous(model, edges):
     Returns
     --------
     The variables are added as a attribute to the optimization model object
-    `model` of type OptimizationModel()
+    `model`.
 
 
     """
@@ -114,13 +113,22 @@ def set_bounds(model, objs=None, uids=None, side='output'):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows
 
-    .. math::  w(e, O_1[e], t) \\leq out_{max}(e,O_1[e]) + \
-    add\\_cap(e,O_1[e]), \\qquad \\forall e \\in uids, \\forall t \\in T
+    If side is `output`
 
-        .. math:: w(e_1, e_2, t) \\leq ub_w(e_1, e_2), \\qquad \
-    \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
-    .. math:: w(e_1, e_2, t) \\geq lb_w(e_1, e_2), \\qquad \
-    \\forall (e_1, e_2) \\in \\vec{E}, \\forall t \\in T
+    .. math:: W(e, O_(e)), t) \\leq out_{max}(e, t), \\qquad \
+    \\forall e, \\forall t
+
+    With investment:
+
+    .. math::  W(e, O(e), t) \\leq out_{max}(e, t) + \
+    ADDCAP(e,O_1[e]), \\qquad \\forall e, \\forall t
+
+    If side is `input`:
+
+    .. math:: W(I(e), e, t) \\leq in_max(e, t), \\qquad \
+    \\forall e, \\forall t
+
+
 
     Parameters
     ------------
@@ -136,8 +144,8 @@ def set_bounds(model, objs=None, uids=None, side='output'):
 
     Returns
     -------
-    The constraints are added as attributes
-    to the optimization model object `model` of type OptimizationModel()
+    The constraints are added as attributes to the optimization model
+    object `model`.
     """
 
     if objs is None:
@@ -154,8 +162,7 @@ def set_bounds(model, objs=None, uids=None, side='output'):
     for e in objs:
         in_max[e.uid] = e.in_max
         out_max[e.uid] = e.out_max
-
-    if objs[0].model_param['investment'] == False:
+    if objs[0].model_param.get('investment', False) == False:
         # edges for simple transformers ([('coal', 'pp_coal'),...])
         ee = model.edges(objs)
         for (e1, e2) in ee:
@@ -203,7 +210,13 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
     additional constraints of type pyomo.Constraint(). The mathematical
     description for the constraint is as follows:
 
-    .. math:: cap(e, t) \\leq cap_{max}(e) + cap_{add}(e), \
+
+     .. math:: cap_{min}(e) \\leq CAP(e, t) \\leq cap_{max}(e), \
+    \\qquad \\forall e \\in uids, \\forall t \\in T
+
+    If investment:
+
+    .. math:: CAP(e, t) \\leq cap_{max}(e) + ADDCAP(e), \
     \\qquad \\forall e \\in uids, \\forall t \\in T
 
     Parameters
@@ -220,8 +233,7 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
     Returns
     -------
     The upper and lower bounds of the variables are
-    altered in the optimization model object `model` of type
-    OptimizationModel()
+    altered in the optimization model object `model`.
 
     """
 
@@ -260,6 +272,7 @@ def set_fixed_sink_value(model, objs=None, uids=None):
     """ Creates fixed sink from standard edges / variables by setting the value
     of variables and fixing variables to that value.
 
+    .. math:: W(I(e), e,t) = val(e,t), \\qquad \\forall e, \\forall t
 
     Parameters
     ------------

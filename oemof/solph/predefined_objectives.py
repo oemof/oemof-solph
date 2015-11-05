@@ -48,8 +48,8 @@ def minimize_cost(self):
     expr += objexpr.add_output_revenues(self, revenue_objs)
 
     # costs for dispatchable sources
-    expr += objexpr.add_dispatch_source_costs(self,
-                                         objs=self.objs['dispatch_source'])
+    expr += objexpr.add_curtailment_costs(self,
+                                          objs=self.objs['dispatch_source'])
 
     # add capex for investment components
     objs_inv = [e for e in cost_objs if e.model_param['investment'] == True]
