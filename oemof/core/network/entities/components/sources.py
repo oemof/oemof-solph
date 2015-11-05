@@ -4,6 +4,10 @@ from . import Source
 class FixedSource(Source):
     """
     """
+    model_param = {'linear_constr': ('fixvalue'),
+                   'milp_constr' : (),
+                   'objective' : ('cvar', 'cfix'),
+                   'investment': False}
     lower_name = "fixed_source"
 
     def __init__(self, **kwargs):
@@ -20,6 +24,10 @@ class FixedSource(Source):
 class DispatchSource(Source):
     """
     """
+    model_param = {'linear_constr': ('dispatch'),
+                   'milp_constr' : (),
+                   'objective' : ('cvar', 'cfix','cdispatch'),
+                   'investment': False}
     lower_name = "dispatch_source"
 
     def __init__(self, **kwargs):
@@ -28,7 +36,6 @@ class DispatchSource(Source):
         """
         super().__init__(**kwargs)
         self.val = kwargs.get('val', None)
-        self.dispatch = kwargs.get('dispatch', False)
         self.dispatch_ex = kwargs.get('dispatch_ex', 0)
 
     def calc_emissions(self):

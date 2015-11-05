@@ -278,6 +278,12 @@ def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
     The constraints will be added as attributes of
     the optimization model object `model` of class OptimizationModel().
     """
+    if uids is None:
+        uids = [e.uid for e in objs]
+
+    # create dispatch var
+    model.dispatch_source_var = po.Var(uids, model.timesteps,
+                                       within=po.NonNegativeReals)
 
     # normed value of renewable source (0 <= value <=1)
     val = {}
@@ -293,13 +299,13 @@ def add_dispatch_source(model, objs=None, uids=None, val=None, out_max=None):
             # set upper bound of variable
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][e2])
 
-    def dispatch_rule(model, e, t):
-        lhs = model.dispatch[e, t]
+    def dispatch_source_rule(model, e, t):
+        lhs = model.dispatch_source_var[e, t]
         rhs = val[e][t] * out_max[e][model.O[e][0]] - \
            model.w[e, model.O[e][0], t]
         return(lhs == rhs)
     setattr(model, objs[0].lower_name+"_calc",
-            po.Constraint(uids, model.timesteps, rule=dispatch_rule))
+            po.Constraint(uids, model.timesteps, rule=dispatch_source_rule))
 
 def add_storage_balance(model, objs=None, uids=None):
     """ Creates constraint for storage balance
@@ -379,7 +385,6 @@ def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
     the optimization model object `model` of class OptimizationModel().
     """
 
-    # normed value of renewable source (0 <= value <=1)
     def grad_pos_calc_rule(model, e, t):
         if t > 0:
             lhs = model.w[e, model.O[e][0], t] - model.w[e,model.O[e][0], t-1]
@@ -426,4 +431,3 @@ def add_output_gradient_calc(model, objs=None, uids=None, grad_direc='both'):
         # set constraint
         setattr(model, objs[0].lower_name+"_grad_neg_calc",
                 po.Constraint(uids, model.timesteps, rule=grad_neg_calc_rule))
-

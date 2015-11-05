@@ -127,16 +127,14 @@ def add_dispatch_source_costs(model, objs=[], uids=None):
         if uids is None:
             uids = [obj.uid for obj in objs]
         # get dispatch expenditure for renewable energies with dispatch
-        model.dispatch_ex = {obj.uid: obj.dispatch_ex for obj in objs}
-        expr = sum(model.dispatch[e, t] * model.dispatch_ex[e]
+        dispatch_ex = {obj.uid: obj.dispatch_ex for obj in objs}
+        expr = sum(model.dispatch_source_var[e, t] * dispatch_ex[e]
                    for e in uids for t in model.timesteps)
-        return(expr)
     else:
         expr = 0
         logging.info('No dispatch source objects defined. ' +
                      'No action for objective taken.')
-
-        return(expr)
+    return(expr)
 
 def add_capex(model, objs, uids=None, ref=None):
     """ add capital expenditure to objective

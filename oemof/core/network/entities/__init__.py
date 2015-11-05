@@ -25,6 +25,8 @@ class Bus(Entity):
         self.results = {}
         self.excess = kwargs.get('excess', True)
         self.shortage = kwargs.get('shortage', False)
+        self.excess_costs = kwargs.get('excess_costs', 0)
+        self.shortage_costs = kwargs.get('shortage_costs', 10e10)
 
 
 class Component(Entity):

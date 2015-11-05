@@ -93,16 +93,6 @@ def add_continuous(model, edges):
         uids = [e.uid for e in objs]
         model.add_out = po.Var(uids, within=po.NonNegativeReals)
 
-
-    # dispatch variables for dispatchable sources
-    objs = [e for e in model.entities
-            if isinstance(e, cp.sources.DispatchSource)]
-    # if disptachable sources exist, create pyomo variables
-    if objs:
-        uids = [e.uid for e in objs]
-        model.dispatch = po.Var(uids, model.timesteps,
-                                within=po.NonNegativeReals)
-
     # storage state of charge variables
     objs = [e for e in model.entities
             if isinstance(e, cp.transformers.Storage)]

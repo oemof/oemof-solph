@@ -208,8 +208,8 @@ class OptimizationModel(po.ConcreteModel):
                 milc.add_startup_constraints(model=self, objs=objs, uids=uids)
                 # add start costs
                 self.objfuncexpr += objfuncexprs.add_startup_costs(self,
-                                                                 objs=objs,
-                                                                 uids=uids)
+                                                                   objs=objs,
+                                                                   uids=uids)
 
         if 'cvar' in param['objective']:
             self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
@@ -318,16 +318,56 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : OptimizationModel() instance
         """
-        lc.add_fixed_source(model=self, objs=objs, uids=uids)
+        param = cp.sources.FixedSource.model_param
+        # add constraints
+        if 'fixvalues' in param['linear_constr']:
+            lc.add_fix_source(model=self, objs=objs, uids=uids)
+
+        # add objective expressions
+        if 'cvar' in param ['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+        if 'cfix' in param ['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+        if 'cinv' in param['objective'] and param['investment'] == True:
+            self.objfuncexpr = \
+                objfuncexprs.add_capex(self, objs=objs, uids=uids, ref='output')
+        if 'rsell' in param ['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_output_revenues(self, objs=objs, uids=uids,
+                                                 ref='output')
 
 
     def dispatch_source_assembler(self, objs, uids):
         """
         """
+        param = cp.sources.DisptachSource.model_param
+        # add constraints
+        if param['investment'] == True:
+            raise ValueError('Dispatch source investment is not possible')
 
-        if self.invest is False:
-            lc.add_dispatch_source(model=self, objs=objs, uids=uids)
+        if 'dispatch' in param['linear_constr']:
+             lc.add_dispatch_source(model=self, objs=objs, uids=uids)
 
+        # add objective expressions
+        if 'cvar' in param ['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+        if 'cfix' in param ['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_opex(self, objs=objs, uids=uids, ref='output')
+        if 'cinv' in param['objective'] and param['investment'] == True:
+            self.objfuncexpr = \
+                objfuncexprs.add_capex(self, objs=objs, uids=uids, ref='output')
+        if 'cdisptach' in param['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_disptach_source_costs(self, objs=objs,
+                                                       uids=uids, ref='output')
+        if 'rsell' in param ['objective']:
+            self.objfuncexpr = \
+                objfuncexprs.add_output_revenues(self, objs=objs, uids=uids,
+                                                 ref='output')
     def simple_sink_assembler(self, objs, uids):
         """Method containing the constraints for simple sinks
 
