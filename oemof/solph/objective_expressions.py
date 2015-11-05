@@ -66,6 +66,10 @@ def add_opex_fix(model, objs=None, uids=None, ref=None):
     if uids is None:
         uids = [obj.uid for obj in objs]
 
+    uids_inv = set([obj.uid for obj in objs
+                   if obj.model_param['investment'] == True])
+    uids = set(uids) - uids_inv
+
     opex_fix = {obj.uid: obj.opex_fix for obj in objs}
 
     if ref == 'output':
@@ -73,18 +77,16 @@ def add_opex_fix(model, objs=None, uids=None, ref=None):
         out_max = {obj.uid: obj.out_max for obj in objs}
         out_max = {k: sum(filter(None, v.values()))
                                  for k, v in out_max.items()}
-        if model.invest is False:
-            expr = sum(out_max[e] * opex_fix[e] for e in uids)
-        else:
-            expr = sum((out_max[e] + model.add_out[e]) * opex_fix[e]
-                        for e in uids)
+        expr = 0
+        expr += sum(out_max[e] * opex_fix[e] for e in uids)
+        expr += sum((out_max[e] + model.add_out[e]) * opex_fix[e]
+                    for e in uids_inv)
     elif ref == 'capacity':
         cap_max = {obj.uid: obj.cap_max for obj in objs}
-        if model.invest is False:
-            expr = sum(cap_max[e] * opex_fix[e] for e in uids)
-        else:
-            expr = sum((cap_max[e] + model.add_cap[e]) * opex_fix[e]
-                       for e in uids)
+        expr = 0
+        expr += sum(cap_max[e] * opex_fix[e] for e in uids)
+        expr += sum((cap_max[e] + model.add_cap[e]) * opex_fix[e]
+                       for e in uids_inv)
     else:
         print('No reference defined. Please specificy in `add_opex()`!')
     return(expr)

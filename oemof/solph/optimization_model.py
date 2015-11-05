@@ -41,14 +41,9 @@ class OptimizationModel(po.ConcreteModel):
         self.entities = entities
         self.timesteps = timesteps
 
-
-        # get options
-        self.invest = options.get('invest', False)
-        self.milp = options.get('milp', False)
-
         # calculate all edges ([('coal', 'pp_coal'),...])
-        components = [e for e in self.entities if isinstance(e, Component)]
-        self.all_edges = self.edges(components)
+        self.components = [e for e in self.entities if isinstance(e, Component)]
+        self.all_edges = self.edges(self.components)
 
         var.add_continuous(model=self, edges=self.all_edges)
         # list with all necessary classes
@@ -57,9 +52,9 @@ class OptimizationModel(po.ConcreteModel):
                              cp.Source.__subclasses__() +
                              cp.Transport.__subclasses__())
         self.objfuncexpr = 0
-        self.I = {c.uid: c.inputs[0].uid for c in components
+        self.I = {c.uid: c.inputs[0].uid for c in self.components
                   if not isinstance(c, cp.Source)}
-        self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in components
+        self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in self.components
                   if not isinstance(c, cp.Sink)}
 
         self.objs = {}
@@ -244,6 +239,11 @@ class OptimizationModel(po.ConcreteModel):
         if 'shutdown' in param['milp_constr']:
             self.objfuncexpr += \
                  objfuncexprs.add_shutdown_costs(self, objs=objs, uids=uids)
+        # investment costs (capex) if in component can be invested
+        if param['investment'] == True:
+            self.objfuncexpr += \
+                 objfuncexprs.add_capex(self, objs=objs, uids=uids,
+                                        ref='output')
 
     def simple_chp_assembler(self, objs, uids):
         """Method grouping the constraints for simple chp components.
@@ -302,7 +302,6 @@ class OptimizationModel(po.ConcreteModel):
         # gradient calculation dGrad
         if 'gradient' in param['linear_constr']:
             lc.add_gradient_calc(model=self, objs=objs, uids=uids)
-
         # add binary status variables
         if param['milp_constr']:
             var.add_binary(model=self, objs=objs, uids=uids)
@@ -319,7 +318,7 @@ class OptimizationModel(po.ConcreteModel):
         if 'shutdown' in param['milp_constr']:
             milc.add_shutdown_constraints(model=self,objs=objs, uids=uids)
 
-            # add variable costs (opex_var)
+        # add variable costs (opex_var)
         if 'cvar' in param['objective']:
             self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
                                                           uids=uids)

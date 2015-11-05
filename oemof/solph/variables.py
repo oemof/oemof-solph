@@ -49,7 +49,7 @@ def add_binary(model, objs=None, uids=None):
         uids = [e.uids for e in objs]
 
     # add binary variables to model
-    setattr(model, "status_"+objs[0].lower_name,
+    setattr(model, objs[0].lower_name+'_status_var',
             po.Var(uids, model.timesteps, within=po.Binary))
 
 def add_continuous(model, edges):
@@ -88,10 +88,10 @@ def add_continuous(model, edges):
 
 
     # additional variable for investment models
-    if model.invest is True:
-        objs = [e for e in model.entities if isinstance(e, Component)]
-        uids = [e.uid for e in objs]
-        model.add_out = po.Var(uids, within=po.NonNegativeReals)
+    objs = [e for e in model.components
+            if e.model_param.get('investment', False) ==True]
+    uids = [e.uid for e in objs]
+    model.add_out = po.Var(uids, within=po.NonNegativeReals)
 
     # storage state of charge variables
     objs = [e for e in model.entities
@@ -102,9 +102,8 @@ def add_continuous(model, edges):
 
         model.cap = po.Var(uids, model.timesteps, within=po.NonNegativeReals)
 
-        # create additional variable for investment models
-        if model.invest is True:
-            model.add_cap = po.Var(uids, within=po.NonNegativeReals)
+        uids_inv = [e.uid for e in objs if e.model_param['investment'] == True]
+        model.add_cap = po.Var(uids_inv, within=po.NonNegativeReals)
 
 
 def set_bounds(model, objs=None, uids=None, side='output'):
@@ -156,7 +155,7 @@ def set_bounds(model, objs=None, uids=None, side='output'):
         in_max[e.uid] = e.in_max
         out_max[e.uid] = e.out_max
 
-    if model.invest is False:
+    if objs[0].model_param['investment'] == False:
         # edges for simple transformers ([('coal', 'pp_coal'),...])
         ee = model.edges(objs)
         for (e1, e2) in ee:
@@ -236,7 +235,7 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
     cap_max = {obj.uid: obj.cap_max for obj in objs}
     cap_min = {obj.uid: obj.cap_min for obj in objs}
 
-    if model.invest is False:
+    if objs[0].model_param['investment'] == False:
         # loop over all uids (storages) and timesteps to set the upper bound
         for e in uids:
             for t in model.timesteps:

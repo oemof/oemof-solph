@@ -22,7 +22,8 @@ def minimize_cost(self):
     cost_objs = \
         self.objs['simple_chp'] + \
         self.objs['simple_transformer'] + \
-        self.objs['extrac_chp_const']
+        self.objs['simple_extraction_chp'] + \
+        self.objs['fixed_source']
 
     revenue_objs = (
         self.objs['simple_chp'] +
@@ -37,8 +38,6 @@ def minimize_cost(self):
                                  ref='output')
     expr += objexpr.add_opex_var(self, objs=self.objs['simple_storage'],
                                  ref='input')
-    expr += objexpr.add_opex_var(self, objs=self.objs['fixed_source'],
-                                 ref='output')
     expr += objexpr.add_input_costs(self, objs=cost_objs)
     # fixed opex of components
     expr += objexpr.add_opex_fix(self, objs=cost_objs, ref='output')
@@ -52,20 +51,16 @@ def minimize_cost(self):
     # costs for dispatchable sources
     expr += objexpr.add_dispatch_source_costs(self,
                                          objs=self.objs['dispatch_source'])
-    if self.milp is True:
-        expr += objexpr.add_startup_costs(self,
-                                          objs=self.objs['simple_transformer'])
-        expr += objexpr.add_startup_costs(self,
-                                          objs=self.objs['simple_chp'])
-    # add capex for investment models
-    if(self.invest is True):
-        # capital expenditure for output objects
-        expr += objexpr.add_capex(self, objs=cost_objs, ref='output')
-        # capital expenditure for storages
-        expr += objexpr.add_capex(self, objs=self.objs['simple_storage'],
-                                  ref='capacity')
-        expr += objexpr.add_capex(self, objs=self.objs['fixed_source'],
-                                  ref='output')
+
+    # add capex for investment components
+    objs_inv = [e for e in cost_objs if e.model_param['investment'] == True]
+    # capital expenditure for output objects
+    expr += objexpr.add_capex(self, objs=objs_inv, ref='output')
+    # capital expenditure for storages
+    objs_inv = [e for e in self.objs['simple_storage']
+                if e.model_param['investment'] == True]
+    expr += objexpr.add_capex(self, objs=objs_inv,
+                              ref='capacity')
 
     if self.uids['shortage']:
         expr += objexpr.add_shortage_slack_costs(self)

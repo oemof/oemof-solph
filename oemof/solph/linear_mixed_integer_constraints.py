@@ -56,7 +56,7 @@ def set_bounds(model, objs=None, uids=None, side="output"):
         out_min = {obj.uid: obj.out_min for obj in objs}
         # set lower bounds
         def lb_rule(model, e, t):
-            lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] * \
+            lhs = getattr(model,objs[0].lower_name+'_status_var')[e, t] * \
                       out_min[e][model.O[e][0]]
             rhs = model.w[e, model.O[e][0], t]
             return(lhs <= rhs)
@@ -77,7 +77,7 @@ def set_bounds(model, objs=None, uids=None, side="output"):
         in_min = {obj.uid: obj.in_min for obj in objs}
         # set lower bounds
         def lb_rule(model, e, t):
-            lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] * \
+            lhs = getattr(model,objs[0].lower_name+'_status_var')[e, t] * \
                       in_min[e][model.I[e]]
             rhs = model.w[model.I[e], e, t]
             return(lhs <= rhs)
@@ -120,7 +120,7 @@ def add_output_gradient_constraints(model, objs=None, uids=None,
     out_min = {obj.uid: obj.out_min for obj in objs}
     grad_pos = {obj.uid: obj.grad_pos for obj in objs}
 
-    y = getattr(model, 'status_'+objs[0].lower_name)
+    y = getattr(model, objs[0].lower_name+'_status_var')
 
     # TODO: Define correct boundary conditions for t-1 of time
     def grad_pos_rule(model, e, t):
@@ -188,8 +188,8 @@ def add_startup_constraints(model, objs=None, uids=None):
     def start_up_rule(model, e, t):
         if t >= 1:
             try:
-                lhs = getattr(model,'status_'+objs[0].lower_name)[e, t] - \
-                       getattr(model,'status_'+objs[0].lower_name)[e, t-1]
+                lhs = getattr(model,objs[0].lower_name+'_status_var')[e, t] - \
+                       getattr(model,objs[0].lower_name+'_status_var')[e, t-1]
                 rhs = getattr(model, objs[0].lower_name+'_start_var')[e, t]
                 return(lhs <= rhs)
             except:
@@ -238,8 +238,8 @@ def add_shutdown_constraints(model, objs=None, uids=None):
 
     def shutdown_rule(model, e, t):
         if t > 1:
-            lhs = getattr(model,'status_'+objs[0].lower_name)[e, t-1] - \
-                  getattr(model,'status_'+objs[0].lower_name)[e, t] - \
+            lhs = getattr(model,objs[0].lower_name+'_status_var')[e, t-1] - \
+                  getattr(model,objs[0].lower_name+'_status_var')[e, t] - \
                   getattr(model, objs[0].lower_name+'_stop_var')[e, t]
             rhs = 0
             return(lhs <= rhs)

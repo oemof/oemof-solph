@@ -37,6 +37,7 @@ class Component(Entity):
     Components and not between Entities of equal subtypes. This class
     exists only to facilitate this distinction and is empty otherwise.
     """
+    model_param = {}
     lower_name = "component"
 
     def __init__(self, **kwargs):
