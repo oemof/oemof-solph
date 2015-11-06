@@ -63,7 +63,7 @@ def results_to_objects(instance):
             entity.results['cap'] = []
             for t in instance.timesteps:
                 entity.results['cap'].append(
-                    instance.cap[entity.uid, t].value)
+                    instance.simple_storage.cap[entity.uid, t].value)
 
 
 def bus_duals_to_objects(instance):

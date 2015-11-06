@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Oct 18 18:41:08 2015
+Module contains variable definitions and constraint to bound variables (e.g.
+for investement).
 
-@author: simon
+@author: Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
 import pyomo.environ as po
@@ -10,11 +11,10 @@ import logging
 
 try:
     from oemof.core.network.entities import components as cp
-    from oemof.core.network.entities import Component
 except:
     from .network.entities import components as cp
 
-def add_binary(model, objs=None, uids=None):
+def add_binary(model, block):
     """ Creates all status variables (binary) for `objs`
 
     The function uses the pyomo class `Var()` to create the status variables of
@@ -41,15 +41,14 @@ def add_binary(model, objs=None, uids=None):
 
     """
     # check
-    if objs is None:
+    if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                           which the status variable should be created.")
-    if uids is None:
-        uids = [e.uids for e in objs]
+    if block.uids is None:
+        block.uids = [e.uids for e in block.objs]
 
     # add binary variables to model
-    setattr(model, objs[0].lower_name+'_status_var',
-            po.Var(uids, model.timesteps, within=po.Binary))
+    block.y = po.Var(block.uids, model.timesteps, within=po.Binary)
 
 def add_continuous(model, edges):
     """ Adds all variables corresponding to the edges of the bi-partite
@@ -86,26 +85,8 @@ def add_continuous(model, edges):
     model.w = po.Var(edges, model.timesteps, within=po.NonNegativeReals)
 
 
-    # additional variable for investment models
-    objs = [e for e in model.components
-            if e.model_param.get('investment', False) ==True]
-    uids = [e.uid for e in objs]
-    model.add_out = po.Var(uids, within=po.NonNegativeReals)
 
-    # storage state of charge variables
-    objs = [e for e in model.entities
-            if isinstance(e, cp.transformers.Storage)]
-    # if storages exist, create pyomo variables
-    if objs:
-        uids = [e.uid for e in objs]
-
-        model.cap = po.Var(uids, model.timesteps, within=po.NonNegativeReals)
-
-        uids_inv = [e.uid for e in objs if e.model_param['investment'] == True]
-        model.add_cap = po.Var(uids_inv, within=po.NonNegativeReals)
-
-
-def set_bounds(model, objs=None, uids=None, side='output'):
+def set_bounds(model, block, side='output'):
     """ Sets bounds for variables that represent the weight
     of the edges of the graph if investment models are calculated.
 
@@ -135,11 +116,7 @@ def set_bounds(model, objs=None, uids=None, side='output'):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
-    objs : array like
-        list of component objects for which the bounds will be
-        altered
-    uids : array linke
-        list of component uids corresponding to the objects
+    block : SimpleBlock()
     side : side of component for which the bounds are set('input' or 'output')
 
     Returns
@@ -148,30 +125,30 @@ def set_bounds(model, objs=None, uids=None, side='output'):
     object `model`.
     """
 
-    if objs is None:
+    if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                           which bounds should be set.")
-    if uids is None:
-        uids = [e.uids for e in objs]
+    if block.uids is None:
+        block.uids = [e.uids for e in block.objs]
 
     # set variable bounds (out_max = in_max * efficiency):
     # m.in_max = {'pp_coal': 51794.8717948718, ... }
     # m.out_max = {'pp_coal': 20200, ... }
     in_max = {}
     out_max = {}
-    for e in objs:
+    for e in block.objs:
         in_max[e.uid] = e.in_max
         out_max[e.uid] = e.out_max
-    if objs[0].model_param.get('investment', False) == False:
+    if block.objs[0].model_param.get('investment', False) == False:
         # edges for simple transformers ([('coal', 'pp_coal'),...])
-        ee = model.edges(objs)
+        ee = model.edges(block.objs)
         for (e1, e2) in ee:
             for t in model.timesteps:
                 # transformer output <= model.out_max
-                if e1 in uids and side == 'output':
+                if e1 in block.uids and side == 'output':
                     model.w[e1, e2, t].setub(out_max[e1][e2])
                 # transformer input <= model.in_max
-                if e2 in uids and side == 'input':
+                if e2 in block.uids and side == 'input':
                     try:
                         model.w[e1, e2, t].setub(in_max[e2][e1])
                     except:
@@ -182,18 +159,18 @@ def set_bounds(model, objs=None, uids=None, side='output'):
     else:
         if side == 'output':
             # set maximum of addiational storage capacity
-            add_out_limit = {obj.uid: obj.add_out_limit for obj in objs}
+            add_out_limit = {obj.uid: obj.add_out_limit for obj in block.objs}
             # loop over all uids (storages) set the upper bound
-            for e in uids:
-                model.add_out[e].setub(add_out_limit[e])
+            for e in block.uids:
+                block.add_out[e].setub(add_out_limit[e])
 
             # constraint for additional capacity
-            def add_output_rule(model, e, t):
+            def add_output_rule(block, e, t):
                 lhs = model.w[e, model.O[e][0], t]
-                rhs = out_max[e][model.O[e][0]] + model.add_out[e]
+                rhs = out_max[e][model.O[e][0]] + block.add_out[e]
                 return(lhs <= rhs)
-            setattr(model, objs[0].lower_name+"_output_bound",
-                    po.Constraint(uids, model.timesteps, rule=add_output_rule))
+            block.output_bound = po.Constraint(block.uids, model.timesteps,
+                                               rule=add_output_rule)
 
         # TODO: Implement upper bound constraint for investment models
         if side == 'input':
@@ -202,7 +179,7 @@ def set_bounds(model, objs=None, uids=None, side='output'):
 
 
 
-def set_storage_cap_bounds(model, objs=None, uids=None):
+def set_storage_cap_bounds(model, block):
     """ Alters/sets upper and lower bounds for variables that represent the
     state of charge e.g. filling level of a storage component.
 
@@ -212,23 +189,19 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
 
 
      .. math:: cap_{min}(e) \\leq CAP(e, t) \\leq cap_{max}(e), \
-    \\qquad \\forall e \\in uids, \\forall t \\in T
+    \\qquad \\forall e, \\forall t
 
     If investment:
 
     .. math:: CAP(e, t) \\leq cap_{max}(e) + ADDCAP(e), \
-    \\qquad \\forall e \\in uids, \\forall t \\in T
+    \\qquad \\forall e, \\forall t
 
     Parameters
     ------------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
-    objs : array like
-        list of component objects for which the bounds will be
-        altered
-    uids : array linke
-        list of component uids corresponding to the objects
+    block : SimpleBlock()
 
     Returns
     -------
@@ -237,38 +210,39 @@ def set_storage_cap_bounds(model, objs=None, uids=None):
 
     """
 
-    if objs is None:
+
+    if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                          which bounds should be set.")
-    if uids is None:
-        uids = [e.uids for e in objs]
+    if block.uids is None:
+        block.uids = [e.uids for e in block.objs]
 
     # extract values for storages m.cap_max = {'storge': 120.5, ... }
-    cap_max = {obj.uid: obj.cap_max for obj in objs}
-    cap_min = {obj.uid: obj.cap_min for obj in objs}
+    cap_max = {obj.uid: obj.cap_max for obj in block.objs}
+    cap_min = {obj.uid: obj.cap_min for obj in block.objs}
 
-    if objs[0].model_param['investment'] == False:
+    if block.objs[0].model_param['investment'] == False:
         # loop over all uids (storages) and timesteps to set the upper bound
-        for e in uids:
+        for e in block.uids:
             for t in model.timesteps:
-                model.cap[e, t].setub(cap_max[e])
-                model.cap[e, t].setlb(cap_min[e])
+                block.cap[e, t].setub(cap_max[e])
+                block.cap[e, t].setlb(cap_min[e])
     else:
         # set maximum of additional storage capacity
-        add_cap_limit = {obj.uid: obj.add_cap_limit for obj in objs}
+        add_cap_limit = {obj.uid: obj.add_cap_limit for obj in block.objs}
         # loop over all uids (storages) set the upper bound
-        for e in uids:
-            model.add_cap[e].setub(add_cap_limit[e])
+        for e in block.uids:
+            block.add_cap[e].setub(add_cap_limit[e])
 
         # constraint for additional capacity in investment models
-        def add_cap_rule(model, e, t):
-            lhs = model.cap[e, t]
-            rhs = cap_max[e] + model.add_cap[e]
+        def add_cap_rule(block, e, t):
+            lhs = block.cap[e, t]
+            rhs = cap_max[e] + block.add_cap[e]
             return(lhs <= rhs)
-        setattr(model,objs[0].lower_name+"_cap_bound",
-                po.Constraint(uids, model.timesteps, rule=add_cap_rule))
+        block.cap_bound = po.Constraint(block.uids, model.timesteps,
+                                        rule=add_cap_rule)
 
-def set_fixed_sink_value(model, objs=None, uids=None):
+def set_fixed_sink_value(model, block):
     """ Creates fixed sink from standard edges / variables by setting the value
     of variables and fixing variables to that value.
 
@@ -280,11 +254,7 @@ def set_fixed_sink_value(model, objs=None, uids=None):
     model :OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Attributes are altered of the `model`
-    objs : array like
-        list of component objects for which the variables representing the
-        input edges values will be set to a certain value and then fixed.
-    uids : array like
-        list of component uids corresponding to the objects
+    block : SimpeBlock()
 
     Returns
     -------
@@ -294,8 +264,8 @@ def set_fixed_sink_value(model, objs=None, uids=None):
     be altered.
     """
 
-    val = {obj.uid: obj.val for obj in objs}
-    ee = model.edges(objs)
+    val = {obj.uid: obj.val for obj in block.objs}
+    ee = model.edges(block.objs)
     for (e1, e2) in ee:
         for t in model.timesteps:
             # set variable value

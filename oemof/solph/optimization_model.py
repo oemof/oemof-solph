@@ -7,6 +7,7 @@
 
 
 import pyomo.environ as po
+import logging
 try:
     import variables as var
     import linear_mixed_integer_constraints as milc
@@ -50,7 +51,8 @@ class OptimizationModel(po.ConcreteModel):
         self.timesteps = timesteps
 
         # calculate all edges ([('coal', 'pp_coal'),...])
-        self.components = [e for e in self.entities if isinstance(e, Component)]
+        self.components = [e for e in self.entities
+                           if isinstance(e, Component)]
         self.all_edges = self.edges(self.components)
 
         var.add_continuous(model=self, edges=self.all_edges)
@@ -75,8 +77,14 @@ class OptimizationModel(po.ConcreteModel):
             self.uids[cls.lower_name] = uids
             # "call" methods to add the constraints opt. problem
             if objs:
-                getattr(self, cls.lower_name + '_assembler')(objs=objs,
-                                                             uids=uids)
+                # add pyomo block per cls to OptimizationModel instance
+                block = po.Block()
+                block.uids = uids
+                block.objs = objs
+                block.model_param = cls.model_param
+                self.add_component(cls.lower_name, block)
+                getattr(self, cls.lower_name + '_assembler')(block=block)
+
         self.bus_assembler()
 
         if options.get('objective_name', None) is not None:
@@ -153,7 +161,7 @@ class OptimizationModel(po.ConcreteModel):
         if self.uids['excess']:
              self.objfuncexpr += objfuncexprs.add_excess_slack_costs(self)
 
-    def simple_transformer_assembler(self, objs, uids):
+    def simple_transformer_assembler(self, block):
         """ Method containing the constraints functions for simple
         transformer components.
 
@@ -164,8 +172,7 @@ class OptimizationModel(po.ConcreteModel):
         Parameter
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are added to self
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
@@ -173,92 +180,88 @@ class OptimizationModel(po.ConcreteModel):
         """
         # TODO: This should be dependent on objs classes not fixed if assembler
         # method is used by another assemlber method...
-        param = objs[0].model_param
 
+        param = block.model_param
+
+        if param.get('investment', False) == True and param['milp_constr']:
+            raise ValueError('Component can not be modeled with milp-constr ' +
+                             'in investment mode! Please change `model_param`')
+
+        # additional variable for investment models
+        if param.get('investment', False) == True:
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
 
         # input output relation for simple transformer
         if 'io_relation' in param['linear_constr']:
             print('Creating simple input-output linear constraints for',
-                  objs[0].lower_name, '...')
-            lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+                  block.name, '...')
+            lc.add_simple_io_relation(self, block)
 
         # 'pmax' constraint/bounds for output of component
         if 'out_max' in param['linear_constr']:
-            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+            var.set_bounds(self, block, side='output')
         #'pmax' constraint/bounds for input of component
         if 'in_max' in param['linear_constr']:
-            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
+            var.set_bounds(self, block, side='input')
         # gradient calculation dGrad
         if 'ramping' in param['linear_constr']:
-            lc.add_output_gradient_calc(model=self, objs=objs, uids=uids,
-                                        grad_direc="both")
+            lc.add_output_gradient_calc(self, block, grad_direc="both")
 
         if param['investment'] == False:
             # binary status variables
             if param['milp_constr']:
-                var.add_binary(model=self, objs=objs, uids=uids)
+                var.add_binary(self, block)
             # (pmax)/pmin constraints for output of component
             if 'out_min' in param['milp_constr']:
-                milc.set_bounds(model=self, objs=objs, uids=uids,
-                                side='output')
+                milc.set_bounds(self, block, side='output')
             # (pmax)/pmin constraints for input of component
             if 'in_min' in param['milp_constr']:
                 print('Creating minimum input milp constraints for',
-                      objs[0].lower_name, '...')
-                milc.set_bounds(model=self, objs=objs, uids=uids,
-                                side='input')
+                      block.name, '...')
+                milc.set_bounds(self, block, side='input')
             # additional ramping constraint for milp-models
             if 'ramping' in param['milp_constr']:
                 print('Creating ramping milp constraints for',
-                      objs[0].lower_name, '...')
-                milc.add_output_gradient_constraints(model=self, objs=objs,
-                                                     uids=uids,
+                      block.name, '...')
+                milc.add_output_gradient_constraints(self, block,
                                                      grad_direc='both')
             # startup constraints
             if 'startup' in param['milp_constr']:
-                milc.add_startup_constraints(model=self, objs=objs, uids=uids)
+                milc.add_startup_constraints(self, block)
                 # startup constraints
             if 'shutdown' in param['milp_constr']:
-                milc.add_shutdown_constraints(model=self, objs=objs, uids=uids)
+                milc.add_shutdown_constraints(self, block)
 
         # objective expressions
 
         # add variable costs (opex_var)
         if 'opex_var' in param['objective']:
-            self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
-                                                          uids=uids)
+            self.objfuncexpr += objfuncexprs.add_opex_var(self, block)
         # add fix costs (opex_fix, refers to the output side e.g. el. Power)
         if 'opex_fix' in param['objective']:
-            self.objfuncexpr += objfuncexprs.add_opex_fix(self, objs=objs,
-                                                          uids=uids,
+            self.objfuncexpr += objfuncexprs.add_opex_fix(self, block,
                                                           ref='output')
         # add fuel costs (input_costs, if not included in opex)
         if 'fuel_ex' in param['objective']:
-            self.objfuncexpr += objfuncexprs.add_input_costs(self, objs=objs,
-                                                             uids=uids)
+            self.objfuncexpr += objfuncexprs.add_input_costs(self, block)
         # add revenues generated by output (busprice from output)
         if 'rsell' in param['objective']:
-            self.objfuncexpr += objfuncexprs.add_output_revenues(self,
-                                                                 objs=objs,
-                                                                 uids=uids)
+            self.objfuncexpr += objfuncexprs.add_revenues(self, block,
+                                                          ref='output')
         if 'ramping' in param['linear_constr']:
-            self.objfuncexpr += \
-                objfuncexprs.add_ramping_costs(self, objs=objs, uids=uids)
+            self.objfuncexpr += objfuncexprs.add_ramping_costs(self, block)
         # add startup costs
         if 'startup' in param['milp_constr']:
-            self.objfuncexpr += objfuncexprs.add_startup_costs(self, objs=objs,
-                                                               uids=uids)
+            self.objfuncexpr += objfuncexprs.add_startup_costs(self, block)
         # add shutbown costs
         if 'shutdown' in param['milp_constr']:
-            self.objfuncexpr += \
-                 objfuncexprs.add_shutdown_costs(self, objs=objs, uids=uids)
+            self.objfuncexpr += objfuncexprs.add_shutdown_costs(self, block)
         # investment costs (capex) if in component can be invested
         if param['investment'] == True:
-            self.objfuncexpr += \
-                 objfuncexprs.add_capex(self, objs=objs, uids=uids,
-                                        ref='output')
+            self.objfuncexpr += objfuncexprs.add_capex(self, block,
+                                                       ref='output')
 
-    def simple_chp_assembler(self, objs, uids):
+    def simple_chp_assembler(self, block):
         """ Method grouping the constraints for simple chp components.
 
         The methdo uses the simple_transformer_assembler() method. The
@@ -267,170 +270,177 @@ class OptimizationModel(po.ConcreteModel):
         Parameters
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are created
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
         self : OptimizationModel() instance
         """
-        param = objs[0].model_param
+        param = block.model_param
+
+        # additional variable for investment models
+        if param.get('investement', False) == True:
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(objs=objs, uids=uids)
+        self.simple_transformer_assembler(block)
 
         # add constraint for PQ relation (P/eta_el = Q/eta_th)
         if 'simple_chp_relation' in param['linear_constr']:
-            lc.add_simple_chp_relation(model=self, objs=objs, uids=uids)
+            lc.add_simple_chp_relation(self, block)
 
-    def simple_extraction_chp_assembler(self, objs, uids):
+    def simple_extraction_chp_assembler(self, block):
         """Method grouping the constraints for simple chp components.
 
         Parameters
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are created
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
         self : OptimizationModel() instance
         """
-        param = objs[0].model_param
+        param = block.model_param
 
-        if param['investment'] == True:
+        if param.get('investment', False) == True:
            raise ValueError('Investment models can not be calculated' +
                         'with extraction chps.')
 
         # upper bounds on input
         if 'in_max' in param['linear_constr']:
-            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
+            var.set_bounds(self, block, side='input')
         # upper bounds on output
         if 'out_max' in param['linear_constr']:
-            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+            var.set_bounds(self, block, side='output')
         # relations for P/Q-field of extraction turbine
         if 'simple_extraction_relation' in param['linear_constr']:
-            lc.add_simple_extraction_chp_relation(model=self, objs=objs,
-                                                  uids=uids)
+            lc.add_simple_extraction_chp_relation(self, block)
         else:
-            raise ValueError('Necessary constraint for extraction chp missing!')
+            logging.warning('Necessary constraint for extraction chp missing!')
 
         # gradient calculation dGrad
-        if 'gradient' in param['linear_constr']:
-            lc.add_gradient_calc(model=self, objs=objs, uids=uids)
+        if 'ramping' in param['linear_constr']:
+            lc.add_output_gradient_calc(self, block)
         # add binary status variables
         if param['milp_constr']:
-            var.add_binary(model=self, objs=objs, uids=uids)
+            var.add_binary(self, block)
         # pmin constraint for input
         if 'in_min' in param['milp_constr']:
-            milc.set_bounds(model=self, objs=objs, uids=uids, side="input")
+            milc.set_bounds(self, block, side="input")
         # pmin for output side
         if 'out_min' in param['milp_constr']:
-            milc.set_bounds(model=self, objs=objs, uids=uids, side="output")
+            milc.set_bounds(self, block, side="output")
         # start up constraints (electrical output side)
         if 'startup' in param['milp_constr']:
-            milc.add_startup_constraints(model=self, objs=objs, uids=uids)
+            milc.add_startup_constraints(self, block)
         # shut down constraint (electrical output side)
         if 'shutdown' in param['milp_constr']:
-            milc.add_shutdown_constraints(model=self,objs=objs, uids=uids)
+            milc.add_shutdown_constraints(self, block)
+        if 'ramping' in param['milp_constr']:
+            milc.add_output_gradient_constraints(self, block,
+                                                 grad_direc='both')
 
         # add variable costs (opex_var)
         if 'opex_var' in param['objective']:
-            self.objfuncexpr += objfuncexprs.add_opex_var(self, objs=objs,
-                                                          uids=uids)
+            self.objfuncexpr += objfuncexprs.add_opex_var(self, block)
         # add fix costs (opex_fix, refers to the output side e.g. el. Power)
         if 'opex_fix' in param['objective']:
-            self.objfuncexpr += \
-                objfuncexprs.add_opex_fix(self, objs=objs, uids=uids,
-                                          ref='output')
+            self.objfuncexpr += objfuncexprs.add_opex_fix(self, block,
+                                                          ref='output')
         # add fuel costs (input_costs, if not included in opex)
         if 'fuel_ex' in param['objective']:
-            self.objfuncexpr += \
-                objfuncexprs.add_input_costs(self, objs=objs, uids=uids)
+            self.objfuncexpr += objfuncexprs.add_input_costs(self, block)
         # add revenues generated by output (busprice from output)
         if 'rsell' in param['objective']:
-            self.objfuncexpr += \
-                 objfuncexprs.add_output_revenues(self, objs=objs, uids=uids)
+            self.objfuncexpr += objfuncexprs.add_revenues(self, block,
+                                                          ref='output')
+        # ramping costs
+        if 'ramping' in param['linear_constr']:
+            self.objfuncexpr += objfuncexprs.add_ramping_costs(self, block)
         # add startup costs
         if 'startup' in param['milp_constr']:
-            self.objfuncexpr += \
-                 objfuncexprs.add_startup_costs(self, objs=objs, uids=uids)
+            self.objfuncexpr += objfuncexprs.add_startup_costs(self, block)
         # add shutbown costs
         if 'shutdown' in param['milp_constr']:
-            self.objfuncexpr += \
-                 objfuncexprs.add_shutdown_costs(self, objs=objs, uids=uids)
+            self.objfuncexpr += objfuncexprs.add_shutdown_costs(self, block)
 
-    def fixed_source_assembler(self, objs, uids):
+    def fixed_source_assembler(self, block):
         """Method containing the constraints for
         fixed sources.
 
         Parameters
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are created
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
         self : OptimizationModel() instance
         """
-        param = cp.sources.FixedSource.model_param
+        param = block.model_param
+
+        # additional variable for investment models
+        if param.get('investement', False) == True:
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
 
         # add constraints
         if 'fixvalues' in param['linear_constr']:
-            lc.add_fix_source(model=self, objs=objs, uids=uids)
+            lc.add_fix_source(self, block)
 
         # add variable operational expenditure
         if 'opex_var' in param ['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_opex_var(self, objs=objs, uids=uids,
-                                          ref='output')
+            self.objfuncexpr = objfuncexprs.add_opex_var(self, block,
+                                                         ref='output')
         # add fixed operational expenditure
         if 'opex_fix' in param ['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_opex_fix(self, objs=objs, uids=uids,
-                                          ref='output')
+            self.objfuncexpr = objfuncexprs.add_opex_fix(self, block,
+                                                         ref='output')
         # add revenues from selling output
         if 'rsell' in param ['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_output_revenues(self, objs=objs, uids=uids,
-                                                 ref='output')
+            self.objfuncexpr = objfuncexprs.add_revenues(self, block,
+                                                         ref='output')
         if param['investment'] == True:
-            self.objfuncexpr = \
-                objfuncexprs.add_capex(self, objs=objs, uids=uids, ref='output')
+            self.objfuncexpr = objfuncexprs.add_capex(self, block,
+                                                      ref='output')
 
-    def dispatch_source_assembler(self, objs, uids):
+    def dispatch_source_assembler(self, block):
+        """Method containing the constraints for dispatchable sources.
+
+        Parameters
+        ----------
+        self : OptimizationModel() instance
+        block : SimpleBlock()
+
+        Returns
+        -------
+        self : OptimizationModel() instance
         """
-        """
-        param = objs[0].model_param
+        param = block.model_param
         # add constraints
-        if param['investment'] == True:
+        if param.get('investment', False) == True:
             raise ValueError('Dispatch source investment is not possible')
 
         if 'dispatch' in param['linear_constr']:
-             lc.add_dispatch_source(model=self, objs=objs, uids=uids)
+             lc.add_dispatch_source(self, block)
 
         if 'opex_var' in param ['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_opex_var(self, objs=objs, uids=uids,
-                                          ref='output')
+            self.objfuncexpr = objfuncexprs.add_opex_var(self, block,
+                                                         ref='output')
         if 'opex_fix' in param ['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_opex_fix(self, objs=objs, uids=uids,
-                                          ref='output')
+            self.objfuncexpr = objfuncexprs.add_opex_fix(self, block,
+                                                         ref='output')
         # add dispatch costs (dispatch_ex) to objective
         if 'dispatch_ex' in param['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_curtailment_costs(self, objs=objs, uids=uids)
+            self.objfuncexpr = objfuncexprs.add_curtailment_costs(self, block)
         if 'rsell' in param ['objective']:
-            self.objfuncexpr = \
-                objfuncexprs.add_output_revenues(self, objs=objs, uids=uids,
-                                                 ref='output')
+            self.objfuncexpr = objfuncexprs.add_revenues(self, block,
+                                                         ref='output')
         if param['investment'] == True:
-            self.objfuncexpr = \
-                objfuncexprs.add_capex(self, objs=objs, uids=uids, ref='output')
+            self.objfuncexpr = objfuncexprs.add_capex(self, block,
+                                                      ref='output')
 
-    def simple_sink_assembler(self, objs, uids):
+    def simple_sink_assembler(self, block):
         """Method containing the constraints for simple sinks
 
         Simple sinks are modeled with a fixed output value set for the
@@ -439,68 +449,73 @@ class OptimizationModel(po.ConcreteModel):
         Parameters
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are created
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
         self : OptimizationModel() instance
         """
-        var.set_fixed_sink_value(model=self, objs=objs, uids=uids)
+        var.set_fixed_sink_value(self, block)
 
-    def simple_storage_assembler(self, objs, uids):
+    def simple_storage_assembler(self, block):
         """Simple storage assembler containing the constraints for simple
         storage components.
 
          Parameters
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are created
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
         self : OptimizationModel() instance
         """
-        param = objs[0].model_param
+        # add capacity variable
+        block.cap = po.Var(block.uids, self.timesteps,
+                           within=po.NonNegativeReals)
 
-        lc.add_storage_balance(model=self, objs=objs, uids=uids)
-        var.set_storage_cap_bounds(self, objs, uids)
+        param = block.model_param
+
+        # add addictional capacity variable
+        if param.get('investment', False) == True:
+            block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
+
+        lc.add_storage_balance(self, block)
+        var.set_storage_cap_bounds(self, block)
 
         # optimization model with no investment
-        if param['investment'] == False:
-            var.set_bounds(model=self, objs=objs, uids=uids, side='output')
-            var.set_bounds(model=self, objs=objs, uids=uids, side='input')
+        if param.get('investment', False) == False:
+            var.set_bounds(self, block, side='output')
+            var.set_bounds(self, block, side='input')
         # investment
         else:
             # constraint that limits discharge power by using the c-rate
-            c_rate_out = {obj.uid: obj.c_rate_out for obj in objs}
-            cap_max = {obj.uid: obj.cap_max for obj in objs}
+            c_rate_out = {obj.uid: obj.c_rate_out for obj in block.objs}
+            cap_max = {obj.uid: obj.cap_max for obj in block.objs}
 
-            def storage_discharge_limit_rule(self, e, t):
+            def storage_discharge_limit_rule(block, e, t):
                 expr = 0
                 expr += self.w[e, self.O[e][0], t]
-                expr += -(cap_max[e] + self.add_cap[e]) \
+                expr += -(cap_max[e] + block.add_cap[e]) \
                     * c_rate_out[e]
                 return(expr <= 0)
-            setattr(self, objs[0].lower_name+"_discharge_limit_invest",
-                    po.Constraint(uids, self.timesteps,
-                                  rule=storage_discharge_limit_rule))
+            block.discharge_limit_invest = po.Constraint(block.uids,
+                                                         self.timesteps,
+                                             rule=storage_discharge_limit_rule)
 
             # constraint that limits charging power by using the c-rate
-            c_rate_in = {obj.uid: obj.c_rate_in for obj in objs}
+            c_rate_in = {obj.uid: obj.c_rate_in for obj in block.objs}
 
-            def storage_charge_limit_rule(self, e, t):
+            def storage_charge_limit_rule(block, e, t):
                 expr = 0
                 expr += self.w[e, self.I[e], t]
-                expr += -(cap_max[e] + self.add_cap[e]) \
+                expr += -(cap_max[e] + block.add_cap[e]) \
                     * c_rate_in[e]
                 return(expr <= 0)
-            setattr(self,objs[0].lower_name+"_charge_limit_invest",
-                    po.Constraint(uids, self.timesteps,
-                                  rule=storage_charge_limit_rule))
+            block.charge_limit_invest = po.Constraint(block.uids, self.timesteps,
+                                           rule=storage_charge_limit_rule)
 
-    def simple_transport_assembler(self, objs, uids):
+    def simple_transport_assembler(self, block):
         """Simple transport assembler grouping the constraints
         for simple transport components
 
@@ -509,8 +524,7 @@ class OptimizationModel(po.ConcreteModel):
         Parameters
         ----------
         self : OptimizationModel() instance
-        objs : oemof objects for which the constraints etc. are created
-        uids : unique ids of `objs`
+        block : SimpleBlock()
 
         Returns
         -------
@@ -518,9 +532,9 @@ class OptimizationModel(po.ConcreteModel):
         """
 
         # input output relation for simple transport
-        lc.add_simple_io_relation(model=self, objs=objs, uids=uids)
+        lc.add_simple_io_relation(self, block)
         # bounds
-        var.set_bounds(model=self, objs=objs, uids=uids, side='output')
+        var.set_bounds(self, block, side='output')
 
     def objective_assembler(self, objective_name="minimize_costs"):
         """ calls functions to add predefined objective functions
