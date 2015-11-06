@@ -2,6 +2,8 @@
  Meta description
 =========================================
 
+Eva, Ulf and Ilka learn git.
+
 This so called meta-description was developed to make oemof easy to use and 
 develop. It describes general ideas and structures of oemof and its modules.
 
