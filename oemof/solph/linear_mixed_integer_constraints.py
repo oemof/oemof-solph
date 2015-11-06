@@ -57,36 +57,39 @@ def set_bounds(model, block, side="output"):
         out_max = {obj.uid: obj.out_max for obj in block.objs}
 
         # set upper bounds
-        def ub_rule(block, e, t):
+        def output_ub_rule(block, e, t):
             return(model.w[e, model.O[e][0], t] <= block.y[e, t]
                         * out_max[e][model.O[e][0]])
-        block.out_max = po.Constraint(block.uids, model.timesteps, rule=ub_rule)
+        block.maximum_output = po.Constraint(block.uids, model.timesteps,
+                                             rule=output_ub_rule)
 
         out_min = {obj.uid: obj.out_min for obj in block.objs}
         # set lower bounds
-        def lb_rule(block, e, t):
+        def output_lb_rule(block, e, t):
             lhs = block.y[e, t] * out_min[e][model.O[e][0]]
             rhs = model.w[e, model.O[e][0], t]
             return(lhs <= rhs)
-        block.out_min = po.Constraint(block.uids, model.timesteps, rule=lb_rule)
+        block.minimum_output = po.Constraint(block.uids, model.timesteps,
+                                             rule=output_lb_rule)
 
     if side == "input":
         in_max = {obj.uid: obj.in_max for obj in block.objs}
 
         # set upper bounds
-        def ub_rule(block, e, t):
+        def input_ub_rule(block, e, t):
             return(model.w[model.I[e], e, t] <= block.y[e, t]
                         * in_max[e][model.I[e]])
-        block.in_max = po.Constraint(block.uids, model.timesteps, rule=ub_rule)
+        block.maximum_input = po.Constraint(block.uids, model.timesteps,
+                                            rule=input_ub_rule)
 
         in_min = {obj.uid: obj.in_min for obj in block.objs}
         # set lower bounds
-        def lb_rule(block, e, t):
+        def input_lb_rule(block, e, t):
             lhs = block.y[e, t] * in_min[e][model.I[e]]
             rhs = model.w[model.I[e], e, t]
             return(lhs <= rhs)
         block.minimum_input = po.Constraint(block.uids, model.timesteps,
-                                            rule=lb_rule)
+                                            rule=input_lb_rule)
 
 def add_output_gradient_constraints(model, block, grad_direc="both"):
     """ Creates constraints to model the output gradient.

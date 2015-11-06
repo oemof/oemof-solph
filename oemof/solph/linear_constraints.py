@@ -179,7 +179,7 @@ def add_simple_extraction_chp_relation(model, block):
     """
 
     if block.uids is None:
-        uids = [e.uid for e in block.objs]
+        block.uids = [e.uid for e in block.objs]
 
     out_max = {}
     beta = {}
@@ -196,13 +196,13 @@ def add_simple_extraction_chp_relation(model, block):
         rhs = (model.w[e, model.O[e][0], t] +
               beta[e] * model.w[e, model.O[e][1], t]) / eta[e][0]
         return(lhs == rhs)
-    block.equivalent_output = po.Constraint(uids, model.timesteps,
+    block.equivalent_output = po.Constraint(block.uids, model.timesteps,
                                             rule=equivalent_output_rule)
     def power_heat_rule(block, e, t):
         lhs = model.w[e, model.O[e][1], t]
         rhs = model.w[e, model.O[e][0], t] / sigma[e]
         return(lhs <= rhs)
-    block.pth_relation = po.Constraint(uids, model.timesteps,
+    block.pth_relation = po.Constraint(block.uids, model.timesteps,
                                        rule=power_heat_rule)
 
 def add_bus_output_limit(model, objs=None, uids=None):
