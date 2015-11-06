@@ -44,11 +44,8 @@ def add_binary(model, block):
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                           which the status variable should be created.")
-    if block.uids is None:
-        block.uids = [e.uids for e in block.objs]
-
     # add binary variables to model
-    block.y = po.Var(block.uids, model.timesteps, within=po.Binary)
+    block.y = po.Var(block.indexset, within=po.Binary)
 
 def add_continuous(model, edges):
     """ Adds all variables corresponding to the edges of the bi-partite
@@ -169,7 +166,7 @@ def set_bounds(model, block, side='output'):
                 lhs = model.w[e, model.O[e][0], t]
                 rhs = out_max[e][model.O[e][0]] + block.add_out[e]
                 return(lhs <= rhs)
-            block.output_bound = po.Constraint(block.uids, model.timesteps,
+            block.output_bound = po.Constraint(block.indexset,
                                                rule=add_output_rule)
 
         # TODO: Implement upper bound constraint for investment models
@@ -239,7 +236,7 @@ def set_storage_cap_bounds(model, block):
             lhs = block.cap[e, t]
             rhs = cap_max[e] + block.add_cap[e]
             return(lhs <= rhs)
-        block.cap_bound = po.Constraint(block.uids, model.timesteps,
+        block.cap_bound = po.Constraint(block.indexset,
                                         rule=add_cap_rule)
 
 def set_fixed_sink_value(model, block):

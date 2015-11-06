@@ -50,17 +50,15 @@ def set_bounds(model, block, side="output"):
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                          which bounds should be set.")
-    if block.uids is None:
-        block.uids = [e.uids for e in block.objs]
-
     if side == "output":
         out_max = {obj.uid: obj.out_max for obj in block.objs}
 
         # set upper bounds
         def output_ub_rule(block, e, t):
-            return(model.w[e, model.O[e][0], t] <= block.y[e, t]
-                        * out_max[e][model.O[e][0]])
-        block.maximum_output = po.Constraint(block.uids, model.timesteps,
+            lhs = model.w[e, model.O[e][0], t]
+            rhs = block.y[e, t] * out_max[e][model.O[e][0]]
+            return(lhs <= rhs)
+        block.maximum_output = po.Constraint(block.indexset,
                                              rule=output_ub_rule)
 
         out_min = {obj.uid: obj.out_min for obj in block.objs}
@@ -69,7 +67,7 @@ def set_bounds(model, block, side="output"):
             lhs = block.y[e, t] * out_min[e][model.O[e][0]]
             rhs = model.w[e, model.O[e][0], t]
             return(lhs <= rhs)
-        block.minimum_output = po.Constraint(block.uids, model.timesteps,
+        block.minimum_output = po.Constraint(block.indexset,
                                              rule=output_lb_rule)
 
     if side == "input":
@@ -77,10 +75,10 @@ def set_bounds(model, block, side="output"):
 
         # set upper bounds
         def input_ub_rule(block, e, t):
-            return(model.w[model.I[e], e, t] <= block.y[e, t]
-                        * in_max[e][model.I[e]])
-        block.maximum_input = po.Constraint(block.uids, model.timesteps,
-                                            rule=input_ub_rule)
+            lhs = model.w[model.I[e], e, t]
+            rhs = block.y[e, t] * in_max[e][model.I[e]]
+            return(lhs <= rhs)
+        block.maximum_input = po.Constraint(block.indexset, rule=input_ub_rule)
 
         in_min = {obj.uid: obj.in_min for obj in block.objs}
         # set lower bounds
@@ -88,8 +86,7 @@ def set_bounds(model, block, side="output"):
             lhs = block.y[e, t] * in_min[e][model.I[e]]
             rhs = model.w[model.I[e], e, t]
             return(lhs <= rhs)
-        block.minimum_input = po.Constraint(block.uids, model.timesteps,
-                                            rule=input_lb_rule)
+        block.minimum_input = po.Constraint(block.indexset, rule=input_lb_rule)
 
 def add_output_gradient_constraints(model, block, grad_direc="both"):
     """ Creates constraints to model the output gradient.
@@ -127,8 +124,6 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                           which bounds should be set.")
-    if block.uids is None:
-        block.uids = [e.uids for e in block.objs]
 
     out_min = {obj.uid: obj.out_min for obj in block.objs}
     grad_pos = {obj.uid: obj.grad_pos for obj in block.objs}
@@ -155,18 +150,18 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
 
     # positive gradient
     if grad_direc == "positive" or grad_direc == "both":
-        block.milp_gradient_pos = po.Constraint(block.uids, model.timesteps,
+        block.milp_gradient_pos = po.Constraint(block.indexset,
                                                 rule=grad_pos_rule)
     # negative gradient
     if grad_direc == "negative" or grad_direc == "both":
-        block.milp_gradient_neg = po.Constraint(block.uids, model.timesteps,
+        block.milp_gradient_neg = po.Constraint(block.indexset,
                                                 rule=grad_neg_rule)
 
 
 def add_startup_constraints(model, block):
     """ Creates constraints to model the start up of a component
 
-    .. math::  X_on(e,t) - X_on(e,t-1) \\leq Z_{start}(e,t), \\qquad \
+    .. math::  Y(e,t) - Yn(e,t-1) \\leq Z_{start}(e,t), \\qquad \
         \\forall e, \\forall t
 
     Parameters
@@ -188,8 +183,6 @@ def add_startup_constraints(model, block):
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                           which constraints should be set.")
-    if block.uids is None:
-        block.uids = [e.uids for e in block.objs]
 
     # create binary start-up variables for objects
     block.z_start = po.Var(block.uids, model.timesteps, within=po.Binary)
@@ -206,14 +199,13 @@ def add_startup_constraints(model, block):
         else:
             # TODO: Define correct boundary conditions
             return(po.Constraint.Skip)
-    block.start_up = po.Constraint(block.uids, model.timesteps,
-                                   rule=start_up_rule)
+    block.start_up = po.Constraint(block.indexset, rule=start_up_rule)
 
 
 def add_shutdown_constraints(model, block):
     """ Creates constraints to model the shut down of a component
 
-    .. math::  X_on(e,t-1) - X_on(e,t) \\leq Z_{stop}(e,t), \\qquad \
+    .. math::  Y(e,t-1) - Y(e,t) \\leq Z_{stop}(e,t), \\qquad \
     \\forall e, \\forall t
 
     Parameters
@@ -235,8 +227,6 @@ def add_shutdown_constraints(model, block):
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                           which constraints should be set.")
-    if block.uids is None:
-        block.uids = [e.uids for e in block.objs]
 
     # create binary start-up variables for objects
     block.z_stop = po.Var(block.uids, model.timesteps, within=po.Binary)
@@ -249,5 +239,4 @@ def add_shutdown_constraints(model, block):
         else:
             # TODO: Define correct boundary conditions
             return(po.Constraint.Skip)
-    block.shut_down = po.Constraint(block.uids, model.timesteps,
-                                    rule=shutdown_rule)
+    block.shut_down = po.Constraint(block.indexset, rule=shutdown_rule)

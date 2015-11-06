@@ -49,7 +49,7 @@ class OptimizationModel(po.ConcreteModel):
 
         self.entities = entities
         self.timesteps = timesteps
-
+        self.T = po.Set(initialize=timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.components = [e for e in self.entities
                            if isinstance(e, Component)]
@@ -79,7 +79,8 @@ class OptimizationModel(po.ConcreteModel):
             if objs:
                 # add pyomo block per cls to OptimizationModel instance
                 block = po.Block()
-                block.uids = uids
+                block.uids = po.Set(initialize=uids)
+                block.indexset = po.Set(initialize=block.uids*self.T)
                 block.objs = objs
                 block.model_param = cls.model_param
                 self.add_component(cls.lower_name, block)

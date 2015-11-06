@@ -85,8 +85,6 @@ def add_simple_io_relation(model, block):
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                          which the constraints should be build")
-    if block.uids is None:
-        block.uids = [e.uids for e in block.objs]
 
     eta = {obj.uid: obj.eta for obj in block.objs}
 
@@ -95,8 +93,7 @@ def add_simple_io_relation(model, block):
         lhs = model.w[model.I[e], e, t] * eta[e][0] - \
             model.w[e, model.O[e][0], t]
         return(lhs == 0)
-    block.io_relation = po.Constraint(block.uids, model.timesteps,
-                                      rule=io_rule,
+    block.io_relation = po.Constraint(block.indexset, rule=io_rule,
                                       doc="Input * Efficiency = Output")
 
 def add_simple_chp_relation(model, block):
@@ -127,6 +124,9 @@ def add_simple_chp_relation(model, block):
     OptimizationModel()
 
     """
+    if block.objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                          which constraints should be set.")
     #TODO:
     #  - add possibility of multiple output busses (e.g. for heat and power)
     # efficiencies for simple chps
@@ -139,8 +139,7 @@ def add_simple_chp_relation(model, block):
         lhs = model.w[e, model.O[e][0], t] / eta[e][0]
         lhs += -model.w[e, model.O[e][1], t] / eta[e][1]
         return(lhs == 0)
-    block.pth_relation = po.Constraint(block.uids, model.timesteps,
-                                      rule=simple_chp_rule,
+    block.pth_relation = po.Constraint(block.indexset, rule=simple_chp_rule,
                                       doc="P/eta_el - Q/eta_th = 0")
 
 def add_simple_extraction_chp_relation(model, block):
@@ -177,9 +176,9 @@ def add_simple_extraction_chp_relation(model, block):
     --------
 
     """
-
-    if block.uids is None:
-        block.uids = [e.uid for e in block.objs]
+    if block.objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                          which constraints should be set.")
 
     out_max = {}
     beta = {}
@@ -196,14 +195,13 @@ def add_simple_extraction_chp_relation(model, block):
         rhs = (model.w[e, model.O[e][0], t] +
               beta[e] * model.w[e, model.O[e][1], t]) / eta[e][0]
         return(lhs == rhs)
-    block.equivalent_output = po.Constraint(block.uids, model.timesteps,
+    block.equivalent_output = po.Constraint(block.indexset,
                                             rule=equivalent_output_rule)
     def power_heat_rule(block, e, t):
         lhs = model.w[e, model.O[e][1], t]
         rhs = model.w[e, model.O[e][0], t] / sigma[e]
         return(lhs <= rhs)
-    block.pth_relation = po.Constraint(block.uids, model.timesteps,
-                                       rule=power_heat_rule)
+    block.pth_relation = po.Constraint(block.indexset, rule=power_heat_rule)
 
 def add_bus_output_limit(model, objs=None, uids=None):
     """ Adds constraint to set limit for variables as sum over the total
@@ -241,7 +239,7 @@ def add_bus_output_limit(model, objs=None, uids=None):
             return(po.Constraint.Skip)
         else:
             return(lhs <= 0)
-    setattr(model,objs[0].lower_name+"_limit",
+    setattr(model, objs[0].lower_name+"_limit",
             po.Constraint(uids, rule=output_limit_rule))
 
 def add_fixed_source(model, block):
@@ -303,8 +301,7 @@ def add_fixed_source(model, block):
             lhs = model.w[e, model.O[e][0], t]
             rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
             return(lhs == rhs)
-        block.invest = po.Constraint(block.uids, model.timesteps,
-                                     rule=invest_rule)
+        block.invest = po.Constraint(block.indexset, rule=invest_rule)
 
 def add_dispatch_source(model, block):
     """ Creates dispatchable source models by setting bounds and
@@ -334,12 +331,8 @@ def add_dispatch_source(model, block):
     the optimization model object `model` of class OptimizationModel().
     """
 
-    if block.uids is None:
-        block.uids = [e.uid for e in block.objs]
-
     # create dispatch var
-    block.curtailment_var = po.Var(block.uids, model.timesteps,
-                                   within=po.NonNegativeReals)
+    block.curtailment_var = po.Var(block.indexset, within=po.NonNegativeReals)
 
     # normed value of renewable source (0 <= value <=1)
     val = {}
@@ -360,7 +353,7 @@ def add_dispatch_source(model, block):
         rhs = val[e][t] * out_max[e][model.O[e][0]] - \
            model.w[e, model.O[e][0], t]
         return(lhs == rhs)
-    block.curtailment = po.Constraint(block.uids, model.timesteps,
+    block.curtailment = po.Constraint(block.indexset,
                                       rule=curtailment_source_rule)
 
 def add_storage_balance(model, block):
@@ -406,8 +399,7 @@ def add_storage_balance(model, block):
             expr += + model.w[model.I[e], e, t] * eta_in[e]
             expr += - model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
-    block.balance = po.Constraint(block.uids, model.timesteps,
-                                  rule=storage_balance_rule)
+    block.balance = po.Constraint(block.indexset, rule=storage_balance_rule)
 
 
 def add_output_gradient_calc(model, block, grad_direc='both'):
@@ -471,20 +463,18 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     if grad_direc == 'positive' or grad_direc == "both":
         # create variable
         grad_pos = {obj.uid: obj.grad_pos for obj in block.objs}
-        block.grad_pos_var = po.Var(block.uids, model.timesteps,
-                                    within=po.NonNegativeReals,
+        block.grad_pos_var = po.Var(block.indexset, within=po.NonNegativeReals,
                                     bounds=grad_pos_bound_rule)
         # set constraint
-        block.grad_pos_calc = po.Constraint(block.uids, model.timesteps,
+        block.grad_pos_calc = po.Constraint(block.indexset,
                                             rule=grad_pos_calc_rule)
 
     # positive gradient
     if grad_direc == 'negative' or grad_direc == "both":
         # create variable
         grad_neg = {obj.uid: obj.grad_neg for obj in block.objs}
-        block.grad_neg_var = po.Var(block.uids, model.timesteps,
-                                    within=po.NonNegativeReals,
+        block.grad_neg_var = po.Var(block.indexset, within=po.NonNegativeReals,
                                     bounds=grad_neg_bound_rule)
         # set constraint
-        block.grad_neg_calc = po.Constraint(block.uids, model.timesteps,
+        block.grad_neg_calc = po.Constraint(block.indexset,
                                             rule=grad_neg_calc_rule)
