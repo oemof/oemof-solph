@@ -28,7 +28,7 @@ def add_opex_var(model, block, ref='output'):
 
     """
     if block.uids is None:
-        uids = [obj.uid for obj in block.objs]
+        block.uids = [obj.uid for obj in block.objs]
 
 
     opex_var = {obj.uid: obj.opex_var for obj in block.objs}
@@ -41,7 +41,6 @@ def add_opex_var(model, block, ref='output'):
         expr = sum(model.w[model.I[e], e, t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
-
     return(expr)
 
 def add_input_costs(model, block):
