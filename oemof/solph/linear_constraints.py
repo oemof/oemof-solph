@@ -184,17 +184,17 @@ def add_simple_extraction_chp_relation(model, block):
     out_max = {}
     beta = {}
     sigma = {}
-    eta = {}
+    eta_el_cond = {}
     for e in block.objs:
         out_max[e.uid] = e.out_max
         beta[e.uid] = e.beta
         sigma[e.uid] = e.sigma
-        eta[e.uid] = e.eta
+        eta_el_cond[e.uid] = e.eta_el_cond
 
     def equivalent_output_rule(block, e, t):
         lhs = model.w[model.I[e], e, t]
         rhs = (model.w[e, model.O[e][0], t] +
-              beta[e] * model.w[e, model.O[e][1], t]) / eta[e][0]
+              beta[e] * model.w[e, model.O[e][1], t]) / eta_el_cond[e]
         return(lhs == rhs)
     block.equivalent_output = po.Constraint(block.indexset,
                                             rule=equivalent_output_rule)

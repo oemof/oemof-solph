@@ -48,16 +48,27 @@ class Transformer(Component):
 
     def __init__(self, **kwargs):
         """
-        Parameters:
-        ------------
 
+        Technical Parameters:
+        ----------------------
         out_min : minimal output of transformer (e.g. pmin for powerplants)
         in_min : minimal input of transformer (e.g. pmin for powerplants)
-        start_cost: cost per start up of transformer (only milp models)
-        ramping_costs: costs for ramping
-        grad: gradient
-        t_min_off :
-        t_min_on :
+        grad_pos : positive gradient (<=0, <=1, relativ out_max)
+        grad_neg : negative gradient (<=0, <=1, relativ out_max)
+        t_min_off : minimal off time in timesteps (e.g. 5 hours)
+        t_min_on : minimal on time in timesteps (e.g  5 hours)
+        outages : outages of component. can be scalar or array:
+                 either: defined timesteps of timehorizon: e.g. [1,4,200]
+                 or: 0 <= scalar <= 1 as factor of the total timehorizon
+                 e.g. 0.05
+
+        Economic Parameters:
+        -----------------------
+        input_costs : costs for usage of input (if not included in opex_var)
+        start_costs : cost per start up of transformer (only milp models)
+        stop_costs : cost per stop up of transformer (only milp models)
+        ramp_costs: costs for ramping
+        output_price : price for selling output (revenue expr. in objective)
 
         """
         super().__init__(**kwargs)
@@ -69,39 +80,24 @@ class Transformer(Component):
             raise ValueError("Transformer must have at least one output.\n" +
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
-        # minimal output
+        # technical parameter
         self.out_min = kwargs.get('out_min', None)
-        if self.out_min is None:
-            # set default output to 0.5*out_max
-            self.out_min = {self.outputs[0].uid: 0}
-            logging.info('No minimum output defined. Setting min output to' +
-                         ' 0 of component%s', self.uid)
-        # minimal input
         self.in_min = kwargs.get('in_min', None)
-        if self.in_min is None:
-            # set default input to 0.5*in_max
-            self.in_min = {self.inputs[0].uid: 0}
-            logging.info('No minimum input defined. Setting min output to' +
-                         ' 0 of component%s', self.uid)
-
+        self.grad_pos = kwargs.get('grad_pos', None)
+        self.grad_neg  = kwargs.get('grad_neg', None)
+        self.t_min_off = kwargs.get('t_min_off', None)
+        self.t_min_on = kwargs.get('t_min_on', None)
+        self.outages = kwargs.get('outages', None)
+        # economic parameter
+        self.input_costs = kwargs.get('input_costs', None)
         self.start_costs = kwargs.get('start_costs', None)
-        if self.start_costs is None:
-            self.start_costs = 1
-            logging.info('No startcosts defined. Setting default costs of 1' +
-                         ' for component %s', self.uid)
         self.stop_costs = kwargs.get('stop_costs', None)
-
-        self.ramp_costs = kwargs.get('ramp_costs', 0)
-
-        self.grad_pos = kwargs.get('grad_pos', 0)
-        self.grad_neg  = kwargs.get('grad_neg', 0)
-        self.t_min_off = kwargs.get('t_min_off', 0)
-        self.t_min_on = kwargs.get('t_min_on', 0)
+        self.ramp_costs = kwargs.get('ramp_costs', None)
+        self.output_price = kwargs.get('output_price', None)
 
     def calc_emissions(self):
         self.emissions = [i * self.co2_var
                           for i in self.results['in'][self.inputs[0].uid]]
-
 
 class Transport(Component):
     """

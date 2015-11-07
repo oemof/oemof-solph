@@ -12,10 +12,14 @@ except:
 import pyomo.environ as po
 import oemof.solph as solph
 
-def minimize_cost(self):
+def minimize_cost(self, c_blocks=(), r_blocks=()):
     """ Builds objective function that minimises the total costs.
 
-
+    Costs included are:
+                        opex_var,
+                        opex_fix,
+                        curtailment_costs (dispatch source)
+                        annulised capex (investment components)
     """
     expr = 0
     c_blocks = ('simple_transformer', 'simple_chp', 'fixed_source',
@@ -23,7 +27,8 @@ def minimize_cost(self):
     r_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
 
     blocks = [block for block in self.block_data_objects(active=True)
-              if not isinstance(block, solph.optimization_model.OptimizationModel)]
+              if not isinstance(block,
+                                solph.optimization_model.OptimizationModel)]
 
     for block in blocks:
         if block.name in c_blocks:
@@ -40,7 +45,7 @@ def minimize_cost(self):
             # investment costs
             if block.model_param.get('investement', False) == True:
                 expr += objexpr.add_capex(self, block, ref=ref)
-        # revenues
+            # revenues
         if block.name in r_blocks:
             expr += objexpr.add_revenues(self, block, ref='output')
 
@@ -55,3 +60,42 @@ def minimize_cost(self):
         expr += objexpr.add_excess_slack_costs(self)
 
     self.objective = po.Objective(expr=expr)
+
+def uc_minimize_costs(self, c_block=(), r_block=()):
+    """
+
+    """
+    c_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
+    r_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
+
+    blocks = [block for block in self.block_data_objects(active=True)
+              if not isinstance(block,
+                                solph.optimization_model.OptimizationModel)]
+    expr = 0
+    for block in blocks:
+        if block.name in c_blocks:
+            # variable costs
+            expr += objexpr.add_opex_var(self, block, ref='output')
+            # input costs
+            expr += objexpr.add_input_costs(self, block)
+            # startup costs
+            if 'startup' in block.model_param.get('milp_constr', ()):
+                expr += objexpr.add_startup_costs(self, block)
+            # shutdown costs
+            if 'shutdown' in block.model_param.get('milp_constr', ()):
+                expr += objexpr.add_shutdown_costs(self, block)
+            # ramp costs
+            if 'ramping' in block.model_param.get('linear_constr', ()):
+                expr += objexpr.add_ramping_costs(self, block)
+        if block.name in r_blocks:
+            expr += objexpr.add_revenues(self, block, ref='output')
+
+    if self.uids['shortage']:
+        expr += objexpr.add_shortage_slack_costs(self)
+    # artificial costs for excess or shortage
+    if self.uids['excess']:
+        expr += objexpr.add_excess_slack_costs(self)
+
+
+    self.objective = po.Objective(expr=expr)
+

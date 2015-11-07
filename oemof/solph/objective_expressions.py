@@ -57,12 +57,15 @@ def add_input_costs(model, block):
     uids : corresponding uids
     """
     if block.uids is None:
-        uids = [obj.uid for obj in block.objs]
+        block.uids = [obj.uid for obj in block.objs]
 
-
-    input_costs = {obj.uid: obj.inputs[0].price for obj in block.objs}
+    input_costs = {}
+    for e in block.objs:
+        if e.__dict__.get('input_costs', None) is not None:
+            input_costs[e.uid] = e.input_costs
+        else:
+            input_costs[e.uid] = e.inputs[0].price
     # outputs for cost objs
-
     expr = -sum(model.w[model.I[e], e, t] * input_costs[e]
                 for e in block.uids for t in model.timesteps)
 
@@ -142,24 +145,32 @@ def add_revenues(model, block, ref='output'):
     model : OptimizationModel() instance
     block : SimpleBlock()
     """
+
     if block.uids is None:
         block.uids = [obj.uid for obj in block.objs]
+
     expr = 0
     if ref == 'output':
         #  if price is already a vector (array) this vector is taken
-        revenues = {}
+        output_price = {}
         for e in block.objs:
-            if isinstance(e.outputs[0].price, (float, int, np.integer)):
-                price = [e.outputs[0].price] * len(model.timesteps)
-                revenues[e.uid] = price
+            if e.__dict__.get('output_price', None) is not None:
+                if isinstance(e.output_price, (float, int, np.integer)):
+                    output_price[e.uid] = output_price * len(model.timesteps)
+                else:
+                    output_price[e.uid] = e.output_price
+            elif isinstance(e.outputs[0].price, (float, int, np.integer)):
+                output_price[e.uid] = \
+                    [e.outputs[0].price] * len(model.timesteps)
             else:
-                revenues[e.uid] = e.outputs[0].price
+                output_price[e.uid] = e.outputs[0].price
 
         # create expression term
-        expr += -sum(model.w[e, model.O[e][0], t] * revenues[e][t]
-                    for e in block.uids for t in model.timesteps)
+        expr += -sum(model.w[e, model.O[e][0], t] * output_price[e][t]
+                     for e in block.uids for t in model.timesteps)
     else:
         pass
+
     return(expr)
 
 def add_curtailment_costs(model, block=None, objs=None):
@@ -281,24 +292,36 @@ def add_shutdown_costs(model, block):
                for e in block.uids for t in model.timesteps)
     return(expr)
 
-def add_ramping_costs(model, block):
+def add_ramping_costs(model, block, grad_direc='positive'):
     """ Add gradient costs for components to linear objective expression.
 
-    .. math::  \\sum_e \\sum_t GRADPOS(e,t) \\cdot c_{ramp}(e)
+    .. math::  \\sum_e \\sum_t GRADPOS(e,t) \\cdot c_{ramp,neg}(e)
+
+    .. math:: \\sum_e \\sum_t GRADNEG(e,t) \\cdot c_{ramp,pos}(e)
 
     Parameters
     ------------
 
     model : OptimizationModel() instance
     block : SimpleBlock()
+    grad_direc : string
+        direction of gradient for which the costs are added to the objective
+        expression
+
     """
     if block.uids is None:
         block.uids = [obj.uid for obj in block. objs]
 
-
-    c_ramp = {obj.uid: obj.ramp_costs for obj in block.objs}
-    expr = sum(block.grad_pos_var[e, t] * c_ramp[e]
-               for e in block.uids for t in model.timesteps)
+    c_ramp = {obj.uid: obj.ramp_costs.get(grad_direc, obj.ramp_costs)
+              for obj in block.objs}
+    if grad_direc == 'positive':
+        expr = sum(block.grad_pos_var[e, t] * c_ramp[e]
+                   for e in block.uids for t in model.timesteps)
+    if grad_direc == 'negative' :
+        expr = sum(block.grad_neg_var[e, t] * c_ramp[e]
+                   for e in block.uids for t in model.timesteps)
+    else:
+        pass
     return(expr)
 
 def add_excess_slack_costs(model, uids=None):

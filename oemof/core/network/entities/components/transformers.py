@@ -107,12 +107,12 @@ class SimpleExtractionCHP(Transformer):
         """
         Parameters:
         -----------
-        eta : eta as constant efficiency for transformer output
-        beta : power loss index (max: at full load, min: at minimal load)
-        sigma : power to heat ratio P/Q
+        eta_el_cond : constant el. efficiency for transformer in condesing mode
+        beta : power loss index
+        sigma : power to heat ratio P/Q in backpressure mode
         """
         super().__init__(**kwargs)
-        self.eta = kwargs.get('eta', [None, None])
+        self.eta_el = kwargs.get('eta_el_cond', None)
         self.beta = kwargs.get('beta', None)
         self.sigma = kwargs.get('sigma', None)
 
@@ -121,7 +121,6 @@ class Storage(Transformer):
     """
     """
     model_param = {'investment': False}
-
     lower_name = "simple_storage"
 
     def __init__(self, **kwargs):
@@ -147,14 +146,10 @@ class Storage(Transformer):
         self.cap_initial = kwargs.get('cap_initial', None)
         if self.cap_initial is None:
             self.cap_initial = self.cap_max*0.5
-        logging.info('No initial storage capacity set. Setting capacity to' +
-                     ' 0.5 of max. capacity for component: %s', self.uid)
+            logging.info('No initial storage capacity set. Setting capacity to' +
+                         ' 0.5 of max. capacity for component: %s', self.uid)
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)
         self.c_rate_in = kwargs.get('c_rate_in', None)
-#        if self.c_rate_in is None:
-#            self.c_rate_in = next(iter(self.in_max.values())) / self.cap_max
         self.c_rate_out = kwargs.get('c_rate_out', None)
-#        if self.c_rate_out is None:
-#            self.c_rate_out = next(iter(self.out_max.values())) / self.cap_max
