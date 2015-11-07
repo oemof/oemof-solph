@@ -45,7 +45,7 @@ def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
     I = {b.uid: [i.uid for i in b.inputs] for b in objs}
     O = {b.uid: [o.uid for o in b.outputs] for b in objs}
     # component inputs/outputs are negative/positive in the bus balance
-    def bus_balance_rule(block, e, t):
+    def bus_balance_rule(model, e, t):
         lhs = 0
         lhs += sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
@@ -56,6 +56,7 @@ def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
         return(0, lhs - rhs, upper)
     setattr(model, objs[0].lower_name+"_balance",
             po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
+
 
 
 def add_simple_io_relation(model, block):

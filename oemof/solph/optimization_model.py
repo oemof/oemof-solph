@@ -2,10 +2,6 @@
 
 @contact Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
-
-
-
-
 import pyomo.environ as po
 import logging
 try:
@@ -207,7 +203,8 @@ class OptimizationModel(po.ConcreteModel):
         # gradient calculation dGrad
         if 'ramping' in param['linear_constr']:
             lc.add_output_gradient_calc(self, block, grad_direc="both")
-
+        if 'outages' in param['linear_constr']:
+            var.set_outages(self, block, outagetype='period', side='output')
         if param['investment'] == False:
             # binary status variables
             if param['milp_constr']:

@@ -7,6 +7,7 @@ for investement).
 """
 
 import pyomo.environ as po
+import numpy as np
 import logging
 
 try:
@@ -239,6 +240,51 @@ def set_storage_cap_bounds(model, block):
         block.cap_bound = po.Constraint(block.indexset,
                                         rule=add_cap_rule)
 
+def set_outages(model, block, outagetype='period', side='output'):
+    """ Fixes component input/output to zeros for modeling outages.
+
+
+    Parameters:
+    -----------
+    model :OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
+        Attributes are altered of the `model`
+    block : SimpeBlock()
+    outagetype : type to model outages of component if outages is scalar.
+       'period' yield one timeblock where component is off , wihle 'random_days'
+       will sample random days over the timehorizon where component is off
+    side : side of component to fix to zero: 'output', 'input'.
+
+    """
+    outages = {obj.uid: obj.outages for obj in block.objs}
+    timesteps = {}
+    for e in outages.keys():
+       if isinstance(outages[e], (float, np.float)) \
+          and outages[e] <= 1 and outages[e] >= 0:
+            time_off = int(len(model.timesteps) * outages[e])
+            if outagetype == 'period':
+                start = np.random.randint(0, len(model.timesteps)-time_off+1)
+                end = start + time_off
+                timesteps[e] = [t for t in range(start, end)]
+            if outagetype == 'random_days':
+                timesteps[e] = np.random.randint(0, len(model.timesteps))
+       elif len(outages[e]) >= 1:
+           timesteps[e] = outages[e]
+       else:
+           timesteps[e] = []
+
+    if side == 'input' and timesteps[e]:
+        for e in block.uids:
+            for t in timesteps[e]:
+                model.w[model.I[e], e, t] = 0
+                model.w[model.I[e], e, t].fix()
+    if side == 'output' and timesteps[e]:
+        for e in block.uids:
+            for t in timesteps[e]:
+                model.w[e, model.O[e][0], t] = 0
+                model.w[e, model.O[e][0], t].fix()
+    else:
+      pass
 def set_fixed_sink_value(model, block):
     """ Creates fixed sink from standard edges / variables by setting the value
     of variables and fixing variables to that value.

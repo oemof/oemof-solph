@@ -59,6 +59,11 @@ class Component(Entity):
         co2_fix : fixed co2 emissions (e.g. t / MW)
         co2_var : variable co2 emissions (e.g. t / MWh)
         co2_cap : co2 emissions due to installed power (e.g. t/ MW)
+
+        outages : outages of component. can be scalar or array:
+                 either: defined timesteps of timehorizon: e.g. [1,4,200]
+                 or: 0 <= scalar <= 1 as factor of the total timehorizon
+                 e.g. 0.05
         """
         super().__init__(**kwargs)
 
@@ -82,6 +87,6 @@ class Component(Entity):
             p = self.wacc
             n = self.lifetime
             self.crf = (p*(1+p)**n)/(((1+p)**n)-1)
-
+        self.outages = kwargs.get('outages', [])
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})
