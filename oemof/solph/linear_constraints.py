@@ -270,8 +270,8 @@ def add_bus_output_limit(model, objs=None, uids=None):
         else:
             return(lhs <= 0)
     setattr(model, objs[0].lower_name+"_limit",
-            po.Constraint(uids, rule=output_limit_rule),
-                          doc="Sum of output <= sum limit of bus")
+            po.Constraint(uids, rule=output_limit_rule,
+                          doc="Sum of output <= sum limit of bus"))
 
 def add_fixed_source(model, block):
     """ Add fixed source
@@ -318,6 +318,7 @@ def add_fixed_source(model, block):
         for (e1, e2) in ee:
             for t in model.timesteps:
                 # set value of variable
+
                 model.w[e1, e2, t] = val[e1][t] * out_max[e1][e2]
                 # fix variable value ("set variable to parameter" )
                 model.w[e1, e2, t].fix()

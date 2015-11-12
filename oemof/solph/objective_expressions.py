@@ -37,6 +37,7 @@ def add_opex_var(model, block, ref='output'):
         expr = sum(model.w[e, model.O[e][0], t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
+
     elif ref == 'input':
         expr = sum(model.w[model.I[e], e, t] * opex_var[e]
                    for e in block.uids
@@ -66,8 +67,8 @@ def add_input_costs(model, block):
         else:
             input_costs[e.uid] = e.inputs[0].price
     # outputs for cost objs
-    expr = -sum(model.w[model.I[e], e, t] * input_costs[e]
-                for e in block.uids for t in model.timesteps)
+    expr = sum(model.w[model.I[e], e, t] * input_costs[e]
+               for e in block.uids for t in model.timesteps)
 
     return(expr)
 
@@ -196,7 +197,7 @@ def add_curtailment_costs(model, block=None, objs=None):
         if block.uids is None:
             block.uids = [obj.uid for obj in block.objs]
         # get dispatch expenditure for renewable energies with dispatch
-        c_curtail = {obj.uid: obj.dispatch_ex for obj in block.objs}
+        c_curtail = {obj.uid: obj.curtail_costs for obj in block.objs}
         expr = sum(block.curtailment_var[e, t] * c_curtail[e]
                    for e in block.uids for t in model.timesteps)
     return(expr)

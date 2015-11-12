@@ -205,6 +205,7 @@ class OptimizationModel(po.ConcreteModel):
             lc.add_output_gradient_calc(self, block, grad_direc="both")
         if 'outages' in param['linear_constr']:
             var.set_outages(self, block, outagetype='period', side='output')
+
         if param['investment'] == False:
             # binary status variables
             if param['milp_constr']:
@@ -331,7 +332,7 @@ class OptimizationModel(po.ConcreteModel):
 
         # add constraints
         if 'fixvalues' in param['linear_constr']:
-            lc.add_fix_source(self, block)
+            lc.add_fixed_source(self, block)
 
     def dispatch_source_assembler(self, block):
         """Method containing the constraints for dispatchable sources.
@@ -352,12 +353,12 @@ class OptimizationModel(po.ConcreteModel):
 
         self.simple_transformer_assembler(block)
 
-        if 'dispatch' in param['linear_constr']:
+        if 'curtail' in param['linear_constr']:
              lc.add_dispatch_source(self, block)
 
         if self.objective_name == 'individual':
             # add dispatch costs (dispatch_ex) to objective
-            if 'dispatch_ex' in param['objective']:
+            if 'curtail_costs' in param['objective']:
                 self.objfuncexpr += objfuncexprs.add_curtailment_costs(self,
                                                                       block)
 

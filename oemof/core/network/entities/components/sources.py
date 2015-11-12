@@ -11,7 +11,7 @@ class FixedSource(Source):
 
     'opex_var', 'opex_fix', 'rsell'
     """
-    model_param = {'linear_constr': ('fixvalue'),
+    model_param = {'linear_constr': ('fixvalues'),
                    'milp_constr' : (),
                    'objective' : ('opex_var', 'opex_fix'),
                    'investment': False}
@@ -21,7 +21,6 @@ class FixedSource(Source):
         """
         """
         super().__init__(**kwargs)
-        self.val = kwargs.get('val', None)
 
     def calc_emissions(self):
         self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]
@@ -38,9 +37,9 @@ class DispatchSource(Source):
 
     Dispatch sources are not implemented for investment at the moment.
     """
-    model_param = {'linear_constr': ('dispatch'),
+    model_param = {'linear_constr': ('curtail'),
                    'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix','dispatch_ex'),
+                   'objective' : ('opex_var', 'opex_fix','curtail_costs'),
                    'investment': False}
     lower_name = "dispatch_source"
 
@@ -49,8 +48,6 @@ class DispatchSource(Source):
         :param boolean dispatch: Flag if RenewableSource is dispatchable or not
         """
         super().__init__(**kwargs)
-        self.val = kwargs.get('val', None)
-        self.dispatch_ex = kwargs.get('dispatch_ex', 0)
 
     def calc_emissions(self):
         self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]

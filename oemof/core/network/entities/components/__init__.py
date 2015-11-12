@@ -30,6 +30,9 @@ class Source(Component):
         """
         """
         super().__init__(**kwargs)
+        self.val = kwargs.get('val', None)
+        self.curtail_costs = kwargs.get('curtail_costs', 0)
+
         if self.inputs:
             raise ValueError("Source must not have inputs.\n" +
                              "Got: {0!r}".format([str(x)
