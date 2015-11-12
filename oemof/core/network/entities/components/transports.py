@@ -9,7 +9,7 @@ class Simple(Transport):
 
     def __init__(self, **kwargs):
         """
-        :param eta: eta as constant efficiency for simple transport
+        :param eta: Constant efficiency of the transport.
         :param in_max: Maximum input the transport can handle, in $MW$.
         :param out_max: Maximum output which can possibly be obtained when
                         using the transport, in $MW$.
