@@ -25,7 +25,8 @@ class Simple(Transformer):
     """
     model_param = {'linear_constr': ('io_relation', 'out_max'),
                    'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix', 'fuel_ex', 'rsell'),
+                   'objective' : ('opex_var', 'opex_fix', 'input_costs',
+                                  'rsell'),
                    'investment': False}
     lower_name = 'simple_transformer'
 
@@ -62,7 +63,8 @@ class CHP(Transformer):
     model_param = {'linear_constr': ('io_relation', 'out_max',
                                      'simple_chp_relation'),
                    'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix', 'fuel_ex', 'rsell'),
+                   'objective' : ('opex_var', 'opex_fix', 'input_costs',
+                                  'rsell'),
                    'investment': False}
     lower_name = "simple_chp"
 
@@ -99,7 +101,8 @@ class SimpleExtractionCHP(Transformer):
     model_param = {'linear_constr': ('in_max', 'out_max',
                                      'simple_extraction_relation'),
                    'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix', 'fuel_ex', 'rsell'),
+                   'objective' : ('opex_var', 'opex_fix', 'input_costs',
+                                  'rsell'),
                    'investment': False}
     lower_name = "simple_extraction_chp"
 

@@ -49,6 +49,9 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
                 ref = 'output'
             # variable costs
             expr += objexpr.add_opex_var(self, block, ref='output')
+            # input costs
+            if 'input_costs' in block.model_param.get('objective'):
+                expr += objexpr.add_input_costs(self, block)
             # fix costs
             expr += objexpr.add_opex_fix(self, block, ref=ref)
             # investment costs
