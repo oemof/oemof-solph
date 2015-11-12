@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(500)]
+timesteps = [t for t in range(8760)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -87,7 +87,7 @@ pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
 sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  outputs=[b_el],
                                  eta_in=1, eta_out=0.8, cap_loss=0.00,
-                                 opex_fix=35, opex_var=0, co2_var=None,
+                                 opex_fix=35, opex_var=10e10, co2_var=None,
                                  capex=1000,
                                  cap_max=0,
                                  cap_initial=0,

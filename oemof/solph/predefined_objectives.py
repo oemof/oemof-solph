@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct 19 21:01:48 2015
+This module contains predefined objectives that can be used to model
+energysystems.
 
-@author: simon
+@author: Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 try:
     import objective_expressions as objexpr
@@ -18,8 +19,16 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
     Costs included are:
                         opex_var,
                         opex_fix,
-                        curtailment_costs (dispatch source)
+                        curtailment_costs (dispatch sources),
                         annulised capex (investment components)
+
+    Parameters:
+    ------------
+    self : pyomo model instance
+    c_blocks : pyomo blocks containing components that are included in
+               cost terms of objective function
+    r_blocks : pyomo blocks containing components that are included in revenue
+               terms of objective function
     """
     expr = 0
     c_blocks = ('simple_transformer', 'simple_chp', 'fixed_source',
@@ -62,7 +71,27 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
     self.objective = po.Objective(expr=expr)
 
 def uc_minimize_costs(self, c_block=(), r_block=()):
-    """
+    """ Unit commitment min. cost objective
+
+    Costs that are included:
+       For objects in c_blocks:
+                          opex_var,
+                          input costs (e.g. fuel),
+                          startup costs (only milp models),
+                          shutdown costs (only milp models)
+                          ramp costs
+       For objects in r_blocks:
+                          output revenues
+       Other:
+          excess, slack costs for additional slack variables per bus (if exist)
+
+    Parameters:
+    ------------
+    self : pyomo model instance
+    c_blocks : pyomo blocks containing components that are included in
+               cost terms of objective function
+    r_blocks : pyomo blocks containing components that are included in revenue
+               terms of objective function
 
     """
     c_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
