@@ -18,7 +18,7 @@ class Simple(Transport):
         #       calculate the missing ones accordingly. Also write down the
         #       relationshiph between the three parameters in the doctstring.
         super().__init__(**kwargs)
-        self.eta = kwargs.get('eta', None)
+        self.eta = kwargs.get('eta')
         self.in_max = kwargs.get('in_max')
         self.out_max = kwargs.get('out_max')
 
