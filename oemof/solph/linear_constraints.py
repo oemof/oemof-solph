@@ -1,18 +1,45 @@
 # -*- coding: utf-8 -*-
 """
-The linear_contraints module contains the coded pyomo constraint that
-are used by the '*_assembler' methods of OptimizationModel()-class
+The linear_contraints module contains the pyomo constraints wrapped in
+functions. This functions are used by the '_assembler- methods
+of the OptimizationModel()-class.
 
 The module frequently uses the dictionaries I and O for the construction of
-constraints. I,E contain all uids of components as the keys of the dict and
+constraints. I, E contain all uids of components as the keys of the dict and
 the input/output uids as items of the dict corresponding to the key.
 
-In mathematical notation I,O can be seen as indexed index sets The
+*Illustrative Example*:
+
+    Consider the following example of a chp-powerplant modeled with 4 entities
+    (3 busses, 1 component) and their unique ids being stored in a list
+    called `uids`:
+
+    >>> uids = ['bus_el', 'bus_th', 'bus_coal','pp_coal']
+    >>> I = {'pp_coal': 'bus_coal'}
+    >>> O = {'pp_coal': ['bus_el', 'bus_th']}
+    >>> print(I['pp_coal'])
+    'bus_el'
+
+
+In mathematical notation I, O can be seen as indexed index sets The
 elements of the sets are the uids of all components (index: `e`). The the
 inputs/outputs uids are the elements of the accessed set by the
-component index `e`.
-Generally the index `e` is the index for the uids-sets containing the uids
-of objects for which the constraints are build.
+component index `e`. Generally the index `e` is the index for the uids-sets
+containing the uids of objects for which the constraints are build.
+For all mathematical constraints the following definitions hold:
+
+    Inputs:
+    :math:`I(e) = \\text{Input-uids of entity } e`
+
+    Outputs:
+    :math:`O(e) = \\text{Output-uids of entity } e`
+
+    Entities:
+    :math:`e \\in E = \\{uids\\},`
+
+    Timesteps:
+    :math:`t \\in T = \\{timesteps\\}`
+
 
 Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
@@ -197,12 +224,14 @@ def add_simple_extraction_chp_relation(model, block):
               beta[e] * model.w[e, model.O[e][1], t]) / eta_el_cond[e]
         return(lhs == rhs)
     block.equivalent_output = po.Constraint(block.indexset,
-                                            rule=equivalent_output_rule)
+                                            rule=equivalent_output_rule,
+                                            doc="H = (P + Q*beta)/eta_el_cond")
     def power_heat_rule(block, e, t):
-        lhs = model.w[e, model.O[e][1], t]
-        rhs = model.w[e, model.O[e][0], t] / sigma[e]
+        lhs = model.w[e, model.O[e][0], t] / model.w[e, model.O[e][1], t]
+        rhs = sigma[e]
         return(lhs <= rhs)
-    block.pth_relation = po.Constraint(block.indexset, rule=power_heat_rule)
+    block.pth_relation = po.Constraint(block.indexset, rule=power_heat_rule,
+                                       doc="P / Q = sigma")
 
 def add_bus_output_limit(model, objs=None, uids=None):
     """ Adds constraint to set limit for variables as sum over the total
@@ -241,7 +270,8 @@ def add_bus_output_limit(model, objs=None, uids=None):
         else:
             return(lhs <= 0)
     setattr(model, objs[0].lower_name+"_limit",
-            po.Constraint(uids, rule=output_limit_rule))
+            po.Constraint(uids, rule=output_limit_rule),
+                          doc="Sum of output <= sum limit of bus")
 
 def add_fixed_source(model, block):
     """ Add fixed source
