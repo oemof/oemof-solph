@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(12)]
+timesteps = [t for t in range(500)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -73,7 +73,7 @@ demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
 
 # Simple Transformer for b_el
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            in_max={bgas.uid: None}, opex_var=40,
+                            in_max={bgas.uid: None}, opex_var=50,
                             out_max={b_el.uid: 10e10}, eta=[0.58])
 
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
@@ -87,10 +87,10 @@ pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
 sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
                                  outputs=[b_el],
                                  eta_in=1, eta_out=0.8, cap_loss=0.00,
-                                 opex_fix=35, opex_var=10e10, co2_var=None,
+                                 opex_fix=35, opex_var=0, co2_var=None,
                                  capex=1000,
                                  cap_max=0,
-                                 cap_initial=300000,
+                                 cap_initial=0,
                                  c_rate_in = 1/6,
                                  c_rate_out = 1/6)
 
@@ -120,8 +120,7 @@ components = transformers + renew_sources + storages + sinks
 entities = components + buses
 
 om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': True,
-                                'objective_name': 'minimize_costs'})
+                       options={'objective_name': 'minimize_costs'})
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
