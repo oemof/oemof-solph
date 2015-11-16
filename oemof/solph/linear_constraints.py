@@ -46,7 +46,7 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 
 import pyomo.environ as po
 
-def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
+def add_bus_balance(model, objs=None, uids=None, balance_type='=='):
     """ Adds constraint for the input-ouput balance of bus objects
 
     .. math:: \\sum_{i \\in I(e)} W(i, e, t) = \\sum_{o \\in O(e)} \
@@ -64,9 +64,13 @@ def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
     The constraints are added to as a attribute to the optimization model
     object `model` of type OptimizationModel()
     """
-    if balance_type == ">=":
+    if not objs or objs is None:
+        raise ValueError('Failed to create busbalance. No busobjects defined!')
+
+
+    if balance_type == '>=':
         upper = float('+inf')
-    if balance_type == "==":
+    if balance_type == '==':
         upper = 0;
 
     I = {b.uid: [i.uid for i in b.inputs] for b in objs}
@@ -76,12 +80,12 @@ def add_bus_balance(model, objs=None, uids=None, balance_type="=="):
         lhs = 0
         lhs += sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
-        if e in model.uids["excess"]:
+        if e in model.uids['excess']:
             rhs += model.excess_slack[e, t]
-        if e in model.uids["shortage"]:
+        if e in model.uids['shortage']:
             lhs += model.shortage_slack[e, t]
         return(0, lhs - rhs, upper)
-    setattr(model, objs[0].lower_name+"_balance",
+    setattr(model, objs[0].lower_name+'_balance',
             po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
 
 
@@ -110,7 +114,7 @@ def add_simple_io_relation(model, block):
     OptimizationModel()
 
     """
-    if block.objs is None:
+    if not block.objs or block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
                          which the constraints should be build")
 
@@ -152,9 +156,9 @@ def add_simple_chp_relation(model, block):
     OptimizationModel()
 
     """
-    if block.objs is None:
-        raise ValueError("No objects defined. Please specify objects for \
-                          which constraints should be set.")
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for \
+                          which backpressure chp constraints should be set.')
     #TODO:
     #  - add possibility of multiple output busses (e.g. for heat and power)
     # efficiencies for simple chps
@@ -204,9 +208,9 @@ def add_simple_extraction_chp_relation(model, block):
     --------
 
     """
-    if block.objs is None:
-        raise ValueError("No objects defined. Please specify objects for \
-                          which constraints should be set.")
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which extraction chp constraints should be set.')
 
     out_max = {}
     beta = {}
@@ -225,7 +229,7 @@ def add_simple_extraction_chp_relation(model, block):
         return(lhs == rhs)
     block.equivalent_output = po.Constraint(block.indexset,
                                             rule=equivalent_output_rule,
-                                            doc="H = (P + Q*beta)/eta_el_cond")
+                                            doc='H = (P + Q*beta)/eta_el_cond')
     def power_heat_rule(block, e, t):
         lhs = model.w[e, model.O[e][0], t] / model.w[e, model.O[e][1], t]
         rhs = sigma[e]
@@ -253,7 +257,9 @@ def add_bus_output_limit(model, objs=None, uids=None):
     The constraints are added as attributes
     to the optimization model object `model` of type OptimizationModel()
     """
-
+    if not objs or objs is None:
+        raise ValueError('Failed to create bus outputlimit. ' +
+                         'No busobjects defined!')
     limit = {obj.uid: obj.sum_out_limit for obj in objs}
 
     # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
@@ -298,7 +304,9 @@ def add_fixed_source(model, block):
     The constraints will be added as attributes to
     the optimization model object `model` of typeOptimizationModel().
     """
-
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which fixed source constriants should be created.')
     # normed value of renewable source (0 <= value <=1)
     val = {}
     out_max = {}
@@ -362,7 +370,9 @@ def add_dispatch_source(model, block):
     The constraints will be added as attributes of
     the optimization model object `model` of class OptimizationModel().
     """
-
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which dispatch source constaints should be set.')
     # create dispatch var
     block.curtailment_var = po.Var(block.indexset, within=po.NonNegativeReals)
 
@@ -399,6 +409,9 @@ def add_storage_balance(model, block):
     ----------
 
     """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which storage balanece constraint should be set.')
     # constraint for storage energy balance
     cap_initial = {}
     cap_loss = {}
@@ -469,6 +482,10 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     The constraints will be added as attributes of
     the optimization model object `model` of class OptimizationModel().
     """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which output gradient constraints should be set.')
+
     def grad_pos_calc_rule(block, e, t):
         if t > 0:
             lhs = model.w[e, model.O[e][0], t] - model.w[e,model.O[e][0], t-1]
