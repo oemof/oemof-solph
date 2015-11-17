@@ -22,13 +22,19 @@ class EnergySystem:
         ''
         self.regions[region.code] = region
 
-    def connect(self, code1, code2, media, in_max, out_max, eta, classtype):
+    def connect(self, code1, code2, media, in_max, out_max, eta,
+                transport_class):
         ''
-        def trans_simp(self, reg_out, reg_in, media, in_max, out_max, eta):
-            logging.debug('Creating simple connection from {0} to {1}'.format(
-                reg_out, reg_in))
-            return transport.Simple(
-                uid='_'.join([reg_out, reg_in, media]),
+        if not transport_class == transport.Simple:
+            raise(TypeError(
+                    "Sorry, `EnergySystem.connect` currently only works with" +
+                    "a `transport_class` argument of" + str(transport.Simple)))
+        for reg_out, reg_in in [(code1, code2), (code2, code1)]:
+            logging.debug('Creating simple {3} from {0} to {1}'.format(
+                    reg_out, reg_in, transport_class))
+            uid = '_'.join([reg_out, reg_in, media])
+            self.connections[uid] = transport_class(
+                uid=uid,
                 outputs=[self.regions[reg_out].buses['_'.join(
                     ['b', reg_out, media])]],
                 inputs=[self.regions[reg_in].buses['_'.join(
@@ -37,14 +43,6 @@ class EnergySystem:
                 in_max={'_'.join(['b', reg_in, media]): in_max},
                 eta=[eta]
                 )
-        if classtype == 'simple':
-            c1 = trans_simp(self, code1, code2, media, in_max, out_max, eta)
-            c2 = trans_simp(self, code2, code1, media, in_max, out_max, eta)
-        else:
-            raise('error')
-
-        self.connections['_'.join([code1, code2, media])] = c1
-        self.connections['_'.join([code2, code1, media])] = c2
 
 
 class EnergyRegion:
