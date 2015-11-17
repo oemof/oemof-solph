@@ -15,10 +15,8 @@ class EnergySystem:
 
     def __init__(self, **kwargs):
         ''
-        self.regions = kwargs.get('regions', {})  # list of region objects
-        self.global_buses = kwargs.get('regions', {})  # list of buses
-        self.sim = kwargs.get('sim')  # simulation object
-        self.connections = kwargs.get('connections', {})
+        for attribute in ['regions', 'global_buses', 'sim', 'connections']:
+          setattr(self, attribute, kwargs.get(attribute, {}))
 
     def add_region(self, region):
         ''
