@@ -285,6 +285,7 @@ def set_outages(model, block, outagetype='period', side='output'):
                 model.w[e, model.O[e][0], t].fix()
     else:
       pass
+
 def set_fixed_sink_value(model, block):
     """ Creates fixed sink from standard edges / variables by setting the value
     of variables and fixing variables to that value.

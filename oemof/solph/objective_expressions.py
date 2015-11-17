@@ -325,7 +325,7 @@ def add_ramping_costs(model, block, grad_direc='positive'):
         pass
     return(expr)
 
-def add_excess_slack_costs(model, uids=None):
+def add_excess_slack_costs(model, block):
     """ Artificial cost term for excess slack variables.
 
     .. math:: \\sum_e \\sum_t EXCESS(e,t) \\cdot c_{excess}(e)
@@ -335,15 +335,15 @@ def add_excess_slack_costs(model, uids=None):
 
     uids : unique ids of bus objects
     """
-    if uids is None:
-        uids = model.uids['excess']
-    c_excess = {b.uid:b.excess_costs for b in model.bus_objs}
-    expr = sum(model.excess_slack[e, t] * c_excess[e]
-               for e in uids for t in model.timesteps)
+
+    c_excess = {b.uid:b.excess_costs for b in block.objs
+                if b.excess==True}
+    expr = sum(block.excess_slack[e, t] * c_excess[e]
+               for e in block.excess_uids for t in model.timesteps)
     return(expr)
 
 
-def add_shortage_slack_costs(model, uids=None):
+def add_shortage_slack_costs(model, block=None):
     """ Artificial cost term for shortage slack variables.
 
     .. math:: \\sum_e \\sum_t SHORTAGE(e,t) \\cdot c_{shortage}(e)
@@ -351,14 +351,11 @@ def add_shortage_slack_costs(model, uids=None):
     Parameters:
     ------------
 
-    uids : unique ids of bus objects
-
     """
-    if uids is None:
-        uids = model.uids['shortage']
-    c_shortage = {b.uid: b.shortage_costs for b in model.bus_objs}
-    expr = sum(model.shortage_slack[e, t] * c_shortage[e]
-               for e in uids for t in model.timesteps)
+    c_shortage = {b.uid: b.shortage_costs for b in block.objs
+                  if b.shortage==True}
+    expr = sum(block.shortage_slack[e, t] * c_shortage[e]
+               for e in block.shortage_uids for t in model.timesteps)
     return(expr)
 
 

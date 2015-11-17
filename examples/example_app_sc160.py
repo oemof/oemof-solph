@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(8760)]
+timesteps = [t for t in range(12)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -39,7 +39,8 @@ transformer.Storage.model_param.update({'investment': True})
 
 # resources
 #bgas = Bus(uid="gas", type="gas", price=70, excess=False)
-bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=194397000)
+bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=194397000,
+           balanced=False)
 #bgas = Bus(uid="gas", type="gas", price=70)
 
 # electricity and heat
@@ -220,7 +221,7 @@ if __name__ == "__main__":
         # excess
         excess = list()
         for t in om.timesteps:
-            excess.append(om.excess_slack['b_el', t].value)
+            excess.append(om.bus.excess_slack['b_el', t].value)
 
         print('sum excess: ', np.asarray(excess).sum())
 

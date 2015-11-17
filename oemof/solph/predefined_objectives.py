@@ -65,11 +65,11 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
     if hasattr(self, 'dispatch_source'):
         expr += objexpr.add_curtailment_costs(self, self.dispatch_source)
 
-    if self.uids['shortage']:
-        expr += objexpr.add_shortage_slack_costs(self)
+    if self.bus.shortage_uids:
+        expr += objexpr.add_shortage_slack_costs(self, block)
     # artificial costs for excess or shortage
-    if self.uids['excess']:
-        expr += objexpr.add_excess_slack_costs(self)
+    if self.bus.excess_uids:
+        expr += objexpr.add_excess_slack_costs(self, block)
 
     self.objective = po.Objective(expr=expr)
 

@@ -63,4 +63,4 @@ class Commodity(Source):
         """
         """
         super().__init__(**kwargs)
-
+        self.sum_out_limit = kwargs.get('sum_out_limit', float('+inf'))

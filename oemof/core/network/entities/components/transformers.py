@@ -115,7 +115,7 @@ class SimpleExtractionCHP(Transformer):
         sigma : power to heat ratio P/Q in backpressure mode
         """
         super().__init__(**kwargs)
-        self.eta_el = kwargs.get('eta_el_cond', None)
+        self.eta_el_cond = kwargs.get('eta_el_cond', None)
         self.beta = kwargs.get('beta', None)
         self.sigma = kwargs.get('sigma', None)
 
@@ -123,7 +123,8 @@ class SimpleExtractionCHP(Transformer):
 class Storage(Transformer):
     """
     """
-    model_param = {'investment': False}
+    model_param = {'investment': False,
+                   'objective': ('opex_var', 'opex_fix')}
     lower_name = "simple_storage"
 
     def __init__(self, **kwargs):

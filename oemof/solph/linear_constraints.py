@@ -46,7 +46,7 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 
 import pyomo.environ as po
 
-def add_bus_balance(model, objs=None, uids=None, balance_type='=='):
+def add_bus_balance(model, block=None, balance_type='=='):
     """ Adds constraint for the input-ouput balance of bus objects
 
     .. math:: \\sum_{i \\in I(e)} W(i, e, t) = \\sum_{o \\in O(e)} \
@@ -55,8 +55,7 @@ def add_bus_balance(model, objs=None, uids=None, balance_type='=='):
     Parameters
     -----------
     model : OptimizationModel() instance
-    objs : bus objects for which the constraints are created
-    uids : unique ids of bus object in `objs` (math. index 'e')
+    block : SimpleBlock()
     balance_type : type of constraint ("==" or ">=" )
 
     Returns
@@ -64,29 +63,34 @@ def add_bus_balance(model, objs=None, uids=None, balance_type='=='):
     The constraints are added to as a attribute to the optimization model
     object `model` of type OptimizationModel()
     """
-    if not objs or objs is None:
+    if not block.objs or block.objs is None:
         raise ValueError('Failed to create busbalance. No busobjects defined!')
-
 
     if balance_type == '>=':
         upper = float('+inf')
     if balance_type == '==':
         upper = 0;
 
-    I = {b.uid: [i.uid for i in b.inputs] for b in objs}
-    O = {b.uid: [o.uid for o in b.outputs] for b in objs}
+    uids = []
+    I = {}
+    O = {}
+    for b in block.objs:
+        if b.balanced == True:
+            uids.append(b.uid)
+            I[b.uid] = [i.uid for i in b.inputs]
+            O[b.uid] = [o.uid for o in b.outputs]
+
     # component inputs/outputs are negative/positive in the bus balance
-    def bus_balance_rule(model, e, t):
+    def bus_balance_rule(block, e, t):
         lhs = 0
         lhs += sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
-        if e in model.uids['excess']:
-            rhs += model.excess_slack[e, t]
-        if e in model.uids['shortage']:
-            lhs += model.shortage_slack[e, t]
+        if e in block.excess_uids:
+            rhs += block.excess_slack[e, t]
+        if e in block.shortage_uids:
+            lhs += block.shortage_slack[e, t]
         return(0, lhs - rhs, upper)
-    setattr(model, objs[0].lower_name+'_balance',
-            po.Constraint(uids, model.timesteps, rule=bus_balance_rule))
+    block.balance = po.Constraint(uids, model.timesteps, rule=bus_balance_rule)
 
 
 
@@ -231,13 +235,13 @@ def add_simple_extraction_chp_relation(model, block):
                                             rule=equivalent_output_rule,
                                             doc='H = (P + Q*beta)/eta_el_cond')
     def power_heat_rule(block, e, t):
-        lhs = model.w[e, model.O[e][0], t] / model.w[e, model.O[e][1], t]
-        rhs = sigma[e]
+        lhs = model.w[e, model.O[e][0], t]
+        rhs = sigma[e] *  model.w[e, model.O[e][1], t]
         return(lhs <= rhs)
     block.pth_relation = po.Constraint(block.indexset, rule=power_heat_rule,
-                                       doc="P / Q = sigma")
+                                       doc="P <= sigma * Q")
 
-def add_bus_output_limit(model, objs=None, uids=None):
+def add_global_output_limit(model, block=None):
     """ Adds constraint to set limit for variables as sum over the total
     timehorizon
 
@@ -257,27 +261,27 @@ def add_bus_output_limit(model, objs=None, uids=None):
     The constraints are added as attributes
     to the optimization model object `model` of type OptimizationModel()
     """
-    if not objs or objs is None:
-        raise ValueError('Failed to create bus outputlimit. ' +
-                         'No busobjects defined!')
-    limit = {obj.uid: obj.sum_out_limit for obj in objs}
+    if not block.objs or block.objs is None:
+        raise ValueError('Failed to create outputlimit. ' +
+                         'No objects defined!')
+
+    limit = {obj.uid: obj.sum_out_limit for obj in block.objs}
 
     # outputs: {'rcoal': ['coal'], 'rgas': ['gas'],...}
-    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in objs}
+    O = {obj.uid: [o.uid for o in obj.outputs[:]] for obj in block.objs}
 
     # set upper bounds: sum(yearly commodity output) <= yearly_limit
-    def output_limit_rule(model, e):
+    def output_limit_rule(block, e):
         lhs = sum(model.w[e, o, t] for t in model.timesteps for o in O[e]) -\
-            limit[e]
+              limit[e]
         # if bus is defined but has not outputs Constraint is skipped
-        # (should be logged as well)
+        # TODO: should be logged as well?
         if isinstance(lhs, (int, float)) or limit[e] == float('inf'):
             return(po.Constraint.Skip)
         else:
             return(lhs <= 0)
-    setattr(model, objs[0].lower_name+"_limit",
-            po.Constraint(uids, rule=output_limit_rule,
-                          doc="Sum of output <= sum limit of bus"))
+    block.global_limit = po.Constraint(block.uids, rule=output_limit_rule,
+                                       doc="Sum of output <= global_limit")
 
 def add_fixed_source(model, block):
     """ Add fixed source

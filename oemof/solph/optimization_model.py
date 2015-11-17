@@ -82,8 +82,14 @@ class OptimizationModel(po.ConcreteModel):
                 self.add_component(cls.lower_name, block)
                 getattr(self, cls.lower_name + '_assembler')(block=block)
 
-        self.uids = {}
-        self.bus_assembler()
+
+        # add bus block
+        block = po.Block()
+        # get all bus objects
+        block.objs = [e for e in self.entities if isinstance(e, Bus)]
+        block.uids = [e.uid for e in block.objs]
+        self.bus_assembler(block)
+        self.add_component('bus', block)
 
         # create objective function
         if self.objective_name == 'individual':
@@ -92,7 +98,7 @@ class OptimizationModel(po.ConcreteModel):
             self.objective_assembler(objective_name=self.objective_name)
 
 
-    def bus_assembler(self):
+    def bus_assembler(self, block):
         """ Method creates bus balance for all buses.
 
         The bus model creates all full balance around the energy buses using
@@ -108,54 +114,37 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : pyomo.ConcreteModel
         """
-        # get all bus objects
-        self.bus_objs = [e for e in self.entities if isinstance(e, Bus)]
-
-        # get uids from bus objects
-        self.bus_uids = [e.uid for e in self.bus_objs]
-
 
         # slack variables that assures a feasible problem
         # get uids for busses that allow excess
-        self.uids.update({'excess': [b.uid for b in self.bus_objs
-                                     if b.excess == True]})
+        block.excess_uids = [b.uid for b in block.objs if b.excess == True]
         # get uids for busses that allow shortage
-        self.uids.update({'shortage': [b.uid for b in self.bus_objs
-                                       if b.shortage == True]})
-        # create variables for 'slack' of shortage and excess
-        if self.uids['excess']:
-            self.excess_slack = po.Var(self.uids['excess'],
-                                       self.timesteps,
-                                       within=po.NonNegativeReals)
-        if self.uids['shortage']:
-            self.shortage_slack = po.Var(self.uids['shortage'],
-                                         self.timesteps,
-                                         within=po.NonNegativeReals)
+        block.shortage_uids = [b.uid for b in block.objs if b.shortage == True]
 
-        # select only "energy"-bus objects for bus balance constraint
-        energy_bus_objs = [obj for obj in self.bus_objs
-                           if any([obj.type == "el", obj.type == "th"])]
-        energy_bus_uids = [obj.uid for obj in energy_bus_objs]
+        # create variables for 'slack' of shortage and excess
+        if block.excess_uids:
+            block.excess_slack = po.Var(block.excess_uids,
+                                        self.timesteps,
+                                        within=po.NonNegativeReals)
+        if block.shortage_uids:
+            block.shortage_slack = po.Var(block.shortage_uids,
+                                          self.timesteps,
+                                          within=po.NonNegativeReals)
 
         print('Creating bus balance constraints ...')
         # bus balance constraint for energy bus objects
-        lc.add_bus_balance(self, objs=energy_bus_objs, uids=energy_bus_uids,
-                           balance_type="==")
+        lc.add_bus_balance(self, block, balance_type="==")
 
-        # select only buses that are resources (gas, oil, etc.)
-        resource_bus_objs = [obj for obj in self.bus_objs
-                             if all([obj.type != "el", obj.type != "th"])]
-        resource_bus_uids = [e.uid for e in resource_bus_objs]
-
-        # set limits for resource buses
-        lc.add_bus_output_limit(model=self, objs=resource_bus_objs,
-                                uids=resource_bus_uids)
+        # set limits for buses
+        lc.add_global_output_limit(self, block)
 
         if self.objective_name == 'individual':
-            if self.uids['shortage']:
-                self.objfuncexpr += objfuncexprs.add_shortage_slack_costs(self)
-            if self.uids['excess']:
-                 self.objfuncexpr += objfuncexprs.add_excess_slack_costs(self)
+            if block.shortage_uids:
+                self.objfuncexpr += \
+                    objfuncexprs.add_shortage_slack_costs(self, block)
+            if self.excess_uids:
+                 self.objfuncexpr += \
+                     objfuncexprs.add_excess_slack_costs(self, block)
 
     def simple_transformer_assembler(self, block):
         """ Method containing the constraints functions for simple
@@ -378,6 +367,25 @@ class OptimizationModel(po.ConcreteModel):
         self : OptimizationModel() instance
         """
         var.set_fixed_sink_value(self, block)
+
+
+    def commodity_assembler(self, block):
+        """Method containing the constraints for commodity
+
+        Comoodity are modeled with a fixed output value set for the
+        variable of the output.
+
+        Parameters
+        ----------
+        self : OptimizationModel() instance
+        block : SimpleBlock()
+
+        Returns
+        -------
+        self : OptimizationModel() instance
+        """
+        lc.add_global_output_limit(self, block)
+
 
     def simple_storage_assembler(self, block):
         """Simple storage assembler containing the constraints for simple
