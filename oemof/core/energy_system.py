@@ -26,7 +26,7 @@ class EnergySystem:
         ''
         def trans_simp(self, reg_out, reg_in, media, in_max, out_max, eta):
             logging.debug('Creating simple connection from {0} to {1}'.format(
-                code1, code2))
+                reg_out, reg_in))
             return transport.Simple(
                 uid='_'.join([reg_out, reg_in, media]),
                 outputs=[self.regions[reg_out].buses['_'.join(
