@@ -16,7 +16,7 @@ class EnergySystem:
     def __init__(self, **kwargs):
         ''
         self.regions = kwargs.get('regions', {})  # list of region objects
-        self.global_busses = kwargs.get('regions', {})  # list of busses
+        self.global_buses = kwargs.get('regions', {})  # list of buses
         self.sim = kwargs.get('sim')  # simulation object
         self.connections = kwargs.get('connections', {})
 
@@ -31,9 +31,9 @@ class EnergySystem:
                 code1, code2))
             return transport.Simple(
                 uid='_'.join([reg_out, reg_in, media]),
-                outputs=[self.regions[reg_out].busses['_'.join(
+                outputs=[self.regions[reg_out].buses['_'.join(
                     ['b', reg_out, media])]],
-                inputs=[self.regions[reg_in].busses['_'.join(
+                inputs=[self.regions[reg_in].buses['_'.join(
                     ['b', reg_in, media])]],
                 out_max={'_'.join(['b', reg_out, media]): out_max},
                 in_max={'_'.join(['b', reg_in, media]): in_max},
@@ -59,7 +59,7 @@ class EnergyRegion:
         self.renew_pps = kwargs.get('renew_pps', [])  # list of entities
         self.conv_pps = kwargs.get('conv_pss', [])  # list of entities
         self.sinks = kwargs.get('sinks', [])  # list of sinks
-        self.busses = kwargs.get('busses', {})  # dict of busses
+        self.buses = kwargs.get('buses', {})  # dict of buses
 
         # Diese Attribute enthalten Hilfsgrößen, die beim Erstellen oder bei
         # der Auswertung von Nutzen sind.
