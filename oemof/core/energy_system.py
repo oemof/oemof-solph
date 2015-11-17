@@ -15,38 +15,34 @@ class EnergySystem:
 
     def __init__(self, **kwargs):
         ''
-        self.regions = kwargs.get('regions', {})  # list of region objects
-        self.global_busses = kwargs.get('regions', {})  # list of busses
-        self.sim = kwargs.get('sim')  # simulation object
-        self.connections = kwargs.get('connections', {})
+        for attribute in ['regions', 'global_buses', 'sim', 'connections']:
+          setattr(self, attribute, kwargs.get(attribute, {}))
 
     def add_region(self, region):
         ''
         self.regions[region.code] = region
 
-    def connect(self, code1, code2, media, in_max, out_max, eta, classtype):
+    def connect(self, code1, code2, media, in_max, out_max, eta,
+                transport_class):
         ''
-        def trans_simp(self, reg_out, reg_in, media, in_max, out_max, eta):
-            logging.debug('Creating simple connection from {0} to {1}'.format(
-                code1, code2))
-            return transport.Simple(
-                uid='_'.join([reg_out, reg_in, media]),
-                outputs=[self.regions[reg_out].busses['_'.join(
+        if not transport_class == transport.Simple:
+            raise(TypeError(
+                    "Sorry, `EnergySystem.connect` currently only works with" +
+                    "a `transport_class` argument of" + str(transport.Simple)))
+        for reg_out, reg_in in [(code1, code2), (code2, code1)]:
+            logging.debug('Creating simple {3} from {0} to {1}'.format(
+                    reg_out, reg_in, transport_class))
+            uid = '_'.join([reg_out, reg_in, media])
+            self.connections[uid] = transport_class(
+                uid=uid,
+                outputs=[self.regions[reg_out].buses['_'.join(
                     ['b', reg_out, media])]],
-                inputs=[self.regions[reg_in].busses['_'.join(
+                inputs=[self.regions[reg_in].buses['_'.join(
                     ['b', reg_in, media])]],
                 out_max={'_'.join(['b', reg_out, media]): out_max},
                 in_max={'_'.join(['b', reg_in, media]): in_max},
                 eta=[eta]
                 )
-        if classtype == 'simple':
-            c1 = trans_simp(self, code1, code2, media, in_max, out_max, eta)
-            c2 = trans_simp(self, code2, code1, media, in_max, out_max, eta)
-        else:
-            raise('error')
-
-        self.connections['_'.join([code1, code2, media])] = c1
-        self.connections['_'.join([code2, code1, media])] = c2
 
 
 class EnergyRegion:
@@ -59,7 +55,7 @@ class EnergyRegion:
         self.renew_pps = kwargs.get('renew_pps', [])  # list of entities
         self.conv_pps = kwargs.get('conv_pss', [])  # list of entities
         self.sinks = kwargs.get('sinks', [])  # list of sinks
-        self.busses = kwargs.get('busses', {})  # dict of busses
+        self.buses = kwargs.get('buses', {})  # dict of buses
 
         # Diese Attribute enthalten Hilfsgrößen, die beim Erstellen oder bei
         # der Auswertung von Nutzen sind.
