@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
    :glob:
    
+   meta_description
    installation_and_setup
    model_description
    api/*
