@@ -30,7 +30,7 @@ class EnergySystem:
                     "Sorry, `EnergySystem.connect` currently only works with" +
                     "a `transport_class` argument of" + str(transport.Simple)))
         for reg_out, reg_in in [(code1, code2), (code2, code1)]:
-            logging.debug('Creating simple {3} from {0} to {1}'.format(
+            logging.debug('Creating simple {2} from {0} to {1}'.format(
                     reg_out, reg_in, transport_class))
             uid = '_'.join([reg_out, reg_in, media])
             self.connections[uid] = transport_class(
