@@ -404,13 +404,16 @@ def add_dispatch_source(model, block):
                                       rule=curtailment_source_rule)
 
 def add_storage_balance(model, block):
-    """ Creates constraint for storage balance
+    """ Constraint to update the storage level in every timestep
+        depending on charge and discharge operations and storage losses.
 
-    .. math:: STORLEV(e,t) = STORLEV(e,t-1) - \\frac{P_{discharge}(e,t)}  \
-    {\\eta_{discharge}(e)} + \\frac{P_{charge}(e,t)}{\\eta_{charge}(e)} \
+    .. math:: STORLEV(e,t) = STORLEV(e,t-1) \\cdot (1 - CAPLOSS)(e) \
+    - \\frac{P_{discharge}(e,t)}{\\eta_{discharge}(e)}
+    + \\frac{P_{charge}(e,t)}{\\eta_{charge}(e)} \
     \\qquad \\forall e, \\forall t
 
     .. math:: STORLEV = \\text{Storage level}
+    .. math:: CAPLOSS = \\text{Self discharge rate}
     .. math:: P_{discharge} = \\text{Discharge power - in systems with \
         hourly timesteps equivalent to the discharge energy}
     .. math:: P_{charge} = \\text{Charge power - in systems with \
