@@ -406,6 +406,14 @@ def add_dispatch_source(model, block):
 def add_storage_balance(model, block):
     """ Creates constraint for storage balance
 
+    .. math:: STORLEV(e,t) = STORLEV(e,t-1) - \\frac{P_{discharge}(e,t)}  \
+    {\\eta_{discharge}(e)} + \\frac{P_{charge}(e,t)}{\\eta_{charge}(e)} \
+    \\qquad \\forall e, \\forall t
+
+    .. math:: STORLEV = \\text{Storage level}
+    .. math:: \\eta_{discharge} = \\text{Discharge efficiency factor}
+    .. math:: \\eta_{charge} = \\text{Charge efficiency factor}
+
     Parameters
     -------------
 
