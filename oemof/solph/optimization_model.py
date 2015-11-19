@@ -386,7 +386,6 @@ class OptimizationModel(po.ConcreteModel):
         """
         lc.add_global_output_limit(self, block)
 
-
     def simple_storage_assembler(self, block):
         """Simple storage assembler containing the constraints for simple
         storage components.
@@ -412,6 +411,7 @@ class OptimizationModel(po.ConcreteModel):
 
         lc.add_storage_balance(self, block)
         var.set_storage_cap_bounds(self, block)
+#        lc.add_storage_charge_discharge_limits(self, block)
 
         # optimization model with no investment
         if param.get('investment', False) == False:
@@ -419,31 +419,7 @@ class OptimizationModel(po.ConcreteModel):
             var.set_bounds(self, block, side='input')
         # investment
         else:
-            # constraint that limits discharge power by using the c-rate
-            c_rate_out = {obj.uid: obj.c_rate_out for obj in block.objs}
-            cap_max = {obj.uid: obj.cap_max for obj in block.objs}
-
-            def storage_discharge_limit_rule(block, e, t):
-                expr = 0
-                expr += self.w[e, self.O[e][0], t]
-                expr += -(cap_max[e] + block.add_cap[e]) \
-                    * c_rate_out[e]
-                return(expr <= 0)
-            block.discharge_limit_invest = po.Constraint(block.uids,
-                                                         self.timesteps,
-                                             rule=storage_discharge_limit_rule)
-
-            # constraint that limits charging power by using the c-rate
-            c_rate_in = {obj.uid: obj.c_rate_in for obj in block.objs}
-
-            def storage_charge_limit_rule(block, e, t):
-                expr = 0
-                expr += self.w[e, self.I[e], t]
-                expr += -(cap_max[e] + block.add_cap[e]) \
-                    * c_rate_in[e]
-                return(expr <= 0)
-            block.charge_limit_invest = po.Constraint(block.uids, self.timesteps,
-                                           rule=storage_charge_limit_rule)
+            lc.add_storage_charge_discharge_limits(self, block)
 
     def simple_transport_assembler(self, block):
         """Simple transport assembler grouping the constraints
