@@ -411,6 +411,10 @@ def add_storage_balance(model, block):
     \\qquad \\forall e, \\forall t
 
     .. math:: STORLEV = \\text{Storage level}
+    .. math:: P_{discharge} = \\text{Discharge power - in systems with \
+        hourly timesteps equivalent to the discharge energy}
+    .. math:: P_{charge} = \\text{Charge power - in systems with \
+        hourly timesteps equivalent to the charge energy}
     .. math:: \\eta_{discharge} = \\text{Discharge efficiency factor}
     .. math:: \\eta_{charge} = \\text{Charge efficiency factor}
 
