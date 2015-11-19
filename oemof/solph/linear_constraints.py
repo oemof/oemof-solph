@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 The linear_contraints module contains the pyomo constraints wrapped in
-functions. This functions are used by the '_assembler- methods
+functions. These functions are used by the '_assembler- methods
 of the OptimizationModel()-class.
 
 The module frequently uses the dictionaries I and O for the construction of
-constraints. I, E contain all uids of components as the keys of the dict and
-the input/output uids as items of the dict corresponding to the key.
+constraints. I and O contain all components' uids as dictionary keys and the
+relevant input input/output uids as dictionary items.
 
 *Illustrative Example*:
 
@@ -60,7 +60,7 @@ def add_bus_balance(model, block=None, balance_type='=='):
 
     Returns
     ----------
-    The constraints are added to as a attribute to the optimization model
+    The constraints are added as an attribute to the optimization model
     object `model` of type OptimizationModel()
     """
     if not block.objs or block.objs is None:
@@ -284,12 +284,13 @@ def add_global_output_limit(model, block=None):
                                        doc="Sum of output <= global_limit")
 
 def add_fixed_source(model, block):
-    """ Add fixed source
+    """ Adds fixed source
 
      .. math::  W(e,O(e),t) = val_{norm}(e,t) \\cdot out_{max}(e), \
      \\qquad \\forall e, \\forall t
 
     If investment for component:
+
     .. math::  W(e, O(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
     \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
 
@@ -306,7 +307,7 @@ def add_fixed_source(model, block):
     Returns
     -------
     The constraints will be added as attributes to
-    the optimization model object `model` of typeOptimizationModel().
+    the optimization model object `model` of type OptimizationModel().
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -356,7 +357,7 @@ def add_dispatch_source(model, block):
     dispatch can be used in the objective function to add cost for dispatch
     of sources.
 
-    The mathemathical fomulation for the constraint is as follows:
+    The mathemathical formulation of the constraint is as follows:
 
     .. math:: CURTAIL(e,t) = val_{norm}(e,t) \\cdot out_{max}(e) - \
     W(e,O(e),t),  \\qquad \\forall e, \\forall t

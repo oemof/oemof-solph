@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 This module contains predefined objectives that can be used to model
-energysystems.
+energy systems.
 
 @author: Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
@@ -13,6 +13,7 @@ except:
 import pyomo.environ as po
 import oemof.solph as solph
 
+
 def minimize_cost(self, c_blocks=(), r_blocks=()):
     """ Builds objective function that minimises the total costs.
 
@@ -20,7 +21,7 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
                         opex_var,
                         opex_fix,
                         curtailment_costs (dispatch sources),
-                        annulised capex (investment components)
+                        annualised capex (investment components)
 
     Parameters:
     ------------
@@ -72,6 +73,7 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
         expr += objexpr.add_excess_slack_costs(self, block)
 
     self.objective = po.Objective(expr=expr)
+
 
 def uc_minimize_costs(self, c_block=(), r_block=()):
     """ Unit commitment min. cost objective
