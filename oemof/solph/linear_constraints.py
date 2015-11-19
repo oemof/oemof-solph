@@ -467,6 +467,24 @@ def add_storage_balance(model, block):
 def add_storage_charge_discharge_limits(model, block):
     """
     Constraints that limit the discharge and charge power by the c-rate
+
+    .. math:: P_{discharge}(e, t) \\leq (CAP_{max}(e) + ADDCAP(e)) \
+        \\cdot c_{out}(e)
+    .. math:: P_{charge}(e, t) \\leq (CAP_{max}(e) + ADDCAP(e)) \
+        \\cdot c_{in}(e)
+
+    .. math:: P_{discharge} = \\text{Discharge power - in systems with \
+        hourly timesteps equivalent to the discharge energy}
+    .. math:: P_{charge} = \\text{Charge power - in systems with \
+        hourly timesteps equivalent to the charge energy}
+    .. math:: CAP_{max} = \\text{Installed capacity of energy storage}
+    .. math:: ADDCAP = \\text{Additionally installed capacity \
+        of energy storage in investment models}
+    ..math:: c_{out} = \\text{C factor for discharging, here defined as ratio
+        of ouput power and maximum capacity}
+    ..math:: c_{in} = \\text{C factor for charging, here defined as ratio
+        of input power and maximum capacity}
+
     """
 
     c_rate_out = {obj.uid: obj.c_rate_out for obj in block.objs}
