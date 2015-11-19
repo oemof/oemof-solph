@@ -143,6 +143,7 @@ def get_pp_data_from_type(row):
     return row
 
 
+# TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
 def get_feedin():
     'Dummy function until real function exists.'
     feedin_df = pd.DataFrame()
@@ -151,13 +152,14 @@ def get_feedin():
     return feedin_df
 
 
+# TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
 def get_demand():
     'Dummy function until real function exists.'
     demand_df = pd.DataFrame()
     demand_df['el'] = np.random.rand(8760) * 10 ** 8
     return demand_df
 
-
+# TODO: Könnte das nicht besser eine Methode der Energiesystemklasse sein?
 def create_bus(region, pp, global_buses):
     r'''
     Maybe it is more stable to ask for the type of the bus object instead of
@@ -181,6 +183,7 @@ def create_bus(region, pp, global_buses):
     return bus_reg
 
 
+# TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
 def create_solph_objects(region, pp, esystem, feedin):
     # Dispatch Sources
     if pp[1].type in ['wind_power', 'solar_power']:
@@ -286,6 +289,10 @@ TwoRegExample.connect('StaDes', 'LanWit', 'el', in_max=10000, out_max=9000,
 # The next step is to create a list of all entities and create an Optimization
 # Model. This could be part of the solph package.
 # ****************************************************************************
+
+
+# TODO: Könnte das Erstellen der solph-Komponenten nicht in einer Methode der
+# EnergySystem-Klasse passieren?
 
 entities = []
 components = []
