@@ -456,13 +456,13 @@ def add_storage_balance(model, block):
         expr = 0
         if(t == 0):
             expr += block.cap[e, t] - cap_initial[e]
-            expr += + model.w[model.I[e], e, t] * eta_in[e]
-            expr += - model.w[e, model.O[e][0], t] / eta_out[e]
+            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += block.cap[e, t]
             expr += - block.cap[e, t-1] * (1 - cap_loss[e])
-            expr += + model.w[model.I[e], e, t] * eta_in[e]
-            expr += - model.w[e, model.O[e][0], t] / eta_out[e]
+            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
     block.balance = po.Constraint(block.indexset, rule=storage_balance_rule)
 
