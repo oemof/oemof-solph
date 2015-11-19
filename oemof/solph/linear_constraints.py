@@ -409,7 +409,7 @@ def add_storage_balance(model, block):
 
     .. math:: STORLEV(e,t) = STORLEV(e,t-1) \\cdot (1 - CAPLOSS)(e) \
     - \\frac{P_{discharge}(e,t)}{\\eta_{discharge}(e)}
-    + \\frac{P_{charge}(e,t)}{\\eta_{charge}(e)} \
+    + P_{charge}(e,t) \\cdot \\eta_{charge}(e) \
     \\qquad \\forall e, \\forall t
 
     .. math:: STORLEV = \\text{Storage level}
