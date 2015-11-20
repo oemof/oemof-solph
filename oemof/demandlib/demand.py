@@ -7,7 +7,7 @@ Created on Fri Jul 24 19:11:38 2015
 
 import numpy as np
 import pandas as pd
-from . import energy_buildings as eb
+from oemof.core import energy_buildings as eb
 
 
 class electrical_demand():
@@ -128,7 +128,10 @@ class electrical_demand():
     References
     ----------
     statistics ...
-    Masterarbeit Birgit
+
+    B. Schachler: Bewertung des Einsatzes von Kraft-Wärme-Kopplungsanlagen
+    hinsichtlich der CO2-Emissionen bei wachsendem Anteil Erneuerbarer
+    Energien, Masterarbeit, Technische Universität Berlin, 2014
 
     Examples
     --------
@@ -161,6 +164,7 @@ class electrical_demand():
         elif method == 'db':
             conn = kwargs.get('conn')
             self.elec_demand = np.array([111, 222])
+            print('Dummy value. Not working so far.')
 
         elif method == 'scale_profile_csv':
             self.profile = self.read_from_csv(path=
@@ -196,7 +200,7 @@ class electrical_demand():
                                         'selp_type']]
 
             if kwargs.get('ann_el_demand_per_sector')[0][
-                    'ann_el_demand'] is 'calculate':
+                    'ann_el_demand'] is None:
                 self.elec_demand = (
                     self.hh_e_slp / self.hh_e_slp.sum() *
                     self.calculate_annual_demand_households(**kwargs) +
