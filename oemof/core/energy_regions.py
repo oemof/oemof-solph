@@ -14,6 +14,7 @@ from ..tools import pg_helpers
 
 from . import energy_weather as w
 from . import energy_power_plants as pp
+from oemof.demandlib import demand as dm
 from feedinlib import powerplants as plants
 from feedinlib import models
 
