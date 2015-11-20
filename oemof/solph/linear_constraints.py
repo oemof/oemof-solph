@@ -94,7 +94,7 @@ def add_bus_balance(model, block=None, balance_type='=='):
 
 
 
-def add_simple_io_relation(model, block):
+def add_simple_io_relation(model, block, idx=0):
     """ Adds constraint for input-output relation as simple function
     The function uses the `pyomo.Constraint()` class to build the constraint
     with the following relation.
@@ -126,8 +126,8 @@ def add_simple_io_relation(model, block):
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t] * eta[e][0] - \
-            model.w[e, model.O[e][0], t]
+        lhs = model.w[model.I[e], e, t] * eta[e][idx] - \
+            model.w[e, model.O[e][idx], t]
         return(lhs == 0)
     block.io_relation = po.Constraint(block.indexset, rule=io_rule,
                                       doc="Input * Efficiency = Output")
@@ -331,7 +331,6 @@ def add_fixed_source(model, block):
         for (e1, e2) in ee:
             for t in model.timesteps:
                 # set value of variable
-
                 model.w[e1, e2, t] = val[e1][t] * out_max[e1][e2]
                 # fix variable value ("set variable to parameter" )
                 model.w[e1, e2, t].fix()
