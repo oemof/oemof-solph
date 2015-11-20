@@ -56,7 +56,7 @@ def set_bounds(model, block, side="output"):
         # set upper bounds
         def output_ub_rule(block, e, t):
             lhs = model.w[e, model.O[e][0], t]
-            rhs = block.y[e, t] * out_max[e][model.O[e][0]]
+            rhs = block.y[e, t] * out_max[e][0]
             return(lhs <= rhs)
         block.maximum_output = po.Constraint(block.indexset,
                                              rule=output_ub_rule)
@@ -64,7 +64,7 @@ def set_bounds(model, block, side="output"):
         out_min = {obj.uid: obj.out_min for obj in block.objs}
         # set lower bounds
         def output_lb_rule(block, e, t):
-            lhs = block.y[e, t] * out_min[e][model.O[e][0]]
+            lhs = block.y[e, t] * out_min[e][0]
             rhs = model.w[e, model.O[e][0], t]
             return(lhs <= rhs)
         block.minimum_output = po.Constraint(block.indexset,
@@ -76,14 +76,14 @@ def set_bounds(model, block, side="output"):
         # set upper bounds
         def input_ub_rule(block, e, t):
             lhs = model.w[model.I[e], e, t]
-            rhs = block.y[e, t] * in_max[e][model.I[e]]
+            rhs = block.y[e, t] * in_max[e][0]
             return(lhs <= rhs)
         block.maximum_input = po.Constraint(block.indexset, rule=input_ub_rule)
 
         in_min = {obj.uid: obj.in_min for obj in block.objs}
         # set lower bounds
         def input_lb_rule(block, e, t):
-            lhs = block.y[e, t] * in_min[e][model.I[e]]
+            lhs = block.y[e, t] * in_min[e][0]
             rhs = model.w[model.I[e], e, t]
             return(lhs <= rhs)
         block.minimum_input = po.Constraint(block.indexset, rule=input_lb_rule)
@@ -132,7 +132,7 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
     def grad_pos_rule(block, e, t):
         if t > 1:
             return(model.w[e, model.O[e][0], t] - model.w[e, model.O[e][0], t-1] <=  \
-               grad_pos[e] + out_min[e][model.O[e][0]] * (1 -block.y[e, t]))
+               grad_pos[e] + out_min[e][0] * (1 -block.y[e, t]))
         else:
             return(po.Constraint.Skip)
 
@@ -142,7 +142,7 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
         if t > 1:
             lhs = model.w[e, model.O[e][0], t-1] - model.w[e, model.O[e][0], t]
             rhs =  grad_neg[e] + \
-                   out_min[e][model.O[e][0]] * (1 -block.y[e, t-1])
+                   out_min[e][0] * (1 -block.y[e, t-1])
             return(lhs <=  rhs)
 
         else:

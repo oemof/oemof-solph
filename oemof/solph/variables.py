@@ -144,11 +144,11 @@ def set_bounds(model, block, side='output'):
             for t in model.timesteps:
                 # transformer output <= model.out_max
                 if e1 in block.uids and side == 'output':
-                    model.w[e1, e2, t].setub(out_max[e1][e2])
+                    model.w[e1, e2, t].setub(out_max[e1][0])
                 # transformer input <= model.in_max
                 if e2 in block.uids and side == 'input':
                     try:
-                        model.w[e1, e2, t].setub(in_max[e2][e1])
+                        model.w[e1, e2, t].setub(in_max[e2][0])
                     except:
                         logging.warning("No upper bound for input (%s,%s)",
                                         e1, e2)

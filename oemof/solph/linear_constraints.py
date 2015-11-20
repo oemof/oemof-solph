@@ -331,7 +331,7 @@ def add_fixed_source(model, block):
         for (e1, e2) in ee:
             for t in model.timesteps:
                 # set value of variable
-                model.w[e1, e2, t] = val[e1][t] * out_max[e1][e2]
+                model.w[e1, e2, t] = val[e1][t] * out_max[e1][0]
                 # fix variable value ("set variable to parameter" )
                 model.w[e1, e2, t].fix()
     else:
@@ -392,7 +392,7 @@ def add_dispatch_source(model, block):
     for (e1, e2) in ee:
         for t in model.timesteps:
             # set upper bound of variable
-            model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][e2])
+            model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][0])
 
     def curtailment_source_rule(block, e, t):
         lhs = block.curtailment_var[e, t]

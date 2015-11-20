@@ -26,7 +26,7 @@ from oemof.core.network.entities.components import transports as transport
 import pandas as pd
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(12)]
+timesteps = [t for t in range(1000)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -49,8 +49,7 @@ b_el = Bus(uid="b_el", type="el", excess=True)
 # renewable sources (only pv onshore)
 wind_on = source.FixedSource(uid="wind_on",outputs=[b_el],
                                 val=data['wind'],
-                                cap_max={b_el.uid: 1000000},
-                                out_max={b_el.uid: 1000000},
+                                out_max=[1000000],
                                 add_out_limit=0,
                                 capex=1000,
                                 opex_fix=20,
@@ -59,8 +58,7 @@ wind_on = source.FixedSource(uid="wind_on",outputs=[b_el],
 #                                wacc={b_el.uid: 0.07})
 
 pv = source.FixedSource(uid="pv", outputs=[b_el], val=data['pv'],
-                           cap_max={b_el.uid: 582000},
-                           out_max={b_el.uid: 582000},
+                           out_max=[582000],
                            add_out_limit=0,
                            capex=900,
                            opex_fix=15,
@@ -74,8 +72,8 @@ demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
 
 # Simple Transformer for b_el
 pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            in_max={bgas.uid: None}, opex_var=50,
-                            out_max={b_el.uid: 10e10}, eta=[0.58])
+                            in_max=None, opex_var=50,
+                            out_max=[10e10], eta=[0.58])
 
 # chp (not from BNetzA) eta_el=0.3, eta_th=0.3
 #pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
