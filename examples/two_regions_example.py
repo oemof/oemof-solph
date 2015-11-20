@@ -12,6 +12,7 @@ logging.getLogger().setLevel(logging.INFO)
 from oemof.tools import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
+from oemof_pg import feedin_pg
 from oemof.core import energy_system as es
 from oemof.solph import postprocessing
 from oemof.core.network.entities import Bus
@@ -156,8 +157,9 @@ def get_feedin():
 def get_demand():
     'Dummy function until real function exists.'
     demand_df = pd.DataFrame()
-    demand_df['el'] = np.random.rand(8760) * 10 ** 8
+    demand_df['el'] = np.random.rand(8760) * 10 ** 10
     return demand_df
+
 
 # TODO: Könnte das nicht besser eine Methode der Energiesystemklasse sein?
 def create_bus(region, pp, global_buses):
@@ -184,28 +186,16 @@ def create_bus(region, pp, global_buses):
 
 
 # TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
-def create_solph_objects(region, pp, esystem, feedin):
-    # Dispatch Sources
-    if pp[1].type in ['wind_power', 'solar_power']:
-        # renewables get their data from time_series dataframe
-        # Hier fände ich eine Typ noch gut (Wind, PV...)
-        logging.debug('Create dispatch source {0} for {1}.'.format(
-            '_'.join(['DispSrc', region.code, str(len(region.renew_pps))]),
-            pp[1].type))
-        region.renew_pps.append(source.DispatchSource(
-            uid='_'.join(['DispSrc', region.code, str(len(region.renew_pps))]),
-            outputs=[region.buses['_'.join(['b', region.code, 'el'])]],
-            val=feedin[pp[1].type],
-            out_max={'_'.join(['b', region.code, 'el']): float(pp[1].cap)}))
-
-    elif pp[1].type in ['lignite', 'natural_gas', 'hard_coal']:
+def create_solph_objects(region, pp, esystem):
+    ''
+    if pp[1].type in ['lignite', 'natural_gas', 'hard_coal']:
         logging.debug('Create SimpleTransformer for ' + pp[1].type)
         bus_reg = create_bus(region, pp, esystem.global_buses)
         if bus_reg == region.code:
             resource_bus = region.buses['_'.join(['b', bus_reg, pp[1].type])]
         elif bus_reg == 'glob':
             resource_bus = esystem.global_buses['_'.join(['b', bus_reg,
-                                                           pp[1].type])]
+                                                          pp[1].type])]
 
         # Hier fände ich eine Typ noch gut (lignite, natural_gas,...)
         logging.debug('Create transformer {0} for {1}.'.format(
@@ -245,34 +235,38 @@ TwoRegExample.add_region(es.EnergyRegion(
 # Create global buses
 uid = "b_glob_hard_coal"
 TwoRegExample.global_buses[uid] = Bus(uid=uid, type="coal", price=60,
-                                       sum_out_limit=10e10)
+                                      sum_out_limit=10e10)
 uid = "b_glob_lignite"
 TwoRegExample.global_buses[uid] = Bus(uid=uid, type="coal", price=60,
-                                       sum_out_limit=10e10)
+                                      sum_out_limit=10e10)
 
 # Create entity objects for each region
 for region in TwoRegExample.regions.values():
     logging.info('Processing region: {0} ({1})'.format(
         region.name, region.code))
-    # Get feedin time series
-    feedin = get_feedin()
 
     # Get demand time series and create buses. One bus for each demand series.
     demand = get_demand()
     for demandtype in demand.keys():
         uid = '_'.join([region.code, demandtype])
         region.buses['b_' + uid] = Bus(uid='b_' + uid, type=demandtype,
-                                        price=60, sum_out_limit=10e10)
+                                       price=60, sum_out_limit=10e10)
         region.sinks.append(sink.Simple(uid='Sink_' + uid,
                                         inputs=[region.buses['b_' + uid]],
                                         val=demand[demandtype]))
 
+    # Create source object
+    my_feedin = feedin_pg.Feedin()
+    region.renew_pps.extend(
+        (my_feedin.create_fixed_source(conn, region=region, **site)))
+
     # Get power plants from database
-    pps_df = db_pps.get_all_power_plants(conn, region.geom)
-    pps_df.loc[len(pps_df)] = 10 ** 6, np.nan, 'natural_gas'
-#    pps_df = pps_df.apply(get_pp_data_from_type, axis=1)
+    # Create powerplant object
+    pps_df = db_pps.get_bnetza_pps(conn, region.geom)
+    pps_df.loc[len(pps_df)] = 'natural_gas', np.nan, 10 ** 10
+    # pps_df = pps_df.apply(get_pp_data_from_type, axis=1)
     for pp in pps_df.iterrows():
-        create_solph_objects(region, pp, TwoRegExample, feedin)
+        create_solph_objects(region, pp, TwoRegExample)
 
 # Connect the electrical bus of region StaDes und LanWit.
 TwoRegExample.connect('StaDes', 'LanWit', 'el', in_max=10000, out_max=9000,
