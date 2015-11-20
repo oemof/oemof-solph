@@ -408,7 +408,7 @@ def add_storage_balance(model, block):
         depending on charge and discharge operations and storage losses.
 
     .. math:: STORLEV(e,t) = STORLEV(e,t-1) \\cdot (1 - CAPLOSS)(e) \
-    - \\frac{P_{discharge}(e,t)}{\\eta_{discharge}(e)}
+    - \\frac{P_{discharge}(e,t)}{\\eta_{discharge}(e)} \
     + P_{charge}(e,t) \\cdot \\eta_{charge}(e) \
     \\qquad \\forall e, \\forall t
 
@@ -473,8 +473,10 @@ def add_storage_charge_discharge_limits(model, block):
 
     .. math:: P_{discharge}(e, t) \\leq (CAP_{max}(e) + ADDCAP(e)) \
         \\cdot c_{out}(e)
+        \\qquad \\forall e, \\forall t
     .. math:: P_{charge}(e, t) \\leq (CAP_{max}(e) + ADDCAP(e)) \
         \\cdot c_{in}(e)
+        \\qquad \\forall e, \\forall t
 
     .. math:: P_{discharge} = \\text{Discharge power - in systems with \
         hourly timesteps equivalent to the discharge energy}
@@ -483,9 +485,9 @@ def add_storage_charge_discharge_limits(model, block):
     .. math:: CAP_{max} = \\text{Installed capacity of energy storage}
     .. math:: ADDCAP = \\text{Additionally installed capacity \
         of energy storage in investment models}
-    ..math:: c_{out} = \\text{C factor for discharging, here defined as ratio
+    .. math:: c_{out} = \\text{C factor for discharging, here defined as ratio
         of ouput power and maximum capacity}
-    ..math:: c_{in} = \\text{C factor for charging, here defined as ratio
+    .. math:: c_{in} = \\text{C factor for charging, here defined as ratio
         of input power and maximum capacity}
 
     """
