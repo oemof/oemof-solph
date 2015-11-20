@@ -72,3 +72,12 @@ class EnergyRegion:
             for part in name_parts:
                 self._code += part[:1].upper() + part[1:3]
         return self._code
+
+
+class Simulation:
+    r"""
+    """
+
+    def __init__(self, **kwargs):
+        ''
+        pass
