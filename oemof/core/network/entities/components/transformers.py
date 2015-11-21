@@ -13,10 +13,12 @@ class Simple(Transformer):
 
     Parameters:
     -------------
-    objective: 'opex_var','opex_fix', 'fuel_ex', 'rsell',
-    linear_constr: 'io_relation', 'out_max', 'in_max', 'ramping'
-    milp_constr: 'out_min', 'in_min', 'ramping', 'startup', 'shutdown'
-    investment: True v False
+    eta: effciency as constant efficiency for simple transformer
+    model_param : dict
+        objective: 'opex_var','opex_fix', 'fuel_ex', 'rsell',
+        linear_constr: 'io_relation', 'out_max', 'in_max', 'ramping'
+        milp_constr: 'out_min', 'in_min', 'ramping', 'startup', 'shutdown'
+        investment: True v False
 
     Note that some options (e.g. 'startup') lead to implicit/automatic creation
     of objective expression terms. Respectively some options yield correct
@@ -32,10 +34,15 @@ class Simple(Transformer):
 
     def __init__(self, **kwargs):
         """
-        :param eta: eta as constant efficiency for simple transformer
         """
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', None)
+
+        if self.eta is None and \
+        'io_relation' in Simple.model_param['linear_constr']:
+            raise ValueError('"io_relation" in ' +
+                             'transformer.Simple.model_param["linear_constr"]'+
+                              ' can not be set if efficiency is not defined')
 
 
 class CHP(Transformer):
@@ -43,12 +50,14 @@ class CHP(Transformer):
     A CombinedHeatPower Transformer always has a simple input output relation
     with a constant efficiency
 
+     Parameters:
+    -------------
+
+
     For individual modeling the model_param variable can be altered. The
     following options (select by string) are available. Some of them
     are obligatory.
 
-    Parameters:
-    -------------
     objective: 'opex_var','opex_fix', 'fuel_ex', 'rsell',
     linear_constr: 'io_relation', 'simple_chp_relation', 'out_max', 'in_max',
                    'ramping',
@@ -74,6 +83,11 @@ class CHP(Transformer):
         """
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', [None, None])
+        if self.eta[0] is None or self.eta[1] is None and \
+            'simple_chp_relation' in Simple.model_param['linear_constr']:
+            raise ValueError('"simple_chp_relation" in ' +
+                             'transformer.Simple.model_param["linear_constr"]'+
+                             ' can not be set if no efficiencies are defined')
 
 class SimpleExtractionCHP(Transformer):
     """
@@ -119,7 +133,18 @@ class SimpleExtractionCHP(Transformer):
         self.beta = kwargs.get('beta', None)
         self.sigma = kwargs.get('sigma', None)
 
-
+        if self.in_max is None:
+            raise ValueError('Missing attribute "in_max" for object: \n' +
+                             str(type(self)))
+        if self.eta_el_cond is None:
+            raise ValueError('Missing attribute "eta_el_cond" for object: \n' +
+                             str(type(self)))
+        if self.beta is None:
+            raise ValueError('Missing attribute "beta" for object: \n' +
+                             str(type(self)))
+        if self.sigma is None:
+            raise ValueError('Missing attribute "sigma" for object: \n' +
+                             str(type(self)))
 class Storage(Transformer):
     """
     """
