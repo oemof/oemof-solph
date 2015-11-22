@@ -8,6 +8,7 @@ class Bus(Entity):
     consumers of a commodity of the same kind. As such it has a type,
     which signifies what kind of commodity goes through the bus.
     """
+    optimization_options = {}
     lower_name = "bus"
 
     def __init__(self, **kwargs):
@@ -38,7 +39,7 @@ class Component(Entity):
     Components and not between Entities of equal subtypes. This class
     exists only to facilitate this distinction and is empty otherwise.
     """
-    model_param = {}
+    optimization_options = {}
     lower_name = "component"
 
     def __init__(self, **kwargs):

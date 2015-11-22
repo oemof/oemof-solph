@@ -50,13 +50,10 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
                 ref = 'output'
             # variable costs
             expr += objexpr.add_opex_var(self, block, ref='output')
-            # input costs
-            if 'input_costs' in block.model_param.get('objective'):
-                expr += objexpr.add_input_costs(self, block)
             # fix costs
             expr += objexpr.add_opex_fix(self, block, ref=ref)
             # investment costs
-            if block.model_param.get('investment', False) == True:
+            if block.optimization_options.get('investment', False) == True:
                 expr += objexpr.add_capex(self, block, ref=ref)
             # revenues
         if block.name in r_blocks:
@@ -71,65 +68,6 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
     # artificial costs for excess or shortage
     if self.bus.excess_uids:
         expr += objexpr.add_excess_slack_costs(self, block)
-
-    self.objective = po.Objective(expr=expr)
-
-
-def uc_minimize_costs(self, c_block=(), r_block=()):
-    """ Unit commitment min. cost objective
-
-    Costs that are included:
-       For objects in c_blocks:
-                          opex_var,
-                          input costs (e.g. fuel),
-                          startup costs (only milp models),
-                          shutdown costs (only milp models)
-                          ramp costs
-       For objects in r_blocks:
-                          output revenues
-       Other:
-          excess, slack costs for additional slack variables per bus (if exist)
-
-    Parameters:
-    ------------
-    self : pyomo model instance
-    c_blocks : pyomo blocks containing components that are included in
-               cost terms of objective function
-    r_blocks : pyomo blocks containing components that are included in revenue
-               terms of objective function
-
-    """
-    c_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
-    r_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
-
-    blocks = [block for block in self.block_data_objects(active=True)
-              if not isinstance(block,
-                                solph.optimization_model.OptimizationModel)]
-    expr = 0
-    for block in blocks:
-        if block.name in c_blocks:
-            # variable costs
-            expr += objexpr.add_opex_var(self, block, ref='output')
-            # input costs
-            expr += objexpr.add_input_costs(self, block)
-            # startup costs
-            if 'startup' in block.model_param.get('milp_constr', ()):
-                expr += objexpr.add_startup_costs(self, block)
-            # shutdown costs
-            if 'shutdown' in block.model_param.get('milp_constr', ()):
-                expr += objexpr.add_shutdown_costs(self, block)
-            # ramp costs
-            if 'ramping' in block.model_param.get('linear_constr', ()):
-                expr += objexpr.add_ramping_costs(self, block)
-        if block.name in r_blocks:
-            expr += objexpr.add_revenues(self, block, ref='output')
-
-    if self.uids['shortage']:
-        expr += objexpr.add_shortage_slack_costs(self)
-    # artificial costs for excess or shortage
-    if self.uids['excess']:
-        expr += objexpr.add_excess_slack_costs(self)
-
 
     self.objective = po.Objective(expr=expr)
 

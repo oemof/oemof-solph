@@ -6,30 +6,8 @@ class Simple(Transformer):
     """
     Simple Transformers always have a simple input output relation with a
     constant efficiency
-
-    For individual modeling the model_param variable can be altered. The
-    following options (select by string) are available. Some of them
-    are obligatory.
-
-    Parameters:
-    -------------
-    eta: effciency as constant efficiency for simple transformer
-    model_param : dict
-        objective: 'opex_var','opex_fix', 'fuel_ex', 'rsell',
-        linear_constr: 'io_relation', 'out_max', 'in_max', 'ramping'
-        milp_constr: 'out_min', 'in_min', 'ramping', 'startup', 'shutdown'
-        investment: True v False
-
-    Note that some options (e.g. 'startup') lead to implicit/automatic creation
-    of objective expression terms. Respectively some options yield correct
-    models in combination with others. For details look at
-    OptimizationModel.simple_transformer_assembler() in the oemof/solph module.
     """
-    model_param = {'linear_constr': ('io_relation', 'out_max'),
-                   'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix', 'input_costs',
-                                  'rsell'),
-                   'investment': False}
+    optimization_options = {}
     lower_name = 'simple_transformer'
 
     def __init__(self, **kwargs):
@@ -38,43 +16,13 @@ class Simple(Transformer):
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', None)
 
-        if self.eta is None and \
-        'io_relation' in Simple.model_param['linear_constr']:
-            raise ValueError('"io_relation" in ' +
-                             'transformer.Simple.model_param["linear_constr"]'+
-                              ' can not be set if efficiency is not defined')
-
 
 class CHP(Transformer):
     """
     A CombinedHeatPower Transformer always has a simple input output relation
     with a constant efficiency
-
-     Parameters:
-    -------------
-
-
-    For individual modeling the model_param variable can be altered. The
-    following options (select by string) are available. Some of them
-    are obligatory.
-
-    objective: 'opex_var','opex_fix', 'fuel_ex', 'rsell',
-    linear_constr: 'io_relation', 'simple_chp_relation', 'out_max', 'in_max',
-                   'ramping',
-    milp_constr: 'out_min', 'in_min', 'ramping', 'startup', 'shutdown'
-    investment: True v False
-
-    Note that some options (e.g. 'startup') lead to implicit/automatic creation
-    of objective expression terms. Similarly some options only yield correct
-    models in combination with other options set.
-    For details look at OptimizationModel.simple_chp_assembler() in
     """
-    model_param = {'linear_constr': ('io_relation', 'out_max',
-                                     'simple_chp_relation'),
-                   'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix', 'input_costs',
-                                  'rsell'),
-                   'investment': False}
+    optimization_options = {}
     lower_name = "simple_chp"
 
     def __init__(self, **kwargs):
@@ -83,51 +31,23 @@ class CHP(Transformer):
         """
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', [None, None])
-        if self.eta[0] is None or self.eta[1] is None and \
-            'simple_chp_relation' in Simple.model_param['linear_constr']:
-            raise ValueError('"simple_chp_relation" in ' +
-                             'transformer.Simple.model_param["linear_constr"]'+
-                             ' can not be set if no efficiencies are defined')
 
 class SimpleExtractionCHP(Transformer):
     """
     Class for combined heat and power unit with extraction turbine and constant
     power to heat coeffcient in backpressure mode
 
-    For individual modeling the model_param variable can be altered. The
-    following options (select by string) are available. Some of them
-    are obligatory.
-
     Parameters:
-    -------------
-    objective: 'opex_var','opex_fix', 'fuel_ex', 'rsell',
-    linear_constr: 'io_relation', 'simple_extraction_relation', 'out_max',
-                   'in_max', 'ramping',
-    milp_constr: 'out_min', 'in_min', 'ramping', 'startup', 'shutdown'
-    investment:  False (no investment possible for chp extraction turbines)
-
-    Note that some options (e.g. 'startup') lead to implicit/automatic creation
-    of objective expression terms. Similarly some options only yield correct
-    models in combination with other options set.
-    For details look at OptimizationModel.simple_extraction_chp_assembler() in
-    the oemof/solph module.
+    -----------
+    eta_el_cond : constant el. efficiency for transformer in condesing mode
+    beta : power loss index
+    sigma : power to heat ratio P/Q in backpressure mode
     """
-    model_param = {'linear_constr': ('in_max', 'out_max',
-                                     'simple_extraction_relation'),
-                   'milp_constr' : (),
-                   'objective' : ('opex_var', 'opex_fix', 'input_costs',
-                                  'rsell'),
-                   'investment': False}
+    optimization_options = {}
     lower_name = "simple_extraction_chp"
 
     def __init__(self, **kwargs):
-        """
-        Parameters:
-        -----------
-        eta_el_cond : constant el. efficiency for transformer in condesing mode
-        beta : power loss index
-        sigma : power to heat ratio P/Q in backpressure mode
-        """
+
         super().__init__(**kwargs)
         self.eta_el_cond = kwargs.get('eta_el_cond', None)
         self.beta = kwargs.get('beta', None)
@@ -147,26 +67,24 @@ class SimpleExtractionCHP(Transformer):
                              str(type(self)))
 class Storage(Transformer):
     """
+    Parameters:
+    -----------
+    cap_max : maximal sate of charge
+    cap_min : minimum state of charge
+    cap_initial : state of charge at timestep 0 (default cap_max*0.5)
+    add_cap_limit : limit of additional installed capacity (only investment
+    models)
+    eta_in : efficiency at charging
+    eta_out : efficiency at discharging
+    cap_loss : capacity loss per timestep in p/100
+    c_rate_in : c-rate for charging (unit is s^-1)
+    c_rate_out : c-rate for discharging (unit is s^-1)
     """
-    model_param = {'investment': False,
-                   'objective': ('opex_var', 'opex_fix')}
+    optimization_options = {}
     lower_name = "simple_storage"
 
     def __init__(self, **kwargs):
-        """
-        Parameters:
-        -----------
-        cap_max : maximal sate of charge
-        cap_min : minimum state of charge
-        cap_initial : state of charge at timestep 0 (default cap_max*0.5)
-        add_cap_limit : limit of additional installed capacity (only investment
-        models)
-        eta_in : efficiency at charging
-        eta_out : efficiency at discharging
-        cap_loss : capacity loss per timestep in p/100
-        c_rate_in : c-rate for charging (unit is s^-1)
-        c_rate_out : c-rate for discharging (unit is s^-1)
-        """
+
         super().__init__(**kwargs)
 
         self.cap_max = kwargs.get('cap_max', None)
