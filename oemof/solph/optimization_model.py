@@ -31,11 +31,6 @@ class OptimizationModel(po.ConcreteModel):
     timesteps : list with all timesteps as integer values
     options : nested dictionary with options to set.
 
-
-    Returns
-    -------
-    m : pyomo.ConcreteModel
-
     """
 
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
@@ -45,7 +40,7 @@ class OptimizationModel(po.ConcreteModel):
 
         self.entities = entities
         self.timesteps = timesteps
-        self.objective_name = options.get('objective_name', 'individual')
+        self.objective_name = options.get('objective_name', None)
 
         self.T = po.Set(initialize=timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
@@ -66,7 +61,6 @@ class OptimizationModel(po.ConcreteModel):
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in self.components
                   if not isinstance(c, cp.Sink)}
 
-        self.objfuncexpr = 0
         # set attributes lists per class with objects and uids for opt model
         for cls in component_classes:
             objs = [e for e in self.entities if isinstance(e, cls)]
@@ -92,10 +86,10 @@ class OptimizationModel(po.ConcreteModel):
         self.add_component('bus', block)
 
         # create objective function
-        if self.objective_name == 'individual':
-            self.objective = po.Objective(expr=self.objfuncexpr)
-        else:
-            self.objective_assembler(objective_name=self.objective_name)
+        if self.objective_name is None:
+            raise ValueError('No objective name defined!')
+
+        self.objective_assembler(objective_name=self.objective_name)
 
 
     def bus_assembler(self, block):
@@ -108,10 +102,6 @@ class OptimizationModel(po.ConcreteModel):
 
         Parameters
         ----------
-        self : pyomo.ConcreteModel
-
-        Returns
-        -------
         self : pyomo.ConcreteModel
         """
 
@@ -138,14 +128,6 @@ class OptimizationModel(po.ConcreteModel):
         # set limits for buses
         lc.add_global_output_limit(self, block)
 
-        if self.objective_name == 'individual':
-            if block.shortage_uids:
-                self.objfuncexpr += \
-                    objfuncexprs.add_shortage_slack_costs(self, block)
-            if self.excess_uids:
-                 self.objfuncexpr += \
-                     objfuncexprs.add_excess_slack_costs(self, block)
-
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
 
@@ -169,7 +151,10 @@ class OptimizationModel(po.ConcreteModel):
                                    bounds=add_out_bound_rule)
 
         for option in block.optimization_options:
-            block.optimization_options[option]()
+            if option == 'objective':
+                pass
+            else:
+                block.optimization_options[option]()
 
     def simple_transformer_assembler(self, block):
         """ Method containing the constraints functions for simple
