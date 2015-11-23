@@ -153,18 +153,16 @@ components = transformers + renewable_sources + storages + sinks + commodities
 # create list of all entities
 entities = components + buses
 
+# TODO: other solver libraries should be passable
 simulation = es.Simulation(solver='glpk', timesteps=timesteps,
                            stream_solver_output=True)
+
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 energysystem.optimize()
 
 # write results back to objects
 pp.results_to_objects(energysystem.optimization_model)
-
-
-# group specific components for result analysis
-#components = transformers + renewable_sources
 
 
 if __name__ == "__main__":
