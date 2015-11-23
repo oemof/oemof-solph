@@ -146,6 +146,20 @@ class OptimizationModel(po.ConcreteModel):
                  self.objfuncexpr += \
                      objfuncexprs.add_excess_slack_costs(self, block)
 
+    def default_assembler(self, block):
+        """
+        """
+
+        if block.optimization_options.get('investment', False) == True and \
+                                   block.optimization_options['milp_constr']():
+            raise ValueError('Component can not be modeled with milp-constr ' +
+                             'in investment mode!')
+        if block.optimization_options['investment']() == True:
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
+
+        for option in block.optimization_options:
+            block.optimization_options[option]()
+
     def simple_transformer_assembler(self, block):
         """ Method containing the constraints functions for simple
         transformer components.
@@ -175,32 +189,22 @@ class OptimizationModel(po.ConcreteModel):
             objfuncexprs.add_input_costs(self, block)
             objfuncexprs.add_revenues(self, block)
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options == {}:
             block.optimization_options = default_optimization_options
         else:
             block.optimization_options = block.optimization_options
 
-        if block.optimization_options.get('investment', False) == True and \
-                                        block.optimization_options['milp_constr']():
-            raise ValueError('Component can not be modeled with milp-constr ' +
-                             'in investment mode! Please change `optimization_options`')
-
-        if block.optimization_options.get('investment', False) == True:
-            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
-
-        for option in block.optimization_options:
-            if option == 'investment':
-                pass
-            else:
-                block.optimization_options[option]()
+        self.default_assembler(block)
 
 
     def simple_chp_assembler(self, block):
@@ -228,13 +232,14 @@ class OptimizationModel(po.ConcreteModel):
             objfuncexprs.add_input_costs(self, block)
             objfuncexprs.add_revenues(self, block)
         def mixed_integer_linear_constraints():
-           return (False)
-
+            return False
+        def investment():
+            return False
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options == {}:
             block.optimization_options = default_optimization_options
@@ -242,7 +247,7 @@ class OptimizationModel(po.ConcreteModel):
             block.optimization_options = block.optimization_options
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
+        self.default_assembler(block)
 
     def simple_extraction_chp_assembler(self, block):
         """Method grouping the constraints for simple chp components.
@@ -266,13 +271,15 @@ class OptimizationModel(po.ConcreteModel):
             objfuncexprs.add_input_costs(self, block)
             objfuncexprs.add_revenues(self, block)
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options == {}:
             block.optimization_options = default_optimization_options
@@ -280,7 +287,7 @@ class OptimizationModel(po.ConcreteModel):
             block.optimization_options = block.optimization_options
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
+        self.default_assembler(block)
 
 
     def fixed_source_assembler(self, block):
@@ -302,13 +309,15 @@ class OptimizationModel(po.ConcreteModel):
             objfuncexprs.add_opex_var(self, block, ref='output')
             objfuncexprs.add_opex_fix(self, block, ref='output')
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+           return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options == {}:
             block.optimization_options = default_optimization_options
@@ -316,7 +325,7 @@ class OptimizationModel(po.ConcreteModel):
             block.optimization_options = block.optimization_options
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
+        self.default_assembler(block)
 
 
     def dispatch_source_assembler(self, block):
@@ -338,24 +347,26 @@ class OptimizationModel(po.ConcreteModel):
             objfuncexprs.add_opex_fix(self, block, ref='output')
             objfuncexprs.add_curtailment_costs(self, block)
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options == {}:
             block.optimization_options = default_optimization_options
         else:
             block.optimization_options = block.optimization_options
 
-        if block.optimization_options.get('investment', False) == True:
+        if block.optimization_options.get['investment']() == True:
             raise ValueError('Dispatch source investment is not possible')
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
+        self.default_assembler(block)
 
 
     def simple_sink_assembler(self, block):
@@ -419,16 +430,18 @@ class OptimizationModel(po.ConcreteModel):
             else:
                 lc.add_storage_charge_discharge_limits(self, block)
         def objective_function_expressions():
-           objfuncexprs.add_opex_var(self, block, ref='output')
-           objfuncexprs.add_opex_fix(self, block, ref='capacity')
+            objfuncexprs.add_opex_var(self, block, ref='output')
+            objfuncexprs.add_opex_fix(self, block, ref='capacity')
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options == {}:
             block.optimization_options = default_optimization_options
@@ -436,12 +449,12 @@ class OptimizationModel(po.ConcreteModel):
             default_optimization_options.update(block.optimization_options)
             block.optimization_options = default_optimization_options
 
-        if block.optimization_options.get('investment', False) == True:
+        if block.optimization_options['investment']() == False:
             block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
 
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
+        self.default_assembler(block)
 
 
 
