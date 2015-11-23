@@ -17,6 +17,7 @@ class Entity:
     entity, these properties are collected here so that they are shared
     with descendant classes.
     """
+    optimization_options = {}
     def __init__(self, **kwargs):
         #TODO: add default argument values to docstrings (if it's possible).
         """

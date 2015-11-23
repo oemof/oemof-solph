@@ -12,7 +12,7 @@ try:
 except:
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
-
+    from ..core.network.entities.components.transformers import Storage
 
 def results_to_objects(instance):
     """ write the results from a pyomo optimization problem back to the
@@ -63,22 +63,10 @@ def results_to_objects(instance):
             entity.results['cap'] = []
             for t in instance.timesteps:
                 entity.results['cap'].append(
-                    instance.cap[entity.uid, t].value)
-
-    if(instance.invest is True):
-        for entity in instance.entities:
-            if isinstance(entity, cp.Transformer):
-                entity.results['add_out'] = \
-                    instance.add_out[entity.uid].value
-            if isinstance(entity, cp.Source):
-                entity.results['add_out'] = \
-                    instance.add_out[entity.uid].value
-            if isinstance(entity, cp.transformers.Storage):
-                entity.results['add_cap'] = \
-                    instance.add_cap[entity.uid].value
+                    getattr(instance, str(Storage)).cap[entity.uid, t].value)
 
 
-def dual_variables_to_objects(instance):
+def bus_duals_to_objects(instance):
     """ Extracts values from dual variables of `instance` and writes
     values back to bus-objects.
 
@@ -93,10 +81,10 @@ def dual_variables_to_objects(instance):
     """
     for b in instance.bus_objs:
         if b.type == "el" or b.type == "th":
-            b.results["duals"] = []
+            b.results["shadowprice"] = []
             for t in instance.timesteps:
-                b.results["duals"].append(
-                    instance.dual[getattr(instance, "bus")[(b.uid, t)]])
+                b.results["shadowprice"].append(
+                    instance.dual[getattr(instance, "bus_balance")[(b.uid, t)]])
     # print(b.results["duals"])
 
 

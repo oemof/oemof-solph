@@ -4,7 +4,7 @@
 
 Eva, Ulf and Ilka learn git.
 
-This so called meta-description was developed to make oemof easy to use and 
+This so called meta-description was developed to make oemof easy to use and
 develop. It describes general ideas and structures of oemof and its modules.
 
 
@@ -15,7 +15,7 @@ Models in energy system analysis often do not disclose source code and data or o
 This lack of transparency slows down the scientific discussion about the model fitness in terms of a specific application.
 Moreover, models are often tailor-made and do not allow and easy adaption to other requirements or an integration of new approaches.
 
-The Open Energy Modelling Framework (oemof) addresses this issue by introducing an open source modeling framework for 
+The Open Energy Modelling Framework (oemof) addresses this issue by introducing an open source modeling framework for
 energy systems analysis including a detailed documentation structure.
 This transparent approach allows scientific discourse about the underlying models and thus improves the model quality.
 Additionally, a modular design approach allows a flexible adaption for a variety of applications.
@@ -31,7 +31,7 @@ Framework structure
 Generic oemof energy systems consist of entities and represent a bipartite directed graph.
 
 *Entities* can be subdivided into busses or components.
-A *Bus* has a certain type (e.g. gas) and can be connected to other busses 
+A *Bus* has a certain type (e.g. gas) and can be connected to other busses
 (e.g. electricity or thermal) via components.
 A *Component* in turn represents a (possible) in- or outflow into a bus.
 
@@ -46,21 +46,21 @@ The basic components are:
 Mathematical description (generic formulation as graph wihtout timesteps)
 ----------------------------------------------------------------------------
 
- Entities are connected in such a way that buses are only connected to components 
-and vice versa. In this way the energy system can be interpreted as a bipartite graph. 
-In this graph the entities represent vertices. The inputs and the ouputs can 
-be interpreted as directed edges. For every edge in this graph there will be a value which 
+ Entities are connected in such a way that buses are only connected to components
+and vice versa. In this way the energy system can be interpreted as a bipartite graph.
+In this graph the entities represent vertices. The inputs and the ouputs can
+be interpreted as directed edges. For every edge in this graph there will be a value which
 we will define as the weight of the edge.
 
 
-Set of entities :math:`E` as a union of sets of buses (B), 
-transformers(F), sources (O), sinks (I) and transports (P) respectively, 
+Set of entities :math:`E` as a union of sets of buses (B),
+transformers(F), sources (O), sinks (I) and transports (P) respectively,
 which are the vertices:
 
 .. math::
    E := \{ E_B, E_F, E_O, E_I, E_P \}
 
-Set of Components: 
+Set of Components:
 
 .. math::
    E_C := E \setminus E_B
@@ -87,10 +87,10 @@ And additional constraint for outflow :math:`o` and inflow :math:`i` for each ed
    o_{e_1} - i_{e_2} = 0, \quad \forall (e_1, e_2) \in \vec{E}
 
 
-Example 
+Example
 ------------------------------------------
 
-An example of a simple energy system shows the usage of the entities for real world representations. 
+An example of a simple energy system shows the usage of the entities for real world representations.
 
 *Region1:*
 
@@ -176,7 +176,7 @@ The modelling library feedinlib is currently in a development stage.
 Using feedinlib energy production timeseries of several energy plants can be created.
 Focus is on fluctuating renewable energies like wind energy and photovoltaics.
 The output timeseries can be input for the components of the energy system and therefore incorporated in the optimization within the modelling library solph.
-However, a stand-alone usage of feedinlib is also intended. 
+However, a stand-alone usage of feedinlib is also intended.
 
 Clone or fork the 'feedinlib' from github and use it within your project. Don’t forget to play back your fixes and improvements. We are pleased to get your feedback.
 
@@ -194,63 +194,70 @@ Description of demandlib.
 The *solph* module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The solph module of oemof allows to create and solve linear optimization 
-problems. The optimization problem is build based on a energy system defined via 
-oemof-entities. These entities are instances of 
-oemof base classes (e. g. buses or components). For the definition of variables, 
-constraints and an objective function as well as for communication with solvers 
+The solph module of oemof allows to create and solve linear (and mixed-integer)
+optimization problems. The optimization problem is build based on a energy
+system defined via oemof-entities. These entities are instances of
+oemof base classes (e. g. buses or components). For the definition of variables,
+constraints and an objective function as well as for communication with solvers
 etc. the python packages `Pyomo <http://www.pyomo.org/>`_ is used.
 
-Structure of solph 
+Structure of solph
 ------------------------------------------
-At its core solph has a class called *OptimizationModel()* which is a child of 
+At its core solph has a class called *OptimizationModel()* which is a child of
 the pyomo class *ConcreteModel()*. This class contains different methods.
-An important type of methods are so called *assembler* methods. These methods 
-correspond exactly to one oemof-class. For example the *transfomer.Simple()* 
-class of oemof will have a associated method called 
-simple_transformer_assembler(). This method exctracts information from oemof 
-objects and groups all necessary constraints to model a simple transformer. 
+An important type of methods are so called *assembler* methods. These methods
+correspond exactly to one oemof-base-class. For example the
+*transfomer.Simple()* class of oemof will have a associated method called
+simple_transformer_assembler(). This method groups all necessary constraints
+to model a simple transformer. The constraints expressions are defined in
+extra module (*linear_constraints.py*, *linear_mixed_integer_constraints.py*).
+All necessary constraints related with variables are defined in *variables.py*.
+
 
 Constructor
 ************
 The whole pyomo model is build when instantiating the optimization model.
-This is why the constructor of the  *OptimizationModel()* class plays an 
-important role. 
+This is why the constructor of the  *OptimizationModel()* class plays an
+important role.
 
-The general procedure is as basically follows: 
+The general procedure is as basically follows:
 
-1. Set some options 
+1. Set some options
 2. Create all necessary optimization variables
-3. Loop trough all entities and group existing objects by class 
-4. Call the associated *assembler* method for every **group** of objects. 
+3. Loop trough all entities and group existing objects by class
+4. Call the associated *assembler* method for every **group** of objects.
    This builds constraints to model components.
 5. Build the bus constraints with bus *assembler*.
 6. Build objective *assembler*.
 
 
-Assembler methods 
+Assembler methods
 ******************
-The *assembler* methods can be specified in two different ways. Firstly, functions 
-from the solph-library called *linear_constraints.py* can be used to add 
-constraints to the *assembler*. Secondly, *assembler* methods can use other 
-*assembler* methods and then be extended by functions from the library. 
-The same holds for the objective *assembler*. The objective function uses 
-pre-defined objectives from the solph-library called *linear_objectives.py*.
+The *assembler* methods can be specified in two different ways. Firstly, functions
+from the solph-library called *linear_constraints.py* can be used to add
+constraints to the *assembler*. Secondly, *assembler* methods can use other
+*assembler* methods and then be extended by functions from the library.
+The same holds for the objective *assembler*. The objective function uses
+pre-defined objectives from the solph-library called *objectives.py*. These
+pre-defined objectives are build by the use of objective expressions defined
+in *objective_expressions*. Different objectives for optimization models
+can be selected by setting the option *objective_types* inside the
+*objective_assembler* method.
 
-If necessary, the two libraries used be *assemlber* methods can be extended 
-and used in methods of *OptimizationModel()* afterwards.  
 
+If necessary, the two libraries used be *assemlber* methods can be extended
+and used in methods of *OptimizationModel()* afterwards.
 
 Solve and other
 ****************
-Moreover, the *OptimizationModel()* class contains methods for setting options 
-and solving the optimization model. 
+Moreover, the *OptimizationModel()* class contains a method for solving
+the optimization model.
 
 
 Postprocessing of results
-------------------------------------------
+----------------------------
 To extract values from the optimization problem variables their exist a
-postprossing module containing different functions. 
+postprossing module containing different functions.
 Results can be written back to the oemof-objects or
 to excel-spreadsheets.
 

@@ -8,7 +8,7 @@ class Bus(Entity):
     consumers of a commodity of the same kind. As such it has a type,
     which signifies what kind of commodity goes through the bus.
     """
-    lower_name = "bus"
+    optimization_options = {}
 
     def __init__(self, **kwargs):
         """
@@ -20,9 +20,14 @@ class Bus(Entity):
         super().__init__(**kwargs)
         self.type = kwargs.get("type", None)
         self.price = kwargs.get("price", 0)
+        self.balanced = kwargs.get("balanced", True)
         self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
         self.emission_factor = kwargs.get("emission_factor", 0)
         self.results = {}
+        self.excess = kwargs.get('excess', True)
+        self.shortage = kwargs.get('shortage', False)
+        self.excess_costs = kwargs.get('excess_costs', 0)
+        self.shortage_costs = kwargs.get('shortage_costs', 10e10)
 
 
 class Component(Entity):
@@ -33,7 +38,7 @@ class Component(Entity):
     Components and not between Entities of equal subtypes. This class
     exists only to facilitate this distinction and is empty otherwise.
     """
-    lower_name = "component"
+    optimization_options = {}
 
     def __init__(self, **kwargs):
         """
@@ -41,27 +46,25 @@ class Component(Entity):
         ------------
         in_max : maximum input of component (e.g. in MW)
         out_max : maximum output of component (e.g. in MW)
-        add_out_limit : limit on additional output "capacity"
+        add_out_limit : limit on additional output "capacity" (e.g. in MW)
 
-        capex : capital expenditure
-        lifetime : lifetime of component
+        capex : capital expenditure (e.g. in Euro / MW )
+        lifetime : lifetime of component (e.g. years)
         wacc : weigted average cost of capital (dimensionless)
         crf: capital recovery factor: (p*(1+p)^n)/(((1+p)^n)-1)
 
         opex_fix : fixed operational expenditure (e.g. expenses for staff)
-        opex_var : variable operational expenditure (e.g. spare parts)
-        ramp_costs : costs du to ramping
-        start_costs : costs due to start of component
+        opex_var : variable operational expenditure (e.g. spare parts + fuelcosts)
 
-        co2_fix : fixed co2 emissions
-        co2_var : variable co2 emissions
-        co2_cap : co2 emissions due to installed capacity
+        co2_fix : fixed co2 emissions (e.g. t / MW)
+        co2_var : variable co2 emissions (e.g. t / MWh)
+        co2_cap : co2 emissions due to installed power (e.g. t/ MW)
         """
         super().__init__(**kwargs)
 
         self.in_max = kwargs.get('in_max', None)
         self.out_max = kwargs.get('out_max', None)
-        self.add_out_limit = kwargs.get('add_out_limit', None)
+        self.add_out_limit = kwargs.get('add_out_limit', 0)
 
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
@@ -69,8 +72,6 @@ class Component(Entity):
 
         self.opex_var = kwargs.get('opex_var', 0)
         self.opex_fix = kwargs.get('opex_fix', 0)
-        self.ramp_costs = kwargs.get('rampex', 0)
-        self.start_costs = kwargs.get('start_costs', 0)
 
         self.co2_var = kwargs.get('co2_var', 0)
         self.co2_fix = kwargs.get('co2_fix', 0)
@@ -81,6 +82,5 @@ class Component(Entity):
             p = self.wacc
             n = self.lifetime
             self.crf = (p*(1+p)**n)/(((1+p)**n)-1)
-
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})
