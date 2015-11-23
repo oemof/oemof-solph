@@ -45,24 +45,30 @@ class EnergySystem:
                 )
 
 
-class EnergyRegion:
+
+class Region:
     r"""
     """
 
     def __init__(self, **kwargs):
         ''
         # Diese Attribute müssen definitiv vorhanden sein, damit solph läuft.
-        self.renew_pps = kwargs.get('renew_pps', [])  # list of entities
-        self.conv_pps = kwargs.get('conv_pss', [])  # list of entities
-        self.sinks = kwargs.get('sinks', [])  # list of sinks
-        self.buses = kwargs.get('buses', {})  # dict of buses
+        self.entities = []  # list of entities
+        self.add_entities(kwargs.get('entities', []))
 
         # Diese Attribute enthalten Hilfsgrößen, die beim Erstellen oder bei
         # der Auswertung von Nutzen sind.
         self.name = kwargs.get('name')
         self._code = kwargs.get('code')
         self.geom = kwargs.get('geom')
-        self.year = kwargs.get('year')
+
+    # TODO: oder sollte das ein setter sein?
+    def add_entities(self, entities):
+        'add list of components to self.components'
+        self.entities.extend(entities)
+        for entity in entities:
+            if self not in entity.regions:
+                entity.regions.append(self)
 
     @property
     def code(self):
