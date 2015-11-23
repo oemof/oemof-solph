@@ -36,6 +36,15 @@ class Entity:
             if self not in e_out.inputs:
                 e_out.inputs.append(self)
         self.geo_data = kwargs.get("geo_data", None)
+        self.regions = []
+        self.add_regions(kwargs.get('regions', []))
+
+    def add_regions(self, regions):
+        'Add regions to self.regions'
+        self.regions.extend(regions)
+        for region in regions:
+            if self not in region.entities:
+                region.entities.append(self)
 
     def __str__(self):
         return "<{0} #{1}>".format(type(self).__name__, self.uid)
