@@ -48,10 +48,12 @@ from oemof.solph.optimization_model import OptimizationModel
 from oemof.solph import postprocessing as pp
 
 # import oemof base classes to create energy system objects
+from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
+
 
 
 ###############################################################################
@@ -60,6 +62,8 @@ from oemof.core.network.entities.components import transformers as transformer
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
 
+energysystem = es.EnergySystem()
+simulation = es.Simulation(solver='gurobi', optim_module='solph')
 
 ###############################################################################
 # set optimzation options for storage components
