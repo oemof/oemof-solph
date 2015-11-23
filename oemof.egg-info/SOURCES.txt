@@ -1,5 +1,0 @@
-README.rst
-oemof.egg-info/PKG-INFO
-oemof.egg-info/SOURCES.txt
-oemof.egg-info/dependency_links.txt
-oemof.egg-info/top_level.txt
