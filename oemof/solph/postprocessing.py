@@ -12,7 +12,7 @@ try:
 except:
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
-
+    from ..core.network.entities.components.transformers import Storage
 
 def results_to_objects(instance):
     """ write the results from a pyomo optimization problem back to the
@@ -63,7 +63,7 @@ def results_to_objects(instance):
             entity.results['cap'] = []
             for t in instance.timesteps:
                 entity.results['cap'].append(
-                    instance.simple_storage.cap[entity.uid, t].value)
+                    getattr(instance, str(Storage)).cap[entity.uid, t].value)
 
 
 def bus_duals_to_objects(instance):

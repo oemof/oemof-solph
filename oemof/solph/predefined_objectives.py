@@ -13,6 +13,7 @@ except:
 import pyomo.environ as po
 import oemof.solph as solph
 
+from ..core.network.entities import Bus
 
 def minimize_cost(self, c_blocks=(), r_blocks=()):
     """ Builds objective function that minimises the total costs.
@@ -63,10 +64,10 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
     if hasattr(self, 'dispatch_source'):
         expr += objexpr.add_curtailment_costs(self, self.dispatch_source)
 
-    if self.bus.shortage_uids:
+    if getattr(self, str(Bus)).shortage_uids:
         expr += objexpr.add_shortage_slack_costs(self, block)
     # artificial costs for excess or shortage
-    if self.bus.excess_uids:
+    if getattr(self, str(Bus)).excess_uids:
         expr += objexpr.add_excess_slack_costs(self, block)
 
     self.objective = po.Objective(expr=expr)

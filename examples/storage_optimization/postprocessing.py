@@ -7,6 +7,8 @@ Created on Mon Nov 23 15:49:36 2015
 
 import matplotlib.pyplot as plt
 
+from oemof.core.network.entities import Bus
+
 def plot_dispatch(bus_to_plot, timesteps, data, storage, demand):
     # plotting: later as multiple pdf with pie-charts and topology?
     import numpy as np
@@ -91,7 +93,8 @@ def print_results(bus_to_print, data, demand, transformers, storage,
     excess = list()
     for t in energysystem.simulation.timesteps:
         excess.append(
-          energysystem.optimization_model.bus.excess_slack['bel', t].value)
+          getattr(energysystem.optimization_model,
+                  str(Bus)).excess_slack['bel', t].value)
 
     print('sum excess: ', np.asarray(excess).sum())
 
