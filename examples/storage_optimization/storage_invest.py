@@ -40,7 +40,6 @@ are written back into the objects.
 # imports
 ###############################################################################
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
 # import solph module to create/process optimization model instance
@@ -172,7 +171,11 @@ pp.results_to_objects(energysystem.optimization_model)
 
 if __name__ == "__main__":
     import postprocessing as pp
-    pp.plot_dispatch('bel')
+
+    data = renewable_sources+transformers+storages
+
+    pp.plot_dispatch('bel', timesteps, data, storage, demand)
 #    pp.plot_dispatchplt.show()
 
-    pp.print_results('bel')
+    pp.print_results('bel', data, demand, transformers, storage,
+                     energysystem)

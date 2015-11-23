@@ -5,19 +5,19 @@ Created on Mon Nov 23 15:49:36 2015
 @author: cord
 """
 
-def plot_dispatch(bus_to_plot):
+import matplotlib.pyplot as plt
+
+def plot_dispatch(bus_to_plot, timesteps, data, storage, demand):
     # plotting: later as multiple pdf with pie-charts and topology?
     import numpy as np
     import matplotlib as mpl
     import matplotlib.cm as cm
 
-    plot_data = renewable_sources+transformers+storages
-
     # data preparation
     x = np.arange(len(timesteps))
     y = []
     labels = []
-    for c in plot_data:
+    for c in data:
         if bus_to_plot in c.results['out']:
             y.append(c.results['out'][bus_to_plot])
             labels.append(c.uid)
@@ -52,7 +52,8 @@ def plot_dispatch(bus_to_plot):
     ax.set_ylabel('Power in kW')
     ax.set_title('Dispatch')
 
-def print_results(bus_to_print):
+def print_results(bus_to_print, data, demand, transformers, storage,
+                  energysystem):
     import numpy as np
 
     # demand results
@@ -60,9 +61,8 @@ def print_results(bus_to_print):
           np.asarray(demand.results['in'][bus_to_print]).sum())
 
     # production results
-    print_data = renewable_sources+transformers+storages
     sum_production = np.array([])
-    for c in print_data:
+    for c in data:
         print(c)
         res = np.asarray(c.results['out'][bus_to_print])
         sum_production = np.append(sum_production, res)
