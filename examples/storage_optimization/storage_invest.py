@@ -43,7 +43,6 @@ are written back into the objects.
 import pandas as pd
 
 # import solph module to create/process optimization model instance
-from oemof.solph.optimization_model import OptimizationModel
 from oemof.solph import postprocessing as pp
 
 # import oemof base classes to create energy system objects
@@ -52,7 +51,6 @@ from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
-
 
 
 ###############################################################################
@@ -132,8 +130,8 @@ storage = transformer.Storage(uid='sto_simple',
                               capex=1000,
                               cap_max=0,
                               cap_initial=0,
-                              c_rate_in = 1/6,
-                              c_rate_out = 1/6)
+                              c_rate_in=1/6,
+                              c_rate_out=1/6)
 
 ###############################################################################
 # Create, solve and postprocess OptimizationModel instance

@@ -6,7 +6,7 @@ Created on Mon Jul 20 15:53:14 2015
 """
 
 import logging
-from oemof.solph.optimization_model import OptimizationModel as OM
+from oemof.solph.optimization_model import OptimizationModel as om
 
 
 class EnergySystem:
@@ -22,7 +22,7 @@ class EnergySystem:
     def optimize(self):
 
        if self.optimization_model is None:
-           self.optimization_model = OM(energysystem = self)
+           self.optimization_model = om(energysystem = self)
 
        self.optimization_model.solve(solver=self.simulation.solver,
                                      debug=self.simulation.debug,
