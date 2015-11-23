@@ -39,7 +39,7 @@ class SimpleExtractionCHP(Transformer):
 
     Parameters:
     -----------
-    eta_el_cond : constant el. efficiency for transformer in condesing mode
+    eta_el_cond : constant el. efficiency for transformer in condensing mode
     beta : power loss index
     sigma : power to heat ratio P/Q in backpressure mode
     """

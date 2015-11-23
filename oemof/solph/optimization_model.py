@@ -206,7 +206,7 @@ class OptimizationModel(po.ConcreteModel):
     def simple_chp_assembler(self, block):
         """ Method grouping the constraints for simple chp components.
 
-        The methdo uses the simple_transformer_assembler() method. The
+        The method uses the simple_transformer_assembler() method. The
         optimization_options comes from the transfomer.CHP()
 
         Parameters
