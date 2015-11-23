@@ -31,7 +31,8 @@ Framework structure
 Generic oemof energy systems consist of entities and represent a bipartite directed graph.
 
 *Entities* can be subdivided into busses or components.
-A *Bus* has a certain type (e.g. gas) and can be connected to other busses (e.g. electricity or thermal) via components.
+A *Bus* has a certain type (e.g. gas) and can be connected to other busses 
+(e.g. electricity or thermal) via components.
 A *Component* in turn represents a (possible) in- or outflow into a bus.
 
 The basic components are:
@@ -40,6 +41,50 @@ The basic components are:
 * *Source*  represents an energy flow into a single bus
 * *Sink*  represents an energy flow out of a single bus
 * *Transformer*  represents an energy flow from one bus to another
+
+
+Mathematical description (generic formulation as graph wihtout timesteps)
+----------------------------------------------------------------------------
+
+ Entities are connected in such a way that buses are only connected to components 
+and vice versa. In this way the energy system can be interpreted as a bipartite graph. 
+In this graph the entities represent vertices. The inputs and the ouputs can 
+be interpreted as directed edges. For every edge in this graph there will be a value which 
+we will define as the weight of the edge.
+
+
+Set of entities :math:`E` as a union of sets of buses (B), 
+transformers(F), sources (O), sinks (I) and transports (P) respectively, 
+which are the vertices:
+
+.. math::
+   E := \{ E_B, E_F, E_O, E_I, E_P \}
+
+Set of Components: 
+
+.. math::
+   E_C := E \setminus E_B
+
+Set of directed edges...:
+
+.. math::
+   \vec{E} := \{(e_i, e_j),...\}
+
+Function :math:`f` as "Uebertragunsfunktion" for each component used in constraints:
+
+.. math::
+   f(I_e, O_e) \leq \vec{0}, \quad \forall e \in E_C
+
+:math:`I_e` and :math:`O_e` as subsets of :math:`E`:
+
+.. math::
+   I_e & := \{ i \in E | (i,e) \in \vec{E} \}\\
+   O_e & := \{ o \in E | (e,o) \in \vec{E} \}
+
+And additional constraint for outflow :math:`o` and inflow :math:`i` for each edge:
+
+.. math::
+   o_{e_1} - i_{e_2} = 0, \quad \forall (e_1, e_2) \in \vec{E}
 
 
 Example 
@@ -93,6 +138,9 @@ In oemof this would look as follows::
                      |          |        |       |       |       |         |
  ptg2(Transformer)   |<--------------------------|       |       |         |
                      |---------------------------------------------------->|
+
+
+
 
 
 Classes and modules
