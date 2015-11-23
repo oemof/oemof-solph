@@ -26,10 +26,10 @@ except:
 
     from ..core.network.entities.components.transformers import (
         CHP, Simple, SimpleExtractionCHP, Storage)
-    from ..core.network.entities.components.sources import (DispatchSource,
-        FixedSource)
+    from ..core.network.entities.components.sources import (Commodity,
+        DispatchSource, FixedSource)
     from ..core.network.entities.components.sinks import Simple as Sink
-    import ..core.network.entities.components.transports
+    from ..core.network.entities.components import transports
 
 
 @singledispatch
@@ -111,7 +111,7 @@ class OptimizationModel(po.ConcreteModel):
                 block.objs = objs
                 block.optimization_options = cls.optimization_options
                 self.add_component(str(cls), block)
-                assembler.registry[cls](e=None, es=objs, om=self, block=block)
+                assembler.registry[cls](e=None, om=self, block=block)
 
 
         # add bus block
@@ -119,7 +119,7 @@ class OptimizationModel(po.ConcreteModel):
         # get all bus objects
         block.objs = [e for e in self.entities if isinstance(e, Bus)]
         block.uids = [e.uid for e in block.objs]
-        assembler.registry[Bus](e=None, es=block.objs, om=self, block=block)
+        assembler.registry[Bus](e=None, om=self, block=block)
         self.add_component(str(Bus), block)
 
         # create objective function
@@ -251,7 +251,7 @@ class OptimizationModel(po.ConcreteModel):
 
 
 @assembler.register(Bus)
-def _(entity, om, block)
+def _(e, om, block):
         """ Method creates bus balance for all buses.
 
         The bus model creates all full balance around the energy buses using
@@ -380,7 +380,7 @@ def _(e, om, block):
         return om
 
 @assembler.register(SimpleExtractionCHP)
-def _(self, block):
+def _(e, om, block):
         """Method grouping the constraints for simple chp components.
 
         Parameters
