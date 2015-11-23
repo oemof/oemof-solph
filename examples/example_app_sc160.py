@@ -4,15 +4,33 @@
 General description:
 ---------------------
 
+The example models the following energy system:
+
+                input/output  bgas     bel
+                     |          |        |       |
+                     |          |        |       |
+ wind(FixedSource)   |------------------>|       |
+                     |          |        |       |
+ pv(FixedSource)     |------------------>|       |
+                     |          |        |       |
+ rgas(Commodity)     |--------->|        |       |
+                     |          |        |       |
+ demand(Sink)        |<------------------|       |
+                     |          |        |       |
+                     |          |        |       |
+ pp_gas(Transformer) |<---------|        |       |
+                     |------------------>|       |
+                     |          |        |       |
+ storage(Storage)    |<------------------|       |
+                     |------------------>|       |
+
 Data:
 ------
-
 The application uses some data from BNetzA scenario 2033 B. Demand-series
 are generated randomly.
 
 Notes:
 -------
-
 The energy system is build out of objects. It is solved and the results
 are written back into the objects.
 
@@ -43,13 +61,12 @@ from oemof.core.network.entities.components import transformers as transformer
 data = pd.read_csv("example_data_sc160.csv", sep=",")
 
 
-
 ###############################################################################
 # set optimzation options for storage components
 ###############################################################################
 
 transformer.Storage.optimization_options.update({'investment': lambda: True})
-timesteps = [t for t in range(168)]
+timesteps = [t for t in range(10)]
 
 ###############################################################################
 # Create oemof objetc
@@ -59,17 +76,18 @@ timesteps = [t for t in range(168)]
 bgas = Bus(uid="bgas",
            type="gas",
            price=70,
-           sum_out_limit=194397000,
-           balanced=True)
+           balanced=True,
+           excess=False)
 
-# create electricity
+# create electricity bus
 bel = Bus(uid="bel",
           type="el",
           excess=True)
 
 # create commodity object for gas resource
 rgas = source.Commodity(uid='rgas',
-                        outputs=[bgas])
+                        outputs=[bgas],
+                        sum_out_limit=194397000)
 
 # create fixed source object for wind
 wind = source.FixedSource(uid="wind",
