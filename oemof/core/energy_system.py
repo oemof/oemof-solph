@@ -45,7 +45,6 @@ class EnergySystem:
                 )
 
 
-
 class Region:
     r"""
     """
@@ -62,9 +61,10 @@ class Region:
         self._code = kwargs.get('code')
         self.geom = kwargs.get('geom')
 
-    # TODO: oder sollte das ein setter sein?
+    # TODO: oder sollte das ein setter sein? Yupp.
     def add_entities(self, entities):
         'add list of components to self.components'
+        # TODO: prevent duplicate entries
         self.entities.extend(entities)
         for entity in entities:
             if self not in entity.regions:
