@@ -9,7 +9,6 @@ class Bus(Entity):
     which signifies what kind of commodity goes through the bus.
     """
     optimization_options = {}
-    lower_name = "bus"
 
     def __init__(self, **kwargs):
         """
@@ -40,7 +39,6 @@ class Component(Entity):
     exists only to facilitate this distinction and is empty otherwise.
     """
     optimization_options = {}
-    lower_name = "component"
 
     def __init__(self, **kwargs):
         """

@@ -2,6 +2,9 @@
 
 @contact Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
+
+from functools import singledispatch
+
 import pyomo.environ as po
 import logging
 try:
@@ -21,6 +24,41 @@ except:
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
 
+    from ..core.network.entities.components.transformers import (
+        CHP, Simple, SimpleExtractionCHP, Storage)
+    from ..core.network.entities.components.sources import (DispatchSource,
+        FixedSource)
+    from ..core.network.entities.components.sinks import Simple as Sink
+    import ..core.network.entities.components.transports
+
+
+@singledispatch
+def assembler(e, om, block):
+    """ Assemblers are the functions adding constraints to an optimization
+        model for a set of objects.
+
+    This is the most general form of assembler function, called only if no
+    other, more specific assemblers have been found. Since we don't know what
+    to do in this case, we can only throw a :class:`TypeError`.
+    Parameters
+    ----------
+    entity: An object. Only used to figure out which assembler function to call
+            by dispatching on its `type`. Not used otherwise.
+            It's a good idea to set this to `None` if the function is called
+            directly via :attr:`assembler.registry`.
+    om    : The optimization model. Should be an instance of
+            :class:`pyomo.ConcreteModel`.
+    block : A pyomo block.
+
+    Returns
+    -------
+    om    : The optimization model passed in as an argument, with additional
+            bus balances.
+    """
+    raise TypeError(
+        "Did not find a way to generate optimization constraints for object:" +
+        "\n\n {o}\n\n of type:\n\n {t}".format(o=entity, t=type(entity)))
+    return om
 
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
@@ -77,8 +115,8 @@ class OptimizationModel(po.ConcreteModel):
                 block.indexset = po.Set(initialize=block.uids*self.T)
                 block.objs = objs
                 block.optimization_options = cls.optimization_options
-                self.add_component(cls.lower_name, block)
-                getattr(self, cls.lower_name + '_assembler')(block=block)
+                self.add_component(str(cls), block)
+                assembler.registry[cls](e=None, es=objs, om=self, block=block)
 
 
         # add bus block
@@ -86,8 +124,8 @@ class OptimizationModel(po.ConcreteModel):
         # get all bus objects
         block.objs = [e for e in self.entities if isinstance(e, Bus)]
         block.uids = [e.uid for e in block.objs]
-        self.bus_assembler(block)
-        self.add_component('bus', block)
+        assembler.registry[Bus](e=None, es=block.objs, om=self, block=block)
+        self.add_component(str(Bus), block)
 
         # create objective function
         if self.objective_name == 'individual':
@@ -95,364 +133,6 @@ class OptimizationModel(po.ConcreteModel):
         else:
             self.objective_assembler(objective_name=self.objective_name)
 
-
-    def bus_assembler(self, block):
-        """ Method creates bus balance for all buses.
-
-        The bus model creates all full balance around the energy buses using
-        the :func:`lc.generic_bus_constraint` function.
-        Additionally it sets constraints to model limits over the timehorizon
-        for resource buses using :func:`lc.generic_limit`
-
-        Parameters
-        ----------
-        self : pyomo.ConcreteModel
-
-        Returns
-        -------
-        self : pyomo.ConcreteModel
-        """
-
-        # slack variables that assures a feasible problem
-        # get uids for busses that allow excess
-        block.excess_uids = [b.uid for b in block.objs if b.excess == True]
-        # get uids for busses that allow shortage
-        block.shortage_uids = [b.uid for b in block.objs if b.shortage == True]
-
-        # create variables for 'slack' of shortage and excess
-        if block.excess_uids:
-            block.excess_slack = po.Var(block.excess_uids,
-                                        self.timesteps,
-                                        within=po.NonNegativeReals)
-        if block.shortage_uids:
-            block.shortage_slack = po.Var(block.shortage_uids,
-                                          self.timesteps,
-                                          within=po.NonNegativeReals)
-
-        print('Creating bus balance constraints ...')
-        # bus balance constraint for energy bus objects
-        lc.add_bus_balance(self, block, balance_type="==")
-
-        # set limits for buses
-        lc.add_global_output_limit(self, block)
-
-        if self.objective_name == 'individual':
-            if block.shortage_uids:
-                self.objfuncexpr += \
-                    objfuncexprs.add_shortage_slack_costs(self, block)
-            if self.excess_uids:
-                 self.objfuncexpr += \
-                     objfuncexprs.add_excess_slack_costs(self, block)
-
-    def simple_transformer_assembler(self, block):
-        """ Method containing the constraints functions for simple
-        transformer components.
-
-        Constraints are selected by the `optimization_options` variable of
-        transformer.Simple().
-
-
-        Parameter
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        # TODO: This should be dependent on objs classes not fixed if assembler
-        # method is used by another assemlber method...
-
-        def linear_constraints():
-            lc.add_simple_io_relation(self, block)
-            var.set_bounds(self, block, side='output')
-        def objective_function_expressions():
-            objfuncexprs.add_opex_var(self, block, ref='output')
-            objfuncexprs.add_opex_fix(self, block, ref='output')
-            objfuncexprs.add_input_costs(self, block)
-            objfuncexprs.add_revenues(self, block)
-        def mixed_integer_linear_constraints():
-           return (False)
-
-        default_optimization_options = {
-            'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': False}
-
-        if not block.optimization_options:
-            block.optimization_options = default_optimization_options
-
-        if (block.optimization_options.get('investment', False) and
-            block.optimization_options['milp_constr']()):
-            raise ValueError('Component can not be modeled with milp-constr ' +
-                             'in investment mode!\n' +
-                             'Please change `optimization_options`')
-
-        if block.optimization_options.get('investment', False):
-            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
-
-        for option in block.optimization_options:
-            if not option == 'investment':
-                block.optimization_options[option]()
-
-
-    def simple_chp_assembler(self, block):
-        """ Method grouping the constraints for simple chp components.
-
-        The method uses the simple_transformer_assembler() method. The
-        optimization_options comes from the transfomer.CHP()
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        def linear_constraints():
-            lc.add_simple_io_relation(self, block)
-            lc.add_simple_chp_relation(self, block)
-            var.set_bounds(self, block, side='output')
-        def objective_function_expressions():
-            objfuncexprs.add_opex_var(self, block, ref='output')
-            objfuncexprs.add_opex_fix(self, block, ref='output')
-            objfuncexprs.add_input_costs(self, block)
-            objfuncexprs.add_revenues(self, block)
-        def mixed_integer_linear_constraints():
-           return False
-
-        default_optimization_options = {
-            'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': False}
-
-        if block.optimization_options == {}:
-            block.optimization_options = default_optimization_options
-        else:
-            block.optimization_options = block.optimization_options
-
-        # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
-
-    def simple_extraction_chp_assembler(self, block):
-        """Method grouping the constraints for simple chp components.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        def linear_constraints():
-            lc.add_simple_extraction_chp_relation(self, block)
-            var.set_bounds(self, block, side='output')
-            var.set_bounds(self, block, side='input')
-        def objective_function_expressions():
-            objfuncexprs.add_opex_var(self, block, ref='output')
-            objfuncexprs.add_opex_fix(self, block, ref='output')
-            objfuncexprs.add_input_costs(self, block)
-            objfuncexprs.add_revenues(self, block)
-        def mixed_integer_linear_constraints():
-           return False
-
-        default_optimization_options = {
-            'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': False}
-
-        if not block.optimization_options:
-            block.optimization_options = default_optimization_options
-
-        # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
-
-
-    def fixed_source_assembler(self, block):
-        """Method containing the constraints for
-        fixed sources.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        def linear_constraints():
-            lc.add_fixed_source(self, block)
-        def objective_function_expressions():
-            objfuncexprs.add_opex_var(self, block, ref='output')
-            objfuncexprs.add_opex_fix(self, block, ref='output')
-        def mixed_integer_linear_constraints():
-           return False
-
-        default_optimization_options = {
-            'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': False}
-
-        if not block.optimization_options:
-            block.optimization_options = default_optimization_options
-
-        # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
-
-
-    def dispatch_source_assembler(self, block):
-        """Method containing the constraints for dispatchable sources.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        def linear_constraints():
-            lc.add_dispatch_source(self, block)
-        def objective_function_expressions():
-            objfuncexprs.add_opex_var(self, block, ref='output')
-            objfuncexprs.add_opex_fix(self, block, ref='output')
-            objfuncexprs.add_curtailment_costs(self, block)
-        def mixed_integer_linear_constraints():
-           return (False)
-
-        default_optimization_options = {
-            'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': False}
-
-        if not block.optimization_options:
-            block.optimization_options = default_optimization_options
-
-        if block.optimization_options.get('investment', False):
-            raise ValueError('Dispatch source investment is not possible')
-
-        # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
-
-
-    def simple_sink_assembler(self, block):
-        """Method containing the constraints for simple sinks
-
-        Simple sinks are modeled with a fixed output value set for the
-        variable of the output.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        var.set_fixed_sink_value(self, block)
-
-
-    def commodity_assembler(self, block):
-        """Method containing the constraints for commodity
-
-        Comoodity are modeled with a fixed output value set for the
-        variable of the output.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        lc.add_global_output_limit(self, block)
-
-    def simple_storage_assembler(self, block):
-        """Simple storage assembler containing the constraints for simple
-        storage components.
-
-         Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-        # add capacity variable
-        block.cap = po.Var(block.uids, self.timesteps,
-                           within=po.NonNegativeReals)
-
-        def linear_constraints():
-            lc.add_storage_balance(self, block)
-            var.set_storage_cap_bounds(self, block)
-            if not block.optimization_options.get('investment', False):
-                var.set_bounds(self, block, side='output')
-                var.set_bounds(self, block, side='input')
-            else:
-                lc.add_storage_charge_discharge_limits(self, block)
-        def objective_function_expressions():
-           objfuncexprs.add_opex_var(self, block, ref='output')
-           objfuncexprs.add_opex_fix(self, block, ref='capacity')
-        def mixed_integer_linear_constraints():
-           return False
-
-        default_optimization_options = {
-            'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': False}
-
-        if block.optimization_options:
-            default_optimization_options.update(block.optimization_options)
-        block.optimization_options = default_optimization_options
-
-        if block.optimization_options.get('investment', False):
-            block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
-
-
-        # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        self.simple_transformer_assembler(block)
-
-
-
-
-    def simple_transport_assembler(self, block):
-        """Simple transport assembler grouping the constraints
-        for simple transport components
-
-        The method uses the simple_transformer_assembler() method.
-
-        Parameters
-        ----------
-        self : OptimizationModel() instance
-        block : SimpleBlock()
-
-        Returns
-        -------
-        self : OptimizationModel() instance
-        """
-
-        # input output relation for simple transport
-        lc.add_simple_io_relation(self, block)
-        # bounds
-        var.set_bounds(self, block, side='output')
 
     def objective_assembler(self, objective_name="minimize_costs"):
         """ calls functions to add predefined objective functions
@@ -544,3 +224,366 @@ class OptimizationModel(po.ConcreteModel):
                 ej = (c.uid, o.uid)
                 edges.append(ej)
         return(edges)
+
+@assembler.register(Bus)
+def _(entity, om, block)
+        """ Method creates bus balance for all buses.
+
+        The bus model creates all full balance around the energy buses using
+        the :func:`lc.generic_bus_constraint` function.
+        Additionally it sets constraints to model limits over the timehorizon
+        for resource buses using :func:`lc.generic_limit`
+
+        Parameters
+        ----------
+        see :func:`assembler`.
+
+        Returns
+        -------
+        om : The optimization model passed in as an argument, with additional
+             bus balances.
+        """
+
+        # slack variables that assures a feasible problem
+        # get uids for busses that allow excess
+        block.excess_uids = [b.uid for b in block.objs if b.excess == True]
+        # get uids for busses that allow shortage
+        block.shortage_uids = [b.uid for b in block.objs if b.shortage == True]
+
+        # create variables for 'slack' of shortage and excess
+        if block.excess_uids:
+            block.excess_slack = po.Var(block.excess_uids,
+                                        om.timesteps,
+                                        within=po.NonNegativeReals)
+        if block.shortage_uids:
+            block.shortage_slack = po.Var(block.shortage_uids,
+                                          om.timesteps,
+                                          within=po.NonNegativeReals)
+
+        print('Creating bus balance constraints ...')
+        # bus balance constraint for energy bus objects
+        lc.add_bus_balance(om, block, balance_type="==")
+
+        # set limits for buses
+        lc.add_global_output_limit(om, block)
+
+        if om.objective_name == 'individual':
+            if block.shortage_uids:
+                om.objfuncexpr += objfuncexprs.add_shortage_slack_costs(om,
+                                                                        block)
+            if self.excess_uids:
+                 om.objfuncexpr += objfuncexprs.add_excess_slack_costs(om,
+                                                                       block)
+        return om
+
+@assembler.registr(Simple)
+def _(e, om, block):
+        """ Method containing the constraints functions for simple
+        transformer components.
+
+        Constraints are selected by the `optimization_options` variable of
+        :class:`Simple`.
+
+
+        Parameters
+        ----------
+        see :func:`assembler`.
+
+        Returns
+        -------
+        see :func:`assembler`.
+        """
+        # TODO: This should be dependent on objs classes not fixed if assembler
+        # method is used by another assemlber method...
+
+        def linear_constraints():
+            lc.add_simple_io_relation(om, block)
+            var.set_bounds(om, block, side='output')
+        def objective_function_expressions():
+            objfuncexprs.add_opex_var(om, block, ref='output')
+            objfuncexprs.add_opex_fix(om, block, ref='output')
+            objfuncexprs.add_input_costs(om, block)
+            objfuncexprs.add_revenues(om, block)
+        def mixed_integer_linear_constraints():
+           return (False)
+
+        default_optimization_options = {
+            'linear_constr': linear_constraints,
+            'milp_constr' : mixed_integer_linear_constraints,
+            'objective' : objective_function_expressions,
+            'investment': False}
+
+        if not block.optimization_options:
+            block.optimization_options = default_optimization_options
+
+        if (block.optimization_options.get('investment', False) and
+            block.optimization_options['milp_constr']()):
+            raise ValueError('Component can not be modeled with milp-constr ' +
+                             'in investment mode!\n' +
+                             'Please change `optimization_options`')
+
+        if block.optimization_options.get('investment', False):
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
+
+        for option in block.optimization_options:
+            if not option == 'investment':
+                block.optimization_options[option]()
+        return om
+
+@assembler.register(CHP)
+def _(e, om, block):
+        """ Method grouping the constraints for simple chp components.
+
+        The method uses the simple_transformer_assembler() method. The
+        optimization_options comes from the transfomer.CHP()
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        def linear_constraints():
+            lc.add_simple_io_relation(om, block)
+            lc.add_simple_chp_relation(om, block)
+            var.set_bounds(om, block, side='output')
+        def objective_function_expressions():
+            objfuncexprs.add_opex_var(om, block, ref='output')
+            objfuncexprs.add_opex_fix(om, block, ref='output')
+            objfuncexprs.add_input_costs(om, block)
+            objfuncexprs.add_revenues(om, block)
+        def mixed_integer_linear_constraints():
+           return False
+
+        default_optimization_options = {
+            'linear_constr': linear_constraints,
+            'milp_constr' : mixed_integer_linear_constraints,
+            'objective' : objective_function_expressions,
+            'investment': False}
+
+        if block.optimization_options == {}:
+            block.optimization_options = default_optimization_options
+        else:
+            block.optimization_options = block.optimization_options
+
+        # simple_transformer assebmler for in-out relation, pmin,.. etc.
+        assembler.registry[Simple](None, self, block)
+        return om
+
+@assembler.register(SimpleExtractionCHP)
+def _(self, block):
+        """Method grouping the constraints for simple chp components.
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        def linear_constraints():
+            lc.add_simple_extraction_chp_relation(om, block)
+            var.set_bounds(om, block, side='output')
+            var.set_bounds(om, block, side='input')
+        def objective_function_expressions():
+            objfuncexprs.add_opex_var(om, block, ref='output')
+            objfuncexprs.add_opex_fix(om, block, ref='output')
+            objfuncexprs.add_input_costs(om, block)
+            objfuncexprs.add_revenues(om, block)
+        def mixed_integer_linear_constraints():
+           return False
+
+        default_optimization_options = {
+            'linear_constr': linear_constraints,
+            'milp_constr' : mixed_integer_linear_constraints,
+            'objective' : objective_function_expressions,
+            'investment': False}
+
+        if not block.optimization_options:
+            block.optimization_options = default_optimization_options
+
+        # simple_transformer assebmler for in-out relation, pmin,.. etc.
+        assembler.registry[Simple](None, om, block)
+        return om
+
+@assembler.register(FixedSource)
+def _(e, om, block):
+        """Method containing the constraints for
+        fixed sources.
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        def linear_constraints():
+            lc.add_fixed_source(om, block)
+        def objective_function_expressions():
+            objfuncexprs.add_opex_var(om, block, ref='output')
+            objfuncexprs.add_opex_fix(om, block, ref='output')
+        def mixed_integer_linear_constraints():
+           return False
+
+        default_optimization_options = {
+            'linear_constr': linear_constraints,
+            'milp_constr' : mixed_integer_linear_constraints,
+            'objective' : objective_function_expressions,
+            'investment': False}
+
+        if not block.optimization_options:
+            block.optimization_options = default_optimization_options
+
+        # simple_transformer assebmler for in-out relation, pmin,.. etc.
+        assembler.registry[Simple](None, om, block)
+        return om
+
+@assembler.register(DispatchSource)
+def _(e, om, block):
+        """Method containing the constraints for dispatchable sources.
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        def linear_constraints():
+            lc.add_dispatch_source(om, block)
+        def objective_function_expressions():
+            objfuncexprs.add_opex_var(om, block, ref='output')
+            objfuncexprs.add_opex_fix(om, block, ref='output')
+            objfuncexprs.add_curtailment_costs(om, block)
+        def mixed_integer_linear_constraints():
+           return (False)
+
+        default_optimization_options = {
+            'linear_constr': linear_constraints,
+            'milp_constr' : mixed_integer_linear_constraints,
+            'objective' : objective_function_expressions,
+            'investment': False}
+
+        if not block.optimization_options:
+            block.optimization_options = default_optimization_options
+
+        if block.optimization_options.get('investment', False):
+            raise ValueError('Dispatch source investment is not possible')
+
+        # simple_transformer assebmler for in-out relation, pmin,.. etc.
+        assembler.registry[Simple](None, om, block)
+        return om
+
+@assembler.register(Sink)
+def _(e, om, block):
+        """Method containing the constraints for simple sinks
+
+        Simple sinks are modeled with a fixed output value set for the
+        variable of the output.
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        var.set_fixed_sink_value(om, block)
+        return om
+
+@assembler.register(Commodity)
+def _(e, om, block):
+        """Method containing the constraints for commodity
+
+        Comoodity are modeled with a fixed output value set for the
+        variable of the output.
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        lc.add_global_output_limit(om, block)
+        return om
+
+@assembler.register(Storage)
+def _(e, om, block):
+        """Simple storage assembler containing the constraints for simple
+        storage components.
+
+         Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+        # add capacity variable
+        block.cap = po.Var(block.uids, om.timesteps,
+                           within=po.NonNegativeReals)
+
+        def linear_constraints():
+            lc.add_storage_balance(om, block)
+            var.set_storage_cap_bounds(om, block)
+            if not block.optimization_options.get('investment', False):
+                var.set_bounds(om, block, side='output')
+                var.set_bounds(om, block, side='input')
+            else:
+                lc.add_storage_charge_discharge_limits(om, block)
+        def objective_function_expressions():
+           objfuncexprs.add_opex_var(om, block, ref='output')
+           objfuncexprs.add_opex_fix(om, block, ref='capacity')
+        def mixed_integer_linear_constraints():
+           return False
+
+        default_optimization_options = {
+            'linear_constr': linear_constraints,
+            'milp_constr' : mixed_integer_linear_constraints,
+            'objective' : objective_function_expressions,
+            'investment': False}
+
+        if block.optimization_options:
+            default_optimization_options.update(block.optimization_options)
+        block.optimization_options = default_optimization_options
+
+        if block.optimization_options.get('investment', False):
+            block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
+
+
+        # simple_transformer assebmler for in-out relation, pmin,.. etc.
+        assembler.registry[Simple](None, om, block)
+
+@assembler.register(transports.Simple)
+def _(e, om, block):
+        """Simple transport assembler grouping the constraints
+        for simple transport components
+
+        The method uses the simple_transformer_assembler() method.
+
+        Parameters
+        ----------
+        See :func:`assembler`.
+
+        Returns
+        -------
+        See :func:`assembler`.
+        """
+
+        # input output relation for simple transport
+        lc.add_simple_io_relation(om, block)
+        # bounds
+        var.set_bounds(om, block, side='output')
+
+
+

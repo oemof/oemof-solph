@@ -7,7 +7,6 @@ class FixedSource(Source):
     for all timesteps in the timehorizon of the optimization problem.
     """
     optimization_options = {}
-    lower_name = "fixed_source"
 
     def __init__(self, **kwargs):
         """
@@ -21,7 +20,6 @@ class DispatchSource(Source):
 
     """
     optimization_options = {}
-    lower_name = "dispatch_source"
 
     def __init__(self, **kwargs):
         """
@@ -36,7 +34,6 @@ class Commodity(Source):
 
     """
     optimization_options = {}
-    lower_name = "commodity"
     def __init__(self, **kwargs):
         """
         """

@@ -8,7 +8,6 @@ class Simple(Transformer):
     constant efficiency
     """
     optimization_options = {}
-    lower_name = 'simple_transformer'
 
     def __init__(self, **kwargs):
         """
@@ -23,7 +22,6 @@ class CHP(Transformer):
     with a constant efficiency
     """
     optimization_options = {}
-    lower_name = "simple_chp"
 
     def __init__(self, **kwargs):
         """
@@ -81,7 +79,6 @@ class Storage(Transformer):
     c_rate_out : c-rate for discharging (unit is s^-1)
     """
     optimization_options = {}
-    lower_name = "simple_storage"
 
     def __init__(self, **kwargs):
 
