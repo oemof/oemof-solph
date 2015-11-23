@@ -137,7 +137,7 @@ def set_bounds(model, block, side='output'):
     for e in block.objs:
         in_max[e.uid] = e.in_max
         out_max[e.uid] = e.out_max
-    if block.optimization_options.get('investment', False) == False:
+    if not block.optimization_options.get('investment', False):
         # edges for simple transformers ([('coal', 'pp_coal'),...])
         ee = model.edges(block.objs)
         for (e1, e2) in ee:
@@ -219,7 +219,7 @@ def set_storage_cap_bounds(model, block):
     cap_max = {obj.uid: obj.cap_max for obj in block.objs}
     cap_min = {obj.uid: obj.cap_min for obj in block.objs}
 
-    if block.optimization_options.get('investment', False) == False:
+    if not block.optimization_options.get('investment', False):
         # loop over all uids (storages) and timesteps to set the upper bound
         for e in block.uids:
             for t in model.timesteps:
