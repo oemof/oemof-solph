@@ -53,7 +53,7 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
             # fix costs
             expr += objexpr.add_opex_fix(self, block, ref=ref)
             # investment costs
-            if block.optimization_options.get('investment', False):
+            if block.optimization_options['investment']():
                 expr += objexpr.add_capex(self, block, ref=ref)
             # revenues
         if block.name in r_blocks:

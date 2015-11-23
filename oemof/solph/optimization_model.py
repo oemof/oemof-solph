@@ -69,23 +69,19 @@ class OptimizationModel(po.ConcreteModel):
     timesteps : list with all timesteps as integer values
     options : nested dictionary with options to set.
 
-
-    Returns
-    -------
-    m : pyomo.ConcreteModel
-
     """
 
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
-    def __init__(self, entities, timesteps, options=None):
+    def __init__(self, energysystem):
         super().__init__()
 
-        self.entities = entities
-        self.timesteps = timesteps
-        self.objective_name = options.get('objective_name', 'individual')
+        self.entities = energysystem.entities
+        self.timesteps = energysystem.simulation.timesteps
 
-        self.T = po.Set(initialize=timesteps, ordered=True)
+        self.objective_name = energysystem.simulation.objective_name
+
+        self.T = po.Set(initialize=self.timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.components = [e for e in self.entities
                            if isinstance(e, Component)]
@@ -102,7 +98,6 @@ class OptimizationModel(po.ConcreteModel):
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in self.components
                   if not isinstance(c, cp.Sink)}
 
-        self.objfuncexpr = 0
         # set attributes lists per class with objects and uids for opt model
         for cls in cbt:
             objs = cbt[cls]
@@ -128,10 +123,38 @@ class OptimizationModel(po.ConcreteModel):
         self.add_component(str(Bus), block)
 
         # create objective function
-        if self.objective_name == 'individual':
-            self.objective = po.Objective(expr=self.objfuncexpr)
-        else:
-            self.objective_assembler(objective_name=self.objective_name)
+        if self.objective_name is None:
+            raise ValueError('No objective name defined!')
+
+        self.objective_assembler(objective_name=self.objective_name)
+
+
+    def default_assembler(self, block):
+        """ Method for setting optimization model objects for blocks
+
+        Parameter
+        ----------
+        self : OptimizationModel() instance
+        block : SimpleBlock()
+        """
+
+        if (block.optimization_options['investment']() and
+            block.optimization_options['milp_constr']()):
+            raise ValueError('Component can not be modeled with milp-constr ' +
+                             'in investment mode!\n' +
+                             'Please change `optimization_options`')
+        # add additional variables (investment mode)
+        if block.optimization_options['investment']():
+            add_out_limit = {obj.uid: obj.add_out_limit
+                             for obj in block.objs}
+            def add_out_bound_rule(block, e):
+               return (0, add_out_limit[e])
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals,
+                                   bounds=add_out_bound_rule)
+
+        for option in block.optimization_options:
+            if not option == 'objective':
+                block.optimization_options[option]()
 
 
     def objective_assembler(self, objective_name="minimize_costs"):
@@ -199,6 +222,7 @@ class OptimizationModel(po.ConcreteModel):
                       "Termination condition: ",
                       results.solver.termination_condition)
 
+
     def edges(self, components):
         """Method that creates a list with all edges for the objects in
         components.
@@ -224,6 +248,7 @@ class OptimizationModel(po.ConcreteModel):
                 ej = (c.uid, o.uid)
                 edges.append(ej)
         return(edges)
+
 
 @assembler.register(Bus)
 def _(entity, om, block)
@@ -266,17 +291,9 @@ def _(entity, om, block)
 
         # set limits for buses
         lc.add_global_output_limit(om, block)
-
-        if om.objective_name == 'individual':
-            if block.shortage_uids:
-                om.objfuncexpr += objfuncexprs.add_shortage_slack_costs(om,
-                                                                        block)
-            if self.excess_uids:
-                 om.objfuncexpr += objfuncexprs.add_excess_slack_costs(om,
-                                                                       block)
         return om
 
-@assembler.registr(Simple)
+@assembler.register(Simple)
 def _(e, om, block):
         """ Method containing the constraints functions for simple
         transformer components.
@@ -305,29 +322,20 @@ def _(e, om, block):
             objfuncexprs.add_input_costs(om, block)
             objfuncexprs.add_revenues(om, block)
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
 
-        if (block.optimization_options.get('investment', False) and
-            block.optimization_options['milp_constr']()):
-            raise ValueError('Component can not be modeled with milp-constr ' +
-                             'in investment mode!\n' +
-                             'Please change `optimization_options`')
-
-        if block.optimization_options.get('investment', False):
-            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
-
-        for option in block.optimization_options:
-            if not option == 'investment':
-                block.optimization_options[option]()
+        om.default_assembler(block)
         return om
 
 @assembler.register(CHP)
@@ -355,21 +363,20 @@ def _(e, om, block):
             objfuncexprs.add_input_costs(om, block)
             objfuncexprs.add_revenues(om, block)
         def mixed_integer_linear_constraints():
-           return False
-
+            return False
+        def investment():
+            return False
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
-        if block.optimization_options == {}:
+        if not block.optimization_options:
             block.optimization_options = default_optimization_options
-        else:
-            block.optimization_options = block.optimization_options
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        assembler.registry[Simple](None, self, block)
+        om.default_assembler(block)
         return om
 
 @assembler.register(SimpleExtractionCHP)
@@ -394,19 +401,21 @@ def _(self, block):
             objfuncexprs.add_input_costs(om, block)
             objfuncexprs.add_revenues(om, block)
         def mixed_integer_linear_constraints():
-           return False
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        assembler.registry[Simple](None, om, block)
+        om.default_assembler(block)
         return om
 
 @assembler.register(FixedSource)
@@ -428,19 +437,21 @@ def _(e, om, block):
             objfuncexprs.add_opex_var(om, block, ref='output')
             objfuncexprs.add_opex_fix(om, block, ref='output')
         def mixed_integer_linear_constraints():
-           return False
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        assembler.registry[Simple](None, om, block)
+        om.default_assembler(block)
         return om
 
 @assembler.register(DispatchSource)
@@ -462,22 +473,24 @@ def _(e, om, block):
             objfuncexprs.add_opex_fix(om, block, ref='output')
             objfuncexprs.add_curtailment_costs(om, block)
         def mixed_integer_linear_constraints():
-           return (False)
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
 
-        if block.optimization_options.get('investment', False):
+        if block.optimization_options.get['investment']():
             raise ValueError('Dispatch source investment is not possible')
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        assembler.registry[Simple](None, om, block)
+        om.default_assembler(block)
         return om
 
 @assembler.register(Sink)
@@ -542,27 +555,29 @@ def _(e, om, block):
             else:
                 lc.add_storage_charge_discharge_limits(om, block)
         def objective_function_expressions():
-           objfuncexprs.add_opex_var(om, block, ref='output')
-           objfuncexprs.add_opex_fix(om, block, ref='capacity')
+            objfuncexprs.add_opex_var(om, block, ref='output')
+            objfuncexprs.add_opex_fix(om, block, ref='capacity')
         def mixed_integer_linear_constraints():
-           return False
+            return False
+        def investment():
+            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
             'milp_constr' : mixed_integer_linear_constraints,
             'objective' : objective_function_expressions,
-            'investment': False}
+            'investment': investment}
 
         if block.optimization_options:
             default_optimization_options.update(block.optimization_options)
         block.optimization_options = default_optimization_options
 
-        if block.optimization_options.get('investment', False):
+        if block.optimization_options['investment']():
             block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
 
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
-        assembler.registry[Simple](None, om, block)
+        om.default_assembler(block)
 
 @assembler.register(transports.Simple)
 def _(e, om, block):
@@ -584,6 +599,3 @@ def _(e, om, block):
         lc.add_simple_io_relation(om, block)
         # bounds
         var.set_bounds(om, block, side='output')
-
-
-
