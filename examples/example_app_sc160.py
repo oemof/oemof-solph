@@ -34,8 +34,7 @@ em_coal = 0.0917 * 3.6
 em_gas = 0.0556 * 3.6
 em_oil = 0.0750 * 3.6
 
-transformer.Storage.optimization_options.update({
-    'investment': lambda: False })
+transformer.Storage.optimization_options.update({'investment': lambda: True})
 
 # resources
 #bgas = Bus(uid="gas", type="gas", price=70, excess=False)

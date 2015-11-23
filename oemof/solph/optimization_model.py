@@ -147,15 +147,26 @@ class OptimizationModel(po.ConcreteModel):
                      objfuncexprs.add_excess_slack_costs(self, block)
 
     def default_assembler(self, block):
-        """
+        """ Method for setting optimization model objects for blocks
+
+        Parameter
+        ----------
+        self : OptimizationModel() instance
+        block : SimpleBlock()
         """
 
-        if block.optimization_options.get('investment', False) == True and \
-                                   block.optimization_options['milp_constr']():
+        if block.optimization_options['investment']() == True and \
+                           block.optimization_options['milp_constr']() == True:
             raise ValueError('Component can not be modeled with milp-constr ' +
                              'in investment mode!')
+        # add additional variables (investment mode)
         if block.optimization_options['investment']() == True:
-            block.add_out = po.Var(block.uids, within=po.NonNegativeReals)
+            add_out_limit = {obj.uid: obj.add_out_limit
+                                for obj in block.objs}
+            def add_out_bound_rule(block, e):
+               return (0, add_out_limit[e])
+            block.add_out = po.Var(block.uids, within=po.NonNegativeReals,
+                                   bounds=add_out_bound_rule)
 
         for option in block.optimization_options:
             block.optimization_options[option]()
@@ -424,7 +435,7 @@ class OptimizationModel(po.ConcreteModel):
         def linear_constraints():
             lc.add_storage_balance(self, block)
             var.set_storage_cap_bounds(self, block)
-            if block.optimization_options.get('investment', False) == False:
+            if block.optimization_options['investment']() == False:
                 var.set_bounds(self, block, side='output')
                 var.set_bounds(self, block, side='input')
             else:
@@ -449,7 +460,7 @@ class OptimizationModel(po.ConcreteModel):
             default_optimization_options.update(block.optimization_options)
             block.optimization_options = default_optimization_options
 
-        if block.optimization_options['investment']() == False:
+        if block.optimization_options['investment']() == True:
             block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
 
 
