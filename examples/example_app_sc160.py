@@ -1,129 +1,154 @@
 # -*- coding: utf-8 -*-
 
-""" Example application that models Germany as one region for the year 2033.
+"""
+General description:
+---------------------
 
-Data
-----
+Data:
+------
 
 The application uses some data from BNetzA scenario 2033 B. Demand-series
 are generated randomly.
 
-Notes
------
+Notes:
+-------
+
 The energy system is build out of objects. It is solved and the results
 are written back into the objects.
 
 """
+
+###############################################################################
+# imports
+###############################################################################
+
 import matplotlib.pyplot as plt
+import pandas as pd
+
+# import solph module to create/process optimization model instance
 from oemof.solph.optimization_model import OptimizationModel
 from oemof.solph import postprocessing as pp
+
+# import oemof base classes to create energy system objects
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
-from oemof.core.network.entities.components import transports as transport
 
-import pandas as pd
+
+###############################################################################
+# read data from csv file
+###############################################################################
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
-timesteps = [t for t in range(1000)]
 
-# emission factors in t/MWh
-em_lig = 0.111 * 3.6
-em_coal = 0.0917 * 3.6
-em_gas = 0.0556 * 3.6
-em_oil = 0.0750 * 3.6
+
+
+###############################################################################
+# set optimzation options for storage components
+###############################################################################
 
 transformer.Storage.optimization_options.update({'investment': lambda: True})
+timesteps = [t for t in range(168)]
 
-# resources
-#bgas = Bus(uid="gas", type="gas", price=70, excess=False)
-bgas = Bus(uid="gas", type="gas", price=70, sum_out_limit=194397000,
-           balanced=False)
-#bgas = Bus(uid="gas", type="gas", price=70)
+###############################################################################
+# Create oemof objetc
+###############################################################################
 
-# electricity and heat
-b_el = Bus(uid="b_el", type="el", excess=True)
+# create bus
+bgas = Bus(uid="bgas",
+           type="gas",
+           price=70,
+           sum_out_limit=194397000,
+           balanced=True)
 
-# renewable sources (only pv onshore)
-wind_on = source.FixedSource(uid="wind_on",outputs=[b_el],
-                                val=data['wind'],
-                                out_max=[1000000],
-                                add_out_limit=0,
-                                capex=1000,
-                                opex_fix=20,
-                                lifetime=25,
-                                crf=0.08)
-#                                wacc={b_el.uid: 0.07})
+# create electricity
+bel = Bus(uid="bel",
+          type="el",
+          excess=True)
 
-pv = source.FixedSource(uid="pv", outputs=[b_el], val=data['pv'],
-                           out_max=[582000],
-                           add_out_limit=0,
-                           capex=900,
-                           opex_fix=15,
-                           lifetime=25,
-                           crf=0.08)
-#                          wacc={b_el.uid: 0.07})
+# create commodity object for gas resource
+rgas = source.Commodity(uid='rgas',
+                        outputs=[bgas])
 
-# demands
-demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
-                        val=data['demand_el'])
+# create fixed source object for wind
+wind = source.FixedSource(uid="wind",
+                          outputs=[bel],
+                          val=data['wind'],
+                          out_max=[1000000],
+                          add_out_limit=0,
+                          capex=1000,
+                          opex_fix=20,
+                          lifetime=25,
+                          crf=0.08)
 
-# Simple Transformer for b_el
-pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            in_max=None, opex_var=50,
-                            out_max=[10e10], eta=[0.58])
+# create fixed source object for pv
+pv = source.FixedSource(uid="pv",
+                        outputs=[bel],
+                        val=data['pv'],
+                        out_max=[582000],
+                        add_out_limit=0,
+                        capex=900,
+                        opex_fix=15,
+                        lifetime=25,
+                        crf=0.08)
 
-# chp (not from BNetzA) eta_el=0.3, eta_th=0.3
-#pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
-#                         in_max={bgas.uid: 100000},
-#                         out_max={b_th.uid: None, b_el.uid: 30000},
-#                         eta=[0.4, 0.3], opex_fix=20, opex_var=2,
-#                         co2_var=em_gas)
+# create simple sink object for demand
+demand = sink.Simple(uid="demand", inputs=[bel], val=data['demand_el'])
 
-# storage
-sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
-                                 outputs=[b_el],
-                                 eta_in=1, eta_out=0.8, cap_loss=0.00,
-                                 opex_fix=35, opex_var=10e10, co2_var=None,
-                                 capex=1000,
-                                 cap_max=0,
-                                 cap_initial=0,
-                                 c_rate_in = 1/6,
-                                 c_rate_out = 1/6)
+# create simple transformer object for gas powerplant
+pp_gas = transformer.Simple(uid='pp_gas',
+                            inputs=[bgas], outputs=[bel],
+                            opex_var=50, out_max=[10e10], eta=[0.58])
 
+# create storage transformer object for storage
+storage = transformer.Storage(uid='sto_simple',
+                              inputs=[bel],
+                              outputs=[bel],
+                              eta_in=1,
+                              eta_out=0.8,
+                              cap_loss=0.00,
+                              opex_fix=35,
+                              opex_var=10e10,
+                              capex=1000,
+                              cap_max=0,
+                              cap_initial=0,
+                              c_rate_in = 1/6,
+                              c_rate_out = 1/6)
 
-#                                 in_max={b_el.uid: 100000},
-#                                 out_max={b_el.uid: 200000},
-
-#sto_simple = transformer.Storage(uid='sto_simple', inputs=[b_el],
-#                                 outputs=[b_el],
-#                                 eta_in=1, eta_out=0.8,
-#                                 capex=375,
-#                                 opex_fix=10,
-#                                 lifetime=10,
-#                                 wacc=0.07)
-                                 # + c-Rate
+###############################################################################
+# Create, solve and postprocess OptimizationModel instance
+###############################################################################
 
 # group busses
-buses = [bgas, b_el]
+buses = [bgas, bel]
 
-# group components
+# create lists of components
 transformers = [pp_gas]
-renew_sources = [pv, wind_on]
-storages = [sto_simple]
-sinks = [demand_el]
+renewable_sources = [pv, wind]
+commodities = [rgas]
+storages = [storage]
+sinks = [demand]
 
-components = transformers + renew_sources + storages + sinks
+# groupt components
+components = transformers + renewable_sources + storages + sinks + commodities
+
+# create list of all entities
 entities = components + buses
 
-om = OptimizationModel(entities=entities, timesteps=timesteps,
+# create optimization model object
+om = OptimizationModel(entities=entities,
+                       timesteps=timesteps,
                        options={'objective_name': 'minimize_costs'})
-
+# solve optimization model object
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
+
+# write results back to objects
 pp.results_to_objects(om)
-# write results to data frame for excel export
-components = transformers + renew_sources
+
+
+# group specific components for result analysis
+#components = transformers + renewable_sources
 
 
 if __name__ == "__main__":
@@ -133,9 +158,7 @@ if __name__ == "__main__":
         import matplotlib as mpl
         import matplotlib.cm as cm
 
-        plot_data = renew_sources+transformers+storages
-
-#        plot_data = renew_sources+transformers+transports+storages
+        plot_data = renewable_sources+transformers+storages
 
         # data preparation
         x = np.arange(len(timesteps))
@@ -148,10 +171,6 @@ if __name__ == "__main__":
 
         # plot production
         fig, ax = plt.subplots()
-#        sp = ax.stackplot(x, y,
-#                          colors=cm.rainbow(np.linspace(0, 1, len(plot_data))),
-#                          linewidth=0)
-
         sp = ax.stackplot(x, y,
                           colors=('yellow', 'blue', 'grey', 'red'),
                           linewidth=0)
@@ -160,7 +179,7 @@ if __name__ == "__main__":
                                        facecolor=
                                        pol.get_facecolor()[0]) for pol in sp]
         # plot demand
-        ax.step(x, demand_el.results['in'][demand_el.inputs[0].uid],
+        ax.step(x, demand.results['in'][demand.inputs[0].uid],
                 c="black", lw=2)
 
         # storage soc (capacity at every timestep)
@@ -168,9 +187,9 @@ if __name__ == "__main__":
 
         # plot storage input
         ax.step(x, (np.asarray(
-            sto_simple.results['in'][sto_simple.inputs[0].uid])
+            storage.results['in'][storage.inputs[0].uid])
             + np.asarray(
-                demand_el.results['in'][demand_el.inputs[0].uid])),
+                demand.results['in'][demand.inputs[0].uid])),
             c='red', ls='-', lw=1)
 
         ax.legend(proxy, labels)
@@ -185,10 +204,10 @@ if __name__ == "__main__":
 
         # demand results
         print('sum elec demand: ',
-              np.asarray(demand_el.results['in'][bus_to_print]).sum())
+              np.asarray(demand.results['in'][bus_to_print]).sum())
 
         # production results
-        print_data = renew_sources+transformers+storages
+        print_data = renewable_sources+transformers+storages
         sum_production = np.array([])
         for c in print_data:
             print(c)
@@ -205,20 +224,20 @@ if __name__ == "__main__":
             print('sum non renewable: ', transf.sum())
 
         # storage state and capacity
-        storage_soc = np.asarray(sto_simple.results['cap'])
+        storage_soc = np.asarray(storage.results['cap'])
         print('sum storage content: ', storage_soc.sum())
         print('storage capacity: ', storage_soc.max())
 
         # storage load
         storage_load = np.asarray(
-            sto_simple.results['in'][sto_simple.inputs[0].uid])
+            storage.results['in'][storage.inputs[0].uid])
         print('sum storage load: ', storage_load.sum())
         print('maximum storage load: ', storage_load.max())
 
         # excess
         excess = list()
         for t in om.timesteps:
-            excess.append(om.bus.excess_slack['b_el', t].value)
+            excess.append(om.bus.excess_slack['bel', t].value)
 
         print('sum excess: ', np.asarray(excess).sum())
 
@@ -227,11 +246,11 @@ if __name__ == "__main__":
                                    - transf.sum()  # minus non renewable prod.
                                    - np.asarray(excess).sum() # minus excess
                                    - storage_load.sum()) /  # minus stor. load
-                                   np.asarray(demand_el.results['in']
+                                   np.asarray(demand.results['in']
                                               [bus_to_print]).sum())  #  in
                                               # proportion to the demand
 
-    plot_dispatch('b_el')
+    plot_dispatch('bel')
     plt.show()
 
-    print_results('b_el')
+    print_results('bel')
