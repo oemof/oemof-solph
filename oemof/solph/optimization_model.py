@@ -54,12 +54,10 @@ class OptimizationModel(po.ConcreteModel):
         self.all_edges = self.edges(self.components)
         var.add_continuous(model=self, edges=self.all_edges)
 
-        # list with all necessary classes
-        component_classes = (cp.Transformer.__subclasses__() +
-                             cp.Sink.__subclasses__() +
-                             cp.Source.__subclasses__() +
-                             cp.Transport.__subclasses__())
-
+        # group components by type (cbt: components by type)
+        cbt = {}
+        for c in self.components:
+          cbt[type(c)] = cbt.get(type(c), []) + [c]
 
         self.I = {c.uid: c.inputs[0].uid for c in self.components
                   if not isinstance(c, cp.Source)}
@@ -68,10 +66,10 @@ class OptimizationModel(po.ConcreteModel):
 
         self.objfuncexpr = 0
         # set attributes lists per class with objects and uids for opt model
-        for cls in component_classes:
-            objs = [e for e in self.entities if isinstance(e, cls)]
+        for cls in cbt:
+            objs = cbt[cls]
             # "call" methods to add the constraints opt. problem
-            if objs:
+            if objs: # Should always be nonempty but who knows...
                 uids = [e.uid for e in objs]
                 # add pyomo block per cls to OptimizationModel instance
                 block = po.Block()
