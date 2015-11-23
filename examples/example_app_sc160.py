@@ -61,16 +61,14 @@ from oemof.core.network.entities.components import transformers as transformer
 ###############################################################################
 
 data = pd.read_csv("example_data_sc160.csv", sep=",")
+timesteps = [t for t in range(8760)]
 
-energysystem = es.EnergySystem()
-simulation = es.Simulation(solver='gurobi', optim_module='solph')
 
 ###############################################################################
 # set optimzation options for storage components
 ###############################################################################
 
 transformer.Storage.optimization_options.update({'investment': lambda: True})
-timesteps = [t for t in range(10)]
 
 ###############################################################################
 # Create oemof objetc
@@ -158,15 +156,14 @@ components = transformers + renewable_sources + storages + sinks + commodities
 # create list of all entities
 entities = components + buses
 
-# create optimization model object
-om = OptimizationModel(entities=entities,
-                       timesteps=timesteps,
-                       options={'objective_name': 'minimize_costs'})
-# solve optimization model object
-om.solve(solver='gurobi', debug=True, tee=True, duals=False)
+simulation = es.Simulation(solver='glpk', timesteps=timesteps,
+                           stream_solver_output=True)
+energysystem = es.EnergySystem(entities=entities, simulation=simulation)
+
+energysystem.optimize()
 
 # write results back to objects
-pp.results_to_objects(om)
+pp.results_to_objects(energysystem.optimization_model)
 
 
 # group specific components for result analysis
@@ -258,8 +255,9 @@ if __name__ == "__main__":
 
         # excess
         excess = list()
-        for t in om.timesteps:
-            excess.append(om.bus.excess_slack['bel', t].value)
+        for t in energysystem.simulation.timesteps:
+            excess.append(
+              energysystem.optimization_model.bus.excess_slack['bel', t].value)
 
         print('sum excess: ', np.asarray(excess).sum())
 

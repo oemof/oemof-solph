@@ -6,7 +6,7 @@ Created on Mon Jul 20 15:53:14 2015
 """
 
 import logging
-from oemof.core.network.entities.components import transports as transport
+from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 class EnergySystem:
@@ -17,7 +17,16 @@ class EnergySystem:
         ''
         for attribute in ['regions', 'entities', 'simulation']:
           setattr(self, attribute, kwargs.get(attribute, {}))
+        self.optimization_model = kwargs.get('optimization_model', None)
 
+    def optimize(self):
+
+       if self.optimization_model is None:
+           self.optimization_model = OM(energysystem = self)
+
+       self.optimization_model.solve(solver=self.simulation.solver,
+                                     debug=self.simulation.debug,
+                                     tee=self.simulation.stream_solver_output)
 
 
 
@@ -52,8 +61,12 @@ class Simulation:
     def __init__(self, **kwargs):
         ''
         self.solver = kwargs.get('solver', 'glpk')
-        self.optim_module = kwargs.get('optim_modul', 'solph')
+        self.debug  = kwargs.get('debug', False)
+        self.stream_solver_output = kwargs.get('stream_solver_output', False)
+        self.objective_name = kwargs.get('objective_name', 'minimize_costs')
 
-        if self.optim_module == 'solph':
-            pass
+        self.timesteps = kwargs.get('timesteps', None)
+        if self.timesteps is None:
+            raise ValueError('No timesteps defined!')
+
 

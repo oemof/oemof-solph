@@ -35,14 +35,15 @@ class OptimizationModel(po.ConcreteModel):
 
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
-    def __init__(self, entities, timesteps, options=None):
+    def __init__(self, energysystem):
         super().__init__()
 
-        self.entities = entities
-        self.timesteps = timesteps
-        self.objective_name = options.get('objective_name', None)
+        self.entities = energysystem.entities
+        self.timesteps = energysystem.simulation.timesteps
 
-        self.T = po.Set(initialize=timesteps, ordered=True)
+        self.objective_name = energysystem.simulation.objective_name
+
+        self.T = po.Set(initialize=self.timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
         self.components = [e for e in self.entities
                            if isinstance(e, Component)]
