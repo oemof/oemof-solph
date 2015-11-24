@@ -65,7 +65,7 @@ timesteps = [t for t in range(192)]
 # set optimzation options for storage components
 ###############################################################################
 
-transformer.Storage.optimization_options.update({'investment': lambda: True})
+transformer.Storage.optimization_options.update({'investment': True})
 
 ###############################################################################
 # Create oemof objetc

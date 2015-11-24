@@ -109,7 +109,7 @@ def add_opex_fix(model, block, ref=None):
         if block.uids is None:
             block.uids = [obj.uid for obj in block.objs]
         uids_inv = set([obj.uid for obj in block.objs
-                       if block.optimization_options['investment']()])
+                       if block.optimization_options.get('investment', False)])
         uids = set(block.uids) - uids_inv
 
         opex_fix = {obj.uid: obj.opex_fix for obj in block.objs}
