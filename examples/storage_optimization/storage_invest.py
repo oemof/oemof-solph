@@ -58,7 +58,7 @@ from oemof.core.network.entities.components import transformers as transformer
 ###############################################################################
 
 data = pd.read_csv("storage_invest.csv", sep=",")
-timesteps = [t for t in range(192)]
+timesteps = [t for t in range(8760)]
 
 
 ###############################################################################

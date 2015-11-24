@@ -396,7 +396,7 @@ def add_dispatch_source(model, block):
 
     def curtailment_source_rule(block, e, t):
         lhs = block.curtailment_var[e, t]
-        rhs = val[e][t] * out_max[e][model.O[e][0]] - \
+        rhs = val[e][t] * out_max[e][0] - \
            model.w[e, model.O[e][0], t]
         return(lhs == rhs)
     block.curtailment = po.Constraint(block.indexset,
@@ -421,8 +421,12 @@ def add_storage_balance(model, block):
     .. math:: \\eta_{charge} = \\text{Charge efficiency factor}
 
     Parameters
-    -------------
-
+    ------------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
+        Constraints are added as attributes to the `model` and bounds are
+        altered for attributes of `model`
+    block : SimpleBlock()
 
     Returns
     ----------
