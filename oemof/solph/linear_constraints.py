@@ -29,13 +29,13 @@ containing the uids of objects for which the constraints are build.
 For all mathematical constraints the following definitions hold:
 
     Inputs:
-    :math:`I(e) = \\text{Input-uids of entity } e`
+    :math:`I(e) = \\text{Input-uids of entity } e \\in E`
 
     Outputs:
-    :math:`O(e) = \\text{Output-uids of entity } e`
+    :math:`O(e) = \\text{Output-uids of entity } e \\in E`
 
     Entities:
-    :math:`e \\in E = \\{uids\\},`
+    :math:`E = \\{uids\\},`
 
     Timesteps:
     :math:`t \\in T = \\{timesteps\\}`
@@ -46,7 +46,7 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 
 import pyomo.environ as po
 
-def add_bus_balance(model, block=None, balance_type='=='):
+def add_bus_balance(model, block=None):
     """ Adds constraint for the input-ouput balance of bus objects
 
     .. math:: \\sum_{i \\in I(e)} W(i, e, t) = \\sum_{o \\in O(e)} \
@@ -56,7 +56,6 @@ def add_bus_balance(model, block=None, balance_type='=='):
     -----------
     model : OptimizationModel() instance
     block : SimpleBlock()
-    balance_type : type of constraint ("==" or ">=" )
 
     Returns
     ----------
@@ -65,11 +64,6 @@ def add_bus_balance(model, block=None, balance_type='=='):
     """
     if not block.objs or block.objs is None:
         raise ValueError('Failed to create busbalance. No busobjects defined!')
-
-    if balance_type == '>=':
-        upper = float('+inf')
-    if balance_type == '==':
-        upper = 0;
 
     uids = []
     I = {}
@@ -89,7 +83,7 @@ def add_bus_balance(model, block=None, balance_type='=='):
             rhs += block.excess_slack[e, t]
         if e in block.shortage_uids:
             lhs += block.shortage_slack[e, t]
-        return(0, lhs - rhs, upper)
+        return(lhs == rhs)
     block.balance = po.Constraint(uids, model.timesteps, rule=bus_balance_rule)
 
 

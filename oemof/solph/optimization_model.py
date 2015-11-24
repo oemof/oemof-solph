@@ -290,7 +290,7 @@ def _(e, om, block):
 
     print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
-    lc.add_bus_balance(om, block, balance_type="==")
+    lc.add_bus_balance(om, block)
 
     # set limits for buses
     lc.add_global_output_limit(om, block)

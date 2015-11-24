@@ -131,7 +131,8 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
     # TODO: Define correct boundary conditions for t-1 of time
     def grad_pos_rule(block, e, t):
         if t > 1:
-            return(model.w[e, model.O[e][0], t] - model.w[e, model.O[e][0], t-1] <=  \
+            return(model.w[e, model.O[e][0], t] - \
+               model.w[e, model.O[e][0], t-1] <=  \
                grad_pos[e] + out_min[e][0] * (1 -block.y[e, t]))
         else:
             return(po.Constraint.Skip)
