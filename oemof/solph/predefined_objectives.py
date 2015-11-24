@@ -65,7 +65,10 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
 
     # costs for dispatchable sources
     if hasattr(self, str(source.DispatchSource)):
-        expr += objexpr.add_curtailment_costs(self, self.dispatch_source)
+        expr += \
+            objexpr.add_curtailment_costs(self,
+                                          getattr(self,
+                                                  str(source.DispatchSource)))
 
     if getattr(self, str(Bus)).shortage_uids:
         expr += objexpr.add_shortage_slack_costs(self, block)
