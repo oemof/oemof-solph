@@ -146,7 +146,7 @@ class OptimizationModel(po.ConcreteModel):
 
         if 'milp_constr' in block.optimization_options:
             # create binary status variables for block components
-            block.y = var.add_binary(self, block)
+            var.add_binary(self, block)
 
         # add additional variables (investment mode)
         if block.optimization_options.get('investment', False):
