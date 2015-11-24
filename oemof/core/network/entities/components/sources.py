@@ -3,50 +3,39 @@ from . import Source
 
 class FixedSource(Source):
     """
+    A fixed source only has one output always. The value of the output is fixed
+    for all timesteps in the timehorizon of the optimization problem.
     """
-    lower_name = "fixed_source"
+    optimization_options = {}
 
     def __init__(self, **kwargs):
         """
-        :param boolean dispatch: Flag if RenewableSource is dispatchable or not
         """
         super().__init__(**kwargs)
-        self.val = kwargs.get('val', None)
-
-    def calc_emissions(self):
-        self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]
 
 
 class DispatchSource(Source):
+    """ Dispatch sources only have one output (like FixedSource) but the
+    output can be reduced inside the optimization problem.
+
     """
-    """
-    lower_name = "dispatch_source"
+    optimization_options = {}
 
     def __init__(self, **kwargs):
         """
-        :param boolean dispatch: Flag if RenewableSource is dispatchable or not
         """
         super().__init__(**kwargs)
-        self.val = kwargs.get('val', None)
-        self.dispatch = kwargs.get('dispatch', False)
-        self.dispatch_ex = kwargs.get('dispatch_ex', 0)
-
-    def calc_emissions(self):
-        self.emissions = [0 for o in self.results['out'][self.outputs[0].uid]]
 
 
+# TODO: Implement constraints etc. for Commodity()
 class Commodity(Source):
-    """
-    """
-    lower_name = "commodity"
+    """ The commodity component can be used to model inputs to resource busses.
+    At the moment no constraint etc. are implemented for this component.
 
+    """
+    optimization_options = {}
     def __init__(self, **kwargs):
         """
         """
         super().__init__(**kwargs)
-        self.sum_out_limit = kwargs.get('yearly_limit', float('+inf'))
-        self.emmision_factor = kwargs.get('emmission_factor', 0)
-
-    def calc_emissions(self):
-        self.emissions = [o * self.emmision_factor
-                          for o in self.results['out'][self.outputs[0].uid]]
+        self.sum_out_limit = kwargs.get('sum_out_limit', float('+inf'))

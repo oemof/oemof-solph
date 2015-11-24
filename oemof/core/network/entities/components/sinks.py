@@ -4,7 +4,7 @@ from . import Sink
 class Simple(Sink):
     """
     """
-    lower_name = "simple_sink"
+    optimization_options = {}
 
     def __init__(self, **kwargs):
         """

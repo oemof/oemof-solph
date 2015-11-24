@@ -7,6 +7,7 @@ Created on Mon Jul 20 15:53:14 2015
 
 import logging
 from oemof.core.network.entities.components import transports as transport
+from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 class EnergySystem:
@@ -15,13 +16,11 @@ class EnergySystem:
 
     def __init__(self, **kwargs):
         ''
-        for attribute in ['regions', 'global_buses', 'sim', 'connections']:
-          setattr(self, attribute, kwargs.get(attribute, {}))
+        for attribute in ['regions', 'entities', 'simulation']:
+            setattr(self, attribute, kwargs.get(attribute, {}))
+        self.optimization_model = kwargs.get('optimization_model', None)
 
-    def add_region(self, region):
-        ''
-        self.regions[region.code] = region
-
+    # TODO: Condense signature (use Buse)
     def connect(self, code1, code2, media, in_max, out_max, eta,
                 transport_class):
         ''
@@ -44,6 +43,15 @@ class EnergySystem:
                 eta=[eta]
                 )
 
+    def optimize(self):
+
+       if self.optimization_model is None:
+           self.optimization_model = OM(energysystem = self)
+
+       self.optimization_model.solve(solver=self.simulation.solver,
+                                     debug=self.simulation.debug,
+                                     tee=self.simulation.stream_solver_output)
+
 
 class Region:
     r"""
@@ -51,12 +59,9 @@ class Region:
 
     def __init__(self, **kwargs):
         ''
-        # Diese Attribute müssen definitiv vorhanden sein, damit solph läuft.
         self.entities = []  # list of entities
         self.add_entities(kwargs.get('entities', []))
 
-        # Diese Attribute enthalten Hilfsgrößen, die beim Erstellen oder bei
-        # der Auswertung von Nutzen sind.
         self.name = kwargs.get('name')
         self._code = kwargs.get('code')
         self.geom = kwargs.get('geom')
@@ -86,4 +91,11 @@ class Simulation:
 
     def __init__(self, **kwargs):
         ''
-        pass
+        self.solver = kwargs.get('solver', 'glpk')
+        self.debug  = kwargs.get('debug', False)
+        self.stream_solver_output = kwargs.get('stream_solver_output', False)
+        self.objective_name = kwargs.get('objective_name', 'minimize_costs')
+
+        self.timesteps = kwargs.get('timesteps', None)
+        if self.timesteps is None:
+            raise ValueError('No timesteps defined!')
