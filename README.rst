@@ -1,4 +1,4 @@
-Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented model to analyse energy systems, developed in Python. It is designed as a framework with a modular structure and has several packages which communicate through well defined interfaces.
+Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented model to analyse energy supply systems, developed in Python. It is designed as a framework with a modular structure and has several packages which communicate through well defined interfaces.
 
 Documentation
 =============
