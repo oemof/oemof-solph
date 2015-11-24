@@ -14,6 +14,8 @@ import pyomo.environ as po
 import oemof.solph as solph
 
 from ..core.network.entities import Bus
+from ..core.network.entities.components import transformers as transformer
+from ..core.network.entities.components import sources as source
 
 def minimize_cost(self, c_blocks=(), r_blocks=()):
     """ Builds objective function that minimises the total costs.
@@ -33,9 +35,9 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
                terms of objective function
     """
     expr = 0
-    c_blocks = ('simple_transformer', 'simple_chp', 'fixed_source',
-                'simple_storage', 'simple_transport', 'dispatch_source')
-    r_blocks = ('simple_transformer', 'simple_chp', 'simple_extraction_chp')
+    c_blocks = (str(transformer.Simple), str(transformer.CHP),
+                str(source.FixedSource))
+    r_blocks = ()
 
     blocks = [block for block in self.block_data_objects(active=True)
               if not isinstance(block,
@@ -50,6 +52,7 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
             else:
                 ref = 'output'
             # variable costs
+
             expr += objexpr.add_opex_var(self, block, ref='output')
             # fix costs
             expr += objexpr.add_opex_fix(self, block, ref=ref)

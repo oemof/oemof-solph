@@ -30,7 +30,6 @@ def add_opex_var(model, block, ref='output'):
     if block.uids is None:
         block.uids = [obj.uid for obj in block.objs]
 
-
     opex_var = {obj.uid: obj.opex_var for obj in block.objs}
     # outputs for cost objs
     if ref == 'output':
@@ -113,7 +112,6 @@ def add_opex_fix(model, block, ref=None):
         uids = set(block.uids) - uids_inv
 
         opex_fix = {obj.uid: obj.opex_fix for obj in block.objs}
-
         if ref == 'output':
             # installed electrical/thermal output: {'pp_chp': 30000,...}
             out_max = {obj.uid: obj.out_max for obj in block.objs}

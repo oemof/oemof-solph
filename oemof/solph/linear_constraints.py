@@ -396,7 +396,7 @@ def add_dispatch_source(model, block):
 
     def curtailment_source_rule(block, e, t):
         lhs = block.curtailment_var[e, t]
-        rhs = val[e][t] * out_max[e][model.O[e][0]] - \
+        rhs = val[e][t] * out_max[e][0] - \
            model.w[e, model.O[e][0], t]
         return(lhs == rhs)
     block.curtailment = po.Constraint(block.indexset,
