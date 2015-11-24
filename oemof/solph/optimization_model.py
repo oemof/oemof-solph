@@ -138,13 +138,18 @@ class OptimizationModel(po.ConcreteModel):
         block : SimpleBlock()
         """
 
-        if (block.optimization_options['investment']() and
-            block.optimization_options['milp_constr']()):
+        if (block.optimization_options.get('investment', False) and
+            'milp_constr' in block.optimization_options):
             raise ValueError('Component can not be modeled with milp-constr ' +
                              'in investment mode!\n' +
                              'Please change `optimization_options`')
+
+        if 'milp_constr' in block.optimization_options:
+            # create binary status variables for block components
+            block.y = var.add_binary(self, block)
+
         # add additional variables (investment mode)
-        if block.optimization_options['investment']():
+        if block.optimization_options.get('investment', False):
             add_out_limit = {obj.uid: obj.add_out_limit
                              for obj in block.objs}
             def add_out_bound_rule(block, e):
@@ -153,7 +158,7 @@ class OptimizationModel(po.ConcreteModel):
                                    bounds=add_out_bound_rule)
 
         for option in block.optimization_options:
-            if not option == 'objective':
+            if not option in ['objective', 'investment']:
                 block.optimization_options[option]()
 
 
@@ -163,8 +168,6 @@ class OptimizationModel(po.ConcreteModel):
         """
         print('Creating predefined objective with name:', objective_name)
         if objective_name == 'minimize_costs':
-            predefined_objectives.minimize_cost(self)
-        if objective_name == 'uc_minimize_costs':
             predefined_objectives.minimize_cost(self)
 
 
@@ -321,16 +324,10 @@ def _(e, om, block):
             objfuncexprs.add_opex_fix(om, block, ref='output')
             objfuncexprs.add_input_costs(om, block)
             objfuncexprs.add_revenues(om, block)
-        def mixed_integer_linear_constraints():
-            return False
-        def investment():
-            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': investment}
+            'objective' : objective_function_expressions}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
@@ -362,15 +359,10 @@ def _(e, om, block):
             objfuncexprs.add_opex_fix(om, block, ref='output')
             objfuncexprs.add_input_costs(om, block)
             objfuncexprs.add_revenues(om, block)
-        def mixed_integer_linear_constraints():
-            return False
-        def investment():
-            return False
+
         default_optimization_options = {
             'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': investment}
+            'objective' : objective_function_expressions}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
@@ -400,16 +392,10 @@ def _(e, om, block):
             objfuncexprs.add_opex_fix(om, block, ref='output')
             objfuncexprs.add_input_costs(om, block)
             objfuncexprs.add_revenues(om, block)
-        def mixed_integer_linear_constraints():
-            return False
-        def investment():
-            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': investment}
+            'objective' : objective_function_expressions}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
@@ -436,16 +422,9 @@ def _(e, om, block):
         def objective_function_expressions():
             objfuncexprs.add_opex_var(om, block, ref='output')
             objfuncexprs.add_opex_fix(om, block, ref='output')
-        def mixed_integer_linear_constraints():
-            return False
-        def investment():
-            return False
-
         default_optimization_options = {
             'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': investment}
+            'objective' : objective_function_expressions}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
@@ -472,22 +451,16 @@ def _(e, om, block):
             objfuncexprs.add_opex_var(om, block, ref='output')
             objfuncexprs.add_opex_fix(om, block, ref='output')
             objfuncexprs.add_curtailment_costs(om, block)
-        def mixed_integer_linear_constraints():
-            return False
-        def investment():
-            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': investment}
+            'objective' : objective_function_expressions}
 
         if not block.optimization_options:
             block.optimization_options = default_optimization_options
 
-        if block.optimization_options.get['investment']():
-            raise ValueError('Dispatch source investment is not possible')
+        if block.optimization_options.get('investment', False):
+            raise ValueError('Dispatch source + investment is not possible!')
 
         # simple_transformer assebmler for in-out relation, pmin,.. etc.
         om.default_assembler(block)
@@ -557,27 +530,20 @@ def _(e, om, block):
         def objective_function_expressions():
             objfuncexprs.add_opex_var(om, block, ref='output')
             objfuncexprs.add_opex_fix(om, block, ref='capacity')
-        def mixed_integer_linear_constraints():
-            return False
-        def investment():
-            return False
 
         default_optimization_options = {
             'linear_constr': linear_constraints,
-            'milp_constr' : mixed_integer_linear_constraints,
-            'objective' : objective_function_expressions,
-            'investment': investment}
+            'objective' : objective_function_expressions}
 
         if block.optimization_options:
             default_optimization_options.update(block.optimization_options)
         block.optimization_options = default_optimization_options
 
-        if block.optimization_options['investment']():
+        if block.optimization_options.get('investment', False):
             block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
 
-
-        # simple_transformer assebmler for in-out relation, pmin,.. etc.
         om.default_assembler(block)
+        return(om)
 
 @assembler.register(transports.Simple)
 def _(e, om, block):
@@ -599,3 +565,4 @@ def _(e, om, block):
         lc.add_simple_io_relation(om, block)
         # bounds
         var.set_bounds(om, block, side='output')
+        return(om)

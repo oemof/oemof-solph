@@ -322,7 +322,7 @@ def add_fixed_source(model, block):
     # normed value of renewable source (0 <= value <=1)
     val = {obj.uid: obj.val for obj in block.objs}
 
-    if not block.optimization_options['investment']():
+    if not block.optimization_options.get('investment', False):
         # maximal ouput of renewable source (in general installed capacity)
         out_max = {obj.uid: obj.out_max for obj in block.objs}
         # edges for renewables ([('wind_on', 'b_el'), ...)
