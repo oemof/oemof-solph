@@ -143,22 +143,22 @@ In oemof this would look as follows::
 
 
 
-Classes and modules
+Classes and packages
 ------------------------------------------
 
 All energy system entities (busses and components) are represented in a class hierarchy that can be easily extended.
-These classes form the basis for so so-called framework modules, that operate on top of them.
+These classes form the basis for so so-called framework packages, that operate on top of them.
 
-The framework consists of various modules that provide different functionalities.
+The framework consists of various packages that provide different functionalities.
 Currently, there are three modules but in future further extensions will be made.
 
-oemof's current modules:
+oemof's current packages:
 
 * *feedinlib* generates wind and solar feedin timeseries for different plants and geographical locations
 * *demandlib* generates electrical and thermal demands for different objects
 * *solph* creates and solves a (mixed-integer) linear optimization problem for a given energy system
 
-All modules may interact with each other but can also be used stand-alone.
+All packages may interact with each other but can also be used stand-alone.
 A detailed description can be found in the following sections.
 
 
@@ -166,10 +166,40 @@ A detailed description can be found in the following sections.
 oemof *base classes*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Currently, oemof provides the following classes. The first three levels represent the basic components to model energy systems. Additional subclasses can be defined underneath.
+
+* Entity
+
+  * Bus
+
+  * Component
+
+    * Sink
+
+      * Simple
+
+    * Source
+
+      * Commodity
+      * DispatchSource
+      * FixedSource
+
+    * Transformer
+
+      * Simple
+      * CHP
+      * SimplexExtractionCHP
+      * Storage
+
+    * Transport
+
+      * Simple
+
+More information on the functionality of the respective classes can be found in their `ApiDocs [Link!] <http://www.python.org>`_.
 
 
 
-The *feedinlib* module
+The *feedinlib* package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The modelling library feedinlib is currently in a development stage.
@@ -183,7 +213,7 @@ Clone or fork the 'feedinlib' from github and use it within your project. Don’
 
 
 
-The *demandlib* module
+The *demandlib* package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Description of demandlib.
@@ -191,7 +221,7 @@ Description of demandlib.
 
 
 
-The *solph* module
+The *solph* package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The solph module of oemof allows to create and solve linear (and mixed-integer)
