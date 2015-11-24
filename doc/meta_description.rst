@@ -162,6 +162,143 @@ All packages may interact with each other but can also be used stand-alone.
 A detailed description can be found in the following sections.
 
 
+Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The framework is documented on three different levels:
+
+* Code commenting 
+* Code documentation
+* General documentation
+
+
+Code commenting
+------------------------
+
+Code comments are block and inline comments in the source code. They can help to understand the code and should be utilized "as much as necessary, as little as possible". When writing comments follow the PEP 0008 style guide: https://www.python.org/dev/peps/pep-0008/#comments.
+
+Code documentation
+------------------------
+
+Code documentation is done via documentation strings, a.k.a. "docstrings", and used for all public modules, functions, classes, and methods. 
+
+We are using the numpydoc extension of sphinx and thus the numpydoc docstring notation. 
+PEP 0257 (https://www.python.org/dev/peps/pep-0257/) lays down a few, very general conventions for docstrings. Following is an example of a numpydoc docstring:
+
+.. code:: python
+
+    def docstring():
+        r"""A one-line summary that does not use variable names or the
+        function name.
+
+        Several sentences providing an extended description. Refer to
+        variables using back-ticks, e.g. `var`.
+    
+        Parameters
+        ----------
+        var1 : array_like
+            Array_like means all those objects -- lists, nested lists, etc. --
+            that can be converted to an array.  We can also refer to
+            variables like `var1`.
+        var2 : int
+            The type above can either refer to an actual Python type
+            (e.g. ``int``), or describe the type of the variable in more
+            detail, e.g. ``(N,) ndarray`` or ``array_like``.
+        Long_variable_name : {'hi', 'ho'}, optional
+            Choices in brackets, default first when optional.
+        main_dt : dictionary
+            Main dictionary as described below [1]_
+        prob : pulp.lp-problem
+            LP-Problem-Variable, which contains the linear problem [2]_
+    
+        Returns
+        -------
+        type
+            Explanation of anonymous return value of type ``type``.
+        describe : type
+            Explanation of return value named `describe`.
+        out : type
+            Explanation of `out`.
+        prob : pulp.lp-problem
+            LP-Problem-Variable, which contains the extended linear problem [2]_
+    
+        Other Parameters
+        ----------------
+        only_seldom_used_keywords : type
+            Explanation
+        common_parameters_listed_above : type
+            Explanation
+        Timesteps [t] : main_dt['timesteps']
+            np-array with the timesteps according to the timeseries
+        Regions [r] : main_dt['energy_system']['regions']
+            See: solph.extenddc [4]_
+        Electric demand : main_dt['timeseries']['demand'][r]['lele'][t]
+            r = region, t = timesteps
+        main_dt['energy_system'] : dict-branch with lists of components
+            Definition of the 'energy_system' see: :py:mod:`solph.extenddc`
+        main_dt['lp'] : dict-branch with all lp-variables
+            Definition of lp-variables see: :py:mod:`solph.lp_definition`
+    
+        Raises
+        ------
+        BadException
+            Because you shouldn't have done that.
+    
+        See Also
+        --------
+        otherfunc : relationship (optional)
+        newfunc : Relationship (optional), which could be fairly long, in which
+                  case the line wraps here.
+        thirdfunc, fourthfunc, fifthfunc
+        solph.main_model.create_model_equations : Blubber
+    
+        Notes
+        -----
+        Notes about the implementation algorithm (if needed).
+    
+        This can have multiple paragraphs.
+    
+        You may include some math:
+    
+        .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+    
+        And even use a greek symbol like :math:`omega` inline.
+    
+        References
+        ----------
+        Cite the relevant literature, e.g. [3]_.  You may also cite these
+        references in the notes section above.
+    
+        .. [1] Link to the description of the main_dt for solph.
+        .. [2] `PuLP <https://code.google.com/p/pulp-or/>`_, PuLP Documentation.
+        .. [3] O. McNoleg, "The integration of GIS, remote sensing,
+           expert systems and adaptive co-kriging for environmental habitat
+           modelling of the Highland Haggis using object-oriented, fuzzy-logic
+           and neural-network techniques," Computers & Geosciences, vol. 22,
+           pp. 585-588, 1996.
+    
+        Examples
+        --------
+        These are written in doctest format, and should illustrate how to
+        use the function.
+    
+        >>> a=[1,2,3]
+        >>> print [x + 3 for x in a]
+        [4, 5, 6]
+        >>> print "a\n\nb" 
+        a
+        b
+    
+        """ 
+
+
+
+General documentation
+------------------------
+
+The general implementation-independent documentation such as installation guide, flow charts, and mathematical models is done via ReStructuredText (rst). The files can be found in the folder */oemof/doc*.
+For further information on restructured text see: http://docutils.sourceforge.net/rst.html.
+
 
 oemof *base classes*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
