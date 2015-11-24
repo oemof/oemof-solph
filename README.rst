@@ -39,7 +39,9 @@ feedinlib, oemof_pg ?
 Examples
 --------
 
-**LINK**
+`Storage optimization  <https://github.com/oemof/oemof_base/tree/master/examples/storage_optimization>`_
+
+`Development examples  <https://github.com/oemof/oemof_base/tree/master/examples/development_examples>`_
 
 License
 -------
