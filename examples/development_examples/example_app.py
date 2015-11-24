@@ -32,7 +32,7 @@ import logging
 logging.basicConfig(filename='example_app.log', level=logging.DEBUG)
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(168*4)]
+timesteps = [t for t in range(168)]
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -107,8 +107,7 @@ om = OptimizationModel(energysystem=energysystem)
 
 om.solve(solver='gurobi', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
-#pp.results_to_excel(om)
-# write results to data frame for excel export
+
 components = transformers + renew_sources
 
 

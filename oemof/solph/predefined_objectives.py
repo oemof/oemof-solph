@@ -45,7 +45,7 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
 
     for block in blocks:
         if block.name in c_blocks:
-            if block.name == 'simple_storage':
+            if block.name == str(transformer.Storage):
                 ref = 'capacity'
                 expr += objexpr.add_opex_var(self, self.simple_storage,
                                              ref='input')
@@ -64,7 +64,7 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
             expr += objexpr.add_revenues(self, block, ref='output')
 
     # costs for dispatchable sources
-    if hasattr(self, 'dispatch_source'):
+    if hasattr(self, str(source.DispatchSource)):
         expr += objexpr.add_curtailment_costs(self, self.dispatch_source)
 
     if getattr(self, str(Bus)).shortage_uids:

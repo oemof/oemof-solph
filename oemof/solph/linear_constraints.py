@@ -421,8 +421,12 @@ def add_storage_balance(model, block):
     .. math:: \\eta_{charge} = \\text{Charge efficiency factor}
 
     Parameters
-    -------------
-
+    ------------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data
+        Constraints are added as attributes to the `model` and bounds are
+        altered for attributes of `model`
+    block : SimpleBlock()
 
     Returns
     ----------
