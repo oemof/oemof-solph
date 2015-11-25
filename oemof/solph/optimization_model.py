@@ -40,18 +40,23 @@ def assembler(e, om, block):
     This is the most general form of assembler function, called only if no
     other, more specific assemblers have been found. Since we don't know what
     to do in this case, we can only throw a :class:`TypeError`.
+
     Parameters
     ----------
+
     entity: An object. Only used to figure out which assembler function to call
             by dispatching on its `type`. Not used otherwise.
             It's a good idea to set this to `None` if the function is called
             directly via :attr:`assembler.registry`.
+
     om    : The optimization model. Should be an instance of
             :class:`pyomo.ConcreteModel`.
+
     block : A pyomo block.
 
     Returns
     -------
+
     om    : The optimization model passed in as an argument, with additional
             bus balances.
     """
@@ -290,7 +295,7 @@ def _(e, om, block):
 
     print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
-    lc.add_bus_balance(om, block, balance_type="==")
+    lc.add_bus_balance(om, block)
 
     # set limits for buses
     lc.add_global_output_limit(om, block)

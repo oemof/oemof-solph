@@ -24,15 +24,6 @@ The example models the following energy system:
  storage(Storage)    |<------------------|       |
                      |------------------>|       |
 
-Data:
-------
-The application uses some data from BNetzA scenario 2033 B. Demand-series
-are generated randomly.
-
-Notes:
--------
-The energy system is build out of objects. It is solved and the results
-are written back into the objects.
 
 """
 

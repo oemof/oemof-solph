@@ -104,7 +104,7 @@ def set_bounds(model, block, side='output'):
 
     If side is `input`:
 
-    .. math:: W(I(e), e, t) \\leq in_max(e, t), \\qquad \
+    .. math:: W(I(e), e, t) \\leq in_{max}(e, t), \\qquad \
     \\forall e, \\forall t
 
 
