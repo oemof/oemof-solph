@@ -14,7 +14,6 @@ Contents:
    
    meta_description
    installation_and_setup
-   model_description
    developer_notes
    api/*
 
