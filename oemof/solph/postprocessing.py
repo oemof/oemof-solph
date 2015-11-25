@@ -77,9 +77,10 @@ def bus_duals_to_objects(instance):
 
     No return value specified.
     """
-    for b in instance.bus_objs:
-        if b.type == "el" or b.type == "th":
+    for b in getattr(instance, str(Bus)).objs:
+        if b.balanced:
             b.results["shadowprice"] = []
             for t in instance.timesteps:
                 b.results["shadowprice"].append(
-                    instance.dual[getattr(instance, "bus_balance")[(b.uid, t)]])
+                    instance.dual[getattr(
+                        getattr(instance,str(Bus)), "balance")[(b.uid, t)]])
