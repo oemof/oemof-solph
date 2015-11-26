@@ -13,6 +13,7 @@ from pypower.api import  runpf, printpf
 # define a new bus class as child from Bus
 class BusPypo(Bus):
     """
+    # TODO: Add documentation as docstrings, adhere to pep8 and pep257    
     some explanation on the class
     """
 
