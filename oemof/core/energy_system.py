@@ -11,11 +11,39 @@ from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 class EnergySystem:
-    r"""
-    """
+    r"""Defining an energy supply system to use oemof's solver libraries.
 
+    Note
+    ----
+    The list of regions is not necessary to use the energy system with solph.
+
+    Parameters
+    ----------
+    entities : list of core.network objects
+        List of all objects of the energy system. All class describtion can
+        be found in the :py:mod:`oemof.core.network` package
+    simulation : core.energy_system.Simulation object
+        Simulation object that contains all necessary attributes to start the
+        solver library. Defined in the :py:class:`Simulation
+        <oemof.core.energy_system.Simulation>` class.
+    regions : list of core.energy_system.Region objects
+        List of regions defined in the :py:class:`Region
+        <oemof.core.energy_system.Simulation>` class.
+
+    Attributes
+    ----------
+    entities : list of core.network objects
+        List of all objects of the energy system. All class describtion can
+        be found in the :py:mod:`oemof.core.network` package
+    simulation : core.energy_system.Simulation object
+        Simulation object that contains all necessary attributes to start the
+        solver library. Defined in the :py:class:`Simulation
+        <oemof.core.energy_system.Simulation>` class.
+    regions : list of core.energy_system.Region objects
+        List of regions defined in the :py:class:`Region
+        <oemof.core.energy_system.Simulation>` class.
+    """
     def __init__(self, **kwargs):
-        ''
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, {}))
         self.optimization_model = kwargs.get('optimization_model', None)
@@ -23,7 +51,7 @@ class EnergySystem:
     # TODO: Condense signature (use Buse)
     def connect(self, code1, code2, media, in_max, out_max, eta,
                 transport_class):
-        ''
+        """Create a transport object to connect to buses."""
         if not transport_class == transport.Simple:
             raise(TypeError(
                 "Sorry, `EnergySystem.connect` currently only works with" +
@@ -43,8 +71,9 @@ class EnergySystem:
                 eta=[eta]
                 )
 
+    # TODO: Add concept to make it possible to use another solver library.
     def optimize(self):
-
+        """Start optimizing the energy system using solph."""
         if self.optimization_model is None:
             self.optimization_model = OM(energysystem=self)
 
@@ -55,11 +84,10 @@ class EnergySystem:
 
 
 class Region:
-    r"""
-    """
 
     def __init__(self, **kwargs):
-        ''
+        r"""
+        """
         self.entities = []  # list of entities
         self.add_entities(kwargs.get('entities', []))
 
