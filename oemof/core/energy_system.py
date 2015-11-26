@@ -95,7 +95,7 @@ class Simulation:
         self.solver = kwargs.get('solver', 'glpk')
         self.debug  = kwargs.get('debug', False)
         self.stream_solver_output = kwargs.get('stream_solver_output', False)
-        self.objective_name = kwargs.get('objective_name', 'minimize_costs')
+        self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps', None)
         if self.timesteps is None:
