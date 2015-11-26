@@ -83,8 +83,7 @@ class OptimizationModel(po.ConcreteModel):
 
         self.entities = energysystem.entities
         self.timesteps = energysystem.simulation.timesteps
-
-        self.objective_name = energysystem.simulation.objective_name
+        self.objective_options = energysystem.simulation.objective_options
 
         self.T = po.Set(initialize=self.timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
@@ -128,10 +127,10 @@ class OptimizationModel(po.ConcreteModel):
         self.add_component(str(Bus), block)
 
         # create objective function
-        if self.objective_name is None:
-            raise ValueError('No objective name defined!')
+        if not self.objective_options:
+            raise ValueError('No objective options defined!')
 
-        self.objective_assembler(objective_name=self.objective_name)
+        self.objective_assembler(objective_options=self.objective_options)
 
 
     def default_assembler(self, block):
@@ -167,13 +166,20 @@ class OptimizationModel(po.ConcreteModel):
                 block.optimization_options[option]()
 
 
-    def objective_assembler(self, objective_name="minimize_costs"):
+    def objective_assembler(self, objective_options):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective with name:', objective_name)
-        if objective_name == 'minimize_costs':
-            predefined_objectives.minimize_cost(self)
+        print('Creating predefined objective with name:',
+              str(objective_options['function']))
+
+        revenue_objects = objective_options.get('revenue_objects', ())
+        cost_objects = objective_options.get('cost_objects', ())
+
+        objective_options['function'](self,
+                                      revenue_objects=revenue_objects)
+
+
 
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
