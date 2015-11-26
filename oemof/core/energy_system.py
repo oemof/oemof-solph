@@ -50,7 +50,8 @@ class EnergySystem:
 
        self.optimization_model.solve(solver=self.simulation.solver,
                                      debug=self.simulation.debug,
-                                     tee=self.simulation.stream_solver_output)
+                                     tee=self.simulation.stream_solver_output,
+                                     duals=self.simulation.duals)
 
 
 class Region:
@@ -95,7 +96,7 @@ class Simulation:
         self.debug  = kwargs.get('debug', False)
         self.stream_solver_output = kwargs.get('stream_solver_output', False)
         self.objective_name = kwargs.get('objective_name', 'minimize_costs')
-
+        self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps', None)
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')

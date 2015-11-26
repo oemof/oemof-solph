@@ -1,3 +1,0 @@
-[submodule "feedinlib/pvlib-python"]
-	path = feedinlib/pvlib-python
-	url = git@github.com:pvlib/pvlib-python.git

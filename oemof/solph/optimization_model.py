@@ -40,18 +40,23 @@ def assembler(e, om, block):
     This is the most general form of assembler function, called only if no
     other, more specific assemblers have been found. Since we don't know what
     to do in this case, we can only throw a :class:`TypeError`.
+
     Parameters
     ----------
+
     entity: An object. Only used to figure out which assembler function to call
             by dispatching on its `type`. Not used otherwise.
             It's a good idea to set this to `None` if the function is called
             directly via :attr:`assembler.registry`.
+
     om    : The optimization model. Should be an instance of
             :class:`pyomo.ConcreteModel`.
+
     block : A pyomo block.
 
     Returns
     -------
+
     om    : The optimization model passed in as an argument, with additional
             bus balances.
     """
