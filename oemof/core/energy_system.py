@@ -26,11 +26,11 @@ class EnergySystem:
         ''
         if not transport_class == transport.Simple:
             raise(TypeError(
-                    "Sorry, `EnergySystem.connect` currently only works with" +
-                    "a `transport_class` argument of" + str(transport.Simple)))
+                "Sorry, `EnergySystem.connect` currently only works with" +
+                "a `transport_class` argument of" + str(transport.Simple)))
         for reg_out, reg_in in [(code1, code2), (code2, code1)]:
             logging.debug('Creating simple {2} from {0} to {1}'.format(
-                    reg_out, reg_in, transport_class))
+                reg_out, reg_in, transport_class))
             uid = '_'.join([reg_out, reg_in, media])
             self.connections[uid] = transport_class(
                 uid=uid,
@@ -45,13 +45,13 @@ class EnergySystem:
 
     def optimize(self):
 
-       if self.optimization_model is None:
-           self.optimization_model = OM(energysystem = self)
+        if self.optimization_model is None:
+            self.optimization_model = OM(energysystem=self)
 
-       self.optimization_model.solve(solver=self.simulation.solver,
-                                     debug=self.simulation.debug,
-                                     tee=self.simulation.stream_solver_output,
-                                     duals=self.simulation.duals)
+        self.optimization_model.solve(solver=self.simulation.solver,
+                                      debug=self.simulation.debug,
+                                      tee=self.simulation.stream_solver_output,
+                                      duals=self.simulation.duals)
 
 
 class Region:
@@ -93,7 +93,7 @@ class Simulation:
     def __init__(self, **kwargs):
         ''
         self.solver = kwargs.get('solver', 'glpk')
-        self.debug  = kwargs.get('debug', False)
+        self.debug = kwargs.get('debug', False)
         self.stream_solver_output = kwargs.get('stream_solver_output', False)
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
