@@ -6,12 +6,11 @@
 from functools import singledispatch
 
 import pyomo.environ as po
-import logging
+
 try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import predefined_objectives as predefined_objectives
     import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
@@ -19,7 +18,6 @@ except:
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
-    from . import predefined_objectives as predefined_objectives
     from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
@@ -170,7 +168,7 @@ class OptimizationModel(po.ConcreteModel):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective with name:',
+        print('Creating predefined objective:',
               str(objective_options['function']))
 
         revenue_objects = objective_options.get('revenue_objects', ())

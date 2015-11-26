@@ -35,7 +35,7 @@ import pandas as pd
 
 # import solph module to create/process optimization model instance
 from oemof.solph import postprocessing as pp
-
+from oemof.solph import predefined_objectives as predefined_objectives
 # import oemof base classes to create energy system objects
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
@@ -146,7 +146,9 @@ entities = components + buses
 
 # TODO: other solver libraries should be passable
 simulation = es.Simulation(solver='glpk', timesteps=timesteps,
-                           stream_solver_output=True)
+                           stream_solver_output=True,
+                           objective_options={
+                               'function':predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
