@@ -1,0 +1,27 @@
+v0.0.2 (December 22, 2015)
+++++++++++++++++++++++++++
+
+New features
+############
+
+
+Documentation
+#############
+
+
+Testing
+####### 
+
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+ * Uwe Krien
