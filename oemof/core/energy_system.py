@@ -161,16 +161,23 @@ class Simulation:
     ----------
     solver : string
         Name of the solver supported by the used solver library.
+        (e.g. 'glpk', 'gurobi')
     debug : boolean
         Set the chosen solver to debug (verbose) mode to get more information.
     stream_solver_output : boolean
-        # TODO @simonhilpert
+        If True, solver output is streamed in python console
     duals : boolean
-        # TODO @simonhilpert
+        If True, results of dual variables and reduced costs will be saved
     objective_options : dictionary
-        # TODO @simonhilpert
-    timesteps : list or sequence object  # TODO: Correct???
-        # Timesteps to be simulated or optimized in the used library
+        'function': function to use from
+                    :py:mod:`oemof.solph.predefined_objectives`
+        'cost_objects': list of str(`class`) elements. Objects of type  `class`
+                        are include in cost terms of objective function.
+        'revenue_objects': list of str(`class`) elements. . Objects of type
+                           `class` are include in revenue terms of
+                           objective function.
+    timesteps : list or sequence object
+         Timesteps to be simulated or optimized in the used library
     """
     def __init__(self, **kwargs):
         ''
