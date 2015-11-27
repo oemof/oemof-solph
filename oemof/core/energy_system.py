@@ -155,9 +155,23 @@ class Region:
 
 
 class Simulation:
-    r"""
-    """
+    r"""Defining the simulation related parameters according to the solver lib.
 
+    Parameters
+    ----------
+    solver : string
+        Name of the solver supported by the used solver library.
+    debug : boolean
+        Set the chosen solver to debug (verbose) mode to get more information.
+    stream_solver_output : boolean
+        # TODO @simonhilpert
+    duals : boolean
+        # TODO @simonhilpert
+    objective_options : dictionary
+        # TODO @simonhilpert
+    timesteps : list or sequence object  # TODO: Correct???
+        # Timesteps to be simulated or optimized in the used library
+    """
     def __init__(self, **kwargs):
         ''
         self.solver = kwargs.get('solver', 'glpk')
