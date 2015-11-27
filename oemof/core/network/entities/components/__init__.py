@@ -85,19 +85,14 @@ class Transformer(Component):
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
         # technical parameter
-        self.out_min = kwargs.get('out_min', None)
-        self.in_min = kwargs.get('in_min', None)
-        self.grad_pos = kwargs.get('grad_pos', None)
-        self.grad_neg  = kwargs.get('grad_neg', None)
-        self.t_min_off = kwargs.get('t_min_off', None)
-        self.t_min_on = kwargs.get('t_min_on', None)
-        self.outages = kwargs.get('outages', None)
-        # economic parameter
-        self.input_costs = kwargs.get('input_costs', None)
-        self.start_costs = kwargs.get('start_costs', None)
-        self.stop_costs = kwargs.get('stop_costs', None)
-        self.ramp_costs = kwargs.get('ramp_costs', None)
-        self.output_price = kwargs.get('output_price', None)
+        parameters = ['out_min', 'in_min', 'grad_pos', 'grad_neg', 
+                      't_min_off', 't_min_on', 'outages', 'input_costs', 
+                      'start_costs', 'stop_costs', 'ramp_costs', 
+                      'output_price']                                         
+        
+        for k in kwargs: 
+            if k in parameters:
+                setattr(self, k, kwargs[k])    
 
 
 class Transport(Component):
