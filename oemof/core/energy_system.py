@@ -84,20 +84,59 @@ class EnergySystem:
 
 
 class Region:
+    r"""Defining a region within an energy supply system.
 
+    Note
+    ----
+    The list of regions is not necessary to use the energy system with solph.
+
+    Parameters
+    ----------
+    entities : list of core.network objects
+        List of all objects of the energy system. All class descriptions can
+        be found in the :py:mod:`oemof.core.network` package.
+    name : string
+        A unique name to identify the region. If possible use typical names for
+        regions and english names for countries.
+    code : string
+        A short unique name to identify the region.
+    geom : shapely.geometry object
+        The geometry representing the region must be a polygon or a multi
+        polygon.
+
+    Attributes
+    ----------
+    entities : list of core.network objects
+        List of all objects of the energy system. All class descriptions can
+        be found in the :py:mod:`oemof.core.network` package.
+    name : string
+        A unique name to identify the region. If possible use typical names for
+        regions and english names for countries.
+    geom : shapely.geometry object
+        The geometry representing the region must be a polygon or a multi
+        polygon.
+    """
     def __init__(self, **kwargs):
-        r"""
-        """
         self.entities = []  # list of entities
         self.add_entities(kwargs.get('entities', []))
 
         self.name = kwargs.get('name')
-        self._code = kwargs.get('code')
         self.geom = kwargs.get('geom')
+        self._code = kwargs.get('code')
 
     # TODO: oder sollte das ein setter sein? Yupp.
     def add_entities(self, entities):
-        'add list of components to self.components'
+        """Add a list of entities to the existing list of entities.
+
+        For every entity added to a region the region attribute of the entity
+        is set
+
+        Parameters
+        ----------
+        entities : list of core.network objects
+        List of all objects of the energy system that belongs to area covered
+        by the polygon of the region. All class descriptions can
+        be found in the :py:mod:`oemof.core.network` package."""
         # TODO: prevent duplicate entries
         self.entities.extend(entities)
         for entity in entities:
@@ -106,6 +145,7 @@ class Region:
 
     @property
     def code(self):
+        """Creating a short code based on the region name if no code is set."""
         if self._code is None:
             name_parts = self.name.replace('_', ' ').split(' ', 1)
             self._code = ''
