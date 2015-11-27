@@ -10,23 +10,31 @@ connected.
 
 
 class Entity:
-    """
+    r"""
     The most abstract type of vertex in an energy system graph. Since each
     entity in an energy system has to be uniquely identifiable and
     connected (either via input or via output) to at least one other
     entity, these properties are collected here so that they are shared
     with descendant classes.
+
+    Parameters
+    ----------
+    uid : string or tuple
+        Unique component identifier of the entity.
+    inputs : list
+        List of Entities acting as input to this Entity.
+    outputs : list
+        List of Entities acting as output from this Enity.
+    geo_data : shapely.geometry object
+        Geo-spatial data with informations for location/region-shape. The
+        geometry can be a polygon/multi-polygon for regions, a line fore
+        transport objects or a point for objects such as transformer sources.
     """
     optimization_options = {}
+
     def __init__(self, **kwargs):
-        #TODO: add default argument values to docstrings (if it's possible).
-        """
-        :param uid: unique component identifier
-        :param inputs: list of Entities acting as input to this Entity.
-        :param outputs: list of Entities acting as output from this Enity.
-        :param geo_data: geo-spatial data with informations for
-                         location/region-shape
-        """
+        # TODO: @Günni:
+        # add default argument values to docstrings (if it's possible).
         self.uid = kwargs["uid"]
         self.inputs = kwargs.get("inputs", [])
         self.outputs = kwargs.get("outputs", [])
