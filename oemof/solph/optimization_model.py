@@ -43,7 +43,6 @@ def assembler(e, om, block):
 
     Parameters
     ----------
-
     entity: An object. Only used to figure out which assembler function to call
             by dispatching on its `type`. Not used otherwise.
             It's a good idea to set this to `None` if the function is called
@@ -56,7 +55,6 @@ def assembler(e, om, block):
 
     Returns
     -------
-
     om    : The optimization model passed in as an argument, with additional
             bus balances.
     """
@@ -68,7 +66,7 @@ def assembler(e, om, block):
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
 
-    Parameter
+    Parameters
     ----------
     entities : list with all entity objects
     timesteps : list with all timesteps as integer values
@@ -137,7 +135,7 @@ class OptimizationModel(po.ConcreteModel):
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
 
-        Parameter
+        Parameters
         ----------
         self : OptimizationModel() instance
         block : SimpleBlock()
@@ -183,12 +181,11 @@ class OptimizationModel(po.ConcreteModel):
 
         Parameters
         ----------
-
         self : pyomo.ConcreteModel
         solver str: solver to be used e.g. 'glpk','gurobi','cplex'
         solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
-        **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
+        \**kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
         Returns
@@ -308,7 +305,6 @@ def _(e, om, block):
 
     Constraints are selected by the `optimization_options` variable of
     :class:`Simple`.
-
 
     Parameters
     ----------
