@@ -53,12 +53,12 @@ def add_bus_balance(model, block=None):
     W(e, o, t), \\qquad \\forall t
 
     Parameters
-    -----------
+    ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
 
     Returns
-    ----------
+    -------
     The constraints are added as an attribute to the optimization model
     object `model` of type OptimizationModel()
     """
@@ -99,7 +99,7 @@ def add_simple_io_relation(model, block, idx=0):
     The constraint is indexed with all unique ids of objects and timesteps.
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
@@ -141,7 +141,7 @@ def add_simple_chp_relation(model, block):
     timesteps 't'.
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
@@ -198,13 +198,9 @@ def add_simple_extraction_chp_relation(model, block):
     timesteps 't'.
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
-
-    Returns:
-    --------
-
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -243,7 +239,7 @@ def add_global_output_limit(model, block=None):
     \\leq sumlimit_{out}(e), \\qquad \\forall e
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
        An object to be solved containing all Variables, Constraints, Data
        Constraints are added as attribtes to the `model`
@@ -292,7 +288,7 @@ def add_fixed_source(model, block):
 
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
@@ -356,7 +352,7 @@ def add_dispatch_source(model, block):
     W(e,O(e),t),  \\qquad \\forall e, \\forall t
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model` and bounds are
@@ -415,16 +411,12 @@ def add_storage_balance(model, block):
     .. math:: \\eta_{charge} = \\text{Charge efficiency factor}
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model` and bounds are
         altered for attributes of `model`
     block : SimpleBlock()
-
-    Returns
-    ----------
-
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -486,7 +478,6 @@ def add_storage_charge_discharge_limits(model, block):
         of ouput power and maximum capacity}
     .. math:: c_{in} = \\text{C factor for charging, here defined as ratio
         of input power and maximum capacity}
-
     """
 
     c_rate_out = {obj.uid: obj.c_rate_out for obj in block.objs}
@@ -534,7 +525,7 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     .. math:: GRADNEG(e,t) \\leq gradneg_{max}(e), \\qquad \\forall e, \\forall t
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model` and bounds are

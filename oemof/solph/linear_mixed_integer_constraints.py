@@ -30,8 +30,7 @@ def set_bounds(model, block, side="output"):
     \\qquad \\forall e, \\forall t
 
     Parameters
-    ------------
-
+    ----------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
@@ -42,7 +41,6 @@ def set_bounds(model, block, side="output"):
 
     Returns
     -------
-
     The upper and lower bounds of the variables are
     set via constraints in the optimization model object `model`
 
@@ -102,24 +100,18 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
     \\cdot (1 - Y(e,t-1))
 
     Parameters
-    ------------
+    ----------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
-
     block : SimplBlock()
-
     grad_direc : string
          direction of gradient ("both", "positive", "negative")
-    Returns
-    -------
-
 
     References
     ----------
     .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
        Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
        TU Munich, p.38
-
     """
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
@@ -166,17 +158,14 @@ def add_startup_constraints(model, block):
         \\forall e, \\forall t
 
     Parameters
-    ------------
+    ----------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
     block : SimpleBlock()
 
-    Returns
-    ---------
-
     References
     ----------
-    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+    .. [2] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
        Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
        TU Munich, p.38
     """
@@ -210,17 +199,14 @@ def add_shutdown_constraints(model, block):
     \\forall e, \\forall t
 
     Parameters
-    ------------
+    ----------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
     block : SimpleBlock()
 
-    Returns
-    -------
-
     References
     ----------
-    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+    .. [3] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
        Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
        TU Munich, p.38
     """

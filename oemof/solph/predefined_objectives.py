@@ -26,8 +26,8 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                         curtailment_costs (dispatch sources),
                         annualised capex (investment components)
 
-    Parameters:
-    ------------
+    Parameters
+    ----------
     self : pyomo model instance
     cost_blocks : array like
        list containing classes of objects that are included in
