@@ -17,11 +17,7 @@ from ..core.network.entities import Bus
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
 
-def minimize_cost(self,
-                  cost_objects=(str(transformer.Simple),
-                                str(transformer.CHP),
-                                str(source.FixedSource)),
-                  revenue_objects=()):
+def minimize_cost(self, cost_objects=None, revenue_objects=None):
     """ Builds objective function that minimises the total costs.
 
     Costs included are:
@@ -43,6 +39,13 @@ def minimize_cost(self,
     expr = 0
     c_blocks = cost_objects
     r_blocks = revenue_objects
+
+    if cost_objects is None:
+        c_blocks = [str(transformer.Simple),
+                    str(transformer.CHP),
+                    str(source.FixedSource)]
+    if revenue_objects is None:
+        r_blocks = []
 
     blocks = [block for block in self.block_data_objects(active=True)
               if not isinstance(block,
