@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
 @author: Simon Hilpert simon.hilpert@fh-flensburg.de
 """
 
@@ -17,13 +16,8 @@ def results_to_objects(instance):
     oemof-objects
 
     Parameters
-    ------------
-    instance : solved OptimizationModel() instance containing the results
-
-    Returns
     ----------
-
-    No return value specified.
+    instance : solved OptimizationModel() instance containing the results
     """
     for entity in instance.entities:
         if (isinstance(entity, cp.Transformer) or
@@ -69,13 +63,8 @@ def bus_duals_to_objects(instance):
     values back to bus-objects.
 
     Parameters
-    ------------
-    instance : solved OptimizationModel() instance containing the results
-
-    Returns
     ----------
-
-    No return value specified.
+    instance : solved OptimizationModel() instance containing the results
     """
     for b in getattr(instance, str(Bus)).objs:
         if b.balanced:
