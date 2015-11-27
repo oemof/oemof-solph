@@ -20,8 +20,8 @@ class EnergySystem:
     Parameters
     ----------
     entities : list of core.network objects
-        List of all objects of the energy system. All class describtion can
-        be found in the :py:mod:`oemof.core.network` package
+        List of all objects of the energy system. All class descriptions can
+        be found in the :py:mod:`oemof.core.network` package.
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
@@ -33,8 +33,8 @@ class EnergySystem:
     Attributes
     ----------
     entities : list of core.network objects
-        List of all objects of the energy system. All class describtion can
-        be found in the :py:mod:`oemof.core.network` package
+        List of all objects of the energy system. All class descriptions can
+        be found in the :py:mod:`oemof.core.network` package.
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
