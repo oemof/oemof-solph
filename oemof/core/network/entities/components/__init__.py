@@ -45,8 +45,8 @@ class Transformer(Component):
     (possibly m) inputs into (possibly n) outputs. As such neither its
     list of inputs, nor its list of outputs are allowed to be empty.
 
-    Technical Parameters:
-    ----------------------
+    Parameters
+    ----------
     out_min : minimal output of transformer (e.g. pmin for powerplants)
     in_min : minimal input of transformer (e.g. pmin for powerplants)
     grad_pos : positive gradient (<=0, <=1, relativ out_max)
@@ -57,9 +57,6 @@ class Transformer(Component):
              either: defined timesteps of timehorizon: e.g. [1,4,200]
              or: 0 <= scalar <= 1 as factor of the total timehorizon
              e.g. 0.05
-
-    Economic Parameters:
-    -----------------------
     input_costs : costs for usage of input (if not included in opex_var)
     start_costs : cost per start up of transformer (only milp models)
     stop_costs : cost per stop up of transformer (only milp models)
@@ -85,14 +82,14 @@ class Transformer(Component):
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
         # technical parameter
-        parameters = ['out_min', 'in_min', 'grad_pos', 'grad_neg', 
-                      't_min_off', 't_min_on', 'outages', 'input_costs', 
-                      'start_costs', 'stop_costs', 'ramp_costs', 
-                      'output_price']                                         
-        
-        for k in kwargs: 
+        parameters = ['out_min', 'in_min', 'grad_pos', 'grad_neg',
+                      't_min_off', 't_min_on', 'outages', 'input_costs',
+                      'start_costs', 'stop_costs', 'ramp_costs',
+                      'output_price']
+
+        for k in kwargs:
             if k in parameters:
-                setattr(self, k, kwargs[k])    
+                setattr(self, k, kwargs[k])
 
 
 class Transport(Component):
