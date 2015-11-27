@@ -35,8 +35,8 @@ class SimpleExtractionCHP(Transformer):
     Class for combined heat and power unit with extraction turbine and constant
     power to heat coeffcient in backpressure mode
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     eta_el_cond : constant el. efficiency for transformer in condensing mode
     beta : power loss index
     sigma : power to heat ratio P/Q in backpressure mode
@@ -65,8 +65,8 @@ class SimpleExtractionCHP(Transformer):
                              str(type(self)))
 class Storage(Transformer):
     """
-    Parameters:
-    -----------
+    Parameters
+    ----------
     cap_max : maximal sate of charge
     cap_min : minimum state of charge
     cap_initial : state of charge at timestep 0 (default cap_max*0.5)
