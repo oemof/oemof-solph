@@ -43,31 +43,31 @@ I(c)      i     Set of inputs for component c
 O(c)      o     Set of outputs for component c
 ========= ===== ============================== ===============================
 
-Optimization variables 
+Optimization variables
 ----------------------------------------------
 
-========= ======= =============== ============================================ 
-Name      Indices pyomo variable  Description                                                                        
 ========= ======= =============== ============================================
-W         ee, t   w               Inflow/Outflow variable of component c                           
-ADDOUT    c       add_out         Variable for additional installed output c   
-ADDCAP    c       add_cap         Variable for additional installed capacity c 
-Y         c, t    y               Status variable of component c               
-Z_start   c, t    z_start         Variable indicating startup of component c   
-Z_stop    c, t    z_stop          Variable indicating shutdown of component c  
-GRADPOS   c, t    grad_pos_var    Diff. between outflow of two timesteps  
-GRADNEG   c, t    grad_neg_var    Diff. between outflow of two timesteps  
+Name      Indices pyomo variable  Description
+========= ======= =============== ============================================
+W         ee, t   w               Inflow/Outflow variable of component c
+ADDOUT    c       add_out         Variable for additional installed output c
+ADDCAP    c       add_cap         Variable for additional installed capacity c
+Y         c, t    y               Status variable of component c
+Z_start   c, t    z_start         Variable indicating startup of component c
+Z_stop    c, t    z_stop          Variable indicating shutdown of component c
+GRADPOS   c, t    grad_pos_var    Diff. between outflow of two timesteps
+GRADNEG   c, t    grad_neg_var    Diff. between outflow of two timesteps
 ========= ======= =============== ============================================
 
-Optimization parameters 
+Optimization parameters
 -------------------------------------------
 
-========= ======= =============== ============================================                              
-Name      Index   Attribute       Description                                                                     
-========= ======= =============== ============================================                                          
-out_max   c       out_max         Maximal outflow of component c               
-in_max    c       in_max          Maximal inflow of component c                
-in_min    c       in_min          Minimum inflow of component c                
-out_min   c       out_min         Minimum outflow of component c             
-========= ======= =============== ============================================ 
+========= ======= =============== ============================================
+Name      Index   Attribute       Description
+========= ======= =============== ============================================
+out_max   c       out_max         Maximal outflow of component c
+in_max    c       in_max          Maximal inflow of component c
+in_min    c       in_min          Minimum inflow of component c
+out_min   c       out_min         Minimum outflow of component c
+========= ======= =============== ============================================
 
