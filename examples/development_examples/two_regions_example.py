@@ -145,14 +145,6 @@ def get_pp_data_from_type(row):
 
 
 # TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
-def get_feedin():
-    'Dummy function until real function exists.'
-    feedin_df = pd.DataFrame()
-    feedin_df['wind_power'] = np.random.rand(8760) / 2.3 * 1000
-    feedin_df['solar_power'] = np.random.rand(8760) / 4.5 * 1000
-    return feedin_df
-
-
 # TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
 def get_demand():
     'Dummy function until real function exists.'
