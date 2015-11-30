@@ -229,7 +229,7 @@ Bus(uid="b_glob_hard_coal", type="coal", price=60, sum_out_limit=10e10)
 Bus(uid="b_glob_lignite", type="coal", price=60, sum_out_limit=10e10)
 
 # Create entity objects for each region
-for region in TwoRegExample.regions.values():
+for region in TwoRegExample.regions:
     logging.info('Processing region: {0} ({1})'.format(
         region.name, region.code))
 
