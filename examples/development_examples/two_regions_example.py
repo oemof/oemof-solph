@@ -9,7 +9,8 @@ import numpy as np
 # logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger().setLevel(logging.INFO)
 # logging.getLogger().setLevel(logging.WARNING)
-from oemof.tools import db
+
+from oemof_pg import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
 from oemof_pg import feedin_pg
@@ -17,7 +18,6 @@ from oemof.core import energy_system as es
 from oemof.solph import postprocessing
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
-from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel
