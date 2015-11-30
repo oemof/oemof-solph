@@ -17,19 +17,20 @@ class Bus(Entity):
     price : float
         price per unit of type
     balanced : boolean
-        TODO: Does anybody know what it means
+        if true a busbalance is created, otherwise the busbalance is ignored
     sum_out_limit : float (default: +inf)
-        TODO: Does anybody know what it means
-    emission_factor : float
-        TODO: Unit?
+        limit of sum of all outflows over the timehorizon
+    # TODO: Find a better name for 'sum_out_limit' (global_outflow_limit?)
     excess : boolean
-        TODO: Does anybody know what it means
+        if true, an optimization variable is created that takes up the slack of
+        outflows to keep the busbalance (sum inflows = sum outflows + excess)
     shortage : boolean
-        TODO: Does anybody know what it means
+        if true, an optimization variable is created that takes the slack of
+        inflows to keep the busbalance (sum inflows + shortage = sum outflows)
     excess_costs : float
-        TODO: Unit? Costs for an unbalanced balance.
+        costs per unit of excess that is needed to balance the bus
     shortage_costs : float
-        TODO: Does anybody know what it means
+        costs per unit of shortage that is needed to balance the bus
     """
     optimization_options = {}
 
@@ -39,7 +40,6 @@ class Bus(Entity):
         self.price = kwargs.get("price", 0)
         self.balanced = kwargs.get("balanced", True)
         self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
-        self.emission_factor = kwargs.get("emission_factor", 0)
         self.results = {}
         self.excess = kwargs.get('excess', True)
         self.shortage = kwargs.get('shortage', False)
