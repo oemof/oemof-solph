@@ -216,11 +216,11 @@ conn = db.connection()
 TwoRegExample = es.EnergySystem()
 
 # Add regions to the energy system
-TwoRegExample.add_region(es.EnergyRegion(
+TwoRegExample.regions.append(es.Region(
     year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE0E'),
     name='Landkreis Wittenberg'))
 
-TwoRegExample.add_region(es.EnergyRegion(
+TwoRegExample.regions.append(es.Region(
     year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE01'),
     name='Stadt Dessau-Roßlau'))
 
