@@ -48,7 +48,7 @@ class Entity:
         self.regions = []
         self.add_regions(kwargs.get('regions', []))
 
-        # TODO: @Gunni Yupp!
+        # TODO: @Gunni Yupp! Add docstring.
     def add_regions(self, regions):
         'Add regions to self.regions'
         self.regions.extend(regions)
@@ -57,4 +57,5 @@ class Entity:
                 region.entities.append(self)
 
     def __str__(self):
+        # TODO: @Günni: Unused privat method. No Docstring.
         return "<{0} #{1}>".format(type(self).__name__, self.uid)
