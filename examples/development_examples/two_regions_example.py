@@ -225,12 +225,8 @@ TwoRegExample.regions.append(es.Region(
     name='Stadt Dessau-Roßlau'))
 
 # Create global buses
-uid = "b_glob_hard_coal"
-TwoRegExample.global_buses[uid] = Bus(uid=uid, type="coal", price=60,
-                                      sum_out_limit=10e10)
-uid = "b_glob_lignite"
-TwoRegExample.global_buses[uid] = Bus(uid=uid, type="coal", price=60,
-                                      sum_out_limit=10e10)
+Bus(uid="b_glob_hard_coal", type="coal", price=60, sum_out_limit=10e10)
+Bus(uid="b_glob_lignite", type="coal", price=60, sum_out_limit=10e10)
 
 # Create entity objects for each region
 for region in TwoRegExample.regions.values():
@@ -241,11 +237,11 @@ for region in TwoRegExample.regions.values():
     demand = get_demand()
     for demandtype in demand.keys():
         uid = '_'.join([region.code, demandtype])
-        region.buses['b_' + uid] = Bus(uid='b_' + uid, type=demandtype,
-                                       price=60, sum_out_limit=10e10)
         region.sinks.append(sink.Simple(uid='Sink_' + uid,
                                         inputs=[region.buses['b_' + uid]],
                                         val=demand[demandtype]))
+        Bus(uid='b_' + uid, type=demandtype, price=60, sum_out_limit=10e10,
+            regions=[region])
 
     # Create source object
     my_feedin = feedin_pg.Feedin()
