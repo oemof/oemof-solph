@@ -55,8 +55,8 @@ class Component(Entity):
     Components and not between Entities of equal subtypes. This class
     exists only to facilitate this distinction and is empty otherwise.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     in_max : float
         maximum input of component (e.g. in MW)
     out_max : float
