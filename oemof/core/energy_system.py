@@ -134,9 +134,11 @@ class Region:
         Parameters
         ----------
         entities : list of core.network objects
-        List of all objects of the energy system that belongs to area covered
-        by the polygon of the region. All class descriptions can
-        be found in the :py:mod:`oemof.core.network` package."""
+            List of all objects of the energy system that belongs to area
+            covered by the polygon of the region. All class descriptions can
+            be found in the :py:mod:`oemof.core.network` package.
+        """
+
         # TODO: prevent duplicate entries
         self.entities.extend(entities)
         for entity in entities:
