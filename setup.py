@@ -8,6 +8,5 @@ setup(name='oemof_base',
       package_dir={'oemof': 'oemof'},
       install_requires=['numpy >= 1.7.0',
                         'pandas >= 0.13.1',
-                        'pyomo >= 4.0.0',
-                        'shapely >= 1.4.0']
+                        'pyomo >= 4.0.0']
       )
