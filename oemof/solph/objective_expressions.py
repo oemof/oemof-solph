@@ -18,8 +18,8 @@ def add_opex_var(model, block, ref='output'):
 
     .. math:: \\sum_e \\sum_t W(I(e),e,t) \\cdot c_{var}(e)
 
-    Parameters:
-    ------------
+    Parameters
+    ----------
     model : OptimizationModel() instance
     objs : objects for which term should be set
     uids : corresponding uids
@@ -49,9 +49,8 @@ def add_input_costs(model, block):
 
     .. math:: \\sum_e \\sum_t W(I(e), e, t) \\cdot c_{input}(e)
 
-    Parameters:
-    ------------
-
+    Parameters
+    ----------
     model : OptimizationModel() instance
     objs : objects for which term should be set
     uids : corresponding uids
@@ -89,8 +88,7 @@ def add_opex_fix(model, block, ref=None):
     .. math:: \\sum_e (out_{max}(e) + ADDCAP(e)) \\cdot c_{fix}(e)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     objs : objects for which term should be set
     uids : corresponding uids
@@ -136,8 +134,7 @@ def add_revenues(model, block, ref='output'):
     .. math:: \\sum_e \\sum_t W(e,O(e),t) \\cdot r_{out}(e,t)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
     """
@@ -175,8 +172,7 @@ def add_curtailment_costs(model, block=None, objs=None):
     .. math:: \\sum_e \\sum_ t CURTAIL(e,t) \\cdot c_{curt}(e)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     objs : objects for which term should be set
     uids : corresponding uids
@@ -209,8 +205,7 @@ def add_capex(model, block, ref='output'):
     .. math:: \\sum_e ADDCAP(e) \\cdot crf(e) \\cdot c_{inv}(e)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     objs : objects for which term should be set
     uids : corresponding uids
@@ -248,8 +243,7 @@ def add_startup_costs(model, block):
     .. math:: \\sum_{e} \\sum_{t} Z_{start}(e,t) \\cdot c_{start}(e)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
 
@@ -274,8 +268,7 @@ def add_shutdown_costs(model, block):
     .. math:: \\sum_{e} \\sum_t Z_{stop}(e,t) \\cdot c_{stop}(e)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
     """
@@ -296,14 +289,12 @@ def add_ramping_costs(model, block, grad_direc='positive'):
     .. math:: \\sum_e \\sum_t GRADNEG(e,t) \\cdot c_{ramp,pos}(e)
 
     Parameters
-    ------------
-
+    ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
     grad_direc : string
         direction of gradient for which the costs are added to the objective
         expression
-
     """
     if block.uids is None:
         block.uids = [obj.uid for obj in block. objs]
@@ -325,9 +316,8 @@ def add_excess_slack_costs(model, block):
 
     .. math:: \\sum_e \\sum_t EXCESS(e,t) \\cdot c_{excess}(e)
 
-    Parameters:
-    ------------
-
+    Parameters
+    ----------
     uids : unique ids of bus objects
     """
 
@@ -342,10 +332,6 @@ def add_shortage_slack_costs(model, block=None):
     """ Artificial cost term for shortage slack variables.
 
     .. math:: \\sum_e \\sum_t SHORTAGE(e,t) \\cdot c_{shortage}(e)
-
-    Parameters:
-    ------------
-
     """
     c_shortage = {b.uid: b.shortage_costs for b in block.objs
                   if b.shortage==True}

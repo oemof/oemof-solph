@@ -17,7 +17,7 @@ from ..core.network.entities import Bus
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
 
-def minimize_cost(self, c_blocks=(), r_blocks=()):
+def minimize_cost(self, cost_objects=None, revenue_objects=None):
     """ Builds objective function that minimises the total costs.
 
     Costs included are:
@@ -26,18 +26,26 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
                         curtailment_costs (dispatch sources),
                         annualised capex (investment components)
 
-    Parameters:
-    ------------
+    Parameters
+    ----------
     self : pyomo model instance
-    c_blocks : pyomo blocks containing components that are included in
+    cost_blocks : array like
+       list containing classes of objects that are included in
                cost terms of objective function
-    r_blocks : pyomo blocks containing components that are included in revenue
+    revenue_blocks : array like
+       list containing classes of objects that are included in revenue
                terms of objective function
     """
     expr = 0
-    c_blocks = (str(transformer.Simple), str(transformer.CHP),
-                str(source.FixedSource))
-    r_blocks = ()
+    c_blocks = cost_objects
+    r_blocks = revenue_objects
+
+    if cost_objects is None:
+        c_blocks = [str(transformer.Simple),
+                    str(transformer.CHP),
+                    str(source.FixedSource)]
+    if revenue_objects is None:
+        r_blocks = []
 
     blocks = [block for block in self.block_data_objects(active=True)
               if not isinstance(block,
@@ -65,7 +73,10 @@ def minimize_cost(self, c_blocks=(), r_blocks=()):
 
     # costs for dispatchable sources
     if hasattr(self, str(source.DispatchSource)):
-        expr += objexpr.add_curtailment_costs(self, self.dispatch_source)
+        expr += \
+            objexpr.add_curtailment_costs(self,
+                                          getattr(self,
+                                                  str(source.DispatchSource)))
 
     if getattr(self, str(Bus)).shortage_uids:
         expr += objexpr.add_shortage_slack_costs(self, block)

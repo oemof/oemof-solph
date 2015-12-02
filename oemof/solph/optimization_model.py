@@ -6,12 +6,11 @@
 from functools import singledispatch
 
 import pyomo.environ as po
-import logging
+
 try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import predefined_objectives as predefined_objectives
     import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
@@ -19,7 +18,6 @@ except:
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
-    from . import predefined_objectives as predefined_objectives
     from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
@@ -40,14 +38,17 @@ def assembler(e, om, block):
     This is the most general form of assembler function, called only if no
     other, more specific assemblers have been found. Since we don't know what
     to do in this case, we can only throw a :class:`TypeError`.
+
     Parameters
     ----------
     entity: An object. Only used to figure out which assembler function to call
             by dispatching on its `type`. Not used otherwise.
             It's a good idea to set this to `None` if the function is called
             directly via :attr:`assembler.registry`.
+
     om    : The optimization model. Should be an instance of
             :class:`pyomo.ConcreteModel`.
+
     block : A pyomo block.
 
     Returns
@@ -63,7 +64,7 @@ def assembler(e, om, block):
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
 
-    Parameter
+    Parameters
     ----------
     entities : list with all entity objects
     timesteps : list with all timesteps as integer values
@@ -78,8 +79,7 @@ class OptimizationModel(po.ConcreteModel):
 
         self.entities = energysystem.entities
         self.timesteps = energysystem.simulation.timesteps
-
-        self.objective_name = energysystem.simulation.objective_name
+        self.objective_options = energysystem.simulation.objective_options
 
         self.T = po.Set(initialize=self.timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
@@ -123,16 +123,16 @@ class OptimizationModel(po.ConcreteModel):
         self.add_component(str(Bus), block)
 
         # create objective function
-        if self.objective_name is None:
-            raise ValueError('No objective name defined!')
+        if not self.objective_options:
+            raise ValueError('No objective options defined!')
 
-        self.objective_assembler(objective_name=self.objective_name)
+        self.objective_assembler(objective_options=self.objective_options)
 
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
 
-        Parameter
+        Parameters
         ----------
         self : OptimizationModel() instance
         block : SimpleBlock()
@@ -159,16 +159,24 @@ class OptimizationModel(po.ConcreteModel):
 
         for option in block.optimization_options:
             if not option in ['objective', 'investment']:
-                block.optimization_options[option]()
+                block.optimization_options[option](self, block)
 
 
-    def objective_assembler(self, objective_name="minimize_costs"):
+    def objective_assembler(self, objective_options):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective with name:', objective_name)
-        if objective_name == 'minimize_costs':
-            predefined_objectives.minimize_cost(self)
+        print('Creating predefined objective:',
+              str(objective_options['function']))
+
+        revenue_objects = objective_options.get('revenue_objects')
+        cost_objects = objective_options.get('cost_objects')
+
+        objective_options['function'](self,
+                                      cost_objects=cost_objects,
+                                      revenue_objects=revenue_objects)
+
+
 
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
@@ -178,12 +186,11 @@ class OptimizationModel(po.ConcreteModel):
 
         Parameters
         ----------
-
         self : pyomo.ConcreteModel
         solver str: solver to be used e.g. 'glpk','gurobi','cplex'
         solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
-        **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
+        \**kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
         Returns
@@ -290,7 +297,7 @@ def _(e, om, block):
 
     print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
-    lc.add_bus_balance(om, block, balance_type="==")
+    lc.add_bus_balance(om, block)
 
     # set limits for buses
     lc.add_global_output_limit(om, block)
@@ -304,7 +311,6 @@ def _(e, om, block):
     Constraints are selected by the `optimization_options` variable of
     :class:`Simple`.
 
-
     Parameters
     ----------
     see :func:`assembler`.
@@ -316,10 +322,10 @@ def _(e, om, block):
     # TODO: This should be dependent on objs classes not fixed if assembler
     # method is used by another assemlber method...
 
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_input_costs(om, block)
@@ -350,11 +356,11 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         lc.add_simple_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_input_costs(om, block)
@@ -383,11 +389,11 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_simple_extraction_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
         var.set_bounds(om, block, side='input')
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_input_costs(om, block)
@@ -417,9 +423,9 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_fixed_source(om, block)
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
     default_optimization_options = {
@@ -445,9 +451,9 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_dispatch_source(om, block)
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_curtailment_costs(om, block)
@@ -519,7 +525,7 @@ def _(e, om, block):
     block.cap = po.Var(block.uids, om.timesteps,
                         within=po.NonNegativeReals)
 
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_storage_balance(om, block)
         var.set_storage_cap_bounds(om, block)
         if not block.optimization_options.get('investment', False):
@@ -527,7 +533,7 @@ def _(e, om, block):
             var.set_bounds(om, block, side='input')
         else:
             lc.add_storage_charge_discharge_limits(om, block)
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='capacity')
 
