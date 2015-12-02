@@ -45,7 +45,7 @@ class EnergySystem:
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
-            setattr(self, attribute, kwargs.get(attribute, {}))
+            setattr(self, attribute, kwargs.get(attribute, []))
         self.optimization_model = kwargs.get('optimization_model', None)
 
     # TODO: Condense signature (use Buse)
