@@ -178,6 +178,9 @@ class Simulation:
                            objective function.
     timesteps : list or sequence object
          Timesteps to be simulated or optimized in the used library
+    relaxed : boolean
+        If True, integer variables will be relaxed
+        (only relevant for milp-problems)
     """
     def __init__(self, **kwargs):
         ''
@@ -187,5 +190,7 @@ class Simulation:
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps', None)
+        self.relaxed = kwargs.get('relaxed', False)
+
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')

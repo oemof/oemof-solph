@@ -15,7 +15,7 @@ try:
 except:
     from .network.entities import components as cp
 
-def add_binary(model, block):
+def add_binary(model, block, relaxed=False):
     """ Creates all status variables (binary) for `objs`
 
     The function uses the pyomo class `Var()` to create the status variables of
@@ -44,7 +44,11 @@ def add_binary(model, block):
         raise ValueError("No objects defined. Please specify objects for \
                           which the status variable should be created.")
     # add binary variables to model
-    block.y = po.Var(block.indexset, within=po.Binary)
+    if not relaxed:
+        block.y = po.Var(block.indexset, within=po.Binary)
+    if relaxed:
+        block.y = po.Var(block.indexset, within=po.NonNegativeReals,
+                         bounds=(0,1))
 
 def add_continuous(model, edges):
     """ Adds all variables corresponding to the edges of the bi-partite

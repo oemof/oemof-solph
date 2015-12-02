@@ -80,6 +80,7 @@ class OptimizationModel(po.ConcreteModel):
         self.entities = energysystem.entities
         self.timesteps = energysystem.simulation.timesteps
         self.objective_options = energysystem.simulation.objective_options
+        self.relaxed = getattr(energysystem.simulation, 'relaxed', False)
 
         self.T = po.Set(initialize=self.timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
@@ -146,7 +147,7 @@ class OptimizationModel(po.ConcreteModel):
 
         if 'milp_constr' in block.optimization_options:
             # create binary status variables for block components
-            var.add_binary(self, block)
+            var.add_binary(self, block, relaxed=self.relaxed)
 
         # add additional variables (investment mode)
         if block.optimization_options.get('investment', False):
