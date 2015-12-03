@@ -6,6 +6,7 @@ Created on Mon Jul 20 15:53:14 2015
 """
 
 import logging
+from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel as OM
 
@@ -46,6 +47,7 @@ class EnergySystem:
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
+        Entity.registry = self
         self.optimization_model = kwargs.get('optimization_model', None)
 
     # TODO: Condense signature (use Buse)
@@ -134,9 +136,11 @@ class Region:
         Parameters
         ----------
         entities : list of core.network objects
-        List of all objects of the energy system that belongs to area covered
-        by the polygon of the region. All class descriptions can
-        be found in the :py:mod:`oemof.core.network` package."""
+            List of all objects of the energy system that belongs to area
+            covered by the polygon of the region. All class descriptions can
+            be found in the :py:mod:`oemof.core.network` package.
+        """
+
         # TODO: prevent duplicate entries
         self.entities.extend(entities)
         for entity in entities:
