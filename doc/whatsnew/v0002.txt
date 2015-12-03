@@ -8,6 +8,7 @@ New features
 Documentation
 #############
 
+ * missing docstrings of the core subpackage added
 
 Testing
 ####### 
@@ -16,6 +17,7 @@ Testing
 Bug fixes
 #########
 
+ * now the api-docs can be read on readthedocs.org
 
 Other changes
 #############

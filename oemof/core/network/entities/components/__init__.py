@@ -22,8 +22,8 @@ class Source(Component):
     The opposite of a Sink, i.e. a Component which only produces and as a
     consequence has no input.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     in_max : float
         maximum input of component (e.g. in MW)
     out_max : float
