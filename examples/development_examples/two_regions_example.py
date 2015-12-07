@@ -6,7 +6,7 @@ import logging
 import pandas as pd
 import numpy as np
 
-# logging.getLogger().setLevel(logging.DEBUG)
+#logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger().setLevel(logging.INFO)
 # logging.getLogger().setLevel(logging.WARNING)
 
@@ -15,13 +15,12 @@ from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
 from oemof_pg import feedin_pg
 from oemof.core import energy_system as es
-from oemof.solph import postprocessing
+from oemof.solph import postprocessing as pp
+from oemof.solph import predefined_objectives as predefined_objectives
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import transformers as transformer
 from oemof.core.network.entities.components import transports as transport
-from oemof.solph.optimization_model import OptimizationModel
-
 import warnings
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
 
@@ -107,6 +106,13 @@ capex['oil'] = 22
 capex['solar_power'] = 1
 capex['wind_power'] = 1
 
+# price for resource
+price = {}
+price['lignite'] = 60
+price['hard_coal'] = 60
+price['natural_gas'] = 60
+price['oil'] = 60
+
 de_en = {
     'Braunkohle': 'lignite',
     'Steinkohle': 'hard_coal',
@@ -134,77 +140,42 @@ resource_buses = {
 translator = lambda x: de_en[x]
 
 
-def get_pp_data_from_type(row):
-    row['eta'] = eta_elec.get(row['type'], np.nan)
-    row['capex'] = capex.get(row['type'], 0)
-    row['opex_fix'] = opex_fix.get(row['type'], 0)
-    row['opex_var'] = opex_var.get(row['type'], 0)
-    row['co2_var'] = co2_emissions.get(row['type'], 0)
-    row['uid'] = row['type']
-    return row
-
-
-# TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
-# TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
 def get_demand():
     'Dummy function until real function exists.'
     demand_df = pd.DataFrame()
-    demand_df['el'] = np.random.rand(8760) * 10 ** 10
+    demand_df['elec'] = np.random.rand(8760) * 10 ** 10
     return demand_df
 
 
-# TODO: Könnte das nicht besser eine Methode der Energiesystemklasse sein?
-def create_bus(region, pp, global_buses):
-    r'''
-    Maybe it is more stable to ask for the type of the bus object instead of
-    checking the uid.
-    '''
-    if '_'.join(['b', 'glob', pp[1].type]) not in global_buses:
-        uid = '_'.join(['b', region.code, pp[1].type])
-        if uid not in region.buses:
-            logging.debug('Creating bus {0}.'.format(uid))
-            region.buses[uid] = (
-                Bus(uid=uid, type=pp[1].type, price=60, sum_out_limit=10e10))
-            bus_reg = region.code
-        else:
-            logging.debug('Local bus {0} exists. Nothing done.'.format(
-                '_'.join(['b', region.code, pp[1].type])))
-            bus_reg = region.code
-    else:
-        logging.debug('Global bus {0} exists. Nothing done.'.format(
-            '_'.join(['b', 'glob', pp[1].type])))
-        bus_reg = 'glob'
-    return bus_reg
+def entity_exists(esystem, uid):
+    return len([obj for obj in esystem.entities if obj.uid == uid]) > 0
 
 
-# TODO: Könnte das nicht besser eine Methode der Regionenklasse sein?
-def create_solph_objects(region, pp, esystem):
+def create_entity_objects(esystem, region, pp, tclass, bclass):
     ''
-    if pp[1].type in ['lignite', 'natural_gas', 'hard_coal']:
-        logging.debug('Create SimpleTransformer for ' + pp[1].type)
-        bus_reg = create_bus(region, pp, esystem.global_buses)
-        if bus_reg == region.code:
-            resource_bus = region.buses['_'.join(['b', bus_reg, pp[1].type])]
-        elif bus_reg == 'glob':
-            resource_bus = esystem.global_buses['_'.join(['b', bus_reg,
-                                                          pp[1].type])]
-
-        # Hier fände ich eine Typ noch gut (lignite, natural_gas,...)
-        logging.debug('Create transformer {0} for {1}.'.format(
-            '_'.join(['TransSimp', region.code, str(len(region.conv_pps))]),
-            pp[1].type))
-        region.conv_pps.append(transformer.Simple(
-            uid='_'.join(['TransSimp', region.code,
-                          str(len(region.conv_pps))]),
-            inputs=[resource_bus],
-            outputs=[region.buses['_'.join(['b', region.code, 'el'])]],
-            in_max={'_'.join(['b', bus_reg, pp[1].type]): None},
-            out_max={'_'.join(['b', region.code, 'el']): float(pp[1].cap)},
-            eta=[eta_elec[pp[1].type]]))
+    if entity_exists(esystem, ('bus', region.name, pp[1].type)):
+        logging.debug('Bus {0} exists. Nothing done.'.format(
+            ('bus', region.name, pp[1].type)))
+        location = region.name
+    elif entity_exists(esystem, ('bus', 'global', pp[1].type)):
+        logging.debug('Bus {0} exists. Nothing done.'.format(
+            ('bus', 'global', pp[1].type)))
+        location = 'global'
     else:
-        logging.warning(
-            "Power plant type {0} is not connected to solph type.".format(
-                pp[1].type))
+        logging.debug('Creating Bus {0}.'.format(
+            ('bus', region.name, pp[1].type)))
+        bclass(uid=('bus', region.name, pp[1].type), type=pp[1].type,
+               price=price[pp[1].type], sum_out_limit=10e10, regions=[region])
+        location = region.name
+    tclass(
+        uid=(tclass, region, pp[1].type),
+        inputs=[obj for obj in esystem.entities if obj.uid == (
+                'bus', location, pp[1].type)],
+        outputs=[obj for obj in region.entities if obj.uid == (
+                 'bus', region.name, 'elec')],
+        in_max=[None],
+        out_max=[float(pp[1].cap)],
+        eta=[eta_elec[pp[1].type]])
 
 
 year = 2010
@@ -213,20 +184,21 @@ overwrite = True
 conn = db.connection()
 
 # Create an energy system
-TwoRegExample = es.EnergySystem()
+TwoRegExample = es.EnergySystem(year=2010)
 
 # Add regions to the energy system
 TwoRegExample.regions.append(es.Region(
-    year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE0E'),
+    geom=tools.get_polygon_from_nuts(conn, 'DEE0E'),
     name='Landkreis Wittenberg'))
 
 TwoRegExample.regions.append(es.Region(
-    year=year, geom=tools.get_polygon_from_nuts(conn, 'DEE01'),
+    geom=tools.get_polygon_from_nuts(conn, 'DEE01'),
     name='Stadt Dessau-Roßlau'))
 
 # Create global buses
-Bus(uid="b_glob_hard_coal", type="coal", price=60, sum_out_limit=10e10)
-Bus(uid="b_glob_lignite", type="coal", price=60, sum_out_limit=10e10)
+Bus(uid=('bus', 'global', 'coal'), type='coal', price=60, sum_out_limit=10e10)
+Bus(uid=('bus', 'global', 'lignite'), type='lignite', price=60,
+    sum_out_limit=10e10)
 
 # Create entity objects for each region
 for region in TwoRegExample.regions:
@@ -236,143 +208,64 @@ for region in TwoRegExample.regions:
     # Get demand time series and create buses. One bus for each demand series.
     demand = get_demand()
     for demandtype in demand.keys():
-        uid = '_'.join([region.code, demandtype])
-        region.sinks.append(sink.Simple(uid='Sink_' + uid,
-                                        inputs=[region.buses['b_' + uid]],
-                                        val=demand[demandtype]))
-        Bus(uid='b_' + uid, type=demandtype, price=60, sum_out_limit=10e10,
-            regions=[region])
-
+        Bus(uid=('bus', region.name, demandtype), type=demandtype, price=60,
+            sum_out_limit=10e10, regions=[region])
+        sink.Simple(
+            uid=('sink', region.name, demandtype),
+            inputs=[obj for obj in TwoRegExample.entities
+                    if obj.uid == ('bus', region.name, demandtype)],
+            val=demand[demandtype],
+            region=[region])
     # Create source object
-    my_feedin = feedin_pg.Feedin()
-    region.renew_pps.extend(
-        (my_feedin.create_fixed_source(conn, region=region, **site)))
+    feedin_pg.Feedin().create_fixed_source(
+        conn, region=region, year=TwoRegExample.year, bustype='elec', **site)
 
-    # Get power plants from database
-    # Create powerplant object
+    # Get power plants from database and write them into a DataFrame
     pps_df = db_pps.get_bnetza_pps(conn, region.geom)
+
+    # Add aditional power plants to the DataFrame
     pps_df.loc[len(pps_df)] = 'natural_gas', np.nan, 10 ** 10
-    # pps_df = pps_df.apply(get_pp_data_from_type, axis=1)
-    for pp in pps_df.iterrows():
-        create_solph_objects(region, pp, TwoRegExample)
+
+    # TODO: Summerize power plants of the same type
+
+    for pwrp in pps_df.iterrows():
+        create_entity_objects(TwoRegExample, region, pwrp,
+                              tclass=transformer.Simple, bclass=Bus)
 
 # Connect the electrical bus of region StaDes und LanWit.
-TwoRegExample.connect('StaDes', 'LanWit', 'el', in_max=10000, out_max=9000,
-                      eta=0.9, transport_class=transport.Simple)
+bus1 = [obj for obj in TwoRegExample.entities if obj.uid == (
+    'bus', 'Landkreis Wittenberg', 'elec')][0]
+bus2 = [obj for obj in TwoRegExample.entities if obj.uid == (
+    'bus', 'Stadt Dessau-Roßlau', 'elec')][0]
+TwoRegExample.connect(bus1, bus2, in_max=10000, out_max=9000, eta=0.9,
+                      transport_class=transport.Simple)
 
-# ****************************************************************************
-# At this point the TwoRegExample of the class EnergySystem is defined.
-# Still missing a simulation object that contains all the hard coded
-# informations below (solver, excess=True,...).
-# ****************************************************************************
+# Remove orphan buses
+buses = [obj for obj in TwoRegExample.entities if isinstance(obj, Bus)]
+for bus in buses:
+    if len(bus.inputs) > 0 or len(bus.outputs) > 0:
+        logging.debug('Bus {0} has connections.'.format(bus.type))
+    else:
+        logging.debug('Bus {0} has no connections and will be deleted.'.format(
+            bus.type))
+        TwoRegExample.entities.remove(bus)
 
+TwoRegExample.simulation = es.Simulation(
+    solver='gurobi', timesteps=[t for t in range(8760)],
+    stream_solver_output=True, objective_options={
+        'function': predefined_objectives.minimize_cost})
 
-# ****************************************************************************
-# The next step is to create a list of all entities and create an Optimization
-# Model. This could be part of the solph package.
-# ****************************************************************************
+# Optimize the energy system
+TwoRegExample.optimize()
 
+# write results back to objects
+pp.results_to_objects(TwoRegExample.optimization_model)
 
-# TODO: Könnte das Erstellen der solph-Komponenten nicht in einer Methode der
-# EnergySystem-Klasse passieren?
-
-entities = []
-components = []
-
-for bus in TwoRegExample.global_buses.values():
-    entities.append(bus)
-
-for connection in TwoRegExample.connections.values():
-    entities.append(connection)
-    components.append(connection)
-
-for region in TwoRegExample.regions.values():
-    for bus in region.buses.values():
-        entities.append(bus)
-    for pp in region.conv_pps:
-        entities.append(pp)
-        components.append(pp)
-    for pp in region.renew_pps:
-        entities.append(pp)
-        components.append(pp)
-    for pp in region.sinks:
-        entities.append(pp)
-        components.append(pp)
-
-timesteps = [t for t in range(876)]
-
-om = OptimizationModel(entities=entities, timesteps=timesteps,
-                       options={'invest': False, 'slack': {
-                           'excess': True, 'shortage': True}})
-
-om.solve(solver='gurobi', debug=True, tee=False, duals=True)
-
-postprocessing.results_to_objects(om)
-
-df = pd.DataFrame()
-for c in components:
-    for k in c.results["out"].keys():
-        df[c.uid] = c.results["out"][k]
-
-#for t in transmissions:
-#    for k in t.results["out"].keys():
-#        df[t.uid] = t.results["out"][k]
-#for c in components:
-#    for k in c.results["in"].keys():
-#        df[c.uid] = c.results["in"][k]
 #
-#for c in components:
-#    c.calc_emissions()
-#    df[c.uid] = c.emissions
-
-print(df.keys())
-
-df.plot()
-plt.show()
-
-
-def plot_dispatch(bus_to_plot):
-        # plotting: later as multiple pdf with pie-charts and topology?
-        import numpy as np
-        import matplotlib as mpl
-        import matplotlib.cm as cm
-
-        plot_data = components
-
-        # data preparation
-        x = np.arange(len(timesteps))
-        y = []
-        labels = []
-        for c in plot_data:
-            if bus_to_plot in c.results['out']:
-                y.append(c.results['out'][bus_to_plot])
-                labels.append(c.uid)
-
-
-        # plotting
-        fig, ax = plt.subplots()
-        sp = ax.stackplot(x, y,
-                          colors=cm.rainbow(np.linspace(0, 1, len(plot_data))))
-        proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                       facecolor=
-                                       pol.get_facecolor()[0]) for pol in sp]
-        ax.legend(proxy, labels)
-        ax.grid()
-        ax.set_xlabel('Timesteps in h')
-        ax.set_ylabel('Power in MW')
-        ax.set_title('Dispatch')
-
-plot_dispatch('b_LanWit_el')
-plt.show()
-# write results to data frame for excel export
-
-#    print(region.power_plants['re'].type.unique())
-#    print(region.power_plants['re'].subtype.unique())
-#    print(region.power_plants['fossil'].type.unique())
-#    print(region.power_plants['fossil'].subtype.unique())
-#    print(region.feedin.keys())
-#print(feedin)
-#print('busse', buses.keys())
-#print('transformer', transformers.keys())
-#print('')
-#print(demand.keys())
+#data = renewable_sources+transformers+storages
+#
+#pp.plot_dispatch('bel', timesteps, data, storage, demand)
+##    pp.plot_dispatchplt.show()
+#
+#pp.print_results('bel', data, demand, transformers, storage,
+#                     energysystem)
