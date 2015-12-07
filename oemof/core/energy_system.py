@@ -30,6 +30,8 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
+    year : integer
+        Define the time for the energy system.
 
     Attributes
     ----------
@@ -49,6 +51,7 @@ class EnergySystem:
             setattr(self, attribute, kwargs.get(attribute, []))
         Entity.registry = self
         self.optimization_model = kwargs.get('optimization_model', None)
+        self.year = kwargs.get('year')
 
     # TODO: Condense signature (use Buse)
     def connect(self, code1, code2, media, in_max, out_max, eta,
