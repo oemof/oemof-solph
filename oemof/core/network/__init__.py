@@ -32,6 +32,14 @@ class Entity:
     """
     optimization_options = {}
 
+    #: The central registry keeping track of all :class:`Entity`s created.
+    # If this is `None`, :class:`Entity` instances are not kept track of.
+    # Should be an instance of :class:`oemof.core.energy_system.EnergySystem`
+    # and when you instantiate an
+    # :class:`oemof.core.energy_system.EnergySystem` it automatically becomes
+    # the entity registry to which all entities created are added.
+    registry = None
+
     def __init__(self, **kwargs):
         # TODO: @Günni:
         # add default argument values to docstrings (if it's possible).
@@ -47,6 +55,8 @@ class Entity:
         self.geo_data = kwargs.get("geo_data", None)
         self.regions = []
         self.add_regions(kwargs.get('regions', []))
+        if __class__.registry is not None:
+            __class__.registry.entities.append(self)
 
         # TODO: @Gunni Yupp! Add docstring.
     def add_regions(self, regions):
