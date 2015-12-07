@@ -1,5 +1,5 @@
-oemof_base
-==========
+oemof
+=====
 
 .. toctree::
    :maxdepth: 4
