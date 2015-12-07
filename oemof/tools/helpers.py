@@ -460,3 +460,11 @@ def dict2textfile(dic, filename=None, path=None):
     f1 = open(os.path.join(path, filename), 'w+')
     pp.pprint(dic, f1)
     f1.close()
+
+def call_demandlib():
+    '''
+    Calls the demandlib and creates an object which includes the demand
+    timeseries.
+    '''
+
+    return

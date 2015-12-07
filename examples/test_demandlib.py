@@ -14,9 +14,11 @@ import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 from oemof_base.oemof.tools import db
-from oemof_base.oemof.core import energy_regions
+# from oemof_base.oemof.core import energy_regions
 from oemof_base.oemof.core import energy_buildings as eb
-
+from oemof.core.network.entities import Bus
+from oemof.core.network.entities.components import sinks as sink
+from oemof.tools import pg_helpers
 
 conn = db.connection()
 year = 2013
@@ -147,26 +149,37 @@ ind_number_of_employees_region = [
     {'wz_13': 18554},
     {'wz_14': 20976}]
 
-reg5 = energy_regions.region(year, geo2)
-reg5.set_connection(conn)
-reg5.fetch_demand_series(method='calculate_profile',
-                         conn=conn,
-                         ann_el_demand_per_sector=ann_el_demand_per_sector)
 
-reg6 = energy_regions.region(year, geo2)
-reg6.set_connection(conn)
-reg6.fetch_demand_series(method='calculate_profile',
-                         conn=conn,
-                         population=population,
-                         ann_el_demand_per_sector=ann_el_demand_per_sector,
-                         ann_el_demand_per_person=ann_el_demand_per_person,
-                         household_structure=household_structure,
-                         household_members_all=household_members_all,
-                         comm_ann_el_demand_state=comm_ann_el_demand_state,
-                         comm_number_of_employees_state=
-                         comm_number_of_employees_state,
-                         comm_number_of_employees_region=
-                         comm_number_of_employees_region)
+bel = Bus(uid="bel",
+          type="el",
+          excess=True)
+
+data = pd.read_csv("storage_optimization/storage_invest.csv", sep=",")
+demand = sink.Simple(uid="demand", inputs=[bel], val=data['demand_el'])
+demand = helpers.call_demandlib(demand,
+                                method='calculate_profile',
+                                ann_el_demand_per_sector=ann_el_demand_per_sector)
+
+# reg5 = energy_regions.region(year, geo2)
+# reg5.set_connection(conn)
+# reg5.fetch_demand_series(method='calculate_profile',
+#                         conn=conn,
+#                         ann_el_demand_per_sector=ann_el_demand_per_sector)
+
+# reg6 = energy_regions.region(year, geo2)
+# reg6.set_connection(conn)
+# reg6.fetch_demand_series(method='calculate_profile',
+#                         conn=conn,
+#                         population=population,
+#                         ann_el_demand_per_sector=ann_el_demand_per_sector,
+#                         ann_el_demand_per_person=ann_el_demand_per_person,
+#                         household_structure=household_structure,
+#                         household_members_all=household_members_all,
+#                         comm_ann_el_demand_state=comm_ann_el_demand_state,
+#                         comm_number_of_employees_state=
+#                         comm_number_of_employees_state,
+#                         comm_number_of_employees_region=
+#                         comm_number_of_employees_region)
 
 #reg7 = energy_regions.region(year, geo2)
 #reg7.set_connection(conn)
