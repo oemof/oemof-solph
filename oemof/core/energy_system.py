@@ -54,27 +54,33 @@ class EnergySystem:
         self.year = kwargs.get('year')
 
     # TODO: Condense signature (use Buse)
-    def connect(self, code1, code2, media, in_max, out_max, eta,
-                transport_class):
-        """Create a transport object to connect to buses."""
+    def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
+        """Create two transport objects to connect two buses of the same type
+        in both directions.
+
+        Parameters
+        ----------
+        bus1, bus2 : core.network.Bus object
+            Two buses to be connected.
+        eta : float
+            Constant efficiency of the transport.
+        in_max : float
+            Maximum input the transport can handle, in $MW$.
+        out_max : float
+            Maximum output which can possibly be obtained when using the
+            transport, in $MW$.
+        transport_class class
+            Transport class to use for the connection
+        """
         if not transport_class == transport.Simple:
+            logging.error('')
             raise(TypeError(
                 "Sorry, `EnergySystem.connect` currently only works with" +
                 "a `transport_class` argument of" + str(transport.Simple)))
-        for reg_out, reg_in in [(code1, code2), (code2, code1)]:
-            logging.debug('Creating simple {2} from {0} to {1}'.format(
-                reg_out, reg_in, transport_class))
-            uid = '_'.join([reg_out, reg_in, media])
-            self.connections[uid] = transport_class(
-                uid=uid,
-                outputs=[self.regions[reg_out].buses['_'.join(
-                    ['b', reg_out, media])]],
-                inputs=[self.regions[reg_in].buses['_'.join(
-                    ['b', reg_in, media])]],
-                out_max={'_'.join(['b', reg_out, media]): out_max},
-                in_max={'_'.join(['b', reg_in, media]): in_max},
-                eta=[eta]
-                )
+        for bus_a, bus_b in [(bus1, bus2), (bus2, bus1)]:
+            uid = bus_a.uid + bus_b.uid
+            transport_class(uid=uid, outputs=[bus_a], inputs=[bus_b],
+                            out_max=[out_max], in_max=[in_max], eta=[eta])
 
     # TODO: Add concept to make it possible to use another solver library.
     def optimize(self):
@@ -193,6 +199,6 @@ class Simulation:
         self.stream_solver_output = kwargs.get('stream_solver_output', False)
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
-        self.timesteps = kwargs.get('timesteps', None)
+        self.timesteps = kwargs.get('timesteps')
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')
