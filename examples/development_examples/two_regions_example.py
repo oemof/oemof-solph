@@ -256,6 +256,9 @@ TwoRegExample.simulation = es.Simulation(
     stream_solver_output=True, objective_options={
         'function': predefined_objectives.minimize_cost})
 
+for entity in TwoRegExample.entities:
+    entity.uid = str(entity.uid)
+
 # Optimize the energy system
 TwoRegExample.optimize()
 
