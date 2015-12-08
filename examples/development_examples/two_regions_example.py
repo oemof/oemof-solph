@@ -10,6 +10,7 @@ import numpy as np
 logging.getLogger().setLevel(logging.INFO)
 # logging.getLogger().setLevel(logging.WARNING)
 
+import plotter
 from oemof_pg import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
