@@ -1,18 +1,17 @@
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 Installation and setup
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
-.. contents::
 
 Introduction
-~~~~~~~~~~~~
+============
 Following you find guidelines for the installation process for different operation systems. 
 
 Linux
-~~~~~
+======
 
 If you have Python 3 installed
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
 As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have Python 3 you can install oemof by using pip. Run the following code in your terminal:
 
@@ -23,7 +22,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
 If you do not have Python 3 installed
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------
 
 There are different ways to install Python on your system. 
 One way is to install Python 3 through the Linux repositories. If you are using Ubuntu try executing the following code in your terminal: 
@@ -37,7 +36,7 @@ Otherwise you can download different versions of Python via https://www.python.o
 
 
 Required Python packages
-^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included by default in the installation of Python 3.4 and later versions.
 To install pip for earlier Python versions try executing the following code in your terminal: 
@@ -77,7 +76,7 @@ The following table shows which packages are needed for which oemof library:
  
 
 Solver
-^^^^^^
+-------
 
 In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
 The recommended open-source solver is Cbc (Coin-or branch and cut). 
@@ -85,10 +84,10 @@ See the CBC wiki for download and installation instructions: https://projects.co
 
 
 Windows
-~~~~~~~
+========
 
 If you have Python 3 installed
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------
 
 As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have Python 3 you can install oemof by using pip. Run the following code in your command window:
 
@@ -99,7 +98,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
 If you do not have Python 3 installed
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------
 
 To install python3 download the winpython version suitable for your system from http://winpython.sourceforge.net/ and follow the installation instructions.
 
@@ -112,7 +111,7 @@ Next, set the system’s PATH variable to include directories that include pytho
 
 
 Required Python packages
-^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included in the winpython download. 
 If you do not have pip installed see here: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel.
@@ -145,14 +144,14 @@ The following table shows which packages are needed for which oemof library:
 
  
 Solver
-^^^^^^
+-------
 
 In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
 The recommended open-source solver is Cbc (Coin-or branch and cut). 
 See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
 
 Mac OS
-~~~~~~~
+=======
 
 Installation guidelines for Mac OS will follow. 
 

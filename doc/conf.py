@@ -33,7 +33,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.pngmath',
-    'numpydoc'
+    'sphinx.ext.napoleon'
 ]
 
 numpydoc_show_class_members = False

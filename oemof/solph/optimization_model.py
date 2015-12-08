@@ -40,14 +40,17 @@ def assembler(e, om, block):
     This is the most general form of assembler function, called only if no
     other, more specific assemblers have been found. Since we don't know what
     to do in this case, we can only throw a :class:`TypeError`.
+
     Parameters
     ----------
     entity: An object. Only used to figure out which assembler function to call
             by dispatching on its `type`. Not used otherwise.
             It's a good idea to set this to `None` if the function is called
             directly via :attr:`assembler.registry`.
+
     om    : The optimization model. Should be an instance of
             :class:`pyomo.ConcreteModel`.
+
     block : A pyomo block.
 
     Returns
@@ -63,7 +66,7 @@ def assembler(e, om, block):
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
 
-    Parameter
+    Parameters
     ----------
     entities : list with all entity objects
     timesteps : list with all timesteps as integer values
@@ -132,7 +135,7 @@ class OptimizationModel(po.ConcreteModel):
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
 
-        Parameter
+        Parameters
         ----------
         self : OptimizationModel() instance
         block : SimpleBlock()
@@ -178,12 +181,11 @@ class OptimizationModel(po.ConcreteModel):
 
         Parameters
         ----------
-
         self : pyomo.ConcreteModel
         solver str: solver to be used e.g. 'glpk','gurobi','cplex'
         solver_io str: str that defines the solver interaction
         (file or interface) 'lp','nl','python'
-        **kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
+        \**kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
         Returns
@@ -290,7 +292,7 @@ def _(e, om, block):
 
     print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
-    lc.add_bus_balance(om, block, balance_type="==")
+    lc.add_bus_balance(om, block)
 
     # set limits for buses
     lc.add_global_output_limit(om, block)
@@ -303,7 +305,6 @@ def _(e, om, block):
 
     Constraints are selected by the `optimization_options` variable of
     :class:`Simple`.
-
 
     Parameters
     ----------

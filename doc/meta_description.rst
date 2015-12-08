@@ -1,56 +1,62 @@
-=========================================
+##########################################
  Meta description
-=========================================
+##########################################
 
-Eva, Ulf and Ilka learn git.
 
 This so called meta-description was developed to make oemof easy to use and
 develop. It describes general ideas and structures of oemof and its modules.
 
 
 The idea of an open framework
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==============================
 
-Models in energy system analysis often do not disclose source code and data or only have a sparse documentation.
-This lack of transparency slows down the scientific discussion about the model fitness in terms of a specific application.
-Moreover, models are often tailor-made and do not allow and easy adaption to other requirements or an integration of new approaches.
+The Open Energy System Modeling Framework has been developed for the modeling and analysis of energy supply systems considering power and heat as well as prospectively mobility. Energy system models often do not have publicly accessible source code and freely available data and are poorly documented. The missing transparency slows down the scientific discussion on  model quality with regard to certain problems such as grid extension. Besides, energy system models are often developed for a certain application and cannot be adjusted (or only with great effort) to other requirements.
 
-The Open Energy Modelling Framework (oemof) addresses this issue by introducing an open source modeling framework for
-energy systems analysis including a detailed documentation structure.
-This transparent approach allows scientific discourse about the underlying models and thus improves the model quality.
-Additionally, a modular design approach allows a flexible adaption for a variety of applications.
+The Center for Sustainable Energy Systems (ZNES) together with the Reiner Lemoine Institute (RLI) in Berlin and the Otto-von-Guericke-University of Magdeburg (OVGU) are developing an Open Energy System Modeling Framework (oemof) that addresses these problems by offering a free, open and clearly documented framework for energy system modeling. This transparent approach allows a sound scientific discourse on the underlying models and data. In this way the assessment of quality and significance of undertaken analyses is improved. Moreover, the modular composition of the framework supports the adjustment to a large number of application purposes. The open source approach allows a collaborative development of the framework that offers several advantages:
 
-The framework can be used to model arbitrary energy systems.
-Applications range from complex single-region combined heat and power models to multi-regional models in the european power sector.
-Models can be optimised with respect to different targets such as emissions or costs. Both can be computed in appropriate time.
-Moreover, only single parts of the framework can be used for simple tasks such as wind or solar feedin calculation for a specific site.
+- **Synergies** - By developing collaboratively synergies between the participating institutes can be utilized.
 
-Framework structure
-------------------------------------------
+- **Debugging** - Through the input of a larger group of users and developers bugs are identified and fixed at an earlier stage.
 
-Generic oemof energy systems consist of entities and represent a bipartite directed graph.
-
-*Entities* can be subdivided into busses or components.
-A *Bus* has a certain type (e.g. gas) and can be connected to other busses
-(e.g. electricity or thermal) via components.
-A *Component* in turn represents a (possible) in- or outflow into a bus.
-
-The basic components are:
-
-* *Transport* represents a directed connection between two busses with a given capacity
-* *Source*  represents an energy flow into a single bus
-* *Sink*  represents an energy flow out of a single bus
-* *Transformer*  represents an energy flow from one bus to another
+- **Advancement** - The oemof-based application profits from further development of the framework.
 
 
-Mathematical description (generic formulation as graph wihtout timesteps)
+Open Energy System Modeling Framework (oemof)
+-----------------------------------------------
+
+oemof is programmed in Python and uses several Python packages for scientific applications (e.g. mathematical optimisation, network analysis, data analyses), optionally in combination with a PostgreSQL/PostGIS Database. It offers a toolbox of various functionalities needed to build energy system models in high temporal and spatial resolution. For instance, the wind energy feed-in in a model region based on weather data can be modeled, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
+
+The framework consists of packages. For the communication between these packages interfaces are provided. A package again consists of modules that handle a defined task. A linkage of specific modules of the various packages is in oemof called an application (app) and depicts for example a concrete energy system model. The following image shows the underlying concept.
+
+**Abbildung**: Verschiedene Pakete, aus denen verschiedene App gebastelt werden
+
+Besides other applications the apps "renpass-gis" and "reegis" are currently developed within the framework. "renpass-gis" enables the simulation of a future European energy system with a high spatial and temporal resolution. Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered. The app "reegis" provides a simulation of a regional heat and power supply system. These two examples show that the modular approach of the framework allows applications with very different objectives. 
+
+An energy system within oemof
+-----------------------------
+
+The modeling of energy supply systems and its variety of components has a cleary structured approach within the oemof framework. Thus, energy supply systems with different levels of complexity can be based on equal basic module blocks. Those form an universal basic structure.
+
+An *entity* is either a *bus* or a *component*. A bus is always connected with one or several components and characterised by an unique identifier (electricity, gas, heat). Components take resources from or feed resources to buses. Transfers from buses are inputs of components, transfers to buses are ouputs of components.
+
+Components are likewise always connected with one or several buses. Based on their characteristics they are divided into several sub types. *Transformers* have input and output, e.g. a gas turbine takes from a bus of type 'gas' and feeds into a bus of type 'electricity'. With additional information like parameters and transfer functions input and output can be specified. Using the example of a gas turbine the resource consumption (input) is related to the provided end energy (output) by means of an efficiency factor. A *sink* has only an input but no output. With *sink* consumers like households can be modeled. A *source* has exactly one output but no input. Thus for example, wind energy and photovoltaic plants can be modeled. Components of type *transport* have like transformers input and output. However, corresponding buses are always of the same type, e.g. electricity. With components of type transport transmission lines can be modeled for example.
+
+Components and buses can be combined to an energy system. Buses are nodes, connected among each other through edges which are the inputs and outputs of the components. Such a model can be interpreted mathematically as bipartite graph as buses are solely connected to components and vice versa. Thereby the in- and outputs of the components are the directed edges of the graph. The buses themselves are the nodes of the graph.
+
+Besides the use of the basic components one has the possibility to develop more specified components on the base of the basic components. The following figure illustrates the setup of a simple energy system and the basic structure explained before.
+
+Figure: Setup of a simple energy system within the framework (buses and
+components)
+
+
+Mathematical description (generic formulation as graph without timesteps)
 ----------------------------------------------------------------------------
 
- Entities are connected in such a way that buses are only connected to components
+Entities are connected in such a way that buses are only connected to components
 and vice versa. In this way the energy system can be interpreted as a bipartite graph.
 In this graph the entities represent vertices. The inputs and the ouputs can
 be interpreted as directed edges. For every edge in this graph there will be a value which
-we will define as the weight of the edge.
+we define as the weight of the edge.
 
 
 Set of entities :math:`E` as a union of sets of buses (B),
@@ -163,7 +169,7 @@ A detailed description can be found in the following sections.
 
 
 Documentation
-~~~~~~~~~~~~~~~~~~~~~~~~
+===============
 
 The framework is documented on three different levels:
 
@@ -301,7 +307,7 @@ For further information on restructured text see: http://docutils.sourceforge.ne
 
 
 oemof *base classes*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 Currently, oemof provides the following classes. The first three levels represent the basic components to model energy systems. Additional subclasses can be defined underneath.
 
@@ -337,7 +343,7 @@ More information on the functionality of the respective classes can be found in 
 
 
 The *feedinlib* package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 The modelling library feedinlib is currently in a development stage.
 Using feedinlib energy production timeseries of several energy plants can be created.
@@ -351,7 +357,7 @@ Clone or fork the 'feedinlib' from github and use it within your project. Don’
 
 
 The *demandlib* package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 Description of demandlib.
 
@@ -359,7 +365,7 @@ Description of demandlib.
 
 
 The *solph* package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 The solph module of oemof allows to create and solve linear (and mixed-integer)
 optimization problems. The optimization problem is build based on a energy
@@ -382,7 +388,8 @@ All necessary constraints related with variables are defined in *variables.py*.
 
 
 Constructor
-************
+^^^^^^^^^^^^
+
 The whole pyomo model is build when instantiating the optimization model.
 This is why the constructor of the  *OptimizationModel()* class plays an
 important role.
@@ -399,7 +406,8 @@ The general procedure is as basically follows:
 
 
 Assembler methods
-******************
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 The *assembler* methods can be specified in two different ways. Firstly, functions
 from the solph-library called *linear_constraints.py* can be used to add
 constraints to the *assembler*. Secondly, *assembler* methods can use other
@@ -416,7 +424,8 @@ If necessary, the two libraries used be *assemlber* methods can be extended
 and used in methods of *OptimizationModel()* afterwards.
 
 Solve and other
-****************
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 Moreover, the *OptimizationModel()* class contains a method for solving
 the optimization model.
 

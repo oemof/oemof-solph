@@ -24,8 +24,7 @@ def add_binary(model, block):
     timesteps are used.
 
     Parameters
-    ------------
-
+    ----------
     model : pyomo.ConcreteModel()
         A pyomo-object to be solved containing all Variables, Constraints, Data
         Variables are added as attributes to the `model`
@@ -34,8 +33,7 @@ def add_binary(model, block):
     uids : unique ids of `ojbs`
 
     Returns
-    --------
-
+    -------
     There is no return value. The variables are added as a
     attribute to the optimization model object `model`.
 
@@ -63,7 +61,7 @@ def add_continuous(model, edges):
     (If specific components such as disptach sources and storages exist.)
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         A object to be solved containing all Variables, Constraints, Data
         Variables are added as attributes to the `model`
@@ -73,11 +71,9 @@ def add_continuous(model, edges):
         e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
 
     Returns
-    --------
+    -------
     The variables are added as a attribute to the optimization model object
     `model`.
-
-
     """
     # variable for all edges
     model.w = po.Var(edges, model.timesteps, within=po.NonNegativeReals)
@@ -104,13 +100,13 @@ def set_bounds(model, block, side='output'):
 
     If side is `input`:
 
-    .. math:: W(I(e), e, t) \\leq in_max(e, t), \\qquad \
+    .. math:: W(I(e), e, t) \\leq in_{max}(e, t), \\qquad \
     \\forall e, \\forall t
 
 
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
@@ -196,7 +192,7 @@ def set_storage_cap_bounds(model, block):
     \\qquad \\forall e, \\forall t
 
     Parameters
-    ------------
+    ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
@@ -245,8 +241,8 @@ def set_outages(model, block, outagetype='period', side='output'):
     """ Fixes component input/output to zeros for modeling outages.
 
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     model :OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Attributes are altered of the `model`
@@ -294,8 +290,7 @@ def set_fixed_sink_value(model, block):
     .. math:: W(I(e), e,t) = val(e,t), \\qquad \\forall e, \\forall t
 
     Parameters
-    ------------
-
+    ----------
     model :OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Attributes are altered of the `model`
@@ -303,7 +298,6 @@ def set_fixed_sink_value(model, block):
 
     Returns
     -------
-
     The variables as attributes to
     the optimization model object `model` of type OptimizationModel() will
     be altered.
