@@ -144,7 +144,7 @@ translator = lambda x: de_en[x]
 def get_demand():
     'Dummy function until real function exists.'
     demand_df = pd.DataFrame()
-    demand_df['elec'] = np.random.rand(8760) * 10 ** 10
+    demand_df['elec'] = np.random.rand(8760) * 10 ** 7
     return demand_df
 
 
