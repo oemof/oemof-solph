@@ -169,7 +169,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
                price=price[pp[1].type], sum_out_limit=10e10, regions=[region])
         location = region.name
     tclass(
-        uid=(tclass, region, pp[1].type),
+        uid=(tclass, region.name, pp[1].type),
         inputs=[obj for obj in esystem.entities if obj.uid == (
                 'bus', location, pp[1].type)],
         outputs=[obj for obj in region.entities if obj.uid == (
