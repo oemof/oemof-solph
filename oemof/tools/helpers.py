@@ -449,6 +449,15 @@ def pickle2dict(filename=None, path=None):
     return dic
 
 
+def call_demandlib(demand, method, kwargs**):
+    '''
+    Calls the demandlib and creates an object which includes the demand
+    timeseries.
+    '''
+    print('hallo')
+    return
+
+
 def dict2textfile(dic, filename=None, path=None):
     'Writing a dictionary to textfile in a readable and clearly formatted way.'
     if filename is None:
@@ -461,10 +470,3 @@ def dict2textfile(dic, filename=None, path=None):
     pp.pprint(dic, f1)
     f1.close()
 
-def call_demandlib():
-    '''
-    Calls the demandlib and creates an object which includes the demand
-    timeseries.
-    '''
-
-    return

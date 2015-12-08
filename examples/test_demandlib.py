@@ -18,7 +18,7 @@ from oemof_base.oemof.tools import db
 from oemof_base.oemof.core import energy_buildings as eb
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
-from oemof.tools import pg_helpers
+from oemof.tools import helpers
 
 conn = db.connection()
 year = 2013
@@ -156,9 +156,9 @@ bel = Bus(uid="bel",
 
 data = pd.read_csv("storage_optimization/storage_invest.csv", sep=",")
 demand = sink.Simple(uid="demand", inputs=[bel], val=data['demand_el'])
-demand = helpers.call_demandlib(demand,
-                                method='calculate_profile',
-                                ann_el_demand_per_sector=ann_el_demand_per_sector)
+helpers.call_demandlib(demand,
+                       method='calculate_profile',
+                       ann_el_demand_per_sector=ann_el_demand_per_sector)
 
 # reg5 = energy_regions.region(year, geo2)
 # reg5.set_connection(conn)
