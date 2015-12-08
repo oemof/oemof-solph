@@ -233,6 +233,23 @@ for region in TwoRegExample.regions:
         create_entity_objects(TwoRegExample, region, pwrp,
                               tclass=transformer.Simple, bclass=Bus)
 
+#    # create storage transformer object for storage
+#    bel = [obj for obj in TwoRegExample.entities
+#           if obj.uid == ('bus', region.name, demandtype)]
+#    transformer.Storage(uid=('sto_simple', region.name, 'elec'),
+#                        inputs=bel,
+#                        outputs=bel,
+#                        eta_in=1,
+#                        eta_out=0.8,
+#                        cap_loss=0.00,
+#                        opex_fix=35,
+#                        opex_var=10e10,
+#                        capex=1000,
+#                        cap_max=100000,
+#                        cap_initial=0,
+#                        c_rate_in=1/6,
+#                        c_rate_out=1/6)
+
 # Connect the electrical bus of region StaDes und LanWit.
 bus1 = [obj for obj in TwoRegExample.entities if obj.uid == (
     'bus', 'Landkreis Wittenberg', 'elec')][0]
@@ -265,11 +282,12 @@ TwoRegExample.optimize()
 # write results back to objects
 pp.results_to_objects(TwoRegExample.optimization_model)
 
+#for region in TwoRegExample.regions:
+#    comp = [obj for obj in TwoRegExample.entities
+#            if obj.region.name == region.name]
 #
-#data = renewable_sources+transformers+storages
-#
-#pp.plot_dispatch('bel', timesteps, data, storage, demand)
-##    pp.plot_dispatchplt.show()
+#    plotter.plot_dispatch('bel', timesteps, data, storage, demand)
+#    plt.show()
 #
 #pp.print_results('bel', data, demand, transformers, storage,
 #                     energysystem)
