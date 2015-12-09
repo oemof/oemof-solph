@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Application to use for grid course FL Dec 2015
+Example application that uses pypower for load flow simulation.
+pypo stands for an abbreviation for pypower
+Mainly developed by Christian Fleischer
 """
 from oemof.core.network.entities.buses import BusPypo
 from oemof.core.network.entities.components.transports import BranchPypo
