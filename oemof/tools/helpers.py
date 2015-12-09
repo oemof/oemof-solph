@@ -449,7 +449,7 @@ def pickle2dict(filename=None, path=None):
     return dic
 
 
-def call_demandlib(demand, method, kwargs**):
+def call_demandlib(demand, method, **kwargs):
     '''
     Calls the demandlib and creates an object which includes the demand
     timeseries.
