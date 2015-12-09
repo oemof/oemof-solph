@@ -56,6 +56,15 @@ except:
         'You will not be able to use the helper function: {0}'.format(hlp_fkt))
     logging.info('Install geocoder to use it.')
 
+# Download a file from the internet
+hlp_fkt = ' download_file'
+try:
+    from urllib.request import urlretrieve
+except:
+    logging.info(
+        'You will not be able to use the helper function: {0}'.format(hlp_fkt))
+    logging.info('Install urllib to use it.')
+
 
 def get_polygon_from_shp_file(file):
     r"""A one-line summary that does not use variable names or the
@@ -460,3 +469,12 @@ def dict2textfile(dic, filename=None, path=None):
     f1 = open(os.path.join(path, filename), 'w+')
     pp.pprint(dic, f1)
     f1.close()
+
+
+def download_file(filename, url):
+    '''Copy a file from the given url to the given filename.
+    '''
+    if not os.path.isfile(filename):
+        logging.info('Copying file from {0} to {1}'.format(
+            url, filename))
+        urlretrieve(url, filename)
