@@ -285,6 +285,12 @@ TwoRegExample.optimize()
 # write results back to objects
 pp.results_to_objects(TwoRegExample.optimization_model)
 
+for region in TwoRegExample.regions:
+    print(region.name)
+    for tf in [obj for obj in region.entities if isinstance(
+            obj, transformer.Simple)]:
+        print(tf.uid)
+#    print(tf.results['out'])
 #for region in TwoRegExample.regions:
 #    comp = [obj for obj in TwoRegExample.entities
 #            if obj.region.name == region.name]
