@@ -112,3 +112,16 @@ class Storage(Transformer):
         self.cap_loss = kwargs.get('cap_loss', 0)
         self.c_rate_in = kwargs.get('c_rate_in', None)
         self.c_rate_out = kwargs.get('c_rate_out', None)
+
+        if self.out_max is None:
+            try:
+                self.out_max = [self.c_rate_out * self.cap_max]
+            except:
+                raise ValueError('Failed to set out_max automatically.' +
+                                 'Did you specify c_rate_out and cap_max?')
+        if self.in_max is None:
+            try:
+                self.in_max = [self.c_rate_in * self.cap_max]
+            except:
+                raise ValueError('Failed to set in_max automatically.' +
+                                 'Did you specify c_rate_out and cap_max?')
