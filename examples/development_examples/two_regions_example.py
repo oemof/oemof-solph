@@ -177,8 +177,8 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
                  'bus', region.name, 'elec')],
         in_max=[None],
         out_max=[float(pp[1].cap)],
-        eta=[eta_elec[pp[1].type]])
-
+        eta=[eta_elec[pp[1].type]],
+        regions=[region])
 
 logger.define_logging()
 year = 2010
