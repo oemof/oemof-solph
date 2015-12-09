@@ -15,6 +15,7 @@ from oemof_pg import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
 from oemof_pg import feedin_pg
+from oemof.tools import logger
 from oemof.core import energy_system as es
 from oemof.solph import postprocessing as pp
 from oemof.solph import predefined_objectives as predefined_objectives
@@ -179,6 +180,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
         eta=[eta_elec[pp[1].type]])
 
 
+logger.define_logging()
 year = 2010
 overwrite = False
 overwrite = True
