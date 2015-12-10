@@ -18,14 +18,10 @@ class electrical_demand():
 
     Parameters
     ----------
-    method : {'csv', 'db', 'scale_profile_csv', scale_profile_db',
+    method : {'scale_profile_csv', scale_profile_db',
                   scale_entsoe', calculate_profile'}, required
         Method to calculate the demand for your region.
         Explanation:
-
-        'csv' : read from csv
-
-        'db' : read from database
 
         'scale_profile_csv': read only profile from csv and scale it with
             given or calculated demand
@@ -44,13 +40,13 @@ class electrical_demand():
     ----------------
     Required according to chosen method.
 
-    {'csv', 'scale_profile_csv'} :
+    {'scale_profile_csv'} :
         path : str
             '/path/to/file'
         filename : str
             'filename.csv'
 
-    {'db', 'scale_profile_db', 'scale_profile_entsoe'} :
+    {'scale_profile_db', 'scale_profile_entsoe'} :
         conn :
 
     {'scale_profile_csv', 'scale_profile_db', 'scale_profile_entsoe'} :
@@ -154,19 +150,7 @@ class electrical_demand():
     def decider(self, method, **kwargs):
         '''
         '''
-        if method == 'csv':
-            self.elec_demand = self.read_from_csv(path=
-                                                  kwargs.get('path'),
-                                                  filename=
-                                                  kwargs.get('filename'))
-
-        #TODO: implement
-        elif method == 'db':
-            conn = kwargs.get('conn')
-            self.elec_demand = np.array([111, 222])
-            print('Dummy value. Not working so far.')
-
-        elif method == 'scale_profile_csv':
+        if method == 'scale_profile_csv':
             self.profile = self.read_from_csv(path=
                                               kwargs.get('path'),
                                               filename=

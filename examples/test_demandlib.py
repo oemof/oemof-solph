@@ -40,16 +40,6 @@ geo2 = Point(12.2, 52.2).buffer(1.0)
 #year = 2010 # years from 2006 to 2011 do exist in the example data
 # (and only for Germany), more countries are in old oemof's database
 #
-#reg1 = energy_regions.region(year, geo2)
-#reg1.set_connection(conn)
-#reg1.fetch_demand_series(method='csv',
-#                         path='/home/caro/rlihome/Git/oemof/src/',
-#                         filename='example_data_entsoe.csv')
-##
-#reg2 = energy_regions.region(year, geo2)
-#reg2.set_connection(conn)
-#reg2.fetch_demand_series(method='db', conn=conn)
-
 #reg3 = energy_regions.region(year, geo2)
 #reg3.set_connection(conn)
 #reg3.fetch_demand_series(method='scale_profile_csv',
