@@ -4,16 +4,20 @@ from . import Transport
 class Simple(Transport):
     """
     Simple Transport connects two busses with a constant efficiency
+
+    Parameters
+    ----------
+    eta : float
+        Constant efficiency of the transport.
+    in_max : float
+        Maximum input the transport can handle, in $MW$.
+    out_max : float
+        Maximum output which can possibly be obtained when using the transport,
+        in $MW$.
     """
     optimization_options = {}
 
     def __init__(self, **kwargs):
-        """
-        :param eta: Constant efficiency of the transport.
-        :param in_max: Maximum input the transport can handle, in $MW$.
-        :param out_max: Maximum output which can possibly be obtained when
-                        using the transport, in $MW$.
-        """
         # TODO: Add check for what combination of parameters is given and
         #       calculate the missing ones accordingly. Also write down the
         #       relationshiph between the three parameters in the doctstring.

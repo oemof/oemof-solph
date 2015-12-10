@@ -21,6 +21,7 @@ from oemof.core import energy_system as es
 # solph imports
 from oemof.solph.optimization_model import OptimizationModel
 from oemof.solph import postprocessing as pp
+from oemof.solph import predefined_objectives as predefined_objectives
 # base classes import
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
@@ -100,12 +101,13 @@ entities = components + buses
 
 simulation = es.Simulation(solver='glpk', timesteps=timesteps,
                            stream_solver_output=True,
-                           objective_name='minimize_costs')
+                           objective_options={
+                               'function': predefined_objectives.minimize_cost})
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 om = OptimizationModel(energysystem=energysystem)
 
-om.solve(solver='gurobi', debug=True, tee=True, duals=False)
+om.solve(solver='glpk', debug=True, tee=True, duals=False)
 pp.results_to_objects(om)
 
 components = transformers + renew_sources
