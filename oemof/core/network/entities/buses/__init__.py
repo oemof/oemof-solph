@@ -23,19 +23,6 @@ class BusPypo(Bus):
         zone -- loss zone (positive integer)
         vmax -- the maximum allowed voltage magnitude in p.u.
         vmin -- the minimum allowed voltage magnitude in p.u.
-
-        Keyword generator arguments:
-        PG --  the real power output in MW
-        QG --  the reactive power output in MVAr
-        qmax -- the maximum reactive power output in MVAr
-        qmin -- the minimum reactive power output in MVAr
-        VG -- the voltage magitude setpoint in p.u.
-        mbase -- the total MVA base of the maschine, defaults to base MVA
-        gen_status -- machine status,
-                        > 0 = machine in-service
-                        ≤ 0 = machine out-of-service
-        pmax -- the maximum real power output in MW
-        pmin -- the minimum real power output in MW
         """
 
         super().__init__(**kwargs)
@@ -53,18 +40,6 @@ class BusPypo(Bus):
         self.zone = kwargs.get("zone", None)
         self.vmax = kwargs.get("vmax", None)
         self.vmin = kwargs.get("vmin", None)
-
-        # Generator Data parameters
-#       gen_bus -- bus_id used instead (bus_id already created)
-        self.PG = kwargs.get("PG", None)
-        self.QG = kwargs.get("QG", None)
-        self.qmax = kwargs.get("qmax", None)
-        self.qmin = kwargs.get("qmin", None)
-        self.VG = kwargs.get("VG", None)
-        self.mbase = kwargs.get("mbase", None)
-        self.gen_status = kwargs.get("gen_status", None)
-        self.pmax = kwargs.get("pmax", None)
-        self.pmin = kwargs.get("pmin", None)
 
     def __iter__(self):
         return iter(self.bus_id)

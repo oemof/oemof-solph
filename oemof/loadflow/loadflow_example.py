@@ -3,10 +3,11 @@
 """
 Example application that uses pypower for load flow simulation.
 pypo stands for an abbreviation for pypower
-Mainly developed by Christian Fleischer
+Mainly developed by Christian Fleischer and Clemens Wingenbach
 """
 from oemof.core.network.entities.buses import BusPypo
 from oemof.core.network.entities.components.transports import BranchPypo
+from oemof.core.network.entities.components.sources import GenPypo
 from numpy import array
 from pypower.api import runpf
 
@@ -25,10 +26,10 @@ b_el3 = BusPypo(uid = "b_el3", type = "el", bus_id = 3, bus_type = 3, PD = 0,
 busses = [b_el1, b_el2, b_el3]
 
 #generator and generators initialization
-g_el1 = BusPypo(uid = "generator1", bus_id = 2, PG = 30, QG = 0, qmax = 62.5,
+g_el1 = GenPypo(uid = "generator1", outputs = [b_el2], PG = 30, QG = 0, qmax = 62.5,
                 qmin = -15, VG = 1, mbase = 100, gen_status = 1, pmax = 60,
                 pmin = 0)
-g_el2 = BusPypo(uid = "generator2", bus_id = 3, PG = 0, QG = 0, qmax = 0,
+g_el2 = GenPypo(uid = "generator2", outputs = [b_el3], PG = 0, QG = 0, qmax = 0,
                 qmin = -15, VG = 1, mbase = 100, gen_status = 1, pmax = 0,
                 pmin = 0)
 #generator list
@@ -59,7 +60,7 @@ for bus in busses:
 #make generator array from generators list
 my_gen_array = []
 for gen in generators:
-    my_gen_array.append([bus.bus_id, gen.PG, gen.QG, gen.qmax, gen.qmin,
+    my_gen_array.append([gen.outputs[0].bus_id, gen.PG, gen.QG, gen.qmax, gen.qmin,
                          gen.VG, gen.mbase, gen.gen_status, gen.pmax,
                          gen.pmin])
 #make branch array from branches list
