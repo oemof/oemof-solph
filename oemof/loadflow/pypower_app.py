@@ -52,11 +52,10 @@ branch_data = branch_data[branch_sub]
 
 buses = {}
 positions = {}
-i = 0
+
 for index, row in bus_data.iterrows():
-    i+=1
     bus_temp = BusPypo(uid=row['bus_i'], type="el",
-                       bus_id=i, bus_type=int(row["bus_type"]),
+                       bus_id=int(row['bus_i']), bus_type=int(row["bus_type"]),
                        PD = int(row["pd"]), QD = int(row["qd"]),
                        GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
                        base_kv = 380, zone = 1, vmax = 1.05, vmin = 0.95)
@@ -76,11 +75,18 @@ for index, row in branch_data.iterrows():
     branches[branch_temp.uid] = branch_temp
     positions[branch_temp] = [row['lat'], row['lon']]
 
-dummy_gen = GenPypo(uid = "generator1", outputs = [buses["7911"]], PG = 30, QG = 0, qmax = 62.5,
-                qmin = -15, VG = 1, mbase = 100, gen_status = 1, pmax = 60,
-                pmin = 0)
-positions[dummy_gen] = [11.1,55.1]
-generators = [dummy_gen]
+def create_dummy_gen(bus):
+    dummy_gen = GenPypo(uid = "generator1", outputs = [bus],
+                        PG = 30, QG = 0, qmax = 62.5,
+                        qmin = -15, VG = 1, mbase = 100, gen_status = 1, pmax = 60,
+                        pmin = 0)
+    return dummy_gen
+
+generators = []
+for bus in list(buses.values()):
+    gen_temp = create_dummy_gen(bus)
+    generators.append(gen_temp)
+    positions[gen_temp] = positions[bus]
 
 entities = list(buses.values())+list(branches.values()) + generators
 
