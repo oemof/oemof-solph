@@ -10,13 +10,25 @@ from pypower.api import runpf
 import sqlalchemy
 import pandas as pd
 
-con = sqlalchemy.create_engine('postgresql://grids:user123@localhost:5432/oemof')
+con = sqlalchemy.create_engine('postgresql://student:user123@localhost:5432/oemof')
 
-sql = 'SELECT * FROM grids.opentgmod_bus_data WHERE gid < 4;'
+sql = 'SELECT * FROM grids.opentgmod_bus_data WHERE base_kv = 380;'
 bus_data =pd.read_sql_query(sql, con)
 
 branch_data = pd.read_sql_table('opentgmod_branch_data', con, schema='grids')
-branch_data[branch_data.f_bus.isin(bus_data.bus_i)]
+branch_sub = [x&y for (x,y) in zip(list(branch_data.f_bus.isin(bus_data.bus_i)),
+                                  list(branch_data.t_bus.isin(bus_data.bus_i)))]
+branch_data = branch_data[branch_sub]
+
+buses = {}
+for index, row in bus_data.iterrows():
+    buses[row['bus_i']] = BusPypo(uid= row['bus_i'])
+
+branches = []
+for index, row in branch_data.iterrows():
+    branches.append(BranchPypo(uid= row['gid'],
+                               inputs = [buses[row['f_bus']]],
+                               outputs = [buses[row['t_bus']]]))
 
 ##bus initialization
 #b_el1 = BusPypo(uid = "b_el1", type = "el", bus_id = 1, bus_type = 1, PD = 30,
@@ -105,21 +117,21 @@ branch_data[branch_data.f_bus.isin(bus_data.bus_i)]
 ##prints out results of power flow optimization
 #results = runpf(ppc)
 #
-##plot topology
-#import networkx as nx
-#g = nx.DiGraph()
-#buses = [b_el1, b_el2, b_el3]
-#components = [branch1, branch2, branch3]
-#es = buses + components
-#g.add_nodes_from(es)
-#for e in es:
-#    for e_in in e.inputs:
-#        a, b = e_in, e
-#        g.add_edge(a, b)
-#graph_pos=nx.spectral_layout(g)
-#nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
-#                       node_size = 900)
-#nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
-#                       node_color="b", node_size=300)
-#nx.draw_networkx_edges(g, graph_pos)
-#nx.draw_networkx_labels(g, graph_pos)
+#plot topology
+import networkx as nx
+g = nx.DiGraph()
+buses = list(buses.values())
+components = branches
+es = buses + components
+g.add_nodes_from(es)
+for e in es:
+    for e_in in e.inputs:
+        a, b = e_in, e
+        g.add_edge(a, b)
+graph_pos=nx.spectral_layout(g)
+nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
+                       node_size = 900)
+nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
+                       node_color="b", node_size=300)
+nx.draw_networkx_edges(g, graph_pos)
+nx.draw_networkx_labels(g, graph_pos)

@@ -11,9 +11,6 @@ from numpy import array
 from pypower.api import runpf
 
 
-
-
-
 #bus initialization
 b_el1 = BusPypo(uid = "b_el1", type = "el", bus_id = 1, bus_type = 1, PD = 30,
                 QD = 10, GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
