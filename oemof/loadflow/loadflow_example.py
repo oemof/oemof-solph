@@ -8,9 +8,7 @@ Mainly developed by Christian Fleischer and Clemens Wingenbach
 from oemof.core.network.entities.buses import BusPypo
 from oemof.core.network.entities.components.transports import BranchPypo
 from oemof.core.network.entities.components.sources import GenPypo
-from numpy import array
-from pypower.api import runpf
-
+from oemof.core import energy_system as es
 
 #bus initialization
 b_el1 = BusPypo(uid = "b_el1", type = "el", bus_id = 1, bus_type = 1, PD = 30,
@@ -51,69 +49,9 @@ branch3 = BranchPypo(uid = "cable3", inputs = [b_el2], outputs = [b_el3],
 #branch list
 branches = [branch1, branch2, branch3]
 
-#make bus array from busses list
-my_bus_array = []
-for bus in busses:
-    my_bus_array.append([bus.bus_id, bus.bus_type, bus.PD, bus.QD, bus.GS,
-                         bus.BS, bus.bus_area, bus.VM, bus.VA, bus.base_kv,
-                         bus.zone, bus.vmax, bus.vmin])
-#make generator array from generators list
-my_gen_array = []
-for gen in generators:
-    my_gen_array.append([gen.outputs[0].bus_id, gen.PG, gen.QG, gen.qmax, gen.qmin,
-                         gen.VG, gen.mbase, gen.gen_status, gen.pmax,
-                         gen.pmin])
-#make branch array from branches list
-my_branch_array = []
-for branch in branches:
-    my_branch_array.append([branch.f_bus, branch.t_bus, branch.br_r,
-                            branch.br_x, branch.br_b, branch.rate_a,
-                            branch.rate_b, branch.rate_c, branch.tap,
-                            branch.shift, branch.br_status])
+entities = busses + generators + branches
 
-#create casefile
-def examplecase():
-    """create pypower case file "ppc". The examplecase contains 3 buses,
-    3 branches and 2 generators.
-
-    Minimum required information for ppc case file:
-    "version" -- defines version of ppc file, version 1 and version 2 available
-    "baseMVA" -- the power base value of the power system in MVA
-    "bus" -- arrays busses input data
-    "gen" -- arrays with generators input data
-    "branch" -- arrays with branches input data
-    """
-    ppc = {"version": '1'}
-
-    ##-----  Power Flow Data  -----##
-    ## system MVA base
-    ppc["baseMVA"] = 100.0
-    ppc["bus"] = array(my_bus_array)
-    ppc ["gen"] = array(my_gen_array)
-    ppc["branch"] = array(my_branch_array)
-
-    return ppc
-
-#initialtes example case as ppc
-ppc = examplecase()
-#prints out results of power flow optimization
-results = runpf(ppc)
-
-#plot topology
-import networkx as nx
-g = nx.DiGraph()
-buses = [b_el1, b_el2, b_el3]
-components = [branch1, branch2, branch3]
-es = buses + components
-g.add_nodes_from(es)
-for e in es:
-    for e_in in e.inputs:
-        a, b = e_in, e
-        g.add_edge(a, b)
-graph_pos=nx.spectral_layout(g)
-nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
-                       node_size = 900)
-nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
-                       node_color="b", node_size=300)
-nx.draw_networkx_edges(g, graph_pos)
-nx.draw_networkx_labels(g, graph_pos)
+simulation = es.Simulation(method='pypower')
+energysystem = es.EnergySystem(entities=entities, simulation=simulation)
+energysystem.plot_as_graph(labels=True)
+results = energysystem.simulate_loadflow()

@@ -151,18 +151,4 @@ for index, row in branch_data.iterrows():
 #results = runpf(ppc)
 #
 #plot topology
-import networkx as nx
-g = nx.Graph()
-buses = list(buses.values())
-components = list(branches.values())
-entities = buses + components
-g.add_nodes_from(entities)
-for e in entities:
-    for e_in in e.inputs:
-        g.add_edge(e_in, e)
-nx.draw_networkx_nodes(g, positions, buses, node_shape="o", node_color="r",
-                       node_size = 600)
-nx.draw_networkx_nodes(g, positions, components, node_shape="s",
-                       node_color="b", node_size=200)
-nx.draw_networkx_edges(g, positions)
-plt.show()
+

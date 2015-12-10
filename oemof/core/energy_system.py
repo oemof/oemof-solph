@@ -7,6 +7,8 @@ Created on Mon Jul 20 15:53:14 2015
 
 import logging
 from oemof.core.network import Entity
+from oemof.core.network.entities import Bus
+from oemof.core.network.entities import Component
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel as OM
 
@@ -93,6 +95,85 @@ class EnergySystem:
                                       tee=self.simulation.stream_solver_output,
                                       duals=self.simulation.duals)
 
+    # TODO: pack into a better structure
+    def simulate_loadflow(self):
+        """Start loadflow calculation with pypower."""
+        from oemof.core.network.entities.buses import BusPypo
+        from oemof.core.network.entities.components.transports import BranchPypo
+        from oemof.core.network.entities.components.sources import GenPypo
+        from numpy import array
+        from pypower.api import runpf
+        #make bus array from busses list
+        buses = [e for e in self.entities if isinstance(e, BusPypo)]
+        generators = [e for e in self.entities if isinstance(e, GenPypo)]
+        branches = [e for e in self.entities if isinstance(e, BranchPypo)]
+        my_bus_array = []
+        for bus in buses:
+            my_bus_array.append([bus.bus_id, bus.bus_type, bus.PD, bus.QD, bus.GS,
+                                 bus.BS, bus.bus_area, bus.VM, bus.VA, bus.base_kv,
+                                 bus.zone, bus.vmax, bus.vmin])
+        #make generator array from generators list
+        my_gen_array = []
+        for gen in generators:
+            my_gen_array.append([gen.outputs[0].bus_id, gen.PG, gen.QG, gen.qmax, gen.qmin,
+                                 gen.VG, gen.mbase, gen.gen_status, gen.pmax,
+                                 gen.pmin])
+        #make branch array from branches list
+        my_branch_array = []
+        for branch in branches:
+            my_branch_array.append([branch.f_bus, branch.t_bus, branch.br_r,
+                                    branch.br_x, branch.br_b, branch.rate_a,
+                                    branch.rate_b, branch.rate_c, branch.tap,
+                                    branch.shift, branch.br_status])
+
+        """create pypower case file "ppc".
+        Minimum required information for ppc case file:
+        "version" -- defines version of ppc file, version 1 and version 2 available
+        "baseMVA" -- the power base value of the power system in MVA
+        "bus" -- arrays busses input data
+        "gen" -- arrays with generators input data
+        "branch" -- arrays with branches input data
+        """
+        ppc = {"version": '1'}
+        ##-----  Power Flow Data  -----##
+        ## system MVA base
+        ppc["baseMVA"] = 100.0
+        ppc["bus"] = array(my_bus_array)
+        ppc ["gen"] = array(my_gen_array)
+        ppc["branch"] = array(my_branch_array)
+        return runpf(ppc)
+
+
+    def plot_as_graph(self, **kwargs):
+        """
+        Plots so far a graph which is not directed
+        positions - A dictionary with nodes as keys and positions as values. If not
+        specified a spring layout positioning will be computed.
+        See networkx.layout for functions that compute node positions.
+        """
+        positions = kwargs.get('positions', None)
+        labels = kwargs.get('labels', False)
+        import networkx as nx
+        import matplotlib.pyplot as plt
+        g = nx.Graph()
+        entities = self.entities
+        buses = [e for e in entities if isinstance(e, Bus)]
+        components = [e for e in entities if isinstance(e, Component)]
+
+        g.add_nodes_from(entities)
+        for e in entities:
+            for e_in in e.inputs:
+                g.add_edge(e_in, e)
+        if positions is None:
+            positions = nx.spectral_layout(g)
+        nx.draw_networkx_nodes(g, positions, buses, node_shape="o", node_color="r",
+                               node_size = 600)
+        nx.draw_networkx_nodes(g, positions, components, node_shape="s",
+                               node_color="b", node_size=200)
+        nx.draw_networkx_edges(g, positions)
+        if labels:
+            nx.draw_networkx_labels(g, positions)
+        plt.show()
 
 class Region:
     r"""Defining a region within an energy supply system.
@@ -194,11 +275,13 @@ class Simulation:
     """
     def __init__(self, **kwargs):
         ''
-        self.solver = kwargs.get('solver', 'glpk')
-        self.debug = kwargs.get('debug', False)
-        self.stream_solver_output = kwargs.get('stream_solver_output', False)
-        self.objective_options = kwargs.get('objective_options', {})
-        self.duals = kwargs.get('duals', False)
-        self.timesteps = kwargs.get('timesteps')
-        if self.timesteps is None:
-            raise ValueError('No timesteps defined!')
+        self.method = kwargs.get('method', 'solph')
+        if self.method is "solph":
+            self.solver = kwargs.get('solver', 'glpk')
+            self.debug = kwargs.get('debug', False)
+            self.stream_solver_output = kwargs.get('stream_solver_output', False)
+            self.objective_options = kwargs.get('objective_options', {})
+            self.duals = kwargs.get('duals', False)
+            self.timesteps = kwargs.get('timesteps')
+            if self.timesteps is None:
+                raise ValueError('No timesteps defined!')
