@@ -155,7 +155,7 @@ bel = Bus(uid="bel",
           excess=True)
 
 data = pd.read_csv("storage_optimization/storage_invest.csv", sep=",")
-demand = sink.Simple(uid="demand", inputs=[bel], val=data['demand_el'])
+demand = sink.Simple(uid="demand", inputs=[bel])
 helpers.call_demandlib(demand,
                        method='calculate_profile',
                        ann_el_demand_per_sector=ann_el_demand_per_sector)

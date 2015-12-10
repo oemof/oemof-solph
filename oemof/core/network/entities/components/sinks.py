@@ -7,4 +7,4 @@ class Simple(Sink):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.val = kwargs['val']
+        self.val = kwargs.get('val', None)
