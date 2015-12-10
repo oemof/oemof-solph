@@ -9,26 +9,59 @@ from numpy import array
 from pypower.api import runpf
 import sqlalchemy
 import pandas as pd
+import matplotlib.pyplot as plt
 
 con = sqlalchemy.create_engine('postgresql://student:user123@localhost:5432/oemof')
 
-sql = 'SELECT * FROM grids.opentgmod_bus_data WHERE base_kv = 380;'
-bus_data =pd.read_sql_query(sql, con)
+sql = '''SELECT gid,
+         bus_i,
+         bus_type,
+         pd ,
+         qd ,
+         bus_area,
+         vm ,
+         va ,
+         base_kv ,
+         zone,
+         ST_X(geom) AS lat,
+         ST_Y(geom) AS lon
+         FROM grids.opentgmod_bus_data
+         WHERE base_kv = 380;'''
+bus_data = pd.read_sql_query(sql, con)
 
-branch_data = pd.read_sql_table('opentgmod_branch_data', con, schema='grids')
+sql = '''SELECT gid,
+         f_bus,
+         t_bus,
+         br_r,
+         br_x,
+         br_b,
+         rate_a,
+         tap,
+         shift,
+         br_status,
+         link_type,
+         ST_X(ST_PointOnSurface(geom)) AS lat,
+         ST_Y(ST_PointOnSurface(geom)) AS lon
+         FROM grids.opentgmod_branch_data;'''
+branch_data = pd.read_sql_query(sql, con)
+
+
 branch_sub = [x&y for (x,y) in zip(list(branch_data.f_bus.isin(bus_data.bus_i)),
                                   list(branch_data.t_bus.isin(bus_data.bus_i)))]
 branch_data = branch_data[branch_sub]
 
 buses = {}
+positions = {}
 for index, row in bus_data.iterrows():
     buses[row['bus_i']] = BusPypo(uid= row['bus_i'])
+    positions[buses[row['bus_i']]] = [row['lat'], row['lon']]
 
-branches = []
+branches = {}
 for index, row in branch_data.iterrows():
-    branches.append(BranchPypo(uid= row['gid'],
-                               inputs = [buses[row['f_bus']]],
-                               outputs = [buses[row['t_bus']]]))
+    branches[row['gid']] = BranchPypo(uid= row['gid'],
+                                      inputs = [buses[row['f_bus']]],
+                                      outputs = [buses[row['t_bus']]])
+    positions[branches[row['gid']]] = [row['lat'], row['lon']]
 
 ##bus initialization
 #b_el1 = BusPypo(uid = "b_el1", type = "el", bus_id = 1, bus_type = 1, PD = 30,
@@ -119,19 +152,18 @@ for index, row in branch_data.iterrows():
 #
 #plot topology
 import networkx as nx
-g = nx.DiGraph()
+g = nx.Graph()
 buses = list(buses.values())
-components = branches
-es = buses + components
-g.add_nodes_from(es)
-for e in es:
+components = list(branches.values())
+entities = buses + components
+g.add_nodes_from(entities)
+for e in entities:
     for e_in in e.inputs:
         a, b = e_in, e
         g.add_edge(a, b)
-graph_pos=nx.spectral_layout(g)
-nx.draw_networkx_nodes(g, graph_pos, buses, node_shape="o", node_color="r",
-                       node_size = 900)
-nx.draw_networkx_nodes(g, graph_pos, components, node_shape="s",
-                       node_color="b", node_size=300)
-nx.draw_networkx_edges(g, graph_pos)
-nx.draw_networkx_labels(g, graph_pos)
+nx.draw_networkx_nodes(g, positions, buses, node_shape="o", node_color="r",
+                       node_size = 600)
+nx.draw_networkx_nodes(g, positions, components, node_shape="s",
+                       node_color="b", node_size=200)
+nx.draw_networkx_edges(g, positions)
+plt.show()
