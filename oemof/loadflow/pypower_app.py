@@ -159,8 +159,7 @@ entities = buses + components
 g.add_nodes_from(entities)
 for e in entities:
     for e_in in e.inputs:
-        a, b = e_in, e
-        g.add_edge(a, b)
+        g.add_edge(e_in, e)
 nx.draw_networkx_nodes(g, positions, buses, node_shape="o", node_color="r",
                        node_size = 600)
 nx.draw_networkx_nodes(g, positions, components, node_shape="s",
