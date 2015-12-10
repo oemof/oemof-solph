@@ -55,12 +55,20 @@ positions = {}
 
 for index, row in bus_data.iterrows():
     bus_temp = BusPypo(uid=row['bus_i'], type="el",
-                       bus_id=int(row['bus_i']), bus_type=int(row["bus_type"]),
-                       PD = int(row["pd"]), QD = int(row["qd"]),
+                       bus_id=int(row['bus_i']),
+                       bus_type=1,
+                       PD = 30, QD = 0,
                        GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
                        base_kv = 380, zone = 1, vmax = 1.05, vmin = 0.95)
     buses[bus_temp.uid] = bus_temp
-    positions[bus_temp] = [row['lat'], row['lon']]
+    #positions[bus_temp] = [row['lat'], row['lon']]
+
+buses[bus_temp.uid] = BusPypo(uid=bus_temp.uid, type="el",
+                       bus_id=bus_temp.bus_id,
+                       bus_type=3,
+                       PD = 30, QD = 0,
+                       GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
+                       base_kv = 380, zone = 1, vmax = 1.1, vmin = 0.9)
 
 branches = {}
 for index, row in branch_data.iterrows():
@@ -73,12 +81,12 @@ for index, row in branch_data.iterrows():
                              br_b = 0.03, rate_a = 130, rate_b = 130, rate_c = 130,
                              tap = 0, shift = 0, br_status = 1)
     branches[branch_temp.uid] = branch_temp
-    positions[branch_temp] = [row['lat'], row['lon']]
+    #positions[branch_temp] = [row['lat'], row['lon']]
 
 def create_dummy_gen(bus):
     dummy_gen = GenPypo(uid = "generator1", outputs = [bus],
                         PG = 30, QG = 0, qmax = 62.5,
-                        qmin = -15, VG = 1, mbase = 100, gen_status = 1, pmax = 60,
+                        qmin = -15, VG = 1.05, mbase = 100, gen_status = 1, pmax = 60,
                         pmin = 0)
     return dummy_gen
 
@@ -86,12 +94,12 @@ generators = []
 for bus in list(buses.values()):
     gen_temp = create_dummy_gen(bus)
     generators.append(gen_temp)
-    positions[gen_temp] = positions[bus]
+    #positions[gen_temp] = positions[bus]
 
 entities = list(buses.values())+list(branches.values()) + generators
 
 simulation = es.Simulation(method='pypower')
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
-energysystem.plot_as_graph(labels=False, positions=positions)
+#energysystem.plot_as_graph(labels=False, positions=positions)
 results = energysystem.simulate_loadflow()
 
