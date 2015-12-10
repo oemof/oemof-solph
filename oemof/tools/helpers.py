@@ -15,6 +15,7 @@ import os
 import pickle
 import time
 import pprint as pp
+from demandlib import demand as dm
 
 
 # get_polygon_from_shp_file
@@ -454,6 +455,10 @@ def call_demandlib(demand, method, **kwargs):
     Calls the demandlib and creates an object which includes the demand
     timeseries.
     '''
+#     dm.electrical_demand(method,
+#                          ann_el_demand_per_sector=kwargs.get(
+#                              'ann_el_demand_per_sector'))
+#
     print('hallo')
     return
 
