@@ -9,8 +9,9 @@ from oemof.core.network.entities.components.sources import GenPypo
 from oemof.core import energy_system as es
 import sqlalchemy
 import pandas as pd
+import pg8000
 
-con = sqlalchemy.create_engine('postgresql://student:user123@localhost:5432/oemof')
+con = sqlalchemy.create_engine('postgresql+pg8000://postgres:user123@localhost:5432/oemof')
 
 #For conventional nearest neoghbour:
 #  SELECT g1.gid As gref_gid,
