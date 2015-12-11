@@ -36,6 +36,7 @@ con = sqlalchemy.create_engine('postgresql://student:user123@localhost:5432/oemo
 #ORDER BY ST_Distance_Sphere(g1.geom, g2.geom)
 #LIMIT 10;
 
+# get bus and branch data from database
 sql = '''SELECT gid,
          bus_i,
          bus_type,
@@ -68,19 +69,22 @@ sql = '''SELECT gid,
          FROM grids.opentgmod_branch_data;'''
 branch_data = pd.read_sql_query(sql, con)
 
-
+# choose only branches for existing buses
 branch_sub = [x&y for (x,y) in zip(list(branch_data.f_bus.isin(bus_data.bus_i)),
                                   list(branch_data.t_bus.isin(bus_data.bus_i)))]
 branch_data = branch_data[branch_sub]
 
-buses = {}
+# initailize positions for plotting
 positions = {}
 
+# intitialize buses
+buses = {}
+
+# choose ref buses, the rest will be initialized as PQ-bus
 ref_buses = ["8205", "3227", "4075", "1978", "3285", "7766", "7847", "7879"]
 for index, row in bus_data.iterrows():
     bus_type=1
     if row['bus_i'] in ref_buses:
-        print(row['bus_i'])
         bus_type = 3
     bus_temp = BusPypo(uid=row['bus_i'], type="el",
                        bus_id=int(row['bus_i']),
@@ -91,6 +95,7 @@ for index, row in bus_data.iterrows():
     buses[bus_temp.uid] = bus_temp
     positions[bus_temp] = [row['lat'], row['lon']]
 
+# intitialize branches
 branches = {}
 for index, row in branch_data.iterrows():
     branch_temp = BranchPypo(uid=row['gid'],
@@ -104,6 +109,7 @@ for index, row in branch_data.iterrows():
     branches[branch_temp.uid] = branch_temp
     positions[branch_temp] = [row['lat'], row['lon']]
 
+# function to initialize dummy generators
 def create_dummy_gen(bus):
     dummy_gen = GenPypo(uid = "generator1", outputs = [bus],
                         PG = 200, QG = 0, qmax = 200,
@@ -111,18 +117,24 @@ def create_dummy_gen(bus):
                         pmax = 200, pmin = 0)
     return dummy_gen
 
+# intitialize generators
 generators = []
 for bus in list(buses.values()):
     gen_temp = create_dummy_gen(bus)
     generators.append(gen_temp)
     positions[gen_temp] = positions[bus]
 
+# make entity list
 entities = list(buses.values())+list(branches.values()) + generators
 
+# choose simulation parameter
 simulation = es.Simulation(method='pypower')
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
+
+# plot entities as graph
 energysystem.plot_as_graph(labels=False, positions=positions)
 
-# if resultsfile already exists it will be appended
+# simulate loadflow
+# if resultsfile already exists an error will be raised
 results = energysystem.simulate_loadflow(max_iterations=20,
                                          resultsfile="app_results.txt")
