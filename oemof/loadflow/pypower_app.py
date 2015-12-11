@@ -10,8 +10,31 @@ from oemof.core import energy_system as es
 import sqlalchemy
 import pandas as pd
 
-
 con = sqlalchemy.create_engine('postgresql://student:user123@localhost:5432/oemof')
+
+#For conventional nearest neoghbour:
+#  SELECT g1.gid As gref_gid,
+# g1.bus_i As gref_description,
+# g2.pp_nr As gnn_gid,
+# g2.bnetza_nr As gnn_description,
+# ST_Distance_Sphere(g1.geom,ST_SetSRID(g2.geom, 4326))/1000 AS distance_in_km
+#FROM grids.opentgmod_bus_data As g1,
+# (SELECT * FROM grids.register_conventional_power_plants) As g2
+#WHERE g1.gid = 100 and g1.gid <> g2.pp_nr
+#ORDER BY ST_Distance_Sphere(g1.geom,ST_SetSRID(g2.geom, 4326))
+#LIMIT 10;
+
+#For renewable nearest neoghbour:
+#SELECT g1.gid As gref_gid,
+# g1.bus_i As gref_description,
+# g2.gid As gnn_gid,
+# g2.power_plant_id As gnn_description,
+# ST_Distance_Sphere(g1.geom,ST_SetSRID(g2.geom, 4326))/1000 AS distance_in_km
+#FROM grids.opentgmod_bus_data As g1,
+# (SELECT * FROM grids.register_renewable_power_plants) As g2
+#WHERE g1.gid = 100 and g1.gid <> g2.gid
+#ORDER BY ST_Distance_Sphere(g1.geom, g2.geom)
+#LIMIT 10;
 
 sql = '''SELECT gid,
          bus_i,
@@ -53,22 +76,20 @@ branch_data = branch_data[branch_sub]
 buses = {}
 positions = {}
 
+ref_buses = ["8205", "3227", "4075", "1978", "3285", "7766", "7847", "7879"]
 for index, row in bus_data.iterrows():
+    bus_type=1
+    if row['bus_i'] in ref_buses:
+        print(row['bus_i'])
+        bus_type = 3
     bus_temp = BusPypo(uid=row['bus_i'], type="el",
                        bus_id=int(row['bus_i']),
-                       bus_type=1,
-                       PD = 30, QD = 0,
+                       bus_type=bus_type,
+                       PD = 200, QD = 0,
                        GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
                        base_kv = 380, zone = 1, vmax = 1.1, vmin = 0.9)
     buses[bus_temp.uid] = bus_temp
-    #positions[bus_temp] = [row['lat'], row['lon']]
-
-buses[bus_temp.uid] = BusPypo(uid=bus_temp.uid, type="el",
-                       bus_id=bus_temp.bus_id,
-                       bus_type=3,
-                       PD = 30, QD = 0,
-                       GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
-                       base_kv = 380, zone = 1, vmax = 1.1, vmin = 0.9)
+    positions[bus_temp] = [row['lat'], row['lon']]
 
 branches = {}
 for index, row in branch_data.iterrows():
@@ -81,28 +102,27 @@ for index, row in branch_data.iterrows():
                              br_b = 0.03, rate_a = 130, rate_b = 130, rate_c = 130,
                              tap = 0, shift = 0, br_status = 1)
     branches[branch_temp.uid] = branch_temp
-    #positions[branch_temp] = [row['lat'], row['lon']]
+    positions[branch_temp] = [row['lat'], row['lon']]
 
 def create_dummy_gen(bus):
     dummy_gen = GenPypo(uid = "generator1", outputs = [bus],
-                        PG = 30, QG = 0, qmax = 30,
-                        qmin = -60, VG = 1, mbase = 100, gen_status = 1,
-                        pmax = 60, pmin = 0)
+                        PG = 200, QG = 0, qmax = 200,
+                        qmin = -200, VG = 1, mbase = 100, gen_status = 1,
+                        pmax = 200, pmin = 0)
     return dummy_gen
 
 generators = []
 for bus in list(buses.values()):
     gen_temp = create_dummy_gen(bus)
     generators.append(gen_temp)
-    #positions[gen_temp] = positions[bus]
+    positions[gen_temp] = positions[bus]
 
 entities = list(buses.values())+list(branches.values()) + generators
 
 simulation = es.Simulation(method='pypower')
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
-#energysystem.plot_as_graph(labels=False, positions=positions)
+energysystem.plot_as_graph(labels=False, positions=positions)
 
 # if resultsfile already exists it will be appended
 results = energysystem.simulate_loadflow(max_iterations=20,
                                          resultsfile="app_results.txt")
-
