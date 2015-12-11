@@ -96,13 +96,17 @@ class EnergySystem:
                                       duals=self.simulation.duals)
 
     # TODO: pack into a better structure
-    def simulate_loadflow(self):
+    def simulate_loadflow(self, max_iterations=10, resultsfile=""):
         """Start loadflow calculation with pypower."""
         from oemof.core.network.entities.buses import BusPypo
         from oemof.core.network.entities.components.transports import BranchPypo
         from oemof.core.network.entities.components.sources import GenPypo
         from numpy import array
         from pypower.api import runpf
+        from pypower.ppoption import ppoption
+
+        ppopt_complete = ppoption(PF_MAX_IT=max_iterations)
+        print(ppopt_complete)
         #make bus array from busses list
         buses = [e for e in self.entities if isinstance(e, BusPypo)]
         generators = [e for e in self.entities if isinstance(e, GenPypo)]
@@ -141,7 +145,8 @@ class EnergySystem:
         ppc["bus"] = array(my_bus_array)
         ppc ["gen"] = array(my_gen_array)
         ppc["branch"] = array(my_branch_array)
-        return runpf(ppc)
+
+        return runpf(casedata=ppc, ppopt=ppopt_complete, fname=resultsfile)
 
 
     def plot_as_graph(self, **kwargs):

@@ -54,4 +54,5 @@ entities = busses + generators + branches
 simulation = es.Simulation(method='pypower')
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 energysystem.plot_as_graph(labels=True)
-results = energysystem.simulate_loadflow()
+# if resultsfile already exists it will be appended
+results = energysystem.simulate_loadflow(resultsfile="example_results.txt")

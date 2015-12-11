@@ -59,7 +59,7 @@ for index, row in bus_data.iterrows():
                        bus_type=1,
                        PD = 30, QD = 0,
                        GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
-                       base_kv = 380, zone = 1, vmax = 1.05, vmin = 0.95)
+                       base_kv = 380, zone = 1, vmax = 1.1, vmin = 0.9)
     buses[bus_temp.uid] = bus_temp
     #positions[bus_temp] = [row['lat'], row['lon']]
 
@@ -85,9 +85,9 @@ for index, row in branch_data.iterrows():
 
 def create_dummy_gen(bus):
     dummy_gen = GenPypo(uid = "generator1", outputs = [bus],
-                        PG = 30, QG = 0, qmax = 62.5,
-                        qmin = -15, VG = 1.05, mbase = 100, gen_status = 1, pmax = 60,
-                        pmin = 0)
+                        PG = 30, QG = 0, qmax = 30,
+                        qmin = -60, VG = 1, mbase = 100, gen_status = 1,
+                        pmax = 60, pmin = 0)
     return dummy_gen
 
 generators = []
@@ -101,5 +101,8 @@ entities = list(buses.values())+list(branches.values()) + generators
 simulation = es.Simulation(method='pypower')
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 #energysystem.plot_as_graph(labels=False, positions=positions)
-results = energysystem.simulate_loadflow()
+
+# if resultsfile already exists it will be appended
+results = energysystem.simulate_loadflow(max_iterations=20,
+                                         resultsfile="app_results.txt")
 
