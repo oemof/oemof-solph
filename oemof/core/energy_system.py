@@ -104,9 +104,10 @@ class EnergySystem:
         from numpy import array
         from pypower.api import runpf
         from pypower.ppoption import ppoption
+        import os
 
         ppopt_complete = ppoption(PF_MAX_IT=max_iterations)
-        print(ppopt_complete)
+
         #make bus array from busses list
         buses = [e for e in self.entities if isinstance(e, BusPypo)]
         generators = [e for e in self.entities if isinstance(e, GenPypo)]
@@ -145,8 +146,12 @@ class EnergySystem:
         ppc["bus"] = array(my_bus_array)
         ppc ["gen"] = array(my_gen_array)
         ppc["branch"] = array(my_branch_array)
-
-        return runpf(casedata=ppc, ppopt=ppopt_complete, fname=resultsfile)
+        if os.path.isfile(resultsfile):
+            raise ValueError("Result file '{0}' already exists.".format(resultsfile),
+            "Please choose a different file name, or get rid of the existing file")
+        results = runpf(casedata=ppc, ppopt=ppopt_complete, fname=resultsfile)
+        print("Result file has been saved at:", os.getcwd())
+        return results
 
 
     def plot_as_graph(self, **kwargs):
