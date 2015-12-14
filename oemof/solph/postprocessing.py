@@ -4,10 +4,10 @@
 """
 
 try:
-    from network.entities import Bus, Component
+    from network.entities import Bus
     from network.entities import components as cp
 except:
-    from ..core.network.entities import Bus, Component
+    from ..core.network.entities import Bus
     from ..core.network.entities import components as cp
     from ..core.network.entities.components.transformers import Storage
 
@@ -21,7 +21,8 @@ def results_to_objects(instance):
     """
     for entity in instance.entities:
         if (isinstance(entity, cp.Transformer) or
-                isinstance(entity, cp.Source)):
+                isinstance(entity, cp.Source) or
+                isinstance(entity, cp.Transport)):
             # write outputs
             O = [e.uid for e in entity.outputs[:]]
             for o in O:
