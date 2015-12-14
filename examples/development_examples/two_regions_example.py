@@ -9,7 +9,7 @@ import numpy as np
 #logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger().setLevel(logging.INFO)
 # logging.getLogger().setLevel(logging.WARNING)
-
+from oemof.outputlib import stacked_time_plot_file as stplot
 import plotter
 from oemof_pg import db
 from oemof_pg import tools
@@ -285,11 +285,20 @@ TwoRegExample.optimize()
 # write results back to objects
 pp.results_to_objects(TwoRegExample.optimization_model)
 
-for region in TwoRegExample.regions:
-    print(region.name)
-    for tf in [obj for obj in region.entities if isinstance(
-            obj, transformer.Simple)]:
-        print(tf.uid)
+
+#for bus in [obj for obj in region.entities if obj.uid == (
+#        'bus', 'Stadt Dessau-Roßlau', 'elec')]:
+
+print("Ins:")
+for inp in bus2.inputs:
+    print(inp.uid)
+    print(inp.results['out'][bus2.uid][0:3])
+print("Outs:")
+for out in bus2.outputs:
+    print(out.uid)
+    print(out.results['in'][bus2.uid][0:3])
+
+stplot.stackplot
 #    print(tf.results['out'])
 #for region in TwoRegExample.regions:
 #    comp = [obj for obj in TwoRegExample.entities

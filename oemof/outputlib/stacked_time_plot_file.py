@@ -5,9 +5,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import logging
 import os
-from oemof.dblib import read_data_pg as rdb
-from oemof.dblib import basic_functions as bf
-from . import config as config
+
+
+class stackplot:
+    r"""Plot results.
+
+    Attributes
+    ----------
+    energysystem : oemof.core.EnergySystem object
+        The energy system must have results
+    """
+    def __init__(self, **kwargs):
+        self.bus = kwargs.get('bus')
 
 
 def stackplot_core(main_dc, reg, energy_type, ax_dc, ax):
