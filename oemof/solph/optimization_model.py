@@ -177,8 +177,73 @@ class OptimizationModel(po.ConcreteModel):
                                       cost_objects=cost_objects,
                                       revenue_objects=revenue_objects)
 
+    def results(self):
+        """ Returns a nested dictionary of the results of this optimization
+        model.
 
+        The dictionary is keyed by the :class:`Entities
+        <oemof.core.network.Entity>` of the optimization model, that is
+        :meth:`om.results()[s][t]`
+        holds the time series representing values attached to the edge (i.e.
+        the flow) from `s` to `t`, where `s` and `t` are instances of
+        :class:`Entity <oemof.core.network.Entity>`.
 
+        Time series belonging only to one object, like e.g. shadow prices of
+        commodities on a certain :class:`Bus
+        <oemof.core.network.entities.Bus>`, dispatch values of a
+        :class:`DispatchSource
+        <oemof.core.network.entities.components.sources.DispatchSource>` or
+        storage values of a
+        :class:`Storage
+        <oemof.core.network.entities.components.transformers.Storage>` are
+        treated as belonging to an edge looping from the entity to itself.
+        This means they can be accessed via
+        :meth:`om.results()[entity][entity]`.
+
+        Note that the optimization model has to be solved prior to invoking
+        this method.
+        """
+        result = {}
+        for entity in self.entities:
+            if (  isinstance(entity, cp.Transformer) or
+                  isinstance(entity, cp.Source)):
+                if entity.outputs: result[entity] = result.get(entity, {})
+                for o in entity.outputs:
+                    result[entity][o] = [self.w[entity.uid, o, t].value
+                                         for t in self.timesteps]
+
+                for i in entity.inputs:
+                    result[i] = result.get(i, {})
+                    result[i][entity] = [self.w[i, entity.uid, t].value
+                                         for t in self.timesteps]
+
+            if isinstance(entity, cp.sources.DispatchSource):
+                result[entity] = result.get(entity, {})
+                # TODO: Why does this use `entity.outputs[0]`?
+                result[entity][entity] = [self.w[entity.uid,
+                                                 entity.outputs[0].uid,
+                                                 t].bounds[1]
+                                          for t in self.timesteps]
+
+            if isinstance(entity, cp.Sink):
+                for i in entity.inputs:
+                    result[i] = result.get(i, {})
+                    result[i][entity] = [self.w[i, entity.uid, t].value
+                                         for t in self.timesteps]
+
+            if isinstance(entity, cp.transformers.Storage):
+                result[entity] = result.get(entity, {})
+                result[entity][entity] = [getattr(self, str(Storage)
+                                                 ).cap[entity.uid, t].value
+                                          for t in self.timesteps]
+
+        for bus in getattr(self, str(Bus)):
+            if bus.balanced:
+                result[bus] = result.get(bus, {})
+                result[bus][bus] = [self.dual[getattr(self, str(Bus)
+                                                     ).balance[(bus.uid, t)]]
+                                     for t in self.timesteps]
+        return result
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
