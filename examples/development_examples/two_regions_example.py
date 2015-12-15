@@ -279,26 +279,25 @@ TwoRegExample.simulation = es.Simulation(
 for entity in TwoRegExample.entities:
     entity.uid = str(entity.uid)
 
+logging.info(TwoRegExample.dump())
 # Optimize the energy system
 TwoRegExample.optimize()
 
 # write results back to objects
 pp.results_to_objects(TwoRegExample.optimization_model)
 
+logging.info(TwoRegExample.dump())
 
-#for bus in [obj for obj in region.entities if obj.uid == (
-#        'bus', 'Stadt Dessau-Roßlau', 'elec')]:
-
-print("Ins:")
-for inp in bus2.inputs:
-    print(inp.uid)
-    print(inp.results['out'][bus2.uid][0:3])
-print("Outs:")
-for out in bus2.outputs:
-    print(out.uid)
-    print(out.results['in'][bus2.uid][0:3])
-
-stplot.stackplot
+#print("Ins:")
+#for inp in bus2.inputs:
+#    print(inp.uid)
+#    print(inp.results['out'][bus2.uid][0:3])
+#print("Outs:")
+#for out in bus2.outputs:
+#    print(out.uid)
+#    print(out.results['in'][bus2.uid][0:3])
+#
+#stplot.stackplot
 #    print(tf.results['out'])
 #for region in TwoRegExample.regions:
 #    comp = [obj for obj in TwoRegExample.entities
