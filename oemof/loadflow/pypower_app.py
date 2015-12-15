@@ -15,30 +15,6 @@ import pg8000
 con = sqlalchemy.create_engine('postgresql+pg8000://'+
                                'student:user123@localhost:5432/oemof')
 
-#For conventional nearest neoghbour:
-#  SELECT g1.gid As gref_gid,
-# g1.bus_i As gref_description,
-# g2.pp_nr As gnn_gid,
-# g2.bnetza_nr As gnn_description,
-# ST_Distance_Sphere(g1.geom,ST_SetSRID(g2.geom, 4326))/1000 AS distance_in_km
-#FROM grids.opentgmod_bus_data As g1,
-# (SELECT * FROM grids.register_conventional_power_plants) As g2
-#WHERE g1.gid = 100 and g1.gid <> g2.pp_nr
-#ORDER BY ST_Distance_Sphere(g1.geom,ST_SetSRID(g2.geom, 4326))
-#LIMIT 10;
-
-#For renewable nearest neoghbour:
-#SELECT g1.gid As gref_gid,
-# g1.bus_i As gref_description,
-# g2.gid As gnn_gid,
-# g2.power_plant_id As gnn_description,
-# ST_Distance_Sphere(g1.geom,ST_SetSRID(g2.geom, 4326))/1000 AS distance_in_km
-#FROM grids.opentgmod_bus_data As g1,
-# (SELECT * FROM grids.register_renewable_power_plants) As g2
-#WHERE g1.gid = 100 and g1.gid <> g2.gid
-#ORDER BY ST_Distance_Sphere(g1.geom, g2.geom)
-#LIMIT 10;
-
 # get bus and branch data from database
 sql = '''SELECT gid,
          bus_i,
@@ -71,6 +47,21 @@ sql = '''SELECT gid,
          ST_Y(ST_PointOnSurface(geom)) AS lat
          FROM grids.opentgmod_branch_data;'''
 branch_data = pd.read_sql_query(sql, con)
+
+#For conventional nearest neighbour:
+sql = """SELECT
+         DISTINCT ON (pp.pp_nr) pp.pp_nr AS pp_nr,
+         bus.bus_i AS bus_id,
+         ST_Distance_Sphere(pp.geom, bus.geom)/1000 AS dist_in_km,
+         pp.pinst AS pinst,
+         ST_X(pp.geom) AS lon,
+         ST_Y(pp.geom) AS lat
+         FROM
+         grids.opentgmod_bus_data AS bus,
+         grids.register_conventional_power_plants AS pp
+         WHERE bus.base_kv = 380
+         ORDER BY  pp_nr, dist_in_km;"""
+gen_data = pd.read_sql_query(sql, con)
 
 # choose only branches for existing buses
 branch_sub = [x & y for (x, y) in
@@ -108,29 +99,28 @@ for index, row in branch_data.iterrows():
                              f_bus=buses[row['f_bus']].bus_id,
                              t_bus=buses[row['t_bus']].bus_id,
                              br_r = row["br_r"], br_x = row['br_x'],
-                             br_b = row['br_b'], rate_a = 130, rate_b = 130, rate_c = 130,
+                             br_b = row['br_b'],
+                             rate_a = row["rate_a"],
+                             rate_b = row["rate_a"],
+                             rate_c = row["rate_a"],
                              tap = 0, shift = 0, br_status = 1)
     branches[branch_temp.uid] = branch_temp
     positions[branch_temp] = [row['lon'], row['lat']]
 
-
-# function to initialize dummy generators
-def create_dummy_gen(bus):
-    dummy_gen = GenPypo(uid = "generator1", outputs = [bus],
-                        PG = 200, QG = 0, qmax = 200,
-                        qmin = -200, VG = 1, mbase = 100, gen_status = 1,
-                        pmax = 200, pmin = 0)
-    return dummy_gen
-
 # intitialize generators
-generators = []
-for bus in list(buses.values()):
-    gen_temp = create_dummy_gen(bus)
-    generators.append(gen_temp)
-    positions[gen_temp] = positions[bus]
+generators = {}
+for index, row in gen_data.iterrows():
+    gen_temp = GenPypo(uid = row["pp_nr"], outputs = [buses[row["bus_id"]]],
+                        PG = 0.8*row["pinst"],
+                        QG = 0, qmax = row["pinst"],
+                        qmin = -row["pinst"],
+                        VG = 1, mbase = 100, gen_status = 1,
+                        pmax = row["pinst"], pmin = 0)
+    generators[gen_temp.uid] = gen_temp
+    positions[gen_temp] = [row['lon'], row['lat']]
 
 # make entity list
-entities = list(buses.values())+list(branches.values()) + generators
+entities = list(buses.values())+list(branches.values()) + list(generators.values())
 
 # choose simulation parameter
 simulation = es.Simulation(method='pypower')
@@ -142,6 +132,6 @@ energysystem.plot_as_graph(labels=False, positions=positions)
 # simulate loadflow
 # if resultsfile already exists an error will be raised
 # without the resultsfile argument the output will be in the console
-results = energysystem.simulate_loadflow(max_iterations=20)
-
-# TODO:                                          resultsfile="app_results.txt")
+results = energysystem.simulate_loadflow(max_iterations=20,
+                                         resultsfile="app_results.txt",
+                                         overwrite=True)

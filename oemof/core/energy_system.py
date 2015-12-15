@@ -96,7 +96,8 @@ class EnergySystem:
                                       duals=self.simulation.duals)
 
     # TODO: pack into a better structure
-    def simulate_loadflow(self, max_iterations=10, resultsfile=""):
+    def simulate_loadflow(self, max_iterations=10, resultsfile="",
+                          overwrite=False):
         """Start loadflow calculation with pypower."""
         from oemof.core.network.entities.buses import BusPypo
         from oemof.core.network.entities.components.transports import BranchPypo
@@ -147,8 +148,11 @@ class EnergySystem:
         ppc ["gen"] = array(my_gen_array)
         ppc["branch"] = array(my_branch_array)
         if os.path.isfile(resultsfile):
-            raise ValueError("Result file '{0}' already exists.".format(resultsfile),
-            "Please choose a different file name, or get rid of the existing file")
+            if overwrite:
+                os.remove(resultsfile)
+            else:
+                raise ValueError("Result file '{0}' already exists.".format(resultsfile),
+                                 "Please choose a different file name, or get rid of the existing file")
         results = runpf(casedata=ppc, ppopt=ppopt_complete, fname=resultsfile)
         if resultsfile is not "":
             print("Result file has been saved at:", os.getcwd()+"/"+resultsfile)
