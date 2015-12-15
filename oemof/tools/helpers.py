@@ -464,10 +464,11 @@ def call_demandlib(demand, method, year, **kwargs):
     '''
 
     df = create_basic_dataframe(year, **kwargs)
-#     dm.electrical_demand(method,
-#                          ann_el_demand_per_sector=kwargs.get(
-#                              'ann_el_demand_per_sector'))
-#
+    dm.electrical_demand(method,
+                         dataframe=df,
+                         ann_el_demand_per_sector=kwargs.get(
+                         'ann_el_demand_per_sector'))
+
     print('hallo')
     return
 

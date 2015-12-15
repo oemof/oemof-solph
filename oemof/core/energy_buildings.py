@@ -10,7 +10,6 @@ import pandas as pd
 from math import ceil as round_up
 from datetime import time as settime
 
-
 class electric_building():
     ''
 
@@ -215,15 +214,12 @@ class bdew_elec_slp():
         # Write values from the data base to a DataFrame
         # The dates are not real dates but helpers to calculate the mean values
 
-        # TODO@Günni: Replace sql-string by sqlalchemy
-        sql = 'select period, weekday'
-        for slp_type in slp_types:
-            sql += ', {0}'.format(slp_type)
-        sql += ' from demand.selp_series;'
+        # Read standard load profile series from csv file
+        selp_series = pd.read_csv('../demandlib/selp_series.csv',skiprows=0)
 
-        # Create DataFrame from sql-query results.
+        # Create DataFrame from standard load profile series in csv file
         tmp_df = pd.DataFrame(
-            conn.execute(sql).fetchall(),
+            selp_series,
             index=pd.date_range(
                 pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min'),
             columns=['period', 'weekday'] + slp_types)
