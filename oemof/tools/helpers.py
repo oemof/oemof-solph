@@ -12,8 +12,10 @@ All special import should be in try/except loops to avoid import errors.
 import logging
 from datetime import date, timedelta
 import os
+import pandas as pd
 import pickle
 import time
+import calendar
 import pprint as pp
 from demandlib import demand as dm
 
@@ -450,11 +452,18 @@ def pickle2dict(filename=None, path=None):
     return dic
 
 
-def call_demandlib(demand, method, **kwargs):
+def call_demandlib(demand, method, year, **kwargs):
     '''
     Calls the demandlib and creates an object which includes the demand
     timeseries.
+
+    Required Parameters
+    -------------------
+    demand :
+    method : Method which is to be applied for the demand
     '''
+
+    df = create_basic_dataframe(year, **kwargs)
 #     dm.electrical_demand(method,
 #                          ann_el_demand_per_sector=kwargs.get(
 #                              'ann_el_demand_per_sector'))
@@ -475,3 +484,50 @@ def dict2textfile(dic, filename=None, path=None):
     pp.pprint(dic, f1)
     f1.close()
 
+def create_basic_dataframe(year, **kwargs):
+    r"""Giving back a DataFrame containing weekdays and optionally holidays for the
+    given year and region.
+
+    Parameters
+    ----------
+    year: the year for which dataframe should be created
+
+    Optional Parameters
+    -------------------
+    holidays: array with information for every hour of the year, if holiday or not
+        (0: no holiday, 1: holiday)
+
+    Returns
+    -------
+    pandas.DataFrame : DataFrame with a time index
+
+    Notes
+    -----
+    Using Pandas > 0.16
+
+    """
+    if calendar.isleap(year):
+        hoy = 8784
+    else:
+        hoy = 8760
+
+    time_df = pd.DataFrame(
+        index=pd.date_range(pd.datetime(year, 1, 1, 0), periods=hoy,
+                            freq='H'),
+        columns=['weekday', 'hour', 'date'])
+
+    # Add a column 'hour of the day to the DataFrame
+    time_df['hour'] = time_df.index.hour + 1
+    time_df['weekday'] = time_df.index.weekday + 1
+    time_df['date'] = time_df.index.date
+
+    # Set weekday to Holiday (0) for all holidays
+    if kwargs.get('holidays'):
+        time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
+            pd.to_datetime(list(holidays.keys()))), 0, True)
+
+#    holidays = helpers.get_german_holidays(year, place)
+
+    df = time_df
+
+    return df
