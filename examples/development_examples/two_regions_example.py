@@ -196,7 +196,7 @@ TwoRegExample.regions.append(es.Region(
 
 TwoRegExample.regions.append(es.Region(
     geom=tools.get_polygon_from_nuts(conn, 'DEE01'),
-    name='Stadt Dessau-Roßlau'))
+    name='Stadt Dessau-Rosslau'))
 
 # Create global buses
 Bus(uid=('bus', 'global', 'coal'), type='coal', price=60, sum_out_limit=10e10)
@@ -257,7 +257,7 @@ for region in TwoRegExample.regions:
 bus1 = [obj for obj in TwoRegExample.entities if obj.uid == (
     'bus', 'Landkreis Wittenberg', 'elec')][0]
 bus2 = [obj for obj in TwoRegExample.entities if obj.uid == (
-    'bus', 'Stadt Dessau-Roßlau', 'elec')][0]
+    'bus', 'Stadt Dessau-Rosslau', 'elec')][0]
 TwoRegExample.connect(bus1, bus2, in_max=10000, out_max=9000, eta=0.9,
                       transport_class=transport.Simple)
 
