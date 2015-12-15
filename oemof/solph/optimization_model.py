@@ -209,12 +209,12 @@ class OptimizationModel(po.ConcreteModel):
                   isinstance(entity, cp.Source)):
                 if entity.outputs: result[entity] = result.get(entity, {})
                 for o in entity.outputs:
-                    result[entity][o] = [self.w[entity.uid, o, t].value
+                    result[entity][o] = [self.w[entity.uid, o.uid, t].value
                                          for t in self.timesteps]
 
                 for i in entity.inputs:
                     result[i] = result.get(i, {})
-                    result[i][entity] = [self.w[i, entity.uid, t].value
+                    result[i][entity] = [self.w[i.uid, entity.uid, t].value
                                          for t in self.timesteps]
 
             if isinstance(entity, cp.sources.DispatchSource):
@@ -228,7 +228,7 @@ class OptimizationModel(po.ConcreteModel):
             if isinstance(entity, cp.Sink):
                 for i in entity.inputs:
                     result[i] = result.get(i, {})
-                    result[i][entity] = [self.w[i, entity.uid, t].value
+                    result[i][entity] = [self.w[i.uid, entity.uid, t].value
                                          for t in self.timesteps]
 
             if isinstance(entity, cp.transformers.Storage):
