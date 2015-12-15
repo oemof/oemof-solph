@@ -237,12 +237,13 @@ class OptimizationModel(po.ConcreteModel):
                                                  ).cap[entity.uid, t].value
                                           for t in self.timesteps]
 
-        for bus in getattr(self, str(Bus)):
-            if bus.balanced:
-                result[bus] = result.get(bus, {})
-                result[bus][bus] = [self.dual[getattr(self, str(Bus)
-                                                     ).balance[(bus.uid, t)]]
-                                     for t in self.timesteps]
+        if hasattr(self, "dual"):
+            for bus in getattr(self, str(Bus)).objs:
+                if bus.balanced:
+                    result[bus] = result.get(bus, {})
+                    result[bus][bus] = [
+                        self.dual[getattr(self, str(Bus)).balance[(bus.uid, t)]]
+                        for t in self.timesteps]
         return result
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
