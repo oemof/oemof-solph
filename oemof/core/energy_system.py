@@ -166,14 +166,18 @@ class EnergySystem:
         specified a spring layout positioning will be computed.
         See networkx.layout for functions that compute node positions.
         """
+        from oemof.core.network.entities.buses import BusPypo
+        from oemof.core.network.entities.components.transports import BranchPypo
+        from oemof.core.network.entities.components.sources import GenPypo
         positions = kwargs.get('positions', None)
         labels = kwargs.get('labels', False)
         import networkx as nx
         import matplotlib.pyplot as plt
         g = nx.Graph()
         entities = self.entities
-        buses = [e for e in entities if isinstance(e, Bus)]
-        components = [e for e in entities if isinstance(e, Component)]
+        buses = [e for e in entities if isinstance(e, BusPypo)]
+        generators = [e for e in entities if isinstance(e, GenPypo)]
+        branches = [e for e in entities if isinstance(e, BranchPypo)]
 
         g.add_nodes_from(entities)
         for e in entities:
@@ -183,8 +187,10 @@ class EnergySystem:
             positions = nx.spectral_layout(g)
         nx.draw_networkx_nodes(g, positions, buses, node_shape="o", node_color="r",
                                node_size = 600)
-        nx.draw_networkx_nodes(g, positions, components, node_shape="s",
+        nx.draw_networkx_nodes(g, positions, branches, node_shape="s",
                                node_color="b", node_size=200)
+        nx.draw_networkx_nodes(g, positions, generators, node_shape="s",
+                               node_color="g", node_size=200)
         nx.draw_networkx_edges(g, positions)
         if labels:
             nx.draw_networkx_labels(g, positions)
