@@ -6,6 +6,7 @@ New features
 
  * Adding a definition of a default oemof logger (`issue #28 <https://github.com/oemof/oemof_base/issues/28>`_)
  * Revise the EnergySystem class according to the oemof developing meeting (`issue #25 <https://github.com/oemof/oemof_base/issues/25>`_)
+ * Add a dump and restore method to the EnergySystem class to dump/restore its attributes (`issue #31 <https://github.com/oemof/oemof_base/issues/31>`_)
 
 Documentation
 #############
