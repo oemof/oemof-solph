@@ -117,6 +117,23 @@ class EnergySystem:
         logging.debug(msg)
         return msg
 
+    def restore(self, dpath=None, filename=None):
+        r""" Restore an EnergySystem instance.
+        """
+        logging.info(
+            "Restoring attributes will overwrite existing attributes.")
+        if dpath is None:
+            dpath = os.path.join(os.path.expanduser("~"), '.oemof', 'dumps')
+
+        if filename is None:
+            filename = 'es_dump.oemof'
+
+        self.__dict__ = pickle.load(open(os.path.join(dpath, filename), "rb"))
+        msg = ('Attributes restored from: {0}'.format(os.path.join(
+            dpath, filename)))
+        logging.debug(msg)
+        return msg
+
 
 class Region:
     r"""Defining a region within an energy supply system.
