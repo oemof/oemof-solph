@@ -150,7 +150,8 @@ class EnergySystem:
             raise ValueError("Result file '{0}' already exists.".format(resultsfile),
             "Please choose a different file name, or get rid of the existing file")
         results = runpf(casedata=ppc, ppopt=ppopt_complete, fname=resultsfile)
-        print("Result file has been saved at:", os.getcwd())
+        if resultsfile is not "":
+            print("Result file has been saved at:", os.getcwd()+"/"+resultsfile)
         return results
 
 

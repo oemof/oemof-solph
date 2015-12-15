@@ -11,7 +11,8 @@ import sqlalchemy
 import pandas as pd
 import pg8000
 
-con = sqlalchemy.create_engine('postgresql+pg8000://postgres:user123@localhost:5432/oemof')
+# TODO: con = sqlalchemy.create_engine('postgresql+pg8000://postgres:user123@localhost:5432/oemof')
+con = sqlalchemy.create_engine('postgresql+pg8000://student:user123@localhost:5432/oemof')
 
 #For conventional nearest neoghbour:
 #  SELECT g1.gid As gref_gid,
@@ -48,8 +49,8 @@ sql = '''SELECT gid,
          va ,
          base_kv ,
          zone,
-         ST_X(geom) AS lat,
-         ST_Y(geom) AS lon
+         ST_X(geom) AS lon,
+         ST_Y(geom) AS lat
          FROM grids.opentgmod_bus_data
          WHERE base_kv = 380;'''
 bus_data = pd.read_sql_query(sql, con)
@@ -65,8 +66,8 @@ sql = '''SELECT gid,
          shift,
          br_status,
          link_type,
-         ST_X(ST_PointOnSurface(geom)) AS lat,
-         ST_Y(ST_PointOnSurface(geom)) AS lon
+         ST_X(ST_PointOnSurface(geom)) AS lon,
+         ST_Y(ST_PointOnSurface(geom)) AS lat
          FROM grids.opentgmod_branch_data;'''
 branch_data = pd.read_sql_query(sql, con)
 
@@ -94,7 +95,7 @@ for index, row in bus_data.iterrows():
                        GS = 0, BS =0 , bus_area = 1, VM =1 , VA = 0,
                        base_kv = 380, zone = 1, vmax = 1.1, vmin = 0.9)
     buses[bus_temp.uid] = bus_temp
-    positions[bus_temp] = [row['lat'], row['lon']]
+    positions[bus_temp] = [row['lon'], row['lat']]
 
 # intitialize branches
 branches = {}
@@ -108,7 +109,7 @@ for index, row in branch_data.iterrows():
                              br_b = 0.03, rate_a = 130, rate_b = 130, rate_c = 130,
                              tap = 0, shift = 0, br_status = 1)
     branches[branch_temp.uid] = branch_temp
-    positions[branch_temp] = [row['lat'], row['lon']]
+    positions[branch_temp] = [row['lon'], row['lat']]
 
 # function to initialize dummy generators
 def create_dummy_gen(bus):
@@ -137,5 +138,6 @@ energysystem.plot_as_graph(labels=False, positions=positions)
 
 # simulate loadflow
 # if resultsfile already exists an error will be raised
+# without the resultsfile argument the output will be in the console
 results = energysystem.simulate_loadflow(max_iterations=20,
                                          resultsfile="app_results.txt")
