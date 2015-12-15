@@ -5,7 +5,10 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
+import pickle
 import logging
+import os
+
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel as OM
@@ -92,6 +95,44 @@ class EnergySystem:
                                       debug=self.simulation.debug,
                                       tee=self.simulation.stream_solver_output,
                                       duals=self.simulation.duals)
+
+    def dump(self, dpath=None, filename=None, keep_weather=True):
+        r""" Dump an EnergySystem instance.
+        """
+        if dpath is None:
+            bpath = os.path.join(os.path.expanduser("~"), '.oemof')
+            if not os.path.isdir(bpath):
+                os.mkdir(bpath)
+            dpath = os.path.join(bpath, 'dumps')
+            if not os.path.isdir(dpath):
+                os.mkdir(dpath)
+
+        if filename is None:
+            filename = 'es_dump.oemof'
+
+        pickle.dump(self.__dict__, open(os.path.join(dpath, filename), 'wb'))
+
+        msg = ('Attributes dumped to: {0}'.format(os.path.join(
+            dpath, filename)))
+        logging.debug(msg)
+        return msg
+
+    def restore(self, dpath=None, filename=None):
+        r""" Restore an EnergySystem instance.
+        """
+        logging.info(
+            "Restoring attributes will overwrite existing attributes.")
+        if dpath is None:
+            dpath = os.path.join(os.path.expanduser("~"), '.oemof', 'dumps')
+
+        if filename is None:
+            filename = 'es_dump.oemof'
+
+        self.__dict__ = pickle.load(open(os.path.join(dpath, filename), "rb"))
+        msg = ('Attributes restored from: {0}'.format(os.path.join(
+            dpath, filename)))
+        logging.debug(msg)
+        return msg
 
 
 class Region:
