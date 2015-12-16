@@ -48,12 +48,19 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
+    results : dictionary
+        A dictionary holding the results produced by the energy system.
+        Is `None` while no results are produced.
+        Currently only set after a call to :meth:`optimize` after which it
+        holds the return value of :meth:`om.results()
+        <oemof.solph.optimization_model.OptimizationModel.results>`.
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
         Entity.registry = self
         self.optimization_model = kwargs.get('optimization_model', None)
+        self.results = None
         self.year = kwargs.get('year')
 
     # TODO: Condense signature (use Buse)
@@ -95,6 +102,8 @@ class EnergySystem:
                                       debug=self.simulation.debug,
                                       tee=self.simulation.stream_solver_output,
                                       duals=self.simulation.duals)
+
+        self.results = self.optimization_model.results()
 
     def dump(self, dpath=None, filename=None, keep_weather=True):
         r""" Dump an EnergySystem instance.
@@ -232,6 +241,9 @@ class Simulation:
                            objective function.
     timesteps : list or sequence object
          Timesteps to be simulated or optimized in the used library
+    relaxed : boolean
+        If True, integer variables will be relaxed
+        (only relevant for milp-problems)
     """
     def __init__(self, **kwargs):
         ''
@@ -241,5 +253,7 @@ class Simulation:
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
+        self.relaxed = kwargs.get('relaxed', False)
+
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')
