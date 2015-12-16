@@ -57,10 +57,6 @@ def add_bus_balance(model, block=None):
     model : OptimizationModel() instance
     block : SimpleBlock()
 
-    Returns
-    -------
-    The constraints are added as an attribute to the optimization model
-    object `model` of type OptimizationModel()
     """
     if not block.objs or block.objs is None:
         raise ValueError('Failed to create busbalance. No busobjects defined!')
@@ -101,15 +97,8 @@ def add_simple_io_relation(model, block, idx=0):
     Parameters
     ----------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model`
-    block : pyomo.SimpleBlock()
-
-    Returns
-    -------
-    The constraints are added as a
-    attribute to the optimization model object `model` of type
-    OptimizationModel()
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
 
     """
     if not block.objs or block.objs is None:
@@ -143,15 +132,8 @@ def add_simple_chp_relation(model, block):
     Parameters
     ----------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model`
-    block : SimpleBlock
-
-    Returns
-    -------
-    The constraints are added as a
-    attribute to the optimization model object `model` of type
-    OptimizationModel()
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
 
     """
     if not block.objs or block.objs is None:
@@ -200,7 +182,9 @@ def add_simple_extraction_chp_relation(model, block):
     Parameters
     ----------
     model : OptimizationModel() instance
+           An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -241,15 +225,9 @@ def add_global_output_limit(model, block=None):
     Parameters
     ----------
     model : OptimizationModel() instance
-       An object to be solved containing all Variables, Constraints, Data
-       Constraints are added as attribtes to the `model`
-    objs : objects
-    uids : unique ids
+       An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
 
-    Returns
-    -------
-    The constraints are added as attributes
-    to the optimization model object `model` of type OptimizationModel()
     """
     if not block.objs or block.objs is None:
         raise ValueError('Failed to create outputlimit. ' +
@@ -290,14 +268,9 @@ def add_fixed_source(model, block):
     Parameters
     ----------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model`
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
 
-    Returns
-    -------
-    The constraints will be added as attributes to
-    the optimization model object `model` of type OptimizationModel().
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -354,15 +327,9 @@ def add_dispatch_source(model, block):
     Parameters
     ----------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model` and bounds are
-        altered for attributes of `model`
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
 
-    Returns
-    -------
-    The constraints will be added as attributes of
-    the optimization model object `model` of class OptimizationModel().
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -413,9 +380,7 @@ def add_storage_balance(model, block):
     Parameters
     ----------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model` and bounds are
-        altered for attributes of `model`
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
     """
     if not block.objs or block.objs is None:
@@ -527,19 +492,13 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     Parameters
     ----------
     model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Constraints are added as attributes to the `model` and bounds are
-        altered for attributes of `model`
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
 
     grad_direc: string
         string defining the direction of the gradient constraint.
         ('positive', negative', 'both')
 
-    Returns
-    -------
-    The constraints will be added as attributes of
-    the optimization model object `model` of class OptimizationModel().
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -586,3 +545,5 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
         # set constraint
         block.grad_neg_calc = po.Constraint(block.indexset,
                                             rule=grad_neg_calc_rule)
+
+
