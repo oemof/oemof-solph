@@ -5,16 +5,17 @@
 Here we gather important notes for the developing of oemof and elements within
 the framework.
 
-
 Collaboration
 -----------------------------------------
 
 We use the collaboration features from Github, see https://github.com/oemof.
 
 
-h2. Style guidlines
+Style guidlines
+-----------------------------------------
 
-h3. PEP8 (Python Style Guide)
+PEP8 (Python Style Guide)
+=========================================
 
 We adhere to “PEP8”:https://www.python.org/dev/peps/pep-0008/ for any
 code produced in the framework.
@@ -26,7 +27,8 @@ maintainer of your IDE or Editor.
 Some IDEs have pep8 checkers, which are very helpful, especially for
 python beginners.
 
-h3. Quoted strings
+Quoted strings
+=========================================
 
 For strings we use double quotes if possible.
 
@@ -37,7 +39,8 @@ For strings we use double quotes if possible.
    info_msg = 'This is a string where we need to use "single" quotes'
    </code></pre>
 
-h3. UML class diagrams
+UML class diagrams
+=========================================
 
 We use @pyreverse@ for the creation of UML class diagrams, which will be
 integrated in the sphinx documentation (done by Günni). For example:
@@ -48,7 +51,8 @@ integrated in the sphinx documentation (done by Günni). For example:
    pyreverse -o png -p components oemof/src/components.py
    </pre>
 
-h2. Naming Conventions
+Naming Conventions
+-----------------------------------------
 
 We use plural in the code for modules if there are possibly more than
 one child classes (e.g. import transformers AND NOT transformer). Arrays
@@ -81,16 +85,18 @@ This means: \* Variables/Objects: Name it after the data they describe
 (pwer\_line, wind\_speed) \* Functions/Method: Name it after what they
 do: *use verbs* (get\_wind\_speed, set\_parameter)
 
-h2. Local files (config, output, csv…)
+Local files (config, output, csv…)
+-----------------------------------------
 
-h3. Hidden folder
+Hidden folder
+=========================================
 
 -  configuration files (e.g. oemof.cfg)
 -  logging fi
 
 
 Git branching model
------------------------------------------
+=========================================
 
 So far we adhere mostly to the git branching model by Vincent Driessen, see
 http://nvie.com/posts/a-successful-git-branching-model/.
