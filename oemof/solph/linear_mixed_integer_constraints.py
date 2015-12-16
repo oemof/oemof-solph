@@ -228,7 +228,7 @@ def add_shutdown_constraints(model, block):
             return(po.Constraint.Skip)
     block.shut_down = po.Constraint(block.indexset, rule=shutdown_rule)
 
-def add_minimum_dowtime(model, block):
+def add_minimum_downtime(model, block):
     """ Adds minimum downtime constraints for for components in `block`
 
 
