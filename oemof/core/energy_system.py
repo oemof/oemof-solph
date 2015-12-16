@@ -52,7 +52,6 @@ class EnergySystem:
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, {}))
-        self.optimization_model = kwargs.get('optimization_model', None)
         self.results = None
 
     # TODO: Condense signature (use Buse)
@@ -79,17 +78,33 @@ class EnergySystem:
                 )
 
     # TODO: Add concept to make it possible to use another solver library.
-    def optimize(self):
-        """Start optimizing the energy system using solph."""
-        if self.optimization_model is None:
-            self.optimization_model = OM(energysystem=self)
+    def optimize(self, om=None):
+        """Start optimizing the energy system using solph.
 
-        self.optimization_model.solve(solver=self.simulation.solver,
-                                      debug=self.simulation.debug,
-                                      tee=self.simulation.stream_solver_output,
-                                      duals=self.simulation.duals)
+        Parameters
+        ----------
+        om : :class:`OptimizationModel <oemof.solph.optimization_model.OptimizationModel>`, optional
+            The optimization model used to optimize the :class:`EnergySystem`.
+            If not given, an :class:`OptimizationModel
+            <oemof.solph.optimization_model.OptimizationModel>` instance local
+            to this method is created using the current :class:`EnergySystem`
+            instance as an argument.
+            You only need to supply this if you want to observe any side
+            effects that solving has on the `om`.
 
-        self.results = self.optimization_model.results()
+        Returns
+        -------
+        self : :class:`EnergySystem`
+        """
+        if om is None:
+            om = OM(energysystem=self)
+
+        om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
+                 tee=self.simulation.stream_solver_output,
+                 duals=self.simulation.duals)
+
+        self.results = om.results()
+        return self
 
 class Region:
     r"""Defining a region within an energy supply system.
