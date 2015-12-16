@@ -20,7 +20,7 @@ PEP8 (Python Style Guide)
 
 * We adhere to `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ for any code produced in the framework.
 
-* We use pylint to check your code. Pylint is integrated in many IDEs and Editors. `Check here <http://docs.pylint.org/ide-integration>`_ or ask the maintainer of your IDE or Editor.
+* We use pylint to check your code. Pylint is integrated in many IDEs and Editors. `Check here <http://docs.pylint.org/ide-integration>`_ or ask the maintainer of your IDE or Editor
 
 * Some IDEs have pep8 checkers, which are very helpful, especially for python beginners.
 
@@ -50,7 +50,7 @@ Naming Conventions
 Using git
 --------- 
 
-branching model
+Branching model
 ^^^^^^^^^^^^^^^
 
 So far we adhere mostly to the git branching model by `Vincent Driessen <http://nvie.com/posts/a-successful-git-branching-model/>`_.
@@ -60,7 +60,7 @@ The only difference is to use a different name for the branch origin/develop
 latest delivered development changes for the next release. Some would call this 
 the integration branch."). The name we use is origin/dev.
 
-commit message
+Commit message
 ^^^^^^^^^^^^^^
 
 Use this nice little `tutorial <http://chris.beams.io/posts/git-commit/>`_ to learn how to write a nice commit message.
