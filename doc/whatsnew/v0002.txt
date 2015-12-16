@@ -13,6 +13,7 @@ Documentation
 
  * missing docstrings of the core subpackage added (`issue #9 <https://github.com/oemof/oemof_base/issues/9>`_)
  * missing figures of the meta-documentation added
+ * missing content in developer notes (`issue #34 <https://github.com/oemof/oemof_base/issues/34>`_)
 
 Testing
 ####### 
@@ -34,3 +35,4 @@ Contributors
  * Uwe Krien
  * Simon Hilpert
  * Cord Kaldemeyer
+ * Guido Pleßmann
