@@ -31,8 +31,8 @@ def set_bounds(model, block, side="output"):
 
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
         Bounds are altered at model attributes (variables) of `model`
     block : SimpleBlock()
     side : string
@@ -101,9 +101,9 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
 
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
-    block : SimplBlock()
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
     grad_direc : string
          direction of gradient ("both", "positive", "negative")
 
@@ -159,8 +159,8 @@ def add_startup_constraints(model, block):
 
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
 
     References
@@ -200,8 +200,8 @@ def add_shutdown_constraints(model, block):
 
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
 
     References
@@ -227,3 +227,42 @@ def add_shutdown_constraints(model, block):
             # TODO: Define correct boundary conditions
             return(po.Constraint.Skip)
     block.shut_down = po.Constraint(block.indexset, rule=shutdown_rule)
+
+def add_minimum_dowtime(model, block):
+    """ Adds minimum downtime constraints for for components in `block`
+
+     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,off} \\leq t_{min,off} - \
+     \\sum_{\\gamma=0}^{t_{min,off}-1} Y(e,t+\\gamma)  \
+     \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,off}]
+
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which output gradient constraints should be set.')
+
+    t_min_off = {obj.uid: obj.t_min_off for obj in block.objs}
+    t_last = len(model.timesteps)-1
+
+    def minimum_downtime_rule(block, e, t):
+        if t <= 1:
+            return po.Constraint.Skip
+        elif t >= t_last - t_min_off[e]:
+            # Adaption for border sections with range(timesteps_max-t)
+            lhs = (block.y[e, t-1] - block.y[e, t]) * t_min_off[e]
+            rhs = t_min_off[e] - sum(block.y[e, t + p]
+                                     for p in range(t_last - t))
+            return(lhs <= rhs)
+        else:
+            lhs = (block.y[e, t-1] - block.y[e, t]) * t_min_off[e]
+            rhs = t_min_off[e] - sum(block.y[e, t + p]
+                                     for p in range(t_min_off[e]))
+            return(lhs <= rhs)
+    block.minimum_downtime = po.Constraint(block.indexset,
+                                           rule=minimum_downtime_rule)
