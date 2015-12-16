@@ -206,6 +206,7 @@ class OptimizationModel(po.ConcreteModel):
         result = {}
         for entity in self.entities:
             if (  isinstance(entity, cp.Transformer) or
+                  isinstance(entity, cp.Transport)   or
                   isinstance(entity, cp.Source)):
                 if entity.outputs: result[entity] = result.get(entity, {})
                 for o in entity.outputs:
