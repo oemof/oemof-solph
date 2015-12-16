@@ -231,10 +231,16 @@ def add_shutdown_constraints(model, block):
 def add_minimum_dowtime(model, block):
     """ Adds minimum downtime constraints for for components in `block`
 
-     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,off} \\leq t_{min,off} - \
+
+     .. math::  (Y(e, t-1)-Y(e,t)) \\cdot t_{min,off} \\leq t_{min,off} - \
      \\sum_{\\gamma=0}^{t_{min,off}-1} Y(e,t+\\gamma)  \
      \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,off}]
 
+    For the last timesteps:
+
+    .. math::  (Y(e, t-1)-Y(e,t)) \\cdot t_{min,off} \\leq t_{min,off} - \
+     \\sum_{\\gamma=0}^{t_{max}-t} Y(e,t+\\gamma)  \
+     \\qquad \\forall e, \\forall t \\in [t_{max}-t_{min,off}, t_{max]}]
 
     Parameters
     ----------
@@ -248,21 +254,64 @@ def add_minimum_dowtime(model, block):
                           'which output gradient constraints should be set.')
 
     t_min_off = {obj.uid: obj.t_min_off for obj in block.objs}
-    t_last = len(model.timesteps)-1
+    t_max = len(model.timesteps)-1
 
     def minimum_downtime_rule(block, e, t):
         if t <= 1:
             return po.Constraint.Skip
-        elif t >= t_last - t_min_off[e]:
+        elif t >= t_max - t_min_off[e]:
             # Adaption for border sections with range(timesteps_max-t)
             lhs = (block.y[e, t-1] - block.y[e, t]) * t_min_off[e]
             rhs = t_min_off[e] - sum(block.y[e, t + p]
-                                     for p in range(t_last - t))
+                                     for p in range(t_max - t))
             return(lhs <= rhs)
         else:
             lhs = (block.y[e, t-1] - block.y[e, t]) * t_min_off[e]
             rhs = t_min_off[e] - sum(block.y[e, t + p]
                                      for p in range(t_min_off[e]))
+            return(lhs <= rhs)
+    block.minimum_downtime = po.Constraint(block.indexset,
+                                           rule=minimum_downtime_rule)
+
+
+def add_minimum_uptime(model, block):
+    """ Adds minimum uptime constraints for for components in `block`
+
+     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,on} \\leq  \
+     \\sum_{\\gamma=0}^{t_{min,on}-1} Y(e,t+\\gamma)  \
+     \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,on}]
+
+     For the last timesteps:
+
+     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,on} \\leq  \
+      \\sum_{\\gamma=0}^{t_{max}-t} Y(e,t+\\gamma)  \
+      \\qquad \\forall e, \\forall t \\in [t_{max}-t_{min,on}, t_{max}]
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which output gradient constraints should be set.')
+
+    t_min_on = {obj.uid: obj.t_min_on for obj in block.objs}
+    t_max = len(model.timesteps)-1
+
+def minimum_uptime_rule(block, e, t):
+        if t <= 1:
+            return po.Constraint.Skip
+        elif t >= t_max - t_min_on[e]:
+            # Adaption for border sections with range(timesteps_max-t)
+            lhs = (block.y[e, t] - block.y[e, t-1]) * t_min_on[e]
+            rhs = sum(block.y[e, t + p] for p in range(t_max - t))
+            return(lhs <= rhs)
+        else:
+            lhs = (block.y[e, t] - block.y[e, t-1]) * t_min_on[e]
+            rhs = sum(block.y[e, t + p] for p in range(t_min_on[e]))
             return(lhs <= rhs)
     block.minimum_downtime = po.Constraint(block.indexset,
                                            rule=minimum_downtime_rule)
