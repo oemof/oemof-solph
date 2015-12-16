@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8
 
-import matplotlib.pyplot as plt
 import logging
 import pandas as pd
 import numpy as np
@@ -9,15 +8,12 @@ import numpy as np
 #logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger().setLevel(logging.INFO)
 # logging.getLogger().setLevel(logging.WARNING)
-from oemof.outputlib import stacked_time_plot_file as stplot
-import plotter
 from oemof_pg import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
 from oemof_pg import feedin_pg
 from oemof.tools import logger
 from oemof.core import energy_system as es
-from oemof.solph import postprocessing as pp
 from oemof.solph import predefined_objectives as predefined_objectives
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
