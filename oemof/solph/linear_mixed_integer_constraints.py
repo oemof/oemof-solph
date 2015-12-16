@@ -313,5 +313,5 @@ def add_minimum_uptime(model, block):
             lhs = (block.y[e, t] - block.y[e, t-1]) * t_min_on[e]
             rhs = sum(block.y[e, t + p] for p in range(t_min_on[e]))
             return(lhs <= rhs)
-    block.minimum_downtime = po.Constraint(block.indexset,
-                                           rule=minimum_uptime_rule)
+    block.minimum_uptime = po.Constraint(block.indexset,
+                                          rule=minimum_uptime_rule)
