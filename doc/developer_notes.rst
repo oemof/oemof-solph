@@ -43,7 +43,7 @@ Naming Conventions
 
 * Use talking names
 
-  * Variables/Objects: Name it after the data they describe (pwer\_line, wind\_speed)
+  * Variables/Objects: Name it after the data they describe (power\_line, wind\_speed)
   * Functions/Method: Name it after what they do: **use verbs** (get\_wind\_speed, set\_parameter)
 
 
