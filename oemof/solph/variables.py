@@ -16,12 +16,10 @@ except:
     from .network.entities import components as cp
 
 def add_binary(model, block, relaxed=False):
-    """ Creates all status variables (binary) for `objs`
+    """ Creates all status variables (binary) for `block.objs`
 
-    The function uses the pyomo class `Var()` to create the status variables of
-    components. E.g. if a transformer is switched on/off -> y=1/0
-    As index-sets the provided unique ids of the objects and the defined
-    timesteps are used.
+    Status variable indicates if a unit is turned on or off.
+    E.g. if a transformer is switched on/off -> y=1/0
 
     Parameters
     ----------
@@ -30,13 +28,9 @@ def add_binary(model, block, relaxed=False):
         Variables are added as attributes to the `model`
     objs : array_like (list)
         all components for which the status variable is created
-    uids : unique ids of `ojbs`
-
-    Returns
-    -------
-    There is no return value. The variables are added as a
-    attribute to the optimization model object `model`.
-
+    relaxed : boolean
+       If True "binary" variables will be created as continuous variables with
+       bounds of 0 and 1.
 
     """
     # check
@@ -89,8 +83,8 @@ def set_bounds(model, block, side='output'):
     of the edges of the graph if investment models are calculated.
 
     For investment  models upper and lower bounds will be modeled via
-    additional constraints of type pyomo.Constraint(). The mathematical
-    description for the constraint is as follows
+    additional constraints. The mathematical description for the
+    constraint is as follows:
 
     If side is `output`
 
@@ -107,7 +101,13 @@ def set_bounds(model, block, side='output'):
     .. math:: W(I(e), e, t) \\leq in_{max}(e, t), \\qquad \
     \\forall e, \\forall t
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
 
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -115,12 +115,9 @@ def set_bounds(model, block, side='output'):
         An object to be solved containing all Variables, Constraints, Data
         Constraints are added as attributes to the `model`
     block : SimpleBlock()
-    side : side of component for which the bounds are set('input' or 'output')
+    side : string
+       Side of component for which the bounds are set ('input' or 'output')
 
-    Returns
-    -------
-    The constraints are added as attributes to the optimization model
-    object `model`.
     """
 
     if block.objs is None:
@@ -180,12 +177,11 @@ def set_bounds(model, block, side='output'):
 
 def set_storage_cap_bounds(model, block):
     """ Alters/sets upper and lower bounds for variables that represent the
-    state of charge e.g. filling level of a storage component.
+    absolut state of charge e.g. filling level of a storage component.
 
     For investment  models upper and lower bounds will be modeled via
-    additional constraints of type pyomo.Constraint(). The mathematical
-    description for the constraint is as follows:
-
+    additional constraints. The mathematical description for the
+    constraint is as follows:
 
      .. math:: cap_{min}(e) \\leq CAP(e, t) \\leq cap_{max}(e), \
     \\qquad \\forall e, \\forall t
@@ -195,18 +191,16 @@ def set_storage_cap_bounds(model, block):
     .. math:: CAP(e, t) \\leq cap_{max}(e) + ADDCAP(e), \
     \\qquad \\forall e, \\forall t
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
     block : SimpleBlock()
-
-    Returns
-    -------
-    The upper and lower bounds of the variables are
-    altered in the optimization model object `model`.
-
     """
 
 
@@ -248,13 +242,15 @@ def set_outages(model, block, outagetype='period', side='output'):
     Parameters
     ----------
     model :OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data
-        Attributes are altered of the `model`
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpeBlock()
-    outagetype : type to model outages of component if outages is scalar.
-       'period' yield one timeblock where component is off , wihle 'random_days'
-       will sample random days over the timehorizon where component is off
-    side : side of component to fix to zero: 'output', 'input'.
+    outagetype : string
+        Type to model outages of component if outages is scalar.
+       'period' yield one timeblock where component is off,
+       while 'random_days' will sample random days over the timehorizon
+       where component is off
+    side : string
+       Side of component to fix to zero: 'output', 'input'.
 
     """
     outages = {obj.uid: obj.outages for obj in block.objs}
@@ -288,10 +284,16 @@ def set_outages(model, block, outagetype='period', side='output'):
       pass
 
 def set_fixed_sink_value(model, block):
-    """ Creates fixed sink from standard edges / variables by setting the value
-    of variables and fixing variables to that value.
+    """ Setting a value und fixes the variable of input.
+
+    The mathematical formulation is as follows:
 
     .. math:: W(I(e), e,t) = val(e,t), \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -300,11 +302,6 @@ def set_fixed_sink_value(model, block):
         Attributes are altered of the `model`
     block : SimpeBlock()
 
-    Returns
-    -------
-    The variables as attributes to
-    the optimization model object `model` of type OptimizationModel() will
-    be altered.
     """
 
     val = {obj.uid: obj.val for obj in block.objs}

@@ -8,24 +8,36 @@ import numpy as np
 import logging
 
 def add_opex_var(model, block, ref='output'):
-    """ Variable operation expenditure term for linear objective function
+    """ Variable operation expenditure term for linear objective function.
 
     If reference of opex is `output`:
 
-    .. math:: \\sum_e \\sum_t W(e,O(e),t) \\cdot c_{var}(e)
+    .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot costs_{outflow}(e)
 
     If reference of opex is `input`:
 
-    .. math:: \\sum_e \\sum_t W(I(e),e,t) \\cdot c_{var}(e)
+    .. math:: \\sum_e \\sum_t W(I(e),e,t) \\cdot costs_{inflow}(e)
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
-    objs : objects for which term should be set
-    uids : corresponding uids
-    ref : reference side on which opex are based on
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+    ref : string
+       Reference side on which opex are based on
         (e.g. powerplant MWhth -> input or MWhel -> output)
 
+    Returns
+    ---------
+    Expression
     """
     if block.uids is None:
         block.uids = [obj.uid for obj in block.objs]
@@ -49,11 +61,20 @@ def add_input_costs(model, block):
 
     .. math:: \\sum_e \\sum_t W(I(e), e, t) \\cdot c_{input}(e)
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+
     Parameters
     ----------
     model : OptimizationModel() instance
-    objs : objects for which term should be set
-    uids : corresponding uids
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+
+    Returns
+    ---------
+    Expression
     """
     if block.uids is None:
         block.uids = [obj.uid for obj in block.objs]
@@ -71,7 +92,7 @@ def add_input_costs(model, block):
     return(expr)
 
 def add_opex_fix(model, block, ref=None):
-    """ Fixed operation expenditure term for linear objective function
+    """ Fixed operation expenditure term for linear objective function.
 
     If reference is `output` (e.g. powerplants):
 
@@ -87,14 +108,21 @@ def add_opex_fix(model, block, ref=None):
 
     .. math:: \\sum_e (out_{max}(e) + ADDCAP(e)) \\cdot c_{fix}(e)
 
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
     Parameters
     ----------
     model : OptimizationModel() instance
-    objs : objects for which term should be set
-    uids : corresponding uids
+    block : SimpleBlock()
     ref : string
         string to check if capex is referred to capacity (storage) or output
         (e.g. powerplant)
+
+    Returns
+    ---------
+    Expression
 
     """
     if not block.objs:
@@ -129,14 +157,24 @@ def add_opex_fix(model, block, ref=None):
 
 
 def add_revenues(model, block, ref='output'):
-    """ revenue term for linear objective function
+    """ Revenue term for linear objective function.
 
-    .. math:: \\sum_e \\sum_t W(e,O(e),t) \\cdot r_{out}(e,t)
+    .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot r_{out}(e,t)
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+
+    Returns
+    ---------
+    Expression
     """
 
     if block.uids is None:
@@ -166,16 +204,23 @@ def add_revenues(model, block, ref='output'):
 
     return(expr)
 
-def add_curtailment_costs(model, block=None, objs=None):
+def add_curtailment_costs(model, block=None):
     """ Cost term for dispatchable sources in linear objective.
 
     .. math:: \\sum_e \\sum_ t CURTAIL(e,t) \\cdot c_{curt}(e)
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+
     Parameters
     ----------
     model : OptimizationModel() instance
-    objs : objects for which term should be set
-    uids : corresponding uids
+    block : SimpleBlock()
+
+    Returns
+    ---------
+    Expression
     """
 
     if not block.objs:
@@ -204,15 +249,20 @@ def add_capex(model, block, ref='output'):
 
     .. math:: \\sum_e ADDCAP(e) \\cdot crf(e) \\cdot c_{inv}(e)
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
     Parameters
     ----------
     model : OptimizationModel() instance
-    objs : objects for which term should be set
-    uids : corresponding uids
+    block : SimpleBlock()
     ref : string
         string to check if capex is referred to capacity (storage) or output
         (e.g. powerplant)
 
+    Returns
+    ---------
+    Expression
     """
     if not block.objs:
         expr = 0
@@ -240,14 +290,17 @@ def add_capex(model, block, ref='output'):
 def add_startup_costs(model, block):
     """ Adds startup costs for components to objective expression
 
-    .. math:: \\sum_{e} \\sum_{t} Z_{start}(e,t) \\cdot c_{start}(e)
+    .. math:: \\sum_{e} \\sum_{t} Z_{start}(e,t) \\cdot costs_{start}(e)
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
 
-    Returns:
+    Returns
     ---------
     Expression
     """
@@ -265,12 +318,16 @@ def add_startup_costs(model, block):
 def add_shutdown_costs(model, block):
     """ Adds shutdown costs for components to objective expression
 
-    .. math:: \\sum_{e} \\sum_t Z_{stop}(e,t) \\cdot c_{stop}(e)
+    .. math:: \\sum_{e} \\sum_t Z_{stop}(e,t) \\cdot costs_{stop}(e)
 
     Parameters
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+
+    Returns
+    ---------
+    Expression
     """
 
     if block.uids is None:
@@ -284,9 +341,12 @@ def add_shutdown_costs(model, block):
 def add_ramping_costs(model, block, grad_direc='positive'):
     """ Add gradient costs for components to linear objective expression.
 
-    .. math::  \\sum_e \\sum_t GRADPOS(e,t) \\cdot c_{ramp,neg}(e)
+    .. math::  \\sum_e \\sum_t GRADPOS(e,t) \\cdot costs_{ramp,neg}(e)
 
-    .. math:: \\sum_e \\sum_t GRADNEG(e,t) \\cdot c_{ramp,pos}(e)
+    .. math:: \\sum_e \\sum_t GRADNEG(e,t) \\cdot costs_{ramp,pos}(e)
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
@@ -295,6 +355,10 @@ def add_ramping_costs(model, block, grad_direc='positive'):
     grad_direc : string
         direction of gradient for which the costs are added to the objective
         expression
+
+    Returns
+    ---------
+    Expression
     """
     if block.uids is None:
         block.uids = [obj.uid for obj in block. objs]
@@ -311,14 +375,22 @@ def add_ramping_costs(model, block, grad_direc='positive'):
         pass
     return(expr)
 
-def add_excess_slack_costs(model, block):
+def add_excess_slack_costs(model, block=None):
     """ Artificial cost term for excess slack variables.
 
-    .. math:: \\sum_e \\sum_t EXCESS(e,t) \\cdot c_{excess}(e)
+    .. math:: \\sum_e \\sum_t EXCESS(e,t) \\cdot costs_{excess}(e)
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
-    uids : unique ids of bus objects
+    model : OptimizationModel() instance
+    block : SimpleBlock()
+
+    Returns
+    ---------
+    Expression
     """
 
     c_excess = {b.uid:b.excess_costs for b in block.objs
@@ -331,7 +403,19 @@ def add_excess_slack_costs(model, block):
 def add_shortage_slack_costs(model, block=None):
     """ Artificial cost term for shortage slack variables.
 
-    .. math:: \\sum_e \\sum_t SHORTAGE(e,t) \\cdot c_{shortage}(e)
+    .. math:: \\sum_e \\sum_t SHORTAGE(e,t) \\cdot costs_{shortage}(e)
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+    block : SimpleBlock()
+
+    Returns
+    ---------
+    Expression
     """
     c_shortage = {b.uid: b.shortage_costs for b in block.objs
                   if b.shortage==True}

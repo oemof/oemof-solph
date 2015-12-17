@@ -47,10 +47,19 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 import pyomo.environ as po
 
 def add_bus_balance(model, block=None):
-    """ Adds constraint for the input-ouput balance of bus objects
+    """ Adds constraint for the input-ouput balance of bus objects.
+
+    The mathematical formulation for the balance is as follows:
 
     .. math:: \\sum_{i \\in I(e)} W(i, e, t) = \\sum_{o \\in O(e)} \
-    W(e, o, t), \\qquad \\forall t
+    W(e, o, t), \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy (bus) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (bus) :math:`e`.
 
     Parameters
     ----------
@@ -85,14 +94,21 @@ def add_bus_balance(model, block=None):
 
 
 def add_simple_io_relation(model, block, idx=0):
-    """ Adds constraint for input-output relation as simple function
-    The function uses the `pyomo.Constraint()` class to build the constraint
-    with the following relation.
+    """ Adds constraints for input-output relation as simple function for
+    all objects in `block.objs`.
+
+    The mathematical formulation of the input-output relation of a simple
+    transformer is as follows:
 
     .. math:: W(I(e), e, t) \cdot \\eta(e) = W(e, O(e), t), \
     \\qquad \\forall e, \\forall t
 
-    The constraint is indexed with all unique ids of objects and timesteps.
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -116,18 +132,25 @@ def add_simple_io_relation(model, block, idx=0):
                                       doc="Input * Efficiency = Output")
 
 def add_simple_chp_relation(model, block):
-    """ Adds constraint for input-output relation for a simple
-    representation of combined heat an power units.
+    """ Adds constraint for output-output relation for all simple
+    combined heat an power units in `block.objs`.
 
-    The function uses the `pyomo.Constraint()` class to build the constraint
-    with the following relation:
+    The mathematical formulation for the constraint is as follows:
 
     .. math:: \\frac{W_1(e,O_1(e),t)}{\\eta_1(e,t)} = \
-    \\frac{W_2(e,O_2(e), t)}{\\eta_2(e,t)}, \
+    \\frac{W_2(e, O_2(e), t)}{\\eta_2(e,t)}, \
     \\qquad \\forall e, \\forall t
 
-    The constraint is indexed with all unique ids 'e' of objects and
-    timesteps 't'.
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`O_2(e)` beeing the set of all second outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -155,29 +178,37 @@ def add_simple_chp_relation(model, block):
                                       doc="P/eta_el - Q/eta_th = 0")
 
 def add_simple_extraction_chp_relation(model, block):
-    """ Adds constraint for power to heat relation and equivalent output
+    """ Adds constraints for power to heat relation and equivalent output
     for a simple extraction combined heat an power units. The constraints
-    represent the PQ-region of the extraction unit.
+    represent the PQ-region of the extraction unit and are set for all
+    objects in `block.objs`
 
-    The function uses the `pyomo.Constraint()` class to build the constraint
-    with the following relation:
+    The mathematical formulation is as follows:
 
-    Power/Heat ratio:
+    For Power/Heat ratio:
 
     .. math:: W(e,O_1(e),t) = W(e, O_2(e), t) \\cdot \\sigma(e), \
     \\qquad \\forall e, \\forall t
 
-    .. math:: \\sigma = \\text{Power to heat ratio}
+    .. math:: \\sigma(e) = \\text{Power to heat ratio of entity } e
 
-    Equivalent power:
+    For euivalent power:
 
     .. math:: W(I(e),e,t) = \\frac{(W(e,O_1(e),t) + \\beta(e) \\cdot \
     W(e, O_2(e), t))}{\\eta_1(e)}
 
-    .. math:: \\beta = \\text{Power loss index}
+    .. math:: \\beta(e) = \\text{Power loss index of entity } e
 
-    The constraint is indexed with all unique ids 'e' of objects and
-    timesteps 't'.
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`O_2(e)` beeing the set of all second outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -216,11 +247,19 @@ def add_simple_extraction_chp_relation(model, block):
                                        doc="P <= sigma * Q")
 
 def add_global_output_limit(model, block=None):
-    """ Adds constraint to set limit for variables as sum over the total
-    timehorizon
+    """ Adds constraints to set limit for variables as sum over the total
+    timehorizon for all objects in `block.objs`
 
-    .. math:: \sum_{t} \sum_{o \\in O(e)} W(e, o, t) \
-    \\leq sumlimit_{out}(e), \\qquad \\forall e
+    The mathematical formulation is as follows:
+
+    .. math:: \sum_{t \\in T} \sum_{o \\in O(e)} W(e, o, t) \
+    \\leq sumlimit_{out}(e), \\qquad \\forall e \\in E
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped in the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy :math:`e`.
+
 
     Parameters
     ----------
@@ -252,20 +291,26 @@ def add_global_output_limit(model, block=None):
                                        doc="Sum of output <= global_limit")
 
 def add_fixed_source(model, block):
-    """ Adds fixed source
+    """ Sets fixed source bounds and constraints for all objects in
+    `block.objs`
+
+    The mathematical formulation is as follows:
 
      .. math::  W(e,O(e),t) = val_{norm}(e,t) \\cdot out_{max}(e), \
      \\qquad \\forall e, \\forall t
 
-    If investment for component:
+    For `investment` for component:
 
     .. math::  W(e, O(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
     \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
 
     .. math:: ADDOUT(e)  \\leq addout_{max}(e), \\qquad \\forall e
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
 
-    Parameters
+    :math:`O(e)` beeing the set of all outputs of entitiy
+    (component) :math:`e`.
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
@@ -311,8 +356,7 @@ def add_fixed_source(model, block):
         block.invest = po.Constraint(block.indexset, rule=invest_rule)
 
 def add_dispatch_source(model, block):
-    """ Creates dispatchable source models by setting bounds and
-       adding constraints
+    """ Creates dispatchable source bounds/constraints.
 
     First the maximum value for the output of the source will be set. Then a
     constraint is defined that determines the dispatch of the source. This
@@ -323,6 +367,12 @@ def add_dispatch_source(model, block):
 
     .. math:: CURTAIL(e,t) = val_{norm}(e,t) \\cdot out_{max}(e) - \
     W(e,O(e),t),  \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped in the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+
 
     Parameters
     ----------
@@ -360,22 +410,21 @@ def add_dispatch_source(model, block):
                                       rule=curtailment_source_rule)
 
 def add_storage_balance(model, block):
-    """ Constraint to update the storage level in every timestep
-        depending on charge and discharge operations and storage losses.
+    """ Constraint to build the storage balance in every timestep
 
-    .. math:: STORLEV(e,t) = STORLEV(e,t-1) \\cdot (1 - CAPLOSS)(e) \
-    - \\frac{P_{discharge}(e,t)}{\\eta_{discharge}(e)} \
-    + P_{charge}(e,t) \\cdot \\eta_{charge}(e) \
-    \\qquad \\forall e, \\forall t
+     The mathematical formulation of the constraint is as follows:
 
-    .. math:: STORLEV = \\text{Storage level}
-    .. math:: CAPLOSS = \\text{Self discharge rate}
-    .. math:: P_{discharge} = \\text{Discharge power - in systems with \
-        hourly timesteps equivalent to the discharge energy}
-    .. math:: P_{charge} = \\text{Charge power - in systems with \
-        hourly timesteps equivalent to the charge energy}
-    .. math:: \\eta_{discharge} = \\text{Discharge efficiency factor}
-    .. math:: \\eta_{charge} = \\text{Charge efficiency factor}
+    .. math:: CAP(e,t) = CAP(e,t-1) \\cdot (1 - caploss(e)) \
+    - \\frac{W(e, O(e),t)}{\\eta_{out}(e)} \
+    + W(I(e),e,t) \\cdot \\eta_{in}(e)  \\qquad \\forall e, \\forall t \\in [2, t_{max}]
+
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -422,27 +471,30 @@ def add_storage_balance(model, block):
 
 
 def add_storage_charge_discharge_limits(model, block):
-    """
-    Constraints that limit the discharge and charge power by the c-rate
+    """ Constraints that limit the discharge and charge power by the c-rate
 
-    .. math:: P_{discharge}(e, t) \\leq (CAP_{max}(e) + ADDCAP(e)) \
-        \\cdot c_{out}(e)
-        \\qquad \\forall e, \\forall t
-    .. math:: P_{charge}(e, t) \\leq (CAP_{max}(e) + ADDCAP(e)) \
-        \\cdot c_{in}(e)
+     Constraints are for investment models only.
+
+    The mathematical formulation for the constraints is as follows:
+
+    Discharge:
+
+    .. math:: W(e, O(e), t) \\leq (cap_{max}(e) + ADDCAP(e)) \
+        \\cdot c_{rate,out}(e)
         \\qquad \\forall e, \\forall t
 
-    .. math:: P_{discharge} = \\text{Discharge power - in systems with \
-        hourly timesteps equivalent to the discharge energy}
-    .. math:: P_{charge} = \\text{Charge power - in systems with \
-        hourly timesteps equivalent to the charge energy}
-    .. math:: CAP_{max} = \\text{Installed capacity of energy storage}
-    .. math:: ADDCAP = \\text{Additionally installed capacity \
-        of energy storage in investment models}
-    .. math:: c_{out} = \\text{C factor for discharging, here defined as ratio
-        of ouput power and maximum capacity}
-    .. math:: c_{in} = \\text{C factor for charging, here defined as ratio
-        of input power and maximum capacity}
+    Charge:
+
+    .. math:: W(I(e), e, t) \\leq (cap_{max}(e) + ADDCAP(e)) \
+        \\cdot c_{rate, in}(e)
+        \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
     """
 
     c_rate_out = {obj.uid: obj.c_rate_out for obj in block.objs}
@@ -475,6 +527,8 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     """ Add constraint to calculate the gradient between two timesteps
     (positive and negative)
 
+    The mathematical formulation for constraints are as follows:
+
     Positive gradient:
 
     .. math::  W(e,O(e),t) - W(e,O(e),t-1) \\leq GRADPOS(e,t)\
@@ -488,6 +542,12 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     \\qquad \\forall e, \\forall t / t=1
 
     .. math:: GRADNEG(e,t) \\leq gradneg_{max}(e), \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+
 
     Parameters
     ----------
