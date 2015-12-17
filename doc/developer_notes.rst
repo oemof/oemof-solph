@@ -37,7 +37,7 @@ For strings we use double quotes if possible.
 Naming Conventions
 ------------------
 
-* We use plural in the code for modules if there are possibly more than one child classes (e.g. import transformers AND NOT transformer). Arrays in the code if there are multiple have to be plural (e.g. `transformers = [T1, T2,...]`).
+* We use plural in the code for modules if there is possibly more than one child class (e.g. import transformers AND NOT transformer). If there are arrays in the code that contain multiple elements they have to be named in plural (e.g. `transformers = [T1, T2,...]`).
 
 * Please, follow the naming conventions of `pylint <http://pylint-messages.wikidot.com/messages:c0103>`_
 
