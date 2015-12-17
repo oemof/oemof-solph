@@ -88,12 +88,12 @@ def set_bounds(model, block, side='output'):
 
     If side is `output`
 
-    .. math:: W(e, O_(e)), t) \\leq out_{max}(e, t), \\qquad \
+    .. math:: W(e, O_1(e)), t) \\leq out_{max}(e, t), \\qquad \
     \\forall e, \\forall t
 
     With investment:
 
-    .. math::  W(e, O(e), t) \\leq out_{max}(e, t) + \
+    .. math::  W(e, O_1(e), t) \\leq out_{max}(e, t) + \
     ADDCAP(e,O_1[e]), \\qquad \\forall e, \\forall t
 
     If side is `input`:

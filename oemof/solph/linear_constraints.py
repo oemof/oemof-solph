@@ -32,7 +32,16 @@ For all mathematical constraints the following definitions hold:
     :math:`I(e) = \\text{Input-uids of entity } e \\in E`
 
     Outputs:
-    :math:`O(e) = \\text{Output-uids of entity } e \\in E`
+    :math:`O(e) = \\text{All output-uids of entity } e \\in E`
+
+    As components may have multiple outputs they are grouped in subsets. The
+    order is given by the order of outputs inside the attribute `outputs`
+    of the entitiy.
+
+    :math:`O_1(e) = \\text{First output-uids of entity } e \\in E`
+
+    :math:`O_2(e) = \\text{Second output-uids of entity } e \\in E`
+
 
     Entities:
     :math:`E = \\{uids\\},`
@@ -100,13 +109,14 @@ def add_simple_io_relation(model, block, idx=0):
     The mathematical formulation of the input-output relation of a simple
     transformer is as follows:
 
-    .. math:: W(I(e), e, t) \cdot \\eta(e) = W(e, O(e), t), \
+    .. math:: W(I(e), e, t) \cdot \\eta(e) = W(e, O_1(e), t), \
     \\qquad \\forall e, \\forall t
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
 
     :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
@@ -301,7 +311,7 @@ def add_fixed_source(model, block):
 
     For `investment` for component:
 
-    .. math::  W(e, O(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
+    .. math::  W(e, O_1(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
     \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
 
     .. math:: ADDOUT(e)  \\leq addout_{max}(e), \\qquad \\forall e
@@ -309,7 +319,7 @@ def add_fixed_source(model, block):
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy
+    :math:`O_1(e)` beeing the set of all outputs of entitiy
     (component) :math:`e`.
     ----------
     model : OptimizationModel() instance
@@ -366,12 +376,13 @@ def add_dispatch_source(model, block):
     The mathemathical formulation of the constraint is as follows:
 
     .. math:: CURTAIL(e,t) = val_{norm}(e,t) \\cdot out_{max}(e) - \
-    W(e,O(e),t),  \\qquad \\forall e, \\forall t
+    W(e,O_1(e),t),  \\qquad \\forall e, \\forall t
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped in the attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+    :math:`O_1(e)` beeing the set of all first outputs of entitiy
+    (component) :math:`e`.
 
 
     Parameters
@@ -415,14 +426,15 @@ def add_storage_balance(model, block):
      The mathematical formulation of the constraint is as follows:
 
     .. math:: CAP(e,t) = CAP(e,t-1) \\cdot (1 - caploss(e)) \
-    - \\frac{W(e, O(e),t)}{\\eta_{out}(e)} \
+    - \\frac{W(e, O_1(e),t)}{\\eta_{out}(e)} \
     + W(I(e),e,t) \\cdot \\eta_{in}(e)  \\qquad \\forall e, \\forall t \\in [2, t_{max}]
 
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+    :math:`O_1(e)` beeing the set of all first outputs
+    of entitiy (component) :math:`e`.
 
     :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
@@ -479,7 +491,7 @@ def add_storage_charge_discharge_limits(model, block):
 
     Discharge:
 
-    .. math:: W(e, O(e), t) \\leq (cap_{max}(e) + ADDCAP(e)) \
+    .. math:: W(e, O_1(e), t) \\leq (cap_{max}(e) + ADDCAP(e)) \
         \\cdot c_{rate,out}(e)
         \\qquad \\forall e, \\forall t
 
@@ -492,7 +504,8 @@ def add_storage_charge_discharge_limits(model, block):
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
 
     :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
     """
@@ -531,14 +544,14 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
 
     Positive gradient:
 
-    .. math::  W(e,O(e),t) - W(e,O(e),t-1) \\leq GRADPOS(e,t)\
+    .. math::  W(e,O_1(e),t) - W(e,O(e),t-1) \\leq GRADPOS(e,t)\
     \\qquad \\forall e, \\forall t / t=1
 
     .. math:: GRADPOS(e,t) \\leq gradpos_{max}(e), \\qquad \\forall e, \\forall t
 
     Negative gradient:
 
-        .. math::  W(e,O(e),t-1) - W(e,O(e),t) \\leq GRADNEG(e,t)\
+        .. math::  W(e,O_1(e),t-1) - W(e,O(e),t) \\leq GRADNEG(e,t)\
     \\qquad \\forall e, \\forall t / t=1
 
     .. math:: GRADNEG(e,t) \\leq gradneg_{max}(e), \\qquad \\forall e, \\forall t
@@ -546,7 +559,8 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy (component) :math:`e`.
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
 
 
     Parameters

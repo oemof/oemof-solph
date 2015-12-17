@@ -59,7 +59,7 @@ def add_input_costs(model, block):
     """ Adds costs for usage of input (fuel, elec, etc. ) if not included in
     opex
 
-    .. math:: \\sum_e \\sum_t W(I(e), e, t) \\cdot c_{input}(e)
+    .. math:: \\sum_e \\sum_t W(I(e), e, t) \\cdot costs_{inflow}(e)
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
@@ -96,17 +96,17 @@ def add_opex_fix(model, block, ref=None):
 
     If reference is `output` (e.g. powerplants):
 
-    .. math:: \\sum_e out_{max}(e) \\cdot c_{fix}(e)
+    .. math:: \\sum_e out_{max}(e) \\cdot costs_{fix}(e)
 
     If reference is `capacity` (e.g. storages):
 
-    .. math:: \\sum_e cap_{max}(e) \\cdot c_{fix}(e)
+    .. math:: \\sum_e cap_{max}(e) \\cdot costs_{fix}(e)
 
     If investment:
 
-    .. math:: \\sum_e (out_{max}(e) + ADDOUT(e)) \\cdot c_{fix}(e)
+    .. math:: \\sum_e (out_{max}(e) + ADDOUT(e)) \\cdot costs_{fix}(e)
 
-    .. math:: \\sum_e (out_{max}(e) + ADDCAP(e)) \\cdot c_{fix}(e)
+    .. math:: \\sum_e (out_{max}(e) + ADDCAP(e)) \\cdot costs_{fix}(e)
 
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
@@ -159,7 +159,7 @@ def add_opex_fix(model, block, ref=None):
 def add_revenues(model, block, ref='output'):
     """ Revenue term for linear objective function.
 
-    .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot r_{out}(e,t)
+    .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot revenue_{outflow}(e,t)
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
@@ -207,7 +207,7 @@ def add_revenues(model, block, ref='output'):
 def add_curtailment_costs(model, block=None):
     """ Cost term for dispatchable sources in linear objective.
 
-    .. math:: \\sum_e \\sum_ t CURTAIL(e,t) \\cdot c_{curt}(e)
+    .. math:: \\sum_e \\sum_ t CURTAIL(e,t) \\cdot costs_{curtailment}(e)
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
@@ -243,11 +243,11 @@ def add_capex(model, block, ref='output'):
 
     If reference is `output` (e.g. powerplants):
 
-    .. math:: \\sum_e ADDOUT(e) \\cdot crf(e) \\cdot c_{inv}(e)
+    .. math:: \\sum_e ADDOUT(e) \\cdot crf(e) \\cdot costs_{inv}(e)
 
     If reference is `capacity` (e.g. storages):
 
-    .. math:: \\sum_e ADDCAP(e) \\cdot crf(e) \\cdot c_{inv}(e)
+    .. math:: \\sum_e ADDCAP(e) \\cdot crf(e) \\cdot costs_{inv}(e)
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.
