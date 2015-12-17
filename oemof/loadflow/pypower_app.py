@@ -94,7 +94,7 @@ for index, row in pop_data.iterrows():
     populations[row['bus_id']] = row['population']
 
 # Choose total deman in MWh/h
-demand = 100e3
+demand = 183e3
 
 # initailize positions for plotting
 positions = {}
@@ -141,6 +141,7 @@ for index, row in branch_data.iterrows():
 
 # intitialize generators
 generators = {}
+buses_with_generators = []
 for index, row in gen_data.iterrows():
     gen_temp = GenPypo(uid = row["pp_nr"], outputs = [buses[row["bus_id"]]],
                         PG = 0.8*int(row["pinst"]),
@@ -150,6 +151,21 @@ for index, row in gen_data.iterrows():
                         pmax = row["pinst"], pmin = 0)
     generators[gen_temp.uid] = gen_temp
     positions[gen_temp] = [row['lon'], row['lat']]
+    buses_with_generators.append(row["bus_id"])
+
+for bus in list(buses.values()):
+    if bus.uid not in buses_with_generators:
+        power_temp = bus.PD
+        gen_temp = GenPypo(uid = bus.uid, outputs = [bus],
+                        PG = power_temp,
+                        QG = 0, qmax = power_temp,
+                        qmin = -power_temp,
+                        VG = 1, mbase = 100, gen_status = 1,
+                        pmax = power_temp, pmin = 0)
+        generators[gen_temp.uid] = gen_temp
+        positions[gen_temp] = positions[bus]
+
+
 
 # make entity list
 entities = list(buses.values())+list(branches.values()) + list(generators.values())
