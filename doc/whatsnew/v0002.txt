@@ -7,6 +7,8 @@ New features
  * Adding a definition of a default oemof logger (`issue #28 <https://github.com/oemof/oemof_base/issues/28>`_)
  * Revise the EnergySystem class according to the oemof developing meeting (`issue #25 <https://github.com/oemof/oemof_base/issues/25>`_)
  * Add a dump and restore method to the EnergySystem class to dump/restore its attributes (`issue #31 <https://github.com/oemof/oemof_base/issues/31>`_)
+ * Functionality for minimum up- and downtime constraints (oemof.solph.linear_mixed_integer_constraints module)
+ * Add `relax` option to simulation class for calculation of linear relaxed mixed integer problems
 
 Documentation
 #############
@@ -24,6 +26,7 @@ Bug fixes
 
  * now the api-docs can be read on readthedocs.org
  * a storage automically calculates its maximum output/input if the capacity and the c-rate is given (`issue #27 <https://github.com/oemof/oemof_base/issues/27>`_)
+ * Fix error in accessing dual variables in oemof.solph.postprocessing
 
 Other changes
 #############
