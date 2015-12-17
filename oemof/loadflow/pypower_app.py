@@ -159,7 +159,7 @@ simulation = es.Simulation(method='pypower')
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 # plot entities as graph
-energysystem.plot_as_graph(labels=False, positions=positions)
+g = energysystem.plot_as_graph(labels=False, positions=positions)
 
 # simulate loadflow
 # if resultsfile already exists an error will be raised

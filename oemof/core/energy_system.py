@@ -195,6 +195,8 @@ class EnergySystem:
         if labels:
             nx.draw_networkx_labels(g, positions)
         plt.show()
+        if not nx.is_connected(g):
+            raise ValueError("Graph is not connected")
 
 class Region:
     r"""Defining a region within an energy supply system.
