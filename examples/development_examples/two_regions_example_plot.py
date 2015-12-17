@@ -18,14 +18,12 @@ logging.info(TwoRegExample.restore())
 bus2 = [obj for obj in TwoRegExample.entities if obj.uid == str((
     'bus', 'Landkreis Wittenberg', 'elec'))][0]
 
-print("Inputs:")
+tmp_in = {}
+tmp_out = {}
+
 for inp in bus2.inputs:
-    print(inp.uid)
-    print(TwoRegExample.results[inp][bus2][0:3])
-
-print("Outputs:")
+    tmp_in[inp.uid] = TwoRegExample.results[inp][bus2]
 for out in bus2.outputs:
-    print(out.uid)
-    print(TwoRegExample.results[bus2][out][0:3])
+    tmp_out[out.uid] = TwoRegExample.results[bus2][out]
 
-stplot.stackplot()
+stplot.busplot(inputs=tmp_in, outputs=tmp_out)
