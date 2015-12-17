@@ -7,7 +7,7 @@ import logging
 import os
 
 
-class stackplot:
+class busplot:
     r"""Plot results.
 
     Attributes
@@ -17,6 +17,8 @@ class stackplot:
     """
     def __init__(self, **kwargs):
         self.bus = kwargs.get('bus')
+        self.inputs = kwargs.get('inputs', {})
+        self.outputs = kwargs.get('outputs', {})
 
 
 def stackplot_core(main_dc, reg, energy_type, ax_dc, ax):
