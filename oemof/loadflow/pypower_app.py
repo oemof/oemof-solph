@@ -49,7 +49,8 @@ sql = '''SELECT gid,
 branch_data = pd.read_sql_query(sql, con)
 
 #For conventional nearest neighbour:
-sql = """SELECT
+sql = """SELECT bus_id, SUM(pinst) AS pinst FROM
+         (SELECT
          DISTINCT ON (pp.pp_nr) pp.pp_nr AS pp_nr,
          bus.bus_i AS bus_id,
          ST_Distance_Sphere(pp.geom, bus.geom)/1000 AS dist_in_km,
@@ -60,7 +61,8 @@ sql = """SELECT
          grids.opentgmod_bus_data AS bus,
          grids.register_conventional_power_plants AS pp
          WHERE bus.base_kv = 380 AND pinst IS NOT NULL
-         ORDER BY  pp_nr, dist_in_km;"""
+         ORDER BY  pp_nr, dist_in_km) AS temp_table
+         GROUP BY bus_id;"""
 gen_data = pd.read_sql_query(sql, con)
 
 # for population data:
@@ -143,14 +145,14 @@ for index, row in branch_data.iterrows():
 generators = {}
 buses_with_generators = []
 for index, row in gen_data.iterrows():
-    gen_temp = GenPypo(uid = row["pp_nr"], outputs = [buses[row["bus_id"]]],
+    gen_temp = GenPypo(uid = row["bus_id"], outputs = [buses[row["bus_id"]]],
                         PG = 0.8*int(row["pinst"]),
                         QG = 0, qmax = row["pinst"],
                         qmin = -row["pinst"],
                         VG = 1, mbase = 100, gen_status = 1,
                         pmax = row["pinst"], pmin = 0)
     generators[gen_temp.uid] = gen_temp
-    positions[gen_temp] = [row['lon'], row['lat']]
+    positions[gen_temp] = positions[buses[row['bus_id']]]
     buses_with_generators.append(row["bus_id"])
 
 for bus in list(buses.values()):
