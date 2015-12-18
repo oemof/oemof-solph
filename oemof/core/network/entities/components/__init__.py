@@ -7,7 +7,6 @@ class Sink(Component):
     Therefore its list of outputs has to be either None or empty
     (i.e. logically False).
     """
-    lower_name = "sink"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -24,9 +23,9 @@ class Source(Component):
 
     Parameter
     ---------
-    in_max : float
+    in_max : list
         maximum input of component (e.g. in MW)
-    out_max : float
+    out_max : list
         maximum output of component (e.g. in MW)
     add_out_limit : float
         limit on additional output "capacity" (e.g. in MW)
@@ -50,7 +49,6 @@ class Source(Component):
         co2 emissions due to installed power (e.g. t/ MW)
     """
     optimization_options = {}
-    lower_name = "source"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -71,14 +69,14 @@ class Transformer(Component):
 
     Parameters
     ----------
-    out_min : float
-        minimal output of transformer (e.g. pmin for powerplants)
-    in_min : float
-        minimal input of transformer (e.g. pmin for powerplants)
+    out_min : list
+        minimal output of transformer (e.g. min power output of powerplants)
+    in_min : list
+        minimal input of transformer (e.g. min fuel consumption of powerplants)
     grad_pos : float
-        positive gradient (<=0, <=1, relativ out_max)
+        positive gradient (>=0, <=1, relative out_max)
     grad_neg : float
-        negative gradient (<=0, <=1, relativ out_max)
+        negative gradient (>=0, <=1, relative out_max)
     t_min_off : float
         minimal off time in timesteps (e.g. 5 hours)
     t_min_on : float
@@ -99,7 +97,6 @@ class Transformer(Component):
         price for selling output (revenue expr. in objective)
     """
     optimization_options = {}
-    lower_name = "transformer"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -132,7 +129,6 @@ class Transport(Component):
     such changes.
     """
     optimization_options = {}
-    lower_name = "transport"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

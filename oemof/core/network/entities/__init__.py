@@ -57,9 +57,9 @@ class Component(Entity):
 
     Parameter
     ---------
-    in_max : float
+    in_max : list
         maximum input of component (e.g. in MW)
-    out_max : float
+    out_max : list
         maximum output of component (e.g. in MW)
     add_out_limit : float
         limit on additional output "capacity" (e.g. in MW)
@@ -75,8 +75,6 @@ class Component(Entity):
         fixed operational expenditure (e.g. expenses for staff)
     opex_var : float
         variable operational expenditure (e.g. spare parts + fuelcosts)
-    co2_fix : float
-        fixed co2 emissions (e.g. t / MW)
     co2_var : float
         variable co2 emissions (e.g. t / MWh)
     co2_cap : float
@@ -88,8 +86,8 @@ class Component(Entity):
 
         super().__init__(**kwargs)
 
-        self.in_max = kwargs.get('in_max', None)
-        self.out_max = kwargs.get('out_max', None)
+        self.in_max = kwargs.get('in_max')
+        self.out_max = kwargs.get('out_max')
         self.add_out_limit = kwargs.get('add_out_limit', 0)
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
@@ -97,7 +95,6 @@ class Component(Entity):
         self.opex_var = kwargs.get('opex_var', 0)
         self.opex_fix = kwargs.get('opex_fix', 0)
         self.co2_var = kwargs.get('co2_var', 0)
-        self.co2_fix = kwargs.get('co2_fix', 0)
         self.co2_cap = kwargs.get('co2_cap', 0)
 
         self.crf = kwargs.get('crf', None)

@@ -125,6 +125,8 @@ def add_simple_io_relation(model, block, idx=0):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+    idx : integer
+      Index to choose which output to select (from list of Outputs: O[e][idx])
 
     """
     if not block.objs or block.objs is None:

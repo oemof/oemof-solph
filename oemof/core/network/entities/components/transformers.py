@@ -1,12 +1,20 @@
 
 from . import Transformer
 import logging
+import numpy as np
 
 
 class Simple(Transformer):
     """
     Simple Transformers always have a simple input output relation with a
     constant efficiency
+
+    Parameters
+    -----------
+
+    eta : list
+       constant efficiency for conversion of input into output (0 <= eta <= 1)
+       e.g. eta = [0.4]
     """
     optimization_options = {}
 
@@ -21,15 +29,55 @@ class CHP(Transformer):
     """
     A CombinedHeatPower Transformer always has a simple input output relation
     with a constant efficiency
+
+    Parameters
+    -----------
+
+    eta : list
+      constant effciency for converting input into output. First element of
+      list is used for conversion of input into first element of
+      attribute `outputs`. Second element for second element of attribute
+      `outputs`. E.g. eta = [0.3, 0.4]
+
     """
     optimization_options = {}
 
     def __init__(self, **kwargs):
-        """
-        :param eta: eta as constant efficiency for simple transformer
-        """
+
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', [None, None])
+
+class VariableEfficiencyCHP(Transformer):
+    """
+    A CombinedHeatPower Transformer with variable electrical efficiency
+
+    Parameters
+    ----------
+    eta_total : float
+        total constant efficiency for the transformer
+    eta_el : list
+        list containing the minimial (first element) and maximal (second element)
+        electrical efficiency (0 <= eta_el <= 1)
+
+
+    """
+    optimization_options = {}
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+        self.eta_total = kwargs.get('eta_total')
+        self.eta_el = kwargs.get('eta_el')
+
+        # calculate minimal
+        self.in_min = [self.out_min[0] / self.eta_el[0]]
+        self.in_max = [self.out_max[0] / self.eta_el[1]]
+
+        A = np.array([[1, self.out_min[0]],
+                      [1, self.out_max[0]]])
+        b = np.array([self.in_min[0],
+                      self.in_max[0]])
+        self.coeff = np.linalg.solve(A, b)
 
 
 class SimpleExtractionCHP(Transformer):
@@ -47,14 +95,13 @@ class SimpleExtractionCHP(Transformer):
         power to heat ratio P/Q in backpressure mode
     """
     optimization_options = {}
-    lower_name = "simple_extraction_chp"
 
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-        self.eta_el_cond = kwargs.get('eta_el_cond', None)
-        self.beta = kwargs.get('beta', None)
-        self.sigma = kwargs.get('sigma', None)
+        self.eta_el_cond = kwargs.get('eta_el_cond')
+        self.beta = kwargs.get('beta')
+        self.sigma = kwargs.get('sigma')
 
         if self.in_max is None:
             raise ValueError('Missing attribute "in_max" for object: \n' +
@@ -75,9 +122,9 @@ class Storage(Transformer):
     Parameters
     ----------
     cap_max : float
-        maximal sate of charge
+        absolut maximal sate of charge
     cap_min : float
-        minimum state of charge
+        absolut minimum state of charge
     cap_initial : float
         state of charge at timestep 0 (default cap_max*0.5)
     add_cap_limit : float
