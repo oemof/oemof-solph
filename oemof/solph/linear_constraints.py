@@ -141,7 +141,49 @@ def add_simple_io_relation(model, block, idx=0):
             model.w[e, model.O[e][idx], t]
         return(lhs == 0)
     block.io_relation = po.Constraint(block.indexset, rule=io_rule,
-                                      doc="Input * Efficiency = Output")
+                                      doc="INFLOW * efficiency = OUTFLOW_1")
+
+def add_eta_total_chp_relation(model, block):
+    """ Adds constraints for input-(output1,output2) relation as
+    simple function for all objects in `block.objs`.
+
+    The mathematical formulation of the input-output relation of a simple
+    transformer is as follows:
+
+    .. math:: W(I(e), e, t) \cdot \\eta_{total}(e) = \
+    W(e, O_1(e), t) + W(e, O_2(e), t), \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
+
+    :math:`O_2(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which the constraints should be build")
+
+    eta_total = {obj.uid: obj.eta_total for obj in block.objs}
+    # constraint for simple transformers: input * efficiency = output
+    def ioo_rule(block, e, t):
+        lhs = model.w[model.I[e], e, t] * eta_total[e]
+        rhs = model.w[e, model.O[e][0], t] + model.w[e, model.O[e][1], t]
+        return(lhs == rhs)
+    block.ioo_relation = po.Constraint(block.indexset, rule=ioo_rule,
+                             doc="INFLOW * efficiency = OUTFLOW_1 + OUTFLOW_2")
+
 
 def add_simple_chp_relation(model, block):
     """ Adds constraint for output-output relation for all simple
@@ -149,8 +191,8 @@ def add_simple_chp_relation(model, block):
 
     The mathematical formulation for the constraint is as follows:
 
-    .. math:: \\frac{W_1(e,O_1(e),t)}{\\eta_1(e,t)} = \
-    \\frac{W_2(e, O_2(e), t)}{\\eta_2(e,t)}, \
+    .. math:: \\frac{W(e,O_1(e),t)}{\\eta_1(e,t)} = \
+    \\frac{W(e, O_2(e), t)}{\\eta_2(e,t)}, \
     \\qquad \\forall e, \\forall t
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for

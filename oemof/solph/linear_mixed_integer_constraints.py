@@ -91,6 +91,44 @@ def set_bounds(model, block, side="output"):
             return(lhs <= rhs)
         block.minimum_input = po.Constraint(block.indexset, rule=input_lb_rule)
 
+def add_variable_linear_eta_relation(model, block):
+    """ Adds constraint for input-output relation for all
+    units with variable efficiency grouped in `block.objs`.
+
+    The mathematical formulation for the constraint is as follows:
+
+    .. math:: \\frac{W(I(e),e ,t) = Y(e,t) \\cdot c_1 + c_2 \\cdot W(e, O_1(e), t)}, \
+    \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for \
+                          which backpressure chp constraints should be set.')
+
+    c = {obj.uid: obj.coeff for obj in block.objs}
+
+    def variable_linear_eta_rule(block, e, t):
+        lhs = model.w[model.I[e], e, t]
+        rhs = block.y[e,t]*c[e][0] + c[e][1] * model.w[e, model.O[e][0], t]
+        return(lhs == rhs)
+    block.variable_linear_eta_relation = po.Constraint(block.indexset,
+                                            rule=variable_linear_eta_rule,
+                                            doc="INFLOW = Y*c1 + c2*OUTFLOW_1")
+
 def add_output_gradient_constraints(model, block, grad_direc="both"):
     """ Creates constraints to model the output gradient for milp-models.
 
