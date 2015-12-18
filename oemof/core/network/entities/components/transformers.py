@@ -50,6 +50,8 @@ class CHP(Transformer):
 class VariableEfficiencyCHP(Transformer):
     """
     A CombinedHeatPower Transformer with variable electrical efficiency
+    Note: The model uses constraints which require binary variables, hence
+    objects of this class will results in mixed-integer-linear-problems.
 
     Parameters
     ----------
