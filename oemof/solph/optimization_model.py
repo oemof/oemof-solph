@@ -23,7 +23,7 @@ except:
     from ..core.network.entities import components as cp
 
     from ..core.network.entities.components.transformers import (
-        CHP, Simple, SimpleExtractionCHP, Storage)
+        CHP, Simple, SimpleExtractionCHP, Storage, VariableEfficiencyCHP)
     from ..core.network.entities.components.sources import (Commodity,
         DispatchSource, FixedSource)
     from ..core.network.entities.components.sinks import Simple as Sink
@@ -470,6 +470,36 @@ def _(e, om, block):
     default_optimization_options = {
         'linear_constr': linear_constraints,
         'objective' : objective_function_expressions}
+
+    if not block.optimization_options:
+        block.optimization_options = default_optimization_options
+
+    # simple_transformer assebmler for in-out relation, pmin,.. etc.
+    om.default_assembler(block)
+    return om
+
+@assembler.register(VariableEfficiencyCHP)
+def _(e, om, block):
+    """Method grouping the constraints for chp components with variable el.
+    efficiency.
+
+    Parameters
+    ----------
+    See :func:`assembler`.
+
+    Returns
+    -------
+    See :func:`assembler`.
+    """
+    def linear_constraints(om, block):
+        lc.add_eta_total_chp_relation(om, block)
+        var.set_bounds(om, block, side='output')
+    def milp_constraints(om, block):
+        milc.add_variable_linear_eta_relation(om, block)
+
+    default_optimization_options = {
+        'linear_constr': linear_constraints,
+        'milp_constr': milp_constraints}
 
     if not block.optimization_options:
         block.optimization_options = default_optimization_options

@@ -55,11 +55,11 @@ class Component(Entity):
     Components and not between Entities of equal subtypes. This class
     exists only to facilitate this distinction and is empty otherwise.
 
-    Parameters
-    ----------
-    in_max : float
+    Parameter
+    ---------
+    in_max : list
         maximum input of component (e.g. in MW)
-    out_max : float
+    out_max : list
         maximum output of component (e.g. in MW)
     add_out_limit : float
         limit on additional output "capacity" (e.g. in MW)
@@ -88,8 +88,8 @@ class Component(Entity):
 
         super().__init__(**kwargs)
 
-        self.in_max = kwargs.get('in_max', None)
-        self.out_max = kwargs.get('out_max', None)
+        self.in_max = kwargs.get('in_max')
+        self.out_max = kwargs.get('out_max')
         self.add_out_limit = kwargs.get('add_out_limit', 0)
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
