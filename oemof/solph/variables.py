@@ -132,8 +132,13 @@ def set_bounds(model, block, side='output'):
     in_max = {}
     out_max = {}
     for e in block.objs:
-        in_max[e.uid] = e.in_max
-        out_max[e.uid] = e.out_max
+        if side == 'output':
+            output_uids = [o.uid for o in e.outputs[:]]
+            out_max[e.uid] = dict(zip(output_uids, e.out_max))
+        if side == 'input':
+            input_uids = [i.uid for i in e.inputs[:]]
+            in_max[e.uid] = dict(zip(input_uids, e.in_max))
+
 
     if not block.optimization_options.get('investment', False):
         # edges for simple transformers ([('coal', 'pp_coal'),...])
@@ -142,11 +147,11 @@ def set_bounds(model, block, side='output'):
             for t in model.timesteps:
                 # transformer output <= model.out_max
                 if e1 in block.uids and side == 'output':
-                    model.w[e1, e2, t].setub(out_max[e1][0])
+                    model.w[e1, e2, t].setub(out_max[e1][e2])
                 # transformer input <= model.in_max
                 if e2 in block.uids and side == 'input':
                     try:
-                        model.w[e1, e2, t].setub(in_max[e2][0])
+                        model.w[e1, e2, t].setub(in_max[e2][e1])
                     except:
                         logging.warning("No upper bound for input (%s,%s)",
                                         e1, e2)
