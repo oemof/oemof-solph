@@ -245,6 +245,19 @@ class OptimizationModel(po.ConcreteModel):
                     result[bus][bus] = [
                         self.dual[getattr(self, str(Bus)).balance[(bus.uid, t)]]
                         for t in self.timesteps]
+
+        for bus in getattr(self, str(Bus)).objs:
+            if bus.excess:
+                result[bus] = result.get(bus, {})
+                result[bus]['excess'] = [
+                    getattr(self, str(Bus)).excess_slack[(bus.uid, t)].value
+                    for t in self.timesteps]
+            if bus.shortage:
+                result[bus] = result.get(bus, {})
+                result[bus]['shortage'] = [
+                    getattr(self, str(Bus)).shortage_slack[(bus.uid, t)].value
+                    for t in self.timesteps]
+
         return result
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
