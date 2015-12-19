@@ -87,18 +87,13 @@ def print_results(bus_to_print, data, demand, transformers, storage,
     print('maximum storage load: ', storage_load.max())
 
     # excess
-#    excess = list()
-#    for t in energysystem.simulation.timesteps:
-#        excess.append(
-#          getattr(energysystem.optimization_model,
-#                  str(Bus)).excess_slack['bel', t].value)
-
-#    print('sum excess: ', np.asarray(excess).sum())
+    excess = results[bus_to_print]['excess']
+    print('sum excess: ', np.asarray(excess).sum())
 
     # autarky degree
     print('autarky degree: ', (sum_production.sum()  # production
                                - transf.sum()  # minus non renewable prod.
-                               #- np.asarray(excess).sum() # minus excess
+                               - np.asarray(excess).sum() # minus excess
                                - storage_load.sum()) /  # minus stor. load
                                np.asarray(results[bus_to_print][demand]).sum())
                                #  in

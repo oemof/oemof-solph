@@ -154,9 +154,6 @@ energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 energysystem.optimize()
 
-# write results back to objects
-#pp.results_to_objects(energysystem.optimization_model)
-
 
 if __name__ == "__main__":
     import postprocessing as pp
