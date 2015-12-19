@@ -145,7 +145,7 @@ components = transformers + renewable_sources + storages + sinks + commodities
 entities = components + buses
 
 # TODO: other solver libraries should be passable
-simulation = es.Simulation(solver='glpk', timesteps=timesteps,
+simulation = es.Simulation(solver='gurobi', timesteps=timesteps,
                            stream_solver_output=True,
                            objective_options={
                                'function':predefined_objectives.minimize_cost})
@@ -155,7 +155,7 @@ energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 energysystem.optimize()
 
 # write results back to objects
-pp.results_to_objects(energysystem.optimization_model)
+#pp.results_to_objects(energysystem.optimization_model)
 
 
 if __name__ == "__main__":
@@ -163,8 +163,9 @@ if __name__ == "__main__":
 
     data = renewable_sources+transformers+storages
 
-    pp.plot_dispatch('bel', timesteps, data, storage, demand)
+    pp.plot_dispatch(bel, energysystem.results,
+                     simulation.timesteps, data, storage, demand)
 #    pp.plot_dispatchplt.show()
 
-    pp.print_results('bel', data, demand, transformers, storage,
-                     energysystem)
+    pp.print_results(bel, data, demand,
+                     transformers, storage, energysystem)
