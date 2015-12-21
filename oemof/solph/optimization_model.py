@@ -196,9 +196,9 @@ class OptimizationModel(po.ConcreteModel):
         storage values of a
         :class:`Storage
         <oemof.core.network.entities.components.transformers.Storage>` are
-        treated as belonging to an edge looping from the entity to itself.
+        treated as belonging to an edge looping from the object to itself.
         This means they can be accessed via
-        :meth:`om.results()[entity][entity] <OptimizationModel.results>`.
+        :meth:`om.results()[object][object] <OptimizationModel.results>`.
 
         Note that the optimization model has to be solved prior to invoking
         this method.
