@@ -15,6 +15,7 @@ Contents:
    meta_description
    installation_and_setup
    developer_notes
+   whats_new
    api/*
 
 

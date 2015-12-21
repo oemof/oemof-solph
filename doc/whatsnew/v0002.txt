@@ -1,0 +1,22 @@
+v0.0.2 (December 22, 2015)
+++++++++++++++++++++++++++
+
+New features
+############
+
+ * There's now a standard way of working with the results obtained via a call
+   to :meth:`OptimizationModel#results
+   <oemof.solph.optimization_model.OptimizationModel.results>`.
+   See its documentation, the documentation of :meth:`EnergySystem#optimize
+   <oemof.core.energy_system.EnergySystem.optimize>` and finally the discussion
+   at `issue #33 <https://github.com/oemof/oemof_base/issues/33>`_ for more
+   information.
+
+Contributors
+############
+
+ * Uwe Krien
+ * Simon Hilpert
+ * Cord Kaldemeyer
+ * Guido Pleßmann
+ * Stephan Günther
