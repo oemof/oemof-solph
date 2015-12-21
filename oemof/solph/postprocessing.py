@@ -11,14 +11,28 @@ except:
     from ..core.network.entities import components as cp
     from ..core.network.entities.components.transformers import Storage
 
-def results_to_objects(instance):
+
+class Results:
+    """ A class for objects holding the results of running
+    :meth:`OptimizationModel.solve`.
+    """
+    def __getitem__(self, key): return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+
+def results_to_objects(instance, inplace=False):
     """ write the results from a pyomo optimization problem back to the
     oemof-objects
 
     Parameters
     ----------
     instance : solved OptimizationModel() instance containing the results
+    inplace  : bool, optional
+        Placeholder. Doesn't do anything currently.
     """
+    result = {}
     for entity in instance.entities:
         if (isinstance(entity, cp.Transformer) or
                 isinstance(entity, cp.Source)):
