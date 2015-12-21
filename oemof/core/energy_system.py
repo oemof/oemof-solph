@@ -40,9 +40,14 @@ class EnergySystem:
 
     Attributes
     ----------
-    entities : list of core.network objects
-        List of all objects of the energy system. All class descriptions can
-        be found in the :py:mod:`oemof.core.network` package.
+    entities : list of :class:`Entity <oemof.core.network.Entity>`
+        A list containing the :class:`Entities <oemof.core.network.Entity>`
+        that comprise the energy system. If this :class:`EnergySystem` is
+        set as the :attr:`registry <oemof.core.network.Entity.registry>`
+        attribute, which is done automatically on :class:`EnergySystem`
+        construction, newly created :class:`Entities
+        <oemof.core.network.Entity>` are automatically added to this list on
+        construction.
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
