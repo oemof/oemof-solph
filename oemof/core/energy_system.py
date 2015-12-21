@@ -48,12 +48,18 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
+    results : dictionary
+        A dictionary holding the results produced by the energy system.
+        Is `None` while no results are produced.
+        Currently only set after a call to :meth:`optimize` after which it
+        holds the return value of :meth:`om.results()
+        <oemof.solph.optimization_model.OptimizationModel.results>`.
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
         Entity.registry = self
-        self.optimization_model = kwargs.get('optimization_model', None)
+        self.results = None
         self.year = kwargs.get('year')
 
     # TODO: Condense signature (use Buse)
@@ -86,15 +92,33 @@ class EnergySystem:
                             out_max=[out_max], in_max=[in_max], eta=[eta])
 
     # TODO: Add concept to make it possible to use another solver library.
-    def optimize(self):
-        """Start optimizing the energy system using solph."""
-        if self.optimization_model is None:
-            self.optimization_model = OM(energysystem=self)
+    def optimize(self, om=None):
+        """Start optimizing the energy system using solph.
 
-        self.optimization_model.solve(solver=self.simulation.solver,
-                                      debug=self.simulation.debug,
-                                      tee=self.simulation.stream_solver_output,
-                                      duals=self.simulation.duals)
+        Parameters
+        ----------
+        om : :class:`OptimizationModel <oemof.solph.optimization_model.OptimizationModel>`, optional
+            The optimization model used to optimize the :class:`EnergySystem`.
+            If not given, an :class:`OptimizationModel
+            <oemof.solph.optimization_model.OptimizationModel>` instance local
+            to this method is created using the current :class:`EnergySystem`
+            instance as an argument.
+            You only need to supply this if you want to observe any side
+            effects that solving has on the `om`.
+
+        Returns
+        -------
+        self : :class:`EnergySystem`
+        """
+        if om is None:
+            om = OM(energysystem=self)
+
+        om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
+                 tee=self.simulation.stream_solver_output,
+                 duals=self.simulation.duals)
+
+        self.results = om.results()
+        return self
 
     def dump(self, dpath=None, filename=None, keep_weather=True):
         r""" Dump an EnergySystem instance.
@@ -232,6 +256,9 @@ class Simulation:
                            objective function.
     timesteps : list or sequence object
          Timesteps to be simulated or optimized in the used library
+    relaxed : boolean
+        If True, integer variables will be relaxed
+        (only relevant for milp-problems)
     """
     def __init__(self, **kwargs):
         ''
@@ -241,5 +268,7 @@ class Simulation:
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
+        self.relaxed = kwargs.get('relaxed', False)
+
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')
