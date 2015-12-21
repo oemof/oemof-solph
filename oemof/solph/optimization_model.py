@@ -183,7 +183,7 @@ class OptimizationModel(po.ConcreteModel):
 
         The dictionary is keyed by the :class:`Entities
         <oemof.core.network.Entity>` of the optimization model, that is
-        :meth:`om.results()[s][t]`
+        :meth:`om.results()[s][t] <OptimizationModel.results>`
         holds the time series representing values attached to the edge (i.e.
         the flow) from `s` to `t`, where `s` and `t` are instances of
         :class:`Entity <oemof.core.network.Entity>`.
@@ -198,7 +198,7 @@ class OptimizationModel(po.ConcreteModel):
         <oemof.core.network.entities.components.transformers.Storage>` are
         treated as belonging to an edge looping from the entity to itself.
         This means they can be accessed via
-        :meth:`om.results()[entity][entity]`.
+        :meth:`om.results()[entity][entity] <OptimizationModel.results>`.
 
         Note that the optimization model has to be solved prior to invoking
         this method.
