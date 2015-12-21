@@ -16,6 +16,13 @@ New features
    <oemof.core.energy_system.EnergySystem.optimize>` and finally the discussion
    at `issue #33 <https://github.com/oemof/oemof_base/issues/33>`_ for more
    information.
+* New class :class:`VariableEfficiencyCHP <oemof.core.network.entities.components.transformers.VariableEfficiencyCHP>`
+  to model combined heat and power units with variable electrical efficiency.
+* New methods for :class:`VariableEfficiencyCHP <oemof.core.network.entities.components.transformers.VariableEfficiencyCHP>` inside
+  the solph-module:
+
+ * :meth:`MILP-constraint <oemof.solph.linear_mixed_integer_constraints.add_variable_linear_eta_relation>`
+ * :meth:`Linear-constraint <oemof.solph.linear_constraints.add_eta_total_chp_relation>`
 
 Documentation
 #############

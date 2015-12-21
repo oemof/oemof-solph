@@ -97,7 +97,7 @@ def add_variable_linear_eta_relation(model, block):
 
     The mathematical formulation for the constraint is as follows:
 
-    .. math:: \\frac{W(I(e),e ,t) = Y(e,t) \\cdot c_1 + c_2 \\cdot W(e, O_1(e), t)}, \
+    .. math:: W(I(e),e ,t) = Y(e,t) \\cdot c_1 + c_2 \\cdot W(e, O_1(e), t), \
     \\qquad \\forall e, \\forall t
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
