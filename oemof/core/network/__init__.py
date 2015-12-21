@@ -29,15 +29,20 @@ class Entity:
         Geo-spatial data with informations for location/region-shape. The
         geometry can be a polygon/multi-polygon for regions, a line fore
         transport objects or a point for objects such as transformer sources.
+
+    Attributes
+    ----------
+    registry: :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
+        The central registry keeping track of all :class:`Entities <Entity>`
+        created. If this is `None`, :class:`Entity` instances are not
+        kept track of. When you instantiate an :class:`EnergySystem
+        <oemof.core.energy_system.EnergySystem>` it automatically becomes the
+        entity registry, i.e. all entities created are added to its
+        :attr:`entities <oemof.core.energy_system.EnergySystem.entities>`
+        attribute on construction.
     """
     optimization_options = {}
 
-    #: The central registry keeping track of all :class:`Entity`s created.
-    # If this is `None`, :class:`Entity` instances are not kept track of.
-    # Should be an instance of :class:`oemof.core.energy_system.EnergySystem`
-    # and when you instantiate an
-    # :class:`oemof.core.energy_system.EnergySystem` it automatically becomes
-    # the entity registry to which all entities created are added.
     registry = None
 
     def __init__(self, **kwargs):
