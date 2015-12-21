@@ -460,7 +460,7 @@ def call_demandlib(demand, method, year, **kwargs):
     Required Parameters
     -------------------
     demand :
-    method : Method which is to be applied for the demand
+    method : Method which is to be applied for the demand calculation
     '''
 
     df = create_basic_dataframe(year, **kwargs)
@@ -487,7 +487,7 @@ def dict2textfile(dic, filename=None, path=None):
 
 def create_basic_dataframe(year, **kwargs):
     r"""Giving back a DataFrame containing weekdays and optionally holidays for the
-    given year and region.
+    given year.
 
     Parameters
     ----------
@@ -496,7 +496,7 @@ def create_basic_dataframe(year, **kwargs):
     Optional Parameters
     -------------------
     holidays: array with information for every hour of the year, if holiday or not
-        (0: no holiday, 1: holiday)
+        (0: holiday, 1: no holiday)
 
     Returns
     -------
