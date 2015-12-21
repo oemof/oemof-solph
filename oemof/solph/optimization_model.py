@@ -177,7 +177,7 @@ class OptimizationModel(po.ConcreteModel):
                                       cost_objects=cost_objects,
                                       revenue_objects=revenue_objects)
 
-    def results(self, inplace=False):
+    def results(self):
         """ Returns a nested dictionary of the results of this optimization
         model.
 
@@ -202,11 +202,6 @@ class OptimizationModel(po.ConcreteModel):
 
         Note that the optimization model has to be solved prior to invoking
         this method.
-
-        Parameters
-        ----------
-        inplace : bool, optional
-            Placeholder. Doesn't do anything currently.
         """
         result = {}
         for entity in self.entities:
