@@ -9,6 +9,10 @@ New features
  * Add a dump and restore method to the EnergySystem class to dump/restore its attributes (`issue #31 <https://github.com/oemof/oemof_base/issues/31>`_)
  * Functionality for minimum up- and downtime constraints (oemof.solph.linear_mixed_integer_constraints module)
  * Add `relax` option to simulation class for calculation of linear relaxed mixed integer problems
+ * Instances of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
+   now keep track of :class:`Entities <oemof.core.network.Entity>` via the
+   :attr:`entities <oemof.core.energy_system.EnergySystem.entities>` attribute.
+   (`issue #20 <https://github.com/oemof/oemof_base/issues/20>`_)
  * There's now a standard way of working with the results obtained via a call
    to :meth:`OptimizationModel#results
    <oemof.solph.optimization_model.OptimizationModel.results>`.
