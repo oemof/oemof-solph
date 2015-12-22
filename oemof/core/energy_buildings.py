@@ -215,14 +215,21 @@ class bdew_elec_slp():
         # The dates are not real dates but helpers to calculate the mean values
 
         # Read standard load profile series from csv file
-        selp_series = pd.read_csv('../demandlib/selp_series.csv',skiprows=0)
-
+        # selp_series = pd.read_csv('../demandlib/selp_series.csv',skiprows=0)
+        selp_series = pd.read_csv('../demandlib/selp_series.csv')
+        tmp_df = selp_series
         # Create DataFrame from standard load profile series in csv file
-        tmp_df = pd.DataFrame(
-            selp_series,
-            index=pd.date_range(
-                pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min'),
-            columns=['period', 'weekday'] + slp_types)
+        # tmp_df = pd.DataFrame(
+        #     selp_series,
+        #     index=pd.date_range(
+        #         pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min'),
+            #  columns=['period', 'weekday'] + slp_types)
+
+        index = pd.date_range(
+                pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min')
+                # columns=['period', 'weekday'] + slp_types)
+
+        tmp_df.set_index(index)
 
         # All holidays(0) are set to sunday(7)
         time_df.weekday = time_df.weekday.replace(0, 7)
