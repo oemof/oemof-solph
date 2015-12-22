@@ -16,6 +16,7 @@ from oemof.tools import logger
 from oemof.core import energy_system as es
 from oemof.solph import predefined_objectives as predefined_objectives
 from oemof.core.network.entities import Bus
+from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import transformers as transformer
 from oemof.core.network.entities.components import transports as transport
@@ -165,6 +166,11 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
         bclass(uid=('bus', region.name, pp[1].type), type=pp[1].type,
                price=price[pp[1].type], regions=[region])
         location = region.name
+        source.Commodity(
+            uid='rgas',
+            outputs=[obj for obj in esystem.entities if obj.uid == (
+                'bus', location, pp[1].type)])
+
     tclass(
         uid=('simple transformer', region.name, pp[1].type),
         inputs=[obj for obj in esystem.entities if obj.uid == (
