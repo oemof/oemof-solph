@@ -291,9 +291,4 @@ for entity in TwoRegExample.entities:
 # Optimize the energy system
 TwoRegExample.optimize()
 
-## write results back to objects
-#pp.results_to_objects(TwoRegExample.optimization_model)
-#
-TwoRegExample.optimization_model = None
-
 logging.info(TwoRegExample.dump())
