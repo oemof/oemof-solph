@@ -141,7 +141,7 @@ translator = lambda x: de_en[x]
 def get_demand():
     'Dummy function until real function exists.'
     demand_df = pd.DataFrame()
-    demand_df['elec'] = np.random.rand(8760) * 10 ** 7
+    demand_df['elec'] = np.random.rand(8760) * 10 ** 11
     return demand_df
 
 
@@ -163,7 +163,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
         logging.debug('Creating Bus {0}.'.format(
             ('bus', region.name, pp[1].type)))
         bclass(uid=('bus', region.name, pp[1].type), type=pp[1].type,
-               price=price[pp[1].type], sum_out_limit=10e10, regions=[region])
+               price=price[pp[1].type], regions=[region])
         location = region.name
     tclass(
         uid=('simple transformer', region.name, pp[1].type),
@@ -174,6 +174,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
         in_max=[None],
         out_max=[float(pp[1].cap)],
         eta=[eta_elec[pp[1].type]],
+        opex_var=opex_var[pp[1].type],
         regions=[region])
 
 logger.define_logging()
@@ -208,7 +209,7 @@ for region in TwoRegExample.regions:
     demand = get_demand()
     for demandtype in demand.keys():
         Bus(uid=('bus', region.name, demandtype), type=demandtype, price=60,
-            sum_out_limit=10e10, regions=[region])
+            regions=[region])
         sink.Simple(
             uid=('sink', region.name, demandtype),
             inputs=[obj for obj in TwoRegExample.entities
@@ -223,7 +224,7 @@ for region in TwoRegExample.regions:
     pps_df = db_pps.get_bnetza_pps(conn, region.geom)
 
     # Add aditional power plants to the DataFrame
-    pps_df.loc[len(pps_df)] = 'natural_gas', np.nan, 10 ** 10
+    pps_df.loc[len(pps_df)] = 'natural_gas', np.nan, 10 ** 12
 
     # TODO: Summerize power plants of the same type
 
@@ -242,9 +243,9 @@ for region in TwoRegExample.regions:
                         eta_out=0.8,
                         cap_loss=0.00,
                         opex_fix=35,
-                        opex_var=10e10,
+                        opex_var=0,
                         capex=1000,
-                        cap_max=100000,
+                        cap_max=10 ** 12,
                         cap_initial=0,
                         c_rate_in=1/6,
                         c_rate_out=1/6)
@@ -254,8 +255,14 @@ bus1 = [obj for obj in TwoRegExample.entities if obj.uid == (
     'bus', 'Landkreis Wittenberg', 'elec')][0]
 bus2 = [obj for obj in TwoRegExample.entities if obj.uid == (
     'bus', 'Stadt Dessau-Rosslau', 'elec')][0]
-TwoRegExample.connect(bus1, bus2, in_max=10000, out_max=9000, eta=0.9,
+TwoRegExample.connect(bus1, bus2, in_max=10 * 10 ** 12, out_max=0.9 * 10 ** 12, eta=0.9,
                       transport_class=transport.Simple)
+
+pv_lk_wtb = ([obj for obj in TwoRegExample.entities if obj.uid == (
+    'FixedSrc', 'Landkreis Wittenberg', 'pv_pwr')][0])
+
+# Multiply PV with 10
+pv_lk_wtb.val = pv_lk_wtb.val * 25
 
 # Remove orphan buses
 buses = [obj for obj in TwoRegExample.entities if isinstance(obj, Bus)]
