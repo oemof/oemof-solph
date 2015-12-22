@@ -30,11 +30,10 @@ The example models the following energy system:
 ###############################################################################
 # imports
 ###############################################################################
-
+import matplotlib.pyplot as plt
 import pandas as pd
 
 # import solph module to create/process optimization model instance
-from oemof.solph import postprocessing as pp
 from oemof.solph import predefined_objectives as predefined_objectives
 # import oemof base classes to create energy system objects
 from oemof.core import energy_system as es
@@ -162,7 +161,12 @@ if __name__ == "__main__":
 
     pp.plot_dispatch(bel, energysystem.results,
                      simulation.timesteps, data, storage, demand)
-#    pp.plot_dispatchplt.show()
 
     pp.print_results(bel, data, demand,
                      transformers, storage, energysystem)
+
+    # Alternative plotting variant
+    # Setting the time range to plot
+    prange = pd.date_range(pd.datetime(energysystem.year, 6, 1, 0, 0),
+                           periods=168, freq='H')
+    pp.use_devplot(energysystem, bel.uid)

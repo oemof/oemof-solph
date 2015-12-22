@@ -6,8 +6,10 @@ Created on Mon Nov 23 15:49:36 2015
 """
 
 import matplotlib.pyplot as plt
-
+import pandas as pd
+from oemof.outputlib import devplots
 from oemof.core.network.entities import Bus
+
 
 def plot_dispatch(bus_to_plot, results, timesteps, data, storage, demand):
     # plotting: later as multiple pdf with pie-charts and topology?
@@ -50,6 +52,24 @@ def plot_dispatch(bus_to_plot, results, timesteps, data, storage, demand):
     ax.set_xlabel('Timesteps in h')
     ax.set_ylabel('Power in kW')
     ax.set_title('Dispatch')
+    plt.show()
+
+
+def use_devplot(energysystem, uid, prange):
+    energysystem.year = 2010
+
+    # Initialise the plot object with the energy system
+    plot = devplots.stackplot(es=energysystem)
+
+    # Prepare the time series to plot the balance around the electricity bus
+    plot.plot_dc = plot.create_io_df(uid)
+
+    # Plotting the bus balance with an own color set.
+    c_in = ['#4536bb', '#ffcc00', '#7c7c7c', '#ff5e5e']
+    c_out = ['#0cce1e', '#ff5e5e']
+    plot.full(prange, in_color=c_in, out_color=c_out)
+    plt.show()
+
 
 def print_results(bus_to_print, data, demand, transformers, storage,
                   energysystem):
