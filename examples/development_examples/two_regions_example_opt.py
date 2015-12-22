@@ -172,7 +172,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
                 'bus', location, pp[1].type)])
 
     tclass(
-        uid=('simple transformer', region.name, pp[1].type),
+        uid=('transformer', region.name, pp[1].type),
         inputs=[obj for obj in esystem.entities if obj.uid == (
                 'bus', location, pp[1].type)],
         outputs=[obj for obj in region.entities if obj.uid == (
