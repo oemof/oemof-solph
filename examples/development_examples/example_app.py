@@ -107,9 +107,8 @@ energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 om = OptimizationModel(energysystem=energysystem)
 
-om.solve(solver='glpk', debug=True, tee=True, duals=False)
-pp.results_to_objects(om)
-
+om.solve(solver='gurobi', debug=True, tee=True, duals=True)
+results = om.results()
 components = transformers + renew_sources
 
 
@@ -127,9 +126,8 @@ if __name__ == "__main__":
         y = []
         labels = []
         for c in plot_data:
-            if bus_to_plot in c.results['out']:
-                y.append(c.results['out'][bus_to_plot])
-                labels.append(c.uid)
+            y.append(results[c][bus_to_plot])
+            labels.append(c.uid)
 
         # plotting
         fig, ax = plt.subplots()
@@ -144,5 +142,5 @@ if __name__ == "__main__":
         ax.set_ylabel('Power in MW')
         ax.set_title('Dispatch')
 
-    plot_dispatch('b_el')
+    plot_dispatch(b_el)
     plt.show()

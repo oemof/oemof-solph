@@ -5,7 +5,10 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
+import pickle
 import logging
+import os
+
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel as OM
@@ -20,9 +23,11 @@ class EnergySystem:
 
     Parameters
     ----------
-    entities : list of core.network objects
-        List of all objects of the energy system. All class descriptions can
-        be found in the :py:mod:`oemof.core.network` package.
+    entities : list of :class:`Entity <oemof.core.network.Entity>`, optional
+        A list containing the already existing :class:`Entities
+        <oemof.core.network.Entity>` that should be part of the energy system.
+        Stored in the :attr:`entities` attribute.
+        Defaults to `[]` if not supplied.
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
@@ -35,9 +40,14 @@ class EnergySystem:
 
     Attributes
     ----------
-    entities : list of core.network objects
-        List of all objects of the energy system. All class descriptions can
-        be found in the :py:mod:`oemof.core.network` package.
+    entities : list of :class:`Entity <oemof.core.network.Entity>`
+        A list containing the :class:`Entities <oemof.core.network.Entity>`
+        that comprise the energy system. If this :class:`EnergySystem` is
+        set as the :attr:`registry <oemof.core.network.Entity.registry>`
+        attribute, which is done automatically on :class:`EnergySystem`
+        construction, newly created :class:`Entities
+        <oemof.core.network.Entity>` are automatically added to this list on
+        construction.
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
@@ -45,12 +55,19 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
+    results : dictionary
+        A dictionary holding the results produced by the energy system.
+        Is `None` while no results are produced.
+        Currently only set after a call to :meth:`optimize` after which it
+        holds the return value of :meth:`om.results()
+        <oemof.solph.optimization_model.OptimizationModel.results>`.
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
+
         Entity.registry = self
-        self.optimization_model = kwargs.get('optimization_model', None)
+        self.results = None
         self.year = kwargs.get('year')
 
     # TODO: Condense signature (use Buse)
@@ -78,20 +95,76 @@ class EnergySystem:
                 "Sorry, `EnergySystem.connect` currently only works with" +
                 "a `transport_class` argument of" + str(transport.Simple)))
         for bus_a, bus_b in [(bus1, bus2), (bus2, bus1)]:
-            uid = bus_a.uid + bus_b.uid
+            uid = ('transport',) + bus_a.uid + bus_b.uid
             transport_class(uid=uid, outputs=[bus_a], inputs=[bus_b],
                             out_max=[out_max], in_max=[in_max], eta=[eta])
 
     # TODO: Add concept to make it possible to use another solver library.
-    def optimize(self):
-        """Start optimizing the energy system using solph."""
-        if self.optimization_model is None:
-            self.optimization_model = OM(energysystem=self)
+    def optimize(self, om=None):
+        """Start optimizing the energy system using solph.
 
-        self.optimization_model.solve(solver=self.simulation.solver,
-                                      debug=self.simulation.debug,
-                                      tee=self.simulation.stream_solver_output,
-                                      duals=self.simulation.duals)
+        Parameters
+        ----------
+        om : :class:`OptimizationModel <oemof.solph.optimization_model.OptimizationModel>`, optional
+            The optimization model used to optimize the :class:`EnergySystem`.
+            If not given, an :class:`OptimizationModel
+            <oemof.solph.optimization_model.OptimizationModel>` instance local
+            to this method is created using the current :class:`EnergySystem`
+            instance as an argument.
+            You only need to supply this if you want to observe any side
+            effects that solving has on the `om`.
+
+        Returns
+        -------
+        self : :class:`EnergySystem`
+        """
+        if om is None:
+            om = OM(energysystem=self)
+
+        om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
+                 tee=self.simulation.stream_solver_output,
+                 duals=self.simulation.duals)
+
+        self.results = om.results()
+        return self
+
+    def dump(self, dpath=None, filename=None, keep_weather=True):
+        r""" Dump an EnergySystem instance.
+        """
+        if dpath is None:
+            bpath = os.path.join(os.path.expanduser("~"), '.oemof')
+            if not os.path.isdir(bpath):
+                os.mkdir(bpath)
+            dpath = os.path.join(bpath, 'dumps')
+            if not os.path.isdir(dpath):
+                os.mkdir(dpath)
+
+        if filename is None:
+            filename = 'es_dump.oemof'
+
+        pickle.dump(self.__dict__, open(os.path.join(dpath, filename), 'wb'))
+
+        msg = ('Attributes dumped to: {0}'.format(os.path.join(
+            dpath, filename)))
+        logging.debug(msg)
+        return msg
+
+    def restore(self, dpath=None, filename=None):
+        r""" Restore an EnergySystem instance.
+        """
+        logging.info(
+            "Restoring attributes will overwrite existing attributes.")
+        if dpath is None:
+            dpath = os.path.join(os.path.expanduser("~"), '.oemof', 'dumps')
+
+        if filename is None:
+            filename = 'es_dump.oemof'
+
+        self.__dict__ = pickle.load(open(os.path.join(dpath, filename), "rb"))
+        msg = ('Attributes restored from: {0}'.format(os.path.join(
+            dpath, filename)))
+        logging.debug(msg)
+        return msg
 
 
 class Region:
@@ -191,6 +264,9 @@ class Simulation:
                            objective function.
     timesteps : list or sequence object
          Timesteps to be simulated or optimized in the used library
+    relaxed : boolean
+        If True, integer variables will be relaxed
+        (only relevant for milp-problems)
     """
     def __init__(self, **kwargs):
         ''
@@ -200,5 +276,7 @@ class Simulation:
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
+        self.relaxed = kwargs.get('relaxed', False)
+
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')

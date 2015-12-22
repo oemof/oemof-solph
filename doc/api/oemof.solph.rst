@@ -36,14 +36,6 @@ oemof.solph.optimization_model module
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.postprocessing module
----------------------------------
-
-.. automodule:: oemof.solph.postprocessing
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 oemof.solph.predefined_objectives module
 ----------------------------------------
 
