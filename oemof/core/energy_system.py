@@ -65,10 +65,8 @@ class EnergySystem:
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
-<<<<<<< HEAD
+
         Entity.registry = self
-=======
->>>>>>> 7a5699aeb7743a84edb77e9a93aa237bcdb02b0c
         self.results = None
         self.year = kwargs.get('year')
 
