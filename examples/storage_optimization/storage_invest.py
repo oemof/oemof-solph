@@ -150,6 +150,7 @@ simulation = es.Simulation(solver='gurobi', timesteps=timesteps,
                                'function':predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
+energysystem.year = 2010
 
 energysystem.optimize()
 
@@ -169,4 +170,4 @@ if __name__ == "__main__":
     # Setting the time range to plot
     prange = pd.date_range(pd.datetime(energysystem.year, 6, 1, 0, 0),
                            periods=168, freq='H')
-    pp.use_devplot(energysystem, bel.uid)
+    pp.use_devplot(energysystem, bel.uid, prange)
