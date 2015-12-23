@@ -28,7 +28,12 @@ oemof is programmed in Python and uses several Python packages for scientific ap
 
 The framework consists of packages. For the communication between these packages interfaces are provided. A package again consists of modules that handle a defined task. A linkage of specific modules of the various packages is in oemof called an application (app) and depicts for example a concrete energy system model. The following image shows the underlying concept.
 
-**Abbildung**: Verschiedene Pakete, aus denen verschiedene App gebastelt werden
+.. 	image:: framework_concept.svg
+   :height: 744px
+   :width: 1052 px
+   :scale: 30 %
+   :alt: alternate text
+   :align: center
 
 Besides other applications the apps "renpass-gis" and "reegis" are currently developed within the framework. "renpass-gis" enables the simulation of a future European energy system with a high spatial and temporal resolution. Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered. The app "reegis" provides a simulation of a regional heat and power supply system. These two examples show that the modular approach of the framework allows applications with very different objectives. 
 
@@ -44,10 +49,6 @@ Components are likewise always connected with one or several buses. Based on the
 Components and buses can be combined to an energy system. Buses are nodes, connected among each other through edges which are the inputs and outputs of the components. Such a model can be interpreted mathematically as bipartite graph as buses are solely connected to components and vice versa. Thereby the in- and outputs of the components are the directed edges of the graph. The buses themselves are the nodes of the graph.
 
 Besides the use of the basic components one has the possibility to develop more specified components on the base of the basic components. The following figure illustrates the setup of a simple energy system and the basic structure explained before.
-
-Figure: Setup of a simple energy system within the framework (buses and
-components)
-
 
 Mathematical description (generic formulation as graph without timesteps)
 ----------------------------------------------------------------------------
@@ -331,7 +332,7 @@ Currently, oemof provides the following classes. The first three levels represen
 
       * Simple
       * CHP
-      * SimplexExtractionCHP
+      * SimpleExtractionCHP
       * Storage
 
     * Transport

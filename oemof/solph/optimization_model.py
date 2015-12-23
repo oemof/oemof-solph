@@ -6,12 +6,11 @@
 from functools import singledispatch
 
 import pyomo.environ as po
-import logging
+
 try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import predefined_objectives as predefined_objectives
     import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
@@ -19,13 +18,12 @@ except:
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
-    from . import predefined_objectives as predefined_objectives
     from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
 
     from ..core.network.entities.components.transformers import (
-        CHP, Simple, SimpleExtractionCHP, Storage)
+        CHP, Simple, SimpleExtractionCHP, Storage, VariableEfficiencyCHP)
     from ..core.network.entities.components.sources import (Commodity,
         DispatchSource, FixedSource)
     from ..core.network.entities.components.sinks import Simple as Sink
@@ -81,8 +79,8 @@ class OptimizationModel(po.ConcreteModel):
 
         self.entities = energysystem.entities
         self.timesteps = energysystem.simulation.timesteps
-
-        self.objective_name = energysystem.simulation.objective_name
+        self.objective_options = energysystem.simulation.objective_options
+        self.relaxed = getattr(energysystem.simulation, 'relaxed', False)
 
         self.T = po.Set(initialize=self.timesteps, ordered=True)
         # calculate all edges ([('coal', 'pp_coal'),...])
@@ -126,10 +124,10 @@ class OptimizationModel(po.ConcreteModel):
         self.add_component(str(Bus), block)
 
         # create objective function
-        if self.objective_name is None:
-            raise ValueError('No objective name defined!')
+        if not self.objective_options:
+            raise ValueError('No objective options defined!')
 
-        self.objective_assembler(objective_name=self.objective_name)
+        self.objective_assembler(objective_options=self.objective_options)
 
 
     def default_assembler(self, block):
@@ -149,7 +147,7 @@ class OptimizationModel(po.ConcreteModel):
 
         if 'milp_constr' in block.optimization_options:
             # create binary status variables for block components
-            var.add_binary(self, block)
+            var.add_binary(self, block, relaxed=self.relaxed)
 
         # add additional variables (investment mode)
         if block.optimization_options.get('investment', False):
@@ -162,17 +160,105 @@ class OptimizationModel(po.ConcreteModel):
 
         for option in block.optimization_options:
             if not option in ['objective', 'investment']:
-                block.optimization_options[option]()
+                block.optimization_options[option](self, block)
 
 
-    def objective_assembler(self, objective_name="minimize_costs"):
+    def objective_assembler(self, objective_options):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective with name:', objective_name)
-        if objective_name == 'minimize_costs':
-            predefined_objectives.minimize_cost(self)
+        print('Creating predefined objective:',
+              str(objective_options['function']))
 
+        revenue_objects = objective_options.get('revenue_objects')
+        cost_objects = objective_options.get('cost_objects')
+
+        objective_options['function'](self,
+                                      cost_objects=cost_objects,
+                                      revenue_objects=revenue_objects)
+
+    def results(self):
+        """ Returns a nested dictionary of the results of this optimization
+        model.
+
+        The dictionary is keyed by the :class:`Entities
+        <oemof.core.network.Entity>` of the optimization model, that is
+        :meth:`om.results()[s][t] <OptimizationModel.results>`
+        holds the time series representing values attached to the edge (i.e.
+        the flow) from `s` to `t`, where `s` and `t` are instances of
+        :class:`Entity <oemof.core.network.Entity>`.
+
+        Time series belonging only to one object, like e.g. shadow prices of
+        commodities on a certain :class:`Bus
+        <oemof.core.network.entities.Bus>`, dispatch values of a
+        :class:`DispatchSource
+        <oemof.core.network.entities.components.sources.DispatchSource>` or
+        storage values of a
+        :class:`Storage
+        <oemof.core.network.entities.components.transformers.Storage>` are
+        treated as belonging to an edge looping from the object to itself.
+        This means they can be accessed via
+        :meth:`om.results()[object][object] <OptimizationModel.results>`.
+
+        Note that the optimization model has to be solved prior to invoking
+        this method.
+        """
+        result = {}
+        for entity in self.entities:
+            if (  isinstance(entity, cp.Transformer) or
+                  isinstance(entity, cp.Transport)   or
+                  isinstance(entity, cp.Source)):
+                if entity.outputs: result[entity] = result.get(entity, {})
+                for o in entity.outputs:
+                    result[entity][o] = [self.w[entity.uid, o.uid, t].value
+                                         for t in self.timesteps]
+
+                for i in entity.inputs:
+                    result[i] = result.get(i, {})
+                    result[i][entity] = [self.w[i.uid, entity.uid, t].value
+                                         for t in self.timesteps]
+
+            if isinstance(entity, cp.sources.DispatchSource):
+                result[entity] = result.get(entity, {})
+                # TODO: Why does this use `entity.outputs[0]`?
+                result[entity][entity] = [self.w[entity.uid,
+                                                 entity.outputs[0].uid,
+                                                 t].bounds[1]
+                                          for t in self.timesteps]
+
+            if isinstance(entity, cp.Sink):
+                for i in entity.inputs:
+                    result[i] = result.get(i, {})
+                    result[i][entity] = [self.w[i.uid, entity.uid, t].value
+                                         for t in self.timesteps]
+
+            if isinstance(entity, cp.transformers.Storage):
+                result[entity] = result.get(entity, {})
+                result[entity][entity] = [getattr(self, str(Storage)
+                                                 ).cap[entity.uid, t].value
+                                          for t in self.timesteps]
+
+        if hasattr(self, "dual"):
+            for bus in getattr(self, str(Bus)).objs:
+                if bus.balanced:
+                    result[bus] = result.get(bus, {})
+                    result[bus][bus] = [
+                        self.dual[getattr(self, str(Bus)).balance[(bus.uid, t)]]
+                        for t in self.timesteps]
+
+        for bus in getattr(self, str(Bus)).objs:
+            if bus.excess:
+                result[bus] = result.get(bus, {})
+                result[bus]['excess'] = [
+                    getattr(self, str(Bus)).excess_slack[(bus.uid, t)].value
+                    for t in self.timesteps]
+            if bus.shortage:
+                result[bus] = result.get(bus, {})
+                result[bus]['shortage'] = [
+                    getattr(self, str(Bus)).shortage_slack[(bus.uid, t)].value
+                    for t in self.timesteps]
+
+        return result
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
               duals=False, **kwargs):
@@ -317,10 +403,10 @@ def _(e, om, block):
     # TODO: This should be dependent on objs classes not fixed if assembler
     # method is used by another assemlber method...
 
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_input_costs(om, block)
@@ -351,11 +437,11 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         lc.add_simple_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_input_costs(om, block)
@@ -384,11 +470,11 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_simple_extraction_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
         var.set_bounds(om, block, side='input')
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_input_costs(om, block)
@@ -397,6 +483,36 @@ def _(e, om, block):
     default_optimization_options = {
         'linear_constr': linear_constraints,
         'objective' : objective_function_expressions}
+
+    if not block.optimization_options:
+        block.optimization_options = default_optimization_options
+
+    # simple_transformer assebmler for in-out relation, pmin,.. etc.
+    om.default_assembler(block)
+    return om
+
+@assembler.register(VariableEfficiencyCHP)
+def _(e, om, block):
+    """Method grouping the constraints for chp components with variable el.
+    efficiency.
+
+    Parameters
+    ----------
+    See :func:`assembler`.
+
+    Returns
+    -------
+    See :func:`assembler`.
+    """
+    def linear_constraints(om, block):
+        lc.add_eta_total_chp_relation(om, block)
+        var.set_bounds(om, block, side='output')
+    def milp_constraints(om, block):
+        milc.add_variable_linear_eta_relation(om, block)
+
+    default_optimization_options = {
+        'linear_constr': linear_constraints,
+        'milp_constr': milp_constraints}
 
     if not block.optimization_options:
         block.optimization_options = default_optimization_options
@@ -418,9 +534,9 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_fixed_source(om, block)
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
     default_optimization_options = {
@@ -446,9 +562,9 @@ def _(e, om, block):
     -------
     See :func:`assembler`.
     """
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_dispatch_source(om, block)
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='output')
         objfuncexprs.add_curtailment_costs(om, block)
@@ -520,7 +636,7 @@ def _(e, om, block):
     block.cap = po.Var(block.uids, om.timesteps,
                         within=po.NonNegativeReals)
 
-    def linear_constraints():
+    def linear_constraints(om, block):
         lc.add_storage_balance(om, block)
         var.set_storage_cap_bounds(om, block)
         if not block.optimization_options.get('investment', False):
@@ -528,7 +644,7 @@ def _(e, om, block):
             var.set_bounds(om, block, side='input')
         else:
             lc.add_storage_charge_discharge_limits(om, block)
-    def objective_function_expressions():
+    def objective_function_expressions(om, block):
         objfuncexprs.add_opex_var(om, block, ref='output')
         objfuncexprs.add_opex_fix(om, block, ref='capacity')
 

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from oemof.core import energy_system as es
 # solph imports
 from oemof.solph.optimization_model import OptimizationModel
-from oemof.solph import postprocessing as pp
+from oemof.solph import predefined_objectives as predefined_objectives
 # base classes import
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
@@ -44,7 +44,8 @@ em_oil = 0.0750 * 3.6
 bcoal = Bus(uid="coal", type="coal", price=20, balanced=False, excess=False)
 bgas = Bus(uid="gas", type="gas", price=35, balanced=False, excess=False)
 boil = Bus(uid="oil", type="oil", price=40,  balanced=False, excess=False)
-blig = Bus(uid="lignite", type="lignite", balanced=False, price=15, excess=False)
+blig = Bus(uid="lignite", type="lignite", balanced=False, price=15,
+           excess=False)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el", excess=False, shortage=False)
@@ -98,16 +99,15 @@ sinks = [demand_th, demand_el]
 components = transformers + renew_sources + sinks
 entities = components + buses
 
-simulation = es.Simulation(solver='glpk', timesteps=timesteps,
-                           stream_solver_output=True,
-                           objective_name='minimize_costs')
+simulation = es.Simulation(
+    solver='glpk', timesteps=timesteps, stream_solver_output=True,
+    objective_options={'function': predefined_objectives.minimize_cost})
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 om = OptimizationModel(energysystem=energysystem)
 
-om.solve(solver='gurobi', debug=True, tee=True, duals=False)
-pp.results_to_objects(om)
-
+om.solve(solver='gurobi', debug=True, tee=True, duals=True)
+results = om.results()
 components = transformers + renew_sources
 
 
@@ -125,22 +125,20 @@ if __name__ == "__main__":
         y = []
         labels = []
         for c in plot_data:
-            if bus_to_plot in c.results['out']:
-                y.append(c.results['out'][bus_to_plot])
-                labels.append(c.uid)
+            y.append(results[c][bus_to_plot])
+            labels.append(c.uid)
 
         # plotting
         fig, ax = plt.subplots()
         sp = ax.stackplot(x, y,
                           colors=cm.rainbow(np.linspace(0, 1, len(plot_data))))
-        proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                       facecolor=
-                                       pol.get_facecolor()[0]) for pol in sp]
+        proxy = [mpl.patches.Rectangle(
+            (0, 0), 0, 0, facecolor=pol.get_facecolor()[0]) for pol in sp]
         ax.legend(proxy, labels)
         ax.grid()
         ax.set_xlabel('Timesteps in h')
         ax.set_ylabel('Power in MW')
         ax.set_title('Dispatch')
 
-    plot_dispatch('b_el')
+    plot_dispatch(b_el)
     plt.show()

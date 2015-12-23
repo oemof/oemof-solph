@@ -30,12 +30,11 @@ The example models the following energy system:
 ###############################################################################
 # imports
 ###############################################################################
-
+import matplotlib.pyplot as plt
 import pandas as pd
 
 # import solph module to create/process optimization model instance
-from oemof.solph import postprocessing as pp
-
+from oemof.solph import predefined_objectives as predefined_objectives
 # import oemof base classes to create energy system objects
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
@@ -145,15 +144,15 @@ components = transformers + renewable_sources + storages + sinks + commodities
 entities = components + buses
 
 # TODO: other solver libraries should be passable
-simulation = es.Simulation(solver='glpk', timesteps=timesteps,
-                           stream_solver_output=True)
+simulation = es.Simulation(solver='gurobi', timesteps=timesteps,
+                           stream_solver_output=True,
+                           objective_options={
+                               'function':predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
+energysystem.year = 2010
 
 energysystem.optimize()
-
-# write results back to objects
-pp.results_to_objects(energysystem.optimization_model)
 
 
 if __name__ == "__main__":
@@ -161,8 +160,14 @@ if __name__ == "__main__":
 
     data = renewable_sources+transformers+storages
 
-    pp.plot_dispatch('bel', timesteps, data, storage, demand)
-#    pp.plot_dispatchplt.show()
+    pp.plot_dispatch(bel, energysystem.results,
+                     simulation.timesteps, data, storage, demand)
 
-    pp.print_results('bel', data, demand, transformers, storage,
-                     energysystem)
+    pp.print_results(bel, data, demand,
+                     transformers, storage, energysystem)
+
+    # Alternative plotting variant
+    # Setting the time range to plot
+    prange = pd.date_range(pd.datetime(energysystem.year, 6, 1, 0, 0),
+                           periods=168, freq='H')
+    pp.use_devplot(energysystem, bel.uid, prange)
