@@ -44,7 +44,8 @@ em_oil = 0.0750 * 3.6
 bcoal = Bus(uid="coal", type="coal", price=20, balanced=False, excess=False)
 bgas = Bus(uid="gas", type="gas", price=35, balanced=False, excess=False)
 boil = Bus(uid="oil", type="oil", price=40,  balanced=False, excess=False)
-blig = Bus(uid="lignite", type="lignite", balanced=False, price=15, excess=False)
+blig = Bus(uid="lignite", type="lignite", balanced=False, price=15,
+           excess=False)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el", excess=False, shortage=False)
@@ -98,10 +99,9 @@ sinks = [demand_th, demand_el]
 components = transformers + renew_sources + sinks
 entities = components + buses
 
-simulation = es.Simulation(solver='glpk', timesteps=timesteps,
-                           stream_solver_output=True,
-                           objective_options={
-                               'function': predefined_objectives.minimize_cost})
+simulation = es.Simulation(
+    solver='glpk', timesteps=timesteps, stream_solver_output=True,
+    objective_options={'function': predefined_objectives.minimize_cost})
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 om = OptimizationModel(energysystem=energysystem)
@@ -132,9 +132,8 @@ if __name__ == "__main__":
         fig, ax = plt.subplots()
         sp = ax.stackplot(x, y,
                           colors=cm.rainbow(np.linspace(0, 1, len(plot_data))))
-        proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                       facecolor=
-                                       pol.get_facecolor()[0]) for pol in sp]
+        proxy = [mpl.patches.Rectangle(
+            (0, 0), 0, 0, facecolor=pol.get_facecolor()[0]) for pol in sp]
         ax.legend(proxy, labels)
         ax.grid()
         ax.set_xlabel('Timesteps in h')
