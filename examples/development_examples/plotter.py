@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from oemof.core.network.entities import Bus
 
+
 def plot_dispatch(bus_to_plot, timesteps, data, storage, demand):
     # plotting: later as multiple pdf with pie-charts and topology?
     import numpy as np
@@ -29,9 +30,8 @@ def plot_dispatch(bus_to_plot, timesteps, data, storage, demand):
                       colors=('yellow', 'blue', 'grey', 'red'),
                       linewidth=0)
 
-    proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                   facecolor=
-                                   pol.get_facecolor()[0]) for pol in sp]
+    proxy = [mpl.patches.Rectangle(
+        (0, 0), 0, 0, facecolor=pol.get_facecolor()[0]) for pol in sp]
     # plot demand
     ax.step(x, demand.results['in'][demand.inputs[0].uid],
             c="black", lw=2)
@@ -52,6 +52,7 @@ def plot_dispatch(bus_to_plot, timesteps, data, storage, demand):
     ax.set_xlabel('Timesteps in h')
     ax.set_ylabel('Power in kW')
     ax.set_title('Dispatch')
+
 
 def print_results(bus_to_print, data, demand, transformers, storage,
                   energysystem):
@@ -92,16 +93,16 @@ def print_results(bus_to_print, data, demand, transformers, storage,
     excess = list()
     for t in energysystem.simulation.timesteps:
         excess.append(
-          getattr(energysystem.optimization_model,
-                  str(Bus)).excess_slack['bel', t].value)
+            getattr(energysystem.optimization_model,
+                    str(Bus)).excess_slack['bel', t].value)
 
     print('sum excess: ', np.asarray(excess).sum())
 
     # autarky degree
-    print('autarky degree: ', (sum_production.sum()  # production
-                               - transf.sum()  # minus non renewable prod.
-                               - np.asarray(excess).sum() # minus excess
-                               - storage_load.sum()) /  # minus stor. load
-                               np.asarray(demand.results['in']
-                                          [bus_to_print]).sum())  #  in
-                                          # proportion to the demand
+    print('autarky degree: ', (
+        sum_production.sum()  # production
+        - transf.sum()  # minus non renewable prod.
+        - np.asarray(excess).sum()  # minus excess
+        - storage_load.sum()) /  # minus stor. load
+        np.asarray(demand.results['in']
+                   [bus_to_print]).sum())  # in proportion to the demand
