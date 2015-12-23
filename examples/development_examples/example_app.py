@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 from oemof.core import energy_system as es
 # solph imports
 from oemof.solph.optimization_model import OptimizationModel
-from oemof.solph import postprocessing as pp
 from oemof.solph import predefined_objectives as predefined_objectives
 # base classes import
 from oemof.core.network.entities import Bus
