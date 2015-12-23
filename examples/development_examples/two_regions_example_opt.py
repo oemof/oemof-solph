@@ -5,9 +5,6 @@ import logging
 import pandas as pd
 import numpy as np
 
-#logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger().setLevel(logging.INFO)
-# logging.getLogger().setLevel(logging.WARNING)
 from oemof_pg import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
