@@ -13,7 +13,6 @@ def plot_dispatch(bus_to_plot, timesteps, data, storage, demand):
     # plotting: later as multiple pdf with pie-charts and topology?
     import numpy as np
     import matplotlib as mpl
-    import matplotlib.cm as cm
 
     # data preparation
     x = np.arange(len(timesteps))
