@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='oemof_base',
-      version='0.0.2',
+      version='0.0.3dev',
       author='oemof developing group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
