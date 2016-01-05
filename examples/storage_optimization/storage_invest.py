@@ -35,6 +35,7 @@ import pandas as pd
 
 # import solph module to create/process optimization model instance
 from oemof.solph import predefined_objectives as predefined_objectives
+from oemof.solph.optimization_model import OptimizationModel
 # import oemof base classes to create energy system objects
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
@@ -137,34 +138,49 @@ commodities = [rgas]
 storages = [storage]
 sinks = [demand]
 
-# groupt components
+# group components
 components = transformers + renewable_sources + storages + sinks + commodities
 
 # create list of all entities
 entities = components + buses
 
 # TODO: other solver libraries should be passable
-simulation = es.Simulation(solver='gurobi', timesteps=timesteps,
-                           stream_solver_output=True,
+simulation = es.Simulation(timesteps=timesteps, stream_solver_output=True,
                            objective_options={
                                'function':predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 energysystem.year = 2010
 
-energysystem.optimize()
+#energysystem.optimize()
 
+om = OptimizationModel(energysystem)
+om.solve(solver='gurobi')
+results = om.results()
 
 if __name__ == "__main__":
+
     import postprocessing as pp
+    from oemof.outputlib import to_pandas as tpd
 
-    data = renewable_sources+transformers+storages
+    # Creation of a multi-indexed pandas dataframe
+    es_df = tpd.EnergySystemDataFrame(result_object=results,
+                                      idx_start_date="2016-01-01 00:00:00",
+                                      ixd_date_freq="H")
+    es_df.data_frame.describe
 
-    pp.plot_dispatch(bel, energysystem.results,
-                     simulation.timesteps, data, storage, demand)
-
-    pp.print_results(bel, data, demand,
-                     transformers, storage, energysystem)
+    # Plotting    
+    es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
+                   date_from="2016-01-01 00:00:00",
+                   date_to="2016-01-31 00:00:00",
+                   title="January 2016", xlabel="Power in MW",
+                   ylabel="Date", tick_distance = 24*7)
+    
+    es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
+                   date_from="2016-01-01 00:00:00",
+                   date_to="2016-12-31 00:00:00",
+                   title="Year 2016", xlabel="Outflow in MW",
+                   ylabel="Date", tick_distance = 24*7*4*3)
 
     # Alternative plotting variant
     # Setting the time range to plot
