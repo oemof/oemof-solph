@@ -10,14 +10,6 @@ class stackplot:
     r''' Creates a plot around a bus with all inputs as bar plots and all
     outputs as lineplots.
 
-    TODO: Check if EnergySystem contains a results dictionary!
-    TODO: Option to remove empty time series from legend (e.g. unused storage)
-    TODO: Combine legends in a combined plot and keep only the lowest x-axis.
-    TODO: Default naming for title, axis...
-    TODO: Passing kwargs to 'bar' or 'line' plot but not both (e.g. lw=4).
-    TODO: Set order of columns to plot
-    TODO: Sink has to be the lowest line but plotted on top.
-
     Parameters
     ----------
     plot_dc : dictionary of pandas.DataFrame
@@ -39,6 +31,14 @@ class stackplot:
     The EnergySystem object needs to have a results dictionary.
 
     '''
+    # TODO: Check if EnergySystem contains a results dictionary!
+    # TODO: Option to remove empty time series from legend(e.g. unused storage)
+    # TODO: Combine legends in a combined plot and keep only the lowest x-axis.
+    # TODO: Default naming for title, axis...
+    # TODO: Passing kwargs to 'bar' or 'line' plot but not both (e.g. lw=4).
+    # TODO: Set order of columns to plot
+    # TODO: Sink has to be the lowest line but plotted on top.
+
     def __init__(self, **kwargs):
         self.plot_dc = kwargs.get('plot_dc', {})
         self.es = kwargs.get('es')
@@ -100,6 +100,9 @@ class stackplot:
 
     def core(self, eid, ax, kind, prange, **kwargs):
         r'''Plotting a DataFrame of the dictionary.
+
+        Parameters
+        ----------
         eid : str
             The key of the plot_dc dictionary.
         ax : matplotlib artist object
