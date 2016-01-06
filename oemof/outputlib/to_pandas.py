@@ -166,6 +166,7 @@ class EnergySystemDataFrame:
         kwargs.setdefault('colormap', 'Spectral')
         kwargs.setdefault('mpl_style', 'ggplot')
         kwargs.setdefault('df_plot_kwargs', {})
+        kwargs.setdefault('linewidth', 2)
 
         # slicing
         idx = pd.IndexSlice
@@ -184,15 +185,15 @@ class EnergySystemDataFrame:
         mpl.style.use(kwargs.get('mpl_style'))
 
         # plotting: basic pandas plot
-        subset.plot(kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
-                    title=kwargs.get('title'), linewidth='2',
-                    subplots=kwargs.get('subplots'),
-                    **kwargs['df_plot_kwargs'])
+        axt = subset.plot(
+            kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
+            title=kwargs.get('title'), linewidth=kwargs.get('linewidth'),
+            subplots=kwargs.get('subplots'), **kwargs['df_plot_kwargs'])
         # plotting: adjustments
         dates = subset.index.get_level_values('datetime').unique()
         [(ax.set_ylabel(kwargs.get('ylabel')),
           ax.set_xlabel(kwargs.get('xlabel')),
-          #ax.set_xticks(range(0,len(dates),1), minor=True),
+          # ax.set_xticks(range(0,len(dates),1), minor=True),
           ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
                         minor=False),
           ax.set_xticklabels(
@@ -202,3 +203,4 @@ class EnergySystemDataFrame:
           ax.legend(loc='upper right')
           )
          for ax in plt.gcf().axes]
+        return axt
