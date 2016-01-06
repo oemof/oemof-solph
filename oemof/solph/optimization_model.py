@@ -506,9 +506,9 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_eta_total_chp_relation(om, block)
-        var.set_bounds(om, block, side='output')
     def milp_constraints(om, block):
         milc.add_variable_linear_eta_relation(om, block)
+        milc.set_bounds(om, block, side='output')
 
     default_optimization_options = {
         'linear_constr': linear_constraints,
