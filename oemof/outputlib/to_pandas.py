@@ -2,6 +2,7 @@
 # -*- coding: utf-8
 
 import pandas as pd
+import logging
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -207,3 +208,63 @@ class EnergySystemDataFrame:
           )
          for ax in plt.gcf().axes]
         return axt
+
+    def stackplot(self, **kwargs):
+        r'''Creating a matplotlib figure object.
+
+        Parameters
+        ----------'''
+        kwargs.setdefault('bus_uid', None)
+        kwargs.setdefault('bus_type', None)
+        kwargs.setdefault('ax', None)
+        kwargs.setdefault('date_from', None)
+        kwargs.setdefault('date_to', None)
+        kwargs.setdefault('width', 1)
+        kwargs.setdefault('title', 'Connected components')
+        kwargs.setdefault('xlabel', 'Date')
+        kwargs.setdefault('ylabel', 'Power in MW')
+        kwargs.setdefault('date_format', '%d-%m-%Y')
+        kwargs.setdefault('tick_distance', 24)
+        kwargs.setdefault('subplots', False)
+        kwargs.setdefault('colormap_bar', 'Spectral')
+        kwargs.setdefault('colormap_line', 'jet')
+        kwargs.setdefault('df_plot_kwargs', {})
+        kwargs.setdefault('linewidth', 2)
+
+        my_kwargs = {
+            'ax': kwargs['ax'],
+            'width': kwargs['width'],
+            'stacked': True}
+
+        ax = self.plot_bus(
+            bus_uid=kwargs['bus_uid'], bus_type=kwargs['bus_type'],
+            type="input", kind='bar', linewidth=0,
+            date_from=kwargs['date_from'],
+            date_to=kwargs['date_to'],
+            colormap=kwargs['colormap_bar'], title=kwargs['title'],
+            xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
+            tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
+
+        my_kwargs = {
+            'ax': ax,
+            'stacked': True,
+            'drawstyle': 'steps-mid'}
+
+        ax = self.plot_bus(
+            bus_uid=kwargs['bus_uid'], bus_type=kwargs['bus_type'],
+            type="output", kind='line', linewidth=kwargs['linewidth'],
+            date_from=kwargs['date_from'],
+            date_to=kwargs['date_to'],
+            colormap=kwargs['colormap_line'], title=kwargs['title'],
+            xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
+            tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
+
+        # Put a legend to the right of the current axis
+        handles, labels = ax.get_legend_handles_labels()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
+
+        # Put a legend to the right of the current axis
+        ax.legend(reversed(handles), reversed(labels), loc='center left',
+                  bbox_to_anchor=(1, 0.5), ncol=1, fancybox=True,
+                  shadow=True)
