@@ -10,8 +10,7 @@ class Simple(Transformer):
     constant efficiency
 
     Parameters
-    -----------
-
+    ----------
     eta : list
        constant efficiency for conversion of input into output (0 <= eta <= 1)
        e.g. eta = [0.4]
@@ -31,8 +30,7 @@ class CHP(Transformer):
     with a constant efficiency
 
     Parameters
-    -----------
-
+    ----------
     eta : list
       constant effciency for converting input into output. First element of
       list is used for conversion of input into first element of

@@ -11,7 +11,7 @@ We use the collaboration features from Github, see https://github.com/oemof.
 
 
 Style guidelines
----------------
+----------------
 
 We mostly follow standard guidelines instead of developing own rules.
 
