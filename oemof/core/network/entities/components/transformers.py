@@ -47,7 +47,7 @@ class CHP(Transformer):
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', [None, None])
 
-class VariableEfficiencyCHP(Transformer):
+class VariableEfficiencyCHP(CHP):
     """
     A CombinedHeatPower Transformer with variable electrical efficiency
     Note: The model uses constraints which require binary variables, hence
@@ -68,21 +68,20 @@ class VariableEfficiencyCHP(Transformer):
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-        self.eta_total = kwargs.get('eta_total')
-        self.eta_el = kwargs.get('eta_el')
+
+        self.eta_total = sum(self.eta)
 
         # calculate minimal
-        self.in_min = [self.out_min[0] / self.eta_el[0]]
-        self.in_max = [self.out_max[0] / self.eta_el[1]]
+        self.in_min = [self.out_min[0] / self.eta_min[0]]
+        self.in_max = [self.out_max[0] / self.eta[0]]
 
         A = np.array([[1, self.out_min[0]],
                       [1, self.out_max[0]]])
-        b = np.array([self.in_min[0],
-                      self.in_max[0]])
+        b = np.array([self.in_min[0], self.in_max[0]])
         self.coeff = np.linalg.solve(A, b)
 
 
-class SimpleExtractionCHP(Transformer):
+class SimpleExtractionCHP(CHP):
     """
     Class for combined heat and power unit with extraction turbine and constant
     power to heat coeffcient in backpressure mode
@@ -101,13 +100,16 @@ class SimpleExtractionCHP(Transformer):
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-        self.eta_el_cond = kwargs.get('eta_el_cond')
+        self.eta_el_cond = kwargs.get('eta_el_cond', self.eta[0])
         self.beta = kwargs.get('beta')
         self.sigma = kwargs.get('sigma')
 
         if self.in_max is None:
-            raise ValueError('Missing attribute "in_max" for object: \n' +
-                             str(type(self)))
+            try:
+                self.in_max = [self.out_max[0]/self.eta_el_cond]
+            except:
+                raise ValueError('Missing attribute "in_max" for object: \n' +
+                                 str(type(self)) + 'Auto calculation failed!')
         if self.eta_el_cond is None:
             raise ValueError('Missing attribute "eta_el_cond" for object: \n' +
                              str(type(self)))
