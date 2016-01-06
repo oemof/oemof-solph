@@ -35,12 +35,12 @@ class EnergySystemDataFrame:
         Start date of the dataframe date index e.g. "2016-01-01 00:00:00"
     ixd_date_freq : string
         Frequency for the dataframe date index e.g. "H" for hours
-    data_frame : pandas dataframe 
+    data_frame : pandas dataframe
         Multi-indexed pandas dataframe holding the data from the result object
     """
     def __init__(self, **kwargs):
         # default values if not arguments are passed
-        kwargs.setdefault('ixd_date_freq', 'H') 
+        kwargs.setdefault('ixd_date_freq', 'H')
 
         self.result_object = kwargs.get('result_object')
         self.idx_start_date = kwargs.get('idx_start_date')
@@ -48,7 +48,7 @@ class EnergySystemDataFrame:
         self.data_frame = None
         if not (self.data_frame): self.data_frame = self.create()
 
-    def create(self): 
+    def create(self):
         """ Method for creating a multi-index pandas dataframe of
         the result object
 
@@ -108,7 +108,7 @@ class EnergySystemDataFrame:
                              periods=len(v), freq=self.ixd_date_freq)]
                         row['val'] = [v]
                         df = df.append(row)
-        
+
         # split date and value lists columns into rows (long format)
         df_long = pd.DataFrame()
         for index, cols in df.iterrows():
@@ -119,7 +119,7 @@ class EnergySystemDataFrame:
                 [df_extract, cols.drop(['datetime', 'val']).to_frame().T],
                  axis=1).fillna(method='ffill').fillna(method='bfill')
             df_long = pd.concat([df_long, df_extract], ignore_index=True)
-        
+
         # create multiindexed dataframe
         arrays = [df_long['bus_uid'], df_long['bus_type'], df_long['type'],
                   df_long['obj_uid'], df_long['datetime']]
@@ -129,7 +129,7 @@ class EnergySystemDataFrame:
                                                  'obj_uid', 'datetime'])
         df_multiindex = pd.DataFrame(df_long['val'].values,
                                     columns=['val'], index=index)
-        
+
         # sort MultiIndex to work correctly
         df_multiindex.sort_index(inplace=True)
 
@@ -151,7 +151,7 @@ class EnergySystemDataFrame:
         kwargs.setdefault('type', None)
         kwargs.setdefault('date_from', None)
         kwargs.setdefault('date_to', None)
-        kwargs.setdefault('kind', 'line')        
+        kwargs.setdefault('kind', 'line')
         kwargs.setdefault('title', 'Connected components')
         kwargs.setdefault('xlabel', 'Date')
         kwargs.setdefault('ylabel', 'Power in MW')
