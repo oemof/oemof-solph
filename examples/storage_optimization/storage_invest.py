@@ -145,18 +145,14 @@ components = transformers + renewable_sources + storages + sinks + commodities
 entities = components + buses
 
 # TODO: other solver libraries should be passable
-simulation = es.Simulation(timesteps=timesteps, stream_solver_output=True,
-                           objective_options={
-                               'function':predefined_objectives.minimize_cost})
+simulation = es.Simulation(
+    timesteps=timesteps, stream_solver_output=True, solver='gurobi',
+    objective_options={'function': predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 energysystem.year = 2010
 
-#energysystem.optimize()
-
-om = OptimizationModel(energysystem)
-om.solve(solver='gurobi')
-results = om.results()
+energysystem.optimize()
 
 if __name__ == "__main__":
 
@@ -164,23 +160,25 @@ if __name__ == "__main__":
     from oemof.outputlib import to_pandas as tpd
 
     # Creation of a multi-indexed pandas dataframe
-    es_df = tpd.EnergySystemDataFrame(result_object=results,
+    es_df = tpd.EnergySystemDataFrame(energy_system=energysystem,
                                       idx_start_date="2016-01-01 00:00:00",
                                       ixd_date_freq="H")
     es_df.data_frame.describe
 
-    # Plotting    
+    # Plotting
     es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
                    date_from="2016-01-01 00:00:00",
                    date_to="2016-01-31 00:00:00",
                    title="January 2016", xlabel="Power in MW",
                    ylabel="Date", tick_distance = 24*7)
-    
+
     es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
                    date_from="2016-01-01 00:00:00",
                    date_to="2016-12-31 00:00:00",
                    title="Year 2016", xlabel="Outflow in MW",
                    ylabel="Date", tick_distance = 24*7*4*3)
+
+    plt.show()
 
     # Alternative plotting variant
     # Setting the time range to plot

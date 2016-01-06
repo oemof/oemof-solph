@@ -43,9 +43,11 @@ class EnergySystemDataFrame:
         kwargs.setdefault('ixd_date_freq', 'H')
 
         self.result_object = kwargs.get('result_object')
+        self.energy_system = kwargs.get('energy_system')
         self.idx_start_date = kwargs.get('idx_start_date')
         self.ixd_date_freq = kwargs.get('ixd_date_freq')
         self.data_frame = None
+        if not self.result_object: self.result_object = self.energy_system.results
         if not (self.data_frame): self.data_frame = self.create()
 
     def create(self):
