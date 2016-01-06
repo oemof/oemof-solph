@@ -95,6 +95,10 @@ class Transformer(Component):
         costs for ramping
     output_price : float
         price for selling output (revenue expr. in objective)
+    eta_min : list
+      efficiency of transformer at minimum load for conversion of input
+      to output (order of elements corresponding to order of elements
+      out outputs,out_min etc.)
     """
     optimization_options = {}
 
@@ -112,7 +116,7 @@ class Transformer(Component):
         parameters = ['out_min', 'in_min', 'grad_pos', 'grad_neg',
                       't_min_off', 't_min_on', 'outages', 'input_costs',
                       'start_costs', 'stop_costs', 'ramp_costs',
-                      'output_price']
+                      'output_price', 'eta_min']
 
         for k in kwargs:
             if k in parameters:
