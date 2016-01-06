@@ -160,9 +160,10 @@ class EnergySystemDataFrame:
         kwargs.setdefault('subplots', False)
         kwargs.setdefault('colormap', 'Spectral')
         kwargs.setdefault('mpl_style', 'ggplot')
-              
-        # slicing        
-        idx = pd.IndexSlice     
+        kwargs.setdefault('df_plot_kwargs', {})
+
+        # slicing
+        idx = pd.IndexSlice
         subset = self.data_frame.loc[idx[[kwargs.get('bus_uid')],
                                          [kwargs.get('bus_type')],
                                          [kwargs.get('type')],
@@ -172,14 +173,15 @@ class EnergySystemDataFrame:
                                           pd.Timestamp(kwargs.get('date_to')))]]
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
-        
+
         # plotting: set matplotlib style
         mpl.style.use(kwargs.get('mpl_style'))
 
-        # plotting: basic pandas plot      
+        # plotting: basic pandas plot
         subset.plot(kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
                     title=kwargs.get('title'), linewidth='2',
-                    subplots=kwargs.get('subplots'))
+                    subplots=kwargs.get('subplots'),
+                    **kwargs['df_plot_kwargs'])
         # plotting: adjustments
         dates = subset.index.get_level_values('datetime').unique()
         [(ax.set_ylabel(kwargs.get('ylabel')),
