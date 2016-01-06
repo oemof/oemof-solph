@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 # - Create some "standard-slices" for plots e.g. all inputs of a specific bus
 # - Make dataframe creation and plotting configurable via params_dc{}
 
+
 class EnergySystemDataFrame:
     """Creates a multi-indexed pandas dataframe from a solph result object
     and holds methods to plot subsets of the data
@@ -47,8 +48,10 @@ class EnergySystemDataFrame:
         self.idx_start_date = kwargs.get('idx_start_date')
         self.ixd_date_freq = kwargs.get('ixd_date_freq')
         self.data_frame = None
-        if not self.result_object: self.result_object = self.energy_system.results
-        if not (self.data_frame): self.data_frame = self.create()
+        if not self.result_object:
+            self.result_object = self.energy_system.results
+        if not (self.data_frame):
+            self.data_frame = self.create()
 
     def create(self):
         """ Method for creating a multi-index pandas dataframe of
@@ -115,11 +118,11 @@ class EnergySystemDataFrame:
         df_long = pd.DataFrame()
         for index, cols in df.iterrows():
             df_extract = pd.DataFrame.from_dict(
-                         {'datetime': cols.ix['datetime'],
-                         'val': cols.ix['val']})
+                {'datetime': cols.ix['datetime'],
+                 'val': cols.ix['val']})
             df_extract = pd.concat(
                 [df_extract, cols.drop(['datetime', 'val']).to_frame().T],
-                 axis=1).fillna(method='ffill').fillna(method='bfill')
+                axis=1).fillna(method='ffill').fillna(method='bfill')
             df_long = pd.concat([df_long, df_extract], ignore_index=True)
 
         # create multiindexed dataframe
@@ -130,7 +133,7 @@ class EnergySystemDataFrame:
                                           names=['bus_uid', 'bus_type', 'type',
                                                  'obj_uid', 'datetime'])
         df_multiindex = pd.DataFrame(df_long['val'].values,
-                                    columns=['val'], index=index)
+                                     columns=['val'], index=index)
 
         # sort MultiIndex to work correctly
         df_multiindex.sort_index(inplace=True)
@@ -166,13 +169,14 @@ class EnergySystemDataFrame:
 
         # slicing
         idx = pd.IndexSlice
-        subset = self.data_frame.loc[idx[[kwargs.get('bus_uid')],
-                                         [kwargs.get('bus_type')],
-                                         [kwargs.get('type')],
-                                          :,
-                                          slice(
-                                          pd.Timestamp(kwargs.get('date_from')),
-                                          pd.Timestamp(kwargs.get('date_to')))]]
+        subset = self.data_frame.loc[idx[
+            [kwargs.get('bus_uid')],
+            [kwargs.get('bus_type')],
+            [kwargs.get('type')],
+            :,
+            slice(
+                pd.Timestamp(kwargs.get('date_from')),
+                pd.Timestamp(kwargs.get('date_to')))]]
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
 
@@ -189,12 +193,12 @@ class EnergySystemDataFrame:
         [(ax.set_ylabel(kwargs.get('ylabel')),
           ax.set_xlabel(kwargs.get('xlabel')),
           #ax.set_xticks(range(0,len(dates),1), minor=True),
-          ax.set_xticks(range(0,len(dates),kwargs.get('tick_distance')),
+          ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
                         minor=False),
           ax.set_xticklabels(
               [item.strftime('%d-%m-%Y')
                for item in dates.tolist()[0::kwargs.get('tick_distance')]],
-              rotation=0,minor=False),
+              rotation=0, minor=False),
           ax.legend(loc='upper right')
           )
          for ax in plt.gcf().axes]
