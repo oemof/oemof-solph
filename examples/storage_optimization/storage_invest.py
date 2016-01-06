@@ -179,9 +179,16 @@ if __name__ == "__main__":
                    ylabel="Date", tick_distance = 24*7*4*3)
 
     plt.show()
+    # Plotting a combined stacked plot
+    fig = plt.figure(figsize=(24, 14))
+    plt.rcParams.update({'font.size': 14})
+    plt.rc('legend', **{'fontsize': 19})
+    ax = fig.add_subplot(1, 1, 1)
 
-    # Alternative plotting variant
-    # Setting the time range to plot
-    prange = pd.date_range(pd.datetime(energysystem.year, 6, 1, 0, 0),
-                           periods=168, freq='H')
-    pp.use_devplot(energysystem, bel.uid, prange)
+    es_df.stackplot(bus_uid="bel", bus_type="el", ax=ax,
+                    date_from="2016-06-01 00:00:00",
+                    date_to="2016-06-8 00:00:00",
+                    title="Electricity bus",
+                    ylabel="Power in MW", xlabel="Date",
+                    linewidth=4,
+                    tick_distance=24)
