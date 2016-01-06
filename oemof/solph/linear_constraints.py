@@ -296,7 +296,7 @@ def add_simple_extraction_chp_relation(model, block):
     def power_heat_rule(block, e, t):
         lhs = model.w[e, model.O[e][0], t]
         rhs = sigma[e] *  model.w[e, model.O[e][1], t]
-        return(lhs <= rhs)
+        return(lhs >= rhs)
     block.pth_relation = po.Constraint(block.indexset, rule=power_heat_rule,
                                        doc="P <= sigma * Q")
 
