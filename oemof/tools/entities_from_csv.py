@@ -5,7 +5,6 @@
 """
 import pandas as pd
 from oemof.core.network.entities import Bus
-from oemof.core.network.entities import components as cp
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import transformers as transformer
@@ -218,7 +217,6 @@ def add_chp(row, **kwargs):
         obj = cls(**kwargs)
         transformers.append(obj)
 
-import csvmapper as mapper
 def entities_from_csv(files, entities_dict=None):
     """ Creates 'oemof-objects' from csv files by the use of pandas dataframes
 
@@ -247,19 +245,19 @@ def entities_from_csv(files, entities_dict=None):
         else:
             raise Warning('No csv data for bus prices!')
             busprices = pd.DataFrame()
-        bus_df.apply(mapper.add_bus, axis=1, busprices=busprices,
+        bus_df.apply(add_bus, axis=1, busprices=busprices,
                      busses=entities_dict['busses'])
     # transformers
     file = files.get('transformers')
     if file is not None:
         df = pd.read_csv(file)
-        df.apply(mapper.add_transformer, axis=1, busses=entities_dict['busses'],
+        df.apply(add_transformer, axis=1, busses=entities_dict['busses'],
                  transformers=entities_dict['transformers'])
 
     file = files.get('storages')
     if file is not None:
         df = pd.read_csv(file)
-        df.apply(mapper.add_storage, axis=1, busses=entities_dict['busses'],
+        df.apply(add_storage, axis=1, busses=entities_dict['busses'],
                  transformers=entities_dict['storages'])
 
     file = files.get('sources')
@@ -270,7 +268,7 @@ def entities_from_csv(files, entities_dict=None):
             sourcevalues = pd.read_csv(values_csv)
         else:
             raise ValueError('No csv data found for source values!')
-        df.apply(mapper.add_source, axis=1, busses=entities_dict['busses'],
+        df.apply(add_source, axis=1, busses=entities_dict['busses'],
                  sources=entities_dict['sources'], sourcevalues=sourcevalues)
 
     file = files.get('sinks')
@@ -281,13 +279,13 @@ def entities_from_csv(files, entities_dict=None):
             sinkvalues = pd.read_csv(values_csv)
         else:
             raise ValueError('No csv data found for sink values!')
-        df.apply(mapper.add_sink, axis=1, busses=entities_dict['busses'],
+        df.apply(add_sink, axis=1, busses=entities_dict['busses'],
                  sinks=entities_dict['sinks'], sinkvalues=sinkvalues)
 
     file = files.get('chps', None)
     if file is not None:
         chp_df = pd.read_csv(file)
-        chp_df.apply(mapper.add_chp, axis=1, busses=entities_dict['busses'],
+        chp_df.apply(add_chp, axis=1, busses=entities_dict['busses'],
                      transformers=entities_dict['transformers'])
 
     entities = sum([entities_dict[k] for k in entities_dict.keys()], [])
