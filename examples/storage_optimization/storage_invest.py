@@ -140,6 +140,8 @@ storage = transformer.Storage(uid='sto_simple',
 # Optimise the energy system and plot the results
 ###############################################################################
 
+# If you dumped the energysystem once, you can skip the optimisation wtih '#'
+# and use the restore method.
 energysystem.optimize()
 
 # energysystem.dump()
