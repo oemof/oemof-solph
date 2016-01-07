@@ -8,11 +8,10 @@ from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import transformers as transformer
+from ..core.network.entities.components import transports as transport
 
-
-# busses ######################################################################
 def add_bus(row, **kwargs):
-    """ Adds bus object ot list of busses. The function is used
+    r""" Adds bus object ot list of busses. The function is used
     by apply() method of pandas data frames.
 
     Parameters:
@@ -34,11 +33,12 @@ def add_bus(row, **kwargs):
     # if price is constant
     else:
         price = row['price']
+
     if row.get('sum_out_limit', False) == False or 'FALSE':
         sum_out_limit = float('+inf')
     else:
         sum_out_limit = float(row['sum_out_limit'])
-
+    # set kwargs from row items
     kwargs = {}
     for k in row.keys():
         kwargs.update({k: row[k]})
@@ -48,7 +48,7 @@ def add_bus(row, **kwargs):
     busses.append(obj)
 
 def add_source(row, **kwargs):
-    """ Adds source object ot list of source. The function is used
+    r""" Adds source object ot list of source. The function is used
     by apply() method of pandas data frames.
 
     Parameters:
@@ -83,7 +83,7 @@ def add_source(row, **kwargs):
     sources.append(obj)
 
 def add_sink(row, **kwargs):
-    """ Adds sink object ot list of transformers. The function is used
+    r""" Adds sink object ot list of transformers. The function is used
     by apply() method of pandas data frames.
 
     Parameters:
@@ -114,7 +114,7 @@ def add_sink(row, **kwargs):
     sinks.append(obj)
 
 def add_transformer(row, **kwargs):
-    """ Adds transformer objects ot list of transformers. The function is used
+    r""" Adds transformer objects ot list of transformers. The function is used
     by apply() method of pandas data frames.
 
     Parameters:
@@ -130,6 +130,7 @@ def add_transformer(row, **kwargs):
         busses = kwargs.get('busses', None)
         transformers = kwargs.get('transformers', [])
         # get transformer class
+
         cls = getattr(transformer, row['class'])
 
         # set kwargs from row
@@ -150,7 +151,7 @@ def add_transformer(row, **kwargs):
         transformers.append(obj)
 
 def add_storage(row, **kwargs):
-    """ Adds storage objects ot list of storages. The function is used by
+    r""" Adds storage objects ot list of storages. The function is used by
     apply() method of pandas data frames.
 
     Parameters:
@@ -172,8 +173,8 @@ def add_storage(row, **kwargs):
         for k in row.keys():
             kwargs.update({k: row[k]})
         # set special kwargs (conversion to list etc. )
-        kwargs['out_max'] = [row['out_max']]
-        kwargs['in_max'] = [row['in_max']]
+        kwargs['out_max'] = [row.get('out_max')]
+        kwargs['in_max'] = [row.get('in_max')]
         kwargs['outputs'] = [bus for bus in busses if bus.uid == row["output"]]
         kwargs['inputs'] = [b for b in busses if b.uid == row['input']]
 
@@ -182,7 +183,7 @@ def add_storage(row, **kwargs):
         transformers.append(obj)
 
 def add_chp(row, **kwargs):
-    """ Adds chps objects ot list of transformers. The function is used by
+    r""" Adds chps objects ot list of transformers. The function is used by
     apply() method of pandas data frames.
 
     Parameters:
@@ -244,7 +245,7 @@ def add_transport(row, **kwargs):
         transports.append(obj)
 
 def entities_from_csv(files, entities_dict=None):
-    """ Creates 'oemof-objects' from csv files by the use of pandas dataframes
+    r""" Creates 'oemof-objects' from csv files by the use of pandas dataframes
 
     Parameters:
     -----------
