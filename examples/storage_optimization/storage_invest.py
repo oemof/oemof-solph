@@ -151,50 +151,33 @@ es_df = tpd.EnergySystemDataFrame(energy_system=energysystem,
                                   ixd_date_freq="H")
 es_df.data_frame.describe
 
-import pandas as pd
+# Plotting line plots
+es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
+               date_from="2016-01-01 00:00:00",
+               date_to="2016-01-31 00:00:00",
+               title="January 2016", xlabel="Power in MW",
+               ylabel="Date", tick_distance=24*7)
 
-# slicing
-idx = pd.IndexSlice
-subset = es_df.data_frame.loc[idx[
-    ["bel"],
-    ["el"],
-    ["input"],
-    :,
-    slice(
-        pd.Timestamp("2016-01-01 00:00:00"),
-        pd.Timestamp("2016-01-01 03:00:00"))]]
-# unstacking object/component level to get columns
-subset = subset.unstack(level='obj_uid')
+es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
+               date_from="2016-01-01 00:00:00",
+               date_to="2016-12-31 00:00:00",
+               title="Year 2016", xlabel="Outflow in MW",
+               ylabel="Date", tick_distance=24*7*4*3)
 
-subset.plot(title="Title", xlabel="Date", ylabel="Power in MW")
+plt.show()
 
-## Plotting line plots
-#es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
-#               date_from="2016-01-01 00:00:00",
-#               date_to="2016-01-31 00:00:00",
-#               title="January 2016", xlabel="Power in MW",
-#               ylabel="Date", tick_distance=24*7)
+# Plotting a combined stacked plot
+fig = plt.figure(figsize=(24, 14))
+plt.rcParams.update({'font.size': 14})
+plt.rc('legend', **{'fontsize': 19})
+ax = fig.add_subplot(1, 1, 1)
 
-#es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
-#               date_from="2016-01-01 00:00:00",
-#               date_to="2016-12-31 00:00:00",
-#               title="Year 2016", xlabel="Outflow in MW",
-#               ylabel="Date", tick_distance=24*7*4*3)
-#
-#plt.show()
-#
-## Plotting a combined stacked plot
-#fig = plt.figure(figsize=(24, 14))
-#plt.rcParams.update({'font.size': 14})
-#plt.rc('legend', **{'fontsize': 19})
-#ax = fig.add_subplot(1, 1, 1)
-#
-#es_df.stackplot(bus_uid="bel", bus_type="el", ax=ax,
-#                date_from="2016-06-01 00:00:00",
-#                date_to="2016-06-8 00:00:00",
-#                title="Electricity bus",
-#                ylabel="Power in MW", xlabel="Date",
-#                linewidth=4,
-#                tick_distance=24)
-#
-#plt.show()
+es_df.stackplot(bus_uid="bel", bus_type="el", ax=ax,
+                date_from="2016-06-01 00:00:00",
+                date_to="2016-06-8 00:00:00",
+                title="Electricity bus",
+                ylabel="Power in MW", xlabel="Date",
+                linewidth=4,
+                tick_distance=24)
+
+plt.show()
