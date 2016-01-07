@@ -139,6 +139,14 @@ class OptimizationModel(po.ConcreteModel):
         block : SimpleBlock()
         """
 
+        if block.optimization_options:
+            for k in block.optimization_options:
+                block.default_optimization_options.update({
+                    k: block.optimization_options[k]})
+            block.optimization_options = block.default_optimization_options
+        else:
+            block.optimization_options = block.default_optimization_options
+
         if (block.optimization_options.get('investment', False) and
             'milp_constr' in block.optimization_options):
             raise ValueError('Component can not be modeled with milp-constr ' +
@@ -167,8 +175,6 @@ class OptimizationModel(po.ConcreteModel):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective:',
-              str(objective_options['function']))
 
         revenue_objects = objective_options.get('revenue_objects')
         cost_objects = objective_options.get('cost_objects')
@@ -376,7 +382,6 @@ def _(e, om, block):
                                       om.timesteps,
                                       within=po.NonNegativeReals)
 
-    print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
     lc.add_bus_balance(om, block)
 
@@ -406,18 +411,9 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_input_costs(om, block)
-        objfuncexprs.add_revenues(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     om.default_assembler(block)
     return om
@@ -441,18 +437,9 @@ def _(e, om, block):
         lc.add_simple_io_relation(om, block)
         lc.add_simple_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_input_costs(om, block)
-        objfuncexprs.add_revenues(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -474,18 +461,9 @@ def _(e, om, block):
         lc.add_simple_extraction_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
         var.set_bounds(om, block, side='input')
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_input_costs(om, block)
-        objfuncexprs.add_revenues(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -510,12 +488,9 @@ def _(e, om, block):
         milc.add_variable_linear_eta_relation(om, block)
         milc.set_bounds(om, block, side='output')
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints,
         'milp_constr': milp_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -536,15 +511,10 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_fixed_source(om, block)
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
 
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
+
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -564,17 +534,9 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_dispatch_source(om, block)
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_curtailment_costs(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     if block.optimization_options.get('investment', False):
         raise ValueError('Dispatch source + investment is not possible!')
@@ -644,17 +606,9 @@ def _(e, om, block):
             var.set_bounds(om, block, side='input')
         else:
             lc.add_storage_charge_discharge_limits(om, block)
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='capacity')
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if block.optimization_options:
-        default_optimization_options.update(block.optimization_options)
-    block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     if block.optimization_options.get('investment', False):
         block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)

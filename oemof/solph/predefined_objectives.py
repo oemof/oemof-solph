@@ -16,6 +16,7 @@ import oemof.solph as solph
 from ..core.network.entities import Bus
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
+from ..solph import linear_mixed_integer_constraints as milc
 
 def minimize_cost(self, cost_objects=None, revenue_objects=None):
     """ Builds objective function that minimises the total costs.
@@ -42,6 +43,8 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
 
     if cost_objects is None:
         c_blocks = [str(transformer.Simple),
+                    str(transformer.VariableEfficiencyCHP),
+                    str(transformer.SimpleExtractionCHP),
                     str(transformer.CHP),
                     str(source.FixedSource)]
     if revenue_objects is None:
@@ -67,6 +70,9 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
             # investment costs
             if block.optimization_options.get('investment', False):
                 expr += objexpr.add_capex(self, block, ref=ref)
+            if hasattr(block, 'z_start'):
+                expr += objexpr.add_startup_costs(self, block)
+
             # revenues
         if block.name in r_blocks:
             expr += objexpr.add_revenues(self, block, ref='output')
