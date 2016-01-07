@@ -217,6 +217,32 @@ def add_chp(row, **kwargs):
         obj = cls(**kwargs)
         transformers.append(obj)
 
+def add_transport(row, **kwargs):
+    r""" Adds transpport objects ot list of transports. The function is used by
+    apply() method of pandas data frames.
+
+    """
+    if not row['skip']:
+        busses = kwargs.get('busses', None)
+        transports = kwargs.get('transports', None)
+        cls = getattr(transport, row['class'])
+
+        # set kwargs from row
+        kwargs = {}
+        for k in row.keys():
+            kwargs.update({k: row[k]})
+
+        kwargs['eta'] = [row['eta']]
+        kwargs['out_max'] = [row['out_max']]
+        kwargs['in_max'] = [row.get('in_max')]
+        kwargs['inputs'] = [b for b in busses if b.uid == row['input']]
+
+        kwargs['outputs'] = [b for b in busses if b.uid == row['output']]
+
+        # instantiate object with kwargs
+        obj = cls(**kwargs)
+        transports.append(obj)
+
 def entities_from_csv(files, entities_dict=None):
     """ Creates 'oemof-objects' from csv files by the use of pandas dataframes
 
@@ -253,6 +279,12 @@ def entities_from_csv(files, entities_dict=None):
         df = pd.read_csv(file)
         df.apply(add_transformer, axis=1, busses=entities_dict['busses'],
                  transformers=entities_dict['transformers'])
+
+    file = files.get('transports')
+    if file is not None:
+        df = pd.read_csv(file)
+        df.apply(add_transport, axis=1, busses=entities_dict['busses'],
+                 transports=entities_dict['transports'])
 
     file = files.get('storages')
     if file is not None:
