@@ -175,8 +175,6 @@ class OptimizationModel(po.ConcreteModel):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective:',
-              str(objective_options['function']))
 
         revenue_objects = objective_options.get('revenue_objects')
         cost_objects = objective_options.get('cost_objects')
@@ -384,7 +382,6 @@ def _(e, om, block):
                                       om.timesteps,
                                       within=po.NonNegativeReals)
 
-    print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
     lc.add_bus_balance(om, block)
 
