@@ -258,7 +258,7 @@ def entities_from_csv(files, entities_dict=None):
     if file is not None:
         df = pd.read_csv(file)
         df.apply(add_storage, axis=1, busses=entities_dict['busses'],
-                 transformers=entities_dict['storages'])
+                 transformers=entities_dict['transformers'])
 
     file = files.get('sources')
     if file is not None:
