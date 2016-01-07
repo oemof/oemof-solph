@@ -10,9 +10,13 @@ import matplotlib.pyplot as plt
 # - Add storages to column "other".
 #   But only the state of charge? I think it is good to have load/unload
 #   as output/input (uwe)
+#   Yes! (Cord)
 #
 # - Create some "standard-slices" for plots e.g. all inputs of a specific bus
-# - Make dataframe creation and plotting configurable via params_dc{}
+# - Add option to use a real datetime-index as x-values and proper labeled
+#   y-values (e. g. not (wind,val) but wind) for subsets of the multiindex-df
+# - Make dataframe creation and plotting configurable with as less code as
+#   possible via **kwargs
 
 
 class EnergySystemDataFrame:
