@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 #   y-values (e. g. not (wind,val) but wind) for subsets of the multiindex-df
 # - Make dataframe creation and plotting configurable with as less code as
 #   possible via **kwargs
+# - Add possibility to define that dataframe is only created for spefific busses
+#   e.g. only for electrical busses or a given list of busses. This might be
+#   helpful for very big problems like renpass-gis, etc.
 
 
 class EnergySystemDataFrame:
@@ -188,7 +191,7 @@ class EnergySystemDataFrame:
                 pd.Timestamp(kwargs.get('date_to')))]]
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
-
+        
         # plotting: set matplotlib style
         mpl.style.use(kwargs.get('mpl_style'))
 
