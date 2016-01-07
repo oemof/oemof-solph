@@ -139,6 +139,14 @@ class OptimizationModel(po.ConcreteModel):
         block : SimpleBlock()
         """
 
+        if block.optimization_options:
+            for k in block.optimization_options:
+                block.default_optimization_options.update({
+                    k: block.optimization_options[k]})
+            block.optimization_options = block.default_optimization_options
+        else:
+            block.optimization_options = block.default_optimization_options
+
         if (block.optimization_options.get('investment', False) and
             'milp_constr' in block.optimization_options):
             raise ValueError('Component can not be modeled with milp-constr ' +
@@ -407,11 +415,8 @@ def _(e, om, block):
         lc.add_simple_io_relation(om, block)
         var.set_bounds(om, block, side='output')
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     om.default_assembler(block)
     return om
@@ -436,11 +441,8 @@ def _(e, om, block):
         lc.add_simple_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -463,11 +465,8 @@ def _(e, om, block):
         var.set_bounds(om, block, side='output')
         var.set_bounds(om, block, side='input')
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -492,12 +491,9 @@ def _(e, om, block):
         milc.add_variable_linear_eta_relation(om, block)
         milc.set_bounds(om, block, side='output')
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints,
         'milp_constr': milp_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -519,11 +515,9 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_fixed_source(om, block)
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints}
 
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -544,11 +538,8 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_dispatch_source(om, block)
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     if block.optimization_options.get('investment', False):
         raise ValueError('Dispatch source + investment is not possible!')
@@ -619,12 +610,8 @@ def _(e, om, block):
         else:
             lc.add_storage_charge_discharge_limits(om, block)
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints}
-
-    if block.optimization_options:
-        default_optimization_options.update(block.optimization_options)
-    block.optimization_options = default_optimization_options
 
     if block.optimization_options.get('investment', False):
         block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
