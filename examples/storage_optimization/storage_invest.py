@@ -170,7 +170,6 @@ plt.show()
 
 # Plotting a combined stacked plot
 fig = plt.figure(figsize=(24, 14))
-plt.rcParams.update({'font.size': 14})
 plt.rc('legend', **{'fontsize': 19})
 ax = fig.add_subplot(1, 1, 1)
 
