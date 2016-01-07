@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 
 class EnergySystemDataFrame:
-    """Creates a multi-indexed pandas dataframe from a solph result object
+    r"""Creates a multi-indexed pandas dataframe from a solph result object
     and holds methods to plot subsets of the data
 
     Note
@@ -65,7 +65,7 @@ class EnergySystemDataFrame:
             self.data_frame = self.create()
 
     def create(self):
-        """ Method for creating a multi-index pandas dataframe of
+        r""" Method for creating a multi-index pandas dataframe of
         the result object
 
         Parameters
@@ -152,7 +152,7 @@ class EnergySystemDataFrame:
         return df_multiindex
 
     def plot_bus(self, **kwargs):
-        """ Method for plotting all inputs/outputs of a bus
+        r""" Method for plotting all inputs/outputs of a bus
 
         Parameters
         ----------
@@ -191,7 +191,7 @@ class EnergySystemDataFrame:
                 pd.Timestamp(kwargs.get('date_to')))]]
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
-        
+
         # plotting: set matplotlib style
         mpl.style.use(kwargs.get('mpl_style'))
 
@@ -217,11 +217,11 @@ class EnergySystemDataFrame:
         return axt
 
     def stackplot(self, **kwargs):
-        r'''Creating a matplotlib figure object.
+        r"""Creating a matplotlib figure object.
 
         Parameters
         ----------
-        '''
+        """
 
         # Define default values
         kwargs.setdefault('bus_uid', None)
