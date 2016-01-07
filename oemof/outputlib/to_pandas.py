@@ -217,7 +217,10 @@ class EnergySystemDataFrame:
         r'''Creating a matplotlib figure object.
 
         Parameters
-        ----------'''
+        ----------
+        '''
+
+        # Define default values
         kwargs.setdefault('bus_uid', None)
         kwargs.setdefault('bus_type', None)
         kwargs.setdefault('ax', None)
@@ -234,6 +237,12 @@ class EnergySystemDataFrame:
         kwargs.setdefault('colormap_line', 'jet')
         kwargs.setdefault('df_plot_kwargs', {})
         kwargs.setdefault('linewidth', 2)
+        kwargs.setdefault('loc', 'center left')
+        kwargs.setdefault('bbox_to_anchor', (1, 0.5))
+        kwargs.setdefault('ncol', 1)
+        kwargs.setdefault('fancybox', True)
+        kwargs.setdefault('shadow', True)
+        kwargs.setdefault('drawstyle', 'steps-mid')
 
         my_kwargs = {
             'ax': kwargs['ax'],
@@ -250,9 +259,9 @@ class EnergySystemDataFrame:
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
         my_kwargs = {
-            'ax': ax,
+            'ax': kwargs['ax'],
             'stacked': True,
-            'drawstyle': 'steps-mid'}
+            'drawstyle': kwargs['drawstyle']}
 
         ax = self.plot_bus(
             bus_uid=kwargs['bus_uid'], bus_type=kwargs['bus_type'],
@@ -269,6 +278,7 @@ class EnergySystemDataFrame:
         ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
 
         # Put a legend to the right of the current axis
-        ax.legend(reversed(handles), reversed(labels), loc='center left',
-                  bbox_to_anchor=(1, 0.5), ncol=1, fancybox=True,
-                  shadow=True)
+        ax.legend(reversed(handles), reversed(labels), loc=kwargs['loc'],
+                  bbox_to_anchor=kwargs['bbox_to_anchor'],
+                  ncol=kwargs['ncol'], fancybox=kwargs['fancybox'],
+                  shadow=kwargs['shadow'])
