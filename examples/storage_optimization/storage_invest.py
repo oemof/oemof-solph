@@ -59,7 +59,7 @@ timesteps = [t for t in range(8760)]
 ###############################################################################
 
 simulation = es.Simulation(
-    timesteps=timesteps, stream_solver_output=True, solver='gurobi',
+    timesteps=timesteps, stream_solver_output=True, solver='glpk',
     objective_options={'function': predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(year=2016, simulation=simulation)
