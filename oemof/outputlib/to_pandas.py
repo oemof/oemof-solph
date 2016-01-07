@@ -189,19 +189,20 @@ class EnergySystemDataFrame:
             slice(
                 pd.Timestamp(kwargs.get('date_from')),
                 pd.Timestamp(kwargs.get('date_to')))]]
+        # extracting levels to use them in plot
+        obj_uids = subset.index.get_level_values('obj_uid').unique()
+        dates = subset.index.get_level_values('datetime').unique()
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
 
         # plotting: set matplotlib style
         mpl.style.use(kwargs.get('mpl_style'))
-
         # plotting: basic pandas plot
         axt = subset.plot(
             kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
             title=kwargs.get('title'), linewidth=kwargs.get('linewidth'),
             subplots=kwargs.get('subplots'), **kwargs['df_plot_kwargs'])
-        # plotting: adjustments
-        dates = subset.index.get_level_values('datetime').unique()
+        # plotting: adjustments        
         [(ax.set_ylabel(kwargs.get('ylabel')),
           ax.set_xlabel(kwargs.get('xlabel')),
           # ax.set_xticks(range(0,len(dates),1), minor=True),
@@ -211,7 +212,8 @@ class EnergySystemDataFrame:
               [item.strftime('%d-%m-%Y')
                for item in dates.tolist()[0::kwargs.get('tick_distance')]],
               rotation=0, minor=False),
-          ax.legend(loc='upper right')
+          ax.legend(obj_uids,
+                    loc='upper right')
           )
          for ax in plt.gcf().axes]
         return axt
