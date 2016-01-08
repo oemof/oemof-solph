@@ -175,7 +175,6 @@ class EnergySystemDataFrame:
         kwargs.setdefault('tick_distance', 24)
         kwargs.setdefault('subplots', False)
         kwargs.setdefault('colormap', 'Spectral')
-        kwargs.setdefault('mpl_style', 'ggplot')
         kwargs.setdefault('df_plot_kwargs', {})
         kwargs.setdefault('linewidth', 2)
 
@@ -196,7 +195,9 @@ class EnergySystemDataFrame:
         subset = subset.unstack(level='obj_uid')
 
         # plotting: set matplotlib style
-        mpl.style.use(kwargs.get('mpl_style'))
+        if kwargs.get('mpl_style'):
+            mpl.style.use(kwargs.get('mpl_style'))
+
         # plotting: basic pandas plot
         axt = subset.plot(
             kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
