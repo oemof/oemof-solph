@@ -238,6 +238,8 @@ class EnergySystemDataFrame:
 
         self.stackplot_part(bus_uid, date_from, date_to, ax, **kwargs)
 
+        plt.show()
+
     def stackplot_part(self, bus_uid, date_from, date_to, ax, **kwargs):
         r"""Creating a matplotlib figure object.
 
