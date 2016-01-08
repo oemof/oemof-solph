@@ -188,9 +188,11 @@ class EnergySystemDataFrame:
             slice(
                 pd.Timestamp(kwargs.get('date_from')),
                 pd.Timestamp(kwargs.get('date_to')))]]
+
         # extracting levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
         dates = subset.index.get_level_values('datetime').unique()
+
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
 
