@@ -199,25 +199,23 @@ class EnergySystemDataFrame:
             mpl.style.use(kwargs.get('mpl_style'))
 
         # plotting: basic pandas plot
-        axt = subset.plot(
+        ax = subset.plot(
             kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
             title=kwargs.get('title'), linewidth=kwargs.get('linewidth'),
             subplots=kwargs.get('subplots'), **kwargs['df_plot_kwargs'])
-        # plotting: adjustments        
-        [(ax.set_ylabel(kwargs.get('ylabel')),
-          ax.set_xlabel(kwargs.get('xlabel')),
-          # ax.set_xticks(range(0,len(dates),1), minor=True),
-          ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
-                        minor=False),
-          ax.set_xticklabels(
-              [item.strftime('%d-%m-%Y')
-               for item in dates.tolist()[0::kwargs.get('tick_distance')]],
-              rotation=0, minor=False),
-          ax.legend(obj_uids,
-                    loc='upper right')
-          )
-         for ax in plt.gcf().axes]
-        return axt
+
+        # plotting: adjustments
+        ax.set_ylabel(kwargs.get('ylabel')),
+        ax.set_xlabel(kwargs.get('xlabel')),
+        # ax.set_xticks(range(0,len(dates),1), minor=True),
+        ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
+                      minor=False),
+        ax.set_xticklabels(
+            [item.strftime('%d-%m-%Y')
+             for item in dates.tolist()[0::kwargs.get('tick_distance')]],
+            rotation=0, minor=False),
+        ax.legend(obj_uids, loc='upper right')
+        return ax
 
     def stackplot(self, **kwargs):
         r"""Creating a matplotlib figure object.
