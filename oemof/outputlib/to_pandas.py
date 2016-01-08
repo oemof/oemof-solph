@@ -151,7 +151,7 @@ class EnergySystemDataFrame:
 
         return df_multiindex
 
-    def plot_bus(self, **kwargs):
+    def plot_bus(self, bus_uid, date_from, date_to, **kwargs):
         r""" Method for plotting all inputs/outputs of a bus
 
         Parameters
@@ -162,11 +162,7 @@ class EnergySystemDataFrame:
         date_from : string (Start date selection e.g. "2016-01-01 00:00:00")
         date_to : string (End date selection e.g. "2016-03-01 00:00:00")
         """
-        kwargs.setdefault('bus_uid', None)
-        kwargs.setdefault('bus_type', None)
         kwargs.setdefault('type', None)
-        kwargs.setdefault('date_from', None)
-        kwargs.setdefault('date_to', None)
         kwargs.setdefault('kind', 'line')
         kwargs.setdefault('title', 'Connected components')
         kwargs.setdefault('xlabel', 'Date')
@@ -180,14 +176,15 @@ class EnergySystemDataFrame:
 
         # slicing
         idx = pd.IndexSlice
+
         subset = self.data_frame.loc[idx[
-            [kwargs.get('bus_uid')],
+            [bus_uid],
             :,
             [kwargs.get('type')],
             :,
             slice(
-                pd.Timestamp(kwargs.get('date_from')),
-                pd.Timestamp(kwargs.get('date_to')))]]
+                pd.Timestamp(date_from),
+                pd.Timestamp(date_to))]]
 
         # extracting levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
@@ -256,10 +253,8 @@ class EnergySystemDataFrame:
             'stacked': True}
 
         ax = self.plot_bus(
-            bus_uid=kwargs['bus_uid'], bus_type=kwargs['bus_type'],
+            bus_uid, date_from, date_to,
             type="input", kind='bar', linewidth=0,
-            date_from=kwargs['date_from'],
-            date_to=kwargs['date_to'],
             colormap=kwargs['colormap_bar'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
@@ -270,10 +265,8 @@ class EnergySystemDataFrame:
             'drawstyle': kwargs['drawstyle']}
 
         ax = self.plot_bus(
-            bus_uid=kwargs['bus_uid'], bus_type=kwargs['bus_type'],
+            bus_uid, date_from, date_to,
             type="output", kind='line', linewidth=kwargs['linewidth'],
-            date_from=kwargs['date_from'],
-            date_to=kwargs['date_to'],
             colormap=kwargs['colormap_line'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
