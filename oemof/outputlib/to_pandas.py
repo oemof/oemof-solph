@@ -216,7 +216,29 @@ class EnergySystemDataFrame:
         ax.legend(obj_uids, loc='upper right')
         return ax
 
-    def stackplot(self, **kwargs):
+    def stackplot(self, bus_uid, date_from, date_to, **kwargs):
+        r"""Creating a matplotlib figure object.
+
+        Parameters
+        ----------
+        """
+
+        kwargs.setdefault('figwidth', 24)
+        kwargs.setdefault('figheight', 14)
+        kwargs.setdefault('fontlegend', 19)
+        kwargs.setdefault('fontgeneral', 19)
+        kwargs.setdefault('style', 'grayscale')
+
+        fig = plt.figure(figsize=(kwargs['figwidth'], kwargs['figheight']))
+        plt.rc('legend', **{'fontsize': kwargs['fontlegend']})
+        plt.rcParams.update({'font.size': kwargs['fontgeneral']})
+        plt.style.use(kwargs['style'])
+
+        ax = fig.add_subplot(1, 1, 1)
+
+        self.stackplot_part(bus_uid, date_from, date_to, ax, **kwargs)
+
+    def stackplot_part(self, bus_uid, date_from, date_to, ax, **kwargs):
         r"""Creating a matplotlib figure object.
 
         Parameters
@@ -248,7 +270,7 @@ class EnergySystemDataFrame:
         kwargs.setdefault('drawstyle', 'steps-mid')
 
         my_kwargs = {
-            'ax': kwargs['ax'],
+            'ax': ax,
             'width': kwargs['width'],
             'stacked': True}
 
@@ -260,7 +282,7 @@ class EnergySystemDataFrame:
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
         my_kwargs = {
-            'ax': kwargs['ax'],
+            'ax': ax,
             'stacked': True,
             'drawstyle': kwargs['drawstyle']}
 
