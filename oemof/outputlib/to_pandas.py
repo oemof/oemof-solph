@@ -182,7 +182,7 @@ class EnergySystemDataFrame:
         idx = pd.IndexSlice
         subset = self.data_frame.loc[idx[
             [kwargs.get('bus_uid')],
-            [kwargs.get('bus_type')],
+            :,
             [kwargs.get('type')],
             :,
             slice(
