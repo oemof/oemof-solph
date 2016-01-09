@@ -90,23 +90,23 @@ class EnergySystemDataFrame:
                          freq=self.ixd_date_freq)]
                     row['val'] = [self.result_object[i].get(e)]
                     df = df.append(row)
-                        
-#                    # self referenced components
-#                    elif e is o:
-#                        row['bus_uid'] = [e.uid]
-#                        row['bus_type'] = [e.type]
-#                        row['type'] = ['other']
-#                        row['obj_uid'] = ['self_referenced']
-#                        row['datetime'] = \
-#                            [pd.date_range(self.idx_start_date,
-#                             periods=len(v), freq=self.ixd_date_freq)]
-#                        row['val'] = [v]
-#                        df = df.append(row)                        
-                        
+                    # self referenced components in else-block
+                    if i in self.result_object.get(i, {}):
+                        row['bus_uid'] = [e.uid]
+                        row['bus_type'] = [e.type]
+                        row['type'] = ['other']
+                        row['obj_uid'] = [i.uid]
+                        row['datetime'] = \
+                            [pd.date_range(self.idx_start_date,
+                             periods=len(self.result_object[i].get(e)),
+                             freq=self.ixd_date_freq)]
+                        row['val'] = [self.result_object[i].get(e)]
+                        df = df.append(row)
                 # outputs
                 for k, v in o.items():
                     # skip self referenced entries (duals, etc.) and
                     # string keys to put them into "other"
+                    # check if self.result_object.get(i, {} works, too
                     if k is not e and not (isinstance(k, str)):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
@@ -119,25 +119,19 @@ class EnergySystemDataFrame:
                         df = df.append(row)
                 # other
                 for k, v in o.items():
-                    row['bus_uid'] = [e.uid]
-                    row['bus_type'] = [e.type]
-                    row['type'] = ['other']
-                    # self referenced entries (duals, etc.) in else block
-                    if k is not e and isinstance(k, str):
-                        row['obj_uid'] = [k]
-                        row['datetime'] = \
-                            [pd.date_range(self.idx_start_date,
-                             periods=len(v), freq=self.ixd_date_freq)]
-                        row['val'] = [v]
-                        df = df.append(row)
-                    else:
+                   # self referenced entries (duals, etc.) in else block
+                    # check if self.result_object.get(i, {} works, too
+                    if isinstance(k, str):
+                        row['bus_uid'] = [e.uid]
+                        row['bus_type'] = [e.type]
+                        row['type'] = ['other']
                         row['obj_uid'] = ['duals']
                         row['datetime'] = \
                             [pd.date_range(self.idx_start_date,
                              periods=len(v), freq=self.ixd_date_freq)]
                         row['val'] = [v]
                         df = df.append(row)
-                
+
         # split date and value lists columns into rows (long format)
         df_long = pd.DataFrame()
         for index, cols in df.iterrows():
@@ -201,7 +195,7 @@ class EnergySystemDataFrame:
             :,
             slice(
                 pd.Timestamp(kwargs.get('date_from')),
-                pd.Timestamp(kwargs.get('date_to')))]]
+                pd.Timestamp(kwargs.get('date_to')))], :]
         # extracting levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
         dates = subset.index.get_level_values('datetime').unique()
@@ -215,7 +209,7 @@ class EnergySystemDataFrame:
             kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
             title=kwargs.get('title'), linewidth=kwargs.get('linewidth'),
             subplots=kwargs.get('subplots'), **kwargs['df_plot_kwargs'])
-        # plotting: adjustments        
+        # plotting: adjustments
         [(ax.set_ylabel(kwargs.get('ylabel')),
           ax.set_xlabel(kwargs.get('xlabel')),
           # ax.set_xticks(range(0,len(dates),1), minor=True),

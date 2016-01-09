@@ -140,7 +140,7 @@ storage = transformer.Storage(uid='sto_simple',
 # Optimise the energy system and plot the results
 ###############################################################################
 
-# If you dumped the energysystem once, you can skip the optimisation wtih '#'
+# If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
 energysystem.optimize()
 
@@ -152,6 +152,12 @@ es_df = tpd.EnergySystemDataFrame(energy_system=energysystem,
                                   idx_start_date="2016-01-01 00:00:00",
                                   ixd_date_freq="H")
 es_df.data_frame.describe
+
+# Example slice from dataframe
+es_df.data_frame.index.get_level_values('obj_uid').unique()
+idx = pd.IndexSlice
+es_df.data_frame.loc[idx[:, :, ('input', 'output', 'other'), :,
+                         "2016-01-01 02:00:00"], :]
 
 # Plotting line plots
 es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
@@ -167,8 +173,6 @@ es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
                ylabel="Date", tick_distance=24*7*4*3)
 
 plt.show()
-
-es_df.data_frame.index.get_level_values('obj_uid').unique()
 
 # Plotting a combined stacked plot
 fig = plt.figure(figsize=(24, 14))
