@@ -75,21 +75,34 @@ class EnergySystemDataFrame:
         df = pd.DataFrame(columns=['bus_uid', 'bus_type', 'type',
                                    'obj_uid', 'datetime', 'val'])
         for e, o in self.result_object.items():
+            # busses
             if 'Bus' in str(e.__class__):
                 row = pd.DataFrame()
                 # inputs
                 for i in e.inputs:
-                    if i in self.result_object:
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['input']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = \
-                            [pd.date_range(self.idx_start_date,
-                             periods=len(self.result_object[i].get(e)),
-                             freq=self.ixd_date_freq)]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
+                    row['bus_uid'] = [e.uid]
+                    row['bus_type'] = [e.type]
+                    row['type'] = ['input']
+                    row['obj_uid'] = [i.uid]
+                    row['datetime'] = \
+                        [pd.date_range(self.idx_start_date,
+                         periods=len(self.result_object[i].get(e)),
+                         freq=self.ixd_date_freq)]
+                    row['val'] = [self.result_object[i].get(e)]
+                    df = df.append(row)
+                        
+#                    # self referenced components
+#                    elif e is o:
+#                        row['bus_uid'] = [e.uid]
+#                        row['bus_type'] = [e.type]
+#                        row['type'] = ['other']
+#                        row['obj_uid'] = ['self_referenced']
+#                        row['datetime'] = \
+#                            [pd.date_range(self.idx_start_date,
+#                             periods=len(v), freq=self.ixd_date_freq)]
+#                        row['val'] = [v]
+#                        df = df.append(row)                        
+                        
                 # outputs
                 for k, v in o.items():
                     # skip self referenced entries (duals, etc.) and
@@ -124,7 +137,7 @@ class EnergySystemDataFrame:
                              periods=len(v), freq=self.ixd_date_freq)]
                         row['val'] = [v]
                         df = df.append(row)
-
+                
         # split date and value lists columns into rows (long format)
         df_long = pd.DataFrame()
         for index, cols in df.iterrows():

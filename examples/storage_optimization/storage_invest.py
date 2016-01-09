@@ -168,6 +168,8 @@ es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
 
 plt.show()
 
+es_df.data_frame.index.get_level_values('obj_uid').unique()
+
 # Plotting a combined stacked plot
 fig = plt.figure(figsize=(24, 14))
 plt.rc('legend', **{'fontsize': 19})
