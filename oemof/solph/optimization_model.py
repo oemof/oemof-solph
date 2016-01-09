@@ -6,6 +6,7 @@
 from functools import singledispatch
 
 import pyomo.environ as po
+import logging
 
 try:
     import variables as var
@@ -18,7 +19,6 @@ except:
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
-    from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
 
@@ -179,9 +179,14 @@ class OptimizationModel(po.ConcreteModel):
         revenue_objects = objective_options.get('revenue_objects')
         cost_objects = objective_options.get('cost_objects')
 
-        objective_options['function'](self,
-                                      cost_objects=cost_objects,
-                                      revenue_objects=revenue_objects)
+        if objective_options.get('function') is None:
+            logging.warning('No objective function selected. If you want '+
+                            'to build an objective yourself you can' +
+                            'ignore this warning.')
+        else:
+            objective_options['function'](self,
+                                          cost_objects=cost_objects,
+                                          revenue_objects=revenue_objects)
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
