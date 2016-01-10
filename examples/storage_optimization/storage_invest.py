@@ -159,7 +159,6 @@ es_df = tpd.EnergySystemDataFrame(energy_system=energysystem,
 es_df.data_frame.describe
 es_df.data_frame.index.get_level_values('bus_uid').unique()
 es_df.data_frame.index.get_level_values('bus_type').unique()
-es_df.data_frame.index.get_level_values('obj_uid').unique()
 idx = pd.IndexSlice
 es_df.data_frame.loc[idx[:, :, ('input', 'output', 'other'), :,
                          "2016-01-01 02:00:00"], :]
