@@ -27,7 +27,7 @@ class EnergySystemDataFrame:
         Start date of the dataframe date index e.g. "2016-01-01 00:00:00"
     ixd_date_freq : string
         Frequency for the dataframe date index e.g. "H" for hours
-    busses : list if strings
+    bus_uids : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
 
@@ -41,7 +41,7 @@ class EnergySystemDataFrame:
         Frequency for the dataframe date index e.g. "H" for hours
     data_frame : pandas dataframe
         Multi-indexed pandas dataframe holding the data from the result object
-    busses : list if strings
+    bus_uids : list if strings
         List of strings with busses that should be contained in dataframe
     """
     def __init__(self, **kwargs):
@@ -52,13 +52,14 @@ class EnergySystemDataFrame:
         self.energy_system = kwargs.get('energy_system')
         self.idx_start_date = kwargs.get('idx_start_date')
         self.ixd_date_freq = kwargs.get('ixd_date_freq')
-        self.busses = kwargs.get('busses')
+        self.bus_uids = kwargs.get('bus_uids')
+#        self.bus_types = kwargs.get('bus_types')
         self.data_frame = None
         if not self.result_object:
             self.result_object = self.energy_system.results
-            if not self.busses:
-                self.busses = [e.uid for e in self.result_object.keys()
-                               if 'Bus' in str(e.__class__)]
+            if not self.bus_uids:
+                self.bus_uids = [e.uid for e in self.result_object.keys()
+                                 if 'Bus' in str(e.__class__)]
         if not (self.data_frame):
             self.data_frame = self.create()
 
@@ -74,7 +75,7 @@ class EnergySystemDataFrame:
                                    'obj_uid', 'datetime', 'val'])
         for e, o in self.result_object.items():
             # busses
-            if 'Bus' in str(e.__class__) and e.uid in self.busses:
+            if 'Bus' in str(e.__class__) and e.uid in self.bus_uids:
                 row = pd.DataFrame()
                 # inputs
                 for i in e.inputs:
