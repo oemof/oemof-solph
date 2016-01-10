@@ -147,13 +147,17 @@ energysystem.optimize()
 # energysystem.dump()
 # energysystem.restore()
 
+#[e.uid for e in energysystem.results.keys()
+# if 'Bus' in str(e.__class__)]
+
 # Creation of a multi-indexed pandas dataframe
 es_df = tpd.EnergySystemDataFrame(energy_system=energysystem,
                                   idx_start_date="2016-01-01 00:00:00",
                                   ixd_date_freq="H")
-es_df.data_frame.describe
 
-# Example slice from dataframe
+# Example usage of dataframe object
+es_df.data_frame.describe
+es_df.data_frame.index.get_level_values('bus_uid').unique()
 es_df.data_frame.index.get_level_values('obj_uid').unique()
 idx = pd.IndexSlice
 es_df.data_frame.loc[idx[:, :, ('input', 'output', 'other'), :,
