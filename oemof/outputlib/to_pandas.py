@@ -30,6 +30,9 @@ class EnergySystemDataFrame:
     bus_uids : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
+    bus_types : list if strings
+        List of strings with bus types that should be contained in dataframe.
+        If not set, all bus types are contained.
 
     Attributes
     ----------
@@ -43,6 +46,8 @@ class EnergySystemDataFrame:
         Multi-indexed pandas dataframe holding the data from the result object
     bus_uids : list if strings
         List of strings with busses that should be contained in dataframe
+    bus_types : list if strings
+        List of strings with bus types that should be contained in dataframe.
     """
     def __init__(self, **kwargs):
         # default values if not arguments are passed
@@ -53,13 +58,16 @@ class EnergySystemDataFrame:
         self.idx_start_date = kwargs.get('idx_start_date')
         self.ixd_date_freq = kwargs.get('ixd_date_freq')
         self.bus_uids = kwargs.get('bus_uids')
-#        self.bus_types = kwargs.get('bus_types')
+        self.bus_types = kwargs.get('bus_types')
         self.data_frame = None
         if not self.result_object:
             self.result_object = self.energy_system.results
             if not self.bus_uids:
                 self.bus_uids = [e.uid for e in self.result_object.keys()
                                  if 'Bus' in str(e.__class__)]
+            if not self.bus_types:
+                self.bus_types = [e.type for e in self.result_object.keys()
+                                  if 'Bus' in str(e.__class__)]
         if not (self.data_frame):
             self.data_frame = self.create()
 
@@ -75,7 +83,9 @@ class EnergySystemDataFrame:
                                    'obj_uid', 'datetime', 'val'])
         for e, o in self.result_object.items():
             # busses
-            if 'Bus' in str(e.__class__) and e.uid in self.bus_uids:
+            if ('Bus' in str(e.__class__) and
+                    e.uid in self.bus_uids and
+                    e.type in self.bus_types):
                 row = pd.DataFrame()
                 # inputs
                 for i in e.inputs:
