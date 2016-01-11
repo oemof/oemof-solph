@@ -245,11 +245,12 @@ class EnergySystemDataFrame:
         ax.set_xlabel(kwargs.get('xlabel')),
         # ax.set_xticks(range(0,len(dates),1), minor=True),
         ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
-                      minor=False),
+                      minor=False)
         ax.set_xticklabels(
             [item.strftime(kwargs['date_format'])
              for item in dates.tolist()[0::kwargs.get('tick_distance')]],
-            rotation=0, minor=False),
+            rotation=0, minor=False)
+
         ax.legend(obj_uids, loc='upper right')
         return ax
 
