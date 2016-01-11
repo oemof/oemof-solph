@@ -93,7 +93,7 @@ class EnergySystemDataFrame:
                     row['datetime'] = [self.energy_system.time_idx]
                     row['val'] = [self.result_object[i].get(e)]
                     df = df.append(row)
-                    # self referenced components in else-block
+                    # self referenced components
                     if i in self.result_object.get(i, {}):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
@@ -116,7 +116,7 @@ class EnergySystemDataFrame:
                         df = df.append(row)
                 # other
                 for k, v in o.items():
-                    # self referenced entries (duals, etc.) in else block
+                    # self referenced entries (duals, etc.)
                     if isinstance(k, str):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
