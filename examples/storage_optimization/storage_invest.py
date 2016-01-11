@@ -32,12 +32,16 @@ The example models the following energy system:
 ###############################################################################
 import matplotlib.pyplot as plt
 import pandas as pd
+import logging
 
 # import solph module to create/process optimization model instance
 from oemof.solph import predefined_objectives as predefined_objectives
 
 # Outputlib
 from oemof.outputlib import to_pandas as tpd
+
+# Default logger of oemof
+from oemof.tools import logger
 
 # import oemof base classes to create energy system objects
 from oemof.core import energy_system as es
@@ -47,10 +51,14 @@ from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
 
 
+# Define logger
+logger.define_logging()
+
 ###############################################################################
-# read data from csv file
+# read data from csv file and set time index
 ###############################################################################
 
+logging.info('Read data from csv file and set time index')
 data = pd.read_csv("storage_invest.csv", sep=",")
 time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
 
@@ -58,6 +66,7 @@ time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
 # initialize the energy system
 ###############################################################################
 
+logging.info('Initialize the energy system')
 simulation = es.Simulation(
     timesteps=range(len(time_index)), stream_solver_output=True, solver='glpk',
     objective_options={'function': predefined_objectives.minimize_cost})
@@ -71,9 +80,10 @@ energysystem = es.EnergySystem(time_idx=time_index, simulation=simulation)
 transformer.Storage.optimization_options.update({'investment': True})
 
 ###############################################################################
-# Create oemof objetc
+# Create oemof object
 ###############################################################################
 
+logging.info('Create oemof objects')
 # create bus
 bgas = Bus(uid="bgas",
            type="gas",
@@ -140,12 +150,14 @@ storage = transformer.Storage(uid='sto_simple',
 # Optimise the energy system and plot the results
 ###############################################################################
 
+logging.info('Optimise the energy system')
+
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
-#energysystem.optimize()
+energysystem.optimize()
 
-#energysystem.dump()
-energysystem.restore()
+# energysystem.dump()
+# energysystem.restore()
 
 # Creation of a multi-indexed pandas dataframe
 es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
@@ -154,6 +166,8 @@ es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
 es_df.data_frame.describe
 es_df.data_frame.index.get_level_values('bus_uid').unique()
 es_df.data_frame.index.get_level_values('bus_type').unique()
+
+logging.info('Plot the results')
 
 # Plotting line plots
 es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
