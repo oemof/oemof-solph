@@ -198,14 +198,9 @@ class EnergySystemDataFrame:
             [kwargs.get('type')],
             :,
             slice(
-<<<<<<< HEAD
-                pd.Timestamp(kwargs.get('date_from')),
-                pd.Timestamp(kwargs.get('date_to')))], :]
-=======
                 pd.Timestamp(date_from),
                 pd.Timestamp(date_to))]]
 
->>>>>>> features/outputlib-based-on-pandas_uvchik
         # extracting levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
         dates = subset.index.get_level_values('datetime').unique()
@@ -222,25 +217,6 @@ class EnergySystemDataFrame:
             kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
             title=kwargs.get('title'), linewidth=kwargs.get('linewidth'),
             subplots=kwargs.get('subplots'), **kwargs['df_plot_kwargs'])
-<<<<<<< HEAD
-        # plotting: adjustments
-        [(ax.set_ylabel(kwargs.get('ylabel')),
-          ax.set_xlabel(kwargs.get('xlabel')),
-          # ax.set_xticks(range(0,len(dates),1), minor=True),
-          ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
-                        minor=False),
-          ax.set_xticklabels(
-              [item.strftime('%d-%m-%Y')
-               for item in dates.tolist()[0::kwargs.get('tick_distance')]],
-              rotation=0, minor=False),
-          ax.legend(obj_uids,
-                    loc='upper right')
-          )
-         for ax in plt.gcf().axes]
-        return axt
-
-    def stackplot(self, **kwargs):
-=======
 
         # plotting: adjustments
         ax.set_ylabel(kwargs.get('ylabel')),
@@ -280,7 +256,6 @@ class EnergySystemDataFrame:
         plt.show()
 
     def stackplot_part(self, bus_uid, date_from, date_to, ax, **kwargs):
->>>>>>> features/outputlib-based-on-pandas_uvchik
         r"""Creating a matplotlib figure object.
 
         Parameters
