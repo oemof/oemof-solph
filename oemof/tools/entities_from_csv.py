@@ -4,10 +4,10 @@
 @author: Simon Hilpert simon.hilpert@fh-flensburg.de
 """
 import pandas as pd
-from oemof.core.network.entities import Bus
-from oemof.core.network.entities.components import sources as source
-from oemof.core.network.entities.components import sinks as sink
-from oemof.core.network.entities.components import transformers as transformer
+from ..core.network.entities import Bus
+from ..core.network.entities.components import sources as source
+from ..core.network.entities.components import sinks as sink
+from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import transports as transport
 
 def add_bus(row, **kwargs):
