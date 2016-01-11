@@ -53,23 +53,18 @@ class EnergySystemDataFrame:
     """
     def __init__(self, **kwargs):
         # default values if not arguments are passed
-        kwargs.setdefault('ixd_date_freq', 'H')
-
-        self.result_object = kwargs.get('result_object')
         self.energy_system = kwargs.get('energy_system')
-        self.idx_start_date = kwargs.get('idx_start_date')
-        self.ixd_date_freq = kwargs.get('ixd_date_freq')
         self.bus_uids = kwargs.get('bus_uids')
         self.bus_types = kwargs.get('bus_types')
         self.data_frame = None
-        if not self.result_object:
-            self.result_object = self.energy_system.results
-            if not self.bus_uids:
-                self.bus_uids = [e.uid for e in self.result_object.keys()
-                                 if 'Bus' in str(e.__class__)]
-            if not self.bus_types:
-                self.bus_types = [e.type for e in self.result_object.keys()
-                                  if 'Bus' in str(e.__class__)]
+        self.result_object = self.energy_system.results
+
+        if not self.bus_uids:
+            self.bus_uids = [e.uid for e in self.result_object.keys()
+                             if 'Bus' in str(e.__class__)]
+        if not self.bus_types:
+            self.bus_types = [e.type for e in self.result_object.keys()
+                              if 'Bus' in str(e.__class__)]
         if not (self.data_frame):
             self.data_frame = self.create()
 
@@ -121,7 +116,7 @@ class EnergySystemDataFrame:
                         df = df.append(row)
                 # other
                 for k, v in o.items():
-                   # self referenced entries (duals, etc.) in else block
+                    # self referenced entries (duals, etc.) in else block
                     if isinstance(k, str):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
