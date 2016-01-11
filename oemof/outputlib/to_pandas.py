@@ -174,11 +174,11 @@ class EnergySystemDataFrame:
         kwargs.setdefault('xlabel', 'Date')
         kwargs.setdefault('ylabel', 'Power in MW')
         kwargs.setdefault('date_format', '%d-%m-%Y')
-        kwargs.setdefault('tick_distance', 24)
         kwargs.setdefault('subplots', False)
         kwargs.setdefault('colormap', 'Spectral')
         kwargs.setdefault('df_plot_kwargs', {})
         kwargs.setdefault('linewidth', 2)
+        kwargs.setdefault('number_autoticks', 3)
 
         # slicing
         idx = pd.IndexSlice
@@ -198,6 +198,13 @@ class EnergySystemDataFrame:
 
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
+
+        # if no tick distance is set, it is set automatically
+        if not kwargs.get('tick_distance'):
+            # if the ticks are set automatically date and time are shown
+            kwargs['tick_distance'] = int(len(dates) /
+                                          kwargs['number_autoticks']) - 1
+            kwargs['date_format'] = '%d-%m-%Y %H:%M'
 
         # plotting: set matplotlib style
         if kwargs.get('mpl_style'):
