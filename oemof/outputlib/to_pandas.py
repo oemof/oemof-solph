@@ -3,6 +3,7 @@
 
 import pandas as pd
 import logging
+import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -242,6 +243,11 @@ class EnergySystemDataFrame:
         kwargs.setdefault('fontlegend', 19)
         kwargs.setdefault('fontgeneral', 19)
         kwargs.setdefault('style', 'grayscale')
+        kwargs.setdefault('show', True)
+        kwargs.setdefault('save', False)
+        kwargs.setdefault('savename', 'stackplot_{0}'.format(str(bus_uid)))
+        kwargs.setdefault('savepath', os.path.join(
+            os.environ['HOME'], '.oemof', 'plots'))
 
         if not kwargs['autostyle']:
             fig = plt.figure(figsize=(kwargs['figwidth'], kwargs['figheight']))
@@ -255,7 +261,16 @@ class EnergySystemDataFrame:
 
         self.stackplot_part(bus_uid, ax, **kwargs)
 
-        plt.show()
+        if kwargs['save']:
+            if not os.path.isdir(kwargs['savepath']):
+                os.mkdir(kwargs['savepath'])
+            fullpath = os.path.join(kwargs['savepath'],
+                                    kwargs['savename'] + '.pdf')
+            logging.info('Saving plot to {0}'.format(fullpath))
+            fig.savefig(fullpath)
+        if kwargs['show']:
+            plt.show(fig)
+        plt.close(fig)
 
     def stackplot_part(self, bus_uid, ax, **kwargs):
         r"""Creating a matplotlib figure object.
