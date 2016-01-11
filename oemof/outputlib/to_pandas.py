@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 class EnergySystemDataFrame:
     r"""Creates a multi-indexed pandas dataframe from a solph result object
-    and holds methods to plot subsets of the data
+    and holds methods to plot subsets of the data.
 
     Note
     ----
@@ -43,7 +43,9 @@ class EnergySystemDataFrame:
     ixd_date_freq : string
         Frequency for the dataframe date index e.g. "H" for hours
     data_frame : pandas dataframe
-        Multi-indexed pandas dataframe holding the data from the result object
+        Multi-indexed pandas dataframe holding the data from the result object.
+        For more information on advanced dataframe indexing see:
+        http://pandas.pydata.org/pandas-docs/stable/advanced.html
     bus_uids : list if strings
         List of strings with busses that should be contained in dataframe
     bus_types : list if strings
