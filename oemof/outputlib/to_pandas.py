@@ -200,10 +200,16 @@ class EnergySystemDataFrame:
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
 
+        # Create color list from color dictionary
         if kwargs.get('colordict'):
             kwargs['colormap'] = None
-            kwargs['df_plot_kwargs']['color'] = list(
+            clist = list(
                 map(kwargs.get('colordict').get, list(subset['val'].columns)))
+            clist = ['#ff00f0' if v is None else v for v in clist]
+            if len(clist) == 1:
+                kwargs['df_plot_kwargs']['color'] = clist[0]
+            else:
+                kwargs['df_plot_kwargs']['color'] = clist
 
         # if no tick distance is set, it is set automatically
         if not kwargs.get('tick_distance'):
