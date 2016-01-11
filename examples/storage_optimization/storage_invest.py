@@ -154,10 +154,10 @@ logging.info('Optimise the energy system')
 
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
-#energysystem.optimize()
+energysystem.optimize()
 
 # energysystem.dump()
-energysystem.restore()
+# energysystem.restore()
 
 # Creation of a multi-indexed pandas dataframe
 es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
