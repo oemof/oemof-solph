@@ -59,7 +59,9 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
         if block.name in c_blocks:
             if block.name == str(transformer.Storage):
                 ref = 'capacity'
-                expr += objexpr.add_opex_var(self, self.simple_storage,
+                expr += objexpr.add_opex_var(self,
+                                             getattr(self,
+                                                     str(transformer.Storage)),
                                              ref='input')
             else:
                 ref = 'output'
