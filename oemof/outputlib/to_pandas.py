@@ -156,7 +156,7 @@ class EnergySystemDataFrame:
 
         return df_multiindex
 
-    def plot_bus(self, bus_uid, date_from, date_to, **kwargs):
+    def plot_bus(self, bus_uid, **kwargs):
         r""" Method for plotting all inputs/outputs of a bus
 
         Parameters
@@ -164,9 +164,15 @@ class EnergySystemDataFrame:
         bus_uid : string
         bus_type : string (e.g. "el" or "gas")
         type : string (input/output/other)
-        date_from : string (Start date selection e.g. "2016-01-01 00:00:00")
-        date_to : string (End date selection e.g. "2016-03-01 00:00:00")
+        date_from : string, optional
+            Start date selection e.g. "2016-01-01 00:00:00". If not set, the
+            whole time range will be plotted.
+        date_to : string, optional
+            End date selection e.g. "2016-03-01 00:00:00". If not set, the
+            whole time range will be plotted.
         """
+        kwargs.setdefault('date_from', self.energy_system.time_idx[0])
+        kwargs.setdefault('date_to', self.energy_system.time_idx[-1])
         kwargs.setdefault('type', None)
         kwargs.setdefault('kind', 'line')
         kwargs.setdefault('title', 'Connected components')
@@ -188,8 +194,8 @@ class EnergySystemDataFrame:
             [kwargs.get('type')],
             :,
             slice(
-                pd.Timestamp(date_from),
-                pd.Timestamp(date_to))]]
+                pd.Timestamp(kwargs['date_from']),
+                pd.Timestamp(kwargs['date_to']))]]
 
         # extracting levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
@@ -221,7 +227,7 @@ class EnergySystemDataFrame:
         ax.legend(obj_uids, loc='upper right')
         return ax
 
-    def stackplot(self, bus_uid, date_from, date_to, **kwargs):
+    def stackplot(self, bus_uid, **kwargs):
         r"""Creating a matplotlib figure object.
 
         Parameters
@@ -241,11 +247,11 @@ class EnergySystemDataFrame:
 
         ax = fig.add_subplot(1, 1, 1)
 
-        self.stackplot_part(bus_uid, date_from, date_to, ax, **kwargs)
+        self.stackplot_part(bus_uid, ax, **kwargs)
 
         plt.show()
 
-    def stackplot_part(self, bus_uid, date_from, date_to, ax, **kwargs):
+    def stackplot_part(self, bus_uid, ax, **kwargs):
         r"""Creating a matplotlib figure object.
 
         Parameters
@@ -256,8 +262,8 @@ class EnergySystemDataFrame:
         kwargs.setdefault('bus_uid', None)
         kwargs.setdefault('bus_type', None)
         kwargs.setdefault('ax', None)
-        kwargs.setdefault('date_from', None)
-        kwargs.setdefault('date_to', None)
+        kwargs.setdefault('date_from', self.energy_system.time_idx[0])
+        kwargs.setdefault('date_to', self.energy_system.time_idx[-1])
         kwargs.setdefault('width', 1)
         kwargs.setdefault('title', 'Connected components')
         kwargs.setdefault('xlabel', 'Date')
@@ -282,7 +288,7 @@ class EnergySystemDataFrame:
             'stacked': True}
 
         ax = self.plot_bus(
-            bus_uid, date_from, date_to,
+            bus_uid, date_from=kwargs['date_from'], date_to=kwargs['date_to'],
             type="input", kind='bar', linewidth=0,
             colormap=kwargs['colormap_bar'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
@@ -294,7 +300,7 @@ class EnergySystemDataFrame:
             'drawstyle': kwargs['drawstyle']}
 
         ax = self.plot_bus(
-            bus_uid, date_from, date_to,
+            bus_uid, date_from=kwargs['date_from'], date_to=kwargs['date_to'],
             type="output", kind='line', linewidth=kwargs['linewidth'],
             colormap=kwargs['colormap_line'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
