@@ -200,6 +200,11 @@ class EnergySystemDataFrame:
         # unstacking object/component level to get columns
         subset = subset.unstack(level='obj_uid')
 
+        if kwargs.get('colordict'):
+            kwargs['colormap'] = None
+            kwargs['df_plot_kwargs']['color'] = list(
+                map(kwargs.get('colordict').get, list(subset['val'].columns)))
+
         # if no tick distance is set, it is set automatically
         if not kwargs.get('tick_distance'):
             # if the ticks are set automatically date and time are shown
@@ -306,6 +311,7 @@ class EnergySystemDataFrame:
 
         if kwargs['autostyle']:
             kwargs['tick_distance'] = False
+
         my_kwargs = {
             'ax': ax,
             'width': kwargs['width'],
@@ -316,6 +322,7 @@ class EnergySystemDataFrame:
             type="input", kind='bar', linewidth=0,
             colormap=kwargs['colormap_bar'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
+            colordict=kwargs.get('colordict'),
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
         my_kwargs = {
@@ -327,6 +334,7 @@ class EnergySystemDataFrame:
             bus_uid, date_from=kwargs['date_from'], date_to=kwargs['date_to'],
             type="output", kind='line', linewidth=kwargs['linewidth'],
             colormap=kwargs['colormap_line'], title=kwargs['title'],
+            colordict=kwargs.get('colordict'),
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
