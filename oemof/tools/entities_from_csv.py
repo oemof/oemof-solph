@@ -322,4 +322,5 @@ def entities_from_csv(files, entities_dict=None):
                      transformers=entities_dict['transformers'])
 
     entities = sum([entities_dict[k] for k in entities_dict.keys()], [])
-    return(entities)
+    entities_dict['entities'] = entities
+    return(entities_dict)
