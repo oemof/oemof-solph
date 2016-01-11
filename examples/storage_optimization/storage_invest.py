@@ -52,17 +52,17 @@ from oemof.core.network.entities.components import transformers as transformer
 ###############################################################################
 
 data = pd.read_csv("storage_invest.csv", sep=",")
-timesteps = [t for t in range(8760)]
+time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
 
 ###############################################################################
 # initialize the energy system
 ###############################################################################
 
 simulation = es.Simulation(
-    timesteps=timesteps, stream_solver_output=True, solver='glpk',
+    timesteps=range(len(time_index)), stream_solver_output=True, solver='glpk',
     objective_options={'function': predefined_objectives.minimize_cost})
 
-energysystem = es.EnergySystem(year=2016, simulation=simulation)
+energysystem = es.EnergySystem(time_idx=time_index, simulation=simulation)
 
 ###############################################################################
 # set optimzation options for storage components
@@ -142,50 +142,37 @@ storage = transformer.Storage(uid='sto_simple',
 
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
-energysystem.optimize()
+#energysystem.optimize()
 
-# energysystem.dump()
-# energysystem.restore()
-
-#[e.uid for e in energysystem.results.keys()
-# if 'Bus' in str(e.__class__)]
+#energysystem.dump()
+energysystem.restore()
 
 # Creation of a multi-indexed pandas dataframe
-es_df = tpd.EnergySystemDataFrame(energy_system=energysystem,
-                                  idx_start_date="2016-01-01 00:00:00",
-                                  ixd_date_freq="H")
+es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
 
 # Example usage of dataframe object
 es_df.data_frame.describe
 es_df.data_frame.index.get_level_values('bus_uid').unique()
 es_df.data_frame.index.get_level_values('bus_type').unique()
-idx = pd.IndexSlice
-es_df.data_frame.loc[idx[:, :, ('input', 'output', 'other'), :,
-                         "2016-01-01 02:00:00"], :]
 
 # Plotting line plots
 es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
-               date_from="2016-01-01 00:00:00",
-               date_to="2016-01-31 00:00:00",
+               date_from="2012-01-01 00:00:00",
+               date_to="2012-01-31 00:00:00",
                title="January 2016", xlabel="Power in MW",
                ylabel="Date", tick_distance=24*7)
 
 es_df.plot_bus(bus_uid="bgas", bus_type="gas", type="output",
-               date_from="2016-01-01 00:00:00",
-               date_to="2016-12-31 00:00:00",
                title="Year 2016", xlabel="Outflow in MW",
                ylabel="Date", tick_distance=24*7*4*3)
 
 plt.show()
 
 # Plotting a combined stacked plot
-fig = plt.figure(figsize=(24, 14))
-plt.rc('legend', **{'fontsize': 19})
-ax = fig.add_subplot(1, 1, 1)
 
-es_df.stackplot(bus_uid="bel", bus_type="el", ax=ax,
-                date_from="2016-06-01 00:00:00",
-                date_to="2016-06-8 00:00:00",
+es_df.stackplot("bel",
+                date_from="2012-06-01 00:00:00",
+                date_to="2012-06-8 00:00:00",
                 title="Electricity bus",
                 ylabel="Power in MW", xlabel="Date",
                 linewidth=4,
