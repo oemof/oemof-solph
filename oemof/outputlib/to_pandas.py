@@ -95,10 +95,7 @@ class EnergySystemDataFrame:
                     row['bus_type'] = [e.type]
                     row['type'] = ['input']
                     row['obj_uid'] = [i.uid]
-                    row['datetime'] = \
-                        [pd.date_range(self.idx_start_date,
-                         periods=len(self.result_object[i].get(e)),
-                         freq=self.ixd_date_freq)]
+                    row['datetime'] = [self.energy_system.time_idx]
                     row['val'] = [self.result_object[i].get(e)]
                     df = df.append(row)
                     # self referenced components in else-block
@@ -107,10 +104,7 @@ class EnergySystemDataFrame:
                         row['bus_type'] = [e.type]
                         row['type'] = ['other']
                         row['obj_uid'] = [i.uid]
-                        row['datetime'] = \
-                            [pd.date_range(self.idx_start_date,
-                             periods=len(self.result_object[i].get(e)),
-                             freq=self.ixd_date_freq)]
+                        row['datetime'] = [self.energy_system.time_idx]
                         row['val'] = [self.result_object[i].get(e)]
                         df = df.append(row)
                 # outputs
@@ -122,9 +116,7 @@ class EnergySystemDataFrame:
                         row['bus_type'] = [e.type]
                         row['type'] = ['output']
                         row['obj_uid'] = [k.uid]
-                        row['datetime'] = \
-                            [pd.date_range(self.idx_start_date,
-                             periods=len(v), freq=self.ixd_date_freq)]
+                        row['datetime'] = [self.energy_system.time_idx]
                         row['val'] = [v]
                         df = df.append(row)
                 # other
@@ -135,9 +127,7 @@ class EnergySystemDataFrame:
                         row['bus_type'] = [e.type]
                         row['type'] = ['other']
                         row['obj_uid'] = ['duals']
-                        row['datetime'] = \
-                            [pd.date_range(self.idx_start_date,
-                             periods=len(v), freq=self.ixd_date_freq)]
+                        row['datetime'] = [self.energy_system.time_idx]
                         row['val'] = [v]
                         df = df.append(row)
 
