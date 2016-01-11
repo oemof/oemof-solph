@@ -236,16 +236,20 @@ class EnergySystemDataFrame:
         ----------
         """
 
+        kwargs.setdefault('autostyle', False)
         kwargs.setdefault('figwidth', 24)
         kwargs.setdefault('figheight', 14)
         kwargs.setdefault('fontlegend', 19)
         kwargs.setdefault('fontgeneral', 19)
         kwargs.setdefault('style', 'grayscale')
 
-        fig = plt.figure(figsize=(kwargs['figwidth'], kwargs['figheight']))
-        plt.rc('legend', **{'fontsize': kwargs['fontlegend']})
-        plt.rcParams.update({'font.size': kwargs['fontgeneral']})
-        plt.style.use(kwargs['style'])
+        if not kwargs['autostyle']:
+            fig = plt.figure(figsize=(kwargs['figwidth'], kwargs['figheight']))
+            plt.rc('legend', **{'fontsize': kwargs['fontlegend']})
+            plt.rcParams.update({'font.size': kwargs['fontgeneral']})
+            plt.style.use(kwargs['style'])
+        else:
+            fig = plt.figure()
 
         ax = fig.add_subplot(1, 1, 1)
 
@@ -266,6 +270,7 @@ class EnergySystemDataFrame:
         kwargs.setdefault('ax', None)
         kwargs.setdefault('date_from', self.energy_system.time_idx[0])
         kwargs.setdefault('date_to', self.energy_system.time_idx[-1])
+        kwargs.setdefault('autostyle', False)
         kwargs.setdefault('width', 1)
         kwargs.setdefault('title', 'Connected components')
         kwargs.setdefault('xlabel', 'Date')
@@ -284,6 +289,8 @@ class EnergySystemDataFrame:
         kwargs.setdefault('shadow', True)
         kwargs.setdefault('drawstyle', 'steps-mid')
 
+        if kwargs['autostyle']:
+            kwargs['tick_distance'] = False
         my_kwargs = {
             'ax': ax,
             'width': kwargs['width'],
@@ -310,11 +317,15 @@ class EnergySystemDataFrame:
 
         # Put a legend to the right of the current axis
         handles, labels = ax.get_legend_handles_labels()
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
 
-        # Put a legend to the right of the current axis
-        ax.legend(reversed(handles), reversed(labels), loc=kwargs['loc'],
-                  bbox_to_anchor=kwargs['bbox_to_anchor'],
-                  ncol=kwargs['ncol'], fancybox=kwargs['fancybox'],
-                  shadow=kwargs['shadow'])
+        if not kwargs['autostyle']:
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
+
+            # Put a legend to the right of the current axis
+            ax.legend(reversed(handles), reversed(labels), loc=kwargs['loc'],
+                      bbox_to_anchor=kwargs['bbox_to_anchor'],
+                      ncol=kwargs['ncol'], fancybox=kwargs['fancybox'],
+                      shadow=kwargs['shadow'])
+        else:
+            ax.legend(reversed(handles), reversed(labels))
