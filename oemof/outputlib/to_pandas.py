@@ -229,7 +229,7 @@ class EnergySystemDataFrame:
         ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
                       minor=False),
         ax.set_xticklabels(
-            [item.strftime('%d-%m-%Y')
+            [item.strftime(kwargs['date_format'])
              for item in dates.tolist()[0::kwargs.get('tick_distance')]],
             rotation=0, minor=False),
         ax.legend(obj_uids, loc='upper right')
@@ -241,6 +241,7 @@ class EnergySystemDataFrame:
         Parameters
         ----------
         """
+        logging.info('Creating stackplot for Bus: {0}'.format(bus_uid))
 
         kwargs.setdefault('autostyle', False)
         kwargs.setdefault('figwidth', 24)
