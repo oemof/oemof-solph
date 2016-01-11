@@ -35,8 +35,10 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
-    year : integer
-        Define the time for the energy system.
+    time_idx : pandas.index, optional
+        Define the time range and increment for the energy system. This is an
+        optional parameter but might be import for other functions/methods that
+        use the EnergySystem class as an input parameter.
 
     Attributes
     ----------
@@ -61,6 +63,10 @@ class EnergySystem:
         Currently only set after a call to :meth:`optimize` after which it
         holds the return value of :meth:`om.results()
         <oemof.solph.optimization_model.OptimizationModel.results>`.
+    time_idx : pandas.index, optional
+        Define the time range and increment for the energy system. This is an
+        optional atribute but might be import for other functions/methods that
+        use the EnergySystem class as an input parameter.
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
@@ -68,7 +74,7 @@ class EnergySystem:
 
         Entity.registry = self
         self.results = None
-        self.year = kwargs.get('year')
+        self.time_idx = kwargs.get('time_idx')
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
