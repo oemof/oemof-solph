@@ -355,7 +355,7 @@ def add_fixed_source(model, block):
 
     For `investment` for component:
 
-    .. math::  W(e, O_1(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
+    .. math::  W(e, O_1(e), t) \\leq (out_{max}(e) + ADDOUT(e)) \
     \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
 
     .. math:: ADDOUT(e)  \\leq addout_{max}(e), \\qquad \\forall e
@@ -383,6 +383,7 @@ def add_fixed_source(model, block):
 
     # normed value of renewable source (0 <= value <=1)
     val = {obj.uid: obj.val for obj in block.objs}
+
 
     if not block.optimization_options.get('investment', False):
         # maximal ouput of renewable source (in general installed capacity)

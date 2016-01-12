@@ -84,7 +84,7 @@ transformer.Storage.optimization_options.update({'investment': True})
 ###############################################################################
 
 logging.info('Create oemof objects')
-# create bus
+# create gas bus
 bgas = Bus(uid="bgas",
            type="gas",
            price=70,
