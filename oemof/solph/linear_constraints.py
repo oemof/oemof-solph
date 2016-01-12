@@ -406,7 +406,7 @@ def add_fixed_source(model, block):
 
         def invest_rule(block, e, t):
             lhs = model.w[e, model.O[e][0], t]
-            rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
+            rhs = (out_max[e][0] + block.add_out[e]) * val[e][t]
             return(lhs == rhs)
         block.invest = po.Constraint(block.indexset, rule=invest_rule)
 

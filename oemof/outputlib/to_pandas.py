@@ -58,8 +58,16 @@ class EnergySystemDataFrame:
         self.bus_uids = kwargs.get('bus_uids')
         self.bus_types = kwargs.get('bus_types')
         self.data_frame = None
-        self.result_object = self.energy_system.results
-
+        self.result_object = kwargs.get('result_object')
+        self.time_slice = kwargs.get('time_slice')
+        if self.time_slice is None:
+           self.time_slice = self.energy_system.time_idx
+        if self.result_object is None:
+            try:
+                self.result_object = self.energy_system.results
+            except:
+                raise ValueError('Could not set attribute `result_object` ' +
+                                 'from energsystem.results.')
         if not self.bus_uids:
             self.bus_uids = [e.uid for e in self.result_object.keys()
                              if 'Bus' in str(e.__class__)]
@@ -91,7 +99,7 @@ class EnergySystemDataFrame:
                     row['bus_type'] = [e.type]
                     row['type'] = ['input']
                     row['obj_uid'] = [i.uid]
-                    row['datetime'] = [self.energy_system.time_idx]
+                    row['datetime'] = [self.time_slice]
                     row['val'] = [self.result_object[i].get(e)]
                     df = df.append(row)
                     # self referenced components
@@ -100,7 +108,7 @@ class EnergySystemDataFrame:
                         row['bus_type'] = [e.type]
                         row['type'] = ['other']
                         row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.energy_system.time_idx]
+                        row['datetime'] = [self.time_slice]
                         row['val'] = [self.result_object[i].get(e)]
                         df = df.append(row)
                 # outputs
@@ -112,7 +120,7 @@ class EnergySystemDataFrame:
                         row['bus_type'] = [e.type]
                         row['type'] = ['output']
                         row['obj_uid'] = [k.uid]
-                        row['datetime'] = [self.energy_system.time_idx]
+                        row['datetime'] = [self.time_slice]
                         row['val'] = [v]
                         df = df.append(row)
                 # other
@@ -123,7 +131,7 @@ class EnergySystemDataFrame:
                         row['bus_type'] = [e.type]
                         row['type'] = ['other']
                         row['obj_uid'] = ['duals']
-                        row['datetime'] = [self.energy_system.time_idx]
+                        row['datetime'] = [self.time_slice]
                         row['val'] = [v]
                         df = df.append(row)
 
@@ -167,8 +175,8 @@ class EnergySystemDataFrame:
             End date selection e.g. "2016-03-01 00:00:00". If not set, the
             whole time range will be plotted.
         """
-        kwargs.setdefault('date_from', self.energy_system.time_idx[0])
-        kwargs.setdefault('date_to', self.energy_system.time_idx[-1])
+        kwargs.setdefault('date_from', self.time_slice[0])
+        kwargs.setdefault('date_to', self.time_slice[-1])
         kwargs.setdefault('type', None)
         kwargs.setdefault('kind', 'line')
         kwargs.setdefault('title', 'Connected components')
