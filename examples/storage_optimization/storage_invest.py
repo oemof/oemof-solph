@@ -193,7 +193,7 @@ es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
                ylabel="Date", tick_distance=24*7)
 
 # Minimal parameter
-es_df.plot_bus(bus_uid="bel", bus_type="gas", type="output", title="Year 2016")
+es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
 
 plt.show()
 
