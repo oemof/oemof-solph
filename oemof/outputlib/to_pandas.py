@@ -95,13 +95,14 @@ class EnergySystemDataFrame:
                 row = pd.DataFrame()
                 # inputs
                 for i in e.inputs:
-                    row['bus_uid'] = [e.uid]
-                    row['bus_type'] = [e.type]
-                    row['type'] = ['input']
-                    row['obj_uid'] = [i.uid]
-                    row['datetime'] = [self.time_slice]
-                    row['val'] = [self.result_object[i].get(e)]
-                    df = df.append(row)
+                    if i in self.result_object:
+                        row['bus_uid'] = [e.uid]
+                        row['bus_type'] = [e.type]
+                        row['type'] = ['input']
+                        row['obj_uid'] = [i.uid]
+                        row['datetime'] = [self.time_slice]
+                        row['val'] = [self.result_object[i].get(e)]
+                        df = df.append(row)
                     # self referenced components
                     if i in self.result_object.get(i, {}):
                         row['bus_uid'] = [e.uid]
