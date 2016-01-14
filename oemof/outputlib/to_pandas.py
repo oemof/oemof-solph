@@ -200,7 +200,7 @@ class EnergySystemDataFrame:
             :,
             slice(
                 pd.Timestamp(kwargs['date_from']),
-                pd.Timestamp(kwargs['date_to']))]]
+                pd.Timestamp(kwargs['date_to']))], :]
 
         # extracting levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
