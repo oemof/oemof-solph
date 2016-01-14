@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8
 
-import pandas as pd
-import logging
 import os
-import matplotlib as mpl
+import logging
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # TODO:
@@ -24,10 +23,6 @@ class EnergySystemDataFrame:
     ----------
     result_object : dictionary
         solph result objects
-    idx_start_date : string
-        Start date of the dataframe date index e.g. "2016-01-01 00:00:00"
-    ixd_date_freq : string
-        Frequency for the dataframe date index e.g. "H" for hours
     bus_uids : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
@@ -39,10 +34,12 @@ class EnergySystemDataFrame:
     ----------
     result_object : dictionary
         solph result objects
-    idx_start_date : string
-        Start date of the dataframe date index e.g. "2016-01-01 00:00:00"
-    ixd_date_freq : string
-        Frequency for the dataframe date index e.g. "H" for hours
+    bus_uids : list if strings
+        List of strings with busses that should be contained in dataframe.
+        If not set, all busses are contained.
+    bus_types : list if strings
+        List of strings with bus types that should be contained in dataframe.
+        If not set, all bus types are contained.
     data_frame : pandas dataframe
         Multi-indexed pandas dataframe holding the data from the result object.
         For more information on advanced dataframe indexing see:
@@ -61,7 +58,7 @@ class EnergySystemDataFrame:
         self.result_object = kwargs.get('result_object')
         self.time_slice = kwargs.get('time_slice')
         if self.time_slice is None:
-           self.time_slice = self.energy_system.time_idx
+            self.time_slice = self.energy_system.time_idx
         if self.result_object is None:
             try:
                 self.result_object = self.energy_system.results
@@ -229,7 +226,7 @@ class EnergySystemDataFrame:
 
         # plotting: set matplotlib style
         if kwargs.get('mpl_style'):
-            mpl.style.use(kwargs.get('mpl_style'))
+            plt.style.use(kwargs.get('mpl_style'))
 
         # plotting: basic pandas plot
         ax = subset.plot(
@@ -251,10 +248,43 @@ class EnergySystemDataFrame:
         return ax
 
     def stackplot(self, bus_uid, **kwargs):
-        r"""Creating a matplotlib figure object.
+        r"""Creating a stackplot for the given bus.
 
         Parameters
         ----------
+        bus_uid : string
+            Uid of the bus to plot.
+        autostyle : boolean, optional (default: False)
+            Skips the figure_size, tick_distance, style and the legend settings
+            and uses the autoformat of the pandas plot function instead.
+        date_from : string, optional
+            Start date selection e.g. "2016-01-01 00:00:00". If not set, the
+            whole time range will be plotted.
+        date_to : string, optional
+            End date selection e.g. "2016-03-01 00:00:00". If not set, the
+            whole time range will be plotted.
+        figheight : int, optional (default: 14)
+            Height of the figure. "autostyle=True" will disable this parameter.
+        fighwidth : int, optional (default: 24)
+            Width of the figure. "autostyle=True" will disable this parameter.
+        fontgeneral : int, optional (default: 19)
+            General font size. "autostyle=True" will disable this parameter.
+        fontlegend : int, optional (default: 19)
+            Font size of the legend. "autostyle=True" will disable this
+            parameter.
+        show : boolean, optional (default: True)
+            Show the plot on the screen.
+        save : boolean, optional (default: False)
+            Save the plot to disc as a pdf file.
+        savename : string, optional (default: 'stackplot' + bus_uid)
+            Name of the file without the suffix.
+        savepath : string, optional (default: '~/.oemof/plots')
+            Path for the plots.
+        style : string, optional (default: 'grayscale')
+            Possible values are 'bmh', 'grayscale', 'fivethirtyeight',
+            'dark_background', 'ggplot'. See the `matplotlib documentation
+            <http://matplotlib.org/users/style_sheets.html>`_ for more
+            information. "autostyle=True" will disable this parameter.
         """
         logging.info('Creating stackplot for Bus: {0}'.format(bus_uid))
 
@@ -294,10 +324,29 @@ class EnergySystemDataFrame:
         plt.close(fig)
 
     def stackplot_part(self, bus_uid, ax, **kwargs):
-        r"""Creating a matplotlib figure object.
+        r"""Creating a stackplot for the given bus. This is only the core part
+        of the plot method to use within a subplot. To plot one bus in one step
+        you should use the :meth:`stackplot`.
 
         Parameters
         ----------
+        bus_uid : string
+            Uid of the bus to plot.
+        autostyle : boolean, optional (default: False)
+            Skips the figure_size, tick_distance, style and the legend settings
+            and uses the autoformat of the pandas plot function instead.
+        date_from : string, optional
+            Start date selection e.g. "2016-01-01 00:00:00". If not set, the
+            whole time range will be plotted.
+        date_to : string, optional
+            End date selection e.g. "2016-03-01 00:00:00". If not set, the
+            whole time range will be plotted.
+        tick_distance : int, optional
+            Distance between two ticks of the x-axis in hours.
+            "autostyle=True" will disable this parameter.
+        date_format : string, optional (default: '%d-%m-%Y')
+            Format of the date and time in the x-axis.
+            "autostyle=True" will disable this parameter.
         """
 
         # Define default values
@@ -312,7 +361,7 @@ class EnergySystemDataFrame:
         kwargs.setdefault('xlabel', 'Date')
         kwargs.setdefault('ylabel', 'Power in MW')
         kwargs.setdefault('date_format', '%d-%m-%Y')
-        kwargs.setdefault('tick_distance', 24)
+        kwargs.setdefault('tick_distance', None)
         kwargs.setdefault('subplots', False)
         kwargs.setdefault('colormap_bar', 'Spectral')
         kwargs.setdefault('colormap_line', 'jet')
@@ -354,7 +403,6 @@ class EnergySystemDataFrame:
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
-        # Put a legend to the right of the current axis
         handles, labels = ax.get_legend_handles_labels()
 
         if not kwargs['autostyle']:

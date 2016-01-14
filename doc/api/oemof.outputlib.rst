@@ -4,10 +4,10 @@ oemof.outputlib package
 Submodules
 ----------
 
-oemof.outputlib.devplots module
--------------------------------
+oemof.outputlib.to_pandas module
+--------------------------------
 
-.. automodule:: oemof.outputlib.devplots
+.. automodule:: oemof.outputlib.to_pandas
     :members:
     :undoc-members:
     :show-inheritance:
