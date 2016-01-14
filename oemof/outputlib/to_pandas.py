@@ -199,11 +199,17 @@ class EnergySystemDataFrame:
                 pd.Timestamp(kwargs['date_from']),
                 pd.Timestamp(kwargs['date_to']))], :]
 
-        # extracting levels to use them in plot
+        # remove components/obj_uids that contain passed substring
+        if kwargs.get('exclude_obj_uid_substring'):
+            subset = subset.iloc[
+                ~subset.index.get_level_values('obj_uid').str
+                .contains(kwargs.get('exclude_obj_uid_substring'))]
+
+        # extract levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
         dates = subset.index.get_level_values('datetime').unique()
 
-        # unstacking object/component level to get columns
+        # unstack object/component level to get columns
         subset = subset.unstack(level='obj_uid')
 
         # Create color list from color dictionary
