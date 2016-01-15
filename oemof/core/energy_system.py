@@ -73,7 +73,7 @@ class EnergySystem:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
-        self.results = None
+        self.results = kwargs.get('results')
         self.time_idx = kwargs.get('time_idx')
 
     # TODO: Condense signature (use Buse)
