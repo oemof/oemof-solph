@@ -51,11 +51,7 @@ def add_continuous(model, edges):
     The function uses the pyomo class `Var()` to create the optimization
     variables. As index-sets the provided edges of the graph
     (in general all edges) and the defined timesteps are used.
-    If an invest model is used an additional optimization variable indexed by
-    the edges is created to handle "flexible" upper bounds of the edge variable
-    by using an additional constraint.
-    The following variables are created: Variables for all the edges, variables
-    for the state of charge of storages.
+    The following variables are created: Variables for all the edges
     (If specific components such as disptach sources and storages exist.)
 
     Parameters
@@ -67,11 +63,6 @@ def add_continuous(model, edges):
         `edges` will be a list containing tuples representing the directed
         edges of the graph by using unique ids of components and buses.
         e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
-
-    Returns
-    -------
-    The variables are added as a attribute to the optimization model object
-    `model`.
     """
     # variable for all edges
     model.w = po.Var(edges, model.timesteps, within=po.NonNegativeReals)
@@ -206,6 +197,7 @@ def set_storage_cap_bounds(model, block):
         An object to be solved containing all Variables, Constraints, Data
         Bounds are altered at model attributes (variables) of `model`
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
     """
 
 
@@ -248,7 +240,8 @@ def set_outages(model, block, outagetype='period', side='output'):
     ----------
     model :OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
-    block : SimpeBlock()
+    block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
     outagetype : string
         Type to model outages of component if outages is scalar.
        'period' yield one timeblock where component is off,
@@ -305,7 +298,8 @@ def set_fixed_sink_value(model, block):
     model :OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data
         Attributes are altered of the `model`
-    block : SimpeBlock()
+    block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     """
 

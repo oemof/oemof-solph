@@ -74,6 +74,8 @@ def add_bus_balance(model, block=None):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -125,6 +127,8 @@ def add_simple_io_relation(model, block, idx=0):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     idx : integer
       Index to choose which output to select (from list of Outputs: O[e][idx])
 
@@ -169,6 +173,8 @@ def add_eta_total_chp_relation(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -211,6 +217,8 @@ def add_simple_chp_relation(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -269,6 +277,8 @@ def add_simple_extraction_chp_relation(model, block):
     model : OptimizationModel() instance
            An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -320,6 +330,8 @@ def add_global_output_limit(model, block=None):
     model : OptimizationModel() instance
        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -369,6 +381,8 @@ def add_fixed_source(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -435,6 +449,8 @@ def add_dispatch_source(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -488,6 +504,8 @@ def add_storage_balance(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -613,6 +631,8 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     grad_direc: string
         string defining the direction of the gradient constraint.

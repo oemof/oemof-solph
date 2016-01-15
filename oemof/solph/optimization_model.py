@@ -278,11 +278,19 @@ class OptimizationModel(po.ConcreteModel):
 
         Parameters
         ----------
-        self : pyomo.ConcreteModel
-        solver str: solver to be used e.g. 'glpk','gurobi','cplex'
-        solver_io str: str that defines the solver interaction
-        (file or interface) 'lp','nl','python'
-        \**kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
+        self : pyomo.ConcreteModel() object
+        solver string:
+            solver to be used e.g. 'glpk','gurobi','cplex'
+        solver_io str:
+            str that defines the solver interaction
+            (file or interface) 'lp','nl','python'
+        debug : boolean
+            If True model is solved in debug mode. lp-file is written.
+        duals : boolean
+            If True, duals and reduced costs are imported from the solver
+            results
+        \**kwargs:
+            other arguments for the pyomo.opt.SolverFactory.solve()
         method
 
         Returns
