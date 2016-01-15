@@ -4,7 +4,10 @@
 import os
 import logging
 import pandas as pd
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except:
+    logging.warning('Matplotlib does not work.')
 
 # TODO:
 # - Make dataframe creation and plotting configurable with as less code as
