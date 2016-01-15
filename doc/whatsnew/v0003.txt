@@ -12,7 +12,7 @@ Documentation
 #############
 
  * Added the Readme.rst as "Getting started" to the documentation.
- * Fixed installation description (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
+ * Fixed installation description (`issue #38 <https://github.com/oemof/oemof_base/issues/38>`_)
  * Improved the developer notes.
 
 Testing
