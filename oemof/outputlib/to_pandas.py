@@ -126,14 +126,23 @@ class EnergySystemDataFrame:
                         df = df.append(row)
                 # other
                 for k, v in o.items():
-                    # self referenced entries (duals, etc.)
+                    # shortage, excess, ...
                     if isinstance(k, str):
+                        row['bus_uid'] = [e.uid]
+                        row['bus_type'] = [e.type]
+                        row['type'] = ['other']
+                        row['obj_uid'] = [k]
+                        row['datetime'] = [self.time_slice]
+                        row['val'] = [v]
+                        df = df.append(row)
+                    # self referenced entries (duals, etc.)
+                    if k in self.result_object.get(k, {}):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
                         row['type'] = ['other']
                         row['obj_uid'] = ['duals']
                         row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
+                        row['val'] = [self.result_object[k].get(k)]
                         df = df.append(row)
 
         # split date and value lists columns into rows (long format)
