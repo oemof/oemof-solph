@@ -182,6 +182,8 @@ class EnergySystemDataFrame:
         date_to : string, optional
             End date selection e.g. "2016-03-01 00:00:00". If not set, the
             whole time range will be plotted.
+        exclude_obj_uids : list of strings
+            List of strings/substrings of obj_uids to be excluded
         """
         kwargs.setdefault('date_from', self.time_slice[0])
         kwargs.setdefault('date_to', self.time_slice[-1])
@@ -209,11 +211,12 @@ class EnergySystemDataFrame:
                 pd.Timestamp(kwargs['date_from']),
                 pd.Timestamp(kwargs['date_to']))], :]
 
-        # remove components/obj_uids that contain passed substring
-        if kwargs.get('exclude_obj_uid_substring'):
-            subset = subset.iloc[
-                ~subset.index.get_level_values('obj_uid').str
-                .contains(kwargs.get('exclude_obj_uid_substring'))]
+        # remove passed obj_uids/substrings of obj_uids (case sensitive)
+        if kwargs.get('exclude_obj_uids'):
+            for expr in kwargs.get('exclude_obj_uids'):
+                subset = subset.iloc[
+                    ~subset.index.get_level_values('obj_uid').str
+                    .contains(expr)]
 
         # extract levels to use them in plot
         obj_uids = subset.index.get_level_values('obj_uid').unique()
@@ -280,6 +283,8 @@ class EnergySystemDataFrame:
         date_to : string, optional
             End date selection e.g. "2016-03-01 00:00:00". If not set, the
             whole time range will be plotted.
+        exclude_obj_uids : list of strings
+            List of strings/substrings of obj_uids to be excluded
         figheight : int, optional (default: 14)
             Height of the figure. "autostyle=True" will disable this parameter.
         fighwidth : int, optional (default: 24)
@@ -404,7 +409,7 @@ class EnergySystemDataFrame:
             type="input", kind='bar', linewidth=0,
             colormap=kwargs['colormap_bar'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
-            colordict=kwargs.get('colordict'),
+            colordict=kwargs.get('colordict'), 
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
         my_kwargs = {
@@ -417,6 +422,7 @@ class EnergySystemDataFrame:
             type="output", kind='line', linewidth=kwargs['linewidth'],
             colormap=kwargs['colormap_line'], title=kwargs['title'],
             colordict=kwargs.get('colordict'),
+            exclude_obj_uids=kwargs.get('exclude_obj_uids'),
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 

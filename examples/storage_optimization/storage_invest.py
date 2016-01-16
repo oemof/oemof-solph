@@ -170,16 +170,10 @@ es_df.data_frame.index.get_level_values('bus_type').unique()
 
 # Example slice (see http://pandas.pydata.org/pandas-docs/stable/advanced.html)
 idx = pd.IndexSlice
-df = es_df.data_frame
-df = df.loc[idx[:,
-                'el',
-                'other',
-                :,
-                slice(
-                    pd.Timestamp("2012-01-01 00:00:00"),
-                    pd.Timestamp("2012-01-02 00:00:00"))], :]
-df = df.unstack(level='obj_uid')
-print(df)
+es_df.data_frame.loc[idx[:, 'el', 'other', :,
+                         slice(
+                            pd.Timestamp("2012-01-01 00:00:00"),
+                            pd.Timestamp("2012-01-02 00:00:00"))], :]
 
 logging.info('Plot the results')
 
@@ -194,7 +188,8 @@ es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
                date_from="2012-01-01 00:00:00", colordict=cdict,
                date_to="2012-01-31 00:00:00",
                title="January 2016", xlabel="Power in MW",
-               ylabel="Date", tick_distance=24*7)
+               ylabel="Date", tick_distance=24*7,
+               exclude_obj_uids=['pv'])
 
 # Minimal parameter
 es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
@@ -202,7 +197,6 @@ es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
 plt.show()
 
 # Plotting a combined stacked plot
-
 es_df.stackplot("bel",
                 colordict=cdict,
                 date_from="2012-06-01 00:00:00",
@@ -210,6 +204,6 @@ es_df.stackplot("bel",
                 title="Electricity bus",
                 ylabel="Power in MW", xlabel="Date",
                 linewidth=4,
-                tick_distance=24, save=True)
-
+                tick_distance=24, save=True,
+                exclude_obj_uids=['sto'])
 plt.show()
