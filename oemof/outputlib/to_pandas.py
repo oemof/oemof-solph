@@ -93,8 +93,9 @@ class EnergySystemDataFrame:
                     e.uid in self.bus_uids and
                     e.type in self.bus_types):
                 row = pd.DataFrame()
-                # inputs
+                # bus inputs
                 for i in e.inputs:
+                    # values for input components
                     if i in self.result_object:
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
@@ -103,7 +104,7 @@ class EnergySystemDataFrame:
                         row['datetime'] = [self.time_slice]
                         row['val'] = [self.result_object[i].get(e)]
                         df = df.append(row)
-                    # self referenced components
+                    # add. values for input components (storage levels, etc.)
                     if i in self.result_object.get(i, {}):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
@@ -112,10 +113,9 @@ class EnergySystemDataFrame:
                         row['datetime'] = [self.time_slice]
                         row['val'] = [self.result_object[i].get(e)]
                         df = df.append(row)
-                # outputs
+                # bus outputs
                 for k, v in o.items():
-                    # skip self referenced entries (duals, etc.) and
-                    # string keys to put them into "other"
+                    # values for output components
                     if k is not e and not (isinstance(k, str)):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
@@ -124,9 +124,7 @@ class EnergySystemDataFrame:
                         row['datetime'] = [self.time_slice]
                         row['val'] = [v]
                         df = df.append(row)
-                # other
-                for k, v in o.items():
-                    # shortage, excess, ...
+                    # bus vars (shortage, excess, etc.)
                     if isinstance(k, str):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
@@ -135,7 +133,7 @@ class EnergySystemDataFrame:
                         row['datetime'] = [self.time_slice]
                         row['val'] = [v]
                         df = df.append(row)
-                    # self referenced entries (duals, etc.)
+                    # add. values for busses (duals, etc.)
                     if k in self.result_object.get(k, {}):
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
