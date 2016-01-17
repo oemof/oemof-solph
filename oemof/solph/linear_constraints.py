@@ -90,17 +90,20 @@ def add_bus_balance(model, block=None):
             I[b.uid] = [i.uid for i in b.inputs]
             O[b.uid] = [o.uid for o in b.outputs]
 
+    block.balanced_uids = po.Set(initialize=uids)
+    block.balanced_indexset = po.Set(initialize=block.balanced_uids*model.T)
     # component inputs/outputs are negative/positive in the bus balance
     def bus_balance_rule(block, e, t):
         lhs = 0
-        lhs += sum(model.w[i, e, t] for i in I[e])
+        lhs = sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
         if e in block.excess_uids:
             rhs += block.excess_slack[e, t]
         if e in block.shortage_uids:
             lhs += block.shortage_slack[e, t]
         return(lhs == rhs)
-    block.balance = po.Constraint(uids, model.timesteps, rule=bus_balance_rule)
+    block.balance = po.Constraint(block.balanced_indexset,
+                                  rule=bus_balance_rule)
 
 
 
