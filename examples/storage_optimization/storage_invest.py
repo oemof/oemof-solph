@@ -68,7 +68,7 @@ time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
 
 logging.info('Initialize the energy system')
 simulation = es.Simulation(
-    timesteps=range(len(time_index)), stream_solver_output=True, solver='glpk',
+    timesteps=range(len(time_index)), verbose=True, solver='glpk',
     objective_options={'function': predefined_objectives.minimize_cost})
 
 energysystem = es.EnergySystem(time_idx=time_index, simulation=simulation)

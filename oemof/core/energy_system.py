@@ -128,7 +128,7 @@ class EnergySystem:
             om = OM(energysystem=self)
 
         om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
-                 tee=self.simulation.stream_solver_output,
+                 verbose=self.simulation.verbose,
                  duals=self.simulation.duals)
 
         self.results = om.results()
@@ -256,8 +256,8 @@ class Simulation:
         (e.g. 'glpk', 'gurobi')
     debug : boolean
         Set the chosen solver to debug (verbose) mode to get more information.
-    stream_solver_output : boolean
-        If True, solver output is streamed in python console
+    verbose : boolean
+        If True, solver output etc. is streamed in python console
     duals : boolean
         If True, results of dual variables and reduced costs will be saved
     objective_options : dictionary
@@ -278,7 +278,7 @@ class Simulation:
         ''
         self.solver = kwargs.get('solver', 'glpk')
         self.debug = kwargs.get('debug', False)
-        self.stream_solver_output = kwargs.get('stream_solver_output', False)
+        self.verbose = kwargs.get('verbose', False)
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
