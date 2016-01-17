@@ -170,10 +170,10 @@ es_df.data_frame.index.get_level_values('bus_type').unique()
 
 # Example slice (see http://pandas.pydata.org/pandas-docs/stable/advanced.html)
 idx = pd.IndexSlice
-es_df.data_frame.loc[idx[:, 'el', 'other', :,
+other = es_df.data_frame.loc[idx[:, 'el', 'other', :,
                          slice(
                             pd.Timestamp("2012-01-01 00:00:00"),
-                            pd.Timestamp("2012-01-02 00:00:00"))], :]
+                            pd.Timestamp("2012-01-01 03:00:00"))], :]
 
 logging.info('Plot the results')
 

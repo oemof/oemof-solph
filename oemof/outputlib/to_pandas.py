@@ -138,7 +138,7 @@ class EnergySystemDataFrame:
                         row['bus_uid'] = [e.uid]
                         row['bus_type'] = [e.type]
                         row['type'] = ['other']
-                        row['obj_uid'] = ['duals']
+                        row['obj_uid'] = ['dual']
                         row['datetime'] = [self.time_slice]
                         row['val'] = [self.result_object[k].get(k)]
                         df = df.append(row)
