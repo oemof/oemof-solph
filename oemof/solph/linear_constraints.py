@@ -475,7 +475,6 @@ def add_dispatch_source(model, block):
         for t in model.timesteps:
             # set upper bound of variable
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][0])
-
     def curtailment_source_rule(block, e, t):
         lhs = block.curtailment_var[e, t]
         rhs = val[e][t] * out_max[e][0] - \
