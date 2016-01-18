@@ -274,7 +274,8 @@ class EnergySystemDataFrame:
              for item in dates.tolist()[0::kwargs.get('tick_distance')]],
             rotation=0, minor=False)
 
-        ax.legend(obj_uids, loc='upper right')
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, labels, loc='upper right')
         return ax
 
     def stackplot(self, bus_uid, **kwargs):
@@ -419,7 +420,7 @@ class EnergySystemDataFrame:
             type="input", kind='bar', linewidth=0,
             colormap=kwargs['colormap_bar'], title=kwargs['title'],
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
-            colordict=kwargs.get('colordict'), 
+            colordict=kwargs.get('colordict'),
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
         my_kwargs = {
