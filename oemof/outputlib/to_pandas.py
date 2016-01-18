@@ -87,60 +87,70 @@ class EnergySystemDataFrame:
         """
         df = pd.DataFrame(columns=['bus_uid', 'bus_type', 'type',
                                    'obj_uid', 'datetime', 'val'])
-        for e, o in self.result_object.items():
-            # busses
-            if ('Bus' in str(e.__class__) and
-                    e.uid in self.bus_uids and
-                    e.type in self.bus_types):
-                row = pd.DataFrame()
-                # bus inputs
-                for i in e.inputs:
-                    # values for input components
-                    if i in self.result_object:
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
+        for k, v in self.result_object.items():
+            row = pd.DataFrame()
+            if ('Bus' in str(k.__class__)):
+                if k in self.result_object[k].keys():
+                    for kk, vv in self.result_object[k].items():
+                        if(k is kk):
+                            # duals (results[bus][bus])
+                            row['bus_uid'] = [k.uid]
+                            row['bus_type'] = [k.type]
+                            row['type'] = ['other']
+                            row['obj_uid'] = ['duals']
+                            row['datetime'] = [self.time_slice]
+                            row['val'] = [self.result_object[k].get(k)]
+                            df = df.append(row)
+                else:
+                    for kk, vv in v.items():
+                        if (isinstance(kk, str)):
+                            # bus variables (results[bus]['some_key'])
+                            row['bus_uid'] = [k.uid]
+                            row['bus_type'] = [k.type]
+                            row['type'] = ['other']
+                            row['obj_uid'] = [kk]
+                            row['datetime'] = [self.time_slice]
+                            row['val'] = [vv]
+                            df = df.append(row)
+                        else:
+                            # bus outputs (results[bus][component])
+                            row['bus_uid'] = [k.uid]
+                            row['bus_type'] = [k.type]
+                            row['type'] = ['output']
+                            row['obj_uid'] = [kk.uid]
+                            row['datetime'] = [self.time_slice]
+                            row['val'] = [vv]
+                            df = df.append(row)
+            else:
+                if k in self.result_object[k].keys():
+                    # self ref. components (results[component][component])
+                    for kk, vv in self.result_object[k].items():
+                        if(k is kk):
+                            row['bus_uid'] = [k.outputs[0].uid]
+                            row['bus_type'] = [k.outputs[0].type]
+                            row['type'] = ['other']
+                            row['obj_uid'] = [k.uid]
+                            row['datetime'] = [self.time_slice]
+                            row['val'] = [self.result_object[k].get(kk)]
+                            df = df.append(row)
+                        else:
+                            row['bus_uid'] = [k.outputs[0].uid]
+                            row['bus_type'] = [k.outputs[0].type]
+                            row['type'] = ['input']
+                            row['obj_uid'] = [k.uid]
+                            row['datetime'] = [self.time_slice]
+                            row['val'] = [self.result_object[k].
+                                          get(k.outputs[0])]
+                            df = df.append(row)
+                else:
+                    for kk, vv in v.items():
+                        # bus inputs (results[component][bus])
+                        row['bus_uid'] = [kk.uid]
+                        row['bus_type'] = [kk.type]
                         row['type'] = ['input']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
-                    # add. values for input components (storage levels, etc.)
-                    if i in self.result_object.get(i, {}):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
-                # bus outputs
-                for k, v in o.items():
-                    # values for output components
-                    if k is not e and not (isinstance(k, str)):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['output']
                         row['obj_uid'] = [k.uid]
                         row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
-                        df = df.append(row)
-                    # bus vars (shortage, excess, etc.)
-                    if isinstance(k, str):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = [k]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
-                        df = df.append(row)
-                    # add. values for busses (duals, etc.)
-                    if k in self.result_object.get(k, {}):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = ['dual']
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[k].get(k)]
+                        row['val'] = [vv]
                         df = df.append(row)
 
         # split date and value lists columns into rows (long format)

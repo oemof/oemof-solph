@@ -36,9 +36,10 @@ import logging
 
 # import solph module to create/process optimization model instance
 from oemof.solph import predefined_objectives as predefined_objectives
+from oemof.solph.optimization_model import OptimizationModel
 
 # Outputlib
-from oemof.outputlib import to_pandas as tpd
+from oemof.outputlib import to_pandas as tp
 
 # Default logger of oemof
 from oemof.tools import logger
@@ -49,7 +50,6 @@ from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
-
 
 # Define logger
 logger.define_logging()
@@ -89,13 +89,11 @@ bgas = Bus(uid="bgas",
            type="gas",
            price=70,
            balanced=True,
-           excess=False)
+           excess=True)
 
 # create electricity bus
 bel = Bus(uid="bel",
-          type="el",
-          excess=True,
-          shortage=True)
+          type="el")
 
 # create commodity object for gas resource
 rgas = source.Commodity(uid='rgas',
@@ -155,13 +153,22 @@ logging.info('Optimise the energy system')
 
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
-energysystem.optimize()
+
+om = OptimizationModel(energysystem=energysystem)
+#om.solve(solver='gurobi', debug=False, duals=True)
+#energysystem.results = om.results()
+energysystem.optimize(om=om)
+#energysystem.optimize()
 
 # energysystem.dump()
 # energysystem.restore()
 
 # Creation of a multi-indexed pandas dataframe
-es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
+es_df = tp.EnergySystemDataFrame(energy_system=energysystem)
+
+#EnergySystemDataFrame
+#DataFramePlot
+
 
 # Example usage of dataframe object
 es_df.data_frame.describe
@@ -170,10 +177,12 @@ es_df.data_frame.index.get_level_values('bus_type').unique()
 
 # Example slice (see http://pandas.pydata.org/pandas-docs/stable/advanced.html)
 idx = pd.IndexSlice
-other = es_df.data_frame.loc[idx[:, 'el', 'other', :,
-                         slice(
-                            pd.Timestamp("2012-01-01 00:00:00"),
-                            pd.Timestamp("2012-01-01 03:00:00"))], :]
+df = es_df.data_frame
+df = df.loc[idx[:, 'el', :, :,
+                slice(
+                    pd.Timestamp("2012-01-01 00:00:00"),
+                    pd.Timestamp("2012-01-01 00:00:00"))], :]
+print(df)
 
 logging.info('Plot the results')
 
@@ -184,7 +193,7 @@ cdict = {'wind': '#5b5bae',
          'demand': '#ce4aff'}
 
 # Plotting line plots
-es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
+es_df.plot_bus(bus_uid="bel", bus_type="el", type="output",
                date_from="2012-01-01 00:00:00", colordict=cdict,
                date_to="2012-01-31 00:00:00",
                title="January 2016", xlabel="Power in MW",

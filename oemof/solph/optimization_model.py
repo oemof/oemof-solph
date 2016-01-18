@@ -272,7 +272,7 @@ class OptimizationModel(po.ConcreteModel):
         return result
 
     def solve(self, solver='glpk', solver_io='lp', debug=False,
-              duals=False, **kwargs):
+              duals=True, **kwargs):
         """ Method that takes care of the communication with the solver
         to solve the optimization model
 
