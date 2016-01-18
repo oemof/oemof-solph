@@ -47,7 +47,8 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                     str(transformer.SimpleExtractionCHP),
                     str(transformer.Storage),
                     str(transformer.CHP),
-                    str(source.FixedSource)]
+                    str(source.FixedSource),
+                    str(source.Commodity)]
     if revenue_objects is None:
         r_blocks = []
 
