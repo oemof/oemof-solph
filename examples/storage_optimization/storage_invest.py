@@ -181,7 +181,7 @@ df = es_df.data_frame
 df = df.loc[idx[:, 'el', :, :,
                 slice(
                     pd.Timestamp("2012-01-01 00:00:00"),
-                    pd.Timestamp("2012-01-01 00:00:00"))], :]
+                    pd.Timestamp("2012-01-01 01:00:00"))], :]
 print(df)
 
 logging.info('Plot the results')
