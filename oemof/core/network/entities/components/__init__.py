@@ -28,8 +28,7 @@ class Source(Component):
     out_max : list
         maximum output of component (e.g. in MW)
     add_out_limit : float
-        limit on additional output "capacity" (e.g. in MW),
-        default value is 0 if add_out_limit is not set
+        limit on additional output "capacity" (e.g. in MW)
     capex : float
         capital expenditure (e.g. in Euro / MW )
     lifetime : float

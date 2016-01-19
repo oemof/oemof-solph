@@ -62,8 +62,7 @@ class Component(Entity):
     out_max : list
         maximum output of component (e.g. in MW)
     add_out_limit : float
-        limit on additional output "capacity" (e.g. in MW),
-        default value is 0 if add_out_limit is not set
+        limit on additional output "capacity" (e.g. in MW)
     capex : float
         capital expenditure (e.g. in Euro / MW )
     lifetime : float
@@ -89,7 +88,7 @@ class Component(Entity):
 
         self.in_max = kwargs.get('in_max')
         self.out_max = kwargs.get('out_max')
-        self.add_out_limit = kwargs.get('add_out_limit', 0)
+        self.add_out_limit = kwargs.get('add_out_limit')
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
         self.wacc = kwargs.get('wacc', 0.05)
