@@ -18,7 +18,7 @@ relevant input input/output uids as dictionary items.
     >>> I = {'pp_coal': 'bus_coal'}
     >>> O = {'pp_coal': ['bus_el', 'bus_th']}
     >>> print(I['pp_coal'])
-    'bus_el'
+    bus_coal
 
 
 In mathematical notation I, O can be seen as indexed index sets The
