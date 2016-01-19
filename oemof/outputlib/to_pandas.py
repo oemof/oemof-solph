@@ -123,9 +123,9 @@ class EnergySystemDataFrame:
                             df = df.append(row)
             else:
                 if k in self.result_object[k].keys():
-                    # self ref. components (results[component][component])
                     for kk, vv in self.result_object[k].items():
                         if(k is kk):
+                            # self ref. components (results[component][component])
                             row['bus_uid'] = [k.outputs[0].uid]
                             row['bus_type'] = [k.outputs[0].type]
                             row['type'] = ['other']
@@ -134,6 +134,7 @@ class EnergySystemDataFrame:
                             row['val'] = [self.result_object[k].get(kk)]
                             df = df.append(row)
                         else:
+                            # bus inputs (only self ref. components)
                             row['bus_uid'] = [k.outputs[0].uid]
                             row['bus_type'] = [k.outputs[0].type]
                             row['type'] = ['input']
