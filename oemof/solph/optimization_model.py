@@ -12,7 +12,6 @@ try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
