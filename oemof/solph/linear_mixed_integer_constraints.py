@@ -213,7 +213,7 @@ def add_startup_constraints(model, block):
 
     The mathematical formulation of constraint is as follows:
 
-    .. math::  Y(e,t) - Yn(e,t-1) \\leq Z_{start}(e,t), \\qquad \
+    .. math::  Y(e,t) - Y(e,t-1) \\leq Z_{start}(e,t), \\qquad \
         \\forall e, \\forall t
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for

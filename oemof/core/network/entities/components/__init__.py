@@ -74,9 +74,9 @@ class Transformer(Component):
     in_min : list
         minimal input of transformer (e.g. min fuel consumption of powerplants)
     grad_pos : float
-        positive gradient (>=0, <=1, relative out_max)
+        positive gradient (absolut value between two sequential timesteps)
     grad_neg : float
-        negative gradient (>=0, <=1, relative out_max)
+        negative gradient (absolut value between two sequential timesteps)
     t_min_off : float
         minimal off time in timesteps (e.g. 5 hours)
     t_min_on : float

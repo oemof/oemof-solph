@@ -271,26 +271,35 @@ class OptimizationModel(po.ConcreteModel):
 
         return result
 
-    def solve(self, solver='glpk', solver_io='lp', debug=False,
-              duals=True, **kwargs):
+
+    def solve(self, solver='glpk', debug=False, verbose=True, duals=False,
+              solver_cmdline_options={}, opt_kwargs={}, solve_kwargs={}):
+
         """ Method that takes care of the communication with the solver
-        to solve the optimization model
+        to solve the optimization model.
 
         Parameters
         ----------
         self : pyomo.ConcreteModel() object
         solver string:
             solver to be used e.g. 'glpk','gurobi','cplex'
-        solver_io str:
-            str that defines the solver interaction
-            (file or interface) 'lp','nl','python'
         debug : boolean
             If True model is solved in debug mode. lp-file is written.
         duals : boolean
             If True, duals and reduced costs are imported from the solver
             results
-        \**kwargs:
-            other arguments for the pyomo.opt.SolverFactory.solve()
+        verbose : boolean
+            If True informations are printed
+        opt_kwargs : dict
+            Other arguments for the pyomo.opt.SolverFactory() class
+        solve_kwargs : dict
+            Other arguments for the pyomo.opt.SolverFactory.solve() method
+            Example : {'solver_io':'lp'}
+        solver_cmdline_options : dict
+            Dictionary with command line options for solver
+            Examples:
+            {'mipgap':0.01'} results in '--mipgap 0.01'
+            {'interior':''} results in '--interior'
         method
 
         Returns
@@ -310,27 +319,27 @@ class OptimizationModel(po.ConcreteModel):
         if debug == True:
             self.write('problem.lp',
                        io_options={'symbolic_solver_labels': True})
-            # print instance
-            # instance.pprint()
 
         # solve instance
-        opt = SolverFactory(solver, solver_io=solver_io)
+        opt = SolverFactory(solver, **opt_kwargs)
+        # set command line options
+        options = opt.options
+        for k in solver_cmdline_options:
+          options[k] = solver_cmdline_options[k]
         # store results
-        results = opt.solve(self, **kwargs)
-        if debug == True:
-            if (results.solver.status == "ok") and \
-               (results.solver.termination_condition == "optimal"):
-                # Do something when the solution in optimal and feasible
-                self.solutions.load_from(results)
+        results = opt.solve(self, **solve_kwargs)
+        #if (results.solver.status == "ok") and \
+        #   (results.solver.termination_condition == "optimal"):
+            # Do something when the solution in optimal and feasible
+        self.solutions.load_from(results)
 
-            elif (results.solver.termination_condition == "infeasible"):
-                print("Model is infeasible",
-                      "Solver Status: ", results.solver.status)
-            else:
-                # Something else is wrong
-                print("Solver Status: ", results.solver.status, "\n"
-                      "Termination condition: ",
-                      results.solver.termination_condition)
+        if verbose:
+            print('***************************************************')
+            print('Optimization problem informations from solph')
+            print('****************************************************')
+            for k in results:
+              print(k, results[k])
+        return results
 
 
     def edges(self, components):

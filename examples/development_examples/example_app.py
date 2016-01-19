@@ -106,7 +106,11 @@ energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 om = OptimizationModel(energysystem=energysystem)
 
-om.solve(solver='gurobi', debug=True, tee=True, duals=True)
+om.solve(solver='glpk', debug=False, duals=True, verbose=True,
+         solve_kwargs={'tee':True,
+                       'keepfiles':True},
+         opt_kwargs={'solver_io':'lp'},
+         solver_cmdline_options={'min':''})
 results = om.results()
 components = transformers + renew_sources
 
