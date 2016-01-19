@@ -102,6 +102,7 @@ class OptimizationModel(po.ConcreteModel):
                   if not isinstance(c, cp.Sink)}
 
         # set attributes lists per class with objects and uids for opt model
+        logging.info('Solph: Building component constraints.')
         for cls in cbt:
             objs = cbt[cls]
             # "call" methods to add the constraints opt. problem
@@ -114,6 +115,8 @@ class OptimizationModel(po.ConcreteModel):
                 block.objs = objs
                 block.optimization_options = cls.optimization_options
                 self.add_component(str(cls), block)
+                logging.debug('Solph: Creating optimization block for omeof '+
+                              'classes: ' + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
 
 
@@ -122,6 +125,7 @@ class OptimizationModel(po.ConcreteModel):
         # get all bus objects
         block.objs = [e for e in self.entities if isinstance(e, Bus)]
         block.uids = [e.uid for e in block.objs]
+        logging.info('Solph: Building bus constraints')
         assembler.registry[Bus](e=None, om=self, block=block)
         self.add_component(str(Bus), block)
 
@@ -129,6 +133,7 @@ class OptimizationModel(po.ConcreteModel):
         if not self.objective_options:
             raise ValueError('No objective options defined!')
 
+        logging.info('Solph: Building objective function.')
         self.objective_assembler(objective_options=self.objective_options)
 
 
@@ -311,17 +316,19 @@ class OptimizationModel(po.ConcreteModel):
         # Create a 'dual' suffix component on the instance
         # so the solver plugin will know which suffixes to collect
         if duals is True:
+            logging.debug("Solph: Setting suffixes for duals & reduced costs.")
             # dual variables (= shadow prices)
             self.dual = po.Suffix(direction=po.Suffix.IMPORT)
             # reduced costs
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug == True:
-            path = helpers.extend_basic_path('lp_files')        
+            path = helpers.extend_basic_path('lp_files')
             self.write(helpers.get_fullpath(path, 'problem.lp'),
                        io_options={'symbolic_solver_labels': True})
             logging.info('LP-file saved to {0}'.format(
                 helpers.get_fullpath(path, 'problem.lp')))
+
 
         # solve instance
         opt = SolverFactory(solver, **opt_kwargs)
@@ -330,21 +337,23 @@ class OptimizationModel(po.ConcreteModel):
         for k in solver_cmdline_options:
           options[k] = solver_cmdline_options[k]
         # store results
+        logging.info("Solph: Handing problem to solver and solving.")
         results = opt.solve(self, **solve_kwargs)
         #if (results.solver.status == "ok") and \
         #   (results.solver.termination_condition == "optimal"):
             # Do something when the solution in optimal and feasible
+        logging.debug("Solph: Loading results back to opt. model instance.")
         self.solutions.load_from(results)
         if verbose:
             logging.info('**************************************************')
-            logging.info('Optimization problem informations from solph')
-            logging.info('**************************************************')
+            logging.info("Optimization problem informations from solph")
+            logging.info("**************************************************")
             for k in results:
               logging.info('{0}: {1}'.format(k, results[k]))
         else:
-            logging.debug('**************************************************')
-            logging.debug('Optimization problem informations from solph')
-            logging.debug('**************************************************')
+            logging.debug("**************************************************")
+            logging.debug("Optimization problem informations from solph")
+            logging.debug("**************************************************")
             for k in results:
               logging.debug('{0}: {1}'.format(k, results[k]))
         return results
