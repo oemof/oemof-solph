@@ -58,7 +58,7 @@ def assembler(e, om, block):
     """
     raise TypeError(
         "Did not find a way to generate optimization constraints for object:" +
-        "\n\n {o}\n\n of type:\n\n {t}".format(o=entity, t=type(entity)))
+        "\n\n {o}\n\n of type:\n\n {t}".format(o=e, t=type(e)))
     return om
 
 class OptimizationModel(po.ConcreteModel):
