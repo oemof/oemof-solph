@@ -75,9 +75,10 @@ class OptimizationModel(po.ConcreteModel):
 
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
-    def __init__(self, energysystem):
-        super().__init__()
 
+    def __init__(self, energysystem, loglevel=logging.INFO):
+        super().__init__()
+        logging.basicConfig(format='%(levelname)s:%(message)s', level=loglevel)
         self.entities = energysystem.entities
         self.timesteps = energysystem.simulation.timesteps
         self.objective_options = energysystem.simulation.objective_options
@@ -288,7 +289,7 @@ class OptimizationModel(po.ConcreteModel):
             If True, duals and reduced costs are imported from the solver
             results
         verbose : boolean
-            If True informations are printed
+            If True the logging level is set from debug to info
         opt_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory() class
         solve_kwargs : dict
@@ -334,13 +335,18 @@ class OptimizationModel(po.ConcreteModel):
         #   (results.solver.termination_condition == "optimal"):
             # Do something when the solution in optimal and feasible
         self.solutions.load_from(results)
-
         if verbose:
-            print('***************************************************')
-            print('Optimization problem informations from solph')
-            print('****************************************************')
+            logging.info('**************************************************')
+            logging.info('Optimization problem informations from solph')
+            logging.info('**************************************************')
             for k in results:
-              print(k, results[k])
+              logging.info('{0}: {1}'.format(k, results[k]))
+        else:
+            logging.debug('**************************************************')
+            logging.debug('Optimization problem informations from solph')
+            logging.debug('**************************************************')
+            for k in results:
+              logging.debug('{0}: {1}'.format(k, results[k]))
         return results
 
 
