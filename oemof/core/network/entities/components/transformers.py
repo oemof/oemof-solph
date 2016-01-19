@@ -124,7 +124,8 @@ class Storage(Transformer):
     Parameters
     ----------
     cap_max : float
-        absolut maximal sate of charge
+        absolut maximum state of charge if invest=FALSE,
+        absolut maximum state of charge of built capacity if invest=TRUE
     cap_min : float
         absolut minimum state of charge
     cap_initial : float
