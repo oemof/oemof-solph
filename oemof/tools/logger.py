@@ -20,12 +20,8 @@ def define_logging(logging_dir='log_files'):
     Uwe Krien (uwe.krien@rl-institut.de)
     '''
     url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
-    basicpath = os.path.join(os.environ['HOME'], '.oemof')
-    logpath = os.path.join(basicpath, logging_dir)
-    if not os.path.isdir(basicpath):
-        os.mkdir(basicpath)
-    if not os.path.isdir(logpath):
-        os.mkdir(logpath)
+    basicpath = helpers.get_basic_path()
+    logpath = helpers.extend_basic_path(logging_dir)
     log_filename = os.path.join(basicpath, 'logging.ini')
     if not os.path.isfile(log_filename):
         helpers.download_file(log_filename, url)

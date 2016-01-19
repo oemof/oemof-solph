@@ -12,10 +12,10 @@ try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
+    from .. tools import helpers
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
@@ -58,8 +58,9 @@ def assembler(e, om, block):
     """
     raise TypeError(
         "Did not find a way to generate optimization constraints for object:" +
-        "\n\n {o}\n\n of type:\n\n {t}".format(o=entity, t=type(entity)))
+        "\n\n {o}\n\n of type:\n\n {t}".format(o=e, t=type(e)))
     return om
+
 
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
@@ -315,8 +316,11 @@ class OptimizationModel(po.ConcreteModel):
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug == True:
-            self.write('problem.lp',
+            path = helpers.extend_basic_path('lp_files')        
+            self.write(helpers.get_fullpath(path, 'problem.lp'),
                        io_options={'symbolic_solver_labels': True})
+            logging.info('LP-file saved to {0}'.format(
+                helpers.get_fullpath(path, 'problem.lp')))
 
         # solve instance
         opt = SolverFactory(solver, **opt_kwargs)

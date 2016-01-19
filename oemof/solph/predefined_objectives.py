@@ -16,7 +16,7 @@ import oemof.solph as solph
 from ..core.network.entities import Bus
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
-from ..solph import linear_mixed_integer_constraints as milc
+
 
 def minimize_cost(self, cost_objects=None, revenue_objects=None):
     """ Builds objective function that minimises the total costs.
