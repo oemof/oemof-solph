@@ -54,6 +54,6 @@ def check_git_branch():
     last_commit = f.read(8)
     f.close()
 
-    logging.info("Used oemof version: {0} @ {1}".format(
+    logging.info("Used oemof version: {0}@{1}".format(
         last_commit,
         name_branch))
