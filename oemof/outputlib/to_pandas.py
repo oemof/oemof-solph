@@ -91,7 +91,7 @@ class EnergySystemDataFrame:
             row = pd.DataFrame()
             if ('Bus' in str(k.__class__)):
                 if k in self.result_object[k].keys():
-                    for kk, vv in self.result_object[k].items():
+                    for kk, vv in v.items():
                         if(k is kk):
                             # duals (results[bus][bus])
                             row['bus_uid'] = [k.uid]
@@ -124,7 +124,7 @@ class EnergySystemDataFrame:
             else:
                 if k in self.result_object[k].keys():
                     # self ref. components (results[component][component])
-                    for kk, vv in self.result_object[k].items():
+                    for kk, vv in v.items():
                         if(k is kk):
                             row['bus_uid'] = [k.outputs[0].uid]
                             row['bus_type'] = [k.outputs[0].type]
