@@ -89,3 +89,17 @@ def check_git_branch():
     logging.info("Used oemof version: {0}@{1}".format(
         last_commit,
         name_branch))
+        
+if __name__ == '__main__':
+    import doctest
+    
+    OC = doctest.OutputChecker
+    class AEOutputChecker(OC):
+        def check_output(self, want, got, optionflags):
+            from re import sub
+            if optionflags & doctest.ELLIPSIS:
+                want = sub(r'\[\.\.\.\]', '...', want)
+            return OC.check_output(self, want, got, optionflags)
+
+    doctest.OutputChecker = AEOutputChecker
+    doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
