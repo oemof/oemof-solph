@@ -16,7 +16,40 @@ from oemof.tools import helpers
 def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     r"""Initialise the logger using the logging.conf file in the local path.
 
-    '''
+    Several sentences providing an extended description. Refer to
+    variables using back-ticks, e.g. `var`.
+
+    Parameters
+    ----------
+    inifile : string, optional (default: logging.ini)
+        Name of the configuration file to define the logger. If no ini-file
+        exist a default ini-file will be downloaded from
+        'http://vernetzen.uni-flensburg.de/~git/logging_default.ini' and used.
+    basicpath : string, optional (default: '.oemof' in HOME)
+        The basicpath for different oemof related informations. By default
+        a ".oemof' folder is created in your home directory.
+    subdir : string, optional (default: 'log_files')
+        The name of the subfolder of the basicpath where the log-files are
+        stored.
+
+    Notes
+    -----
+    By default the INFO level is printed on the screen and the debug level
+    in a file.
+
+    Examples
+    --------
+    To define the default logge you have to import the python logging library
+    and this function.
+
+    >>> import logging
+    >>> from oemof.tools import logger
+    >>> logger.define_logging()
+    [...]INFO-Path for logging:...
+    [...]INFO-Used oemof version:...
+    >>> logging.debug("Hallo")
+    
+    """
     url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
     if basicpath is None:
         basicpath = helpers.get_basic_path()
