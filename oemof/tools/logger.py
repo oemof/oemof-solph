@@ -13,15 +13,14 @@ import logging.config
 from oemof.tools import helpers
 
 
-def define_logging(logging_dir='log_files'):
-    '''
-    Initialise the logger using the logging.conf file in the local path
+def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
+    r"""Initialise the logger using the logging.conf file in the local path.
 
-    Uwe Krien (uwe.krien@rl-institut.de)
     '''
     url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
-    basicpath = helpers.get_basic_path()
-    logpath = helpers.extend_basic_path(logging_dir)
+    if basicpath is None:
+        basicpath = helpers.get_basic_path()
+    logpath = helpers.extend_basic_path(subdir)
     log_filename = os.path.join(basicpath, 'logging.ini')
     if not os.path.isfile(log_filename):
         helpers.download_file(log_filename, url)
