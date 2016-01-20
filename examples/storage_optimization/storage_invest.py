@@ -155,9 +155,9 @@ logging.info('Optimise the energy system')
 # and use the restore method.
 
 om = OptimizationModel(energysystem=energysystem)
-#om.solve(solver='gurobi', debug=False, duals=True)
-#energysystem.results = om.results()
-energysystem.optimize(om=om)
+om.solve(solver='gurobi', debug=False, duals=True)
+energysystem.results = om.results()
+#energysystem.optimize(om=om)
 #energysystem.optimize()
 
 # energysystem.dump()
@@ -193,16 +193,16 @@ cdict = {'wind': '#5b5bae',
          'demand': '#ce4aff'}
 
 # Plotting line plots
-es_df.plot_bus(bus_uid="bel", bus_type="el", type="output",
+es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
                date_from="2012-01-01 00:00:00", colordict=cdict,
                date_to="2012-01-31 00:00:00",
                title="January 2016", xlabel="Power in MW",
                ylabel="Date", tick_distance=24*7,
                exclude_obj_uids=['pv'])
+plt.show()
 
 # Minimal parameter
-es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
-
+es_df.plot_bus(bus_uid="bel", type="input", title="Year 2016")
 plt.show()
 
 # Plotting a combined stacked plot

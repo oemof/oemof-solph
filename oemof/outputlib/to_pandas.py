@@ -231,7 +231,6 @@ class EnergySystemDataFrame:
                     .contains(expr)]
 
         # extract levels to use them in plot
-        obj_uids = subset.index.get_level_values('obj_uid').unique()
         dates = subset.index.get_level_values('datetime').unique()
 
         # unstack object/component level to get columns
