@@ -90,7 +90,7 @@ class EnergySystemDataFrame:
         for k, v in self.result_object.items():
             row = pd.DataFrame()
             if ('Bus' in str(k.__class__)):
-                if k in self.result_object[k].keys():
+                if k in v.keys():
                     for kk, vv in v.items():
                         if(k is kk):
                             # duals (results[bus][bus])
@@ -99,7 +99,7 @@ class EnergySystemDataFrame:
                             row['type'] = ['other']
                             row['obj_uid'] = ['duals']
                             row['datetime'] = [self.time_slice]
-                            row['val'] = [self.result_object[k].get(k)]
+                            row['val'] = [v.get(k)]
                             df = df.append(row)
                 else:
                     for kk, vv in v.items():
@@ -122,7 +122,7 @@ class EnergySystemDataFrame:
                             row['val'] = [vv]
                             df = df.append(row)
             else:
-                if k in self.result_object[k].keys():
+                if k in v.keys():
                     # self ref. components (results[component][component])
                     for kk, vv in v.items():
                         if(k is kk):
@@ -132,7 +132,7 @@ class EnergySystemDataFrame:
                             row['type'] = ['other']
                             row['obj_uid'] = [k.uid]
                             row['datetime'] = [self.time_slice]
-                            row['val'] = [self.result_object[k].get(kk)]
+                            row['val'] = [vv]
                             df = df.append(row)
                         else:
                             # bus inputs (only self ref. components)
@@ -141,8 +141,7 @@ class EnergySystemDataFrame:
                             row['type'] = ['input']
                             row['obj_uid'] = [k.uid]
                             row['datetime'] = [self.time_slice]
-                            row['val'] = [self.result_object[k].
-                                          get(k.outputs[0])]
+                            row['val'] = [v.get(k.outputs[0])]
                             df = df.append(row)
                 else:
                     for kk, vv in v.items():

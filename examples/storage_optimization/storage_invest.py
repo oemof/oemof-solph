@@ -213,6 +213,5 @@ es_df.stackplot("bel",
                 title="Electricity bus",
                 ylabel="Power in MW", xlabel="Date",
                 linewidth=4,
-                tick_distance=24, save=True,
-                exclude_obj_uids=['sto'])
+                tick_distance=24, save=True)
 plt.show()
