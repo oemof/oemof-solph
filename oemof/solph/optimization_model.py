@@ -80,6 +80,7 @@ class OptimizationModel(po.ConcreteModel):
         super().__init__()
         logging.basicConfig(format='%(levelname)s:%(message)s', level=loglevel)
         self.entities = energysystem.entities
+        self.energysystem = energysystem
         self.timesteps = energysystem.simulation.timesteps
         self.objective_options = energysystem.simulation.objective_options
         self.relaxed = getattr(energysystem.simulation, 'relaxed', False)
@@ -278,14 +279,15 @@ class OptimizationModel(po.ConcreteModel):
 
         return result
 
-    def solve(self, solver='glpk', debug=False, verbose=True, duals=False,
-              solver_cmdline_options={}, opt_kwargs={}, solve_kwargs={}):
+    def solve(self, **kwargs):
         """ Method that takes care of the communication with the solver
         to solve the optimization model.
 
         Parameters
         ----------
         self : pyomo.ConcreteModel() object
+        **kwargs : key words
+            Possible keys can be set:
         solver string:
             solver to be used e.g. 'glpk','gurobi','cplex'
         debug : boolean
@@ -294,9 +296,9 @@ class OptimizationModel(po.ConcreteModel):
             If True, duals and reduced costs are imported from the solver
             results
         verbose : boolean
-            If True the logging level is set from debug to info
-        opt_kwargs : dict
-            Other arguments for the pyomo.opt.SolverFactory() class
+            If True informations are printed
+        solver_io : string
+            pyomo solver interface file format: 'lp','python','nl', etc.
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {'solver_io':'lp'}
@@ -311,6 +313,22 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : solved pyomo.ConcreteModel() instance
         """
+        solver = kwargs.get('solver',  self.energysystem.simulation.solver)
+        if solver is None:
+           solver = 'glpk'
+        debug = kwargs.get('debug',  self.energysystem.simulation.debug)
+        if debug is None:
+            debug = False
+        duals = kwargs.get('duals',  self.energysystem.simulation.duals)
+        if duals is None:
+            duals = False
+        verbose = kwargs.get('verbose', self.energysystem.simulation.verbose)
+        if verbose is None:
+            verbose = False
+        solver_io = kwargs.get('solver_io', 'lp')
+        solve_kwargs = kwargs.get('solve_kwargs', {})
+        solver_cmdline_options = kwargs.get('solver_cmdline_options', {})
+
 
         from pyomo.opt import SolverFactory
         # Create a 'dual' suffix component on the instance
@@ -331,7 +349,7 @@ class OptimizationModel(po.ConcreteModel):
 
 
         # solve instance
-        opt = SolverFactory(solver, **opt_kwargs)
+        opt = SolverFactory(solver, solver_io=solver_io)
         # set command line options
         options = opt.options
         for k in solver_cmdline_options:
@@ -339,10 +357,7 @@ class OptimizationModel(po.ConcreteModel):
         # store results
         logging.info("Solph: Handing problem to solver and solving.")
         results = opt.solve(self, **solve_kwargs)
-        #if (results.solver.status == "ok") and \
-        #   (results.solver.termination_condition == "optimal"):
-            # Do something when the solution in optimal and feasible
-        logging.debug("Solph: Loading results back to opt. model instance.")
+
         self.solutions.load_from(results)
         if verbose:
             logging.info('**************************************************')
