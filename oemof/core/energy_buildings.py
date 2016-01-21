@@ -220,8 +220,10 @@ class bdew_elec_slp():
         sql += ' from demand.selp_series;'
         print(sql)
         # Read standard load profile series from csv file
-        # selp_series = pd.read_csv('../demandlib/selp_series.csv',skiprows=0)
+        selp_series = pd.read_csv('../demandlib/selp_series_neu.csv',skiprows=0)
         # selp_series = pd.read_csv('../demandlib/selp_series.csv')
+        print(selp_series)
+        print(conn.execute(sql).fetchall())
         # tmp_df = selp_series
         # Create DataFrame from standard load profile series in csv file
         tmp_df = pd.DataFrame(
