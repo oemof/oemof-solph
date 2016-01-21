@@ -140,6 +140,7 @@ def add_transformer(row, **kwargs):
         # set special kwargs (conversion to list etc. )
         kwargs['eta'] = [row['eta']]
         kwargs['out_max'] = [row['out_max']]
+        kwargs['output_price'] = [row.get('output_price')]
         kwargs['outputs'] = [bus for bus in busses if bus.uid == row["output"]]
         kwargs['inputs'] = [b for b in busses if b.uid == row['input']]
         opex_var = kwargs['inputs'][0].price / kwargs['eta'][0]
@@ -213,6 +214,8 @@ def add_chp(row, **kwargs):
         kwargs['out_max'] = [row['out_max_el'], row.get('out_max_th', None)]
         kwargs['out_min'] = [row['out_min']]
         kwargs['eta_min'] = [row['eta_el_min'], row.get('eta_th_min', None)]
+        kwargs['output_price'] = [row.get('output_price_el'),
+                                  row.get('output_price_th')]
         kwargs['eta'] = [row['eta_el'], row['eta_th']]
         # instantiate object with kwargs
         obj = cls(**kwargs)
