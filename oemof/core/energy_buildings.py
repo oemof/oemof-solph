@@ -191,7 +191,6 @@ class bdew_elec_slp():
         else:
             self.periods = periods
         self._year = time_df.index.year[1000]
-        print(self._year)
         self.slp_frame = self.all_load_profiles(conn, time_df)
 
     def all_load_profiles(self, conn, time_df):

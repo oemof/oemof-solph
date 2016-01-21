@@ -492,7 +492,6 @@ def call_demandlib(demand, method, year, **kwargs):
                          comm_number_of_employees_region=kwargs.get(
                          'comm_number_of_employees_region'))
 
-    print('hallo')
     return demand
 
 
