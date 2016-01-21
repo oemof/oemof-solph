@@ -10,10 +10,6 @@ import pyomo.environ as po
 import numpy as np
 import logging
 
-try:
-    from oemof.core.network.entities import components as cp
-except:
-    from .network.entities import components as cp
 
 def add_binary(model, block, relaxed=False):
     """ Creates all status variables (binary) for `block.objs`
@@ -42,7 +38,8 @@ def add_binary(model, block, relaxed=False):
         block.y = po.Var(block.indexset, within=po.Binary)
     if relaxed:
         block.y = po.Var(block.indexset, within=po.NonNegativeReals,
-                         bounds=(0,1))
+                         bounds=(0, 1))
+
 
 def add_continuous(model, edges):
     """ Adds all variables corresponding to the edges of the bi-partite
@@ -167,8 +164,7 @@ def set_bounds(model, block, side='output'):
         # TODO: Implement upper bound constraint for investment models
         if side == 'input':
             raise ValueError('Setting upper bounds on inputs of components' +
-                              ' not possible for investment models')
-
+                             ' not possible for investment models')
 
 
 def set_storage_cap_bounds(model, block):
@@ -199,7 +195,6 @@ def set_storage_cap_bounds(model, block):
     block : SimpleBlock()
          block to group all objects corresponding to one oemof base class
     """
-
 
     if block.objs is None:
         raise ValueError("No objects defined. Please specify objects for \
@@ -232,6 +227,7 @@ def set_storage_cap_bounds(model, block):
         block.cap_bound = po.Constraint(block.indexset,
                                         rule=add_cap_rule)
 
+
 def set_outages(model, block, outagetype='period', side='output'):
     """ Fixes component input/output to zeros for modeling outages.
 
@@ -254,8 +250,8 @@ def set_outages(model, block, outagetype='period', side='output'):
     outages = {obj.uid: obj.outages for obj in block.objs}
     timesteps = {}
     for e in outages.keys():
-       if isinstance(outages[e], (float, np.float)) \
-          and outages[e] <= 1 and outages[e] >= 0:
+        if isinstance(outages[e], (float, np.float)) \
+                and outages[e] <= 1 and outages[e] >= 0:
             time_off = int(len(model.timesteps) * outages[e])
             if outagetype == 'period':
                 start = np.random.randint(0, len(model.timesteps)-time_off+1)
@@ -263,10 +259,10 @@ def set_outages(model, block, outagetype='period', side='output'):
                 timesteps[e] = [t for t in range(start, end)]
             if outagetype == 'random_days':
                 timesteps[e] = np.random.randint(0, len(model.timesteps))
-       elif len(outages[e]) >= 1:
-           timesteps[e] = outages[e]
-       else:
-           timesteps[e] = []
+        elif len(outages[e]) >= 1:
+            timesteps[e] = outages[e]
+        else:
+            timesteps[e] = []
 
     if side == 'input' and timesteps[e]:
         for e in block.uids:
@@ -279,7 +275,8 @@ def set_outages(model, block, outagetype='period', side='output'):
                 model.w[e, model.O[e][0], t] = 0
                 model.w[e, model.O[e][0], t].fix()
     else:
-      pass
+        pass
+
 
 def set_fixed_sink_value(model, block):
     """ Setting a value und fixes the variable of input.
