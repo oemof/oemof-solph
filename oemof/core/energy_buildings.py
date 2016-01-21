@@ -212,31 +212,16 @@ class bdew_elec_slp():
         Calculates the hourly electricity load profile in MWh/h of a region.
         '''
 
-        # Write values from the data base to a DataFrame
-        # The dates are not real dates but helpers to calculate the mean values
-        sql = 'select period, weekday'
-        for slp_type in slp_types:
-            sql += ', {0}'.format(slp_type)
-        sql += ' from demand.selp_series;'
-        print(sql)
         # Read standard load profile series from csv file
-        selp_series = pd.read_csv('../demandlib/selp_series_neu.csv',skiprows=0)
-        # selp_series = pd.read_csv('../demandlib/selp_series.csv')
-        print(selp_series)
-        print(conn.execute(sql).fetchall())
-        # tmp_df = selp_series
-        # Create DataFrame from standard load profile series in csv file
-        tmp_df = pd.DataFrame(
-            conn.execute(sql).fetchall(),
-            index=pd.date_range(
-                pd.datetime(self._year, 1, 1, 0), periods=2016, freq='15Min'),
-                columns=['period', 'weekday'] + slp_types)
+
+        selp_series = pd.read_csv('../demandlib/selp_series.csv')
+        tmp_df = selp_series
 
         index = pd.date_range(
                 pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min')
                 # columns=['period', 'weekday'] + slp_types)
 
-        # tmp_df.set_index(index)
+        tmp_df.set_index(index, inplace=True)
 
         # All holidays(0) are set to sunday(7)
         time_df.weekday = time_df.weekday.replace(0, 7)
