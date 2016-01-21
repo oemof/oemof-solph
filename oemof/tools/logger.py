@@ -44,7 +44,7 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
 
     >>> import logging
     >>> from oemof.tools import logger
-    >>> logger.define_logging()
+    >>> logger.define_logging() # doctest: +SKIP
     [...]INFO-Path for logging:...
     [...]INFO-Used oemof version:...
     >>> logging.debug("Hallo")
