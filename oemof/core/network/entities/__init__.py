@@ -88,7 +88,7 @@ class Component(Entity):
 
         self.in_max = kwargs.get('in_max')
         self.out_max = kwargs.get('out_max')
-        self.add_out_limit = kwargs.get('add_out_limit', 0)
+        self.add_out_limit = kwargs.get('add_out_limit')
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
         self.wacc = kwargs.get('wacc', 0.05)

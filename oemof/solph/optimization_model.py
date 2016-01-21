@@ -6,19 +6,19 @@
 from functools import singledispatch
 
 import pyomo.environ as po
+import logging
 
 try:
     import variables as var
     import linear_mixed_integer_constraints as milc
     import linear_constraints as lc
-    import objective_expressions as objfuncexprs
     from oemof.core.network.entities import Bus, Component
     from oemof.core.network.entities import components as cp
 except:
+    from .. tools import helpers
     from . import variables as var
     from . import linear_mixed_integer_constraints as milc
     from . import linear_constraints as lc
-    from . import objective_expressions as objfuncexprs
     from ..core.network.entities import Bus, Component
     from ..core.network.entities import components as cp
 
@@ -58,8 +58,9 @@ def assembler(e, om, block):
     """
     raise TypeError(
         "Did not find a way to generate optimization constraints for object:" +
-        "\n\n {o}\n\n of type:\n\n {t}".format(o=entity, t=type(entity)))
+        "\n\n {o}\n\n of type:\n\n {t}".format(o=e, t=type(e)))
     return om
+
 
 class OptimizationModel(po.ConcreteModel):
     """Create Pyomo model of the energy system.
@@ -139,6 +140,14 @@ class OptimizationModel(po.ConcreteModel):
         block : SimpleBlock()
         """
 
+        if block.optimization_options:
+            for k in block.optimization_options:
+                block.default_optimization_options.update({
+                    k: block.optimization_options[k]})
+            block.optimization_options = block.default_optimization_options
+        else:
+            block.optimization_options = block.default_optimization_options
+
         if (block.optimization_options.get('investment', False) and
             'milp_constr' in block.optimization_options):
             raise ValueError('Component can not be modeled with milp-constr ' +
@@ -167,15 +176,18 @@ class OptimizationModel(po.ConcreteModel):
         """ calls functions to add predefined objective functions
 
         """
-        print('Creating predefined objective:',
-              str(objective_options['function']))
 
         revenue_objects = objective_options.get('revenue_objects')
         cost_objects = objective_options.get('cost_objects')
 
-        objective_options['function'](self,
-                                      cost_objects=cost_objects,
-                                      revenue_objects=revenue_objects)
+        if objective_options.get('function') is None:
+            logging.warning('No objective function selected. If you want '+
+                            'to build an objective yourself you can' +
+                            'ignore this warning.')
+        else:
+            objective_options['function'](self,
+                                          cost_objects=cost_objects,
+                                          revenue_objects=revenue_objects)
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
@@ -260,18 +272,33 @@ class OptimizationModel(po.ConcreteModel):
 
         return result
 
-    def solve(self, solver='glpk', solver_io='lp', debug=False,
-              duals=False, **kwargs):
+    def solve(self, solver='glpk', debug=False, verbose=True, duals=False,
+              solver_cmdline_options={}, opt_kwargs={}, solve_kwargs={}):
         """ Method that takes care of the communication with the solver
-        to solve the optimization model
+        to solve the optimization model.
 
         Parameters
         ----------
-        self : pyomo.ConcreteModel
-        solver str: solver to be used e.g. 'glpk','gurobi','cplex'
-        solver_io str: str that defines the solver interaction
-        (file or interface) 'lp','nl','python'
-        \**kwargs: other arguments for the pyomo.opt.SolverFactory.solve()
+        self : pyomo.ConcreteModel() object
+        solver string:
+            solver to be used e.g. 'glpk','gurobi','cplex'
+        debug : boolean
+            If True model is solved in debug mode. lp-file is written.
+        duals : boolean
+            If True, duals and reduced costs are imported from the solver
+            results
+        verbose : boolean
+            If True informations are printed
+        opt_kwargs : dict
+            Other arguments for the pyomo.opt.SolverFactory() class
+        solve_kwargs : dict
+            Other arguments for the pyomo.opt.SolverFactory.solve() method
+            Example : {'solver_io':'lp'}
+        solver_cmdline_options : dict
+            Dictionary with command line options for solver
+            Examples:
+            {'mipgap':0.01'} results in '--mipgap 0.01'
+            {'interior':''} results in '--interior'
         method
 
         Returns
@@ -289,29 +316,32 @@ class OptimizationModel(po.ConcreteModel):
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug == True:
-            self.write('problem.lp',
+            path = helpers.extend_basic_path('lp_files')        
+            self.write(helpers.get_fullpath(path, 'problem.lp'),
                        io_options={'symbolic_solver_labels': True})
-            # print instance
-            # instance.pprint()
+            logging.info('LP-file saved to {0}'.format(
+                helpers.get_fullpath(path, 'problem.lp')))
 
         # solve instance
-        opt = SolverFactory(solver, solver_io=solver_io)
+        opt = SolverFactory(solver, **opt_kwargs)
+        # set command line options
+        options = opt.options
+        for k in solver_cmdline_options:
+          options[k] = solver_cmdline_options[k]
         # store results
-        results = opt.solve(self, **kwargs)
-        if debug == True:
-            if (results.solver.status == "ok") and \
-               (results.solver.termination_condition == "optimal"):
-                # Do something when the solution in optimal and feasible
-                self.solutions.load_from(results)
+        results = opt.solve(self, **solve_kwargs)
+        #if (results.solver.status == "ok") and \
+        #   (results.solver.termination_condition == "optimal"):
+            # Do something when the solution in optimal and feasible
+        self.solutions.load_from(results)
 
-            elif (results.solver.termination_condition == "infeasible"):
-                print("Model is infeasible",
-                      "Solver Status: ", results.solver.status)
-            else:
-                # Something else is wrong
-                print("Solver Status: ", results.solver.status, "\n"
-                      "Termination condition: ",
-                      results.solver.termination_condition)
+        if verbose:
+            print('***************************************************')
+            print('Optimization problem informations from solph')
+            print('****************************************************')
+            for k in results:
+              print(k, results[k])
+        return results
 
 
     def edges(self, components):
@@ -376,7 +406,6 @@ def _(e, om, block):
                                       om.timesteps,
                                       within=po.NonNegativeReals)
 
-    print('Creating bus balance constraints ...')
     # bus balance constraint for energy bus objects
     lc.add_bus_balance(om, block)
 
@@ -406,18 +435,9 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_input_costs(om, block)
-        objfuncexprs.add_revenues(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     om.default_assembler(block)
     return om
@@ -441,18 +461,9 @@ def _(e, om, block):
         lc.add_simple_io_relation(om, block)
         lc.add_simple_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_input_costs(om, block)
-        objfuncexprs.add_revenues(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -474,18 +485,9 @@ def _(e, om, block):
         lc.add_simple_extraction_chp_relation(om, block)
         var.set_bounds(om, block, side='output')
         var.set_bounds(om, block, side='input')
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_input_costs(om, block)
-        objfuncexprs.add_revenues(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -506,16 +508,13 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_eta_total_chp_relation(om, block)
-        var.set_bounds(om, block, side='output')
     def milp_constraints(om, block):
         milc.add_variable_linear_eta_relation(om, block)
+        milc.set_bounds(om, block, side='output')
 
-    default_optimization_options = {
+    block.default_optimization_options = {
         'linear_constr': linear_constraints,
         'milp_constr': milp_constraints}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -536,15 +535,10 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_fixed_source(om, block)
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
 
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
+
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -564,17 +558,9 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_dispatch_source(om, block)
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='output')
-        objfuncexprs.add_curtailment_costs(om, block)
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if not block.optimization_options:
-        block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     if block.optimization_options.get('investment', False):
         raise ValueError('Dispatch source + investment is not possible!')
@@ -644,17 +630,9 @@ def _(e, om, block):
             var.set_bounds(om, block, side='input')
         else:
             lc.add_storage_charge_discharge_limits(om, block)
-    def objective_function_expressions(om, block):
-        objfuncexprs.add_opex_var(om, block, ref='output')
-        objfuncexprs.add_opex_fix(om, block, ref='capacity')
 
-    default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'objective' : objective_function_expressions}
-
-    if block.optimization_options:
-        default_optimization_options.update(block.optimization_options)
-    block.optimization_options = default_optimization_options
+    block.default_optimization_options = {
+        'linear_constr': linear_constraints}
 
     if block.optimization_options.get('investment', False):
         block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)

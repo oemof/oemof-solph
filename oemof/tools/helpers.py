@@ -515,7 +515,24 @@ def download_file(filename, url):
         logging.info('Copying file from {0} to {1}'.format(
             url, filename))
         urlretrieve(url, filename)
+        
+        
+def get_basic_path():
+    basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    if not os.path.isdir(basicpath):
+        os.mkdir(basicpath)
+    return basicpath
+    
+    
+def extend_basic_path(subfolder):
+    extended_path = os.path.join(get_basic_path(), subfolder)
+    if not os.path.isdir(subfolder):
+        os.mkdir(subfolder)
+    return extended_path
+    
 
+def get_fullpath(path, filename):
+    return os.path.join(path, filename)
 
 def create_basic_dataframe(year, **kwargs):
     r"""Giving back a DataFrame containing weekdays and optionally holidays for the

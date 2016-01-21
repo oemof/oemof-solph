@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
    :glob:
    
+   getting_started
    meta_description
    installation_and_setup
    developer_notes

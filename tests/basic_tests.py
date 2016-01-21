@@ -13,4 +13,3 @@ class EnergySystem_Tests:
         eq_(Entity.registry, es)
         bus = Bus(uid='bus-uid', type='bus-type')
         eq_(es.entities[0], bus)
-

@@ -17,6 +17,7 @@ from ..core.network.entities import Bus
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
 
+
 def minimize_cost(self, cost_objects=None, revenue_objects=None):
     """ Builds objective function that minimises the total costs.
 
@@ -42,8 +43,12 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
 
     if cost_objects is None:
         c_blocks = [str(transformer.Simple),
+                    str(transformer.VariableEfficiencyCHP),
+                    str(transformer.SimpleExtractionCHP),
+                    str(transformer.Storage),
                     str(transformer.CHP),
-                    str(source.FixedSource)]
+                    str(source.FixedSource),
+                    str(source.Commodity)]
     if revenue_objects is None:
         r_blocks = []
 
@@ -55,7 +60,9 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
         if block.name in c_blocks:
             if block.name == str(transformer.Storage):
                 ref = 'capacity'
-                expr += objexpr.add_opex_var(self, self.simple_storage,
+                expr += objexpr.add_opex_var(self,
+                                             getattr(self,
+                                                     str(transformer.Storage)),
                                              ref='input')
             else:
                 ref = 'output'
@@ -63,10 +70,14 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
 
             expr += objexpr.add_opex_var(self, block, ref='output')
             # fix costs
-            expr += objexpr.add_opex_fix(self, block, ref=ref)
+            if block != str(source.Commodity):
+                expr += objexpr.add_opex_fix(self, block, ref=ref)
             # investment costs
             if block.optimization_options.get('investment', False):
                 expr += objexpr.add_capex(self, block, ref=ref)
+            if hasattr(block, 'z_start'):
+                expr += objexpr.add_startup_costs(self, block)
+
             # revenues
         if block.name in r_blocks:
             expr += objexpr.add_revenues(self, block, ref='output')

@@ -44,6 +44,8 @@ def set_bounds(model, block, side="output"):
         An object to be solved containing all Variables, Constraints, Data.
         Bounds are altered at model attributes (variables) of `model`
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     side : string
        string to select on which side the bounds should be set
        (`ìnput`, `output`)
@@ -113,6 +115,8 @@ def add_variable_linear_eta_relation(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -155,6 +159,8 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     grad_direc : string
          direction of gradient ("both", "positive", "negative")
 
@@ -207,7 +213,7 @@ def add_startup_constraints(model, block):
 
     The mathematical formulation of constraint is as follows:
 
-    .. math::  Y(e,t) - Yn(e,t-1) \\leq Z_{start}(e,t), \\qquad \
+    .. math::  Y(e,t) - Y(e,t-1) \\leq Z_{start}(e,t), \\qquad \
         \\forall e, \\forall t
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
@@ -219,6 +225,8 @@ def add_startup_constraints(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
     References
     ----------
@@ -265,6 +273,8 @@ def add_shutdown_constraints(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     References
     ----------
@@ -314,6 +324,8 @@ def add_minimum_downtime(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -364,6 +376,8 @@ def add_minimum_uptime(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:

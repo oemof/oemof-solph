@@ -31,12 +31,13 @@ def add_opex_var(model, block, ref='output'):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
     ref : string
        Reference side on which opex are based on
         (e.g. powerplant MWhth -> input or MWhel -> output)
 
     Returns
-    ---------
+    -------
     Expression
     """
     if block.uids is None:
@@ -71,9 +72,10 @@ def add_input_costs(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
     if block.uids is None:
@@ -116,12 +118,13 @@ def add_opex_fix(model, block, ref=None):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
     ref : string
         string to check if capex is referred to capacity (storage) or output
         (e.g. powerplant)
 
     Returns
-    ---------
+    -------
     Expression
 
     """
@@ -171,9 +174,10 @@ def add_revenues(model, block, ref='output'):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
 
@@ -217,9 +221,10 @@ def add_curtailment_costs(model, block=None):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
 
@@ -256,12 +261,13 @@ def add_capex(model, block, ref='output'):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
     ref : string
         string to check if capex is referred to capacity (storage) or output
         (e.g. powerplant)
 
     Returns
-    ---------
+    -------
     Expression
     """
     if not block.objs:
@@ -299,9 +305,10 @@ def add_startup_costs(model, block):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
     if block.objs is None:
@@ -324,9 +331,10 @@ def add_shutdown_costs(model, block):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
 
@@ -352,12 +360,13 @@ def add_ramping_costs(model, block, grad_direc='positive'):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
     grad_direc : string
         direction of gradient for which the costs are added to the objective
         expression
 
     Returns
-    ---------
+    -------
     Expression
     """
     if block.uids is None:
@@ -386,10 +395,11 @@ def add_excess_slack_costs(model, block=None):
     Parameters
     ----------
     model : OptimizationModel() instance
-    block : SimpleBlock()
+    block : SimpleBlock()    block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
 
@@ -412,9 +422,10 @@ def add_shortage_slack_costs(model, block=None):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
 
     Returns
-    ---------
+    -------
     Expression
     """
     c_shortage = {b.uid: b.shortage_costs for b in block.objs

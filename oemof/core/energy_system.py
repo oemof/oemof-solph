@@ -35,8 +35,10 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
-    year : integer
-        Define the time for the energy system.
+    time_idx : pandas.index, optional
+        Define the time range and increment for the energy system. This is an
+        optional parameter but might be import for other functions/methods that
+        use the EnergySystem class as an input parameter.
 
     Attributes
     ----------
@@ -61,14 +63,18 @@ class EnergySystem:
         Currently only set after a call to :meth:`optimize` after which it
         holds the return value of :meth:`om.results()
         <oemof.solph.optimization_model.OptimizationModel.results>`.
+    time_idx : pandas.index, optional
+        Define the time range and increment for the energy system. This is an
+        optional atribute but might be import for other functions/methods that
+        use the EnergySystem class as an input parameter.
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
-        self.results = None
-        self.year = kwargs.get('year')
+        self.results = kwargs.get('results')
+        self.time_idx = kwargs.get('time_idx')
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
@@ -122,7 +128,7 @@ class EnergySystem:
             om = OM(energysystem=self)
 
         om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
-                 tee=self.simulation.stream_solver_output,
+                 verbose=self.simulation.verbose,
                  duals=self.simulation.duals)
 
         self.results = om.results()
@@ -250,8 +256,8 @@ class Simulation:
         (e.g. 'glpk', 'gurobi')
     debug : boolean
         Set the chosen solver to debug (verbose) mode to get more information.
-    stream_solver_output : boolean
-        If True, solver output is streamed in python console
+    verbose : boolean
+        If True, solver output etc. is streamed in python console
     duals : boolean
         If True, results of dual variables and reduced costs will be saved
     objective_options : dictionary
@@ -272,7 +278,7 @@ class Simulation:
         ''
         self.solver = kwargs.get('solver', 'glpk')
         self.debug = kwargs.get('debug', False)
-        self.stream_solver_output = kwargs.get('stream_solver_output', False)
+        self.verbose = kwargs.get('verbose', False)
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')

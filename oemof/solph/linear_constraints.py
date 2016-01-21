@@ -18,7 +18,7 @@ relevant input input/output uids as dictionary items.
     >>> I = {'pp_coal': 'bus_coal'}
     >>> O = {'pp_coal': ['bus_el', 'bus_th']}
     >>> print(I['pp_coal'])
-    'bus_el'
+    bus_coal
 
 
 In mathematical notation I, O can be seen as indexed index sets The
@@ -74,6 +74,8 @@ def add_bus_balance(model, block=None):
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -88,17 +90,20 @@ def add_bus_balance(model, block=None):
             I[b.uid] = [i.uid for i in b.inputs]
             O[b.uid] = [o.uid for o in b.outputs]
 
+    block.balanced_uids = po.Set(initialize=uids)
+    block.balanced_indexset = po.Set(initialize=block.balanced_uids*model.T)
     # component inputs/outputs are negative/positive in the bus balance
     def bus_balance_rule(block, e, t):
         lhs = 0
-        lhs += sum(model.w[i, e, t] for i in I[e])
+        lhs = sum(model.w[i, e, t] for i in I[e])
         rhs = sum(model.w[e, o, t] for o in O[e])
         if e in block.excess_uids:
             rhs += block.excess_slack[e, t]
         if e in block.shortage_uids:
             lhs += block.shortage_slack[e, t]
         return(lhs == rhs)
-    block.balance = po.Constraint(uids, model.timesteps, rule=bus_balance_rule)
+    block.balance = po.Constraint(block.balanced_indexset,
+                                  rule=bus_balance_rule)
 
 
 
@@ -125,6 +130,8 @@ def add_simple_io_relation(model, block, idx=0):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     idx : integer
       Index to choose which output to select (from list of Outputs: O[e][idx])
 
@@ -169,6 +176,8 @@ def add_eta_total_chp_relation(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -211,6 +220,8 @@ def add_simple_chp_relation(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -269,6 +280,8 @@ def add_simple_extraction_chp_relation(model, block):
     model : OptimizationModel() instance
            An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -296,7 +309,7 @@ def add_simple_extraction_chp_relation(model, block):
     def power_heat_rule(block, e, t):
         lhs = model.w[e, model.O[e][0], t]
         rhs = sigma[e] *  model.w[e, model.O[e][1], t]
-        return(lhs <= rhs)
+        return(lhs >= rhs)
     block.pth_relation = po.Constraint(block.indexset, rule=power_heat_rule,
                                        doc="P <= sigma * Q")
 
@@ -320,6 +333,8 @@ def add_global_output_limit(model, block=None):
     model : OptimizationModel() instance
        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -355,7 +370,7 @@ def add_fixed_source(model, block):
 
     For `investment` for component:
 
-    .. math::  W(e, O_1(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
+    .. math::  W(e, O_1(e), t) \\leq (out_{max}(e) + ADDOUT(e)) \
     \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
 
     .. math:: ADDOUT(e)  \\leq addout_{max}(e), \\qquad \\forall e
@@ -369,6 +384,8 @@ def add_fixed_source(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -383,6 +400,7 @@ def add_fixed_source(model, block):
 
     # normed value of renewable source (0 <= value <=1)
     val = {obj.uid: obj.val for obj in block.objs}
+
 
     if not block.optimization_options.get('investment', False):
         # maximal ouput of renewable source (in general installed capacity)
@@ -405,7 +423,7 @@ def add_fixed_source(model, block):
 
         def invest_rule(block, e, t):
             lhs = model.w[e, model.O[e][0], t]
-            rhs = (out_max[e][model.O[e][0]] + model.add_out[e]) * val[e][t]
+            rhs = (out_max[e][0] + block.add_out[e]) * val[e][t]
             return(lhs == rhs)
         block.invest = po.Constraint(block.indexset, rule=invest_rule)
 
@@ -434,6 +452,8 @@ def add_dispatch_source(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -455,7 +475,6 @@ def add_dispatch_source(model, block):
         for t in model.timesteps:
             # set upper bound of variable
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][0])
-
     def curtailment_source_rule(block, e, t):
         lhs = block.curtailment_var[e, t]
         rhs = val[e][t] * out_max[e][0] - \
@@ -487,6 +506,8 @@ def add_storage_balance(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -612,6 +633,8 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     grad_direc: string
         string defining the direction of the gradient constraint.

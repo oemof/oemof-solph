@@ -5,9 +5,6 @@ import logging
 import pandas as pd
 import numpy as np
 
-#logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger().setLevel(logging.INFO)
-# logging.getLogger().setLevel(logging.WARNING)
 from oemof_pg import db
 from oemof_pg import tools
 from oemof_pg import powerplants as db_pps
@@ -261,13 +258,13 @@ bus1 = [obj for obj in TwoRegExample.entities if obj.uid == (
     'bus', 'Landkreis Wittenberg', 'elec')][0]
 bus2 = [obj for obj in TwoRegExample.entities if obj.uid == (
     'bus', 'Stadt Dessau-Rosslau', 'elec')][0]
-TwoRegExample.connect(bus1, bus2, in_max=10 * 10 ** 12, out_max=0.9 * 10 ** 12, eta=0.9,
-                      transport_class=transport.Simple)
+TwoRegExample.connect(bus1, bus2, in_max=10 * 10 ** 12, out_max=0.9 * 10 ** 12,
+                      eta=0.9, transport_class=transport.Simple)
 
 pv_lk_wtb = ([obj for obj in TwoRegExample.entities if obj.uid == (
     'FixedSrc', 'Landkreis Wittenberg', 'pv_pwr')][0])
 
-# Multiply PV with 10
+# Multiply PV with 25
 pv_lk_wtb.val = pv_lk_wtb.val * 25
 
 # Remove orphan buses
