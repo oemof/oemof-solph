@@ -142,5 +142,5 @@ helpers.call_demandlib(demand_2,
                        comm_number_of_employees_state=comm_number_of_employees_state,
                        comm_number_of_employees_region=comm_number_of_employees_region)
 
-
-print('ok')
+print(demand.val)
+print(demand_2.val)
