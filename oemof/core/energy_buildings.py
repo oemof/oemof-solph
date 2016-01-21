@@ -191,6 +191,7 @@ class bdew_elec_slp():
         else:
             self.periods = periods
         self._year = time_df.index.year[1000]
+        print(self._year)
         self.slp_frame = self.all_load_profiles(conn, time_df)
 
     def all_load_profiles(self, conn, time_df):
@@ -213,23 +214,27 @@ class bdew_elec_slp():
 
         # Write values from the data base to a DataFrame
         # The dates are not real dates but helpers to calculate the mean values
-
+        sql = 'select period, weekday'
+        for slp_type in slp_types:
+            sql += ', {0}'.format(slp_type)
+        sql += ' from demand.selp_series;'
+        print(sql)
         # Read standard load profile series from csv file
         # selp_series = pd.read_csv('../demandlib/selp_series.csv',skiprows=0)
-        selp_series = pd.read_csv('../demandlib/selp_series.csv')
-        tmp_df = selp_series
+        # selp_series = pd.read_csv('../demandlib/selp_series.csv')
+        # tmp_df = selp_series
         # Create DataFrame from standard load profile series in csv file
-        # tmp_df = pd.DataFrame(
-        #     selp_series,
-        #     index=pd.date_range(
-        #         pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min'),
-            #  columns=['period', 'weekday'] + slp_types)
+        tmp_df = pd.DataFrame(
+            conn.execute(sql).fetchall(),
+            index=pd.date_range(
+                pd.datetime(self._year, 1, 1, 0), periods=2016, freq='15Min'),
+                columns=['period', 'weekday'] + slp_types)
 
         index = pd.date_range(
                 pd.datetime(2007, 1, 1, 0), periods=2016, freq='15Min')
                 # columns=['period', 'weekday'] + slp_types)
 
-        tmp_df.set_index(index)
+        # tmp_df.set_index(index)
 
         # All holidays(0) are set to sunday(7)
         time_df.weekday = time_df.weekday.replace(0, 7)

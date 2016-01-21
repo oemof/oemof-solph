@@ -461,7 +461,7 @@ def pickle2dict(filename=None, path=None):
     return dic
 
 
-def call_demandlib(demand, method, year, **kwargs):
+def call_demandlib(demand, conn, method, year, **kwargs):
     '''
     Calls the demandlib and creates an object which includes the demand
     timeseries.
@@ -474,6 +474,7 @@ def call_demandlib(demand, method, year, **kwargs):
 
     df = create_basic_dataframe(year, **kwargs)
     dm.electrical_demand(method,
+                         conn=conn,
                          dataframe=df,
                          ann_el_demand_per_sector=kwargs.get(
                          'ann_el_demand_per_sector'))
