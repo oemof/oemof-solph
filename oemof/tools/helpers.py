@@ -473,13 +473,27 @@ def call_demandlib(demand, method, year, **kwargs):
     '''
 
     df = create_basic_dataframe(year, **kwargs)
-    dm.electrical_demand(method,
+    demand.val = dm.electrical_demand(method,
                          dataframe=df,
                          ann_el_demand_per_sector=kwargs.get(
-                         'ann_el_demand_per_sector'))
+                         'ann_el_demand_per_sector'),
+                         ann_el_demand_per_person=kwargs.get(
+                         'ann_el_demand_per_person'),
+                         household_structure=kwargs.get(
+                         'household_structure'),
+                         household_members_all=kwargs.get(
+                         'household_members_all'),
+                         population=kwargs.get(
+                         'population'),
+                         comm_ann_el_demand_state=kwargs.get(
+                         'comm_ann_el_demand_state'),
+                         comm_number_of_employees_state=kwargs.get(
+                         'comm_number_of_employees_state'),
+                         comm_number_of_employees_region=kwargs.get(
+                         'comm_number_of_employees_region'))
 
     print('hallo')
-    return
+    return demand
 
 
 def dict2textfile(dic, filename=None, path=None):
