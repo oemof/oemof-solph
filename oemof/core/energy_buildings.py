@@ -197,7 +197,7 @@ class bdew_elec_slp():
     def all_load_profiles(self, conn, time_df):
         slp_types = ['h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'l0',
                      'l1', 'l2']
-        new_df = self.create_bdew_load_profiles(conn, time_df, slp_types)
+        new_df = self.create_bdew_load_profiles(time_df, slp_types)
 
         # Add the slp for the industrial group
         new_df['i0'] = self.simple_industrial_heat_profile(time_df)
@@ -207,7 +207,7 @@ class bdew_elec_slp():
         # Jahressumme als die anderen.
         return new_df
 
-    def create_bdew_load_profiles(self, conn, time_df, slp_types):
+    def create_bdew_load_profiles(self, time_df, slp_types):
         '''
         Calculates the hourly electricity load profile in MWh/h of a region.
         '''
