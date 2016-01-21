@@ -61,6 +61,9 @@ class Component(Entity):
         maximum input of component (e.g. in MW)
     out_max : list
         maximum output of component (e.g. in MW)
+    ub_out : list of pandas.series (or array-like)
+        Upperbound for the output of a component. If ub_out is not set out_max
+        is used. Contrary to out_max ub_out hast to be array-like.
     add_out_limit : float
         limit on additional output "capacity" (e.g. in MW)
     capex : float
@@ -88,6 +91,7 @@ class Component(Entity):
 
         self.in_max = kwargs.get('in_max')
         self.out_max = kwargs.get('out_max')
+        self.ub_out = kwargs.get('ub_out')
         self.add_out_limit = kwargs.get('add_out_limit')
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
