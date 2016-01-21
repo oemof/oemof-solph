@@ -116,7 +116,7 @@ ind_number_of_employees_region = [
 # Create demand object and relevant bus
 #################################################################################
 
-# Example 1: Calculate profile with annual electric demand is known
+# Example 1: Calculate profile with annual electric demand per sector is known
 
 bel = Bus(uid="bel",
           type="el",
@@ -128,6 +128,7 @@ helpers.call_demandlib(demand,
                        year=2010,
                        ann_el_demand_per_sector=ann_el_demand_per_sector)
 
+# Example 2: Calculate profile with unknown annual electric demand per sector
 
 demand_2 = sink.Simple(uid="demand_2", inputs=[bel])
 helpers.call_demandlib(demand_2,
