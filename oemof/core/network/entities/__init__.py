@@ -62,8 +62,12 @@ class Component(Entity):
     out_max : list
         maximum output of component (e.g. in MW)
     ub_out : list of pandas.series (or array-like)
-        Upperbound for the output of a component. If ub_out is not set out_max
-        is used. Contrary to out_max ub_out hast to be array-like.
+        The time-depended maximum output of a component. If ub_out is not set
+        out_max is used. Contrary to out_max ub_out has to be array-like. If
+        ub_out is set out_max is used as the installed capacity and ub_out as
+        the time-depended maximum output. It is in charge of the user that
+        these values are not inconsistent. You may use max(ub_out) for out_max.
+        (power)
     add_out_limit : float
         limit on additional output "capacity" (e.g. in MW)
     capex : float
