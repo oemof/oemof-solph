@@ -2,8 +2,10 @@
 
 from setuptools import find_packages, setup
 
+import oemof
+
 setup(name='oemof_base',
-      version='0.0.3dev',
+      version=oemof.__version__,
       author='oemof developing group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
