@@ -65,7 +65,16 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     logger = logging.getLogger('simpleExample')
     logger.debug('*********************************************************')
     logging.info('Path for logging: %s' % logpath)
-    check_git_branch()
+    try:
+        check_git_branch()
+    except:
+        check_version()
+
+
+def check_version():
+    """Returns the actual version number of the used oemof version."""
+    # TODO : Please add this feature if you know how.
+    pass
 
 
 def check_git_branch():
@@ -93,10 +102,10 @@ def check_git_branch():
     logging.info("Used oemof version: {0}@{1}".format(
         last_commit,
         name_branch))
-        
+
 if __name__ == '__main__':
     import doctest
-    
+
     OC = doctest.OutputChecker
     class AEOutputChecker(OC):
         def check_output(self, want, got, optionflags):
