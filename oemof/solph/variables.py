@@ -161,7 +161,7 @@ def set_bounds(model, block, side='output'):
             # constraint for additional capacity
             def add_output_rule(block, e, t):
                 lhs = model.w[e, model.O[e][0], t]
-                rhs = ub_out[e][model.O[e][0]] + block.add_out[e]
+                rhs = ub_out[e][model.O[e][0]][t] + block.add_out[e]
                 return(lhs <= rhs)
             block.output_bound = po.Constraint(block.indexset,
                                                rule=add_output_rule)
