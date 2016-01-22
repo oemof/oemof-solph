@@ -35,20 +35,24 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     Notes
     -----
     By default the INFO level is printed on the screen and the debug level
-    in a file.
+    in a file, but you can easily configure the ini-file.
+    Every module that wants to create logging messages has to import the
+    logging module. The oemof logger module has to be imported once to
+    initialise it.
 
     Examples
     --------
     To define the default logge you have to import the python logging library
-    and this function.
+    and this function. The first logging message should be the path where the
+    log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
     >>> logger.define_logging() # doctest: +SKIP
-    [...]INFO-Path for logging:...
-    [...]INFO-Used oemof version:...
+    17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
+    ...
     >>> logging.debug("Hallo")
-    
+
     """
     url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
     if basicpath is None:
