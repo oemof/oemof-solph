@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jan 23 09:37:59 2016
 
-@author: simon
+@author: Simon Hilpert
 """
 
 #Tools to override slow Pyomo problem building
@@ -20,8 +19,12 @@ def l_constraint(model, name, constraints, *args):
 
     Instead of:
     model.constraint_name = Constraint(index1,index2,...,rule=f)
-    call:
+
+    Call:
     l_constraint(model, constraint_name, constraints, index1, index2,...)
+
+    This is a copy of the code from the python module pypsa. Thanks to
+    Tom Brown / Jonas Hoersch for implementing it!
 
     Parameters
     ----------
@@ -34,10 +37,13 @@ def l_constraint(model, name, constraints, *args):
         Constraints is a dictionary of constraints of the form:
 
         constraints[i] = [[(coeff1, var1), (coeff2, var2),...], sense, constant_term]
+
         sense is one of "==","<=",">=".
+
         constant_term is constant rhs of equation
 
         I.e. variable coefficients are stored as a list of tuples.
+
     *args :
        arguments passed to the pyomo.Constraint() class.
 
