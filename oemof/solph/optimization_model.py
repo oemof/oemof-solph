@@ -254,10 +254,10 @@ class OptimizationModel(po.ConcreteModel):
             block = getattr(self, str(type(entity)))
 
             for attribute in ["add_cap", "add_out"]:
-                value = getattr(block[entity.uid], attribute, None)
-                if value:
+                values = getattr(block, attribute, None)
+                if values:
                     result[entity] = result.get(entity, UD())
-                    setattr(result[entity], attribute, value)
+                    setattr(result[entity], attribute, values[entity.uid])
 
         if hasattr(self, "dual"):
             for bus in getattr(self, str(Bus)).objs:
