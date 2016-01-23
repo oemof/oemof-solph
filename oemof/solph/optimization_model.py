@@ -3,6 +3,7 @@
 @contact Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
+from collections import UserDict as UD
 from functools import singledispatch
 
 import pyomo.environ as po
@@ -215,12 +216,12 @@ class OptimizationModel(po.ConcreteModel):
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
-        result = {}
+        result = UD()
         for entity in self.entities:
             if (  isinstance(entity, cp.Transformer) or
                   isinstance(entity, cp.Transport)   or
                   isinstance(entity, cp.Source)):
-                if entity.outputs: result[entity] = result.get(entity, {})
+                if entity.outputs: result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
                     result[entity][o] = [self.w[entity.uid, o.uid, t].value
                                          for t in self.timesteps]
@@ -231,7 +232,7 @@ class OptimizationModel(po.ConcreteModel):
                                          for t in self.timesteps]
 
             if isinstance(entity, cp.sources.DispatchSource):
-                result[entity] = result.get(entity, {})
+                result[entity] = result.get(entity, UD())
                 # TODO: Why does this use `entity.outputs[0]`?
                 result[entity][entity] = [self.w[entity.uid,
                                                  entity.outputs[0].uid,
@@ -245,7 +246,7 @@ class OptimizationModel(po.ConcreteModel):
                                          for t in self.timesteps]
 
             if isinstance(entity, cp.transformers.Storage):
-                result[entity] = result.get(entity, {})
+                result[entity] = result.get(entity, UD())
                 result[entity][entity] = [getattr(self, str(Storage)
                                                  ).cap[entity.uid, t].value
                                           for t in self.timesteps]
