@@ -91,19 +91,41 @@ def add_bus_balance(model, block=None):
             O[b.uid] = [o.uid for o in b.outputs]
 
     block.balanced_uids = po.Set(initialize=uids)
+    block.balanced_uids.construct()
+
     block.balanced_indexset = po.Set(initialize=block.balanced_uids*model.T)
-    # component inputs/outputs are negative/positive in the bus balance
-    def bus_balance_rule(block, e, t):
-        lhs = 0
-        lhs = sum(model.w[i, e, t] for i in I[e])
-        rhs = sum(model.w[e, o, t] for o in O[e])
-        if e in block.excess_uids:
-            rhs += block.excess_slack[e, t]
-        if e in block.shortage_uids:
-            lhs += block.shortage_slack[e, t]
-        return(lhs == rhs)
-    block.balance = po.Constraint(block.balanced_indexset,
-                                  rule=bus_balance_rule)
+    block.balanced_indexset.construct()
+
+    if not model.energysystem.simulation.fast_build:
+        # component inputs/outputs are negative/positive in the bus balance
+        def bus_balance_rule(block, e, t):
+            lhs = 0
+            lhs = sum(model.w[i, e, t] for i in I[e])
+            rhs = sum(model.w[e, o, t] for o in O[e])
+            if e in block.excess_uids:
+                rhs += model.excess_slack[e, t]
+            if e in block.shortage_uids:
+                lhs += model.shortage_slack[e, t]
+            return(lhs == rhs)
+        block.balance = po.Constraint(block.balanced_indexset,
+                                      rule=bus_balance_rule)
+
+    if model.energysystem.simulation.fast_build:
+        from . import pyomo_fastbuild as pofast
+
+        balance_dict = {}
+        for t in model.timesteps:
+            for e in uids:
+                tuples = [(1, model.w[i, e, t]) for i in I[e]] + \
+                         [(-1, model.w[e, o, t]) for o in O[e]]
+                if e in block.excess_uids:
+                    tuples.append((-1, model.excess_slack[e, t]))
+                if e in block.shortage_uids:
+                    tuples.append((1, model.shortage_slack[e, t]))
+
+                balance_dict[e, t] = [tuples, "==", 0.]
+        pofast.l_constraint(block, 'balance', balance_dict,
+                            block.balanced_indexset)
 
 
 
