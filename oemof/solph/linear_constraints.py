@@ -54,6 +54,7 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
 import pyomo.environ as po
+from . import pyomo_fastbuild as pofast
 
 def add_bus_balance(model, block=None):
     """ Adds constraint for the input-ouput balance of bus objects.
@@ -111,8 +112,6 @@ def add_bus_balance(model, block=None):
                                       rule=bus_balance_rule)
 
     if model.energysystem.simulation.fast_build:
-        from . import pyomo_fastbuild as pofast
-
         balance_dict = {}
         for t in model.timesteps:
             for e in uids:
@@ -164,13 +163,24 @@ def add_simple_io_relation(model, block, idx=0):
 
     eta = {obj.uid: obj.eta for obj in block.objs}
 
+
     # constraint for simple transformers: input * efficiency = output
     def io_rule(block, e, t):
         lhs = model.w[model.I[e], e, t] * eta[e][idx] - \
             model.w[e, model.O[e][idx], t]
         return(lhs == 0)
-    block.io_relation = po.Constraint(block.indexset, rule=io_rule,
-                                      doc="INFLOW * efficiency = OUTFLOW_1")
+
+    if not model.energysystem.simulation.fast_build:
+        block.io_relation = po.Constraint(block.indexset, rule=io_rule,
+                                          doc="INFLOW * efficiency = OUTFLOW_1")
+
+    if model.energysystem.simulation.fast_build:
+        io_relation_dict = {(e, t): [[(eta[e][idx], model.w[model.I[e], e, t]),
+                                      (-1, model.w[e, model.O[e][idx], t])],
+                                     "==", 0.]
+                            for e,t in block.indexset}
+        pofast.l_constraint(block, 'io_relation', io_relation_dict,
+                            block.indexset)
 
 def add_eta_total_chp_relation(model, block):
     """ Adds constraints for input-(output1,output2) relation as
@@ -261,8 +271,19 @@ def add_simple_chp_relation(model, block):
         lhs = model.w[e, model.O[e][0], t] / eta[e][0]
         lhs += -model.w[e, model.O[e][1], t] / eta[e][1]
         return(lhs == 0)
-    block.pth_relation = po.Constraint(block.indexset, rule=simple_chp_rule,
-                                      doc="P/eta_el - Q/eta_th = 0")
+
+    if not model.energysystem.simulation.fast_build:
+        block.pth_relation = po.Constraint(block.indexset, rule=simple_chp_rule,
+                                           doc="P/eta_el - Q/eta_th = 0")
+
+    if model.energysystem.simulation.fast_build:
+        pth_relation_dict = {(e, t): [
+                                [(1/eta[e][0], model.w[e, model.O[e][0], t]),
+                                 (-1/eta[e][1], model.w[e, model.O[e][1], t])],
+                                "==", 0.]
+                             for e,t in block.indexset}
+        pofast.l_constraint(block, 'pth_relation', pth_relation_dict,
+                            block.indexset)
 
 def add_simple_extraction_chp_relation(model, block):
     """ Adds constraints for power to heat relation and equivalent output
