@@ -251,6 +251,14 @@ class OptimizationModel(po.ConcreteModel):
                                                  ).cap[entity.uid, t].value
                                           for t in self.timesteps]
 
+            block = getattr(self, str(type(entity)))
+
+            for attribute in ["add_cap", "add_out"]:
+                value = getattr(block[entity.uid], attribute, None)
+                if value:
+                    result[entity] = result.get(entity, UD())
+                    setattr(result[entity], attribute, value)
+
         if hasattr(self, "dual"):
             for bus in getattr(self, str(Bus)).objs:
                 if bus.balanced:
