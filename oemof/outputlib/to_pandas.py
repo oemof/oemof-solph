@@ -164,15 +164,13 @@ class EnergySystemDataFrame:
                                                              row['val'])]
 
         # create multiindexed dataframe
-        arrays = [df_long['bus_uid'], df_long['bus_type'], df_long['type'],
-                  df_long['obj_uid'], df_long['datetime']]
-        tuples = list(zip(*arrays))
-        index = pd.MultiIndex.from_tuples(tuples,
-                                          names=['bus_uid', 'bus_type', 'type',
-                                                 'obj_uid', 'datetime'])
-        df_multiindex = pd.DataFrame(df_long['val'].values,
-                                     columns=['val'], index=index)
-        # sort MultiIndex to work correctly
+        index = ['bus_uid', 'bus_type', 'type',
+                 'obj_uid', 'datetime']
+
+        columns = index + ['val']
+
+        df_multiindex = pd.DataFrame(tuples, columns=columns).set_index(index)
+
         df_multiindex.sort_index(inplace=True)
 
         return df_multiindex
