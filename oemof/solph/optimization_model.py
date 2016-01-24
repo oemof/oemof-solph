@@ -223,6 +223,7 @@ class OptimizationModel(po.ConcreteModel):
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
+        # TODO: Maybe make the results dictionary a proper object?
         result = UD()
         for entity in self.entities:
             if (  isinstance(entity, cp.Transformer) or
