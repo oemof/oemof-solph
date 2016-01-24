@@ -213,6 +213,13 @@ class OptimizationModel(po.ConcreteModel):
         This means they can be accessed via
         :meth:`om.results()[object][object] <OptimizationModel.results>`.
 
+        Object attributes holding optimization results, like e.g. `add_cap` for
+        storage objects, can be accessed like this:
+
+          :meth:`om.results()[s].add_cap`
+
+        where `s` is a storage object.
+
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
