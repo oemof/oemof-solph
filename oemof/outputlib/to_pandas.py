@@ -154,14 +154,14 @@ class EnergySystemDataFrame:
                         rows_list.append(row)
 
         # split date and value lists to tuples
-        tuples = [(row['bus_uid'],
-                   row['bus_type'],
-                   row['type'],
-                   row['obj_uid'],
+        tuples = [(item['bus_uid'],
+                   item['bus_type'],
+                   item['type'],
+                   item['obj_uid'],
                    date,
                    val)
-                   for row in rows_list for date, val in zip(row['datetime'],
-                                                             row['val'])]
+                   for item in rows_list for date, val in zip(item['datetime'],
+                                                              item['val'])]
 
         # create multiindexed dataframe
         index = ['bus_uid', 'bus_type', 'type',
