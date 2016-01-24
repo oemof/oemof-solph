@@ -93,32 +93,32 @@ class EnergySystemDataFrame:
                     for kk, vv in v.items():
                         if(k is kk):
                             # duals (results[bus][bus])
-                            row['bus_uid'] = [k.uid]
-                            row['bus_type'] = [k.type]
-                            row['type'] = ['other']
-                            row['obj_uid'] = ['duals']
-                            row['datetime'] = [self.time_slice]
-                            row['val'] = [v.get(k)]
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'other'
+                            row['obj_uid'] = 'duals'
+                            row['datetime'] = self.time_slice
+                            row['val'] = v.get(k)
                             rows_list.append(row)
                 else:
                     for kk, vv in v.items():
                         if (isinstance(kk, str)):
                             # bus variables (results[bus]['some_key'])
-                            row['bus_uid'] = [k.uid]
-                            row['bus_type'] = [k.type]
-                            row['type'] = ['other']
-                            row['obj_uid'] = [kk]
-                            row['datetime'] = [self.time_slice]
-                            row['val'] = [vv]
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'other'
+                            row['obj_uid'] = kk
+                            row['datetime'] = self.time_slice
+                            row['val'] = vv
                             rows_list.append(row)
                         else:
                             # bus outputs (results[bus][component])
-                            row['bus_uid'] = [k.uid]
-                            row['bus_type'] = [k.type]
-                            row['type'] = ['output']
-                            row['obj_uid'] = [kk.uid]
-                            row['datetime'] = [self.time_slice]
-                            row['val'] = [vv]
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'output'
+                            row['obj_uid'] = kk.uid
+                            row['datetime'] = self.time_slice
+                            row['val'] = vv
                             rows_list.append(row)
             else:
                 if k in v.keys():
@@ -126,31 +126,31 @@ class EnergySystemDataFrame:
                     for kk, vv in v.items():
                         if(k is kk):
                             # self ref. comp. (results[component][component])
-                            row['bus_uid'] = [k.outputs[0].uid]
-                            row['bus_type'] = [k.outputs[0].type]
-                            row['type'] = ['other']
-                            row['obj_uid'] = [k.uid]
-                            row['datetime'] = [self.time_slice]
-                            row['val'] = [vv]
+                            row['bus_uid'] = k.outputs[0].uid
+                            row['bus_type'] = k.outputs[0].type
+                            row['type'] = 'other'
+                            row['obj_uid'] = k.uid
+                            row['datetime'] = self.time_slice
+                            row['val'] = vv
                             rows_list.append(row)
                         else:
                             # bus inputs (only self ref. components)
-                            row['bus_uid'] = [k.outputs[0].uid]
-                            row['bus_type'] = [k.outputs[0].type]
-                            row['type'] = ['input']
-                            row['obj_uid'] = [k.uid]
-                            row['datetime'] = [self.time_slice]
-                            row['val'] = [v.get(k.outputs[0])]
+                            row['bus_uid'] = k.outputs[0].uid
+                            row['bus_type'] = k.outputs[0].type
+                            row['type'] = 'input'
+                            row['obj_uid'] = k.uid
+                            row['datetime'] = self.time_slice
+                            row['val'] = v.get(k.outputs[0])
                             rows_list.append(row)
                 else:
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
-                        row['bus_uid'] = [kk.uid]
-                        row['bus_type'] = [kk.type]
-                        row['type'] = ['input']
-                        row['obj_uid'] = [k.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [vv]
+                        row['bus_uid'] = kk.uid
+                        row['bus_type'] = kk.type
+                        row['type'] = 'input'
+                        row['obj_uid'] = k.uid
+                        row['datetime'] = self.time_slice
+                        row['val'] = vv
                         rows_list.append(row)
 
         # split date and value lists columns into rows (long format)
