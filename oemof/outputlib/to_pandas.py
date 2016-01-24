@@ -153,16 +153,15 @@ class EnergySystemDataFrame:
                         row['val'] = vv
                         rows_list.append(row)
 
-        # split date and value lists columns into rows (long format)
-        df_long = pd.DataFrame()
-        for index, cols in df.iterrows():
-            df_extract = pd.DataFrame.from_dict(
-                {'datetime': cols.ix['datetime'],
-                 'val': cols.ix['val']})
-            df_extract = pd.concat(
-                [df_extract, cols.drop(['datetime', 'val']).to_frame().T],
-                axis=1).fillna(method='ffill').fillna(method='bfill')
-            df_long = pd.concat([df_long, df_extract], ignore_index=True)
+        # split date and value lists to tuples
+        tuples = [(row['bus_uid'],
+                   row['bus_type'],
+                   row['type'],
+                   row['obj_uid'],
+                   date,
+                   val)
+                   for row in rows_list for date, val in zip(row['datetime'],
+                                                             row['val'])]
 
         # create multiindexed dataframe
         arrays = [df_long['bus_uid'], df_long['bus_type'], df_long['type'],
