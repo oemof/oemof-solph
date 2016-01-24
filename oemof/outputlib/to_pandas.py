@@ -85,8 +85,7 @@ class EnergySystemDataFrame:
         ----------
         self : EnergySystemDataFrame() instance
         """
-        df = pd.DataFrame(columns=['bus_uid', 'bus_type', 'type',
-                                   'obj_uid', 'datetime', 'val'])
+        rows_list = []
         for k, v in self.result_object.items():
             row = pd.DataFrame()
             if ('Bus' in str(k.__class__)):
@@ -100,7 +99,7 @@ class EnergySystemDataFrame:
                             row['obj_uid'] = ['duals']
                             row['datetime'] = [self.time_slice]
                             row['val'] = [v.get(k)]
-                            df = df.append(row)
+                            rows_list.append(row)
                 else:
                     for kk, vv in v.items():
                         if (isinstance(kk, str)):
@@ -111,7 +110,7 @@ class EnergySystemDataFrame:
                             row['obj_uid'] = [kk]
                             row['datetime'] = [self.time_slice]
                             row['val'] = [vv]
-                            df = df.append(row)
+                            rows_list.append(row)
                         else:
                             # bus outputs (results[bus][component])
                             row['bus_uid'] = [k.uid]
@@ -120,7 +119,7 @@ class EnergySystemDataFrame:
                             row['obj_uid'] = [kk.uid]
                             row['datetime'] = [self.time_slice]
                             row['val'] = [vv]
-                            df = df.append(row)
+                            rows_list.append(row)
             else:
                 if k in v.keys():
                     # self ref. components (results[component][component])
@@ -133,7 +132,7 @@ class EnergySystemDataFrame:
                             row['obj_uid'] = [k.uid]
                             row['datetime'] = [self.time_slice]
                             row['val'] = [vv]
-                            df = df.append(row)
+                            rows_list.append(row)
                         else:
                             # bus inputs (only self ref. components)
                             row['bus_uid'] = [k.outputs[0].uid]
@@ -142,7 +141,7 @@ class EnergySystemDataFrame:
                             row['obj_uid'] = [k.uid]
                             row['datetime'] = [self.time_slice]
                             row['val'] = [v.get(k.outputs[0])]
-                            df = df.append(row)
+                            rows_list.append(row)
                 else:
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
@@ -152,7 +151,7 @@ class EnergySystemDataFrame:
                         row['obj_uid'] = [k.uid]
                         row['datetime'] = [self.time_slice]
                         row['val'] = [vv]
-                        df = df.append(row)
+                        rows_list.append(row)
 
         # split date and value lists columns into rows (long format)
         df_long = pd.DataFrame()
