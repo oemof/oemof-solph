@@ -63,6 +63,8 @@ class EnergySystem:
         Currently only set after a call to :meth:`optimize` after which it
         holds the return value of :meth:`om.results()
         <oemof.solph.optimization_model.OptimizationModel.results>`.
+        See the documentation of that method for a detailed description of the
+        structure of the results dictionary.
     time_idx : pandas.index, optional
         Define the time range and increment for the energy system. This is an
         optional atribute but might be import for other functions/methods that
