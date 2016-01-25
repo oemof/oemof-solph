@@ -159,7 +159,7 @@ def add_opex_fix(model, block, ref=None):
         return(expr)
 
 
-def add_revenues(model, block, ref='output'):
+def add_revenues(model, block, ref='output', idx=0):
     """ Revenue term for linear objective function.
 
     .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot revenue_{outflow}(e,t)
@@ -175,6 +175,13 @@ def add_revenues(model, block, ref='output'):
     model : OptimizationModel() instance
     block : SimpleBlock()
          block to group all objects corresponding to one oemof base class
+    ref : string
+       Reference side for revnues ('output' or 'input' Note: 'input' not
+       defined)
+    idx : integer
+       Integer indicating which output from list to select
+       if entity has multiple outputs
+
 
     Returns
     -------
@@ -189,22 +196,23 @@ def add_revenues(model, block, ref='output'):
         #  if price is already a vector (array) this vector is taken
         output_price = {}
         for e in block.objs:
-            if e.__dict__.get('output_price', None) is not None:
-                if isinstance(e.output_price, (float, int, np.integer)):
-                    output_price[e.uid] = output_price * len(model.timesteps)
+            if e.__dict__.get('output_price', None)[idx] is not None:
+                if isinstance(e.output_price[idx], (float, int, np.integer,
+                                               np.float)):
+                    output_price[e.uid] = [e.output_price[idx]] * len(model.timesteps)
                 else:
-                    output_price[e.uid] = e.output_price
-            elif isinstance(e.outputs[0].price, (float, int, np.integer)):
+                    output_price[e.uid] = e.output_price[idx]
+            elif isinstance(e.outputs[idx].price, (float, int, np.integer)):
                 output_price[e.uid] = \
-                    [e.outputs[0].price] * len(model.timesteps)
+                    [e.outputs[idx].price] * len(model.timesteps)
             else:
-                output_price[e.uid] = e.outputs[0].price
+                output_price[e.uid] = e.outputs[idx].price
 
         # create expression term
-        expr += -sum(model.w[e, model.O[e][0], t] * output_price[e][t]
+        expr += -sum(model.w[e, model.O[e][idx], t] * output_price[e][t]
                      for e in block.uids for t in model.timesteps)
     else:
-        pass
+        raise NotImplementedError("Referece side 'input' not implemented.")
 
     return(expr)
 
@@ -405,7 +413,7 @@ def add_excess_slack_costs(model, block=None):
 
     c_excess = {b.uid:b.excess_costs for b in block.objs
                 if b.excess==True}
-    expr = sum(block.excess_slack[e, t] * c_excess[e]
+    expr = sum(model.excess_slack[e, t] * c_excess[e]
                for e in block.excess_uids for t in model.timesteps)
     return(expr)
 
@@ -430,7 +438,7 @@ def add_shortage_slack_costs(model, block=None):
     """
     c_shortage = {b.uid: b.shortage_costs for b in block.objs
                   if b.shortage==True}
-    expr = sum(block.shortage_slack[e, t] * c_shortage[e]
+    expr = sum(model.shortage_slack[e, t] * c_shortage[e]
                for e in block.shortage_uids for t in model.timesteps)
     return(expr)
 

@@ -10,14 +10,14 @@ from ..core.network.entities.components import sinks as sink
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import transports as transport
 
+
 def add_bus(row, **kwargs):
     r""" Adds bus object ot list of busses. The function is used
     by apply() method of pandas data frames.
 
-    Parameters:
-    -----------
-    row :
-        row of pandas.DataFrame()
+    Parameters
+    ----------
+    row : row of pandas.DataFrame()
     busses : list
         list of existing busses
     busprices : pandas.DataFrame()
@@ -28,7 +28,7 @@ def add_bus(row, **kwargs):
     busses = kwargs.get('busses', [])
 
     # check for prices
-    if row['timeseries'] == True:
+    if row['timeseries']:
         price = busprices[row['uid']]
     # if price is constant
     else:
@@ -47,14 +47,14 @@ def add_bus(row, **kwargs):
     obj = Bus(**kwargs)
     busses.append(obj)
 
+
 def add_source(row, **kwargs):
     r""" Adds source object ot list of source. The function is used
     by apply() method of pandas data frames.
 
-    Parameters:
-    -----------
-    row :
-        row of pandas.DataFrame()
+    Parameters
+    ----------
+    row : row of pandas.DataFrame()
     busses : list
         list of existing busses
     sink : list
@@ -77,19 +77,19 @@ def add_source(row, **kwargs):
     # set special kwargs (conversion to list etc. )
     kwargs['out_max'] = [row.get('out_max', None)]
     kwargs['outputs'] = [b for b in busses if b.uid == row['output']]
-    kwargs['val'] =  sourcevalues[row['uid']]
+    kwargs['val'] = sourcevalues[row['uid']]
 
     obj = cls(**kwargs)
     sources.append(obj)
+
 
 def add_sink(row, **kwargs):
     r""" Adds sink object ot list of transformers. The function is used
     by apply() method of pandas data frames.
 
-    Parameters:
-    -----------
-    row :
-        row of pandas.DataFrame()
+    Parameters
+    ----------
+    row : row of pandas.DataFrame()
     busses : list
         list of existing busses
     sink : list
@@ -109,18 +109,18 @@ def add_sink(row, **kwargs):
 
     # instantiate sink object
     obj = cls(uid=row['uid'],
-              inputs = inputs,
-              val = sinkvalues[row['uid']])
+              inputs=inputs,
+              val=sinkvalues[row['uid']])
     sinks.append(obj)
+
 
 def add_transformer(row, **kwargs):
     r""" Adds transformer objects ot list of transformers. The function is used
     by apply() method of pandas data frames.
 
-    Parameters:
-    -----------
-    row :
-        row of pandas.DataFrame()
+    Parameters
+    ----------
+    row : row of pandas.DataFrame()
     busses : list
         list of existing busses
     transformers : list
@@ -138,8 +138,9 @@ def add_transformer(row, **kwargs):
         for k in row.keys():
             kwargs.update({k: row[k]})
         # set special kwargs (conversion to list etc. )
-        kwargs['eta'] =  [row['eta']]
+        kwargs['eta'] = [row['eta']]
         kwargs['out_max'] = [row['out_max']]
+        kwargs['output_price'] = [row.get('output_price')]
         kwargs['outputs'] = [bus for bus in busses if bus.uid == row["output"]]
         kwargs['inputs'] = [b for b in busses if b.uid == row['input']]
         opex_var = kwargs['inputs'][0].price / kwargs['eta'][0]
@@ -150,14 +151,14 @@ def add_transformer(row, **kwargs):
         obj = cls(**kwargs)
         transformers.append(obj)
 
+
 def add_storage(row, **kwargs):
     r""" Adds storage objects ot list of storages. The function is used by
     apply() method of pandas data frames.
 
-    Parameters:
-    -----------
-    row :
-        row of pandas.DataFrame()
+    Parameters
+    ----------
+    row : row of pandas.DataFrame()
     busses : list
         list of existing busses
     transformers : list
@@ -182,14 +183,14 @@ def add_storage(row, **kwargs):
         obj = cls(**kwargs)
         transformers.append(obj)
 
+
 def add_chp(row, **kwargs):
     r""" Adds chps objects ot list of transformers. The function is used by
     apply() method of pandas data frames.
 
-    Parameters:
-    -----------
-    row :
-        row of pandas.DataFrame()
+    Parameters
+    ----------
+    row : row of pandas.DataFrame()
     busses : list
         list of existing busses
     transformers : list
@@ -208,15 +209,18 @@ def add_chp(row, **kwargs):
         # special kwargs where transformation of type is necessary (e.g. list)
         kwargs['inputs'] = [b for b in busses if b.uid == row['input']]
         kwargs['outputs'] = [bus for bus in busses if
-                                              any([bus.uid == row["output_el"],
-                                              bus.uid == row["output_th"]])]
+                             any([bus.uid == row["output_el"],
+                                  bus.uid == row["output_th"]])]
         kwargs['out_max'] = [row['out_max_el'], row.get('out_max_th', None)]
         kwargs['out_min'] = [row['out_min']]
         kwargs['eta_min'] = [row['eta_el_min'], row.get('eta_th_min', None)]
+        kwargs['output_price'] = [row.get('output_price_el'),
+                                  row.get('output_price_th')]
         kwargs['eta'] = [row['eta_el'], row['eta_th']]
         # instantiate object with kwargs
         obj = cls(**kwargs)
         transformers.append(obj)
+
 
 def add_transport(row, **kwargs):
     r""" Adds transpport objects ot list of transports. The function is used by
@@ -244,11 +248,12 @@ def add_transport(row, **kwargs):
         obj = cls(**kwargs)
         transports.append(obj)
 
+
 def entities_from_csv(files, entities_dict=None):
     r""" Creates 'oemof-objects' from csv files by the use of pandas dataframes
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     files : dict
         dictionary containing the paths to files for object creation. Keys are:
         'transformers','busses','storages','chps', 'sources', 'sourcevalues',
@@ -257,12 +262,12 @@ def entities_from_csv(files, entities_dict=None):
         dictionary containing lists of oemof base class objects
     """
     if entities_dict is None:
-        entities_dict = {'busses':[],
-                         'transformers':[],
-                         'sinks':[],
-                         'sources':[],
-                         'transports':[]}
-   # first create busses
+        entities_dict = {'busses': [],
+                         'transformers': [],
+                         'sinks': [],
+                         'sources': [],
+                         'transports': []}
+    # first create busses
     file = files.get('busses')
     if file is not None:
         bus_df = pd.read_csv(file)

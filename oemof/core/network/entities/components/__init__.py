@@ -93,8 +93,9 @@ class Transformer(Component):
         cost per stop up of transformer (only milp models)
     ramp_costs : float
         costs for ramping
-    output_price : float
-        price for selling output (revenue expr. in objective)
+    output_price : list
+        price for selling to output bus. prices ordered in the order
+        of 'outputs'
     eta_min : list
       efficiency of transformer at minimum load for conversion of input
       to output (order of elements corresponding to order of elements
