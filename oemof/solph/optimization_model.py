@@ -268,14 +268,12 @@ class OptimizationModel(po.ConcreteModel):
         for bus in getattr(self, str(Bus)).objs:
             if bus.excess:
                 result[bus] = result.get(bus, {})
-                result[bus]['excess'] = [
-                    getattr(self, str(Bus)).excess_slack[(bus.uid, t)].value
-                    for t in self.timesteps]
+                result[bus]['excess'] = [self.excess_slack[(bus.uid, t)].value
+                                         for t in self.timesteps]
             if bus.shortage:
                 result[bus] = result.get(bus, {})
-                result[bus]['shortage'] = [
-                    getattr(self, str(Bus)).shortage_slack[(bus.uid, t)].value
-                    for t in self.timesteps]
+                result[bus]['shortage'] = [self.shortage_slack[(bus.uid, t)].value
+                                           for t in self.timesteps]
 
         return result
 
@@ -428,11 +426,11 @@ def _(e, om, block):
 
     # create variables for 'slack' of shortage and excess
     if block.excess_uids:
-        block.excess_slack = po.Var(block.excess_uids,
+        om.excess_slack = po.Var(block.excess_uids,
                                     om.timesteps,
                                     within=po.NonNegativeReals)
     if block.shortage_uids:
-        block.shortage_slack = po.Var(block.shortage_uids,
+        om.shortage_slack = po.Var(block.shortage_uids,
                                       om.timesteps,
                                       within=po.NonNegativeReals)
 

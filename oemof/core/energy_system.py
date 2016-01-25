@@ -273,6 +273,11 @@ class Simulation:
     relaxed : boolean
         If True, integer variables will be relaxed
         (only relevant for milp-problems)
+    fast_build : boolean
+        If True, the standard way of pyomo constraint building is skipped and
+        a different function is used.
+        (Warning: No guarantee that all expected 'standard' pyomo model
+        functionalities work for the constructed model!)
     """
     def __init__(self, **kwargs):
         ''
@@ -283,6 +288,7 @@ class Simulation:
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
         self.relaxed = kwargs.get('relaxed', False)
+        self.fast_build = kwargs.get('fast_build', False)
 
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')
