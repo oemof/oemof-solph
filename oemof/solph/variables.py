@@ -121,11 +121,14 @@ def set_bounds(model, block, side='output'):
     for e in block.objs:
         if side == 'output':
             output_uids = [o.uid for o in e.outputs[:]]
+            # ** Time depended bound
             if e.ub_out:
                 ub_out[e.uid] = dict(zip(output_uids, e.ub_out))
+            # ** Constant bound
             else:
-                # If upperbound does not exist, create a list with the same
-                # value. Use out_max for the upper bound of the variable.
+                # If ub_out (time depended bound9 does not exist, create a list
+                # with the same value. Use out_max for the upper bound of the
+                # variable.
                 ub_out[e.uid] = dict(zip(
                     output_uids,
                     [[x] * len(model.timesteps) for x in e.out_max]))
@@ -133,6 +136,7 @@ def set_bounds(model, block, side='output'):
             input_uids = [i.uid for i in e.inputs[:]]
             ub_in[e.uid] = dict(zip(input_uids, e.in_max))
 
+    # *** No investment - set upper bound to maximal output***
     if not block.optimization_options.get('investment', False):
         # edges for simple transformers ([('coal', 'pp_coal'),...])
         ee = model.edges(block.objs)
@@ -150,6 +154,7 @@ def set_bounds(model, block, side='output'):
                                         e1, e2)
                         pass
 
+    # *** Investment - set upper bound to overall output and add constraint***
     else:
         if side == 'output':
             # set maximum of addiational storage capacity
@@ -165,6 +170,7 @@ def set_bounds(model, block, side='output'):
                 return(lhs <= rhs)
             block.output_bound = po.Constraint(block.indexset,
                                                rule=add_output_rule)
+            # constraint for additional capacity
 
         # TODO: Implement upper bound constraint for investment models
         if side == 'input':
