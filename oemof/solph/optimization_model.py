@@ -78,15 +78,15 @@ class OptimizationModel(po.ConcreteModel):
 
     def __init__(self, energysystem, loglevel=logging.INFO):
         super().__init__()
-        logging.basicConfig(format='%(levelname)s:%(message)s', level=loglevel)
+        logging.basicConfig(format="%(levelname)s:%(message)s", level=loglevel)
         self.entities = energysystem.entities
         self.energysystem = energysystem
         self.timesteps = energysystem.simulation.timesteps
         self.objective_options = energysystem.simulation.objective_options
-        self.relaxed = getattr(energysystem.simulation, 'relaxed', False)
+        self.relaxed = getattr(energysystem.simulation, "relaxed", False)
 
         self.T = po.Set(initialize=self.timesteps, ordered=True)
-        # calculate all edges ([('coal', 'pp_coal'),...])
+        # calculate all edges ([("coal", "pp_coal"),...])
         self.components = [e for e in self.entities
                            if isinstance(e, Component)]
         self.all_edges = self.edges(self.components)
@@ -103,7 +103,7 @@ class OptimizationModel(po.ConcreteModel):
                   if not isinstance(c, cp.Sink)}
 
         # set attributes lists per class with objects and uids for opt model
-        logging.info('Solph: Building component constraints.')
+        logging.info("Building component constraints.")
         for cls in cbt:
             objs = cbt[cls]
             # "call" methods to add the constraints opt. problem
@@ -116,8 +116,8 @@ class OptimizationModel(po.ConcreteModel):
                 block.objs = objs
                 block.optimization_options = cls.optimization_options
                 self.add_component(str(cls), block)
-                logging.debug('Solph: Creating optimization block for omeof '+
-                              'classes: ' + block.name)
+                logging.debug("Creating optimization block for omeof "+
+                              "classes: " + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
 
 
@@ -126,15 +126,15 @@ class OptimizationModel(po.ConcreteModel):
         # get all bus objects
         block.objs = [e for e in self.entities if isinstance(e, Bus)]
         block.uids = [e.uid for e in block.objs]
-        logging.info('Solph: Building bus constraints')
+        logging.info("Building bus constraints")
         assembler.registry[Bus](e=None, om=self, block=block)
         self.add_component(str(Bus), block)
 
         # create objective function
         if not self.objective_options:
-            raise ValueError('No objective options defined!')
+            raise ValueError("No objective options defined!")
 
-        logging.info('Solph: Building objective function.')
+        logging.info("Building objective function.")
         self.objective_assembler(objective_options=self.objective_options)
 
 
@@ -155,18 +155,18 @@ class OptimizationModel(po.ConcreteModel):
         else:
             block.optimization_options = block.default_optimization_options
 
-        if (block.optimization_options.get('investment', False) and
-            'milp_constr' in block.optimization_options):
-            raise ValueError('Component can not be modeled with milp-constr ' +
-                             'in investment mode!\n' +
-                             'Please change `optimization_options`')
+        if (block.optimization_options.get("investment", False) and
+            "milp_constr" in block.optimization_options):
+            raise ValueError("Component can not be modeled with milp-constr " +
+                             "in investment mode!\n" +
+                             "Please change `optimization_options`")
 
-        if 'milp_constr' in block.optimization_options:
+        if "milp_constr" in block.optimization_options:
             # create binary status variables for block components
             var.add_binary(self, block, relaxed=self.relaxed)
 
         # add additional variables (investment mode)
-        if block.optimization_options.get('investment', False):
+        if block.optimization_options.get("investment", False):
             add_out_limit = {obj.uid: obj.add_out_limit
                              for obj in block.objs}
             def add_out_bound_rule(block, e):
@@ -175,7 +175,7 @@ class OptimizationModel(po.ConcreteModel):
                                    bounds=add_out_bound_rule)
 
         for option in block.optimization_options:
-            if not option in ['objective', 'investment']:
+            if not option in ["objective", "investment"]:
                 block.optimization_options[option](self, block)
 
 
@@ -184,15 +184,15 @@ class OptimizationModel(po.ConcreteModel):
 
         """
 
-        revenue_objects = objective_options.get('revenue_objects')
-        cost_objects = objective_options.get('cost_objects')
+        revenue_objects = objective_options.get("revenue_objects")
+        cost_objects = objective_options.get("cost_objects")
 
-        if objective_options.get('function') is None:
-            logging.warning('No objective function selected. If you want '+
-                            'to build an objective yourself you can' +
-                            'ignore this warning.')
+        if objective_options.get("function") is None:
+            logging.warning("No objective function selected. If you want "+
+                            "to build an objective yourself you can" +
+                            " ignore this warning.")
         else:
-            objective_options['function'](self,
+            objective_options["function"](self,
                                           cost_objects=cost_objects,
                                           revenue_objects=revenue_objects)
 
@@ -268,11 +268,11 @@ class OptimizationModel(po.ConcreteModel):
         for bus in getattr(self, str(Bus)).objs:
             if bus.excess:
                 result[bus] = result.get(bus, {})
-                result[bus]['excess'] = [self.excess_slack[(bus.uid, t)].value
+                result[bus]["excess"] = [self.excess_slack[(bus.uid, t)].value
                                          for t in self.timesteps]
             if bus.shortage:
                 result[bus] = result.get(bus, {})
-                result[bus]['shortage'] = [self.shortage_slack[(bus.uid, t)].value
+                result[bus]["shortage"] = [self.shortage_slack[(bus.uid, t)].value
                                            for t in self.timesteps]
 
         return result
@@ -287,7 +287,7 @@ class OptimizationModel(po.ConcreteModel):
         **kwargs : key words
             Possible keys can be set:
         solver string:
-            solver to be used e.g. 'glpk','gurobi','cplex'
+            solver to be used e.g. "glpk","gurobi","cplex"
         debug : boolean
             If True model is solved in debug mode. lp-file is written.
         duals : boolean
@@ -296,54 +296,54 @@ class OptimizationModel(po.ConcreteModel):
         verbose : boolean
             If True informations are printed
         solver_io : string
-            pyomo solver interface file format: 'lp','python','nl', etc.
+            pyomo solver interface file format: "lp","python","nl", etc.
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
-            Example : {'solver_io':'lp'}
+            Example : {"solver_io":"lp"}
         solver_cmdline_options : dict
             Dictionary with command line options for solver
             Examples:
-            {'mipgap':0.01'} results in '--mipgap 0.01'
-            {'interior':''} results in '--interior'
+            {"mipgap":0.01"} results in "--mipgap 0.01"
+            {"interior":""} results in "--interior"
         method
 
         Returns
         -------
         self : solved pyomo.ConcreteModel() instance
         """
-        solver = kwargs.get('solver',  self.energysystem.simulation.solver)
+        solver = kwargs.get("solver",  self.energysystem.simulation.solver)
         if solver is None:
-           solver = 'glpk'
-        debug = kwargs.get('debug',  self.energysystem.simulation.debug)
+           solver = "glpk"
+        debug = kwargs.get("debug",  self.energysystem.simulation.debug)
         if debug is None:
             debug = False
-        duals = kwargs.get('duals',  self.energysystem.simulation.duals)
+        duals = kwargs.get("duals",  self.energysystem.simulation.duals)
         if duals is None:
             duals = False
-        verbose = kwargs.get('verbose', self.energysystem.simulation.verbose)
+        verbose = kwargs.get("verbose", self.energysystem.simulation.verbose)
         if verbose is None:
             verbose = False
-        solver_io = kwargs.get('solver_io', 'lp')
-        solve_kwargs = kwargs.get('solve_kwargs', {})
-        solver_cmdline_options = kwargs.get('solver_cmdline_options', {})
+        solver_io = kwargs.get("solver_io", "lp")
+        solve_kwargs = kwargs.get("solve_kwargs", {})
+        solver_cmdline_options = kwargs.get("solver_cmdline_options", {})
 
 
         from pyomo.opt import SolverFactory
-        # Create a 'dual' suffix component on the instance
+        # Create a "dual" suffix component on the instance
         # so the solver plugin will know which suffixes to collect
         if duals is True:
-            logging.debug("Solph: Setting suffixes for duals & reduced costs.")
+            logging.debug("Setting suffixes for duals & reduced costs.")
             # dual variables (= shadow prices)
             self.dual = po.Suffix(direction=po.Suffix.IMPORT)
             # reduced costs
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug == True:
-            path = helpers.extend_basic_path('lp_files')
-            self.write(helpers.get_fullpath(path, 'problem.lp'),
-                       io_options={'symbolic_solver_labels': True})
-            logging.info('LP-file saved to {0}'.format(
-                helpers.get_fullpath(path, 'problem.lp')))
+            path = helpers.extend_basic_path("lp_files")
+            self.write(helpers.get_fullpath(path, "problem.lp"),
+                       io_options={"symbolic_solver_labels": True})
+            logging.info("LP-file saved to {0}".format(
+                helpers.get_fullpath(path, "problem.lp")))
 
 
         # solve instance
@@ -353,22 +353,22 @@ class OptimizationModel(po.ConcreteModel):
         for k in solver_cmdline_options:
           options[k] = solver_cmdline_options[k]
         # store results
-        logging.info("Solph: Handing problem to solver and solving.")
+        logging.info("Handing problem to solver and solving.")
         results = opt.solve(self, **solve_kwargs)
 
         self.solutions.load_from(results)
         if verbose:
-            logging.info('**************************************************')
+            logging.info("**************************************************")
             logging.info("Optimization problem informations from solph")
             logging.info("**************************************************")
             for k in results:
-              logging.info('{0}: {1}'.format(k, results[k]))
+              logging.info("{0}: {1}".format(k, results[k]))
         else:
             logging.debug("**************************************************")
             logging.debug("Optimization problem informations from solph")
             logging.debug("**************************************************")
             for k in results:
-              logging.debug('{0}: {1}'.format(k, results[k]))
+              logging.debug("{0}: {1}".format(k, results[k]))
         return results
 
 
@@ -388,7 +388,7 @@ class OptimizationModel(po.ConcreteModel):
 
         edges = []
         # create a list of tuples
-        # e.g. [('coal', 'pp_coal'), ('pp_coal', 'b_el'),...]
+        # e.g. [("coal", "pp_coal"), ("pp_coal", "b_el"),...]
         for c in components:
             for i in c.inputs:
                 ei = (i.uid, c.uid)
@@ -424,7 +424,7 @@ def _(e, om, block):
     # get uids for busses that allow shortage
     block.shortage_uids = [b.uid for b in block.objs if b.shortage == True]
 
-    # create variables for 'slack' of shortage and excess
+    # create variables for "slack" of shortage and excess
     if block.excess_uids:
         om.excess_slack = po.Var(block.excess_uids,
                                     om.timesteps,
@@ -462,10 +462,10 @@ def _(e, om, block):
 
     def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
-        var.set_bounds(om, block, side='output')
+        var.set_bounds(om, block, side="output")
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints}
+        "linear_constr": linear_constraints}
 
     om.default_assembler(block)
     return om
@@ -488,10 +488,10 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         lc.add_simple_chp_relation(om, block)
-        var.set_bounds(om, block, side='output')
+        var.set_bounds(om, block, side="output")
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints}
+        "linear_constr": linear_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -511,11 +511,11 @@ def _(e, om, block):
     """
     def linear_constraints(om, block):
         lc.add_simple_extraction_chp_relation(om, block)
-        var.set_bounds(om, block, side='output')
-        var.set_bounds(om, block, side='input')
+        var.set_bounds(om, block, side="output")
+        var.set_bounds(om, block, side="input")
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints}
+        "linear_constr": linear_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -538,11 +538,11 @@ def _(e, om, block):
         lc.add_eta_total_chp_relation(om, block)
     def milp_constraints(om, block):
         milc.add_variable_linear_eta_relation(om, block)
-        milc.set_bounds(om, block, side='output')
+        milc.set_bounds(om, block, side="output")
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints,
-        'milp_constr': milp_constraints}
+        "linear_constr": linear_constraints,
+        "milp_constr": milp_constraints}
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -565,7 +565,7 @@ def _(e, om, block):
         lc.add_fixed_source(om, block)
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints}
+        "linear_constr": linear_constraints}
 
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
@@ -588,10 +588,10 @@ def _(e, om, block):
         lc.add_dispatch_source(om, block)
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints}
+        "linear_constr": linear_constraints}
 
-    if block.optimization_options.get('investment', False):
-        raise ValueError('Dispatch source + investment is not possible!')
+    if block.optimization_options.get("investment", False):
+        raise ValueError("Dispatch source + investment is not possible!")
 
     # simple_transformer assebmler for in-out relation, pmin,.. etc.
     om.default_assembler(block)
@@ -653,16 +653,16 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_storage_balance(om, block)
         var.set_storage_cap_bounds(om, block)
-        if not block.optimization_options.get('investment', False):
-            var.set_bounds(om, block, side='output')
-            var.set_bounds(om, block, side='input')
+        if not block.optimization_options.get("investment", False):
+            var.set_bounds(om, block, side="output")
+            var.set_bounds(om, block, side="input")
         else:
             lc.add_storage_charge_discharge_limits(om, block)
 
     block.default_optimization_options = {
-        'linear_constr': linear_constraints}
+        "linear_constr": linear_constraints}
 
-    if block.optimization_options.get('investment', False):
+    if block.optimization_options.get("investment", False):
         block.add_cap = po.Var(block.uids, within=po.NonNegativeReals)
 
     om.default_assembler(block)
@@ -687,5 +687,5 @@ def _(e, om, block):
     # input output relation for simple transport
     lc.add_simple_io_relation(om, block)
     # bounds
-    var.set_bounds(om, block, side='output')
+    var.set_bounds(om, block, side="output")
     return(om)
