@@ -118,12 +118,19 @@ def set_bounds(model, block, side='output'):
     # m.out_max = {'pp_coal': 20200, ... }
     ub_in = {}
     ub_out = {}
+    out_max = {}
+    exist_ub_out = False
     for e in block.objs:
         if side == 'output':
             output_uids = [o.uid for o in e.outputs[:]]
             # ** Time depended bound
             if e.ub_out:
                 ub_out[e.uid] = dict(zip(output_uids, e.ub_out))
+                out_max[e.uid] = dict(zip(output_uids, e.out_max))
+                if e.out_max < np.array(e.ub_out).max():
+                    logging.error('The maximal value of ub_out should not be' +
+                                  ' greater than out_max ({}).'.format(e.uid))
+                exist_ub_out = True
             # ** Constant bound
             else:
                 # If ub_out (time depended bound9 does not exist, create a list
@@ -168,9 +175,20 @@ def set_bounds(model, block, side='output'):
                 lhs = model.w[e, model.O[e][0], t]
                 rhs = ub_out[e][model.O[e][0]][t] + block.add_out[e]
                 return(lhs <= rhs)
-            block.output_bound = po.Constraint(block.indexset,
-                                               rule=add_output_rule)
+
             # constraint for additional capacity
+            def add_output_rule_time_depended_bound(block, e, t):
+                lhs = model.w[e, model.O[e][0], t]
+                rhs = ub_out[e][model.O[e][0]][t] * (1 + block.add_out[e])
+                return(lhs <= rhs)
+
+            if exist_ub_out:
+                block.output_bound = po.Constraint(
+                        block.indexset,
+                        rule=add_output_rule_time_depended_bound)
+            else:
+                block.output_bound = po.Constraint(
+                        block.indexset, rule=add_output_rule)
 
         # TODO: Implement upper bound constraint for investment models
         if side == 'input':
