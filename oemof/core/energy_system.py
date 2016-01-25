@@ -129,7 +129,8 @@ class EnergySystem:
 
         om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
                  verbose=self.simulation.verbose,
-                 duals=self.simulation.duals)
+                 duals=self.simulation.duals,
+                 solve_kwargs=self.simulation.solve_kwargs)
 
         self.results = om.results()
         return self
@@ -283,6 +284,7 @@ class Simulation:
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
         self.relaxed = kwargs.get('relaxed', False)
+        self.solve_kwargs = kwargs.get('solve_kwargs', {})
 
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')
