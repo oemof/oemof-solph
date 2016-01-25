@@ -75,10 +75,12 @@ class OptimizationModel(po.ConcreteModel):
 
     # TODO Cord: Take "next(iter(self.dict.values()))" where the first value of
     #            dict has to be selected
-    def __init__(self, energysystem):
-        super().__init__()
 
+    def __init__(self, energysystem, loglevel=logging.INFO):
+        super().__init__()
+        logging.basicConfig(format='%(levelname)s:%(message)s', level=loglevel)
         self.entities = energysystem.entities
+        self.energysystem = energysystem
         self.timesteps = energysystem.simulation.timesteps
         self.objective_options = energysystem.simulation.objective_options
         self.relaxed = getattr(energysystem.simulation, 'relaxed', False)
@@ -101,6 +103,7 @@ class OptimizationModel(po.ConcreteModel):
                   if not isinstance(c, cp.Sink)}
 
         # set attributes lists per class with objects and uids for opt model
+        logging.info('Solph: Building component constraints.')
         for cls in cbt:
             objs = cbt[cls]
             # "call" methods to add the constraints opt. problem
@@ -113,6 +116,8 @@ class OptimizationModel(po.ConcreteModel):
                 block.objs = objs
                 block.optimization_options = cls.optimization_options
                 self.add_component(str(cls), block)
+                logging.debug('Solph: Creating optimization block for omeof '+
+                              'classes: ' + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
 
 
@@ -121,6 +126,7 @@ class OptimizationModel(po.ConcreteModel):
         # get all bus objects
         block.objs = [e for e in self.entities if isinstance(e, Bus)]
         block.uids = [e.uid for e in block.objs]
+        logging.info('Solph: Building bus constraints')
         assembler.registry[Bus](e=None, om=self, block=block)
         self.add_component(str(Bus), block)
 
@@ -128,6 +134,7 @@ class OptimizationModel(po.ConcreteModel):
         if not self.objective_options:
             raise ValueError('No objective options defined!')
 
+        logging.info('Solph: Building objective function.')
         self.objective_assembler(objective_options=self.objective_options)
 
 
@@ -261,25 +268,24 @@ class OptimizationModel(po.ConcreteModel):
         for bus in getattr(self, str(Bus)).objs:
             if bus.excess:
                 result[bus] = result.get(bus, {})
-                result[bus]['excess'] = [
-                    getattr(self, str(Bus)).excess_slack[(bus.uid, t)].value
-                    for t in self.timesteps]
+                result[bus]['excess'] = [self.excess_slack[(bus.uid, t)].value
+                                         for t in self.timesteps]
             if bus.shortage:
                 result[bus] = result.get(bus, {})
-                result[bus]['shortage'] = [
-                    getattr(self, str(Bus)).shortage_slack[(bus.uid, t)].value
-                    for t in self.timesteps]
+                result[bus]['shortage'] = [self.shortage_slack[(bus.uid, t)].value
+                                           for t in self.timesteps]
 
         return result
 
-    def solve(self, solver='glpk', debug=False, verbose=True, duals=False,
-              solver_cmdline_options={}, opt_kwargs={}, solve_kwargs={}):
+    def solve(self, **kwargs):
         """ Method that takes care of the communication with the solver
         to solve the optimization model.
 
         Parameters
         ----------
         self : pyomo.ConcreteModel() object
+        **kwargs : key words
+            Possible keys can be set:
         solver string:
             solver to be used e.g. 'glpk','gurobi','cplex'
         debug : boolean
@@ -289,8 +295,8 @@ class OptimizationModel(po.ConcreteModel):
             results
         verbose : boolean
             If True informations are printed
-        opt_kwargs : dict
-            Other arguments for the pyomo.opt.SolverFactory() class
+        solver_io : string
+            pyomo solver interface file format: 'lp','python','nl', etc.
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {'solver_io':'lp'}
@@ -305,42 +311,64 @@ class OptimizationModel(po.ConcreteModel):
         -------
         self : solved pyomo.ConcreteModel() instance
         """
+        solver = kwargs.get('solver',  self.energysystem.simulation.solver)
+        if solver is None:
+           solver = 'glpk'
+        debug = kwargs.get('debug',  self.energysystem.simulation.debug)
+        if debug is None:
+            debug = False
+        duals = kwargs.get('duals',  self.energysystem.simulation.duals)
+        if duals is None:
+            duals = False
+        verbose = kwargs.get('verbose', self.energysystem.simulation.verbose)
+        if verbose is None:
+            verbose = False
+        solver_io = kwargs.get('solver_io', 'lp')
+        solve_kwargs = kwargs.get('solve_kwargs', {})
+        solver_cmdline_options = kwargs.get('solver_cmdline_options', {})
+
 
         from pyomo.opt import SolverFactory
         # Create a 'dual' suffix component on the instance
         # so the solver plugin will know which suffixes to collect
         if duals is True:
+            logging.debug("Solph: Setting suffixes for duals & reduced costs.")
             # dual variables (= shadow prices)
             self.dual = po.Suffix(direction=po.Suffix.IMPORT)
             # reduced costs
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug == True:
-            path = helpers.extend_basic_path('lp_files')        
+            path = helpers.extend_basic_path('lp_files')
             self.write(helpers.get_fullpath(path, 'problem.lp'),
                        io_options={'symbolic_solver_labels': True})
             logging.info('LP-file saved to {0}'.format(
                 helpers.get_fullpath(path, 'problem.lp')))
 
+
         # solve instance
-        opt = SolverFactory(solver, **opt_kwargs)
+        opt = SolverFactory(solver, solver_io=solver_io)
         # set command line options
         options = opt.options
         for k in solver_cmdline_options:
           options[k] = solver_cmdline_options[k]
         # store results
+        logging.info("Solph: Handing problem to solver and solving.")
         results = opt.solve(self, **solve_kwargs)
-        #if (results.solver.status == "ok") and \
-        #   (results.solver.termination_condition == "optimal"):
-            # Do something when the solution in optimal and feasible
-        self.solutions.load_from(results)
 
+        self.solutions.load_from(results)
         if verbose:
-            print('***************************************************')
-            print('Optimization problem informations from solph')
-            print('****************************************************')
+            logging.info('**************************************************')
+            logging.info("Optimization problem informations from solph")
+            logging.info("**************************************************")
             for k in results:
-              print(k, results[k])
+              logging.info('{0}: {1}'.format(k, results[k]))
+        else:
+            logging.debug("**************************************************")
+            logging.debug("Optimization problem informations from solph")
+            logging.debug("**************************************************")
+            for k in results:
+              logging.debug('{0}: {1}'.format(k, results[k]))
         return results
 
 
@@ -398,11 +426,11 @@ def _(e, om, block):
 
     # create variables for 'slack' of shortage and excess
     if block.excess_uids:
-        block.excess_slack = po.Var(block.excess_uids,
+        om.excess_slack = po.Var(block.excess_uids,
                                     om.timesteps,
                                     within=po.NonNegativeReals)
     if block.shortage_uids:
-        block.shortage_slack = po.Var(block.shortage_uids,
+        om.shortage_slack = po.Var(block.shortage_uids,
                                       om.timesteps,
                                       within=po.NonNegativeReals)
 

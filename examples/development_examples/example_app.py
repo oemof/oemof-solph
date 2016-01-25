@@ -29,7 +29,9 @@ from oemof.core.network.entities.components import transformers as transformer
 
 import pandas as pd
 import logging
-logging.basicConfig(filename='example_app.log', level=logging.DEBUG)
+from oemof.tools import logger
+
+logger.define_logging()
 
 data = pd.read_csv("example_data.csv", sep=",")
 timesteps = [t for t in range(168)]
@@ -99,17 +101,15 @@ sinks = [demand_th, demand_el]
 components = transformers + renew_sources + sinks
 entities = components + buses
 
-simulation = es.Simulation(
-    solver='glpk', timesteps=timesteps, stream_solver_output=True,
+simulation = es.Simulation(solver='glpk', timesteps=timesteps, verbose=False,
+                           duals=False,
     objective_options={'function': predefined_objectives.minimize_cost})
 energysystem = es.EnergySystem(entities=entities, simulation=simulation)
 
 om = OptimizationModel(energysystem=energysystem)
 
-om.solve(solver='glpk', debug=False, duals=True, verbose=True,
-         solve_kwargs={'tee':True,
-                       'keepfiles':True},
-         opt_kwargs={'solver_io':'lp'},
+om.solve(solve_kwargs={'tee':True,
+                       'keepfiles':False},
          solver_cmdline_options={'min':''})
 results = om.results()
 components = transformers + renew_sources

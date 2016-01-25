@@ -146,9 +146,9 @@ def get_polygon_from_shp_file(file):
     use the function.
 
     >>> a=[1,2,3]
-    >>> print [x + 3 for x in a]
+    >>> print([x + 3 for x in a])
     [4, 5, 6]
-    >>> print "a\n\nb"
+    >>> print("a\nb")
     a
     b
 

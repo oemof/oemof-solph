@@ -413,7 +413,7 @@ def add_excess_slack_costs(model, block=None):
 
     c_excess = {b.uid:b.excess_costs for b in block.objs
                 if b.excess==True}
-    expr = sum(block.excess_slack[e, t] * c_excess[e]
+    expr = sum(model.excess_slack[e, t] * c_excess[e]
                for e in block.excess_uids for t in model.timesteps)
     return(expr)
 
@@ -438,7 +438,7 @@ def add_shortage_slack_costs(model, block=None):
     """
     c_shortage = {b.uid: b.shortage_costs for b in block.objs
                   if b.shortage==True}
-    expr = sum(block.shortage_slack[e, t] * c_shortage[e]
+    expr = sum(model.shortage_slack[e, t] * c_shortage[e]
                for e in block.shortage_uids for t in model.timesteps)
     return(expr)
 
