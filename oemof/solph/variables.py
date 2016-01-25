@@ -179,7 +179,8 @@ def set_bounds(model, block, side='output'):
             # constraint for additional capacity
             def add_output_rule_time_depended_bound(block, e, t):
                 lhs = model.w[e, model.O[e][0], t]
-                rhs = ub_out[e][model.O[e][0]][t] * (1 + block.add_out[e])
+                rhs = ub_out[e][model.O[e][0]][t] * (
+                    1 + block.add_out[e] / out_max[e][model.O[e][0]])
                 return(lhs <= rhs)
 
             if exist_ub_out:
