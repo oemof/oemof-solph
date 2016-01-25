@@ -17,7 +17,7 @@ import pickle
 import time
 import calendar
 import pprint as pp
-from demandlib import demand as dm
+from oemof.demandlib import demand as dm
 
 
 # get_polygon_from_shp_file

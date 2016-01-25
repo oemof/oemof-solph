@@ -6,16 +6,10 @@ Created on Wed Sep 23 15:26:53 2015
 """
 
 import logging
-#logging.getLogger().setLevel(logging.DEBUG)
-#logging.getLogger().setLevel(logging.INFO)
+# logging.getLogger().setLevel(logging.DEBUG)
+# logging.getLogger().setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.WARNING)
-import pandas as pd
-import matplotlib.pyplot as plt
-from shapely.geometry import Polygon
-from shapely.geometry import Point
-from oemof_base.oemof.tools import db
-# from oemof_base.oemof.core import energy_regions
-from oemof_base.oemof.core import energy_buildings as eb
+
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
 from oemof.tools import helpers
@@ -77,7 +71,7 @@ household_structure = [
      'household_type': 'four'}]
 
 household_members_all = 40000
-# TODO: wäre cool, wenn diese Summe automatisch
+# TODO:
 # would be cool to let this sum up automatically from all
 #  household_members in household_structure
 
@@ -112,9 +106,9 @@ ind_number_of_employees_region = [
     {'wz_13': 18554},
     {'wz_14': 20976}]
 
-#################################################################################
+# ############################################################################
 # Create demand object and relevant bus
-#################################################################################
+# ############################################################################
 
 # Example 1: Calculate profile with annual electric demand per sector is known
 
@@ -131,17 +125,18 @@ helpers.call_demandlib(demand,
 # Example 2: Calculate profile with unknown annual electric demand per sector
 
 demand_2 = sink.Simple(uid="demand_2", inputs=[bel])
-helpers.call_demandlib(demand_2,
-                       method='calculate_profile',
-                       year=2010,
-                       ann_el_demand_per_sector=ann_el_demand_per_sector_2,
-                       ann_el_demand_per_person=ann_el_demand_per_person,
-                       household_structure=household_structure,
-                       household_members_all=household_members_all,
-                       population=population,
-                       comm_ann_el_demand_state=comm_ann_el_demand_state,
-                       comm_number_of_employees_state=comm_number_of_employees_state,
-                       comm_number_of_employees_region=comm_number_of_employees_region)
+helpers.call_demandlib(
+    demand_2,
+    method='calculate_profile',
+    year=2010,
+    ann_el_demand_per_sector=ann_el_demand_per_sector_2,
+    ann_el_demand_per_person=ann_el_demand_per_person,
+    household_structure=household_structure,
+    household_members_all=household_members_all,
+    population=population,
+    comm_ann_el_demand_state=comm_ann_el_demand_state,
+    comm_number_of_employees_state=comm_number_of_employees_state,
+    comm_number_of_employees_region=comm_number_of_employees_region)
 
 print(demand.val)
 print(demand_2.val)

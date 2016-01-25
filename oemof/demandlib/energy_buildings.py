@@ -213,7 +213,7 @@ class bdew_elec_slp():
 
         # Read standard load profile series from csv file
 
-        selp_series = pd.read_csv('../demandlib/selp_series.csv')
+        selp_series = pd.read_csv('../oemof/demandlib/selp_series.csv')
         tmp_df = selp_series
 
         index = pd.date_range(

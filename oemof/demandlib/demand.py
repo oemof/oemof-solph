@@ -7,7 +7,7 @@ Created on Fri Jul 24 19:11:38 2015
 
 import numpy as np
 import pandas as pd
-from oemof.core import energy_buildings as eb
+from oemof.demandlib import energy_buildings as eb
 
 
 class electrical_demand():
