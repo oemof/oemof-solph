@@ -2,32 +2,52 @@
 # -*- coding: utf-8
 
 import logging
-import pandas as pd
 import matplotlib.pyplot as plt
-from oemof.outputlib import devplots
+
+from oemof.outputlib import to_pandas as tpd
 from oemof.tools import logger
 from oemof.core import energy_system as es
 
+
+# The following dictionaries are a workaround due to issue #26
+rename = {
+    "(val, ('sink', 'Landkreis Wittenberg', 'elec'))": "elec demand",
+    "(val, ('sto_simple', 'Landkreis Wittenberg', 'elec'))": "battery",
+    "(val, ('transport', 'bus', 'Stadt Dessau-Rosslau', 'elec', 'bus', 'Landkreis Wittenberg', 'elec'))": "to Dessau",
+    "(val, ('FixedSrc', 'Landkreis Wittenberg', 'pv_pwr'))": "pv power",
+    "(val, ('FixedSrc', 'Landkreis Wittenberg', 'wind_pwr'))": "wind power",
+    "(val, ('transformer', 'Landkreis Wittenberg', 'natural_gas'))": "gas power plant",
+    "(val, ('transport', 'bus', 'Landkreis Wittenberg', 'elec', 'bus', 'Stadt Dessau-Rosslau', 'elec'))": "to Wittenberg",
+    "(val, ('sink', 'Stadt Dessau-Rosslau', 'elec'))": "elec demand",
+    "(val, ('sto_simple', 'Stadt Dessau-Rosslau', 'elec'))": "battery",
+    "(val, ('FixedSrc', 'Stadt Dessau-Rosslau', 'pv_pwr'))": "pv power",
+    "(val, ('FixedSrc', 'Stadt Dessau-Rosslau', 'wind_pwr'))": "wind power",
+    "(val, ('transformer', 'Stadt Dessau-Rosslau', 'lignite'))": "lignite power plant",
+    "(val, ('transformer', 'Stadt Dessau-Rosslau', 'natural_gas'))": "gas power plant",
+    }
+
 # Define a color set for the plots.
-color_def = {}
+cdict = {}
 
-color_def['FixedSrc'] = {}
-color_def['FixedSrc']['wind_pwr'] = '#4536bb'
-color_def['FixedSrc']['pv_pwr'] = '#ffcc00'
+cdict["('FixedSrc', 'Landkreis Wittenberg', 'wind_pwr')"] = '#4536bb'
+cdict["('FixedSrc', 'Landkreis Wittenberg', 'pv_pwr')"] = '#ffcc00'
+cdict["('FixedSrc', 'Stadt Dessau-Rosslau', 'wind_pwr')"] = '#4536bb'
+cdict["('FixedSrc', 'Stadt Dessau-Rosslau', 'pv_pwr')"] = '#ffcc00'
 
-color_def['transport'] = {}
-color_def['transport']['LandkreisWittenberg'] = '#643780'
-color_def['transport']['StadtDessau-Rosslau'] = '#643780'
+cdict["('transport', 'bus', 'Landkreis Wittenberg', 'elec', 'bus', 'Stadt Dessau-Rosslau', 'elec')"] = '#643780'
+cdict["('transport', 'bus', 'Stadt Dessau-Rosslau', 'elec', 'bus', 'Landkreis Wittenberg', 'elec')"] = '#643780'
 
-color_def['transformer'] = {}
-color_def['transformer']['natural_gas'] = '#7c7c7c'
-color_def['transformer']['lignite'] = '#000000'
+cdict["('transformer', 'Landkreis Wittenberg', 'natural_gas')"] = '#7c7c7c'
+cdict["('transformer', 'Stadt Dessau-Rosslau', 'natural_gas')"] = '#7c7c7c'
+cdict["('transformer', 'Landkreis Wittenberg', 'lignite')"] = '#000000'
+cdict["('transformer', 'Stadt Dessau-Rosslau', 'lignite')"] = '#000000'
 
-color_def['sto_simple'] = {}
-color_def['sto_simple']['elec'] = '#ff5e5e'
+cdict["('sto_simple', 'Landkreis Wittenberg', 'elec')"] = '#ff5e5e'
+cdict["('sto_simple', 'Stadt Dessau-Rosslau', 'elec')"] = '#ff5e5e'
 
-color_def['sink'] = {}
-color_def['sink']['elec'] = '#0cce1e'
+cdict["('sink', 'Landkreis Wittenberg', 'elec')"] = '#0cce1e'
+cdict["('sink', 'Stadt Dessau-Rosslau', 'elec')"] = '#0cce1e'
+
 
 # Define the oemof default logger
 logger.define_logging()
@@ -38,64 +58,41 @@ TwoRegExample = es.EnergySystem()
 # Restoring a dumped EnergySystem
 logging.info(TwoRegExample.restore())
 
-# Plotting the regions in one plot or separated plots
-combined_plot = True
+es_df = tpd.EnergySystemDataFrame(energy_system=TwoRegExample)
 
-# Create a nested dictionary of DataFrames for inputs and outputs of a bus.
-plot = devplots.stackplot(es=TwoRegExample)
-color_dc = {}
+fig = plt.figure(figsize=(24, 14))
+plt.rc('legend', **{'fontsize': 19})
+plt.rcParams.update({'font.size': 14})
+plt.style.use('ggplot')
 
-if combined_plot:
-    fig = plot.create_fig()
-    i = 0
-    n = len(TwoRegExample.regions)
+n = 1
 
 # Loop over the regions to plot them.
 for region in TwoRegExample.regions:
     uid = str(('bus', region.name, 'elec'))
-    plot.plot_dc = plot.create_io_df(uid)
 
-    # *** This part is just necessary to define colors and column names
-    # *** This part is optional.
-    io_ls = ['in', 'out']
-    rename = {}
-    color_dc[region.name] = {}
-    for io in io_ls:
-        rename = {}
-        color_dc[region.name][io] = []
-        for column in plot.plot_dc[io].keys():
-            # The following lines are necessary due to an oemof bug (issue #26)
-            uid = column.replace('(', '').replace("'", "").replace(')', '')
-            uid = tuple(uid.split(','))
+    ax = fig.add_subplot(2, 1, n)
+    n += 1
+    es_df.stackplot_part(
+        uid, ax,
+        date_from="2010-06-01 00:00:00",
+        date_to="2010-06-8 00:00:00",
+        title=region.name, colordict=cdict,
+        ylabel="Power in MW", xlabel="",
+        linewidth=4,
+        tick_distance=24)
 
-            # Set nicer names for the columns (default: uid).
-            maintype = uid[0]
-            subtype = uid[2].replace(' ', '')
-            col = uid[0] + uid[2]
+    handles, labels = ax.get_legend_handles_labels()
 
-            # Set a color set according to the dictionary above.
-            color_dc[region.name][io].append(color_def[maintype][subtype])
-            rename[column] = col
+    new_labels = []
+    for lab in labels:
+        new_labels.append(rename.get(str(lab), lab))
 
-        # Rename the columns.
-        plot.plot_dc[io].rename(columns=rename, inplace=True)
-    # *** Eding the optional part.
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.87, box.height])
 
-    prange = pd.date_range(pd.datetime(2010, 6, 1, 0, 0),
-                           periods=168, freq='H')
+    ax.legend(
+        reversed(handles), reversed(new_labels), loc='center left',
+        bbox_to_anchor=(1, 0.5), ncol=1, fancybox=True, shadow=True)
 
-    # Normaly just one of the following blocks are necessary.
-    if not combined_plot:
-        logging.info('Plotting region {0} in separated plots.'.format(
-            region.name))
-        plot.full(prange, out_color=color_dc[region.name]['out'],
-                  in_color=color_dc[region.name]['in'])
-
-    if combined_plot:
-        logging.info('Plotting region {0} in a combined plot.'.format(
-            region.name))
-        i += 1
-        ax = fig.add_subplot(n, 1, i)
-        plot.part(prange, ax, out_color=color_dc[region.name]['out'],
-                  in_color=color_dc[region.name]['in'])
 plt.show()
