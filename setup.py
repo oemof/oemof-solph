@@ -1,9 +1,19 @@
 #! /usr/bin/env python
 
+"""TODO: Maybe add a docstring containing a long description for oemof?
+
+  This would double as something we could put int the `long_description`
+  parameter for `setup` and it would squelch some complaints pylint has on
+  `setup.py`.
+
+"""
+
 from setuptools import find_packages, setup
 
+import oemof
+
 setup(name='oemof_base',
-      version='0.0.3dev',
+      version=oemof.__version__,
       author='oemof developing group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
@@ -12,4 +22,4 @@ setup(name='oemof_base',
       install_requires=['numpy >= 1.7.0',
                         'pandas >= 0.17.0',
                         'pyomo >= 4.0.0']
-      )
+     )
