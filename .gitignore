@@ -12,6 +12,6 @@
 *.pdf
 .idea
 doc/_build/
-doc/api/*.rst
 dist/*
 oemof.egg-info/*
+oemof_base.egg-info/*

@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 from oemof.core import energy_system as es
 # solph imports
 from oemof.solph.optimization_model import OptimizationModel
-from oemof.solph import postprocessing as pp
 from oemof.solph import predefined_objectives as predefined_objectives
 # base classes import
 from oemof.core.network.entities import Bus
@@ -28,12 +27,20 @@ from oemof.core.network.entities.components import sinks as sink
 from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
 
+from oemof.outputlib import to_pandas as tpd
 import pandas as pd
-import logging
-logging.basicConfig(filename='example_app.log', level=logging.DEBUG)
+from oemof.tools import logger
+logger.define_logging()
 
 data = pd.read_csv("example_data.csv", sep=",")
-timesteps = [t for t in range(168)]
+time_index = pd.date_range('1/1/2012', periods=168, freq='H')
+simulation = es.Simulation(solver='glpk', timesteps=range(len(time_index)),
+                           verbose=False, duals=True,
+                           objective_options={
+                             'function': predefined_objectives.minimize_cost})
+#
+energy_system = es.EnergySystem(simulation=simulation, time_idx=time_index)
+
 
 # emission factors in t/MWh
 em_lig = 0.111 * 3.6
@@ -45,7 +52,8 @@ em_oil = 0.0750 * 3.6
 bcoal = Bus(uid="coal", type="coal", price=20, balanced=False, excess=False)
 bgas = Bus(uid="gas", type="gas", price=35, balanced=False, excess=False)
 boil = Bus(uid="oil", type="oil", price=40,  balanced=False, excess=False)
-blig = Bus(uid="lignite", type="lignite", balanced=False, price=15, excess=False)
+blig = Bus(uid="lignite", type="lignite", balanced=False, price=15,
+           excess=False)
 
 # electricity and heat
 b_el = Bus(uid="b_el", type="el", excess=False, shortage=False)
@@ -99,50 +107,19 @@ sinks = [demand_th, demand_el]
 components = transformers + renew_sources + sinks
 entities = components + buses
 
-simulation = es.Simulation(solver='glpk', timesteps=timesteps,
-                           stream_solver_output=True,
-                           objective_options={
-                               'function': predefined_objectives.minimize_cost})
-energysystem = es.EnergySystem(entities=entities, simulation=simulation)
+om = OptimizationModel(energysystem=energy_system)
+#
+om.solve(solve_kwargs={'tee':True,
+                       'keepfiles':False},
+         solver_cmdline_options={'min':''})
+energy_system.results = om.results()
 
-om = OptimizationModel(energysystem=energysystem)
+es_df = tpd.EnergySystemDataFrame(energy_system=energy_system)
 
-om.solve(solver='glpk', debug=True, tee=True, duals=False)
-pp.results_to_objects(om)
-
-components = transformers + renew_sources
-
-
-if __name__ == "__main__":
-    def plot_dispatch(bus_to_plot):
-        # plotting: later as multiple pdf with pie-charts and topology?
-        import numpy as np
-        import matplotlib as mpl
-        import matplotlib.cm as cm
-
-        plot_data = renew_sources+transformers
-
-        # data preparation
-        x = np.arange(len(timesteps))
-        y = []
-        labels = []
-        for c in plot_data:
-            if bus_to_plot in c.results['out']:
-                y.append(c.results['out'][bus_to_plot])
-                labels.append(c.uid)
-
-        # plotting
-        fig, ax = plt.subplots()
-        sp = ax.stackplot(x, y,
-                          colors=cm.rainbow(np.linspace(0, 1, len(plot_data))))
-        proxy = [mpl.patches.Rectangle((0, 0), 0, 0,
-                                       facecolor=
-                                       pol.get_facecolor()[0]) for pol in sp]
-        ax.legend(proxy, labels)
-        ax.grid()
-        ax.set_xlabel('Timesteps in h')
-        ax.set_ylabel('Power in MW')
-        ax.set_title('Dispatch')
-
-    plot_dispatch('b_el')
-    plt.show()
+# plot
+es_df.plot_bus(bus_uid="b_el", bus_type="el", type="input",
+               date_from="2012-01-01 00:00:00",
+               date_to="2012-01-31 00:00:00", kind='bar',
+               title="January 2016", xlabel="Power in MW",
+               ylabel="Date", tick_distance=24*7,
+               df_plot_kwargs={'stacked':True ,'width':1, 'lw':0.2})

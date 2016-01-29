@@ -30,12 +30,19 @@ The example models the following energy system:
 ###############################################################################
 # imports
 ###############################################################################
-
+import matplotlib.pyplot as plt
 import pandas as pd
+import logging
 
 # import solph module to create/process optimization model instance
-from oemof.solph import postprocessing as pp
 from oemof.solph import predefined_objectives as predefined_objectives
+
+# Outputlib
+from oemof.outputlib import to_pandas as tpd
+
+# Default logger of oemof
+from oemof.tools import logger
+
 # import oemof base classes to create energy system objects
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
@@ -44,13 +51,27 @@ from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
 
 
+# Define logger
+logger.define_logging()
+
 ###############################################################################
-# read data from csv file
+# read data from csv file and set time index
 ###############################################################################
 
+logging.info('Read data from csv file and set time index')
 data = pd.read_csv("storage_invest.csv", sep=",")
-timesteps = [t for t in range(8760)]
+time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
 
+###############################################################################
+# initialize the energy system
+###############################################################################
+
+logging.info('Initialize the energy system')
+simulation = es.Simulation(
+    timesteps=range(len(time_index)), verbose=True, solver='glpk',
+    objective_options={'function': predefined_objectives.minimize_cost})
+
+energysystem = es.EnergySystem(time_idx=time_index, simulation=simulation)
 
 ###############################################################################
 # set optimzation options for storage components
@@ -59,10 +80,11 @@ timesteps = [t for t in range(8760)]
 transformer.Storage.optimization_options.update({'investment': True})
 
 ###############################################################################
-# Create oemof objetc
+# Create oemof object
 ###############################################################################
 
-# create bus
+logging.info('Create oemof objects')
+# create gas bus
 bgas = Bus(uid="bgas",
            type="gas",
            price=70,
@@ -125,46 +147,65 @@ storage = transformer.Storage(uid='sto_simple',
                               c_rate_out=1/6)
 
 ###############################################################################
-# Create, solve and postprocess OptimizationModel instance
+# Optimise the energy system and plot the results
 ###############################################################################
 
-# group busses
-buses = [bgas, bel]
+logging.info('Optimise the energy system')
 
-# create lists of components
-transformers = [pp_gas]
-renewable_sources = [pv, wind]
-commodities = [rgas]
-storages = [storage]
-sinks = [demand]
-
-# groupt components
-components = transformers + renewable_sources + storages + sinks + commodities
-
-# create list of all entities
-entities = components + buses
-
-# TODO: other solver libraries should be passable
-simulation = es.Simulation(solver='glpk', timesteps=timesteps,
-                           stream_solver_output=True,
-                           objective_options={
-                               'function':predefined_objectives.minimize_cost})
-
-energysystem = es.EnergySystem(entities=entities, simulation=simulation)
-
+# If you dumped the energysystem once, you can skip the optimisation with '#'
+# and use the restore method.
 energysystem.optimize()
 
-# write results back to objects
-pp.results_to_objects(energysystem.optimization_model)
+# energysystem.dump()
+# energysystem.restore()
 
+# Creation of a multi-indexed pandas dataframe
+es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
 
-if __name__ == "__main__":
-    import postprocessing as pp
+# Example usage of dataframe object
+es_df.data_frame.describe
+es_df.data_frame.index.get_level_values('bus_uid').unique()
+es_df.data_frame.index.get_level_values('bus_type').unique()
 
-    data = renewable_sources+transformers+storages
+# Example slice (see http://pandas.pydata.org/pandas-docs/stable/advanced.html)
+idx = pd.IndexSlice
+es_df.data_frame.loc[idx[:,
+                         'el',
+                         :,
+                         slice('pp_gas', 'pv'),
+                         slice(
+                             pd.Timestamp("2012-01-01 00:00:00"),
+                             pd.Timestamp("2012-01-01 01:00:00"))], :]
 
-    pp.plot_dispatch('bel', timesteps, data, storage, demand)
-#    pp.plot_dispatchplt.show()
+logging.info('Plot the results')
 
-    pp.print_results('bel', data, demand, transformers, storage,
-                     energysystem)
+cdict = {'wind': '#5b5bae',
+         'pv': '#ffde32',
+         'sto_simple': '#42c77a',
+         'pp_gas': '#636f6b',
+         'demand': '#ce4aff'}
+
+# Plotting line plots
+es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
+               date_from="2012-01-01 00:00:00", colordict=cdict,
+               date_to="2012-01-31 00:00:00",
+               title="January 2016", xlabel="Power in MW",
+               ylabel="Date", tick_distance=24*7)
+
+# Minimal parameter
+es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
+
+plt.show()
+
+# Plotting a combined stacked plot
+
+es_df.stackplot("bel",
+                colordict=cdict,
+                date_from="2012-06-01 00:00:00",
+                date_to="2012-06-8 00:00:00",
+                title="Electricity bus",
+                ylabel="Power in MW", xlabel="Date",
+                linewidth=4,
+                tick_distance=24, save=True)
+
+plt.show()

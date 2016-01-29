@@ -8,17 +8,17 @@ import pyomo.environ as po
 
 
 def set_bounds(model, block, side="output"):
-    """ Set upper and lower bounds via constraints
+    """ Set upper and lower bounds via constraints.
 
     The bounds are set with constraints using the binary status variable
-    of the components.
+    of the components. The mathematical formulation is as follows:
 
     If side is `output`:
 
-    .. math::  W(e, O(e), t) \\leq out_{max}(e) \\cdot Y(e, t), \
+    .. math::  W(e, O_1(e), t) \\leq out_{max}(e) \\cdot Y(e, t), \
     \\qquad \\forall e, \\forall t
 
-    .. math:: W(e, O(e), t) \\geq out_{min}(e) \\cdot Y(e, t), \
+    .. math:: W(e, O_1(e), t) \\geq out_{min}(e) \\cdot Y(e, t), \
     \\qquad \\forall e, \\forall t
 
     If side is `input`:
@@ -29,20 +29,27 @@ def set_bounds(model, block, side="output"):
     .. math:: W(I(e), e, t) \\geq in_{min}(e) \\cdot Y(e, t), \
     \\qquad \\forall e, \\forall t
 
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
         Bounds are altered at model attributes (variables) of `model`
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     side : string
        string to select on which side the bounds should be set
        (`ìnput`, `output`)
 
-    Returns
-    -------
-    The upper and lower bounds of the variables are
-    set via constraints in the optimization model object `model`
 
     """
     if block.objs is None:
@@ -86,24 +93,74 @@ def set_bounds(model, block, side="output"):
             return(lhs <= rhs)
         block.minimum_input = po.Constraint(block.indexset, rule=input_lb_rule)
 
-def add_output_gradient_constraints(model, block, grad_direc="both"):
-    """ Creates constraints to model the output gradient.
+def add_variable_linear_eta_relation(model, block):
+    """ Adds constraint for input-output relation for all
+    units with variable efficiency grouped in `block.objs`.
 
-    If gradient direction is positive:
+    The mathematical formulation for the constraint is as follows:
 
-    .. math:: W(e,O(e),t) - W(e,O(e),t-1) \\leq gradpos(e) + out_{min}(e) \
-    \\cdot (1 - Y(e,t))
+    .. math:: W(I(e),e ,t) = Y(e,t) \\cdot c_1 + c_2 \\cdot W(e, O_1(e), t), \
+    \\qquad \\forall e, \\forall t
 
-    If gradient direction is negative:
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
 
-    .. math:: W(e,O(e),t-1) - W(e,O(e),t) \\leq gradneg(e) + out_{min}(e) \
-    \\cdot (1 - Y(e,t-1))
+    :math:`O_1(e)` beeing the set of all first outputs of entitiy
+    (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
-    block : SimplBlock()
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for \
+                          which backpressure chp constraints should be set.')
+
+    c = {obj.uid: obj.coeff for obj in block.objs}
+
+    def variable_linear_eta_rule(block, e, t):
+        lhs = model.w[model.I[e], e, t]
+        rhs = block.y[e,t]*c[e][0] + c[e][1] * model.w[e, model.O[e][0], t]
+        return(lhs == rhs)
+    block.variable_linear_eta_relation = po.Constraint(block.indexset,
+                                            rule=variable_linear_eta_rule,
+                                            doc="INFLOW = Y*c1 + c2*OUTFLOW_1")
+
+def add_output_gradient_constraints(model, block, grad_direc="both"):
+    """ Creates constraints to model the output gradient for milp-models.
+
+    If gradient direction is `positive`:
+
+    .. math:: W(e,O_1(e),t) - W(e,O_1(e),t-1) \\leq gradpos(e) + out_{min}(e) \
+    \\cdot (1 - Y(e,t))
+
+    If gradient direction is `negative`:
+
+    .. math:: W(e,O_1(e),t-1) - W(e,O_1(e),t) \\leq gradneg(e) + out_{min}(e) \
+    \\cdot (1 - Y(e,t-1))
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    :math:`O_1(e)` beeing the set of all first outputs of
+    entitiy (component) :math:`e`.
+
+    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     grad_direc : string
          direction of gradient ("both", "positive", "negative")
 
@@ -152,20 +209,28 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
 
 
 def add_startup_constraints(model, block):
-    """ Creates constraints to model the start up of a component
+    """ Creates constraints to model the start up of a components.
 
-    .. math::  Y(e,t) - Yn(e,t-1) \\leq Z_{start}(e,t), \\qquad \
+    The mathematical formulation of constraint is as follows:
+
+    .. math::  Y(e,t) - Y(e,t-1) \\leq Z_{start}(e,t), \\qquad \
         \\forall e, \\forall t
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
 
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
     References
     ----------
-    .. [2] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
        Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
        TU Munich, p.38
     """
@@ -193,20 +258,27 @@ def add_startup_constraints(model, block):
 
 
 def add_shutdown_constraints(model, block):
-    """ Creates constraints to model the shut down of a component
+    """ Creates constraints to model the shut down of a component.
+
+    The mathematical formulation for the constraint is as follows:
 
     .. math::  Y(e,t-1) - Y(e,t) \\leq Z_{stop}(e,t), \\qquad \
     \\forall e, \\forall t
 
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
     Parameters
     ----------
-    model : pyomo.ConcreteModel()
-        A pyomo-object to be solved containing all Variables, Constraints, Data
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     References
     ----------
-    .. [3] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
+    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
        Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
        TU Munich, p.38
     """
@@ -227,3 +299,105 @@ def add_shutdown_constraints(model, block):
             # TODO: Define correct boundary conditions
             return(po.Constraint.Skip)
     block.shut_down = po.Constraint(block.indexset, rule=shutdown_rule)
+
+def add_minimum_downtime(model, block):
+    """ Adds minimum downtime constraints for for components grouped inside
+    `block.objs`.
+
+    The mathematical formulation for constraints is as follows:
+
+     .. math::  (Y(e, t-1)-Y(e,t)) \\cdot t_{min,off} \\leq t_{min,off} - \
+     \\sum_{\\gamma=0}^{t_{min,off}-1} Y(e,t+\\gamma)  \
+     \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,off}]
+
+    Extra constraints for last timesteps:
+
+    .. math::  (Y(e, t-1)-Y(e,t)) \\cdot t_{min,off} \\leq t_{min,off} - \
+     \\sum_{\\gamma=0}^{t_{max}-t} Y(e,t+\\gamma)  \
+     \\qquad \\forall e, \\forall t \\in [t_{max}-t_{min,off}, t_{max}]
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which minimum downtime constraints should be set.')
+
+    t_min_off = {obj.uid: obj.t_min_off for obj in block.objs}
+    t_max = len(model.timesteps)-1
+
+    def minimum_downtime_rule(block, e, t):
+        if t <= 1:
+            return po.Constraint.Skip
+        elif t >= t_max - t_min_off[e]:
+            # Adaption for border sections with range(timesteps_max-t)
+            lhs = (block.y[e, t-1] - block.y[e, t]) * t_min_off[e]
+            rhs = t_min_off[e] - sum(block.y[e, t + p]
+                                     for p in range(t_max - t))
+            return(lhs <= rhs)
+        else:
+            lhs = (block.y[e, t-1] - block.y[e, t]) * t_min_off[e]
+            rhs = t_min_off[e] - sum(block.y[e, t + p]
+                                     for p in range(t_min_off[e]))
+            return(lhs <= rhs)
+    block.minimum_downtime = po.Constraint(block.indexset,
+                                           rule=minimum_downtime_rule)
+
+
+def add_minimum_uptime(model, block):
+    """ Adds minimum uptime constraints for for components in `block`
+
+    The mathematical formulation for constraints is as follows:
+
+     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,on} \\leq  \
+     \\sum_{\\gamma=0}^{t_{min,on}-1} Y(e,t+\\gamma)  \
+     \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,on}]
+
+     Extra constraint for the last timesteps:
+
+     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,on} \\leq  \
+      \\sum_{\\gamma=0}^{t_{max}-t} Y(e,t+\\gamma)  \
+      \\qquad \\forall e, \\forall t \\in [t_{max}-t_{min,on}, t_{max}]
+
+    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
+    all entities grouped inside the attribute `block.objs`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for' +
+                          'which minimum uptime constraints should be set.')
+
+    t_min_on = {obj.uid: obj.t_min_on for obj in block.objs}
+    t_max = len(model.timesteps)-1
+
+    def minimum_uptime_rule(block, e, t):
+        if t <= 1:
+            return po.Constraint.Skip
+        elif t >= t_max - t_min_on[e]:
+            # Adaption for border sections with range(timesteps_max-t)
+            lhs = (block.y[e, t] - block.y[e, t-1]) * t_min_on[e]
+            rhs = sum(block.y[e, t + p] for p in range(t_max - t))
+            return(lhs <= rhs)
+        else:
+            lhs = (block.y[e, t] - block.y[e, t-1]) * t_min_on[e]
+            rhs = sum(block.y[e, t + p] for p in range(t_min_on[e]))
+            return(lhs <= rhs)
+    block.minimum_uptime = po.Constraint(block.indexset,
+                                          rule=minimum_uptime_rule)
