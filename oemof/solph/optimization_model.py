@@ -95,7 +95,20 @@ class OptimizationModel(po.ConcreteModel):
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in self.components
                   if not isinstance(c, cp.Sink)}
 
-        # set attributes lists per class with objects and uids for opt model
+        # Add constraints for all components to the model
+        self.build_component_constraints(cbt)
+
+        # Add constraints for all buses to the model
+        self.build_bus_constraints()
+
+        # create objective function
+        if not self.objective_options:
+            raise ValueError("No objective options defined!")
+
+        logging.info("Building objective function.")
+        self.objective_assembler(objective_options=self.objective_options)
+
+    def build_component_constraints(self, cbt):
         logging.info("Building component constraints.")
         for cls in cbt:
             objs = cbt[cls]
@@ -113,6 +126,7 @@ class OptimizationModel(po.ConcreteModel):
                               "classes: " + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
 
+    def build_bus_constraints(self):
         # add bus block
         block = po.Block()
         # get all bus objects
@@ -121,13 +135,6 @@ class OptimizationModel(po.ConcreteModel):
         logging.info("Building bus constraints")
         assembler.registry[Bus](e=None, om=self, block=block)
         self.add_component(str(Bus), block)
-
-        # create objective function
-        if not self.objective_options:
-            raise ValueError("No objective options defined!")
-
-        logging.info("Building objective function.")
-        self.objective_assembler(objective_options=self.objective_options)
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
@@ -296,6 +303,14 @@ class OptimizationModel(po.ConcreteModel):
 
         return result
 
+    def write_lp_file(self, path=None, filename="problem.lp"):
+        if path is None:
+            path = helpers.extend_basic_path("lp_files")
+        self.write(helpers.get_fullpath(path, filename),
+                   io_options={"symbolic_solver_labels": True})
+        logging.info("LP-file saved to {0}".format(
+            helpers.get_fullpath(path, filename)))
+
     def solve(self, **kwargs):
         r""" Method that takes care of the communication with the solver
         to solve the optimization model.
@@ -359,11 +374,7 @@ class OptimizationModel(po.ConcreteModel):
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug is True:
-            path = helpers.extend_basic_path("lp_files")
-            self.write(helpers.get_fullpath(path, "problem.lp"),
-                       io_options={"symbolic_solver_labels": True})
-            logging.info("LP-file saved to {0}".format(
-                helpers.get_fullpath(path, "problem.lp")))
+            self.write_lp_file()
 
         # solve instance
         opt = SolverFactory(solver, solver_io=solver_io)
