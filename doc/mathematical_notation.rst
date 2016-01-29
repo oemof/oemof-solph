@@ -2,72 +2,89 @@
  Mathematical notation for solph
 ##########################################
 
-Sets
-------------------------------------------
 
-========= ===== ============================== ===============================
-Name      Index Description                    Elements from objects of class
-========= ===== ============================== ===============================
-E         e     Set of entities                solph.newtwork.Entity
-B         b     Set of busses                  solph.network.entities.Bus
-C         c     Set of components              solph.network.entities.Component
-========= ===== ============================== ===============================
+Sets 
+----------------------
 
-Subsets of Component Set C
-******************************************
+.. math::
+   :nowrap:
 
+	\begin{tabular}{p{2cm}p{7cm}p{3cm}}\hline
+	\textbf{Symbol}            & \textbf{Description}          & \textbf{Python-type of object in set}\\\hline
+	\\
+	$\mathcal{E}$        & Set of all Entities                                  & Entity\\
+	$\mathcal{\vec{E}}$  & Set of all weighted edges $(e_i, e_j)$               & Tuple\\
+	$\mathcal{E_B}$      & Set of all edges                                     & Bus \\
+	$\mathcal{E_C}$      & Set of all components                                & Component\\
+	$\mathcal{E}_{I}$    & Set of components with 1 input                       & Sink \\
+	$\mathcal{E}_{O}$    & Set of components with 1 output                      & Source \\
+	$\mathcal{E}_{IO}$   & Components with 1 input, 1 output $i_e \neq {o_{e,n}}$ & SimpleTransformer\\
+	$\mathcal{E}_{IOO}$  & Components with 1 input, 2 outputs                   & SimpleCHP\\
+	$\mathcal{E}_{S}$    & Components with 1 input, 1 output  $i_e = o_{e,n}$   & Storage\\
+	$\mathcal{I}_e$      & All inputs of Entity $e$                             & Dict\\
+	$\mathcal{O}_e$      & All outputs of Entity $e$                            & Dict\\
+	$\mathcal{T}$        & Set of timesteps                                     & List \\ 
+	\end{tabular}
 
-========= ===== ============================== ===============================
-Name      Index Description                    Elements from objects of class
-========= ===== ============================== ===============================
-SSTO      st    Set of  simple storages        transformer.Storage
-STRNF     trn   Set of simple tranformers      transformer.Simple
-SBPCHP    bp    Set of simple chps             transformer.SimpleCHP
-SEXCHP    ex    Set of simple extraction chps  transformer.SimpleExtractionCHP
-STRPT     trp   Set of simple transports       transports.Simple
-SSIK      si    Set of sinple sinks            sinks.Simple
-COMM      co    Set of commodities             sinks.Commodity
-FXSO      fx    Set of fixed sources           source.FixedSource
-DISO      di    Set of dispatchable sources    source.DispatchSource
-========= ===== ============================== ===============================
+Variables 
+----------------------
 
-Other Sets
-******************************************
+.. math::
+   :nowrap:
 
-========= ===== ============================== ===============================
-Name      Index Description
-========= ===== ============================== ===============================
-T         t     Set of timesteps
-E 	  ee	Set of ExE
-I(c)      i     Set of inputs for component c
-O(c)      o     Set of outputs for component c
-========= ===== ============================== ===============================
+	\begin{tabular}{p{2cm}p{4cm}p{2cm}p{2cm}}\hline
+	\textbf{Symbol}      & \textbf{Description}                      & \textbf{Possible Set}  & \textbf{Python variable}  \\\hline
+	\\
+	\multicolumn{4}{l}{\textbf{LP-models}}\\
+	$w_{e_1, e_2}(t)$    & Weight of Edge $(e_1, e_2)$ at  $t$             & $(e_1, e_2) \in  \mathcal{\vec{E}}$   & \verb+w[e1,e2,t]+ \\
+	$l_e(t)$             & Level of  component  $e$ at $t$                  & $e \in \mathcal{E}_S$     & \verb+cap[e,t]+     \\
+	$g^{pos}_{e_{o,1}}(t)$ & Positive gradient between two sequential timesteps  & $e \in \mathcal{E}_C$     & \verb+grad_pos_var[e,t]+ \\
+	$g^{neg}_{e_{o,1}}(t)$ & Negative gradient between two sequential timesteps  & $e \in \mathcal{E}_C$     & \verb+grad_neg_var[e,t]+ \\ 
+	\\
+	\multicolumn{4}{l}{\textbf{Dispatch-source only}}\\
+	$w^{cut}_{e,o_e}(t)$ & Curtailment of value $w_{e, o_e}(t)$             &$e \in \mathcal{E}_O$     & \verb+curtailment_var[e1,e2,t]+ \\
+	\\
+	\multicolumn{4}{l}{\textbf{Investment models}}\\
+	$\overline{w}^{add}_{o_e}$  & Optimized extension of bound $\overline{W}_{e, o_{e,1}}$    &$e \in \mathcal{E}_C$   &\verb+add_out[e]+ \\
+	$\overline{l}^{add}_e$      & Optimized extension of bound $\overline{L}_e$               &$e \in \mathcal{E}_S$   &\verb+add_cap[e]+ \\
+	\\
+	\multicolumn{4}{l}{\textbf{MILP-models}}\\
+	$y_e(t)$	     & Binary status variable of component  $e$ at $t$  &$e \in \mathcal{E}_C$     & \verb+y[e,t]+         \\
+	$z^{start}_e(t)$     & Binary startup variable of component $e$ at $t$ &$e \in \mathcal{E}_C$     & \verb+z_start[e,t]+   \\
+	$z^{stop}_e(t)$	     & Binary shutdown variable of component $e$ at $t$ &$e \in \mathcal{E}_C$    & \verb+z_stop[e,t]+   \\
+	\end{tabular}
 
-Optimization variables
-----------------------------------------------
+Parameters 
+----------------------
+Parameters will be notate with uppercase. 
 
-========= ======= =============== ============================================
-Name      Indices pyomo variable  Description
-========= ======= =============== ============================================
-W         ee, t   w               Inflow/Outflow variable of component c
-ADDOUT    c       add_out         Variable for additional installed output c
-ADDCAP    c       add_cap         Variable for additional installed capacity c
-Y         c, t    y               Status variable of component c
-Z_start   c, t    z_start         Variable indicating startup of component c
-Z_stop    c, t    z_stop          Variable indicating shutdown of component c
-GRADPOS   c, t    grad_pos_var    Diff. between outflow of two timesteps
-GRADNEG   c, t    grad_neg_var    Diff. between outflow of two timesteps
-========= ======= =============== ============================================
+.. math::
+   :nowrap:
 
-Optimization parameters
--------------------------------------------
+	\begin{tabular}{p{2cm}p{5cm}p{4cm}p{1.5cm}}\hline
+	\textbf{Symbol}            & \textbf{Description}                            & \textbf{Python variable} & \textbf{Python type} \\\hline
 
-========= ======= =============== ============================================
-Name      Index   Attribute       Description
-========= ======= =============== ============================================
-out_max   c       out_max         Maximal outflow of component c
-in_max    c       in_max          Maximal inflow of component c
-in_min    c       in_min          Minimum inflow of component c
-out_min   c       out_min         Minimum outflow of component c
-========= ======= =============== ============================================
+	$V_e$                      & Value of Component 
+		                     $e \in \{\mathcal{E}_o, \mathcal{E}_I\}$        & \verb+val+  & \\
+	$V^{norm}_e$                      & Normend value of component 
+		                     $e \in \{\mathcal{E}_o, \mathcal{E}_I\}$        & \verb+val+  & \\                             
+	$\eta_{i_e,o_{e,n}}$       & Efficiency at conversion of input $i_e$ to 
+		                     $n-$th output $o_{e,n}$ of component $e$        & \verb+eta+ & list\\
+	$\overline{W}_{e_1, e_2}$  & Upper bound of variable $w_{e_1, e_2}$          & \verb+out_max+ / \verb+in_max+ & list\\
+	$\underline{W}_{e_1, e_2}$ & Lower bound of variable  $w_{e_1, e_2}$         & \verb+out_min+ / \verb+in_min+ & list\\
+	$\overline{L}_e$           & Upper bound of variable $l_e$                   & \verb+cap_max+       & float\\
+	$\underline{L}_e$          & Lower bound of variable $l_e$                   & \verb+cap_min+       & float\\
+	$C^{rate}_{e_i}$           & C-rate input of component $e$                   & \verb+c_rate_in+     & float\\
+	$C^{rate}_{e_o}$	   & C-rate output of component $e$		     & \verb+c_rate_out+    & float\\
+	$\overline{O}^{global}_e$  & Global limit for all outputs of entity $e$      & \verb+sum_out_limit+ & float\\
+	$\overline{G}^{pos}_{e_{o,1}}$ & Upper bound for positive gradient of 1st output     & \verb+grad_pos+ & float\\
+	$\overline{G}^{neg}_{e_{o,1}}$ & Upper bound for negative gradient of 1st output     & \verb+grad_neg+ & float\\
+	$C^{loss}_e$                 & Loss of energy per timestep                     & \verb+cap_loss+       & float \\
+	$C_{e,i}$                    & Costs for one unit inflow of Component $e$      & \verb+input_costs+   & list\\
+	$C_{e,o}$                   & Costs for one unit outflow of Component $e$     & \verb+output_costs+ \verb+opex_var+ & list\\
+	$R_{e,i}$                  & Revenues for one unit inflow of Component $e$   & \verb+input_revenues+ & list \\ 
+	$R_{e,o_n}$                & Revenues for one unit outflow of the 
+		                     $n$-th output of Component $e$                  & \verb+output_revenues+ & list\\
+	\end{tabular}
+
 
