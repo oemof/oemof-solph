@@ -242,8 +242,8 @@ class OptimizationModel(po.ConcreteModel):
             if ( isinstance(entity, cp.Transformer) or
                  isinstance(entity, cp.Transport)   or
                  isinstance(entity, cp.Source)):
-                if entity.outputs: result[entity] =
-                    result.get(entity, UD())
+                if entity.outputs:
+                    result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
                     result[entity][o] = [self.w[entity.uid, o.uid, t].value
                                          for t in self.timesteps]
