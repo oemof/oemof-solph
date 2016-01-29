@@ -94,17 +94,11 @@ class OptimizationModel(po.ConcreteModel):
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in self.components
                   if not isinstance(c, cp.Sink)}
 
-        # set attributes lists per class with objects and uids for opt model
+        # Add constraints for all components to the model
         self.build_component_constraints(cbt)
 
-        # add bus block
-        block = po.Block()
-        # get all bus objects
-        block.objs = [e for e in self.entities if isinstance(e, Bus)]
-        block.uids = [e.uid for e in block.objs]
-        logging.info("Building bus constraints")
-        assembler.registry[Bus](e=None, om=self, block=block)
-        self.add_component(str(Bus), block)
+        # Add constraints for all buses to the model
+        self.build_bus_constraints()
 
         # create objective function
         if not self.objective_options:
@@ -130,6 +124,16 @@ class OptimizationModel(po.ConcreteModel):
                 logging.debug("Creating optimization block for omeof " +
                               "classes: " + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
+
+    def build_bus_constraints(self):
+        # add bus block
+        block = po.Block()
+        # get all bus objects
+        block.objs = [e for e in self.entities if isinstance(e, Bus)]
+        block.uids = [e.uid for e in block.objs]
+        logging.info("Building bus constraints")
+        assembler.registry[Bus](e=None, om=self, block=block)
+        self.add_component(str(Bus), block)
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
