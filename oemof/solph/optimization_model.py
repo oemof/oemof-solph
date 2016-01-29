@@ -95,22 +95,7 @@ class OptimizationModel(po.ConcreteModel):
                   if not isinstance(c, cp.Sink)}
 
         # set attributes lists per class with objects and uids for opt model
-        logging.info("Building component constraints.")
-        for cls in cbt:
-            objs = cbt[cls]
-            # "call" methods to add the constraints opt. problem
-            if objs:  # Should always be nonempty but who knows...
-                uids = [e.uid for e in objs]
-                # add pyomo block per cls to OptimizationModel instance
-                block = po.Block()
-                block.uids = po.Set(initialize=uids)
-                block.indexset = po.Set(initialize=block.uids*self.T)
-                block.objs = objs
-                block.optimization_options = cls.optimization_options
-                self.add_component(str(cls), block)
-                logging.debug("Creating optimization block for omeof " +
-                              "classes: " + block.name)
-                assembler.registry[cls](e=None, om=self, block=block)
+        self.build_component_constraints(cbt)
 
         # add bus block
         block = po.Block()
@@ -127,6 +112,24 @@ class OptimizationModel(po.ConcreteModel):
 
         logging.info("Building objective function.")
         self.objective_assembler(objective_options=self.objective_options)
+
+    def build_component_constraints(self, cbt):
+        logging.info("Building component constraints.")
+        for cls in cbt:
+            objs = cbt[cls]
+            # "call" methods to add the constraints opt. problem
+            if objs:  # Should always be nonempty but who knows...
+                uids = [e.uid for e in objs]
+                # add pyomo block per cls to OptimizationModel instance
+                block = po.Block()
+                block.uids = po.Set(initialize=uids)
+                block.indexset = po.Set(initialize=block.uids*self.T)
+                block.objs = objs
+                block.optimization_options = cls.optimization_options
+                self.add_component(str(cls), block)
+                logging.debug("Creating optimization block for omeof " +
+                              "classes: " + block.name)
+                assembler.registry[cls](e=None, om=self, block=block)
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
@@ -270,6 +273,14 @@ class OptimizationModel(po.ConcreteModel):
 
         return result
 
+    def write_lp_file(self, path=None, filename="problem.lp"):
+        if path is None:
+            path = helpers.extend_basic_path("lp_files")
+        self.write(helpers.get_fullpath(path, filename),
+                   io_options={"symbolic_solver_labels": True})
+        logging.info("LP-file saved to {0}".format(
+            helpers.get_fullpath(path, filename)))
+
     def solve(self, **kwargs):
         """ Method that takes care of the communication with the solver
         to solve the optimization model.
@@ -331,11 +342,7 @@ class OptimizationModel(po.ConcreteModel):
             self.rc = po.Suffix(direction=po.Suffix.IMPORT)
         # write lp-file
         if debug is True:
-            path = helpers.extend_basic_path("lp_files")
-            self.write(helpers.get_fullpath(path, "problem.lp"),
-                       io_options={"symbolic_solver_labels": True})
-            logging.info("LP-file saved to {0}".format(
-                helpers.get_fullpath(path, "problem.lp")))
+            self.write_lp_file()
 
         # solve instance
         opt = SolverFactory(solver, solver_io=solver_io)
