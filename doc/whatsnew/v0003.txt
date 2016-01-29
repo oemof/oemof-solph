@@ -6,8 +6,10 @@ New features
 
  * Added a class to convert the results dictionary to a multiindex DataFrame (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
  * Added a basic plot library (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
-
-
+ * Add logging functionalities (`issue #28 <https://github.com/oemof/oemof_base/issues/28>`_)
+ * Add `entities_from_csv` functionality for creating of entities from csv-files 
+ * Add fast_build functionlity for pyomo models in solph module (`issue #68 <https://github.com/oemof/oemof_base/issues/68>`_)
+ 
 Documentation
 #############
 
@@ -21,7 +23,8 @@ Testing
 
 Bug fixes
 #########
-
+ * Fix contraints in solph
+ * Fix pep8
 
 Other changes
 #############
@@ -33,3 +36,4 @@ Contributors
  * Cord Kaldemeyer
  * Uwe Krien
  * Clemens Wingenbach
+ * Simon Hilpert
