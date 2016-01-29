@@ -6,7 +6,7 @@ New features
 
  * Added a class to convert the results dictionary to a multiindex DataFrame (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
  * Added a basic plot library (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
-
+ * The package is no longer named `oemof_base` but is now just called `oemof`.
 
 Documentation
 #############
