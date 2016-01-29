@@ -80,11 +80,16 @@ Parameters will be notate with uppercase.
 	$\overline{G}^{pos}_{e_{o,1}}$ & Upper bound for positive gradient of 1st output     & \verb+grad_pos+ & float\\
 	$\overline{G}^{neg}_{e_{o,1}}$ & Upper bound for negative gradient of 1st output     & \verb+grad_neg+ & float\\
 	$C^{loss}_e$                 & Loss of energy per timestep                     & \verb+cap_loss+       & float \\
-	$C_{e,i}$                    & Costs for one unit inflow of Component $e$      & \verb+input_costs+   & list\\
+        $T^{min,off}_e$              & Minimum down-time of component $e$               & \verb+t_min_off+      & float \\    
+        $T^{min,on}_e$               & Minimum up-time of component $e$               & \verb+t_min_on+      & float \\          
+	\\
+	\multicolumn{4}{l}{\textbf{Cost/Revenue parameters}}\\
+        $C_{e,i}$                    & Costs for one unit inflow of Component $e$      & \verb+input_costs+   & list\\
 	$C_{e,o}$                   & Costs for one unit outflow of Component $e$     & \verb+output_costs+ \verb+opex_var+ & list\\
 	$R_{e,i}$                  & Revenues for one unit inflow of Component $e$   & \verb+input_revenues+ & list \\ 
 	$R_{e,o_n}$                & Revenues for one unit outflow of the 
 		                     $n$-th output of Component $e$                  & \verb+output_revenues+ & list\\
+        $C^{cut}_e$    & Costs for curtailment of variable  & \verb+curtailment_costs+ & float \\
 	\end{tabular}
 
 
