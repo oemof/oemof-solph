@@ -24,7 +24,10 @@ Documentation
  * Improved the developer notes.
 
 Testing
-####### 
+#######
+
+ * With this release we start implementing nosetests (`issue #47 <https://github.com/oemof/oemof_base/issues/47>`_
+ * Tests added to test constraints and the registration process (`issue #73 <https://github.com/oemof/oemof_base/issues/73>`_).
 
 
 Bug fixes
