@@ -10,7 +10,8 @@ New features
  * Add `entities_from_csv` functionality for creating of entities from csv-files 
  * Add a time-depended upper bound for the output of a component (`issue #65 <https://github.com/oemof/oemof_base/issues/65>`_)
  * Add fast_build functionlity for pyomo models in solph module (`issue #68 <https://github.com/oemof/oemof_base/issues/68>`_)
- 
+ * The package is no longer named `oemof_base` but is now just called `oemof`.
+
 Documentation
 #############
 
@@ -38,3 +39,5 @@ Contributors
  * Uwe Krien
  * Clemens Wingenbach
  * Simon Hilpert
+ * Stephan Günther
+

@@ -12,11 +12,12 @@ from setuptools import find_packages, setup
 
 import oemof
 
-setup(name='oemof_base',
+setup(name='oemof',
       version=oemof.__version__,
       author='oemof developing group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
+      namespace_package = ['oemof'],
       packages=find_packages(),
       package_dir={'oemof': 'oemof'},
       install_requires=['numpy >= 1.7.0',
