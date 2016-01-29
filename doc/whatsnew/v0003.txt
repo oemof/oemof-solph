@@ -6,7 +6,10 @@ New features
 
  * Added a class to convert the results dictionary to a multiindex DataFrame (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
  * Added a basic plot library (`issue #36 <https://github.com/oemof/oemof_base/issues/36>`_)
-
+ * The `results` dictionary stored in the energy system now contains an
+   attribute for the objective function and for objects which have special
+   result attributes, those are now accessible under the object keys, too.
+   (`issue #58 <https://github.com/oemof/oemof_base/issues/58>`_)
 
 Documentation
 #############
