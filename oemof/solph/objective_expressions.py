@@ -12,19 +12,11 @@ def add_opex_var(model, block, ref='output'):
 
     If reference of opex is `output`:
 
-    .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot costs_{outflow}(e)
+    .. math:: \\sum_e \\sum_t w_{e, o_{e,1}}(t) \\cdot C_{e, o_{e,1}}(t)
 
     If reference of opex is `input`:
 
-    .. math:: \\sum_e \\sum_t W(I(e),e,t) \\cdot costs_{inflow}(e)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+    .. math:: \\sum_e \\sum_t w_{i_e,e}(t) \\cdot C_{i_e, e}(t)
 
     Parameters
     ----------
@@ -60,12 +52,7 @@ def add_input_costs(model, block):
     """ Adds costs for usage of input (fuel, elec, etc. ) if not included in
     opex
 
-    .. math:: \\sum_e \\sum_t W(I(e), e, t) \\cdot costs_{inflow}(e)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+    .. math:: \\sum_e \\sum_t w_{i_e, e}(t) \\cdot C_{i_e, e}(t)
 
     Parameters
     ----------
@@ -95,24 +82,6 @@ def add_input_costs(model, block):
 
 def add_opex_fix(model, block, ref=None):
     """ Fixed operation expenditure term for linear objective function.
-
-    If reference is `output` (e.g. powerplants):
-
-    .. math:: \\sum_e out_{max}(e) \\cdot costs_{fix}(e)
-
-    If reference is `capacity` (e.g. storages):
-
-    .. math:: \\sum_e cap_{max}(e) \\cdot costs_{fix}(e)
-
-    If investment:
-
-    .. math:: \\sum_e (out_{max}(e) + ADDOUT(e)) \\cdot costs_{fix}(e)
-
-    .. math:: \\sum_e (out_{max}(e) + ADDCAP(e)) \\cdot costs_{fix}(e)
-
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
@@ -162,13 +131,8 @@ def add_opex_fix(model, block, ref=None):
 def add_revenues(model, block, ref='output', idx=0):
     """ Revenue term for linear objective function.
 
-    .. math:: \\sum_e \\sum_t W(e,O_1(e),t) \\cdot revenue_{outflow}(e,t)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
+    .. math:: \\sum_e \\sum_t w_{e, o_{e,1}}(t) \\cdot R_{e, o_{e,1}}(t)
+.
 
     Parameters
     ----------
@@ -219,10 +183,7 @@ def add_revenues(model, block, ref='output', idx=0):
 def add_curtailment_costs(model, block=None):
     """ Cost term for dispatchable sources in linear objective.
 
-    .. math:: \\sum_e \\sum_ t CURTAIL(e,t) \\cdot costs_{curtailment}(e)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    .. math:: \\sum_e \\sum_ t w^{cut}_e(t) \\cdot C^{cut}_e
 
 
     Parameters
@@ -256,14 +217,9 @@ def add_capex(model, block, ref='output'):
 
     If reference is `output` (e.g. powerplants):
 
-    .. math:: \\sum_e ADDOUT(e) \\cdot crf(e) \\cdot costs_{inv}(e)
 
     If reference is `capacity` (e.g. storages):
 
-    .. math:: \\sum_e ADDCAP(e) \\cdot crf(e) \\cdot costs_{inv}(e)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
@@ -304,10 +260,7 @@ def add_capex(model, block, ref='output'):
 def add_startup_costs(model, block):
     """ Adds startup costs for components to objective expression
 
-    .. math:: \\sum_{e} \\sum_{t} Z_{start}(e,t) \\cdot costs_{start}(e)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    .. math:: \\sum_{e} \\sum_{t} z^{start}_e(t) \\cdot C^{start}_e
 
     Parameters
     ----------
@@ -333,7 +286,7 @@ def add_startup_costs(model, block):
 def add_shutdown_costs(model, block):
     """ Adds shutdown costs for components to objective expression
 
-    .. math:: \\sum_{e} \\sum_t Z_{stop}(e,t) \\cdot costs_{stop}(e)
+    .. math:: \\sum_{e} \\sum_t z^{stop}_e(t) \\cdot C^{stop}_e
 
     Parameters
     ----------
@@ -357,12 +310,9 @@ def add_shutdown_costs(model, block):
 def add_ramping_costs(model, block, grad_direc='positive'):
     """ Add gradient costs for components to linear objective expression.
 
-    .. math::  \\sum_e \\sum_t GRADPOS(e,t) \\cdot costs_{ramp,neg}(e)
+    .. math::  \\sum_e \\sum_t g^{pos}_e(t) \\cdot C^{g,neg}_e
 
-    .. math:: \\sum_e \\sum_t GRADNEG(e,t) \\cdot costs_{ramp,pos}(e)
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    .. math:: \\sum_e \\sum_t g^{neg}_e(t) \\cdot C^{g,pos}_e
 
     Parameters
     ----------
@@ -395,10 +345,8 @@ def add_ramping_costs(model, block, grad_direc='positive'):
 def add_excess_slack_costs(model, block=None):
     """ Artificial cost term for excess slack variables.
 
-    .. math:: \\sum_e \\sum_t EXCESS(e,t) \\cdot costs_{excess}(e)
+    .. math:: \\sum_e \\sum_t EXCESS_e(t) \\cdot C^{excess}_e
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
@@ -421,7 +369,7 @@ def add_excess_slack_costs(model, block=None):
 def add_shortage_slack_costs(model, block=None):
     """ Artificial cost term for shortage slack variables.
 
-    .. math:: \\sum_e \\sum_t SHORTAGE(e,t) \\cdot costs_{shortage}(e)
+    .. math:: \\sum_e \\sum_t SHORTAGE_e(t) \\cdot C^{shortage}_e
 
     With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
     all entities grouped inside the attribute `block.objs`.

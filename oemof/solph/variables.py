@@ -75,26 +75,23 @@ def set_bounds(model, block, side='output'):
 
     If side is `output`
 
-    .. math:: W(e, O_1(e)), t) \\leq out_{max}(e, t), \\qquad \
+    .. math:: w_{e, o_{e,1}}(t) \\leq \\overline{W}_{e, o_{e,1}} \\qquad \
     \\forall e, \\forall t
 
     With investment:
 
-    .. math::  W(e, O_1(e), t) \\leq out_{max}(e, t) + \
-    ADDCAP(e,O_1[e]), \\qquad \\forall e, \\forall t
+    .. math::  w_{e, o_{e,1}}(t) \\leq \\overline{W}_{e, o_{e,1}} + \
+    \\overline{w}^{add}_{o_e}, \\qquad \\forall e, \\forall t
 
     If side is `input`:
 
-    .. math:: W(I(e), e, t) \\leq in_{max}(e, t), \\qquad \
+    .. math:: w_{i_{e}, e}(t) \\leq \\overline{W}_{i_{e}, e} \\qquad \
     \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing
+    the set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -205,17 +202,19 @@ def set_storage_cap_bounds(model, block):
     additional constraints. The mathematical description for the
     constraint is as follows:
 
-     .. math:: cap_{min}(e) \\leq CAP(e, t) \\leq cap_{max}(e), \
+     .. math:: \\underline{L}_e \\leq l_e(t) \\leq \\overline{L}_e, \
     \\qquad \\forall e, \\forall t
 
     If investment:
 
-    .. math:: CAP(e, t) \\leq cap_{max}(e) + ADDCAP(e), \
+    .. math:: l_e(t)  \\leq \\overline{L}_e + \\overline{l}^{add}_e, \
     \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing
+    the set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
+    Additionally :math:`\mathcal{E} \subset \mathcal{E}_{S}`.
 
     Parameters
     ----------
@@ -313,12 +312,13 @@ def set_fixed_sink_value(model, block):
 
     The mathematical formulation is as follows:
 
-    .. math:: W(I(e), e,t) = val(e,t), \\qquad \\forall e, \\forall t
+    .. math:: w_{i_e, e}(t) = V_e(t), \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing
+    the set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+    Additionally :math:`\mathcal{E} \subset \mathcal{E}_{I}`.
 
     Parameters
     ----------
