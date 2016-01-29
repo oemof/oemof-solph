@@ -11,6 +11,10 @@ New features
  * Add a time-depended upper bound for the output of a component (`issue #65 <https://github.com/oemof/oemof_base/issues/65>`_)
  * Add fast_build functionlity for pyomo models in solph module (`issue #68 <https://github.com/oemof/oemof_base/issues/68>`_)
  * The package is no longer named `oemof_base` but is now just called `oemof`.
+ * The `results` dictionary stored in the energy system now contains an
+   attribute for the objective function and for objects which have special
+   result attributes, those are now accessible under the object keys, too.
+   (`issue #58 <https://github.com/oemof/oemof_base/issues/58>`_)
 
 Documentation
 #############

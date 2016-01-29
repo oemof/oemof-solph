@@ -3,6 +3,7 @@
 @contact Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
+from collections import UserDict as UD
 from functools import singledispatch
 
 import pyomo.environ as po
@@ -209,16 +210,33 @@ class OptimizationModel(po.ConcreteModel):
         This means they can be accessed via
         :meth:`om.results()[object][object] <OptimizationModel.results>`.
 
+        Object attributes holding optimization results, like e.g. `add_cap` for
+        storage objects, can be accessed like this:
+
+          :meth:`om.results()[s].add_cap`
+
+        where `s` is a storage object.
+
+        The :class:`pyomo.environ.Objective` instance that represents the
+        objective function of this optimization model is stored under the
+        :attr:`objective` attribute so you an access the value of the objective
+        function in the following two equivalent ways:
+
+          * :meth:`om.results().objective()`
+          * :meth:`om.results().objective.value()`
+
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
-        result = {}
+        # TODO: Maybe make the results dictionary a proper object?
+        result = UD()
+        result.objective = self.objective
         for entity in self.entities:
-            if (isinstance(entity, cp.Transformer) or
-                    isinstance(entity, cp.Transport) or
-                    isinstance(entity, cp.Source)):
-                if entity.outputs:
-                    result[entity] = result.get(entity, {})
+            if ( isinstance(entity, cp.Transformer) or
+                 isinstance(entity, cp.Transport)   or
+                 isinstance(entity, cp.Source)):
+                if entity.outputs: result[entity] =
+                    result.get(entity, UD())
                 for o in entity.outputs:
                     result[entity][o] = [self.w[entity.uid, o.uid, t].value
                                          for t in self.timesteps]
@@ -229,7 +247,7 @@ class OptimizationModel(po.ConcreteModel):
                                          for t in self.timesteps]
 
             if isinstance(entity, cp.sources.DispatchSource):
-                result[entity] = result.get(entity, {})
+                result[entity] = result.get(entity, UD())
                 # TODO: Why does this use `entity.outputs[0]`?
                 result[entity][entity] = [self.w[entity.uid,
                                                  entity.outputs[0].uid,
@@ -243,10 +261,18 @@ class OptimizationModel(po.ConcreteModel):
                                          for t in self.timesteps]
 
             if isinstance(entity, cp.transformers.Storage):
-                result[entity] = result.get(entity, {})
+                result[entity] = result.get(entity, UD())
                 result[entity][entity] = [getattr(self, str(Storage)
                                                   ).cap[entity.uid, t].value
                                           for t in self.timesteps]
+
+            block = getattr(self, str(type(entity)))
+
+            for attribute in ["add_cap", "add_out"]:
+                values = getattr(block, attribute, None)
+                if values:
+                    result[entity] = result.get(entity, UD())
+                    setattr(result[entity], attribute, values[entity.uid]())
 
         if hasattr(self, "dual"):
             for bus in getattr(self, str(Bus)).objs:
