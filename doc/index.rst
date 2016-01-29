@@ -13,7 +13,7 @@ Contents:
    :glob:
    
    getting_started
-   meta_description
+   overview
    installation_and_setup
    developer_notes
    whats_new
