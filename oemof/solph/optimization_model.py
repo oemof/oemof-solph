@@ -271,14 +271,15 @@ class OptimizationModel(po.ConcreteModel):
         return result
 
     def solve(self, **kwargs):
-        """ Method that takes care of the communication with the solver
+        r""" Method that takes care of the communication with the solver
         to solve the optimization model.
 
         Parameters
         ----------
         self : pyomo.ConcreteModel() object
-        **kwargs : key words
-            Possible keys can be set:
+
+        **kwargs : keywords
+            Possible keys can be set see below
         solver string:
             solver to be used e.g. "glpk","gurobi","cplex"
         debug : boolean
@@ -296,13 +297,14 @@ class OptimizationModel(po.ConcreteModel):
         solver_cmdline_options : dict
             Dictionary with command line options for solver
             Examples:
-            {"mipgap":0.01"} results in "--mipgap 0.01"
-            {"interior":""} results in "--interior"
-        method
+            {"mipgap":"0.01"} results in "--mipgap 0.01"
+            {"interior":" "} results in "--interior"
+
 
         Returns
         -------
         self : solved pyomo.ConcreteModel() instance
+
         """
         solver = kwargs.get("solver",  self.energysystem.simulation.solver)
         if solver is None:
