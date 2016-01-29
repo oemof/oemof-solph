@@ -22,5 +22,5 @@ setup(name='oemof',
       package_dir={'oemof': 'oemof'},
       install_requires=['numpy >= 1.7.0',
                         'pandas >= 0.17.0',
-                        'pyomo >= 4.0.0']
+                        'pyomo >= 4.2.0']
      )
