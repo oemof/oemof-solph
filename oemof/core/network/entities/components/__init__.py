@@ -74,9 +74,9 @@ class Transformer(Component):
     in_min : list
         minimal input of transformer (e.g. min fuel consumption of powerplants)
     grad_pos : float
-        positive gradient (>=0, <=1, relative out_max)
+        positive gradient (absolut value between two sequential timesteps)
     grad_neg : float
-        negative gradient (>=0, <=1, relative out_max)
+        negative gradient (absolut value between two sequential timesteps)
     t_min_off : float
         minimal off time in timesteps (e.g. 5 hours)
     t_min_on : float
@@ -93,8 +93,13 @@ class Transformer(Component):
         cost per stop up of transformer (only milp models)
     ramp_costs : float
         costs for ramping
-    output_price : float
-        price for selling output (revenue expr. in objective)
+    output_price : list
+        price for selling to output bus. prices ordered in the order
+        of 'outputs'
+    eta_min : list
+      efficiency of transformer at minimum load for conversion of input
+      to output (order of elements corresponding to order of elements
+      out outputs,out_min etc.)
     """
     optimization_options = {}
 
@@ -112,7 +117,7 @@ class Transformer(Component):
         parameters = ['out_min', 'in_min', 'grad_pos', 'grad_neg',
                       't_min_off', 't_min_on', 'outages', 'input_costs',
                       'start_costs', 'stop_costs', 'ramp_costs',
-                      'output_price']
+                      'output_price', 'eta_min']
 
         for k in kwargs:
             if k in parameters:

@@ -15,28 +15,20 @@ def set_bounds(model, block, side="output"):
 
     If side is `output`:
 
-    .. math::  W(e, O_1(e), t) \\leq out_{max}(e) \\cdot Y(e, t), \
+    .. math::  w_{e, o_{e,1}}(t) \\leq \\overline{W}_{e, o_{e,1}} \\cdot y_e(t), \
     \\qquad \\forall e, \\forall t
 
-    .. math:: W(e, O_1(e), t) \\geq out_{min}(e) \\cdot Y(e, t), \
+    .. math::  w_{e, o_{e,1}}(t) \\geq \\underline{W}_{e, o_{e,1}} \\cdot y_e(t), \
     \\qquad \\forall e, \\forall t
 
     If side is `input`:
 
-    .. math::  W(I(e), e, t) \\leq in_{max}(e) \\cdot Y(e, t), \
+    .. math::  w_{i_e, e}(t) \\leq \\overline{W}_{i_e, e} \\cdot y_e(t), \
     \\qquad \\forall e, \\forall t
 
-    .. math:: W(I(e), e, t) \\geq in_{min}(e) \\cdot Y(e, t), \
+    .. math:: w_{i_e, e}(t) \\geq \\underline{W}_{i_e, e} \\cdot y_e(t), \
     \\qquad \\forall e, \\forall t
 
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`O_1(e)` beeing the set of all first outputs of entitiy
-    (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
@@ -44,6 +36,8 @@ def set_bounds(model, block, side="output"):
         An object to be solved containing all Variables, Constraints, Data.
         Bounds are altered at model attributes (variables) of `model`
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     side : string
        string to select on which side the bounds should be set
        (`ìnput`, `output`)
@@ -97,22 +91,17 @@ def add_variable_linear_eta_relation(model, block):
 
     The mathematical formulation for the constraint is as follows:
 
-    .. math:: W(I(e),e ,t) = Y(e,t) \\cdot c_1 + c_2 \\cdot W(e, O_1(e), t), \
+    .. math:: w_{i_e, e}(t) = y_e(t) \\cdot c_1 + c_2 \\cdot w_{e, o_{e,1}}(t), \
     \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`O_1(e)` beeing the set of all first outputs of entitiy
-    (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -134,27 +123,22 @@ def add_output_gradient_constraints(model, block, grad_direc="both"):
 
     If gradient direction is `positive`:
 
-    .. math:: W(e,O_1(e),t) - W(e,O_1(e),t-1) \\leq gradpos(e) + out_{min}(e) \
-    \\cdot (1 - Y(e,t))
+    .. math:: w_{e,o_{e,1}}(t) - w_{e,o_{e,1}}(t-1) \\leq \\overline{G}^{pos}_{e_{o,1}} + \
+    \\underline{W}_{e, o_{e,1}} \\cdot (1 - y_e(t))
 
     If gradient direction is `negative`:
 
-    .. math:: W(e,O_1(e),t-1) - W(e,O_1(e),t) \\leq gradneg(e) + out_{min}(e) \
-    \\cdot (1 - Y(e,t-1))
+    .. math:: w_{e,o_{e,1}}(t-1) - w_{e,o_{e,1}}(t) \\leq \\overline{G}^{neg}_{e_{o,1}} + \
+    \\underline{W}_{e, o_{e,1}} \\cdot (1 - y_{e}(t-1))
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     grad_direc : string
          direction of gradient ("both", "positive", "negative")
 
@@ -207,24 +191,17 @@ def add_startup_constraints(model, block):
 
     The mathematical formulation of constraint is as follows:
 
-    .. math::  Y(e,t) - Yn(e,t-1) \\leq Z_{start}(e,t), \\qquad \
+    .. math::  y_e(t) - y_e(t-1) \\leq z^{start}_e(t), \\qquad \
         \\forall e, \\forall t
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
-    References
-    ----------
-    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
-       Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
-       TU Munich, p.38
     """
 
     if block.objs is None:
@@ -254,23 +231,18 @@ def add_shutdown_constraints(model, block):
 
     The mathematical formulation for the constraint is as follows:
 
-    .. math::  Y(e,t-1) - Y(e,t) \\leq Z_{stop}(e,t), \\qquad \
+    .. math::  y_e(t-1) - y_e(t) \\leq z^{stop}_e(t), \\qquad \
     \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
-    References
-    ----------
-    .. [1] M. Steck (2012): "Entwicklung und Bewertung von Algorithmen zur
-       Einsatzplanerstelleung virtueller Kraftwerke", PhD-Thesis,
-       TU Munich, p.38
     """
 
     if block.objs is None:
@@ -296,24 +268,24 @@ def add_minimum_downtime(model, block):
 
     The mathematical formulation for constraints is as follows:
 
-     .. math::  (Y(e, t-1)-Y(e,t)) \\cdot t_{min,off} \\leq t_{min,off} - \
-     \\sum_{\\gamma=0}^{t_{min,off}-1} Y(e,t+\\gamma)  \
+     .. math::  (y_e(t-1)-y_e(t)) \\cdot T^{min,off}_e \\leq T^{min,off}_e - \
+     \\sum_{\\gamma=0}^{T^{min,off}_e-1} y_e(t+\\gamma)  \
      \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,off}]
 
     Extra constraints for last timesteps:
 
-    .. math::  (Y(e, t-1)-Y(e,t)) \\cdot t_{min,off} \\leq t_{min,off} - \
-     \\sum_{\\gamma=0}^{t_{max}-t} Y(e,t+\\gamma)  \
+    .. math::  (y_e(t-1)-y_e(t)) \\cdot T^{min,off}_e \\leq T^{min,off}_e - \
+     \\sum_{\\gamma=0}^{t_{max}-t} y_e(t+\\gamma)  \
      \\qquad \\forall e, \\forall t \\in [t_{max}-t_{min,off}, t_{max}]
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -346,24 +318,24 @@ def add_minimum_uptime(model, block):
 
     The mathematical formulation for constraints is as follows:
 
-     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,on} \\leq  \
-     \\sum_{\\gamma=0}^{t_{min,on}-1} Y(e,t+\\gamma)  \
+     .. math::  (y_e(t) - y_e(t-1)) \\cdot T^{min,on}_e \\leq  \
+     \\sum_{\\gamma=0}^{T^{min,on}_e-1} y_e(t+\\gamma)  \
      \\qquad \\forall e, \\forall t \\in [2, t_{max}-t_{min,on}]
 
      Extra constraint for the last timesteps:
 
-     .. math::  (Y(e,t) - Y(e, t-1)) \\cdot t_{min,on} \\leq  \
-      \\sum_{\\gamma=0}^{t_{max}-t} Y(e,t+\\gamma)  \
+     .. math::  (y_e(t) - y_e(t-1)) \\cdot T^{min,on}_e \\leq  \
+      \\sum_{\\gamma=0}^{t_{max}-t} y_e(t+\\gamma)  \
       \\qquad \\forall e, \\forall t \\in [t_{max}-t_{min,on}, t_{max}]
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:

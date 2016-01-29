@@ -35,8 +35,10 @@ class EnergySystem:
     regions : list of core.energy_system.Region objects
         List of regions defined in the :py:class:`Region
         <oemof.core.energy_system.Simulation>` class.
-    year : integer
-        Define the time for the energy system.
+    time_idx : pandas.index, optional
+        Define the time range and increment for the energy system. This is an
+        optional parameter but might be import for other functions/methods that
+        use the EnergySystem class as an input parameter.
 
     Attributes
     ----------
@@ -61,14 +63,20 @@ class EnergySystem:
         Currently only set after a call to :meth:`optimize` after which it
         holds the return value of :meth:`om.results()
         <oemof.solph.optimization_model.OptimizationModel.results>`.
+        See the documentation of that method for a detailed description of the
+        structure of the results dictionary.
+    time_idx : pandas.index, optional
+        Define the time range and increment for the energy system. This is an
+        optional atribute but might be import for other functions/methods that
+        use the EnergySystem class as an input parameter.
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
-        self.results = None
-        self.year = kwargs.get('year')
+        self.results = kwargs.get('results')
+        self.time_idx = kwargs.get('time_idx')
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
@@ -122,8 +130,9 @@ class EnergySystem:
             om = OM(energysystem=self)
 
         om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
-                 tee=self.simulation.stream_solver_output,
-                 duals=self.simulation.duals)
+                 verbose=self.simulation.verbose,
+                 duals=self.simulation.duals,
+                 solve_kwargs=self.simulation.solve_kwargs)
 
         self.results = om.results()
         return self
@@ -250,8 +259,8 @@ class Simulation:
         (e.g. 'glpk', 'gurobi')
     debug : boolean
         Set the chosen solver to debug (verbose) mode to get more information.
-    stream_solver_output : boolean
-        If True, solver output is streamed in python console
+    verbose : boolean
+        If True, solver output etc. is streamed in python console
     duals : boolean
         If True, results of dual variables and reduced costs will be saved
     objective_options : dictionary
@@ -267,16 +276,23 @@ class Simulation:
     relaxed : boolean
         If True, integer variables will be relaxed
         (only relevant for milp-problems)
+    fast_build : boolean
+        If True, the standard way of pyomo constraint building is skipped and
+        a different function is used.
+        (Warning: No guarantee that all expected 'standard' pyomo model
+        functionalities work for the constructed model!)
     """
     def __init__(self, **kwargs):
         ''
         self.solver = kwargs.get('solver', 'glpk')
         self.debug = kwargs.get('debug', False)
-        self.stream_solver_output = kwargs.get('stream_solver_output', False)
+        self.verbose = kwargs.get('verbose', False)
         self.objective_options = kwargs.get('objective_options', {})
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
         self.relaxed = kwargs.get('relaxed', False)
+        self.fast_build = kwargs.get('fast_build', False),
+        self.solve_kwargs = kwargs.get('solve_kwargs', {})
 
         if self.timesteps is None:
             raise ValueError('No timesteps defined!')

@@ -12,9 +12,11 @@ Contents:
    :maxdepth: 2
    :glob:
    
-   meta_description
+   getting_started
+   overview
    installation_and_setup
    developer_notes
+   mathematical_notation
    whats_new
    api/*
 

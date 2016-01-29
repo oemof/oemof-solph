@@ -12,9 +12,12 @@ All special import should be in try/except loops to avoid import errors.
 import logging
 from datetime import date, timedelta
 import os
+import pandas as pd
 import pickle
 import time
+import calendar
 import pprint as pp
+from oemof.demandlib import demand as dm
 
 
 # get_polygon_from_shp_file
@@ -143,9 +146,9 @@ def get_polygon_from_shp_file(file):
     use the function.
 
     >>> a=[1,2,3]
-    >>> print [x + 3 for x in a]
+    >>> print([x + 3 for x in a])
     [4, 5, 6]
-    >>> print "a\n\nb"
+    >>> print("a\nb")
     a
     b
 
@@ -458,6 +461,40 @@ def pickle2dict(filename=None, path=None):
     return dic
 
 
+def call_demandlib(demand, method, year, **kwargs):
+    '''
+    Calls the demandlib and creates an object which includes the demand
+    timeseries.
+
+    Required Parameters
+    -------------------
+    demand :
+    method : Method which is to be applied for the demand calculation
+    '''
+
+    df = create_basic_dataframe(year, **kwargs)
+    demand.val = dm.electrical_demand(method,
+                         dataframe=df,
+                         ann_el_demand_per_sector=kwargs.get(
+                         'ann_el_demand_per_sector'),
+                         ann_el_demand_per_person=kwargs.get(
+                         'ann_el_demand_per_person'),
+                         household_structure=kwargs.get(
+                         'household_structure'),
+                         household_members_all=kwargs.get(
+                         'household_members_all'),
+                         population=kwargs.get(
+                         'population'),
+                         comm_ann_el_demand_state=kwargs.get(
+                         'comm_ann_el_demand_state'),
+                         comm_number_of_employees_state=kwargs.get(
+                         'comm_number_of_employees_state'),
+                         comm_number_of_employees_region=kwargs.get(
+                         'comm_number_of_employees_region')).elec_demand
+
+    return demand
+
+
 def dict2textfile(dic, filename=None, path=None):
     'Writing a dictionary to textfile in a readable and clearly formatted way.'
     if filename is None:
@@ -478,3 +515,69 @@ def download_file(filename, url):
         logging.info('Copying file from {0} to {1}'.format(
             url, filename))
         urlretrieve(url, filename)
+
+
+def get_basic_path():
+    basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    if not os.path.isdir(basicpath):
+        os.mkdir(basicpath)
+    return basicpath
+
+
+def extend_basic_path(subfolder):
+    extended_path = os.path.join(get_basic_path(), subfolder)
+    if not os.path.isdir(subfolder):
+        os.mkdir(subfolder)
+    return extended_path
+
+
+def get_fullpath(path, filename):
+    return os.path.join(path, filename)
+
+def create_basic_dataframe(year, **kwargs):
+    r"""Giving back a DataFrame containing weekdays and optionally holidays for the
+    given year.
+
+    Parameters
+    ----------
+    year: the year for which dataframe should be created
+
+    Optional Parameters
+    -------------------
+    holidays: array with information for every hour of the year, if holiday or not
+        (0: holiday, 1: no holiday)
+
+    Returns
+    -------
+    pandas.DataFrame : DataFrame with a time index
+
+    Notes
+    -----
+    Using Pandas > 0.16
+
+    """
+    if calendar.isleap(year):
+        hoy = 8784
+    else:
+        hoy = 8760
+
+    time_df = pd.DataFrame(
+        index=pd.date_range(pd.datetime(year, 1, 1, 0), periods=hoy,
+                            freq='H'),
+        columns=['weekday', 'hour', 'date'])
+
+    # Add a column 'hour of the day to the DataFrame
+    time_df['hour'] = time_df.index.hour + 1
+    time_df['weekday'] = time_df.index.weekday + 1
+    time_df['date'] = time_df.index.date
+
+    # Set weekday to Holiday (0) for all holidays
+    if kwargs.get('holidays'):
+        time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
+            pd.to_datetime(list(holidays.keys()))), 0, True)
+
+#    holidays = helpers.get_german_holidays(year, place)
+
+    df = time_df
+
+    return df

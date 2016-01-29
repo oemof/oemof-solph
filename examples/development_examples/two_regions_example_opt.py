@@ -182,12 +182,18 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
 
 logger.define_logging()
 year = 2010
+time_index = pd.date_range('1/1/{0}'.format(year), periods=8760, freq='H')
 overwrite = False
 overwrite = True
 conn = db.connection()
 
+# Create a simulation object
+simulation = es.Simulation(
+    timesteps=range(len(time_index)), verbose=True, solver='glpk',
+    objective_options={'function': predefined_objectives.minimize_cost})
+
 # Create an energy system
-TwoRegExample = es.EnergySystem(year=2010)
+TwoRegExample = es.EnergySystem(time_idx=time_index, simulation=simulation)
 
 # Add regions to the energy system
 TwoRegExample.regions.append(es.Region(
@@ -219,9 +225,11 @@ for region in TwoRegExample.regions:
                     if obj.uid == ('bus', region.name, demandtype)],
             val=demand[demandtype],
             region=[region])
+
     # Create source object
     feedin_pg.Feedin().create_fixed_source(
-        conn, region=region, year=TwoRegExample.year, bustype='elec', **site)
+        conn, region=region, year=TwoRegExample.time_idx.year[0],
+        bustype='elec', **site)
 
     # Get power plants from database and write them into a DataFrame
     pps_df = db_pps.get_bnetza_pps(conn, region.geom)
@@ -230,7 +238,6 @@ for region in TwoRegExample.regions:
     pps_df.loc[len(pps_df)] = 'natural_gas', np.nan, 10 ** 12
 
     # TODO: Summerize power plants of the same type
-
     for pwrp in pps_df.iterrows():
         create_entity_objects(TwoRegExample, region, pwrp,
                               tclass=transformer.Simple, bclass=Bus)

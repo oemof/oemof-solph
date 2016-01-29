@@ -58,13 +58,21 @@ class Component(Entity):
     Parameters
     ----------
     in_max : list
-        maximum input of component (e.g. in MW)
+        maximum input of component (power)
     out_max : list
-        maximum output of component (e.g. in MW)
+        maximum output of component (power)
+    ub_out : list of pandas.series (or array-like)
+        The time-depended maximum output of a component. If ub_out is not set
+        out_max is used. Contrary to out_max ub_out has to be array-like. If
+        ub_out is set out_max is used as the installed capacity and ub_out as
+        the time-depended maximum output. It is in charge of the user that
+        these values are not inconsistent. You may use max(ub_out) for out_max.
+        (power)
     add_out_limit : float
-        limit on additional output "capacity" (e.g. in MW)
+        limit on additional output "capacity" (power)
     capex : float
-        capital expenditure (e.g. in Euro / MW )
+        Capital expenditure. To get the capital cost it is multiplied with
+        out_max (monetory value per power).
     lifetime : float
         lifetime of component (e.g. years)
     wacc : float
@@ -72,9 +80,12 @@ class Component(Entity):
     crf : float
         capital recovery factor: (p*(1+p)^n)/(((1+p)^n)-1)
     opex_fix : float
-        fixed operational expenditure (e.g. expenses for staff)
+        fixed operational expenditure (e.g. expenses for staff) (monetory
+        value over the full time period).
     opex_var : float
-        variable operational expenditure (e.g. spare parts + fuelcosts)
+        Variable operational expenditure (e.g. spare parts). You can use it to
+        define the fuel costs. Fuel cost can be defined in different ways, so
+        be aware not to definge them twice.
     co2_var : float
         variable co2 emissions (e.g. t / MWh)
     co2_cap : float
@@ -88,7 +99,8 @@ class Component(Entity):
 
         self.in_max = kwargs.get('in_max')
         self.out_max = kwargs.get('out_max')
-        self.add_out_limit = kwargs.get('add_out_limit', 0)
+        self.ub_out = kwargs.get('ub_out')
+        self.add_out_limit = kwargs.get('add_out_limit')
         self.capex = kwargs.get('capex', 0)
         self.lifetime = kwargs.get('lifetime', 20)
         self.wacc = kwargs.get('wacc', 0.05)

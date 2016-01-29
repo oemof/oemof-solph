@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The linear_contraints module contains the pyomo constraints wrapped in
 functions. These functions are used by the '_assembler- methods
@@ -18,7 +17,7 @@ relevant input input/output uids as dictionary items.
     >>> I = {'pp_coal': 'bus_coal'}
     >>> O = {'pp_coal': ['bus_el', 'bus_th']}
     >>> print(I['pp_coal'])
-    'bus_el'
+    bus_coal
 
 
 In mathematical notation I, O can be seen as indexed index sets The
@@ -29,51 +28,34 @@ containing the uids of objects for which the constraints are build.
 For all mathematical constraints the following definitions hold:
 
     Inputs:
-    :math:`I(e) = \\text{Input-uids of entity } e \\in E`
+    :math:`\mathcal{I}_e = \\text{Input-uids of entity } e \\in \mathcal{E}`
 
     Outputs:
-    :math:`O(e) = \\text{All output-uids of entity } e \\in E`
-
-    As components may have multiple outputs they are grouped in subsets. The
-    order is given by the order of outputs inside the attribute `outputs`
-    of the entitiy.
-
-    :math:`O_1(e) = \\text{First output-uids of entity } e \\in E`
-
-    :math:`O_2(e) = \\text{Second output-uids of entity } e \\in E`
-
-
-    Entities:
-    :math:`E = \\{uids\\},`
-
-    Timesteps:
-    :math:`t \\in T = \\{timesteps\\}`
+    :math:`\mathcal{O}_e = \\text{All output-uids of entity } e \\in \mathcal{E}`
 
 
 Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
 import pyomo.environ as po
+from . import pyomo_fastbuild as pofast
 
 def add_bus_balance(model, block=None):
     """ Adds constraint for the input-ouput balance of bus objects.
 
     The mathematical formulation for the balance is as follows:
 
-    .. math:: \\sum_{i \\in I(e)} W(i, e, t) = \\sum_{o \\in O(e)} \
-    W(e, o, t), \\qquad \\forall e, \\forall t
+    .. math:: \\sum_{i \\in \mathcal{I}_e} w_{i, e}(t) = \\sum_{o \\in O_e} \
+    w_{e, o}(t), \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    :math:`O(e)` beeing the set of all outputs of entitiy (bus) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (bus) :math:`e`.
+    With :math:`e  \\in \mathcal{E}_B, t \in \mathcal{T}`
 
     Parameters
     ----------
     model : OptimizationModel() instance
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -88,17 +70,40 @@ def add_bus_balance(model, block=None):
             I[b.uid] = [i.uid for i in b.inputs]
             O[b.uid] = [o.uid for o in b.outputs]
 
-    # component inputs/outputs are negative/positive in the bus balance
-    def bus_balance_rule(block, e, t):
-        lhs = 0
-        lhs += sum(model.w[i, e, t] for i in I[e])
-        rhs = sum(model.w[e, o, t] for o in O[e])
-        if e in block.excess_uids:
-            rhs += block.excess_slack[e, t]
-        if e in block.shortage_uids:
-            lhs += block.shortage_slack[e, t]
-        return(lhs == rhs)
-    block.balance = po.Constraint(uids, model.timesteps, rule=bus_balance_rule)
+    block.balanced_uids = po.Set(initialize=uids)
+    block.balanced_uids.construct()
+
+    block.balanced_indexset = po.Set(initialize=block.balanced_uids*model.T)
+    block.balanced_indexset.construct()
+
+    if not model.energysystem.simulation.fast_build:
+        # component inputs/outputs are negative/positive in the bus balance
+        def bus_balance_rule(block, e, t):
+            lhs = 0
+            lhs = sum(model.w[i, e, t] for i in I[e])
+            rhs = sum(model.w[e, o, t] for o in O[e])
+            if e in block.excess_uids:
+                rhs += model.excess_slack[e, t]
+            if e in block.shortage_uids:
+                lhs += model.shortage_slack[e, t]
+            return(lhs == rhs)
+        block.balance = po.Constraint(block.balanced_indexset,
+                                      rule=bus_balance_rule)
+
+    if model.energysystem.simulation.fast_build:
+        balance_dict = {}
+        for t in model.timesteps:
+            for e in uids:
+                tuples = [(1, model.w[i, e, t]) for i in I[e]] + \
+                         [(-1, model.w[e, o, t]) for o in O[e]]
+                if e in block.excess_uids:
+                    tuples.append((-1, model.excess_slack[e, t]))
+                if e in block.shortage_uids:
+                    tuples.append((1, model.shortage_slack[e, t]))
+
+                balance_dict[e, t] = [tuples, "==", 0.]
+        pofast.l_constraint(block, 'balance', balance_dict,
+                            block.balanced_indexset)
 
 
 
@@ -109,22 +114,25 @@ def add_simple_io_relation(model, block, idx=0):
     The mathematical formulation of the input-output relation of a simple
     transformer is as follows:
 
-    .. math:: W(I(e), e, t) \cdot \\eta(e) = W(e, O_1(e), t), \
+    .. math:: w_{i_e, e}(t) \cdot \\eta_{i,o_{e,n}} = w_{e, o_{e,n}}(t), \
     \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing
+    the set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
+    Additionally :math:`\mathcal{E} \subset \{\mathcal{E}_{IO}, \mathcal{E}_{IOO}\}`.
 
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+    :math:`n` indicates the n-th output of component :math:`e` (arg: idx)
+
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     idx : integer
       Index to choose which output to select (from list of Outputs: O[e][idx])
 
@@ -135,13 +143,24 @@ def add_simple_io_relation(model, block, idx=0):
 
     eta = {obj.uid: obj.eta for obj in block.objs}
 
+
     # constraint for simple transformers: input * efficiency = output
     def io_rule(block, e, t):
         lhs = model.w[model.I[e], e, t] * eta[e][idx] - \
             model.w[e, model.O[e][idx], t]
         return(lhs == 0)
-    block.io_relation = po.Constraint(block.indexset, rule=io_rule,
-                                      doc="INFLOW * efficiency = OUTFLOW_1")
+
+    if not model.energysystem.simulation.fast_build:
+        block.io_relation = po.Constraint(block.indexset, rule=io_rule,
+                                          doc="INFLOW * efficiency = OUTFLOW_n")
+
+    if model.energysystem.simulation.fast_build:
+        io_relation_dict = {(e, t): [[(eta[e][idx], model.w[model.I[e], e, t]),
+                                      (-1, model.w[e, model.O[e][idx], t])],
+                                     "==", 0.]
+                            for e,t in block.indexset}
+        pofast.l_constraint(block, 'io_relation', io_relation_dict,
+                            block.indexset)
 
 def add_eta_total_chp_relation(model, block):
     """ Adds constraints for input-(output1,output2) relation as
@@ -150,25 +169,22 @@ def add_eta_total_chp_relation(model, block):
     The mathematical formulation of the input-output relation of a simple
     transformer is as follows:
 
-    .. math:: W(I(e), e, t) \cdot \\eta_{total}(e) = \
-    W(e, O_1(e), t) + W(e, O_2(e), t), \\qquad \\forall e, \\forall t
+    .. math:: w_{i_e, e}(t) \cdot \\eta^{total}_e = \
+    w_{e, o_{e,1}}(t) + w_{e, o_{e,2}}(t), \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
-
-    :math:`O_2(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IOO}`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -191,26 +207,23 @@ def add_simple_chp_relation(model, block):
 
     The mathematical formulation for the constraint is as follows:
 
-    .. math:: \\frac{W(e,O_1(e),t)}{\\eta_1(e,t)} = \
-    \\frac{W(e, O_2(e), t)}{\\eta_2(e,t)}, \
+    .. math:: \\frac{w_{e, o_{e,1}}(t)}{\\eta_{e, o_{e,1}}(t)} = \
+    \\frac{w_{e, o_{e,2}}(t)}{\\eta_{e, o_{e,2}}(t)}, \
     \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of entitiy
-    (component) :math:`e`.
-
-    :math:`O_2(e)` beeing the set of all second outputs of entitiy
-    (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IOO}`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -228,8 +241,19 @@ def add_simple_chp_relation(model, block):
         lhs = model.w[e, model.O[e][0], t] / eta[e][0]
         lhs += -model.w[e, model.O[e][1], t] / eta[e][1]
         return(lhs == 0)
-    block.pth_relation = po.Constraint(block.indexset, rule=simple_chp_rule,
-                                      doc="P/eta_el - Q/eta_th = 0")
+
+    if not model.energysystem.simulation.fast_build:
+        block.pth_relation = po.Constraint(block.indexset, rule=simple_chp_rule,
+                                           doc="P/eta_el - Q/eta_th = 0")
+
+    if model.energysystem.simulation.fast_build:
+        pth_relation_dict = {(e, t): [
+                                [(1/eta[e][0], model.w[e, model.O[e][0], t]),
+                                 (-1/eta[e][1], model.w[e, model.O[e][1], t])],
+                                "==", 0.]
+                             for e,t in block.indexset}
+        pofast.l_constraint(block, 'pth_relation', pth_relation_dict,
+                            block.indexset)
 
 def add_simple_extraction_chp_relation(model, block):
     """ Adds constraints for power to heat relation and equivalent output
@@ -241,34 +265,33 @@ def add_simple_extraction_chp_relation(model, block):
 
     For Power/Heat ratio:
 
-    .. math:: W(e,O_1(e),t) = W(e, O_2(e), t) \\cdot \\sigma(e), \
+    .. math:: w_{e,o_{e,1}}(t) = w_{e, o_{e,2}}(t) \\cdot \\sigma_{e}, \
     \\qquad \\forall e, \\forall t
 
-    .. math:: \\sigma(e) = \\text{Power to heat ratio of entity } e
+    .. math:: \\sigma_{e} = \\text{Power to heat ratio of entity } e
 
     For euivalent power:
 
-    .. math:: W(I(e),e,t) = \\frac{(W(e,O_1(e),t) + \\beta(e) \\cdot \
-    W(e, O_2(e), t))}{\\eta_1(e)}
+    .. math:: w_{i_e,e}(t) = \\frac{w_{e,o_{e,1}}(t) + \\beta_e \\cdot \
+    w_{e, o_{e,2}}(t)}{\\eta_{i_e, o_{e,1}}}
 
-    .. math:: \\beta(e) = \\text{Power loss index of entity } e
+    .. math:: \\beta_e = \\text{Power loss index of entity } e
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of entitiy
-    (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IOO}`.
 
-    :math:`O_2(e)` beeing the set of all second outputs of entitiy
-    (component) :math:`e`.
 
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
            An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -306,13 +329,14 @@ def add_global_output_limit(model, block=None):
 
     The mathematical formulation is as follows:
 
-    .. math:: \sum_{t \\in T} \sum_{o \\in O(e)} W(e, o, t) \
-    \\leq sumlimit_{out}(e), \\qquad \\forall e \\in E
+    .. math:: \sum_{t \\in \mathcal{T}} \sum_{o \\in \mathcal{O}_e} w_{e, o}(t) \
+    \\leq \overline{O}^{global}_e, \\qquad \\forall e \\in E
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped in the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O(e)` beeing the set of all outputs of entitiy :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \{\mathcal{E}_{B},\mathcal{E}_{O}\}`.
 
 
     Parameters
@@ -320,6 +344,8 @@ def add_global_output_limit(model, block=None):
     model : OptimizationModel() instance
        An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -350,25 +376,30 @@ def add_fixed_source(model, block):
 
     The mathematical formulation is as follows:
 
-     .. math::  W(e,O(e),t) = val_{norm}(e,t) \\cdot out_{max}(e), \
+     .. math::  w_{e,o_e}(t) = V^{norm}_e(t) \\cdot \overline{W}_{e, o_e}, \
      \\qquad \\forall e, \\forall t
 
     For `investment` for component:
 
-    .. math::  W(e, O_1(e), t) \\leq (out_{max}(e) + ADDOUT(e) \
-    \cdot val_{norm}(e,t), \\qquad \\forall e, \\forall t
+    .. math::  w_{e, o}(t) \\leq (\overline{W}_{e, o_e} + \overline{w}^{add}_{e_o}) \
+    \cdot V^{norm}_e(t), \\qquad \\forall e, \\forall t
 
-    .. math:: ADDOUT(e)  \\leq addout_{max}(e), \\qquad \\forall e
+    .. math:: \overline{w}^{add}_{e_o}  \\leq \overline{W}^{add}_{e_o}, \
+    \\qquad \\forall e
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all outputs of entitiy
-    (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{O}`.
+
+    Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+        block to group all constraints and variables etc., block corresponds
+        to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -383,6 +414,7 @@ def add_fixed_source(model, block):
 
     # normed value of renewable source (0 <= value <=1)
     val = {obj.uid: obj.val for obj in block.objs}
+
 
     if not block.optimization_options.get('investment', False):
         # maximal ouput of renewable source (in general installed capacity)
@@ -419,14 +451,13 @@ def add_dispatch_source(model, block):
 
     The mathemathical formulation of the constraint is as follows:
 
-    .. math:: CURTAIL(e,t) = val_{norm}(e,t) \\cdot out_{max}(e) - \
-    W(e,O_1(e),t),  \\qquad \\forall e, \\forall t
+    .. math:: w^{cut}_{e,o_e}(t) = V^{norm}_e(t) \\cdot \overline{W}_{e,o_e} - \
+    w_{e,o_e}(t),  \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped in the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped in the attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of entitiy
-    (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{O}`.
 
 
     Parameters
@@ -434,6 +465,8 @@ def add_dispatch_source(model, block):
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
@@ -455,7 +488,6 @@ def add_dispatch_source(model, block):
         for t in model.timesteps:
             # set upper bound of variable
             model.w[e1, e2, t].setub(val[e1][t] * out_max[e1][0])
-
     def curtailment_source_rule(block, e, t):
         lhs = block.curtailment_var[e, t]
         rhs = val[e][t] * out_max[e][0] - \
@@ -469,24 +501,24 @@ def add_storage_balance(model, block):
 
      The mathematical formulation of the constraint is as follows:
 
-    .. math:: CAP(e,t) = CAP(e,t-1) \\cdot (1 - caploss(e)) \
-    - \\frac{W(e, O_1(e),t)}{\\eta_{out}(e)} \
-    + W(I(e),e,t) \\cdot \\eta_{in}(e)  \\qquad \\forall e, \\forall t \\in [2, t_{max}]
+    .. math:: l_e(t) = l_e(t-1) \\cdot (1 - C^{loss}(e)) \
+    - \\frac{w_{e,o_e}(t)}{\\eta^{out}_e} \
+    + w_{i_e,e}(t) \\cdot \\eta^{in}_e  \\qquad \\forall e, \\forall t \\in [2, t_{max}]
 
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped in the attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs
-    of entitiy (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{S}`.
 
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
@@ -529,29 +561,23 @@ def add_storage_balance(model, block):
 def add_storage_charge_discharge_limits(model, block):
     """ Constraints that limit the discharge and charge power by the c-rate
 
-     Constraints are for investment models only.
+    Constraints are for investment models only.
 
     The mathematical formulation for the constraints is as follows:
 
     Discharge:
 
-    .. math:: W(e, O_1(e), t) \\leq (cap_{max}(e) + ADDCAP(e)) \
-        \\cdot c_{rate,out}(e)
+    .. math:: w_{e, o_e}(t) \\leq (\overline{L}_e + \overline{l}^{add}_e) \
+        \\cdot C^{rate}_{o_e}
         \\qquad \\forall e, \\forall t
 
     Charge:
 
-    .. math:: W(I(e), e, t) \\leq (cap_{max}(e) + ADDCAP(e)) \
-        \\cdot c_{rate, in}(e)
+    .. math:: w_{i_e, e}(t) \\leq (\overline{L}_e + \overline{l}^{add}_e) \
+        \\cdot C^{rate}_{i_e}
         \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
-
-    :math:`I(e)` beeing the set of all inputs of entitiy (component) :math:`e`.
     """
 
     c_rate_out = {obj.uid: obj.c_rate_out for obj in block.objs}
@@ -580,7 +606,7 @@ def add_storage_charge_discharge_limits(model, block):
                                               rule=storage_charge_limit_rule)
 
 
-def add_output_gradient_calc(model, block, grad_direc='both'):
+def add_output_gradient_calc(model, block, grad_direc='both', idx=0):
     """ Add constraint to calculate the gradient between two timesteps
     (positive and negative)
 
@@ -588,30 +614,32 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
 
     Positive gradient:
 
-    .. math::  W(e,O_1(e),t) - W(e,O(e),t-1) \\leq GRADPOS(e,t)\
+    .. math::  w_{e,o_{e,n}}(t) - w_{e, o_{e,n}}(t-1) \\leq g^{pos}_{e_o}(t)\
     \\qquad \\forall e, \\forall t / t=1
 
-    .. math:: GRADPOS(e,t) \\leq gradpos_{max}(e), \\qquad \\forall e, \\forall t
+    .. math:: g^{pos}_{e_o}(t) \\leq \overline{G}^{pos}_{e_o}, \\qquad \\forall e, \\forall t
 
     Negative gradient:
 
-        .. math::  W(e,O_1(e),t-1) - W(e,O(e),t) \\leq GRADNEG(e,t)\
+        .. math::  w_{e,o_{e,n}}(t-1) - w_{e,o_{e,n}}(t) \\leq g^{neg}_{e_o}(t)\
     \\qquad \\forall e, \\forall t / t=1
 
-    .. math:: GRADNEG(e,t) \\leq gradneg_{max}(e), \\qquad \\forall e, \\forall t
+    .. math:: g^{neg}_{e_o}(t) \\leq \overline{G}^{neg}_{e_o}, \\qquad \\forall e, \\forall t
 
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped in the attribute `block.objs`.
 
-    :math:`O_1(e)` beeing the set of all first outputs of
-    entitiy (component) :math:`e`.
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{C}`.
 
+    :math:`n` indicates the n-th output of component :math:`e` (arg: idx)
 
     Parameters
     ----------
     model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     grad_direc: string
         string defining the direction of the gradient constraint.
@@ -624,7 +652,7 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
 
     def grad_pos_calc_rule(block, e, t):
         if t > 0:
-            lhs = model.w[e, model.O[e][0], t] - model.w[e,model.O[e][0], t-1]
+            lhs = model.w[e, model.O[e][idx], t] - model.w[e,model.O[e][idx], t-1]
             rhs = block.grad_pos_var[e, t]
             return(lhs <= rhs)
         else:
@@ -632,7 +660,7 @@ def add_output_gradient_calc(model, block, grad_direc='both'):
 
     def grad_neg_calc_rule(block, e, t):
         if t > 0:
-            lhs = model.w[e, model.O[e][0], t-1] - model.w[e,model.O[e][0], t]
+            lhs = model.w[e, model.O[e][idx], t-1] - model.w[e,model.O[e][idx], t]
             rhs = block.grad_neg_var[e, t]
             return(lhs <= rhs)
         else:

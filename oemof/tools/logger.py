@@ -13,19 +13,51 @@ import logging.config
 from oemof.tools import helpers
 
 
-def define_logging(logging_dir='log_files'):
-    '''
-    Initialise the logger using the logging.conf file in the local path
+def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
+    r"""Initialise the logger using the logging.conf file in the local path.
 
-    Uwe Krien (uwe.krien@rl-institut.de)
-    '''
+    Several sentences providing an extended description. Refer to
+    variables using back-ticks, e.g. `var`.
+
+    Parameters
+    ----------
+    inifile : string, optional (default: logging.ini)
+        Name of the configuration file to define the logger. If no ini-file
+        exist a default ini-file will be downloaded from
+        'http://vernetzen.uni-flensburg.de/~git/logging_default.ini' and used.
+    basicpath : string, optional (default: '.oemof' in HOME)
+        The basicpath for different oemof related informations. By default
+        a ".oemof' folder is created in your home directory.
+    subdir : string, optional (default: 'log_files')
+        The name of the subfolder of the basicpath where the log-files are
+        stored.
+
+    Notes
+    -----
+    By default the INFO level is printed on the screen and the debug level
+    in a file, but you can easily configure the ini-file.
+    Every module that wants to create logging messages has to import the
+    logging module. The oemof logger module has to be imported once to
+    initialise it.
+
+    Examples
+    --------
+    To define the default logge you have to import the python logging library
+    and this function. The first logging message should be the path where the
+    log file is saved to.
+
+    >>> import logging
+    >>> from oemof.tools import logger
+    >>> logger.define_logging() # doctest: +SKIP
+    17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
+    ...
+    >>> logging.debug("Hallo")
+
+    """
     url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
-    basicpath = os.path.join(os.environ['HOME'], '.oemof')
-    logpath = os.path.join(basicpath, logging_dir)
-    if not os.path.isdir(basicpath):
-        os.mkdir(basicpath)
-    if not os.path.isdir(logpath):
-        os.mkdir(logpath)
+    if basicpath is None:
+        basicpath = helpers.get_basic_path()
+    logpath = helpers.extend_basic_path(subdir)
     log_filename = os.path.join(basicpath, 'logging.ini')
     if not os.path.isfile(log_filename):
         helpers.download_file(log_filename, url)
@@ -33,7 +65,16 @@ def define_logging(logging_dir='log_files'):
     logger = logging.getLogger('simpleExample')
     logger.debug('*********************************************************')
     logging.info('Path for logging: %s' % logpath)
-    check_git_branch()
+    try:
+        check_git_branch()
+    except:
+        check_version()
+
+
+def check_version():
+    """Returns the actual version number of the used oemof version."""
+    # TODO : Please add this feature if you know how.
+    pass
 
 
 def check_git_branch():
@@ -58,6 +99,20 @@ def check_git_branch():
     last_commit = f.read(8)
     f.close()
 
-    logging.info("Used oemof version: {0} @ {1}".format(
+    logging.info("Used oemof version: {0}@{1}".format(
         last_commit,
         name_branch))
+
+if __name__ == '__main__':
+    import doctest
+
+    OC = doctest.OutputChecker
+    class AEOutputChecker(OC):
+        def check_output(self, want, got, optionflags):
+            from re import sub
+            if optionflags & doctest.ELLIPSIS:
+                want = sub(r'\[\.\.\.\]', '...', want)
+            return OC.check_output(self, want, got, optionflags)
+
+    doctest.OutputChecker = AEOutputChecker
+    doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
