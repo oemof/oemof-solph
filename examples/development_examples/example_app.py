@@ -123,3 +123,4 @@ es_df.plot_bus(bus_uid="b_el", bus_type="el", type="input",
                title="January 2016", xlabel="Power in MW",
                ylabel="Date", tick_distance=24*7,
                df_plot_kwargs={'stacked':True ,'width':1, 'lw':0.2})
+plt.show()
