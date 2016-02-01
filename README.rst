@@ -5,7 +5,7 @@ With oemof we provide base packages for energy system modeling and optimization.
 Documentation
 =============
 
-Full documentation can be found at http://www.pythonhosted.org/oemof_base/.
+Full documentation can be found at http://oemof.readthedocs.org.
 
 
 Installing oemof
@@ -27,7 +27,9 @@ To install the developer version two steps are necessary:
   git clone git@github.com:oemof/oemof.git
   sudo pip3 install -e /path/to/the/repository
 
-See http://www.pythonhosted.org/oemof_base/installation_and_setup.html for further information.
+See http://oemof.readthedocs.org/en/latest/installation_and_setup.html for further information.
+
+See the developer version of the documentation at: http://oemof.readthedocs.org/en/latest/.
 
 Further packages within oemof
 ==============================
