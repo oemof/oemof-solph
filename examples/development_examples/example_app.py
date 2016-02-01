@@ -119,7 +119,10 @@ import pprint
 pp = pprint.PrettyPrinter(depth=6)
 pp.pprint(energy_system.results)
 
+
+rows_list = []
 for k, v in energy_system.results.items():
+    row = {}
     if ('Bus' in str(k.__class__)):
         pass        
     else:
@@ -131,6 +134,12 @@ for k, v in energy_system.results.items():
                 #print("#1 k ", k, "v", v)
                 print("#3 k", k, "kk ", kk, "vv ", vv)
                 #print("#2 k ", k, "v", kk)
+                row['bus_uid'] = kk.uid
+                row['bus_type'] = kk.type
+                row['type'] = 'input'
+                row['obj_uid'] = k.uid
+                row['val'] = vv
+                rows_list.append(row)                
 
 es_df = tpd.ResultsDataFrame(energy_system=energy_system)
 print(es_df)
