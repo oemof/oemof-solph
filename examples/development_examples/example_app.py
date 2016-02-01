@@ -33,7 +33,7 @@ from oemof.tools import logger
 logger.define_logging()
 
 data = pd.read_csv("example_data.csv", sep=",")
-time_index = pd.date_range('1/1/2012', periods=168, freq='H')
+time_index = pd.date_range('1/1/2012', periods=2, freq='H')
 simulation = es.Simulation(solver='glpk', timesteps=range(len(time_index)),
                            verbose=False, duals=True,
                            objective_options={
@@ -114,12 +114,13 @@ om.solve(solve_kwargs={'tee':True,
          solver_cmdline_options={'min':''})
 energy_system.results = om.results()
 
-es_df = tpd.EnergySystemDataFrame(energy_system=energy_system)
+es_df = tpd.ResultsDataFrame(energy_system=energy_system)
+print(es_df)
 
-# plot
-es_df.plot_bus(bus_uid="b_el", bus_type="el", type="input",
-               date_from="2012-01-01 00:00:00",
-               date_to="2012-01-31 00:00:00", kind='bar',
-               title="January 2016", xlabel="Power in MW",
-               ylabel="Date", tick_distance=24*7,
-               df_plot_kwargs={'stacked':True ,'width':1, 'lw':0.2})
+## plot
+#es_df.plot_bus(bus_uid="b_el", bus_type="el", type="input",
+#               date_from="2012-01-01 00:00:00",
+#               date_to="2012-01-31 00:00:00", kind='bar',
+#               title="January 2016", xlabel="Power in MW",
+#               ylabel="Date", tick_distance=24*7,
+#               df_plot_kwargs={'stacked':True ,'width':1, 'lw':0.2})

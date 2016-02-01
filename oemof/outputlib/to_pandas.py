@@ -91,9 +91,19 @@ class ResultsDataFrame(pd.DataFrame):
                             row['val'] = v.get(k.outputs[0])
                             rows_list.append(row)
                 else:
+#                    for x in k.outputs:
+#                        # bus inputs (results[component][bus])
+#                        row['bus_uid'] = x.uid
+#                        row['bus_type'] = x.type
+#                        row['type'] = 'input'
+#                        row['obj_uid'] = k.uid + "*" + str(k.outputs)
+#                        row['datetime'] = es.time_idx
+#                        row['val'] = v.get(x)
+#                        rows_list.append(row)                    
+
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
-                        row['bus_uid'] = k.uid + "bla"
+                        row['bus_uid'] = kk.uid
                         row['bus_type'] = kk.type
                         row['type'] = 'input'
                         row['obj_uid'] = k.uid
