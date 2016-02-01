@@ -14,7 +14,7 @@ except:
 #   possible via self.result_object.get(i, {} and **kwargs
 
 
-class EnergySystemDataFrame:
+class ResultsDataFrame(pd.DataFrame):
     r"""Creates a multi-indexed pandas dataframe from a solph result object
     and holds methods to plot subsets of the data.
 
@@ -24,142 +24,103 @@ class EnergySystemDataFrame:
 
     Parameters
     ----------
-    result_object : dictionary
-        solph result objects
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe.
-        If not set, all busses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
 
-    Attributes
-    ----------
-    result_object : dictionary
-        solph result objects
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe.
-        If not set, all busses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
-    data_frame : pandas dataframe
-        Multi-indexed pandas dataframe holding the data from the result object.
-        For more information on advanced dataframe indexing see:
-        http://pandas.pydata.org/pandas-docs/stable/advanced.html
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
+    energy_system : class:`Entity <oemof.core.EnergySystem>`
+        energy supply system
     """
+
     def __init__(self, **kwargs):
         # default values if not arguments are passed
-        self.energy_system = kwargs.get('energy_system')
-        self.bus_uids = kwargs.get('bus_uids')
-        self.bus_types = kwargs.get('bus_types')
-        self.data_frame = None
-        self.result_object = kwargs.get('result_object')
-        self.time_slice = kwargs.get('time_slice')
-        if self.time_slice is None:
-            self.time_slice = self.energy_system.time_idx
-        if self.result_object is None:
-            try:
-                self.result_object = self.energy_system.results
-            except:
-                raise ValueError('Could not set attribute `result_object` ' +
-                                 'from energsystem.results.')
-        if not self.bus_uids:
-            self.bus_uids = [e.uid for e in self.result_object.keys()
-                             if 'Bus' in str(e.__class__)]
-        if not self.bus_types:
-            self.bus_types = [e.type for e in self.result_object.keys()
-                              if 'Bus' in str(e.__class__)]
-        if not (self.data_frame):
-            self.data_frame = self.create()
+        es = kwargs.get('energy_system')
 
-    def create(self):
-        r""" Method for creating a multi-index pandas dataframe of
-        the result object
+        rows_list = []
+        for k, v in es.results.items():
+            row = {}
+            if ('Bus' in str(k.__class__)):
+                if k in v.keys():
+                    for kk, vv in v.items():
+                        if(k is kk):
+                            # duals (results[bus][bus])
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'other'
+                            row['obj_uid'] = 'duals'
+                            row['datetime'] = es.time_idx
+                            row['val'] = v.get(k)
+                            rows_list.append(row)
+                else:
+                    for kk, vv in v.items():
+                        if (isinstance(kk, str)):
+                            # bus variables (results[bus]['some_key'])
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'other'
+                            row['obj_uid'] = kk
+                            row['datetime'] = es.time_idx
+                            row['val'] = vv
+                            rows_list.append(row)
+                        else:
+                            # bus outputs (results[bus][component])
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'output'
+                            row['obj_uid'] = kk.uid
+                            row['datetime'] = es.time_idx
+                            row['val'] = vv
+                            rows_list.append(row)
+            else:
+                if k in v.keys():
+                    # self ref. components (results[component][component])
+                    for kk, vv in v.items():
+                        if(k is kk):
+                            # self ref. comp. (results[component][component])
+                            row['bus_uid'] = k.outputs[0].uid
+                            row['bus_type'] = k.outputs[0].type
+                            row['type'] = 'other'
+                            row['obj_uid'] = k.uid
+                            row['datetime'] = es.time_idx
+                            row['val'] = vv
+                            rows_list.append(row)
+                        else:
+                            # bus inputs (only self ref. components)
+                            row['bus_uid'] = k.outputs[0].uid
+                            row['bus_type'] = k.outputs[0].type
+                            row['type'] = 'input'
+                            row['obj_uid'] = k.uid
+                            row['datetime'] = es.time_idx
+                            row['val'] = v.get(k.outputs[0])
+                            rows_list.append(row)
+                else:
+                    for kk, vv in v.items():
+                        # bus inputs (results[component][bus])
+                        row['bus_uid'] = k.uid + "bla"
+                        row['bus_type'] = kk.type
+                        row['type'] = 'input'
+                        row['obj_uid'] = k.uid
+                        row['datetime'] = es.time_idx
+                        row['val'] = vv
+                        rows_list.append(row)
 
-        Parameters
-        ----------
-        self : EnergySystemDataFrame() instance
-        """
-        df = pd.DataFrame(columns=['bus_uid', 'bus_type', 'type',
-                                   'obj_uid', 'datetime', 'val'])
-        for e, o in self.result_object.items():
-            # busses
-            if ('Bus' in str(e.__class__) and
-                    e.uid in self.bus_uids and
-                    e.type in self.bus_types):
-                row = pd.DataFrame()
-                # inputs
-                for i in e.inputs:
-                    if i in self.result_object:
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['input']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
-                    # self referenced components
-                    if i in self.result_object.get(i, {}):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
-                # outputs
-                for k, v in o.items():
-                    # skip self referenced entries (duals, etc.) and
-                    # string keys to put them into "other"
-                    if k is not e and not (isinstance(k, str)):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['output']
-                        row['obj_uid'] = [k.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
-                        df = df.append(row)
-                # other
-                for k, v in o.items():
-                    # self referenced entries (duals, etc.)
-                    if isinstance(k, str):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = ['duals']
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
-                        df = df.append(row)
-
-        # split date and value lists columns into rows (long format)
-        df_long = pd.DataFrame()
-        for index, cols in df.iterrows():
-            df_extract = pd.DataFrame.from_dict(
-                {'datetime': cols.ix['datetime'],
-                 'val': cols.ix['val']})
-            df_extract = pd.concat(
-                [df_extract, cols.drop(['datetime', 'val']).to_frame().T],
-                axis=1).fillna(method='ffill').fillna(method='bfill')
-            df_long = pd.concat([df_long, df_extract], ignore_index=True)
+        # split date and value lists to tuples
+        tuples = [(item['bus_uid'],
+                   item['bus_type'],
+                   item['type'],
+                   item['obj_uid'],
+                   date,
+                   val)
+                   for item in rows_list for date, val in zip(item['datetime'],
+                                                              item['val'])]
 
         # create multiindexed dataframe
-        arrays = [df_long['bus_uid'], df_long['bus_type'], df_long['type'],
-                  df_long['obj_uid'], df_long['datetime']]
-        tuples = list(zip(*arrays))
-        index = pd.MultiIndex.from_tuples(tuples,
-                                          names=['bus_uid', 'bus_type', 'type',
-                                                 'obj_uid', 'datetime'])
-        df_multiindex = pd.DataFrame(df_long['val'].values,
-                                     columns=['val'], index=index)
-        # sort MultiIndex to work correctly
-        df_multiindex.sort_index(inplace=True)
+        index = ['bus_uid', 'bus_type', 'type',
+                 'obj_uid', 'datetime']
 
-        return df_multiindex
+        columns = index + ['val']
+
+        super().__init__(tuples, columns=columns)
+        self.set_index(index, inplace=True)
+        self.sort_index(inplace=True)
+
 
     def plot_bus(self, bus_uid, **kwargs):
         r""" Method for plotting all inputs/outputs of a bus
@@ -175,6 +136,8 @@ class EnergySystemDataFrame:
         date_to : string, optional
             End date selection e.g. "2016-03-01 00:00:00". If not set, the
             whole time range will be plotted.
+        exclude_obj_uids : list of strings
+            List of strings/substrings of obj_uids to be excluded
         """
         kwargs.setdefault('date_from', self.time_slice[0])
         kwargs.setdefault('date_to', self.time_slice[-1])
@@ -202,14 +165,14 @@ class EnergySystemDataFrame:
                 pd.Timestamp(kwargs['date_from']),
                 pd.Timestamp(kwargs['date_to']))], :]
 
-        # remove components/obj_uids that contain passed substring
-        if kwargs.get('exclude_obj_uid_substring'):
-            subset = subset.iloc[
-                ~subset.index.get_level_values('obj_uid').str
-                .contains(kwargs.get('exclude_obj_uid_substring'))]
+        # remove passed obj_uids/substrings of obj_uids (case sensitive)
+        if kwargs.get('exclude_obj_uids'):
+            for expr in kwargs.get('exclude_obj_uids'):
+                subset = subset.iloc[
+                    ~subset.index.get_level_values('obj_uid').str
+                    .contains(expr)]
 
         # extract levels to use them in plot
-        obj_uids = subset.index.get_level_values('obj_uid').unique()
         dates = subset.index.get_level_values('datetime').unique()
 
         # unstack object/component level to get columns
@@ -254,7 +217,8 @@ class EnergySystemDataFrame:
              for item in dates.tolist()[0::kwargs.get('tick_distance')]],
             rotation=0, minor=False)
 
-        ax.legend(obj_uids, loc='upper right')
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, labels, loc='upper right')
         return ax
 
     def stackplot(self, bus_uid, **kwargs):
@@ -273,6 +237,8 @@ class EnergySystemDataFrame:
         date_to : string, optional
             End date selection e.g. "2016-03-01 00:00:00". If not set, the
             whole time range will be plotted.
+        exclude_obj_uids : list of strings
+            List of strings/substrings of obj_uids to be excluded
         figheight : int, optional (default: 14)
             Height of the figure. "autostyle=True" will disable this parameter.
         fighwidth : int, optional (default: 24)
@@ -410,6 +376,7 @@ class EnergySystemDataFrame:
             type="output", kind='line', linewidth=kwargs['linewidth'],
             colormap=kwargs['colormap_line'], title=kwargs['title'],
             colordict=kwargs.get('colordict'),
+            exclude_obj_uids=kwargs.get('exclude_obj_uids'),
             xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
             tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
 
