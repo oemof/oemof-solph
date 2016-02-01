@@ -115,6 +115,10 @@ om.solve(solve_kwargs={'tee':True,
 energy_system.results = om.results()
 
 
+
+es_df = tpd.ResultsDataFrame(energy_system=energy_system)
+print(es_df)
+
 import pprint
 pp = pprint.PrettyPrinter(depth=6)
 pp.pprint(energy_system.results)
@@ -139,10 +143,7 @@ for k, v in energy_system.results.items():
                 row['type'] = 'input'
                 row['obj_uid'] = k.uid
                 row['val'] = vv
-                rows_list.append(row)                
-
-es_df = tpd.ResultsDataFrame(energy_system=energy_system)
-print(es_df)
+                rows_list.append(row)             
 
 ## plot
 #es_df.plot_bus(bus_uid="b_el", bus_type="el", type="input",
