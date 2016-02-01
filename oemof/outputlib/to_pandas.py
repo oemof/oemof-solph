@@ -110,6 +110,9 @@ class ResultsDataFrame(pd.DataFrame):
                         row['datetime'] = es.time_idx
                         row['val'] = vv
                         rows_list.append(row)
+        import pprint
+        pp = pprint.PrettyPrinter(depth=6)
+        pp.pprint(rows_list)
 
         # split date and value lists to tuples
         tuples = [(item['bus_uid'],
