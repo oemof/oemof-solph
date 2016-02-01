@@ -127,6 +127,64 @@ class ResultsDataFrame(pd.DataFrame):
         self.sort_index(inplace=True)
 
 
+    def slice_by(self, **kwargs):
+        r""" Method for slicing the ResultsDataFrame. A subset is returned.
+
+        Parameters
+        ----------
+        bus_uid : string
+        bus_type : string (e.g. "el" or "gas")
+        type : string (input/output/other)
+        obj_uid: string
+        date_from : string
+            Start date selection e.g. "2016-01-01 00:00:00". If not set, the
+            whole time range will be plotted.
+        date_to : string
+            End date selection e.g. "2016-03-01 00:00:00". If not set, the
+            whole time range will be plotted.
+
+        """
+
+
+        kwargs.setdefault('bus_uid', slice(None))
+        kwargs.setdefault('bus_type', slice(None))
+        kwargs.setdefault('type', slice(None))
+        kwargs.setdefault('obj_uid', slice(None))
+        kwargs.setdefault('date_from', self.index.get_level_values('datetime')[0])
+        kwargs.setdefault('date_to', self.index.get_level_values('datetime')[-1])
+
+
+        # slicing
+        idx = pd.IndexSlice
+
+        subset = self.loc[idx[
+            kwargs['bus_uid'],
+            kwargs['bus_type'],
+            kwargs['type'],
+            kwargs['obj_uid'],
+            slice(pd.Timestamp(kwargs['date_from']),
+                  pd.Timestamp(kwargs['date_to']))], :]
+
+        return subset
+
+#    def get_plot_data(self, **kwargs):
+#        r"""
+#        """
+#
+#        subset = self.slice_by(**kwargs)
+#
+#        columns = ['bus_uid',
+#                   'bus_type',
+#                   'type',
+#                   'obj_uid']
+#
+#        return subset.unstack(columns)
+#
+#
+#class DataFramePlot(ResultsDataFrame):
+#    r"""
+#    """
+
     def plot_bus(self, bus_uid, **kwargs):
         r""" Method for plotting all inputs/outputs of a bus
 
