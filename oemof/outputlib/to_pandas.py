@@ -35,12 +35,12 @@ class ResultsDataFrame(pd.DataFrame):
 
         rows_list = []
         for k, v in es.results.items():
-            row = {}
             if ('Bus' in str(k.__class__)):
                 if k in v.keys():
                     for kk, vv in v.items():
                         if(k is kk):
                             # duals (results[bus][bus])
+                            row = {}
                             row['bus_uid'] = k.uid
                             row['bus_type'] = k.type
                             row['type'] = 'other'
@@ -51,6 +51,7 @@ class ResultsDataFrame(pd.DataFrame):
                 else:
                     for kk, vv in v.items():
                         if (isinstance(kk, str)):
+                            row = {}
                             # bus variables (results[bus]['some_key'])
                             row['bus_uid'] = k.uid
                             row['bus_type'] = k.type
@@ -61,6 +62,7 @@ class ResultsDataFrame(pd.DataFrame):
                             rows_list.append(row)
                         else:
                             # bus outputs (results[bus][component])
+                            row = {}
                             row['bus_uid'] = k.uid
                             row['bus_type'] = k.type
                             row['type'] = 'output'
@@ -74,6 +76,7 @@ class ResultsDataFrame(pd.DataFrame):
                     for kk, vv in v.items():
                         if(k is kk):
                             # self ref. comp. (results[component][component])
+                            row = {}
                             row['bus_uid'] = k.outputs[0].uid
                             row['bus_type'] = k.outputs[0].type
                             row['type'] = 'other'
@@ -83,6 +86,7 @@ class ResultsDataFrame(pd.DataFrame):
                             rows_list.append(row)
                         else:
                             # bus inputs (only self ref. components)
+                            row = {}
                             row['bus_uid'] = k.outputs[0].uid
                             row['bus_type'] = k.outputs[0].type
                             row['type'] = 'input'
@@ -91,18 +95,9 @@ class ResultsDataFrame(pd.DataFrame):
                             row['val'] = v.get(k.outputs[0])
                             rows_list.append(row)
                 else:
-#                    for x in k.outputs:
-#                        # bus inputs (results[component][bus])
-#                        row['bus_uid'] = x.uid
-#                        row['bus_type'] = x.type
-#                        row['type'] = 'input'
-#                        row['obj_uid'] = k.uid + "*" + str(k.outputs)
-#                        row['datetime'] = es.time_idx
-#                        row['val'] = v.get(x)
-#                        rows_list.append(row)                    
-
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
+                        row = {}
                         row['bus_uid'] = kk.uid
                         row['bus_type'] = kk.type
                         row['type'] = 'input'
@@ -110,9 +105,6 @@ class ResultsDataFrame(pd.DataFrame):
                         row['datetime'] = es.time_idx
                         row['val'] = vv
                         rows_list.append(row)
-        import pprint
-        pp = pprint.PrettyPrinter(depth=6)
-        pp.pprint(rows_list)
 
         # split date and value lists to tuples
         tuples = [(item['bus_uid'],
