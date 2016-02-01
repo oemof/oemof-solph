@@ -114,6 +114,24 @@ om.solve(solve_kwargs={'tee':True,
          solver_cmdline_options={'min':''})
 energy_system.results = om.results()
 
+
+import pprint
+pp = pprint.PrettyPrinter(depth=6)
+pp.pprint(energy_system.results)
+
+for k, v in energy_system.results.items():
+    if ('Bus' in str(k.__class__)):
+        pass        
+    else:
+        if k in v.keys():
+            pass
+        else:
+            for kk, vv in v.items():                
+                #print("Von: ", kk.uid, " nach ", vv.uid)
+                #print("#1 k ", k, "v", v)
+                print("#3 k", k, "kk ", kk, "vv ", vv)
+                #print("#2 k ", k, "v", kk)
+
 es_df = tpd.ResultsDataFrame(energy_system=energy_system)
 print(es_df)
 
