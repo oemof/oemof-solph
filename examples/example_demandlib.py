@@ -1,9 +1,5 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 23 15:26:53 2015
-
-@author: caro
-"""
 
 import logging
 # logging.getLogger().setLevel(logging.DEBUG)
