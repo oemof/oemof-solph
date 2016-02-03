@@ -1,4 +1,4 @@
-
+fstor
 from . import Transformer
 import logging
 import numpy as np
@@ -128,8 +128,8 @@ class Storage(Transformer):
         absolut maximum state of charge of built capacity if invest=TRUE
     cap_min : float
         absolut minimum state of charge
-    cap_initial : float
-        state of charge at timestep 0 (default cap_max*0.5)
+    cap_initial : float, optional
+        The state of charge (soc) at timestep 0.
     add_cap_limit : float
         limit of additional installed capacity (only investment models)
     eta_in : float
@@ -153,10 +153,6 @@ class Storage(Transformer):
         self.cap_min = kwargs.get('cap_min', None)
         self.add_cap_limit = kwargs.get('add_cap_limit', None)
         self.cap_initial = kwargs.get('cap_initial', None)
-        if self.cap_initial is None:
-            self.cap_initial = self.cap_max*0.5
-            logging.info('No initial storage capacity set. Setting capacity ' +
-                         'to 0.5 of max. capacity for component: %s', self.uid)
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)
