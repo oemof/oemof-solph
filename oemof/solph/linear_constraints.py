@@ -537,8 +537,8 @@ def add_storage_balance(model, block):
         eta_out[e.uid] = e.eta_out
 
     # set cap of last timesteps to fixed value of cap_initial
-    if cap_initial[e] is not None:
-        for e in block.uids:
+    for e in block.uids:
+        if cap_initial[e] is not None:
             block.cap[e, 0] = cap_initial[e]
             block.cap[e, 0].fix()
 
