@@ -16,7 +16,7 @@ except:
 
 class ResultsDataFrame(pd.DataFrame):
     r"""Creates a multi-indexed pandas dataframe from a solph result object
-    and holds methods to plot subsets of the data.
+    and holds methods to create subsets of the data.
 
     Note
     ----
@@ -167,23 +167,20 @@ class ResultsDataFrame(pd.DataFrame):
 
         return subset
 
-#    def get_plot_data(self, **kwargs):
-#        r"""
-#        """
-#
-#        subset = self.slice_by(**kwargs)
-#
-#        columns = ['bus_uid',
-#                   'bus_type',
-#                   'type',
-#                   'obj_uid']
-#
-#        return subset.unstack(columns)
-#
-#
-#class DataFramePlot(ResultsDataFrame):
-#    r"""
-#    """
+
+class DataFramePlot(ResultsDataFrame):
+    r"""Creates a multi-indexed pandas dataframe from a solph result object
+    and holds methods to plot subsets of the data.
+
+    Parameters
+    ----------
+
+    energy_system : class:`Entity <oemof.core.EnergySystem>`
+        energy supply system
+    """
+
+    def __init__(self, **kwargs):
+        super(DataFramePlot, self).__init__(**kwargs)
 
     def plot_bus(self, bus_uid, **kwargs):
         r""" Method for plotting all inputs/outputs of a bus
@@ -202,9 +199,9 @@ class ResultsDataFrame(pd.DataFrame):
         exclude_obj_uids : list of strings
             List of strings/substrings of obj_uids to be excluded
         """
-        kwargs.setdefault('date_from', self.time_slice[0])
-        kwargs.setdefault('date_to', self.time_slice[-1])
-        kwargs.setdefault('type', None)
+        kwargs.setdefault('date_from', self.index.get_level_values('datetime')[0])
+        kwargs.setdefault('date_to', self.index.get_level_values('datetime')[-1])
+        kwargs.setdefault('type', slice(None))
         kwargs.setdefault('kind', 'line')
         kwargs.setdefault('title', 'Connected components')
         kwargs.setdefault('xlabel', 'Date')
@@ -217,16 +214,7 @@ class ResultsDataFrame(pd.DataFrame):
         kwargs.setdefault('number_autoticks', 3)
 
         # slicing
-        idx = pd.IndexSlice
-
-        subset = self.data_frame.loc[idx[
-            [bus_uid],
-            :,
-            [kwargs.get('type')],
-            :,
-            slice(
-                pd.Timestamp(kwargs['date_from']),
-                pd.Timestamp(kwargs['date_to']))], :]
+        subset = self.slice_by(bus_uid=bus_uid, **kwargs)
 
         # remove passed obj_uids/substrings of obj_uids (case sensitive)
         if kwargs.get('exclude_obj_uids'):
@@ -392,8 +380,8 @@ class ResultsDataFrame(pd.DataFrame):
         kwargs.setdefault('bus_uid', None)
         kwargs.setdefault('bus_type', None)
         kwargs.setdefault('ax', None)
-        kwargs.setdefault('date_from', self.energy_system.time_idx[0])
-        kwargs.setdefault('date_to', self.energy_system.time_idx[-1])
+        kwargs.setdefault('date_from', self.index.get_level_values('datetime')[0])
+        kwargs.setdefault('date_to', self.index.get_level_values('datetime')[-1])
         kwargs.setdefault('autostyle', False)
         kwargs.setdefault('width', 1)
         kwargs.setdefault('title', 'Connected components')
