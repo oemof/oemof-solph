@@ -60,7 +60,7 @@ logger.define_logging()
 
 logging.info('Read data from csv file and set time index')
 data = pd.read_csv("storage_invest.csv", sep=",")
-time_index = pd.date_range('1/1/2012', periods=2, freq='H')
+time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
 
 ###############################################################################
 # initialize the energy system
@@ -176,35 +176,34 @@ es_df.loc[idx[:, 'el', :,
                   pd.Timestamp("2012-01-01 00:00:00"),
                   pd.Timestamp("2012-01-01 01:00:00"))], :]
 
-#logging.info('Plot the results')
-#
-#cdict = {'wind': '#5b5bae',
-#         'pv': '#ffde32',
-#         'sto_simple': '#42c77a',
-#         'pp_gas': '#636f6b',
-#         'demand': '#ce4aff'}
-#
-## Plotting line plots
-#es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
-#               date_from="2012-01-01 00:00:00", colordict=cdict,
-#               date_to="2012-01-31 00:00:00",
-#               title="January 2016", xlabel="Power in MW",
-#               ylabel="Date", tick_distance=24*7)
-#
-## Minimal parameter
-#es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
-#
-#plt.show()
-#
-## Plotting a combined stacked plot
-#
-#es_df.stackplot("bel",
-#                colordict=cdict,
-#                date_from="2012-06-01 00:00:00",
-#                date_to="2012-06-8 00:00:00",
-#                title="Electricity bus",
-#                ylabel="Power in MW", xlabel="Date",
-#                linewidth=4,
-#                tick_distance=24, save=True)
-#
-#plt.show()
+logging.info('Plot the results')
+
+cdict = {'wind': '#5b5bae',
+         'pv': '#ffde32',
+         'sto_simple': '#42c77a',
+         'pp_gas': '#636f6b',
+         'demand': '#ce4aff'}
+
+# Plotting line plots
+myplot = tpd.DataFramePlot(energy_system=energysystem)
+myplot.plot_bus(bus_uid="bel", bus_type="el", type="input",
+                date_from="2012-01-01 00:00:00", colordict=cdict,
+                date_to="2012-01-31 00:00:00",
+                title="January 2016", xlabel="Power in MW",
+                ylabel="Date", tick_distance=24*7)
+
+# Minimal parameter
+myplot.plot_bus(bus_uid="bel", type="output", title="Year 2016")
+
+plt.show()
+
+# Plotting a combined stacked plot
+
+myplot.stackplot("bel",
+                 colordict=cdict,
+                 date_from="2012-06-01 00:00:00",
+                 date_to="2012-06-8 00:00:00",
+                 title="Electricity bus",
+                 ylabel="Power in MW", xlabel="Date",
+                 linewidth=4,
+                 tick_distance=24, save=True)
