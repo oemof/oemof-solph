@@ -537,10 +537,11 @@ def add_storage_balance(model, block):
         eta_out[e.uid] = e.eta_out
 
     # set cap of last timesteps to fixed value of cap_initial
+    t_last = len(model.timesteps)-1
     for e in block.uids:
         if cap_initial[e] is not None:
-            block.cap[e, 0] = cap_initial[e]
-            block.cap[e, 0].fix()
+            block.cap[e, t_last] = cap_initial[e]
+            block.cap[e, t_last].fix()
 
     def storage_balance_rule(block, e, t):
         # TODO: include time increment
@@ -548,7 +549,7 @@ def add_storage_balance(model, block):
         if(t == 0):
             t_last = len(model.timesteps)-1
             expr += block.cap[e, t]
-            expr += - block.cap[e, t_last] * (1 - cap_loss[e])
+            expr += - block.cap[e, t_last] #* (1 - cap_loss[e])
             expr += - model.w[model.I[e], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
