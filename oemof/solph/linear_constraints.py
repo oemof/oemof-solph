@@ -549,7 +549,7 @@ def add_storage_balance(model, block):
         if(t == 0):
             t_last = len(model.timesteps)-1
             expr += block.cap[e, t]
-            expr += - block.cap[e, t_last] #* (1 - cap_loss[e])
+            expr += - block.cap[e, t_last] * (1 - cap_loss[e])
             expr += - model.w[model.I[e], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
