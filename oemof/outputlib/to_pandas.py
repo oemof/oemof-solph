@@ -181,6 +181,112 @@ class DataFramePlot(ResultsDataFrame):
 
     def __init__(self, **kwargs):
         super(DataFramePlot, self).__init__(**kwargs)
+        self.subset = kwargs.get('subset')
+        self.ax = kwargs.get('ax')
+
+    def slice_unstacked(self, **kwargs):
+        ""
+        unstacklevel = kwargs.get('unstacklevel', 'obj_uid')
+        subset = super(DataFramePlot, self).slice_by(**kwargs)
+        subset = subset.unstack(level=unstacklevel)
+        self.subset = subset
+        return self
+
+    def color_from_dict(self, colordict):
+        ""
+        tmplist = list(
+            map(colordict.get, list(self.subset['val'].columns)))
+        tmplist = ['#ff00f0' if v is None else v for v in tmplist]
+        if len(tmplist) == 1:
+            colorlist = tmplist[0]
+        else:
+            colorlist = tmplist
+        return colorlist
+
+    def set_datetime_ticks(self, tick_distance=None, number_autoticks=3,
+                           date_format='%d-%m-%Y %H:%M'):
+        ""
+        dates = self.subset.index.get_level_values('datetime').unique()
+        if tick_distance is None:
+            tick_distance = int(len(dates) / number_autoticks) - 1
+        self.ax.set_xticks(range(0, len(dates), tick_distance),
+                           minor=False)
+        self.ax.set_xticklabels(
+            [item.strftime(date_format)
+             for item in dates.tolist()[0::tick_distance]],
+            rotation=0, minor=False)
+        return self
+
+    def outside_legend(self, **kwargs):
+        ""
+        kwargs.setdefault('reverse', False)
+        kwargs.setdefault('loc', 'center left')
+        kwargs.setdefault('bbox_to_anchor', (1, 0.5))
+        kwargs.setdefault('ncol', 1)
+        kwargs.setdefault('plotshare', 0.9)
+        kwargs.setdefault('fancybox', True)
+        kwargs.setdefault('shadow', True)
+        kwargs.setdefault('handles', self.ax.get_legend_handles_labels()[0])
+        kwargs.setdefault('labels', self.ax.get_legend_handles_labels()[1])
+
+        if kwargs['reverse']:
+            kwargs['handles'] = reversed(kwargs['handles'])
+            kwargs['labels'] = reversed(kwargs['labels'])
+
+        box = self.ax.get_position()
+        self.ax.set_position([box.x0, box.y0, box.width * kwargs['plotshare'],
+                              box.height])
+
+        self.ax.legend(
+            kwargs['handles'], kwargs['labels'], loc=kwargs['loc'],
+            bbox_to_anchor=kwargs['bbox_to_anchor'], ncol=kwargs['ncol'],
+            fancybox=kwargs['fancybox'], shadow=kwargs['shadow'])
+
+    def plot(self, **kwargs):
+        ""
+        self.ax = self.subset.plot(**kwargs)
+        return self
+
+    def io_plot(self, bus_uid, cdict, line_kwa={}, bar_kwa={}, **kwargs):
+        ""
+        self.ax = kwargs.get('ax')
+        if self.ax is None:
+            fig = plt.figure()
+            self.ax = fig.add_subplot(1, 1, 1)
+
+        self.slice_unstacked(bus_uid=bus_uid, type='input', **kwargs)
+        self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
+                         ax=self.ax, color=self.color_from_dict(cdict),
+                         **bar_kwa)
+        self.slice_unstacked(bus_uid=bus_uid, type='output', **kwargs)
+        new_df = pd.DataFrame(index=self.subset.index)
+        n = 0
+        tmp = 0
+        for col in self.subset.columns:
+            if n < 1:
+                new_df[col] = self.subset[col]
+            else:
+                new_df[col] = self.subset[col] + tmp
+            tmp = new_df[col]
+            n += 1
+        new_df.sort_index(axis=1, ascending=False, inplace=True)
+        colorlist = self.color_from_dict(cdict)
+        colorlist.reverse()
+        separator = len(colorlist)
+        new_df.plot(kind='line', ax=self.ax, color=colorlist,
+                    drawstyle='steps-mid', **line_kwa)
+
+        handles, labels = self.ax.get_legend_handles_labels()
+
+        tmp_lab = [x for x in reversed(labels[0:separator])]
+        tmp_hand = [x for x in reversed(handles[0:separator])]
+        handles = tmp_hand + handles[separator:]
+        labels = tmp_lab + labels[separator:]
+        labels.reverse()
+        handles.reverse()
+
+        self.ax.legend(handles, labels)
+        return handles, labels
 
     def plot_bus(self, bus_uid, **kwargs):
         r""" Method for plotting all inputs/outputs of a bus
@@ -260,7 +366,6 @@ class DataFramePlot(ResultsDataFrame):
         # plotting: adjustments
         ax.set_ylabel(kwargs.get('ylabel')),
         ax.set_xlabel(kwargs.get('xlabel')),
-        # ax.set_xticks(range(0,len(dates),1), minor=True),
         ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
                       minor=False)
         ax.set_xticklabels(
