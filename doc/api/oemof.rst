@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     oemof.core
+    oemof.demandlib
     oemof.outputlib
     oemof.solph
 
