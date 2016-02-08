@@ -217,30 +217,55 @@ class DataFramePlot(ResultsDataFrame):
             rotation=0, minor=False)
         return self
 
-    def outside_legend(self, **kwargs):
-        ""
-        kwargs.setdefault('reverse', False)
+    def outside_legend(self, reverse=False, plotshare=0.9, **kwargs):
+        r""" Move the legend outside the plot. Bases on the ideas of Joe
+        Kington. See
+        http://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot
+        for more information.
+
+        Parameters
+        ----------
+        reverse : boolean (default: False)
+            Print out the legend in reverse order. This is interesting for
+            stack-plots to have the legend in the same order as the stacks.
+        plotshare : real (default: 0.9)
+            Share of the plot area to create space for the legend (0 to 1).
+        loc : string (default: 'center left')
+            Location of the plot.
+        bbox_to_anchor : tuple (default: (1, 0.5))
+            Set the anchor for the legend.
+        ncol : integer (default: 1)
+            Number of columns of the legend.
+        handles : list of handles
+            A list of handels if they are already modified by another function
+            or method. Normally these handles will be automatically taken from
+            the artis object.
+        lables : list of labels
+            A list of labels if they are already modified by another function
+            or method. Normally these handles will be automatically taken from
+            the artis object.
+        Note
+        ----
+        All keyword arguments (kwargs) will be directly passed to the
+        matplotlib legend class. See
+        http://matplotlib.org/api/legend_api.html#matplotlib.legend.Legend
+        for more parameters.
+        """
         kwargs.setdefault('loc', 'center left')
         kwargs.setdefault('bbox_to_anchor', (1, 0.5))
         kwargs.setdefault('ncol', 1)
-        kwargs.setdefault('plotshare', 0.9)
-        kwargs.setdefault('fancybox', True)
-        kwargs.setdefault('shadow', True)
-        kwargs.setdefault('handles', self.ax.get_legend_handles_labels()[0])
-        kwargs.setdefault('labels', self.ax.get_legend_handles_labels()[1])
+        handles = kwargs.pop('handles', self.ax.get_legend_handles_labels()[0])
+        labels = kwargs.pop('labels', self.ax.get_legend_handles_labels()[1])
 
-        if kwargs['reverse']:
-            kwargs['handles'] = reversed(kwargs['handles'])
-            kwargs['labels'] = reversed(kwargs['labels'])
+        if reverse:
+            handles.reverse()
+            labels.reverse()
 
         box = self.ax.get_position()
-        self.ax.set_position([box.x0, box.y0, box.width * kwargs['plotshare'],
+        self.ax.set_position([box.x0, box.y0, box.width * plotshare,
                               box.height])
 
-        self.ax.legend(
-            kwargs['handles'], kwargs['labels'], loc=kwargs['loc'],
-            bbox_to_anchor=kwargs['bbox_to_anchor'], ncol=kwargs['ncol'],
-            fancybox=kwargs['fancybox'], shadow=kwargs['shadow'])
+        self.ax.legend(handles, labels, **kwargs)
 
     def plot(self, **kwargs):
         ""
