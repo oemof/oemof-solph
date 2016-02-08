@@ -9,10 +9,6 @@ try:
 except:
     logging.warning('Matplotlib does not work.')
 
-# TODO:
-# - Make dataframe creation and plotting configurable with as less code as
-#   possible via self.result_object.get(i, {} and **kwargs
-
 
 class ResultsDataFrame(pd.DataFrame):
     r"""Creates a multi-indexed pandas dataframe from a solph result object
@@ -107,14 +103,11 @@ class ResultsDataFrame(pd.DataFrame):
                         rows_list.append(row)
 
         # split date and value lists to tuples
-        tuples = [(item['bus_uid'],
-                   item['bus_type'],
-                   item['type'],
-                   item['obj_uid'],
-                   date,
-                   val)
-                   for item in rows_list for date, val in zip(item['datetime'],
-                                                              item['val'])]
+        tuples = [
+            (item['bus_uid'], item['bus_type'], item['type'], item['obj_uid'],
+             date, val)
+            for item in rows_list for date, val in zip(item['datetime'],
+                                                       item['val'])]
 
         # create multiindexed dataframe
         index = ['bus_uid', 'bus_type', 'type',
@@ -125,7 +118,6 @@ class ResultsDataFrame(pd.DataFrame):
         super().__init__(tuples, columns=columns)
         self.set_index(index, inplace=True)
         self.sort_index(inplace=True)
-
 
     def slice_by(self, **kwargs):
         r""" Method for slicing the ResultsDataFrame. A subset is returned.
@@ -144,15 +136,14 @@ class ResultsDataFrame(pd.DataFrame):
             whole time range will be plotted.
 
         """
-
-
         kwargs.setdefault('bus_uid', slice(None))
         kwargs.setdefault('bus_type', slice(None))
         kwargs.setdefault('type', slice(None))
         kwargs.setdefault('obj_uid', slice(None))
-        kwargs.setdefault('date_from', self.index.get_level_values('datetime')[0])
-        kwargs.setdefault('date_to', self.index.get_level_values('datetime')[-1])
-
+        kwargs.setdefault(
+            'date_from', self.index.get_level_values('datetime')[0])
+        kwargs.setdefault(
+            'date_to', self.index.get_level_values('datetime')[-1])
 
         # slicing
         idx = pd.IndexSlice
