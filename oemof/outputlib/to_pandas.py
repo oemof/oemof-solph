@@ -193,7 +193,21 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = kwargs.get('ax')
 
     def color_from_dict(self, colordict):
-        ""
+        r""" Method to convert a dictionary containing the components and its
+        colors to a color list that can be directly useed with the color
+        parameter of the pandas plotting method.
+
+        Parameters
+        ----------
+        colordict : dictionary
+            A dictionary that has all possible components as keys and its
+            colors as items.
+
+        Returns
+        -------
+        list
+            Containing the colors of all components of the subset attribute
+        """
         tmplist = list(
             map(colordict.get, list(self.subset['val'].columns)))
         tmplist = ['#ff00f0' if v is None else v for v in tmplist]
@@ -205,7 +219,23 @@ class DataFramePlot(ResultsDataFrame):
 
     def set_datetime_ticks(self, tick_distance=None, number_autoticks=3,
                            date_format='%d-%m-%Y %H:%M'):
-        ""
+        r""" Set configurable ticks for the time axis. One can choose the
+        number of ticks or the distance between ticks and the format.
+
+        Parameters
+        ----------
+        tick_distance : real
+            The disctance between to ticks in hours. If not set autoticks are
+            set (see number_autoticks).
+        number_autoticks : int (default: 3)
+            The number of ticks on the time axis, independent of the time
+            range. The higher the number of ticks is, the shorter should be the
+            date_format string.
+        date_format : string (default: '%d-%m-%Y %H:%M')
+            The string to define the format of the date and time. See
+            https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+            for more information.
+        """
         dates = self.subset.index.get_level_values('datetime').unique()
         if tick_distance is None:
             tick_distance = int(len(dates) / number_autoticks) - 1
@@ -215,7 +245,6 @@ class DataFramePlot(ResultsDataFrame):
             [item.strftime(date_format)
              for item in dates.tolist()[0::tick_distance]],
             rotation=0, minor=False)
-        return self
 
     def outside_legend(self, reverse=False, plotshare=0.9, **kwargs):
         r""" Move the legend outside the plot. Bases on the ideas of Joe
@@ -268,22 +297,62 @@ class DataFramePlot(ResultsDataFrame):
         self.ax.legend(handles, labels, **kwargs)
 
     def plot(self, **kwargs):
-        ""
+        r""" Passing the subset attribute to the pandas plotting method. All
+        parameters will be directly passed to pandas.DataFrame.plot(). See
+        http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.plot.html
+        for more information.
+
+        Returns
+        -------
+        self
+        """
         self.ax = self.subset.plot(**kwargs)
         return self
 
     def io_plot(self, bus_uid, cdict, line_kwa={}, bar_kwa={}, **kwargs):
-        ""
+        r""" Plotting a combined bar and line plot to see the fitting of in-
+        and outcomming flows of a bus balance.
+
+        Parameters
+        ----------
+        bus_uid : string
+            Uid of the bus to plot the balance.
+        colordict : dictionary
+            A dictionary that has all possible components as keys and its
+            colors as items.
+        line_kw : dictionary
+            Keyword arguments to be passed to the pandas line plot.
+        bar_kw : dictionary
+            Keyword arguments to be passed to the pandas bar plot.
+
+        Note
+        ----
+        Further keyword arguments will be passed to the slice method.
+
+        Returns
+        -------
+        handles, labels
+            Manipulated labels to correct the unsual construction of the
+            stack line plot. You can use them for further maipulations.
+        """
         self.ax = kwargs.get('ax')
+
         if self.ax is None:
             fig = plt.figure()
             self.ax = fig.add_subplot(1, 1, 1)
 
+        # Create a bar plot for all input flows
         self.slice_unstacked(bus_uid=bus_uid, type='input', **kwargs)
         self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
                          ax=self.ax, color=self.color_from_dict(cdict),
                          **bar_kwa)
+
+        # Create a line plot for all output flows
         self.slice_unstacked(bus_uid=bus_uid, type='output', **kwargs)
+
+        # The following changes are made to have the bottom line on top layer
+        # of all lines. Normally the bottom line is the first line that is
+        # plotted and will be on the lowest layer. This is difficult to read.
         new_df = pd.DataFrame(index=self.subset.index)
         n = 0
         tmp = 0
@@ -301,8 +370,8 @@ class DataFramePlot(ResultsDataFrame):
         new_df.plot(kind='line', ax=self.ax, color=colorlist,
                     drawstyle='steps-mid', **line_kwa)
 
+        # Adapt the legend to the new oder
         handles, labels = self.ax.get_legend_handles_labels()
-
         tmp_lab = [x for x in reversed(labels[0:separator])]
         tmp_hand = [x for x in reversed(handles[0:separator])]
         handles = tmp_hand + handles[separator:]
