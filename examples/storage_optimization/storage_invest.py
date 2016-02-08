@@ -196,14 +196,6 @@ myplot.ax.set_ylabel('Power in MW')
 myplot.ax.set_xlabel('Date')
 myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
-# Old way of plotting
-myplot.plot_bus(bus_uid="bel", type="input",
-                date_from="2012-01-01 00:00:00", colordict=cdict,
-                date_to="2012-01-31 00:00:00",
-                title="January 2016", ylabel="Power in MW",
-                xlabel="Date", tick_distance=24*7)
-plt.show()
-
 # Minimal parameter
 # New way
 myplot.slice_unstacked(bus_uid="bel", type="output")
@@ -213,13 +205,9 @@ myplot.ax.set_ylabel('Power in MW')
 myplot.ax.set_xlabel('Date')
 myplot.set_datetime_ticks()
 
-# Old way
-myplot.plot_bus(bus_uid="bel", type="output", title="Year 2016")
-
 plt.show()
 
 # Plotting a combined stacked plot
-# New way
 fig = plt.figure(figsize=(24, 14))
 plt.rc('legend', **{'fontsize': 19})
 plt.rcParams.update({'font.size': 19})
@@ -236,17 +224,6 @@ myplot.ax.set_xlabel('Date')
 myplot.ax.set_title("Electricity bus")
 myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
 myplot.outside_legend(handles=handles, labels=labels)
-
-# Plotting a combined stacked plot
-# Old way
-myplot.stackplot("bel",
-                 colordict=cdict,
-                 date_from="2012-06-01 00:00:00",
-                 date_to="2012-06-8 00:00:00",
-                 title="Electricity bus",
-                 ylabel="Power in MW", xlabel="Date",
-                 linewidth=4,
-                 tick_distance=24, save=True)
 
 plt.show()
 
