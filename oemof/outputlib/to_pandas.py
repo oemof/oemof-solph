@@ -158,7 +158,8 @@ class ResultsDataFrame(pd.DataFrame):
         return subset
 
     def slice_unstacked(self, unstacklevel='obj_uid', **kwargs):
-        r"""Method for slicing the ResultsDataFrame. A subset is returned.
+        r"""Method for slicing the ResultsDataFrame. A unstacked
+        subset is returned.
 
         Parameters
         ----------
@@ -170,14 +171,23 @@ class ResultsDataFrame(pd.DataFrame):
 
 
 class DataFramePlot(ResultsDataFrame):
-    r"""Creates a multi-indexed pandas dataframe from a solph result object
-    and holds methods to plot subsets of the data.
+    r"""Creates plots based on the subset of a multi-indexed pandas dataframe
+    of the :class:`ResultsDataFrame class
+    <oemof.outputlib.to_pandas.ResultsDataFrame>`.
 
     Parameters
     ----------
+    subset : pandas.DataFrame
+        A subset of the results DataFrame.
+    ax : matplotlib axis object
+        Axis object of the last plot.
 
-    energy_system : class:`Entity <oemof.core.EnergySystem>`
-        energy supply system
+    Attributes
+    ----------
+    subset : pandas.DataFrame
+        A subset of the results DataFrame.
+    ax : matplotlib axis object
+        Axis object of the last plot.
     """
 
     def __init__(self, **kwargs):
@@ -186,11 +196,16 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = kwargs.get('ax')
 
     def slice_unstacked(self, unstacklevel='obj_uid', **kwargs):
-        r"""Creates a multi-indexed pandas dataframe from a solph result object
-        and holds methods to plot subsets of the data.
+        r"""Method for slicing the ResultsDataFrame. The subset attribute
+        will set to an unstacked subset. The self-attribute is returned to
+        allow chaining. This method is an extension of the
+        :class:`slice_unstacked <ResultsDataFrame.slice_unstacked>` method
+        of the `ResultsDataFrame` class (parent class).
 
         Parameters
         ----------
+        unstacklevel : string (default: 'obj_uid')
+            Level to unstack the subset of the DataFrame.
         """
         self.subset = super(
             DataFramePlot, self).slice_unstacked(
@@ -332,7 +347,8 @@ class DataFramePlot(ResultsDataFrame):
 
         Note
         ----
-        Further keyword arguments will be passed to the slice method.
+        Further keyword arguments will be passed to the
+        :class:`slice_unstacked method <DataFramePlot.slice_unstacked>`.
 
         Returns
         -------
