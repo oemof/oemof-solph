@@ -167,6 +167,14 @@ class ResultsDataFrame(pd.DataFrame):
 
         return subset
 
+    def slice_unstacked(self, **kwargs):
+        ""
+        unstacklevel = kwargs.get('unstacklevel', 'obj_uid')
+        subset = self.slice_by(**kwargs)
+        subset = subset.unstack(level=unstacklevel)
+        self.subset = subset
+        return self
+
 
 class DataFramePlot(ResultsDataFrame):
     r"""Creates a multi-indexed pandas dataframe from a solph result object
@@ -183,14 +191,6 @@ class DataFramePlot(ResultsDataFrame):
         super(DataFramePlot, self).__init__(**kwargs)
         self.subset = kwargs.get('subset')
         self.ax = kwargs.get('ax')
-
-    def slice_unstacked(self, **kwargs):
-        ""
-        unstacklevel = kwargs.get('unstacklevel', 'obj_uid')
-        subset = super(DataFramePlot, self).slice_by(**kwargs)
-        subset = subset.unstack(level=unstacklevel)
-        self.subset = subset
-        return self
 
     def color_from_dict(self, colordict):
         ""
