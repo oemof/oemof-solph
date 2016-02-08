@@ -224,20 +224,15 @@ class OptimizationModel(po.ConcreteModel):
 
         where `s` is a storage object.
 
-        The :class:`pyomo.environ.Objective` instance that represents the
-        objective function of this optimization model is stored under the
-        :attr:`objective` attribute so you an access the value of the objective
-        function in the following two equivalent ways:
-
-          * :meth:`om.results().objective()`
-          * :meth:`om.results().objective.value()`
+        The value of the objective function is stored under the
+        :attr:`om.results().objective` attribute.
 
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
         # TODO: Maybe make the results dictionary a proper object?
         result = UD()
-        result.objective = self.objective
+        result.objective = self.objective()
         for entity in self.entities:
             if ( isinstance(entity, cp.Transformer) or
                  isinstance(entity, cp.Transport)   or
