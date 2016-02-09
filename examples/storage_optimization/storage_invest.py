@@ -184,26 +184,55 @@ cdict = {'wind': '#5b5bae',
          'pp_gas': '#636f6b',
          'demand': '#ce4aff'}
 
-# Plotting line plots
+# New way of plotting
 myplot = tpd.DataFramePlot(energy_system=energysystem)
-myplot.plot_bus(bus_uid="bel", bus_type="el", type="input",
-                date_from="2012-01-01 00:00:00", colordict=cdict,
-                date_to="2012-01-31 00:00:00",
-                title="January 2016", xlabel="Power in MW",
-                ylabel="Date", tick_distance=24*7)
+myplot.slice_unstacked(bus_uid="bel", type="input",
+                       date_from="2012-01-01 00:00:00",
+                       date_to="2012-01-31 00:00:00")
+colorlist = myplot.color_from_dict(cdict)
+myplot.plot(color=colorlist, linewidth=2, title="January 2016")
+myplot.ax.legend(loc='upper right')
+myplot.ax.set_ylabel('Power in MW')
+myplot.ax.set_xlabel('Date')
+myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
 # Minimal parameter
-myplot.plot_bus(bus_uid="bel", type="output", title="Year 2016")
+# New way
+myplot.slice_unstacked(bus_uid="bel", type="output")
+myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
+myplot.ax.legend(loc='upper right')
+myplot.ax.set_ylabel('Power in MW')
+myplot.ax.set_xlabel('Date')
+myplot.set_datetime_ticks()
 
 plt.show()
 
 # Plotting a combined stacked plot
+fig = plt.figure(figsize=(24, 14))
+plt.rc('legend', **{'fontsize': 19})
+plt.rcParams.update({'font.size': 19})
+plt.style.use('grayscale')
 
-myplot.stackplot("bel",
-                 colordict=cdict,
-                 date_from="2012-06-01 00:00:00",
-                 date_to="2012-06-8 00:00:00",
-                 title="Electricity bus",
-                 ylabel="Power in MW", xlabel="Date",
-                 linewidth=4,
-                 tick_distance=24, save=True)
+handles, labels = myplot.io_plot(
+    bus_uid="bel", cdict=cdict, line_kwa={'linewidth': 4},
+    ax=fig.add_subplot(1, 1, 1),
+    date_from="2012-06-01 00:00:00",
+    date_to="2012-06-8 00:00:00",
+    )
+myplot.ax.set_ylabel('Power in MW')
+myplot.ax.set_xlabel('Date')
+myplot.ax.set_title("Electricity bus")
+myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
+myplot.outside_legend(handles=handles, labels=labels)
+
+plt.show()
+
+# Simple io_plot (new way)
+myplot.io_plot(
+    bus_uid="bel", cdict=cdict, line_kwa={'linewidth': 4},
+    date_from="2012-06-01 00:00:00",
+    date_to="2012-06-8 00:00:00",
+    )
+myplot.set_datetime_ticks(date_format='%d-%m')
+
+plt.show()
