@@ -386,7 +386,8 @@ class DataFramePlot(ResultsDataFrame):
             n += 1
         new_df.sort_index(axis=1, ascending=False, inplace=True)
         colorlist = self.color_from_dict(cdict)
-        colorlist.reverse()
+        if isinstance(colorlist, list):
+            colorlist.reverse()
         separator = len(colorlist)
         new_df.plot(kind='line', ax=self.ax, color=colorlist,
                     drawstyle='steps-mid', **line_kwa)
