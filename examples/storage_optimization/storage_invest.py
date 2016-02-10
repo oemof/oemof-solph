@@ -155,27 +155,9 @@ logging.info('Optimise the energy system')
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
 energysystem.optimize()
-
-# energysystem.dump()
-# energysystem.restore()
-
-# Creation of a multi-indexed pandas dataframe
-es_df = tpd.EnergySystemDataFrame(energy_system=energysystem)
-
-# Example usage of dataframe object
-es_df.data_frame.describe
-es_df.data_frame.index.get_level_values('bus_uid').unique()
-es_df.data_frame.index.get_level_values('bus_type').unique()
-
-# Example slice (see http://pandas.pydata.org/pandas-docs/stable/advanced.html)
-idx = pd.IndexSlice
-es_df.data_frame.loc[idx[:,
-                         'el',
-                         :,
-                         slice('pp_gas', 'pv'),
-                         slice(
-                             pd.Timestamp("2012-01-01 00:00:00"),
-                             pd.Timestamp("2012-01-01 01:00:00"))], :]
+#
+#energysystem.dump()
+#energysystem.restore()
 
 logging.info('Plot the results')
 
@@ -185,27 +167,44 @@ cdict = {'wind': '#5b5bae',
          'pp_gas': '#636f6b',
          'demand': '#ce4aff'}
 
-# Plotting line plots
-es_df.plot_bus(bus_uid="bel", bus_type="el", type="input",
-               date_from="2012-01-01 00:00:00", colordict=cdict,
-               date_to="2012-01-31 00:00:00",
-               title="January 2016", xlabel="Power in MW",
-               ylabel="Date", tick_distance=24*7)
+# Plotting the input flows of the electricity bus for January
+myplot = tpd.DataFramePlot(energy_system=energysystem)
+myplot.slice_unstacked(bus_uid="bel", type="input",
+                       date_from="2012-01-01 00:00:00",
+                       date_to="2012-01-31 00:00:00")
+colorlist = myplot.color_from_dict(cdict)
+myplot.plot(color=colorlist, linewidth=2, title="January 2012")
+myplot.ax.legend(loc='upper right')
+myplot.ax.set_ylabel('Power in MW')
+myplot.ax.set_xlabel('Date')
+myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
-# Minimal parameter
-es_df.plot_bus(bus_uid="bel", type="output", title="Year 2016")
+# Plotting the output flows of the electricity bus for January
+myplot.slice_unstacked(bus_uid="bel", type="output")
+myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
+myplot.ax.legend(loc='upper right')
+myplot.ax.set_ylabel('Power in MW')
+myplot.ax.set_xlabel('Date')
+myplot.set_datetime_ticks()
 
 plt.show()
 
 # Plotting a combined stacked plot
+fig = plt.figure(figsize=(24, 14))
+plt.rc('legend', **{'fontsize': 19})
+plt.rcParams.update({'font.size': 19})
+plt.style.use('grayscale')
 
-es_df.stackplot("bel",
-                colordict=cdict,
-                date_from="2012-06-01 00:00:00",
-                date_to="2012-06-8 00:00:00",
-                title="Electricity bus",
-                ylabel="Power in MW", xlabel="Date",
-                linewidth=4,
-                tick_distance=24, save=True)
+handles, labels = myplot.io_plot(
+    bus_uid="bel", cdict=cdict, line_kwa={'linewidth': 4},
+    ax=fig.add_subplot(1, 1, 1),
+    date_from="2012-06-01 00:00:00",
+    date_to="2012-06-8 00:00:00",
+    )
+myplot.ax.set_ylabel('Power in MW')
+myplot.ax.set_xlabel('Date')
+myplot.ax.set_title("Electricity bus")
+myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
+myplot.outside_legend(handles=handles, labels=labels)
 
 plt.show()
