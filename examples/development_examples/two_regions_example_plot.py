@@ -58,7 +58,7 @@ TwoRegExample = es.EnergySystem()
 # Restoring a dumped EnergySystem
 logging.info(TwoRegExample.restore())
 
-es_df = tpd.EnergySystemDataFrame(energy_system=TwoRegExample)
+esplot = tpd.DataFramePlot(energy_system=TwoRegExample)
 
 fig = plt.figure(figsize=(24, 14))
 plt.rc('legend', **{'fontsize': 19})
@@ -71,28 +71,23 @@ n = 1
 for region in TwoRegExample.regions:
     uid = str(('bus', region.name, 'elec'))
 
-    ax = fig.add_subplot(2, 1, n)
+    esplot.ax = fig.add_subplot(2, 1, n)
     n += 1
-    es_df.stackplot_part(
-        uid, ax,
+    handles, labels = esplot.io_plot(
+        uid, cdict,
         date_from="2010-06-01 00:00:00",
         date_to="2010-06-8 00:00:00",
-        title=region.name, colordict=cdict,
-        ylabel="Power in MW", xlabel="",
-        linewidth=4,
-        tick_distance=24)
-
-    handles, labels = ax.get_legend_handles_labels()
+        line_kwa={'linewidth': 4})
 
     new_labels = []
     for lab in labels:
         new_labels.append(rename.get(str(lab), lab))
 
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.87, box.height])
+    esplot.ax.set_ylabel('Power in MW')
+    esplot.ax.set_xlabel('')
+    esplot.ax.set_title(region.name)
 
-    ax.legend(
-        reversed(handles), reversed(new_labels), loc='center left',
-        bbox_to_anchor=(1, 0.5), ncol=1, fancybox=True, shadow=True)
+    esplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
+    esplot.outside_legend(handles=handles, labels=new_labels)
 
 plt.show()

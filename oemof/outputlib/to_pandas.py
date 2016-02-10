@@ -356,9 +356,10 @@ class DataFramePlot(ResultsDataFrame):
             Manipulated labels to correct the unsual construction of the
             stack line plot. You can use them for further maipulations.
         """
-        self.ax = kwargs.get('ax')
+        self.ax = kwargs.get('ax', self.ax)
 
         if self.ax is None:
+            print('None')
             fig = plt.figure()
             self.ax = fig.add_subplot(1, 1, 1)
 
