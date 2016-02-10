@@ -4,6 +4,7 @@ v0.0.4 (February 26, 2016)
 New features
 ############
 
+ * Revise the outputlib according to (`issue #54 <https://github.com/oemof/oemof_base/issues/54>`_)
 
 Documentation
 #############
@@ -23,4 +24,9 @@ Other changes
 
 Contributors
 ############
+
+ * Cord Kaldemeyer
+ * Uwe Krien
+ * Simon Hilpert
+ * Stephan Günther
 

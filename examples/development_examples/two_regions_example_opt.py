@@ -5,10 +5,10 @@ import logging
 import pandas as pd
 import numpy as np
 
-from oemof_pg import db
-from oemof_pg import tools
-from oemof_pg import powerplants as db_pps
-from oemof_pg import feedin_pg
+from oemof import db
+from oemof.db import tools
+from oemof.db import powerplants as db_pps
+from oemof.db import feedin_pg
 from oemof.tools import logger
 from oemof.core import energy_system as es
 from oemof.solph import predefined_objectives as predefined_objectives
