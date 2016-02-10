@@ -155,26 +155,9 @@ logging.info('Optimise the energy system')
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
 energysystem.optimize()
-
-# energysystem.dump()
-# energysystem.restore()
-
-# Creation of a multi-indexed pandas dataframe
-es_df = tpd.ResultsDataFrame(energy_system=energysystem)
-
-# Example usage of dataframe object
-es_df
-es_df.describe
-es_df.index.get_level_values('bus_uid').unique()
-es_df.index.get_level_values('bus_type').unique()
-
-# Example slice (see http://pandas.pydata.org/pandas-docs/stable/advanced.html)
-idx = pd.IndexSlice
-es_df.loc[idx[:, 'el', :,
-              slice('pp_gas', 'pv'),
-              slice(
-                  pd.Timestamp("2012-01-01 00:00:00"),
-                  pd.Timestamp("2012-01-01 01:00:00"))], :]
+#
+#energysystem.dump()
+#energysystem.restore()
 
 logging.info('Plot the results')
 
@@ -184,20 +167,19 @@ cdict = {'wind': '#5b5bae',
          'pp_gas': '#636f6b',
          'demand': '#ce4aff'}
 
-# New way of plotting
+# Plotting the input flows of the electricity bus for January
 myplot = tpd.DataFramePlot(energy_system=energysystem)
 myplot.slice_unstacked(bus_uid="bel", type="input",
                        date_from="2012-01-01 00:00:00",
                        date_to="2012-01-31 00:00:00")
 colorlist = myplot.color_from_dict(cdict)
-myplot.plot(color=colorlist, linewidth=2, title="January 2016")
+myplot.plot(color=colorlist, linewidth=2, title="January 2012")
 myplot.ax.legend(loc='upper right')
 myplot.ax.set_ylabel('Power in MW')
 myplot.ax.set_xlabel('Date')
 myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
-# Minimal parameter
-# New way
+# Plotting the output flows of the electricity bus for January
 myplot.slice_unstacked(bus_uid="bel", type="output")
 myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
 myplot.ax.legend(loc='upper right')
@@ -224,15 +206,5 @@ myplot.ax.set_xlabel('Date')
 myplot.ax.set_title("Electricity bus")
 myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
 myplot.outside_legend(handles=handles, labels=labels)
-
-plt.show()
-
-# Simple io_plot (new way)
-myplot.io_plot(
-    bus_uid="bel", cdict=cdict, line_kwa={'linewidth': 4},
-    date_from="2012-06-01 00:00:00",
-    date_to="2012-06-8 00:00:00",
-    )
-myplot.set_datetime_ticks(date_format='%d-%m')
 
 plt.show()
