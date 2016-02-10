@@ -144,11 +144,10 @@ for k, v in energy_system.results.items():
 
 # plot
 esplot = tpd.DataFramePlot(energy_system=energy_system)
-esplot.slice_unstacked(bus_uid="b_el", type="input",
-                       date_from="2012-01-01 00:00:00",
-                       date_to="2012-01-31 00:00:00")
-esplot.plot(title="January 2016", stacked=True, width=1, lw=0.2, kind='bar')
+esplot.slice_unstacked(bus_uid="b_el", type="input")
+esplot.plot(title="January 2016", stacked=True, width=1, lw=0.1, kind='bar')
 esplot.ax.set_ylabel('Power in MW')
 esplot.ax.set_xlabel('Date')
-esplot.set_datetime_ticks(tick_distance=24*7)
+esplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m')
+esplot.outside_legend(reverse=True)
 plt.show()
