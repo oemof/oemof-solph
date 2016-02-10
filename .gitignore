@@ -11,6 +11,7 @@
 *.png
 *.pdf
 .idea
+tests/lp_files/tmp.lp
 doc/_build/
 dist/*
 oemof.egg-info/*
