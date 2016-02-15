@@ -1,8 +1,7 @@
 from .. import Bus
-from
 
 
-class HeatBuse(Bus):
+class HeatBus(Bus):
     r"""
     Parameters
     ----------
