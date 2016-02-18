@@ -4,6 +4,7 @@
 @author: Simon Hilpert simon.hilpert@fh-flensburg.de
 """
 import pandas as pd
+import logging
 from ..core.network.entities import Bus
 from ..core.network.entities.components import sources as source
 from ..core.network.entities.components import sinks as sink
@@ -275,7 +276,7 @@ def entities_from_csv(files, entities_dict=None):
         if file is not None:
             busprices = pd.read_csv(file)
         else:
-            raise Warning('No csv data for bus prices!')
+            logging.info('No csv data for bus prices!')
             busprices = pd.DataFrame()
         bus_df.apply(add_bus, axis=1, busprices=busprices,
                      busses=entities_dict['busses'])

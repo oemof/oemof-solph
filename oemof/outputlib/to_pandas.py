@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8
 
-import os
 import logging
 import pandas as pd
 try:
@@ -9,14 +8,10 @@ try:
 except:
     logging.warning('Matplotlib does not work.')
 
-# TODO:
-# - Make dataframe creation and plotting configurable with as less code as
-#   possible via self.result_object.get(i, {} and **kwargs
 
-
-class EnergySystemDataFrame:
+class ResultsDataFrame(pd.DataFrame):
     r"""Creates a multi-indexed pandas dataframe from a solph result object
-    and holds methods to plot subsets of the data.
+    and holds methods to create subsets of the data.
 
     Note
     ----
@@ -24,405 +19,388 @@ class EnergySystemDataFrame:
 
     Parameters
     ----------
-    result_object : dictionary
-        solph result objects
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe.
-        If not set, all busses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
 
-    Attributes
-    ----------
-    result_object : dictionary
-        solph result objects
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe.
-        If not set, all busses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
-    data_frame : pandas dataframe
-        Multi-indexed pandas dataframe holding the data from the result object.
-        For more information on advanced dataframe indexing see:
-        http://pandas.pydata.org/pandas-docs/stable/advanced.html
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
+    energy_system : class:`Entity <oemof.core.EnergySystem>`
+        energy supply system
     """
+
     def __init__(self, **kwargs):
         # default values if not arguments are passed
-        self.energy_system = kwargs.get('energy_system')
-        self.bus_uids = kwargs.get('bus_uids')
-        self.bus_types = kwargs.get('bus_types')
-        self.data_frame = None
-        self.result_object = kwargs.get('result_object')
-        self.time_slice = kwargs.get('time_slice')
-        if self.time_slice is None:
-            self.time_slice = self.energy_system.time_idx
-        if self.result_object is None:
-            try:
-                self.result_object = self.energy_system.results
-            except:
-                raise ValueError('Could not set attribute `result_object` ' +
-                                 'from energsystem.results.')
-        if not self.bus_uids:
-            self.bus_uids = [e.uid for e in self.result_object.keys()
-                             if 'Bus' in str(e.__class__)]
-        if not self.bus_types:
-            self.bus_types = [e.type for e in self.result_object.keys()
-                              if 'Bus' in str(e.__class__)]
-        if not (self.data_frame):
-            self.data_frame = self.create()
+        es = kwargs.get('energy_system')
 
-    def create(self):
-        r""" Method for creating a multi-index pandas dataframe of
-        the result object
+        rows_list = []
+        for k, v in es.results.items():
+            if ('Bus' in str(k.__class__)):
+                if k in v.keys():
+                    for kk, vv in v.items():
+                        if(k is kk):
+                            # duals (results[bus][bus])
+                            row = {}
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'other'
+                            row['obj_uid'] = 'duals'
+                            row['datetime'] = es.time_idx
+                            row['val'] = v.get(k)
+                            rows_list.append(row)
+                else:
+                    for kk, vv in v.items():
+                        if (isinstance(kk, str)):
+                            row = {}
+                            # bus variables (results[bus]['some_key'])
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'other'
+                            row['obj_uid'] = kk
+                            row['datetime'] = es.time_idx
+                            row['val'] = vv
+                            rows_list.append(row)
+                        else:
+                            # bus outputs (results[bus][component])
+                            row = {}
+                            row['bus_uid'] = k.uid
+                            row['bus_type'] = k.type
+                            row['type'] = 'output'
+                            row['obj_uid'] = kk.uid
+                            row['datetime'] = es.time_idx
+                            row['val'] = vv
+                            rows_list.append(row)
+            else:
+                if k in v.keys():
+                    # self ref. components (results[component][component])
+                    for kk, vv in v.items():
+                        if(k is kk):
+                            # self ref. comp. (results[component][component])
+                            row = {}
+                            row['bus_uid'] = k.outputs[0].uid
+                            row['bus_type'] = k.outputs[0].type
+                            row['type'] = 'other'
+                            row['obj_uid'] = k.uid
+                            row['datetime'] = es.time_idx
+                            row['val'] = vv
+                            rows_list.append(row)
+                        else:
+                            # bus inputs (only self ref. components)
+                            row = {}
+                            row['bus_uid'] = k.outputs[0].uid
+                            row['bus_type'] = k.outputs[0].type
+                            row['type'] = 'input'
+                            row['obj_uid'] = k.uid
+                            row['datetime'] = es.time_idx
+                            row['val'] = v.get(k.outputs[0])
+                            rows_list.append(row)
+                else:
+                    for kk, vv in v.items():
+                        # bus inputs (results[component][bus])
+                        row = {}
+                        row['bus_uid'] = kk.uid
+                        row['bus_type'] = kk.type
+                        row['type'] = 'input'
+                        row['obj_uid'] = k.uid
+                        row['datetime'] = es.time_idx
+                        row['val'] = vv
+                        rows_list.append(row)
 
-        Parameters
-        ----------
-        self : EnergySystemDataFrame() instance
-        """
-        df = pd.DataFrame(columns=['bus_uid', 'bus_type', 'type',
-                                   'obj_uid', 'datetime', 'val'])
-        for e, o in self.result_object.items():
-            # busses
-            if ('Bus' in str(e.__class__) and
-                    e.uid in self.bus_uids and
-                    e.type in self.bus_types):
-                row = pd.DataFrame()
-                # inputs
-                for i in e.inputs:
-                    if i in self.result_object:
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['input']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
-                    # self referenced components
-                    if i in self.result_object.get(i, {}):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = [i.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [self.result_object[i].get(e)]
-                        df = df.append(row)
-                # outputs
-                for k, v in o.items():
-                    # skip self referenced entries (duals, etc.) and
-                    # string keys to put them into "other"
-                    if k is not e and not (isinstance(k, str)):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['output']
-                        row['obj_uid'] = [k.uid]
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
-                        df = df.append(row)
-                # other
-                for k, v in o.items():
-                    # self referenced entries (duals, etc.)
-                    if isinstance(k, str):
-                        row['bus_uid'] = [e.uid]
-                        row['bus_type'] = [e.type]
-                        row['type'] = ['other']
-                        row['obj_uid'] = ['duals']
-                        row['datetime'] = [self.time_slice]
-                        row['val'] = [v]
-                        df = df.append(row)
-
-        # split date and value lists columns into rows (long format)
-        df_long = pd.DataFrame()
-        for index, cols in df.iterrows():
-            df_extract = pd.DataFrame.from_dict(
-                {'datetime': cols.ix['datetime'],
-                 'val': cols.ix['val']})
-            df_extract = pd.concat(
-                [df_extract, cols.drop(['datetime', 'val']).to_frame().T],
-                axis=1).fillna(method='ffill').fillna(method='bfill')
-            df_long = pd.concat([df_long, df_extract], ignore_index=True)
+        # split date and value lists to tuples
+        tuples = [
+            (item['bus_uid'], item['bus_type'], item['type'], item['obj_uid'],
+             date, val)
+            for item in rows_list for date, val in zip(item['datetime'],
+                                                       item['val'])]
 
         # create multiindexed dataframe
-        arrays = [df_long['bus_uid'], df_long['bus_type'], df_long['type'],
-                  df_long['obj_uid'], df_long['datetime']]
-        tuples = list(zip(*arrays))
-        index = pd.MultiIndex.from_tuples(tuples,
-                                          names=['bus_uid', 'bus_type', 'type',
-                                                 'obj_uid', 'datetime'])
-        df_multiindex = pd.DataFrame(df_long['val'].values,
-                                     columns=['val'], index=index)
-        # sort MultiIndex to work correctly
-        df_multiindex.sort_index(inplace=True)
+        index = ['bus_uid', 'bus_type', 'type',
+                 'obj_uid', 'datetime']
 
-        return df_multiindex
+        columns = index + ['val']
 
-    def plot_bus(self, bus_uid, **kwargs):
-        r""" Method for plotting all inputs/outputs of a bus
+        super().__init__(tuples, columns=columns)
+        self.set_index(index, inplace=True)
+        self.sort_index(inplace=True)
+
+    def slice_by(self, **kwargs):
+        r""" Method for slicing the ResultsDataFrame. A subset is returned.
 
         Parameters
         ----------
         bus_uid : string
         bus_type : string (e.g. "el" or "gas")
         type : string (input/output/other)
-        date_from : string, optional
+        obj_uid: string
+        date_from : string
             Start date selection e.g. "2016-01-01 00:00:00". If not set, the
             whole time range will be plotted.
-        date_to : string, optional
+        date_to : string
             End date selection e.g. "2016-03-01 00:00:00". If not set, the
             whole time range will be plotted.
+
         """
-        kwargs.setdefault('date_from', self.time_slice[0])
-        kwargs.setdefault('date_to', self.time_slice[-1])
-        kwargs.setdefault('type', None)
-        kwargs.setdefault('kind', 'line')
-        kwargs.setdefault('title', 'Connected components')
-        kwargs.setdefault('xlabel', 'Date')
-        kwargs.setdefault('ylabel', 'Power in MW')
-        kwargs.setdefault('date_format', '%d-%m-%Y')
-        kwargs.setdefault('subplots', False)
-        kwargs.setdefault('colormap', 'Spectral')
-        kwargs.setdefault('df_plot_kwargs', {})
-        kwargs.setdefault('linewidth', 2)
-        kwargs.setdefault('number_autoticks', 3)
+        kwargs.setdefault('bus_uid', slice(None))
+        kwargs.setdefault('bus_type', slice(None))
+        kwargs.setdefault('type', slice(None))
+        kwargs.setdefault('obj_uid', slice(None))
+        kwargs.setdefault(
+            'date_from', self.index.get_level_values('datetime')[0])
+        kwargs.setdefault(
+            'date_to', self.index.get_level_values('datetime')[-1])
 
         # slicing
         idx = pd.IndexSlice
 
-        subset = self.data_frame.loc[idx[
-            [bus_uid],
-            :,
-            [kwargs.get('type')],
-            :,
-            slice(
-                pd.Timestamp(kwargs['date_from']),
-                pd.Timestamp(kwargs['date_to']))], :]
+        subset = self.loc[idx[
+            kwargs['bus_uid'],
+            kwargs['bus_type'],
+            kwargs['type'],
+            kwargs['obj_uid'],
+            slice(pd.Timestamp(kwargs['date_from']),
+                  pd.Timestamp(kwargs['date_to']))], :]
 
-        # remove components/obj_uids that contain passed substring
-        if kwargs.get('exclude_obj_uid_substring'):
-            subset = subset.iloc[
-                ~subset.index.get_level_values('obj_uid').str
-                .contains(kwargs.get('exclude_obj_uid_substring'))]
+        return subset
 
-        # extract levels to use them in plot
-        obj_uids = subset.index.get_level_values('obj_uid').unique()
-        dates = subset.index.get_level_values('datetime').unique()
+    def slice_unstacked(self, unstacklevel='obj_uid', **kwargs):
+        r"""Method for slicing the ResultsDataFrame. A unstacked
+        subset is returned.
 
-        # unstack object/component level to get columns
-        subset = subset.unstack(level='obj_uid')
+        Parameters
+        ----------
+        unstacklevel : string (default: 'obj_uid')
+            Level to unstack the subset of the DataFrame.
+        """
+        subset = self.slice_by(**kwargs)
+        return subset.unstack(level=unstacklevel)
 
-        # Create color list from color dictionary
-        if kwargs.get('colordict'):
-            kwargs['colormap'] = None
-            clist = list(
-                map(kwargs.get('colordict').get, list(subset['val'].columns)))
-            clist = ['#ff00f0' if v is None else v for v in clist]
-            if len(clist) == 1:
-                kwargs['df_plot_kwargs']['color'] = clist[0]
-            else:
-                kwargs['df_plot_kwargs']['color'] = clist
 
-        # if no tick distance is set, it is set automatically
-        if not kwargs.get('tick_distance'):
-            # if the ticks are set automatically date and time are shown
-            kwargs['tick_distance'] = int(len(dates) /
-                                          kwargs['number_autoticks']) - 1
-            kwargs['date_format'] = '%d-%m-%Y %H:%M'
+class DataFramePlot(ResultsDataFrame):
+    r"""Creates plots based on the subset of a multi-indexed pandas dataframe
+    of the :class:`ResultsDataFrame class
+    <oemof.outputlib.to_pandas.ResultsDataFrame>`.
 
-        # plotting: set matplotlib style
-        if kwargs.get('mpl_style'):
-            plt.style.use(kwargs.get('mpl_style'))
+    Parameters
+    ----------
+    subset : pandas.DataFrame
+        A subset of the results DataFrame.
+    ax : matplotlib axis object
+        Axis object of the last plot.
 
-        # plotting: basic pandas plot
-        ax = subset.plot(
-            kind=kwargs.get('kind'), colormap=kwargs.get('colormap'),
-            title=kwargs.get('title'), linewidth=kwargs.get('linewidth'),
-            subplots=kwargs.get('subplots'), **kwargs['df_plot_kwargs'])
+    Attributes
+    ----------
+    subset : pandas.DataFrame
+        A subset of the results DataFrame.
+    ax : matplotlib axis object
+        Axis object of the last plot.
+    """
 
-        # plotting: adjustments
-        ax.set_ylabel(kwargs.get('ylabel')),
-        ax.set_xlabel(kwargs.get('xlabel')),
-        # ax.set_xticks(range(0,len(dates),1), minor=True),
-        ax.set_xticks(range(0, len(dates), kwargs.get('tick_distance')),
-                      minor=False)
-        ax.set_xticklabels(
-            [item.strftime(kwargs['date_format'])
-             for item in dates.tolist()[0::kwargs.get('tick_distance')]],
+    def __init__(self, **kwargs):
+        super(DataFramePlot, self).__init__(**kwargs)
+        self.subset = kwargs.get('subset')
+        self.ax = kwargs.get('ax')
+
+    def slice_unstacked(self, unstacklevel='obj_uid', **kwargs):
+        r"""Method for slicing the ResultsDataFrame. The subset attribute
+        will set to an unstacked subset. The self-attribute is returned to
+        allow chaining. This method is an extension of the
+        :class:`slice_unstacked <ResultsDataFrame.slice_unstacked>` method
+        of the `ResultsDataFrame` class (parent class).
+
+        Parameters
+        ----------
+        unstacklevel : string (default: 'obj_uid')
+            Level to unstack the subset of the DataFrame.
+        """
+        self.subset = super(
+            DataFramePlot, self).slice_unstacked(
+                unstacklevel='obj_uid', **kwargs)
+        return self
+
+    def color_from_dict(self, colordict):
+        r""" Method to convert a dictionary containing the components and its
+        colors to a color list that can be directly useed with the color
+        parameter of the pandas plotting method.
+
+        Parameters
+        ----------
+        colordict : dictionary
+            A dictionary that has all possible components as keys and its
+            colors as items.
+
+        Returns
+        -------
+        list
+            Containing the colors of all components of the subset attribute
+        """
+        tmplist = list(
+            map(colordict.get, list(self.subset['val'].columns)))
+        tmplist = ['#ff00f0' if v is None else v for v in tmplist]
+        if len(tmplist) == 1:
+            colorlist = tmplist[0]
+        else:
+            colorlist = tmplist
+        return colorlist
+
+    def set_datetime_ticks(self, tick_distance=None, number_autoticks=3,
+                           date_format='%d-%m-%Y %H:%M'):
+        r""" Set configurable ticks for the time axis. One can choose the
+        number of ticks or the distance between ticks and the format.
+
+        Parameters
+        ----------
+        tick_distance : real
+            The disctance between to ticks in hours. If not set autoticks are
+            set (see number_autoticks).
+        number_autoticks : int (default: 3)
+            The number of ticks on the time axis, independent of the time
+            range. The higher the number of ticks is, the shorter should be the
+            date_format string.
+        date_format : string (default: '%d-%m-%Y %H:%M')
+            The string to define the format of the date and time. See
+            https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+            for more information.
+        """
+        dates = self.subset.index.get_level_values('datetime').unique()
+        if tick_distance is None:
+            tick_distance = int(len(dates) / number_autoticks) - 1
+        self.ax.set_xticks(range(0, len(dates), tick_distance),
+                           minor=False)
+        self.ax.set_xticklabels(
+            [item.strftime(date_format)
+             for item in dates.tolist()[0::tick_distance]],
             rotation=0, minor=False)
 
-        ax.legend(obj_uids, loc='upper right')
-        return ax
-
-    def stackplot(self, bus_uid, **kwargs):
-        r"""Creating a stackplot for the given bus.
-
-        Parameters
-        ----------
-        bus_uid : string
-            Uid of the bus to plot.
-        autostyle : boolean, optional (default: False)
-            Skips the figure_size, tick_distance, style and the legend settings
-            and uses the autoformat of the pandas plot function instead.
-        date_from : string, optional
-            Start date selection e.g. "2016-01-01 00:00:00". If not set, the
-            whole time range will be plotted.
-        date_to : string, optional
-            End date selection e.g. "2016-03-01 00:00:00". If not set, the
-            whole time range will be plotted.
-        figheight : int, optional (default: 14)
-            Height of the figure. "autostyle=True" will disable this parameter.
-        fighwidth : int, optional (default: 24)
-            Width of the figure. "autostyle=True" will disable this parameter.
-        fontgeneral : int, optional (default: 19)
-            General font size. "autostyle=True" will disable this parameter.
-        fontlegend : int, optional (default: 19)
-            Font size of the legend. "autostyle=True" will disable this
-            parameter.
-        show : boolean, optional (default: True)
-            Show the plot on the screen.
-        save : boolean, optional (default: False)
-            Save the plot to disc as a pdf file.
-        savename : string, optional (default: 'stackplot' + bus_uid)
-            Name of the file without the suffix.
-        savepath : string, optional (default: '~/.oemof/plots')
-            Path for the plots.
-        style : string, optional (default: 'grayscale')
-            Possible values are 'bmh', 'grayscale', 'fivethirtyeight',
-            'dark_background', 'ggplot'. See the `matplotlib documentation
-            <http://matplotlib.org/users/style_sheets.html>`_ for more
-            information. "autostyle=True" will disable this parameter.
-        """
-        logging.info('Creating stackplot for Bus: {0}'.format(bus_uid))
-
-        kwargs.setdefault('autostyle', False)
-        kwargs.setdefault('figwidth', 24)
-        kwargs.setdefault('figheight', 14)
-        kwargs.setdefault('fontlegend', 19)
-        kwargs.setdefault('fontgeneral', 19)
-        kwargs.setdefault('style', 'grayscale')
-        kwargs.setdefault('show', True)
-        kwargs.setdefault('save', False)
-        kwargs.setdefault('savename', 'stackplot_{0}'.format(str(bus_uid)))
-        kwargs.setdefault('savepath', os.path.join(
-            os.environ['HOME'], '.oemof', 'plots'))
-
-        if not kwargs['autostyle']:
-            fig = plt.figure(figsize=(kwargs['figwidth'], kwargs['figheight']))
-            plt.rc('legend', **{'fontsize': kwargs['fontlegend']})
-            plt.rcParams.update({'font.size': kwargs['fontgeneral']})
-            plt.style.use(kwargs['style'])
-        else:
-            fig = plt.figure()
-
-        ax = fig.add_subplot(1, 1, 1)
-
-        self.stackplot_part(bus_uid, ax, **kwargs)
-
-        if kwargs['save']:
-            if not os.path.isdir(kwargs['savepath']):
-                os.mkdir(kwargs['savepath'])
-            fullpath = os.path.join(kwargs['savepath'],
-                                    kwargs['savename'] + '.pdf')
-            logging.info('Saving plot to {0}'.format(fullpath))
-            fig.savefig(fullpath)
-        if kwargs['show']:
-            plt.show(fig)
-        plt.close(fig)
-
-    def stackplot_part(self, bus_uid, ax, **kwargs):
-        r"""Creating a stackplot for the given bus. This is only the core part
-        of the plot method to use within a subplot. To plot one bus in one step
-        you should use the :meth:`stackplot`.
+    def outside_legend(self, reverse=False, plotshare=0.9, **kwargs):
+        r""" Move the legend outside the plot. Bases on the ideas of Joe
+        Kington. See
+        http://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot
+        for more information.
 
         Parameters
         ----------
-        bus_uid : string
-            Uid of the bus to plot.
-        autostyle : boolean, optional (default: False)
-            Skips the figure_size, tick_distance, style and the legend settings
-            and uses the autoformat of the pandas plot function instead.
-        date_from : string, optional
-            Start date selection e.g. "2016-01-01 00:00:00". If not set, the
-            whole time range will be plotted.
-        date_to : string, optional
-            End date selection e.g. "2016-03-01 00:00:00". If not set, the
-            whole time range will be plotted.
-        tick_distance : int, optional
-            Distance between two ticks of the x-axis in hours.
-            "autostyle=True" will disable this parameter.
-        date_format : string, optional (default: '%d-%m-%Y')
-            Format of the date and time in the x-axis.
-            "autostyle=True" will disable this parameter.
+        reverse : boolean (default: False)
+            Print out the legend in reverse order. This is interesting for
+            stack-plots to have the legend in the same order as the stacks.
+        plotshare : real (default: 0.9)
+            Share of the plot area to create space for the legend (0 to 1).
+        loc : string (default: 'center left')
+            Location of the plot.
+        bbox_to_anchor : tuple (default: (1, 0.5))
+            Set the anchor for the legend.
+        ncol : integer (default: 1)
+            Number of columns of the legend.
+        handles : list of handles
+            A list of handels if they are already modified by another function
+            or method. Normally these handles will be automatically taken from
+            the artis object.
+        lables : list of labels
+            A list of labels if they are already modified by another function
+            or method. Normally these handles will be automatically taken from
+            the artis object.
+        Note
+        ----
+        All keyword arguments (kwargs) will be directly passed to the
+        matplotlib legend class. See
+        http://matplotlib.org/api/legend_api.html#matplotlib.legend.Legend
+        for more parameters.
         """
-
-        # Define default values
-        kwargs.setdefault('bus_uid', None)
-        kwargs.setdefault('bus_type', None)
-        kwargs.setdefault('ax', None)
-        kwargs.setdefault('date_from', self.energy_system.time_idx[0])
-        kwargs.setdefault('date_to', self.energy_system.time_idx[-1])
-        kwargs.setdefault('autostyle', False)
-        kwargs.setdefault('width', 1)
-        kwargs.setdefault('title', 'Connected components')
-        kwargs.setdefault('xlabel', 'Date')
-        kwargs.setdefault('ylabel', 'Power in MW')
-        kwargs.setdefault('date_format', '%d-%m-%Y')
-        kwargs.setdefault('tick_distance', None)
-        kwargs.setdefault('subplots', False)
-        kwargs.setdefault('colormap_bar', 'Spectral')
-        kwargs.setdefault('colormap_line', 'jet')
-        kwargs.setdefault('df_plot_kwargs', {})
-        kwargs.setdefault('linewidth', 2)
         kwargs.setdefault('loc', 'center left')
         kwargs.setdefault('bbox_to_anchor', (1, 0.5))
         kwargs.setdefault('ncol', 1)
-        kwargs.setdefault('fancybox', True)
-        kwargs.setdefault('shadow', True)
-        kwargs.setdefault('drawstyle', 'steps-mid')
+        handles = kwargs.pop('handles', self.ax.get_legend_handles_labels()[0])
+        labels = kwargs.pop('labels', self.ax.get_legend_handles_labels()[1])
 
-        if kwargs['autostyle']:
-            kwargs['tick_distance'] = False
+        if reverse:
+            handles.reverse()
+            labels.reverse()
 
-        my_kwargs = {
-            'ax': ax,
-            'width': kwargs['width'],
-            'stacked': True}
+        box = self.ax.get_position()
+        self.ax.set_position([box.x0, box.y0, box.width * plotshare,
+                              box.height])
 
-        ax = self.plot_bus(
-            bus_uid, date_from=kwargs['date_from'], date_to=kwargs['date_to'],
-            type="input", kind='bar', linewidth=0,
-            colormap=kwargs['colormap_bar'], title=kwargs['title'],
-            xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
-            colordict=kwargs.get('colordict'),
-            tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
+        self.ax.legend(handles, labels, **kwargs)
 
-        my_kwargs = {
-            'ax': ax,
-            'stacked': True,
-            'drawstyle': kwargs['drawstyle']}
+    def plot(self, **kwargs):
+        r""" Passing the subset attribute to the pandas plotting method. All
+        parameters will be directly passed to pandas.DataFrame.plot(). See
+        http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.plot.html
+        for more information.
 
-        ax = self.plot_bus(
-            bus_uid, date_from=kwargs['date_from'], date_to=kwargs['date_to'],
-            type="output", kind='line', linewidth=kwargs['linewidth'],
-            colormap=kwargs['colormap_line'], title=kwargs['title'],
-            colordict=kwargs.get('colordict'),
-            xlabel=kwargs['xlabel'], ylabel=kwargs['ylabel'],
-            tick_distance=kwargs['tick_distance'], df_plot_kwargs=my_kwargs)
+        Returns
+        -------
+        self
+        """
+        self.ax = self.subset.plot(**kwargs)
+        return self
 
-        handles, labels = ax.get_legend_handles_labels()
+    def io_plot(self, bus_uid, cdict, line_kwa={}, bar_kwa={}, **kwargs):
+        r""" Plotting a combined bar and line plot to see the fitting of in-
+        and outcomming flows of a bus balance.
 
-        if not kwargs['autostyle']:
-            box = ax.get_position()
-            ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
+        Parameters
+        ----------
+        bus_uid : string
+            Uid of the bus to plot the balance.
+        colordict : dictionary
+            A dictionary that has all possible components as keys and its
+            colors as items.
+        line_kw : dictionary
+            Keyword arguments to be passed to the pandas line plot.
+        bar_kw : dictionary
+            Keyword arguments to be passed to the pandas bar plot.
 
-            # Put a legend to the right of the current axis
-            ax.legend(reversed(handles), reversed(labels), loc=kwargs['loc'],
-                      bbox_to_anchor=kwargs['bbox_to_anchor'],
-                      ncol=kwargs['ncol'], fancybox=kwargs['fancybox'],
-                      shadow=kwargs['shadow'])
-        else:
-            ax.legend(reversed(handles), reversed(labels))
+        Note
+        ----
+        Further keyword arguments will be passed to the
+        :class:`slice_unstacked method <DataFramePlot.slice_unstacked>`.
+
+        Returns
+        -------
+        handles, labels
+            Manipulated labels to correct the unsual construction of the
+            stack line plot. You can use them for further maipulations.
+        """
+        self.ax = kwargs.get('ax', self.ax)
+
+        if self.ax is None:
+            print('None')
+            fig = plt.figure()
+            self.ax = fig.add_subplot(1, 1, 1)
+
+        # Create a bar plot for all input flows
+        self.slice_unstacked(bus_uid=bus_uid, type='input', **kwargs)
+        self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
+                         ax=self.ax, color=self.color_from_dict(cdict),
+                         **bar_kwa)
+
+        # Create a line plot for all output flows
+        self.slice_unstacked(bus_uid=bus_uid, type='output', **kwargs)
+
+        # The following changes are made to have the bottom line on top layer
+        # of all lines. Normally the bottom line is the first line that is
+        # plotted and will be on the lowest layer. This is difficult to read.
+        new_df = pd.DataFrame(index=self.subset.index)
+        n = 0
+        tmp = 0
+        for col in self.subset.columns:
+            if n < 1:
+                new_df[col] = self.subset[col]
+            else:
+                new_df[col] = self.subset[col] + tmp
+            tmp = new_df[col]
+            n += 1
+        new_df.sort_index(axis=1, ascending=False, inplace=True)
+        colorlist = self.color_from_dict(cdict)
+        if isinstance(colorlist, list):
+            colorlist.reverse()
+        separator = len(colorlist)
+        new_df.plot(kind='line', ax=self.ax, color=colorlist,
+                    drawstyle='steps-mid', **line_kwa)
+
+        # Adapt the legend to the new oder
+        handles, labels = self.ax.get_legend_handles_labels()
+        tmp_lab = [x for x in reversed(labels[0:separator])]
+        tmp_hand = [x for x in reversed(handles[0:separator])]
+        handles = tmp_hand + handles[separator:]
+        labels = tmp_lab + labels[separator:]
+        labels.reverse()
+        handles.reverse()
+
+        self.ax.legend(handles, labels)
+        return handles, labels

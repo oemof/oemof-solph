@@ -13,7 +13,7 @@ To install the developer version two steps are necessary:
 
 .. code:: bash
 
-  git clone git@github.com:oemof/oemof_base.git
+  git clone git@github.com:oemof/oemof.git
   sudo pip3 install -e /path/to/the/repository
   
 Documentation
