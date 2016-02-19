@@ -43,7 +43,7 @@ def add_opex_var(model, block, ref='output'):
                    for t in model.timesteps)
 
     elif ref == 'input':
-        expr = sum(model.w[model.I[e], e, t] * opex_var[e]
+        expr = sum(model.w[model.I[e][0], e, t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
     return(expr)
@@ -75,7 +75,7 @@ def add_input_costs(model, block):
         else:
             input_costs[e.uid] = e.inputs[0].price
     # outputs for cost objs
-    expr = sum(model.w[model.I[e], e, t] * input_costs[e]
+    expr = sum(model.w[model.I[e][0], e, t] * input_costs[e]
                for e in block.uids for t in model.timesteps)
 
     return(expr)
