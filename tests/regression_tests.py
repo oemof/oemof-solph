@@ -34,7 +34,7 @@ def test_issue_74():
     except AttributeError:
         failed = True
     if failed:
-        assert False, "EnergySystem#dump should not raise `AttributeError`."
+        ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
 
 def test_bus_to_sink_outputs_in_results_dataframe():
     logging.disable(logging.CRITICAL)
@@ -64,8 +64,8 @@ def test_bus_to_sink_outputs_in_results_dataframe():
     except KeyError:
         failed = True
     if failed:
-        assert False, \
-               "Output from bus to sink does not appear in results dataframe."
+        ok_(False,
+            "Output from bus to sink does not appear in results dataframe.")
 
     es.results[bus][bus] = [-1]
     rdf = RDF(energy_system=es)
@@ -77,7 +77,7 @@ def test_bus_to_sink_outputs_in_results_dataframe():
     except KeyError:
         failed = True
     if failed:
-        assert False, \
-               ("Output from bus (with duals) to sink " +
-                "does not appear in results dataframe.")
+        ok_(False,
+            "Output from bus (with duals) to sink " +
+            "does not appear in results dataframe.")
 
