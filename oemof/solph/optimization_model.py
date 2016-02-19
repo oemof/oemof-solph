@@ -16,7 +16,8 @@ from . import linear_constraints as lc
 from ..core.network.entities import Bus, Component
 from ..core.network.entities import components as cp
 from ..core.network.entities.components.transformers import (
-    CHP, Simple, SimpleExtractionCHP, Storage, VariableEfficiencyCHP)
+    CHP, Simple, SimpleExtractionCHP, Storage, VariableEfficiencyCHP,
+    PostHeating)
 from ..core.network.entities.components.sources import (
     Commodity, DispatchSource, FixedSource)
 from ..core.network.entities.components.sinks import Simple as Sink
@@ -488,6 +489,37 @@ def _(e, om, block):
     def linear_constraints(om, block):
         lc.add_simple_io_relation(om, block)
         var.set_bounds(om, block, side="output")
+
+    block.default_optimization_options = {
+        "linear_constr": linear_constraints}
+
+    om.default_assembler(block)
+    return om
+
+
+@assembler.register(PostHeating)
+def _(e, om, block):
+    """ Method containing the constraints functions for simple
+    transformer components.
+
+    Constraints are selected by the `optimization_options` variable of
+    :class:`Simple`.
+
+    Parameters
+    ----------
+    see :func:`assembler`.
+
+    Returns
+    -------
+    see :func:`assembler`.
+    """
+    # TODO: This should be dependent on objs classes not fixed if assembler
+    # method is used by another assemlber method...
+
+    def linear_constraints(om, block):
+        lc.add_simple_io_relation(om, block)
+        var.set_bounds(om, block, side="output")
+        lc.add_postheat_relation(om, block)
 
     block.default_optimization_options = {
         "linear_constr": linear_constraints}

@@ -24,6 +24,13 @@ class Simple(Transformer):
         self.eta = kwargs.get('eta', None)
 
 
+class PostHeating(Simple):
+    r"""
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class CHP(Transformer):
     """
     A CombinedHeatPower Transformer always has a simple input output relation

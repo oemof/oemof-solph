@@ -37,8 +37,10 @@ For all mathematical constraints the following definitions hold:
 Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
+import logging
 import pyomo.environ as po
 from . import pyomo_fastbuild as pofast
+
 
 def add_bus_balance(model, block=None):
     """ Adds constraint for the input-ouput balance of bus objects.
@@ -254,6 +256,44 @@ def add_simple_chp_relation(model, block):
                              for e,t in block.indexset}
         pofast.l_constraint(block, 'pth_relation', pth_relation_dict,
                             block.indexset)
+
+
+def add_postheat_relation(model, block):
+    """
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for \
+                          which post heating constraints should be set.')
+
+    eta = {obj.uid: obj.eta for obj in block.objs}
+
+    for e in block.objs:
+        output_objs = [o for o in e.outputs[:]]
+        input_objs = [o for o in e.inputs[:]]
+        print(output_objs[0].temp_kelvin)
+        print(input_objs[1].temp_kelvin)
+
+#            # ** Time depended bound
+#            if e.ub_out:
+#                ub_out[e.uid] = dict(zip(output_uids, e.ub_out))
+#                out_max[e.uid] = dict(zip(output_uids, e.out_max))
+#                if e.out_max < np.array(e.ub_out).max():
+#                    logging.error('The maximal value of ub_out should not be' +
+#                                  ' greater than out_max ({}).'.format(e.uid))
+#                exist_ub_out = True
+
+    def postheat_rule(block, e, t):
+        lhs = model.w[e, model.O[e][0], t] / eta[e][0]
+        lhs += -model.w[e, model.O[e][1], t] / eta[e][1]
+        return(lhs == 0)
+
+    if not model.energysystem.simulation.fast_build:
+        block.pth_relation = po.Constraint(block.indexset, rule=postheat_rule,
+                                           doc="P/eta_el - Q/eta_th = 0")
+
+    if model.energysystem.simulation.fast_build:
+        logging.error("No fast build relation exists for postheat.")
+
 
 def add_simple_extraction_chp_relation(model, block):
     """ Adds constraints for power to heat relation and equivalent output
