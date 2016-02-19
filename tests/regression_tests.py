@@ -14,6 +14,7 @@ import logging
 
 def test_issue_74():
     logging.disable(logging.CRITICAL)
+    failed = False
 
     Storage.optimization_options.update({'investment': True})
     sim = Simulation(timesteps=[0],
@@ -31,6 +32,8 @@ def test_issue_74():
     try:
         es.dump()
     except AttributeError:
+        failed = True
+    if failed:
         assert False, "EnergySystem#dump should not raise `AttributeError`."
 
 def test_bus_to_sink_outputs_in_results_dataframe():
