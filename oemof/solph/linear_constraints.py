@@ -315,6 +315,41 @@ def add_simple_chp_relation(model, block):
         pofast.l_constraint(block, 'pth_relation', pth_relation_dict,
                             block.indexset)
 
+
+def add_postheat_relation(model, block):
+    """
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for \
+                          which post heating constraints should be set.')
+
+    T_coeff = {}
+    for e in block.objs:
+        out = [o for o in e.outputs[:]]
+        T_out = out[0].temperature
+        T_re_out = out[0].re_temperature
+        T_in = [o for o in e.inputs[:]][1].temperature
+        dT_throw = T_out - T_in
+        dT_throw[dT_throw < 0] = 0
+        dT_in = T_in - T_re_out
+        T_coeff[e.uid] = (dT_throw) / (dT_in)
+
+    def postheat_rule(block, e, t):
+        lhs = (model.w[model.I[e][1], e, t] * T_coeff[e][t] -
+               model.w[model.I[e][0], e, t])
+        return(lhs == 0)
+
+    if not model.energysystem.simulation.fast_build:
+        pass
+    block.postheat = po.Constraint(block.indexset, rule=postheat_rule,
+                                       doc="P/eta_el - Q/eta_th = 0")
+
+    if model.energysystem.simulation.fast_build:
+        name = inspect.stack()[0][3]
+        logging.warning(
+            'No fastbuild constraints defined for function: {0}.'.format(name))
+
+
 def add_simple_extraction_chp_relation(model, block):
     """ Adds constraints for power to heat relation and equivalent output
     for a simple extraction combined heat an power units. The constraints
