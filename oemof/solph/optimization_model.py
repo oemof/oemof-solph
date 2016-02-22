@@ -15,8 +15,8 @@ from . import linear_mixed_integer_constraints as milc
 from . import linear_constraints as lc
 from ..core.network.entities import Bus, Component
 from ..core.network.entities import components as cp
-from ..core.network.entities.components.transformers import (
-    CHP, Simple, SimpleExtractionCHP, Storage, VariableEfficiencyCHP)
+from ..core.network.entities.components import transformers as transformer
+
 from ..core.network.entities.components.sources import (
     Commodity, DispatchSource, FixedSource)
 from ..core.network.entities.components.sinks import Simple as Sink
@@ -466,7 +466,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(Simple)
+@assembler.register(transformer.Simple)
 def _(e, om, block):
     """ Method containing the constraints functions for simple
     transformer components.
@@ -496,7 +496,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(CHP)
+@assembler.register(transformer.CHP)
 def _(e, om, block):
     """ Method grouping the constraints for simple chp components.
 
@@ -524,7 +524,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(SimpleExtractionCHP)
+@assembler.register(transformer.SimpleExtractionCHP)
 def _(e, om, block):
     """Method grouping the constraints for simple chp components.
 
@@ -549,7 +549,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(VariableEfficiencyCHP)
+@assembler.register(transformer.VariableEfficiencyCHP)
 def _(e, om, block):
     """Method grouping the constraints for chp components with variable el.
     efficiency.
@@ -666,7 +666,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(Storage)
+@assembler.register(transformer.Storage)
 def _(e, om, block):
     """Simple storage assembler containing the constraints for simple
     storage components.
