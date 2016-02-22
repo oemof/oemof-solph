@@ -498,6 +498,38 @@ def _(e, om, block):
     return om
 
 
+@assembler.register(transformer.PostHeating)
+def _(e, om, block):
+    """ Method containing the constraints functions for simple
+    transformer components.
+
+    Constraints are selected by the `optimization_options` variable of
+    :class:`Simple`.
+
+    Parameters
+    ----------
+    see :func:`assembler`.
+
+    Returns
+    -------
+    see :func:`assembler`.
+    """
+    # TODO: This should be dependent on objs classes not fixed if assembler
+    # method is used by another assemlber method...
+
+    def linear_constraints(om, block):
+        lc.add_two_inputs_io_relation(om, block)
+        var.set_bounds(om, block, side="output")
+        var.set_bounds(om, block, side="input")
+        lc.add_postheat_relation(om, block)
+
+    block.default_optimization_options = {
+        "linear_constr": linear_constraints}
+
+    om.default_assembler(block)
+    return om
+
+
 @assembler.register(transformer.CHP)
 def _(e, om, block):
     """ Method grouping the constraints for simple chp components.
