@@ -39,15 +39,15 @@ c_e__class__oemof_core_network_entities_Bus___balance(bel_2)_:
 = 0
 
 c_e__class__oemof_core_network_entities_Bus___balance(bgas_0)_:
--1 w(bgas_pp_gas_0)
++1 w(bgas_pp_gas_0)
 = 0
 
 c_e__class__oemof_core_network_entities_Bus___balance(bgas_1)_:
--1 w(bgas_pp_gas_1)
++1 w(bgas_pp_gas_1)
 = 0
 
 c_e__class__oemof_core_network_entities_Bus___balance(bgas_2)_:
--1 w(bgas_pp_gas_2)
++1 w(bgas_pp_gas_2)
 = 0
 
 c_e_ONE_VAR_CONSTANT: 

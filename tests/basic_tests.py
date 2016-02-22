@@ -91,7 +91,18 @@ class Constraint_Tests:
 
         transformer.Simple.optimization_options.update({'investment': True})
 
-        del self.energysystem.entities[-1]
+        del self.energysystem.entities[:]
+
+        bgas = Bus(uid="bgas",
+           type="gas",
+           price=70,
+           balanced=True,
+           excess=False)
+
+        # create electricity bus
+        bel = Bus(uid="bel",
+                  type="el",
+                  excess=True)
 
         transformer.Simple(
             uid='pp_gas',
@@ -125,7 +136,11 @@ class Constraint_Tests:
 
         source.FixedSource.optimization_options.update({'investment': True})
 
-        del self.energysystem.entities[-1]
+        del self.energysystem.entities[:]
+
+        bel = Bus(uid="bel",
+                  type="el",
+                  excess=True)
 
         source.FixedSource(uid="wind",
                            outputs=[bel],
