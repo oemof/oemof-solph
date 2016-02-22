@@ -136,9 +136,11 @@ def set_bounds(model, block, side='output'):
                 ub_out[e.uid] = dict(zip(
                     output_uids,
                     [[x] * len(model.timesteps) for x in e.out_max]))
-        if side == 'input':
+        if side == 'input' and e.in_max is not None:
             input_uids = [i.uid for i in e.inputs[:]]
-            ub_in[e.uid] = dict(zip(input_uids, e.in_max))
+            ub_in[e.uid] = dict(zip(
+                input_uids,
+                [[x] * len(model.timesteps) for x in e.in_max]))
 
     # *** No investment - set upper bound to maximal output***
     if not block.optimization_options.get('investment', False):
@@ -150,9 +152,9 @@ def set_bounds(model, block, side='output'):
                 if e1 in block.uids and side == 'output':
                     model.w[e1, e2, t].setub(ub_out[e1][e2][t])
                 # transformer input <= model.in_max
-                if e2 in block.uids and side == 'input':
+                if e2 in ub_in and side == 'input':
                     try:
-                        model.w[e1, e2, t].setub(ub_in[e2][e1])
+                        model.w[e1, e2, t].setub(ub_in[e2][e1][t])
                     except:
                         logging.warning("No upper bound for input (%s,%s)",
                                         e1, e2)
