@@ -37,8 +37,11 @@ For all mathematical constraints the following definitions hold:
 Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
+import inspect
+import logging
 import pyomo.environ as po
 from . import pyomo_fastbuild as pofast
+
 
 def add_bus_balance(model, block=None):
     """ Adds constraint for the input-ouput balance of bus objects.
@@ -106,7 +109,6 @@ def add_bus_balance(model, block=None):
                             block.balanced_indexset)
 
 
-
 def add_simple_io_relation(model, block, idx=0):
     """ Adds constraints for input-output relation as simple function for
     all objects in `block.objs`.
@@ -162,6 +164,63 @@ def add_simple_io_relation(model, block, idx=0):
                             for e,t in block.indexset}
         pofast.l_constraint(block, 'io_relation', io_relation_dict,
                             block.indexset)
+
+
+def add_two_inputs_io_relation(model, block, idx=0):
+    """ Adds constraints for input-output relation as simple function for
+    all objects in `block.objs`.
+
+    The mathematical formulation of the input-output relation of a simple
+    transformer is as follows:
+
+    .. math:: w_{i_e, e}(t) \cdot \\eta_{i,o_{e,n}} = w_{e, o_{e,n}}(t), \
+    \\qquad \\forall e, \\forall t
+
+    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing
+    the set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
+
+    Additionally :math:`\mathcal{E} \subset \{\mathcal{E}_{IO}, \mathcal{E}_{IOO}\}`.
+
+    :math:`n` indicates the n-th output of component :math:`e` (arg: idx)
+
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+    idx : integer
+      Index to choose which output to select (from list of Outputs: O[e][idx])
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which the constraints should be build")
+
+    eta = {obj.uid: obj.eta for obj in block.objs}
+
+    # constraint for simple transformers: input * efficiency = output
+    def io_rule(block, e, t):
+        lhs = (model.w[model.I[e][0], e, t] * eta[e][0] +
+               model.w[model.I[e][1], e, t] * eta[e][1] -
+               model.w[e, model.O[e][0], t])
+        return(lhs == 0)
+
+    if not model.energysystem.simulation.fast_build:
+        pass
+    block.io_relation = po.Constraint(
+            block.indexset, rule=io_rule,
+            doc="INFLOW_1 * efficiency_1 +  INFLOW_2 * efficiency_2 = OUTFLOW"
+            )
+
+    if model.energysystem.simulation.fast_build:
+        name = inspect.stack()[0][3]
+        logging.warning(
+            'No fastbuild constraints defined for function: {0}.'.format(name))
+
 
 def add_eta_total_chp_relation(model, block):
     """ Adds constraints for input-(output1,output2) relation as
