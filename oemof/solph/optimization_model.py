@@ -234,9 +234,9 @@ class OptimizationModel(po.ConcreteModel):
         result = UD()
         result.objective = self.objective()
         for entity in self.entities:
-            if ( isinstance(entity, cp.Transformer) or
-                 isinstance(entity, cp.Transport)   or
-                 isinstance(entity, cp.Source)):
+            if (isinstance(entity, cp.Transformer) or
+                    isinstance(entity, cp.Transport) or
+                    isinstance(entity, cp.Source)):
                 if entity.outputs:
                     result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
@@ -264,9 +264,11 @@ class OptimizationModel(po.ConcreteModel):
 
             if isinstance(entity, cp.transformers.Storage):
                 result[entity] = result.get(entity, UD())
-                result[entity][entity] = [getattr(self, str(Storage)
-                                                  ).cap[entity.uid, t].value
-                                          for t in self.timesteps]
+                result[entity][entity] = [
+                    getattr(
+                        self, str(transformer.Storage)
+                        ).cap[entity.uid, t].value
+                    for t in self.timesteps]
 
             block = getattr(self, str(type(entity)))
 
