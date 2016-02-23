@@ -39,10 +39,6 @@ def test_issue_74():
 def test_bus_to_sink_outputs_in_results_dataframe():
     logging.disable(logging.CRITICAL)
     failed = False
-    # TODO: Show this to the other devs as an example why class level variables
-    #       for program flow are bad (globals in disuise).
-    Storage.optimization_options.update({'investment': False})
-    FS.optimization_options.update({'investment': False})
 
     sim = Simulation(timesteps=[0],
                      objective_options={'function': po.minimize_cost})
@@ -80,4 +76,14 @@ def test_bus_to_sink_outputs_in_results_dataframe():
         ok_(False,
             "Output from bus (with duals) to sink " +
             "does not appear in results dataframe.")
+
+
+def test_investment_defaults():
+    for klass in [Storage, FS]:
+        value = klass.optimization_options['investment']
+        ok_(not value,
+            "\n  Testing the default value at key 'investment' in \n    `" +
+            str(klass) +
+            ".optimization_options.`\n  Expected `False`, got `" +
+            str(value) + "`.")
 
