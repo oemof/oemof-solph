@@ -296,8 +296,8 @@ def set_outages(model, block, outagetype='period', side='output'):
     if side == 'input' and timesteps[e]:
         for e in block.uids:
             for t in timesteps[e]:
-                model.w[model.I[e], e, t] = 0
-                model.w[model.I[e], e, t].fix()
+                model.w[model.I[e][0], e, t] = 0
+                model.w[model.I[e][0], e, t].fix()
     if side == 'output' and timesteps[e]:
         for e in block.uids:
             for t in timesteps[e]:

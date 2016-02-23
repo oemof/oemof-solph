@@ -146,7 +146,7 @@ def add_simple_io_relation(model, block, idx=0):
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t] * eta[e][idx] - \
+        lhs = model.w[model.I[e][0], e, t] * eta[e][idx] - \
             model.w[e, model.O[e][idx], t]
         return(lhs == 0)
 
@@ -155,7 +155,8 @@ def add_simple_io_relation(model, block, idx=0):
                                           doc="INFLOW * efficiency = OUTFLOW_n")
 
     if model.energysystem.simulation.fast_build:
-        io_relation_dict = {(e, t): [[(eta[e][idx], model.w[model.I[e], e, t]),
+        io_relation_dict = {(e, t): [[(eta[e][idx],
+                                      model.w[model.I[e][0], e, t]),
                                       (-1, model.w[e, model.O[e][idx], t])],
                                      "==", 0.]
                             for e,t in block.indexset}
@@ -194,7 +195,7 @@ def add_eta_total_chp_relation(model, block):
     eta_total = {obj.uid: obj.eta_total for obj in block.objs}
     # constraint for simple transformers: input * efficiency = output
     def ioo_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t] * eta_total[e]
+        lhs = model.w[model.I[e][0], e, t] * eta_total[e]
         rhs = model.w[e, model.O[e][0], t] + model.w[e, model.O[e][1], t]
         return(lhs == rhs)
     block.ioo_relation = po.Constraint(block.indexset, rule=ioo_rule,
@@ -309,7 +310,7 @@ def add_simple_extraction_chp_relation(model, block):
         eta_el_cond[e.uid] = e.eta_el_cond
 
     def equivalent_output_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t]
+        lhs = model.w[model.I[e][0], e, t]
         rhs = (model.w[e, model.O[e][0], t] +
               beta[e] * model.w[e, model.O[e][1], t]) / eta_el_cond[e]
         return(lhs == rhs)
@@ -523,7 +524,7 @@ def add_storage_balance(model, block):
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
-                         'which storage balanece constraint should be set.')
+                         'which storage balance constraint should be set.')
     # constraint for storage energy balance
     cap_initial = {}
     cap_loss = {}
@@ -550,12 +551,12 @@ def add_storage_balance(model, block):
             t_last = len(model.timesteps)-1
             expr += block.cap[e, t]
             expr += - block.cap[e, t_last] * (1 - cap_loss[e])
-            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += block.cap[e, t]
             expr += - block.cap[e, t-1] * (1 - cap_loss[e])
-            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
     block.balance = po.Constraint(block.indexset, rule=storage_balance_rule)
@@ -600,7 +601,7 @@ def add_storage_charge_discharge_limits(model, block):
 
     def storage_charge_limit_rule(block, e, t):
         expr = 0
-        expr += model.w[e, model.I[e], t]
+        expr += model.w[e, model.I[e][0], t]
         expr += -(cap_max[e] + block.add_cap[e]) \
             * c_rate_in[e]
         return(expr <= 0)
