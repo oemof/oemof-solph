@@ -12,6 +12,7 @@ from oemof.core.network import Entity
 from oemof.core.network.entities import Bus
 from oemof.solph import optimization_model as om
 from oemof.core.network.entities.components import sources as source
+from oemof.tools import helpers
 
 
 class EnergySystem_Tests:
@@ -51,12 +52,16 @@ class Constraint_Tests:
         self.energysystem = es.EnergySystem(time_idx=self.time_index,
                                             simulation=self.sim)
 
+        self.tmppath = helpers.extend_basic_path('tmp')
+        logging.info(self.tmppath)
+
     def compare_lp_files(self, energysystem, filename):
         self.opt_model = om.OptimizationModel(energysystem=energysystem)
+        tmp_filename = filename.replace('.lp','') + '_tmp.lp'
         self.opt_model.write_lp_file(
-            path=ospath.join("tests", "lp_files"), filename="tmp.lp")
+            path=self.tmppath, filename=tmp_filename)
         logging.info("Comparing with file: {0}".format(filename))
-        ok_(filecmp.cmp(ospath.join("tests", "lp_files", "tmp.lp"),
+        ok_(filecmp.cmp(ospath.join(self.tmppath, tmp_filename),
                         ospath.join("tests", "lp_files", filename)))
 
     def test_Transformer_Simple(self):
@@ -86,7 +91,18 @@ class Constraint_Tests:
 
         transformer.Simple.optimization_options.update({'investment': True})
 
-        del self.energysystem.entities[-1]
+        del self.energysystem.entities[:]
+
+        bgas = Bus(uid="bgas",
+           type="gas",
+           price=70,
+           balanced=True,
+           excess=False)
+
+        # create electricity bus
+        bel = Bus(uid="bel",
+                  type="el",
+                  excess=True)
 
         transformer.Simple(
             uid='pp_gas',
@@ -120,7 +136,11 @@ class Constraint_Tests:
 
         source.FixedSource.optimization_options.update({'investment': True})
 
-        del self.energysystem.entities[-1]
+        del self.energysystem.entities[:]
+
+        bel = Bus(uid="bel",
+                  type="el",
+                  excess=True)
 
         source.FixedSource(uid="wind",
                            outputs=[bel],

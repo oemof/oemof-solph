@@ -526,13 +526,14 @@ def get_basic_path():
 
 def extend_basic_path(subfolder):
     extended_path = os.path.join(get_basic_path(), subfolder)
-    if not os.path.isdir(subfolder):
-        os.mkdir(subfolder)
+    if not os.path.isdir(extended_path):
+        os.mkdir(extended_path)
     return extended_path
 
 
 def get_fullpath(path, filename):
     return os.path.join(path, filename)
+
 
 def create_basic_dataframe(year, **kwargs):
     r"""Giving back a DataFrame containing weekdays and optionally holidays for the

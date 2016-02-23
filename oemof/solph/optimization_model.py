@@ -253,7 +253,7 @@ class OptimizationModel(po.ConcreteModel):
                 # TODO: Why does this use `entity.outputs[0]`?
                 result[entity][entity] = [self.w[entity.uid,
                                                  entity.outputs[0].uid,
-                                                 t].bounds[1]
+                                                 t].value
                                           for t in self.timesteps]
 
             if isinstance(entity, cp.Sink):
