@@ -316,7 +316,7 @@ class OptimizationModel(po.ConcreteModel):
         ----------
         self : pyomo.ConcreteModel() object
 
-        **kwargs : keywords
+        \**kwargs : keywords
             Possible keys can be set see below
         solver string:
             solver to be used e.g. "glpk","gurobi","cplex"

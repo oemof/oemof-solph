@@ -132,7 +132,6 @@ def add_revenues(model, block, ref='output', idx=0):
     """ Revenue term for linear objective function.
 
     .. math:: \\sum_e \\sum_t w_{e, o_{e,1}}(t) \\cdot R_{e, o_{e,1}}(t)
-.
 
     Parameters
     ----------
@@ -145,7 +144,6 @@ def add_revenues(model, block, ref='output', idx=0):
     idx : integer
        Integer indicating which output from list to select
        if entity has multiple outputs
-
 
     Returns
     -------
