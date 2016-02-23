@@ -167,33 +167,7 @@ def add_simple_io_relation(model, block, idx=0):
 
 
 def add_two_inputs_io_relation(model, block, idx=0):
-    """ Adds constraints for input-output relation as simple function for
-    all objects in `block.objs`.
-
-    The mathematical formulation of the input-output relation of a simple
-    transformer is as follows:
-
-    .. math:: w_{i_e, e}(t) \cdot \\eta_{i,o_{e,n}} = w_{e, o_{e,n}}(t), \
-    \\qquad \\forall e, \\forall t
-
-    With :math:`e  \\in \mathcal{E}` and :math:`\mathcal{E}` beeing
-    the set of unique ids for all entities grouped inside the
-    attribute `block.objs`.
-
-    Additionally :math:`\mathcal{E} \subset \{\mathcal{E}_{IO}, \mathcal{E}_{IOO}\}`.
-
-    :math:`n` indicates the n-th output of component :math:`e` (arg: idx)
-
-
-    Parameters
-    ----------
-    model : OptimizationModel() instance
-        An object to be solved containing all Variables, Constraints, Data.
-    block : SimpleBlock()
-         block to group all constraints and variables etc., block corresponds
-         to one oemof base class
-    idx : integer
-      Index to choose which output to select (from list of Outputs: O[e][idx])
+    r"""
 
     """
     if not block.objs or block.objs is None:
@@ -317,7 +291,31 @@ def add_simple_chp_relation(model, block):
 
 
 def add_postheat_relation(model, block):
-    """
+    r""" Adds constraint for the input relation of a post heating device.
+
+    The mathematical formulation for the constraint is as follows:
+
+    .. math::
+        w_{e,i_{e,1}}(t)=w_{e,i_{e,2}}(t)\cdot f,\quad\forall e,\forall t
+        \qquad\\
+        \\
+        f=\frac{T^{flow}_{bus,o}-T^{flow}_{bus,i}}
+        {T^{flow}_{bus,i}-T^{return}_{bus,o}}\qquad\qquad\qquad
+
+    With :math:`e\in\mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
+
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IIO}`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for \
@@ -340,9 +338,8 @@ def add_postheat_relation(model, block):
         return(lhs == 0)
 
     if not model.energysystem.simulation.fast_build:
-        pass
-    block.postheat = po.Constraint(block.indexset, rule=postheat_rule,
-                                       doc="P/eta_el - Q/eta_th = 0")
+        block.postheat = po.Constraint(block.indexset, rule=postheat_rule,
+                                       doc="Q * f = P_addition")
 
     if model.energysystem.simulation.fast_build:
         name = inspect.stack()[0][3]
