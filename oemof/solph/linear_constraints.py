@@ -496,6 +496,7 @@ def add_dispatch_source(model, block):
     block.curtailment = po.Constraint(block.indexset,
                                       rule=curtailment_source_rule)
 
+
 def add_storage_balance(model, block):
     """ Constraint to build the storage balance in every timestep
 
@@ -522,7 +523,7 @@ def add_storage_balance(model, block):
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
-                          'which storage balanece constraint should be set.')
+                         'which storage balanece constraint should be set.')
     # constraint for storage energy balance
     cap_initial = {}
     cap_loss = {}
@@ -538,15 +539,17 @@ def add_storage_balance(model, block):
     # set cap of last timesteps to fixed value of cap_initial
     t_last = len(model.timesteps)-1
     for e in block.uids:
-      block.cap[e, t_last] = cap_initial[e]
-      block.cap[e, t_last].fix()
+        if cap_initial[e] is not None:
+            block.cap[e, t_last] = cap_initial[e]
+            block.cap[e, t_last].fix()
 
     def storage_balance_rule(block, e, t):
-        # TODO:
-        #   - include time increment
+        # TODO: include time increment
         expr = 0
         if(t == 0):
-            expr += block.cap[e, t] - cap_initial[e]
+            t_last = len(model.timesteps)-1
+            expr += block.cap[e, t]
+            expr += - block.cap[e, t_last] * (1 - cap_loss[e])
             expr += - model.w[model.I[e], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
