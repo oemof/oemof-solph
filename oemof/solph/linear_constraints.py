@@ -38,6 +38,7 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
 import pyomo.environ as po
+from pandas import Series as pdSeries
 from . import pyomo_fastbuild as pofast
 
 def add_bus_balance(model, block=None):
@@ -534,6 +535,9 @@ def add_storage_balance(model, block):
     for e in block.objs:
         cap_initial[e.uid] = e.cap_initial
         cap_loss[e.uid] = e.cap_loss
+        # if cap_loss is no list or Series, alter to list
+        if not isinstance(cap_loss[e.uid], (list, pdSeries)):
+            cap_loss[e.uid] = [cap_loss[e.uid]]*len(model.timesteps)
         eta_in[e.uid] = e.eta_in
         eta_out[e.uid] = e.eta_out
 
@@ -550,12 +554,12 @@ def add_storage_balance(model, block):
         if(t == 0):
             t_last = len(model.timesteps)-1
             expr += block.cap[e, t]
-            expr += - block.cap[e, t_last] * (1 - cap_loss[e])
+            expr += - block.cap[e, t_last] * (1 - cap_loss[e][t])
             expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += block.cap[e, t]
-            expr += - block.cap[e, t-1] * (1 - cap_loss[e])
+            expr += - block.cap[e, t-1] * (1 - cap_loss[e][t])
             expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
