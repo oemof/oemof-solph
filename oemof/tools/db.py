@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 import keyring
 from . import config as cfg
+import logging
 
 
 def connection():
