@@ -192,9 +192,14 @@ def set_bounds(model, block, side='output'):
                         block.indexset, rule=add_output_rule)
 
         # TODO: Implement upper bound constraint for investment models
-        if side == 'input':
-            raise ValueError('Setting upper bounds on inputs of components' +
-                             ' not possible for investment models')
+        elif side == 'input':
+            error_mesg = "Setting upper bounds on inputs of components is "
+            error_mesg += "not possible for investment models"
+            for e in block.objs:
+                if e.in_max is not None:
+                    for in_max in e.in_max:
+                        if in_max is not None and in_max != float("inf"):
+                            raise ValueError(error_mesg)
 
 
 def set_storage_cap_bounds(model, block):
