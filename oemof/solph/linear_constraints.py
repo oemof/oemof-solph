@@ -166,8 +166,33 @@ def add_simple_io_relation(model, block, idx=0):
                             block.indexset)
 
 
-def add_two_inputs_io_relation(model, block, idx=0):
-    r"""
+def add_two_inputs_io_relation(model, block):
+    r""" Adds constraint for the input-output relation of a post heating
+    transformer with two input flows.
+
+    Then the amount of all input flows multiplied with their efficiency will be
+    the output flow. The efficiency of the each will be calculated so that the
+    sum of the efficiency of both flows might be greater than one.
+
+    The mathematical formulation for the constraint is as follows:
+
+    .. math::
+        w_{e,i_{e,1}}(t)\cdot\eta_{e,i_{e,1}}(t)+w_{e,i_{e,2}}(t)\cdot
+        \eta_{e,i_{e,2}}(t)=w_{e,o_{e}},\qquad\forall e,\forall t\qquad\qquad
+
+    With :math:`e\in\mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
+
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IIO}`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
 
     """
     if not block.objs or block.objs is None:
