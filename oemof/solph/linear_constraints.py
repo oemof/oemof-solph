@@ -318,6 +318,11 @@ def add_simple_chp_relation(model, block):
 def add_postheat_relation(model, block):
     r""" Adds constraint for the input relation of a post heating device.
 
+    The additional device of the postheat transformer will heat up the flow and
+    therefore will deliver an amount of energy. This amount depends on the
+    temperature difference between the buses and the temperature difference
+    between the input bus and the return flow temperature.
+
     The mathematical formulation for the constraint is as follows:
 
     .. math::
