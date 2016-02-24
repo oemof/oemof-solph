@@ -146,7 +146,7 @@ def add_simple_io_relation(model, block, idx=0):
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t] * eta[e][idx] - \
+        lhs = model.w[model.I[e][0], e, t] * eta[e][idx] - \
             model.w[e, model.O[e][idx], t]
         return(lhs == 0)
 
@@ -155,7 +155,8 @@ def add_simple_io_relation(model, block, idx=0):
                                           doc="INFLOW * efficiency = OUTFLOW_n")
 
     if model.energysystem.simulation.fast_build:
-        io_relation_dict = {(e, t): [[(eta[e][idx], model.w[model.I[e], e, t]),
+        io_relation_dict = {(e, t): [[(eta[e][idx],
+                                      model.w[model.I[e][0], e, t]),
                                       (-1, model.w[e, model.O[e][idx], t])],
                                      "==", 0.]
                             for e,t in block.indexset}
@@ -194,7 +195,7 @@ def add_eta_total_chp_relation(model, block):
     eta_total = {obj.uid: obj.eta_total for obj in block.objs}
     # constraint for simple transformers: input * efficiency = output
     def ioo_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t] * eta_total[e]
+        lhs = model.w[model.I[e][0], e, t] * eta_total[e]
         rhs = model.w[e, model.O[e][0], t] + model.w[e, model.O[e][1], t]
         return(lhs == rhs)
     block.ioo_relation = po.Constraint(block.indexset, rule=ioo_rule,
@@ -309,7 +310,7 @@ def add_simple_extraction_chp_relation(model, block):
         eta_el_cond[e.uid] = e.eta_el_cond
 
     def equivalent_output_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t]
+        lhs = model.w[model.I[e][0], e, t]
         rhs = (model.w[e, model.O[e][0], t] +
               beta[e] * model.w[e, model.O[e][1], t]) / eta_el_cond[e]
         return(lhs == rhs)
@@ -496,6 +497,7 @@ def add_dispatch_source(model, block):
     block.curtailment = po.Constraint(block.indexset,
                                       rule=curtailment_source_rule)
 
+
 def add_storage_balance(model, block):
     """ Constraint to build the storage balance in every timestep
 
@@ -522,7 +524,7 @@ def add_storage_balance(model, block):
     """
     if not block.objs or block.objs is None:
         raise ValueError('No objects defined. Please specify objects for' +
-                          'which storage balanece constraint should be set.')
+                         'which storage balance constraint should be set.')
     # constraint for storage energy balance
     cap_initial = {}
     cap_loss = {}
@@ -538,21 +540,23 @@ def add_storage_balance(model, block):
     # set cap of last timesteps to fixed value of cap_initial
     t_last = len(model.timesteps)-1
     for e in block.uids:
-      block.cap[e, t_last] = cap_initial[e]
-      block.cap[e, t_last].fix()
+        if cap_initial[e] is not None:
+            block.cap[e, t_last] = cap_initial[e]
+            block.cap[e, t_last].fix()
 
     def storage_balance_rule(block, e, t):
-        # TODO:
-        #   - include time increment
+        # TODO: include time increment
         expr = 0
         if(t == 0):
-            expr += block.cap[e, t] - cap_initial[e]
-            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            t_last = len(model.timesteps)-1
+            expr += block.cap[e, t]
+            expr += - block.cap[e, t_last] * (1 - cap_loss[e])
+            expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += block.cap[e, t]
             expr += - block.cap[e, t-1] * (1 - cap_loss[e])
-            expr += - model.w[model.I[e], e, t] * eta_in[e]
+            expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
     block.balance = po.Constraint(block.indexset, rule=storage_balance_rule)
@@ -597,7 +601,7 @@ def add_storage_charge_discharge_limits(model, block):
 
     def storage_charge_limit_rule(block, e, t):
         expr = 0
-        expr += model.w[e, model.I[e], t]
+        expr += model.w[e, model.I[e][0], t]
         expr += -(cap_max[e] + block.add_cap[e]) \
             * c_rate_in[e]
         return(expr <= 0)

@@ -90,7 +90,7 @@ class OptimizationModel(po.ConcreteModel):
         for c in self.components:
             cbt[type(c)] = cbt.get(type(c), []) + [c]
 
-        self.I = {c.uid: c.inputs[0].uid for c in self.components
+        self.I = {c.uid: [i.uid for i in c.inputs[:]] for c in self.components
                   if not isinstance(c, cp.Source)}
         self.O = {c.uid: [o.uid for o in c.outputs[:]] for c in self.components
                   if not isinstance(c, cp.Sink)}
