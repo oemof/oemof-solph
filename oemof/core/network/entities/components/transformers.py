@@ -135,7 +135,7 @@ class Storage(Transformer):
         efficiency at charging
     eta_out : float
         efficiency at discharging
-    cap_loss : float
+    cap_loss : float or list/pandas.Series with length of simulation timesteps
         capacity loss per timestep in p/100
     c_rate_in : float
         c-rate for charging (unit is s^-1)
