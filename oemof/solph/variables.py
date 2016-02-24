@@ -136,6 +136,7 @@ def set_bounds(model, block, side='output'):
                 ub_out[e.uid] = dict(zip(
                     output_uids,
                     [[x] * len(model.timesteps) for x in e.out_max]))
+                out_max[e.uid] = dict(zip(output_uids, e.out_max))
         if side == 'input' and e.in_max is not None:
             input_uids = [i.uid for i in e.inputs[:]]
             ub_in[e.uid] = dict(zip(
