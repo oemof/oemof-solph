@@ -4,6 +4,7 @@ from . import config as cfg
 
 
 def connection():
+    logging.error('You\'re using an outdated version of connection!')
     engine = create_engine(
         "postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}".format(
             user=cfg.get("postGIS", "username"),
