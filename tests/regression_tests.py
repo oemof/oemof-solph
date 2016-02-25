@@ -81,7 +81,7 @@ class TestSolphAndItsResults:
 
     def test_investment_defaults(self):
         for klass in [Storage, FS]:
-            value = klass.optimization_options['investment']
+            value = klass.optimization_options.get('investment')
             ok_(not value,
                 "\n  Testing the default value at key 'investment' in \n    `" +
                 str(klass) +
