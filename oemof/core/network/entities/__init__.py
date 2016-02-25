@@ -1,6 +1,5 @@
 from .. import Entity
 
-
 class Bus(Entity):
     """
     The other type of entity in an energy system graph (besides
@@ -46,6 +45,14 @@ class Bus(Entity):
         self.excess_costs = kwargs.get('excess_costs', 0)
         self.shortage_costs = kwargs.get('shortage_costs', 10e10)
 
+        if self.excess == True:
+            excess = cp.ExcessSlack(self.uid+'_excess',
+                                    inputs=[self],
+                                    costs=self.excess_costs)
+        if self.shortage == True:
+            shortage = cp.ShorageSlack(self.uid+'_shortage',
+                                       outputs=[self],
+                                       costs=self.shortage_costs)
 
 class Component(Entity):
     """
