@@ -7,8 +7,10 @@ Created on Tue Jul 28 12:04:21 2015
 import numpy as np
 import logging
 import pandas as pd
+import os
 from math import ceil as round_up
 from datetime import time as settime
+
 
 class electric_building():
     ''
@@ -30,6 +32,7 @@ class electric_building():
 class heat_building():
     ''
     def __init__(self, conn, time_df, temp, **kwargs):
+        self.datapath = os.path.join(os.path.dirname(__file__), 'data')
         self.year = time_df.index.year[1000]
         time_df['temp'] = (temp - 273)
         self.heat_demand = self.create_slp(conn, time_df, **kwargs)
@@ -54,7 +57,7 @@ class heat_building():
 
         References
         ----------
-        .. [1] `BDEW <https://www.avacon.de/cps/rde/xbcr/avacon/Netze_Lieferanten_Netznutzung_Lastprofilverfahren_Leitfaden_SLP_Gas.pdf>`_, BDEW Documentation for heat profiles.
+        .. [1] `BDEW <https://www.avacon.de/cps/rde/xbcr/avacon/15-06-30_Leitfaden_Abwicklung_SLP_Gas.pdf>`_, BDEW Documentation for heat profiles.
         '''
         tem = time_df['temp'].resample('D', how='mean').reindex(
             time_df.index).fillna(method="ffill")
@@ -81,22 +84,11 @@ class heat_building():
 
     def get_h_values(self, conn, time_df, **kwargs):
         '''Determine the h-values'''
-
-        # TODO@Günni: Replace sql-string by sqlalchemy
-        # Retrieve the hour factors and write them into a DataFrame
-        sql = 'select hour_of_day,weekday'
-        for x in range(1, 11):
-            sql += ',temp_intervall_{0:02.0f}'.format(x)
-        sql += ' from demand.shlp_hour_factors where building_class = '
-        sql += "{building_class} and type = upper('{shlp_type}');".format(
-            **kwargs)
-
-        # Create DataFrame from sql-query results.
-        hour_factors = pd.DataFrame(
-            conn.execute(sql).fetchall(),
-            columns=(
-                ['hour_of_day', 'weekday'] +
-                ['temp_intervall_{0:02.0f}'.format(x) for x in range(1, 11)]))
+        file = os.path.join(self.datapath, 'shlp_hour_factors.csv')
+        hour_factors = pd.read_csv(file, index_col=0)
+        hour_factors = hour_factors.query(
+            'building_class=={building_class} and shlp_type=="{shlp_type}"'
+            .format(**kwargs))
 
         # Join the two DataFrames on the columns 'hour' and 'hour_of_the_day'
         # or ['hour' 'weekday'] and ['hour_of_the_day', 'weekday'] if it is
@@ -118,19 +110,12 @@ class heat_building():
 
     def get_sigmoid_parameter(self, conn, **kwargs):
         ''' Retrieve the sigmoid parameters from the database'''
-
-        # TODO@Günni: Replace sql-string by sqlalchemy
-        # Retrieve the hour factors and write them into a DataFrame
-        sql = 'select parameter_a, parameter_b, parameter_c, parameter_d '
-        sql += 'from demand.shlp_sigmoid_parameters where '
-        sql += """building_class={building_class} and wind_impact=
-            {wind_class} and type=upper('{shlp_type}')""".format(**kwargs)
-
-        # Create DataFrame from sql-query results.
-        sigmoid = pd.DataFrame(
-            conn.execute(sql).fetchall(),
-            columns=[
-                'parameter_{0}'.format(x) for x in ['a', 'b', 'c', 'd']])
+        file = os.path.join(self.datapath, 'shlp_sigmoid_factors.csv')
+        sigmoid = pd.read_csv(file, index_col=0)
+        sigmoid = sigmoid.query(
+            'building_class=={building_class} and '.format(**kwargs) +
+            'shlp_type=="{shlp_type}" and '.format(**kwargs) +
+            'wind_impact=={wind_class}'.format(**kwargs))
 
         A = float(sigmoid['parameter_a'])
         B = float(sigmoid['parameter_b'])
@@ -141,17 +126,12 @@ class heat_building():
 
     def get_weekday_parameter(self, conn, time_df, **kwargs):
         ''' Retrieve the weekdayparameter from the database'''
+        file = os.path.join(self.datapath, 'shlp_weekday_factors.csv')
+        F_df = pd.read_csv(file, index_col=0)
 
-        # TODO@Günni: Replace sql-string by sqlalchemy
-        # Retrieve the hour factors and write them into a DataFrame
-        sql = 'select wochentagsfaktor '
-        sql += 'from demand.shlp_wochentagsfaktoren where '
-        sql += "typ = '{0}';".format(kwargs['shlp_type'].upper())
-
-        # Create DataFrame from sql-query results.
-        F_df = pd.DataFrame(
-            conn.execute(sql).fetchall(),
-            columns=['wochentagsfaktor'])
+        F_df = (F_df.query('shlp_type=="{0}"'.format(
+            kwargs['shlp_type'])))
+        F_df.drop('shlp_type', axis=1, inplace=True)
 
         F_df['weekdays'] = F_df.index + 1
 
