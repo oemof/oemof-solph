@@ -18,19 +18,22 @@ class TestSolphAndItsResults:
 
         self.failed = False
 
+        sim = Simulation(timesteps=[0],
+                         objective_options={'function': po.minimize_cost})
+        tix = time_index = pd.period_range('1970-01-01', periods=1, freq='H')
+        self.es = ES(simulation=sim, time_idx=tix)
+
     def teardown(self):
         logging.disable(logging.NOTSET)
 
     def test_issue_74(self):
         Storage.optimization_options.update({'investment': True})
-        sim = Simulation(timesteps=[0],
-                         objective_options={'function': po.minimize_cost})
-        es = ES(simulation=sim)
         bus = Bus(uid="bus")
         store = Storage(uid="store", inputs=[bus], outputs=[bus], c_rate_out=0.1,
                         c_rate_in=0.1)
         sink = Sink(uid="sink", inputs=[bus], val=[1])
 
+        es = self.es
         om = OM(es)
         om.objective.set_value(-1)
         es.results = om.results()
@@ -43,14 +46,11 @@ class TestSolphAndItsResults:
             ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
 
     def test_bus_to_sink_outputs_in_results_dataframe(self):
-        sim = Simulation(timesteps=[0],
-                         objective_options={'function': po.minimize_cost})
-        tix = time_index = pd.period_range('1970-01-01', periods=1, freq='H')
-        es = ES(simulation=sim, time_idx=tix)
         bus = Bus(uid="bus")
         source = FS(uid="source", outputs=[bus], val=[0.5], out_max=[1])
         sink = Sink(uid="sink", inputs=[bus], val=[1])
 
+        es = self.es
         om = OM(es)
         es.results = om.results()
         es.results[bus][sink] = [0.7]
