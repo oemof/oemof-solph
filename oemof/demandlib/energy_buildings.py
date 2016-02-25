@@ -29,7 +29,7 @@ class electric_building():
         return self.elec_demand
 
 
-class heat_building():
+class HeatBuilding():
     ''
     def __init__(self, conn, time_df, temp, **kwargs):
         self.datapath = os.path.join(os.path.dirname(__file__), 'data')

@@ -46,7 +46,7 @@ print(time_df[:5])
 # Baualtersklassen 1-11, da finde ich gerade die Erklärung nicht zu
 
 # Define default building
-default_efh = eb.heat_building(conn, time_df, temperature, shlp_type='EFH',
+default_efh = eb.HeatBuilding(conn, time_df, temperature, shlp_type='EFH',
                                building_class=1, wind_class=0,
                                annual_heat_demand=150)
 
