@@ -16,12 +16,12 @@ class TestSolphAndItsResults:
     def setup(self):
         logging.disable(logging.CRITICAL)
 
+        self.failed = False
+
     def teardown(self):
         logging.disable(logging.NOTSET)
 
     def test_issue_74(self):
-        failed = False
-
         Storage.optimization_options.update({'investment': True})
         sim = Simulation(timesteps=[0],
                          objective_options={'function': po.minimize_cost})
@@ -38,13 +38,11 @@ class TestSolphAndItsResults:
         try:
             es.dump()
         except AttributeError:
-            failed = True
-        if failed:
+            self.failed = True
+        if self.failed:
             ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
 
     def test_bus_to_sink_outputs_in_results_dataframe(self):
-        failed = False
-
         sim = Simulation(timesteps=[0],
                          objective_options={'function': po.minimize_cost})
         tix = time_index = pd.period_range('1970-01-01', periods=1, freq='H')
@@ -63,8 +61,8 @@ class TestSolphAndItsResults:
                 0.7,
                 "Output from bus to sink does not have the correct value.")
         except KeyError:
-            failed = True
-        if failed:
+            self.failed = True
+        if self.failed:
             ok_(False,
                 "Output from bus to sink does not appear in results dataframe.")
 
@@ -76,8 +74,8 @@ class TestSolphAndItsResults:
                 0.7,
                 "Output from bus to sink does not have the correct value.")
         except KeyError:
-            failed = True
-        if failed:
+            self.failed = True
+        if self.failed:
             ok_(False,
                 "Output from bus (with duals) to sink " +
                 "does not appear in results dataframe.")
