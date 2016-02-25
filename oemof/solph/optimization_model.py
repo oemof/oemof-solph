@@ -14,6 +14,7 @@ from . import variables as var
 from . import linear_mixed_integer_constraints as milc
 from . import linear_constraints as lc
 from ..core.network.entities import Bus, Component
+from ..core.network.entities.buses import HeatBus
 from ..core.network.entities import components as cp
 from ..core.network.entities.components import transformers as transformer
 
@@ -98,8 +99,13 @@ class OptimizationModel(po.ConcreteModel):
         # Add constraints for all components to the model
         self.build_component_constraints(cbt)
 
+        # group buses by type (bbt: buses by type)
+        bbt = {}
+        for b in [e for e in self.entities if isinstance(e, Bus)]:
+            bbt[type(b)] = bbt.get(type(b), []) + [b]
+
         # Add constraints for all buses to the model
-        self.build_bus_constraints()
+        self.build_bus_constraints(bbt)
 
         # create objective function
         if not self.objective_options:
@@ -126,15 +132,19 @@ class OptimizationModel(po.ConcreteModel):
                               "classes: " + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
 
-    def build_bus_constraints(self):
-        # add bus block
-        block = po.Block()
-        # get all bus objects
-        block.objs = [e for e in self.entities if isinstance(e, Bus)]
-        block.uids = [e.uid for e in block.objs]
-        logging.info("Building bus constraints")
-        assembler.registry[Bus](e=None, om=self, block=block)
-        self.add_component(str(Bus), block)
+    def build_bus_constraints(self, bbt):
+        logging.info("Building bus constraints.")
+        for bls in bbt:
+            objs = bbt[bls]
+            # "call" methods to add the constraints opt. problem
+            if objs:
+                # add bus block
+                block = po.Block()
+                uids = [e.uid for e in objs]
+                block.uids = po.Set(initialize=uids)
+                block.objs = objs
+                self.add_component(str(bls), block)
+                assembler.registry[bls](e=None, om=self, block=block)
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
@@ -426,6 +436,49 @@ class OptimizationModel(po.ConcreteModel):
 
 
 @assembler.register(Bus)
+def _(e, om, block):
+    """ Method creates bus balance for all buses.
+
+    The bus model creates all full balance around the energy buses using
+    the :func:`lc.generic_bus_constraint` function.
+    Additionally it sets constraints to model limits over the timehorizon
+    for resource buses using :func:`lc.generic_limit`
+
+    Parameters
+    ----------
+    see :func:`assembler`.
+
+    Returns
+    -------
+    om : The optimization model passed in as an argument, with additional
+          bus balances.
+    """
+
+    # slack variables that assures a feasible problem
+    # get uids for busses that allow excess
+    block.excess_uids = [b.uid for b in block.objs if b.excess is True]
+    # get uids for busses that allow shortage
+    block.shortage_uids = [b.uid for b in block.objs if b.shortage is True]
+
+    # create variables for "slack" of shortage and excess
+    if block.excess_uids:
+        om.excess_slack = po.Var(block.excess_uids,
+                                 om.timesteps,
+                                 within=po.NonNegativeReals)
+    if block.shortage_uids:
+        om.shortage_slack = po.Var(block.shortage_uids,
+                                   om.timesteps,
+                                   within=po.NonNegativeReals)
+
+    # bus balance constraint for energy bus objects
+    lc.add_bus_balance(om, block)
+
+    # set limits for buses
+    lc.add_global_output_limit(om, block)
+    return om
+
+
+@assembler.register(HeatBus)
 def _(e, om, block):
     """ Method creates bus balance for all buses.
 
