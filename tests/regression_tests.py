@@ -13,8 +13,13 @@ from oemof.solph.optimization_model import OptimizationModel as OM
 from oemof.solph import predefined_objectives as po
 
 class TestSolphAndItsResults:
-    def test_issue_74(self):
+    def setup(self):
         logging.disable(logging.CRITICAL)
+
+    def teardown(self):
+        logging.disable(logging.NOTSET)
+
+    def test_issue_74(self):
         failed = False
 
         Storage.optimization_options.update({'investment': True})
@@ -38,7 +43,6 @@ class TestSolphAndItsResults:
             ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
 
     def test_bus_to_sink_outputs_in_results_dataframe(self):
-        logging.disable(logging.CRITICAL)
         failed = False
 
         sim = Simulation(timesteps=[0],
