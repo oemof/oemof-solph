@@ -8,9 +8,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from oemof.demandlib import energy_buildings as eb
 from oemof.tools import helpers
-from oemof import db
-
-conn = db.connection()
 
 # Erstellung eines Temperaturvektors
 periods = 8760
@@ -46,7 +43,7 @@ print(time_df[:5])
 # Baualtersklassen 1-11, da finde ich gerade die Erklärung nicht zu
 
 # Define default building
-default_efh = eb.HeatBuilding(conn, time_df, temperature, shlp_type='EFH',
+default_efh = eb.HeatBuilding(time_df, temperature, shlp_type='EFH',
                                building_class=1, wind_class=0,
                                annual_heat_demand=150)
 

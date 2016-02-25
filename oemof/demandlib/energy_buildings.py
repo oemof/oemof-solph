@@ -31,11 +31,11 @@ class electric_building():
 
 class HeatBuilding():
     ''
-    def __init__(self, conn, time_df, temp, **kwargs):
+    def __init__(self, time_df, temp, **kwargs):
         self.datapath = os.path.join(os.path.dirname(__file__), 'data')
         self.year = time_df.index.year[1000]
         time_df['temp'] = (temp - 273)
-        self.heat_demand = self.create_slp(conn, time_df, **kwargs)
+        self.heat_demand = self.create_slp(time_df, **kwargs)
         self.type = kwargs['shlp_type']
         self.annual_load = kwargs['annual_heat_demand']
 
@@ -82,7 +82,7 @@ class HeatBuilding():
         temp_int = [temp_dict[i] for i in temp_rounded]
         return np.transpose(np.array(temp_int))
 
-    def get_h_values(self, conn, time_df, **kwargs):
+    def get_h_values(self, time_df, **kwargs):
         '''Determine the h-values'''
         file = os.path.join(self.datapath, 'shlp_hour_factors.csv')
         hour_factors = pd.read_csv(file, index_col=0)
@@ -108,7 +108,7 @@ class HeatBuilding():
             self.temp_interval(time_df) - 1)[:]]
         return np.array(list(map(float, h[:])))
 
-    def get_sigmoid_parameter(self, conn, **kwargs):
+    def get_sigmoid_parameter(self, **kwargs):
         ''' Retrieve the sigmoid parameters from the database'''
         file = os.path.join(self.datapath, 'shlp_sigmoid_factors.csv')
         sigmoid = pd.read_csv(file, index_col=0)
@@ -124,7 +124,7 @@ class HeatBuilding():
             'ww_incl', True) else 0
         return A, B, C, D
 
-    def get_weekday_parameter(self, conn, time_df, **kwargs):
+    def get_weekday_parameter(self, time_df, **kwargs):
         ''' Retrieve the weekdayparameter from the database'''
         file = os.path.join(self.datapath, 'shlp_weekday_factors.csv')
         F_df = pd.read_csv(file, index_col=0)
@@ -139,12 +139,12 @@ class HeatBuilding():
             F_df, time_df, left_on='weekdays', right_on='weekday', how='outer',
             left_index=True).sort()['wochentagsfaktor'])))
 
-    def create_slp(self, conn, time_df, **kwargs):
+    def create_slp(self, time_df, **kwargs):
         '''Calculation of the hourly heat demand using the bdew-equations'''
         time_df['weekday'].mask(time_df['weekday'] == 0, 7, True)
-        SF = self.get_h_values(conn, time_df, **kwargs)
-        [A, B, C, D] = self.get_sigmoid_parameter(conn, **kwargs)
-        F = self.get_weekday_parameter(conn, time_df, **kwargs)
+        SF = self.get_h_values(time_df, **kwargs)
+        [A, B, C, D] = self.get_sigmoid_parameter(**kwargs)
+        F = self.get_weekday_parameter(time_df, **kwargs)
 
         h = (A / (1 + (B / (time_df['temp'] - 40)) ** C) + D)
         KW = (kwargs['annual_heat_demand'] /
