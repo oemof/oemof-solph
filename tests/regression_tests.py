@@ -23,8 +23,22 @@ class TestSolphAndItsResults:
         tix = time_index = pd.period_range('1970-01-01', periods=1, freq='H')
         self.es = ES(simulation=sim, time_idx=tix)
 
+        self.cleanup = []
+        for k in [FS, Storage]:
+            if 'investment' in k.optimization_options:
+                value = k.optimization_options['investment']
+                def f(k=k, value=value):
+                    k.optimization_options['investment'] = value
+                self.cleanup.append(f)
+            else:
+                def f(k=k):
+                    if 'investment' in k.optimization_options:
+                        del k.optimization_options['investment']
+                self.cleanup.append(f)
+
     def teardown(self):
         logging.disable(logging.NOTSET)
+        for f in self.cleanup: f()
 
     def test_issue_74(self):
         Storage.optimization_options.update({'investment': True})
@@ -46,6 +60,9 @@ class TestSolphAndItsResults:
             ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
 
     def test_bus_to_sink_outputs_in_results_dataframe(self):
+        Storage.optimization_options.update({'investment': False})
+        FS.optimization_options.update({'investment': False})
+
         bus = Bus(uid="bus")
         source = FS(uid="source", outputs=[bus], val=[0.5], out_max=[1])
         sink = Sink(uid="sink", inputs=[bus], val=[1])
