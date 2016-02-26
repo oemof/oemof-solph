@@ -358,7 +358,6 @@ def add_excess_slack_costs(model, block=None):
     -------
     Expression
     """
-    print([model.O[e] for e in block.uids])
     c_excess = {e.uid:e.costs for e in block.objs}
     expr = sum(model.w[model.I[e][0], e,   t] * c_excess[e]
                for e in block.uids for t in model.timesteps)
