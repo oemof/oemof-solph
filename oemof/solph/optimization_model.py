@@ -13,11 +13,10 @@ from ..tools import helpers
 from . import variables as var
 from . import linear_mixed_integer_constraints as milc
 from . import linear_constraints as lc
-from ..core.network.entities import Bus, Component
+from ..core.network.entities import Bus, Component, ExcessSlack, ShortageSlack
 from ..core.network.entities.buses import HeatBus
 from ..core.network.entities import components as cp
 from ..core.network.entities.components import transformers as transformer
-
 from ..core.network.entities.components.sources import (
     Commodity, DispatchSource, FixedSource)
 from ..core.network.entities.components.sinks import Simple as Sink
@@ -786,7 +785,7 @@ def _(e, om, block):
     var.set_bounds(om, block, side="output")
     return(om)
 
-@assembler.register(transformer.ExcessSlack)
+@assembler.register(ExcessSlack)
 def _(e, om, block):
     """Excess slack assembler grouping the constraints
     for excess slack components.
@@ -804,7 +803,7 @@ def _(e, om, block):
     #var.set_bounds(om, block, side="output")
     return(om)
 
-@assembler.register(transformer.ShortageSlack)
+@assembler.register(ShortageSlack)
 def _(e, om, block):
     """Shortage slack assembler grouping the constraints
     for shortage slack components.
