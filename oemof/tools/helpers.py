@@ -545,8 +545,8 @@ def create_basic_dataframe(year, **kwargs):
 
     Optional Parameters
     -------------------
-    holidays: array with information for every hour of the year, if holiday or not
-        (0: holiday, 1: no holiday)
+    holidays: array with information for every hour of the year, if holiday or
+        not (0: holiday, 1: no holiday)
 
     Returns
     -------
@@ -575,7 +575,7 @@ def create_basic_dataframe(year, **kwargs):
     # Set weekday to Holiday (0) for all holidays
     if kwargs.get('holidays'):
         time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
-            pd.to_datetime(list(holidays.keys()))), 0, True)
+            pd.to_datetime(list(kwargs['holidays'].keys()))), 0, True)
 
 #    holidays = helpers.get_german_holidays(year, place)
 
