@@ -244,9 +244,10 @@ class OptimizationModel(po.ConcreteModel):
         result = UD()
         result.objective = self.objective()
         for entity in self.entities:
-            if (isinstance(entity, cp.Transformer) or
-                    isinstance(entity, cp.Transport) or
-                    isinstance(entity, cp.Source)):
+            if ( isinstance(entity, cp.Transformer) or
+                 isinstance(entity, cp.Transport)   or
+                 isinstance(entity, cp.Source) or
+                 isinstance(entity, ShortageSlack)):
                 if entity.outputs:
                     result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
@@ -266,7 +267,8 @@ class OptimizationModel(po.ConcreteModel):
                                                  t].value
                                           for t in self.timesteps]
 
-            if isinstance(entity, cp.Sink):
+            if (isinstance(entity, cp.Sink) or
+                isinstance(entity, ExcessSlack)):
                 for i in entity.inputs:
                     result[i] = result.get(i, {})
                     result[i][entity] = [self.w[i.uid, entity.uid, t].value
@@ -296,17 +298,6 @@ class OptimizationModel(po.ConcreteModel):
                         self.dual[getattr(self, str(Bus)).balance[
                             (bus.uid, t)]]
                         for t in self.timesteps]
-
-        for bus in getattr(self, str(Bus)).objs:
-            if bus.excess:
-                result[bus] = result.get(bus, {})
-                result[bus]["excess"] = [self.excess_slack[(bus.uid, t)].value
-                                         for t in self.timesteps]
-            if bus.shortage:
-                result[bus] = result.get(bus, {})
-                result[bus]["shortage"] = [
-                    self.shortage_slack[(bus.uid, t)].value
-                    for t in self.timesteps]
 
         return result
 
@@ -453,22 +444,6 @@ def _(e, om, block):
     om : The optimization model passed in as an argument, with additional
           bus balances.
     """
-
-    # slack variables that assures a feasible problem
-    # get uids for busses that allow excess
-    block.excess_uids = [b.uid for b in block.objs if b.excess is True]
-    # get uids for busses that allow shortage
-    block.shortage_uids = [b.uid for b in block.objs if b.shortage is True]
-
-    # create variables for "slack" of shortage and excess
-    if block.excess_uids:
-        om.excess_slack = po.Var(block.excess_uids,
-                                 om.timesteps,
-                                 within=po.NonNegativeReals)
-    if block.shortage_uids:
-        om.shortage_slack = po.Var(block.shortage_uids,
-                                   om.timesteps,
-                                   within=po.NonNegativeReals)
 
     # bus balance constraint for energy bus objects
     lc.add_bus_balance(om, block)
@@ -809,4 +784,40 @@ def _(e, om, block):
     lc.add_simple_io_relation(om, block)
     # bounds
     var.set_bounds(om, block, side="output")
+    return(om)
+
+@assembler.register(transformer.ExcessSlack)
+def _(e, om, block):
+    """Excess slack assembler grouping the constraints
+    for excess slack components.
+
+    Parameters
+    ----------
+    See :func:`assembler`.
+
+    Returns
+    -------
+    See :func:`assembler`.
+    """
+
+    # bounds
+    #var.set_bounds(om, block, side="output")
+    return(om)
+
+@assembler.register(transformer.ShortageSlack)
+def _(e, om, block):
+    """Shortage slack assembler grouping the constraints
+    for shortage slack components.
+
+    Parameters
+    ----------
+    See :func:`assembler`.
+
+    Returns
+    -------
+    See :func:`assembler`.
+    """
+
+    # bounds
+    #var.set_bounds(om, block, side="output")
     return(om)

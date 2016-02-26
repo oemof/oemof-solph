@@ -250,7 +250,7 @@ class bdew_elec_slp():
             new_df.update(pd.DataFrame.merge(
                 tmp_df[tmp_df['period'] == p[:-1]], time_df[a:b],
                 left_on=left_cols, right_on=right_cols,
-                how='inner', left_index=True).sort().drop(['hour_of_day'], 1))
+                how='inner', left_index=True).sort_index().drop(['hour_of_day'], 1))
 
         return new_df
 

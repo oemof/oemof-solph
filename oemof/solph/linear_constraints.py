@@ -40,6 +40,7 @@ Simon Hilpert (simon.hilpert@fh-flensburg.de)
 import inspect
 import logging
 import pyomo.environ as po
+from pandas import Series as pdSeries
 from . import pyomo_fastbuild as pofast
 
 
@@ -85,10 +86,6 @@ def add_bus_balance(model, block=None):
             lhs = 0
             lhs = sum(model.w[i, e, t] for i in I[e])
             rhs = sum(model.w[e, o, t] for o in O[e])
-            if e in block.excess_uids:
-                rhs += model.excess_slack[e, t]
-            if e in block.shortage_uids:
-                lhs += model.shortage_slack[e, t]
             return(lhs == rhs)
         block.balance = po.Constraint(block.balanced_indexset,
                                       rule=bus_balance_rule)
@@ -99,11 +96,6 @@ def add_bus_balance(model, block=None):
             for e in uids:
                 tuples = [(1, model.w[i, e, t]) for i in I[e]] + \
                          [(-1, model.w[e, o, t]) for o in O[e]]
-                if e in block.excess_uids:
-                    tuples.append((-1, model.excess_slack[e, t]))
-                if e in block.shortage_uids:
-                    tuples.append((1, model.shortage_slack[e, t]))
-
                 balance_dict[e, t] = [tuples, "==", 0.]
         pofast.l_constraint(block, 'balance', balance_dict,
                             block.balanced_indexset)
@@ -655,6 +647,9 @@ def add_storage_balance(model, block):
     for e in block.objs:
         cap_initial[e.uid] = e.cap_initial
         cap_loss[e.uid] = e.cap_loss
+        # if cap_loss is no list or Series, alter to list
+        if not isinstance(cap_loss[e.uid], (list, pdSeries)):
+            cap_loss[e.uid] = [cap_loss[e.uid]]*len(model.timesteps)
         eta_in[e.uid] = e.eta_in
         eta_out[e.uid] = e.eta_out
 
@@ -671,12 +666,12 @@ def add_storage_balance(model, block):
         if(t == 0):
             t_last = len(model.timesteps)-1
             expr += block.cap[e, t]
-            expr += - block.cap[e, t_last] * (1 - cap_loss[e])
+            expr += - block.cap[e, t_last] * (1 - cap_loss[e][t])
             expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         else:
             expr += block.cap[e, t]
-            expr += - block.cap[e, t-1] * (1 - cap_loss[e])
+            expr += - block.cap[e, t-1] * (1 - cap_loss[e][t])
             expr += - model.w[model.I[e][0], e, t] * eta_in[e]
             expr += + model.w[e, model.O[e][0], t] / eta_out[e]
         return(expr, 0)
