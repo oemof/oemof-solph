@@ -287,17 +287,6 @@ class OptimizationModel(po.ConcreteModel):
                             (bus.uid, t)]]
                         for t in self.timesteps]
 
-#        for bus in getattr(self, str(Bus)).objs:
-#            if bus.excess:
-#                result[bus] = result.get(bus, {})
-#                result[bus]["excess"] = [self.excess_slack[(bus.uid, t)].value
-#                                         for t in self.timesteps]
-#            if bus.shortage:
-#                result[bus] = result.get(bus, {})
-#                result[bus]["shortage"] = [
-#                    self.shortage_slack[(bus.uid, t)].value
-#                    for t in self.timesteps]
-
         return result
 
     def write_lp_file(self, path=None, filename="problem.lp"):
