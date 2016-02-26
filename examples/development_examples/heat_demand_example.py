@@ -44,8 +44,8 @@ print(time_df[:5])
 
 # Define default building
 default_efh = eb.HeatBuilding(time_df, temperature, shlp_type='EFH',
-                               building_class=1, wind_class=0,
-                               annual_heat_demand=150)
+                              building_class=1, wind_class=0,
+                              annual_heat_demand=150)
 
 # Plot demand of building
 default_efh.load.plot()
