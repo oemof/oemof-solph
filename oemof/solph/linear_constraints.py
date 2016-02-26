@@ -83,10 +83,6 @@ def add_bus_balance(model, block=None):
             lhs = 0
             lhs = sum(model.w[i, e, t] for i in I[e])
             rhs = sum(model.w[e, o, t] for o in O[e])
-            if e in block.excess_uids:
-                rhs += model.excess_slack[e, t]
-            if e in block.shortage_uids:
-                lhs += model.shortage_slack[e, t]
             return(lhs == rhs)
         block.balance = po.Constraint(block.balanced_indexset,
                                       rule=bus_balance_rule)
@@ -97,11 +93,6 @@ def add_bus_balance(model, block=None):
             for e in uids:
                 tuples = [(1, model.w[i, e, t]) for i in I[e]] + \
                          [(-1, model.w[e, o, t]) for o in O[e]]
-                if e in block.excess_uids:
-                    tuples.append((-1, model.excess_slack[e, t]))
-                if e in block.shortage_uids:
-                    tuples.append((1, model.shortage_slack[e, t]))
-
                 balance_dict[e, t] = [tuples, "==", 0.]
         pofast.l_constraint(block, 'balance', balance_dict,
                             block.balanced_indexset)

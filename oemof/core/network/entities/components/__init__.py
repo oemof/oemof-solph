@@ -146,18 +146,4 @@ class Transport(Component):
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
 
-class ExcessSlack(Sink):
-    """A ExcessSlack is a special sink which takes the output slack i.e. excess
-    of the bus to that the component is connected to."""
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.costs = kwargs.get("costs", 0)
-
-class ShortageSlack(Source):
-    """A ShorageSlack is a special source which takes the input slack i.e.
-    shortage of the bus to that the component is connected to."""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.costs = kwargs.get("costs", 10e10)
