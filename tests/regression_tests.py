@@ -60,9 +60,6 @@ class TestSolphAndItsResults:
             ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
 
     def test_bus_to_sink_outputs_in_results_dataframe(self):
-        Storage.optimization_options.update({'investment': False})
-        FS.optimization_options.update({'investment': False})
-
         bus = Bus(uid="bus")
         source = FS(uid="source", outputs=[bus], val=[0.5], out_max=[1])
         sink = Sink(uid="sink", inputs=[bus], val=[1])

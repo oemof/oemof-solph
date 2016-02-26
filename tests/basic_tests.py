@@ -51,6 +51,23 @@ class Constraint_Tests:
         self.energysystem = es.EnergySystem(time_idx=self.time_index,
                                             simulation=self.sim)
 
+    def setup(self):
+        self.cleanup = []
+        for k in [source.FixedSource, transformer.Simple, transformer.Storage]:
+            if 'investment' in k.optimization_options:
+                value = k.optimization_options['investment']
+                def f(k=k, value=value):
+                    k.optimization_options['investment'] = value
+                self.cleanup.append(f)
+            else:
+                def f(k=k):
+                    if 'investment' in k.optimization_options:
+                        del k.optimization_options['investment']
+                self.cleanup.append(f)
+
+    def teardown(self):
+        for f in self.cleanup: f()
+
     def compare_lp_files(self, energysystem, filename):
         self.opt_model = om.OptimizationModel(energysystem=energysystem)
         self.opt_model.write_lp_file(
