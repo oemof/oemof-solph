@@ -13,8 +13,7 @@ except:
 import pyomo.environ as po
 import oemof.solph as solph
 
-from ..core.network.entities import Bus
-from ..core.network.entities import components as cp
+from ..core.network.entities import Bus, ExcessSlack, ShortageSlack
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
 
@@ -92,12 +91,12 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                                                   str(source.DispatchSource)))
 
     # artificial costs for excess or shortage
-    if hasattr(self, str(cp.ExcessSlack)):
+    if hasattr(self, str(ExcessSlack)):
         expr += objexpr.add_excess_slack_costs(self,
-                                               getattr(self, str(cp.ExcessSlack)))
-    if hasattr(self, str(cp.ShortageSlack)):
+                                               getattr(self, str(ExcessSlack)))
+    if hasattr(self, str(ShortageSlack)):
         expr += objexpr.add_shortage_slack_costs(self,
-                                                 getattr(self, str(cp.ShortageSlack)))
+                                                 getattr(self, str(ShortageSlack)))
 
 
     self.objective = po.Objective(expr=expr)

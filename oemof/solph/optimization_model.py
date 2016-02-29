@@ -13,7 +13,7 @@ from ..tools import helpers
 from . import variables as var
 from . import linear_mixed_integer_constraints as milc
 from . import linear_constraints as lc
-from ..core.network.entities import Bus, Component
+from ..core.network.entities import Bus, Component, ExcessSlack, ShortageSlack
 from ..core.network.entities.buses import HeatBus
 from ..core.network.entities import components as cp
 from ..core.network.entities.components import transformers as transformer
@@ -79,12 +79,9 @@ class OptimizationModel(po.ConcreteModel):
         self.relaxed = getattr(energysystem.simulation, "relaxed", False)
 
         self.T = po.Set(initialize=self.timesteps, ordered=True)
-
-        self.entities.extend(self.slack_components())
-        # filter
+        # calculate all edges ([("coal", "pp_coal"),...])
         self.components = [e for e in self.entities
                            if isinstance(e, Component)]
-        # calculate all edges ([("coal", "pp_coal"),...])
         self.all_edges = self.edges(self.components)
         var.add_continuous(model=self, edges=self.all_edges)
 
@@ -147,20 +144,6 @@ class OptimizationModel(po.ConcreteModel):
                 block.objs = objs
                 self.add_component(str(bls), block)
                 assembler.registry[bls](e=None, om=self, block=block)
-
-    def slack_components(self):
-        buses = [e for e in self.entities if isinstance(e, Bus)]
-
-        # create slack components for excess
-        excess = [cp.ExcessSlack(uid=b.uid+'_excess',
-                                 inputs=[b], costs=b.excess_costs)
-                  for b in buses if b.excess == True]
-
-        # create slack components for shortage
-        shortage = [cp.ShortageSlack(uid=b.uid+'_shortage',
-                                     outputs=[b], costs=b.shortage_costs)
-                    for b in buses if b.shortage == True]
-        return (excess+shortage)
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
@@ -284,7 +267,7 @@ class OptimizationModel(po.ConcreteModel):
                                           for t in self.timesteps]
 
             if (isinstance(entity, cp.Sink) or
-                    isinstance(entity, cp.ExcessSlack)):
+                isinstance(entity, ExcessSlack)):
                 for i in entity.inputs:
                     result[i] = result.get(i, {})
                     result[i][entity] = [self.w[i.uid, entity.uid, t].value
@@ -802,7 +785,7 @@ def _(e, om, block):
     var.set_bounds(om, block, side="output")
     return(om)
 
-@assembler.register(cp.ExcessSlack)
+@assembler.register(ExcessSlack)
 def _(e, om, block):
     """Excess slack assembler grouping the constraints
     for excess slack components.
@@ -820,8 +803,7 @@ def _(e, om, block):
     # var.set_bounds(om, block, side="output")
     return(om)
 
-
-@assembler.register(cp.ShortageSlack)
+@assembler.register(ShortageSlack)
 def _(e, om, block):
     """Shortage slack assembler grouping the constraints
     for shortage slack components.
