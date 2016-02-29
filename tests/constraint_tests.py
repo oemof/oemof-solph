@@ -51,7 +51,6 @@ class Constraint_Tests:
                    balanced=True,
                    excess=False)
 
-        # create electricity bus
         bel = Bus(uid="bel",
                   type="el",
                   excess=True)
@@ -67,35 +66,12 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem, "transformer_simp.lp")
 
         transformer.Simple.optimization_options.update({'investment': True})
-
-        del self.energysystem.entities[:]
-
-        bgas = Bus(
-            uid="bgas",
-            type="gas",
-            price=70,
-            balanced=True,
-            excess=False)
-
-        # create electricity bus
-        bel = Bus(uid="bel",
-                  type="el",
-                  excess=True)
-
-        transformer.Simple(
-            uid='pp_gas',
-            inputs=[bgas],
-            outputs=[bel],
-            opex_var=50,
-            out_max=[10e10],
-            eta=[0.58])
-
         self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
+        "Test source.FixedSource with and without investment."
         self.energysystem.entities = []
 
-        # create electricity bus
         bel = Bus(uid="bel",
                   type="el")
 
@@ -110,23 +86,5 @@ class Constraint_Tests:
                            crf=0.08)
 
         self.compare_lp_files(self.energysystem, "source_fixed.lp")
-
         source.FixedSource.optimization_options.update({'investment': True})
-
-        del self.energysystem.entities[:]
-
-        bel = Bus(uid="bel",
-                  type="el",
-                  excess=False)
-
-        source.FixedSource(uid="wind",
-                           outputs=[bel],
-                           val=[50, 80, 30],
-                           out_max=[1000000],
-                           add_out_limit=0,
-                           capex=1000,
-                           opex_fix=20,
-                           lifetime=25,
-                           crf=0.08)
-
         self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
