@@ -1,6 +1,7 @@
-from nose.tools import ok_
+from nose.tools import ok_, assert_raises
 
 import pandas as pd
+import numpy as np
 import logging
 import filecmp
 import os.path as ospath
@@ -9,9 +10,17 @@ from oemof.core.network.entities.components import transformers as transformer
 from oemof.solph import predefined_objectives as predefined_objectives
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
+from oemof.core.network.entities.buses import HeatBus
 from oemof.solph import optimization_model as om
 from oemof.core.network.entities.components import sources as source
 from oemof.tools import helpers
+
+
+class Entity_Tests:
+
+    def test_HeatBus(self):
+        "Creating a HeatBus without the temperature attribute raises an error."
+        assert_raises(TypeError, HeatBus, uid="Test")
 
 
 class Constraint_Tests:
@@ -88,3 +97,46 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem, "source_fixed.lp")
         source.FixedSource.optimization_options.update({'investment': True})
         self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
+
+    def test_storage(self):
+        pass
+
+    def test_postheating_invest(self):
+        self.energysystem.entities = []
+
+        btest = HeatBus(
+            uid="bus_test",
+            excess=False,
+            temperature=1,
+            re_temperature=1)
+
+        district_heat_bus = HeatBus(
+            uid="bus_distr_heat",
+            excess=False,
+            temperature=np.array([380, 360, 370]),
+            re_temperature=np.array([340, 340, 340]))
+
+        storage_heat_bus = HeatBus(
+            excess=False,
+            uid="bus_stor_heat",
+            temperature=370)
+
+        postheat = transformer.PostHeating(
+            uid='postheat_elec',
+            inputs=[btest, storage_heat_bus], outputs=[district_heat_bus],
+            opex_var=0, capex=99999,
+            out_max=[999993],
+            in_max=[777, 888],
+            eta=[0.95, 1])
+
+        assert_raises(ValueError, om.OptimizationModel,
+                      energysystem=self.energysystem)
+
+        postheat.in_max = [None, float('inf')]
+        self.compare_lp_files(self.energysystem, "postheating_invest.lp")
+
+        transformer.PostHeating.optimization_options.update(
+            {'investment': False})
+
+        postheat.in_max = [777, 888]
+        self.compare_lp_files(self.energysystem, "postheating.lp")
