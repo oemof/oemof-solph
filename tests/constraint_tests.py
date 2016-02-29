@@ -97,8 +97,7 @@ class Constraint_Tests:
 
         # create electricity bus
         bel = Bus(uid="bel",
-                  type="el",
-                  excess=True)
+                  type="el")
 
         source.FixedSource(uid="wind",
                            outputs=[bel],
@@ -118,7 +117,7 @@ class Constraint_Tests:
 
         bel = Bus(uid="bel",
                   type="el",
-                  excess=True)
+                  excess=False)
 
         source.FixedSource(uid="wind",
                            outputs=[bel],
