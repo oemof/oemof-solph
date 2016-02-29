@@ -153,12 +153,12 @@ class OptimizationModel(po.ConcreteModel):
 
         # create slack components for excess
         excess = [cp.ExcessSlack(uid=b.uid+'_excess',
-                              inputs=[b], costs=b.excess_costs)
-                  for b in buses if b.excess==True]
+                                 inputs=[b], costs=b.excess_costs)
+                  for b in buses if b.excess == True]
 
         # create slack components for shortage
         shortage = [cp.ShortageSlack(uid=b.uid+'_shortage',
-                                  outputs=[b], costs=b.shortage_costs)
+                                     outputs=[b], costs=b.shortage_costs)
                     for b in buses if b.shortage == True]
         return (excess+shortage)
 
@@ -260,10 +260,10 @@ class OptimizationModel(po.ConcreteModel):
         result = UD()
         result.objective = self.objective()
         for entity in self.entities:
-            if ( isinstance(entity, cp.Transformer) or
-                 isinstance(entity, cp.Transport)   or
-                 isinstance(entity, cp.Source) or
-                 isinstance(entity, cp.ShortageSlack)):
+            if (isinstance(entity, cp.Transformer) or
+                isinstance(entity, cp.Transport) or
+                isinstance(entity, cp.Source) or
+                    isinstance(entity, cp.ShortageSlack)):
                 if entity.outputs:
                     result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
@@ -284,7 +284,7 @@ class OptimizationModel(po.ConcreteModel):
                                           for t in self.timesteps]
 
             if (isinstance(entity, cp.Sink) or
-                isinstance(entity, cp.ExcessSlack)):
+                    isinstance(entity, cp.ExcessSlack)):
                 for i in entity.inputs:
                     result[i] = result.get(i, {})
                     result[i][entity] = [self.w[i.uid, entity.uid, t].value
@@ -817,8 +817,9 @@ def _(e, om, block):
     """
 
     # bounds
-    #var.set_bounds(om, block, side="output")
+    # var.set_bounds(om, block, side="output")
     return(om)
+
 
 @assembler.register(cp.ShortageSlack)
 def _(e, om, block):
@@ -835,5 +836,5 @@ def _(e, om, block):
     """
 
     # bounds
-    #var.set_bounds(om, block, side="output")
+    # var.set_bounds(om, block, side="output")
     return(om)
