@@ -246,7 +246,7 @@ class OptimizationModel(po.ConcreteModel):
             if (isinstance(entity, cp.Transformer) or
                 isinstance(entity, cp.Transport) or
                 isinstance(entity, cp.Source) or
-                    isinstance(entity, cp.ShortageSlack)):
+                    isinstance(entity, ShortageSlack)):
                 if entity.outputs:
                     result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
