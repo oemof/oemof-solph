@@ -132,7 +132,6 @@ def add_revenues(model, block, ref='output', idx=0):
     """ Revenue term for linear objective function.
 
     .. math:: \\sum_e \\sum_t w_{e, o_{e,1}}(t) \\cdot R_{e, o_{e,1}}(t)
-.
 
     Parameters
     ----------
@@ -145,7 +144,6 @@ def add_revenues(model, block, ref='output', idx=0):
     idx : integer
        Integer indicating which output from list to select
        if entity has multiple outputs
-
 
     Returns
     -------
@@ -358,11 +356,9 @@ def add_excess_slack_costs(model, block=None):
     -------
     Expression
     """
-
-    c_excess = {b.uid:b.excess_costs for b in block.objs
-                if b.excess==True}
-    expr = sum(model.excess_slack[e, t] * c_excess[e]
-               for e in block.excess_uids for t in model.timesteps)
+    c_excess = {e.uid:e.costs for e in block.objs}
+    expr = sum(model.w[model.I[e][0], e,   t] * c_excess[e]
+               for e in block.uids for t in model.timesteps)
     return(expr)
 
 
@@ -384,10 +380,9 @@ def add_shortage_slack_costs(model, block=None):
     -------
     Expression
     """
-    c_shortage = {b.uid: b.shortage_costs for b in block.objs
-                  if b.shortage==True}
-    expr = sum(model.shortage_slack[e, t] * c_shortage[e]
-               for e in block.shortage_uids for t in model.timesteps)
+    c_shortage = {e.uid: e.costs for e in block.objs}
+    expr = sum(model.w[e, model.O[e][0], t] * c_shortage[e]
+               for e in block.uids for t in model.timesteps)
     return(expr)
 
 

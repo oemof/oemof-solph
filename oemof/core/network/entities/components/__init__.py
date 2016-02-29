@@ -1,6 +1,5 @@
 from .. import Component
 
-
 class Sink(Component):
     """
     A Sink is special Component which only consumes some source commodity.
@@ -146,3 +145,5 @@ class Transport(Component):
             raise ValueError("Transport must have exactly one output.\n" +
                              "Got: {0!r}".format([str(x)
                                                  for x in self.outputs]))
+
+

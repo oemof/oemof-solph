@@ -13,10 +13,10 @@ from ..tools import helpers
 from . import variables as var
 from . import linear_mixed_integer_constraints as milc
 from . import linear_constraints as lc
-from ..core.network.entities import Bus, Component
+from ..core.network.entities import Bus, Component, ExcessSlack, ShortageSlack
+from ..core.network.entities.buses import HeatBus
 from ..core.network.entities import components as cp
-from ..core.network.entities.components.transformers import (
-    CHP, Simple, SimpleExtractionCHP, Storage, VariableEfficiencyCHP)
+from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components.sources import (
     Commodity, DispatchSource, FixedSource)
 from ..core.network.entities.components.sinks import Simple as Sink
@@ -98,8 +98,13 @@ class OptimizationModel(po.ConcreteModel):
         # Add constraints for all components to the model
         self.build_component_constraints(cbt)
 
+        # group buses by type (bbt: buses by type)
+        bbt = {}
+        for b in [e for e in self.entities if isinstance(e, Bus)]:
+            bbt[type(b)] = bbt.get(type(b), []) + [b]
+
         # Add constraints for all buses to the model
-        self.build_bus_constraints()
+        self.build_bus_constraints(bbt)
 
         # create objective function
         if not self.objective_options:
@@ -126,15 +131,19 @@ class OptimizationModel(po.ConcreteModel):
                               "classes: " + block.name)
                 assembler.registry[cls](e=None, om=self, block=block)
 
-    def build_bus_constraints(self):
-        # add bus block
-        block = po.Block()
-        # get all bus objects
-        block.objs = [e for e in self.entities if isinstance(e, Bus)]
-        block.uids = [e.uid for e in block.objs]
-        logging.info("Building bus constraints")
-        assembler.registry[Bus](e=None, om=self, block=block)
-        self.add_component(str(Bus), block)
+    def build_bus_constraints(self, bbt):
+        logging.info("Building bus constraints.")
+        for bls in bbt:
+            objs = bbt[bls]
+            # "call" methods to add the constraints opt. problem
+            if objs:
+                # add bus block
+                block = po.Block()
+                uids = [e.uid for e in objs]
+                block.uids = po.Set(initialize=uids)
+                block.objs = objs
+                self.add_component(str(bls), block)
+                assembler.registry[bls](e=None, om=self, block=block)
 
     def default_assembler(self, block):
         """ Method for setting optimization model objects for blocks
@@ -234,9 +243,10 @@ class OptimizationModel(po.ConcreteModel):
         result = UD()
         result.objective = self.objective()
         for entity in self.entities:
-            if ( isinstance(entity, cp.Transformer) or
-                 isinstance(entity, cp.Transport)   or
-                 isinstance(entity, cp.Source)):
+            if (isinstance(entity, cp.Transformer) or
+                isinstance(entity, cp.Transport) or
+                isinstance(entity, cp.Source) or
+                    isinstance(entity, ShortageSlack)):
                 if entity.outputs:
                     result[entity] = result.get(entity, UD())
                 for o in entity.outputs:
@@ -256,7 +266,8 @@ class OptimizationModel(po.ConcreteModel):
                                                  t].value
                                           for t in self.timesteps]
 
-            if isinstance(entity, cp.Sink):
+            if (isinstance(entity, cp.Sink) or
+                isinstance(entity, ExcessSlack)):
                 for i in entity.inputs:
                     result[i] = result.get(i, {})
                     result[i][entity] = [self.w[i.uid, entity.uid, t].value
@@ -264,9 +275,11 @@ class OptimizationModel(po.ConcreteModel):
 
             if isinstance(entity, cp.transformers.Storage):
                 result[entity] = result.get(entity, UD())
-                result[entity][entity] = [getattr(self, str(Storage)
-                                                  ).cap[entity.uid, t].value
-                                          for t in self.timesteps]
+                result[entity][entity] = [
+                    getattr(
+                        self, str(transformer.Storage)
+                        ).cap[entity.uid, t].value
+                    for t in self.timesteps]
 
             block = getattr(self, str(type(entity)))
 
@@ -284,17 +297,6 @@ class OptimizationModel(po.ConcreteModel):
                         self.dual[getattr(self, str(Bus)).balance[
                             (bus.uid, t)]]
                         for t in self.timesteps]
-
-        for bus in getattr(self, str(Bus)).objs:
-            if bus.excess:
-                result[bus] = result.get(bus, {})
-                result[bus]["excess"] = [self.excess_slack[(bus.uid, t)].value
-                                         for t in self.timesteps]
-            if bus.shortage:
-                result[bus] = result.get(bus, {})
-                result[bus]["shortage"] = [
-                    self.shortage_slack[(bus.uid, t)].value
-                    for t in self.timesteps]
 
         return result
 
@@ -314,7 +316,7 @@ class OptimizationModel(po.ConcreteModel):
         ----------
         self : pyomo.ConcreteModel() object
 
-        **kwargs : keywords
+        \**kwargs : keywords
             Possible keys can be set see below
         solver string:
             solver to be used e.g. "glpk","gurobi","cplex"
@@ -442,6 +444,33 @@ def _(e, om, block):
           bus balances.
     """
 
+    # bus balance constraint for energy bus objects
+    lc.add_bus_balance(om, block)
+
+    # set limits for buses
+    lc.add_global_output_limit(om, block)
+    return om
+
+
+@assembler.register(HeatBus)
+def _(e, om, block):
+    """ Method creates bus balance for all buses.
+
+    The bus model creates all full balance around the energy buses using
+    the :func:`lc.generic_bus_constraint` function.
+    Additionally it sets constraints to model limits over the timehorizon
+    for resource buses using :func:`lc.generic_limit`
+
+    Parameters
+    ----------
+    see :func:`assembler`.
+
+    Returns
+    -------
+    om : The optimization model passed in as an argument, with additional
+          bus balances.
+    """
+
     # slack variables that assures a feasible problem
     # get uids for busses that allow excess
     block.excess_uids = [b.uid for b in block.objs if b.excess is True]
@@ -466,7 +495,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(Simple)
+@assembler.register(transformer.Simple)
 def _(e, om, block):
     """ Method containing the constraints functions for simple
     transformer components.
@@ -496,7 +525,39 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(CHP)
+@assembler.register(transformer.PostHeating)
+def _(e, om, block):
+    """ Method containing the constraints functions for simple
+    transformer components.
+
+    Constraints are selected by the `optimization_options` variable of
+    :class:`Simple`.
+
+    Parameters
+    ----------
+    see :func:`assembler`.
+
+    Returns
+    -------
+    see :func:`assembler`.
+    """
+    # TODO: This should be dependent on objs classes not fixed if assembler
+    # method is used by another assemlber method...
+
+    def linear_constraints(om, block):
+        lc.add_two_inputs_io_relation(om, block)
+        var.set_bounds(om, block, side="output")
+        var.set_bounds(om, block, side="input")
+        lc.add_postheat_relation(om, block)
+
+    block.default_optimization_options = {
+        "linear_constr": linear_constraints}
+
+    om.default_assembler(block)
+    return om
+
+
+@assembler.register(transformer.CHP)
 def _(e, om, block):
     """ Method grouping the constraints for simple chp components.
 
@@ -524,7 +585,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(SimpleExtractionCHP)
+@assembler.register(transformer.SimpleExtractionCHP)
 def _(e, om, block):
     """Method grouping the constraints for simple chp components.
 
@@ -549,7 +610,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(VariableEfficiencyCHP)
+@assembler.register(transformer.VariableEfficiencyCHP)
 def _(e, om, block):
     """Method grouping the constraints for chp components with variable el.
     efficiency.
@@ -666,7 +727,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(Storage)
+@assembler.register(transformer.Storage)
 def _(e, om, block):
     """Simple storage assembler containing the constraints for simple
     storage components.
@@ -722,4 +783,40 @@ def _(e, om, block):
     lc.add_simple_io_relation(om, block)
     # bounds
     var.set_bounds(om, block, side="output")
+    return(om)
+
+@assembler.register(ExcessSlack)
+def _(e, om, block):
+    """Excess slack assembler grouping the constraints
+    for excess slack components.
+
+    Parameters
+    ----------
+    See :func:`assembler`.
+
+    Returns
+    -------
+    See :func:`assembler`.
+    """
+
+    # bounds
+    # var.set_bounds(om, block, side="output")
+    return(om)
+
+@assembler.register(ShortageSlack)
+def _(e, om, block):
+    """Shortage slack assembler grouping the constraints
+    for shortage slack components.
+
+    Parameters
+    ----------
+    See :func:`assembler`.
+
+    Returns
+    -------
+    See :func:`assembler`.
+    """
+
+    # bounds
+    # var.set_bounds(om, block, side="output")
     return(om)

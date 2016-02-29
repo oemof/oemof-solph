@@ -34,7 +34,7 @@ logger.define_logging()
 data = pd.read_csv("example_data.csv", sep=",")
 time_index = pd.date_range('1/1/2012', periods=168, freq='H')
 simulation = es.Simulation(solver='glpk', timesteps=range(len(time_index)),
-                           verbose=False, duals=True,
+                           verbose=False, duals=False,
                            objective_options={
                              'function': predefined_objectives.minimize_cost})
 #
@@ -55,8 +55,9 @@ blig = Bus(uid="lignite", type="lignite", balanced=False, price=15,
            excess=False)
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="el", excess=False, shortage=False)
-b_th = Bus(uid="b_th", type="th", excess=True, shortage=False)
+b_el = Bus(uid="b_el", type="el", excess=False,
+           shortage=True, shortage_costs=99999)
+b_th = Bus(uid="b_th", type="th", excess=True, excess_costs=0)
 
 # renewable sources (only pv onshore)
 wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el],

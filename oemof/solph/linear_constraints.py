@@ -37,9 +37,12 @@ For all mathematical constraints the following definitions hold:
 Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 
+import inspect
+import logging
 import pyomo.environ as po
 from pandas import Series as pdSeries
 from . import pyomo_fastbuild as pofast
+
 
 def add_bus_balance(model, block=None):
     """ Adds constraint for the input-ouput balance of bus objects.
@@ -83,10 +86,6 @@ def add_bus_balance(model, block=None):
             lhs = 0
             lhs = sum(model.w[i, e, t] for i in I[e])
             rhs = sum(model.w[e, o, t] for o in O[e])
-            if e in block.excess_uids:
-                rhs += model.excess_slack[e, t]
-            if e in block.shortage_uids:
-                lhs += model.shortage_slack[e, t]
             return(lhs == rhs)
         block.balance = po.Constraint(block.balanced_indexset,
                                       rule=bus_balance_rule)
@@ -97,15 +96,9 @@ def add_bus_balance(model, block=None):
             for e in uids:
                 tuples = [(1, model.w[i, e, t]) for i in I[e]] + \
                          [(-1, model.w[e, o, t]) for o in O[e]]
-                if e in block.excess_uids:
-                    tuples.append((-1, model.excess_slack[e, t]))
-                if e in block.shortage_uids:
-                    tuples.append((1, model.shortage_slack[e, t]))
-
                 balance_dict[e, t] = [tuples, "==", 0.]
         pofast.l_constraint(block, 'balance', balance_dict,
                             block.balanced_indexset)
-
 
 
 def add_simple_io_relation(model, block, idx=0):
@@ -163,6 +156,62 @@ def add_simple_io_relation(model, block, idx=0):
                             for e,t in block.indexset}
         pofast.l_constraint(block, 'io_relation', io_relation_dict,
                             block.indexset)
+
+
+def add_two_inputs_io_relation(model, block):
+    r""" Adds constraint for the input-output relation of a post heating
+    transformer with two input flows.
+
+    Then the amount of all input flows multiplied with their efficiency will be
+    the output flow. The efficiency of the each will be calculated so that the
+    sum of the efficiency of both flows might be greater than one.
+
+    The mathematical formulation for the constraint is as follows:
+
+    .. math::
+        w_{e,i_{e,1}}(t)\cdot\eta_{e,i_{e,1}}(t)+w_{e,i_{e,2}}(t)\cdot
+        \eta_{e,i_{e,2}}(t)=w_{e,o_{e}},\qquad\forall e,\forall t\qquad\qquad
+
+    With :math:`e\in\mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
+
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IIO}`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which the constraints should be build")
+
+    eta = {obj.uid: obj.eta for obj in block.objs}
+
+    # constraint for simple transformers: input * efficiency = output
+    def io_rule(block, e, t):
+        lhs = (model.w[model.I[e][0], e, t] * eta[e][0] +
+               model.w[model.I[e][1], e, t] * eta[e][1] -
+               model.w[e, model.O[e][0], t])
+        return(lhs == 0)
+
+    if not model.energysystem.simulation.fast_build:
+        pass
+    block.io_relation = po.Constraint(
+            block.indexset, rule=io_rule,
+            doc="INFLOW_1 * efficiency_1 +  INFLOW_2 * efficiency_2 = OUTFLOW"
+            )
+
+    if model.energysystem.simulation.fast_build:
+        name = inspect.stack()[0][3]
+        logging.warning(
+            'No fastbuild constraints defined for function: {0}.'.format(name))
+
 
 def add_eta_total_chp_relation(model, block):
     """ Adds constraints for input-(output1,output2) relation as
@@ -256,6 +305,69 @@ def add_simple_chp_relation(model, block):
                              for e,t in block.indexset}
         pofast.l_constraint(block, 'pth_relation', pth_relation_dict,
                             block.indexset)
+
+
+def add_postheat_relation(model, block):
+    r""" Adds constraint for the input relation of a post heating device.
+
+    The additional device of the postheat transformer will heat up the flow and
+    therefore will deliver an amount of energy. This amount depends on the
+    temperature difference between the buses and the temperature difference
+    between the input bus and the return flow temperature.
+
+    The mathematical formulation for the constraint is as follows:
+
+    .. math::
+        w_{e,i_{e,1}}(t)=w_{e,i_{e,2}}(t)\cdot f,\quad\forall e,\forall t
+        \qquad\\
+        \\
+        f=\frac{T^{flow}_{bus,o}-T^{flow}_{bus,i}}
+        {T^{flow}_{bus,i}-T^{return}_{bus,o}}\qquad\qquad\qquad
+
+    With :math:`e\in\mathcal{E}` and :math:`\mathcal{E}` beeing the
+    set of unique ids for all entities grouped inside the
+    attribute `block.objs`.
+
+    Additionally: :math:`\mathcal{E} \subset \mathcal{E}_{IIO}`.
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+
+    """
+    if not block.objs or block.objs is None:
+        raise ValueError('No objects defined. Please specify objects for \
+                          which post heating constraints should be set.')
+
+    T_coeff = {}
+    for e in block.objs:
+        out = [o for o in e.outputs[:]]
+        T_out = out[0].temperature
+        T_re_out = out[0].re_temperature
+        T_in = [o for o in e.inputs[:]][1].temperature
+        dT_throw = T_out - T_in
+        dT_throw[dT_throw < 0] = 0
+        dT_in = T_in - T_re_out
+        T_coeff[e.uid] = (dT_throw) / (dT_in)
+
+    def postheat_rule(block, e, t):
+        lhs = (model.w[model.I[e][1], e, t] * T_coeff[e][t] -
+               model.w[model.I[e][0], e, t])
+        return(lhs == 0)
+
+    if not model.energysystem.simulation.fast_build:
+        block.postheat = po.Constraint(block.indexset, rule=postheat_rule,
+                                       doc="Q * f = P_addition")
+
+    if model.energysystem.simulation.fast_build:
+        name = inspect.stack()[0][3]
+        logging.warning(
+            'No fastbuild constraints defined for function: {0}.'.format(name))
+
 
 def add_simple_extraction_chp_relation(model, block):
     """ Adds constraints for power to heat relation and equivalent output
