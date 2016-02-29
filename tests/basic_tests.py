@@ -19,13 +19,13 @@ class EnergySystem_Tests:
 
     def test_entity_registration(self):
         logging.info(Entity.registry)
-#        ok_(Entity.registry is None)
+        ok_(Entity.registry is None)
         ensys = es.EnergySystem()
         eq_(Entity.registry, ensys)
         bus = Bus(uid='bus-uid', type='bus-type')
         eq_(ensys.entities[0], bus)
         bus2 = Bus(uid='bus-uid2', type='bus-type')
         transformer.Simple(uid='pp_gas', inputs=[bus], outputs=[bus2])
-        ok_(isinstance(ensys.entities[2], transformer.Simple))
+        ok_(isinstance(ensys.entities[4], transformer.Simple))
         ensys.simulation = self.simulation
         ok_(len(ensys.simulation.timesteps) == 5)
