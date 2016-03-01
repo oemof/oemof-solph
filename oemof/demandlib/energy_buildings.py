@@ -5,6 +5,7 @@
 import logging
 import pandas as pd
 from datetime import time as settime
+import os
 
 class Building():
     """
@@ -73,10 +74,13 @@ class bdew_elec_slp():
         '''
         Calculates the hourly electricity load profile in MWh/h of a region.
         '''
+        
+        # define file path of slp csv data
+        self.datapath = os.path.join(os.path.dirname(__file__), 'bdew_data')
+        file_path = os.path.join(self.datapath, 'selp_series.csv')
 
         # Read standard load profile series from csv file
-
-        selp_series = pd.read_csv('../oemof/demandlib/bdew_data/selp_series.csv')
+        selp_series = pd.read_csv(file_path)
         tmp_df = selp_series
 
         index = pd.date_range(
