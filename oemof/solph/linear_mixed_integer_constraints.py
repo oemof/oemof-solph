@@ -72,7 +72,7 @@ def set_bounds(model, block, side="output"):
 
         # set upper bounds
         def input_ub_rule(block, e, t):
-            lhs = model.w[model.I[e], e, t]
+            lhs = model.w[model.I[e][0], e, t]
             rhs = block.y[e, t] * in_max[e][0]
             return(lhs <= rhs)
         block.maximum_input = po.Constraint(block.indexset, rule=input_ub_rule)
@@ -81,7 +81,7 @@ def set_bounds(model, block, side="output"):
         # set lower bounds
         def input_lb_rule(block, e, t):
             lhs = block.y[e, t] * in_min[e][0]
-            rhs = model.w[model.I[e], e, t]
+            rhs = model.w[model.I[e][0], e, t]
             return(lhs <= rhs)
         block.minimum_input = po.Constraint(block.indexset, rule=input_lb_rule)
 
@@ -111,7 +111,7 @@ def add_variable_linear_eta_relation(model, block):
     c = {obj.uid: obj.coeff for obj in block.objs}
 
     def variable_linear_eta_rule(block, e, t):
-        lhs = model.w[model.I[e], e, t]
+        lhs = model.w[model.I[e][0], e, t]
         rhs = block.y[e,t]*c[e][0] + c[e][1] * model.w[e, model.O[e][0], t]
         return(lhs == rhs)
     block.variable_linear_eta_relation = po.Constraint(block.indexset,

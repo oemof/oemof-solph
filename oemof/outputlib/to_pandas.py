@@ -55,40 +55,18 @@ class ResultsDataFrame(pd.DataFrame):
         rows_list = []
         for k, v in es.results.items():
             if ('Bus' in str(k.__class__)):
-                if k in v.keys():
-                    for kk, vv in v.items():
-                        if(k is kk):
-                            # duals (results[bus][bus])
-                            row = {}
-                            row['bus_uid'] = k.uid
-                            row['bus_type'] = k.type
-                            row['type'] = 'other'
-                            row['obj_uid'] = 'duals'
-                            row['datetime'] = es.time_idx
-                            row['val'] = v.get(k)
-                            rows_list.append(row)
-                else:
-                    for kk, vv in v.items():
-                        if (isinstance(kk, str)):
-                            row = {}
-                            # bus variables (results[bus]['some_key'])
-                            row['bus_uid'] = k.uid
-                            row['bus_type'] = k.type
-                            row['type'] = 'other'
-                            row['obj_uid'] = kk
-                            row['datetime'] = es.time_idx
-                            row['val'] = vv
-                            rows_list.append(row)
-                        else:
-                            # bus outputs (results[bus][component])
-                            row = {}
-                            row['bus_uid'] = k.uid
-                            row['bus_type'] = k.type
-                            row['type'] = 'output'
-                            row['obj_uid'] = kk.uid
-                            row['datetime'] = es.time_idx
-                            row['val'] = vv
-                            rows_list.append(row)
+                for kk, vv in v.items():
+                    row = {}
+                    row['bus_uid'] = k.uid
+                    row['bus_type'] = k.type
+                    row['type'] = ('output' if not (isinstance(kk, str)) else
+                                   'other')
+                    row['obj_uid'] = 'duals' if (k is kk) else (
+                                      kk     if (isinstance(kk, str)) else
+                                      kk.uid)
+                    row['datetime'] = es.time_idx
+                    row['val'] = vv
+                    rows_list.append(row)
             else:
                 if k in v.keys():
                     # self ref. components (results[component][component])

@@ -1,4 +1,3 @@
-
 from . import Transformer
 import logging
 import numpy as np
@@ -22,6 +21,13 @@ class Simple(Transformer):
         """
         super().__init__(**kwargs)
         self.eta = kwargs.get('eta', None)
+
+
+class PostHeating(Simple):
+    r"""
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class CHP(Transformer):
@@ -128,15 +134,15 @@ class Storage(Transformer):
         absolut maximum state of charge of built capacity if invest=TRUE
     cap_min : float
         absolut minimum state of charge
-    cap_initial : float
-        state of charge at timestep 0 (default cap_max*0.5)
+    cap_initial : float, optional
+        The state of charge (soc) at timestep 0.
     add_cap_limit : float
         limit of additional installed capacity (only investment models)
     eta_in : float
         efficiency at charging
     eta_out : float
         efficiency at discharging
-    cap_loss : float
+    cap_loss : float or list/pandas.Series with length of simulation timesteps
         capacity loss per timestep in p/100
     c_rate_in : float
         c-rate for charging (unit is s^-1)
@@ -153,10 +159,6 @@ class Storage(Transformer):
         self.cap_min = kwargs.get('cap_min', None)
         self.add_cap_limit = kwargs.get('add_cap_limit', None)
         self.cap_initial = kwargs.get('cap_initial', None)
-        if self.cap_initial is None:
-            self.cap_initial = self.cap_max*0.5
-            logging.info('No initial storage capacity set. Setting capacity ' +
-                         'to 0.5 of max. capacity for component: %s', self.uid)
         self.eta_in = kwargs.get('eta_in', 1)
         self.eta_out = kwargs.get('eta_out', 1)
         self.cap_loss = kwargs.get('cap_loss', 0)

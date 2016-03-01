@@ -136,9 +136,12 @@ def set_bounds(model, block, side='output'):
                 ub_out[e.uid] = dict(zip(
                     output_uids,
                     [[x] * len(model.timesteps) for x in e.out_max]))
-        if side == 'input':
+                out_max[e.uid] = dict(zip(output_uids, e.out_max))
+        if side == 'input' and e.in_max is not None:
             input_uids = [i.uid for i in e.inputs[:]]
-            ub_in[e.uid] = dict(zip(input_uids, e.in_max))
+            ub_in[e.uid] = dict(zip(
+                input_uids,
+                [[x] * len(model.timesteps) for x in e.in_max]))
 
     # *** No investment - set upper bound to maximal output***
     if not block.optimization_options.get('investment', False):
@@ -150,9 +153,9 @@ def set_bounds(model, block, side='output'):
                 if e1 in block.uids and side == 'output':
                     model.w[e1, e2, t].setub(ub_out[e1][e2][t])
                 # transformer input <= model.in_max
-                if e2 in block.uids and side == 'input':
+                if e2 in ub_in and side == 'input':
                     try:
-                        model.w[e1, e2, t].setub(ub_in[e2][e1])
+                        model.w[e1, e2, t].setub(ub_in[e2][e1][t])
                     except:
                         logging.warning("No upper bound for input (%s,%s)",
                                         e1, e2)
@@ -189,9 +192,14 @@ def set_bounds(model, block, side='output'):
                         block.indexset, rule=add_output_rule)
 
         # TODO: Implement upper bound constraint for investment models
-        if side == 'input':
-            raise ValueError('Setting upper bounds on inputs of components' +
-                             ' not possible for investment models')
+        elif side == 'input':
+            error_mesg = "Setting upper bounds on inputs of components is "
+            error_mesg += "not possible for investment models"
+            for e in block.objs:
+                if e.in_max is not None:
+                    for in_max in e.in_max:
+                        if in_max is not None and in_max != float("inf"):
+                            raise ValueError(error_mesg)
 
 
 def set_storage_cap_bounds(model, block):
@@ -296,8 +304,8 @@ def set_outages(model, block, outagetype='period', side='output'):
     if side == 'input' and timesteps[e]:
         for e in block.uids:
             for t in timesteps[e]:
-                model.w[model.I[e], e, t] = 0
-                model.w[model.I[e], e, t].fix()
+                model.w[model.I[e][0], e, t] = 0
+                model.w[model.I[e][0], e, t].fix()
     if side == 'output' and timesteps[e]:
         for e in block.uids:
             for t in timesteps[e]:

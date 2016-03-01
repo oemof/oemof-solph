@@ -291,7 +291,7 @@ class Simulation:
         self.duals = kwargs.get('duals', False)
         self.timesteps = kwargs.get('timesteps')
         self.relaxed = kwargs.get('relaxed', False)
-        self.fast_build = kwargs.get('fast_build', False),
+        self.fast_build = kwargs.get('fast_build', False)
         self.solve_kwargs = kwargs.get('solve_kwargs', {})
 
         if self.timesteps is None:

@@ -19,7 +19,7 @@ To install the developer version two steps are necessary:
 Documentation
 -------------
 
-See the documentation of the dev branch at `readthedocs.org <http://oemof_base.readthedocs.org/en/latest/>`_.
+See the documentation of the dev branch at `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
 
 Collaboration
@@ -32,6 +32,8 @@ Style guidelines
 ----------------
 
 We mostly follow standard guidelines instead of developing own rules.
+
+* `Docstring example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_
 
 PEP8 (Python Style Guide)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
