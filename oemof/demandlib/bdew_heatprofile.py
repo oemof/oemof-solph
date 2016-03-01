@@ -217,10 +217,12 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
     SF = get_h_values(df=df, datapath=datapath,
                       building_class=building_class,
                       shlp_type=shlp_type)
+
     [A, B, C, D] = get_sigmoid_parameters(datapath=datapath,
                                           building_class=building_class,
                                           wind_class=wind_class,
                                           shlp_type=shlp_type)
+
     F = get_weekday_parameters(df, datapath, shlp_type=shlp_type)
 
     h = (A / (1 + (B / (df['temperature'] - 40)) ** C) + D)

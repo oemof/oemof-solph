@@ -31,12 +31,8 @@ class Building():
         """
         """
         self.annual_heat_demand = kwargs.get('annual_heat_demand')
-        self.annual_electricity_demand = kwargs.get('annual_electricity_demand')
 
-
-    def hourly_heat_demand(self, year, temperature, holidays=None,
-                           function=None, **kwargs):
-        from oemof.demandlib.bdew_heatprofile import create_bdew_profile as bdew_profile
+    def hourly_heat_demand(self, fun=None, **kwargs):
         """
         Calculate hourly heat demand
 
@@ -44,34 +40,18 @@ class Building():
         ----------
 
         self : building object
-        year : int
-            year for which the demand is calculated
-        temperature : array like
-           array like hourly temperature series
-        holiday : ? (optional)
-           holidays
-        function : python function
+        fun : python function
            function to use for heat demand calculation
-        **kwargs : kwargs
+        kwargs : additional arguments
+           arguments to use in fun
         """
+        if not kwargs.get("annual_heat_demand"):
+            try:
+                kwargs["annual_heat_demand"] = self.annual_heat_demand
+            except:
+                raise ValueError("Missing annual heat demand!")
 
-        # if no heat demand is provided throw value error
-        if not (self.annual_heat_demand or kwargs.get("annual_heat_demand")):
-            raise ValueError("Missing annual heat demand!")
-        # if heat demand is provided as argument override value of self.ann...
-        elif kwargs.get("annual_heat_demand"):
-            self.annual_heat_demand = kwargs.get("annual_heat_demand")
-
-        if function == bdew_profile:
-            hourly_heat_demand = function(datapath=kwargs.get("datapath"),
-                                          year=year, temperature=temperature,
-                                          annual_heat_demand = self.annual_heat_demand,
-                                          shlp_type = kwargs.get("shlp_type"),
-                                          building_class = kwargs.get("building_class"),
-                                          wind_class = kwargs.get("wind_class"))
-        else:
-            pass
-
+        hourly_heat_demand = fun(**kwargs)
 
         return hourly_heat_demand
 
