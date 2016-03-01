@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul 28 12:04:21 2015
 
-@author: uwe
 """
-import numpy as np
 import logging
 import pandas as pd
-import os
-from math import ceil as round_up
 from datetime import time as settime
-
 
 class electric_building():
     ''
@@ -29,132 +23,57 @@ class electric_building():
         return self.elec_demand
 
 
-class HeatBuilding():
-    ''
-    def __init__(self, time_df, temp, **kwargs):
-        self.datapath = os.path.join(os.path.dirname(__file__), 'data')
-        self.year = time_df.index.year[1000]
-        time_df['temp'] = (temp - 273)
-        self.heat_demand = self.create_slp(time_df, **kwargs)
-        self.type = kwargs['shlp_type']
-        self.annual_load = kwargs['annual_heat_demand']
+class Building():
+    """
+    """
 
-    def temp_geo_series(self, time_df):
-        r'''
-        A new temperature vector is generated containing a multy-day
-        average temperature as needed in the load profile function.
+    def __init__(self, **kwargs):
+        """
+        """
+        self.annual_heat_demand = kwargs.get('annual_heat_demand')
+        self.annual_electricity_demand = kwargs.get('annual_electricity_demand')
 
-        Notes
-        -----
-        Equation for the mathematical series of the average tempaerature [1]_:
 
-        .. math::
-            T=\frac{T_{t}+0.5\cdot T_{t-1}+0.25\cdot T_{t-2}+
-                    0.125\cdot T_{t-3}}{1+0.5+0.25+0.125}
+    def hourly_heat_demand(self, year, temperature, holidays=None,
+                           function=None, **kwargs):
+        from oemof.demandlib.bdew_heatprofile import create_bdew_profile as bdew_profile
+        """
+        Calculate hourly heat demand
 
-        with :math:`T_t` = Average temperature on the present day
-             :math:`T_{t-1}` = Average temperature on the previous day ...
-
-        References
+        Parameters
         ----------
-        .. [1] `BDEW <https://www.avacon.de/cps/rde/xbcr/avacon/15-06-30_Leitfaden_Abwicklung_SLP_Gas.pdf>`_, BDEW Documentation for heat profiles.
-        '''
-        tem = time_df['temp'].resample('D', how='mean').reindex(
-            time_df.index).fillna(method="ffill")
-        return (tem + 0.5 * np.roll(tem, 24) + 0.25 * np.roll(tem, 48) +
-                0.125 * np.roll(tem, 72)) / 1.875
 
-    def temp_interval(self, time_df):
-        '''
-        Appoints the corresponding temperature interval to each temperature in
-        the temperature vector.
-        '''
-        temp = self.temp_geo_series(time_df)
-        temp_dict = ({
-            -20: 1, -19: 1, -18: 1, -17: 1, -16: 1, -15: 1, -14: 2,
-            -13: 2, -12: 2, -11: 2, -10: 2, -9: 3, -8: 3, -7: 3, -6: 3, -5: 3,
-            -4: 4, -3: 4, -2: 4, -1: 4, 0: 4, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5,
-            6: 6, 7: 6, 8: 6, 9: 6, 10: 6, 11: 7, 12: 7, 13: 7, 14: 7, 15: 7,
-            16: 8, 17: 8, 18: 8, 19: 8, 20: 8, 21: 9, 22: 9, 23: 9, 24: 9,
-            25: 9, 26: 10, 27: 10, 28: 10, 29: 10, 30: 10, 31: 10, 32: 10,
-            33: 10, 34: 10, 35: 10, 36: 10, 37: 10, 38: 10, 39: 10, 40: 10})
-        temp_rounded = [round_up(i) for i in temp]
-        temp_int = [temp_dict[i] for i in temp_rounded]
-        return np.transpose(np.array(temp_int))
+        self : building object
+        year : int
+            year for which the demand is calculated
+        temperature : array like
+           array like hourly temperature series
+        holiday : ? (optional)
+           holidays
+        function : python function
+           function to use for heat demand calculation
+        **kwargs : kwargs
+        """
 
-    def get_h_values(self, time_df, **kwargs):
-        '''Determine the h-values'''
-        file = os.path.join(self.datapath, 'shlp_hour_factors.csv')
-        hour_factors = pd.read_csv(file, index_col=0)
-        hour_factors = hour_factors.query(
-            'building_class=={building_class} and shlp_type=="{shlp_type}"'
-            .format(**kwargs))
+        # if no heat demand is provided throw value error
+        if not (self.annual_heat_demand or kwargs.get("annual_heat_demand")):
+            raise ValueError("Missing annual heat demand!")
+        # if heat demand is provided as argument override value of self.ann...
+        elif kwargs.get("annual_heat_demand"):
+            self.annual_heat_demand = kwargs.get("annual_heat_demand")
 
-        # Join the two DataFrames on the columns 'hour' and 'hour_of_the_day'
-        # or ['hour' 'weekday'] and ['hour_of_the_day', 'weekday'] if it is
-        # not a residential slp.
-        residential = kwargs['building_class'] > 0
+        if function == bdew_profile:
+            hourly_heat_demand = function(datapath=kwargs.get("datapath"),
+                                          year=year, temperature=temperature,
+                                          annual_heat_demand = self.annual_heat_demand,
+                                          shlp_type = kwargs.get("shlp_type"),
+                                          building_class = kwargs.get("building_class"),
+                                          wind_class = kwargs.get("wind_class"))
+        else:
+            pass
 
-        left_cols = ['hour_of_day'] + (['weekday'] if not residential else [])
-        right_cols = ['hour'] + (['weekday'] if not residential else [])
 
-        SF_mat = pd.DataFrame.merge(
-            hour_factors, time_df, left_on=left_cols, right_on=right_cols,
-            how='outer', left_index=True).sort().drop(
-            left_cols + right_cols, 1)
-
-        # Determine the h values
-        h = np.array(SF_mat)[np.array(range(0, 8760))[:], (
-            self.temp_interval(time_df) - 1)[:]]
-        return np.array(list(map(float, h[:])))
-
-    def get_sigmoid_parameter(self, **kwargs):
-        ''' Retrieve the sigmoid parameters from the database'''
-        file = os.path.join(self.datapath, 'shlp_sigmoid_factors.csv')
-        sigmoid = pd.read_csv(file, index_col=0)
-        sigmoid = sigmoid.query(
-            'building_class=={building_class} and '.format(**kwargs) +
-            'shlp_type=="{shlp_type}" and '.format(**kwargs) +
-            'wind_impact=={wind_class}'.format(**kwargs))
-
-        A = float(sigmoid['parameter_a'])
-        B = float(sigmoid['parameter_b'])
-        C = float(sigmoid['parameter_c'])
-        D = float(sigmoid['parameter_d']) if kwargs.get(
-            'ww_incl', True) else 0
-        return A, B, C, D
-
-    def get_weekday_parameter(self, time_df, **kwargs):
-        ''' Retrieve the weekdayparameter from the database'''
-        file = os.path.join(self.datapath, 'shlp_weekday_factors.csv')
-        F_df = pd.read_csv(file, index_col=0)
-
-        F_df = (F_df.query('shlp_type=="{0}"'.format(
-            kwargs['shlp_type'])))
-        F_df.drop('shlp_type', axis=1, inplace=True)
-
-        F_df['weekdays'] = F_df.index + 1
-
-        return np.array(list(map(float, pd.DataFrame.merge(
-            F_df, time_df, left_on='weekdays', right_on='weekday', how='outer',
-            left_index=True).sort()['wochentagsfaktor'])))
-
-    def create_slp(self, time_df, **kwargs):
-        '''Calculation of the hourly heat demand using the bdew-equations'''
-        time_df['weekday'].mask(time_df['weekday'] == 0, 7, True)
-        SF = self.get_h_values(time_df, **kwargs)
-        [A, B, C, D] = self.get_sigmoid_parameter(**kwargs)
-        F = self.get_weekday_parameter(time_df, **kwargs)
-
-        h = (A / (1 + (B / (time_df['temp'] - 40)) ** C) + D)
-        KW = (kwargs['annual_heat_demand'] /
-              (sum(h * F) / 24))
-        return (KW * h * F * SF)
-
-    @property
-    def load(self):
-        return self.heat_demand
-
+        return hourly_heat_demand
 
 class bdew_elec_slp():
     'Generate electrical standardized load profiles based on the BDEW method.'
