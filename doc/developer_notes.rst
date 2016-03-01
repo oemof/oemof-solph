@@ -19,7 +19,7 @@ To install the developer version two steps are necessary:
 Documentation
 -------------
 
-See the documentation of the dev branch at `readthedocs.org <http://oemof_base.readthedocs.org/en/latest/>`_.
+See the documentation of the dev branch at `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
 
 Collaboration
