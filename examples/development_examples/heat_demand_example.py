@@ -18,7 +18,7 @@ holidays = helpers.get_german_holidays(2010, ['Germany', 'SH'])
 efh = eb.Building()
 # calculate heat load based on bdew profiles
 efh.heat_load = efh.hourly_heat_demand(fun=bdew_heat.create_bdew_profile,
-                                       datapath="../../oemof/demandlib/data",
+                                       datapath="../../oemof/demandlib/bdew_data",
                                        year=2010, holidays=holidays,
                                        temperature=temperature,
                                        shlp_type='EFH',

@@ -6,23 +6,6 @@ import logging
 import pandas as pd
 from datetime import time as settime
 
-class electric_building():
-    ''
-
-    def __init__(self, bdew=None, **kwargs):
-        # slp is of type bdew_elec_slp!
-        self.elec_demand = (
-            bdew.slp[kwargs['selp_type']] /
-            bdew.slp[kwargs['selp_type']].sum(0) *
-            kwargs['annual_elec_demand'])
-        self.type = kwargs['selp_type']
-        self.annual_load = kwargs['annual_elec_demand']
-
-    @property
-    def load(self):
-        return self.elec_demand
-
-
 class Building():
     """
     """
@@ -54,6 +37,7 @@ class Building():
         hourly_heat_demand = fun(**kwargs)
 
         return hourly_heat_demand
+
 
 class bdew_elec_slp():
     'Generate electrical standardized load profiles based on the BDEW method.'
@@ -92,7 +76,7 @@ class bdew_elec_slp():
 
         # Read standard load profile series from csv file
 
-        selp_series = pd.read_csv('../oemof/demandlib/selp_series.csv')
+        selp_series = pd.read_csv('../oemof/demandlib/bdew_data/selp_series.csv')
         tmp_df = selp_series
 
         index = pd.date_range(
