@@ -8,6 +8,7 @@ Created on Fri Jul 24 19:11:38 2015
 import numpy as np
 import pandas as pd
 from oemof.demandlib import energy_buildings as eb
+from oemof.tools import helpers
 
 
 class electrical_demand():
@@ -143,7 +144,7 @@ class electrical_demand():
         if self.annual_demand is None:
             self.annual_demand = self.calculate_annual_demand_region()
 
-        self.dataframe = kwargs.get('dataframe')
+        self.dataframe = helpers.create_basic_dataframe(kwargs.get('year'))
 
         self.decider(method, **kwargs)
 
