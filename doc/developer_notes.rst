@@ -33,6 +33,8 @@ Style guidelines
 
 We mostly follow standard guidelines instead of developing own rules.
 
+* `Docstring example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_
+
 PEP8 (Python Style Guide)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
