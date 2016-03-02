@@ -145,7 +145,9 @@ class ResultsDataFrame(pd.DataFrame):
             Level to unstack the subset of the DataFrame.
         """
         subset = self.slice_by(**kwargs)
-        return subset.unstack(level=unstacklevel)
+        subset = subset.unstack(level=unstacklevel)
+        subset.columns = subset.columns.droplevel()
+        return subset
 
 
 class DataFramePlot(ResultsDataFrame):
@@ -207,7 +209,7 @@ class DataFramePlot(ResultsDataFrame):
             Containing the colors of all components of the subset attribute
         """
         tmplist = list(
-            map(colordict.get, list(self.subset['val'].columns)))
+            map(colordict.get, list(self.subset.columns)))
         tmplist = ['#ff00f0' if v is None else v for v in tmplist]
         if len(tmplist) == 1:
             colorlist = tmplist[0]
