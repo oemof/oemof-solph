@@ -1,0 +1,33 @@
+v0.0.5 (DATE)
+++++++++++++++++++++++++++
+
+New features
+############
+
+* 
+
+Documentation
+#############
+
+* 
+
+Testing
+#######
+
+* 
+
+Bug fixes
+#########
+
+* 
+
+Other changes
+#############
+
+* 
+
+Contributors
+############
+
+* 
+
