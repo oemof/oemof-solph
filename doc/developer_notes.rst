@@ -109,7 +109,7 @@ merging back into the ``dev``.
 
 .. code:: bash
 
-    cd /path/to/oemof_base/
+    cd /path/to/oemof/
     nosetests3 --with-doctest           # or
     nosetests3 --with-doctest --rednose # if you like it
 
