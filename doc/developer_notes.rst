@@ -19,7 +19,8 @@ To install the developer version two steps are necessary:
 Documentation
 -------------
 
-See the documentation of the dev branch at `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
+See the documentation of the dev branch at
+`readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
 
 Collaboration
@@ -38,7 +39,8 @@ We mostly follow standard guidelines instead of developing own rules.
 PEP8 (Python Style Guide)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* We adhere to `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ for any code produced in the framework.
+* We adhere to `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ for any code
+  produced in the framework.
 
 * We use pylint to check your code. Pylint is integrated in many IDEs and Editors. `Check here <http://docs.pylint.org/ide-integration>`_ or ask the maintainer of your IDE or Editor
 
