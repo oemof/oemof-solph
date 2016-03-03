@@ -88,10 +88,10 @@ Branching model
 So far we adhere mostly to the git branching model by 
 `Vincent Driessen <http://nvie.com/posts/a-successful-git-branching-model/>`_.
 
-The only difference is to use a different name for the branch origin/develop 
-("main branch where the source code of HEAD always reflects a state with the 
-latest delivered development changes for the next release. Some would call this 
-the integration branch."). The name we use is origin/dev.
+Differences are:
+* instead of the name ``origin/develop`` we call the branch ``origin/dev``.
+* feature branches are named like ``features/*``
+* release branches are named like ``releases/*``
 
 Commit message
 ^^^^^^^^^^^^^^
