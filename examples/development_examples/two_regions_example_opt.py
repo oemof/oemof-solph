@@ -5,10 +5,10 @@ import logging
 import pandas as pd
 import numpy as np
 
-from oemof_pg import db
-from oemof_pg import tools
-from oemof_pg import powerplants as db_pps
-from oemof_pg import feedin_pg
+from oemof import db
+from oemof.db import tools
+from oemof.db import powerplants as db_pps
+from oemof.db import feedin_pg
 from oemof.tools import logger
 from oemof.core import energy_system as es
 from oemof.solph import predefined_objectives as predefined_objectives
@@ -161,7 +161,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
         logging.debug('Creating Bus {0}.'.format(
             ('bus', region.name, pp[1].type)))
         bclass(uid=('bus', region.name, pp[1].type), type=pp[1].type,
-               price=price[pp[1].type], regions=[region])
+               price=price[pp[1].type], regions=[region], excess=False)
         location = region.name
         source.Commodity(
             uid='rgas',
@@ -205,9 +205,10 @@ TwoRegExample.regions.append(es.Region(
     name='Stadt Dessau-Rosslau'))
 
 # Create global buses
-Bus(uid=('bus', 'global', 'coal'), type='coal', price=60, sum_out_limit=10e10)
+Bus(uid=('bus', 'global', 'coal'), type='coal', price=60, sum_out_limit=10e10,
+    excess=False)
 Bus(uid=('bus', 'global', 'lignite'), type='lignite', price=60,
-    sum_out_limit=10e10)
+    sum_out_limit=10e10, excess=False)
 
 # Create entity objects for each region
 for region in TwoRegExample.regions:
@@ -218,7 +219,7 @@ for region in TwoRegExample.regions:
     demand = get_demand()
     for demandtype in demand.keys():
         Bus(uid=('bus', region.name, demandtype), type=demandtype, price=60,
-            regions=[region])
+            regions=[region], excess=False)
         sink.Simple(
             uid=('sink', region.name, demandtype),
             inputs=[obj for obj in TwoRegExample.entities

@@ -1,9 +1,5 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 23 15:26:53 2015
-
-@author: caro
-"""
 
 import logging
 # logging.getLogger().setLevel(logging.DEBUG)
@@ -119,7 +115,7 @@ bel = Bus(uid="bel",
 demand = sink.Simple(uid="demand", inputs=[bel])
 helpers.call_demandlib(demand,
                        method='calculate_profile',
-                       year=2010,
+                       year=year,
                        ann_el_demand_per_sector=ann_el_demand_per_sector)
 
 # Example 2: Calculate profile with unknown annual electric demand per sector
@@ -128,7 +124,7 @@ demand_2 = sink.Simple(uid="demand_2", inputs=[bel])
 helpers.call_demandlib(
     demand_2,
     method='calculate_profile',
-    year=2010,
+    year=year,
     ann_el_demand_per_sector=ann_el_demand_per_sector_2,
     ann_el_demand_per_person=ann_el_demand_per_person,
     household_structure=household_structure,

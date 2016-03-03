@@ -12,6 +12,7 @@ All special import should be in try/except loops to avoid import errors.
 import logging
 from datetime import date, timedelta
 import os
+import sys
 import pandas as pd
 import pickle
 import time
@@ -518,7 +519,10 @@ def download_file(filename, url):
 
 
 def get_basic_path():
-    basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    if sys.platform == "win32":
+        basicpath = os.path.join(os.environ['USERPROFILE'], '.oemof')
+    else:  # if linux platform
+        basicpath = os.path.join(os.environ['HOME'], '.oemof')
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath
@@ -526,13 +530,14 @@ def get_basic_path():
 
 def extend_basic_path(subfolder):
     extended_path = os.path.join(get_basic_path(), subfolder)
-    if not os.path.isdir(subfolder):
-        os.mkdir(subfolder)
+    if not os.path.isdir(extended_path):
+        os.mkdir(extended_path)
     return extended_path
 
 
 def get_fullpath(path, filename):
     return os.path.join(path, filename)
+
 
 def create_basic_dataframe(year, **kwargs):
     r"""Giving back a DataFrame containing weekdays and optionally holidays for the
@@ -544,8 +549,8 @@ def create_basic_dataframe(year, **kwargs):
 
     Optional Parameters
     -------------------
-    holidays: array with information for every hour of the year, if holiday or not
-        (0: holiday, 1: no holiday)
+    holidays: array with information for every hour of the year, if holiday or
+        not (0: holiday, 1: no holiday)
 
     Returns
     -------
@@ -574,7 +579,7 @@ def create_basic_dataframe(year, **kwargs):
     # Set weekday to Holiday (0) for all holidays
     if kwargs.get('holidays'):
         time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
-            pd.to_datetime(list(holidays.keys()))), 0, True)
+            pd.to_datetime(list(kwargs['holidays'].keys()))), 0, True)
 
 #    holidays = helpers.get_german_holidays(year, place)
 
