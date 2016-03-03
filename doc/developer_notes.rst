@@ -89,6 +89,7 @@ So far we adhere mostly to the git branching model by
 `Vincent Driessen <http://nvie.com/posts/a-successful-git-branching-model/>`_.
 
 Differences are:
+
 * instead of the name ``origin/develop`` we call the branch ``origin/dev``.
 * feature branches are named like ``features/*``
 * release branches are named like ``releases/*``
@@ -98,6 +99,20 @@ Commit message
 
 Use this nice little `tutorial <http://chris.beams.io/posts/git-commit/>`_ to 
 learn how to write a nice commit message.
+
+
+Testing
+-------
+
+We use nosetests for testing. Make sure that all tests are successfull before
+merging back into the ``dev``.
+
+.. code:: bash
+
+    cd /path/to/oemof_base/
+    nosetests3 --with-doctest           # or
+    nosetests3 --with-doctest --rednose # if you like it
+
 
 Issue-Management
 ----------------
