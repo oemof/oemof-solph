@@ -220,10 +220,6 @@ class electrical_demand():
                                    kwargs.get('filename'),
                                    sep=",")
 
-        self.year = 2010  # TODO: year temporarily
-
-        self.profile = self.profile['deu_' + str(self.year)]
-
         return self.profile
 
     def read_from_db(self):
