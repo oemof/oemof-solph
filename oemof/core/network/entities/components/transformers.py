@@ -25,6 +25,13 @@ class Simple(Transformer):
 
 class PostHeating(Simple):
     r"""
+    A postheating transformer can transport heat from one HeatBus to another
+    eventhough the temperature levels are different.
+
+    The postheating transformer needs an two buses containing the temperature
+    attribute as an input and an output. Another nergy input is used to heat up
+    the heat flow if the temperature in the output bus is lower. In the list
+    of inputs the additional bus is defined first and then the heat flow.
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

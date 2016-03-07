@@ -12,6 +12,7 @@ All special import should be in try/except loops to avoid import errors.
 import logging
 from datetime import date, timedelta
 import os
+import sys
 import pandas as pd
 import pickle
 import time
@@ -518,7 +519,10 @@ def download_file(filename, url):
 
 
 def get_basic_path():
-    basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    if sys.platform == "win32":
+        basicpath = os.path.join(os.environ['USERPROFILE'], '.oemof')
+    else:  # if linux platform
+        basicpath = os.path.join(os.environ['HOME'], '.oemof')
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath
