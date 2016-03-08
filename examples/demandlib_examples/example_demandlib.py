@@ -6,8 +6,6 @@ import logging
 # logging.getLogger().setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.WARNING)
 
-from oemof.core.network.entities import Bus
-from oemof.core.network.entities.components import sinks as sink
 from oemof.demandlib import demand as dm
 
 year = 2013
@@ -108,39 +106,33 @@ ind_number_of_employees_region = [
 
 # Example 1: Calculate profile with annual electric demand per sector is known
 
-bel = Bus(uid="bel",
-          type="el",
-          excess=True)
-
-demand = sink.Simple(uid="demand", inputs=[bel])
-demand.val = dm.electrical_demand(method='calculate_profile',
-                                  year=year,
-                                  ann_el_demand_per_sector=
-                                  ann_el_demand_per_sector) \
-                                  .elec_demand
+demand = dm.electrical_demand(method='calculate_profile',
+                              year=year,
+                              ann_el_demand_per_sector=
+                              ann_el_demand_per_sector) \
+                              .elec_demand
 
 # Example 2: Calculate profile with unknown annual electric demand per sector
-#
-demand_2 = sink.Simple(uid="demand_2", inputs=[bel])
-demand_2.val = dm.electrical_demand(method='calculate_profile',
-                                    year=year,
-                                    ann_el_demand_per_sector=
-                                        ann_el_demand_per_sector_2,
-                                    ann_el_demand_per_person=
-                                        ann_el_demand_per_person,
-                                    household_structure=
-                                        household_structure,
-                                    household_members_all=
-                                        household_members_all,
-                                    population=
-                                        population,
-                                    comm_ann_el_demand_state=
-                                        comm_ann_el_demand_state,
-                                    comm_number_of_employees_state=
-                                        comm_number_of_employees_state,
-                                    comm_number_of_employees_region=
-                                        comm_number_of_employees_region) \
-                                    .elec_demand
 
-print(demand.val)
-print(demand_2.val)
+demand_2 = dm.electrical_demand(method='calculate_profile',
+                                year=year,
+                                ann_el_demand_per_sector=
+                                    ann_el_demand_per_sector_2,
+                                ann_el_demand_per_person=
+                                    ann_el_demand_per_person,
+                                household_structure=
+                                    household_structure,
+                                household_members_all=
+                                    household_members_all,
+                                population=
+                                    population,
+                                comm_ann_el_demand_state=
+                                    comm_ann_el_demand_state,
+                                comm_number_of_employees_state=
+                                    comm_number_of_employees_state,
+                                comm_number_of_employees_region=
+                                    comm_number_of_employees_region) \
+                                .elec_demand
+
+print(demand)
+print(demand_2)
