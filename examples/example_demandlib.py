@@ -8,7 +8,6 @@ logging.getLogger().setLevel(logging.WARNING)
 
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.components import sinks as sink
-from oemof.tools import helpers
 from oemof.demandlib import demand as dm
 
 year = 2013
