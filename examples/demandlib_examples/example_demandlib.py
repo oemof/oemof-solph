@@ -19,21 +19,15 @@ year = 2013
 # annual electric demand or let it calculate for every of the three sectors
 # each
 
-ann_el_demand_per_sector = [
-    {'ann_el_demand': 3000,
-     'selp_type': 'h0'},
-    {'ann_el_demand': 3000,
-     'selp_type': 'g0'},
-    {'ann_el_demand': 3000,
-     'selp_type': 'i0'}]
-
-ann_el_demand_per_sector_2 = [
-    {'ann_el_demand': None,
-     'selp_type': 'h0'},
-    {'ann_el_demand': None,
-     'selp_type': 'g0'},
-    {'ann_el_demand': None,
-     'selp_type': 'i0'}]
+ann_el_demand_per_sector = {
+    'h0': 3000,
+    'g0': 3000,
+    'i0': 3000}
+    
+ann_el_demand_per_sector_2 = {
+    'h0': None,
+    'g0': None,
+    'i0': None}
 
 # Necessary data if annual electric demand for every sector needs to be
 # calculated (ann_el_demand_per_sector is None)
