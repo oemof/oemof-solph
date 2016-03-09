@@ -29,8 +29,8 @@ ann_el_demand_per_sector_2 = {
     'g0': None,
     'i0': None}
 
-# Necessary data if annual electric demand for every sector needs to be
-# calculated (ann_el_demand_per_sector is None)
+# Following data has to be provided if sectoral annual demand is specified as
+# None which corresponds to unknown demand
 
 # Household sector data (h)
 # annual electrical demand per household member for one-, two-, three- and
