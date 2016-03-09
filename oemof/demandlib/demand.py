@@ -57,14 +57,19 @@ class electrical_demand():
             region can be an option for further development.
 
     {'calculate_profile'} :
-        ann_el_demand_per_sector : list of dictionaries
+        ann_el_demand_per_sector : dictionary
             Specification of annual electric demand and the corresponding
-            standard load profile type (selp_type) for every sector, e.g.
-                ann_el_demand_per_sector = [
-                    {'ann_el_demand': int or None,
-                     'selp_type: {'h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5',
-                                  'g6', 'i0'}},
-                                  ...]
+            standard load profile type (selp_type) for every sector. Dictionary
+            is structured as follows. Key defining the sector is followed by
+            value that can be int, float, None or can be omitted, e.g.
+                ann_el_demand_per_sector = {
+                    'h0': int, 
+                    'g0': float,
+                    'g1': None,
+                    ...                    
+                    'g6': int,
+                    'i0': int}
+                    
             if ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
                 no sector is specified)
@@ -193,7 +198,6 @@ class electrical_demand():
             self.elec_demand = self.e_slp.multiply(pd.Series(
                 kwargs['ann_el_demand_per_sector']), axis=1).dropna(how='all',
                 axis=1)
-
 
         return self.elec_demand
 
