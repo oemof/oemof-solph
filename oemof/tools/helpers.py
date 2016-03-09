@@ -315,14 +315,19 @@ def fetch_admin_from_coord_osm(coord):
     query += "&zoom=18"
     query += "&addressdetails=1"
 
-    conn = urllib.request.urlopen(query)
-    rev_geocode = conn.read()
-    address_parts = parse_result(rev_geocode)
+    logging.debug(query)
+    try:
+        conn = urllib.request.urlopen(query)
+        rev_geocode = conn.read()
+        address_parts = parse_result(rev_geocode)
+    except urllib.error.URLError:
+        logging.error("OSM Server not reachable.")
+        address_parts = {}
 
     try:
         state = abbreviation_of_state(address_parts['state'])
     except KeyError:
-        logging.error(
+        logging.warning(
             "Didn't get the name of the state. " +
             "Maybe the coordinates ({0}) are outside of Germany.".format(
                 str([lat, lon])))
