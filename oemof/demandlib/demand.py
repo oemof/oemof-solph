@@ -173,41 +173,29 @@ class electrical_demand():
             self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
 
-#            self.hh_e_slp = self.e_slp['h0']
-            self.hh_e_slp = self.e_slp[kwargs.get(
-                                       'ann_el_demand_per_sector')[0][
-                                       'selp_type']]
-            self.comm_e_slp = self.e_slp[kwargs.get(
-                                         'ann_el_demand_per_sector')[1][
-                                         'selp_type']]
-            self.ind_e_slp = self.e_slp[kwargs.get(
-                                        'ann_el_demand_per_sector')[2][
-                                        'selp_type']]
+#            sectors = []
+            # normalize slp timeseries to annual sum of one
+            self.e_slp = self.e_slp / self.e_slp.sum(axis=0)
+            
+            # calculate annual demand for sectors with `None`
+            for key in kwargs['ann_el_demand_per_sector'].keys():
+                
+                if kwargs['ann_el_demand_per_sector'][key] is None:
+                    print(key)
+                    if key.startswith('g', 0, 1):
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_commerce(**kwargs))
+                    elif key.startswith('h', 0, 1):
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_households(**kwargs))
+                    elif key.startswith('i', 0, 1):
+                        pass
+            
+            # multiply given annual demand with timeseries
+            self.elec_demand = self.e_slp.multiply(pd.Series(
+                kwargs['ann_el_demand_per_sector']), axis=1).dropna(how='all',
+                axis=1)
 
-            if kwargs.get('ann_el_demand_per_sector')[0][
-                    'ann_el_demand'] is None:
-                self.elec_demand = (
-                    self.hh_e_slp / self.hh_e_slp.sum() *
-                    self.calculate_annual_demand_households(**kwargs) +
-                    self.comm_e_slp / self.comm_e_slp.sum() *
-                    self.calculate_annual_demand_commerce(**kwargs)) #+
-#                    self.ind_e_slp / self.ind_e_slp.sum()) *
-#                    self.calculate_annual_demand_sectors(**kwargs))
-
-            else:
-
-                self.elec_demand = (self.hh_e_slp / self.hh_e_slp.sum() *
-                                    kwargs.get(
-                                        'ann_el_demand_per_sector')[0][
-                                        'ann_el_demand'] +
-                                    self.comm_e_slp / self.comm_e_slp.sum() *
-                                    kwargs.get(
-                                        'ann_el_demand_per_sector')[1][
-                                        'ann_el_demand'] +
-                                    self.ind_e_slp / self.ind_e_slp.sum() *
-                                    kwargs.get(
-                                        'ann_el_demand_per_sector')[2][
-                                        'ann_el_demand'])
 
         return self.elec_demand
 
