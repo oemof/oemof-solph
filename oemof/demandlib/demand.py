@@ -173,7 +173,6 @@ class electrical_demand():
             self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
 
-#            sectors = []
             # normalize slp timeseries to annual sum of one
             self.e_slp = self.e_slp / self.e_slp.sum(axis=0)
             
@@ -181,7 +180,6 @@ class electrical_demand():
             for key in kwargs['ann_el_demand_per_sector'].keys():
                 
                 if kwargs['ann_el_demand_per_sector'][key] is None:
-                    print(key)
                     if key.startswith('g', 0, 1):
                         kwargs['ann_el_demand_per_sector'][key] = (
                             self.calculate_annual_demand_commerce(**kwargs))
