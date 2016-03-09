@@ -14,6 +14,7 @@ from oemof.core.network.entities.buses import HeatBus
 from oemof.solph import optimization_model as om
 from oemof.core.network.entities.components import sources as source
 from oemof.tools import helpers
+from oemof.tools import create_components as cc
 
 
 class Entity_Tests:
@@ -101,7 +102,7 @@ class Constraint_Tests:
     def test_storage(self):
         pass
 
-    def test_postheating_invest(self):
+    def test_two_inputs_one_output(self):
         self.energysystem.entities = []
 
         btest = HeatBus(
@@ -121,22 +122,25 @@ class Constraint_Tests:
             uid="bus_stor_heat",
             temperature=370)
 
-        postheat = transformer.PostHeating(
+        postheat = transformer.TwoInputsOneOutput(
             uid='postheat_elec',
             inputs=[btest, storage_heat_bus], outputs=[district_heat_bus],
             opex_var=0, capex=99999,
             out_max=[999993],
             in_max=[777, 888],
+            f=cc.instant_flow_heater(storage_heat_bus, district_heat_bus),
             eta=[0.95, 1])
 
         assert_raises(ValueError, om.OptimizationModel,
                       energysystem=self.energysystem)
 
         postheat.in_max = [None, float('inf')]
-        self.compare_lp_files(self.energysystem, "postheating_invest.lp")
+        self.compare_lp_files(self.energysystem,
+                              "two_inputs_one_output_invest.lp")
 
-        transformer.PostHeating.optimization_options.update(
+        transformer.TwoInputsOneOutput.optimization_options.update(
             {'investment': False})
 
         postheat.in_max = [777, 888]
-        self.compare_lp_files(self.energysystem, "postheating.lp")
+        self.compare_lp_files(self.energysystem,
+                              "two_inputs_one_output.lp")
