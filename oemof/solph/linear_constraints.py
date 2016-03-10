@@ -137,10 +137,15 @@ def add_simple_io_relation(model, block, idx=0):
 
     eta = {obj.uid: obj.eta for obj in block.objs}
 
+    for key, value in eta.items():
+        try:
+            len(value[0])
+        except:
+            eta[key] = [[x] * len(model.timesteps) for x in value]
 
     # constraint for simple transformers: input * efficiency = output
     def io_rule(block, e, t):
-        lhs = model.w[model.I[e][0], e, t] * eta[e][idx] - \
+        lhs = model.w[model.I[e][0], e, t] * eta[e][idx][t] - \
             model.w[e, model.O[e][idx], t]
         return(lhs == 0)
 
