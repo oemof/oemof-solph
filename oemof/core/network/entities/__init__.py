@@ -46,6 +46,26 @@ class Bus(Entity):
         self.excess_costs = kwargs.get('excess_costs', 0)
         self.shortage_costs = kwargs.get('shortage_costs', 10e10)
 
+        if self.excess == True:
+           self.create_excess_slack_component()
+        if self.shortage == True:
+           self.create_shortage_slack_component()
+
+    def create_excess_slack_component(self):
+        """
+        """
+        excess = ExcessSlack(uid=self.uid+'_excess',
+                             inputs=[self],
+                             costs=self.excess_costs)
+        return excess
+
+    def create_shortage_slack_component(self):
+        """
+        """
+        shortage = ShortageSlack(uid=self.uid+'_shortage',
+                                 outputs=[self],
+                                 costs=self.shortage_costs)
+        return shortage
 
 class Component(Entity):
     """
@@ -116,3 +136,19 @@ class Component(Entity):
             self.crf = (p*(1+p)**n)/(((1+p)**n)-1)
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})
+
+class ExcessSlack(Component):
+    """A ExcessSlack is a special sink which takes the output slack i.e. excess
+    of the bus to that it is connected."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.costs = kwargs.get("costs", 0)
+
+class ShortageSlack(Component):
+    """A ShorageSlack is a special source which takes the input slack i.e.
+    shortage of the bus to that it is connected."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.costs = kwargs.get("costs", 10e10)

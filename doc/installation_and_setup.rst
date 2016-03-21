@@ -17,7 +17,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
 .. code:: console
 
-  sudo pip3 install oemof-base
+  sudo pip3 install oemof
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
@@ -93,7 +93,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
 .. code:: console
 
-  pip3 install oemof-base
+  pip3 install oemof
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 

@@ -12,6 +12,7 @@ All special import should be in try/except loops to avoid import errors.
 import logging
 from datetime import date, timedelta
 import os
+import sys
 import pandas as pd
 import pickle
 import time
@@ -291,7 +292,7 @@ def fetch_admin_from_coord_osm(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8))
+    >>> fetch_admin_from_coord_osm((12.7, 51.8)) # doctest: +SKIP
     ['Deutschland', 'ST']
     """
 
@@ -314,14 +315,19 @@ def fetch_admin_from_coord_osm(coord):
     query += "&zoom=18"
     query += "&addressdetails=1"
 
-    conn = urllib.request.urlopen(query)
-    rev_geocode = conn.read()
-    address_parts = parse_result(rev_geocode)
+    logging.debug(query)
+    try:
+        conn = urllib.request.urlopen(query)
+        rev_geocode = conn.read()
+        address_parts = parse_result(rev_geocode)
+    except urllib.error.URLError:
+        logging.error("OSM Server not reachable.")
+        address_parts = {}
 
     try:
         state = abbreviation_of_state(address_parts['state'])
     except KeyError:
-        logging.error(
+        logging.warning(
             "Didn't get the name of the state. " +
             "Maybe the coordinates ({0}) are outside of Germany.".format(
                 str([lat, lon])))
@@ -353,8 +359,8 @@ def fetch_admin_from_coord_google(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8))
-    ['Deutschland', 'ST']
+    >>> fetch_admin_from_coord_google((12.7, 51.8))
+    ['DE', 'SA']
     """
 
     new_coord = list((coord[1], coord[0]))
@@ -518,7 +524,10 @@ def download_file(filename, url):
 
 
 def get_basic_path():
-    basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    if sys.platform == "win32":
+        basicpath = os.path.join(os.environ['USERPROFILE'], '.oemof')
+    else:  # if linux platform
+        basicpath = os.path.join(os.environ['HOME'], '.oemof')
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath
@@ -526,13 +535,14 @@ def get_basic_path():
 
 def extend_basic_path(subfolder):
     extended_path = os.path.join(get_basic_path(), subfolder)
-    if not os.path.isdir(subfolder):
-        os.mkdir(subfolder)
+    if not os.path.isdir(extended_path):
+        os.mkdir(extended_path)
     return extended_path
 
 
 def get_fullpath(path, filename):
     return os.path.join(path, filename)
+
 
 def create_basic_dataframe(year, **kwargs):
     r"""Giving back a DataFrame containing weekdays and optionally holidays for the
@@ -544,8 +554,8 @@ def create_basic_dataframe(year, **kwargs):
 
     Optional Parameters
     -------------------
-    holidays: array with information for every hour of the year, if holiday or not
-        (0: holiday, 1: no holiday)
+    holidays: array with information for every hour of the year, if holiday or
+        not (0: holiday, 1: no holiday)
 
     Returns
     -------
@@ -574,7 +584,7 @@ def create_basic_dataframe(year, **kwargs):
     # Set weekday to Holiday (0) for all holidays
     if kwargs.get('holidays'):
         time_df['weekday'].mask(pd.to_datetime(time_df['date']).isin(
-            pd.to_datetime(list(holidays.keys()))), 0, True)
+            pd.to_datetime(list(kwargs['holidays'].keys()))), 0, True)
 
 #    holidays = helpers.get_german_holidays(year, place)
 

@@ -6,12 +6,11 @@
 *.odb
 *.textile
 *.log
-*.lp
 *.svg
 *.png
 *.pdf
 .idea
-tests/lp_files/tmp.lp
+!tests/lp_files/*.lp
 doc/_build/
 dist/*
 oemof.egg-info/*
