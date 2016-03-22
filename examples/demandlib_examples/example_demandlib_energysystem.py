@@ -22,18 +22,18 @@ year = 2013
 # each
 
 ann_el_demand_per_sector = {
-    'h0': 3000,
     'g0': 3000,
+    'h0': 3000,
     'i0': 3000}
 
 ann_el_demand_per_sector_2 = {
-    'h0': None,
     'g0': None,
+    'h0': None,
     'i0': None}
 
 ann_el_demand_per_sector_3 = {
-    'h0': None,
     'g0': 3000,
+    'h0': None,
     'i0': 3000}
 
 # Following data has to be provided if sectoral annual demand is specified as
