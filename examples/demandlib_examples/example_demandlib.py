@@ -142,6 +142,8 @@ demand_2 = dm.electrical_demand(method='calculate_profile',
                                     comm_number_of_employees_region) \
                                 .elec_demand
 
+# Example 3: Calculate profile with mixed input (set demand and statistic data)
+
 demand_3 = dm.electrical_demand(method='calculate_profile',
                                 year=year,
                                 ann_el_demand_per_sector=

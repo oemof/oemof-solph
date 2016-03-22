@@ -150,6 +150,8 @@ demand_2.val = dm.electrical_demand(method='calculate_profile',
                                         comm_number_of_employees_region) \
                                     .elec_demand
 
+# Example 3: Calculate profile with mixed input (set demand and statistic data)
+
 demand_3 = sink.Simple(uid="demand_3", inputs=[bel])
 demand_3.val = dm.electrical_demand(method='calculate_profile',
                                     year=year,
