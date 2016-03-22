@@ -25,7 +25,7 @@ ann_el_demand_per_sector = {
     'h0': 3000,
     'g0': 3000,
     'i0': 3000}
-    
+
 ann_el_demand_per_sector_2 = {
     'h0': None,
     'g0': None,
@@ -40,25 +40,17 @@ ann_el_demand_per_sector_2 = {
 
 population = 40000
 
-ann_el_demand_per_person = [
-    {'ann_el_demand': 2050,
-     'household_type': 'one'},
-    {'ann_el_demand': 1720,
-     'household_type': 'two'},
-    {'ann_el_demand': 1350,
-     'household_type': 'three'},
-    {'ann_el_demand': 1235,
-     'household_type': 'four'}]
+ann_el_demand_per_person = {
+    'one': 2050,
+    'two': 1720,
+    'three': 1350,
+    'four': 1235}
 
-household_structure = [
-    {'household_members': 10000,
-     'household_type': 'one'},
-    {'household_members': 10000,
-     'household_type': 'two'},
-    {'household_members': 10000,
-     'household_type': 'three'},
-    {'household_members': 10000,
-     'household_type': 'four'}]
+household_structure = {
+    'one': 10000,
+    'two': 10000,
+    'three': 10000,
+    'four': 10000}
 
 household_members_all = 40000
 # TODO:

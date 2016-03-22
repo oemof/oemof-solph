@@ -66,10 +66,10 @@ class electrical_demand():
             .. code-block:: python
 
                 ann_el_demand_per_sector = {
-                    'h0': int, 
+                    'h0': int,
                     'g0': float,
                     'g1': None,
-                    ...                    
+                    ...
                     'g6': int,
                     'i0': int}
 
@@ -184,10 +184,10 @@ class electrical_demand():
             # normalize slp timeseries to annual sum of one
             self.e_slp.drop('date', axis=1, inplace=True)
             self.e_slp.div(self.e_slp.sum(axis=1), axis=0)
-            
+
             # calculate annual demand for sectors with `None`
             for key in kwargs['ann_el_demand_per_sector'].keys():
-                
+
                 if kwargs['ann_el_demand_per_sector'][key] is None:
                     if key.startswith('g', 0, 1):
                         kwargs['ann_el_demand_per_sector'][key] = (
@@ -197,7 +197,7 @@ class electrical_demand():
                             self.calculate_annual_demand_households(**kwargs))
                     elif key.startswith('i', 0, 1):
                         pass
-            
+
             # multiply given annual demand with timeseries
             self.elec_demand = self.e_slp.multiply(pd.Series(
                 kwargs['ann_el_demand_per_sector']), axis=1).dropna(how='all',
@@ -249,18 +249,22 @@ class electrical_demand():
         return self.annual_demand
 
     def calculate_annual_demand_households(self, **kwargs):
-        hh_ann_el_demand_per_person = (kwargs.get('household_structure')[0][
-            'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[0]['ann_el_demand'] +
-            kwargs.get('household_structure')[1][
-                'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[1]['ann_el_demand'] +
-            kwargs.get('household_structure')[2][
-                'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[2]['ann_el_demand'] +
-            kwargs.get('household_structure')[3][
-                'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[3]['ann_el_demand'])
+        hh_ann_el_demand_per_person = (
+            kwargs.get('household_structure')['one']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['one'] +
+
+            kwargs.get('household_structure')['two']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['two'] +
+
+            kwargs.get('household_structure')['three']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['three'] +
+
+            kwargs.get('household_structure')['four']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['four'])
 
         return  kwargs.get('population') * hh_ann_el_demand_per_person
 
