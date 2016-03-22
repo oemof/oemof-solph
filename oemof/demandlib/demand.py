@@ -204,6 +204,8 @@ class electrical_demand():
                 kwargs['ann_el_demand_per_sector']), axis=1).dropna(how='all',
                 axis=1)
 
+            print(self.elec_demand.sum())
+
         return self.elec_demand
 
     def read_from_csv(self, **kwargs):
@@ -267,24 +269,17 @@ class electrical_demand():
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['four'])
 
-        zz = kwargs.get('population') * hh_ann_el_demand_per_person
-        print('hh', zz)
-
-        return zz
+        return kwargs.get('population') * hh_ann_el_demand_per_person
 
     def calculate_annual_demand_commerce(self, **kwargs):
-        xx = (kwargs.get('comm_ann_el_demand_state') /
+        return (kwargs.get('comm_ann_el_demand_state') /
                     kwargs.get('comm_number_of_employees_state') *
                     kwargs.get('comm_number_of_employees_region'))
-        print('gg', xx)
-        return xx
 
     def calculate_annual_demand_industry(self, **kwargs):
-        yy = (kwargs.get('ind_ann_el_demand_state') /
+        return (kwargs.get('ind_ann_el_demand_state') /
                     kwargs.get('ind_number_of_employees_state') *
                     kwargs.get('ind_number_of_employees_region'))
-        print('ii', yy)
-        return yy
 
 
 class heat_demand():
