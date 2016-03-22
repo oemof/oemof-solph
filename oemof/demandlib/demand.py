@@ -168,17 +168,14 @@ class electrical_demand():
 
         #TODO: implement
         elif method == 'scale_profile_db':
-            conn = kwargs.get('conn')
             self.elec_demand = np.array([111, 222])
 
         #TODO: implement
         elif method == 'scale_entsoe':
-            conn = kwargs.get('conn')
             self.elec_demand = np.array([111, 222])
 
         #TODO: implement industry + def scale_profile() verwenden
         elif method == 'calculate_profile':
-            self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
 
             # normalize slp timeseries to annual sum of one
@@ -228,7 +225,7 @@ class electrical_demand():
         return
 
     def read_selp(self):
-        self.e_slp = eb.bdew_elec_slp(self.conn, self.dataframe)
+        self.e_slp = eb.bdew_elec_slp(self.dataframe)
         return self.e_slp
 
     def scale_profile(self):
