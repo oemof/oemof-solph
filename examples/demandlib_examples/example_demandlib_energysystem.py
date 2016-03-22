@@ -148,6 +148,6 @@ demand_3.val = dm.electrical_demand(method='calculate_profile',
                                         population) \
                                     .elec_demand
 
-print(demand.val)
-print(demand_2.val)
-print(demand_3.val)
+print(demand.val.sum())
+print(demand_2.val.sum())
+print(demand_3.val.sum())
