@@ -196,7 +196,8 @@ class electrical_demand():
                         kwargs['ann_el_demand_per_sector'][key] = (
                             self.calculate_annual_demand_households(**kwargs))
                     elif key.startswith('i', 0, 1):
-                        pass
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_industry(**kwargs))
 
             # multiply given annual demand with timeseries
             self.elec_demand = self.e_slp.multiply(pd.Series(
@@ -272,6 +273,11 @@ class electrical_demand():
         return (kwargs.get('comm_ann_el_demand_state') /
                     kwargs.get('comm_number_of_employees_state') *
                     kwargs.get('comm_number_of_employees_region'))
+
+    def calculate_annual_demand_industry(self, **kwargs):
+        return (kwargs.get('ind_ann_el_demand_state') /
+                    kwargs.get('ind_number_of_employees_state') *
+                    kwargs.get('ind_number_of_employees_region'))
 
 
 class heat_demand():

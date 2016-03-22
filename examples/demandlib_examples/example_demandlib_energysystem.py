@@ -73,25 +73,36 @@ comm_number_of_employees_region = 10000
 # The industry sector corrsponds to sector C ("Verarbeitendes Gewerbe") with
 # wz ("Wirtschaftszweig") = 1
 
-ind_statistics_state = [
-    {'ann_el_demand': 200000,
-     'number_employees': 551280,
-     'wz': 11},
-    {'ann_el_demand': 300000,
-     'number_employees': 949468,
-     'wz': 12},
-    {'ann_el_demand': 400000,
-     'number_employees': 837733,
-     'wz': 13},
-    {'ann_el_demand': 500000,
-     'number_employees': 1755617,
-     'wz': 14}]
+# Industry sector data (g) - Easy method
+ind_ann_el_demand_state = 500000
+ind_number_of_employees_state = 80000
+ind_number_of_employees_region = 10000
 
-ind_number_of_employees_region = [
-    {'wz_11': 22709},
-    {'wz_12': 15856},
-    {'wz_13': 18554},
-    {'wz_14': 20976}]
+# More sophisticated method can be found in:
+# B. Schachler: Bewertung des Einsatzes von Kraft-Wärme-Kopplungsanlagen
+#    hinsichtlich der CO2-Emissionen bei wachsendem Anteil Erneuerbarer
+#    Energien, Masterarbeit, Technische Universität Berlin, 2014
+# NOT IMPLEMENTED YET
+
+#ind_statistics_state = [
+#    {'ann_el_demand': 200000,
+#     'number_employees': 551280,
+#     'wz': 11},
+#    {'ann_el_demand': 300000,
+#     'number_employees': 949468,
+#     'wz': 12},
+#    {'ann_el_demand': 400000,
+#     'number_employees': 837733,
+#     'wz': 13},
+#    {'ann_el_demand': 500000,
+#     'number_employees': 1755617,
+#     'wz': 14}]
+#
+#ind_number_of_employees_region = [
+#    {'wz_11': 22709},
+#    {'wz_12': 15856},
+#    {'wz_13': 18554},
+#    {'wz_14': 20976}]
 
 # ############################################################################
 # Create demand object and relevant bus
@@ -130,6 +141,12 @@ demand_2.val = dm.electrical_demand(method='calculate_profile',
                                     comm_number_of_employees_state=
                                         comm_number_of_employees_state,
                                     comm_number_of_employees_region=
+                                        comm_number_of_employees_region,
+                                    ind_ann_el_demand_state=
+                                        comm_ann_el_demand_state,
+                                    ind_number_of_employees_state=
+                                        comm_number_of_employees_state,
+                                    ind_number_of_employees_region=
                                         comm_number_of_employees_region) \
                                     .elec_demand
 
