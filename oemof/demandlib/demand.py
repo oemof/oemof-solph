@@ -166,15 +166,6 @@ class electrical_demand():
                                               kwargs.get('filename'))
             self.elec_demand = self.scale_profile()
 
-        #TODO: implement
-        elif method == 'scale_profile_db':
-            self.elec_demand = np.array([111, 222])
-
-        #TODO: implement
-        elif method == 'scale_entsoe':
-            self.elec_demand = np.array([111, 222])
-
-        #TODO: implement industry + def scale_profile() verwenden
         elif method == 'calculate_profile':
             self.e_slp = self.read_selp().slp
 
