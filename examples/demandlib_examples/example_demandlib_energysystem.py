@@ -31,6 +31,11 @@ ann_el_demand_per_sector_2 = {
     'g0': None,
     'i0': None}
 
+ann_el_demand_per_sector_3 = {
+    'h0': None,
+    'g0': 3000,
+    'i0': 3000}
+
 # Following data has to be provided if sectoral annual demand is specified as
 # None which corresponds to unknown demand
 
@@ -128,5 +133,21 @@ demand_2.val = dm.electrical_demand(method='calculate_profile',
                                         comm_number_of_employees_region) \
                                     .elec_demand
 
+demand_3 = sink.Simple(uid="demand_3", inputs=[bel])
+demand_3.val = dm.electrical_demand(method='calculate_profile',
+                                    year=year,
+                                    ann_el_demand_per_sector=
+                                        ann_el_demand_per_sector_3,
+                                    ann_el_demand_per_person=
+                                        ann_el_demand_per_person,
+                                    number_household_members=
+                                        number_household_members,
+                                    household_members_all=
+                                        household_members_all,
+                                    population=
+                                        population) \
+                                    .elec_demand
+
 print(demand.val)
 print(demand_2.val)
+print(demand_3.val)
