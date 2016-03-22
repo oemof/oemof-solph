@@ -44,7 +44,7 @@ ann_el_demand_per_person = {
     'three': 1350,
     'four': 1235}
 
-household_structure = {
+number_household_members = {
     'one': 10000,
     'two': 10000,
     'three': 10000,
@@ -106,8 +106,8 @@ demand_2 = dm.electrical_demand(method='calculate_profile',
                                     ann_el_demand_per_sector_2,
                                 ann_el_demand_per_person=
                                     ann_el_demand_per_person,
-                                household_structure=
-                                    household_structure,
+                                number_household_members=
+                                    number_household_members,
                                 household_members_all=
                                     household_members_all,
                                 population=

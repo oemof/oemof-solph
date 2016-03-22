@@ -250,19 +250,19 @@ class electrical_demand():
 
     def calculate_annual_demand_households(self, **kwargs):
         hh_ann_el_demand_per_person = (
-            kwargs.get('household_structure')['one']
+            kwargs.get('number_household_members')['one']
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['one'] +
 
-            kwargs.get('household_structure')['two']
+            kwargs.get('number_household_members')['two']
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['two'] +
 
-            kwargs.get('household_structure')['three']
+            kwargs.get('number_household_members')['three']
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['three'] +
 
-            kwargs.get('household_structure')['four']
+            kwargs.get('number_household_members')['four']
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['four'])
 
