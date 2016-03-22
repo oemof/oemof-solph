@@ -108,11 +108,11 @@ ind_number_of_employees_region = 10000
 
 # Example 1: Calculate profile with annual electric demand per sector is known
 
-demand = dm.electrical_demand(method='calculate_profile',
-                              year=year,
-                              ann_el_demand_per_sector=
-                              ann_el_demand_per_sector) \
-                              .elec_demand
+#demand = dm.electrical_demand(method='calculate_profile',
+#                              year=year,
+#                              ann_el_demand_per_sector=
+#                              ann_el_demand_per_sector) \
+#                              .elec_demand
 
 # Example 2: Calculate profile with unknown annual electric demand per sector
 
@@ -142,20 +142,20 @@ demand_2 = dm.electrical_demand(method='calculate_profile',
                                     comm_number_of_employees_region) \
                                 .elec_demand
 
-demand_3 = dm.electrical_demand(method='calculate_profile',
-                                year=year,
-                                ann_el_demand_per_sector=
-                                    ann_el_demand_per_sector_3,
-                                ann_el_demand_per_person=
-                                    ann_el_demand_per_person,
-                                number_household_members=
-                                    number_household_members,
-                                household_members_all=
-                                    household_members_all,
-                                population=
-                                    population) \
-                                .elec_demand
+#demand_3 = dm.electrical_demand(method='calculate_profile',
+#                                year=year,
+#                                ann_el_demand_per_sector=
+#                                    ann_el_demand_per_sector_3,
+#                                ann_el_demand_per_person=
+#                                    ann_el_demand_per_person,
+#                                number_household_members=
+#                                    number_household_members,
+#                                household_members_all=
+#                                    household_members_all,
+#                                population=
+#                                    population) \
+#                                .elec_demand
 
-print(demand.sum())
+#print(demand.sum())
 print(demand_2.sum())
-print(demand_3.sum())
+#print(demand_3.sum())

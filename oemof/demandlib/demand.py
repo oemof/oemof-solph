@@ -267,17 +267,24 @@ class electrical_demand():
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['four'])
 
-        return  kwargs.get('population') * hh_ann_el_demand_per_person
+        zz = kwargs.get('population') * hh_ann_el_demand_per_person
+        print('hh', zz)
+
+        return zz
 
     def calculate_annual_demand_commerce(self, **kwargs):
-        return (kwargs.get('comm_ann_el_demand_state') /
+        xx = (kwargs.get('comm_ann_el_demand_state') /
                     kwargs.get('comm_number_of_employees_state') *
                     kwargs.get('comm_number_of_employees_region'))
+        print('gg', xx)
+        return xx
 
     def calculate_annual_demand_industry(self, **kwargs):
-        return (kwargs.get('ind_ann_el_demand_state') /
+        yy = (kwargs.get('ind_ann_el_demand_state') /
                     kwargs.get('ind_number_of_employees_state') *
                     kwargs.get('ind_number_of_employees_region'))
+        print('ii', yy)
+        return yy
 
 
 class heat_demand():
