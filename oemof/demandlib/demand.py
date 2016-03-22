@@ -56,12 +56,15 @@ class electrical_demand():
             value. Calculating the demand from statistic data for the whole
             region can be an option for further development.
 
-    {'calculate_profile'} :
+    calculate_profile :
         ann_el_demand_per_sector : dictionary
             Specification of annual electric demand and the corresponding
             standard load profile type (selp_type) for every sector. Dictionary
             is structured as follows. Key defining the sector is followed by
             value that can be int, float, None or can be omitted, e.g.
+
+            .. code-block:: python
+
                 ann_el_demand_per_sector = {
                     'h0': int, 
                     'g0': float,
@@ -69,10 +72,10 @@ class electrical_demand():
                     ...                    
                     'g6': int,
                     'i0': int}
-                    
+
             if ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
-                no sector is specified)
+            no sector is specified)
 
         population : int
             Population of your region.
