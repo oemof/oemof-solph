@@ -204,8 +204,6 @@ class electrical_demand():
                 kwargs['ann_el_demand_per_sector']), axis=1).dropna(how='all',
                 axis=1)
 
-            print(self.elec_demand.sum())
-
         return self.elec_demand
 
     def read_from_csv(self, **kwargs):
