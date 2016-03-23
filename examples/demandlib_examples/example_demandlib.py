@@ -19,24 +19,23 @@ year = 2013
 # annual electric demand or let it calculate for every of the three sectors
 # each
 
-ann_el_demand_per_sector = [
-    {'ann_el_demand': 3000,
-     'selp_type': 'h0'},
-    {'ann_el_demand': 3000,
-     'selp_type': 'g0'},
-    {'ann_el_demand': 3000,
-     'selp_type': 'i0'}]
+ann_el_demand_per_sector = {
+    'g0': 3000,
+    'h0': 3000,
+    'i0': 3000}
 
-ann_el_demand_per_sector_2 = [
-    {'ann_el_demand': None,
-     'selp_type': 'h0'},
-    {'ann_el_demand': None,
-     'selp_type': 'g0'},
-    {'ann_el_demand': None,
-     'selp_type': 'i0'}]
+ann_el_demand_per_sector_2 = {
+    'g0': None,
+    'h0': None,
+    'i0': None}
 
-# Necessary data if annual electric demand for every sector needs to be
-# calculated (ann_el_demand_per_sector is None)
+ann_el_demand_per_sector_3 = {
+    'g0': 3000,
+    'h0': None,
+    'i0': 3000}
+
+# Following data has to be provided if sectoral annual demand is specified as
+# None which corresponds to unknown demand
 
 # Household sector data (h)
 # annual electrical demand per household member for one-, two-, three- and
@@ -44,25 +43,17 @@ ann_el_demand_per_sector_2 = [
 
 population = 40000
 
-ann_el_demand_per_person = [
-    {'ann_el_demand': 2050,
-     'household_type': 'one'},
-    {'ann_el_demand': 1720,
-     'household_type': 'two'},
-    {'ann_el_demand': 1350,
-     'household_type': 'three'},
-    {'ann_el_demand': 1235,
-     'household_type': 'four'}]
+ann_el_demand_per_person = {
+    'one': 2050,
+    'two': 1720,
+    'three': 1350,
+    'four': 1235}
 
-household_structure = [
-    {'household_members': 10000,
-     'household_type': 'one'},
-    {'household_members': 10000,
-     'household_type': 'two'},
-    {'household_members': 10000,
-     'household_type': 'three'},
-    {'household_members': 10000,
-     'household_type': 'four'}]
+number_household_members = {
+    'one': 10000,
+    'two': 10000,
+    'three': 10000,
+    'four': 10000}
 
 household_members_all = 40000
 # TODO:
@@ -80,25 +71,36 @@ comm_number_of_employees_region = 10000
 # The industry sector corrsponds to sector C ("Verarbeitendes Gewerbe") with
 # wz ("Wirtschaftszweig") = 1
 
-ind_statistics_state = [
-    {'ann_el_demand': 200000,
-     'number_employees': 551280,
-     'wz': 11},
-    {'ann_el_demand': 300000,
-     'number_employees': 949468,
-     'wz': 12},
-    {'ann_el_demand': 400000,
-     'number_employees': 837733,
-     'wz': 13},
-    {'ann_el_demand': 500000,
-     'number_employees': 1755617,
-     'wz': 14}]
+# Industry sector data (g) - Easy method
+ind_ann_el_demand_state = 500000
+ind_number_of_employees_state = 80000
+ind_number_of_employees_region = 10000
 
-ind_number_of_employees_region = [
-    {'wz_11': 22709},
-    {'wz_12': 15856},
-    {'wz_13': 18554},
-    {'wz_14': 20976}]
+# More sophisticated method can be found in:
+# B. Schachler: Bewertung des Einsatzes von Kraft-Wärme-Kopplungsanlagen
+#    hinsichtlich der CO2-Emissionen bei wachsendem Anteil Erneuerbarer
+#    Energien, Masterarbeit, Technische Universität Berlin, 2014
+# NOT IMPLEMENTED YET
+
+#ind_statistics_state = [
+#    {'ann_el_demand': 200000,
+#     'number_employees': 551280,
+#     'wz': 11},
+#    {'ann_el_demand': 300000,
+#     'number_employees': 949468,
+#     'wz': 12},
+#    {'ann_el_demand': 400000,
+#     'number_employees': 837733,
+#     'wz': 13},
+#    {'ann_el_demand': 500000,
+#     'number_employees': 1755617,
+#     'wz': 14}]
+#
+#ind_number_of_employees_region = [
+#    {'wz_11': 22709},
+#    {'wz_12': 15856},
+#    {'wz_13': 18554},
+#    {'wz_14': 20976}]
 
 # ############################################################################
 # Create demand object and relevant bus
@@ -120,8 +122,8 @@ demand_2 = dm.electrical_demand(method='calculate_profile',
                                     ann_el_demand_per_sector_2,
                                 ann_el_demand_per_person=
                                     ann_el_demand_per_person,
-                                household_structure=
-                                    household_structure,
+                                number_household_members=
+                                    number_household_members,
                                 household_members_all=
                                     household_members_all,
                                 population=
@@ -131,8 +133,31 @@ demand_2 = dm.electrical_demand(method='calculate_profile',
                                 comm_number_of_employees_state=
                                     comm_number_of_employees_state,
                                 comm_number_of_employees_region=
+                                    comm_number_of_employees_region,
+                                ind_ann_el_demand_state=
+                                    comm_ann_el_demand_state,
+                                ind_number_of_employees_state=
+                                    comm_number_of_employees_state,
+                                ind_number_of_employees_region=
                                     comm_number_of_employees_region) \
                                 .elec_demand
 
-print(demand)
-print(demand_2)
+# Example 3: Calculate profile with mixed input (set demand and statistic data)
+
+demand_3 = dm.electrical_demand(method='calculate_profile',
+                                year=year,
+                                ann_el_demand_per_sector=
+                                    ann_el_demand_per_sector_3,
+                                ann_el_demand_per_person=
+                                    ann_el_demand_per_person,
+                                number_household_members=
+                                    number_household_members,
+                                household_members_all=
+                                    household_members_all,
+                                population=
+                                    population) \
+                                .elec_demand
+
+print(demand.sum())
+print(demand_2.sum())
+print(demand_3.sum())
