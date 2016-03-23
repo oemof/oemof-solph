@@ -166,19 +166,7 @@ class electrical_demand():
                                               kwargs.get('filename'))
             self.elec_demand = self.scale_profile()
 
-        #TODO: implement
-        elif method == 'scale_profile_db':
-            conn = kwargs.get('conn')
-            self.elec_demand = np.array([111, 222])
-
-        #TODO: implement
-        elif method == 'scale_entsoe':
-            conn = kwargs.get('conn')
-            self.elec_demand = np.array([111, 222])
-
-        #TODO: implement industry + def scale_profile() verwenden
         elif method == 'calculate_profile':
-            self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
 
             # normalize slp timeseries to annual sum of one
@@ -196,7 +184,8 @@ class electrical_demand():
                         kwargs['ann_el_demand_per_sector'][key] = (
                             self.calculate_annual_demand_households(**kwargs))
                     elif key.startswith('i', 0, 1):
-                        pass
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_industry(**kwargs))
 
             # multiply given annual demand with timeseries
             self.elec_demand = self.e_slp.multiply(pd.Series(
@@ -227,7 +216,7 @@ class electrical_demand():
         return
 
     def read_selp(self):
-        self.e_slp = eb.bdew_elec_slp(self.conn, self.dataframe)
+        self.e_slp = eb.bdew_elec_slp(self.dataframe)
         return self.e_slp
 
     def scale_profile(self):
@@ -266,12 +255,17 @@ class electrical_demand():
             / kwargs.get('household_members_all')
             * kwargs.get('ann_el_demand_per_person')['four'])
 
-        return  kwargs.get('population') * hh_ann_el_demand_per_person
+        return kwargs.get('population') * hh_ann_el_demand_per_person
 
     def calculate_annual_demand_commerce(self, **kwargs):
         return (kwargs.get('comm_ann_el_demand_state') /
                     kwargs.get('comm_number_of_employees_state') *
                     kwargs.get('comm_number_of_employees_region'))
+
+    def calculate_annual_demand_industry(self, **kwargs):
+        return (kwargs.get('ind_ann_el_demand_state') /
+                    kwargs.get('ind_number_of_employees_state') *
+                    kwargs.get('ind_number_of_employees_region'))
 
 
 class heat_demand():

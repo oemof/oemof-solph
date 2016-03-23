@@ -43,7 +43,7 @@ class Building():
 class bdew_elec_slp():
     'Generate electrical standardized load profiles based on the BDEW method.'
 
-    def __init__(self, conn, time_df, periods=None):
+    def __init__(self, time_df, periods=None):
         if periods is None:
             self.periods = {
                 'summer1': [5, 15, 9, 14],  # summer: 15.05. to 14.09
@@ -55,9 +55,9 @@ class bdew_elec_slp():
         else:
             self.periods = periods
         self._year = time_df.index.year[1000]
-        self.slp_frame = self.all_load_profiles(conn, time_df)
+        self.slp_frame = self.all_load_profiles(time_df)
 
-    def all_load_profiles(self, conn, time_df):
+    def all_load_profiles(self, time_df):
         slp_types = ['h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'l0',
                      'l1', 'l2']
         new_df = self.create_bdew_load_profiles(time_df, slp_types)
@@ -74,7 +74,7 @@ class bdew_elec_slp():
         '''
         Calculates the hourly electricity load profile in MWh/h of a region.
         '''
-        
+
         # define file path of slp csv data
         self.datapath = os.path.join(os.path.dirname(__file__), 'bdew_data')
         file_path = os.path.join(self.datapath, 'selp_series.csv')

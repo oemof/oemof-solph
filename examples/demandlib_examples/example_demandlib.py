@@ -20,14 +20,19 @@ year = 2013
 # each
 
 ann_el_demand_per_sector = {
-    'h0': 3000,
     'g0': 3000,
+    'h0': 3000,
     'i0': 3000}
 
 ann_el_demand_per_sector_2 = {
-    'h0': None,
     'g0': None,
+    'h0': None,
     'i0': None}
+
+ann_el_demand_per_sector_3 = {
+    'g0': 3000,
+    'h0': None,
+    'i0': 3000}
 
 # Following data has to be provided if sectoral annual demand is specified as
 # None which corresponds to unknown demand
@@ -66,25 +71,36 @@ comm_number_of_employees_region = 10000
 # The industry sector corrsponds to sector C ("Verarbeitendes Gewerbe") with
 # wz ("Wirtschaftszweig") = 1
 
-ind_statistics_state = [
-    {'ann_el_demand': 200000,
-     'number_employees': 551280,
-     'wz': 11},
-    {'ann_el_demand': 300000,
-     'number_employees': 949468,
-     'wz': 12},
-    {'ann_el_demand': 400000,
-     'number_employees': 837733,
-     'wz': 13},
-    {'ann_el_demand': 500000,
-     'number_employees': 1755617,
-     'wz': 14}]
+# Industry sector data (g) - Easy method
+ind_ann_el_demand_state = 500000
+ind_number_of_employees_state = 80000
+ind_number_of_employees_region = 10000
 
-ind_number_of_employees_region = [
-    {'wz_11': 22709},
-    {'wz_12': 15856},
-    {'wz_13': 18554},
-    {'wz_14': 20976}]
+# More sophisticated method can be found in:
+# B. Schachler: Bewertung des Einsatzes von Kraft-Wärme-Kopplungsanlagen
+#    hinsichtlich der CO2-Emissionen bei wachsendem Anteil Erneuerbarer
+#    Energien, Masterarbeit, Technische Universität Berlin, 2014
+# NOT IMPLEMENTED YET
+
+#ind_statistics_state = [
+#    {'ann_el_demand': 200000,
+#     'number_employees': 551280,
+#     'wz': 11},
+#    {'ann_el_demand': 300000,
+#     'number_employees': 949468,
+#     'wz': 12},
+#    {'ann_el_demand': 400000,
+#     'number_employees': 837733,
+#     'wz': 13},
+#    {'ann_el_demand': 500000,
+#     'number_employees': 1755617,
+#     'wz': 14}]
+#
+#ind_number_of_employees_region = [
+#    {'wz_11': 22709},
+#    {'wz_12': 15856},
+#    {'wz_13': 18554},
+#    {'wz_14': 20976}]
 
 # ############################################################################
 # Create demand object and relevant bus
@@ -117,8 +133,31 @@ demand_2 = dm.electrical_demand(method='calculate_profile',
                                 comm_number_of_employees_state=
                                     comm_number_of_employees_state,
                                 comm_number_of_employees_region=
+                                    comm_number_of_employees_region,
+                                ind_ann_el_demand_state=
+                                    comm_ann_el_demand_state,
+                                ind_number_of_employees_state=
+                                    comm_number_of_employees_state,
+                                ind_number_of_employees_region=
                                     comm_number_of_employees_region) \
                                 .elec_demand
 
-print(demand)
-print(demand_2)
+# Example 3: Calculate profile with mixed input (set demand and statistic data)
+
+demand_3 = dm.electrical_demand(method='calculate_profile',
+                                year=year,
+                                ann_el_demand_per_sector=
+                                    ann_el_demand_per_sector_3,
+                                ann_el_demand_per_person=
+                                    ann_el_demand_per_person,
+                                number_household_members=
+                                    number_household_members,
+                                household_members_all=
+                                    household_members_all,
+                                population=
+                                    population) \
+                                .elec_demand
+
+print(demand.sum())
+print(demand_2.sum())
+print(demand_3.sum())
