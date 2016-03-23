@@ -183,7 +183,7 @@ class electrical_demand():
 
             # normalize slp timeseries to annual sum of one
             self.e_slp.drop('date', axis=1, inplace=True)
-            self.e_slp.div(self.e_slp.sum(axis=1), axis=0)
+            self.e_slp = self.e_slp.div(self.e_slp.sum(axis=0), axis=1)
 
             # calculate annual demand for sectors with `None`
             for key in kwargs['ann_el_demand_per_sector'].keys():
