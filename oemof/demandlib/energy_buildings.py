@@ -100,7 +100,7 @@ class bdew_elec_slp():
             tmp_df[slp_type] = tmp_df[slp_type].astype(float)
             new_df[slp_type] = 0
             how[slp_type] = 'mean'
-        tmp_df = tmp_df.resample('H', how=how)
+        tmp_df = tmp_df.groupby(pd.TimeGrouper(freq='H')).agg(how)
 
         # Inner join the slps on the time_df to the slp's for a whole year
         tmp_df['hour_of_day'] = tmp_df.index.hour + 1
