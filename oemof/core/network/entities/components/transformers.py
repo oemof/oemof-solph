@@ -23,18 +23,27 @@ class Simple(Transformer):
         self.eta = kwargs.get('eta', None)
 
 
-class PostHeating(Simple):
+class TwoInputsOneOutput(Simple):
     r"""
-    A postheating transformer can transport heat from one HeatBus to another
-    eventhough the temperature levels are different.
+    A transformer with one output and two input flows
 
-    The postheating transformer needs an two buses containing the temperature
-    attribute as an input and an output. Another nergy input is used to heat up
-    the heat flow if the temperature in the output bus is lower. In the list
-    of inputs the additional bus is defined first and then the heat flow.
+    The two input flows are connect by the factor f. This transformer might
+    represent components such as heat pumps and instant flow heater.
+
+    Parameters
+    ----------
+    eta : list
+        Constant effciency for converting the incoming flows to the internal
+        input flows. The first element of eta is the efficiency of the first
+        element of inputs and so on. If not set the effciency will be one. You
+        have to define both elements or no element.
+    f : array-like
+        A relation-factor between the first and the second input flow.
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.eta = kwargs.get('eta', [1, 1])
+        self.f = kwargs.get('f')
 
 
 class CHP(Transformer):

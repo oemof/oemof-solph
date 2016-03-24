@@ -43,7 +43,7 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
 
     if cost_objects is None:
         c_blocks = [str(transformer.Simple),
-                    str(transformer.PostHeating),
+                    str(transformer.TwoInputsOneOutput),
                     str(transformer.VariableEfficiencyCHP),
                     str(transformer.SimpleExtractionCHP),
                     str(transformer.Storage),
