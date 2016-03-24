@@ -4,7 +4,7 @@ v0.0.5 (DATE)
 New features
 ############
 
-* 
+* added flexible transformer with two inputs and one output (`issue #116 <https://github.com/oemof/oemof_base/issues/116>`_)
 
 Documentation
 #############
