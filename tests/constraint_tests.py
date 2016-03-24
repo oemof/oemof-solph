@@ -95,7 +95,7 @@ class Constraint_Tests:
 
         self.compare_lp_files(self.energysystem, "transformer_simp.lp")
 
-        transformer.Simple.optimization_options.update({'investment': True})
+        transformer.Simple.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
@@ -116,7 +116,7 @@ class Constraint_Tests:
 
         self.compare_lp_files(self.energysystem, "source_fixed.lp")
 
-        source.FixedSource.optimization_options.update({'investment': True})
+        source.FixedSource.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
 
     def test_storage(self):
@@ -124,8 +124,7 @@ class Constraint_Tests:
 
     def test_postheating_invest(self):
 
-        transformer.PostHeating.optimization_options.update(
-            {'investment': True})
+        transformer.PostHeating.optimization_options['investment'] = True
 
         btest = HeatBus(
             uid="bus_test",
@@ -158,8 +157,7 @@ class Constraint_Tests:
         postheat.in_max = [None, float('inf')]
         self.compare_lp_files(self.energysystem, "postheating_invest.lp")
 
-        transformer.PostHeating.optimization_options.update(
-            {'investment': False})
+        transformer.PostHeating.optimization_options['investment'] = False
 
         postheat.in_max = [777, 888]
         self.compare_lp_files(self.energysystem, "postheating.lp")
