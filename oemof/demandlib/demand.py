@@ -22,16 +22,20 @@ class electrical_demand():
         Method to calculate the demand for your region.
         Explanation:
 
-        'scale_profile_csv': read only profile from csv and scale it with
+        'scale_profile_csv':
+            read only profile from csv and scale it with
             given or calculated demand
 
-        'scale_profile_db': read only profile from database and scale it with
+        'scale_profile_db':
+            read only profile from database and scale it with
             given or calculated demand
 
-        'scale_entsoe': read entsoe profile from database and scale it with
+        'scale_entsoe':
+            read entsoe profile from database and scale it with
             given or calculated demand
 
-        'calculate_profile: Calculate profile from the standard load profiles
+        'calculate_profile:
+            Calculate profile from the standard load profiles
             of the three demand sectors (households, service, industry) and
             the corresponding annual electric demand.
 
