@@ -39,9 +39,12 @@ class electrical_demand():
             of the three demand sectors (households, service, industry) and
             the corresponding annual electric demand.
 
+        Depending on which of these values is chosen, additional parameters
+        might be required, as detailed below.
+
+
     Other Parameters
     ----------------
-    Required according to chosen method.
 
     {'scale_profile_csv'} :
         path : str
