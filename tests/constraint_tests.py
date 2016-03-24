@@ -42,6 +42,28 @@ class Constraint_Tests:
         self.tmppath = helpers.extend_basic_path('tmp')
         logging.info(self.tmppath)
 
+    def setup(self):
+        self.energysystem.entities = []
+        backup = {}
+        for klass in [ source.FixedSource, transformer.Simple,
+                       transformer.Storage, transformer.TwoInputsOneOutput]:
+            backup[klass] = {}
+            for option in klass.optimization_options:
+                backup[klass][option] = klass.optimization_options[option]
+        self.optimization_options_backup = backup
+
+    def teardown(self):
+        backup = self.optimization_options_backup
+        for klass in backup:
+            # Need to copy keys to a new list. Otherwise we would change what
+            # we are iterating over, while iterating over it, making python
+            # unhappy.
+            for option in list(klass.optimization_options.keys()):
+                if not option in backup[klass]:
+                    del klass.optimization_options[option]
+            for option in backup[klass]:
+                klass.optimization_options[option] = backup[klass][option]
+
     def compare_lp_files(self, energysystem, filename):
         self.opt_model = om.OptimizationModel(energysystem=energysystem)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
@@ -53,7 +75,6 @@ class Constraint_Tests:
 
     def test_Transformer_Simple(self):
         "Test transformer.Simple with and without investment."
-        self.energysystem.entities = []
 
         bgas = Bus(uid="bgas",
                    type="gas",
@@ -75,12 +96,11 @@ class Constraint_Tests:
 
         self.compare_lp_files(self.energysystem, "transformer_simp.lp")
 
-        transformer.Simple.optimization_options.update({'investment': True})
+        transformer.Simple.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
         "Test source.FixedSource with and without investment."
-        self.energysystem.entities = []
 
         bel = Bus(uid="bel",
                   type="el")
@@ -96,14 +116,15 @@ class Constraint_Tests:
                            crf=0.08)
 
         self.compare_lp_files(self.energysystem, "source_fixed.lp")
-        source.FixedSource.optimization_options.update({'investment': True})
+        source.FixedSource.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
 
     def test_storage(self):
         pass
 
     def test_two_inputs_one_output(self):
-        self.energysystem.entities = []
+        TIOO = transformer.TwoInputsOneOutput
+        TIOO.optimization_options['investment'] = True
 
         btest = HeatBus(
             uid="bus_test",
@@ -138,8 +159,7 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem,
                               "two_inputs_one_output_invest.lp")
 
-        transformer.TwoInputsOneOutput.optimization_options.update(
-            {'investment': False})
+        TIOO.optimization_options['investment'] = False
 
         postheat.in_max = [777, 888]
         self.compare_lp_files(self.energysystem,

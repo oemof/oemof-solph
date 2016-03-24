@@ -37,7 +37,8 @@ def l_constraint(model, name, constraints, *args):
     constraints: dict
         Constraints is a dictionary of constraints of the form:
 
-        constraints[i] = [[(coeff1, var1), (coeff2, var2),...], sense, constant_term]
+        constraints[i] = [[(coeff1, var1), (coeff2, var2),...], sense,
+                          constant_term]
 
         sense is one of "==","<=",">=".
 
