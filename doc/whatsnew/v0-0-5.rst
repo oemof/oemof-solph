@@ -19,7 +19,7 @@ Testing
 Bug fixes
 #########
 
-* using platform independent expression to define the basic path
+* using platform independent expression to define the basic path (`issue #122 <https://github.com/oemof/oemof_base/issues/122>`_)
 
 Other changes
 #############
