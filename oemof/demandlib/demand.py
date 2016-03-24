@@ -18,8 +18,8 @@ class electrical_demand():
 
     Parameters
     ----------
-    method : {'scale_profile_csv', scale_profile_db',
-                  scale_entsoe', calculate_profile'}, required
+    method : {'scale_profile_csv', 'scale_profile_db',
+                  'scale_entsoe', 'calculate_profile'}, required
         Method to calculate the demand for your region.
         Explanation:
 
