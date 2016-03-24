@@ -42,22 +42,26 @@ class Constraint_Tests:
         logging.info(self.tmppath)
 
     def setup(self):
-        self.cleanup = []
         self.energysystem.entities = []
-        for k in [source.FixedSource, transformer.Simple, transformer.Storage]:
-            if 'investment' in k.optimization_options:
-                value = k.optimization_options['investment']
-                def f(k=k, value=value):
-                    k.optimization_options['investment'] = value
-                self.cleanup.append(f)
-            else:
-                def f(k=k):
-                    if 'investment' in k.optimization_options:
-                        del k.optimization_options['investment']
-                self.cleanup.append(f)
+        backup = {}
+        for klass in [ source.FixedSource, transformer.Simple,
+                       transformer.Storage, transformer.PostHeating]:
+            backup[klass] = {}
+            for option in klass.optimization_options:
+                backup[klass][option] = klass.optimization_options[option]
+        self.optimization_options_backup = backup
 
     def teardown(self):
-        for f in self.cleanup: f()
+        backup = self.optimization_options_backup
+        for klass in backup:
+            # Need to copy keys to a new list. Otherwise we would change what
+            # we are iterating over, while iterating over it, making python
+            # unhappy.
+            for option in list(klass.optimization_options.keys()):
+                if not option in backup[klass]:
+                    del klass.optimization_options[option]
+            for option in backup[klass]:
+                klass.optimization_options[option] = backup[klass][option]
 
     def compare_lp_files(self, energysystem, filename):
         self.opt_model = om.OptimizationModel(energysystem=energysystem)
