@@ -122,6 +122,9 @@ class Constraint_Tests:
     def test_postheating_invest(self):
         self.energysystem.entities = []
 
+        transformer.PostHeating.optimization_options.update(
+            {'investment': True})
+
         btest = HeatBus(
             uid="bus_test",
             excess=False,
