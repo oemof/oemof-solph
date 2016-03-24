@@ -43,6 +43,7 @@ class Constraint_Tests:
 
     def setup(self):
         self.cleanup = []
+        self.energysystem.entities = []
         for k in [source.FixedSource, transformer.Simple, transformer.Storage]:
             if 'investment' in k.optimization_options:
                 value = k.optimization_options['investment']
@@ -69,7 +70,6 @@ class Constraint_Tests:
 
     def test_Transformer_Simple(self):
         "Test transformer.Simple with and without investment."
-        self.energysystem.entities = []
 
         bgas = Bus(uid="bgas",
                    type="gas",
@@ -96,7 +96,6 @@ class Constraint_Tests:
 
     def test_source_fixed(self):
         "Test source.FixedSource with and without investment."
-        self.energysystem.entities = []
 
         bel = Bus(uid="bel",
                   type="el")
@@ -120,7 +119,6 @@ class Constraint_Tests:
         pass
 
     def test_postheating_invest(self):
-        self.energysystem.entities = []
 
         transformer.PostHeating.optimization_options.update(
             {'investment': True})
