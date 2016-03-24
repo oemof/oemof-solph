@@ -14,7 +14,10 @@ Documentation
 Testing
 #######
 
-* 
+* There's now a dedicated module/suite testing solph constraints.
+* This suite now has proper fixtures (i.e. `setup`/`teardown` methods) making
+  them (hopefully) independent of the order in which they are run
+  (which, previously, they where not).
 
 Bug fixes
 #########
@@ -29,5 +32,5 @@ Other changes
 Contributors
 ############
 
-* 
+* Stephan Günther
 
