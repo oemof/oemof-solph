@@ -524,10 +524,7 @@ def download_file(filename, url):
 
 
 def get_basic_path():
-    if sys.platform == "win32":
-        basicpath = os.path.join(os.environ['USERPROFILE'], '.oemof')
-    else:  # if linux platform
-        basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    basicpath = os.path.join(os.path.expanduser('~'), '.oemof')
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath
