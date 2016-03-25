@@ -29,11 +29,12 @@ Bug fixes
 Other changes
 #############
 
-*
+* Simplified API of demandlib
 
 Contributors
 ############
 
 * Uwe Krien
 * Stephan Günther
+* Guido Pleßmann
 
