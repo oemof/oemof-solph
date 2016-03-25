@@ -18,7 +18,6 @@ import pickle
 import time
 import calendar
 import pprint as pp
-from oemof.demandlib import demand as dm
 
 
 # get_polygon_from_shp_file
@@ -465,40 +464,6 @@ def pickle2dict(filename=None, path=None):
     dic = pickle.load(inputfile)
     inputfile.close()
     return dic
-
-
-def call_demandlib(demand, method, year, **kwargs):
-    '''
-    Calls the demandlib and creates an object which includes the demand
-    timeseries.
-
-    Required Parameters
-    -------------------
-    demand :
-    method : Method which is to be applied for the demand calculation
-    '''
-
-    df = create_basic_dataframe(year, **kwargs)
-    demand.val = dm.electrical_demand(method,
-                         dataframe=df,
-                         ann_el_demand_per_sector=kwargs.get(
-                         'ann_el_demand_per_sector'),
-                         ann_el_demand_per_person=kwargs.get(
-                         'ann_el_demand_per_person'),
-                         household_structure=kwargs.get(
-                         'household_structure'),
-                         household_members_all=kwargs.get(
-                         'household_members_all'),
-                         population=kwargs.get(
-                         'population'),
-                         comm_ann_el_demand_state=kwargs.get(
-                         'comm_ann_el_demand_state'),
-                         comm_number_of_employees_state=kwargs.get(
-                         'comm_number_of_employees_state'),
-                         comm_number_of_employees_region=kwargs.get(
-                         'comm_number_of_employees_region')).elec_demand
-
-    return demand
 
 
 def dict2textfile(dic, filename=None, path=None):
