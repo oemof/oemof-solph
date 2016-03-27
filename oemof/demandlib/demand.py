@@ -113,7 +113,6 @@ class electrical_demand():
         comm_number_of_employees_region : int
             Number of employees in the service sector of your region.
 
-
     Attributes
     ----------
     annual_demand : int
