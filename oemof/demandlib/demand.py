@@ -132,7 +132,6 @@ class electrical_demand():
 
     Notes
     -----
-    .. math::
 
     References
     ----------
