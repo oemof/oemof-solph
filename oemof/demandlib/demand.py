@@ -66,12 +66,14 @@ class electrical_demand():
 
         ann_el_demand_per_sector : list of dictionaries
             Specification of annual electric demand and the corresponding
-            standard load profile type (selp_type) for every sector, e.g.
+            standard load profile type (selp_type) for every sector, e.g.::
+
                 ann_el_demand_per_sector = [
                     {'ann_el_demand': int or None,
                      'selp_type: {'h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5',
                                   'g6', 'i0'}},
                                   ...]
+
             if ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
                 no sector is specified)
@@ -84,7 +86,8 @@ class electrical_demand():
         ann_el_demand_per_person : list of dictionaries
             Specification of the annual electric demand for one household
             according to the household type (from single to four-person
-            households), e.g.
+            households), e.g.::
+
                 ann_el_demand_per_person = [
                     {'ann_el_demand': int,
                      'household_type': {'one', 'two', 'three', 'four'}},
@@ -92,7 +95,8 @@ class electrical_demand():
 
         household_structure : list of dictionaries
             Number of people living in every household type. Specification
-            for your region, e.g.
+            for your region, e.g.::
+
                 household_structure = [
                     {household_members': int,
                      'household_type': {'one', 'two', 'three', 'four'}},
