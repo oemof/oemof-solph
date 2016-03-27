@@ -46,22 +46,24 @@ class electrical_demand():
     Other Parameters
     ----------------
 
-    {'scale_profile_csv'} :
         path : str
-            '/path/to/file'
+            Should be the '/path/to/the/csv/file'.
+            Required for a `method` value of `'scale_profile_csv'`.
         filename : str
-            'filename.csv'
+            Should be the name of the file found under `path`.
+            Required for a `method` value of `'scale_profile_csv'`.
 
-    {'scale_profile_db', 'scale_profile_entsoe'} :
         conn :
+            Required for `method` values of `'scale_profile_db'` or
+            `'scale_profile_entsoe'`.
 
-    {'scale_profile_csv', 'scale_profile_db', 'scale_profile_entsoe'} :
         annual_elec_demand : int
             Annual demand of your region. Works so far only with a given
             value. Calculating the demand from statistic data for the whole
             region can be an option for further development.
+            Required for `method` values of `'scale_profile_csv'`,
+            `'scale_profile_db'` or `'scale_profile_entsoe'`.
 
-    {'calculate_profile'} :
         ann_el_demand_per_sector : list of dictionaries
             Specification of annual electric demand and the corresponding
             standard load profile type (selp_type) for every sector, e.g.
@@ -73,6 +75,8 @@ class electrical_demand():
             if ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
                 no sector is specified)
+            This parameter, along with all the parameters below, is required if
+            `'calculate_profile'` is specified as the value of `method`.
 
         population : int
             Population of your region.
