@@ -74,7 +74,7 @@ class electrical_demand():
                                   'g6', 'i0'}},
                                   ...]
 
-            if ann_el_demand is None, more parameters to calculate the demand
+            If ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
                 no sector is specified)
             This parameter, along with all the parameters below, is required if
