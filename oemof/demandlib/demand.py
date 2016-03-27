@@ -76,7 +76,7 @@ class electrical_demand():
 
             If ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
-                no sector is specified)
+            no sector is specified)
             This parameter, along with all the parameters below, is required if
             `'calculate_profile'` is specified as the value of `method`.
 
