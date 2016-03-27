@@ -116,7 +116,7 @@ class electrical_demand():
     Attributes
     ----------
     annual_demand : int
-        Included in **kwargs. Given with initialization or calculated or
+        Included in `**kwargs`. Given with initialization or calculated or
         to be calculated within this class according to selected method.
 
     dataframe : pandas dataframe
