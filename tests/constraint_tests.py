@@ -14,6 +14,7 @@ from oemof.core.network.entities.buses import HeatBus
 from oemof.solph import optimization_model as om
 from oemof.core.network.entities.components import sources as source
 from oemof.tools import helpers
+from oemof.tools import create_components as cc
 
 
 class Entity_Tests:
@@ -41,6 +42,28 @@ class Constraint_Tests:
         self.tmppath = helpers.extend_basic_path('tmp')
         logging.info(self.tmppath)
 
+    def setup(self):
+        self.energysystem.entities = []
+        backup = {}
+        for klass in [ source.FixedSource, transformer.Simple,
+                       transformer.Storage, transformer.TwoInputsOneOutput]:
+            backup[klass] = {}
+            for option in klass.optimization_options:
+                backup[klass][option] = klass.optimization_options[option]
+        self.optimization_options_backup = backup
+
+    def teardown(self):
+        backup = self.optimization_options_backup
+        for klass in backup:
+            # Need to copy keys to a new list. Otherwise we would change what
+            # we are iterating over, while iterating over it, making python
+            # unhappy.
+            for option in list(klass.optimization_options.keys()):
+                if not option in backup[klass]:
+                    del klass.optimization_options[option]
+            for option in backup[klass]:
+                klass.optimization_options[option] = backup[klass][option]
+
     def compare_lp_files(self, energysystem, filename):
         self.opt_model = om.OptimizationModel(energysystem=energysystem)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
@@ -52,7 +75,6 @@ class Constraint_Tests:
 
     def test_Transformer_Simple(self):
         "Test transformer.Simple with and without investment."
-        self.energysystem.entities = []
 
         bgas = Bus(uid="bgas",
                    type="gas",
@@ -74,12 +96,11 @@ class Constraint_Tests:
 
         self.compare_lp_files(self.energysystem, "transformer_simp.lp")
 
-        transformer.Simple.optimization_options.update({'investment': True})
+        transformer.Simple.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
         "Test source.FixedSource with and without investment."
-        self.energysystem.entities = []
 
         bel = Bus(uid="bel",
                   type="el")
@@ -95,14 +116,15 @@ class Constraint_Tests:
                            crf=0.08)
 
         self.compare_lp_files(self.energysystem, "source_fixed.lp")
-        source.FixedSource.optimization_options.update({'investment': True})
+        source.FixedSource.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
 
     def test_storage(self):
         pass
 
-    def test_postheating_invest(self):
-        self.energysystem.entities = []
+    def test_two_inputs_one_output(self):
+        TIOO = transformer.TwoInputsOneOutput
+        TIOO.optimization_options['investment'] = True
 
         btest = HeatBus(
             uid="bus_test",
@@ -121,22 +143,24 @@ class Constraint_Tests:
             uid="bus_stor_heat",
             temperature=370)
 
-        postheat = transformer.PostHeating(
+        postheat = transformer.TwoInputsOneOutput(
             uid='postheat_elec',
             inputs=[btest, storage_heat_bus], outputs=[district_heat_bus],
             opex_var=0, capex=99999,
             out_max=[999993],
             in_max=[777, 888],
+            f=cc.instant_flow_heater(storage_heat_bus, district_heat_bus),
             eta=[0.95, 1])
 
         assert_raises(ValueError, om.OptimizationModel,
                       energysystem=self.energysystem)
 
         postheat.in_max = [None, float('inf')]
-        self.compare_lp_files(self.energysystem, "postheating_invest.lp")
+        self.compare_lp_files(self.energysystem,
+                              "two_inputs_one_output_invest.lp")
 
-        transformer.PostHeating.optimization_options.update(
-            {'investment': False})
+        TIOO.optimization_options['investment'] = False
 
         postheat.in_max = [777, 888]
-        self.compare_lp_files(self.energysystem, "postheating.lp")
+        self.compare_lp_files(self.energysystem,
+                              "two_inputs_one_output.lp")

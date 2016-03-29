@@ -8,6 +8,7 @@ Created on Fri Jul 24 19:11:38 2015
 import numpy as np
 import pandas as pd
 from oemof.demandlib import energy_buildings as eb
+from oemof.tools import helpers
 
 
 class electrical_demand():
@@ -18,8 +19,8 @@ class electrical_demand():
 
     Parameters
     ----------
-    method : {'scale_profile_csv', scale_profile_db',
-                  scale_entsoe', calculate_profile'}, required
+    method : 'scale_profile_csv', scale_profile_db',
+        scale_entsoe', calculate_profile', required
         Method to calculate the demand for your region.
         Explanation:
 
@@ -55,18 +56,26 @@ class electrical_demand():
             value. Calculating the demand from statistic data for the whole
             region can be an option for further development.
 
-    {'calculate_profile'} :
-        ann_el_demand_per_sector : list of dictionaries
+    calculate_profile :
+        ann_el_demand_per_sector : dictionary
             Specification of annual electric demand and the corresponding
-            standard load profile type (selp_type) for every sector, e.g.
-                ann_el_demand_per_sector = [
-                    {'ann_el_demand': int or None,
-                     'selp_type: {'h0', 'g0', 'g1', 'g2', 'g3', 'g4', 'g5',
-                                  'g6', 'i0'}},
-                                  ...]
+            standard load profile type (selp_type) for every sector. Dictionary
+            is structured as follows. Key defining the sector is followed by
+            value that can be int, float, None or can be omitted, e.g.
+
+            .. code-block:: python
+
+                ann_el_demand_per_sector = {
+                    'h0': int,
+                    'g0': float,
+                    'g1': None,
+                    ...
+                    'g6': int,
+                    'i0': int}
+
             if ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
-                no sector is specified)
+            no sector is specified)
 
         population : int
             Population of your region.
@@ -143,7 +152,7 @@ class electrical_demand():
         if self.annual_demand is None:
             self.annual_demand = self.calculate_annual_demand_region()
 
-        self.dataframe = kwargs.get('dataframe')
+        self.dataframe = helpers.create_basic_dataframe(kwargs.get('year'))
 
         self.decider(method, **kwargs)
 
@@ -157,56 +166,31 @@ class electrical_demand():
                                               kwargs.get('filename'))
             self.elec_demand = self.scale_profile()
 
-        #TODO: implement
-        elif method == 'scale_profile_db':
-            conn = kwargs.get('conn')
-            self.elec_demand = np.array([111, 222])
-
-        #TODO: implement
-        elif method == 'scale_entsoe':
-            conn = kwargs.get('conn')
-            self.elec_demand = np.array([111, 222])
-
-        #TODO: implement industry + def scale_profile() verwenden
         elif method == 'calculate_profile':
-            self.conn = kwargs.get('conn')
             self.e_slp = self.read_selp().slp
 
-#            self.hh_e_slp = self.e_slp['h0']
-            self.hh_e_slp = self.e_slp[kwargs.get(
-                                       'ann_el_demand_per_sector')[0][
-                                       'selp_type']]
-            self.comm_e_slp = self.e_slp[kwargs.get(
-                                         'ann_el_demand_per_sector')[1][
-                                         'selp_type']]
-            self.ind_e_slp = self.e_slp[kwargs.get(
-                                        'ann_el_demand_per_sector')[2][
-                                        'selp_type']]
+            # normalize slp timeseries to annual sum of one
+            self.e_slp.drop('date', axis=1, inplace=True)
+            self.e_slp = self.e_slp.div(self.e_slp.sum(axis=0), axis=1)
 
-            if kwargs.get('ann_el_demand_per_sector')[0][
-                    'ann_el_demand'] is None:
-                self.elec_demand = (
-                    self.hh_e_slp / self.hh_e_slp.sum() *
-                    self.calculate_annual_demand_households(**kwargs) +
-                    self.comm_e_slp / self.comm_e_slp.sum() *
-                    self.calculate_annual_demand_commerce(**kwargs)) #+
-#                    self.ind_e_slp / self.ind_e_slp.sum()) *
-#                    self.calculate_annual_demand_sectors(**kwargs))
+            # calculate annual demand for sectors with `None`
+            for key in kwargs['ann_el_demand_per_sector'].keys():
 
-            else:
+                if kwargs['ann_el_demand_per_sector'][key] is None:
+                    if key.startswith('g', 0, 1):
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_commerce(**kwargs))
+                    elif key.startswith('h', 0, 1):
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_households(**kwargs))
+                    elif key.startswith('i', 0, 1):
+                        kwargs['ann_el_demand_per_sector'][key] = (
+                            self.calculate_annual_demand_industry(**kwargs))
 
-                self.elec_demand = (self.hh_e_slp / self.hh_e_slp.sum() *
-                                    kwargs.get(
-                                        'ann_el_demand_per_sector')[0][
-                                        'ann_el_demand'] +
-                                    self.comm_e_slp / self.comm_e_slp.sum() *
-                                    kwargs.get(
-                                        'ann_el_demand_per_sector')[1][
-                                        'ann_el_demand'] +
-                                    self.ind_e_slp / self.ind_e_slp.sum() *
-                                    kwargs.get(
-                                        'ann_el_demand_per_sector')[2][
-                                        'ann_el_demand'])
+            # multiply given annual demand with timeseries
+            self.elec_demand = self.e_slp.multiply(pd.Series(
+                kwargs['ann_el_demand_per_sector']), axis=1).dropna(how='all',
+                axis=1)
 
         return self.elec_demand
 
@@ -218,10 +202,6 @@ class electrical_demand():
         self.profile = pd.read_csv(kwargs.get('path') +
                                    kwargs.get('filename'),
                                    sep=",")
-
-        self.year = 2010  # TODO: year temporarily
-
-        self.profile = self.profile['deu_' + str(self.year)]
 
         return self.profile
 
@@ -236,7 +216,7 @@ class electrical_demand():
         return
 
     def read_selp(self):
-        self.e_slp = eb.bdew_elec_slp(self.conn, self.dataframe)
+        self.e_slp = eb.bdew_elec_slp(self.dataframe)
         return self.e_slp
 
     def scale_profile(self):
@@ -258,25 +238,34 @@ class electrical_demand():
         return self.annual_demand
 
     def calculate_annual_demand_households(self, **kwargs):
-        hh_ann_el_demand_per_person = (kwargs.get('household_structure')[0][
-            'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[0]['ann_el_demand'] +
-            kwargs.get('household_structure')[1][
-                'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[1]['ann_el_demand'] +
-            kwargs.get('household_structure')[2][
-                'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[2]['ann_el_demand'] +
-            kwargs.get('household_structure')[3][
-                'household_members'] / kwargs.get('household_members_all') *
-            kwargs.get('ann_el_demand_per_person')[3]['ann_el_demand'])
+        hh_ann_el_demand_per_person = (
+            kwargs.get('number_household_members')['one']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['one'] +
 
-        return  kwargs.get('population') * hh_ann_el_demand_per_person
+            kwargs.get('number_household_members')['two']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['two'] +
+
+            kwargs.get('number_household_members')['three']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['three'] +
+
+            kwargs.get('number_household_members')['four']
+            / kwargs.get('household_members_all')
+            * kwargs.get('ann_el_demand_per_person')['four'])
+
+        return kwargs.get('population') * hh_ann_el_demand_per_person
 
     def calculate_annual_demand_commerce(self, **kwargs):
         return (kwargs.get('comm_ann_el_demand_state') /
                     kwargs.get('comm_number_of_employees_state') *
                     kwargs.get('comm_number_of_employees_region'))
+
+    def calculate_annual_demand_industry(self, **kwargs):
+        return (kwargs.get('ind_ann_el_demand_state') /
+                    kwargs.get('ind_number_of_employees_state') *
+                    kwargs.get('ind_number_of_employees_region'))
 
 
 class heat_demand():

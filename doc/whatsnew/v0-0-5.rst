@@ -1,33 +1,40 @@
-v0.0.5 (DATE)
+v0.0.5 (March 25, 2016)
 ++++++++++++++++++++++++++
 
 New features
 ############
 
-* 
+* added flexible transformer with two inputs and one output
+  (`issue #116 <https://github.com/oemof/oemof_base/issues/116>`_)
 
 Documentation
 #############
 
-* 
+*
 
 Testing
 #######
 
-* 
+* There's now a dedicated module/suite testing solph constraints.
+* This suite now has proper fixtures (i.e. `setup`/`teardown` methods) making
+  them (hopefully) independent of the order in which they are run
+  (which, previously, they where not).
 
 Bug fixes
 #########
 
-* 
+* using platform independent expression to define the basic path
+  (`issue #122 <https://github.com/oemof/oemof_base/issues/122>`_)
 
 Other changes
 #############
 
-* 
+* Simplified API of demandlib
 
 Contributors
 ############
 
-* 
+* Uwe Krien
+* Stephan Günther
+* Guido Pleßmann
 

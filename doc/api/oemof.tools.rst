@@ -12,14 +12,6 @@ oemof.tools.config module
     :undoc-members:
     :show-inheritance:
 
-oemof.tools.db module
----------------------
-
-.. automodule:: oemof.tools.db
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 oemof.tools.entities_from_csv module
 ------------------------------------
 
