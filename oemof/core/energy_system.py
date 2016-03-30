@@ -39,7 +39,7 @@ class EnergySystem:
         Define the time range and increment for the energy system. This is an
         optional parameter but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
-    groupings : ``list``
+    groupings : list
         The elements of this list are used to construct :class:`Groupings
         <oemof.core.energy_system.Grouping>`. These groupings are then used to
         aggregate the entities added to this energy system into :attr:`groups`.
