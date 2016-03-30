@@ -41,7 +41,7 @@ class EnergySystem:
         use the EnergySystem class as an input parameter.
     groupings : ``list``
         The elements of this list are used to construct :class:`Groupings
-        <oemeof.core.energy_system.Grouping>`. These groupings are then used to
+        <oemof.core.energy_system.Grouping>`. These groupings are then used to
         aggregate the entities added to this energy system into :attr:`groups`.
         By default, there'll always be one group for each :attr:`uid
         <oemof.core.network.Entity.uid>` containing exactly the entity with the
