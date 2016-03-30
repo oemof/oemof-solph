@@ -45,7 +45,7 @@ class EnergySystem:
         aggregate the entities added to this energy system into :attr:`groups`.
         By default, there'll always be one group for each :attr:`uid
         <oemof.core.network.Entity.uid>` containing exactly the entity with the
-        given ``uid``.
+        given :attr:`uid <oemof.core.network.Entity.uid>`.
         See the :ref:`examples <energy-system-examples>` for more information.
 
     Attributes
