@@ -29,3 +29,9 @@ class EnergySystem_Tests:
         ok_(isinstance(ensys.entities[4], transformer.Simple))
         ensys.simulation = self.simulation
         ok_(len(ensys.simulation.timesteps) == 5)
+
+    def test_entity_grouping_on_construction(self):
+        bus = Bus(uid="test bus")
+        ES = es.EnergySystem(entities=[bus])
+        ok_(es.groups[bus.uid] is bus)
+
