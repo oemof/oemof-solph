@@ -45,19 +45,8 @@ class EnergySystem:
         aggregate the entities added to this energy system into :attr:`groups`.
         By default, there'll always be one group for each :attr:`uid
         <oemof.core.network.Entity.uid>` containing exactly the entity with the
-        given ``uid``:
-
-        >>> from oemof.core.network import Entity
-        >>> from oemof.core.network.entities import Bus
-        >>> es = EnergySystem()
-        >>> bus = Bus(uid="electricity")
-        >>> str(bus)
-        '<Bus #electricity>'
-        >>> str(es.groups['electricity'])
-        '<Bus #electricity>'
-        >>> # Clean up: reset entity registry to default state.
-        >>> Entity.registry = None
-
+        given ``uid``.
+        See the :ref:`examples <energy-system-examples>` for more information.
 
     Attributes
     ----------
@@ -89,6 +78,27 @@ class EnergySystem:
         Define the time range and increment for the energy system. This is an
         optional atribute but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
+
+
+    .. _energy-system-examples:
+    Examples
+    --------
+
+    Regardles of additional groupings, entities will always be grouped by their
+    uid:
+
+    >>> from oemof.core.network import Entity
+    >>> from oemof.core.network.entities import Bus
+    >>> es = EnergySystem()
+    >>> bus = Bus(uid='electricity')
+    >>> str(bus)
+    '<Bus #electricity>'
+    >>> str(es.groups['electricity'])
+    '<Bus #electricity>'
+    >>> # Clean up: reset entity registry to default state.
+    >>> Entity.registry = None
+
+
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
