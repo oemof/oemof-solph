@@ -39,6 +39,25 @@ class EnergySystem:
         Define the time range and increment for the energy system. This is an
         optional parameter but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
+    groupings : ``list``
+        The elements of this list are used to construct :class:`Groupings
+        <oemeof.core.energy_system.Grouping>`. These groupings are then used to
+        aggregate the entities added to this energy system into :attr:`groups`.
+        By default, there'll always be one group for each :attr:`uid
+        <oemof.core.network.Entity.uid>` containing exactly the entity with the
+        given ``uid``:
+
+        >>> from oemof.core.network import Entity
+        >>> from oemof.core.network.entities import Bus
+        >>> es = EnergySystem()
+        >>> bus = Bus(uid="electricity")
+        >>> str(bus)
+        '<Bus #electricity>'
+        >>> str(es.groups['electricity'])
+        '<Bus #electricity>'
+        >>> # Clean up: reset entity registry to default state.
+        >>> Entity.registry = None
+
 
     Attributes
     ----------
@@ -50,6 +69,7 @@ class EnergySystem:
         construction, newly created :class:`Entities
         <oemof.core.network.Entity>` are automatically added to this list on
         construction.
+    groups : dict
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
