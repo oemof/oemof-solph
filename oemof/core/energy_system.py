@@ -154,6 +154,8 @@ class EnergySystem:
         """ Add an `entity` to this energy system.
         """
         self.entities.append(entity)
+        for g in self._groupings:
+            g(entity, self.groups)
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
