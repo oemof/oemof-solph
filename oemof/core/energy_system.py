@@ -92,12 +92,8 @@ class EnergySystem:
     >>> from oemof.core.network.entities import Bus
     >>> es = EnergySystem()
     >>> bus = Bus(uid='electricity')
-    >>> str(bus)
-    '<Bus #electricity>'
-    >>> str(es.groups['electricity'])
-    '<Bus #electricity>'
-    >>> # Clean up: reset entity registry to default state.
-    >>> Entity.registry = None
+    >>> bus is es.groups['electricity']
+    True
 
 
     """
