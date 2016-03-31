@@ -5,9 +5,10 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
-import pickle
 import logging
 import os
+
+import dill as pickle
 
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
