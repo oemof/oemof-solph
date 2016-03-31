@@ -31,5 +31,5 @@ class EnergySystem_Tests:
     def test_entity_grouping_on_construction(self):
         bus = Bus(uid="test bus")
         ES = es.EnergySystem(entities=[bus])
-        ok_(es.groups[bus.uid] is bus)
+        ok_(ES.groups[bus.uid] is bus)
 
