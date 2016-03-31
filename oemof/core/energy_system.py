@@ -48,7 +48,8 @@ class Grouping:
     #: :class:`entity <oemof.core.network.Entity>` with the same :attr:`uid
     #: <oemof.core.network.Entity.uid>` get's added to the energy system.
     UID = None
-    def __init__(self, key, value=lambda e: [e], collide=lambda e, old: old.append(e),
+    def __init__(self, key, value=lambda e: [e],
+                 collide=lambda e, old: old.append(e) or old,
                  insert=None):
         if insert:
             self._insert = insert
