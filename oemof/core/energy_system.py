@@ -161,7 +161,7 @@ class EnergySystem:
     >>> components = [Component(uid="Component {}".format(i)) for i in range(9)]
     >>> buses == es.groups[Bus]
     True
-    >>> compononents == es.groups[Component]
+    >>> components == es.groups[Component]
     True
 
     """
