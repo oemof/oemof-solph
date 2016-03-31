@@ -5,6 +5,7 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
+from operator import attrgetter
 import logging
 import os
 
@@ -14,6 +15,42 @@ from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel as OM
 
+
+def _value_error(s):
+    raise ValueError(s)
+
+class Grouping:
+    """
+    Used to aggregate :class:`entities <oemof.core.network.Entity>` in an
+    :class:`energy system <EnergySystem>` into :attr:`groups
+    <EnergySystem.groups>`.
+
+    """
+    __slots__ = "_insert"
+
+    #: The default grouping, which is always present in addition to user
+    #: defined ones. Stores every :class:`entity <oemof.core.network.Entity>`
+    #: in a group of its own under its :attr:`uid
+    #: <oemof.core.network.Entity.uid>` and raises an error if another
+    #: :class:`entity <oemof.core.network.Entity>` with the same :attr:`uid
+    #: <oemof.core.network.Entity.uid>` get's added to the energy system.
+    UID = None
+    def __init__(self, key, value=lambda e: [e], collide=lambda e, old: old.append(e),
+                 insert=None):
+        if insert:
+            self._insert = insert
+            return self
+        def insert(e, d):
+            k = key(e)
+            d[k] = collide(e, d[k]) if k in d else value(e)
+
+        self._insert = insert
+
+    def __call__(self, e, d):
+        self._insert(e, d)
+
+Grouping.UID = Grouping(attrgetter('uid'), value=lambda e: e,
+                        collide=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
 
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
