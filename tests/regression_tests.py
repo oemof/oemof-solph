@@ -54,10 +54,12 @@ class TestSolphAndItsResults:
 
         try:
             es.dump()
-        except AttributeError:
-            self.failed = True
+        except AttributeError as ae:
+            self.failed = ae
         if self.failed:
-            ok_(False, "EnergySystem#dump should not raise `AttributeError`.")
+            ok_(False,
+                "EnergySystem#dump should not raise `AttributeError`: \n" +
+                " Error message: " + str(self.failed))
 
     def test_bus_to_sink_outputs_in_results_dataframe(self):
         bus = Bus(uid="bus")

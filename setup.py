@@ -20,7 +20,8 @@ setup(name='oemof',
       namespace_package = ['oemof'],
       packages=find_packages(),
       package_dir={'oemof': 'oemof'},
-      install_requires=['numpy >= 1.7.0',
+      install_requires=['dill',
+                        'numpy >= 1.7.0',
                         'pandas >= 0.17.0',
                         'pyomo >= 4.2.0']
      )

@@ -36,14 +36,12 @@ class Constraint_Tests:
             objective_options={
                 'function': predefined_objectives.minimize_cost})
 
-        self.energysystem = es.EnergySystem(time_idx=self.time_index,
-                                            simulation=self.sim)
-
         self.tmppath = helpers.extend_basic_path('tmp')
         logging.info(self.tmppath)
 
     def setup(self):
-        self.energysystem.entities = []
+        self.energysystem = es.EnergySystem(time_idx=self.time_index,
+                                            simulation=self.sim)
         backup = {}
         for klass in [ source.FixedSource, transformer.Simple,
                        transformer.Storage, transformer.TwoInputsOneOutput]:

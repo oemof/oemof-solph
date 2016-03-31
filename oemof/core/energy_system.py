@@ -5,14 +5,66 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
-import pickle
+from operator import attrgetter
 import logging
 import os
+
+import dill as pickle
 
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
 from oemof.solph.optimization_model import OptimizationModel as OM
 
+
+def _value_error(s):
+    raise ValueError(s)
+
+class Grouping:
+    """
+    Used to aggregate :class:`entities <oemof.core.network.Entity>` in an
+    :class:`energy system <EnergySystem>` into :attr:`groups
+    <EnergySystem.groups>`.
+
+    """
+    __slots__ = "_insert"
+
+    @staticmethod
+    def create(argument):
+        if isinstance(argument, Grouping):
+            return argument
+        if callable(argument):
+            return Grouping(argument)
+        raise NotImplementedError(
+                "Can only create Groupings from Groupings and callables for now.\n" +
+                "  Please add a comment to https://github.com/oemof/oemof/issues/60\n" +
+                "  If you stumble upon this as this feature is currently being\n" +
+                "  developed and any input on how you expect it to work would be\n" +
+                "  appreciated")
+
+    #: The default grouping, which is always present in addition to user
+    #: defined ones. Stores every :class:`entity <oemof.core.network.Entity>`
+    #: in a group of its own under its :attr:`uid
+    #: <oemof.core.network.Entity.uid>` and raises an error if another
+    #: :class:`entity <oemof.core.network.Entity>` with the same :attr:`uid
+    #: <oemof.core.network.Entity.uid>` get's added to the energy system.
+    UID = None
+    def __init__(self, key, value=lambda e: [e],
+                 collide=lambda e, old: old.append(e) or old,
+                 insert=None):
+        if insert:
+            self._insert = insert
+            return self
+        def insert(e, d):
+            k = key(e)
+            d[k] = collide(e, d[k]) if k in d else value(e)
+
+        self._insert = insert
+
+    def __call__(self, e, d):
+        self._insert(e, d)
+
+Grouping.UID = Grouping(attrgetter('uid'), value=lambda e: e,
+                        collide=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
 
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
@@ -39,6 +91,16 @@ class EnergySystem:
         Define the time range and increment for the energy system. This is an
         optional parameter but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
+    groupings : list
+        The elements of this list are used to construct :class:`Groupings
+        <oemof.core.energy_system.Grouping>` or they are used directly if they
+        are instances of :class:`Grouping <oemof.core.energy_system.Grouping>`.
+        These groupings are then used to aggregate the entities added to this
+        energy system into :attr:`groups`.
+        By default, there'll always be one group for each :attr:`uid
+        <oemof.core.network.Entity.uid>` containing exactly the entity with the
+        given :attr:`uid <oemof.core.network.Entity.uid>`.
+        See the :ref:`examples <energy-system-examples>` for more information.
 
     Attributes
     ----------
@@ -50,6 +112,7 @@ class EnergySystem:
         construction, newly created :class:`Entities
         <oemof.core.network.Entity>` are automatically added to this list on
         construction.
+    groups : dict
     simulation : core.energy_system.Simulation object
         Simulation object that contains all necessary attributes to start the
         solver library. Defined in the :py:class:`Simulation
@@ -69,14 +132,59 @@ class EnergySystem:
         Define the time range and increment for the energy system. This is an
         optional atribute but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
+
+
+    .. _energy-system-examples:
+    Examples
+    --------
+
+    Regardles of additional groupings, :class:`entities
+    <oemof.core.network.Entity>` will always be grouped by their :attr:`uid
+    <oemof.core.network.Entity.uid>`:
+
+    >>> from oemof.core.network import Entity
+    >>> from oemof.core.network.entities import Bus, Component
+    >>> es = EnergySystem()
+    >>> bus = Bus(uid='electricity')
+    >>> bus is es.groups['electricity']
+    True
+
+    For simple user defined groupings, you can just supply a function that
+    computes a key from an :class:`entity <oemof.core.network.Entity>` and the
+    resulting groups will be lists of :class:`entity
+    <oemof.core.network.Entity>` stored under the returned keys, like in this
+    example, where :class:`entities <oemof.core.network.Entity>` are grouped by
+    their `type`:
+
+    >>> es = EnergySystem(groupings=[type])
+    >>> buses = [Bus(uid="Bus {}".format(i)) for i in range(9)]
+    >>> components = [Component(uid="Component {}".format(i)) for i in range(9)]
+    >>> buses == es.groups[Bus]
+    True
+    >>> components == es.groups[Component]
+    True
+
     """
     def __init__(self, **kwargs):
         for attribute in ['regions', 'entities', 'simulation']:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
+        self.groups = {}
+        self._groupings = [Grouping.UID] + [ Grouping.create(g)
+                                             for g in kwargs.get('groupings', [])]
+        for e in self.entities:
+            for g in self._groupings:
+                g(e, self.groups)
         self.results = kwargs.get('results')
         self.time_idx = kwargs.get('time_idx')
+
+    def add(self, entity):
+        """ Add an `entity` to this energy system.
+        """
+        self.entities.append(entity)
+        for g in self._groupings:
+            g(entity, self.groups)
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
