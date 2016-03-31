@@ -28,6 +28,19 @@ class Grouping:
     """
     __slots__ = "_insert"
 
+    @staticmethod
+    def create(argument):
+        if isinstance(argument, Grouping):
+            return argument
+        if callable(argument):
+            return Grouping(argument)
+        raise NotImplementedError(
+                "Can only create Groupings from Groupings and callables for now.\n" +
+                "  Please add a comment to https://github.com/oemof/oemof/issues/60\n" +
+                "  If you stumble upon this as this feature is currently being\n" +
+                "  developed and any input on how you expect it to work would be\n" +
+                "  appreciated")
+
     #: The default grouping, which is always present in addition to user
     #: defined ones. Stores every :class:`entity <oemof.core.network.Entity>`
     #: in a group of its own under its :attr:`uid
