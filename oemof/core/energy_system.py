@@ -141,6 +141,12 @@ class EnergySystem:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
+        self.groups = {}
+        self._groupings = [Grouping.UID] + [ Grouping.create(g)
+                                             for g in kwargs.get('groupings', [])]
+        for e in self.entities:
+            for g in self._groupings:
+                g(e, self.groups)
         self.results = kwargs.get('results')
         self.time_idx = kwargs.get('time_idx')
 
