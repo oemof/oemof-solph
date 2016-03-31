@@ -6,7 +6,7 @@ import logging
 from oemof.core.network.entities.components import transformers as transformer
 from oemof.core import energy_system as es
 from oemof.core.network import Entity
-from oemof.core.network.entities import Bus
+from oemof.core.network.entities import Bus, Component
 
 
 class EnergySystem_Tests:
