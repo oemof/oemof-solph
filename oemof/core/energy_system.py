@@ -124,8 +124,9 @@ class EnergySystem:
     Examples
     --------
 
-    Regardles of additional groupings, entities will always be grouped by their
-    uid:
+    Regardles of additional groupings, :class:`entities
+    <oemof.core.network.Entity>` will always be grouped by their :attr:`uid
+    <oemof.core.network.Entity.uid>`:
 
     >>> from oemof.core.network import Entity
     >>> from oemof.core.network.entities import Bus
