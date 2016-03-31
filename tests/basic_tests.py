@@ -18,8 +18,6 @@ class EnergySystem_Tests:
         self.simulation = es.Simulation(timesteps=range(len(time_index)))
 
     def test_entity_registration(self):
-        logging.info(Entity.registry)
-        ok_(Entity.registry is None)
         ensys = es.EnergySystem()
         eq_(Entity.registry, ensys)
         bus = Bus(uid='bus-uid', type='bus-type')
