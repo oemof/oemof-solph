@@ -105,6 +105,11 @@ class EnergySystem:
         self.results = kwargs.get('results')
         self.time_idx = kwargs.get('time_idx')
 
+    def add(self, entity):
+        """ Add an `entity` to this energy system.
+        """
+        self.entities.append(entity)
+
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
         """Create two transport objects to connect two buses of the same type
