@@ -44,6 +44,14 @@ oemof.solph.predefined_objectives module
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.pyomo_fastbuild module
+----------------------------------
+
+.. automodule:: oemof.solph.pyomo_fastbuild
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 oemof.solph.variables module
 ----------------------------
 

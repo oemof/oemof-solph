@@ -46,7 +46,7 @@ def l_constraint(model, name, constraints, *args):
 
         I.e. variable coefficients are stored as a list of tuples.
 
-    *args :
+    \*args :
        arguments passed to the pyomo.Constraint() class.
 
 
