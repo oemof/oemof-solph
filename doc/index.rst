@@ -10,15 +10,14 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   :glob:
-   
+
    getting_started
    overview
    installation_and_setup
    developer_notes
    mathematical_notation
    whats_new
-   api/*
+   api
 
 
 Indices and tables
