@@ -30,6 +30,9 @@ Bug fixes
 
 * using platform independent expression to define the basic path
   (`issue #122 <https://github.com/oemof/oemof_base/issues/122>`_)
+* Weeks no longer have more than seven days.
+  (`Issue #126 <https://github.com/oemof/oemof_base/issues/126>`_)
+
 
 Other changes
 #############
