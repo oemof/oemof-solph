@@ -6,6 +6,7 @@ import pandas as pd
 from oemof.demandlib import energy_buildings as eb
 from oemof.tools import helpers
 from oemof.demandlib import bdew_heatprofile as bdew_heat
+from matplotlib import pyplot as plt
 
 # read example temperature series
 temperature = pd.read_csv("example_data.csv")["temperature"]
@@ -30,3 +31,4 @@ efh.heat_load = efh.hourly_heat_demand(fun=bdew_heat.create_bdew_profile,
 ax = efh.heat_load.plot()
 ax.set_xlabel("Hour of the year")
 ax.set_ylabel("Heat demand in MW")
+plt.show()
