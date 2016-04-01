@@ -360,7 +360,11 @@ Clone or fork the 'feedinlib' from github and use it within your project. Don’
 The *demandlib* package
 ========================
 
-Description of demandlib.
+The demand timeseries modeling library is designed to generated synthetic demand 
+timeseries. It founds on methodolody of *Standardlastprofile* defined by the 
+*Bundesverband der Energie- und Wasserwirtschaft (BDEW)*.
+.. Load profiles for the electricity sector founds on data of 
+.. `EWE <www.ewe-netz.de/strom/1988.php>`_. 
 
 
 

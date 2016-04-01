@@ -38,12 +38,13 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                terms of objective function
     """
     expr = 0
+    # TODO: Fix naming
     c_blocks = cost_objects
     r_blocks = revenue_objects
 
     if cost_objects is None:
         c_blocks = [str(transformer.Simple),
-                    str(transformer.PostHeating),
+                    str(transformer.TwoInputsOneOutput),
                     str(transformer.VariableEfficiencyCHP),
                     str(transformer.SimpleExtractionCHP),
                     str(transformer.Storage),
@@ -68,7 +69,6 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
             else:
                 ref = 'output'
             # variable costs
-
             expr += objexpr.add_opex_var(self, block, ref='output')
             # fix costs
             if block != str(source.Commodity):

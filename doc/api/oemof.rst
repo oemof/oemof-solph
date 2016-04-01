@@ -10,6 +10,7 @@ Subpackages
     oemof.demandlib
     oemof.outputlib
     oemof.solph
+    oemof.tools
 
 Module contents
 ---------------

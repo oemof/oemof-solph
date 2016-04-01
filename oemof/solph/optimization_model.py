@@ -525,7 +525,7 @@ def _(e, om, block):
     return om
 
 
-@assembler.register(transformer.PostHeating)
+@assembler.register(transformer.TwoInputsOneOutput)
 def _(e, om, block):
     """ Method containing the constraints functions for simple
     transformer components.
@@ -545,10 +545,9 @@ def _(e, om, block):
     # method is used by another assemlber method...
 
     def linear_constraints(om, block):
-        lc.add_two_inputs_io_relation(om, block)
+        lc.add_two_inputs_one_output_relation(om, block)
         var.set_bounds(om, block, side="output")
         var.set_bounds(om, block, side="input")
-        lc.add_postheat_relation(om, block)
 
     block.default_optimization_options = {
         "linear_constr": linear_constraints}

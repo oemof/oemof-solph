@@ -18,7 +18,6 @@ import pickle
 import time
 import calendar
 import pprint as pp
-from oemof.demandlib import demand as dm
 
 
 # get_polygon_from_shp_file
@@ -292,7 +291,7 @@ def fetch_admin_from_coord_osm(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8))
+    >>> fetch_admin_from_coord_osm((12.7, 51.8)) # doctest: +SKIP
     ['Deutschland', 'ST']
     """
 
@@ -315,14 +314,19 @@ def fetch_admin_from_coord_osm(coord):
     query += "&zoom=18"
     query += "&addressdetails=1"
 
-    conn = urllib.request.urlopen(query)
-    rev_geocode = conn.read()
-    address_parts = parse_result(rev_geocode)
+    logging.debug(query)
+    try:
+        conn = urllib.request.urlopen(query)
+        rev_geocode = conn.read()
+        address_parts = parse_result(rev_geocode)
+    except urllib.error.URLError:
+        logging.error("OSM Server not reachable.")
+        address_parts = {}
 
     try:
         state = abbreviation_of_state(address_parts['state'])
     except KeyError:
-        logging.error(
+        logging.warning(
             "Didn't get the name of the state. " +
             "Maybe the coordinates ({0}) are outside of Germany.".format(
                 str([lat, lon])))
@@ -354,8 +358,8 @@ def fetch_admin_from_coord_google(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8))
-    ['Deutschland', 'ST']
+    >>> fetch_admin_from_coord_google((12.7, 51.8))
+    ['DE', 'SA']
     """
 
     new_coord = list((coord[1], coord[0]))
@@ -462,40 +466,6 @@ def pickle2dict(filename=None, path=None):
     return dic
 
 
-def call_demandlib(demand, method, year, **kwargs):
-    '''
-    Calls the demandlib and creates an object which includes the demand
-    timeseries.
-
-    Required Parameters
-    -------------------
-    demand :
-    method : Method which is to be applied for the demand calculation
-    '''
-
-    df = create_basic_dataframe(year, **kwargs)
-    demand.val = dm.electrical_demand(method,
-                         dataframe=df,
-                         ann_el_demand_per_sector=kwargs.get(
-                         'ann_el_demand_per_sector'),
-                         ann_el_demand_per_person=kwargs.get(
-                         'ann_el_demand_per_person'),
-                         household_structure=kwargs.get(
-                         'household_structure'),
-                         household_members_all=kwargs.get(
-                         'household_members_all'),
-                         population=kwargs.get(
-                         'population'),
-                         comm_ann_el_demand_state=kwargs.get(
-                         'comm_ann_el_demand_state'),
-                         comm_number_of_employees_state=kwargs.get(
-                         'comm_number_of_employees_state'),
-                         comm_number_of_employees_region=kwargs.get(
-                         'comm_number_of_employees_region')).elec_demand
-
-    return demand
-
-
 def dict2textfile(dic, filename=None, path=None):
     'Writing a dictionary to textfile in a readable and clearly formatted way.'
     if filename is None:
@@ -519,10 +489,7 @@ def download_file(filename, url):
 
 
 def get_basic_path():
-    if sys.platform == "win32":
-        basicpath = os.path.join(os.environ['USERPROFILE'], '.oemof')
-    else:  # if linux platform
-        basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    basicpath = os.path.join(os.path.expanduser('~'), '.oemof')
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath
