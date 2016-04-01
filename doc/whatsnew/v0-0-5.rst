@@ -42,7 +42,11 @@ Bug fixes
 Other changes
 #############
 
+* Oemof has a new dependency: `dill <https://pypi.python.org/pypi/dill>`_. It
+  enables serialization of less common types and acts as a drop in replacement
+  for `pickle <https://docs.python.org/3/library/pickle.html>`_.
 * Demandlib's API has been simplified.
+
 
 Contributors
 ############
