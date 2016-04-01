@@ -13,7 +13,9 @@ New features
 Documentation
 #############
 
-*
+* The documentation of demandlib's `electrical_demand` class has been cleaned up.
+* The API documentation now has its own section so it doesn't clutter up the main
+  navigation sidebar so much anymore.
 
 Testing
 #######
