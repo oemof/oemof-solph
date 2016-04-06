@@ -118,7 +118,7 @@ def get_h_values(df, datapath, filename="shlp_hour_factors.csv",
         left_cols + right_cols, 1)
 
     # Determine the h values
-    h = np.array(SF_mat)[np.array(range(0, 8760))[:], (get_temperature_interval(df) - 1)[:]]
+    h = np.array(SF_mat)[np.array(range(0, 8760))[:], (get_temperature_interval(df) + 2)[:]]
 
     return np.array(list(map(float, h[:])))
 
