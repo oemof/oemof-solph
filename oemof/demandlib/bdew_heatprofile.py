@@ -122,8 +122,9 @@ def get_h_values(df, datapath, filename="shlp_hour_factors.csv",
 
     return np.array(list(map(float, h[:])))
 
+
 def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
-                           wind_class=None,
+                           wind_class=None, ww_incl=True,
                            filename="shlp_sigmoid_factors.csv"):
     """ Retrieve the sigmoid parameters from csv-files
 
@@ -139,6 +140,8 @@ def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
         type of standard heat load profile according to bdew
     wind_class : int
         wind classification for building location (0=not windy or 1=windy)
+    ww_incl : boolean
+        decider whether warm water load is included in the heat load profile
     """
 
     file = os.path.join(datapath, filename)
@@ -151,11 +154,12 @@ def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
     A = float(sigmoid['parameter_a'])
     B = float(sigmoid['parameter_b'])
     C = float(sigmoid['parameter_c'])
-    D = float(sigmoid['parameter_d'])
-    # TODO: integrate ww_incl
-    #if kwargs.get('ww_incl', True) else 0
-
+    if ww_incl:
+        D = float(sigmoid['parameter_d'])
+    else:
+        D = 0
     return A, B, C, D
+
 
 def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
                            shlp_type=None):
@@ -184,6 +188,7 @@ def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
     return np.array(list(map(float, pd.DataFrame.merge(
         F_df, df, left_on='weekdays', right_on='weekday', how='outer',
         left_index=True).sort()['wochentagsfaktor'])))
+
 
 def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
                         shlp_type, building_class, wind_class, **kwargs):
@@ -221,7 +226,8 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
     [A, B, C, D] = get_sigmoid_parameters(datapath=datapath,
                                           building_class=building_class,
                                           wind_class=wind_class,
-                                          shlp_type=shlp_type)
+                                          shlp_type=shlp_type,
+                                          ww_incl=kwargs.get('ww_incl', True))
 
     F = get_weekday_parameters(df, datapath, shlp_type=shlp_type)
 
