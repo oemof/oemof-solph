@@ -17,6 +17,7 @@ Contents:
    developer_notes
    mathematical_notation
    whats_new
+   oemof_core
    api
 
 
