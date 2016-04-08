@@ -12,6 +12,7 @@ All special import should be in try/except loops to avoid import errors.
 import logging
 from datetime import date, timedelta
 import os
+import sys
 import pandas as pd
 import pickle
 import time
@@ -290,7 +291,7 @@ def fetch_admin_from_coord_osm(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8))
+    >>> fetch_admin_from_coord_osm((12.7, 51.8)) # doctest: +SKIP
     ['Deutschland', 'ST']
     """
 
@@ -313,14 +314,19 @@ def fetch_admin_from_coord_osm(coord):
     query += "&zoom=18"
     query += "&addressdetails=1"
 
-    conn = urllib.request.urlopen(query)
-    rev_geocode = conn.read()
-    address_parts = parse_result(rev_geocode)
+    logging.debug(query)
+    try:
+        conn = urllib.request.urlopen(query)
+        rev_geocode = conn.read()
+        address_parts = parse_result(rev_geocode)
+    except urllib.error.URLError:
+        logging.error("OSM Server not reachable.")
+        address_parts = {}
 
     try:
         state = abbreviation_of_state(address_parts['state'])
     except KeyError:
-        logging.error(
+        logging.warning(
             "Didn't get the name of the state. " +
             "Maybe the coordinates ({0}) are outside of Germany.".format(
                 str([lat, lon])))
@@ -352,8 +358,8 @@ def fetch_admin_from_coord_google(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8))
-    ['Deutschland', 'ST']
+    >>> fetch_admin_from_coord_google((12.7, 51.8))
+    ['DE', 'SA']
     """
 
     new_coord = list((coord[1], coord[0]))
@@ -483,7 +489,7 @@ def download_file(filename, url):
 
 
 def get_basic_path():
-    basicpath = os.path.join(os.environ['HOME'], '.oemof')
+    basicpath = os.path.join(os.path.expanduser('~'), '.oemof')
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath

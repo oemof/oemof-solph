@@ -13,7 +13,7 @@ except:
 import pyomo.environ as po
 import oemof.solph as solph
 
-from ..core.network.entities import Bus
+from ..core.network.entities import Bus, ExcessSlack, ShortageSlack
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
 
@@ -38,11 +38,13 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                terms of objective function
     """
     expr = 0
+    # TODO: Fix naming
     c_blocks = cost_objects
     r_blocks = revenue_objects
 
     if cost_objects is None:
         c_blocks = [str(transformer.Simple),
+                    str(transformer.TwoInputsOneOutput),
                     str(transformer.VariableEfficiencyCHP),
                     str(transformer.SimpleExtractionCHP),
                     str(transformer.Storage),
@@ -67,7 +69,6 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
             else:
                 ref = 'output'
             # variable costs
-
             expr += objexpr.add_opex_var(self, block, ref='output')
             # fix costs
             if block != str(source.Commodity):
@@ -89,11 +90,14 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                                           getattr(self,
                                                   str(source.DispatchSource)))
 
-    if getattr(self, str(Bus)).shortage_uids:
-        expr += objexpr.add_shortage_slack_costs(self, block)
     # artificial costs for excess or shortage
-    if getattr(self, str(Bus)).excess_uids:
-        expr += objexpr.add_excess_slack_costs(self, block)
+    if hasattr(self, str(ExcessSlack)):
+        expr += objexpr.add_excess_slack_costs(self,
+                                               getattr(self, str(ExcessSlack)))
+    if hasattr(self, str(ShortageSlack)):
+        expr += objexpr.add_shortage_slack_costs(self,
+                                                 getattr(self, str(ShortageSlack)))
+
 
     self.objective = po.Objective(expr=expr)
 

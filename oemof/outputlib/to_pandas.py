@@ -19,9 +19,33 @@ class ResultsDataFrame(pd.DataFrame):
 
     Parameters
     ----------
+    result_object : dictionary
+        solph result objects
+    bus_uids : list if strings
+        List of strings with busses that should be contained in dataframe.
+        If not set, all busses are contained.
+    bus_types : list if strings
+        List of strings with bus types that should be contained in dataframe.
+        If not set, all bus types are contained.
 
-    energy_system : class:`Entity <oemof.core.EnergySystem>`
-        energy supply system
+    Attributes
+    ----------
+    result_object : dictionary
+        solph result objects
+    bus_uids : list if strings
+        List of strings with busses that should be contained in dataframe.
+        If not set, all busses are contained.
+    bus_types : list if strings
+        List of strings with bus types that should be contained in dataframe.
+        If not set, all bus types are contained.
+    data_frame : pandas dataframe
+        Multi-indexed pandas dataframe holding the data from the result object.
+        For more information on advanced dataframe indexing see:
+        http://pandas.pydata.org/pandas-docs/stable/advanced.html
+    bus_uids : list if strings
+        List of strings with busses that should be contained in dataframe
+    bus_types : list if strings
+        List of strings with bus types that should be contained in dataframe.
     """
 
     def __init__(self, **kwargs):
@@ -145,7 +169,9 @@ class ResultsDataFrame(pd.DataFrame):
             Level to unstack the subset of the DataFrame.
         """
         subset = self.slice_by(**kwargs)
-        return subset.unstack(level=unstacklevel)
+        subset = subset.unstack(level=unstacklevel)
+        subset.columns = subset.columns.droplevel()
+        return subset
 
 
 class DataFramePlot(ResultsDataFrame):
@@ -207,7 +233,7 @@ class DataFramePlot(ResultsDataFrame):
             Containing the colors of all components of the subset attribute
         """
         tmplist = list(
-            map(colordict.get, list(self.subset['val'].columns)))
+            map(colordict.get, list(self.subset.columns)))
         tmplist = ['#ff00f0' if v is None else v for v in tmplist]
         if len(tmplist) == 1:
             colorlist = tmplist[0]

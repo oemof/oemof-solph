@@ -10,6 +10,7 @@ import pandas as pd
 import os
 from oemof.tools.helpers import create_basic_dataframe as basic_df
 
+
 def weighted_temperature(df, how="geometric_series"):
     r'''
     A new temperature vector is generated containing a multi-day
@@ -84,7 +85,7 @@ def get_temperature_interval(df):
     return np.transpose(np.array(temperature_interval))
 
 
-def get_h_values(df, datapath, filename="shlp_hour_factors.csv",
+def get_SF_values(df, datapath, filename="shlp_hour_factors.csv",
                  building_class=None, shlp_type=None):
     """ Determine the h-values
 
@@ -108,19 +109,24 @@ def get_h_values(df, datapath, filename="shlp_hour_factors.csv",
     # or ['hour' 'weekday'] and ['hour_of_the_day', 'weekday'] if it is
     # not a residential slp.
     residential = building_class > 0
-
     left_cols = ['hour_of_day'] + (['weekday'] if not residential else [])
     right_cols = ['hour'] + (['weekday'] if not residential else [])
-
     SF_mat = pd.DataFrame.merge(
         hour_factors, df, left_on=left_cols, right_on=right_cols,
-        how='outer', left_index=True).sort().drop(
-        left_cols + right_cols, 1)
+        how='outer', left_index=True).sort_index()
+
+    # drop unnecessary columns
+    drop_cols = (['hour_of_day', 'hour', 'building_class', 'shlp_type',
+        'date', 'temperature'] + (['weekday_x'] if residential else []) +
+        (['weekday_y'] if residential else []) +
+        (['weekday'] if not residential else []))
+    SF_mat = SF_mat.drop(drop_cols, 1)
 
     # Determine the h values
-    h = np.array(SF_mat)[np.array(range(0, 8760))[:], (get_temperature_interval(df) - 1)[:]]
+    SF = (np.array(SF_mat)[np.array(list(range(0, 8760)))[:],
+        (get_temperature_interval(df) - 1)[:]])
+    return np.array(list(map(float, SF[:])))
 
-    return np.array(list(map(float, h[:])))
 
 
 def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
@@ -183,7 +189,7 @@ def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
 
     F_df.drop('shlp_type', axis=1, inplace=True)
 
-    F_df['weekdays'] = F_df.index + 1
+    F_df['weekdays'] = np.array(range(7)) + 1
 
     return np.array(list(map(float, pd.DataFrame.merge(
         F_df, df, left_on='weekdays', right_on='weekday', how='outer',
@@ -191,7 +197,7 @@ def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
 
 
 def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
-                        shlp_type, building_class, wind_class, **kwargs):
+                        shlp_type, wind_class, **kwargs):
     """ Calculation of the hourly heat demand using the bdew-equations
 
     Parameters
@@ -219,15 +225,16 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
 
     df['weekday'].mask(df['weekday'] == 0, 7, True)
 
-    SF = get_h_values(df=df, datapath=datapath,
-                      building_class=building_class,
+    SF = get_SF_values(df=df, datapath=datapath,
+                      building_class=kwargs.get('building_class', 0),
                       shlp_type=shlp_type)
 
-    [A, B, C, D] = get_sigmoid_parameters(datapath=datapath,
-                                          building_class=building_class,
-                                          wind_class=wind_class,
-                                          shlp_type=shlp_type,
-                                          ww_incl=kwargs.get('ww_incl', True))
+    [A, B, C, D] = get_sigmoid_parameters(
+                      datapath=datapath,
+                      building_class=kwargs.get('building_class', 0),
+                      wind_class=wind_class,
+                      shlp_type=shlp_type,
+		      ww_incl=kwargs.get('ww_incl', True))
 
     F = get_weekday_parameters(df, datapath, shlp_type=shlp_type)
 

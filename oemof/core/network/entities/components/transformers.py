@@ -23,6 +23,29 @@ class Simple(Transformer):
         self.eta = kwargs.get('eta', None)
 
 
+class TwoInputsOneOutput(Simple):
+    r"""
+    A transformer with one output and two input flows
+
+    The two input flows are connect by the factor f. This transformer might
+    represent components such as heat pumps and instant flow heater.
+
+    Parameters
+    ----------
+    eta : list
+        Constant effciency for converting the incoming flows to the internal
+        input flows. The first element of eta is the efficiency of the first
+        element of inputs and so on. If not set the effciency will be one. You
+        have to define both elements or no element.
+    f : array-like
+        A relation-factor between the first and the second input flow.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.eta = kwargs.get('eta', [1, 1])
+        self.f = kwargs.get('f')
+
+
 class CHP(Transformer):
     """
     A CombinedHeatPower Transformer always has a simple input output relation

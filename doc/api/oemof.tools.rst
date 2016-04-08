@@ -12,10 +12,10 @@ oemof.tools.config module
     :undoc-members:
     :show-inheritance:
 
-oemof.tools.db module
----------------------
+oemof.tools.create_components module
+------------------------------------
 
-.. automodule:: oemof.tools.db
+.. automodule:: oemof.tools.create_components
     :members:
     :undoc-members:
     :show-inheritance:
