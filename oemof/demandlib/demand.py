@@ -19,49 +19,63 @@ class electrical_demand():
 
     Parameters
     ----------
-    method : 'scale_profile_csv', scale_profile_db',
-        scale_entsoe', calculate_profile', required
+    method : {'scale_profile_csv', 'scale_profile_db', 'scale_entsoe', 'calculate_profile'}
         Method to calculate the demand for your region.
         Explanation:
 
-        'scale_profile_csv': read only profile from csv and scale it with
+        'scale_profile_csv':
+            read only profile from csv and scale it with
             given or calculated demand
 
-        'scale_profile_db': read only profile from database and scale it with
+        'scale_profile_db':
+            read only profile from database and scale it with
             given or calculated demand
 
-        'scale_entsoe': read entsoe profile from database and scale it with
+        'scale_entsoe':
+            read entsoe profile from database and scale it with
             given or calculated demand
 
-        'calculate_profile: Calculate profile from the standard load profiles
+        'calculate_profile:
+            Calculate profile from the standard load profiles
             of the three demand sectors (households, service, industry) and
             the corresponding annual electric demand.
 
+        Depending on which of these values is chosen, additional parameters
+        might be required, as detailed below.
+
+
     Other Parameters
     ----------------
-    Required according to chosen method.
 
-    {'scale_profile_csv'} :
         path : str
-            '/path/to/file'
+            Required for a `method` value of `'scale_profile_csv'`.
+
+            Should be the '/path/to/the/csv/file'.
+
         filename : str
-            'filename.csv'
+            Required for a `method` value of `'scale_profile_csv'`.
 
-    {'scale_profile_db', 'scale_profile_entsoe'} :
+            Should be the name of the file found under `path`.
+
         conn :
+            Required for `method` values of `'scale_profile_db'` or
+            `'scale_profile_entsoe'`.
 
-    {'scale_profile_csv', 'scale_profile_db', 'scale_profile_entsoe'} :
         annual_elec_demand : int
+            Required for `method` values of `'scale_profile_csv'`,
+            `'scale_profile_db'` or `'scale_profile_entsoe'`.
+
             Annual demand of your region. Works so far only with a given
             value. Calculating the demand from statistic data for the whole
             region can be an option for further development.
 
-    calculate_profile :
         ann_el_demand_per_sector : dictionary
+            Required for a `method` value of `'calculate_profile'`.
+
             Specification of annual electric demand and the corresponding
             standard load profile type (selp_type) for every sector. Dictionary
             is structured as follows. Key defining the sector is followed by
-            value that can be int, float, None or can be omitted, e.g.
+            value that can be int, float, None or can be omitted, e.g.:
 
             .. code-block:: python
 
@@ -73,7 +87,7 @@ class electrical_demand():
                     'g6': int,
                     'i0': int}
 
-            if ann_el_demand is None, more parameters to calculate the demand
+            If ann_el_demand is None, more parameters to calculate the demand
             are necessary: (works so far only if ann_el_demand for every or
             no sector is specified)
 
@@ -83,7 +97,10 @@ class electrical_demand():
         ann_el_demand_per_person : list of dictionaries
             Specification of the annual electric demand for one household
             according to the household type (from single to four-person
-            households), e.g.
+            households), e.g.:
+
+            .. code-block:: python
+
                 ann_el_demand_per_person = [
                     {'ann_el_demand': int,
                      'household_type': {'one', 'two', 'three', 'four'}},
@@ -91,7 +108,10 @@ class electrical_demand():
 
         household_structure : list of dictionaries
             Number of people living in every household type. Specification
-            for your region, e.g.
+            for your region, e.g.:
+
+            .. code-block:: python
+
                 household_structure = [
                     {household_members': int,
                      'household_type': {'one', 'two', 'three', 'four'}},
@@ -108,11 +128,10 @@ class electrical_demand():
         comm_number_of_employees_region : int
             Number of employees in the service sector of your region.
 
-
     Attributes
     ----------
     annual_demand : int
-        Included in **kwargs. Given with initialization or calculated or
+        Included in `**kwargs`. Given with initialization or calculated or
         to be calculated within this class according to selected method.
 
     dataframe : pandas dataframe
@@ -128,7 +147,6 @@ class electrical_demand():
 
     Notes
     -----
-    .. math::
 
     References
     ----------

@@ -61,7 +61,7 @@ class Entity:
         self.regions = []
         self.add_regions(kwargs.get('regions', []))
         if __class__.registry is not None:
-            __class__.registry.entities.append(self)
+            __class__.registry.add(self)
 
         # TODO: @Gunni Yupp! Add docstring.
     def add_regions(self, regions):

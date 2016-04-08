@@ -12,6 +12,14 @@ oemof.tools.config module
     :undoc-members:
     :show-inheritance:
 
+oemof.tools.create_components module
+------------------------------------
+
+.. automodule:: oemof.tools.create_components
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 oemof.tools.entities_from_csv module
 ------------------------------------
 

@@ -185,7 +185,7 @@ def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
 
     F_df.drop('shlp_type', axis=1, inplace=True)
 
-    F_df['weekdays'] = F_df.index + 1
+    F_df['weekdays'] = np.array(range(7)) + 1
 
     return np.array(list(map(float, pd.DataFrame.merge(
         F_df, df, left_on='weekdays', right_on='weekday', how='outer',

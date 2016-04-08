@@ -95,17 +95,9 @@ pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
                          out_max=[40, 30],
                          eta=[0.4, 0.3], opex_fix=0, opex_var=50,
                          co2_var=em_gas)
+#storage = transformer.Storage(uid="sto", inputs=[b_el], outputs=[b_el],
+#                              out_max=[10], in_max=[10], cap_max=20)
 
-# group busses
-buses = [bcoal, bgas, boil, blig, b_el, b_th]
-
-# group components
-transformers = [pp_coal, pp_lig, pp_gas, pp_oil, pp_chp]
-renew_sources = [pv, wind_on]
-sinks = [demand_th, demand_el]
-
-components = transformers + renew_sources + sinks
-entities = components + buses
 
 om = OptimizationModel(energysystem=energy_system)
 #
@@ -114,39 +106,22 @@ om.solve(solve_kwargs={'tee': True,
          solver_cmdline_options={'min': ''})
 energy_system.results = om.results()
 
-es_df = tpd.ResultsDataFrame(energy_system=energy_system).slice_by(
-    date_from="2012-01-01 00:00:00", date_to="2012-01-1 02:00:00")
-print(es_df)
-
-import pprint
-pp = pprint.PrettyPrinter(depth=6)
-# pp.pprint(energy_system.results)
-
-rows_list = []
-for k, v in energy_system.results.items():
-    row = {}
-    if ('Bus' in str(k.__class__)):
-        pass
-    else:
-        if k in v.keys():
-            pass
-        else:
-            for kk, vv in v.items():
-                # print("Von: ", kk.uid, " nach ", vv.uid)
-                # print("#1 k ", k, "v", v)
-                # print("#3 k", k, "kk ", kk, "vv ", vv)
-                # print("#2 k ", k, "v", kk)
-                row['bus_uid'] = kk.uid
-                row['bus_type'] = kk.type
-                row['type'] = 'input'
-                row['obj_uid'] = k.uid
-                row['val'] = vv
-                rows_list.append(row)
-
 # plot
+cdict = {'wind_on': '#00bfff',
+         'pv': '#ffd700',
+         #'sto': '#42c77a',
+         'pp_gas': '#8b1a1a',
+         'pp_coal': '#838b8b',
+         'pp_lig': '#8b7355',
+         'pp_oil': '#000000',
+         'pp_chp': '#20b2aa',
+         'demand_el': '#fff8dc'}
+# use outputlib
 esplot = tpd.DataFramePlot(energy_system=energy_system)
 esplot.slice_unstacked(bus_uid="b_el", type="input")
-esplot.plot(title="January 2016", stacked=True, width=1, lw=0.1, kind='bar')
+colorlist = esplot.color_from_dict(cdict)
+esplot.plot(color=colorlist, title="January 2016", stacked=True, width=1, lw=0.1,
+            kind='bar')
 esplot.ax.set_ylabel('Power in MW')
 esplot.ax.set_xlabel('Date')
 esplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m')

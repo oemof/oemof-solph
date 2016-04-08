@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    oemof.core.network.entities.buses
     oemof.core.network.entities.components
 
 Module contents

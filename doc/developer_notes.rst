@@ -17,6 +17,12 @@ To install the developer version two steps are necessary:
   git clone git@github.com:oemof/oemof.git
   sudo pip3 install -e /path/to/the/repository
   
+Newly added required packages (via PyPi) are installed by performing a manual upgrade of oemof. Therefore, run
+
+.. code:: bash
+
+  sudo pip3 install --upgrade -e /path/to/the/repository
+  
 Documentation
 -------------
 
