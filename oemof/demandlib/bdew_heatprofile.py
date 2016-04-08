@@ -10,6 +10,7 @@ import pandas as pd
 import os
 from oemof.tools.helpers import create_basic_dataframe as basic_df
 
+
 def weighted_temperature(df, how="geometric_series"):
     r'''
     A new temperature vector is generated containing a multi-day
@@ -216,7 +217,7 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
     """
 
     df = basic_df(year, holidays=kwargs.get('holidays'))
-    print(df)
+
     df["temperature"] = temperature.values
 
     df['weekday'].mask(df['weekday'] == 0, 7, True)
@@ -234,8 +235,7 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
     F = get_weekday_parameters(df, datapath, shlp_type=shlp_type)
 
     h = (A / (1 + (B / (df['temperature'] - 40)) ** C) + D)
-    #print(h)
-    #print(F)
+
     KW = annual_heat_demand / (sum(h * F) / 24)
     heat_profile = (KW * h * F * SF)
 
