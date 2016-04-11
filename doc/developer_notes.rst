@@ -39,9 +39,13 @@ We use the collaboration features from Github, see https://github.com/oemof.
 Style guidelines
 ----------------
 
-We mostly follow standard guidelines instead of developing own rules.
+We mostly follow standard guidelines instead of developing own rules. So if anything is not defined in this section, search for a `PEP rule <https://www.python.org/dev/peps/>`_ and follow it.
 
-* `Docstring example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_
+Docstrings
+^^^^^^^^^^
+
+We decided to use the style of the numpydoc docstrings. See the following link for an
+`example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_.
 
 PEP8 (Python Style Guide)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
