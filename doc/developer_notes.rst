@@ -59,12 +59,15 @@ PEP8 (Python Style Guide)
 Quoted strings
 ^^^^^^^^^^^^^^
 
-For strings we use double quotes if possible.
+As there is no recommendation in the PEP rules we use double quotes for strings read by humans such as logging/error messages and single quotes for internal strings such as keys and column names. However one can deviate from this rules if the string contains a double or single quote to avoid escape characters. According to `PEP 257 <http://legacy.python.org/dev/peps/pep-0257/>`_ and numpydoc we use three double quotes for docstrings.
 
 .. code-block:: python
 
-    info_msg = "We use double quotes for strings"
-    info_msg = 'This is a string where we need to use "single" quotes'
+    logging.info("We use double quotes for messages")
+    
+    my_dictionary.get('key_string')
+    
+    logging.warning('Use three " to quote docstrings!'  # exception to avoid escape characters
 
 Naming Conventions
 ------------------
