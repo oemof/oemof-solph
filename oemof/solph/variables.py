@@ -342,6 +342,8 @@ def set_fixed_sink_value(model, block):
     bound_type = {obj.uid: obj.bound_type for obj in block.objs}
     ee = model.edges(block.objs)
     for (e1, e2) in ee:
+        if val[e2] is None:
+            val[e2] = np.zeros(len(model.timesteps))
         if bound_type[e2] == 'fix':
             for t in model.timesteps:
                 # fix variable value for optimization problem
