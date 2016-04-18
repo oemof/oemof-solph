@@ -339,10 +339,20 @@ def set_fixed_sink_value(model, block):
     """
 
     val = {obj.uid: obj.val for obj in block.objs}
+    bound_type = {obj.uid: obj.bound_type for obj in block.objs}
     ee = model.edges(block.objs)
     for (e1, e2) in ee:
-        for t in model.timesteps:
-            # set variable value
-            model.w[(e1, e2), t] = val[e2][t]
-            # fix variable value for optimization problem
-            model.w[(e1, e2), t].fix()
+        if bound_type[e2] == 'fix':
+            for t in model.timesteps:
+                # fix variable value for optimization problem
+                model.w[(e1, e2), t].fix(val[e2][t])
+
+        elif bound_type[e2] == 'min':
+            for t in model.timesteps:
+                # fix variable value for optimization problem
+                model.w[(e1, e2), t].setlb(val[e2][t])
+
+        elif bound_type[e2] == 'max':
+            for t in model.timesteps:
+                # fix variable value for optimization problem
+                model.w[(e1, e2), t].setub(val[e2][t])
