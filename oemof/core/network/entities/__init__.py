@@ -21,16 +21,6 @@ class Bus(Entity):
     sum_out_limit : float (default: +inf)
         limit of sum of all outflows over the timehorizon
     # TODO: Find a better name for 'sum_out_limit' (global_outflow_limit?)
-    excess : boolean
-        if true, an optimization variable is created that takes up the slack of
-        outflows to keep the busbalance (sum inflows = sum outflows + excess)
-    shortage : boolean
-        if true, an optimization variable is created that takes the slack of
-        inflows to keep the busbalance (sum inflows + shortage = sum outflows)
-    excess_costs : float
-        costs per unit of excess that is needed to balance the bus
-    shortage_costs : float
-        costs per unit of shortage that is needed to balance the bus
     """
     optimization_options = {}
 
@@ -41,31 +31,7 @@ class Bus(Entity):
         self.balanced = kwargs.get("balanced", True)
         self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
         self.results = {}
-        self.excess = kwargs.get('excess', True)
-        self.shortage = kwargs.get('shortage', False)
-        self.excess_costs = kwargs.get('excess_costs', 0)
-        self.shortage_costs = kwargs.get('shortage_costs', 10e10)
 
-        if self.excess == True:
-           self.create_excess_slack_component()
-        if self.shortage == True:
-           self.create_shortage_slack_component()
-
-    def create_excess_slack_component(self):
-        """
-        """
-        excess = ExcessSlack(uid=self.uid+'_excess',
-                             inputs=[self],
-                             costs=self.excess_costs)
-        return excess
-
-    def create_shortage_slack_component(self):
-        """
-        """
-        shortage = ShortageSlack(uid=self.uid+'_shortage',
-                                 outputs=[self],
-                                 costs=self.shortage_costs)
-        return shortage
 
 class Component(Entity):
     """
@@ -136,19 +102,3 @@ class Component(Entity):
             self.crf = (p*(1+p)**n)/(((1+p)**n)-1)
         self.results = kwargs.get('results', {'in': {},
                                               'out': {}})
-
-class ExcessSlack(Component):
-    """A ExcessSlack is a special sink which takes the output slack i.e. excess
-    of the bus to that it is connected."""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.costs = kwargs.get("costs", 0)
-
-class ShortageSlack(Component):
-    """A ShorageSlack is a special source which takes the input slack i.e.
-    shortage of the bus to that it is connected."""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.costs = kwargs.get("costs", 10e10)
