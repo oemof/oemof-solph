@@ -75,7 +75,7 @@ c_e__class__oemof_core_network_entities_buses_HeatBus___balance(bus_test_2)_:
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
-bounds 
+bounds
    0 <= w(bus_stor_heat_postheat_elec_0) <= 888
    0 <= w(bus_stor_heat_postheat_elec_1) <= 888
    0 <= w(bus_stor_heat_postheat_elec_2) <= 888
@@ -85,4 +85,4 @@ bounds
    0 <= w(postheat_elec_bus_distr_heat_0) <= 999993
    0 <= w(postheat_elec_bus_distr_heat_1) <= 999993
    0 <= w(postheat_elec_bus_distr_heat_2) <= 999993
-end 
+end

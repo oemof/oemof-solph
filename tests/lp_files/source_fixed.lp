@@ -20,8 +20,8 @@ c_e__class__oemof_core_network_entities_Bus___balance(bel_2)_:
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
-bounds 
+bounds
    0 <= w(bel_bel_excess_0) <= +inf
    0 <= w(bel_bel_excess_1) <= +inf
    0 <= w(bel_bel_excess_2) <= +inf
-end 
+end
