@@ -18,6 +18,8 @@ from oemof.tools import helpers
 from oemof.tools import create_components as cc
 
 
+logging.disable(logging.INFO)
+
 class Entity_Tests:
 
     def test_HeatBus(self):
