@@ -69,7 +69,9 @@ class Constraint_Tests:
             path=self.tmppath, filename=tmp_filename)
         logging.info("Comparing with file: {0}".format(filename))
         ok_(filecmp.cmp(ospath.join(self.tmppath, tmp_filename),
-                        ospath.join("tests", "lp_files", filename)))
+                        ospath.join(ospath.dirname(ospath.realpath(__file__)),
+                                    "lp_files",
+                                    filename)))
 
     def test_Transformer_Simple(self):
         "Test transformer.Simple with and without investment."
