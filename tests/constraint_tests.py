@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import logging
 import os.path as ospath
+import re
 
 from oemof.core.network.entities.components import transformers as transformer
 from oemof.solph import predefined_objectives as predefined_objectives
@@ -72,15 +73,18 @@ class Constraint_Tests:
             with open(ospath.join(ospath.dirname(ospath.realpath(__file__)),
                                                  "lp_files",
                                                  filename)) as expected_file:
-                expected = expected_file.readlines()
-                generated = generated_file.readlines()
+                def chop_trailing_whitespace(lines):
+                    return [re.sub("\s*$", '', l) for l in lines]
+                expected = chop_trailing_whitespace(expected_file.readlines())
+                generated = chop_trailing_whitespace(generated_file.readlines())
                 eq_(generated, expected,
                     "Failed matching expected with generated lp file:\n" +
-                    "".join(unified_diff(expected, generated,
-                                         fromfile=ospath.relpath(
-                                                expected_file.name),
-                                         tofile=ospath.basename(
-                                                generated_file.name))))
+                    "\n".join(unified_diff(expected, generated,
+                                           fromfile=ospath.relpath(
+                                               expected_file.name),
+                                           tofile=ospath.basename(
+                                               generated_file.name),
+                                           lineterm="")))
 
     def test_Transformer_Simple(self):
         "Test transformer.Simple with and without investment."
