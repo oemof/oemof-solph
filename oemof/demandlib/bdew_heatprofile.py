@@ -68,7 +68,6 @@ def get_temperature_interval(df):
 
 
     """
-    temperature_weighted = weighted_temperature(df)
     intervals = ({
         -20: 1, -19: 1, -18: 1, -17: 1, -16: 1, -15: 1, -14: 2,
         -13: 2, -12: 2, -11: 2, -10: 2, -9: 3, -8: 3, -7: 3, -6: 3, -5: 3,
@@ -78,7 +77,7 @@ def get_temperature_interval(df):
         25: 9, 26: 10, 27: 10, 28: 10, 29: 10, 30: 10, 31: 10, 32: 10,
         33: 10, 34: 10, 35: 10, 36: 10, 37: 10, 38: 10, 39: 10, 40: 10})
 
-    temperature_rounded = [ceil(i) for i in temperature_weighted]
+    temperature_rounded = [ceil(i) for i in df['temperature_geo']]
 
     temperature_interval = [intervals[i] for i in temperature_rounded]
 
