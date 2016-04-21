@@ -1,9 +1,9 @@
-from nose.tools import ok_, assert_raises
+from nose.tools import eq_, assert_raises
 
+from difflib import unified_diff
 import pandas as pd
 import numpy as np
 import logging
-import filecmp
 import os.path as ospath
 
 from oemof.core.network.entities.components import transformers as transformer
@@ -68,10 +68,19 @@ class Constraint_Tests:
         self.opt_model.write_lp_file(
             path=self.tmppath, filename=tmp_filename)
         logging.info("Comparing with file: {0}".format(filename))
-        ok_(filecmp.cmp(ospath.join(self.tmppath, tmp_filename),
-                        ospath.join(ospath.dirname(ospath.realpath(__file__)),
-                                    "lp_files",
-                                    filename)))
+        with open(ospath.join(self.tmppath, tmp_filename)) as generated_file:
+            with open(ospath.join(ospath.dirname(ospath.realpath(__file__)),
+                                                 "lp_files",
+                                                 filename)) as expected_file:
+                expected = expected_file.readlines()
+                generated = generated_file.readlines()
+                eq_(generated, expected,
+                    "Failed matching expected with generated lp file:\n" +
+                    "".join(unified_diff(expected, generated,
+                                         fromfile=ospath.relpath(
+                                                expected_file.name),
+                                         tofile=ospath.basename(
+                                                generated_file.name))))
 
     def test_Transformer_Simple(self):
         "Test transformer.Simple with and without investment."
