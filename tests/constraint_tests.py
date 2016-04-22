@@ -1,21 +1,19 @@
-from nose.tools import eq_, assert_raises
-
 from difflib import unified_diff
-import pandas as pd
-import numpy as np
 import logging
 import os.path as ospath
 import re
 
-from oemof.core.network.entities.components import transformers as transformer
-from oemof.solph import predefined_objectives as predefined_objectives
+from nose.tools import eq_, assert_raises
+import numpy as np
+import pandas as pd
+
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.buses import HeatBus
-from oemof.solph import optimization_model as om
-from oemof.core.network.entities.components import sources as source
-from oemof.tools import helpers
-from oemof.tools import create_components as cc
+from oemof.core.network.entities.components import (sources as source,
+                                                    transformers as transformer)
+from oemof.solph import optimization_model as om, predefined_objectives
+from oemof.tools import create_components as cc, helpers
 
 
 logging.disable(logging.INFO)
