@@ -151,8 +151,8 @@ class Constraint_Tests:
         pass
 
     def test_two_inputs_one_output(self):
-        tioo = transformer.TwoInputsOneOutput
-        tioo.optimization_options['investment'] = True
+        TIOO = transformer.TwoInputsOneOutput
+        TIOO.optimization_options['investment'] = True
 
         btest = HeatBus(
             uid="bus_test",
@@ -187,7 +187,7 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem,
                               "two_inputs_one_output_invest.lp")
 
-        tioo.optimization_options['investment'] = False
+        TIOO.optimization_options['investment'] = False
 
         postheat.in_max = [777, 888]
         self.compare_lp_files(self.energysystem,
