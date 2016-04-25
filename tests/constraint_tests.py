@@ -75,6 +75,7 @@ class Constraint_Tests:
             with open(ospath.join(ospath.dirname(ospath.realpath(__file__)),
                                   "lp_files",
                                   filename)) as expected_file:
+
                 def chop_trailing_whitespace(lines):
                     return [re.sub("\s*$", '', l) for l in lines]
 
@@ -82,6 +83,7 @@ class Constraint_Tests:
                     if not pattern:
                         return lines
                     return re.subn(pattern, "", "\n".join(lines))[0].split("\n")
+
                 expected = remove(ignored,
                                   chop_trailing_whitespace(
                                       expected_file.readlines()))
