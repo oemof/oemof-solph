@@ -122,8 +122,7 @@ class Constraint_Tests:
                               ignored=self.objective_pattern)
 
         transformer.Simple.optimization_options['investment'] = True
-        self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp",
-                              ignored=self.objective_pattern)
+        self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
         "Test source.FixedSource with and without investment."
@@ -144,8 +143,7 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem, "source_fixed.lp",
                               ignored=self.objective_pattern)
         source.FixedSource.optimization_options['investment'] = True
-        self.compare_lp_files(self.energysystem, "source_fixed_invest.lp",
-                              ignored=self.objective_pattern)
+        self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
 
     def test_storage(self):
         pass
@@ -185,8 +183,7 @@ class Constraint_Tests:
 
         postheat.in_max = [None, float('inf')]
         self.compare_lp_files(self.energysystem,
-                              "two_inputs_one_output_invest.lp",
-                              ignored=self.objective_pattern)
+                              "two_inputs_one_output_invest.lp")
 
         TIOO.optimization_options['investment'] = False
 
