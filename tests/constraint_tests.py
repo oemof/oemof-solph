@@ -67,10 +67,9 @@ class Constraint_Tests:
                 klass.optimization_options[option] = backup[klass][option]
 
     def compare_lp_files(self, energysystem, filename, ignored=None):
-        self.opt_model = om.OptimizationModel(energysystem=energysystem)
+        opt_model = om.OptimizationModel(energysystem=energysystem)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
-        self.opt_model.write_lp_file(
-            path=self.tmppath, filename=tmp_filename)
+        opt_model.write_lp_file(path=self.tmppath, filename=tmp_filename)
         logging.info("Comparing with file: {0}".format(filename))
         with open(ospath.join(self.tmppath, tmp_filename)) as generated_file:
             with open(ospath.join(ospath.dirname(ospath.realpath(__file__)),
