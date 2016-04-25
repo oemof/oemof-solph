@@ -15,12 +15,12 @@ from oemof.core.network.entities.components import (sources as source,
 from oemof.solph import optimization_model as om, predefined_objectives
 from oemof.tools import create_components as cc, helpers
 
-
 logging.disable(logging.INFO)
+
 
 class Entity_Tests:
 
-    def test_HeatBus(self):
+    def test_heatbus(self):
         "Creating a HeatBus without the temperature attribute raises an error."
         assert_raises(TypeError, HeatBus, uid="Test")
 
@@ -74,10 +74,11 @@ class Constraint_Tests:
         logging.info("Comparing with file: {0}".format(filename))
         with open(ospath.join(self.tmppath, tmp_filename)) as generated_file:
             with open(ospath.join(ospath.dirname(ospath.realpath(__file__)),
-                                                 "lp_files",
-                                                 filename)) as expected_file:
+                                  "lp_files",
+                                  filename)) as expected_file:
                 def chop_trailing_whitespace(lines):
                     return [re.sub("\s*$", '', l) for l in lines]
+
                 def remove(pattern, lines):
                     if not pattern:
                         return lines
@@ -97,8 +98,8 @@ class Constraint_Tests:
                                                generated_file.name),
                                            lineterm="")))
 
-    def test_Transformer_Simple(self):
-        "Test transformer.Simple with and without investment."
+    def test_transformer_simple(self):
+        """Test transformer.Simple with and without investment."""
 
         bgas = Bus(uid="bgas",
                    type="gas",
@@ -125,7 +126,7 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
-        "Test source.FixedSource with and without investment."
+        """Test source.FixedSource with and without investment."""
 
         bel = Bus(uid="bel",
                   type="el")
@@ -149,8 +150,8 @@ class Constraint_Tests:
         pass
 
     def test_two_inputs_one_output(self):
-        TIOO = transformer.TwoInputsOneOutput
-        TIOO.optimization_options['investment'] = True
+        tioo = transformer.TwoInputsOneOutput
+        tioo.optimization_options['investment'] = True
 
         btest = HeatBus(
             uid="bus_test",
@@ -185,7 +186,7 @@ class Constraint_Tests:
         self.compare_lp_files(self.energysystem,
                               "two_inputs_one_output_invest.lp")
 
-        TIOO.optimization_options['investment'] = False
+        tioo.optimization_options['investment'] = False
 
         postheat.in_max = [777, 888]
         self.compare_lp_files(self.energysystem,
