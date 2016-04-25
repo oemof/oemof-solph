@@ -63,7 +63,7 @@ class Constraint_Tests:
             for option in backup[klass]:
                 klass.optimization_options[option] = backup[klass][option]
 
-    def compare_lp_files(self, energysystem, filename):
+    def compare_lp_files(self, energysystem, filename, ignored=None):
         self.opt_model = om.OptimizationModel(energysystem=energysystem)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
         self.opt_model.write_lp_file(
@@ -75,8 +75,16 @@ class Constraint_Tests:
                                                  filename)) as expected_file:
                 def chop_trailing_whitespace(lines):
                     return [re.sub("\s*$", '', l) for l in lines]
-                expected = chop_trailing_whitespace(expected_file.readlines())
-                generated = chop_trailing_whitespace(generated_file.readlines())
+                def remove(pattern, lines):
+                    if not pattern:
+                        return lines
+                    return re.subn(pattern, "", "\n".join(lines))[0].split("\n")
+                expected = remove(ignored,
+                                  chop_trailing_whitespace(
+                                      expected_file.readlines()))
+                generated = remove(ignored,
+                                   chop_trailing_whitespace(
+                                       generated_file.readlines()))
                 eq_(generated, expected,
                     "Failed matching expected with generated lp file:\n" +
                     "\n".join(unified_diff(expected, generated,
