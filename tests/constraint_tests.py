@@ -30,6 +30,9 @@ class Constraint_Tests:
     @classmethod
     def setUpClass(self):
 
+        self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
+                                            re.DOTALL|re.MULTILINE)
+
         self.time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
         self.sim = es.Simulation(
@@ -115,10 +118,12 @@ class Constraint_Tests:
             out_max=[10e10],
             eta=[0.58])
 
-        self.compare_lp_files(self.energysystem, "transformer_simp.lp")
+        self.compare_lp_files(self.energysystem, "transformer_simp.lp",
+                              ignored=self.objective_pattern)
 
         transformer.Simple.optimization_options['investment'] = True
-        self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
+        self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp",
+                              ignored=self.objective_pattern)
 
     def test_source_fixed(self):
         "Test source.FixedSource with and without investment."
@@ -136,9 +141,11 @@ class Constraint_Tests:
                            lifetime=25,
                            crf=0.08)
 
-        self.compare_lp_files(self.energysystem, "source_fixed.lp")
+        self.compare_lp_files(self.energysystem, "source_fixed.lp",
+                              ignored=self.objective_pattern)
         source.FixedSource.optimization_options['investment'] = True
-        self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
+        self.compare_lp_files(self.energysystem, "source_fixed_invest.lp",
+                              ignored=self.objective_pattern)
 
     def test_storage(self):
         pass
@@ -178,10 +185,12 @@ class Constraint_Tests:
 
         postheat.in_max = [None, float('inf')]
         self.compare_lp_files(self.energysystem,
-                              "two_inputs_one_output_invest.lp")
+                              "two_inputs_one_output_invest.lp",
+                              ignored=self.objective_pattern)
 
         TIOO.optimization_options['investment'] = False
 
         postheat.in_max = [777, 888]
         self.compare_lp_files(self.energysystem,
-                              "two_inputs_one_output.lp")
+                              "two_inputs_one_output.lp",
+                              ignored=self.objective_pattern)
