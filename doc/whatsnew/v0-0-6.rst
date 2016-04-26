@@ -14,7 +14,7 @@ Documentation
 
 Testing
 #######
-
+* Fix constraint tests (`Issue #137 <https://github.com/oemof/oemof/issues/137>`_)
 
 Bug fixes
 #########
@@ -29,5 +29,5 @@ Other changes
 
 Contributors
 ############
-
-
+* Uwe Krien
+* Stephan Günther
