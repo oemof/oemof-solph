@@ -116,7 +116,7 @@ class Transformer(Component):
         parameters = ['out_min', 'in_min', 'grad_pos', 'grad_neg',
                       't_min_off', 't_min_on', 'outages', 'input_costs',
                       'start_costs', 'stop_costs', 'ramp_costs',
-                      'output_price', 'eta_min']
+                      'output_price', 'eta_min', 'max_starts']
 
         for k in kwargs:
             if k in parameters:

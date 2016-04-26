@@ -68,7 +68,6 @@ def get_temperature_interval(df):
 
 
     """
-    temperature_weighted = weighted_temperature(df)
     intervals = ({
         -20: 1, -19: 1, -18: 1, -17: 1, -16: 1, -15: 1, -14: 2,
         -13: 2, -12: 2, -11: 2, -10: 2, -9: 3, -8: 3, -7: 3, -6: 3, -5: 3,
@@ -78,7 +77,7 @@ def get_temperature_interval(df):
         25: 9, 26: 10, 27: 10, 28: 10, 29: 10, 30: 10, 31: 10, 32: 10,
         33: 10, 34: 10, 35: 10, 36: 10, 37: 10, 38: 10, 39: 10, 40: 10})
 
-    temperature_rounded = [ceil(i) for i in temperature_weighted]
+    temperature_rounded = [ceil(i) for i in df['temperature_geo']]
 
     temperature_interval = [intervals[i] for i in temperature_rounded]
 
@@ -129,7 +128,7 @@ def get_SF_values(df, datapath, filename="shlp_hour_factors.csv",
 
 
 def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
-                           wind_class=None,
+                           wind_class=None, ww_incl=True,
                            filename="shlp_sigmoid_factors.csv"):
     """ Retrieve the sigmoid parameters from csv-files
 
@@ -145,6 +144,8 @@ def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
         type of standard heat load profile according to bdew
     wind_class : int
         wind classification for building location (0=not windy or 1=windy)
+    ww_incl : boolean
+        decider whether warm water load is included in the heat load profile
     """
 
     file = os.path.join(datapath, filename)
@@ -157,10 +158,10 @@ def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
     A = float(sigmoid['parameter_a'])
     B = float(sigmoid['parameter_b'])
     C = float(sigmoid['parameter_c'])
-    D = float(sigmoid['parameter_d'])
-    # TODO: integrate ww_incl
-    #if kwargs.get('ww_incl', True) else 0
-
+    if ww_incl:
+        D = float(sigmoid['parameter_d'])
+    else:
+        D = 0
     return A, B, C, D
 
 
@@ -186,7 +187,7 @@ def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
 
     F_df.drop('shlp_type', axis=1, inplace=True)
 
-    F_df['weekdays'] = np.array(range(7)) + 1
+    F_df['weekdays'] = np.array(list(range(7))) + 1
 
     return np.array(list(map(float, pd.DataFrame.merge(
         F_df, df, left_on='weekdays', right_on='weekday', how='outer',
@@ -220,6 +221,8 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
 
     df["temperature"] = temperature.values
 
+    df["temperature_geo"] = weighted_temperature(df, how="geometric_series")
+
     df['weekday'].mask(df['weekday'] == 0, 7, True)
 
     SF = get_SF_values(df=df, datapath=datapath,
@@ -230,12 +233,11 @@ def create_bdew_profile(datapath, year, temperature, annual_heat_demand,
                       datapath=datapath,
                       building_class=kwargs.get('building_class', 0),
                       wind_class=wind_class,
-                      shlp_type=shlp_type)
+                      shlp_type=shlp_type,
+                      ww_incl=kwargs.get('ww_incl', True))
 
     F = get_weekday_parameters(df, datapath, shlp_type=shlp_type)
-
-    h = (A / (1 + (B / (df['temperature'] - 40)) ** C) + D)
-
+    h = (A / (1 + (B / (df["temperature_geo"] - 40)) ** C) + D)
     KW = annual_heat_demand / (sum(h * F) / 24)
     heat_profile = (KW * h * F * SF)
 

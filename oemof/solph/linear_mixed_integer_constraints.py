@@ -5,7 +5,7 @@ The module contains linear mixed integer constraints.
 @author: Simon Hilpert (simon.hilpert@fh-flensburg.de)
 """
 import pyomo.environ as po
-
+import pandas as pd
 
 def set_bounds(model, block, side="output"):
     """ Set upper and lower bounds via constraints.
@@ -359,3 +359,43 @@ def add_minimum_uptime(model, block):
             return(lhs <= rhs)
     block.minimum_uptime = po.Constraint(block.indexset,
                                           rule=minimum_uptime_rule)
+
+def maximum_starts_per_period(model, block, period=24):
+    """
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+        An object to be solved containing all Variables, Constraints, Data.
+        Bounds are altered at model attributes (variables) of `model`
+    block : SimpleBlock()
+         block to group all constraints and variables etc., block corresponds
+         to one oemof base class
+    period : array like
+       length of period
+
+    """
+    if not hasattr(block, 'z_start'):
+        raise ValueError("Can not add maximum starts per period. \
+                         Please add startup constraints!")
+
+    if block.objs is None:
+        raise ValueError("No objects defined. Please specify objects for \
+                         which bounds should be set.")
+
+    df = pd.DataFrame()
+    for t in model.timesteps:
+        if t >= period:
+            df[t-period] = range(t-period,t)
+
+    max_starts = {obj.uid: obj.max_starts for obj in block.objs}
+
+    def max_start_rule(block, e, t):
+        if max_starts[e] >= len(model.timesteps):
+            return po.Constraint.Skip
+        elif (t <= len(model.timesteps)-period-1):
+
+            return sum(block.z_start[e, d] for d in df[t]) <= max_starts[e]
+        else:
+            return po.Constraint.Skip
+    block.max_starts = po.Constraint(block.indexset, rule=max_start_rule)

@@ -8,7 +8,7 @@ import numpy as np
 import logging
 import pyomo.environ as po
 
-def add_opex_var(model, block, ref='output'):
+def add_opex_var(model, block, ref='output', idx=0):
     """ Variable operation expenditure term for linear objective function.
 
     If reference of opex is `output`:
@@ -28,6 +28,9 @@ def add_opex_var(model, block, ref='output'):
     ref : string
        Reference side on which opex are based on
         (e.g. powerplant MWhth -> input or MWhel -> output)
+    idx : int
+       Index to select output/input of list of inputs/ouputs if multiple i/o
+       exist
 
     Returns
     -------
@@ -39,12 +42,12 @@ def add_opex_var(model, block, ref='output'):
     opex_var = {obj.uid: obj.opex_var for obj in block.objs}
     # outputs for cost objs
     if ref == 'output':
-        expr = sum(model.w[e, model.O[e][0], t] * opex_var[e]
+        expr = sum(model.w[e, model.O[e][idx], t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
 
     elif ref == 'input':
-        expr = sum(model.w[model.I[e][0], e, t] * opex_var[e]
+        expr = sum(model.w[model.I[e][idx], e, t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
     return(expr)

@@ -3,7 +3,10 @@ v0.0.6 (TBA)
 
 New features
 ############
-
+* It is now possible to choose whether or not the heat load profile generated
+  with the BDEW  heat load profile method should only include space heating
+  or space heating and warm water combined.
+  (`Issue #130 <https://github.com/oemof/oemof/issues/130>`_)
 
 Documentation
 #############
@@ -15,7 +18,10 @@ Testing
 
 Bug fixes
 #########
-
+* Use of wrong columns in generation of SF vector in BDEW heat load profile
+  generation (`Issue #129 <https://github.com/oemof/oemof/issues/129>`_)
+* Use of wrong temperature vector in generation of h vector in BDEW heat load
+  profile generation.
 
 Other changes
 #############

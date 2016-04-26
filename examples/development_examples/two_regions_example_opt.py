@@ -164,7 +164,7 @@ def create_entity_objects(esystem, region, pp, tclass, bclass):
                price=price[pp[1].type], regions=[region], excess=False)
         location = region.name
         source.Commodity(
-            uid='rgas',
+            uid=('resource', region.name, pp[1].type),
             outputs=[obj for obj in esystem.entities if obj.uid == (
                 'bus', location, pp[1].type)])
 

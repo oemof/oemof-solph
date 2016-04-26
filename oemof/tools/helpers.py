@@ -291,7 +291,7 @@ def fetch_admin_from_coord_osm(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_osm((12.7, 51.8)) # doctest: +SKIP
+    >>> fetch_admin_from_coord_osm((12.7, 51.8))  # doctest: +SKIP
     ['Deutschland', 'ST']
     """
 
@@ -358,7 +358,7 @@ def fetch_admin_from_coord_google(coord):
 
     Examples
     --------
-    >>> fetch_admin_from_coord_google((12.7, 51.8))
+    >>> fetch_admin_from_coord_google((12.7, 51.8))  # doctest: +SKIP
     ['DE', 'SA']
     """
 

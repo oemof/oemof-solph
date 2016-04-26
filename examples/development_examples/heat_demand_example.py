@@ -9,7 +9,7 @@ from oemof.demandlib import bdew_heatprofile as bdew_heat
 from matplotlib import pyplot as plt
 
 # read example temperature series
-temperature = pd.read_csv("example_data.csv")["temperature"]
+temperature = pd.read_csv("../example_data.csv")["temperature"]
 
 # get german holidays
 holidays = helpers.get_german_holidays(2010, ['Germany', 'SH'])
