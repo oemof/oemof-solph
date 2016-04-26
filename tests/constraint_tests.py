@@ -1,25 +1,26 @@
-from nose.tools import ok_, assert_raises
-
-import pandas as pd
-import numpy as np
+from difflib import unified_diff
 import logging
-import filecmp
 import os.path as ospath
+import re
 
-from oemof.core.network.entities.components import transformers as transformer
-from oemof.solph import predefined_objectives as predefined_objectives
+from nose.tools import eq_, assert_raises
+import numpy as np
+import pandas as pd
+
 from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.buses import HeatBus
-from oemof.solph import optimization_model as om
-from oemof.core.network.entities.components import sources as source
-from oemof.tools import helpers
-from oemof.tools import create_components as cc
+from oemof.core.network.entities.components import (sources as source,
+                                                    transformers as transformer)
+from oemof.solph import optimization_model as om, predefined_objectives
+from oemof.tools import create_components as cc, helpers
+
+logging.disable(logging.INFO)
 
 
 class Entity_Tests:
 
-    def test_HeatBus(self):
+    def test_heatbus(self):
         "Creating a HeatBus without the temperature attribute raises an error."
         assert_raises(TypeError, HeatBus, uid="Test")
 
@@ -28,6 +29,9 @@ class Constraint_Tests:
 
     @classmethod
     def setUpClass(self):
+
+        self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
+                                            re.DOTALL|re.MULTILINE)
 
         self.time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
@@ -62,17 +66,41 @@ class Constraint_Tests:
             for option in backup[klass]:
                 klass.optimization_options[option] = backup[klass][option]
 
-    def compare_lp_files(self, energysystem, filename):
-        self.opt_model = om.OptimizationModel(energysystem=energysystem)
+    def compare_lp_files(self, energysystem, filename, ignored=None):
+        opt_model = om.OptimizationModel(energysystem=energysystem)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
-        self.opt_model.write_lp_file(
-            path=self.tmppath, filename=tmp_filename)
+        opt_model.write_lp_file(path=self.tmppath, filename=tmp_filename)
         logging.info("Comparing with file: {0}".format(filename))
-        ok_(filecmp.cmp(ospath.join(self.tmppath, tmp_filename),
-                        ospath.join("tests", "lp_files", filename)))
+        with open(ospath.join(self.tmppath, tmp_filename)) as generated_file:
+            with open(ospath.join(ospath.dirname(ospath.realpath(__file__)),
+                                  "lp_files",
+                                  filename)) as expected_file:
 
-    def test_Transformer_Simple(self):
-        "Test transformer.Simple with and without investment."
+                def chop_trailing_whitespace(lines):
+                    return [re.sub("\s*$", '', l) for l in lines]
+
+                def remove(pattern, lines):
+                    if not pattern:
+                        return lines
+                    return re.subn(pattern, "", "\n".join(lines))[0].split("\n")
+
+                expected = remove(ignored,
+                                  chop_trailing_whitespace(
+                                      expected_file.readlines()))
+                generated = remove(ignored,
+                                   chop_trailing_whitespace(
+                                       generated_file.readlines()))
+                eq_(generated, expected,
+                    "Failed matching expected with generated lp file:\n" +
+                    "\n".join(unified_diff(expected, generated,
+                                           fromfile=ospath.relpath(
+                                               expected_file.name),
+                                           tofile=ospath.basename(
+                                               generated_file.name),
+                                           lineterm="")))
+
+    def test_transformer_simple(self):
+        """Test transformer.Simple with and without investment."""
 
         bgas = Bus(uid="bgas",
                    type="gas",
@@ -92,13 +120,14 @@ class Constraint_Tests:
             out_max=[10e10],
             eta=[0.58])
 
-        self.compare_lp_files(self.energysystem, "transformer_simp.lp")
+        self.compare_lp_files(self.energysystem, "transformer_simp.lp",
+                              ignored=self.objective_pattern)
 
         transformer.Simple.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "transformer_simp_invest.lp")
 
     def test_source_fixed(self):
-        "Test source.FixedSource with and without investment."
+        """Test source.FixedSource with and without investment."""
 
         bel = Bus(uid="bel",
                   type="el")
@@ -113,7 +142,8 @@ class Constraint_Tests:
                            lifetime=25,
                            crf=0.08)
 
-        self.compare_lp_files(self.energysystem, "source_fixed.lp")
+        self.compare_lp_files(self.energysystem, "source_fixed.lp",
+                              ignored=self.objective_pattern)
         source.FixedSource.optimization_options['investment'] = True
         self.compare_lp_files(self.energysystem, "source_fixed_invest.lp")
 
@@ -161,4 +191,5 @@ class Constraint_Tests:
 
         postheat.in_max = [777, 888]
         self.compare_lp_files(self.energysystem,
-                              "two_inputs_one_output.lp")
+                              "two_inputs_one_output.lp",
+                              ignored=self.objective_pattern)

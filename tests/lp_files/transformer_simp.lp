@@ -53,7 +53,7 @@ c_e__class__oemof_core_network_entities_Bus___balance(bgas_2)_:
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
-bounds 
+bounds
    0 <= w(bel_bel_excess_0) <= +inf
    0 <= w(bel_bel_excess_1) <= +inf
    0 <= w(bel_bel_excess_2) <= +inf
@@ -63,4 +63,4 @@ bounds
    0 <= w(pp_gas_bel_0) <= 100000000000
    0 <= w(pp_gas_bel_1) <= 100000000000
    0 <= w(pp_gas_bel_2) <= 100000000000
-end 
+end
