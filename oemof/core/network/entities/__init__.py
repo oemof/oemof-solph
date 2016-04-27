@@ -1,4 +1,5 @@
 from .. import Entity
+import logging
 
 
 class Bus(Entity):
@@ -31,7 +32,12 @@ class Bus(Entity):
         self.balanced = kwargs.get("balanced", True)
         self.sum_out_limit = kwargs.get("sum_out_limit", float("+inf"))
         self.results = {}
-
+        if kwargs.get("excess", False):
+            logging.warning("Excess parameter for buses is outdated " +
+                            "and won't have any effect.")
+        if kwargs.get("shortage", False):
+            logging.warning("Shortage parameter for buses is outdated " +
+                            "and won't have any effect.")
 
 class Component(Entity):
     """
