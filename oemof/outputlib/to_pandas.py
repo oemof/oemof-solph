@@ -216,6 +216,29 @@ class DataFramePlot(ResultsDataFrame):
                 unstacklevel='obj_uid', **kwargs)
         return self
 
+    def rearrange_subset(self, order):
+        r"""
+        Change the order of the subset DataFrame
+
+        Parameters
+        ----------
+        order : list
+            New order of columns
+
+        Returns
+        -------
+        self
+        """
+        cols = list(self.subset.columns.values)
+        neworder = [x for x in list(order) if x in set(cols)]
+        missing = [x for x in list(cols) if x not in set(order)]
+        if len(missing) > 0:
+            logging.warning(
+                "Columns that are not part of the order list are removed: " +
+                str(missing))
+        print(neworder)
+        self.subset = self.subset[neworder]
+
     def color_from_dict(self, colordict):
         r""" Method to convert a dictionary containing the components and its
         colors to a color list that can be directly useed with the color
