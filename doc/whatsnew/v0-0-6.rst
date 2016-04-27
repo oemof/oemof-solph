@@ -7,6 +7,7 @@ New features
   with the BDEW  heat load profile method should only include space heating
   or space heating and warm water combined.
   (`Issue #130 <https://github.com/oemof/oemof/issues/130>`_)
+* Add possibility to change the order of the columns of a DataFrame subset. This is useful to change the order of stacked plots. (`Issue #148 <https://github.com/oemof/oemof/issues/148>`_)
 
 Documentation
 #############
