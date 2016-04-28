@@ -121,6 +121,14 @@ def add_opex_fix(model, block, ref=None):
             expr += sum(out_max[e][0] * opex_fix[e] for e in uids)
             expr += sum((out_max[e][0] + block.add_out[e]) * opex_fix[e]
                         for e in uids_inv)
+        elif ref == 'input':
+            # installed electrical/thermal output: {'pp_chp': 30000,...}
+            in_max = {obj.uid: obj.in_max for obj in block.objs}
+            expr += sum((in_max[e][0] if in_max[e] is not None else 0) *
+                        opex_fix[e] for e in uids)
+            expr += sum(((in_max[e][0] if in_max[e] is not None else 0) +
+                         block.add_out[e]) *
+                        opex_fix[e] for e in uids_inv)
         elif ref == 'capacity':
             cap_max = {obj.uid: obj.cap_max for obj in block.objs}
             expr = 0
