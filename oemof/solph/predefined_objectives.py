@@ -61,19 +61,22 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
 
     for block in blocks:
         if block.name in c_blocks:
+            if block.name == str(sink.Simple):
+                ref = 'input'
+            else:
+                ref = 'output'
+            # variable costs
+            expr += objexpr.add_opex_var(self, block, ref=ref)
+
             if block.name == str(transformer.Storage):
                 ref = 'capacity'
                 expr += objexpr.add_opex_var(self,
                                              getattr(self,
                                                      str(transformer.Storage)),
                                              ref='input')
-            else:
-                ref = 'output'
-            # variable costs
-            expr += objexpr.add_opex_var(self, block, ref='output')
             # fix costs
-            if block != str(source.Commodity):
-                expr += objexpr.add_opex_fix(self, block, ref=ref)
+            expr += objexpr.add_opex_fix(self, block, ref=ref)
+
             # investment costs
             if block.optimization_options.get('investment', False):
                 expr += objexpr.add_capex(self, block, ref=ref)
