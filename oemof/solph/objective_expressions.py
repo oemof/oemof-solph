@@ -103,9 +103,9 @@ def add_opex_fix(model, block, ref=None):
     """
     if not block.objs:
         expr=0
-        print('No objects defined for adding fixed opex to objective.' +
-              'No action taken.')
         return(expr)
+        logging.error("No objects defined for adding fixed opex to objective." +
+                      "No action taken.")
     else:
         if block.uids is None:
             block.uids = [obj.uid for obj in block.objs]
@@ -136,8 +136,9 @@ def add_opex_fix(model, block, ref=None):
             expr += sum((cap_max[e] + block.add_cap[e]) * opex_fix[e]
                            for e in uids_inv)
         else:
-            print('No reference defined. Please specificy in `add_opex()`!')
         return(expr)
+            logging.error(
+                "No reference defined. Please specificy in `add_opex()`!")
 
 
 def add_revenues(model, block, ref='output', idx=0):
