@@ -15,6 +15,7 @@ import oemof.solph as solph
 
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
+from ..core.network.entities.components import sinks as sink
 
 
 def minimize_cost(self, cost_objects=None, revenue_objects=None):
@@ -49,7 +50,8 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                     str(transformer.Storage),
                     str(transformer.CHP),
                     str(source.FixedSource),
-                    str(source.Commodity)]
+                    str(source.Commodity),
+                    str(sink.Simple)]
     if revenue_objects is None:
         r_blocks = []
 
