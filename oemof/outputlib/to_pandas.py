@@ -216,6 +216,29 @@ class DataFramePlot(ResultsDataFrame):
                 unstacklevel='obj_uid', **kwargs)
         return self
 
+    def rearrange_subset(self, order):
+        r"""
+        Change the order of the subset DataFrame
+
+        Parameters
+        ----------
+        order : list
+            New order of columns
+
+        Returns
+        -------
+        self
+        """
+        cols = list(self.subset.columns.values)
+        neworder = [x for x in list(order) if x in set(cols)]
+        missing = [x for x in list(cols) if x not in set(order)]
+        if len(missing) > 0:
+            logging.warning(
+                "Columns that are not part of the order list are removed: " +
+                str(missing))
+        print(neworder)
+        self.subset = self.subset[neworder]
+
     def color_from_dict(self, colordict):
         r""" Method to convert a dictionary containing the components and its
         colors to a color list that can be directly useed with the color
@@ -333,7 +356,8 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = self.subset.plot(**kwargs)
         return self
 
-    def io_plot(self, bus_uid, cdict, line_kwa={}, bar_kwa={}, **kwargs):
+    def io_plot(self, bus_uid, cdict, line_kwa={}, lineorder=None, bar_kwa={},
+                barorder=None, **kwargs):
         r""" Plotting a combined bar and line plot to see the fitting of in-
         and outcomming flows of a bus balance.
 
@@ -341,13 +365,17 @@ class DataFramePlot(ResultsDataFrame):
         ----------
         bus_uid : string
             Uid of the bus to plot the balance.
-        colordict : dictionary
+        cdict : dictionary
             A dictionary that has all possible components as keys and its
             colors as items.
-        line_kw : dictionary
+        line_kwa : dictionary
             Keyword arguments to be passed to the pandas line plot.
-        bar_kw : dictionary
+        bar_kwa : dictionary
             Keyword arguments to be passed to the pandas bar plot.
+        lineorder : list
+            Order of columns to plot the line plot
+        barorder : list
+            Order of columns to plot the bar plot
 
         Note
         ----
@@ -363,19 +391,21 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = kwargs.get('ax', self.ax)
 
         if self.ax is None:
-            print('None')
             fig = plt.figure()
             self.ax = fig.add_subplot(1, 1, 1)
 
         # Create a bar plot for all input flows
         self.slice_unstacked(bus_uid=bus_uid, type='input', **kwargs)
+        if barorder is not None:
+            self.rearrange_subset(barorder)
         self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
                          ax=self.ax, color=self.color_from_dict(cdict),
                          **bar_kwa)
 
         # Create a line plot for all output flows
         self.slice_unstacked(bus_uid=bus_uid, type='output', **kwargs)
-
+        if lineorder is not None:
+            self.rearrange_subset(lineorder)
         # The following changes are made to have the bottom line on top layer
         # of all lines. Normally the bottom line is the first line that is
         # plotted and will be on the lowest layer. This is difficult to read.
@@ -389,7 +419,11 @@ class DataFramePlot(ResultsDataFrame):
                 new_df[col] = self.subset[col] + tmp
             tmp = new_df[col]
             n += 1
-        new_df.sort_index(axis=1, ascending=False, inplace=True)
+        if lineorder is None:
+            new_df.sort_index(axis=1, ascending=False, inplace=True)
+        else:
+            lineorder.reverse()
+            new_df = new_df[lineorder]
         colorlist = self.color_from_dict(cdict)
         if isinstance(colorlist, list):
             colorlist.reverse()
