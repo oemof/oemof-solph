@@ -40,6 +40,7 @@ def add_opex_var(model, block, ref='output', idx=0):
         block.uids = [obj.uid for obj in block.objs]
 
     opex_var = {obj.uid: obj.opex_var for obj in block.objs}
+
     # outputs for cost objs
     if ref == 'output':
         expr = sum(model.w[e, model.O[e][idx], t] * opex_var[e]
@@ -84,6 +85,7 @@ def add_input_costs(model, block):
 
     return(expr)
 
+
 def add_opex_fix(model, block, ref=None):
     """ Fixed operation expenditure term for linear objective function.
 
@@ -102,8 +104,7 @@ def add_opex_fix(model, block, ref=None):
 
     """
     if not block.objs:
-        expr=0
-        return(expr)
+        expr = 0
         logging.error("No objects defined for adding fixed opex to objective." +
                       "No action taken.")
     else:
@@ -114,10 +115,10 @@ def add_opex_fix(model, block, ref=None):
         uids = set(block.uids) - uids_inv
 
         opex_fix = {obj.uid: obj.opex_fix for obj in block.objs}
+        expr = 0
         if ref == 'output':
             # installed electrical/thermal output: {'pp_chp': 30000,...}
             out_max = {obj.uid: obj.out_max for obj in block.objs}
-            expr = 0
             expr += sum(out_max[e][0] * opex_fix[e] for e in uids)
             expr += sum((out_max[e][0] + block.add_out[e]) * opex_fix[e]
                         for e in uids_inv)
@@ -131,14 +132,13 @@ def add_opex_fix(model, block, ref=None):
                         opex_fix[e] for e in uids_inv)
         elif ref == 'capacity':
             cap_max = {obj.uid: obj.cap_max for obj in block.objs}
-            expr = 0
             expr += sum(cap_max[e] * opex_fix[e] for e in uids)
             expr += sum((cap_max[e] + block.add_cap[e]) * opex_fix[e]
-                           for e in uids_inv)
+                        for e in uids_inv)
         else:
-        return(expr)
             logging.error(
                 "No reference defined. Please specificy in `add_opex()`!")
+    return expr
 
 
 def add_revenues(model, block, ref='output', idx=0):
