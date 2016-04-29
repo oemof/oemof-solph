@@ -49,7 +49,7 @@ Further example apps in development can be found in
 License
 =======
 
-Copyright (C) 2015 oemof developing group
+Copyright (C) 2016 oemof developing group
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

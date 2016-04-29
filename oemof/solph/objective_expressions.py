@@ -6,8 +6,9 @@ The module contains different objective expression terms.
 """
 import numpy as np
 import logging
+import pyomo.environ as po
 
-def add_opex_var(model, block, ref='output'):
+def add_opex_var(model, block, ref='output', idx=0):
     """ Variable operation expenditure term for linear objective function.
 
     If reference of opex is `output`:
@@ -27,6 +28,9 @@ def add_opex_var(model, block, ref='output'):
     ref : string
        Reference side on which opex are based on
         (e.g. powerplant MWhth -> input or MWhel -> output)
+    idx : int
+       Index to select output/input of list of inputs/ouputs if multiple i/o
+       exist
 
     Returns
     -------
@@ -38,12 +42,12 @@ def add_opex_var(model, block, ref='output'):
     opex_var = {obj.uid: obj.opex_var for obj in block.objs}
     # outputs for cost objs
     if ref == 'output':
-        expr = sum(model.w[e, model.O[e][0], t] * opex_var[e]
+        expr = sum(model.w[e, model.O[e][idx], t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
 
     elif ref == 'input':
-        expr = sum(model.w[model.I[e][0], e, t] * opex_var[e]
+        expr = sum(model.w[model.I[e][idx], e, t] * opex_var[e]
                    for e in block.uids
                    for t in model.timesteps)
     return(expr)
@@ -254,6 +258,86 @@ def add_capex(model, block, ref='output'):
         else:
             print('No reference defined. Please specificy in `add_capex()`')
 
+def linearized_invest_costs(model, block, ref):
+    """ This functionality add linearized costs with sos2-constraint.
+
+    The capex attribute of objects in 'block.objs'- needs to be a list of tuples
+    with interpolation points. Every first element is the absolut value of investment
+    for the corresponding size of investment in the second element of the tuple.
+
+    e.g.  capex = [(10, 20), (20, 15),..]
+
+
+    Parameters
+    ----------
+    model : OptimizationModel() instance
+    block : SimpleBlock()
+         block to group all objects corresponding to one oemof base class
+    ref : string
+        string to check if capex is referred to capacity (storage) or output
+        (e.g. powerplant)
+    """
+    if not block.objs:
+        expr = 0
+        print('No objects for capex objective term defined. No action taken')
+        return(expr)
+
+    else:
+
+        invest_points = {obj.uid: [point[0] for point in obj.capex]
+                         for obj in block.objs}
+        size_points = {obj.uid:  [point[1] for point in obj.capex]
+                       for obj in block.objs}
+        if ref == 'output':
+            variable = block.add_out
+        elif ref == 'capacity':
+            variable = block.add_cap
+
+        def SOS_indices_init(block, e):
+            return [ (e, i)  for i in range(len(invest_points[e]))]
+        block.SOS_indices = po.Set(block.uids, dimen=2, ordered=True,
+                                   initialize=SOS_indices_init)
+
+        def ub_indices_init(block):
+            return [(e, i) for e in block.uids
+                           for i in range(len(invest_points[e]))]
+        block.ub_indices = po.Set(ordered=True, dimen=2,
+                                  initialize=ub_indices_init)
+
+        block.interpolate = po.Var(block.ub_indices, within=po.NonNegativeReals,
+                                   bounds=(0, 1))
+
+        block.invest_costs = po.Var(block.uids, within=po.NonNegativeReals)
+        ## storage costs (SOS2)
+        def sos2_invest_rule(block, e):
+            return (block.invest_costs[e] == sum(block.interpolate[e, i] *
+                    invest_points[e][i]
+                    for i in range(len(invest_points[e]))))
+        block.linearized_invest_constr = po.Constraint(block.uids,
+                                                    rule=sos2_invest_rule)
+
+        # storage size (SOS2)
+        def sos2_size_rule(model, e):
+            return (variable[e] == sum(block.interpolate[e, i] *
+                    size_points[e][i]
+                    for i in range(len(size_points[e]))))
+        block.add_cap_constraint = po.Constraint(block.uids,
+                                                 rule=sos2_size_rule)
+        # sos variable for storage
+        def interpolate_rule(block, e):
+            return (sum(block.interpolate[e, i]
+                    for i in range(len(invest_points[e])))  - 1 == 0)
+        block.interpolate_constraint = po.Constraint(block.uids,
+                                                     rule=interpolate_rule)
+
+        block.invest_sos_constraint = po.SOSConstraint(block.uids,
+                                                       var=block.interpolate,
+                                                       index=block.SOS_indices,
+                                                       sos=2)
+
+        expr = sum(block.invest_costs[e] for e in block.uids)
+
+        return(expr)
 
 def add_startup_costs(model, block):
     """ Adds startup costs for components to objective expression

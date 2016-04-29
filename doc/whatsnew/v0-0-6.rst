@@ -1,0 +1,37 @@
+v0.0.6 (April 29, 2016)
+++++++++++++++++++++++++++
+
+New features
+############
+* It is now possible to choose whether or not the heat load profile generated
+  with the BDEW  heat load profile method should only include space heating
+  or space heating and warm water combined.
+  (`Issue #130 <https://github.com/oemof/oemof/issues/130>`_)
+* Add possibility to change the order of the columns of a DataFrame subset. This is useful to change the order of stacked plots. (`Issue #148 <https://github.com/oemof/oemof/issues/148>`_)
+
+Documentation
+#############
+
+
+Testing
+#######
+* Fix constraint tests (`Issue #137 <https://github.com/oemof/oemof/issues/137>`_)
+
+Bug fixes
+#########
+* Use of wrong columns in generation of SF vector in BDEW heat load profile
+  generation (`Issue #129 <https://github.com/oemof/oemof/issues/129>`_)
+* Use of wrong temperature vector in generation of h vector in BDEW heat load
+  profile generation.
+
+Other changes
+#############
+
+
+Contributors
+############
+* Uwe Krien
+* Stephan Günther
+* Simon Hilpert
+* Cord Kaldemeyer
+* Birgit Schachler

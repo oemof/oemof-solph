@@ -189,6 +189,12 @@ class OptimizationModel(po.ConcreteModel):
     def objective_assembler(self, objective_options):
         """ calls functions to add predefined objective functions
 
+        Parameters
+        ----------
+        self : OptimizationModel() instance
+        objective_options : dict
+           dictionary with infos about objects. key "function" hold function
+           to build objective
         """
 
         revenue_objects = objective_options.get("revenue_objects")
@@ -202,6 +208,24 @@ class OptimizationModel(po.ConcreteModel):
             objective_options["function"](self,
                                           cost_objects=cost_objects,
                                           revenue_objects=revenue_objects)
+
+    def update_objective(self, objective_options=None):
+        """
+        Updates the objective function with new parameters from entities
+
+        Parameters
+        ----------
+        self : OptimizationModel() instance
+        objective_options : dict
+           dictionary with infos about objects. key "function" hold function
+           to build objective
+        """
+        if not objective_options:
+            oo = self.objective_options
+        else:
+            oo = objective_options
+        self.objective_assembler(objective_options=oo)
+        self.preprocess()
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
