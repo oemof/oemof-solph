@@ -1,4 +1,4 @@
-v0.0.6 (TBA)
+v0.0.6 (April 29, 2016)
 ++++++++++++++++++++++++++
 
 New features
@@ -32,3 +32,6 @@ Contributors
 ############
 * Uwe Krien
 * Stephan Günther
+* Simon Hilpert
+* Cord Kaldemeyer
+* Birgit Schachler
