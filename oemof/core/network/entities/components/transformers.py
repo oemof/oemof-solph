@@ -154,6 +154,9 @@ class Storage(Transformer):
         The state of charge (soc) at timestep 0.
     add_cap_limit : float
         limit of additional installed capacity (only investment models)
+    eta : list (optional)
+       constant efficiency for charging, discharging
+       input e.g. eta = [0.9, 0.9]
     eta_in : float
         efficiency at charging
     eta_out : float
@@ -180,6 +183,11 @@ class Storage(Transformer):
         self.cap_loss = kwargs.get('cap_loss', 0)
         self.c_rate_in = kwargs.get('c_rate_in', None)
         self.c_rate_out = kwargs.get('c_rate_out', None)
+        self.eta = kwargs.get('eta')
+
+        if isinstance(self.eta, list):
+            self.eta_in = self.eta[0]
+            self.eta_out = self.eta[1]
 
         if not self.optimization_options.get('investment'):
             if self.cap_max == 0:
