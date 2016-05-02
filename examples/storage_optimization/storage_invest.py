@@ -159,6 +159,39 @@ energysystem.optimize()
 #energysystem.dump()
 #energysystem.restore()
 
+logging.info('Check the result')
+
+myresults = tpd.DataFramePlot(energy_system=energysystem)
+
+pp_gas = myresults.slice_by(bus_uid='bel', bus_type='el',
+                            type='input', obj_uid='pp_gas',
+                            date_from='2012-01-01 00:00:00',
+                            date_to='2012-12-31 23:00:00')
+
+demand = myresults.slice_by(bus_uid='bel', bus_type='el',
+                            type='output', obj_uid='demand',
+                            date_from='2012-01-01 00:00:00',
+                            date_to='2012-12-31 23:00:00')
+
+wind = myresults.slice_by(bus_uid='bel', bus_type='el',
+                          type='input', obj_uid='wind',
+                          date_from='2012-01-01 00:00:00',
+                          date_to='2012-12-31 23:00:00')
+
+pv = myresults.slice_by(bus_uid='bel', bus_type='el',
+                        type='input', obj_uid='pv',
+                        date_from='2012-01-01 00:00:00',
+                        date_to='2012-12-31 23:00:00')
+
+rdict = {'pp_gas_sum': pp_gas.sum(),
+         'demand_sum': demand.sum(),
+         'demand_max': demand.max(),
+         'wind_sum': wind.sum(),
+         'wind_inst': wind.max()/0.99989,
+         'pv_sum': pv.sum(),
+         'pv_inst': pv.max()/0.76474,
+         'storage_cap': energysystem.results[storage].add_cap}
+
 logging.info('Plot the results')
 
 cdict = {'wind': '#5b5bae',
