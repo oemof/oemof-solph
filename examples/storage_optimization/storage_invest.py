@@ -197,7 +197,10 @@ plt.rcParams.update({'font.size': 19})
 plt.style.use('grayscale')
 
 handles, labels = myplot.io_plot(
-    bus_uid="bel", cdict=cdict, line_kwa={'linewidth': 4},
+    bus_uid="bel", cdict=cdict,
+    barorder=['pv', 'wind', 'pp_gas', 'sto_simple'],
+    lineorder=['demand', 'sto_simple'],
+    line_kwa={'linewidth': 4},
     ax=fig.add_subplot(1, 1, 1),
     date_from="2012-06-01 00:00:00",
     date_to="2012-06-8 00:00:00",
