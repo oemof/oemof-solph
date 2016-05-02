@@ -190,7 +190,9 @@ rdict = {'pp_gas_sum': pp_gas.sum(),
          'wind_inst': wind.max()/0.99989,
          'pv_sum': pv.sum(),
          'pv_inst': pv.max()/0.76474,
-         'storage_cap': energysystem.results[storage].add_cap}
+         'storage_cap': energysystem.results[storage].add_cap,
+         'objective': energysystem.results.objective}
+
 
 logging.info('Plot the results')
 
