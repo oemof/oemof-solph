@@ -159,7 +159,7 @@ energysystem.optimize()
 #energysystem.dump()
 #energysystem.restore()
 
-logging.info('Check the result')
+logging.info('Check the results')
 
 myresults = tpd.DataFramePlot(energy_system=energysystem)
 
