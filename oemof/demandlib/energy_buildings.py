@@ -121,7 +121,7 @@ class bdew_elec_slp():
 
         return new_df
 
-    def simple_industrial_profile(self, df):
+    def simple_industrial_profile(self, df, **kwargs):
         """
         Create industrial load profile
 
@@ -142,20 +142,19 @@ class bdew_elec_slp():
         """
 
         # TODO: Remove the hard coded values
-        am = settime(7, 0, 0)
-        pm = settime(23, 30, 0)
+        am = kwargs.get('am', settime(7, 0, 0))
+        pm = kwargs.get('pm', settime(23, 30, 0))
 
         df['ind'] = 0
 
         # Day(am to pm), night (pm to am), week day (week),
         # weekend day (weekend)
-        week = [1, 2, 3, 4, 5]
-        weekend = [0, 6, 7]
+        week = kwargs.get('week', [1, 2, 3, 4, 5])
+        weekend = kwargs.get('weekend', [0, 6, 7])
 
-        profile_factors = {'week': {'day': 0.8,
-                                    'night': 0.6},
-                           'weekend': {'day': 0.9,
-                                       'night': 0.7}}
+        profile_factors = kwargs.get('profile_factors',
+            {'week': {'day': 0.8, 'night': 0.6},
+             'weekend': {'day': 0.9, 'night': 0.7}})
 
         df['ind'].mask(df['weekday'].between_time(am, pm).isin(week),
             profile_factors['week']['day'], True)
