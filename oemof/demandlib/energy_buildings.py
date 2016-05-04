@@ -63,7 +63,7 @@ class bdew_elec_slp():
         new_df = self.create_bdew_load_profiles(time_df, slp_types)
 
         # Add the slp for the industrial group
-        new_df['i0'] = self.simple_industrial_heat_profile(time_df)
+        new_df['i0'] = self.simple_industrial_profile(time_df)
 
         new_df.drop(['hour', 'weekday'], 1, inplace=True)
         # TODO: Gleichmäßig normalisieren der i0-Lastgang hat höhere
@@ -121,7 +121,7 @@ class bdew_elec_slp():
 
         return new_df
 
-    def simple_industrial_heat_profile(self, df):
+    def simple_industrial_profile(self, df):
         """
         Create industrial load profile
 
