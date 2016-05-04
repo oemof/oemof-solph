@@ -122,7 +122,21 @@ class bdew_elec_slp():
         return new_df
 
     def simple_industrial_heat_profile(self, df):
-        ''
+        """
+        Create industrial load profile
+
+        Parameters
+        ----------
+
+        am : datetime.time
+            beginning of workday
+        pm : datetime.time
+            end of workday
+        week : list
+            list of weekdays
+        weekend : list
+            list of weekend days
+        """
 
         # TODO: Remove the hard coded values
         am = settime(7, 0, 0)
