@@ -136,6 +136,9 @@ class bdew_elec_slp():
             list of weekdays
         weekend : list
             list of weekend days
+        profile_factors : dictionary
+            dictionary with scaling factors for night and day of weekdays and
+            weekend days
         """
 
         # TODO: Remove the hard coded values
@@ -149,14 +152,19 @@ class bdew_elec_slp():
         week = [1, 2, 3, 4, 5]
         weekend = [0, 6, 7]
 
-        df['ind'].mask(df['weekday'].between_time(am, pm).isin(week), 0.8,
-                       True)
-        df['ind'].mask(df['weekday'].between_time(pm, am).isin(week), 0.6,
-                       True)
-        df['ind'].mask(df['weekday'].between_time(am, pm).isin(weekend), 0.9,
-                       True)
-        df['ind'].mask(df['weekday'].between_time(pm, am).isin(weekend), 0.7,
-                       True)
+        profile_factors = {'week': {'day': 0.8,
+                                    'night': 0.6},
+                           'weekend': {'day': 0.9,
+                                       'night': 0.7}}
+
+        df['ind'].mask(df['weekday'].between_time(am, pm).isin(week),
+            profile_factors['week']['day'], True)
+        df['ind'].mask(df['weekday'].between_time(pm, am).isin(week),
+            profile_factors['week']['night'], True)
+        df['ind'].mask(df['weekday'].between_time(am, pm).isin(weekend),
+            profile_factors['weekend']['day'], True)
+        df['ind'].mask(df['weekday'].between_time(pm, am).isin(weekend),
+            profile_factors['weekend']['night'], True)
 
         if df['ind'].isnull().any(axis=0):
             logging.error('NAN value found in industrial load profile')
