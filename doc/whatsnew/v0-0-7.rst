@@ -1,25 +1,8 @@
-v0.0.7 (TBA)
+v0.0.7 (May 4, 2016)
 ++++++++++++++++++++++++++
-
-New features
-############
-
-
-Documentation
-#############
-
-
-Testing
-#######
-
 
 Bug fixes
 #########
 
+ * Exclude non working pyomo version
 
-Other changes
-#############
-
-
-Contributors
-############
