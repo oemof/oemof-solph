@@ -7,6 +7,9 @@ import pandas as pd
 from datetime import time as settime
 import os
 
+from oemof.tools import helpers
+
+
 class Building():
     """
     """
