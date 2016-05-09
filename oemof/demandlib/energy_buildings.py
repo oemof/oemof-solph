@@ -152,7 +152,11 @@ class IndustrialLoadProfile():
         '''
         '''
         if method == 'simple_industrial_profile':
-            self.profile = self.simple_industrial_profile(**kwargs)
+            self.dataframe['i0'] = self.simple_industrial_profile(**kwargs)
+            if self.annual_demand:
+                self.profile = (
+                    self.dataframe['i0'] / self.dataframe['i0'].sum()
+                    * self.annual_demand)
 
     def simple_industrial_profile(self, **kwargs):
         """
