@@ -63,7 +63,8 @@ class bdew_elec_slp():
         new_df = self.create_bdew_load_profiles(time_df, slp_types)
 
         # Add the slp for the industrial group
-        ilp = IndustrialLoadProfile(dataframe=time_df)
+        ilp = IndustrialLoadProfile(
+            method='simple_industrial_profile', dataframe=time_df)
         new_df['i0'] = ilp.simple_industrial_profile()
 
         new_df.drop(['hour', 'weekday'], 1, inplace=True)
@@ -133,13 +134,21 @@ class bdew_elec_slp():
 
 class IndustrialLoadProfile():
     'Generate an industrial heat or electric load profile.'
-    def __init__(self, **kwargs):
+    def __init__(self, method, **kwargs):
         """
         """
 
         self.dataframe = kwargs.get('dataframe', None)
         if self.dataframe is None:
             self.dataframe = helpers.create_basic_dataframe(kwargs.get('year'))
+
+        self.decider(method, **kwargs)
+
+    def decider(self, method, **kwargs):
+        '''
+        '''
+        if method == 'simple_industrial_profile':
+            self.profile = self.simple_industrial_profile(**kwargs)
 
     def simple_industrial_profile(self, **kwargs):
         """
