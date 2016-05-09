@@ -63,7 +63,8 @@ class bdew_elec_slp():
         new_df = self.create_bdew_load_profiles(time_df, slp_types)
 
         # Add the slp for the industrial group
-        new_df['i0'] = self.simple_industrial_profile(time_df)
+        ilp = IndustrialLoadProfile(dataframe=time_df)
+        new_df['i0'] = ilp.simple_industrial_profile()
 
         new_df.drop(['hour', 'weekday'], 1, inplace=True)
         # TODO: Gleichmäßig normalisieren der i0-Lastgang hat höhere
@@ -121,7 +122,26 @@ class bdew_elec_slp():
 
         return new_df
 
-    def simple_industrial_profile(self, df, **kwargs):
+    @property
+    def slp(self):
+        return self.slp_frame
+
+    @property
+    def year(self):
+        return self._year
+
+
+class IndustrialLoadProfile():
+    'Generate an industrial heat or electric load profile.'
+    def __init__(self, **kwargs):
+        """
+        """
+
+        self.dataframe = kwargs.get('dataframe', None)
+        if self.dataframe is None:
+            self.dataframe = helpers.create_basic_dataframe(kwargs.get('year'))
+
+    def simple_industrial_profile(self, **kwargs):
         """
         Create industrial load profile
 
@@ -153,25 +173,21 @@ class bdew_elec_slp():
             {'week': {'day': 0.8, 'night': 0.6},
              'weekend': {'day': 0.9, 'night': 0.7}})
 
-        df['ind'] = 0
+        self.dataframe['ind'] = 0
 
-        df['ind'].mask(df['weekday'].between_time(am, pm).isin(week),
+        self.dataframe['ind'].mask(
+            self.dataframe['weekday'].between_time(am, pm).isin(week),
             profile_factors['week']['day'], True)
-        df['ind'].mask(df['weekday'].between_time(pm, am).isin(week),
+        self.dataframe['ind'].mask(
+            self.dataframe['weekday'].between_time(pm, am).isin(week),
             profile_factors['week']['night'], True)
-        df['ind'].mask(df['weekday'].between_time(am, pm).isin(weekend),
+        self.dataframe['ind'].mask(
+            self.dataframe['weekday'].between_time(am, pm).isin(weekend),
             profile_factors['weekend']['day'], True)
-        df['ind'].mask(df['weekday'].between_time(pm, am).isin(weekend),
+        self.dataframe['ind'].mask(
+            self.dataframe['weekday'].between_time(pm, am).isin(weekend),
             profile_factors['weekend']['night'], True)
 
-        if df['ind'].isnull().any(axis=0):
+        if self.dataframe['ind'].isnull().any(axis=0):
             logging.error('NAN value found in industrial load profile')
-        return df.pop('ind')
-
-    @property
-    def slp(self):
-        return self.slp_frame
-
-    @property
-    def year(self):
-        return self._year
+        return self.dataframe.pop('ind')
