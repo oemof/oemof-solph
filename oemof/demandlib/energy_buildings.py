@@ -208,3 +208,7 @@ class IndustrialLoadProfile():
         if self.dataframe['ind'].isnull().any(axis=0):
             logging.error('NAN value found in industrial load profile')
         return self.dataframe.pop('ind')
+
+    @property
+    def slp(self):
+        return self.profile
