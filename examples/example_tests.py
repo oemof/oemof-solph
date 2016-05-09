@@ -42,7 +42,8 @@ try:
     esys = storage_invest.optimise_storage_size(esys, filename=filepath)
     results = storage_invest.get_result_dict(esys)
     stor_invest_run = True
-except:
+except Exception as e:
+    testdict['stor_inv']['messages'] = {'error': e}
     stor_invest_run = False
 
 stor_invest_dict = {
@@ -63,6 +64,6 @@ for tests in testdict.values():
     logging.info(tests['name'])
     logging.info("Run check: {0}".format(tests['run']))
     logging.info("Result check: {0}".format(tests['results']))
-    if show_messages:
+    if show_messages and 'messages' in tests:
         for message in tests['messages'].values():
             logging.error(message)
