@@ -140,6 +140,7 @@ class IndustrialLoadProfile():
     def __init__(self, method, **kwargs):
         """
         """
+        self.annual_demand = kwargs.get('annual_demand')
 
         self.dataframe = kwargs.get('dataframe', None)
         if self.dataframe is None:
