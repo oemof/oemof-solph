@@ -30,11 +30,32 @@ See the documentation of the dev branch at
 `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
 
-Collaboration
--------------
+Collaboration with pull requests
+--------------------------------
 
-We use the collaboration features from Github, see https://github.com/oemof.
+To collaborate use the pull request functionality of github.
 
+How to create a pull request
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ...
+* ...
+* ...
+* Name the related team within the title of the pull request, like "solph: pull request for new feature within solph".
+* Assign a team member.
+
+Pull request workflow for changes, new features and bug fixes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+We have the following workflow for revising and merging pull requests.
+
+After creating a pull request time is running as follows:
+
+* Profound changes: team members have **15 workdays** for commenting, revising and merging; afterwards consensus (which includes a silent consensus) with the right to merge (only for team members)
+* New features: team members have **10 workdays** for commenting, revising and merging; afterwards consensus (which includes a silent consensus) with the right to merge (only for team members)
+* Large substantial bug fix: four-eyes-principle (pull request needed)
+* Small bug fix: decision by oneself (pull request not needed)
+* Typos: fix directly in dev branch (fast forward allowed)
+ 
+Please be aware: only team members have the right to merge pull requests into the current dev branch.
 
 Style guidelines
 ----------------
