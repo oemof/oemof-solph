@@ -18,7 +18,7 @@ Installing oemof
 Developing oemof
 =====================
 
-We highly encourage you to contribute to further development of oemof. If you want to collaborate see description below or contact us.
+We highly encourage you to contribute to further development of oemof. If you want to collaborate install the developer version as described below and pay attention to the developer notes described in the documentation: http://oemof.readthedocs.org/en/latest/developer_notes.html
 
 To install the developer version two steps are necessary:
 
@@ -27,9 +27,9 @@ To install the developer version two steps are necessary:
   git clone git@github.com:oemof/oemof.git
   sudo pip3 install -e /path/to/the/repository
 
-See http://oemof.readthedocs.org/en/latest/installation_and_setup.html for further information.
+See http://oemof.readthedocs.org/en/latest/installation_and_setup.html for further information on installation and setup.
 
-See the developer version of the documentation at: http://oemof.readthedocs.org/en/latest/.
+See the developer version of the full documentation at: http://oemof.readthedocs.org/en/latest/.
 
 Further packages within oemof
 ==============================
