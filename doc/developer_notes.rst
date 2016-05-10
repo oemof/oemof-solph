@@ -39,11 +39,11 @@ How to create a pull request
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * ...
 * ...
-* ...
+* Tests must run, see ...
 * Name the related team within the title of the pull request, like "solph: pull request for new feature within solph".
 * Assign a team member.
 
-Pull request workflow for changes, new features and bug fixes
+Pull request workflow and merging rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 We have the following workflow for revising and merging pull requests.
 
@@ -56,6 +56,11 @@ After creating a pull request time is running as follows:
 * Typos: fix directly in dev branch (fast forward allowed)
  
 Please be aware: only team members have the right to merge pull requests into the current dev branch.
+
+Tests
+^^^^^
+* ...
+* ...
 
 Style guidelines
 ----------------
