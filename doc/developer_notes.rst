@@ -26,7 +26,7 @@ Newly added required packages (via PyPi) are installed by performing a manual up
 Documentation
 -------------
 
-See the documentation of the dev branch at
+See the developer version of the documentation of the dev branch at
 `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
 
