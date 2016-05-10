@@ -1,0 +1,9 @@
+language: python
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+# command to install dependencies
+install: "pip3 install ."
+# command to run tests
+script: nosetests3 --with-doctest
