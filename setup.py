@@ -23,6 +23,5 @@ setup(name='oemof',
       install_requires=['dill',
                         'numpy >= 1.7.0',
                         'pandas >= 0.17.0',
-                        'pyomo >= 4.2.0, != 4.3.11377',
-			'nose']
+                        'pyomo >= 4.2.0, != 4.3.11377']
      )
