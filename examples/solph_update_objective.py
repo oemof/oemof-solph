@@ -34,12 +34,12 @@ simulation = es.Simulation(solver='glpk', timesteps=range(len(time_index)),
 energy_system = es.EnergySystem(simulation=simulation, time_idx=time_index)
 
 # resources
-bcoal = Bus(uid="coal", type="coal", price=20, balanced=False, excess=False)
-bgas = Bus(uid="gas", type="gas", price=35, balanced=False, excess=False)
+bcoal = Bus(uid="coal", type="coal", price=20, balanced=False)
+bgas = Bus(uid="gas", type="gas", price=35, balanced=False)
 
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="el", excess=False)
+b_el = Bus(uid="b_el", type="el")
 
 # demand
 demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
