@@ -72,6 +72,7 @@ class OptimizationModel(po.ConcreteModel):
     def __init__(self, energysystem, loglevel=logging.INFO):
         super().__init__()
         logging.basicConfig(format="%(levelname)s:%(message)s", level=loglevel)
+        # Todo clean up attributes
         self.entities = energysystem.entities
         self.energysystem = energysystem
         self.timesteps = energysystem.simulation.timesteps
@@ -82,7 +83,11 @@ class OptimizationModel(po.ConcreteModel):
         # calculate all edges ([("coal", "pp_coal"),...])
         self.components = [e for e in self.entities
                            if isinstance(e, Component)]
+
+        # Todo adept self.edges to new structure: str(Node) (simon)
         self.all_edges = self.edges(self.components)
+
+        # Todo exchange function with pyomo expression (simon)
         var.add_continuous(model=self, edges=self.all_edges)
 
         # group components by type (cbt: components by type)
