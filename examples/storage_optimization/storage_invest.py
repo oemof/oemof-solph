@@ -51,11 +51,12 @@ from oemof.core.network.entities.components import sources as source
 from oemof.core.network.entities.components import transformers as transformer
 
 
-def initialise_energysystem():
+def initialise_energysystem(number_timesteps=8760):
     """initialize the energy system
     """
     logging.info('Initialize the energy system')
-    time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
+    time_index = pd.date_range('1/1/2012', periods=number_timesteps,
+                               freq='H')
     simulation = es.Simulation(
         timesteps=range(len(time_index)), verbose=True, solver='glpk',
         objective_options={'function': predefined_objectives.minimize_cost})
