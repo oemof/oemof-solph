@@ -14,7 +14,7 @@ def check(cdict, runcheck, subdict):
     if runcheck:
         count = 0
         subdict['run'] = "Okay"
-        subdict['messages'] = {}
+        subdict.setdefault('messages', {})
         for key, value in results.items():
             maxval = cdict[key] + abs(cdict[key]) * tolerance
             minval = cdict[key] - abs(cdict[key]) * tolerance
@@ -33,9 +33,9 @@ def check(cdict, runcheck, subdict):
         subdict['results'] = "Failed"
 
 
-# ********* storage invest example *********************************************
-testdict['stor_inv'] = {
-    'name': "Storage invest example"}
+# ********* storage invest example ******************************************
+testdict['stor_inv'] = {'name': "Storage invest example"}
+
 try:
     esys = storage_invest.initialise_energysystem()
     filepath = os.path.join('storage_optimization', 'storage_invest.csv')
