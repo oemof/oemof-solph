@@ -13,6 +13,7 @@ import dill as pickle
 
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
+from oemof.network import Node
 from oemof.solph.optimization_model import OptimizationModel as OM
 
 
@@ -63,7 +64,13 @@ class Grouping:
     def __call__(self, e, d):
         self._insert(e, d)
 
-Grouping.UID = Grouping(attrgetter('uid'), value=lambda e: e,
+def _uid_or_str(node_or_entity):
+    """ Helper function to support the transition from `Entitie`s to `Node`s.
+    """
+    return (node_or_entity.uid if hasattr(node_or_entity, "uid")
+                               else str(node_or_entity))
+
+Grouping.UID = Grouping(_uid_or_str, value=lambda e: e,
                         collide=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
 
 class EnergySystem:
@@ -170,6 +177,7 @@ class EnergySystem:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
+        Node.registry = self
         self.groups = {}
         self._groupings = [Grouping.UID] + [ Grouping.create(g)
                                              for g in kwargs.get('groupings', [])]

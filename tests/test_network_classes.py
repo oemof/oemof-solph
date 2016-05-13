@@ -1,6 +1,8 @@
 from nose.tools import assert_raises, eq_, ok_
 
-from oemof.network import Node
+from oemof.core.energy_system import EnergySystem as ES
+from oemof.network import Bus, Node, Transformer
+
 
 class Node_Tests:
     def test_that_attributes_cannot_be_added(self):
@@ -25,4 +27,17 @@ class Node_Tests:
         ok_(n3 in n1.inputs,
             "{0} in {1}.outputs but {1} not in {0}.inputs.".format(n1, n3))
 
+
+class EnergySystem_Nodes_Integration_Tests:
+
+    def setup(self):
+        self.es = ES()
+
+    def test_node_registration(self):
+        eq_(Node.registry, self.es)
+        b1 = Bus(label='<B1>')
+        eq_(self.es.entities[0], b1)
+        b2 = Bus(label='<B2>')
+        Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
+        ok_(isinstance(self.es.entities[2], Transformer))
 
