@@ -36,19 +36,27 @@ class EnergySystem:
 Bus = on.Bus
 
 
+class Investment:
+    """
+    """
+    def __init__(self, maximum=float('+inf')):
+        self.maximum = maximum
+
+
 class Sink(on.Sink):
     """
     """
     def __init__(self, **kwargs):
         super().__init__()
-        self.maximum_nominal_value = kwargs.get('maximum_nominal_value')
+        self.investment = kwargs.get('investment')
 
 class Source(on.Source):
     """
     """
     def __init__(self, **kwargs):
         super().__init__()
-        self.maximum_nominal_value = kwargs.get('maximum_nominal_value')
+        self.investment = kwargs.get('investment')
+
 
 class LinearTransformer(on.Transformer):
     """
@@ -56,7 +64,8 @@ class LinearTransformer(on.Transformer):
     def __init__(self, **kwargs):
         super().__init__()
         self.conversion_factors = kwargs.get('conversion_factors')
-        self.maximum_nominal_value = kwargs.get('maximum_nominal_value')
+        self.investment = kwargs.get('investment')
+
 
 class Storage(on.Transformer):
     """
@@ -71,7 +80,12 @@ class Storage(on.Transformer):
         self.nominal_output_capacity_ratio = kwargs.get('nominal_input_capacity_ratio', 0.2)
         self.inflow_conversion_factor = kwargs.get('inflow_conversion_factor', 1)
         self.outflow_conversion_factor = kwargs.get('outflow_conversion_factor', 1)
-
+        self.investment = kwargs.get('investment')
 
 if __name__ == "__main__":
-    Bus(label="bus1")
+
+    b = Bus(label="el")
+
+    s = Source(outputs={b: Flow()}, investement=Investment(maximum=1000))
+    s = Sink(inputs={b: Flow()})
+
