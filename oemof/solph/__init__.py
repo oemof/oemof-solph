@@ -44,14 +44,14 @@ class Investment:
 class Sink(on.Sink):
     """
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__()
         self.investment = kwargs.get('investment')
 
 class Source(on.Source):
     """
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__()
         self.investment = kwargs.get('investment')
 
@@ -59,7 +59,7 @@ class Source(on.Source):
 class LinearTransformer(on.Transformer):
     """
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__()
         self.conversion_factors = kwargs.get('conversion_factors')
         self.investment = kwargs.get('investment')
@@ -68,7 +68,7 @@ class LinearTransformer(on.Transformer):
 class Storage(on.Transformer):
     """
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__()
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.maximum_nominal_capacity = kwargs.get('maximum_nominal_capacity')
