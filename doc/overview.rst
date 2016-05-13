@@ -3,8 +3,7 @@
 ##########################################
 
 
-This so called meta-description was developed to make oemof easy to use and
-develop. It describes general ideas and structures of oemof and its modules.
+This overview was developed to make oemof easy to use and develop. It describes general ideas and structures of oemof and its modules.
 
 
 The idea of an open framework
