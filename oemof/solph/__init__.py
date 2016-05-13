@@ -46,14 +46,14 @@ class Sink(on.Sink):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.investment = kwargs.get('investment')
+
 
 class Source(on.Source):
     """
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.investment = kwargs.get('investment')
+
 
 
 class LinearTransformer(on.Transformer):
@@ -62,7 +62,7 @@ class LinearTransformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factors = kwargs.get('conversion_factors')
-        self.investment = kwargs.get('investment')
+
 
 
 class Storage(on.Transformer):
@@ -78,7 +78,19 @@ class Storage(on.Transformer):
         self.nominal_output_capacity_ratio = kwargs.get('nominal_input_capacity_ratio', 0.2)
         self.inflow_conversion_factor = kwargs.get('inflow_conversion_factor', 1)
         self.outflow_conversion_factor = kwargs.get('outflow_conversion_factor', 1)
-        self.investment = kwargs.get('investment')
+
+
+
+def investment_grouping(node):
+    if hasattr(node, "investment"):
+        return Investment
+    return None
+
+def flowbounds(node):
+    pass
+
+subsets = [investment_grouping, flowbounds]
+
 
 if __name__ == "__main__":
 
