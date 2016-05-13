@@ -39,24 +39,39 @@ Bus = on.Bus
 class Sink(on.Sink):
     """
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
+        self.maximum_nominal_value = kwargs.get('maximum_nominal_value')
 
 class Source(on.Source):
     """
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
+        self.maximum_nominal_value = kwargs.get('maximum_nominal_value')
 
 class LinearTransformer(on.Transformer):
     """
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
+        self.conversion_factors = kwargs.get('conversion_factors')
+        self.maximum_nominal_value = kwargs.get('maximum_nominal_value')
 
 class Storage(on.Transformer):
     """
     """
-    def __init__(self):
-
+    def __init__(self, **kwargs):
         super().__init__()
+        self.nominal_capacity = kwargs.get('nominal_capacity')
+        self.maximum_nominal_capacity = kwargs.get('maximum_nominal_capacity')
+        self.initial_capacity = kwargs.get('initial_capacity', 0)
+        self.capacity_loss = kwargs.get('capacity_loss', 0)
+        self.nominal_input_capacity_ratio = kwargs.get('nominal_input_capacity_ratio', 0.2)
+        self.nominal_output_capacity_ratio = kwargs.get('nominal_input_capacity_ratio', 0.2)
+        self.inflow_conversion_factor = kwargs.get('inflow_conversion_factor', 1)
+        self.outflow_conversion_factor = kwargs.get('outflow_conversion_factor', 1)
+
+
+if __name__ == "__main__":
+    Bus(label="bus1")
