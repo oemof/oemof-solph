@@ -111,17 +111,12 @@ class OptimizationModel(pyomo.ConcreteModel):
 
         self.relaxed = getattr(es.simulation, "relaxed", False)
 
-        def is_investment_flow(source, target):
-            component = next(filter( lambda x: not isinstance(Bus, x),
-                                     (source, target)))
-            return getattr(component, "investment", False)
-
         # edges dictionary with tuples as keys and flows as values
         self.non_investment_flows = {
                 (str(source), str(target)): source.outputs[target]
                 for source in es.nodes
                 for target in source.outputs
-                if not is_investment_flow(source, target) }
+                if not getattr(source.output[target], "investment", False) }
 
         # pyomo Set for all edges as tuples
         self.FLOWS = pyomo.Set(initialize=self.flows.keys, ordered=True)
@@ -131,7 +126,7 @@ class OptimizationModel(pyomo.ConcreteModel):
                 (str(source), str(target)): source.outputs[target]
                 for source in es.nodes
                 for target in source.outputs
-                if is_investment_flow(source, target) }
+                if getattr(source.output[target], "investment", False) }
 
         #
         if self.investment_flows:
