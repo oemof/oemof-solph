@@ -9,19 +9,17 @@ import oemof.network as on
 
 
 class Flow:
-    def __init__(self, actual_value, nominal_value, variable_costs, min, max,
-                 fixed_costs, summed_min, summed_max, fixed=False):
+    def __init__(self, *args, **kwargs):
         """
         """
-        self.min = min
-        self.max = max
-        self.actual_value = actual_value
-        self.nominal_value = nominal_value
-        self.variable_costs =  variable_costs
-        self.fixed_costs = fixed_costs
-        self.summed_min = summed_min
-        self.summed_max =  summed_min
-        self.fixed = fixed
+        self.min = kwargs.get('nominal_value')
+        self.max = kwargs.get('variable_costs')
+        self.actual_value = kwargs.get('actual_value')
+        self.nominal_value = kwargs.get('nominal_value')
+        self.variable_costs =  kwargs.get('variable_costs')
+        self.fixed_costs = kwargs.get('fixed_costs')
+        self.summed = kwargs.get('summed')
+        self.fixed = kwargs.get('fixed')
 
 
 # TODO: create solph sepcific energysystem subclassed from core energy system
@@ -86,8 +84,8 @@ if __name__ == "__main__":
 
     b = Bus(label="el")
 
-    s = Source(outputs={b: Flow(actual_value=[10, 5, 10], fixed=True)},
+    so = Source(outputs={b: Flow(actual_value=[10, 5, 10], fixed=True)},
                investement=Investment(maximum=1000))
-    s = Sink(inputs={b: Flow(min=[0,0,0], max=[0.1, 0.2, 0.9],
+    si = Sink(inputs={b: Flow(min=[0,0,0], max=[0.1, 0.2, 0.9],
                              nominal_value=10, fixed=True)})
 
