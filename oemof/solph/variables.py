@@ -271,15 +271,15 @@ def set_outages(model, block, outagetype='period', side='output'):
 
     Parameters
     ----------
-    model :OptimizationModel() instance
+    model : OptimizationModel() instance
         An object to be solved containing all Variables, Constraints, Data.
     block : SimpleBlock()
          block to group all objects corresponding to one oemof base class
     outagetype : string
-        Type to model outages of component if outages is scalar.
-       'period' yield one timeblock where component is off,
-       while 'random_days' will sample random days over the timehorizon
-       where component is off
+        String indicates how to model outages of component. If outages is
+        scalar 'period' yield one timeblock where component is off,
+        while 'random_days' will sample random days over the timehorizon
+        where component will forced to be offline.
     side : string
        Side of component to fix to zero: 'output', 'input'.
 
@@ -304,13 +304,15 @@ def set_outages(model, block, outagetype='period', side='output'):
     if side == 'input' and timesteps[e]:
         for e in block.uids:
             for t in timesteps[e]:
-                model.w[model.I[e][0], e, t] = 0
-                model.w[model.I[e][0], e, t].fix()
+                if t <= len(model.timesteps)-1:
+                    model.w[model.I[e][0], e, t] = 0
+                    model.w[model.I[e][0], e, t].fix()
     if side == 'output' and timesteps[e]:
         for e in block.uids:
             for t in timesteps[e]:
-                model.w[e, model.O[e][0], t] = 0
-                model.w[e, model.O[e][0], t].fix()
+                if t <= len(model.timesteps)-1:
+                    model.w[e, model.O[e][0], t] = 0
+                    model.w[e, model.O[e][0], t].fix()
     else:
         pass
 
@@ -339,10 +341,22 @@ def set_fixed_sink_value(model, block):
     """
 
     val = {obj.uid: obj.val for obj in block.objs}
+    bound_type = {obj.uid: obj.bound_type for obj in block.objs}
     ee = model.edges(block.objs)
     for (e1, e2) in ee:
-        for t in model.timesteps:
-            # set variable value
-            model.w[(e1, e2), t] = val[e2][t]
-            # fix variable value for optimization problem
-            model.w[(e1, e2), t].fix()
+        if val[e2] is None:
+            val[e2] = np.zeros(len(model.timesteps))
+        if bound_type[e2] == 'fix':
+            for t in model.timesteps:
+                # fix variable value for optimization problem
+                model.w[(e1, e2), t].fix(val[e2][t])
+
+        elif bound_type[e2] == 'min':
+            for t in model.timesteps:
+                # fix variable value for optimization problem
+                model.w[(e1, e2), t].setlb(val[e2][t])
+
+        elif bound_type[e2] == 'max':
+            for t in model.timesteps:
+                # fix variable value for optimization problem
+                model.w[(e1, e2), t].setub(val[e2][t])

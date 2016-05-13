@@ -219,7 +219,7 @@ class EnergySystem:
                 "Sorry, `EnergySystem.connect` currently only works with" +
                 "a `transport_class` argument of" + str(transport.Simple)))
         for bus_a, bus_b in [(bus1, bus2), (bus2, bus1)]:
-            uid = ('transport',) + bus_a.uid + bus_b.uid
+            uid = str('transport_' + bus_a.uid + bus_b.uid)
             transport_class(uid=uid, outputs=[bus_a], inputs=[bus_b],
                             out_max=[out_max], in_max=[in_max], eta=[eta])
 

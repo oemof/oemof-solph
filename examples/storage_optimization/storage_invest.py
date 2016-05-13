@@ -87,14 +87,14 @@ logging.info('Create oemof objects')
 # create gas bus
 bgas = Bus(uid="bgas",
            type="gas",
-           price=70,
-           balanced=True,
-           excess=False)
+           price=70)
 
 # create electricity bus
 bel = Bus(uid="bel",
-          type="el",
-          excess=True)
+          type="el")
+
+# create excess component for the electricity bus to allow overproduction
+excess = sink.Simple(uid="excess", inputs=[bel], bound_type='min')
 
 # create commodity object for gas resource
 rgas = source.Commodity(uid='rgas',
@@ -156,8 +156,8 @@ logging.info('Optimise the energy system')
 # and use the restore method.
 energysystem.optimize()
 #
-#energysystem.dump()
-#energysystem.restore()
+# energysystem.dump()
+# energysystem.restore()
 
 logging.info('Plot the results')
 
@@ -165,7 +165,8 @@ cdict = {'wind': '#5b5bae',
          'pv': '#ffde32',
          'sto_simple': '#42c77a',
          'pp_gas': '#636f6b',
-         'demand': '#ce4aff'}
+         'demand': '#ce4aff',
+         'excess': '#970000'}
 
 # Plotting the input flows of the electricity bus for January
 myplot = tpd.DataFramePlot(energy_system=energysystem)
@@ -196,7 +197,10 @@ plt.rcParams.update({'font.size': 19})
 plt.style.use('grayscale')
 
 handles, labels = myplot.io_plot(
-    bus_uid="bel", cdict=cdict, line_kwa={'linewidth': 4},
+    bus_uid="bel", cdict=cdict,
+    barorder=['pv', 'wind', 'pp_gas', 'sto_simple'],
+    lineorder=['demand', 'sto_simple'],
+    line_kwa={'linewidth': 4},
     ax=fig.add_subplot(1, 1, 1),
     date_from="2012-06-01 00:00:00",
     date_to="2012-06-8 00:00:00",

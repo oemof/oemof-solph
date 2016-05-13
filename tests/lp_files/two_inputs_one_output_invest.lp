@@ -91,7 +91,7 @@ c_e__class__oemof_core_network_entities_buses_HeatBus___balance(bus_test_2)_:
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
-bounds 
+bounds
    0 <= w(bus_stor_heat_postheat_elec_0) <= +inf
    0 <= w(bus_stor_heat_postheat_elec_1) <= +inf
    0 <= w(bus_stor_heat_postheat_elec_2) <= +inf
@@ -102,4 +102,4 @@ bounds
    0 <= w(postheat_elec_bus_distr_heat_1) <= +inf
    0 <= w(postheat_elec_bus_distr_heat_2) <= +inf
    0 <= _class__oemof_core_network_entities_components_transformers_TwoInputsOneOutput___add_out(postheat_elec) <= +inf
-end 
+end
