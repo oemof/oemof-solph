@@ -162,8 +162,13 @@ class OptimizationModel(pyomo.ConcreteModel):
         def _summed_flow_limit(self, o, i):
             """ pyomo rule
             """
-            return sum(self.flow[o, i, t] <= self.flows[o, i].summed
-                       for t in self.TIMESTEPS)
+            return (
+                sum(self.flow[o, i, t] for t in self.TIMESTEPS)
+                    <= self.flows[o, i].summed
+            )
+        self.summed_flow_limit = pyomo.Constraint(self.FLOWS,
+                                                  rule=_summed_flow_limit)
+
 
 
 ###############################################################################
