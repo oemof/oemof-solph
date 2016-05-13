@@ -125,3 +125,19 @@ class Node:
     def outputs(self):
         return flow(self)
 
+
+class Bus(Node):
+    __slots__ = ()
+
+class Component(Node):
+    __slots__ = ()
+
+class Sink(Component):
+    __slots__ = ()
+
+class Source(Component):
+    __slots__ = ()
+
+class Transformer(Component):
+    __slots__ = ()
+
