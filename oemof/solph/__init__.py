@@ -115,49 +115,48 @@ class OptimizationModel(pyomo.ConcreteModel):
         self.flows = {(str(source), str(target)): source.outputs[target]
                       for source in es.nodes for target in source.outputs}
 
-        self.investment_flows = {}
+        # pyomo Set for all edges as tuples
+        self.FLOWS = pyomo.Set(initialize=self.flows.keys, ordered=True)
+
+        #
+        self.investment_flows = {(str(source), str(target)): source.outputs[target]
+                                 for source in es.nodes for target in source.outputs}
+
+        #
+        if self.investent_flows:
+            self.INVESTMENT_FLOWS = pyomo.Set(
+                initialize=self.investment_flows.keys(), ordered=True)
 
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = pyomo.Set(initialize=es.time_index.values,
                                    ordered=True)
 
-        # pyomo Set for all edges as tuples
-        self.FLOWS = pyomo.Set(initialize=self.flows.keys, ordered=True)
-
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
 
-
         for (o, i) in self.FLOWS:
-            if not hasattr(self.flows[o, i].investment):
-                for t in self.TIMESTEPS:
-                    # upper bound of flow variable
-                    self.flow[o, i, t].set_lb(self.flows[o, i].max[t] *
-                                              self.flows[o, i].nominal_value)
-                    # lower bound of flow variable
-                    self.flow[o, i, t].set_ub(self.flows[o, i].min[t] *
-                                              self.flows[o, i].nominal_value)
-                    # pre - optimizide value of flow
-                    self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
+            for t in self.TIMESTEPS:
+                # upper bound of flow variable
+                self.flow[o, i, t].set_lb(self.flows[o, i].max[t] *
+                                          self.flows[o, i].nominal_value)
+                # lower bound of flow variable
+                self.flow[o, i, t].set_ub(self.flows[o, i].min[t] *
+                                          self.flows[o, i].nominal_value)
+                # pre - optimizide value of flow
+                self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
 
-                    # fix variable if flow is fixed
-                    if self.flows[o, i].fix:
-                         self.flow[o, i, t].fix()
-            else:
-                self.investment_flows[o, i] = self.flows[o, i]
+                # fix variable if flow is fixed
+                if self.flows[o, i].fix:
+                     self.flow[o, i, t].fix()
 
 
-        if self.investent_flows:
-            self.INVESTMENT_FLOWS = pyomo.Set(
-                initialize=self.investment_flows.keys(), ordered=True)
+        def _investment_bounds(self, o, i):
+            return (0, self.flows[o, i].investment.maximum)
 
-            def _investment_bounds(self, o, i):
-                return (0, self.flows[o, i].investment.maximum)
-
-            self.investement = pyomo.Var(self.INVESTMENT_FLOWS,
-                                         bounds=_investment_bounds,
-                                         within=pyomo.NonNegativeReals)
+        self.investment = pyomo.Var(self.INVESTMENT_FLOWS,
+                                    bounds=_investment_bounds,
+                                    within=pyomo.NonNegativeReals)
 
         def _summed_flow_limit(self, o, i):
             """ pyomo rule
