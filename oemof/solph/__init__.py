@@ -116,17 +116,18 @@ class OptimizationModel(pyomo.ConcreteModel):
                 (str(source), str(target)): source.outputs[target]
                 for source in es.nodes
                 for target in source.outputs
-                if not getattr(source.output[target], "investment", False) }
+                if not getattr(source.outputs[target], "investment", False) }
 
         # pyomo Set for all edges as tuples
-        self.FLOWS = pyomo.Set(initialize=self.flows.keys, ordered=True)
+        self.NON_INVESTMET_FLOWS = pyomo.Set(initialize=self.non_investment_flows.keys,
+                                             ordered=True)
 
         #
         self.investment_flows = {
                 (str(source), str(target)): source.outputs[target]
                 for source in es.nodes
                 for target in source.outputs
-                if getattr(source.output[target], "investment", False) }
+                if getattr(source.outputs[target], "investment", False) }
 
         #
         if self.investment_flows:
@@ -137,6 +138,7 @@ class OptimizationModel(pyomo.ConcreteModel):
         self.TIMESTEPS = pyomo.Set(initialize=es.time_index.values,
                                    ordered=True)
 
+        self.FLOWS =  self.NON_INVESTMENT_FLOWS | self.INVESTMENT_FLOWS
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
