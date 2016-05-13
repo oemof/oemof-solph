@@ -35,3 +35,10 @@ class EnergySystem_Tests:
         ES = es.EnergySystem(entities=[bus])
         ok_(ES.groups[bus.uid] is bus)
 
+    def test_that_nodes_is_a_proper_alias_for_entities(self):
+        b1, b2 = Bus(uid="B1"), Bus(uid="B2")
+        eq_(self.es.nodes, [b1, b2])
+        empty = []
+        self.es.nodes = empty
+        ok_(self.es.entities is empty)
+

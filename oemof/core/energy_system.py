@@ -223,6 +223,15 @@ class EnergySystem:
             transport_class(uid=uid, outputs=[bus_a], inputs=[bus_b],
                             out_max=[out_max], in_max=[in_max], eta=[eta])
 
+
+    @property
+    def nodes(self):
+        return self.entities
+
+    @nodes.setter
+    def nodes(self, value):
+        self.entities = value
+
     # TODO: Add concept to make it possible to use another solver library.
     def optimize(self, om=None):
         """Start optimizing the energy system using solph.
