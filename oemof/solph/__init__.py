@@ -4,6 +4,8 @@ optimizaton problem. The problem is created from oemof base classes.
 Solph depend on pyomo.
 
 """
+from oemof.network import Source, Sink, Transformer
+
 
 class Flow:
     def __init__(self, actual_value, nominal_value, variable_costs, min, max,
@@ -22,16 +24,14 @@ class Flow:
         self.fixed = fixed
 
 
-
 # TODO: create solph sepcific energysystem subclassed from core energy system
-class EnergySystem():
+class EnergySystem:
 
     def __init__(self):
         """
         """
         pass
 
-from oemof.network import Source, Sink, Transformer
 
 class Sink(Sink):
     """
