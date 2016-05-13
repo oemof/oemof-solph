@@ -4,14 +4,14 @@ optimizaton problem. The problem is created from oemof base classes.
 Solph depend on pyomo.
 
 """
-from oemof.network import Source, Sink, Transformer
+import oemof.network as on
+
 
 
 class Flow:
     def __init__(self, actual_value, nominal_value, variable_costs, min, max,
                  fixed_costs, summed_min, summed_max, fixed=False):
         """
-
         """
         self.min = min
         self.max = max
@@ -32,26 +32,29 @@ class EnergySystem:
         """
         pass
 
+# import bus
+Bus = on.Bus
 
-class Sink(Sink):
+
+class Sink(on.Sink):
     """
     """
     def __init__(self):
         super().__init__()
 
-class Source(Source):
+class Source(on.Source):
     """
     """
     def __init__(self):
         super().__init__()
 
-class LinearTransformer(Transformer):
+class LinearTransformer(on.Transformer):
     """
     """
     def __init__(self):
         super().__init__()
 
-class Storage(Transformer):
+class Storage(on.Transformer):
     """
     """
     def __init__(self):
