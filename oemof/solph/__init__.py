@@ -4,9 +4,15 @@ optimizaton problem. The problem is created from oemof base classes.
 Solph depends on pyomo.
 
 """
+import pyomo.environ as pyomo
 import oemof.network as on
 
 
+###############################################################################
+#
+# Classes
+#
+###############################################################################
 
 class Flow:
     def __init__(self, *args, **kwargs):
@@ -73,22 +79,70 @@ class Storage(on.Transformer):
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.initial_capacity = kwargs.get('initial_capacity', 0)
         self.capacity_loss = kwargs.get('capacity_loss', 0)
-        self.nominal_input_capacity_ratio = kwargs.get('nominal_input_capacity_ratio', 0.2)
-        self.nominal_output_capacity_ratio = kwargs.get('nominal_input_capacity_ratio', 0.2)
-        self.inflow_conversion_factor = kwargs.get('inflow_conversion_factor', 1)
-        self.outflow_conversion_factor = kwargs.get('outflow_conversion_factor', 1)
+        self.nominal_input_capacity_ratio = kwargs.get(
+            'nominal_input_capacity_ratio', 0.2)
+        self.nominal_output_capacity_ratio = kwargs.get(
+            'nominal_input_capacity_ratio', 0.2)
+        self.inflow_conversion_factor = kwargs.get(
+            'inflow_conversion_factor', 1)
+        self.outflow_conversion_factor = kwargs.get(
+            'outflow_conversion_factor', 1)
 
 
+###############################################################################
+#
+# Solph Optimization Model
+#
+###############################################################################
+
+class OptimizationModel(pyomo.ConcreteModel):
+    """ Creates Pyomo model of the energy system.
+
+    Parameters
+    ----------
+    es : object of Solph - EnergySystem Class
+
+
+    """
+    def __init__(self, es):
+        super().__init__()
+
+        self.es = es
+
+        self.relaxed = getattr(es.simulation, "relaxed", False)
+
+        # edges dictionary with tuples as keys and flows as values
+        self.edges = {(str(source), str(target)): source.outputs[target]
+                      for source in es.nodes for target in source.outputs}
+
+        # pyomo set for timesteps of optimization problem
+        self.TIMESTEPS = pyomo.Set(initialize=es.time_index.values,
+                                   ordered=True)
+
+        # pyomo Set for all edges as tuples
+        self.EDGES = pyomo.Set(initialize=self.edges.keys, ordered=True)
+
+        # non-negative pyomo variable for all existing flows in energysystem
+        self.flow_var = pyomo.Var(self.EDGES, self.TIMESTEPS,
+                                  within=pyomo.NonNegativeReals)
+
+
+
+
+
+###############################################################################
+#
+# Solph grouping functions
+#
+###############################################################################
 
 def investment_grouping(node):
     if hasattr(node, "investment"):
         return Investment
     return None
 
-def flowbounds(node):
-    pass
 
-subsets = [investment_grouping, flowbounds]
+subsets = [investment_grouping]
 
 
 if __name__ == "__main__":
