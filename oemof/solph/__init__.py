@@ -8,6 +8,7 @@ import pyomo.environ as pyomo
 import oemof.network as on
 
 
+
 ###############################################################################
 #
 # Classes
@@ -31,10 +32,10 @@ class Flow:
 # TODO: create solph sepcific energysystem subclassed from core energy system
 class EnergySystem:
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """
         """
-        pass
+        super().__init__( *args, **kwargs)
 
 # import bus
 Bus = on.Bus
@@ -111,34 +112,41 @@ class OptimizationModel(pyomo.ConcreteModel):
 
         self.relaxed = getattr(es.simulation, "relaxed", False)
 
-        # edges dictionary with tuples as keys and flows as values
+        # edges dictionary with tuples as keys and non investment flows as values
         self.non_investment_flows = {
                 (str(source), str(target)): source.outputs[target]
                 for source in es.nodes
                 for target in source.outputs
                 if not getattr(source.outputs[target], "investment", False) }
 
-        # pyomo Set for all edges as tuples
-        self.NON_INVESTMET_FLOWS = pyomo.Set(initialize=self.non_investment_flows.keys,
-                                             ordered=True)
+        # pyomo Set for all non - investement flow as tuples
+        self.NON_INVESTMET_FLOWS = pyomo.Set(
+            initialize=self.non_investment_flows.keys, ordered=True)
 
-        #
+        # edges dictionary with tuples as keys and investment flows as values
         self.investment_flows = {
                 (str(source), str(target)): source.outputs[target]
                 for source in es.nodes
                 for target in source.outputs
                 if getattr(source.outputs[target], "investment", False) }
 
-        #
+        def _investment_bounds(self, o, i):
+            return (0, self.flows[o, i].investment.maximum)
+
         if self.investment_flows:
             self.INVESTMENT_FLOWS = pyomo.Set(
                 initialize=self.investment_flows.keys(), ordered=True)
 
-        # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=es.time_index.values,
+            self.investment = pyomo.Var(self.INVESTMENT_FLOWS,
+                                        bounds=_investment_bounds,
+                                        within=pyomo.NonNegativeReals)
+
+       # pyomo set for timesteps of optimization problem
+        self.TIMESTEPS = pyomo.Set(initialize=range(len(es.time_idx)),
                                    ordered=True)
 
         self.FLOWS =  self.NON_INVESTMENT_FLOWS | self.INVESTMENT_FLOWS
+
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
@@ -159,13 +167,6 @@ class OptimizationModel(pyomo.ConcreteModel):
                      self.flow[o, i, t].fix()
 
 
-        def _investment_bounds(self, o, i):
-            return (0, self.flows[o, i].investment.maximum)
-
-        self.investment = pyomo.Var(self.INVESTMENT_FLOWS,
-                                    bounds=_investment_bounds,
-                                    within=pyomo.NonNegativeReals)
-
         def _summed_flow_limit(self, o, i):
             """ pyomo rule
             """
@@ -183,7 +184,6 @@ class OptimizationModel(pyomo.ConcreteModel):
 # Solph grouping functions
 #
 ###############################################################################
-
 def investment_grouping(node):
     if hasattr(node, "investment"):
         return Investment
@@ -192,13 +192,25 @@ def investment_grouping(node):
 
 subsets = [investment_grouping]
 
-
+###############################################################################
+#
+#
+#
+###############################################################################
 if __name__ == "__main__":
+
+    from oemof.core.energy_system import EnergySystem
+    es = EnergySystem(time_idx=[1,2,3])
 
     b = Bus(label="el")
 
-    so = Source(outputs={b: Flow(actual_value=[10, 5, 10], fixed=True, investment=Investment(maximum=1000))},
+    so = Source(outputs={b: Flow(actual_value=[10, 5, 10], fixed=True,
+                                 investment=Investment(maximum=1000))},
                )
     si = Sink(inputs={b: Flow(min=[0,0,0], max=[0.1, 0.2, 0.9],
-                             nominal_value=10, fixed=True)})
+                              nominal_value=10, fixed=True)})
+
+    om = OptimizationModel(es)
+
+
 
