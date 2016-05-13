@@ -19,3 +19,13 @@ class Flow:
         self.fixed_costs = fixed_costs
         self.summed_min = summed_min
         self.summed_max =  summed_min
+
+
+
+# TODO: create solph sepcific energysystem subclassed from core energy system
+def EnergySystem():
+
+    def __init__(self):
+        """
+        """
+        pass
