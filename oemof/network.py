@@ -39,4 +39,89 @@ class _Edges():
 
 flow = _Edges()
 
+class Node:
+    """ Represents a Node in an energy system graph.
+
+    Abstract superclass of the two general types of nodes of an energy system
+    graph, collecting attributes and operations common to all types of nodes.
+    Users should neither instantiate nor subclass this, but use
+    :class:`Component`, :class:`Bus` or one of their subclasses instead.
+
+    .. role:: python(code)
+      :language: python
+
+    Parameters
+    ----------
+    label: :func:`object`, optional
+        Used as the string representation of this node. If this parameter is
+        not an instance of :class:`str` it will be converted to a string and
+        the result will be used as this node's :attr:`label`, which should be
+        unique with respect to the other nodes in the energy system graph this
+        node belongs to. If this parameter is not supplied, the string
+        representation of this node will instead be generated based on this
+        nodes `class` and `id`.
+    inputs: list or dict, optional
+        Either a list of this nodes' input nodes or a dictionary mapping input
+        nodes to corresponding inflows (i.e. input values).
+    outputs: list or dict, optional
+        Either a list of this nodes' output nodes or a dictionary mapping
+        output nodes to corresponding outflows (i.e. output values).
+    flow: function, optional
+        A function taking this node and a target node as a parameter (i.e.
+        something of the form :python:`def f(self, target)`), returning the
+        flow originating from this node into :python:`target`.
+
+    Attributes
+    ----------
+    label: object
+        If this node was given a `label` on construction, this attribute holds
+        the actual object passed as a parameter. Otherwise py:``node.label`` is
+        a synonym for ``str(node)``.
+    inputs: dict
+        Dictionary mapping input :class:`Node`s `n` to flows from `n` into
+        `self`.
+    outputs: dict
+        Dictionary mapping output :class:`Node`s `n` to flows from `self` into
+        `n`.
+
+    """
+
+    registry = None
+    __slots__ = ["__weakref__", "_label"]
+
+    def __init__(self, *args, **kwargs):
+        for optional in ['label']:
+            if optional in kwargs:
+                setattr(self, '_' + optional, kwargs[optional])
+        for i in kwargs.get('inputs', {}):
+            try:
+                flow[i, self] = kwargs['inputs'].get(i)
+            except AttributeError:
+                flow[i, self] = None
+        for o in kwargs.get('outputs', {}):
+            try:
+                flow[self, o] = kwargs['outputs'].get(o)
+            except AttributeError:
+                flow[self, o] = None
+        if __class__.registry is not None:
+            __class__.registry.add(self)
+
+    def __str__(self):
+        return str(self.label)
+
+    @property
+    def label(self):
+        return (self._label if hasattr(self, "_label")
+                            else "<{} #{}>".format(type(self).__name__,
+                                                   id(self)))
+
+    @property
+    def inputs(self):
+        # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
+        #       Find a way to replace it.
+        return {k: flow(k, self) for k in flow._in_edges[self]}
+
+    @property
+    def outputs(self):
+        return flow(self)
 
