@@ -123,7 +123,7 @@ class OptimizationModel(pyomo.ConcreteModel):
                                  for source in es.nodes for target in source.outputs}
 
         #
-        if self.investent_flows:
+        if self.investment_flows:
             self.INVESTMENT_FLOWS = pyomo.Set(
                 initialize=self.investment_flows.keys(), ordered=True)
 
