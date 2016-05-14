@@ -21,7 +21,7 @@ class _Edges():
     _flows = WKD()
     def __getitem__(self, key):
         self._flows[key] = self._flows.get(key, WS())
-        return self._flows.get[key]
+        return self._flows[key]
     def __setitem__(self, key, value):
         source, target = key
         self._in_edges[target] = self._in_edges.get(target, WS())
@@ -30,9 +30,8 @@ class _Edges():
         self._flows[source][target] = value
 
     def __call__(self, *keys):
-        result = self._flows
+        result = self
         for k in keys:
-            print(k)
             result = result[k]
         return result
 
@@ -112,8 +111,8 @@ class Node:
     @property
     def label(self):
         return (self._label if hasattr(self, "_label")
-                            else "<{} #{}>".format(type(self).__name__,
-                                                   id(self)))
+                            else "<{} #0x{:x}>".format(type(self).__name__,
+                                                       id(self)))
 
     @property
     def inputs(self):

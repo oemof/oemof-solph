@@ -1,3 +1,5 @@
+from traceback import format_exception_only as feo
+
 from nose.tools import assert_raises, eq_, ok_
 
 from oemof.core.energy_system import EnergySystem as ES
@@ -26,6 +28,22 @@ class Node_Tests:
             "although it should be by construction.")
         ok_(n3 in n1.inputs,
             "{0} in {1}.outputs but {1} not in {0}.inputs.".format(n1, n3))
+
+    def test_accessing_outputs_of_a_node_without_output_flows(self):
+        n = Node()
+        exception = None
+        try:
+            outputs = n.outputs
+        except Exception as e:
+            exception = e
+        ok_(exception is None,
+            "\n  Test accessing `outputs` on {} having no outputs.".format(n) +
+            "\n  Got unexpected exception:\n" +
+            "\n      {}".format(feo(type(exception), exception)[0]))
+        ok_(len(outputs) == 0,
+            "\n  Failure when testing `len(outputs)`." +
+            "\n  Expected: 0." +
+            "\n  Got     : {}".format(len(outputs)))
 
 
 class EnergySystem_Nodes_Integration_Tests:
