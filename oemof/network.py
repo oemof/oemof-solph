@@ -32,7 +32,6 @@ class _Edges():
     def __call__(self, *keys):
         result = self._flows
         for k in keys:
-            print(k)
             result = result[k]
         return result
 
