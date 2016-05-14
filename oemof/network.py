@@ -111,8 +111,8 @@ class Node:
     @property
     def label(self):
         return (self._label if hasattr(self, "_label")
-                            else "<{} #{}>".format(type(self).__name__,
-                                                   id(self)))
+                            else "<{} #0x{:x}>".format(type(self).__name__,
+                                                       id(self)))
 
     @property
     def inputs(self):
