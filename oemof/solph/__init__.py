@@ -121,7 +121,7 @@ class OptimizationModel(pyomo.ConcreteModel):
 
         # pyomo Set for all non - investement flow as tuples
         self.NON_INVESTMET_FLOWS = pyomo.Set(
-            initialize=self.non_investment_flows.keys, ordered=True)
+            initialize=self.non_investment_flows.keys(), ordered=True)
 
         # edges dictionary with tuples as keys and investment flows as values
         self.investment_flows = {
