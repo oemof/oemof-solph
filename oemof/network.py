@@ -30,7 +30,7 @@ class _Edges():
         self._flows[source][target] = value
 
     def __call__(self, *keys):
-        result = self._flows
+        result = self
         for k in keys:
             result = result[k]
         return result
