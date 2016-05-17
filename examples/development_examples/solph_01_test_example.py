@@ -19,8 +19,8 @@ ebus = Bus(label="el")
 gasbus = Bus(label="gas")
 
 so = Source(outputs={ebus: Flow(
-    actual_value=[10, 5, 10], fixed=True)}, investement=Investment(
-    maximum=1000))
+    actual_value=[10, 5, 10], fixed=True, investement=Investment(
+    maximum=1000))})
 
 si = Sink(inputs={ebus: Flow(
     min=[0, 0, 0], max=[0.1, 0.2, 0.9], nominal_value=10, fixed=True)})

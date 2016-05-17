@@ -8,7 +8,7 @@ import pyomo.environ as pyomo
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
 from oemof.solph import constraints as cblocks
-
+import logging
 
 
 ###############################################################################
@@ -96,13 +96,28 @@ class Storage(on.Transformer):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        overwrite_attribute_warning = (
+            '{0} for storage flows will be overwritten.')
         self.nominal_capacity = kwargs.get('nominal_capacity')
-        self.initial_capacity = kwargs.get('initial_capacity', 0)
-        self.capacity_loss = kwargs.get('capacity_loss', 0)
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
+        # ToDo use warning module von python
+        for flow in self.inputs.values():
+            if flow.nominal_value is not None:
+                logging.warning(overwrite_attribute_warning.format(
+                    'nominal output'))
+            flow.nominal_value = (self.nominal_input_capacity_ratio *
+                self.nominal_capacity)
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
+        for flow in self.output.values():
+            if flow.nominal_value is not None:
+                logging.warning(overwrite_attribute_warning.format(
+                    'nominal input'))
+            flow.nominal_value = (self.nominal_output_capacity_ratio *
+                self.nominal_capacity)
+        self.initial_capacity = kwargs.get('initial_capacity', 0)
+        self.capacity_loss = kwargs.get('capacity_loss', 0)
         self.inflow_conversion_factor = kwargs.get(
             'inflow_conversion_factor', 1)
         self.outflow_conversion_factor = kwargs.get(
