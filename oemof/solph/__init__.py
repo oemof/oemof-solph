@@ -4,6 +4,8 @@ optimizaton problem. The problem is created from oemof base classes.
 Solph depends on pyomo.
 
 """
+from collections import UserList as UL
+
 import pyomo.environ as pyomo
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
@@ -16,6 +18,47 @@ from oemof.solph import constraints as cblocks
 # Classes
 #
 ###############################################################################
+
+class Sequence(UL):
+    """ Emulates a list whose length is not known in advance.
+
+    Parameters
+    ----------
+    source:
+    default:
+
+
+    Examples
+    --------
+    >>> s = Sequence(default=42)
+    >>> len(s)
+    0
+    >>> s[2]
+    42
+    >>> len(s)
+    3
+    >>> s[0] = 23
+    >>> s
+    [23, 42, 42]
+
+    """
+    def __init__(self, *args, **kwargs):
+        self.default = kwargs["default"]
+        super().__init__(*args)
+
+    def __getitem__(self, key):
+        try:
+            return self.data[key]
+        except IndexError:
+            self.data.extend([self.default] * (key - len(self.data) + 1))
+            return self.data[key]
+
+    def __setitem__(self, key, value):
+        try:
+            self.data[key] = value
+        except IndexError:
+            self.data.extend([self.default] * (key - len(self.data) + 1))
+            self.data[key] = value
 
 class Flow:
 
