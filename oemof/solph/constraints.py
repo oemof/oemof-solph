@@ -2,7 +2,7 @@
 """
 
 """
-from pyomo.core import Set, Constraint, BuildAction
+from pyomo.core import Var, Binary, Set, Constraint, BuildAction
 from pyomo.core.base.block import SimpleBlock
 
 class BusBalance(SimpleBlock):
@@ -10,7 +10,6 @@ class BusBalance(SimpleBlock):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
 
     def _create(self, nodes=None):
@@ -79,3 +78,32 @@ class LinearRelation(SimpleBlock):
                         block.constraint.add((n, o, t), (lhs == rhs))
 
         self.constraintCon = BuildAction(rule=_input_output_relation)
+
+
+class MinimumOutflow(SimpleBlock):
+    """ Creates pyomo contraint for linear relation of 1:n flows
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, nodes=None):
+        m = self.parent_block()
+
+        self.NODES = Set(initialize=[str(n) for n in nodes])
+
+        # create statut variable
+        self.status = Var(self.NODES, m.TIMESTEPS, within=Binary)
+
+        self.minimum_outflow = Constraint(self.NODES, noruleinit=True)
+
+        def _minimum_outflow(block):
+            for t in m.TIMESTEPS:
+                for n in block.NODES:
+                    for o in m.OUTPUTS[n]:
+                        lhs = m.flow[n, o, t]
+
+                        rhs = self.status[n, t] * m.es.groups[n].outputs[m.es.groups[o]].min[t]
+
+                        block.minimum_outflow.add((n, o, t), (lhs >= rhs))
+
+        self.constraintCon = BuildAction(rule=_minimum_outflow)

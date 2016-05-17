@@ -36,7 +36,7 @@ class Flow:
         self.max = kwargs.get('max')
         self.actual_value = kwargs.get('actual_value')
         self.nominal_value = kwargs.get('nominal_value')
-        self.variable_costs =  kwargs.get('variable_costs')
+        self.variable_costs = kwargs.get('variable_costs')
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed = kwargs.get('summed')
         self.fixed = kwargs.get('fixed', False)
@@ -197,8 +197,6 @@ class ExpansionModel(pyomo.ConcreteModel):
 
 
 
-
-
 class OperationalModel(pyomo.ConcreteModel):
     """
     All pyomo sets () are UPPERCASE and exclusivey hold strings as indices and
@@ -311,10 +309,13 @@ def investment_grouping(node):
         return Investment
 
 def constraint_grouping(node):
+
     if isinstance(node, on.Bus) and 'el' in str(node):
         return cblocks.BusBalance
-    elif isinstance(node, on.Transformer):
-        return cblocks.LinearRelation
+    #if isinstance(node, on.Transformer):
+    #    return cblocks.LinearRelation
+    if isinstance(node, on.Transformer):
+        return cblocks.MinimumOutflow
 
 ###############################################################################
 #
@@ -350,19 +351,20 @@ if __name__ == "__main__":
                                                     max=[1]*lt,
                                                     nominal_value=None,
                                                     actual_value=[None]*lt)},
-                             outputs={bel:Flow(min=[0, 0, 0],
+                             outputs={bel:Flow(min=[0.5, 0.5, 0.5],
                                                max=[1, 1, 1],
                                                nominal_value=10,
                                                actual_value=[None]*lt),
-                                      bcoal:Flow(min=[0, 0, 0],
+                                      bcoal:Flow(min=[0.5, 0.4, 0.4],
                                                  max=[1, 1, 1],
-                                                 nominal_value=10,
+                                                 nominal_value=30,
                                                  actual_value=[None]*lt)},
-                             conversion_factors={bel: [0.4]*lt, bcoal: [0.5]*lt})
+                             conversion_factors={bel: [0.4]*lt,
+                                                 bcoal: [0.5]*lt})
 
     om = OperationalModel(es)
     om.objective = pyomo.Objective(expr=1)
-    #om.write('problem.lp')
+    om.pprint()
 
 
 
