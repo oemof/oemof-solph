@@ -42,6 +42,7 @@ class Flow:
         self.fixed = kwargs.get('fixed', False)
 
 
+
 # TODO: create solph sepcific energysystem subclassed from core energy system
 class EnergySystem:
 
@@ -60,12 +61,6 @@ class Investment:
     def __init__(self, maximum=float('+inf')):
         self.maximum = maximum
 
-class ConversionFactor:
-    """
-    """
-    def __init__(self, value, flows):
-        self.value = value
-        self.flows = flows
 
 class Sink(on.Sink):
     """
@@ -318,10 +313,8 @@ def investment_grouping(node):
 def constraint_grouping(node):
     if isinstance(node, on.Bus) and 'el' in str(node):
         return cblocks.BusBalance
-    #elif isinstance(node, on.Transformer):
-    #    return cblocks.LinearRelation
-
-
+    elif isinstance(node, on.Transformer):
+        return cblocks.LinearRelation
 
 ###############################################################################
 #
@@ -334,29 +327,38 @@ if __name__ == "__main__":
 
     es = oces.EnergySystem(groupings=[constraint_grouping], time_idx=[1,2,3])
 
+    lt = len(es.time_idx)
 
     bel = Bus(label="el")
+    # TODO: Resolve error by 'unsused' busses??
+    #bth = Bus(label="th")
+
     bcoal = Bus(label="coalbus")
 
     so = Source(label="coalsource",
-                outputs={bcoal: Flow(max=[None, None, None],
-                                     actual_value=[None, None, None],
+                outputs={bcoal: Flow(max=[None]*lt,
+                                     actual_value=[None]*lt,
                                      nominal_value=None)})
 
-    si = Sink(label="sink", inputs={bel: Flow(min=[0, 0, 0],
+    si = Sink(label="sink", inputs={bel: Flow(min=[0]*lt,
                                               max=[0.1, 0.2, 0.9],
                                               nominal_value=10, fixed=True,
                                               actual_value=[1, 2, 3])})
 
     trsf = LinearTransformer(label='trsf', inputs={
-                                         bcoal:Flow(min=[0, 0, 0],
-                                                    max=[1, 1, 1],
+                                         bcoal:Flow(min=[0]*lt,
+                                                    max=[1]*lt,
                                                     nominal_value=None,
-                                                    actual_value=[None, None, None])},
+                                                    actual_value=[None]*lt)},
                              outputs={bel:Flow(min=[0, 0, 0],
                                                max=[1, 1, 1],
                                                nominal_value=10,
-                                               actual_value=[None, None, None])})
+                                               actual_value=[None]*lt),
+                                      bcoal:Flow(min=[0, 0, 0],
+                                                 max=[1, 1, 1],
+                                                 nominal_value=10,
+                                                 actual_value=[None]*lt)},
+                             conversion_factors={bel: [0.4]*lt, bcoal: [0.5]*lt})
 
     om = OperationalModel(es)
     om.objective = pyomo.Objective(expr=1)
