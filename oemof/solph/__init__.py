@@ -63,7 +63,7 @@ class _Sequence(UserList):
 
     Examples
     --------
-    >>> s = Sequence(default=42)
+    >>> s = _Sequence(default=42)
     >>> len(s)
     0
     >>> s[2]
