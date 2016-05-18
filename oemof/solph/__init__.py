@@ -238,13 +238,19 @@ class OperationalModel(pyomo.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
+    objective_groups:
+        Solph looks for these groups in the given energy system and uses them
+        to create the objective expression.
+        Defaults to :const:`OperationalModel.OBJECTIVES`
 
     """
 
     CONSTRAINTS = [cblocks.BusBalance, cblocks.LinearRelation, Investment]
+    OBJECTIVES = [cblocks.outflowcosts]
 
 
-    def __init__(self, es, constraint_groups=OperationalModel.CONSTRAINTS):
+    def __init__(self, es, constraint_groups=OperationalModel.CONSTRAINTS,
+                           objective_groups=OperationalModel.OBJECTIVES):
         super().__init__()
 
         # name of the optimization model
