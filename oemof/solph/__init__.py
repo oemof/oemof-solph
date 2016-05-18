@@ -3,6 +3,7 @@
 
 """
 from collections import abc, UserList
+from inspect import isfunction
 
 import pyomo.environ as pyomo
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -107,7 +108,7 @@ class Flow:
         self.min = Sequence(kwargs.get('min', 0))
         self.max = Sequence(kwargs.get('max', 1))
         self.actual_value = Sequence(kwargs.get('actual_value'))
-        self.variable_costs = Sequence(kwargs.get('variable_costs'))
+        self.variable_costs = Sequence(kwargs.get('variable_costs', 999))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed = kwargs.get('summed')
         self.fixed = kwargs.get('fixed', False)
@@ -225,12 +226,6 @@ class ExpansionModel(pyomo.ConcreteModel):
                 }
 
 
-
-
-
-
-
-
 class OperationalModel(pyomo.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     distpatch.
@@ -298,7 +293,6 @@ class OperationalModel(pyomo.ConcreteModel):
                 if self.flows[o, i].actual_value[t] is not None:
                     # pre- optimized value of flow variable
                     self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
-
                     # fix variable if flow is fixed
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
@@ -311,16 +305,24 @@ class OperationalModel(pyomo.ConcreteModel):
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
+        objective_expr = 0
+
         # loop over all groups
         for group in self.es.groups:
             if callable(group):
-                # create instance for block
-                block = group()
-                # add block to model
-                self.add_component(str(group), block)
-                # create constraints etc. related with block for all nodes
-                # in the group
-                block._create(nodes=self.es.groups[group])
+
+                if isfunction(group):
+                    objective_expr += group(self, self.es.groups[group])
+                else:
+                    # create instance for block
+                    block = group()
+                    # add block to model
+                    self.add_component(str(group), block)
+                    # create constraints etc. related with block for all nodes
+                    # in the group
+                    block._create(nodes=self.es.groups[group])
+
+        self.objective = pyomo.Objective(expr=objective_expr)
 
         # This is for integer problems, migth be usefull but can be moved somewhere else
         # Ignore this!!!
@@ -343,13 +345,14 @@ def investment_grouping(node):
         return Investment
 
 def constraint_grouping(node):
-
     if isinstance(node, on.Bus) and 'el' in str(node):
         return cblocks.BusBalance
     if isinstance(node, on.Transformer):
         return cblocks.LinearRelation
-    #if isinstance(node, on.Transformer):
-    #    return cblocks.MinimumOutflow
+
+def objective_grouping(node):
+    if isinstance(node, on.Transformer):
+        return cblocks.outflowcosts
 
 ###############################################################################
 #
@@ -360,7 +363,8 @@ def constraint_grouping(node):
 if __name__ == "__main__":
     from oemof.core import energy_system as oces
 
-    es = oces.EnergySystem(groupings=[constraint_grouping], time_idx=[1,2,3])
+    es = oces.EnergySystem(groupings=[constraint_grouping, objective_grouping],
+                           time_idx=[1,2,3])
 
     lt = len(es.time_idx)
 
@@ -381,7 +385,7 @@ if __name__ == "__main__":
                                               nominal_value=10, fixed=True,
                                               actual_value=[1, 2, 3])})
 
-    trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow(1)},
+    trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
                              outputs={bel:Flow(nominal_value=10),
                                       bcoal:Flow(min=[0.5, 0.4, 0.4],
                                                  max=[1, 1, 1],
@@ -390,7 +394,7 @@ if __name__ == "__main__":
                                                  bcoal:  _Sequence(default=0.5)})
 
     om = OperationalModel(es)
-    om.objective = pyomo.Objective(expr=1)
+
     om.pprint()
 
 

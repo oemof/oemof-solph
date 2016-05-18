@@ -5,6 +5,7 @@
 from pyomo.core import Var, Binary, Set, Constraint, BuildAction
 from pyomo.core.base.block import SimpleBlock
 
+
 class BusBalance(SimpleBlock):
     """
     """
@@ -20,22 +21,18 @@ class BusBalance(SimpleBlock):
         self.INDEXSET = self.NODES * m.TIMESTEPS
         self.constraint = Constraint(self.INDEXSET, noruleinit=True)
 
-        #@staticmethod
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in block.NODES:
-                    lhs = sum(m.flow[i, n, t] * m.time_increment for i in m.INPUTS[n])
-                    rhs = sum(m.flow[n, o, t] * m.time_increment for o in m.OUTPUTS[n])
+                    lhs = sum(m.flow[i, n, t] * m.time_increment
+                              for i in m.INPUTS[n])
+                    rhs = sum(m.flow[n, o, t] * m.time_increment
+                              for o in m.OUTPUTS[n])
                     expr = (lhs == rhs)
                     block.constraint.add((n,t), expr)
 
         self.constraintCon = BuildAction(rule=_busbalance_rule)
 
-
-
-#  def _constructCon(m):
-
-      #“model.con.add((stage, i), expr)” for every constraint expression “expr”
 
 
 
@@ -62,7 +59,6 @@ class LinearRelation(SimpleBlock):
         m = self.parent_block()
 
         self.NODES = Set(initialize=[str(n) for n in nodes])
-
         self.constraint = Constraint(self.NODES, noruleinit=True)
 
         conversion_factors = {
@@ -76,32 +72,55 @@ class LinearRelation(SimpleBlock):
                         lhs = m.flow[m.INPUTS[n], n, t]   * conversion_factors[(n, o)][t]
                         rhs = m.flow[n, o, t]
                         block.constraint.add((n, o, t), (lhs == rhs))
-
         self.constraintCon = BuildAction(rule=_input_output_relation)
 
 
+def outflowcosts(m, nodes):
+    """
+    """
+    NODES = [str(n) for n in nodes]
+
+    expr = sum(m.flow[n, o, t] *
+               m.flows[n, o].variable_costs[t]
+        for n in NODES
+        for o in m.OUTPUTS[n]
+        for t in m.TIMESTEPS
+    )
+
+    return expr
+
+
+
+
 class MinimumOutflow(SimpleBlock):
-    """ Creates pyomo contraint for linear relation of 1:n flows
+    """
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, nodes=None):
+        """
+        """
         m = self.parent_block()
 
         self.NODES = Set(initialize=[str(n) for n in nodes])
 
-        # create statut variable
+        # create status variable
         self.status = Var(self.NODES, m.TIMESTEPS, within=Binary)
 
+        # create "empty" constraint
         self.minimum_outflow = Constraint(self.NODES, noruleinit=True)
+
+    def _build(self):
+        """
+        """
+        m = self.parent_block()
 
         def _minimum_outflow(block):
             for t in m.TIMESTEPS:
                 for n in block.NODES:
                     for o in m.OUTPUTS[n]:
                         lhs = m.flow[n, o, t]
-
                         rhs = self.status[n, t] * m.es.groups[n].outputs[m.es.groups[o]].min[t]
 
                         block.minimum_outflow.add((n, o, t), (lhs >= rhs))
