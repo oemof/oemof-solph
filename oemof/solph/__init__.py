@@ -340,7 +340,6 @@ class OperationalModel(pyomo.ConcreteModel):
                 # in the group
                 block._create(nodes=self.es.groups[group])
 
-
         self.objective = pyomo.Objective(expr=objective_expr)
 
         # This is for integer problems, migth be usefull but can be moved somewhere else
