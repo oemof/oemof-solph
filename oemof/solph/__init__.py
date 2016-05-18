@@ -1,17 +1,49 @@
 """
-The solph-package contains funtionalities for creating and solving an
-optimizaton problem. The problem is created from oemof base classes.
-Solph depends on pyomo.
+
 
 """
-from collections import UserList as UL
+from collections import abc, UserList
 
 import pyomo.environ as pyomo
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
 from oemof.solph import constraints as cblocks
 
+###############################################################################
+#
+# Functions
+#
+###############################################################################
 
+def Sequence(sequence_or_scalar):
+    """ Tests if an object is sequence (except string) or scalar and returns
+    a the original sequence if object is a sequence and a 'emulated' sequence
+    object of class _Sequence if object is a scalar or string.
+
+    Parameters
+    ----------
+    sequence_or_scalar : array-like or scalar (None, int, etc.)
+
+    Examples
+    --------
+    >>> Sequence([1,2])
+    [1, 2]
+
+    >>> x = Sequence(10)
+    >>> x[0]
+    10
+
+    >>> x[10]
+    10
+    >>> print(x)
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+
+    """
+    if (isinstance(sequence_or_scalar, abc.Sequence)
+            and not isinstance(sequence_or_scalar, str)):
+       return sequence_or_scalar
+    else:
+       return _Sequence(default=sequence_or_scalar)
 
 ###############################################################################
 #
@@ -19,7 +51,7 @@ from oemof.solph import constraints as cblocks
 #
 ###############################################################################
 
-class Sequence(UL):
+class _Sequence(UserList):
     """ Emulates a list whose length is not known in advance.
 
     Parameters
