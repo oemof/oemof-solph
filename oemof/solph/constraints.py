@@ -80,16 +80,45 @@ def outflowcosts(m, nodes):
     """
     NODES = [str(n) for n in nodes]
 
-    expr = sum(m.flow[n, o, t] *
-               m.flows[n, o].variable_costs[t]
-        for n in NODES
-        for o in m.OUTPUTS[n]
-        for t in m.TIMESTEPS
-    )
+    expr = sum(m.flow[n, o, t] * m.flows[n, o].variable_costs[t]
+               for n in NODES
+               for o in m.OUTPUTS[n]
+               for t in m.TIMESTEPS)
 
     return expr
 
 
+def inflowcosts(m, nodes):
+    """
+    """
+    NODES = [str(n) for n in nodes]
+
+    expr = sum(m.flow[i, n, t] * m.flows[i, n].variable_costs[t]
+               for n in NODES
+               for i in m.INPUTS[n]
+               for t in m.TIMESTEPS)
+
+    return expr
+
+def fixedcosts(m, nodes, flow='inflows'):
+    """
+    """
+    NODES = [str(n) for n in nodes]
+
+    if flow == 'outflows':
+        # fixed costs associated with nominal output flow
+        expr = sum(m.flows[n, o].nominal_value * m.flows[n, o].fixed_costs
+                   for n in NODES
+                   for o in m.OUTPUTS[n]
+                   for t in m.TIMESTEPS)
+
+    if flow == 'inflow':
+        # fixed costs are associated with nominal input flow
+        expr = sum(m.flows[i, n].nominal_value * m.flows[i, n].fixed_costs
+                   for n in NODES
+                   for i in m.INPUTS[n]
+                   for t in m.TIMESTEPS)
+    return expr
 
 
 class MinimumOutflow(SimpleBlock):
