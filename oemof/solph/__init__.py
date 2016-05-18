@@ -318,16 +318,16 @@ class OperationalModel(pyomo.ConcreteModel):
         # loop over all groups
         for group in constraint_groups:
 
-                if isfunction(group):
-                    objective_expr += group(self, self.es.groups[group])
-                else:
-                    # create instance for block
-                    block = group()
-                    # add block to model
-                    self.add_component(str(group), block)
-                    # create constraints etc. related with block for all nodes
-                    # in the group
-                    block._create(nodes=self.es.groups[group])
+            if isfunction(group):
+                objective_expr += group(self, self.es.groups[group])
+            else:
+                # create instance for block
+                block = group()
+                # add block to model
+                self.add_component(str(group), block)
+                # create constraints etc. related with block for all nodes
+                # in the group
+                block._create(nodes=self.es.groups[group])
 
         self.objective = pyomo.Objective(expr=objective_expr)
 
