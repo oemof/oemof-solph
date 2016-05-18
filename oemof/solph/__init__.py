@@ -40,8 +40,8 @@ def Sequence(sequence_or_scalar):
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
-    if (isinstance(sequence_or_scalar, abc.Sequence)
-            and not isinstance(sequence_or_scalar, str)):
+    if ( isinstance(sequence_or_scalar, abc.Sequence) and not
+         isinstance(sequence_or_scalar, str) ):
        return sequence_or_scalar
     else:
        return _Sequence(default=sequence_or_scalar)
