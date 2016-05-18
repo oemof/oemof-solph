@@ -354,6 +354,25 @@ def objective_grouping(node):
     if isinstance(node, on.Transformer):
         return cblocks.outflowcosts
 
+GROUPINGS = [constraint_grouping, investment_grouping, objective_grouping]
+""" list:  Groupings needed on an energy system for it to work with solph.
+
+TODO: Maybe move this to the module docstring? It shoule be somewhere prominent
+      so solph user's immediately see that they need to use :const:`GROUPINGS`
+      when they want to create an energy system for use with solph.
+
+If you want to use solph on an energy system, you need to create it with these
+groupings specified like this:
+
+    .. code-block: python
+
+    from oemof.network import EnergySystem
+    import solph
+
+    energy_system = EnergySystem(groupings=solph.GROUPINGS)
+
+"""
+
 ###############################################################################
 #
 # Examples
