@@ -204,95 +204,42 @@ class Storage(on.Transformer):
 
 # TODO: Create Investment model
 class ExpansionModel(pyomo.ConcreteModel):
-    """ Creates Pyomo model of the energy system.
-
-    Parameters
-    ----------
-    es : object of Solph - EnergySystem Class
-
+    """ An energy system model for optimized capacity expansion.
     """
     def __init__(self, es):
         super().__init__()
 
         self.es = es
-        # TODO: Set timeincrement for energy system object
+
         self.time_increment = 1
+
         self.periods = 1
 
-        # edges dictionary with tuples as keys and non investment flows as values
+        # edges dictionary with tuples as keys and non investment flows as
+        # values
         self.non_investment_flows = {
                 (str(source), str(target)): source.outputs[target]
-                for source in es.nodes
-                for target in source.outputs
-                if not getattr(source.outputs[target], "investment", False) }
+                    for source in es.nodes
+                    for target in source.outputs
+                    if not getattr(source.outputs[target], "investment", False)
+                }
 
 
-        # pyomo Set for all non - investement flow as tuples
-        self.NON_INVESTMET_FLOWS = pyomo.Set(
-            initialize=self.non_investment_flows.keys(), ordered=True)
 
 
-        # edges dictionary with tuples as keys and investment flows as values
-        self.investment_flows = {
-                (str(source), str(target)): source.outputs[target]
-                for source in es.nodes
-                for target in source.outputs
-                if getattr(source.outputs[target], "investment", False) }
 
-
-        # pyomo Set for all non - investement flow as tuples
-        self.NON_INVESTMENT_FLOWS = pyomo.Set(
-            initialize=self.non_investment_flows.keys, ordered=True)
-
-        self.INVESTMENT_FLOWS = pyomo.Set(
-            initialize=self.investment_flows.keys(), ordered=True)
-
-        # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=range(len(es.time_idx)),
-                                   ordered=True)
-
-        # pyomo set for periods of optimization
-        self.PERIOS = pyomo.Set(initialize=range(len(self.periods)))
-
-        # pyomo set for all flows in the energy system graph
-        self.FLOWS =  self.NON_INVESTMENT_FLOWS | self.INVESTMENT_FLOWS
-
-        # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS, self.PERIODS,
-                              within=pyomo.NonNegativeReals)
-
-        for (o, i) in self.FLOWS:
-            for p in self.PERIOS:
-                for t in self.TIMESTEPS:
-                    # upper bound of flow variable
-                    self.flow[o, i, p, t].set_lb(self.flows[o, i].max[p, t] *
-                                                 self.flows[o, i].nominal_value[p])
-                    # lower bound of flow variable
-                    self.flow[o, i, p, t].set_ub(self.flows[o, i].min[p, t] *
-                                              self.flows[o, i].nominal_value)
-                    # pre - optimizide value of flow
-                    self.flow[o, i, p, t].value = self.flows[o, i].actual_value[p, t]
-
-                    # fix variable if flow is fixed
-                    if self.flows[o, i].fix:
-                         self.flow[o, i, t].fix()
-
-        # create variables with bounds for investment components
-        def _investment_bounds(self, o, i, p):
-            return (0, self.flows[o, i].investment.maximum[p])
-
-
-        if self.investment_flows:
-              self.investment = pyomo.Var(self.INVESTMENT_FLOWS, self.PERIODS,
-                                          bounds=_investment_bounds,
-                                          within=pyomo.NonNegativeReals)
 
 
 
 class OperationalModel(pyomo.ConcreteModel):
-    """
-    All pyomo sets () are UPPERCASE and exclusivey hold strings as indices and
-    values. Sets
+    """ An energy system model for operational simulation with optimized
+    distpatch.
+
+    Parameters
+    ----------
+
+    es : EnergySystem object
+
     """
     def __init__(self, es):
         super().__init__()
@@ -345,31 +292,26 @@ class OperationalModel(pyomo.ConcreteModel):
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
 
-        # loop over all flows and timesteps to set flow bound / values
+        # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
+                if self.flows[o, i].actual_value[t] is not None:
+                    # pre- optimized value of flow variable
+                    self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
 
-                # pre - optimizide value of flow
-                self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
+                    # fix variable if flow is fixed
+                    if self.flows[o, i].fixed:
+                        self.flow[o, i, t].fix()
 
-                # fix variable if flow is fixed
-                if self.flows[o, i].fixed:
-                     self.flow[o, i, t].fix()
-                     # TODO: Move this if clause somewhere more usefull
-                     # just as reminder
-                     if self.flow[o, i, t].value  is None:
-                         raise ValueError('Can not set fixed value without ' +
-                                          'numeric value for actual value')
-
-                # upper bound of flow variable
                 if self.flows[o, i].nominal_value is not None:
+                    # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
                     # lower bound of flow variable
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
-        # loop over all
+        # loop over all groups
         for group in self.es.groups:
             if callable(group):
                 # create instance for block
@@ -404,10 +346,10 @@ def constraint_grouping(node):
 
     if isinstance(node, on.Bus) and 'el' in str(node):
         return cblocks.BusBalance
-    #if isinstance(node, on.Transformer):
-    #    return cblocks.LinearRelation
     if isinstance(node, on.Transformer):
-        return cblocks.MinimumOutflow
+        return cblocks.LinearRelation
+    #if isinstance(node, on.Transformer):
+    #    return cblocks.MinimumOutflow
 
 ###############################################################################
 #
