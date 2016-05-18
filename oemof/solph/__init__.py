@@ -168,7 +168,7 @@ class LinearTransformer(on.Transformer):
     >>> bel = Bus()
     >>> bth = Bus()
     >>> trsf = LinearTransformer(conversion_factors={bel: 0.4,
-                                                 bth: [1, 2, 3]})
+    ...                                              bth: [1, 2, 3]})
     >>> trsf.conversion_factors[bel][3]
     0.4
 
