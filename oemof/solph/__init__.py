@@ -92,26 +92,22 @@ class _Sequence(UserList):
             self.data.extend([self.default] * (key - len(self.data) + 1))
             self.data[key] = value
 
-class Flow:
 
+class Flow:
+    """
+    """
     def __init__(self, *args, **kwargs):
-        """
-        """
         # TODO: Check if we can inherit form pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        # TODO: Create checks and default values for kwargs.
-        # Problem: Where do we get the information for timesteps
-        # Idea: pass energysystem-object to flow??? -> not very nice!
-
-        self.min = kwargs.get('min')
-        self.max = kwargs.get('max')
-        self.actual_value = kwargs.get('actual_value')
         self.nominal_value = kwargs.get('nominal_value')
-        self.variable_costs = kwargs.get('variable_costs')
+        self.min = Sequence(kwargs.get('min', 0))
+        self.max = Sequence(kwargs.get('max', 1))
+        self.actual_value = Sequence(kwargs.get('actual_value'))
+        self.variable_costs = Sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed = kwargs.get('summed')
         self.fixed = kwargs.get('fixed', False)
@@ -120,12 +116,15 @@ class Flow:
 
 # TODO: create solph sepcific energysystem subclassed from core energy system
 class EnergySystem:
-
+    """
+    """
     def __init__(self, *args, **kwargs):
-        """
-        """
+
         super().__init__( *args, **kwargs)
         #self.flow_var = IndexedVarWithDomain()
+        self.timeindex = kwargs.get('timeindex')
+        self.increment = kwargs.get('increment', 1)
+
 
 Bus = on.Bus
 
@@ -154,11 +153,29 @@ class Source(on.Source):
 
 class LinearTransformer(on.Transformer):
     """
+    Parameters
+    ----------
+
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of timehorizon for simulation.
+
+    Examples
+    --------
+    >>> bel = Bus()
+    >>> bth = Bus()
+    >>> trsf = LinearTransformer(conversion_factors={bel: 0.4,
+                                                 bth: [1, 2, 3]})
+    >>> trsf.conversion_factors[bel][3]
+    0.4
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conversion_factors = kwargs.get('conversion_factors')
-
+        self.conversion_factors = {k: Sequence(v)
+            for k,v in kwargs.get('conversion_factors', {}).items()}
 
 
 class Storage(on.Transformer):
@@ -412,30 +429,23 @@ if __name__ == "__main__":
     bcoal = Bus(label="coalbus")
 
     so = Source(label="coalsource",
-                outputs={bcoal: Flow(max=[None]*lt,
-                                     actual_value=[None]*lt,
-                                     nominal_value=None)})
+                outputs={bcoal: Flow()})
 
-    si = Sink(label="sink", inputs={bel: Flow(min=[0]*lt,
-                                              max=[0.1, 0.2, 0.9],
+    wind = Source(label="wind", outputs={bel:Flow(actual_value=[1,3,10],
+                                                  nominal_value=10,
+                                                  fixed=True)})
+
+    si = Sink(label="sink", inputs={bel: Flow(max=[0.1, 0.2, 0.9],
                                               nominal_value=10, fixed=True,
                                               actual_value=[1, 2, 3])})
 
-    trsf = LinearTransformer(label='trsf', inputs={
-                                         bcoal:Flow(min=[0]*lt,
-                                                    max=[1]*lt,
-                                                    nominal_value=None,
-                                                    actual_value=[None]*lt)},
-                             outputs={bel:Flow(min=[0.5, 0.5, 0.5],
-                                               max=[1, 1, 1],
-                                               nominal_value=10,
-                                               actual_value=[None]*lt),
+    trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow(1)},
+                             outputs={bel:Flow(nominal_value=10),
                                       bcoal:Flow(min=[0.5, 0.4, 0.4],
                                                  max=[1, 1, 1],
-                                                 nominal_value=30,
-                                                 actual_value=[None]*lt)},
-                             conversion_factors={bel: [0.4]*lt,
-                                                 bcoal: [0.5]*lt})
+                                                 nominal_value=30)},
+                             conversion_factors={bel: _Sequence(default=0.4),
+                                                 bcoal:  _Sequence(default=0.5)})
 
     om = OperationalModel(es)
     om.objective = pyomo.Objective(expr=1)
