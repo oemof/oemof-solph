@@ -100,19 +100,30 @@ def inflowcosts(m, nodes):
 
     return expr
 
-def fixedcosts(m, nodes, flow='inflows'):
+def fixedcosts(m, nodes, flows='outflows'):
     """
+
+    Parameters
+    ----------
+    m : Solph OperationalModel object
+        The created expressions are added to the objective of the model m
+    nodes : list
+        List of oemof node object for which the fixed costs should be added.
+    flows : string
+        String indicates for which flows the fixed costs are added. Possible
+        options are 'inflows', 'outflows' or 'both'.
+
     """
     NODES = [str(n) for n in nodes]
 
-    if flow == 'outflows':
+    if flows in ['outflows', 'all']:
         # fixed costs associated with nominal output flow
         expr = sum(m.flows[n, o].nominal_value * m.flows[n, o].fixed_costs
                    for n in NODES
                    for o in m.OUTPUTS[n]
                    for t in m.TIMESTEPS)
 
-    if flow == 'inflow':
+    if flows in ['outflows', 'all']:
         # fixed costs are associated with nominal input flow
         expr = sum(m.flows[i, n].nominal_value * m.flows[i, n].fixed_costs
                    for n in NODES
