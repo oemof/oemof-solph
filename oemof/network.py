@@ -118,6 +118,9 @@ class Node:
     def inputs(self):
         # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
         #       Find a way to replace it.
+        #       This can also have unintuitive behaviour sinc adding new
+        #       associations to the returned mapping will NOT add a new input
+        #       flow to this node.
         return {k: flow(k, self) for k in flow._in_edges.get(self, ())}
 
     @property
