@@ -342,17 +342,18 @@ class OperationalModel(pyomo.ConcreteModel):
 
 
         # loop over all objective groups to add objective exprs to objective
-        self.add_objective(groupings=objective_grouping)
+
+        self.add_objective(groups=objective_groups)
 
 
-        def add_objective(self, groups=[], sense=pyomo.minimize,
-                          name='objective'):
-            """
-            """
-            setattr(self, name, pyomo.Objective(sense=sense, expr=0))
+    def add_objective(self, groups, sense=pyomo.minimize,
+                      name='objective'):
+        """
+        """
+        setattr(self, name, pyomo.Objective(sense=sense, expr=0))
 
-            for group in groups:
-                 self.objective.expr += group(self, self.es.groups.get(group))
+        for group in groups:
+             self.objective.expr += group(self, self.es.groups.get(group))
 
 
 
