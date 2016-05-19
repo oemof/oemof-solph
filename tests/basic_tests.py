@@ -1,3 +1,8 @@
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 from nose.tools import ok_, eq_
 
 import pandas as pd
@@ -34,4 +39,25 @@ class EnergySystem_Tests:
         bus = Bus(uid="test bus")
         ES = es.EnergySystem(entities=[bus])
         ok_(ES.groups[bus.uid] is bus)
+
+    def test_that_None_is_not_a_valid_group(self):
+        def by_uid(n):
+            if "Not in 'Group'" in n.uid:
+                return None
+            else:
+                return "Group"
+        ES = es.EnergySystem(groupings=[by_uid])
+
+        ungrouped = [ Entity(uid="Not in 'Group': {}".format(i))
+                      for i in range(10)]
+        grouped = [ Entity(uid="In 'Group': {}".format(i))
+                    for i in range(10)]
+        ok_(None not in ES.groups)
+        for g in ES.groups.values():
+            for e in ungrouped:
+                if isinstance(g, Iterable) and not isinstance(g, str):
+                    ok_(e not in g)
+            for e in grouped:
+                if isinstance(g, Iterable) and not isinstance(g, str):
+                    ok_(e in g)
 

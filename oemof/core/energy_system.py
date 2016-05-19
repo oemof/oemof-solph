@@ -56,6 +56,8 @@ class Grouping:
             return self
         def insert(e, d):
             k = key(e)
+            if k is None:
+                return
             d[k] = collide(e, d[k]) if k in d else value(e)
 
         self._insert = insert
