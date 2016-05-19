@@ -3,7 +3,6 @@
 
 """
 from collections import abc, UserList
-from inspect import isfunction
 
 import pyomo.environ as pyomo
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -250,7 +249,7 @@ class OperationalModel(pyomo.ConcreteModel):
     """
 
 
-    CONSTRAINT_GROUPS = [cblocks.LinearRelation, cblocks.BusBalance]
+    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation]
     OBJECTIVE_GROUPS = [cblocks.outflowcosts]
 
 
@@ -330,22 +329,32 @@ class OperationalModel(pyomo.ConcreteModel):
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
-        objective_expr = 0
 
-        # loop over all groups
+        # loop over all constraint groups to add constraints to the model
         for group in constraint_groups:
-            if isfunction(group):
-                objective_expr += group(self, self.es.groups[group])
-            else:
-                # create instance for block
-                block = group()
-                # add block to model
-                self.add_component(str(group), block)
-                # create constraints etc. related with block for all nodes
-                # in the group
-                block._create(nodes=self.es.groups[group])
+            # create instance for block
+            block = group()
+            # add block to model
+            self.add_component(str(group), block)
+            # create constraints etc. related with block for all nodes
+            # in the group
+            block._create(nodes=self.es.groups[group])
 
-        self.objective = pyomo.Objective(expr=objective_expr)
+
+        # loop over all objective groups to add objective exprs to objective
+        self.add_objective(groupings=objective_grouping)
+
+
+        def add_objective(self, groups=[], sense=pyomo.minimize,
+                          name='objective'):
+            """
+            """
+            setattr(self, name, pyomo.Objective(sense=sense, expr=0))
+
+            for group in groups:
+                 self.objective.expr += group(self, self.es.groups.get(group))
+
+
 
         # This is for integer problems, migth be usefull but can be moved somewhere else
         # Ignore this!!!
