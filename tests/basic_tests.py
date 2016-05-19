@@ -60,4 +60,17 @@ class EnergySystem_Tests:
             for e in grouped:
                 if isinstance(g, Iterable) and not isinstance(g, str):
                     ok_(e in g)
+    def test_defining_multiple_groupings_with_one_function(self):
+        def assign_to_multiple_groups_in_one_go(n):
+            g1 = n.uid[-1]
+            g2 = n.uid[0:3]
+            return es.MultipleGroups(g1, g2)
+
+        ES = es.EnergySystem(groupings=[assign_to_multiple_groups_in_one_go])
+        entities = [ Entity(uid=("Foo: " if i % 2 == 0 else "Bar: ") +
+                                 "{}".format(i) +
+                                ("A" if i < 5 else "B"))
+                     for i in range(10)]
+        for group in ["Foo", "Bar", "A", "B"]:
+            ok_(len(ES.groups[group]) == 5)
 
