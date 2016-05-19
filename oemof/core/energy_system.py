@@ -20,6 +20,11 @@ from oemof.solph.optimization_model import OptimizationModel as OM
 def _value_error(s):
     raise ValueError(s)
 
+class MultipleGroups(list):
+    __slots__ = ()
+    def __init__(self, *args):
+        super().__init__(args)
+
 class Grouping:
     """
     Used to aggregate :class:`entities <oemof.core.network.Entity>` in an
@@ -54,10 +59,13 @@ class Grouping:
                  insert=None):
         if insert:
             self._insert = insert
-            return self
+            return
         def insert(e, d):
             k = key(e)
-            d[k] = collide(e, d[k]) if k in d else value(e)
+            if k is None:
+                return
+            for group in (k if isinstance(k, MultipleGroups) else [k]):
+                d[group] = collide(e, d[group]) if group in d else value(e)
 
         self._insert = insert
 
