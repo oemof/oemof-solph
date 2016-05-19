@@ -4,6 +4,10 @@ v0.0.8 ()
 New features
 ############
 
+ * It's now possible to assign a node to multiple groups from one
+   :class:`Grouping <oeomof.core.energy_system.Grouping>` by returning
+   :class:`MultipleGroups <oeomof.core.energy_system.MultipleGroups>` from
+   :class:`Grouping <oeomof.core.energy_system.Grouping>`.
 
 Documentation
 #############
@@ -23,3 +27,6 @@ Other changes
 
 Contributors
 ############
+
+ * Stephan Günther
+
