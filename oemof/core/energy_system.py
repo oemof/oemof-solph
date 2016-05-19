@@ -53,7 +53,7 @@ class Grouping:
                  insert=None):
         if insert:
             self._insert = insert
-            return self
+            return
         def insert(e, d):
             k = key(e)
             if k is None:
