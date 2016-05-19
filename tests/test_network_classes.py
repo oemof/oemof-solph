@@ -45,6 +45,22 @@ class Node_Tests:
             "\n  Expected: 0." +
             "\n  Got     : {}".format(len(outputs)))
 
+    def test_accessing_inputs_of_a_node_without_input_flows(self):
+        n = Node()
+        exception = None
+        try:
+            inputs = n.inputs
+        except Exception as e:
+            exception = e
+        ok_(exception is None,
+            "\n  Test accessing `inputs` on {} having no inputs.".format(n) +
+            "\n  Got unexpected exception:\n" +
+            "\n      {}".format(feo(type(exception), exception)[0]))
+        ok_(len(inputs) == 0,
+            "\n  Failure when testing `len(inputs)`." +
+            "\n  Expected: 0." +
+            "\n  Got     : {}".format(len(inputs)))
+
 
 class EnergySystem_Nodes_Integration_Tests:
 

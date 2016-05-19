@@ -118,7 +118,7 @@ class Node:
     def inputs(self):
         # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
         #       Find a way to replace it.
-        return {k: flow(k, self) for k in flow._in_edges[self]}
+        return {k: flow(k, self) for k in flow._in_edges.get(self, ())}
 
     @property
     def outputs(self):
