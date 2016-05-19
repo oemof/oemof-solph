@@ -249,6 +249,7 @@ class OperationalModel(pyomo.ConcreteModel):
         Defaults to :const:`OperationalModel.OBJECTIVES`
     """
 
+
     CONSTRAINT_GROUPS = [cblocks.LinearRelation, cblocks.BusBalance]
     OBJECTIVE_GROUPS = [cblocks.outflowcosts]
 
