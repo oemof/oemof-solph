@@ -245,16 +245,22 @@ class OperationalModel(pyomo.ConcreteModel):
 
     """
 
-    CONSTRAINTS = [cblocks.BusBalance, cblocks.LinearRelation, Investment]
-    OBJECTIVES = [cblocks.outflowcosts]
+    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation]
+    OBJECTIVE_GROUPS = [cblocks.outflowcosts, cblocks.inflowcosts,
+                        cblocks.fixedcosts]
 
 
-    def __init__(self, es, constraint_groups=OperationalModel.CONSTRAINTS,
-                           objective_groups=OperationalModel.OBJECTIVES):
+    def __init__(self, es, *args, **kwargs):
         super().__init__()
+
 
         # name of the optimization model
         self.name = 'OperationalModel'
+
+        constraint_groups = kwargs.get('constraint_groups',
+                                       OperationalModel.CONSTRAINT_GROUPS)
+        objective_groups = kwargs.get('objective_groups',
+                                      OperationalModel.OBJECTIVE_GROUPS)
 
         # TODO : move time-increment to energy system class
         # specified time_increment (time-step width)
@@ -323,7 +329,6 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # loop over all groups
         for group in constraint_groups:
-
             if isfunction(group):
                 objective_expr += group(self, self.es.groups[group])
             else:
