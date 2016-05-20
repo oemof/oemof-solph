@@ -7,6 +7,7 @@ from oemof.core import energy_system as core_es
 import oemof.solph as solph
 from oemof.solph import (Bus, Source, Sink, Flow, Investment, LinearTransformer,
                         Storage)
+from oemof.solph import OperationalModel
 
 
 
@@ -42,7 +43,11 @@ estorage = Storage(
     nominal_output_capacity_ratio=0.5, inflow_conversion_factor=1,
     outflow_conversion_factor=1)
 
-om = solph.OperationalModel(es)
+date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
+om = OperationalModel(es, timeindex=date_time_index)
+om.solve(solve_kwargs={'tee': True})
+om.write('optimization_problem.lp',
+         io_options={'symbolic_solver_labels': True})
 
 om.pprint()
 
