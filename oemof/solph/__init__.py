@@ -297,13 +297,6 @@ class OperationalModel(pyomo.ConcreteModel):
         self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
 
-        # set for all flows for which variable costs are set
-        self.VARIABLECOST_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
-                                         for (t,f) in n.outputs.items()
-                                         if f.variable_costs[0] is not None],
-            ordered=True, dimen=2)
-
         # set for all flows for which fixed osts are set
         self.FIXEDCOST_FLOWS = pyomo.Set(
             initialize=[(str(n), str(t)) for n in self.es.nodes
@@ -375,10 +368,6 @@ class OperationalModel(pyomo.ConcreteModel):
         expr = 0
         for group in OperationalModel.OBJECTIVE_GROUPS:
             expr += group(self, self.es.groups.get(group))
-        # Expression for variable costs associated the flows
-        #expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
-        #            for i, o in self.VARIABLECOST_FLOWS
-        #            for t in self.TIMESTEPS)
 
         # Expression for fixed costs associated the the nominal value of flow
         expr += sum(self.flows[i, o].nominal_value *
@@ -489,13 +478,13 @@ def merge_variable_costs_flows(n, group):
      group.extend(n)
      return group
 
-investment_grouping = oces.Grouping(
+variable_costs_grouping = oces.Grouping(
     key=variable_costs_key,
     value=variable_costs_flows,
     merge=merge_variable_costs_flows)
 
 
-GROUPINGS = [constraint_grouping, investment_grouping]
+GROUPINGS = [constraint_grouping, investment_grouping, variable_costs_grouping]
 """ list:  Groupings needed on an energy system for it to work with solph.
 
 TODO: Maybe move this to the module docstring? It shoule be somewhere prominent
