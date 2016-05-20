@@ -9,7 +9,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
 from oemof.solph import constraints as cblocks
 import logging
-
+import warnings
 
 ###############################################################################
 #
@@ -90,30 +90,25 @@ class LinearTransformer(on.Transformer):
         self.conversion_factors = kwargs.get('conversion_factors')
 
 
-
 class Storage(on.Transformer):
     """
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        overwrite_attribute_warning = (
-            '{0} for storage flows will be overwritten.')
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
-        # ToDo use warning module von python
         for flow in self.inputs.values():
             if flow.nominal_value is not None:
-                logging.warning(overwrite_attribute_warning.format(
-                    'nominal output'))
+                storage_nominal_value_warning('output')
             flow.nominal_value = (self.nominal_input_capacity_ratio *
                 self.nominal_capacity)
+
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
-        for flow in self.output.values():
+        for flow in self.outputs.values():
             if flow.nominal_value is not None:
-                logging.warning(overwrite_attribute_warning.format(
-                    'nominal input'))
+                storage_nominal_value_warning('input')
             flow.nominal_value = (self.nominal_output_capacity_ratio *
                 self.nominal_capacity)
         self.initial_capacity = kwargs.get('initial_capacity', 0)
@@ -122,6 +117,13 @@ class Storage(on.Transformer):
             'inflow_conversion_factor', 1)
         self.outflow_conversion_factor = kwargs.get(
             'outflow_conversion_factor', 1)
+
+
+def storage_nominal_value_warning(flow):
+    msg = ("The nominal_value should not be set for {0} flows of storages." +
+           "The value will be overwritten by the product of the " +
+           "nominal_capacity and the nominal_{0}_capacity_ratio.")
+    warnings.warn(msg.format(flow), SyntaxWarning)
 
 
 ###############################################################################
