@@ -165,37 +165,3 @@ class LinearRelation(SimpleBlock):
                         rhs = m.flow[n, o, t]
                         block.constraint.add((n, o, t), (lhs == rhs))
         self.constraintCon = BuildAction(rule=_input_output_relation)
-
-
-
-# This is just for no for test puposes
-class MinimumOutflow(SimpleBlock):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """
-        """
-        m = self.parent_block()
-        self.NODES = Set(initialize=[str(n) for n in group])
-        # create status variable
-        self.status = Var(self.NODES, m.TIMESTEPS, within=Binary)
-        # create "empty" constraint
-        self.minimum_outflow = Constraint(self.NODES, noruleinit=True)
-
-    def _build(self):
-        """
-        """
-        m = self.parent_block()
-
-        def _minimum_outflow(block):
-            for t in m.TIMESTEPS:
-                for n in block.NODES:
-                    for o in m.OUTPUTS[n]:
-                        lhs = m.flow[n, o, t]
-                        rhs = self.status[n, t] * \
-                            m.es.groups[n].outputs[m.es.groups[o]].min[t]
-                        block.minimum_outflow.add((n, o, t), (lhs >= rhs))
-        self.constraintCon = BuildAction(rule=_minimum_outflow)
