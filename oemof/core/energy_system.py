@@ -17,6 +17,8 @@ from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 def _value_error(s):
+    """ Helper function to be able to `raise ValueError` as an expression.
+    """
     raise ValueError(s)
 
 class MultipleGroups(list):
