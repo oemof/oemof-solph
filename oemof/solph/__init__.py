@@ -111,12 +111,15 @@ class Storage(on.Transformer):
                 storage_nominal_value_warning('input')
             flow.nominal_value = (self.nominal_output_capacity_ratio *
                 self.nominal_capacity)
+
         self.initial_capacity = kwargs.get('initial_capacity', 0)
         self.capacity_loss = kwargs.get('capacity_loss', 0)
         self.inflow_conversion_factor = kwargs.get(
             'inflow_conversion_factor', 1)
         self.outflow_conversion_factor = kwargs.get(
             'outflow_conversion_factor', 1)
+        self.capacity_max = kwargs.get('capacity_max', 1)
+        self.capacity_min = kwargs.get('capacity_min', 0)
 
 
 def storage_nominal_value_warning(flow):
