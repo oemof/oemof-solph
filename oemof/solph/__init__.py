@@ -116,18 +116,6 @@ class Flow:
         self.investment = kwargs.get('investment')
 
 
-# TODO: create solph sepcific energysystem subclassed from core energy system
-class EnergySystem:
-    """
-    """
-    def __init__(self, *args, **kwargs):
-
-        super().__init__( *args, **kwargs)
-        #self.flow_var = IndexedVarWithDomain()
-        self.timeindex = kwargs.get('timeindex')
-        self.increment = kwargs.get('increment', 1)
-
-
 Bus = on.Bus
 
 
