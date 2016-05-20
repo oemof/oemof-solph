@@ -112,7 +112,7 @@ class Flow:
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed = kwargs.get('summed')
         self.fixed = kwargs.get('fixed', False)
-
+        self.investment = kwargs.get('investment')
 
 
 # TODO: create solph sepcific energysystem subclassed from core energy system
@@ -411,36 +411,43 @@ class OperationalModel(pyomo.ConcreteModel):
 
 
 
-        # This is for integer problems, migth be usefull but can be moved somewhere else
-        # Ignore this!!!
-        def relax_problem(self):
-            """ Relaxes integer variables to reals of optimization model self
-            """
-            relaxer = RelaxIntegrality()
-            relaxer._apply_to(self)
+    # Method for integer problems to relax the integer variables to contineous
+    def relax_problem(self):
+        """ Relaxes integer variables to reals of optimization model self
+        """
+        relaxer = RelaxIntegrality()
+        relaxer._apply_to(self)
 
-            return self
+        return self
 
 ###############################################################################
 #
 # Solph grouping functions
 #
 ###############################################################################
-# TODO: Make investment grouping work with (node does not hold 'investment' but the flows do)
-
-# TODO: Delete from grouping / add to groupong method/function for oemof nodes
-def investment_grouping(node):
-    if hasattr(node, "investment"):
-        return Investment
-
 def constraint_grouping(node):
     if isinstance(node, on.Bus) and 'el' in str(node):
         return cblocks.BusBalance
     if isinstance(node, LinearTransformer):
         return cblocks.LinearRelation
 
+def investment_key(n):
+    for f in n.outputs.values():
+        if f.investment is not None:
+            return cblocks.Investment
 
+def investment_flows(n):
+     return [(n, t, f) for (t, f) in n.outputs.items()
+             if f.investment is not None]
 
+def merge_investment_flows(n, group):
+     group.extend(investment_flows(n))
+     return group
+
+investment_grouping = oces.Grouping(
+    key=investment_key,
+    value=investment_flows,
+    collide=merge_investment_flows)
 
 GROUPINGS = [constraint_grouping, investment_grouping]
 """ list:  Groupings needed on an energy system for it to work with solph.
@@ -484,9 +491,13 @@ if __name__ == "__main__":
     so = Source(label="coalsource",
                 outputs={bcoal: Flow()})
 
-    wind = Source(label="wind", outputs={bel:Flow(actual_value=[1,3,10],
-                                                  nominal_value=10,
-                                                  fixed=True)})
+    wind = Source(label="wind", outputs={
+        bel:Flow(actual_value=[1,3,10],
+                 nominal_value=10,
+                 fixed=True,
+                 investment=Investment(maximum=100))
+        }
+    )
 
     si = Sink(label="sink", inputs={bel: Flow(max=[0.1, 0.2, 0.9],
                                               nominal_value=10, fixed=True,
