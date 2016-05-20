@@ -224,27 +224,13 @@ def storage_nominal_value_warning(flow):
 #
 ###############################################################################
 
-# TODO: Create Investment model
+# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
 class ExpansionModel(pyomo.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
     def __init__(self, es):
         super().__init__()
 
-        self.es = es
-
-        self.time_increment = 1
-
-        self.periods = 1
-
-        # edges dictionary with tuples as keys and non investment flows as
-        # values
-        self.non_investment_flows = {
-                (str(source), str(target)): source.outputs[target]
-                    for source in es.nodes
-                    for target in source.outputs
-                    if not getattr(source.outputs[target], "investment", False)
-                }
 
 
 class OperationalModel(pyomo.ConcreteModel):
@@ -253,59 +239,38 @@ class OperationalModel(pyomo.ConcreteModel):
 
     Parameters
     ----------
-
     es : EnergySystem object
+        Object that holds the nodes of an oemof energy system graph
     constraint_groups: list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
-    objective_groups:
-        Solph looks for these groups in the given energy system and uses them
-        to create the objective expression.
-        Defaults to :const:`OperationalModel.OBJECTIVES`
 
-    objective_groups:
-        Solph looks for these groups in the given energy system and uses them
-        to create the objective expression.
-        Defaults to :const:`OperationalModel.OBJECTIVES`
     """
 
-
-    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation]
-    OBJECTIVE_GROUPS = []
+    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
+                         cblocks.Investment]
 
 
     def __init__(self, es, *args, **kwargs):
-
         super().__init__()
 
+        ##########################  Arguments#  ###############################
 
-        # name of the optimization model
         self.name = 'OperationalModel'
+        self.es = es
+        self.timeindex = kwargs.get('timeindex')
+        self.timeincrement = kwargs.get('timeincrement', 1)
 
         constraint_groups = kwargs.get('constraint_groups',
                                        OperationalModel.CONSTRAINT_GROUPS)
-        objective_groups = kwargs.get('objective_groups',
-                                      OperationalModel.OBJECTIVE_GROUPS)
-
-        # TODO : move time-increment to energy system class
-        # specified time_increment (time-step width)
-        self.time_increment = 2
-
-        self.es = es
-        # TODO: Move code below somewhere to grouping in energysystem class (@gnn)
-        # remove None key from dictionary to avoid errors
-        self.es.groups = {k: v for k, v in self.es.groups.items()
-                          if k is not None}
-
+        # dictionary with all flows containing flow objects as values und
+        # tuple of string representation of oemof nodes (source, target)
         self.flows = {(str(source), str(target)): source.outputs[target]
                       for source in es.nodes
                       for target in source.outputs}
 
-        # list with all components
-        self.components = [n for n in self.es.nodes
-                           if isinstance(n, on.Component)]
-
+        #############################  SETS  ##################################
         # set with all nodes
         self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
 
@@ -334,31 +299,25 @@ class OperationalModel(pyomo.ConcreteModel):
         self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
 
+        # set for all flows for which variable costs are set
+        self.VARIABLECOST_FLOWS = pyomo.Set(
+            initialize=[(str(n), str(t)) for n in self.es.nodes
+                                         for (t,f) in n.outputs.items()
+                                         if f.variable_costs[0] is not None],
+            ordered=True, dimen=2)
+
+        # set for all flows for which fixed osts are set
+        self.FIXEDCOST_FLOWS = pyomo.Set(
+            initialize=[(str(n), str(t)) for n in self.es.nodes
+                                         for (t,f) in n.outputs.items()
+                                         if f.fixed_costs is not None],
+            ordered=True, dimen=2)
+
+        ########################### FLOW VARIABLE #############################
+
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
-
-        variablecost_flows = []
-        fixedcost_flows = []
-        for c in self.components:
-            variablecost_flows.extend([(str(c), str(o)) for o in c.outputs
-                                   if on.flow(c, o).variable_costs[0]
-                                   is not None])
-            variablecost_flows.extend([(str(i), str(c)) for i in c.inputs
-                                   if on.flow(i, c).variable_costs[0]
-                                   is not None])
-            fixedcost_flows.extend([(str(c), str(o)) for o in c.outputs
-                                   if on.flow(c, o).fixed_costs
-                                   is not None])
-            fixedcost_flows.extend([(str(i), str(c)) for i in c.inputs
-                                   if on.flow(i, c).fixed_costs
-                                   is not None])
-
-        self.VARIABLECOST_FLOWS = pyomo.Set(initialize=variablecost_flows,
-                                             dimen=2)
-        self.FIXEDCOST_FLOWS = pyomo.Set(initialize=fixedcost_flows,
-                                             dimen=2)
-
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
@@ -377,19 +336,18 @@ class OperationalModel(pyomo.ConcreteModel):
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
-
+        ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
         for group in constraint_groups:
             # create instance for block
             block = group()
-            # add block to model
-            self.add_component(str(group), block)
+            # Add block to model
+            self.add_component(str(block), block)
             # create constraints etc. related with block for all nodes
             # in the group
-            block._create(nodes=self.es.groups[group])
+            block._create(group=self.es.groups[group])
 
-
-        # loop over all objective groups to add objective exprs to objective
+        ############################# Objective ###############################
         self.add_objective()
 
 
@@ -397,12 +355,12 @@ class OperationalModel(pyomo.ConcreteModel):
         """
         """
         expr = 0
-        # expression for variable costs associated the flows
+        # Expression for variable costs associated the flows
         expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
                     for i, o in self.VARIABLECOST_FLOWS
                     for t in self.TIMESTEPS)
 
-        # expression for fixed costs associated the the nominal value of flow
+        # Expression for fixed costs associated the the nominal value of flow
         expr += sum(self.flows[i, o].nominal_value *
                     self.flows[i, o].fixed_costs
                     for i, o in self.FIXEDCOST_FLOWS)
