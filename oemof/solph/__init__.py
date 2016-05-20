@@ -176,7 +176,7 @@ class LinearTransformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {k: Sequence(v)
-            for k,v in kwargs.get('conversion_factors', {}).items()}
+            for k,v in kwargs.get('conversion_factors').items()}
 
 
 class Storage(on.Transformer):
@@ -436,13 +436,8 @@ def investment_grouping(node):
 def constraint_grouping(node):
     if isinstance(node, on.Bus) and 'el' in str(node):
         return cblocks.BusBalance
-    if isinstance(node, on.Transformer):
+    if isinstance(node, LinearTransformer):
         return cblocks.LinearRelation
-
-
-def objective_grouping(flow):
-    if flow.variable_costs[0] is not None:
-        return cblocks.variable_costs
 
 
 
