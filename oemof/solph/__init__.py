@@ -272,6 +272,10 @@ class OperationalModel(pyomo.ConcreteModel):
         # set with all nodes
         self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
 
+        # pyomo set for timesteps of optimization problem
+        self.TIMESTEPS = pyomo.Set(initialize=range(len(es.time_idx)),
+                                   ordered=True)
+
         # indexed index set for inputs of nodes (nodes as indices)
         self.INPUTS = pyomo.Set(self.NODES, initialize={
             str(n): [str(i) for i in n.inputs]
@@ -287,11 +291,6 @@ class OperationalModel(pyomo.ConcreteModel):
                      if not isinstance(n, on.Sink)
             }
         )
-
-
-        # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=range(len(es.time_idx)),
-                                   ordered=True)
 
         # pyomo set for all flows in the energy system graph
         self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
@@ -311,11 +310,20 @@ class OperationalModel(pyomo.ConcreteModel):
                                          if f.fixed_costs is not None],
             ordered=True, dimen=2)
 
+        # set for all flows with an global limit on the flow over time
+        self.UB_LIMIT_FLOWS = pyomo.Set(
+            initialize = [(str(n), str(t)) for n in self.es.nodes
+                                           for (t,f) in n.outputs.items()
+                                           if f.summed is not None],
+            ordered=True, dimen=2)
+
+
         ########################### FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
+
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
@@ -333,6 +341,17 @@ class OperationalModel(pyomo.ConcreteModel):
                     # lower bound of flow variable
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
+
+        # constraint to bound the sum of a flow over all timesteps
+        self.flow_sum = pyomo.Constraint(self.UB_LIMIT_FLOWS,
+                                         noruleinit=True)
+        def _flow_sum_rule(model):
+            for i,o in self.UB_LIMIT_FLOWS:
+                lhs = sum(self.flow[i,o,t] * self.timeincrement
+                          for t in self.TIMESTEPS)
+                rhs = self.flows[i,o].summed
+                self.flow_sum.add((i,o), lhs <= rhs)
+        self.flow_sumCon = pyomo.BuildAction(rule=_flow_sum_rule)
 
         ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
@@ -496,7 +515,7 @@ if __name__ == "__main__":
     wind = Source(label="wind", outputs={
         bel:Flow(actual_value=[1,1,2],
                  nominal_value=2, fixed_costs=25,
-                 fixed=True,
+                 fixed=False, summed=5,
                  investment=Investment(maximum=100, epc=200))
         }
     )
@@ -515,6 +534,8 @@ if __name__ == "__main__":
 
     om = OperationalModel(es)
     om.solve(solve_kwargs={'tee':True})
+    om.write('optimization_problem.lp',
+             io_options={'symbolic_solver_labels':True})
     #om.pprint()
 
 

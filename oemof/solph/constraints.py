@@ -94,21 +94,6 @@ class BusBalance(SimpleBlock):
         self.constraintCon = BuildAction(rule=_busbalance_rule)
 
 
-
-
-# TODO: Implement this as a block
-#        self.flowlimits =  pyomo.Constraint(self.FLOWS,
-#                                            rule=self._summend_flowlimit_rule)
-#    @staticmethod
-#    def _summend_flowlimit_rule(self, o, i):
-#        """
-#        """
-#        return (
-#            sum(self.flow[o, i, t] * self.time_increment
-#                for t in self.TIMESTEPS) <= self.flows[o, i].summed
-#        )
-
-#
 class LinearRelation(SimpleBlock):
     """ Creates pyomo emtpy constraint for linear relation of 1:n flows.
     Construct the constraints with _create method.
