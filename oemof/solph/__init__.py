@@ -270,6 +270,7 @@ class OperationalModel(pyomo.ConcreteModel):
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
                          cblocks.Investment]
 
+    OBJECTIVE_GROUPS = [cblocks.VariableCosts]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()

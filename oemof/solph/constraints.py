@@ -24,26 +24,60 @@ class Investment(SimpleBlock):
 
 
         """
+        if group is None:
+            return None
+
         m = self.parent_block()
+        ############################ SETS #####################################
         # pyomo set with investment flows as list of tuples
         self.INVESTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
                                            for g in group])
 
-        def _invest_bound_rule(block, i, o):
+        self.SUMMED_MAX_INVESTFLOWS = Set(
+            initialize=[(str(g[0]), str(g[1]))
+                        for g in group if g[2].summed_max is not None])
+
+        self.SUMMED_MIN_INVESTFLOWS = Set(
+            initialize=[(str(g[0]), str(g[1]))
+                        for g in group if g[2].summed_min is not None])
+
+        ########################### VARIABLES ##################################
+        def _investvar_bound_rule(block, i, o):
             """ Returns bounds for invest_flow variable
             """
             return (0, m.flows[i, o].investment.maximum)
         # create variable bounded for flows with investement attribute
         self.invest_flow = Var(self.INVESTFLOWS, within=NonNegativeReals,
-                               bounds=_invest_bound_rule)
+                               bounds=_investvar_bound_rule)
 
-        def _invest_bounds(block, i, o, t):
+        ########################### CONSTRAINTS ###############################
+        def _investflow_bound_rule(block, i, o, t):
             """ Returns constraint to bound flow variable if flow investment
             """
             return m.flow[i,o,t] <= self.invest_flow[i,o]
         # create constraint to bound flow variable
         self.invest_bounds = Constraint(self.INVESTFLOWS, m.TIMESTEPS,
-                                        rule=_invest_bounds)
+                                        rule=_investflow_bound_rule)
+
+        def _summed_max_investflow_rule(block, i, o):
+            """
+            """
+            expr = (sum(m.flow[i,o,t] for t in m.TIMESTEPS) <=
+                              m.flows[i,o].summed_max * self.invest_flow[i,o])
+            return expr
+        self.summed_max_investflow = Constraint(self.SUMMED_MAX_INVESTFLOWS,
+                                              rule=_summed_max_investflow_rule)
+
+        def _summed_min_investflow_rule(block, i, o):
+            """
+            """
+            expr = (sum(m.flow[i,o,t] for t in m.TIMESTEPS) >=
+                              m.flows[i,o].summed_min * self.invest_flow[i,o])
+            return expr
+        self.summed_min_investflow = Constraint(self.SUMMED_MIN_INVESTFLOWS,
+                                              rule=_summed_max_investflow_rule)
+
+
     def _objective_expression(self):
         """
         """
@@ -75,6 +109,9 @@ class BusBalance(SimpleBlock):
             List of oemof bus (b) object for which the busbalance is created
             e.g. group = [b1, b2, b3, .....]
         """
+        if group is None:
+            return None
+
         m = self.parent_block()
         self.NODES = Set(initialize=[str(n) for n in group])
         self.INDEXSET = self.NODES * m.TIMESTEPS
@@ -116,6 +153,9 @@ class LinearRelation(SimpleBlock):
             a attribute `conversion_factors` of type dict containing the
             conversion factors from inputs to outputs.
         """
+        if group is None:
+            return None
+
         m = self.parent_block()
 
         self.NODES = Set(initialize=[str(n) for n in group])
@@ -137,34 +177,17 @@ class LinearRelation(SimpleBlock):
 
 
 
-# This is just for no for test puposes
-class MinimumOutflow(SimpleBlock):
+def VariableCosts(m, group=None):
     """
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    if group is None:
+        return 0
 
-    def _create(self, group=None):
-        """
-        """
-        m = self.parent_block()
-        self.NODES = Set(initialize=[str(n) for n in group])
-        # create status variable
-        self.status = Var(self.NODES, m.TIMESTEPS, within=Binary)
-        # create "empty" constraint
-        self.minimum_outflow = Constraint(self.NODES, noruleinit=True)
+    VARIABLECOST_FLOWS = [(str(g[0]), str(g[1])) for g in group]
 
-    def _build(self):
-        """
-        """
-        m = self.parent_block()
+    expr = sum(m.flow[i, o, t] * m.flows[i, o].variable_costs[t]
+                    for i, o in VARIABLECOST_FLOWS
+                    for t in m.TIMESTEPS)
 
-        def _minimum_outflow(block):
-            for t in m.TIMESTEPS:
-                for n in block.NODES:
-                    for o in m.OUTPUTS[n]:
-                        lhs = m.flow[n, o, t]
-                        rhs = self.status[n, t] * \
-                            m.es.groups[n].outputs[m.es.groups[o]].min[t]
-                        block.minimum_outflow.add((n, o, t), (lhs >= rhs))
-        self.constraintCon = BuildAction(rule=_minimum_outflow)
+    return expr
+
