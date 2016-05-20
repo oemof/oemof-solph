@@ -5,14 +5,15 @@
 from collections import abc, UserList
 import warnings
 import pyomo.environ as pyomo
+from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
 from oemof.solph import constraints as cblocks
-
+from oemof.core import energy_system as oces
 
 ###############################################################################
 #
-# Functions
+# Solph Functions
 #
 ###############################################################################
 
@@ -48,7 +49,7 @@ def Sequence(sequence_or_scalar):
 
 ###############################################################################
 #
-# Classes
+# Solph Classes
 #
 ###############################################################################
 
@@ -367,9 +368,51 @@ class OperationalModel(pyomo.ConcreteModel):
 
         self.objective = pyomo.Objective(sense=sense, expr=expr)
 
+    def receive_duals(self):
+        r""" Method sets solver suffix to extract information about dual
+        variables from solver. Shadowprices (duals) and reduced costs (rc) are
+        set as attributes of the model.
 
+        """
+        self.dual = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        # reduced costs
+        self.rc = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
 
-    # Method for integer problems to relax the integer variables to contineous
+    def solve(self, solver='glpk', solver_io='lp', **kwargs):
+        r""" Takes care of communication with solver to solve the model.
+
+        Parameters
+        ----------
+        solver : string
+            solver to be used e.g. "glpk","gurobi","cplex"
+        solver_io : string
+            pyomo solver interface file format: "lp","python","nl", etc.
+        \**kwargs : keyword arguments
+            Possible keys can be set see below:
+        solve_kwargs : dict
+            Other arguments for the pyomo.opt.SolverFactory.solve() method
+            Example : {"tee":True}
+        cmdline_options : dict
+            Dictionary with command line options for solver e.g.
+            {"mipgap":"0.01"} results in "--mipgap 0.01"
+            {"interior":" "} results in "--interior"
+
+        """
+        solve_kwargs = kwargs.get('solve_kwargs', {})
+        solver_cmdline_options = kwargs.get("cmdline_options", {})
+
+        opt = SolverFactory(solver, solver_io=solver_io)
+        # set command line options
+        options = opt.options
+        for k in solver_cmdline_options:
+            options[k] = solver_cmdline_options[k]
+
+        results = opt.solve(self, **solve_kwargs)
+
+        self.solutions.load_from(results)
+
+        return results
+
     def relax_problem(self):
         """ Relaxes integer variables to reals of optimization model self
         """
@@ -384,7 +427,7 @@ class OperationalModel(pyomo.ConcreteModel):
 #
 ###############################################################################
 def constraint_grouping(node):
-    if isinstance(node, on.Bus) and 'el' in str(node):
+    if isinstance(node, on.Bus) and 'balance' in str(node):
         return cblocks.BusBalance
     if isinstance(node, LinearTransformer):
         return cblocks.LinearRelation
@@ -440,18 +483,15 @@ if __name__ == "__main__":
 
     lt = len(es.time_idx)
 
-    bel = Bus(label="el")
-    # TODO: Resolve error by 'unsused' busses??
-    #bth = Bus(label="th")
-
+    bel = Bus(label="el_balance")
     bcoal = Bus(label="coalbus")
 
     so = Source(label="coalsource",
                 outputs={bcoal: Flow()})
 
     wind = Source(label="wind", outputs={
-        bel:Flow(actual_value=[1,3,10],
-                 nominal_value=10,
+        bel:Flow(actual_value=[1,1,2],
+                 nominal_value=2,
                  fixed=True,
                  investment=Investment(maximum=100))
         }
@@ -463,19 +503,15 @@ if __name__ == "__main__":
 
     trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
                              outputs={bel:Flow(nominal_value=10,
-                                               fixed_costs=999,
-                                               variable_costs=10),
-                                      bcoal:Flow(min=[0.5, 0.4, 0.4],
-                                                 max=[1, 1, 1],
-                                                 nominal_value=30)},
-                             conversion_factors={bel: _Sequence(default=0.4),
-                                                 bcoal:  _Sequence(default=0.5)})
+                                               fixed_costs=5,
+                                               variable_costs=10)},
+                             conversion_factors={bel: 0.4})
 
 
 
     om = OperationalModel(es)
-
-    om.pprint()
+    om.solve(solve_kwargs={'tee':True})
+    #om.pprint()
 
 
 
