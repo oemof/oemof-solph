@@ -29,7 +29,9 @@ class BusBalance(SimpleBlock):
                     rhs = sum(m.flow[n, o, t] * m.time_increment
                               for o in m.OUTPUTS[n])
                     expr = (lhs == rhs)
-                    block.constraint.add((n,t), expr)
+                    # no inflows no outflows yield: 0 == 0 which is True
+                    if expr is not True:
+                        block.constraint.add((n,t), expr)
 
         self.constraintCon = BuildAction(rule=_busbalance_rule)
 
