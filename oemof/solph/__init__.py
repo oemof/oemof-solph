@@ -329,18 +329,24 @@ class OperationalModel(pyomo.ConcreteModel):
         self.FIXEDCOST_FLOWS = pyomo.Set(
             initialize=[(str(n), str(t)) for n in self.es.nodes
                                          for (t,f) in n.outputs.items()
-                                         if f.fixed_costs is not None],
+                                         if f.fixed_costs is not None and
+                                         f.nominal_value is not None],
             ordered=True, dimen=2)
 
         # set for all flows with an global limit on the flow over time
         self.UB_LIMIT_FLOWS = pyomo.Set(
-            initialize = [(str(n), str(t)) for n in self.es.nodes
-                                           for (t,f) in n.outputs.items()
-                                           if f.summed is not None],
+            initialize=[(str(n), str(t)) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.summed_max is not None and
+                        f.nominal_value is not None],
             ordered=True, dimen=2)
 
-
-        ########################### FLOW VARIABLE #############################
+        self.LB_LIMIT_FLOWS = pyomo.Set(
+            initialize=[(str(n), str(t)) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.summed_min is not None and
+                        f.nominal_value is not None],
+            ordered=True, dimen=2)
 
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
