@@ -4,6 +4,7 @@
 """
 from collections import abc, UserList
 import warnings
+import pandas as pd
 import pyomo.environ as pyomo
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -258,10 +259,11 @@ class OperationalModel(pyomo.ConcreteModel):
     ----------
     es : EnergySystem object
         Object that holds the nodes of an oemof energy system graph
-    constraint_groups: list
+    constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
+    timeindex : DatetimeIndex
 
     """
 
@@ -277,7 +279,8 @@ class OperationalModel(pyomo.ConcreteModel):
         self.name = 'OperationalModel'
         self.es = es
         self.timeindex = kwargs.get('timeindex')
-        self.timeincrement = kwargs.get('timeincrement', 1)
+        self.timesteps = range(len(self.timeindex))
+        self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
 
         constraint_groups = kwargs.get('constraint_groups',
                                        OperationalModel.CONSTRAINT_GROUPS)
@@ -287,12 +290,12 @@ class OperationalModel(pyomo.ConcreteModel):
                       for source in es.nodes
                       for target in source.outputs}
 
-        #############################  SETS  ##################################
+        # ###########################  SETS  ##################################
         # set with all nodes
         self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=range(len(es.time_idx)),
+        self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
                                    ordered=True)
 
         # indexed index set for inputs of nodes (nodes as indices)
