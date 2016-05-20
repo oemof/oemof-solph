@@ -473,6 +473,8 @@ investment_grouping = oces.Grouping(
     value=investment_flows,
     merge=merge_investment_flows)
 
+
+
 GROUPINGS = [constraint_grouping, investment_grouping]
 """ list:  Groupings needed on an energy system for it to work with solph.
 
