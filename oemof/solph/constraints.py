@@ -24,6 +24,9 @@ class Investment(SimpleBlock):
 
 
         """
+        if group is None:
+            return None
+
         m = self.parent_block()
         ############################ SETS #####################################
         # pyomo set with investment flows as list of tuples
@@ -106,6 +109,9 @@ class BusBalance(SimpleBlock):
             List of oemof bus (b) object for which the busbalance is created
             e.g. group = [b1, b2, b3, .....]
         """
+        if group is None:
+            return None
+
         m = self.parent_block()
         self.NODES = Set(initialize=[str(n) for n in group])
         self.INDEXSET = self.NODES * m.TIMESTEPS
@@ -147,6 +153,9 @@ class LinearRelation(SimpleBlock):
             a attribute `conversion_factors` of type dict containing the
             conversion factors from inputs to outputs.
         """
+        if group is None:
+            return None
+
         m = self.parent_block()
 
         self.NODES = Set(initialize=[str(n) for n in group])
@@ -165,3 +174,20 @@ class LinearRelation(SimpleBlock):
                         rhs = m.flow[n, o, t]
                         block.constraint.add((n, o, t), (lhs == rhs))
         self.constraintCon = BuildAction(rule=_input_output_relation)
+
+
+
+def VariableCosts(m, group=None):
+    """
+    """
+    if group is None:
+        return 0
+
+    VARIABLECOST_FLOWS = [(str(g[0]), str(g[1])) for g in group]
+
+    expr = sum(m.flow[i, o, t] * m.flows[i, o].variable_costs[t]
+                    for i, o in VARIABLECOST_FLOWS
+                    for t in m.TIMESTEPS)
+
+    return expr
+

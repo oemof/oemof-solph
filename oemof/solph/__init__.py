@@ -249,6 +249,7 @@ class OperationalModel(pyomo.ConcreteModel):
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
                          cblocks.Investment]
 
+    OBJECTIVE_GROUPS = [cblocks.VariableCosts]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()
@@ -372,11 +373,12 @@ class OperationalModel(pyomo.ConcreteModel):
         """
         """
         expr = 0
-
+        for group in OperationalModel.OBJECTIVE_GROUPS:
+            expr += group(self, self.es.groups.get(group))
         # Expression for variable costs associated the flows
-        expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
-                    for i, o in self.VARIABLECOST_FLOWS
-                    for t in self.TIMESTEPS)
+        #expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
+        #            for i, o in self.VARIABLECOST_FLOWS
+        #            for t in self.TIMESTEPS)
 
         # Expression for fixed costs associated the the nominal value of flow
         expr += sum(self.flows[i, o].nominal_value *
@@ -473,6 +475,23 @@ investment_grouping = oces.Grouping(
     value=investment_flows,
     merge=merge_investment_flows)
 
+def variable_costs_key(n):
+    for f in n.outputs.values():
+        if f.variable_costs[0] is not None:
+            return cblocks.VariableCosts
+
+def variable_costs_flows(n):
+     return [(n, t, f) for (t, f) in n.outputs.items()
+             if f.variable_costs[0] is not None]
+
+def merge_variable_costs_flows(n, group):
+     group.extend(n)
+     return group
+
+investment_grouping = oces.Grouping(
+    key=variable_costs_key,
+    value=variable_costs_flows,
+    merge=merge_variable_costs_flows)
 
 
 GROUPINGS = [constraint_grouping, investment_grouping]
@@ -517,8 +536,7 @@ if __name__ == "__main__":
     wind = Source(label="wind", outputs={
         bel:Flow(actual_value=[1,1,2],
                  nominal_value=2, fixed_costs=25,
-                 fixed=False, summed=5,
-                 investment=Investment(maximum=100, epc=200))
+                 fixed=False)
         }
     )
 
