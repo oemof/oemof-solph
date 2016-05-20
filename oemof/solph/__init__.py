@@ -282,7 +282,9 @@ class OperationalModel(pyomo.ConcreteModel):
         self.timeindex = kwargs.get('timeindex')
         self.timesteps = range(len(self.timeindex))
         self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
-
+        # TODO Use solph groups and add user defined groups ????
+        # self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
+        # self._constraint_groups.add(kwargs.get('constraint_groups', []))
         constraint_groups = kwargs.get('constraint_groups',
                                        OperationalModel.CONSTRAINT_GROUPS)
         # dictionary with all flows containing flow objects as values und
