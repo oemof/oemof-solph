@@ -108,7 +108,7 @@ class Flow:
         self.min = Sequence(kwargs.get('min', 0))
         self.max = Sequence(kwargs.get('max', 1))
         self.actual_value = Sequence(kwargs.get('actual_value'))
-        self.variable_costs = Sequence(kwargs.get('variable_costs', 999))
+        self.variable_costs = Sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed = kwargs.get('summed')
         self.fixed = kwargs.get('fixed', False)
@@ -272,7 +272,7 @@ class OperationalModel(pyomo.ConcreteModel):
 
 
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation]
-    OBJECTIVE_GROUPS = [cblocks.outflowcosts]
+    OBJECTIVE_GROUPS = []
 
 
     def __init__(self, es, *args, **kwargs):
@@ -333,6 +333,27 @@ class OperationalModel(pyomo.ConcreteModel):
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
                               within=pyomo.NonNegativeReals)
 
+        variablecost_flows = []
+        fixedcost_flows = []
+        for c in self.components:
+            variablecost_flows.extend([(str(c), str(o)) for o in c.outputs
+                                   if on.flow(c, o).variable_costs[0]
+                                   is not None])
+            variablecost_flows.extend([(str(i), str(c)) for i in c.inputs
+                                   if on.flow(i, c).variable_costs[0]
+                                   is not None])
+            fixedcost_flows.extend([(str(c), str(o)) for o in c.outputs
+                                   if on.flow(c, o).fixed_costs
+                                   is not None])
+            fixedcost_flows.extend([(str(i), str(c)) for i in c.inputs
+                                   if on.flow(i, c).fixed_costs
+                                   is not None])
+
+        self.VARIABLECOST_FLOWS = pyomo.Set(initialize=variablecost_flows,
+                                             dimen=2)
+        self.FIXEDCOST_FLOWS = pyomo.Set(initialize=fixedcost_flows,
+                                             dimen=2)
+
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
@@ -364,18 +385,24 @@ class OperationalModel(pyomo.ConcreteModel):
 
 
         # loop over all objective groups to add objective exprs to objective
+        self.add_objective()
 
-        self.add_objective(groups=objective_groups)
 
-
-    def add_objective(self, groups, sense=pyomo.minimize,
-                      name='objective'):
+    def add_objective(self, sense=pyomo.minimize):
         """
         """
-        setattr(self, name, pyomo.Objective(sense=sense, expr=0))
+        expr = 0
+        # expression for variable costs associated the flows
+        expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
+                    for i, o in self.VARIABLECOST_FLOWS
+                    for t in self.TIMESTEPS)
 
-        for group in groups:
-             self.objective.expr += group(self, self.es.groups.get(group))
+        # expression for fixed costs associated the the nominal value of flow
+        expr += sum(self.flows[i, o].nominal_value *
+                    self.flows[i, o].fixed_costs
+                    for i, o in self.FIXEDCOST_FLOWS)
+
+        self.objective = pyomo.Objective(sense=sense, expr=expr)
 
 
 
@@ -405,11 +432,15 @@ def constraint_grouping(node):
     if isinstance(node, on.Transformer):
         return cblocks.LinearRelation
 
-def objective_grouping(node):
-    if isinstance(node, on.Transformer):
-        return cblocks.outflowcosts
 
-GROUPINGS = [constraint_grouping, investment_grouping, objective_grouping]
+def objective_grouping(flow):
+    if flow.variable_costs[0] is not None:
+        return cblocks.variable_costs
+
+
+
+
+GROUPINGS = [constraint_grouping, investment_grouping]
 """ list:  Groupings needed on an energy system for it to work with solph.
 
 TODO: Maybe move this to the module docstring? It shoule be somewhere prominent
@@ -437,7 +468,7 @@ groupings specified like this:
 if __name__ == "__main__":
     from oemof.core import energy_system as oces
 
-    es = oces.EnergySystem(groupings=[constraint_grouping, objective_grouping],
+    es = oces.EnergySystem(groupings=GROUPINGS,
                            time_idx=[1,2,3])
 
     lt = len(es.time_idx)
@@ -460,12 +491,16 @@ if __name__ == "__main__":
                                               actual_value=[1, 2, 3])})
 
     trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
-                             outputs={bel:Flow(nominal_value=10),
+                             outputs={bel:Flow(nominal_value=10,
+                                               fixed_costs=999,
+                                               variable_costs=10),
                                       bcoal:Flow(min=[0.5, 0.4, 0.4],
                                                  max=[1, 1, 1],
                                                  nominal_value=30)},
                              conversion_factors={bel: _Sequence(default=0.4),
                                                  bcoal:  _Sequence(default=0.5)})
+
+
 
     om = OperationalModel(es)
 
