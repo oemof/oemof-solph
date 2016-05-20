@@ -32,11 +32,11 @@ class Investment(SimpleBlock):
 
         self.SUMMED_MAX_INVESTFLOWS = Set(
             initialize=[(str(g[0]), str(g[1]))
-                        for g in group if g[3].summed_max is not None])
+                        for g in group if g[2].summed_max is not None])
 
         self.SUMMED_MIN_INVESTFLOWS = Set(
             initialize=[(str(g[0]), str(g[1]))
-                        for g in group if g[3].summed_min is not None])
+                        for g in group if g[2].summed_min is not None])
 
         ########################### VARIABLES ##################################
         def _investvar_bound_rule(block, i, o):
