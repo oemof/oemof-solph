@@ -61,6 +61,19 @@ class Node_Tests:
             "\n  Expected: 0." +
             "\n  Got     : {}".format(len(inputs)))
 
+    def test_that_the_outputs_attribute_of_a_node_is_a_mapping(self):
+        n = Node()
+        exception = None
+        try:
+            values = n.outputs.values()
+        except AttributeError as e:
+            exception = e
+        ok_(exception is None,
+            "\n  Test accessing `outputs.values()`" +
+            " on {} having no inputs.".format(n) +
+            "\n  Got unexpected exception:\n" +
+            "\n      {}".format(feo(type(exception), exception)[0]))
+
 
 class EnergySystem_Nodes_Integration_Tests:
 

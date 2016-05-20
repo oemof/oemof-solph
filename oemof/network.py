@@ -20,7 +20,7 @@ class _Edges():
     _in_edges = WKD()
     _flows = WKD()
     def __getitem__(self, key):
-        self._flows[key] = self._flows.get(key, WS())
+        self._flows[key] = self._flows.get(key, WKD())
         return self._flows[key]
     def __setitem__(self, key, value):
         source, target = key
