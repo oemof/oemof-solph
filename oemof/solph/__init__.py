@@ -121,9 +121,18 @@ Bus = on.Bus
 
 class Investment:
     """
+    Parameters
+    ----------
+    maximum : float
+        Maximum of the additional invested capacity
+    epc : float
+        Equivalent periodical costs for the investment, if period is one
+        year these costs are equal to the equivalent annual costs.
+
     """
-    def __init__(self, maximum=float('+inf')):
+    def __init__(self, maximum=float('+inf'), epc=None):
         self.maximum = maximum
+        self.epc = epc
 
 
 class Sink(on.Sink):
@@ -344,6 +353,7 @@ class OperationalModel(pyomo.ConcreteModel):
         """
         """
         expr = 0
+
         # Expression for variable costs associated the flows
         expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
                     for i, o in self.VARIABLECOST_FLOWS
@@ -353,6 +363,12 @@ class OperationalModel(pyomo.ConcreteModel):
         expr += sum(self.flows[i, o].nominal_value *
                     self.flows[i, o].fixed_costs
                     for i, o in self.FIXEDCOST_FLOWS)
+
+        # Expression for investment flows
+        for block in self.component_data_objects():
+            if isinstance(block, cblocks.Investment):
+                expr += block._objective_expression()
+
 
         self.objective = pyomo.Objective(sense=sense, expr=expr)
 
@@ -479,9 +495,9 @@ if __name__ == "__main__":
 
     wind = Source(label="wind", outputs={
         bel:Flow(actual_value=[1,1,2],
-                 nominal_value=2,
+                 nominal_value=2, fixed_costs=25,
                  fixed=True,
-                 investment=Investment(maximum=100))
+                 investment=Investment(maximum=100, epc=200))
         }
     )
 

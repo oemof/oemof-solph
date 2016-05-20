@@ -44,6 +44,19 @@ class Investment(SimpleBlock):
         # create constraint to bound flow variable
         self.invest_bounds = Constraint(self.INVESTFLOWS, m.TIMESTEPS,
                                         rule=_invest_bounds)
+    def _objective_expression(self):
+        """
+        """
+        m = self.parent_block()
+        expr = 0
+        for i, o in self.INVESTFLOWS:
+           if m.flows[i, o].fixed_costs is not None:
+                expr += self.invest_flow[i, o] * m.flows[i, o].fixed_costs
+           if m.flows[i, o].investment.epc is not None:
+               expr += self.invest_flow[i, o] * m.flows[i, o].investment.epc
+           else:
+               raise ValueError("Missing value for investment costs")
+        return expr
 
 
 class BusBalance(SimpleBlock):
