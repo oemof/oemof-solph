@@ -3,11 +3,12 @@
 
 """
 from collections import abc, UserList
-
+import warnings
 import pyomo.environ as pyomo
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
 from oemof.solph import constraints as cblocks
+
 
 ###############################################################################
 #
@@ -184,16 +185,37 @@ class Storage(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
-        self.initial_capacity = kwargs.get('initial_capacity', 0)
-        self.capacity_loss = kwargs.get('capacity_loss', 0)
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
+        for flow in self.inputs.values():
+            if flow.nominal_value is not None:
+                storage_nominal_value_warning('output')
+            flow.nominal_value = (self.nominal_input_capacity_ratio *
+                self.nominal_capacity)
+
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
+        for flow in self.outputs.values():
+            if flow.nominal_value is not None:
+                storage_nominal_value_warning('input')
+            flow.nominal_value = (self.nominal_output_capacity_ratio *
+                self.nominal_capacity)
+
+        self.initial_capacity = kwargs.get('initial_capacity', 0)
+        self.capacity_loss = kwargs.get('capacity_loss', 0)
         self.inflow_conversion_factor = kwargs.get(
             'inflow_conversion_factor', 1)
         self.outflow_conversion_factor = kwargs.get(
             'outflow_conversion_factor', 1)
+        self.capacity_max = kwargs.get('capacity_max', 1)
+        self.capacity_min = kwargs.get('capacity_min', 0)
+
+
+def storage_nominal_value_warning(flow):
+    msg = ("The nominal_value should not be set for {0} flows of storages." +
+           "The value will be overwritten by the product of the " +
+           "nominal_capacity and the nominal_{0}_capacity_ratio.")
+    warnings.warn(msg.format(flow), SyntaxWarning)
 
 
 ###############################################################################
