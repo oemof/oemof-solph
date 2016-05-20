@@ -363,7 +363,7 @@ class OperationalModel(pyomo.ConcreteModel):
             self.add_component(str(block), block)
             # create constraints etc. related with block for all nodes
             # in the group
-            block._create(group=self.es.groups[group])
+            block._create(group=self.es.groups.get(group))
 
         ############################# Objective ###############################
         self.add_objective()
@@ -387,7 +387,8 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # Expression for investment flows
         for block in self.component_data_objects():
-            if isinstance(block, cblocks.Investment):
+            if isinstance(block, cblocks.Investment) and \
+                    hasattr(block, 'INVESTMENT_FLOWS'):
                 expr += block._objective_expression()
 
 
