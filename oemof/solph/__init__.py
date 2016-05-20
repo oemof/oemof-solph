@@ -347,6 +347,7 @@ class OperationalModel(pyomo.ConcreteModel):
                         if f.summed_min is not None and
                         f.nominal_value is not None],
             ordered=True, dimen=2)
+        # ######################## FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
@@ -371,15 +372,29 @@ class OperationalModel(pyomo.ConcreteModel):
                                              self.flows[o, i].nominal_value)
 
         # constraint to bound the sum of a flow over all timesteps
-        self.flow_sum = pyomo.Constraint(self.UB_LIMIT_FLOWS,
-                                         noruleinit=True)
-        def _flow_sum_rule(model):
-            for i,o in self.UB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i,o,t] * self.timeincrement
+        self.flow_sum_max = pyomo.Constraint(self.UB_LIMIT_FLOWS,
+                                             noruleinit=True)
+        self.flow_sum_min = pyomo.Constraint(self.LB_LIMIT_FLOWS,
+                                             noruleinit=True)
+
+        def _flow_summed_max_rule(model):
+            for i, o in self.UB_LIMIT_FLOWS:
+                lhs = sum(self.flow[i, o, t] * self.timeincrement
                           for t in self.TIMESTEPS)
-                rhs = self.flows[i,o].summed
-                self.flow_sum.add((i,o), lhs <= rhs)
-        self.flow_sumCon = pyomo.BuildAction(rule=_flow_sum_rule)
+                rhs = (self.flows[i, o].summed_max *
+                       self.flows[i, o].nominal_value)
+                self.flow_sum_max.add((i, o), lhs <= rhs)
+
+        def _flow_summed_min_rule(model):
+            for i, o in self.LB_LIMIT_FLOWS:
+                lhs = sum(self.flow[i, o, t] * self.timeincrement
+                          for t in self.TIMESTEPS)
+                rhs = (self.flows[i, o].summed_min *
+                       self.flows[i, o].nominal_value)
+                self.flow_sum_min.add((i, o), lhs >= rhs)
+
+        self.flow_sum_maxCon = pyomo.BuildAction(rule=_flow_summed_max_rule)
+        self.flow_sum_minCon = pyomo.BuildAction(rule=_flow_summed_min_rule)
 
         ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
