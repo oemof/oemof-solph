@@ -56,7 +56,7 @@ class Grouping:
     #: <oemof.core.network.Entity.uid>` get's added to the energy system.
     UID = None
     def __init__(self, key, value=lambda e: [e],
-                 collide=lambda e, old: old.append(e) or old,
+                 merge=lambda new, old: old.extend(new) or old,
                  insert=None):
         if insert:
             self._insert = insert
@@ -66,7 +66,7 @@ class Grouping:
             if k is None:
                 return
             for group in (k if isinstance(k, MultipleGroups) else [k]):
-                d[group] = collide(e, d[group]) if group in d else value(e)
+                d[group] = merge(value(e), d[group]) if group in d else value(e)
 
         self._insert = insert
 
@@ -74,7 +74,7 @@ class Grouping:
         self._insert(e, d)
 
 Grouping.UID = Grouping(attrgetter('uid'), value=lambda e: e,
-                        collide=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
+                        merge=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
 
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
