@@ -302,21 +302,26 @@ class OperationalModel(pyomo.ConcreteModel):
                       for source in es.nodes
                       for target in source.outputs}
 
-        # set with all components
-        self.COMPONENTS = pyomo.Set(initialize=[str(n)
-                                                for n in self.es.nodes])
+        # list with all components
+        self.components = [n for n in self.es.nodes
+                           if isinstance(n, on.Component)]
 
-        # indexed index set for inputs of components (components as indices)
-        self.INPUTS = pyomo.Set(self.COMPONENTS, initialize={
-            str(c): [str(i) for i in c.inputs.keys()]
-                     for c in self.es.nodes if not isinstance(c, on.Source)
+        # set with all nodes
+        self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
+
+        # indexed index set for inputs of nodes (nodes as indices)
+        self.INPUTS = pyomo.Set(self.NODES, initialize={
+            str(n): [str(i) for i in n.inputs]
+                     for n in self.es.nodes
+                     if not isinstance(n, on.Source)
             }
         )
 
-        # indexed index set for outputs of components (components as indices)
-        self.OUTPUTS = pyomo.Set(self.COMPONENTS, initialize={
-            str(c): [str(o) for o in c.outputs.keys()]
-                     for c in self.es.nodes if not isinstance(c, on.Sink)
+        # indexed index set for outputs of nodes (nodes as indices)
+        self.OUTPUTS = pyomo.Set(self.NODES, initialize={
+            str(n): [str(o) for o in n.outputs]
+                     for n in self.es.nodes
+                     if not isinstance(n, on.Sink)
             }
         )
 
@@ -422,6 +427,8 @@ class OperationalModel(pyomo.ConcreteModel):
 #
 ###############################################################################
 # TODO: Make investment grouping work with (node does not hold 'investment' but the flows do)
+
+# TODO: Delete from grouping / add to groupong method/function for oemof nodes
 def investment_grouping(node):
     if hasattr(node, "investment"):
         return Investment
