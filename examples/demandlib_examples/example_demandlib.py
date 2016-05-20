@@ -7,6 +7,7 @@ import logging
 logging.getLogger().setLevel(logging.WARNING)
 
 from oemof.demandlib import demand as dm
+from oemof.demandlib import energy_buildings as eb
 
 year = 2013
 
@@ -158,6 +159,12 @@ demand_3 = dm.electrical_demand(method='calculate_profile',
                                     population) \
                                 .elec_demand
 
+demand_industry = eb.IndustrialLoadProfile('simple_industrial_profile',
+    **{'annual_demand': 17000 ,
+    'year': 2015
+    })
+
+print(demand_industry.profile.sum())
 print(demand.sum())
 print(demand_2.sum())
 print(demand_3.sum())
