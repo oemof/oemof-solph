@@ -14,10 +14,11 @@ import dill as pickle
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
 from oemof.network import Node
-from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 def _value_error(s):
+    """ Helper function to be able to `raise ValueError` as an expression.
+    """
     raise ValueError(s)
 
 class MultipleGroups(list):
@@ -30,6 +31,32 @@ class Grouping:
     Used to aggregate :class:`entities <oemof.core.network.Entity>` in an
     :class:`energy system <EnergySystem>` into :attr:`groups
     <EnergySystem.groups>`.
+
+    Parameters
+    ----------
+
+    key: callable
+        Called for every :class:`entity <oemof.core.network.Entity>` `e` of the
+        energy system with `e` as the sole argument. Should return the key of
+        the group that `e` should be added to. If `e` should be added to more
+        than one group, e.g. `group_a, group_b, ...` etc., return
+        `MultipleGroups(group_a, group_b)`, or any other non-hashable, iterable
+        containing the group keys.
+        Return `None` if you don't want to store a group for a specific `e`.
+    value: callable, optional
+        A function that should return the actual group obtained from `e`. Like
+        `key`, this is called for every `e` in the energy system, with `e` as
+        the sole argument. If there is no group stored under `key(e)`,
+        `value(e)` will be stored in `groups[key(e)]`. Otherwise
+        `merge(value(e), groups[key(e)])` will be called.
+        The default just wraps an entity in a list, so by default, groups are
+        lists of :class:`entities <oemof.core.network.Entity>`.
+    merge: callable, optional
+        This function is called if `group[key(e)]` already exists. In that
+        case, `merge(value(e), group[key(e)])` is called and should return the
+        new group to store under `key(e)`.
+        By default the list of :class:`entities <oemof.core.network.Entity>` is
+        :meth:`extended <list.extend>` with `[e]`.
 
     """
     __slots__ = "_insert"
@@ -55,7 +82,7 @@ class Grouping:
     #: <oemof.core.network.Entity.uid>` get's added to the energy system.
     UID = None
     def __init__(self, key, value=lambda e: [e],
-                 collide=lambda e, old: old.append(e) or old,
+                 merge=lambda new, old: old.extend(new) or old,
                  insert=None):
         if insert:
             self._insert = insert
@@ -65,7 +92,7 @@ class Grouping:
             if k is None:
                 return
             for group in (k if isinstance(k, MultipleGroups) else [k]):
-                d[group] = collide(e, d[group]) if group in d else value(e)
+                d[group] = merge(value(e), d[group]) if group in d else value(e)
 
         self._insert = insert
 
@@ -79,7 +106,7 @@ def _uid_or_str(node_or_entity):
                                else str(node_or_entity))
 
 Grouping.UID = Grouping(_uid_or_str, value=lambda e: e,
-                        collide=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
+                        merge=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
 
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
@@ -260,6 +287,7 @@ class EnergySystem:
         self : :class:`EnergySystem`
         """
         if om is None:
+            from oemof.solph.optimization_model import OptimizationModel as OM
             om = OM(energysystem=self)
 
         om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
