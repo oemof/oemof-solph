@@ -97,8 +97,21 @@ class _Sequence(UserList):
 
 class Flow:
     """
+    Define a flow between two nodes.
+
+    Parameters
+    ----------
+    summed_max : float
+        Specific maximum value summed over all timesteps. Will be multiplied
+        with the nominal_value to get the absolute limit. If investment is set
+        the summed_max will be multiplied with the nominal_value_variable.
+    summed_min : float
+        see above
+
     """
     def __init__(self, *args, **kwargs):
+        """
+        """
         # TODO: Check if we can inherit form pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
@@ -111,7 +124,8 @@ class Flow:
         self.actual_value = Sequence(kwargs.get('actual_value'))
         self.variable_costs = Sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
-        self.summed = kwargs.get('summed')
+        self.summed_max = kwargs.get('summed_max')
+        self.summed_min = kwargs.get('summed_min')
         self.fixed = kwargs.get('fixed', False)
         self.investment = kwargs.get('investment')
 
