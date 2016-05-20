@@ -556,9 +556,9 @@ if __name__ == "__main__":
                 outputs={bcoal: Flow()})
 
     wind = Source(label="wind", outputs={
-        bel:Flow(actual_value=[1,1,2],
-                 nominal_value=2, fixed_costs=25,
-                 fixed=False, summed=5,
+        bel:Flow(actual_value=[1, 1, 2],
+                 nominal_value=2,
+                 fixed_costs=25,
                  investment=Investment(maximum=100, epc=200))
         }
     )
@@ -570,15 +570,16 @@ if __name__ == "__main__":
     trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
                              outputs={bel:Flow(nominal_value=10,
                                                fixed_costs=5,
-                                               variable_costs=10)},
+                                               variable_costs=10,
+                                               summed_max=4,
+                                               summed_min=2)},
                              conversion_factors={bel: 0.4})
 
-
-
-    om = OperationalModel(es)
-    om.solve(solve_kwargs={'tee':True})
+    date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
+    om = OperationalModel(es, timeindex=date_time_index)
+    om.solve(solve_kwargs={'tee': True})
     om.write('optimization_problem.lp',
-             io_options={'symbolic_solver_labels':True})
+             io_options={'symbolic_solver_labels': True})
     #om.pprint()
 
 
