@@ -123,6 +123,8 @@ class Flow:
         self.min = Sequence(kwargs.get('min', 0))
         self.max = Sequence(kwargs.get('max', 1))
         self.actual_value = Sequence(kwargs.get('actual_value'))
+        self.positive_gradient = Sequence(kwargs.get('positive_gradient'))
+        self.negative_gradient = Sequence(kwargs.get('negative_gradient'))
         self.variable_costs = Sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed_max = kwargs.get('summed_max')
@@ -343,6 +345,19 @@ class OperationalModel(pyomo.ConcreteModel):
                         if f.summed_min is not None and
                         f.nominal_value is not None],
             ordered=True, dimen=2)
+
+        self.NEGATIVE_GRADIENT_FLOWS = pyomo.Set(
+            initialize=[(str(n), str(t)) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.negative_gradient is not None],
+            ordered=True, dimen=2)
+
+        self.POSITIVE_GRADIENT_FLOWS = pyomo.Set(
+            initialize=[(str(n), str(t)) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.positive_gradient is not None],
+            ordered=True, dimen=2)
+
         # ######################## FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
@@ -370,9 +385,6 @@ class OperationalModel(pyomo.ConcreteModel):
         # constraint to bound the sum of a flow over all timesteps
         self.flow_sum_max = pyomo.Constraint(self.UB_LIMIT_FLOWS,
                                              noruleinit=True)
-        self.flow_sum_min = pyomo.Constraint(self.LB_LIMIT_FLOWS,
-                                             noruleinit=True)
-
         def _flow_summed_max_rule(model):
             for i, o in self.UB_LIMIT_FLOWS:
                 lhs = sum(self.flow[i, o, t] * self.timeincrement
@@ -380,7 +392,10 @@ class OperationalModel(pyomo.ConcreteModel):
                 rhs = (self.flows[i, o].summed_max *
                        self.flows[i, o].nominal_value)
                 self.flow_sum_max.add((i, o), lhs <= rhs)
+        self.flow_sum_maxCon = pyomo.BuildAction(rule=_flow_summed_max_rule)
 
+        self.flow_sum_min = pyomo.Constraint(self.LB_LIMIT_FLOWS,
+                                             noruleinit=True)
         def _flow_summed_min_rule(model):
             for i, o in self.LB_LIMIT_FLOWS:
                 lhs = sum(self.flow[i, o, t] * self.timeincrement
@@ -388,11 +403,49 @@ class OperationalModel(pyomo.ConcreteModel):
                 rhs = (self.flows[i, o].summed_min *
                        self.flows[i, o].nominal_value)
                 self.flow_sum_min.add((i, o), lhs >= rhs)
-
-        self.flow_sum_maxCon = pyomo.BuildAction(rule=_flow_summed_max_rule)
         self.flow_sum_minCon = pyomo.BuildAction(rule=_flow_summed_min_rule)
 
-        ############################# CONSTRAINTS #############################
+         # gradient variable for positive gradient
+        def _positive_gradient_bound_rule(self, i, o, t):
+            return (0, self.flows[i,o].negative_gradient[t])
+        self.negative_gradient = pyomo.Var(
+            self.POSITIVE_GRADIENT_FLOWS, self.TIMESTEPS,
+            bounds=_positive_gradient_bound_rule)
+
+        # constraint for positive gradient
+        def _positive_gradient_flow_rule(self, i, o, t):
+            if t > 0:
+                lhs = self.flow[i, o, t] - self.flow[i, o, t-1]
+                rhs = self.positive_gradient[i, o, t]
+                return(lhs <= rhs)
+            else:
+                return(pyomo.Constraint.Skip)
+        self.negative_gradient_con = pyomo.Constraint(
+            self.POSITIVE_GRADIENT_FLOWS, self.TIMESTEPS,
+            rule=_positive_gradient_flow_rule)
+
+        # gradient variable for negative gradient
+        def _negative_gradient_bound_rule(self, i, o, t):
+            return (0, self.flows[i,o].negative_gradient[t])
+
+        self.negative_gradient = pyomo.Var(
+            self.NEGATIVE_GRADIENT_FLOWS, self.TIMESTEPS,
+            bounds=_negative_gradient_bound_rule)
+
+        # constraint for negative gradient
+        def _negative_gradient_flow_rule(self, i, o , t):
+            if t > 0:
+                lhs = self.flow[i, o, t-1] - self.flow[i, o, t]
+                rhs = self.negative_gradient[i, o, t]
+                return(lhs <= rhs)
+            else:
+                return(pyomo.Constraint.Skip)
+        self.negative_gradient_con = pyomo.Constraint(
+            self.NEGATIVE_GRADIENT_FLOWS, self.TIMESTEPS,
+            rule=_negative_gradient_flow_rule)
+
+
+        ##########################  GROUP CONSTRAINTS #########################
         # loop over all constraint groups to add constraints to the model
         for group in constraint_groups:
             # create instance for block
