@@ -268,7 +268,7 @@ class OperationalModel(pyomo.ConcreteModel):
     """
 
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.Investment]
+                         cblocks.InvestmentFlow]
 
     OBJECTIVE_GROUPS = [cblocks.VariableCosts]
 
@@ -320,13 +320,6 @@ class OperationalModel(pyomo.ConcreteModel):
         # pyomo set for all flows in the energy system graph
         self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
-
-        # set for all flows for which variable costs are set
-        self.VARIABLECOST_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
-                                         for (t,f) in n.outputs.items()
-                                         if f.variable_costs[0] is not None],
-            ordered=True, dimen=2)
 
         # set for all flows for which fixed osts are set
         self.FIXEDCOST_FLOWS = pyomo.Set(
@@ -408,7 +401,7 @@ class OperationalModel(pyomo.ConcreteModel):
             self.add_component(str(block), block)
             # create constraints etc. related with block for all nodes
             # in the group
-            block._create(group=self.es.groups[group])
+            block._create(group=self.es.groups.get(group))
 
         ############################# Objective ###############################
         self.add_objective()
@@ -419,10 +412,8 @@ class OperationalModel(pyomo.ConcreteModel):
         """
         expr = 0
 
-        # Expression for variable costs associated the flows
-        expr += sum(self.flow[i, o, t] * self.flows[i, o].variable_costs[t]
-                    for i, o in self.VARIABLECOST_FLOWS
-                    for t in self.TIMESTEPS)
+        for group in OperationalModel.OBJECTIVE_GROUPS:
+            expr += group(self, self.es.groups.get(group))
 
         # Expression for fixed costs associated the the nominal value of flow
         expr += sum(self.flows[i, o].nominal_value *
@@ -431,7 +422,8 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # Expression for investment flows
         for block in self.component_data_objects():
-            if isinstance(block, cblocks.Investment):
+            if isinstance(block, cblocks.InvestmentFlow) and \
+                    hasattr(block, 'INVESTMENT_FLOWS'):
                 expr += block._objective_expression()
 
 
@@ -504,7 +496,7 @@ def constraint_grouping(node):
 def investment_key(n):
     for f in n.outputs.values():
         if f.investment is not None:
-            return cblocks.Investment
+            return cblocks.InvestmentFlow
 
 def investment_flows(n):
      return [(n, t, f) for (t, f) in n.outputs.items()
@@ -519,7 +511,26 @@ investment_grouping = oces.Grouping(
     value=investment_flows,
     merge=merge_investment_flows)
 
-GROUPINGS = [constraint_grouping, investment_grouping]
+def variable_costs_key(n):
+    for f in n.outputs.values():
+        if f.variable_costs[0] is not None:
+            return cblocks.VariableCosts
+
+def variable_costs_flows(n):
+     return [(n, t, f) for (t, f) in n.outputs.items()
+             if f.variable_costs[0] is not None]
+
+def merge_variable_costs_flows(n, group):
+     group.extend(n)
+     return group
+
+variable_costs_grouping = oces.Grouping(
+    key=variable_costs_key,
+    value=variable_costs_flows,
+    merge=merge_variable_costs_flows)
+
+GROUPINGS = [constraint_grouping, investment_grouping, variable_costs_grouping]
+
 """ list:  Groupings needed on an energy system for it to work with solph.
 
 TODO: Maybe move this to the module docstring? It shoule be somewhere prominent

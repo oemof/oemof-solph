@@ -6,7 +6,7 @@ from pyomo.core import Var, Binary, NonNegativeReals, Set, Constraint, BuildActi
 from pyomo.core.base.block import SimpleBlock
 
 
-class Investment(SimpleBlock):
+class InvestmentFlow(SimpleBlock):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -186,8 +186,8 @@ def VariableCosts(m, group=None):
     VARIABLECOST_FLOWS = [(str(g[0]), str(g[1])) for g in group]
 
     expr = sum(m.flow[i, o, t] * m.flows[i, o].variable_costs[t]
-                    for i, o in VARIABLECOST_FLOWS
-                    for t in m.TIMESTEPS)
+               for i, o in VARIABLECOST_FLOWS
+               for t in m.TIMESTEPS)
 
     return expr
 
