@@ -175,6 +175,67 @@ class LinearRelation(SimpleBlock):
                         block.constraint.add((n, o, t), (lhs == rhs))
         self.constraintCon = BuildAction(rule=_input_output_relation)
 
+class DiscreteFlow(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the LinearRelation block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.DiscreteFlow objects for which
+            the constraints are build.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+        ############################ SETS #####################################
+        # pyomo set with investment flows as list of tuples
+        self.DISCRETEFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
+                                             for g in group])
+
+        self.MINFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
+                                             for g in group
+                                             if g[2].min[0] != 0])
+
+        self.STARTCOSTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
+                                  for g in group
+                                  if g[2].discrete.start_costs is not None])
+
+        self.POSITIVE_GRADIENTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
+                                          for g in group
+                                          if g[2].positive_gradient
+                                              is not None])
+
+        self.NEGATIVE_GRADIENTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
+                                          for g in group
+                                          if g[2].negative_gradient
+                                              is not None])
+
+        ##################### VARIABLES AND CONSTRAINTS #######################
+
+        self.status = Var(self.DISCRETEFLOWS, m.TIMESTEPS, within=Binary)
+
+        def _minimum_flow_rule(block, i, o, t):
+            lhs = self.status[i, o, t] * m.flows[i,o].min[t] * \
+                    m.flows[i,o].nominal_value
+            rhs = m.flow[i, o, t]
+            return lhs >= rhs
+        self.minimum_flow = Constraint(self.MINFLOWS, m.TIMESTEPS,
+                                       rule=_minimum_flow_rule)
+
+        def _maximum_flow_rule(block, i, o, t):
+                    lhs = self.status[i, o, t] * m.flows[i,o].max[t] * \
+                            m.flows[i,o].nominal_value
+                    rhs = m.flow[i, o, t]
+                    return lhs <= rhs
+        self.maximum_flow = Constraint(self.MINFLOWS, m.TIMESTEPS,
+                                       rule=_maximum_flow_rule)
 
 
 def VariableCosts(m, group=None):

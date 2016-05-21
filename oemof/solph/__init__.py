@@ -136,10 +136,21 @@ class Flow:
             warnings.warn(
                 "Using the investment object the nominal_value is set to None.",
                 SyntaxWarning)
+        self.discrete = kwargs.get('discrete')
+        if self.investment and self.discrete:
+            raise ValueError("Investment flows cannot be combined with " +
+                              "discrete flows!")
 
+class Discrete:
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_costs = kwargs.get('start_costs')
+        self.minimum_uptime = kwargs.get('minimum_uptime')
+        self.minimum_downtime = kwargs.get('minimum_downtime')
 
 Bus = on.Bus
-
 
 class Investment:
     """
@@ -270,7 +281,7 @@ class OperationalModel(pyomo.ConcreteModel):
     """
 
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.InvestmentFlow]
+                         cblocks.DiscreteFlow, cblocks.InvestmentFlow]
 
     OBJECTIVE_GROUPS = [cblocks.VariableCosts]
 
@@ -582,7 +593,26 @@ variable_costs_grouping = oces.Grouping(
     value=variable_costs_flows,
     merge=merge_variable_costs_flows)
 
-GROUPINGS = [constraint_grouping, investment_grouping, variable_costs_grouping]
+def discreteflow_key(n):
+    for f in n.outputs.values():
+        if f.discrete is not None:
+            return cblocks.DiscreteFlow
+
+def discreteflow_flows(n):
+     return [(n, t, f) for (t, f) in n.outputs.items()
+             if f.discrete is not None]
+
+def merge_discreteflow_flows(n, group):
+     group.extend(n)
+     return group
+
+discreteflow_grouping = oces.Grouping(
+    key=discreteflow_key,
+    value=discreteflow_flows,
+    merge=merge_discreteflow_flows)
+
+GROUPINGS = [constraint_grouping, investment_grouping, discreteflow_grouping,
+             variable_costs_grouping]
 
 """ list:  Groupings needed on an energy system for it to work with solph.
 
@@ -636,10 +666,10 @@ if __name__ == "__main__":
 
     trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
                              outputs={bel:Flow(nominal_value=10,
-                                               fixed_costs=5,
-                                               variable_costs=10,
-                                               summed_max=4,
-                                               summed_min=2)},
+                                               min= 0.5, fixed_costs=5,
+                                               variable_costs=10, summed_max=4,
+                                               summed_min=2,
+                                               discrete=Discrete())},
                              conversion_factors={bel: 0.4})
 
     date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
