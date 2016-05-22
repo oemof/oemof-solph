@@ -31,7 +31,7 @@ class StorageBalance(SimpleBlock):
         # fill dicitionaries with storage objects attributes from group list
         for t in m.TIMESTEPS:
             for n in group:
-                ub_capacity[str(n), t] = n.nominal_capacity*n.capacity_max[t]
+                ub_capacity[str(n), t] = n.nominal_capacity * n.capacity_max[t]
                 capacity_loss[str(n), t] = n.capacity_loss[t]
                 inflow_conversion[str(n), t] = n.inflow_conversion_factor[t]
                 outflow_conversion[str(n), t] = n.outflow_conversion_factor[t]
@@ -43,15 +43,20 @@ class StorageBalance(SimpleBlock):
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
+        # set capapcity of last timestep to fixed value of initial_capacity
+        self.t_end = len(m.TIMESTEPS) - 1
+        for n in group:
+            self.capacity[str(n), self.t_end] = n.initial_capacity * n.nominal_capacity
+            self.capacity[str(n), self.t_end].fix()
+
         def _storage_balance_rule(block, n, t):
             """ Returns the storage balance for every storage n in timestep t
             """
             # TODO: include time increment
             expr = 0
             if t == 0:
-                t_last = len(m.TIMESTEPS)-1
                 expr += block.capacity[n, t]
-                expr += - block.capacity[n, t_last] * (1 - capacity_loss[n, t])
+                expr += - block.capacity[n, block.t_end] * (1 - capacity_loss[n, t])
                 expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
                 expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
             else:

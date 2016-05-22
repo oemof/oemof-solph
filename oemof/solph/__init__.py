@@ -594,7 +594,9 @@ if __name__ == "__main__":
                                                summed_min=2)},
                              conversion_factors={bel: 0.4})
     stor = Storage(label="stor", inputs={bel: Flow()}, outputs={bel:Flow()},
-                   nominal_capacity=50)
+                   nominal_capacity=50, inflow_conversion_factor=0.9,
+                   outflow_conversion_factor=0.8, initial_capacity=0.5,
+                   capacity_loss=0.001)
 
     date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
     om = OperationalModel(es, timeindex=date_time_index)
