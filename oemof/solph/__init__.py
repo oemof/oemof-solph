@@ -270,7 +270,7 @@ class OperationalModel(pyomo.ConcreteModel):
     """
 
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.InvestmentFlow]
+                         cblocks.StorageBalance, cblocks.InvestmentFlow]
 
     OBJECTIVE_GROUPS = [cblocks.VariableCosts]
 
@@ -494,6 +494,9 @@ def constraint_grouping(node):
         return cblocks.BusBalance
     if isinstance(node, LinearTransformer):
         return cblocks.LinearRelation
+    if isinstance(node, Storage):
+        return cblocks.StorageBalance
+
 
 def investment_key(n):
     for f in n.outputs.values():
@@ -590,6 +593,8 @@ if __name__ == "__main__":
                                                summed_max=4,
                                                summed_min=2)},
                              conversion_factors={bel: 0.4})
+    stor = Storage(label="stor", inputs={bel: Flow()}, outputs={bel:Flow()},
+                   nominal_capacity=50)
 
     date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
     om = OperationalModel(es, timeindex=date_time_index)

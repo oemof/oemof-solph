@@ -5,6 +5,63 @@
 from pyomo.core import Var, Binary, NonNegativeReals, Set, Constraint, BuildAction
 from pyomo.core.base.block import SimpleBlock
 
+class StorageBalance(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+
+        Parameters
+        ----------
+        group : list
+            List containing storage objects e.g. groups=[storage1, storage2,..]
+        """
+        m = self.parent_block()
+
+        self.STORAGES = Set(initialize=[str(n) for n in group])
+
+        # dictionaries to use in the _storage_capacity_bound_rule
+        ub_capacity = {}
+        capacity_loss = {}
+        inflow_conversion = {}
+        outflow_conversion = {}
+        # fill dicitionaries with storage objects attributes from group list
+        for t in m.TIMESTEPS:
+            for n in group:
+                ub_capacity[str(n), t] = n.nominal_capacity*n.capacity_max[t]
+                capacity_loss[str(n), t] = n.capacity_loss[t]
+                inflow_conversion[str(n), t] = n.inflow_conversion_factor[t]
+                outflow_conversion[str(n), t] = n.outflow_conversion_factor[t]
+
+        def _storage_capacity_bound_rule(block, n, t):
+            """ Returns bound for capacity variable of storage n in timestep t
+            """
+            return (0, ub_capacity[n, t])
+        self.capacity = Var(self.STORAGES, m.TIMESTEPS,
+                            bounds=_storage_capacity_bound_rule)
+
+        def _storage_balance_rule(block, n, t):
+            """ Returns the storage balance for every storage n in timestep t
+            """
+            # TODO: include time increment
+            expr = 0
+            if t == 0:
+                t_last = len(m.TIMESTEPS)-1
+                expr += block.capacity[n, t]
+                expr += - block.capacity[n, t_last] * (1 - capacity_loss[n, t])
+                expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
+                expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
+            else:
+                expr += block.capacity[n, t]
+                expr += - block.capacity[n, t-1] * (1 - capacity_loss[n, t])
+                expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
+                expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
+            return (expr, 0)
+        self.storage_balance = Constraint(self.STORAGES, m.TIMESTEPS,
+                                          rule=_storage_balance_rule)
 
 class InvestmentFlow(SimpleBlock):
     """
