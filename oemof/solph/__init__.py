@@ -199,6 +199,36 @@ class LinearTransformer(on.Transformer):
 
 class Storage(on.Transformer):
     """
+
+    Parameters
+    ----------
+    nominal_capacity : numeric
+        Absolute nominal capacity of the storage
+    nominal_input_capacity_ratio :  numeric
+        Ratio between the nominal inflow of the storage and its capacity.
+    nominal_output_capacity_ratio : numeric
+        Ratio between the nominal outflow of the storage and its capacity.
+        Note: This ratio is used to create the Flow object for the outflow
+        and set its nominal value of the storage in the constructor.
+    nominal_input_capacity_ratio : numeric
+        see: nominal_output_capacity_ratio
+    initial_capacity : numeric
+        The capacity of the storage in the first (and last) timestep of
+        optimization.
+    capacity_loss : numeric (sequence or scalar)
+        The relativ loss of the storage capacity from between two consecutive
+        timesteps.
+    inflow_conversion_factor : numeric (sequence or scalar)
+        The relative conversion factor, i.e. efficiency associated with the
+        inflow of the storage.
+    outflow_conversion_factor : numeric (sequence or scalar)
+        see: inflow_conversion_factor
+    capacity_min : numeric (sequence or scalar)
+        The normend minimum capacity of the storage, e.g. a value between 0,1.
+        To use different values in every timesteps use a sequence of values.
+    capacity_max : numeric (sequence or scalar)
+        see: capacity_min
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
