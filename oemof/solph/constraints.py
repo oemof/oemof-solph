@@ -209,12 +209,12 @@ class DiscreteFlow(SimpleBlock):
 
         self.POSITIVE_GRADIENTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
                                           for g in group
-                                          if g[2].positive_gradient
+                                          if g[2].positive_gradient[0]
                                               is not None])
 
         self.NEGATIVE_GRADIENTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
                                           for g in group
-                                          if g[2].negative_gradient
+                                          if g[2].negative_gradient[0]
                                               is not None])
 
         ##################### VARIABLES AND CONSTRAINTS #######################

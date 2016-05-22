@@ -360,13 +360,15 @@ class OperationalModel(pyomo.ConcreteModel):
         self.NEGATIVE_GRADIENT_FLOWS = pyomo.Set(
             initialize=[(str(n), str(t)) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
-                        if f.negative_gradient is not None],
+                        if f.negative_gradient[0] is not None and
+                        f.discrete is None],
             ordered=True, dimen=2)
 
         self.POSITIVE_GRADIENT_FLOWS = pyomo.Set(
             initialize=[(str(n), str(t)) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
-                        if f.positive_gradient is not None],
+                        if f.positive_gradient[0] is not None and
+                        f.discrete is None],
             ordered=True, dimen=2)
 
         # ######################## FLOW VARIABLE #############################
@@ -418,8 +420,8 @@ class OperationalModel(pyomo.ConcreteModel):
 
          # gradient variable for positive gradient
         def _positive_gradient_bound_rule(self, i, o, t):
-            return (0, self.flows[i,o].negative_gradient[t])
-        self.negative_gradient = pyomo.Var(
+            return (0, self.flows[i,o].positive_gradient[t])
+        self.positive_gradient = pyomo.Var(
             self.POSITIVE_GRADIENT_FLOWS, self.TIMESTEPS,
             bounds=_positive_gradient_bound_rule)
 
@@ -431,14 +433,13 @@ class OperationalModel(pyomo.ConcreteModel):
                 return(lhs <= rhs)
             else:
                 return(pyomo.Constraint.Skip)
-        self.negative_gradient_con = pyomo.Constraint(
+        self.positive_gradient_con = pyomo.Constraint(
             self.POSITIVE_GRADIENT_FLOWS, self.TIMESTEPS,
             rule=_positive_gradient_flow_rule)
 
         # gradient variable for negative gradient
         def _negative_gradient_bound_rule(self, i, o, t):
             return (0, self.flows[i,o].negative_gradient[t])
-
         self.negative_gradient = pyomo.Var(
             self.NEGATIVE_GRADIENT_FLOWS, self.TIMESTEPS,
             bounds=_negative_gradient_bound_rule)
@@ -662,6 +663,7 @@ if __name__ == "__main__":
 
     si = Sink(label="sink", inputs={bel: Flow(max=[0.1, 0.2, 0.9],
                                               nominal_value=10, fixed=True,
+                                              negative_gradient = 0.5,
                                               actual_value=[1, 2, 3])})
 
     trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
