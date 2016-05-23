@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import pandas as pd
 
 from oemof.tools import logger
 from oemof.core import energy_system as core_es
