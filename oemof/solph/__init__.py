@@ -235,20 +235,8 @@ class Storage(on.Transformer):
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
-        for flow in self.inputs.values():
-            if flow.nominal_value is not None:
-                storage_nominal_value_warning('output')
-            flow.nominal_value = (self.nominal_input_capacity_ratio *
-                self.nominal_capacity)
-
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
-        for flow in self.outputs.values():
-            if flow.nominal_value is not None:
-                storage_nominal_value_warning('input')
-            flow.nominal_value = (self.nominal_output_capacity_ratio *
-                self.nominal_capacity)
-
         self.initial_capacity = kwargs.get('initial_capacity', 0)
         self.capacity_loss = Sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = Sequence(
@@ -259,6 +247,25 @@ class Storage(on.Transformer):
                 'outflow_conversion_factor', 1))
         self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
+        self.investment = kwargs.get('investment')
+        # Check investment
+        if self.investment and self.nominal_capacity is not None:
+            self.nominal_capacity = None
+            warnings.warn(
+                "Using the investment object the nominal_capacity is set to" +
+                "None.", SyntaxWarning)
+        # Check input flows for nominal value
+        for flow in self.inputs.values():
+            if flow.nominal_value is not None:
+                storage_nominal_value_warning('output')
+            flow.nominal_value = (self.nominal_input_capacity_ratio *
+                self.nominal_capacity)
+        # Check output flows for nominal value
+        for flow in self.outputs.values():
+            if flow.nominal_value is not None:
+                storage_nominal_value_warning('input')
+            flow.nominal_value = (self.nominal_output_capacity_ratio *
+                self.nominal_capacity)
 
 
 def storage_nominal_value_warning(flow):
@@ -332,6 +339,19 @@ class OperationalModel(pyomo.ConcreteModel):
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
                                    ordered=True)
+
+        prev_timesteps = [x - 1 for x in self.timesteps]
+        prev_timesteps[0] = len(self.timesteps) - 1
+        self.PREV_TIMESTEPS = pyomo.Set(initialize=prev_timesteps,
+                                        ordered=True)
+
+        print(self.timesteps)
+        print()
+        for timest in self.PREV_TIMESTEPS:
+            print(timest)
+
+        for timest in self.TIMESTEPS:
+            print(timest)
 
         # indexed index set for inputs of nodes (nodes as indices)
         self.INPUTS = pyomo.Set(self.NODES, initialize={
