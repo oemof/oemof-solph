@@ -20,6 +20,8 @@ class StorageBalance(SimpleBlock):
             List containing storage objects e.g. groups=[storage1, storage2,..]
         """
         m = self.parent_block()
+        if group is None:
+            return None
 
         self.STORAGES = Set(initialize=[str(n) for n in group])
 
