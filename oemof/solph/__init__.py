@@ -236,7 +236,7 @@ class Storage(on.Transformer):
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
         self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio', 0.2)
+            'nominal_output_capacity_ratio', 0.2)
         self.initial_capacity = kwargs.get('initial_capacity', 0)
         self.capacity_loss = Sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = Sequence(
@@ -654,6 +654,3 @@ if __name__ == "__main__":
     om.write('optimization_problem.lp',
              io_options={'symbolic_solver_labels': True})
     #om.pprint()
-
-
-
