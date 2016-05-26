@@ -104,7 +104,7 @@ class InvestmentFlow(SimpleBlock):
         def _investvar_bound_rule(block, i, o):
             """ Returns bounds for invest_flow variable
             """
-            return (0, m.flows[i, o].investment.maximum)
+            return 0, m.flows[i, o].investment.maximum
         # create variable bounded for flows with investement attribute
         self.invest_flow = Var(self.INVESTFLOWS, within=NonNegativeReals,
                                bounds=_investvar_bound_rule)
