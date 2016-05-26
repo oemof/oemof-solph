@@ -56,17 +56,12 @@ class StorageBalance(SimpleBlock):
             """
             # TODO: include time increment
             expr = 0
-            if t == 0:
-                expr += block.capacity[n, t]
-                expr += - block.capacity[n, block.t_end] * (1 - capacity_loss[n, t])
-                expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
-                expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
-            else:
-                expr += block.capacity[n, t]
-                expr += - block.capacity[n, t-1] * (1 - capacity_loss[n, t])
-                expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
-                expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
-            return (expr, 0)
+            expr += block.capacity[n, t]
+            expr += - block.capacity[n, m.previous_timestep[t]] * (
+                1 - capacity_loss[n, t])
+            expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
+            expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
+            return expr, 0
         self.storage_balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                           rule=_storage_balance_rule)
 

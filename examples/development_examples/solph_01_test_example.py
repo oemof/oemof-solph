@@ -42,6 +42,7 @@ estorage = Storage(
     inputs={ebus: Flow()}, outputs={ebus: Flow(nominal_value=100)},
     nominal_capacity=500, capacity_loss=0.1, nominal_input_capacity_ratio=0.2,
     nominal_output_capacity_ratio=0.5, inflow_conversion_factor=1,
+    initial_capacity=0.5,
     outflow_conversion_factor=1)
 
 date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')

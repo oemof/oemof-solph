@@ -340,18 +340,12 @@ class OperationalModel(pyomo.ConcreteModel):
         self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
                                    ordered=True)
 
-        prev_timesteps = [x - 1 for x in self.timesteps]
-        prev_timesteps[0] = len(self.timesteps) - 1
-        self.PREV_TIMESTEPS = pyomo.Set(initialize=prev_timesteps,
-                                        ordered=True)
+        previous_timesteps_list = [x - 1 for x in self.timesteps]
+        previous_timesteps_list[0] = len(self.timesteps) - 1
 
-        print(self.timesteps)
-        print()
-        for timest in self.PREV_TIMESTEPS:
-            print(timest)
-
-        for timest in self.TIMESTEPS:
-            print(timest)
+        self.previous_timestep = dict(zip(self.timesteps,
+                                          previous_timesteps_list))
+        print('wer', self.previous_timestep)
 
         # indexed index set for inputs of nodes (nodes as indices)
         self.INPUTS = pyomo.Set(self.NODES, initialize={
