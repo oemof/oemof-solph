@@ -50,7 +50,7 @@ logger.define_logging()
 
 logging.info('Read data from csv file and set time index')
 data = pd.read_csv("storage_invest.csv", sep=",")
-time_index = pd.date_range('1/1/2012', periods=8760, freq='H')
+date_time_index = pd.date_range('1/1/2012', periods=8760, freq='60min')
 
 ###############################################################################
 # initialize the energy system
@@ -117,7 +117,7 @@ logging.info('Optimise the energy system')
 
 # If you dumped the energysystem once, you can skip the optimisation with '#'
 # and use the restore method.
-date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
+
 om = OperationalModel(es, timeindex=date_time_index)
 om.solve(solve_kwargs={'tee': True})
 om.write('optimization_problem.lp',
