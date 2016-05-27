@@ -264,14 +264,24 @@ class Storage(on.Transformer):
         for flow in self.inputs.values():
             if flow.nominal_value is not None:
                 storage_nominal_value_warning('output')
-            flow.nominal_value = (self.nominal_input_capacity_ratio *
-                self.nominal_capacity)
+            if self.nominal_capacity is None:
+                flow.nominal_value = None
+            else:
+                flow.nominal_value = (self.nominal_input_capacity_ratio *
+                                      self.nominal_capacity)
+            if self.investment:
+                flow.investment = Investment()
         # Check output flows for nominal value
         for flow in self.outputs.values():
             if flow.nominal_value is not None:
                 storage_nominal_value_warning('input')
-            flow.nominal_value = (self.nominal_output_capacity_ratio *
-                self.nominal_capacity)
+            if self.nominal_capacity is None:
+                flow.nominal_value = None
+            else:
+                flow.nominal_value = (self.nominal_output_capacity_ratio *
+                                      self.nominal_capacity)
+            if self.investment:
+                flow.investment = Investment()
 
 
 def storage_nominal_value_warning(flow):
