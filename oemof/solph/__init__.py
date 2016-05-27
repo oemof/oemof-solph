@@ -316,7 +316,7 @@ class OperationalModel(pyomo.ConcreteModel):
 
         ##########################  Arguments#  ###############################
 
-        self.name = 'OperationalModel'
+        self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
         self.timesteps = range(len(self.timeindex))
