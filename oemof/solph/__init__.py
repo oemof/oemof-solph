@@ -322,7 +322,7 @@ class OperationalModel(pyomo.ConcreteModel):
 
         ##########################  Arguments#  ###############################
 
-        self.name = 'OperationalModel'
+        self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
         self.timesteps = range(len(self.timeindex))
@@ -456,12 +456,15 @@ class OperationalModel(pyomo.ConcreteModel):
             block._create(group=self.es.groups.get(group))
 
         ############################# Objective ###############################
-        self.add_objective()
+        self.objective_function()
 
 
-    def add_objective(self, sense=pyomo.minimize):
+    def objective_function(self, sense=pyomo.minimize, update=False):
         """
         """
+        if update:
+            self.del_component('objective')
+
         expr = 0
 
         for group in OperationalModel.OBJECTIVE_GROUPS:
