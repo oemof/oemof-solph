@@ -129,6 +129,12 @@ class Flow:
         self.summed_min = kwargs.get('summed_min')
         self.fixed = kwargs.get('fixed', False)
         self.investment = kwargs.get('investment')
+        if self.fixed:
+            warnings.warn(
+                "Values for min/max will be ignored if fixed is True.",
+                SyntaxWarning)
+            self.min = Sequence(0)
+            self.max = Sequence(1)
         if self.investment and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
