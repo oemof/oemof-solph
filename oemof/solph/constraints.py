@@ -104,6 +104,14 @@ class InvestmentFlow(SimpleBlock):
             initialize=[(str(g[0]), str(g[1]))
                         for g in group if g[2].summed_min is not None])
 
+        self.MAX_INVESTFLOWS = Set(
+            initialize=[(str(g[0]), str(g[1]))
+                        for g in group if len(g[2].max) != 0])
+
+        self.MIN_INVESTFLOWS = Set(
+            initialize=[(str(g[0]), str(g[1]))
+                        for g in group if len(g[2].min) != 0])
+
         ########################### VARIABLES ##################################
         def _investvar_bound_rule(block, i, o):
             """ Returns bounds for invest_flow variable
@@ -122,6 +130,24 @@ class InvestmentFlow(SimpleBlock):
         # create constraint to bound flow variable
         self.invest_bounds = Constraint(self.FIXEDFLOWS, m.TIMESTEPS,
                                         rule=_investflow_bound_rule)
+
+        def _max_investflow_rule(block, i, o, t):
+            """
+            """
+            expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
+                                        self.invest_flow[i, o]))
+            return expr
+        self.max_investflow = Constraint(self.MAX_INVESTFLOWS, m.TIMESTEPS,
+                                         rule=_max_investflow_rule)
+
+        def _min_investflow_rule(block, i, o, t):
+            """
+            """
+            expr = (m.flow[i, o, t] >= (m.flows[i, o].min[t] *
+                                        self.invest_flow[i, o]))
+            return expr
+        self.min_investflow = Constraint(self.MIN_INVESTFLOWS, m.TIMESTEPS,
+                                         rule=_min_investflow_rule)
 
         def _summed_max_investflow_rule(block, i, o):
             """
