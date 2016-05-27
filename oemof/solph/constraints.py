@@ -5,6 +5,7 @@
 from pyomo.core import Var, Binary, NonNegativeReals, Set, Constraint, BuildAction
 from pyomo.core.base.block import SimpleBlock
 
+
 class StorageBalance(SimpleBlock):
     """
     """
@@ -64,6 +65,57 @@ class StorageBalance(SimpleBlock):
             return expr, 0
         self.storage_balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                           rule=_storage_balance_rule)
+
+
+class InvestmentStorageBalance(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+        """
+        m = self.parent_block()
+        if group is None:
+            return None
+
+        self.INVESTSTORAGES = Set(initialize=[str(n) for n in group])
+
+        invest_max = {}
+        invest_flow_input = {}
+        for n in group:
+            invest_max[str(n)] = n.investment.maximum
+            # invest_flow_input[str(n)] = (
+            #     list(n.inputs.values())[0].invest_flow)
+
+        def _storage_investvar_bound_rule(block, n):
+            """ Returns bounds for invest_flow variable
+            """
+            return 0, invest_max[n]
+
+        # create variable bounded for flows with investement attribute
+        self.invest_storage = Var(self.INVESTSTORAGES, within=NonNegativeReals,
+                                  bounds=_storage_investvar_bound_rule)
+
+        # def _storage_capacity_input_invest_rule(block, n):
+        #     """ Returns the storage balance for every storage n in timestep t
+        #     """
+        #     return invest_flow_input[n] <= self.invest_storage[n]
+        #
+        # self.storage_capacity_input_invest = Constraint(
+        #     self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
+
+        # ToDo upper bound of capacity
+
+        # ToDo lower bound of capacity
+
+        # ToDo Connection between invest_flow of input and invest_storage
+
+        # ToDo Connection between invest_flow of output and invest_storage
+
+
+
 
 class InvestmentFlow(SimpleBlock):
     """
