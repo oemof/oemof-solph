@@ -83,9 +83,12 @@ class InvestmentStorageBalance(SimpleBlock):
         self.INVESTSTORAGES = Set(initialize=[str(n) for n in group])
 
         invest_max = {}
-        invest_flow_input = {}
+        # invest_flow_input = {}
+
         for n in group:
             invest_max[str(n)] = n.investment.maximum
+            # invest_flow_input[str(n)] = (
+            #     m.InvestmentFlow.invest_flow[m.INPUTS[n], n])
             # invest_flow_input[str(n)] = (
             #     list(n.inputs.values())[0].invest_flow)
 
@@ -101,7 +104,8 @@ class InvestmentStorageBalance(SimpleBlock):
         # def _storage_capacity_input_invest_rule(block, n):
         #     """ Returns the storage balance for every storage n in timestep t
         #     """
-        #     return invest_flow_input[n] <= self.invest_storage[n]
+        #     return (m.InvestmentFlow.invest_flow[m.INPUTS[n], n] <=
+        #             self.invest_storage[n])
         #
         # self.storage_capacity_input_invest = Constraint(
         #     self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
@@ -113,8 +117,6 @@ class InvestmentStorageBalance(SimpleBlock):
         # ToDo Connection between invest_flow of input and invest_storage
 
         # ToDo Connection between invest_flow of output and invest_storage
-
-
 
 
 class InvestmentFlow(SimpleBlock):
