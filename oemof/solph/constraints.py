@@ -152,20 +152,20 @@ class InvestmentFlow(SimpleBlock):
         def _summed_max_investflow_rule(block, i, o):
             """
             """
-            expr = (sum(m.flow[i,o,t] for t in m.TIMESTEPS) <=
-                              m.flows[i,o].summed_max * self.invest_flow[i,o])
+            expr = (sum(m.flow[i, o, t] for t in m.TIMESTEPS) <=
+                    m.flows[i, o].summed_max * self.invest_flow[i, o])
             return expr
-        self.summed_max_investflow = Constraint(self.SUMMED_MAX_INVESTFLOWS,
-                                              rule=_summed_max_investflow_rule)
+        self.summed_max_investflow = Constraint(
+            self.SUMMED_MAX_INVESTFLOWS, rule=_summed_max_investflow_rule)
 
         def _summed_min_investflow_rule(block, i, o):
             """
             """
-            expr = (sum(m.flow[i,o,t] for t in m.TIMESTEPS) >=
-                              m.flows[i,o].summed_min * self.invest_flow[i,o])
+            expr = (sum(m.flow[i, o, t] for t in m.TIMESTEPS) >=
+                    m.flows[i, o].summed_min * self.invest_flow[i, o])
             return expr
-        self.summed_min_investflow = Constraint(self.SUMMED_MIN_INVESTFLOWS,
-                                              rule=_summed_max_investflow_rule)
+        self.summed_min_investflow = Constraint(
+            self.SUMMED_MIN_INVESTFLOWS, rule=_summed_min_investflow_rule)
 
 
     def _objective_expression(self):
