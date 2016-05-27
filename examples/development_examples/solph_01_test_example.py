@@ -23,12 +23,13 @@ gasbus = Bus(label="gas")
 
 so = Source(
     label="source",
-    outputs={ebus: Flow(actual_value=[10, 5, 10], fixed=True,
-                        investement=Investment(maximum=1000))})
+    outputs={ebus: Flow(actual_value=[10, 5, 10], fixed=True, min=[2, 2, 2],
+                        summed_max=500,
+                        investment=Investment(maximum=1000))})
 
 si = Sink(
     label="sink",
-    inputs={ebus: Flow(min=[0, 0, 0], max=[0.1, 0.2, 0.9], nominal_value=10,
+    inputs={ebus: Flow(min=[0, 0, 2], max=[0.1, 0.2, 0.9], nominal_value=10,
                        fixed=True)})
 
 ltransf = LinearTransformer(
@@ -38,7 +39,7 @@ ltransf = LinearTransformer(
     conversion_factors={ebus: 0.5})
 
 estorage = Storage(
-    label="storage",
+    label="storage", investment=Investment(maximum=1000),
     inputs={ebus: Flow()}, outputs={ebus: Flow(nominal_value=100)},
     nominal_capacity=500, capacity_loss=0.1, nominal_input_capacity_ratio=0.2,
     nominal_output_capacity_ratio=0.5, inflow_conversion_factor=1,
