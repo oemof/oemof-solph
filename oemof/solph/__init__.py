@@ -241,7 +241,6 @@ class Storage(on.Transformer):
 
     """
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
@@ -258,6 +257,7 @@ class Storage(on.Transformer):
         self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
+        super().__init__(*args, **kwargs)
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             self.nominal_capacity = None
@@ -327,7 +327,8 @@ class OperationalModel(pyomo.ConcreteModel):
     """
 
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.StorageBalance, cblocks.InvestmentFlow]
+                         cblocks.StorageBalance, cblocks.InvestmentFlow,
+                         cblocks.InvestmentStorageBalance]
 
     OBJECTIVE_GROUPS = [cblocks.VariableCosts]
 
@@ -564,6 +565,8 @@ def constraint_grouping(node):
         return cblocks.BusBalance
     if isinstance(node, LinearTransformer):
         return cblocks.LinearRelation
+    if isinstance(node, Storage) and isinstance(node.investment, Investment):
+        return cblocks.InvestmentStorageBalance
     if isinstance(node, Storage):
         return cblocks.StorageBalance
 
