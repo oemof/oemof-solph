@@ -108,6 +108,10 @@ class Flow:
         the summed_max will be multiplied with the nominal_value_variable.
     summed_min : float
         see above
+    actual_value : float or array-like
+        Specific value for the flow variable. Will be multiplied with the
+        nominal_value to get the absolute value. If fixed is True the flow
+        variable will be fixed to actual_value * nominal_value.
 
     """
     def __init__(self, *args, **kwargs):
