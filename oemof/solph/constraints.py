@@ -28,25 +28,28 @@ class StorageBalance(SimpleBlock):
 
         # dictionaries to use in the _storage_capacity_bound_rule
         ub_capacity = {}
+        lb_capacity = {}
         capacity_loss = {}
         inflow_conversion = {}
         outflow_conversion = {}
-        # fill dicitionaries with storage objects attributes from group list
+        # fill dictionaries with storage objects attributes from group list
         for t in m.TIMESTEPS:
             for n in group:
                 ub_capacity[str(n), t] = n.nominal_capacity * n.capacity_max[t]
+                lb_capacity[str(n), t] = n.nominal_capacity * n.capacity_min[t]
                 capacity_loss[str(n), t] = n.capacity_loss[t]
                 inflow_conversion[str(n), t] = n.inflow_conversion_factor[t]
                 outflow_conversion[str(n), t] = n.outflow_conversion_factor[t]
 
+        # ToDo Minimal capacity bound (lb_capacity)
         def _storage_capacity_bound_rule(block, n, t):
             """ Returns bound for capacity variable of storage n in timestep t
             """
-            return (0, ub_capacity[n, t])
+            return 0, ub_capacity[n, t]
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
-        # set capapcity of last timestep to fixed value of initial_capacity
+        # set capacity of last timestep to fixed value of initial_capacity
         self.t_end = len(m.TIMESTEPS) - 1
         for n in group:
             self.capacity[str(n), self.t_end] = n.initial_capacity * n.nominal_capacity
@@ -80,7 +83,21 @@ class InvestmentStorageBalance(SimpleBlock):
         if group is None:
             return None
 
+        # dictionaries to use in the _storage_capacity_bound_rule
+        ub_capacity = {}
+        lb_capacity = {}
+        for t in m.TIMESTEPS:
+            for n in group:
+                ub_capacity[str(n), t] = n.capacity_max[t]
+                lb_capacity[str(n), t] = n.capacity_min[t]
+
         self.INVESTSTORAGES = Set(initialize=[str(n) for n in group])
+
+        self.MAX_INVESTSTORAGES = Set(
+            initialize=[str(n) for n in group if len(n.capacity_max) != 0])
+
+        self.MIN_INVESTSTORAGES = Set(
+            initialize=[str(n) for n in group if len(n.capacity_min) != 0])
 
         invest_max = {}
         # invest_flow_input = {}
@@ -92,6 +109,12 @@ class InvestmentStorageBalance(SimpleBlock):
             # invest_flow_input[str(n)] = (
             #     list(n.inputs.values())[0].invest_flow)
 
+        # TODO: Capacity variable...
+        # self.capacity = Var(self.STORAGES, m.TIMESTEPS ...)
+
+        # ToDo: set capacity of last timestep to fixed value of initial_capacity
+        # see StorageBalance but without nominal_capacity
+
         def _storage_investvar_bound_rule(block, n):
             """ Returns bounds for invest_flow variable
             """
@@ -101,6 +124,7 @@ class InvestmentStorageBalance(SimpleBlock):
         self.invest_storage = Var(self.INVESTSTORAGES, within=NonNegativeReals,
                                   bounds=_storage_investvar_bound_rule)
 
+        # ToDo Connection between invest_flow of input and invest_storage
         # def _storage_capacity_input_invest_rule(block, n):
         #     """ Returns the storage balance for every storage n in timestep t
         #     """
@@ -110,13 +134,22 @@ class InvestmentStorageBalance(SimpleBlock):
         # self.storage_capacity_input_invest = Constraint(
         #     self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
 
+        # ToDo Connection between invest_flow of output and invest_storage
+
         # ToDo upper bound of capacity
+        # def _max_investstorage_rule(block, n, t):
+        #     """
+        #     """
+        #     expr = (self.capacity[n, t] <= (ub_capacity[str(n), t] *
+        #                                     self.invest_storage[n]))
+        #     return expr
+        # self.max_investstorage = Constraint(
+        #     self.MAX_INVESTSTORAGES, m.TIMESTEPS, rule=_max_investstorage_rule)
 
         # ToDo lower bound of capacity
 
-        # ToDo Connection between invest_flow of input and invest_storage
+        # ToDo: objective functions
 
-        # ToDo Connection between invest_flow of output and invest_storage
 
 
 class InvestmentFlow(SimpleBlock):
