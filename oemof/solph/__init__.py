@@ -414,9 +414,12 @@ class OperationalModel(pyomo.ConcreteModel):
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
-                if self.flows[o, i].actual_value[t] is not None:
+                if self.flows[o, i].actual_value[t] is not None and (
+                        self.flows[o, i].nominal_value is not None):
                     # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
+                    self.flow[o, i, t].value = (
+                        self.flows[o, i].actual_value[t] *
+                        self.flows[o, i].nominal[t])
                     # fix variable if flow is fixed
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
