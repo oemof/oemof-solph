@@ -424,7 +424,7 @@ class OperationalModel(pyomo.ConcreteModel):
                     # pre- optimized value of flow variable
                     self.flow[o, i, t].value = (
                         self.flows[o, i].actual_value[t] *
-                        self.flows[o, i].nominal[t])
+                        self.flows[o, i].nominal_value)
                     # fix variable if flow is fixed
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
