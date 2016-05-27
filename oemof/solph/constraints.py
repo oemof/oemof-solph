@@ -92,6 +92,10 @@ class InvestmentFlow(SimpleBlock):
         self.INVESTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
                                            for g in group])
 
+        self.FIXEDFLOWS = Set(
+            initialize=[(str(g[0]), str(g[1]))
+                        for g in group if g[2].fixed])
+
         self.SUMMED_MAX_INVESTFLOWS = Set(
             initialize=[(str(g[0]), str(g[1]))
                         for g in group if g[2].summed_max is not None])
@@ -113,9 +117,10 @@ class InvestmentFlow(SimpleBlock):
         def _investflow_bound_rule(block, i, o, t):
             """ Returns constraint to bound flow variable if flow investment
             """
-            return m.flow[i,o,t] <= self.invest_flow[i,o]
+            return (m.flow[i, o, t] == (self.invest_flow[i, o] *
+                                        m.flows[i, o].actual_value[t]))
         # create constraint to bound flow variable
-        self.invest_bounds = Constraint(self.INVESTFLOWS, m.TIMESTEPS,
+        self.invest_bounds = Constraint(self.FIXEDFLOWS, m.TIMESTEPS,
                                         rule=_investflow_bound_rule)
 
         def _summed_max_investflow_rule(block, i, o):
