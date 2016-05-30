@@ -19,6 +19,23 @@ si = on.Sink(label='sink',
 
 nodes_flows = pd.read_csv('nodes_flows.csv', sep=',')
 
+# first get distinct values for class and label
+
+
+
+# then operate on these subsets
+
+def create_nodes(row):
+    if row['class'] == 'Sink':
+        node = on.Source(label=str(row['label']))
+    else:
+        node = 'something different'
+    return node
+result = nodes_flows.apply(create_nodes, axis=1)
+print(result)
+
+#if hasattr(a, 'property'):
+
 nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
