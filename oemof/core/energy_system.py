@@ -213,7 +213,7 @@ class EnergySystem:
 
         Entity.registry = self
         Node.registry = self
-        self.groups = {}
+        self._groups = {}
         self._groupings = [Grouping.UID] + [ Grouping.create(g)
                                              for g in kwargs.get('groupings', [])]
         for e in self.entities:
@@ -228,6 +228,10 @@ class EnergySystem:
         self.entities.append(entity)
         for g in self._groupings:
             g(entity, self.groups)
+
+    @property
+    def groups(self):
+        return self._groups
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
