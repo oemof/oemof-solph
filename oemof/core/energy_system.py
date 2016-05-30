@@ -5,6 +5,7 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
+from functools import partial
 from operator import attrgetter
 import logging
 import os
@@ -232,10 +233,13 @@ class EnergySystem:
         """ Add an `entity` to this energy system.
         """
         self.entities.append(entity)
-        self._groups = self._regroup(entity, self.groups, self._groupings)
+        self._groups = partial(self._regroup, entity, self.groups,
+                               self._groupings)
 
     @property
     def groups(self):
+        while callable(self._groups):
+            self._groups = self._groups()
         return self._groups
 
     # TODO: Condense signature (use Buse)
