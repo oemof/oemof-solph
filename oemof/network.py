@@ -1,3 +1,4 @@
+from functools import total_ordering
 from weakref import WeakKeyDictionary as WKD, WeakSet as WS
 """
 This package (along with its subpackages) contains the classes used to model
@@ -38,6 +39,7 @@ class _Edges():
 
 flow = _Edges()
 
+@total_ordering
 class Node:
     """ Represents a Node in an energy system graph.
 
@@ -51,7 +53,7 @@ class Node:
 
     Parameters
     ----------
-    label: :func:`object`, optional
+    label: `hashable`, optional
         Used as the string representation of this node. If this parameter is
         not an instance of :class:`str` it will be converted to a string and
         the result will be used as this node's :attr:`label`, which should be
@@ -104,6 +106,15 @@ class Node:
                 flow[self, o] = None
         if __class__.registry is not None:
             __class__.registry.add(self)
+
+    def __eq__(self, other):
+        return self.label == other.label
+
+    def __lt__(self, other):
+        return self.label < other.label
+
+    def __hash__(self):
+        return hash(self.label)
 
     def __str__(self):
         return str(self.label)
