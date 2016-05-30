@@ -1,0 +1,9 @@
+class,label,source,target,conversion_factor,nominal_value,actual_value,min,max,fixed_costs,variable_costs,summed_max,summed_min,fixed,capacity_loss,outflow_conversion_factor,inflow_conversion_factor
+Source,wind1,wind1,bus_el1,,100,seq,,,,,,,,,,
+Source,solar1,solar1,bus_el1,,100,seq,,,,,,,,,,
+Sink,demand1,bus_el1,demand1,,300,seq,,,,,,,,,,
+Transformer,chp1,bus_gas1,chp1,,,,,,,,,,,,,
+Transformer,chp1,chp1,bus_el1,0.3,200,,,seq,,30,,,,,,
+Transformer,chp1,chp1,bus_th1,0.6,100,,,seq,,15,,,,,,
+Storage,storage1,bus_el1,storage1,,200,,,,,,,,,0.01,0.9,0.9
+Storage,storage1,storage1,bus_el1,,100,,,,,,,,,0.01,0.9,0.9
