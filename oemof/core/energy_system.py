@@ -5,6 +5,7 @@ Created on Mon Jul 20 15:53:14 2015
 @author: uwe
 """
 
+from functools import partial
 from operator import attrgetter
 import logging
 import os
@@ -213,7 +214,7 @@ class EnergySystem:
 
         Entity.registry = self
         Node.registry = self
-        self.groups = {}
+        self._groups = {}
         self._groupings = [Grouping.UID] + [ Grouping.create(g)
                                              for g in kwargs.get('groupings', [])]
         for e in self.entities:
@@ -222,12 +223,24 @@ class EnergySystem:
         self.results = kwargs.get('results')
         self.time_idx = kwargs.get('time_idx')
 
+    @staticmethod
+    def _regroup(entity, groups, groupings):
+        for g in groupings:
+            g(entity, groups)
+        return groups
+
     def add(self, entity):
         """ Add an `entity` to this energy system.
         """
         self.entities.append(entity)
-        for g in self._groupings:
-            g(entity, self.groups)
+        self._groups = partial(self._regroup, entity, self.groups,
+                               self._groupings)
+
+    @property
+    def groups(self):
+        while callable(self._groups):
+            self._groups = self._groups()
+        return self._groups
 
     # TODO: Condense signature (use Buse)
     def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
