@@ -241,6 +241,7 @@ class Storage(on.Transformer):
 
     """
     def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
@@ -257,7 +258,6 @@ class Storage(on.Transformer):
         self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
-        super().__init__(*args, **kwargs)
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             self.nominal_capacity = None
