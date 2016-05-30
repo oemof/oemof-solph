@@ -2,7 +2,8 @@
 
 import pandas as pd
 import oemof.network as on
-from oemof.solph import Flow
+from oemof.network import Bus
+from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source
 
 
 bel = on.Bus(label='el_balance')
@@ -19,8 +20,8 @@ si = on.Sink(label='sink',
 
 nodes_flows = pd.read_csv('nodes_flows.csv', sep=',')
 
-# first get distinct values for class and label
 
+# first get distinct values for class and label
 
 
 # then operate on these subsets
@@ -55,3 +56,30 @@ nodes_flows_seq = nodes_flows_seq.transpose()
 #               nominal_capacity=50, inflow_conversion_factor=0.9,
 #               outflow_conversion_factor=0.8, initial_capacity=0.5,
 #               capacity_loss=0.001)
+
+def create_flow(row):
+    f = Flow()
+    dc = {} # TODO: better use setattr?
+    for k, v in vars(f).items():
+        if k in row:
+            dc[k] = row[k]
+    return Flow(dc)
+
+strcls = {'Transformer':LinearTransformer,
+        'Storage':Storage,
+        'Sink':Sink,
+        'Source':Source}
+
+labels = nodes_flows['label'].unique()
+for lb in labels:
+    idx = nodes_flows.label == lb
+    node_df = nodes_flows[idx]
+    k = next(iter(node_df['class'])) #TODO: better try except unique
+    # initiate node obj
+    node_cls = strcls[k]
+    #TODO: if Transformer, Storage additional attr
+    node = node_cls(inputs = {row.target:create_flow(row) for i, row in
+                        node_df.iterrows() if row.source == lb},
+                outputs = {row.source:create_flow(row) for i, row in
+                         node_df.iterrows() if row.target == lb})
+    #TODO: can't figure out a weak ref error, flow initialisation works fine
