@@ -28,6 +28,8 @@ nodes_flows = pd.read_csv('nodes_flows.csv', sep=',')
 def create_nodes(row):
     if row['class'] == 'Sink':
         node = on.Source(label=str(row['label']))
+#        node.outputs = {row['target']: Flow(actual_value=row['actual_value'],
+#                        nominal_value=row['actual_value'])}
     else:
         node = 'something different'
     return node
