@@ -24,7 +24,7 @@ class StorageBalance(SimpleBlock):
         if group is None:
             return None
 
-        self.STORAGES = Set(initialize=[str(n) for n in group])
+        self.STORAGES = Set(initialize=[n for n in group])
 
         # dictionaries to use in the _storage_capacity_bound_rule
         ub_capacity = {}
@@ -35,11 +35,11 @@ class StorageBalance(SimpleBlock):
         # fill dictionaries with storage objects attributes from group list
         for t in m.TIMESTEPS:
             for n in group:
-                ub_capacity[str(n), t] = n.nominal_capacity * n.capacity_max[t]
-                lb_capacity[str(n), t] = n.nominal_capacity * n.capacity_min[t]
-                capacity_loss[str(n), t] = n.capacity_loss[t]
-                inflow_conversion[str(n), t] = n.inflow_conversion_factor[t]
-                outflow_conversion[str(n), t] = n.outflow_conversion_factor[t]
+                ub_capacity[n, t] = n.nominal_capacity * n.capacity_max[t]
+                lb_capacity[n, t] = n.nominal_capacity * n.capacity_min[t]
+                capacity_loss[n, t] = n.capacity_loss[t]
+                inflow_conversion[n, t] = n.inflow_conversion_factor[t]
+                outflow_conversion[n, t] = n.outflow_conversion_factor[t]
 
         # ToDo Minimal capacity bound (lb_capacity)
         def _storage_capacity_bound_rule(block, n, t):
@@ -52,8 +52,8 @@ class StorageBalance(SimpleBlock):
         # set capacity of last timestep to fixed value of initial_capacity
         self.t_end = len(m.TIMESTEPS) - 1
         for n in group:
-            self.capacity[str(n), self.t_end] = n.initial_capacity * n.nominal_capacity
-            self.capacity[str(n), self.t_end].fix()
+            self.capacity[n, self.t_end] = n.initial_capacity * n.nominal_capacity
+            self.capacity[n, self.t_end].fix()
 
         def _storage_balance_rule(block, n, t):
             """ Returns the storage balance for every storage n in timestep t
@@ -176,27 +176,25 @@ class InvestmentFlow(SimpleBlock):
         m = self.parent_block()
         ############################ SETS #####################################
         # pyomo set with investment flows as list of tuples
-        self.INVESTFLOWS = Set(initialize=[(str(g[0]), str(g[1]))
-                                           for g in group])
+        self.INVESTFLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.FIXEDFLOWS = Set(
-            initialize=[(str(g[0]), str(g[1]))
-                        for g in group if g[2].fixed])
+            initialize=[(g[0], g[1]) for g in group if g[2].fixed])
 
         self.SUMMED_MAX_INVESTFLOWS = Set(
-            initialize=[(str(g[0]), str(g[1]))
-                        for g in group if g[2].summed_max is not None])
+            initialize=[(g[0], g[1])
+            for g in group if g[2].summed_max is not None])
 
         self.SUMMED_MIN_INVESTFLOWS = Set(
-            initialize=[(str(g[0]), str(g[1]))
+            initialize=[(g[0], g[1])
                         for g in group if g[2].summed_min is not None])
 
         self.MAX_INVESTFLOWS = Set(
-            initialize=[(str(g[0]), str(g[1]))
+            initialize=[(g[0], g[1])
                         for g in group if len(g[2].max) != 0])
 
         self.MIN_INVESTFLOWS = Set(
-            initialize=[(str(g[0]), str(g[1]))
+            initialize=[(g[0], g[1])
                         for g in group if len(g[2].min) != 0])
 
         ########################### VARIABLES ##################################
@@ -290,17 +288,16 @@ class BusBalance(SimpleBlock):
             return None
 
         m = self.parent_block()
-        self.NODES = Set(initialize=[str(n) for n in group])
-        self.INDEXSET = self.NODES * m.TIMESTEPS
-        self.constraint = Constraint(self.INDEXSET, noruleinit=True)
+
+        self.constraint = Constraint(group, noruleinit=True)
 
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
-                for n in block.NODES:
+                for n in group:
                     lhs = sum(m.flow[i, n, t] * m.timeincrement
-                              for i in m.INPUTS[n])
+                              for i in n.inputs)
                     rhs = sum(m.flow[n, o, t] * m.timeincrement
-                              for o in m.OUTPUTS[n])
+                              for o in n.outputs)
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
@@ -335,19 +332,13 @@ class LinearRelation(SimpleBlock):
 
         m = self.parent_block()
 
-        self.NODES = Set(initialize=[str(n) for n in group])
-        self.constraint = Constraint(self.NODES, noruleinit=True)
-
-        conversion_factors = {
-            (str(n), str(k)): n.conversion_factors[k]
-             for n in group for k in n.conversion_factors}
+        self.constraint = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
-                for n in block.NODES:
+                for n in group:
                     for o in m.OUTPUTS[n]:
-                        lhs = m.flow[m.INPUTS[n], n, t] * \
-                                conversion_factors[(n, o)][t]
+                        lhs = m.flow[m.INPUTS[n], n, t] * n.conversion_factors[o][t]
                         rhs = m.flow[n, o, t]
                         block.constraint.add((n, o, t), (lhs == rhs))
         self.constraintCon = BuildAction(rule=_input_output_relation)
@@ -360,7 +351,7 @@ def VariableCosts(m, group=None):
     if group is None:
         return 0
 
-    VARIABLECOST_FLOWS = [(str(g[0]), str(g[1])) for g in group]
+    VARIABLECOST_FLOWS = [(g[0], g[1]) for g in group]
 
     expr = sum(m.flow[i, o, t] * m.flows[i, o].variable_costs[t]
                for i, o in VARIABLECOST_FLOWS

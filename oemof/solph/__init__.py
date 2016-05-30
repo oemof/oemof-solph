@@ -349,37 +349,36 @@ class OperationalModel(pyomo.ConcreteModel):
                                        OperationalModel.CONSTRAINT_GROUPS)
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
-        self.flows = {(str(source), str(target)): source.outputs[target]
+        self.flows = {(source, target): source.outputs[target]
                       for source in es.nodes
                       for target in source.outputs}
 
         # ###########################  SETS  ##################################
         # set with all nodes
-        self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
+        self.NODES = pyomo.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
                                    ordered=True)
 
-        previous_timesteps_list = [x - 1 for x in self.timesteps]
-        previous_timesteps_list[0] = len(self.timesteps) - 1
+        # previous timesteps
+        previous_timesteps = [x - 1 for x in self.timesteps]
+        previous_timesteps[0] = self.timesteps[-1]
 
         self.previous_timestep = dict(zip(self.timesteps,
-                                          previous_timesteps_list))
+                                          previous_timesteps))
 
         # indexed index set for inputs of nodes (nodes as indices)
         self.INPUTS = pyomo.Set(self.NODES, initialize={
-            str(n): [str(i) for i in n.inputs]
-                     for n in self.es.nodes
-                     if not isinstance(n, on.Source)
+            n: [i for i in n.inputs] for n in self.es.nodes
+                                     if not isinstance(n, on.Source)
             }
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
         self.OUTPUTS = pyomo.Set(self.NODES, initialize={
-            str(n): [str(o) for o in n.outputs]
-                     for n in self.es.nodes
-                     if not isinstance(n, on.Sink)
+            n: [o for o in n.outputs] for n in self.es.nodes
+                                      if not isinstance(n, on.Sink)
             }
         )
 
@@ -389,7 +388,7 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # set for all flows for which fixed osts are set
         self.FIXEDCOST_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+            initialize=[(n, t) for n in self.es.nodes
                                          for (t,f) in n.outputs.items()
                                          if f.fixed_costs is not None and
                                          f.nominal_value is not None],
@@ -397,14 +396,14 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # set for all flows with an global limit on the flow over time
         self.UB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+            initialize=[(n, t) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
                         if f.summed_max is not None and
                         f.nominal_value is not None],
             ordered=True, dimen=2)
 
         self.LB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+            initialize=[(n, t) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
                         if f.summed_min is not None and
                         f.nominal_value is not None],
