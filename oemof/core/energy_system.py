@@ -222,12 +222,17 @@ class EnergySystem:
         self.results = kwargs.get('results')
         self.time_idx = kwargs.get('time_idx')
 
+    @staticmethod
+    def _regroup(entity, groups, groupings):
+        for g in groupings:
+            g(entity, groups)
+        return groups
+
     def add(self, entity):
         """ Add an `entity` to this energy system.
         """
         self.entities.append(entity)
-        for g in self._groupings:
-            g(entity, self.groups)
+        self._groups = self._regroup(entity, self.groups, self._groupings)
 
     @property
     def groups(self):
