@@ -84,21 +84,23 @@ class InvestmentStorageBalance(SimpleBlock):
         if group is None:
             return None
 
+        self.INVESTSTORAGES = Set(initialize=[str(n) for n in group])
+
+        # The capacity is set as a non-negative variable, therefore it makes no
+        # sense to create an additional constraint if the lower bound is zero
+        # for all time steps.
+        self.MIN_INVESTSTORAGES = Set(
+            initialize=[str(n) for n in group if sum(
+                [n.capacity_min[t] for t in m.TIMESTEPS]) > 0])
+
         # dictionaries to use in the _storage_capacity_bound_rule
         ub_capacity = {}
         lb_capacity = {}
         for t in m.TIMESTEPS:
             for n in group:
                 ub_capacity[str(n), t] = n.capacity_max[t]
-                lb_capacity[str(n), t] = n.capacity_min[t]
-
-        self.INVESTSTORAGES = Set(initialize=[str(n) for n in group])
-
-        self.MAX_INVESTSTORAGES = Set(
-            initialize=[str(n) for n in group if len(n.capacity_max) != 0])
-
-        self.MIN_INVESTSTORAGES = Set(
-            initialize=[str(n) for n in group if len(n.capacity_min) != 0])
+                if sum([n.capacity_min[t] for t in m.TIMESTEPS]) > 0:
+                    lb_capacity[str(n), t] = n.capacity_min[t]
 
         invest_max = {}
         # invest_flow_input = {}
@@ -138,19 +140,28 @@ class InvestmentStorageBalance(SimpleBlock):
 
         # ToDo Connection between invest_flow of output and invest_storage
 
-        # ToDo upper bound of capacity
-        # def _max_investstorage_rule(block, n, t):
-        #     """
-        #     """
-        #     expr = (self.capacity[n, t] <= (ub_capacity[str(n), t] *
-        #                                     self.invest_storage[n]))
-        #     return expr
-        # self.max_investstorage = Constraint(
-        #     self.MAX_INVESTSTORAGES, m.TIMESTEPS, rule=_max_investstorage_rule)
+        # Set the upper bound of the storage capacity
+        def _max_investstorage_rule(block, n, t):
+            """
+            """
+            expr = (self.capacity[n, t] <= (ub_capacity[str(n), t] *
+                                            self.invest_storage[n]))
+            return expr
+        self.max_investstorage = Constraint(
+            self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_investstorage_rule)
 
-        # ToDo lower bound of capacity
+        # Set the lower bound of the storage capacity if the attribute exists
+        def _min_investstorage_rule(block, n, t):
+            """
+            """
+            expr = (self.capacity[n, t] <= (lb_capacity[str(n), t] *
+                                            self.invest_storage[n]))
+            return expr
+        self.min_investstorage = Constraint(
+            self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
 
         # ToDo: objective functions
+        print(None)
 
 
 
