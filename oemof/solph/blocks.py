@@ -111,13 +111,13 @@ class InvestmentStorage(SimpleBlock):
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
         # ToDo Connection between invest_flow of input and invest_storage
-        # def _storage_capacity_input_invest_rule(block, n):
-        #     """ Returns the storage balance for every storage n in timestep t
-        #     """
-        #     return (m.InvestmentFlow.invest_flow[m.INPUTS[n], n] ==
-        #             self.invest_storage[n] * n.nominal_input_capacity_ratio)
-        # self.storage_capacity_input_invest = Constraint(
-        #     self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
+        def _storage_capacity_input_invest_rule(block, n):
+            """ Returns the storage balance for every storage n in timestep t
+            """
+            return (m.InvestmentFlow.invest_flow[m.INPUTS[n], n] ==
+                    self.invest_storage[n] * n.nominal_input_capacity_ratio)
+        self.storage_capacity_input_invest = Constraint(
+            self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
 
         # Connection between invest_flow of output and invest_storage
         def _storage_capacity_output_invest_rule(block, n):
