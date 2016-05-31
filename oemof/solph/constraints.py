@@ -88,6 +88,9 @@ class InvestmentStorageBalance(SimpleBlock):
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
 
+        self.INITIAL_CAPACITY = Set(initialize=[
+            n for n in group if n.initial_capacity is not None])
+
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
         # for all time steps.
@@ -108,6 +111,18 @@ class InvestmentStorageBalance(SimpleBlock):
             return 0, n.investment.maximum
         self.invest_storage = Var(self.INVESTSTORAGES, within=NonNegativeReals,
                                   bounds=_storage_investvar_bound_rule)
+
+        # Set capacity of last timestep to fixed value of initial_capacity
+        self.t_end = len(m.TIMESTEPS) - 1
+
+        def _initial_capacity_invest_rule(block, n, t):
+            """
+            """
+            return (self.capacity[n, self.t_end] == n.initial_capacity *
+                    self.invest_storage[n])
+        self.initial_capacity_invest = Constraint(
+            self.INITIAL_CAPACITY, m.TIMESTEPS,
+            rule=_initial_capacity_invest_rule)
 
         # ToDo Connection between invest_flow of input and invest_storage
         # def _storage_capacity_input_invest_rule(block, n):
