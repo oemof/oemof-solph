@@ -36,34 +36,69 @@ nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
 
+labels = nodes_flows['label'].unique()
 
 def create_flow(row):
-    f = Flow()
-    dc = {} # TODO: better use setattr?
-    for k, v in vars(f).items():
+    # TODO: better use setattr?, catch seq
+    dc = {}
+    for k, v in vars(Flow()).items():
         if k in row:
             dc[k] = row[k]
     return Flow(dc)
 
-strcls = {'Transformer': LinearTransformer,
+def create_buses(df):
+    ''' '''
+    labels = df['label'].unique()
+    buses = {}
+
+    for i, b in df[~df.isin(labels)].iterrows():
+        if b.source == b.source:
+            buses[b.source] = Bus(label=b.source)
+        elif b.target == b.target:
+            buses[b.target] = Bus(label=b.target)
+    #TODO: Buses are initialized multiple times, could be a problem, last set
+    # key determines bus object, also there must be a better way
+    return buses
+
+def obj_for_str(string):
+    dc = {'Transformer': LinearTransformer,
           'Storage': Storage,
           'Sink': Sink,
           'Source': Source}
+    return dc[string]
 
-labels = nodes_flows['label'].unique()
-for lb in labels:
-    idx = nodes_flows.label == lb
-    node_df = nodes_flows[idx]
-    k = next(iter(node_df['class'])) #TODO: better try except unique
-    # initiate node obj
-    node_cls = strcls[k]
-    #TODO: if Transformer, Storage additional attr
-    node = node_cls(inputs = {row.target: create_flow(row) for i, row in
-                              node_df.iterrows() if row.source == lb},
-                outputs = {row.source:create_flow(row) for i, row in
-                           node_df.iterrows() if row.target == lb})
-    #TODO: can't figure out a weak ref error, flow initialisation works fine
-    # dict expects component as key and not a string!
+def one_node(df):
+    ''' '''
+    for node_lb in df['label'].unique():
+        node_subs = df[df.label == node_lb]
+        node_cls_str = next(iter(node_subs['class'])) #TODO: better try except unique
+        yield node_cls_str, node_lb, node_subs
+
+
+entities = []
+buses = create_buses(nodes_flows)
+for node_cls_str, node_lb, node_subs in one_node(nodes_flows):
+
+    kw = {'inputs':{buses[row.source]: create_flow(row) for i, row in
+                node_subs.iterrows() if row.target == node_lb},
+                'outputs':{buses[row.target]:create_flow(row) for i, row in
+                node_subs.iterrows() if row.source == node_lb},
+                'label':node_lb}
+
+    node_cls = obj_for_str(node_cls_str)
+
+    if node_cls_str == 'Transformer':
+        kw.update({'conversion_factors':{buses[row.target]:
+                        row.conversion_factor for i, row in
+                        subs.iterrows() if row.conversion_factor ==\
+                                            row.conversion_factor}})
+    if node_cls_str == 'Storage':
+        #TODO: map row fields to attr
+        continue
+
+    node = node_cls(**kw)
+    entities.append(node)
+
 
 # first get distinct values for class and label
 # then operate on these subsets
