@@ -161,7 +161,6 @@ class InvestmentStorageBalance(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
 
         # ToDo: objective functions
-        print(None)
 
 
 class InvestmentFlow(SimpleBlock):
