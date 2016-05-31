@@ -132,7 +132,6 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
 
 def get_result_dict(energysystem):
     logging.info('Check the results')
-    storage = [e for e in energysystem.entities if e.uid == 'sto_simple'][0]
     myresults = tpd.DataFramePlot(energy_system=energysystem)
 
     pp_gas = myresults.slice_by(bus_uid='el_balance', bus_type='el',
@@ -162,7 +161,7 @@ def get_result_dict(energysystem):
             'wind_inst': wind.max()/0.99989,
             'pv_sum': pv.sum(),
             'pv_inst': pv.max()/0.76474,
-            'storage_cap': energysystem.results[storage].add_cap,
+            # 'storage_cap': energysystem.results[storage].add_cap,
             'objective': energysystem.results.objective}
 
 

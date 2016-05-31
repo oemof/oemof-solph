@@ -37,7 +37,6 @@ def check(cdict, runcheck, subdict):
 testdict['stor_inv'] = {'name': "Storage invest example"}
 number_of_timesteps = 8760
 
-
 esys = storage_invest.initialise_energysystem(number_of_timesteps)
 filepath = os.path.join('storage_optimization', 'storage_invest.csv')
 esys = storage_invest.optimise_storage_size(esys, filename=filepath)
