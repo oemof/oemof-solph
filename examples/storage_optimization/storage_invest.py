@@ -30,12 +30,6 @@ The example models the following energy system:
 ###############################################################################
 # imports
 ###############################################################################
-import matplotlib.pyplot as plt
-import pandas as pd
-import logging
-
-# import solph module to create/process optimization model instance
-from oemof.solph import predefined_objectives as predefined_objectives
 
 # Outputlib
 from oemof.outputlib import to_pandas as tpd
@@ -44,23 +38,25 @@ from oemof.outputlib import to_pandas as tpd
 from oemof.tools import logger
 
 # import oemof base classes to create energy system objects
-from oemof.core import energy_system as es
-from oemof.core.network.entities import Bus
-from oemof.core.network.entities.components import sinks as sink
-from oemof.core.network.entities.components import sources as source
-from oemof.core.network.entities.components import transformers as transformer
+import logging
+import pandas as pd
+import matplotlib.pyplot as plt
+from oemof.core import energy_system as core_es
+import oemof.solph as solph
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from oemof.solph import Investment
+from oemof.solph import OperationalModel
 
 
-def initialise_energysystem(number_timesteps=8760):
+def initialise_energysystem(number_timesteps=876):
     """initialize the energy system
     """
     logging.info('Initialize the energy system')
-    time_index = pd.date_range('1/1/2012', periods=number_timesteps,
-                               freq='H')
-    simulation = es.Simulation(
-        timesteps=range(len(time_index)), verbose=True, solver='glpk',
-        objective_options={'function': predefined_objectives.minimize_cost})
-    return es.EnergySystem(time_idx=time_index, simulation=simulation)
+    date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
+                                    freq='H')
+
+    return core_es.EnergySystem(groupings=solph.GROUPINGS,
+                                time_idx=date_time_index)
 
 
 def optimise_storage_size(energysystem, filename="storage_invest.csv"):
@@ -68,77 +64,53 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     data = pd.read_csv(filename, sep=",")
 
     ##########################################################################
-    # set optimzation options for storage components
-    ##########################################################################
-
-    transformer.Storage.optimization_options.update({'investment': True})
-
-    ##########################################################################
     # Create oemof object
     ##########################################################################
 
     logging.info('Create oemof objects')
     # create gas bus
-    bgas = Bus(uid="bgas",
-               type="gas",
-               price=70,
-               balanced=True,
-               excess=False)
+    bgas = Bus(label="gas_balance")
 
     # create electricity bus
-    bel = Bus(uid="bel",
-              type="el",
-              excess=True)
+    bel = Bus(label="el_balance")
+
+    # create excess component for the electricity bus to allow overproduction
+    Sink(label='excess_bel', inputs={bel: Flow()})
 
     # create commodity object for gas resource
-    source.Commodity(uid='rgas',
-                     outputs=[bgas],
-                     sum_out_limit=194397000)
+    Source(label='rgas', outputs={bgas: Flow(summed_max=194397000,
+                                             nominal_value=1)})
 
     # create fixed source object for wind
-    source.FixedSource(uid="wind",
-                       outputs=[bel],
-                       val=data['wind'],
-                       out_max=[1000000],
-                       add_out_limit=0,
-                       capex=1000,
-                       opex_fix=20,
-                       lifetime=25,
-                       crf=0.08)
+    Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
+                                            nominal_value=1000000,
+                                            fixed=True, fixed_costs=20)})
 
     # create fixed source object for pv
-    source.FixedSource(uid="pv",
-                       outputs=[bel],
-                       val=data['pv'],
-                       out_max=[582000],
-                       add_out_limit=0,
-                       capex=900,
-                       opex_fix=15,
-                       lifetime=25,
-                       crf=0.08)
+    Source(label='pv', outputs={bel: Flow(actual_value=data['pv'],
+                                          nominal_value=582000,
+                                          fixed=True, variable_costs=15)})
 
     # create simple sink object for demand
-    sink.Simple(uid="demand", inputs=[bel], val=data['demand_el'])
+    Sink(label='demand', inputs={bel: Flow(actual_value=data['demand_el'],
+                                           fixed=True)})
 
     # create simple transformer object for gas powerplant
-    transformer.Simple(uid='pp_gas',
-                       inputs=[bgas], outputs=[bel],
-                       opex_var=50, out_max=[10e10], eta=[0.58])
+    LinearTransformer(
+        label="pp_gas",
+        inputs={bgas: Flow()},
+        outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
+        conversion_factors={bel: 0.58})
 
     # create storage transformer object for storage
-    transformer.Storage(uid='sto_simple',
-                        inputs=[bel],
-                        outputs=[bel],
-                        eta_in=1,
-                        eta_out=0.8,
-                        cap_loss=0.00,
-                        opex_fix=35,
-                        opex_var=10e10,
-                        capex=1000,
-                        cap_max=0,
-                        cap_initial=0,
-                        c_rate_in=1/6,
-                        c_rate_out=1/6)
+    Storage(
+        label='storage',
+        inputs={bel: Flow()}, outputs={bel: Flow()},
+        nominal_capacity=500, capacity_loss=0.00, initial_capacity=0,
+        nominal_input_capacity_ratio=1 / 6, nominal_output_capacity_ratio=1 / 6,
+        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
+        investment=Investment(),
+    )
 
     ##########################################################################
     # Optimise the energy system and plot the results
@@ -146,9 +118,14 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
 
     logging.info('Optimise the energy system')
 
-    # If you dumped the energysystem once, you can skip the optimisation
-    # with '#' and use the restore method.
-    energysystem.optimize()
+    om = OperationalModel(energysystem, timeindex=energysystem.time_idx)
+
+    logging.info('Solve the optimization problem')
+    om.solve(solve_kwargs={'tee': True})
+
+    logging.info('Store lp-file')
+    om.write('optimization_problem.lp',
+             io_options={'symbolic_solver_labels': True})
 
     return energysystem
 
@@ -158,7 +135,7 @@ def get_result_dict(energysystem):
     storage = [e for e in energysystem.entities if e.uid == 'sto_simple'][0]
     myresults = tpd.DataFramePlot(energy_system=energysystem)
 
-    pp_gas = myresults.slice_by(bus_uid='bel', bus_type='el',
+    pp_gas = myresults.slice_by(bus_uid='el_balance', bus_type='el',
                                 type='input', obj_uid='pp_gas',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
@@ -228,9 +205,9 @@ def create_plots(energysystem):
     plt.style.use('grayscale')
 
     handles, labels = myplot.io_plot(
-        bus_uid='bel', cdict=cdict,
-        barorder=['pv', 'wind', 'pp_gas', 'sto_simple'],
-        lineorder=['demand', 'sto_simple', 'bel_excess'],
+        bus_label='el_balance', cdict=cdict,
+        barorder=['pv', 'wind', 'pp_gas', 'storage'],
+        lineorder=['demand', 'storage', 'excess_bel'],
         line_kwa={'linewidth': 4},
         ax=fig.add_subplot(1, 1, 1),
         date_from="2012-01-01 00:00:00",
