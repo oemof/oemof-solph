@@ -113,14 +113,13 @@ class InvestmentStorageBalance(SimpleBlock):
         # Set capacity of last timestep to fixed value of initial_capacity
         self.t_end = len(m.TIMESTEPS) - 1
 
-        def _initial_capacity_invest_rule(block, n, t):
+        def _initial_capacity_invest_rule(block, n):
             """
             """
             return (self.capacity[n, self.t_end] == n.initial_capacity *
                     self.invest_storage[n])
         self.initial_capacity_invest = Constraint(
-            self.INITIAL_CAPACITY, m.TIMESTEPS,
-            rule=_initial_capacity_invest_rule)
+            self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
         # ToDo Connection between invest_flow of input and invest_storage
         # def _storage_capacity_input_invest_rule(block, n):
