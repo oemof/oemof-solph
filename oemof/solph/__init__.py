@@ -556,12 +556,21 @@ class OperationalModel(pyomo.ConcreteModel):
                 result[i] = result.get(i, UserDict())
                 result[i][node] = [self.flow[i, node, t].value
                                    for t in self.TIMESTEPS]
-
+        # TODO: This is just a fast fix for now. Change this once structure is
+        #       finished (remove check for hasattr etc.)
             if isinstance(node, Storage):
                 result[node] = result.get(node, UserDict())
-                result[node][node] = [
-                    self.StorageBalance.capacity[node, t].value
-                        for t in self.TIMESTEPS]
+                if hasattr(self.StorageBalance, 'capacity'):
+                    value = [
+                        self.StorageBalance.capacity[node, t].value
+                             for t in self.TIMESTEPS]
+                else:
+                    value = [
+                        self.InvestmentStorageBalance.capacity[node, t].value
+                            for t in self.TIMESTEPS]
+                result[node][node] = value
+
+
         # TO
         # TODO: extract duals for all constraints ?
 
