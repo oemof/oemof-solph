@@ -6,7 +6,7 @@ from collections import abc, UserList, UserDict
 from itertools import chain
 import warnings
 import pandas as pd
-import pyomo.environ as pyomo
+import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
@@ -303,7 +303,7 @@ def storage_nominal_value_warning(flow):
 ###############################################################################
 
 # TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-class ExpansionModel(pyomo.ConcreteModel):
+class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
     def __init__(self, es):
@@ -311,7 +311,7 @@ class ExpansionModel(pyomo.ConcreteModel):
 
 
 
-class OperationalModel(pyomo.ConcreteModel):
+class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     distpatch.
 
@@ -507,9 +507,9 @@ class OperationalModel(pyomo.ConcreteModel):
         set as attributes of the model.
 
         """
-        self.dual = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
-        self.rc = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
 
     def results(self):

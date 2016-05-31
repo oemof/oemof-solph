@@ -2,8 +2,8 @@
 """
 
 """
-import pyomo.environ as pyomo
-from pyomo.core import Var, Binary, NonNegativeReals, Set, Constraint, BuildAction
+from pyomo.core import (Var, NonNegativeReals, Set, Constraint, BuildAction,
+                        Expression)
 from pyomo.core.base.block import SimpleBlock
 
 
@@ -89,7 +89,7 @@ class InvestmentStorageBalance(SimpleBlock):
 
         # Set capacity variable
         self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
-                            within=pyomo.NonNegativeReals)
+                            within=NonNegativeReals)
 
         # Set invest storage variable
         def _storage_investvar_bound_rule(block, n):
@@ -289,7 +289,7 @@ class BusBalance(SimpleBlock):
 
         m = self.parent_block()
 
-        self.constraint = Constraint(group, noruleinit=True)
+        self.balance = Constraint(group, noruleinit=True)
 
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
@@ -301,8 +301,8 @@ class BusBalance(SimpleBlock):
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
-                        block.constraint.add((n,t), expr)
-        self.constraintCon = BuildAction(rule=_busbalance_rule)
+                        block.balance.add((n,t), expr)
+        self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
 class LinearRelation(SimpleBlock):
@@ -332,7 +332,7 @@ class LinearRelation(SimpleBlock):
 
         m = self.parent_block()
 
-        self.constraint = Constraint(group, noruleinit=True)
+        self.relation = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
@@ -341,23 +341,5 @@ class LinearRelation(SimpleBlock):
                         lhs = m.flow[m.INPUTS[n], n, t] * \
                             n.conversion_factors[o][t]
                         rhs = m.flow[n, o, t]
-                        block.constraint.add((n, o, t), (lhs == rhs))
-        self.constraintCon = BuildAction(rule=_input_output_relation)
-
-
-
-def VariableCosts(m, group=None):
-    """
-    """
-    if group is None:
-        return 0
-
-    VARIABLECOST_FLOWS = [(g[0], g[1]) for g in group]
-
-    expr = sum(m.flow[i, o, t] * m.timeincrement *
-               m.flows[i, o].variable_costs[t]
-                   for i, o in VARIABLECOST_FLOWS
-                   for t in m.TIMESTEPS)
-
-    return expr
-
+                        block.relation.add((n, o, t), (lhs == rhs))
+        self.relation_build = BuildAction(rule=_input_output_relation)
