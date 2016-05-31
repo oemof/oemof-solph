@@ -45,10 +45,10 @@ def create_flow(row):
             dc[k] = row[k]
     return Flow(dc)
 
-strcls = {'Transformer':LinearTransformer,
-          'Storage':Storage,
-          'Sink':Sink,
-          'Source':Source}
+strcls = {'Transformer': LinearTransformer,
+          'Storage': Storage,
+          'Sink': Sink,
+          'Source': Source}
 
 labels = nodes_flows['label'].unique()
 for lb in labels:
@@ -58,10 +58,10 @@ for lb in labels:
     # initiate node obj
     node_cls = strcls[k]
     #TODO: if Transformer, Storage additional attr
-    node = node_cls(inputs = {row.target:create_flow(row) for i, row in
-                        node_df.iterrows() if row.source == lb},
+    node = node_cls(inputs = {row.target: create_flow(row) for i, row in
+                              node_df.iterrows() if row.source == lb},
                 outputs = {row.source:create_flow(row) for i, row in
-                         node_df.iterrows() if row.target == lb})
+                           node_df.iterrows() if row.target == lb})
     #TODO: can't figure out a weak ref error, flow initialisation works fine
 
 # first get distinct values for class and label
