@@ -2,7 +2,7 @@
 
 
 """
-from collections import abc, UserList
+from collections import abc, UserList, UserDict
 import warnings
 import pandas as pd
 import pyomo.environ as pyomo
@@ -510,6 +510,64 @@ class OperationalModel(pyomo.ConcreteModel):
         # reduced costs
         self.rc = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
 
+
+    def results(self):
+        """ Returns a nested dictionary of the results of this optimization
+        model.
+
+        The dictionary is keyed by the :class:`Entities
+        <oemof.core.network.Entity>` of the optimization model, that is
+        :meth:`om.results()[s][t] <OptimizationModel.results>`
+        holds the time series representing values attached to the edge (i.e.
+        the flow) from `s` to `t`, where `s` and `t` are instances of
+        :class:`Entity <oemof.core.network.Entity>`.
+
+        Time series belonging only to one object, like e.g. shadow prices of
+        commodities on a certain :class:`Bus
+        <oemof.core.network.entities.Bus>`, dispatch values of a
+        :class:`DispatchSource
+        <oemof.core.network.entities.components.sources.DispatchSource>` or
+        storage values of a
+        :class:`Storage
+        <oemof.core.network.entities.components.transformers.Storage>` are
+        treated as belonging to an edge looping from the object to itself.
+        This means they can be accessed via
+        :meth:`om.results()[object][object] <OptimizationModel.results>`.
+
+        The value of the objective function is stored under the
+        :attr:`om.results().objective` attribute.
+
+        Note that the optimization model has to be solved prior to invoking
+        this method.
+        """
+        # TODO: Maybe make the results dictionary a proper object?
+
+        # TODO: Do we need to store invested capacity / flow etc
+        #       e.g. max(results[node][o]) will give the newly invested nom val
+        result = UserDict()
+        result.objective = self.objective()
+        for node in self.es.nodes:
+            if node.outputs:
+                result[node] = result.get(node, UserDict())
+            for o in node.outputs:
+                result[node][o] = [self.flow[node, o, t].value
+                                   for t in self.TIMESTEPS]
+            for i in node.inputs:
+                result[i] = result.get(i, UserDict())
+                result[i][node] = [self.flow[i, node, t].value
+                                   for t in self.TIMESTEPS]
+
+            if isinstance(node, Storage):
+                result[node] = result.get(node, UserDict())
+                result[node][node] = [
+                    self.StorageBalance.capacity[node, t].value
+                        for t in self.TIMESTEPS]
+        # TO
+        # TODO: extract duals for all constraints ?
+
+        return result
+
+
     def solve(self, solver='glpk', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
 
@@ -542,6 +600,9 @@ class OperationalModel(pyomo.ConcreteModel):
         results = opt.solve(self, **solve_kwargs)
 
         self.solutions.load_from(results)
+
+        # storage optimization results in result dictionary
+        self.result = self.results()
 
         return results
 
