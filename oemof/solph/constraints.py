@@ -125,7 +125,7 @@ class InvestmentStorageBalance(SimpleBlock):
         # def _storage_capacity_input_invest_rule(block, n):
         #     """ Returns the storage balance for every storage n in timestep t
         #     """
-        #     return (m.InvestmentFlow.invest_flow[m.INPUTS[n], n] <=
+        #     return (m.InvestmentFlow.invest_flow[m.INPUTS[n], n] ==
         #             self.invest_storage[n] * n.nominal_input_capacity_ratio)
         # self.storage_capacity_input_invest = Constraint(
         #     self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
@@ -134,9 +134,9 @@ class InvestmentStorageBalance(SimpleBlock):
         def _storage_capacity_output_invest_rule(block, n):
             """ Returns the storage balance for every storage n in timestep t
             """
-            return (m.InvestmentFlow.invest_flow[n, m.OUTPUTS[n]] <=
+            return (m.InvestmentFlow.invest_flow[n, m.OUTPUTS[n]] ==
                     self.invest_storage[n] * n.nominal_output_capacity_ratio)
-        self.storage_capacity_input_invest = Constraint(
+        self.storage_capacity_output_invest = Constraint(
             self.INVESTSTORAGES, rule=_storage_capacity_output_invest_rule)
 
         # Set the upper bound of the storage capacity
