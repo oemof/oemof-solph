@@ -67,16 +67,17 @@ energysystem = es = core_es.EnergySystem(groupings=solph.GROUPINGS,
 
 logging.info('Create oemof objects')
 # create gas bus
-bgas = Bus(label="gas")
+bgas = Bus(label="gas_balance")
 
 # create electricity bus
-bel = Bus(label="el")
+bel = Bus(label="el_balance")
 
 # create excess component for the electricity bus to allow overproduction
 excess = Sink(label='excess_bel', inputs={bel: Flow()})
 
 # create commodity object for gas resource
-rgas = Source(label='rgas', outputs={bgas: Flow(summed_max=194397000)})
+rgas = Source(label='rgas', outputs={bgas: Flow(summed_max=194397000,
+                                                nominal_value=1)})
 
 # create fixed source object for wind
 wind = Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
@@ -143,7 +144,7 @@ cdict = {'wind': '#5b5bae',
 
 # Plotting the input flows of the electricity bus for January
 myplot = tpd.DataFramePlot(energy_system=energysystem)
-myplot.slice_unstacked(bus_label="el", type="input",
+myplot.slice_unstacked(bus_label="el_balance", type="input",
                        date_from="2012-01-01 00:00:00",
                        date_to="2012-01-31 00:00:00")
 colorlist = myplot.color_from_dict(cdict)
@@ -154,7 +155,7 @@ myplot.ax.set_xlabel('Date')
 myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
 # Plotting the output flows of the electricity bus for January
-myplot.slice_unstacked(bus_label="el", type="output")
+myplot.slice_unstacked(bus_label="el_balance", type="output")
 myplot.plot(title="Year 2012", colormap='Spectral', linewidth=2)
 myplot.ax.legend(loc='upper right')
 myplot.ax.set_ylabel('Power in MW')
@@ -170,7 +171,7 @@ plt.rcParams.update({'font.size': 19})
 plt.style.use('grayscale')
 
 handles, labels = myplot.io_plot(
-    bus_label="el", cdict=cdict,
+    bus_label="el_balance", cdict=cdict,
     barorder=['pv', 'wind', 'pp_gas', 'storage'],
     lineorder=['demand', 'storage'],
     line_kwa={'linewidth': 4},
