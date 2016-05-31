@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import pandas as pd
 
 from oemof.tools import logger
 from oemof.core import energy_system as core_es
@@ -22,12 +23,13 @@ gasbus = Bus(label="gas")
 
 so = Source(
     label="source",
-    outputs={ebus: Flow(actual_value=[10, 5, 10], fixed=True,
-                        investement=Investment(maximum=1000))})
+    outputs={ebus: Flow(actual_value=[10, 5, 10], fixed=True, min=[2, 2, 2],
+                        summed_max=500,
+                        investment=Investment(maximum=1000))})
 
 si = Sink(
     label="sink",
-    inputs={ebus: Flow(min=[0, 0, 0], max=[0.1, 0.2, 0.9], nominal_value=10,
+    inputs={ebus: Flow(min=[0, 0, 2], max=[0.1, 0.2, 0.9], nominal_value=10,
                        fixed=True)})
 
 ltransf = LinearTransformer(
@@ -37,10 +39,11 @@ ltransf = LinearTransformer(
     conversion_factors={ebus: 0.5})
 
 estorage = Storage(
-    label="storage",
+    label="storage", investment=Investment(maximum=1000),
     inputs={ebus: Flow()}, outputs={ebus: Flow(nominal_value=100)},
     nominal_capacity=500, capacity_loss=0.1, nominal_input_capacity_ratio=0.2,
-    nominal_output_capacity_ratio=0.5, inflow_conversion_factor=1,
+    nominal_output_capacity_ratio=0.56, inflow_conversion_factor=0.97,
+    initial_capacity=0.5,
     outflow_conversion_factor=1)
 
 date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')

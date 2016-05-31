@@ -2,14 +2,15 @@
 
 
 """
-from collections import abc, UserList
+from collections import abc, UserList, UserDict
+from itertools import chain
 import warnings
 import pandas as pd
-import pyomo.environ as pyomo
+import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
-from oemof.solph import constraints as cblocks
+from oemof.solph import blocks
 from oemof.core import energy_system as oces
 
 ###############################################################################
@@ -108,6 +109,10 @@ class Flow:
         the summed_max will be multiplied with the nominal_value_variable.
     summed_min : float
         see above
+    actual_value : float or array-like
+        Specific value for the flow variable. Will be multiplied with the
+        nominal_value to get the absolute value. If fixed is True the flow
+        variable will be fixed to actual_value * nominal_value.
 
     """
     def __init__(self, *args, **kwargs):
@@ -131,6 +136,12 @@ class Flow:
         self.summed_min = kwargs.get('summed_min')
         self.fixed = kwargs.get('fixed', False)
         self.investment = kwargs.get('investment')
+        if self.fixed:
+            warnings.warn(
+                "Values for min/max will be ignored if fixed is True.",
+                SyntaxWarning)
+            self.min = Sequence(0)
+            self.max = Sequence(1)
         if self.investment and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
@@ -169,17 +180,10 @@ class Investment:
 
 
 class Sink(on.Sink):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    pass
 
 class Source(on.Source):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
 
 
 
@@ -212,34 +216,83 @@ class LinearTransformer(on.Transformer):
 
 class Storage(on.Transformer):
     """
+
+    Parameters
+    ----------
+    nominal_capacity : numeric
+        Absolute nominal capacity of the storage
+    nominal_input_capacity_ratio :  numeric
+        Ratio between the nominal inflow of the storage and its capacity.
+    nominal_output_capacity_ratio : numeric
+        Ratio between the nominal outflow of the storage and its capacity.
+        Note: This ratio is used to create the Flow object for the outflow
+        and set its nominal value of the storage in the constructor.
+    nominal_input_capacity_ratio : numeric
+        see: nominal_output_capacity_ratio
+    initial_capacity : numeric
+        The capacity of the storage in the first (and last) timestep of
+        optimization.
+    capacity_loss : numeric (sequence or scalar)
+        The relativ loss of the storage capacity from between two consecutive
+        timesteps.
+    inflow_conversion_factor : numeric (sequence or scalar)
+        The relative conversion factor, i.e. efficiency associated with the
+        inflow of the storage.
+    outflow_conversion_factor : numeric (sequence or scalar)
+        see: inflow_conversion_factor
+    capacity_min : numeric (sequence or scalar)
+        The normend minimum capacity of the storage, e.g. a value between 0,1.
+        To use different values in every timesteps use a sequence of values.
+    capacity_max : numeric (sequence or scalar)
+        see: capacity_min
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
+        self.nominal_output_capacity_ratio = kwargs.get(
+            'nominal_output_capacity_ratio', 0.2)
+        self.initial_capacity = kwargs.get('initial_capacity')
+        self.capacity_loss = Sequence(kwargs.get('capacity_loss', 0))
+        self.inflow_conversion_factor = Sequence(
+            kwargs.get(
+                'inflow_conversion_factor', 1))
+        self.outflow_conversion_factor = Sequence(
+            kwargs.get(
+                'outflow_conversion_factor', 1))
+        self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
+        self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
+        self.investment = kwargs.get('investment')
+        # Check investment
+        if self.investment and self.nominal_capacity is not None:
+            self.nominal_capacity = None
+            warnings.warn(
+                "Using the investment object the nominal_capacity is set to" +
+                "None.", SyntaxWarning)
+        # Check input flows for nominal value
         for flow in self.inputs.values():
             if flow.nominal_value is not None:
                 storage_nominal_value_warning('output')
-            flow.nominal_value = (self.nominal_input_capacity_ratio *
-                self.nominal_capacity)
-
-        self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio', 0.2)
+            if self.nominal_capacity is None:
+                flow.nominal_value = None
+            else:
+                flow.nominal_value = (self.nominal_input_capacity_ratio *
+                                      self.nominal_capacity)
+            if self.investment:
+                flow.investment = Investment()
+        # Check output flows for nominal value
         for flow in self.outputs.values():
             if flow.nominal_value is not None:
                 storage_nominal_value_warning('input')
-            flow.nominal_value = (self.nominal_output_capacity_ratio *
-                self.nominal_capacity)
-
-        self.initial_capacity = kwargs.get('initial_capacity', 0)
-        self.capacity_loss = kwargs.get('capacity_loss', 0)
-        self.inflow_conversion_factor = kwargs.get(
-            'inflow_conversion_factor', 1)
-        self.outflow_conversion_factor = kwargs.get(
-            'outflow_conversion_factor', 1)
-        self.capacity_max = kwargs.get('capacity_max', 1)
-        self.capacity_min = kwargs.get('capacity_min', 0)
+            if self.nominal_capacity is None:
+                flow.nominal_value = None
+            else:
+                flow.nominal_value = (self.nominal_output_capacity_ratio *
+                                      self.nominal_capacity)
+            if self.investment:
+                flow.investment = Investment()
 
 
 def storage_nominal_value_warning(flow):
@@ -256,7 +309,7 @@ def storage_nominal_value_warning(flow):
 ###############################################################################
 
 # TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-class ExpansionModel(pyomo.ConcreteModel):
+class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
     def __init__(self, es):
@@ -264,7 +317,7 @@ class ExpansionModel(pyomo.ConcreteModel):
 
 
 
-class OperationalModel(pyomo.ConcreteModel):
+class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     distpatch.
 
@@ -280,109 +333,93 @@ class OperationalModel(pyomo.ConcreteModel):
 
     """
 
-    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.DiscreteFlow, cblocks.InvestmentFlow]
 
-    OBJECTIVE_GROUPS = [cblocks.VariableCosts]
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
+                         blocks.Storage, blocks.InvestmentFlow,
+                         blocks.InvestmentStorage, blocks.Flow,
+                         blocks.Discrete]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()
 
-        ##########################  Arguments#  ###############################
+        ##########################  Arguments #################################
 
-        self.name = 'OperationalModel'
+        self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
         self.timesteps = range(len(self.timeindex))
         self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
-        # TODO Use solph groups and add user defined groups ????
-        # self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        # self._constraint_groups.add(kwargs.get('constraint_groups', []))
-        constraint_groups = kwargs.get('constraint_groups',
-                                       OperationalModel.CONSTRAINT_GROUPS)
+
+        self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
+        self._constraint_groups.extend(kwargs.get('constraint_groups', []))
+
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
-        self.flows = {(str(source), str(target)): source.outputs[target]
+        self.flows = {(source, target): source.outputs[target]
                       for source in es.nodes
                       for target in source.outputs}
 
         # ###########################  SETS  ##################################
         # set with all nodes
-        self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
+        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
-                                   ordered=True)
+        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
+
+        # previous timesteps
+        previous_timesteps = [x - 1 for x in self.timesteps]
+        previous_timesteps[0] = self.timesteps[-1]
+
+        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
+        #self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
+        #                            initialize=dict(zip(self.TIMESTEPS,
+        #                                                previous_timesteps)))
 
         # indexed index set for inputs of nodes (nodes as indices)
-        self.INPUTS = pyomo.Set(self.NODES, initialize={
-            str(n): [str(i) for i in n.inputs]
-                     for n in self.es.nodes
-                     if not isinstance(n, on.Source)
+        self.INPUTS = po.Set(self.NODES, initialize={
+            n: [i for i in n.inputs] for n in self.es.nodes
+                                     if not isinstance(n, on.Source)
             }
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
-        self.OUTPUTS = pyomo.Set(self.NODES, initialize={
-            str(n): [str(o) for o in n.outputs]
-                     for n in self.es.nodes
-                     if not isinstance(n, on.Sink)
+        self.OUTPUTS = po.Set(self.NODES, initialize={
+            n: [o for o in n.outputs] for n in self.es.nodes
+                                      if not isinstance(n, on.Sink)
             }
         )
 
         # pyomo set for all flows in the energy system graph
-        self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
+        self.FLOWS = po.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
 
-        # set for all flows for which fixed osts are set
-        self.FIXEDCOST_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
-                                         for (t,f) in n.outputs.items()
-                                         if f.fixed_costs is not None and
-                                         f.nominal_value is not None],
-            ordered=True, dimen=2)
-
-        # set for all flows with an global limit on the flow over time
-        self.UB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+        self.NEGATIVE_GRADIENT_FLOWS = po.Set(
+            initialize=[(n, t) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
-                        if f.summed_max is not None and
-                        f.nominal_value is not None],
+                        if f.negative_gradient[0] is not None],
             ordered=True, dimen=2)
 
-        self.LB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+        self.POSITIVE_GRADIENT_FLOWS = po.Set(
+            initialize=[(n, t) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
-                        if f.summed_min is not None and
-                        f.nominal_value is not None],
+                        if f.positive_gradient[0] is not None],
             ordered=True, dimen=2)
 
-        self.NEGATIVE_GRADIENT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.negative_gradient[0] is not None and
-                        f.discrete is None],
-            ordered=True, dimen=2)
-
-        self.POSITIVE_GRADIENT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.positive_gradient[0] is not None and
-                        f.discrete is None],
-            ordered=True, dimen=2)
-
-        # ######################## FLOW VARIABLE #############################
+        #ää######################## FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
-                              within=pyomo.NonNegativeReals)
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+                              within=po.NonNegativeReals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
-                if self.flows[o, i].actual_value[t] is not None:
+                if self.flows[o, i].actual_value[t] is not None and (
+                        self.flows[o, i].nominal_value is not None):
                     # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = self.flows[o, i].actual_value[t]
+                    self.flow[o, i, t].value = (
+                        self.flows[o, i].actual_value[t] *
+                        self.flows[o, i].nominal_value)
                     # fix variable if flow is fixed
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
@@ -395,71 +432,17 @@ class OperationalModel(pyomo.ConcreteModel):
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
-        # constraint to bound the sum of a flow over all timesteps
-        self.flow_sum_max = pyomo.Constraint(self.UB_LIMIT_FLOWS,
-                                             noruleinit=True)
-        def _flow_summed_max_rule(model):
-            for i, o in self.UB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i, o, t] * self.timeincrement
-                          for t in self.TIMESTEPS)
-                rhs = (self.flows[i, o].summed_max *
-                       self.flows[i, o].nominal_value)
-                self.flow_sum_max.add((i, o), lhs <= rhs)
-        self.flow_sum_maxCon = pyomo.BuildAction(rule=_flow_summed_max_rule)
+        self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
+                                             self.TIMESTEPS,
+                                             within=po.NonNegativeReals)
 
-        self.flow_sum_min = pyomo.Constraint(self.LB_LIMIT_FLOWS,
-                                             noruleinit=True)
-        def _flow_summed_min_rule(model):
-            for i, o in self.LB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i, o, t] * self.timeincrement
-                          for t in self.TIMESTEPS)
-                rhs = (self.flows[i, o].summed_min *
-                       self.flows[i, o].nominal_value)
-                self.flow_sum_min.add((i, o), lhs >= rhs)
-        self.flow_sum_minCon = pyomo.BuildAction(rule=_flow_summed_min_rule)
+        self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
+                                             self.TIMESTEPS,
+                                             within=po.NonNegativeReals)
 
-         # gradient variable for positive gradient
-        def _positive_gradient_bound_rule(self, i, o, t):
-            return (0, self.flows[i,o].positive_gradient[t])
-        self.positive_gradient = pyomo.Var(
-            self.POSITIVE_GRADIENT_FLOWS, self.TIMESTEPS,
-            bounds=_positive_gradient_bound_rule)
-
-        # constraint for positive gradient
-        def _positive_gradient_flow_rule(self, i, o, t):
-            if t > 0:
-                lhs = self.flow[i, o, t] - self.flow[i, o, t-1]
-                rhs = self.positive_gradient[i, o, t]
-                return(lhs <= rhs)
-            else:
-                return(pyomo.Constraint.Skip)
-        self.positive_gradient_con = pyomo.Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, self.TIMESTEPS,
-            rule=_positive_gradient_flow_rule)
-
-        # gradient variable for negative gradient
-        def _negative_gradient_bound_rule(self, i, o, t):
-            return (0, self.flows[i,o].negative_gradient[t])
-        self.negative_gradient = pyomo.Var(
-            self.NEGATIVE_GRADIENT_FLOWS, self.TIMESTEPS,
-            bounds=_negative_gradient_bound_rule)
-
-        # constraint for negative gradient
-        def _negative_gradient_flow_rule(self, i, o , t):
-            if t > 0:
-                lhs = self.flow[i, o, t-1] - self.flow[i, o, t]
-                rhs = self.negative_gradient[i, o, t]
-                return(lhs <= rhs)
-            else:
-                return(pyomo.Constraint.Skip)
-        self.negative_gradient_con = pyomo.Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, self.TIMESTEPS,
-            rule=_negative_gradient_flow_rule)
-
-
-        ##########################  GROUP CONSTRAINTS #########################
+        ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
-        for group in constraint_groups:
+        for group in self._constraint_groups:
             # create instance for block
             block = group()
             # Add block to model
@@ -469,30 +452,23 @@ class OperationalModel(pyomo.ConcreteModel):
             block._create(group=self.es.groups.get(group))
 
         ############################# Objective ###############################
-        self.add_objective()
+        self.objective_function()
 
 
-    def add_objective(self, sense=pyomo.minimize):
+    def objective_function(self, sense=po.minimize, update=False):
         """
         """
+        if update:
+            self.del_component('objective')
+
         expr = 0
-
-        for group in OperationalModel.OBJECTIVE_GROUPS:
-            expr += group(self, self.es.groups.get(group))
-
-        # Expression for fixed costs associated the the nominal value of flow
-        expr += sum(self.flows[i, o].nominal_value *
-                    self.flows[i, o].fixed_costs
-                    for i, o in self.FIXEDCOST_FLOWS)
 
         # Expression for investment flows
         for block in self.component_data_objects():
-            if isinstance(block, cblocks.InvestmentFlow) and \
-                    hasattr(block, 'INVESTMENT_FLOWS'):
+            if hasattr(block, '_objective_expression'):
                 expr += block._objective_expression()
 
-
-        self.objective = pyomo.Objective(sense=sense, expr=expr)
+        self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
         r""" Method sets solver suffix to extract information about dual
@@ -500,9 +476,76 @@ class OperationalModel(pyomo.ConcreteModel):
         set as attributes of the model.
 
         """
-        self.dual = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
-        self.rc = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        self.rc = po.Suffix(direction=po.Suffix.IMPORT)
+
+
+    def results(self):
+        """ Returns a nested dictionary of the results of this optimization
+        model.
+
+        The dictionary is keyed by the :class:`Entities
+        <oemof.core.network.Entity>` of the optimization model, that is
+        :meth:`om.results()[s][t] <OptimizationModel.results>`
+        holds the time series representing values attached to the edge (i.e.
+        the flow) from `s` to `t`, where `s` and `t` are instances of
+        :class:`Entity <oemof.core.network.Entity>`.
+
+        Time series belonging only to one object, like e.g. shadow prices of
+        commodities on a certain :class:`Bus
+        <oemof.core.network.entities.Bus>`, dispatch values of a
+        :class:`DispatchSource
+        <oemof.core.network.entities.components.sources.DispatchSource>` or
+        storage values of a
+        :class:`Storage
+        <oemof.core.network.entities.components.transformers.Storage>` are
+        treated as belonging to an edge looping from the object to itself.
+        This means they can be accessed via
+        :meth:`om.results()[object][object] <OptimizationModel.results>`.
+
+        The value of the objective function is stored under the
+        :attr:`om.results().objective` attribute.
+
+        Note that the optimization model has to be solved prior to invoking
+        this method.
+        """
+        # TODO: Maybe make the results dictionary a proper object?
+
+        # TODO: Do we need to store invested capacity / flow etc
+        #       e.g. max(results[node][o]) will give the newly invested nom val
+        result = UserDict()
+        result.objective = self.objective()
+        for node in self.es.nodes:
+            if node.outputs:
+                result[node] = result.get(node, UserDict())
+            for o in node.outputs:
+                result[node][o] = [self.flow[node, o, t].value
+                                   for t in self.TIMESTEPS]
+            for i in node.inputs:
+                result[i] = result.get(i, UserDict())
+                result[i][node] = [self.flow[i, node, t].value
+                                   for t in self.TIMESTEPS]
+        # TODO: This is just a fast fix for now. Change this once structure is
+        #       finished (remove check for hasattr etc.)
+            if isinstance(node, Storage):
+                result[node] = result.get(node, UserDict())
+                if hasattr(self.Storage, 'capacity'):
+                    value = [
+                        self.Storage.capacity[node, t].value
+                             for t in self.TIMESTEPS]
+                else:
+                    value = [
+                        self.InvestmentStorage.capacity[node, t].value
+                            for t in self.TIMESTEPS]
+                result[node][node] = value
+
+
+        # TO
+        # TODO: extract duals for all constraints ?
+
+        return result
+
 
     def solve(self, solver='glpk', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
@@ -537,6 +580,9 @@ class OperationalModel(pyomo.ConcreteModel):
 
         self.solutions.load_from(results)
 
+        # storage optimization results in result dictionary of energysystem
+        self.es.results = self.results()
+
         return results
 
     def relax_problem(self):
@@ -553,67 +599,74 @@ class OperationalModel(pyomo.ConcreteModel):
 #
 ###############################################################################
 def constraint_grouping(node):
-    if isinstance(node, on.Bus) and 'balance' in str(node):
-        return cblocks.BusBalance
+    if isinstance(node, on.Bus):
+        return blocks.Bus
     if isinstance(node, LinearTransformer):
-        return cblocks.LinearRelation
+        return blocks.LinearTransformer
+    if isinstance(node, Storage) and isinstance(node.investment, Investment):
+        return blocks.InvestmentStorage
+    if isinstance(node, Storage):
+        return blocks.Storage
+
 
 def investment_key(n):
     for f in n.outputs.values():
         if f.investment is not None:
-            return cblocks.InvestmentFlow
+            return blocks.InvestmentFlow
 
 def investment_flows(n):
-     return [(n, t, f) for (t, f) in n.outputs.items()
-             if f.investment is not None]
+    return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
+                                 if f.investment is not None),
+                      ((s, n, f) for (s, f) in n.inputs.items()
+                                 if f.investment is not None)))
 
 def merge_investment_flows(n, group):
-     group.extend(n)
-     return group
+    return group.union(n)
 
-investment_grouping = oces.Grouping(
+investment_flow_grouping = oces.Grouping(
     key=investment_key,
     value=investment_flows,
     merge=merge_investment_flows)
 
-def variable_costs_key(n):
+def standard_flow_key(n):
     for f in n.outputs.values():
-        if f.variable_costs[0] is not None:
-            return cblocks.VariableCosts
+        if f.investment is None:
+            return blocks.Flow
 
-def variable_costs_flows(n):
-     return [(n, t, f) for (t, f) in n.outputs.items()
-             if f.variable_costs[0] is not None]
+def standard_flows(n):
+    return [(n, t, f) for (t, f) in n.outputs.items()
+            if f.investment is None]
 
-def merge_variable_costs_flows(n, group):
-     group.extend(n)
-     return group
+def merge_standard_flows(n, group):
+    group.extend(n)
+    return group
 
-variable_costs_grouping = oces.Grouping(
-    key=variable_costs_key,
-    value=variable_costs_flows,
-    merge=merge_variable_costs_flows)
+standard_flow_grouping = oces.Grouping(
+    key=standard_flow_key,
+    value=standard_flows,
+    merge=merge_standard_flows)
 
-def discreteflow_key(n):
+def discrete_flow_key(n):
     for f in n.outputs.values():
         if f.discrete is not None:
-            return cblocks.DiscreteFlow
+            return blocks.Discrete
 
-def discreteflow_flows(n):
+def discrete_flows(n):
      return [(n, t, f) for (t, f) in n.outputs.items()
              if f.discrete is not None]
 
-def merge_discreteflow_flows(n, group):
+def merge_discrete_flows(n, group):
      group.extend(n)
      return group
 
-discreteflow_grouping = oces.Grouping(
-    key=discreteflow_key,
-    value=discreteflow_flows,
-    merge=merge_discreteflow_flows)
+discrete_flow_grouping = oces.Grouping(
+    key=discrete_flow_key,
+    value=discrete_flows,
+    merge=merge_discrete_flows)
 
-GROUPINGS = [constraint_grouping, investment_grouping, discreteflow_grouping,
-             variable_costs_grouping]
+GROUPINGS = [constraint_grouping, investment_flow_grouping,
+             standard_flow_grouping, discrete_flow_grouping]
+
 
 """ list:  Groupings needed on an energy system for it to work with solph.
 
@@ -670,9 +723,15 @@ if __name__ == "__main__":
                              outputs={bel:Flow(nominal_value=10,
                                                min= 0.5, fixed_costs=5,
                                                variable_costs=10, summed_max=4,
+                                               positive_gradient=0.5,
+                                               negative_gradient=0.5,
                                                summed_min=2,
                                                discrete=Discrete())},
                              conversion_factors={bel: 0.4})
+    stor = Storage(label="stor", inputs={bel: Flow()}, outputs={bel:Flow()},
+                   nominal_capacity=50, inflow_conversion_factor=0.9,
+                   outflow_conversion_factor=0.8, initial_capacity=0.5,
+                   capacity_loss=0.001)
 
     date_time_index = pd.date_range('1/1/2011', periods=3, freq='60min')
     om = OperationalModel(es, timeindex=date_time_index)
@@ -680,6 +739,3 @@ if __name__ == "__main__":
     om.write('optimization_problem.lp',
              io_options={'symbolic_solver_labels': True})
     #om.pprint()
-
-
-

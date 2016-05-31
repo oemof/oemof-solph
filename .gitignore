@@ -9,6 +9,7 @@
 *.svg
 *.png
 *.pdf
+*.lp
 .idea
 !tests/lp_files/*.lp
 doc/_build/
