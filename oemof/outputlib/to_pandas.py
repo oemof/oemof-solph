@@ -222,7 +222,6 @@ class DataFramePlot(ResultsDataFrame):
             logging.warning(
                 "Columns that are not part of the order list are removed: " +
                 str(missing))
-        print(neworder)
         self.subset = self.subset[neworder]
 
     def color_from_dict(self, colordict):
