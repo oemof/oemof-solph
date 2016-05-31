@@ -98,13 +98,11 @@ class InvestmentStorageBalance(SimpleBlock):
             initialize=[n for n in group if sum(
                 [n.capacity_min[t] for t in m.TIMESTEPS]) > 0])
 
-        # TODO: Capacity variable...
+        # Set capacity variable
         self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
                             within=pyomo.NonNegativeReals)
 
-        # ToDo: set capacity of last timestep to fixed value of initial_capacity
-        # see StorageBalance but without nominal_capacity
-
+        # Set invest storage variable
         def _storage_investvar_bound_rule(block, n):
             """ Returns bounds for invest_flow variable
             """
