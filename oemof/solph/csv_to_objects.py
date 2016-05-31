@@ -63,6 +63,7 @@ for lb in labels:
                 outputs = {row.source:create_flow(row) for i, row in
                            node_df.iterrows() if row.target == lb})
     #TODO: can't figure out a weak ref error, flow initialisation works fine
+    # dict expects component as key and not a string!
 
 # first get distinct values for class and label
 # then operate on these subsets
