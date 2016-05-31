@@ -344,7 +344,7 @@ class OperationalModel(po.ConcreteModel):
         self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
 
         self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        self._constraint_groups.append(kwargs.get('constraint_groups', []))
+        self._constraint_groups.extend(kwargs.get('constraint_groups', []))
 
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
@@ -354,64 +354,43 @@ class OperationalModel(po.ConcreteModel):
 
         # ###########################  SETS  ##################################
         # set with all nodes
-        self.NODES = pyomo.Set(initialize=[n for n in self.es.nodes])
+        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
-                                   ordered=True)
+        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.timesteps]
         previous_timesteps[0] = self.timesteps[-1]
 
-        self.previous_timestep = dict(zip(self.timesteps,
-                                          previous_timesteps))
+        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
+        #self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
+        #                            initialize=dict(zip(self.TIMESTEPS,
+        #                                                previous_timesteps)))
 
         # indexed index set for inputs of nodes (nodes as indices)
-        self.INPUTS = pyomo.Set(self.NODES, initialize={
+        self.INPUTS = po.Set(self.NODES, initialize={
             n: [i for i in n.inputs] for n in self.es.nodes
                                      if not isinstance(n, on.Source)
             }
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
-        self.OUTPUTS = pyomo.Set(self.NODES, initialize={
+        self.OUTPUTS = po.Set(self.NODES, initialize={
             n: [o for o in n.outputs] for n in self.es.nodes
                                       if not isinstance(n, on.Sink)
             }
         )
 
         # pyomo set for all flows in the energy system graph
-        self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
+        self.FLOWS = po.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
 
-        # set for all flows for which fixed osts are set
-        self.FIXEDCOST_FLOWS = pyomo.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                                         for (t,f) in n.outputs.items()
-                                         if f.fixed_costs is not None and
-                                         f.nominal_value is not None],
-            ordered=True, dimen=2)
-
-        # set for all flows with an global limit on the flow over time
-        self.UB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.summed_max is not None and
-                        f.nominal_value is not None],
-            ordered=True, dimen=2)
-
-        self.LB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.summed_min is not None and
-                        f.nominal_value is not None],
-            ordered=True, dimen=2)
         # ######################## FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
-                              within=pyomo.NonNegativeReals)
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+                              within=po.NonNegativeReals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
@@ -449,7 +428,7 @@ class OperationalModel(po.ConcreteModel):
         self.objective_function()
 
 
-    def objective_function(self, sense=pyomo.minimize, update=False):
+    def objective_function(self, sense=po.minimize, update=False):
         """
         """
         if update:
@@ -457,22 +436,12 @@ class OperationalModel(po.ConcreteModel):
 
         expr = 0
 
-        for group in OperationalModel.OBJECTIVE_GROUPS:
-            expr += group(self, self.es.groups.get(group))
-
-        # Expression for fixed costs associated the the nominal value of flow
-        expr += sum(self.flows[i, o].nominal_value *
-                    self.flows[i, o].fixed_costs
-                    for i, o in self.FIXEDCOST_FLOWS)
-
         # Expression for investment flows
         for block in self.component_data_objects():
-            if isinstance(block, cblocks.InvestmentFlow) and \
-                    hasattr(block, 'INVESTMENT_FLOWS'):
+            if hasattr(block, '_objective_expression'):
                 expr += block._objective_expression()
 
-
-        self.objective = pyomo.Objective(sense=sense, expr=expr)
+        self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
         r""" Method sets solver suffix to extract information about dual
@@ -618,43 +587,40 @@ def investment_key(n):
         if f.investment is not None:
             return cblocks.InvestmentFlow
 
-
 def investment_flows(n):
     return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
                                  if f.investment is not None),
                       ((s, n, f) for (s, f) in n.inputs.items()
                                  if f.investment is not None)))
 
-
 def merge_investment_flows(n, group):
     return group.union(n)
 
-investment_grouping = oces.Grouping(
+investment_flow_grouping = oces.Grouping(
     key=investment_key,
     value=investment_flows,
     merge=merge_investment_flows)
 
-def variable_costs_key(n):
+def standard_flow_key(n):
     for f in n.outputs.values():
-        if f.variable_costs[0] is not None:
-            return cblocks.VariableCosts
+        if f.investment is None:
+            return cblocks.FlowConstraints
 
-def variable_costs_flows(n):
-    return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
-                                 if f.variable_costs[0] is not None),
-                      ((s, n, f) for (s, f) in n.inputs.items()
-                                 if f.variable_costs[0] is not None)))
+def standard_flows(n):
+    return [(n, t, f) for (t, f) in n.outputs.items()
+            if f.investment is None]
 
+def merge_standard_flows(n, group):
+    group.extend(n)
+    return group
 
-def merge_variable_costs_flows(n, group):
-     return group.union(n)
+standard_flow_grouping = oces.Grouping(
+    key=standard_flow_key,
+    value=standard_flows,
+    merge=merge_standard_flows)
 
-variable_costs_grouping = oces.Grouping(
-    key=variable_costs_key,
-    value=variable_costs_flows,
-    merge=merge_variable_costs_flows)
-
-GROUPINGS = [constraint_grouping, investment_grouping, variable_costs_grouping]
+GROUPINGS = [constraint_grouping, investment_flow_grouping,
+             standard_flow_grouping]
 
 """ list:  Groupings needed on an energy system for it to work with solph.
 

@@ -51,7 +51,7 @@ class StorageBalance(SimpleBlock):
             # TODO: include time increment
             expr = 0
             expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timestep[t]] * (
+            expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
             expr += (- m.flow[m.INPUTS[n], n, t] *
                 n.inflow_conversion_factor[t]) * m.timeincrement
@@ -149,6 +149,93 @@ class InvestmentStorageBalance(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
 
         # ToDo: objective functions
+
+class FlowConstraints(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+
+        Parameters
+        ----------
+        group : list
+            List containing tuples containing flow (f) objects and the
+            associated source (s) and target (t)
+            of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
+
+
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+        ############################ SETS #####################################
+        # set for all flows with an global limit on the flow over time
+        self.SUMMED_MAX_FLOWS = Set(initialize=[(g[0], g[1])
+                                    for g in group
+                                        if g[2].summed_max is not None])
+
+        self.SUMMED_MIN_FLOWS = Set(initialize=[(g[0], g[1])
+                                    for g in group
+                                        if g[2].summed_min is not None])
+
+        ########################### CONSTRAINTS ###############################
+
+        # constraint to bound the sum of a flow over all timesteps with maxim.
+        self.flow_sum_max = Constraint(self.SUMMED_MAX_FLOWS,
+                                       noruleinit=True)
+        def _flow_summed_max_rule(model):
+            for i, o in self.SUMMED_MAX_FLOWS:
+                lhs = sum(m.flow[i, o, t] * m.timeincrement
+                          for t in m.TIMESTEPS)
+                rhs = (m.flows[i, o].summed_max *
+                       m.flows[i, o].nominal_value)
+                self.flow_sum_max.add((i, o), lhs <= rhs)
+        self.flow_sum_max_build = BuildAction(rule=_flow_summed_max_rule)
+
+        # constraint to bound the sum of a flow over all timesteps with minim.
+        self.flow_sum_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
+
+        def _flow_summed_min_rule(model):
+            """ Rule for build action
+            """
+            for i, o in self.SUMMED_MIN_FLOWS:
+                lhs = sum(m.flow[i, o, t] * m.timeincrement
+                          for t in m.TIMESTEPS)
+                rhs = (m.flows[i, o].summed_min *
+                       m.flows[i, o].nominal_value)
+                self.flow_sum_min.add((i, o), lhs >= rhs)
+        self.flow_sum_min_build = BuildAction(rule=_flow_summed_min_rule)
+
+
+    def _objective_expression(self):
+        """
+        """
+        m = self.parent_block()
+
+        variable_costs = 0
+        fixed_costs = 0
+
+        for i, o in m.FLOWS:
+           for t in m.TIMESTEPS:
+               # add variable costs
+               if m.flows[i, o].variable_costs[0] is not None:
+                   variable_costs += (m.flow[i, o, t] * m.timeincrement *
+                                      m.flows[i, o].variable_costs[t])
+           # add fixed costs if nominal_value is not None
+           if (m.flows[i, o].fixed_costs and
+                   m.flows[i,o].nominal_value is not None):
+               fixed_costs += (m.flows[i, o].nominal_value *
+                               m.flows[i, o].fixed_costs)
+
+        # add the costs expression to the block
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.variable_costs = Expression(expr=variable_costs)
+
+        return fixed_costs + variable_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -257,15 +344,32 @@ class InvestmentFlow(SimpleBlock):
         """
         """
         m = self.parent_block()
-        expr = 0
+        fixed_costs = 0
+        variable_costs = 0
+        investment_costs = 0
+
         for i, o in self.INVESTFLOWS:
+           for t in m.TIMESTEPS:
+               # variable costs of flows
+               if m.flows[i, o].variable_costs[0] is not None:
+                   variable_costs += (m.flow[i, o, t] * m.timeincrement *
+                                      m.flows[i, o].variable_costs[t])
+           # fixed costs
            if m.flows[i, o].fixed_costs is not None:
-                expr += self.invest_flow[i, o] * m.flows[i, o].fixed_costs
+                fixed_costs += (self.invest_flow[i, o] *
+                                m.flows[i, o].fixed_costs)
+           # investment costs
            if m.flows[i, o].investment.epc is not None:
-               expr += self.invest_flow[i, o] * m.flows[i, o].investment.epc
+               investment_costs += (self.invest_flow[i, o] *
+                                    m.flows[i, o].investment.epc)
            else:
                raise ValueError("Missing value for investment costs!")
-        return expr
+
+        self.investment_costs = Expression(expr=investment_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.variable_costs = Expression(expr=variable_costs)
+
+        return fixed_costs + variable_costs + investment_costs
 
 
 class BusBalance(SimpleBlock):
