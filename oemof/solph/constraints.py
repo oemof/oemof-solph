@@ -52,10 +52,12 @@ class StorageBalance(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timestep[t]] * (
-                1 - capacity_loss[n, t])
-            expr += - m.flow[m.INPUTS[n], n, t] * inflow_conversion[n, t]
-            expr += + m.flow[n, m.OUTPUTS[n], t] / outflow_conversion[n, t]
-            return expr, 0
+                1 - n.capacity_loss[t])
+            expr += (- m.flow[m.INPUTS[n], n, t] *
+                n.inflow_conversion_factor[t]) * m.timeincrement
+            expr += (m.flow[n, m.OUTPUTS[n], t] /
+                n.outflow_conversion_factor[t]) * m.timeincrement
+            return expr == 0
         self.storage_balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                           rule=_storage_balance_rule)
 
@@ -172,7 +174,6 @@ class InvestmentFlow(SimpleBlock):
 
         m = self.parent_block()
         ############################ SETS #####################################
-        # pyomo set with investment flows as list of tuples
         self.INVESTFLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.FIXEDFLOWS = Set(
@@ -234,8 +235,9 @@ class InvestmentFlow(SimpleBlock):
         def _summed_max_investflow_rule(block, i, o):
             """
             """
-            expr = (sum(m.flow[i, o, t] for t in m.TIMESTEPS) <=
-                    m.flows[i, o].summed_max * self.invest_flow[i, o])
+            expr = (sum(m.flow[i, o, t] * m.timeincrement
+                        for t in m.TIMESTEPS) <=
+                m.flows[i, o].summed_max * self.invest_flow[i, o])
             return expr
         self.summed_max_investflow = Constraint(
             self.SUMMED_MAX_INVESTFLOWS, rule=_summed_max_investflow_rule)
@@ -243,8 +245,9 @@ class InvestmentFlow(SimpleBlock):
         def _summed_min_investflow_rule(block, i, o):
             """
             """
-            expr = (sum(m.flow[i, o, t] for t in m.TIMESTEPS) >=
-                    m.flows[i, o].summed_min * self.invest_flow[i, o])
+            expr = (sum(m.flow[i, o, t] * m.timeincrement
+                        for t in m.TIMESTEPS) >=
+                m.flows[i, o].summed_min * self.invest_flow[i, o])
             return expr
         self.summed_min_investflow = Constraint(
             self.SUMMED_MIN_INVESTFLOWS, rule=_summed_min_investflow_rule)
@@ -261,7 +264,7 @@ class InvestmentFlow(SimpleBlock):
            if m.flows[i, o].investment.epc is not None:
                expr += self.invest_flow[i, o] * m.flows[i, o].investment.epc
            else:
-               raise ValueError("Missing value for investment costs")
+               raise ValueError("Missing value for investment costs!")
         return expr
 
 
@@ -351,9 +354,10 @@ def VariableCosts(m, group=None):
 
     VARIABLECOST_FLOWS = [(g[0], g[1]) for g in group]
 
-    expr = sum(m.flow[i, o, t] * m.flows[i, o].variable_costs[t]
-               for i, o in VARIABLECOST_FLOWS
-               for t in m.TIMESTEPS)
+    expr = sum(m.flow[i, o, t] * m.timeincrement *
+               m.flows[i, o].variable_costs[t]
+                   for i, o in VARIABLECOST_FLOWS
+                   for t in m.TIMESTEPS)
 
     return expr
 
