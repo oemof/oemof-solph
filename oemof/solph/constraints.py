@@ -2,6 +2,7 @@
 """
 
 """
+import pyomo.environ as pyomo
 from pyomo.core import Var, Binary, NonNegativeReals, Set, Constraint, BuildAction
 from pyomo.core.base.block import SimpleBlock
 
@@ -110,7 +111,8 @@ class InvestmentStorageBalance(SimpleBlock):
             #     list(n.inputs.values())[0].invest_flow)
 
         # TODO: Capacity variable...
-        # self.capacity = Var(self.STORAGES, m.TIMESTEPS ...)
+        self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
+                            within=pyomo.NonNegativeReals)
 
         # ToDo: set capacity of last timestep to fixed value of initial_capacity
         # see StorageBalance but without nominal_capacity
