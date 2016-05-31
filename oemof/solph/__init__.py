@@ -10,7 +10,7 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
-from oemof.solph import constraints as cblocks
+from oemof.solph import blocks
 from oemof.core import energy_system as oces
 
 ###############################################################################
@@ -327,10 +327,9 @@ class OperationalModel(po.ConcreteModel):
 
     """
 
-    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.StorageBalance, cblocks.InvestmentFlow,
-                         cblocks.InvestmentStorageBalance,
-                         cblocks.FlowConstraints]
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
+                         blocks.Storage, blocks.InvestmentFlow,
+                         blocks.InvestmentStorage, blocks.Flow]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()
@@ -503,13 +502,13 @@ class OperationalModel(po.ConcreteModel):
         #       finished (remove check for hasattr etc.)
             if isinstance(node, Storage):
                 result[node] = result.get(node, UserDict())
-                if hasattr(self.StorageBalance, 'capacity'):
+                if hasattr(self.Storage, 'capacity'):
                     value = [
-                        self.StorageBalance.capacity[node, t].value
+                        self.Storage.capacity[node, t].value
                              for t in self.TIMESTEPS]
                 else:
                     value = [
-                        self.InvestmentStorageBalance.capacity[node, t].value
+                        self.InvestmentStorage.capacity[node, t].value
                             for t in self.TIMESTEPS]
                 result[node][node] = value
 
@@ -573,19 +572,19 @@ class OperationalModel(po.ConcreteModel):
 ###############################################################################
 def constraint_grouping(node):
     if isinstance(node, on.Bus) and 'balance' in str(node):
-        return cblocks.BusBalance
+        return blocks.Bus
     if isinstance(node, LinearTransformer):
-        return cblocks.LinearRelation
+        return blocks.LinearTransformer
     if isinstance(node, Storage) and isinstance(node.investment, Investment):
-        return cblocks.InvestmentStorageBalance
+        return blocks.InvestmentStorage
     if isinstance(node, Storage):
-        return cblocks.StorageBalance
+        return blocks.Storage
 
 
 def investment_key(n):
     for f in n.outputs.values():
         if f.investment is not None:
-            return cblocks.InvestmentFlow
+            return blocks.InvestmentFlow
 
 def investment_flows(n):
     return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
@@ -604,7 +603,7 @@ investment_flow_grouping = oces.Grouping(
 def standard_flow_key(n):
     for f in n.outputs.values():
         if f.investment is None:
-            return cblocks.FlowConstraints
+            return blocks.Flow
 
 def standard_flows(n):
     return [(n, t, f) for (t, f) in n.outputs.items()

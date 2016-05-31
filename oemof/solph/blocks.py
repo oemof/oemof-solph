@@ -7,7 +7,7 @@ from pyomo.core import (Var, NonNegativeReals, Set, Constraint, BuildAction,
 from pyomo.core.base.block import SimpleBlock
 
 
-class StorageBalance(SimpleBlock):
+class Storage(SimpleBlock):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -62,7 +62,7 @@ class StorageBalance(SimpleBlock):
                                           rule=_storage_balance_rule)
 
 
-class InvestmentStorageBalance(SimpleBlock):
+class InvestmentStorage(SimpleBlock):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -150,7 +150,7 @@ class InvestmentStorageBalance(SimpleBlock):
 
         # ToDo: objective functions
 
-class FlowConstraints(SimpleBlock):
+class Flow(SimpleBlock):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -372,7 +372,7 @@ class InvestmentFlow(SimpleBlock):
         return fixed_costs + variable_costs + investment_costs
 
 
-class BusBalance(SimpleBlock):
+class Bus(SimpleBlock):
     """ Creates emtpy pyomo constraint for bus balance. Construct the
     constraints with _create method.
     """
@@ -409,7 +409,7 @@ class BusBalance(SimpleBlock):
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
-class LinearRelation(SimpleBlock):
+class LinearTransformer(SimpleBlock):
     """ Creates pyomo emtpy constraint for linear relation of 1:n flows.
     Construct the constraints with _create method.
 
