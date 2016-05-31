@@ -32,14 +32,14 @@ The example models the following energy system:
 ###############################################################################
 import logging
 import pandas as pd
-
+import matplotlib.pyplot as plt
 from oemof.tools import logger
 from oemof.core import energy_system as core_es
 import oemof.solph as solph
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 # from oemof.solph import Investment
 from oemof.solph import OperationalModel
-
+from oemof.outputlib import to_pandas as tpd
 
 # Define logger
 logger.define_logging()
@@ -59,7 +59,7 @@ date_time_index = pd.date_range('1/1/2012', periods=8760, freq='60min')
 logging.info('Initialize the energy system')
 
 energysystem = es = core_es.EnergySystem(groupings=solph.GROUPINGS,
-                                         time_idx=[1, 2, 3])
+                                         time_idx=date_time_index)
 
 ###############################################################################
 # Create oemof objects
@@ -67,16 +67,17 @@ energysystem = es = core_es.EnergySystem(groupings=solph.GROUPINGS,
 
 logging.info('Create oemof objects')
 # create gas bus
-bgas = Bus(label="gas")
+bgas = Bus(label="gas_balance")
 
 # create electricity bus
-bel = Bus(label="el")
+bel = Bus(label="el_balance")
 
 # create excess component for the electricity bus to allow overproduction
-excess = Sink(label=('excess', 'bel'), inputs={bel: Flow()})
+excess = Sink(label='excess_bel', inputs={bel: Flow()})
 
 # create commodity object for gas resource
-rgas = Source(label='rgas', outputs={bgas: Flow(summed_max=194397000)})
+rgas = Source(label='rgas', outputs={bgas: Flow(summed_max=194397000,
+                                                nominal_value=1)})
 
 # create fixed source object for wind
 wind = Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
@@ -119,11 +120,15 @@ logging.info('Optimise the energy system')
 # and use the restore method.
 
 om = OperationalModel(es, timeindex=date_time_index)
+
+logging.info('Solve the optimization problem')
 om.solve(solve_kwargs={'tee': True})
+
+logging.info('Store lp-file')
 om.write('optimization_problem.lp',
          io_options={'symbolic_solver_labels': True})
 
-exit(0)
+#exit(0)
 
 # energysystem.dump()
 # energysystem.restore()
@@ -139,7 +144,7 @@ cdict = {'wind': '#5b5bae',
 
 # Plotting the input flows of the electricity bus for January
 myplot = tpd.DataFramePlot(energy_system=energysystem)
-myplot.slice_unstacked(bus_uid="bel", type="input",
+myplot.slice_unstacked(bus_label="el_balance", type="input",
                        date_from="2012-01-01 00:00:00",
                        date_to="2012-01-31 00:00:00")
 colorlist = myplot.color_from_dict(cdict)
@@ -150,8 +155,8 @@ myplot.ax.set_xlabel('Date')
 myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
 # Plotting the output flows of the electricity bus for January
-myplot.slice_unstacked(bus_uid="bel", type="output")
-myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
+myplot.slice_unstacked(bus_label="el_balance", type="output")
+myplot.plot(title="Year 2012", colormap='Spectral', linewidth=2)
 myplot.ax.legend(loc='upper right')
 myplot.ax.set_ylabel('Power in MW')
 myplot.ax.set_xlabel('Date')
@@ -166,9 +171,9 @@ plt.rcParams.update({'font.size': 19})
 plt.style.use('grayscale')
 
 handles, labels = myplot.io_plot(
-    bus_uid="bel", cdict=cdict,
-    barorder=['pv', 'wind', 'pp_gas', 'sto_simple'],
-    lineorder=['demand', 'sto_simple'],
+    bus_label="el_balance", cdict=cdict,
+    barorder=['pv', 'wind', 'pp_gas', 'storage'],
+    lineorder=['demand', 'storage'],
     line_kwa={'linewidth': 4},
     ax=fig.add_subplot(1, 1, 1),
     date_from="2012-06-01 00:00:00",

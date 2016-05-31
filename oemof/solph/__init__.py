@@ -2,7 +2,7 @@
 
 
 """
-from collections import abc, UserList
+from collections import abc, UserList, UserDict
 import warnings
 import pandas as pd
 import pyomo.environ as pyomo
@@ -241,6 +241,7 @@ class Storage(on.Transformer):
 
     """
     def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
             'nominal_input_capacity_ratio', 0.2)
@@ -257,7 +258,6 @@ class Storage(on.Transformer):
         self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
-        super().__init__(*args, **kwargs)
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             self.nominal_capacity = None
@@ -349,37 +349,36 @@ class OperationalModel(pyomo.ConcreteModel):
                                        OperationalModel.CONSTRAINT_GROUPS)
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
-        self.flows = {(str(source), str(target)): source.outputs[target]
+        self.flows = {(source, target): source.outputs[target]
                       for source in es.nodes
                       for target in source.outputs}
 
         # ###########################  SETS  ##################################
         # set with all nodes
-        self.NODES = pyomo.Set(initialize=[str(n) for n in self.es.nodes])
+        self.NODES = pyomo.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
                                    ordered=True)
 
-        previous_timesteps_list = [x - 1 for x in self.timesteps]
-        previous_timesteps_list[0] = len(self.timesteps) - 1
+        # previous timesteps
+        previous_timesteps = [x - 1 for x in self.timesteps]
+        previous_timesteps[0] = self.timesteps[-1]
 
         self.previous_timestep = dict(zip(self.timesteps,
-                                          previous_timesteps_list))
+                                          previous_timesteps))
 
         # indexed index set for inputs of nodes (nodes as indices)
         self.INPUTS = pyomo.Set(self.NODES, initialize={
-            str(n): [str(i) for i in n.inputs]
-                     for n in self.es.nodes
-                     if not isinstance(n, on.Source)
+            n: [i for i in n.inputs] for n in self.es.nodes
+                                     if not isinstance(n, on.Source)
             }
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
         self.OUTPUTS = pyomo.Set(self.NODES, initialize={
-            str(n): [str(o) for o in n.outputs]
-                     for n in self.es.nodes
-                     if not isinstance(n, on.Sink)
+            n: [o for o in n.outputs] for n in self.es.nodes
+                                      if not isinstance(n, on.Sink)
             }
         )
 
@@ -389,7 +388,7 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # set for all flows for which fixed osts are set
         self.FIXEDCOST_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+            initialize=[(n, t) for n in self.es.nodes
                                          for (t,f) in n.outputs.items()
                                          if f.fixed_costs is not None and
                                          f.nominal_value is not None],
@@ -397,14 +396,14 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # set for all flows with an global limit on the flow over time
         self.UB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+            initialize=[(n, t) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
                         if f.summed_max is not None and
                         f.nominal_value is not None],
             ordered=True, dimen=2)
 
         self.LB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(str(n), str(t)) for n in self.es.nodes
+            initialize=[(n, t) for n in self.es.nodes
                         for (t, f) in n.outputs.items()
                         if f.summed_min is not None and
                         f.nominal_value is not None],
@@ -511,6 +510,64 @@ class OperationalModel(pyomo.ConcreteModel):
         # reduced costs
         self.rc = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
 
+
+    def results(self):
+        """ Returns a nested dictionary of the results of this optimization
+        model.
+
+        The dictionary is keyed by the :class:`Entities
+        <oemof.core.network.Entity>` of the optimization model, that is
+        :meth:`om.results()[s][t] <OptimizationModel.results>`
+        holds the time series representing values attached to the edge (i.e.
+        the flow) from `s` to `t`, where `s` and `t` are instances of
+        :class:`Entity <oemof.core.network.Entity>`.
+
+        Time series belonging only to one object, like e.g. shadow prices of
+        commodities on a certain :class:`Bus
+        <oemof.core.network.entities.Bus>`, dispatch values of a
+        :class:`DispatchSource
+        <oemof.core.network.entities.components.sources.DispatchSource>` or
+        storage values of a
+        :class:`Storage
+        <oemof.core.network.entities.components.transformers.Storage>` are
+        treated as belonging to an edge looping from the object to itself.
+        This means they can be accessed via
+        :meth:`om.results()[object][object] <OptimizationModel.results>`.
+
+        The value of the objective function is stored under the
+        :attr:`om.results().objective` attribute.
+
+        Note that the optimization model has to be solved prior to invoking
+        this method.
+        """
+        # TODO: Maybe make the results dictionary a proper object?
+
+        # TODO: Do we need to store invested capacity / flow etc
+        #       e.g. max(results[node][o]) will give the newly invested nom val
+        result = UserDict()
+        result.objective = self.objective()
+        for node in self.es.nodes:
+            if node.outputs:
+                result[node] = result.get(node, UserDict())
+            for o in node.outputs:
+                result[node][o] = [self.flow[node, o, t].value
+                                   for t in self.TIMESTEPS]
+            for i in node.inputs:
+                result[i] = result.get(i, UserDict())
+                result[i][node] = [self.flow[i, node, t].value
+                                   for t in self.TIMESTEPS]
+
+            if isinstance(node, Storage):
+                result[node] = result.get(node, UserDict())
+                result[node][node] = [
+                    self.StorageBalance.capacity[node, t].value
+                        for t in self.TIMESTEPS]
+        # TO
+        # TODO: extract duals for all constraints ?
+
+        return result
+
+
     def solve(self, solver='glpk', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
 
@@ -543,6 +600,9 @@ class OperationalModel(pyomo.ConcreteModel):
         results = opt.solve(self, **solve_kwargs)
 
         self.solutions.load_from(results)
+
+        # storage optimization results in result dictionary of energysystem
+        self.es.results = self.results()
 
         return results
 
