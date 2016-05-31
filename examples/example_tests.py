@@ -37,12 +37,14 @@ def check(cdict, runcheck, subdict):
 testdict['stor_inv'] = {'name': "Storage invest example"}
 number_of_timesteps = 8760
 
+
+esys = storage_invest.initialise_energysystem(number_of_timesteps)
+filepath = os.path.join('storage_optimization', 'storage_invest.csv')
+esys = storage_invest.optimise_storage_size(esys, filename=filepath)
+results = storage_invest.get_result_dict(esys)
+stor_invest_run = True
 try:
-    esys = storage_invest.initialise_energysystem(number_of_timesteps)
-    filepath = os.path.join('storage_optimization', 'storage_invest.csv')
-    esys = storage_invest.optimise_storage_size(esys, filename=filepath)
-    results = storage_invest.get_result_dict(esys)
-    stor_invest_run = True
+    pass
 except Exception as e:
     testdict['stor_inv']['messages'] = {'error': e}
     stor_invest_run = False
