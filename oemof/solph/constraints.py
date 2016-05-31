@@ -130,7 +130,6 @@ class InvestmentStorageBalance(SimpleBlock):
         #     """
         #     return (m.InvestmentFlow.invest_flow[m.INPUTS[n], n] <=
         #             self.invest_storage[n])
-        #
         # self.storage_capacity_input_invest = Constraint(
         #     self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
 
@@ -144,14 +143,14 @@ class InvestmentStorageBalance(SimpleBlock):
             self.INVESTSTORAGES, rule=_storage_capacity_output_invest_rule)
 
         # Set the upper bound of the storage capacity
-        def _max_investstorage_rule(block, n, t):
+        def _max_capacity_invest_rule(block, n, t):
             """
             """
             expr = (self.capacity[n, t] <= (n.capacity_max[t] *
                                             self.invest_storage[n]))
             return expr
-        self.max_investstorage = Constraint(
-            self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_investstorage_rule)
+        self.max_capacity_invest = Constraint(
+            self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
 
         # Set the lower bound of the storage capacity if the attribute exists
         def _min_investstorage_rule(block, n, t):
@@ -165,7 +164,6 @@ class InvestmentStorageBalance(SimpleBlock):
 
         # ToDo: objective functions
         print(None)
-
 
 
 class InvestmentFlow(SimpleBlock):
