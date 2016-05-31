@@ -247,7 +247,7 @@ class Storage(on.Transformer):
             'nominal_input_capacity_ratio', 0.2)
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_output_capacity_ratio', 0.2)
-        self.initial_capacity = kwargs.get('initial_capacity', 0)
+        self.initial_capacity = kwargs.get('initial_capacity')
         self.capacity_loss = Sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = Sequence(
             kwargs.get(
