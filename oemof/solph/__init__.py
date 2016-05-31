@@ -635,13 +635,15 @@ def investment_key(n):
         if f.investment is not None:
             return cblocks.InvestmentFlow
 
+
 def investment_flows(n):
-     return [(n, t, f) for (t, f) in n.outputs.items()
-             if f.investment is not None]
+    return [(n, t, f) for (t, f) in n.outputs.items()
+            if f.investment is not None]
+
 
 def merge_investment_flows(n, group):
-     group.extend(n)
-     return group
+    group.extend(n)
+    return group
 
 investment_grouping = oces.Grouping(
     key=investment_key,
