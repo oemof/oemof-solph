@@ -22,42 +22,29 @@ class StorageBalance(SimpleBlock):
             List containing storage objects e.g. groups=[storage1, storage2,..]
         """
         m = self.parent_block()
+
         if group is None:
             return None
 
         self.STORAGES = Set(initialize=[n for n in group])
 
-        # dictionaries to use in the _storage_capacity_bound_rule
-        ub_capacity = {}
-        lb_capacity = {}
-        capacity_loss = {}
-        inflow_conversion = {}
-        outflow_conversion = {}
-        # fill dictionaries with storage objects attributes from group list
-        for t in m.TIMESTEPS:
-            for n in group:
-                ub_capacity[n, t] = n.nominal_capacity * n.capacity_max[t]
-                lb_capacity[n, t] = n.nominal_capacity * n.capacity_min[t]
-                capacity_loss[n, t] = n.capacity_loss[t]
-                inflow_conversion[n, t] = n.inflow_conversion_factor[t]
-                outflow_conversion[n, t] = n.outflow_conversion_factor[t]
-
-        # ToDo Minimal capacity bound (lb_capacity)
         def _storage_capacity_bound_rule(block, n, t):
-            """ Returns bound for capacity variable of storage n in timestep t
+            """ Returns bounds for capacity variable of storage n in timestep t
             """
-            return 0, ub_capacity[n, t]
+            bounds = (n.nominal_capacity * n.capacity_min[t],
+                      n.nominal_capacity * n.capacity_max[t])
+            return bounds
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
-        # set capacity of last timestep to fixed value of initial_capacity
-        self.t_end = len(m.TIMESTEPS) - 1
+        # set the initial capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, self.t_end] = (n.initial_capacity *
+                self.capacity[n, m.timesteps[-1]] = (n.initial_capacity *
                                                 n.nominal_capacity)
-                self.capacity[n, self.t_end].fix()
+                self.capacity[n, m.timesteps[-1]].fix()
 
+        # storage balance constraint
         def _storage_balance_rule(block, n, t):
             """ Returns the storage balance for every storage n in timestep t
             """
@@ -347,8 +334,9 @@ class LinearRelation(SimpleBlock):
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    for o in m.OUTPUTS[n]:
-                        lhs = m.flow[m.INPUTS[n], n, t] * n.conversion_factors[o][t]
+                    for o in n.outputs:
+                        lhs = m.flow[m.INPUTS[n], n, t] * \
+                            n.conversion_factors[o][t]
                         rhs = m.flow[n, o, t]
                         block.constraint.add((n, o, t), (lhs == rhs))
         self.constraintCon = BuildAction(rule=_input_output_relation)
