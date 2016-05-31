@@ -21,18 +21,15 @@ class ResultsDataFrame(pd.DataFrame):
     ----------
     result_object : dictionary
         solph result objects
-    bus_uids : list if strings
+    bus_labels : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
 
     Attributes
     ----------
     result_object : dictionary
         solph result objects
-    bus_uids : list if strings
+    bus_labels : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
     bus_types : list if strings
