@@ -329,25 +329,23 @@ class OperationalModel(po.ConcreteModel):
 
     CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
                          cblocks.StorageBalance, cblocks.InvestmentFlow,
-                         cblocks.InvestmentStorageBalance]
-
-    OBJECTIVE_GROUPS = [cblocks.VariableCosts]
+                         cblocks.InvestmentStorageBalance,
+                         cblocks.FlowConstraints]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()
 
-        ##########################  Arguments#  ###############################
+        ##########################  Arguments #################################
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
         self.timesteps = range(len(self.timeindex))
         self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
-        # TODO Use solph groups and add user defined groups ????
-        # self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        # self._constraint_groups.add(kwargs.get('constraint_groups', []))
-        constraint_groups = kwargs.get('constraint_groups',
-                                       OperationalModel.CONSTRAINT_GROUPS)
+
+        self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
+        self._constraint_groups.append(kwargs.get('constraint_groups', []))
+
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
         self.flows = {(source, target): source.outputs[target]
@@ -436,34 +434,9 @@ class OperationalModel(po.ConcreteModel):
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
-        # constraint to bound the sum of a flow over all timesteps
-        self.flow_sum_max = pyomo.Constraint(self.UB_LIMIT_FLOWS,
-                                             noruleinit=True)
-        self.flow_sum_min = pyomo.Constraint(self.LB_LIMIT_FLOWS,
-                                             noruleinit=True)
-
-        def _flow_summed_max_rule(model):
-            for i, o in self.UB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i, o, t] * self.timeincrement
-                          for t in self.TIMESTEPS)
-                rhs = (self.flows[i, o].summed_max *
-                       self.flows[i, o].nominal_value)
-                self.flow_sum_max.add((i, o), lhs <= rhs)
-
-        def _flow_summed_min_rule(model):
-            for i, o in self.LB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i, o, t] * self.timeincrement
-                          for t in self.TIMESTEPS)
-                rhs = (self.flows[i, o].summed_min *
-                       self.flows[i, o].nominal_value)
-                self.flow_sum_min.add((i, o), lhs >= rhs)
-
-        self.flow_sum_maxCon = pyomo.BuildAction(rule=_flow_summed_max_rule)
-        self.flow_sum_minCon = pyomo.BuildAction(rule=_flow_summed_min_rule)
-
         ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
-        for group in constraint_groups:
+        for group in self._constraint_groups:
             # create instance for block
             block = group()
             # Add block to model
