@@ -167,17 +167,10 @@ class Investment:
 
 
 class Sink(on.Sink):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    pass
 
 class Source(on.Source):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
 
 
 
@@ -571,7 +564,7 @@ class OperationalModel(po.ConcreteModel):
 #
 ###############################################################################
 def constraint_grouping(node):
-    if isinstance(node, on.Bus) and 'balance' in str(node):
+    if isinstance(node, on.Bus):
         return blocks.Bus
     if isinstance(node, LinearTransformer):
         return blocks.LinearTransformer
