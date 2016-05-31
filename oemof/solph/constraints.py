@@ -53,8 +53,10 @@ class StorageBalance(SimpleBlock):
         # set capacity of last timestep to fixed value of initial_capacity
         self.t_end = len(m.TIMESTEPS) - 1
         for n in group:
-            self.capacity[n, self.t_end] = n.initial_capacity * n.nominal_capacity
-            self.capacity[n, self.t_end].fix()
+            if n.initial_capacity is not None:
+                self.capacity[n, self.t_end] = (n.initial_capacity *
+                                                n.nominal_capacity)
+                self.capacity[n, self.t_end].fix()
 
         def _storage_balance_rule(block, n, t):
             """ Returns the storage balance for every storage n in timestep t
