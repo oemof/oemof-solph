@@ -2,12 +2,12 @@
 """
 
 """
-import pyomo.environ as pyomo
-from pyomo.core import Var, Binary, NonNegativeReals, Set, Constraint, BuildAction
+from pyomo.core import (Var, NonNegativeReals, Set, Constraint, BuildAction,
+                        Expression)
 from pyomo.core.base.block import SimpleBlock
 
 
-class StorageBalance(SimpleBlock):
+class Storage(SimpleBlock):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -51,7 +51,7 @@ class StorageBalance(SimpleBlock):
             # TODO: include time increment
             expr = 0
             expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timestep[t]] * (
+            expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
             expr += (- m.flow[m.INPUTS[n], n, t] *
                 n.inflow_conversion_factor[t]) * m.timeincrement
@@ -62,7 +62,7 @@ class StorageBalance(SimpleBlock):
                                           rule=_storage_balance_rule)
 
 
-class InvestmentStorageBalance(SimpleBlock):
+class InvestmentStorage(SimpleBlock):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -89,7 +89,7 @@ class InvestmentStorageBalance(SimpleBlock):
 
         # Set capacity variable
         self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
-                            within=pyomo.NonNegativeReals)
+                            within=NonNegativeReals)
 
         # Set invest storage variable
         def _storage_investvar_bound_rule(block, n):
@@ -149,6 +149,93 @@ class InvestmentStorageBalance(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
 
         # ToDo: objective functions
+
+class Flow(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+
+        Parameters
+        ----------
+        group : list
+            List containing tuples containing flow (f) objects and the
+            associated source (s) and target (t)
+            of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
+
+
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+        ############################ SETS #####################################
+        # set for all flows with an global limit on the flow over time
+        self.SUMMED_MAX_FLOWS = Set(initialize=[(g[0], g[1])
+                                    for g in group
+                                        if g[2].summed_max is not None])
+
+        self.SUMMED_MIN_FLOWS = Set(initialize=[(g[0], g[1])
+                                    for g in group
+                                        if g[2].summed_min is not None])
+
+        ########################### CONSTRAINTS ###############################
+
+        # constraint to bound the sum of a flow over all timesteps with maxim.
+        self.flow_sum_max = Constraint(self.SUMMED_MAX_FLOWS,
+                                       noruleinit=True)
+        def _flow_summed_max_rule(model):
+            for i, o in self.SUMMED_MAX_FLOWS:
+                lhs = sum(m.flow[i, o, t] * m.timeincrement
+                          for t in m.TIMESTEPS)
+                rhs = (m.flows[i, o].summed_max *
+                       m.flows[i, o].nominal_value)
+                self.flow_sum_max.add((i, o), lhs <= rhs)
+        self.flow_sum_max_build = BuildAction(rule=_flow_summed_max_rule)
+
+        # constraint to bound the sum of a flow over all timesteps with minim.
+        self.flow_sum_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
+
+        def _flow_summed_min_rule(model):
+            """ Rule for build action
+            """
+            for i, o in self.SUMMED_MIN_FLOWS:
+                lhs = sum(m.flow[i, o, t] * m.timeincrement
+                          for t in m.TIMESTEPS)
+                rhs = (m.flows[i, o].summed_min *
+                       m.flows[i, o].nominal_value)
+                self.flow_sum_min.add((i, o), lhs >= rhs)
+        self.flow_sum_min_build = BuildAction(rule=_flow_summed_min_rule)
+
+
+    def _objective_expression(self):
+        """
+        """
+        m = self.parent_block()
+
+        variable_costs = 0
+        fixed_costs = 0
+
+        for i, o in m.FLOWS:
+           for t in m.TIMESTEPS:
+               # add variable costs
+               if m.flows[i, o].variable_costs[0] is not None:
+                   variable_costs += (m.flow[i, o, t] * m.timeincrement *
+                                      m.flows[i, o].variable_costs[t])
+           # add fixed costs if nominal_value is not None
+           if (m.flows[i, o].fixed_costs and
+                   m.flows[i,o].nominal_value is not None):
+               fixed_costs += (m.flows[i, o].nominal_value *
+                               m.flows[i, o].fixed_costs)
+
+        # add the costs expression to the block
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.variable_costs = Expression(expr=variable_costs)
+
+        return fixed_costs + variable_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -257,18 +344,35 @@ class InvestmentFlow(SimpleBlock):
         """
         """
         m = self.parent_block()
-        expr = 0
+        fixed_costs = 0
+        variable_costs = 0
+        investment_costs = 0
+
         for i, o in self.INVESTFLOWS:
+           for t in m.TIMESTEPS:
+               # variable costs of flows
+               if m.flows[i, o].variable_costs[0] is not None:
+                   variable_costs += (m.flow[i, o, t] * m.timeincrement *
+                                      m.flows[i, o].variable_costs[t])
+           # fixed costs
            if m.flows[i, o].fixed_costs is not None:
-                expr += self.invest_flow[i, o] * m.flows[i, o].fixed_costs
+                fixed_costs += (self.invest_flow[i, o] *
+                                m.flows[i, o].fixed_costs)
+           # investment costs
            if m.flows[i, o].investment.epc is not None:
-               expr += self.invest_flow[i, o] * m.flows[i, o].investment.epc
+               investment_costs += (self.invest_flow[i, o] *
+                                    m.flows[i, o].investment.epc)
            else:
                raise ValueError("Missing value for investment costs!")
-        return expr
+
+        self.investment_costs = Expression(expr=investment_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.variable_costs = Expression(expr=variable_costs)
+
+        return fixed_costs + variable_costs + investment_costs
 
 
-class BusBalance(SimpleBlock):
+class Bus(SimpleBlock):
     """ Creates emtpy pyomo constraint for bus balance. Construct the
     constraints with _create method.
     """
@@ -289,7 +393,7 @@ class BusBalance(SimpleBlock):
 
         m = self.parent_block()
 
-        self.constraint = Constraint(group, noruleinit=True)
+        self.balance = Constraint(group, noruleinit=True)
 
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
@@ -301,11 +405,11 @@ class BusBalance(SimpleBlock):
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
-                        block.constraint.add((n,t), expr)
-        self.constraintCon = BuildAction(rule=_busbalance_rule)
+                        block.balance.add((n,t), expr)
+        self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
-class LinearRelation(SimpleBlock):
+class LinearTransformer(SimpleBlock):
     """ Creates pyomo emtpy constraint for linear relation of 1:n flows.
     Construct the constraints with _create method.
 
@@ -332,7 +436,7 @@ class LinearRelation(SimpleBlock):
 
         m = self.parent_block()
 
-        self.constraint = Constraint(group, noruleinit=True)
+        self.relation = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
@@ -341,23 +445,5 @@ class LinearRelation(SimpleBlock):
                         lhs = m.flow[m.INPUTS[n], n, t] * \
                             n.conversion_factors[o][t]
                         rhs = m.flow[n, o, t]
-                        block.constraint.add((n, o, t), (lhs == rhs))
-        self.constraintCon = BuildAction(rule=_input_output_relation)
-
-
-
-def VariableCosts(m, group=None):
-    """
-    """
-    if group is None:
-        return 0
-
-    VARIABLECOST_FLOWS = [(g[0], g[1]) for g in group]
-
-    expr = sum(m.flow[i, o, t] * m.timeincrement *
-               m.flows[i, o].variable_costs[t]
-                   for i, o in VARIABLECOST_FLOWS
-                   for t in m.TIMESTEPS)
-
-    return expr
-
+                        block.relation.add((n, o, t), (lhs == rhs))
+        self.relation_build = BuildAction(rule=_input_output_relation)

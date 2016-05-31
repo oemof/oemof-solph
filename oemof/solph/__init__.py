@@ -6,11 +6,11 @@ from collections import abc, UserList, UserDict
 from itertools import chain
 import warnings
 import pandas as pd
-import pyomo.environ as pyomo
+import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 import oemof.network as on
-from oemof.solph import constraints as cblocks
+from oemof.solph import blocks
 from oemof.core import energy_system as oces
 
 ###############################################################################
@@ -167,17 +167,10 @@ class Investment:
 
 
 class Sink(on.Sink):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    pass
 
 class Source(on.Source):
-    """
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
 
 
 
@@ -303,7 +296,7 @@ def storage_nominal_value_warning(flow):
 ###############################################################################
 
 # TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-class ExpansionModel(pyomo.ConcreteModel):
+class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
     def __init__(self, es):
@@ -311,7 +304,7 @@ class ExpansionModel(pyomo.ConcreteModel):
 
 
 
-class OperationalModel(pyomo.ConcreteModel):
+class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     distpatch.
 
@@ -327,27 +320,24 @@ class OperationalModel(pyomo.ConcreteModel):
 
     """
 
-    CONSTRAINT_GROUPS = [cblocks.BusBalance, cblocks.LinearRelation,
-                         cblocks.StorageBalance, cblocks.InvestmentFlow,
-                         cblocks.InvestmentStorageBalance]
-
-    OBJECTIVE_GROUPS = [cblocks.VariableCosts]
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
+                         blocks.Storage, blocks.InvestmentFlow,
+                         blocks.InvestmentStorage, blocks.Flow]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()
 
-        ##########################  Arguments#  ###############################
+        ##########################  Arguments #################################
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
         self.timesteps = range(len(self.timeindex))
         self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
-        # TODO Use solph groups and add user defined groups ????
-        # self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        # self._constraint_groups.add(kwargs.get('constraint_groups', []))
-        constraint_groups = kwargs.get('constraint_groups',
-                                       OperationalModel.CONSTRAINT_GROUPS)
+
+        self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
+        self._constraint_groups.extend(kwargs.get('constraint_groups', []))
+
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
         self.flows = {(source, target): source.outputs[target]
@@ -356,64 +346,43 @@ class OperationalModel(pyomo.ConcreteModel):
 
         # ###########################  SETS  ##################################
         # set with all nodes
-        self.NODES = pyomo.Set(initialize=[n for n in self.es.nodes])
+        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = pyomo.Set(initialize=self.timesteps,
-                                   ordered=True)
+        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.timesteps]
         previous_timesteps[0] = self.timesteps[-1]
 
-        self.previous_timestep = dict(zip(self.timesteps,
-                                          previous_timesteps))
+        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
+        #self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
+        #                            initialize=dict(zip(self.TIMESTEPS,
+        #                                                previous_timesteps)))
 
         # indexed index set for inputs of nodes (nodes as indices)
-        self.INPUTS = pyomo.Set(self.NODES, initialize={
+        self.INPUTS = po.Set(self.NODES, initialize={
             n: [i for i in n.inputs] for n in self.es.nodes
                                      if not isinstance(n, on.Source)
             }
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
-        self.OUTPUTS = pyomo.Set(self.NODES, initialize={
+        self.OUTPUTS = po.Set(self.NODES, initialize={
             n: [o for o in n.outputs] for n in self.es.nodes
                                       if not isinstance(n, on.Sink)
             }
         )
 
         # pyomo set for all flows in the energy system graph
-        self.FLOWS = pyomo.Set(initialize=self.flows.keys(),
+        self.FLOWS = po.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
 
-        # set for all flows for which fixed osts are set
-        self.FIXEDCOST_FLOWS = pyomo.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                                         for (t,f) in n.outputs.items()
-                                         if f.fixed_costs is not None and
-                                         f.nominal_value is not None],
-            ordered=True, dimen=2)
-
-        # set for all flows with an global limit on the flow over time
-        self.UB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.summed_max is not None and
-                        f.nominal_value is not None],
-            ordered=True, dimen=2)
-
-        self.LB_LIMIT_FLOWS = pyomo.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.summed_min is not None and
-                        f.nominal_value is not None],
-            ordered=True, dimen=2)
         # ######################## FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = pyomo.Var(self.FLOWS, self.TIMESTEPS,
-                              within=pyomo.NonNegativeReals)
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+                              within=po.NonNegativeReals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
@@ -436,34 +405,9 @@ class OperationalModel(pyomo.ConcreteModel):
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
-        # constraint to bound the sum of a flow over all timesteps
-        self.flow_sum_max = pyomo.Constraint(self.UB_LIMIT_FLOWS,
-                                             noruleinit=True)
-        self.flow_sum_min = pyomo.Constraint(self.LB_LIMIT_FLOWS,
-                                             noruleinit=True)
-
-        def _flow_summed_max_rule(model):
-            for i, o in self.UB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i, o, t] * self.timeincrement
-                          for t in self.TIMESTEPS)
-                rhs = (self.flows[i, o].summed_max *
-                       self.flows[i, o].nominal_value)
-                self.flow_sum_max.add((i, o), lhs <= rhs)
-
-        def _flow_summed_min_rule(model):
-            for i, o in self.LB_LIMIT_FLOWS:
-                lhs = sum(self.flow[i, o, t] * self.timeincrement
-                          for t in self.TIMESTEPS)
-                rhs = (self.flows[i, o].summed_min *
-                       self.flows[i, o].nominal_value)
-                self.flow_sum_min.add((i, o), lhs >= rhs)
-
-        self.flow_sum_maxCon = pyomo.BuildAction(rule=_flow_summed_max_rule)
-        self.flow_sum_minCon = pyomo.BuildAction(rule=_flow_summed_min_rule)
-
         ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
-        for group in constraint_groups:
+        for group in self._constraint_groups:
             # create instance for block
             block = group()
             # Add block to model
@@ -476,7 +420,7 @@ class OperationalModel(pyomo.ConcreteModel):
         self.objective_function()
 
 
-    def objective_function(self, sense=pyomo.minimize, update=False):
+    def objective_function(self, sense=po.minimize, update=False):
         """
         """
         if update:
@@ -484,22 +428,12 @@ class OperationalModel(pyomo.ConcreteModel):
 
         expr = 0
 
-        for group in OperationalModel.OBJECTIVE_GROUPS:
-            expr += group(self, self.es.groups.get(group))
-
-        # Expression for fixed costs associated the the nominal value of flow
-        expr += sum(self.flows[i, o].nominal_value *
-                    self.flows[i, o].fixed_costs
-                    for i, o in self.FIXEDCOST_FLOWS)
-
         # Expression for investment flows
         for block in self.component_data_objects():
-            if isinstance(block, cblocks.InvestmentFlow) and \
-                    hasattr(block, 'INVESTMENT_FLOWS'):
+            if hasattr(block, '_objective_expression'):
                 expr += block._objective_expression()
 
-
-        self.objective = pyomo.Objective(sense=sense, expr=expr)
+        self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
         r""" Method sets solver suffix to extract information about dual
@@ -507,9 +441,9 @@ class OperationalModel(pyomo.ConcreteModel):
         set as attributes of the model.
 
         """
-        self.dual = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
-        self.rc = pyomo.Suffix(direction=pyomo.Suffix.IMPORT)
+        self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
 
     def results(self):
@@ -561,13 +495,13 @@ class OperationalModel(pyomo.ConcreteModel):
         #       finished (remove check for hasattr etc.)
             if isinstance(node, Storage):
                 result[node] = result.get(node, UserDict())
-                if hasattr(self.StorageBalance, 'capacity'):
+                if hasattr(self.Storage, 'capacity'):
                     value = [
-                        self.StorageBalance.capacity[node, t].value
+                        self.Storage.capacity[node, t].value
                              for t in self.TIMESTEPS]
                 else:
                     value = [
-                        self.InvestmentStorageBalance.capacity[node, t].value
+                        self.InvestmentStorage.capacity[node, t].value
                             for t in self.TIMESTEPS]
                 result[node][node] = value
 
@@ -630,21 +564,20 @@ class OperationalModel(pyomo.ConcreteModel):
 #
 ###############################################################################
 def constraint_grouping(node):
-    if isinstance(node, on.Bus) and 'balance' in str(node):
-        return cblocks.BusBalance
+    if isinstance(node, on.Bus):
+        return blocks.Bus
     if isinstance(node, LinearTransformer):
-        return cblocks.LinearRelation
+        return blocks.LinearTransformer
     if isinstance(node, Storage) and isinstance(node.investment, Investment):
-        return cblocks.InvestmentStorageBalance
+        return blocks.InvestmentStorage
     if isinstance(node, Storage):
-        return cblocks.StorageBalance
+        return blocks.Storage
 
 
 def investment_key(n):
     for f in n.outputs.values():
         if f.investment is not None:
-            return cblocks.InvestmentFlow
-
+            return blocks.InvestmentFlow
 
 def investment_flows(n):
     return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
@@ -652,36 +585,34 @@ def investment_flows(n):
                       ((s, n, f) for (s, f) in n.inputs.items()
                                  if f.investment is not None)))
 
-
 def merge_investment_flows(n, group):
     return group.union(n)
 
-investment_grouping = oces.Grouping(
+investment_flow_grouping = oces.Grouping(
     key=investment_key,
     value=investment_flows,
     merge=merge_investment_flows)
 
-def variable_costs_key(n):
+def standard_flow_key(n):
     for f in n.outputs.values():
-        if f.variable_costs[0] is not None:
-            return cblocks.VariableCosts
+        if f.investment is None:
+            return blocks.Flow
 
-def variable_costs_flows(n):
-    return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
-                                 if f.variable_costs[0] is not None),
-                      ((s, n, f) for (s, f) in n.inputs.items()
-                                 if f.variable_costs[0] is not None)))
+def standard_flows(n):
+    return [(n, t, f) for (t, f) in n.outputs.items()
+            if f.investment is None]
 
+def merge_standard_flows(n, group):
+    group.extend(n)
+    return group
 
-def merge_variable_costs_flows(n, group):
-     return group.union(n)
+standard_flow_grouping = oces.Grouping(
+    key=standard_flow_key,
+    value=standard_flows,
+    merge=merge_standard_flows)
 
-variable_costs_grouping = oces.Grouping(
-    key=variable_costs_key,
-    value=variable_costs_flows,
-    merge=merge_variable_costs_flows)
-
-GROUPINGS = [constraint_grouping, investment_grouping, variable_costs_grouping]
+GROUPINGS = [constraint_grouping, investment_flow_grouping,
+             standard_flow_grouping]
 
 """ list:  Groupings needed on an energy system for it to work with solph.
 
