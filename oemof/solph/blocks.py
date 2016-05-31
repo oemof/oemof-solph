@@ -191,7 +191,7 @@ class Flow(SimpleBlock):
                           for t in m.TIMESTEPS)
                 rhs = (m.flows[i, o].summed_max *
                        m.flows[i, o].nominal_value)
-                self.flow_sum_max.add((i, o), lhs <= rhs)
+                self.summed_max.add((i, o), lhs <= rhs)
         self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
 
         # constraint to bound the sum of a flow over all timesteps with minim.
@@ -204,7 +204,7 @@ class Flow(SimpleBlock):
                           for t in m.TIMESTEPS)
                 rhs = (m.flows[i, o].summed_min *
                        m.flows[i, o].nominal_value)
-                self.flow_sum_min.add((i, o), lhs >= rhs)
+                self.summed_min.add((i, o), lhs >= rhs)
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
 
@@ -285,7 +285,7 @@ class InvestmentFlow(SimpleBlock):
             """
             return 0, m.flows[i, o].investment.maximum
         # create variable bounded for flows with investement attribute
-        self.flow = Var(self.INVESTFLOWS, within=NonNegativeReals,
+        self.flow = Var(self.FLOWS, within=NonNegativeReals,
                         bounds=_investvar_bound_rule)
 
         ########################### CONSTRAINTS ###############################
@@ -302,7 +302,7 @@ class InvestmentFlow(SimpleBlock):
             """
             """
             expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
-                                        self.invest_flow[i, o]))
+                                        self.flow[i, o]))
             return expr
         self.max = Constraint(self.MAX_FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
@@ -311,7 +311,7 @@ class InvestmentFlow(SimpleBlock):
             """
             """
             expr = (m.flow[i, o, t] >= (m.flows[i, o].min[t] *
-                                        self.invest_flow[i, o]))
+                                        self.flow[i, o]))
             return expr
         self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                               rule=_min_investflow_rule)
@@ -321,7 +321,7 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement
                         for t in m.TIMESTEPS) <=
-                m.flows[i, o].summed_max * self.invest_flow[i, o])
+                m.flows[i, o].summed_max * self.flow[i, o])
             return expr
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS,
                                      rule=_summed_max_investflow_rule)
@@ -331,7 +331,7 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement
                         for t in m.TIMESTEPS) >=
-                m.flows[i, o].summed_min * self.invest_flow[i, o])
+                m.flows[i, o].summed_min * self.flow[i, o])
             return expr
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
@@ -345,7 +345,7 @@ class InvestmentFlow(SimpleBlock):
         variable_costs = 0
         investment_costs = 0
 
-        for i, o in self.INVESTFLOWS:
+        for i, o in self.FLOWS:
            for t in m.TIMESTEPS:
                # variable costs of flows
                if m.flows[i, o].variable_costs[0] is not None:
@@ -353,11 +353,11 @@ class InvestmentFlow(SimpleBlock):
                                       m.flows[i, o].variable_costs[t])
            # fixed costs
            if m.flows[i, o].fixed_costs is not None:
-                fixed_costs += (self.invest_flow[i, o] *
+                fixed_costs += (self.flow[i, o] *
                                 m.flows[i, o].fixed_costs)
            # investment costs
            if m.flows[i, o].investment.epc is not None:
-               investment_costs += (self.invest_flow[i, o] *
+               investment_costs += (self.flow[i, o] *
                                     m.flows[i, o].investment.epc)
            else:
                raise ValueError("Missing value for investment costs!")
