@@ -128,6 +128,8 @@ class Flow:
         self.min = Sequence(kwargs.get('min', 0))
         self.max = Sequence(kwargs.get('max', 1))
         self.actual_value = Sequence(kwargs.get('actual_value'))
+        self.positive_gradient = Sequence(kwargs.get('positive_gradient'))
+        self.negative_gradient = Sequence(kwargs.get('negative_gradient'))
         self.variable_costs = Sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed_max = kwargs.get('summed_max')
@@ -145,10 +147,21 @@ class Flow:
             warnings.warn(
                 "Using the investment object the nominal_value is set to None.",
                 SyntaxWarning)
+        self.discrete = kwargs.get('discrete')
+        if self.investment and self.discrete:
+            raise ValueError("Investment flows cannot be combined with " +
+                              "discrete flows!")
 
+class Discrete:
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_costs = kwargs.get('start_costs')
+        self.minimum_uptime = kwargs.get('minimum_uptime')
+        self.minimum_downtime = kwargs.get('minimum_downtime')
 
 Bus = on.Bus
-
 
 class Investment:
     """
@@ -320,9 +333,11 @@ class OperationalModel(po.ConcreteModel):
 
     """
 
+
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.Storage, blocks.InvestmentFlow,
-                         blocks.InvestmentStorage, blocks.Flow]
+                         blocks.InvestmentStorage, blocks.Flow,
+                         blocks.Discrete]
 
     def __init__(self, es, *args, **kwargs):
         super().__init__()
@@ -378,7 +393,19 @@ class OperationalModel(po.ConcreteModel):
         self.FLOWS = po.Set(initialize=self.flows.keys(),
                                ordered=True, dimen=2)
 
-        # ######################## FLOW VARIABLE #############################
+        self.NEGATIVE_GRADIENT_FLOWS = po.Set(
+            initialize=[(n, t) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.negative_gradient[0] is not None],
+            ordered=True, dimen=2)
+
+        self.POSITIVE_GRADIENT_FLOWS = po.Set(
+            initialize=[(n, t) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.positive_gradient[0] is not None],
+            ordered=True, dimen=2)
+
+        #ää######################## FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
@@ -404,6 +431,14 @@ class OperationalModel(po.ConcreteModel):
                     # lower bound of flow variable
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
+
+        self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
+                                             self.TIMESTEPS,
+                                             within=po.NonNegativeReals)
+
+        self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
+                                             self.TIMESTEPS,
+                                             within=po.NonNegativeReals)
 
         ############################# CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
@@ -505,8 +540,6 @@ class OperationalModel(po.ConcreteModel):
                             for t in self.TIMESTEPS]
                 result[node][node] = value
 
-
-        # TO
         # TODO: extract duals for all constraints ?
 
         return result
@@ -611,8 +644,27 @@ standard_flow_grouping = oces.Grouping(
     value=standard_flows,
     merge=merge_standard_flows)
 
+def discrete_flow_key(n):
+    for f in n.outputs.values():
+        if f.discrete is not None:
+            return blocks.Discrete
+
+def discrete_flows(n):
+     return [(n, t, f) for (t, f) in n.outputs.items()
+             if f.discrete is not None]
+
+def merge_discrete_flows(n, group):
+     group.extend(n)
+     return group
+
+discrete_flow_grouping = oces.Grouping(
+    key=discrete_flow_key,
+    value=discrete_flows,
+    merge=merge_discrete_flows)
+
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
-             standard_flow_grouping]
+             standard_flow_grouping, discrete_flow_grouping]
+
 
 """ list:  Groupings needed on an energy system for it to work with solph.
 
@@ -662,14 +714,17 @@ if __name__ == "__main__":
 
     si = Sink(label="sink", inputs={bel: Flow(max=[0.1, 0.2, 0.9],
                                               nominal_value=10, fixed=True,
+                                              negative_gradient = 0.5,
                                               actual_value=[1, 2, 3])})
 
     trsf = LinearTransformer(label='trsf', inputs={bcoal:Flow()},
                              outputs={bel:Flow(nominal_value=10,
-                                               fixed_costs=5,
-                                               variable_costs=10,
-                                               summed_max=4,
-                                               summed_min=2)},
+                                               min= 0.5, fixed_costs=5,
+                                               variable_costs=10, summed_max=4,
+                                               positive_gradient=0.5,
+                                               negative_gradient=0.5,
+                                               summed_min=2,
+                                               discrete=Discrete())},
                              conversion_factors={bel: 0.4})
     stor = Storage(label="stor", inputs={bel: Flow()}, outputs={bel:Flow()},
                    nominal_capacity=50, inflow_conversion_factor=0.9,

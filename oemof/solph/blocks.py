@@ -2,8 +2,8 @@
 """
 
 """
-from pyomo.core import (Var, NonNegativeReals, Set, Constraint, BuildAction,
-                        Expression)
+from pyomo.core import (Var, Set, Constraint, BuildAction,
+                        Expression, NonNegativeReals, Binary)
 from pyomo.core.base.block import SimpleBlock
 
 
@@ -171,15 +171,32 @@ class Flow(SimpleBlock):
             return None
 
         m = self.parent_block()
+
         ############################ SETS #####################################
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[(g[0], g[1])
-                                    for g in group
-                                        if g[2].summed_max is not None])
+            for g in group if g[2].summed_max is not None])
 
         self.SUMMED_MIN_FLOWS = Set(initialize=[(g[0], g[1])
-                                    for g in group
-                                        if g[2].summed_min is not None])
+            for g in group if g[2].summed_min is not None])
+
+        self.NEGATIVE_GRADIENT_FLOWS = Set(initialize=[(g[0], g[1])
+            for g in group if g[2].negative_gradient[0] is not None])
+
+        self.POSITIVE_GRADIENT_FLOWS = Set(initialize=[(g[0], g[1])
+            for g in group if g[2].positive_gradient[0] is not None])
+
+        ########################### Variables  ################################
+        # set upper bound of gradient variable
+        for i,o,f in group:
+            if m.flows[i, o].positive_gradient[0] is not None:
+                for t in m.TIMESTEPS:
+                    m.positive_flow_gradient[i, o, t].setub(
+                        f.positive_gradient[t] * f.nominal_value)
+            if m.flows[i, o].negative_gradient[0] is not None:
+                for t in m.TIMESTEPS:
+                    m.negative_flow_gradient[i, o, t].setub(
+                        f.negative_gradient[t] * f.nominal_value)
 
         ########################### CONSTRAINTS ###############################
 
@@ -206,6 +223,39 @@ class Flow(SimpleBlock):
                        m.flows[i, o].nominal_value)
                 self.summed_min.add((i, o), lhs >= rhs)
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
+
+        # constraint for positive gradient
+        self.positive_gradient_constr = Constraint(group, noruleinit=True)
+        def _positive_gradient_flow_rule(model):
+            """
+            """
+            for i,o in self.POSITIVE_GRADIENT_FLOWS:
+                for t in m.TIMESTEPS:
+                    if t > 0:
+                        lhs = m.flow[i, o, t] - m.flow[i, o, t-1]
+                        rhs = m.positive_flow_gradient[i, o, t]
+                        self.positive_gradient_constr.add( (i,o,t), lhs <= rhs)
+                    else:
+                        pass #return(Constraint.Skip)
+        self.positive_gradient_build = BuildAction(
+            rule=_positive_gradient_flow_rule)
+
+        # constraint for negative gradient
+        self.negative_gradient_constr = Constraint(group, noruleinit=True)
+        def _negative_gradient_flow_rule(model):
+            """
+            """
+            for i,o in self.NEGATIVE_GRADIENT_FLOWS:
+                for t in m.TIMESTEPS:
+                    if t > 0:
+                        lhs = m.flow[i, o, t] - m.flow[i, o, t-1]
+                        rhs = m.positive_flow_gradient[i, o, t]
+                        self.negative_gradient_constr.add( (i,o,t), lhs <= rhs)
+                    else:
+                        pass #return(Constraint.Skip)
+        self.negative_gradient_build = BuildAction(
+            rule=_positive_gradient_flow_rule)
+
 
 
     def _objective_expression(self):
@@ -279,7 +329,7 @@ class InvestmentFlow(SimpleBlock):
             initialize=[(g[0], g[1])
                         for g in group if len(g[2].min) != 0])
 
-        ########################### VARIABLES ##################################
+        ########################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
             """ Returns bounds for invest_flow variable
             """
@@ -289,6 +339,7 @@ class InvestmentFlow(SimpleBlock):
                         bounds=_investvar_bound_rule)
 
         ########################### CONSTRAINTS ###############################
+        # TODO: Add gradient constraints
         def _investflow_bound_rule(block, i, o, t):
             """ Returns constraint to bound flow variable if flow investment
             """
@@ -444,3 +495,55 @@ class LinearTransformer(SimpleBlock):
                         rhs = m.flow[n, o, t]
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
+
+class Discrete(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the LinearRelation block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.DiscreteFlow objects for which
+            the constraints are build.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+        ############################ SETS #####################################
+
+        self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+
+        self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                         if g[2].min[0] != 0])
+
+        self.STARTCOSTFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                  if g[2].discrete.start_costs is not None])
+
+        ##################### VARIABLES AND CONSTRAINTS #######################
+        self.status = Var(self.FLOWS, m.TIMESTEPS, within=Binary)
+
+        def _minimum_flow_rule(block, i, o, t):
+            lhs = self.status[i, o, t] * m.flows[i,o].min[t] * \
+                    m.flows[i,o].nominal_value
+            rhs = m.flow[i, o, t]
+            return lhs >= rhs
+        self.minimum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                                       rule=_minimum_flow_rule)
+
+        def _maximum_flow_rule(block, i, o, t):
+                    lhs = self.status[i, o, t] * m.flows[i,o].max[t] * \
+                            m.flows[i,o].nominal_value
+                    rhs = m.flow[i, o, t]
+                    return lhs <= rhs
+        self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                                       rule=_maximum_flow_rule)
+
+
+        # TODO: Add gradient constraints for discrete block / flows
+        # TODO: Add objective expression for discrete block / flows
