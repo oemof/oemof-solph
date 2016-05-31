@@ -540,8 +540,6 @@ class OperationalModel(po.ConcreteModel):
                             for t in self.TIMESTEPS]
                 result[node][node] = value
 
-
-        # TO
         # TODO: extract duals for all constraints ?
 
         return result

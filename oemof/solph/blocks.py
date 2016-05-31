@@ -171,6 +171,7 @@ class Flow(SimpleBlock):
             return None
 
         m = self.parent_block()
+
         ############################ SETS #####################################
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[(g[0], g[1])
@@ -184,6 +185,7 @@ class Flow(SimpleBlock):
 
         self.POSITIVE_GRADIENT_FLOWS = Set(initialize=[(g[0], g[1])
             for g in group if g[2].positive_gradient[0] is not None])
+
         ########################### Variables  ################################
         # set upper bound of gradient variable
         for i,o,f in group:
@@ -540,3 +542,7 @@ class Discrete(SimpleBlock):
                     return lhs <= rhs
         self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                                        rule=_maximum_flow_rule)
+
+
+        # TODO: Add gradient constraints for discrete block / flows
+        # TODO: Add objective expression for discrete block / flows
