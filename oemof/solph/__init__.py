@@ -601,8 +601,8 @@ class OperationalModel(pyomo.ConcreteModel):
 
         self.solutions.load_from(results)
 
-        # storage optimization results in result dictionary
-        self.result = self.results()
+        # storage optimization results in result dictionary of energysystem
+        self.es.results = self.results()
 
         return results
 
