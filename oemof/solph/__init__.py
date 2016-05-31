@@ -3,6 +3,7 @@
 
 """
 from collections import abc, UserList, UserDict
+from itertools import chain
 import warnings
 import pandas as pd
 import pyomo.environ as pyomo
@@ -646,13 +647,14 @@ def investment_key(n):
 
 
 def investment_flows(n):
-    return [(n, t, f) for (t, f) in n.outputs.items()
-            if f.investment is not None]
+    return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
+                                 if f.investment is not None),
+                      ((s, n, f) for (s, f) in n.inputs.items()
+                                 if f.investment is not None)))
 
 
 def merge_investment_flows(n, group):
-    group.extend(n)
-    return group
+    return group.union(n)
 
 investment_grouping = oces.Grouping(
     key=investment_key,
@@ -665,12 +667,14 @@ def variable_costs_key(n):
             return cblocks.VariableCosts
 
 def variable_costs_flows(n):
-     return [(n, t, f) for (t, f) in n.outputs.items()
-             if f.variable_costs[0] is not None]
+    return set(chain( ((n, t, f) for (t, f) in n.outputs.items()
+                                 if f.variable_costs[0] is not None),
+                      ((s, n, f) for (s, f) in n.inputs.items()
+                                 if f.variable_costs[0] is not None)))
+
 
 def merge_variable_costs_flows(n, group):
-     group.extend(n)
-     return group
+     return group.union(n)
 
 variable_costs_grouping = oces.Grouping(
     key=variable_costs_key,
