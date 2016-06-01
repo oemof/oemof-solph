@@ -343,7 +343,7 @@ class InvestmentFlow(SimpleBlock):
         def _investflow_bound_rule(block, i, o, t):
             """ Returns constraint to bound flow variable if flow investment
             """
-            return (m.flow[i, o, t] == (self.invest_flow[i, o] *
+            return (m.flow[i, o, t] == (self.flow[i, o] *
                                         m.flows[i, o].actual_value[t]))
         # create constraint to bound flow variable
         self.bounds = Constraint(self.FIXEDFLOWS, m.TIMESTEPS,
