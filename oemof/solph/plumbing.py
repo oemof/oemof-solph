@@ -8,6 +8,7 @@ from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from .network import Sink, Source, Storage
+from .options import Investment
 
 
 ###############################################################################
@@ -232,6 +233,16 @@ class OperationalModel(po.ConcreteModel):
                 else:
                     result[i][i] = [self.InvestmentStorage.capacity[i, t].value
                                     for t in self.TIMESTEPS]
+            # TODO: Make this work: setattr invest to results gnn
+            if False:
+                if isinstance(self.flows[i,o].investment, Investment):
+                    setattr(result[i][o], 'invest',
+                            self.InvestmentFlow.invest[i,o].value)
+                    if isinstance(i, Storage):
+                        setattr(result[i][i], 'invest',
+                                self.InvestmentStorage.invest[i,o].value)
+
+
         # TODO: extract duals for all constraints ?
 
         return result
