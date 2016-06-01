@@ -2,12 +2,13 @@
 """
 
 """
-from collections import UserDict
+from collections import UserDict, UserList
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from .network import Sink, Source, Storage
+from .options import Investment
 
 
 ###############################################################################
@@ -212,6 +213,17 @@ class OperationalModel(po.ConcreteModel):
         This means they can be accessed via
         :meth:`om.results()[object][object] <OptimizationModel.results>`.
 
+        Other result from the optimization model can be accessed like
+        attributes of the flow, e.g. the invest variable for capacity
+        of the storage 'stor' can be accessed like:
+
+        :attr:`om.results()[stor][stor].invest` attribute
+
+        For the investment flow of a 'tranfsformer' trsf to the bus 'bel' this
+        can be accessed with:
+
+        :attr:`om.results()[trsf][bel].invest` attribute
+
         The value of the objective function is stored under the
         :attr:`om.results().objective` attribute.
 
@@ -220,33 +232,30 @@ class OperationalModel(po.ConcreteModel):
         """
         # TODO: Maybe make the results dictionary a proper object?
 
-        # TODO: Do we need to store invested capacity / flow etc
-        #       e.g. max(results[node][o]) will give the newly invested nom val
         result = UserDict()
-        result.objective = self.objective()
-        for node in self.es.nodes:
-            if node.outputs:
-                result[node] = result.get(node, UserDict())
-            for o in node.outputs:
-                result[node][o] = [self.flow[node, o, t].value
-                                   for t in self.TIMESTEPS]
-            for i in node.inputs:
-                result[i] = result.get(i, UserDict())
-                result[i][node] = [self.flow[i, node, t].value
-                                   for t in self.TIMESTEPS]
-        # TODO: This is just a fast fix for now. Change this once structure is
-        #       finished (remove check for hasattr etc.)
-            if isinstance(node, Storage):
-                result[node] = result.get(node, UserDict())
-                if hasattr(self.Storage, 'capacity'):
-                    value = [
-                        self.Storage.capacity[node, t].value
-                             for t in self.TIMESTEPS]
+        for i,o in self.flows:
+            result[i] = result.get(i, UserDict())
+            result[i][o] = UserList([self.flow[i, o, t].value
+                                     for t in self.TIMESTEPS])
+
+            if isinstance(i, Storage):
+                if i.investment is None:
+                    result[i][i] = UserList(
+                        [self.Storage.capacity[i, t].value
+                         for t in self.TIMESTEPS])
                 else:
-                    value = [
-                        self.InvestmentStorage.capacity[node, t].value
-                            for t in self.TIMESTEPS]
-                result[node][node] = value
+                    result[i][i] = UserList(
+                        [self.InvestmentStorage.capacity[i, t].value
+                         for t in self.TIMESTEPS])
+
+
+            if isinstance(self.flows[i,o].investment, Investment):
+                setattr(result[i][o], 'invest',
+                        self.InvestmentFlow.invest[i,o].value)
+                if isinstance(i, Storage):
+                    setattr(result[i][i], 'invest',
+                            self.InvestmentStorage.invest[i].value)
+
 
         # TODO: extract duals for all constraints ?
 
