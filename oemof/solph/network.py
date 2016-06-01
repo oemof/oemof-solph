@@ -169,7 +169,7 @@ class Storage(on.Transformer):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                if not hasattr(flow, 'investment'):
+                if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
         # Check output flows for nominal value
@@ -182,7 +182,7 @@ class Storage(on.Transformer):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                if not hasattr(flow, 'investment'):
+                if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
 
