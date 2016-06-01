@@ -407,9 +407,9 @@ class InvestmentFlow(SimpleBlock):
                 fixed_costs += (self.flow[i, o] *
                                 m.flows[i, o].fixed_costs)
            # investment costs
-           if m.flows[i, o].investment.epc is not None:
+           if m.flows[i, o].investment.ep_costs is not None:
                investment_costs += (self.flow[i, o] *
-                                    m.flows[i, o].investment.epc)
+                                    m.flows[i, o].investment.ep_costs)
            else:
                raise ValueError("Missing value for investment costs!")
 

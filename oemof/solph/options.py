@@ -9,14 +9,14 @@ class Investment:
     ----------
     maximum : float
         Maximum of the additional invested capacity
-    epc : float
+    ep_costs : float
         Equivalent periodical costs for the investment, if period is one
         year these costs are equal to the equivalent annual costs.
 
     """
-    def __init__(self, maximum=float('+inf'), epc=None):
+    def __init__(self, maximum=float('+inf'), ep_costs=None):
         self.maximum = maximum
-        self.epc = epc
+        self.ep_costs = ep_costs
 
 class Discrete:
     """
