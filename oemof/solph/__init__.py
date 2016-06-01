@@ -2,7 +2,8 @@
 
 
 """
-from oemof.solph.network import Sink, Source, LinearTransformer, Storage, Bus, Flow
+from oemof.solph.network import (Sink, Source, LinearTransformer, Storage, Bus,
+                                 Flow)
 from oemof.solph.plumbing import OperationalModel
 from oemof.solph.groupings import GROUPINGS
 
@@ -29,7 +30,7 @@ if __name__ == "__main__":
         bel:Flow(actual_value=[1, 1, 2],
                  nominal_value=2,
                  fixed_costs=25,
-                 investment=Investment(maximum=100, epc=200))
+                 investment=Investment(maximum=100, ep_costs=200))
         }
     )
 

@@ -2,12 +2,12 @@
 """
 
 """
-from collections import abc, UserList, UserDict
+from collections import UserDict
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
-from .network import Sink, Source
+from .network import Sink, Source, Storage
 
 
 ###############################################################################
