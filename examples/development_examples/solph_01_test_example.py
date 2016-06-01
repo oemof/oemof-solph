@@ -25,7 +25,7 @@ so = Source(
     label="source",
     outputs={ebus: Flow(actual_value=[10, 5, 10], fixed=True, min=[2, 2, 2],
                         summed_max=500,
-                        investment=Investment(maximum=1000))})
+                        investment=Investment(maximum=1000, ep_costs=1))})
 
 si = Sink(
     label="sink",
@@ -39,7 +39,7 @@ ltransf = LinearTransformer(
     conversion_factors={ebus: 0.5})
 
 estorage = Storage(
-    label="storage", investment=Investment(maximum=1000),
+    label="storage", investment=Investment(maximum=1000, ep_costs=1),
     inputs={ebus: Flow()}, outputs={ebus: Flow(nominal_value=100)},
     nominal_capacity=500, capacity_loss=0.1, nominal_input_capacity_ratio=0.2,
     nominal_output_capacity_ratio=0.56, inflow_conversion_factor=0.97,
