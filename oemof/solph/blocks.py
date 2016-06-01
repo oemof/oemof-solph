@@ -165,6 +165,27 @@ class InvestmentStorage(SimpleBlock):
 
         # ToDo: objective functions
 
+    def _objective_expression(self):
+        """
+        """
+        investment_costs = 0
+        fixed_costs = 0
+
+        for n in self.INVESTSTORAGES:
+            if n.investment.ep_costs is not None:
+                investment_costs += self.invest[n] * n.investment.ep_costs
+            else:
+                raise ValueError("Missing value for investment costs!")
+
+            if n.fixed_costs is not None:
+                n.fixed_costs += self.invest[n] * n.fixed_costs
+
+        self.investment_costs = Expression(expr=investment_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+
+        return fixed_costs + investment_costs
+
+
 class Flow(SimpleBlock):
     """
     """
