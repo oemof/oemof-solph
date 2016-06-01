@@ -41,7 +41,7 @@ class Storage(SimpleBlock):
         for n in group:
             if n.initial_capacity is not None:
                 self.capacity[n, m.timesteps[-1]] = (n.initial_capacity *
-                                                n.nominal_capacity)
+                                                     n.nominal_capacity)
                 self.capacity[n, m.timesteps[-1]].fix()
 
         # storage balance constraint
@@ -53,9 +53,9 @@ class Storage(SimpleBlock):
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
             expr += (- m.flow[m.INPUTS[n], n, t] *
-                n.inflow_conversion_factor[t]) * m.timeincrement
+                     n.inflow_conversion_factor[t]) * m.timeincrement
             expr += (m.flow[n, m.OUTPUTS[n], t] /
-                n.outflow_conversion_factor[t]) * m.timeincrement
+                     n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
@@ -125,7 +125,7 @@ class InvestmentStorage(SimpleBlock):
         self.initial_capacity_invest = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
-        # ToDo Connection between invest_flow of input and invest
+        # Connection between invest_flow of input and invest
         def _storage_capacity_input_invest_rule(block, n):
             """ Returns the storage balance for every storage n in timestep t
             """
