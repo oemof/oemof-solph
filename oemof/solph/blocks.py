@@ -95,8 +95,8 @@ class InvestmentStorage(SimpleBlock):
             """ Returns bounds for invest_flow variable
             """
             return 0, n.investment.maximum
-        self.invest_storage = Var(self.INVESTSTORAGES, within=NonNegativeReals,
-                                  bounds=_storage_investvar_bound_rule)
+        self.invest = Var(self.INVESTSTORAGES, within=NonNegativeReals,
+                          bounds=_storage_investvar_bound_rule)
 
         # Set capacity of last timestep to fixed value of initial_capacity
         self.t_end = len(m.TIMESTEPS) - 1
@@ -105,25 +105,25 @@ class InvestmentStorage(SimpleBlock):
             """
             """
             return (self.capacity[n, self.t_end] == n.initial_capacity *
-                    self.invest_storage[n])
+                                                    self.invest[n])
         self.initial_capacity_invest = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
-        # ToDo Connection between invest_flow of input and invest_storage
+        # ToDo Connection between invest_flow of input and invest
         def _storage_capacity_input_invest_rule(block, n):
             """ Returns the storage balance for every storage n in timestep t
             """
-            return (m.InvestmentFlow.flow[m.INPUTS[n], n] ==
-                    self.invest_storage[n] * n.nominal_input_capacity_ratio)
+            return (m.InvestmentFlow.invest[m.INPUTS[n], n] ==
+                    self.invest[n] * n.nominal_input_capacity_ratio)
         self.storage_capacity_input_invest = Constraint(
             self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
 
-        # Connection between invest_flow of output and invest_storage
+        # Connection between invest_flow of output and invest
         def _storage_capacity_output_invest_rule(block, n):
             """ Returns the storage balance for every storage n in timestep t
             """
-            return (m.InvestmentFlow.flow[n, m.OUTPUTS[n]] ==
-                    self.invest_storage[n] * n.nominal_output_capacity_ratio)
+            return (m.InvestmentFlow.invest[n, m.OUTPUTS[n]] ==
+                    self.invest[n] * n.nominal_output_capacity_ratio)
         self.storage_capacity_output_invest = Constraint(
             self.INVESTSTORAGES, rule=_storage_capacity_output_invest_rule)
 
@@ -132,7 +132,7 @@ class InvestmentStorage(SimpleBlock):
             """
             """
             expr = (self.capacity[n, t] <= (n.capacity_max[t] *
-                                            self.invest_storage[n]))
+                                            self.invest[n]))
             return expr
         self.max_capacity_invest = Constraint(
             self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
@@ -142,7 +142,7 @@ class InvestmentStorage(SimpleBlock):
             """
             """
             expr = (self.capacity[n, t] <= (n.capacity_min[t] *
-                                            self.invest_storage[n]))
+                                            self.invest[n]))
             return expr
         self.min_investstorage = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
@@ -335,7 +335,7 @@ class InvestmentFlow(SimpleBlock):
             """
             return 0, m.flows[i, o].investment.maximum
         # create variable bounded for flows with investement attribute
-        self.flow = Var(self.FLOWS, within=NonNegativeReals,
+        self.invest = Var(self.FLOWS, within=NonNegativeReals,
                         bounds=_investvar_bound_rule)
 
         ########################### CONSTRAINTS ###############################
@@ -343,7 +343,7 @@ class InvestmentFlow(SimpleBlock):
         def _investflow_bound_rule(block, i, o, t):
             """ Returns constraint to bound flow variable if flow investment
             """
-            return (m.flow[i, o, t] == (self.flow[i, o] *
+            return (m.flow[i, o, t] == (self.invest[i, o] *
                                         m.flows[i, o].actual_value[t]))
         # create constraint to bound flow variable
         self.bounds = Constraint(self.FIXEDFLOWS, m.TIMESTEPS,
@@ -353,7 +353,7 @@ class InvestmentFlow(SimpleBlock):
             """
             """
             expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
-                                        self.flow[i, o]))
+                                        self.invest[i, o]))
             return expr
         self.max = Constraint(self.MAX_FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
@@ -362,7 +362,7 @@ class InvestmentFlow(SimpleBlock):
             """
             """
             expr = (m.flow[i, o, t] >= (m.flows[i, o].min[t] *
-                                        self.flow[i, o]))
+                                        self.invest[i, o]))
             return expr
         self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                               rule=_min_investflow_rule)
@@ -372,7 +372,7 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement
                         for t in m.TIMESTEPS) <=
-                m.flows[i, o].summed_max * self.flow[i, o])
+                m.flows[i, o].summed_max * self.invest[i, o])
             return expr
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS,
                                      rule=_summed_max_investflow_rule)
@@ -382,7 +382,7 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement
                         for t in m.TIMESTEPS) >=
-                m.flows[i, o].summed_min * self.flow[i, o])
+                m.flows[i, o].summed_min * self.invest[i, o])
             return expr
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
@@ -404,11 +404,11 @@ class InvestmentFlow(SimpleBlock):
                                       m.flows[i, o].variable_costs[t])
            # fixed costs
            if m.flows[i, o].fixed_costs is not None:
-                fixed_costs += (self.flow[i, o] *
+                fixed_costs += (self.invest[i, o] *
                                 m.flows[i, o].fixed_costs)
            # investment costs
            if m.flows[i, o].investment.ep_costs is not None:
-               investment_costs += (self.flow[i, o] *
+               investment_costs += (self.invest[i, o] *
                                     m.flows[i, o].investment.ep_costs)
            else:
                raise ValueError("Missing value for investment costs!")
