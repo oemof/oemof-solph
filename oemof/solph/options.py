@@ -89,7 +89,7 @@ class Investment:
         year these costs are equal to the equivalent annual costs.
 
     """
-    def __init__(self, maximum=float('+inf'), ep_costs=None):
+    def __init__(self, maximum=float('+inf'), ep_costs=0):
         self.maximum = maximum
         self.ep_costs = ep_costs
 
