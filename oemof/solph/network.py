@@ -152,6 +152,7 @@ class Storage(on.Transformer):
                 'outflow_conversion_factor', 1))
         self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
+        self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
         # Check investment
         if self.investment and self.nominal_capacity is not None:
