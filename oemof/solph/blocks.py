@@ -2,8 +2,8 @@
 """
 
 """
-from pyomo.core import (Var, Set, Constraint, BuildAction,
-                        Expression, NonNegativeReals, Binary)
+from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
+                        NonNegativeReals, Binary)
 from pyomo.core.base.block import SimpleBlock
 
 
