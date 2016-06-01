@@ -163,7 +163,21 @@ class InvestmentStorage(SimpleBlock):
         self.min_investstorage = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
 
-        # ToDo: objective functions
+        # storage balance constraint
+        def _storage_balance_rule(block, n, t):
+            """ Returns the storage balance for every storage n in timestep t
+            """
+            expr = 0
+            expr += block.capacity[n, t]
+            expr += - block.capacity[n, m.previous_timesteps[t]] * (
+                1 - n.capacity_loss[t])
+            expr += (- m.flow[m.INPUTS[n], n, t] *
+                     n.inflow_conversion_factor[t]) * m.timeincrement
+            expr += (m.flow[n, m.OUTPUTS[n], t] /
+                     n.outflow_conversion_factor[t]) * m.timeincrement
+            return expr == 0
+        self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
+                                  rule=_storage_balance_rule)
 
     def _objective_expression(self):
         """
