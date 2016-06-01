@@ -220,34 +220,18 @@ class OperationalModel(po.ConcreteModel):
         """
         # TODO: Maybe make the results dictionary a proper object?
 
-        # TODO: Do we need to store invested capacity / flow etc
-        #       e.g. max(results[node][o]) will give the newly invested nom val
         result = UserDict()
-        result.objective = self.objective()
-        for node in self.es.nodes:
-            if node.outputs:
-                result[node] = result.get(node, UserDict())
-            for o in node.outputs:
-                result[node][o] = [self.flow[node, o, t].value
-                                   for t in self.TIMESTEPS]
-            for i in node.inputs:
-                result[i] = result.get(i, UserDict())
-                result[i][node] = [self.flow[i, node, t].value
-                                   for t in self.TIMESTEPS]
-        # TODO: This is just a fast fix for now. Change this once structure is
-        #       finished (remove check for hasattr etc.)
-            if isinstance(node, Storage):
-                result[node] = result.get(node, UserDict())
-                if hasattr(self.Storage, 'capacity'):
-                    value = [
-                        self.Storage.capacity[node, t].value
-                             for t in self.TIMESTEPS]
-                else:
-                    value = [
-                        self.InvestmentStorage.capacity[node, t].value
-                            for t in self.TIMESTEPS]
-                result[node][node] = value
+        for i,o in self.flows:
+            result[i] = result.get(i, UserDict())
+            result[i][o] = [self.flow[i, o, t].value for t in self.TIMESTEPS]
 
+            if isinstance(i, Storage):
+                if i.investment is None:
+                    result[i][i] = [self.Storage.capacity[i, t].value
+                                    for t in self.TIMESTEPS]
+                else:
+                    result[i][i] = [self.InvestmentStorage.capacity[i, t].value
+                                    for t in self.TIMESTEPS]
         # TODO: extract duals for all constraints ?
 
         return result
