@@ -2,7 +2,7 @@
 """
 
 """
-from collections import UserDict
+from collections import UserDict, UserList
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -213,6 +213,17 @@ class OperationalModel(po.ConcreteModel):
         This means they can be accessed via
         :meth:`om.results()[object][object] <OptimizationModel.results>`.
 
+        Other result from the optimization model can be accessed like
+        attributes of the flow, e.g. the invest variable for capacity
+        of the storage 'stor' can be accessed like:
+
+        :attr:`om.results()[stor][stor].invest` attribute
+
+        For the investment flow of a 'tranfsformer' trsf to the bus 'bel' this
+        can be accessed with:
+
+        :attr:`om.results()[trsf][bel].invest` attribute
+
         The value of the objective function is stored under the
         :attr:`om.results().objective` attribute.
 
@@ -224,23 +235,26 @@ class OperationalModel(po.ConcreteModel):
         result = UserDict()
         for i,o in self.flows:
             result[i] = result.get(i, UserDict())
-            result[i][o] = [self.flow[i, o, t].value for t in self.TIMESTEPS]
+            result[i][o] = UserList([self.flow[i, o, t].value
+                                     for t in self.TIMESTEPS])
 
             if isinstance(i, Storage):
                 if i.investment is None:
-                    result[i][i] = [self.Storage.capacity[i, t].value
-                                    for t in self.TIMESTEPS]
+                    result[i][i] = UserList(
+                        [self.Storage.capacity[i, t].value
+                         for t in self.TIMESTEPS])
                 else:
-                    result[i][i] = [self.InvestmentStorage.capacity[i, t].value
-                                    for t in self.TIMESTEPS]
-            # TODO: Make this work: setattr invest to results gnn
-            if False:
-                if isinstance(self.flows[i,o].investment, Investment):
-                    setattr(result[i][o], 'invest',
-                            self.InvestmentFlow.invest[i,o].value)
-                    if isinstance(i, Storage):
-                        setattr(result[i][i], 'invest',
-                                self.InvestmentStorage.invest[i,o].value)
+                    result[i][i] = UserList(
+                        [self.InvestmentStorage.capacity[i, t].value
+                         for t in self.TIMESTEPS])
+
+
+            if isinstance(self.flows[i,o].investment, Investment):
+                setattr(result[i][o], 'invest',
+                        self.InvestmentFlow.invest[i,o].value)
+                if isinstance(i, Storage):
+                    setattr(result[i][i], 'invest',
+                            self.InvestmentStorage.invest[i].value)
 
 
         # TODO: extract duals for all constraints ?
