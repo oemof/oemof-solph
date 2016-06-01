@@ -60,6 +60,22 @@ class Storage(SimpleBlock):
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
 
+    def _objective_expression(self):
+        """
+        """
+        if not hasattr(self, 'STORAGES'):
+            return 0
+
+        fixed_costs = 0
+
+        for n in self.STORAGES:
+            if n.fixed_costs is not None:
+                n.fixed_costs += n.nominal_capacity * n.fixed_costs
+
+        self.fixed_costs = Expression(expr=fixed_costs)
+
+        return fixed_costs
+
 
 class InvestmentStorage(SimpleBlock):
     """
