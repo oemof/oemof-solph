@@ -44,11 +44,11 @@ import matplotlib.pyplot as plt
 from oemof.core import energy_system as core_es
 import oemof.solph as solph
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
-from oemof.solph import Investment
+from oemof.solph.network import Investment
 from oemof.solph import OperationalModel
 
 
-def initialise_energysystem(number_timesteps=876):
+def initialise_energysystem(number_timesteps=8760):
     """initialize the energy system
     """
     logging.info('Initialize the energy system')
@@ -106,10 +106,11 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     Storage(
         label='storage',
         inputs={bel: Flow()}, outputs={bel: Flow()},
-        nominal_capacity=500, capacity_loss=0.00, initial_capacity=0,
+        capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1 / 6, nominal_output_capacity_ratio=1 / 6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        investment=Investment(),
+        fixed_costs=35,
+        investment=Investment(ep_costs=80.24),
     )
 
     ##########################################################################
@@ -134,23 +135,19 @@ def get_result_dict(energysystem):
     logging.info('Check the results')
     myresults = tpd.DataFramePlot(energy_system=energysystem)
 
-    pp_gas = myresults.slice_by(bus_uid='el_balance', bus_type='el',
-                                type='input', obj_uid='pp_gas',
+    pp_gas = myresults.slice_by(obj_label='pp_gas',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
-    demand = myresults.slice_by(bus_uid='bel', bus_type='el',
-                                type='output', obj_uid='demand',
+    demand = myresults.slice_by(obj_label='demand',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
-    wind = myresults.slice_by(bus_uid='bel', bus_type='el',
-                              type='input', obj_uid='wind',
+    wind = myresults.slice_by(obj_label='wind',
                               date_from='2012-01-01 00:00:00',
                               date_to='2012-12-31 23:00:00')
 
-    pv = myresults.slice_by(bus_uid='bel', bus_type='el',
-                            type='input', obj_uid='pv',
+    pv = myresults.slice_by(obj_label='pv',
                             date_from='2012-01-01 00:00:00',
                             date_to='2012-12-31 23:00:00')
 
@@ -226,4 +223,5 @@ if __name__ == "__main__":
     esys = optimise_storage_size(esys)
     # esys.dump()
     # esys.restore()
+    print(get_result_dict(esys))
     create_plots(esys)
