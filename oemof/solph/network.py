@@ -5,7 +5,8 @@
 import warnings
 import oemof.network as on
 from .options import Investment
-from .plumbing import Sequence
+from .options import Sequence
+
 
 class Flow:
     """

@@ -6,7 +6,7 @@ import pandas as pd
 from oemof.tools import logger
 from oemof.core import energy_system as core_es
 import oemof.solph as solph
-from oemof.solph import (Bus, Source, Sink, Flow, Investment, LinearTransformer,
+from oemof.solph.network import (Bus, Source, Sink, Flow, Investment, LinearTransformer,
                         Storage)
 from oemof.solph import OperationalModel
 

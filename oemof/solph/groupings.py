@@ -20,7 +20,7 @@ from itertools import chain
 from oemof.core import energy_system as core_es
 from .network import Bus, LinearTransformer, Storage
 from .options import Investment
-import blocks
+from . import blocks
 
 
 def constraint_grouping(node):
