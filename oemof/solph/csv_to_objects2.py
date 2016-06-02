@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import pandas as pd
 import oemof.network as on
 from oemof.network import Bus
@@ -40,6 +41,13 @@ nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
 
+
+def str_to_class(str):
+    return getattr(sys.modules[__name__], str)
+
 for idx, row in nodes_flows.iterrows():
     # print(idx, row['label'])
     attributes_set = dict(zip(row.index, row.values))
+#    print(str_to_class(attributes_set['class']))
+    eval(attributes_set['class'])
+    # first create an object of each class that only contains a label
