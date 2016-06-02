@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import pandas as pd
-import oemof.network as on
 from oemof.network import Bus
 from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source
 
 
-bel = Bus(label='el_balance')
-bcoal = Bus(label='coalbus')
-
 # %% new core interface
+
+bel = Bus(label='el_balance')
+
+bcoal = Bus(label='coalbus')
 
 so = Source(label='coalsource', outputs={bcoal: Flow()})
 
@@ -48,6 +47,7 @@ def str_to_class(str):
 for idx, row in nodes_flows.iterrows():
     # print(idx, row['label'])
     attributes_set = dict(zip(row.index, row.values))
-#    print(str_to_class(attributes_set['class']))
-    eval(attributes_set['class'])
+    # eval to be substituted due to security issues. but works for now..
+    blubb = eval(attributes_set['class'])
+    print(blubb)
     # first create an object of each class that only contains a label
