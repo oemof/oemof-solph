@@ -107,17 +107,19 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     lifetime = 20
     wacc = 0.05
     epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
+    print("epc:", epc)
 
     # create storage transformer object for storage
     Storage(
         label='storage',
-        inputs={bel: Flow()}, outputs={bel: Flow()},
+        inputs={bel: Flow(variable_costs=10e10)},
+        outputs={bel: Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35, variable_costs=10e10,
-        investment=Investment(ep_costs=epc),
+        fixed_costs=35,
+        investment=Investment(ep_costs=115.24258719069128),
     )
 
     ##########################################################################
@@ -143,7 +145,7 @@ def get_result_dict(energysystem):
     storage = energysystem.groups['storage']
     myresults = tpd.DataFramePlot(energy_system=energysystem)
 
-    pp_gas = myresults.slice_by(obj_label='pp_gas', type='output',
+    pp_gas = myresults.slice_by(obj_label='pp_gas', type='input',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
