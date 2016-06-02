@@ -66,11 +66,7 @@ class Grouping:
     #: <oemof.core.network.Entity.uid>` get's added to the energy system.
     UID = None
     def __init__(self, key, value=lambda e: [e],
-                 merge=lambda new, old: old.extend(new) or old,
-                 insert=None):
-        if insert:
-            self._insert = insert
-            return
+                 merge=lambda new, old: old.extend(new) or old):
         def insert(e, d):
             k = key(e)
             if k is None:
