@@ -71,6 +71,14 @@ class Grouping:
             if kw in kwargs:
                 setattr(self, kw, kwargs[kw])
 
+    def key(self, e):
+        raise NotImplementedError(
+                "There is no default implementation for `Groupings.key`.\n" +
+                "Congratulations, you managed to execute supposedly " +
+                "unreachable code.\n" +
+                "Please file a bug at:\n\n    " +
+                "https://github.com/oemof/oemof/issues\n")
+
     def value(self, e):
         return [e]
 
