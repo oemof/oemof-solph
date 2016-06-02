@@ -65,11 +65,18 @@ class Grouping:
     #: :class:`entity <oemof.core.network.Entity>` with the same :attr:`uid
     #: <oemof.core.network.Entity.uid>` get's added to the energy system.
     UID = None
-    def __init__(self, key, value=lambda e: [e],
-                 merge=lambda new, old: old.extend(new) or old):
+    def __init__(self, key, **kwargs):
         self.key = key
-        self.value = value
-        self.merge = merge
+        for kw in ["value", "merge"]:
+            if kw in kwargs:
+                setattr(self, kw, kwargs[kw])
+
+    def value(self, e):
+        return [e]
+
+    def merge(self, new, old):
+        old.extend(new)
+        return old
 
     def __call__(self, e, d):
         k = self.key(e)
