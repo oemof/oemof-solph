@@ -54,10 +54,10 @@ for idx, row in nodes_flows.iterrows():
         obj.outputs = Bus(label=row['target'])
         print(obj.outputs, type(obj.outputs))
 
-    # only set attributes that exist and that have values
-    # problem: attributes (e.g. fixex, cap_loss, ...) are contained in dir(obj)
-    for attr in obj_attrs:
-        if attr in row_dc.keys() and row_dc[attr]:
-            print('My attribute:', row_dc[attr])
+#    # only set attributes that exist and that have values
+#    # problem: attributes (e.g. fixex, cap_loss, ...) are contained in dir(obj)
+#    for attr in obj_attrs:
+#        if attr in row_dc.keys() and row_dc[attr]:
+#            print('Exists:', row_dc[attr])
 
     print(idx, obj)
