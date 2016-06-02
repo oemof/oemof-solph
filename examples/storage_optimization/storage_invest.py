@@ -78,8 +78,8 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     Sink(label='excess_bel', inputs={bel: Flow()})
 
     # create commodity object for gas resource
-    Source(label='rgas', outputs={bgas: Flow(summed_max=194397000,
-                                             nominal_value=1)})
+    Source(label='rgas', outputs={bgas: Flow(nominal_value=194397000,
+                                             summed_max=1)})
 
     # create fixed source object for wind
     Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
@@ -89,11 +89,11 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     # create fixed source object for pv
     Source(label='pv', outputs={bel: Flow(actual_value=data['pv'],
                                           nominal_value=582000,
-                                          fixed=True, variable_costs=15)})
+                                          fixed=True, fixed_costs=15)})
 
     # create simple sink object for demand
     Sink(label='demand', inputs={bel: Flow(actual_value=data['demand_el'],
-                                           fixed=True)})
+                                           fixed=True, nominal_value=1)})
 
     # create simple transformer object for gas powerplant
     LinearTransformer(
@@ -102,15 +102,22 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
         outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
 
+    # Calculate ep_costs from capex to compare with old solph
+    capex = 1000
+    lifetime = 20
+    wacc = 0.05
+    epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
+
     # create storage transformer object for storage
     Storage(
         label='storage',
         inputs={bel: Flow()}, outputs={bel: Flow()},
         capacity_loss=0.00, initial_capacity=0,
-        nominal_input_capacity_ratio=1 / 6, nominal_output_capacity_ratio=1 / 6,
+        nominal_input_capacity_ratio=1/6,
+        nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
-        investment=Investment(ep_costs=80.24),
+        fixed_costs=35, variable_costs=10e10,
+        investment=Investment(ep_costs=epc),
     )
 
     ##########################################################################
@@ -122,7 +129,7 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     om = OperationalModel(energysystem, timeindex=energysystem.time_idx)
 
     logging.info('Solve the optimization problem')
-    om.solve(solve_kwargs={'tee': True})
+    om.solve(solver='glpk', solve_kwargs={'tee': True})
 
     logging.info('Store lp-file')
     om.write('optimization_problem.lp',
@@ -133,9 +140,10 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
 
 def get_result_dict(energysystem):
     logging.info('Check the results')
+    storage = energysystem.groups['storage']
     myresults = tpd.DataFramePlot(energy_system=energysystem)
 
-    pp_gas = myresults.slice_by(obj_label='pp_gas',
+    pp_gas = myresults.slice_by(obj_label='pp_gas', type='output',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
@@ -158,8 +166,9 @@ def get_result_dict(energysystem):
             'wind_inst': wind.max()/0.99989,
             'pv_sum': pv.sum(),
             'pv_inst': pv.max()/0.76474,
-            # 'storage_cap': energysystem.results[storage].add_cap,
-            'objective': energysystem.results.objective}
+            'storage_cap': energysystem.results[storage][storage].invest,
+            # 'objective': energysystem.results.keys()
+            }
 
 
 def create_plots(energysystem):
@@ -168,13 +177,14 @@ def create_plots(energysystem):
 
     cdict = {'wind': '#5b5bae',
              'pv': '#ffde32',
-             'sto_simple': '#42c77a',
+             'storage': '#42c77a',
              'pp_gas': '#636f6b',
-             'demand': '#ce4aff'}
+             'demand': '#ce4aff',
+             'excess_bel': '#555555'}
 
     # Plotting the input flows of the electricity bus for January
     myplot = tpd.DataFramePlot(energy_system=energysystem)
-    myplot.slice_unstacked(bus_uid="bel", type="input",
+    myplot.slice_unstacked(bus_label="el_balance", type="input",
                            date_from="2012-01-01 00:00:00",
                            date_to="2012-01-31 00:00:00")
     colorlist = myplot.color_from_dict(cdict)
@@ -185,7 +195,7 @@ def create_plots(energysystem):
     myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
     # Plotting the output flows of the electricity bus for January
-    myplot.slice_unstacked(bus_uid="bel", type="output")
+    myplot.slice_unstacked(bus_label="el_balance", type="output")
     myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
     myplot.ax.legend(loc='upper right')
     myplot.ax.set_ylabel('Power in MW')
@@ -206,8 +216,8 @@ def create_plots(energysystem):
         lineorder=['demand', 'storage', 'excess_bel'],
         line_kwa={'linewidth': 4},
         ax=fig.add_subplot(1, 1, 1),
-        date_from="2012-01-01 00:00:00",
-        date_to="2012-01-8 00:00:00",
+        date_from="2012-06-01 00:00:00",
+        date_to="2012-06-8 00:00:00",
         )
     myplot.ax.set_ylabel('Power in MW')
     myplot.ax.set_xlabel('Date')
@@ -223,5 +233,6 @@ if __name__ == "__main__":
     esys = optimise_storage_size(esys)
     # esys.dump()
     # esys.restore()
-    print(get_result_dict(esys))
+    import pprint as pp
+    pp.pprint(get_result_dict(esys))
     create_plots(esys)
