@@ -72,14 +72,14 @@ class Grouping:
         self.merge = merge
 
     def __call__(self, e, d):
-            k = self.key(e)
-            if k is None:
-                return
-            for group in (k if ( isinstance(k, Iterable) and not
-                                 isinstance(k, Hashable))
-                            else [k]):
-                d[group] = ( self.merge(self.value(e), d[group])
-                             if group in d else self.value(e))
+        k = self.key(e)
+        if k is None:
+            return
+        for group in (k if ( isinstance(k, Iterable) and not
+                             isinstance(k, Hashable))
+                        else [k]):
+            d[group] = ( self.merge(self.value(e), d[group])
+                         if group in d else self.value(e))
 
 
 
