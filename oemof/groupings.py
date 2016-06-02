@@ -44,7 +44,6 @@ class Grouping:
         :meth:`extended <list.extend>` with `[e]`.
 
     """
-    __slots__ = "_insert"
 
     @staticmethod
     def create(argument):
