@@ -40,6 +40,7 @@ def add_opex_var(model, block, ref='output', idx=0):
         block.uids = [obj.uid for obj in block.objs]
 
     opex_var = {obj.uid: obj.opex_var for obj in block.objs}
+
     # outputs for cost objs
     if ref == 'output':
         expr = sum(model.w[e, model.O[e][idx], t] * opex_var[e]
@@ -84,6 +85,7 @@ def add_input_costs(model, block):
 
     return(expr)
 
+
 def add_opex_fix(model, block, ref=None):
     """ Fixed operation expenditure term for linear objective function.
 
@@ -102,10 +104,9 @@ def add_opex_fix(model, block, ref=None):
 
     """
     if not block.objs:
-        expr=0
-        print('No objects defined for adding fixed opex to objective.' +
-              'No action taken.')
-        return(expr)
+        expr = 0
+        logging.error("No objects defined for adding fixed opex to objective." +
+                      "No action taken.")
     else:
         if block.uids is None:
             block.uids = [obj.uid for obj in block.objs]
@@ -114,22 +115,30 @@ def add_opex_fix(model, block, ref=None):
         uids = set(block.uids) - uids_inv
 
         opex_fix = {obj.uid: obj.opex_fix for obj in block.objs}
+        expr = 0
         if ref == 'output':
             # installed electrical/thermal output: {'pp_chp': 30000,...}
             out_max = {obj.uid: obj.out_max for obj in block.objs}
-            expr = 0
             expr += sum(out_max[e][0] * opex_fix[e] for e in uids)
             expr += sum((out_max[e][0] + block.add_out[e]) * opex_fix[e]
                         for e in uids_inv)
+        elif ref == 'input':
+            # installed electrical/thermal output: {'pp_chp': 30000,...}
+            in_max = {obj.uid: obj.in_max for obj in block.objs}
+            expr += sum((in_max[e][0] if in_max[e] is not None else 0) *
+                        opex_fix[e] for e in uids)
+            expr += sum(((in_max[e][0] if in_max[e] is not None else 0) +
+                         block.add_out[e]) *
+                        opex_fix[e] for e in uids_inv)
         elif ref == 'capacity':
             cap_max = {obj.uid: obj.cap_max for obj in block.objs}
-            expr = 0
             expr += sum(cap_max[e] * opex_fix[e] for e in uids)
             expr += sum((cap_max[e] + block.add_cap[e]) * opex_fix[e]
-                           for e in uids_inv)
+                        for e in uids_inv)
         else:
-            print('No reference defined. Please specificy in `add_opex()`!')
-        return(expr)
+            logging.error(
+                "No reference defined. Please specificy in `add_opex()`!")
+    return expr
 
 
 def add_revenues(model, block, ref='output', idx=0):
@@ -423,50 +432,3 @@ def add_ramping_costs(model, block, grad_direc='positive'):
     else:
         pass
     return(expr)
-
-def add_excess_slack_costs(model, block=None):
-    """ Artificial cost term for excess slack variables.
-
-    .. math:: \\sum_e \\sum_t EXCESS_e(t) \\cdot C^{excess}_e
-
-
-    Parameters
-    ----------
-    model : OptimizationModel() instance
-    block : SimpleBlock()    block : SimpleBlock()
-         block to group all objects corresponding to one oemof base class
-
-    Returns
-    -------
-    Expression
-    """
-    c_excess = {e.uid:e.costs for e in block.objs}
-    expr = sum(model.w[model.I[e][0], e,   t] * c_excess[e]
-               for e in block.uids for t in model.timesteps)
-    return(expr)
-
-
-def add_shortage_slack_costs(model, block=None):
-    """ Artificial cost term for shortage slack variables.
-
-    .. math:: \\sum_e \\sum_t SHORTAGE_e(t) \\cdot C^{shortage}_e
-
-    With :math:`e  \\in E` and :math:`E` beeing the set of unique ids for
-    all entities grouped inside the attribute `block.objs`.
-
-    Parameters
-    ----------
-    model : OptimizationModel() instance
-    block : SimpleBlock()
-         block to group all objects corresponding to one oemof base class
-
-    Returns
-    -------
-    Expression
-    """
-    c_shortage = {e.uid: e.costs for e in block.objs}
-    expr = sum(model.w[e, model.O[e][0], t] * c_shortage[e]
-               for e in block.uids for t in model.timesteps)
-    return(expr)
-
-

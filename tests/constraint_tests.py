@@ -11,7 +11,8 @@ from oemof.core import energy_system as es
 from oemof.core.network.entities import Bus
 from oemof.core.network.entities.buses import HeatBus
 from oemof.core.network.entities.components import (sources as source,
-                                                    transformers as transformer)
+                                                    transformers as transformer,
+                                                    sinks as sink)
 from oemof.solph import optimization_model as om, predefined_objectives
 from oemof.tools import create_components as cc, helpers
 
@@ -104,13 +105,12 @@ class Constraint_Tests:
 
         bgas = Bus(uid="bgas",
                    type="gas",
-                   price=70,
-                   balanced=True,
-                   excess=False)
+                   price=70)
 
         bel = Bus(uid="bel",
-                  type="el",
-                  excess=True)
+                  type="el")
+
+        sink.Simple(uid="excess", inputs=[bel], bound_type='min')
 
         transformer.Simple(
             uid='pp_gas',
@@ -129,8 +129,9 @@ class Constraint_Tests:
     def test_source_fixed(self):
         """Test source.FixedSource with and without investment."""
 
-        bel = Bus(uid="bel",
-                  type="el")
+        bel = Bus(uid="bel", type="el")
+
+        source.Commodity(uid='shortage', outputs=[bel])
 
         source.FixedSource(uid="wind",
                            outputs=[bel],
@@ -156,18 +157,15 @@ class Constraint_Tests:
 
         btest = HeatBus(
             uid="bus_test",
-            excess=False,
             temperature=1,
             re_temperature=1)
 
         district_heat_bus = HeatBus(
             uid="bus_distr_heat",
-            excess=False,
             temperature=np.array([380, 360, 370]),
             re_temperature=np.array([340, 340, 340]))
 
         storage_heat_bus = HeatBus(
-            excess=False,
             uid="bus_stor_heat",
             temperature=370)
 

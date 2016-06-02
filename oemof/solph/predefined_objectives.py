@@ -13,9 +13,9 @@ except:
 import pyomo.environ as po
 import oemof.solph as solph
 
-from ..core.network.entities import Bus, ExcessSlack, ShortageSlack
 from ..core.network.entities.components import transformers as transformer
 from ..core.network.entities.components import sources as source
+from ..core.network.entities.components import sinks as sink
 
 
 def minimize_cost(self, cost_objects=None, revenue_objects=None):
@@ -50,7 +50,8 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                     str(transformer.Storage),
                     str(transformer.CHP),
                     str(source.FixedSource),
-                    str(source.Commodity)]
+                    str(source.Commodity),
+                    str(sink.Simple)]
     if revenue_objects is None:
         r_blocks = []
 
@@ -60,19 +61,22 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
 
     for block in blocks:
         if block.name in c_blocks:
+            if block.name == str(sink.Simple):
+                ref = 'input'
+            else:
+                ref = 'output'
+            # variable costs
+            expr += objexpr.add_opex_var(self, block, ref=ref)
+
             if block.name == str(transformer.Storage):
                 ref = 'capacity'
                 expr += objexpr.add_opex_var(self,
                                              getattr(self,
                                                      str(transformer.Storage)),
                                              ref='input')
-            else:
-                ref = 'output'
-            # variable costs
-            expr += objexpr.add_opex_var(self, block, ref='output')
             # fix costs
-            if block != str(source.Commodity):
-                expr += objexpr.add_opex_fix(self, block, ref=ref)
+            expr += objexpr.add_opex_fix(self, block, ref=ref)
+
             # investment costs
             if block.optimization_options.get('investment', False):
                 expr += objexpr.add_capex(self, block, ref=ref)
@@ -90,14 +94,4 @@ def minimize_cost(self, cost_objects=None, revenue_objects=None):
                                           getattr(self,
                                                   str(source.DispatchSource)))
 
-    # artificial costs for excess or shortage
-    if hasattr(self, str(ExcessSlack)):
-        expr += objexpr.add_excess_slack_costs(self,
-                                               getattr(self, str(ExcessSlack)))
-    if hasattr(self, str(ShortageSlack)):
-        expr += objexpr.add_shortage_slack_costs(self,
-                                                 getattr(self, str(ShortageSlack)))
-
-
     self.objective = po.Objective(expr=expr)
-

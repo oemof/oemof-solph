@@ -23,14 +23,14 @@ simulation = es.Simulation(timesteps=range(len(time_index)),
                                           predefined_objectives.minimize_cost})
 # first system
 sys1 = es.EnergySystem(time_idx=time_index, simulation=simulation)
-bel1 = Bus(uid="bel1", type="el", shortage_costs=70, balanced=True,
-           shortage=True)
+bel1 = Bus(uid="bel1", type="el", shortage_costs=70, balanced=True)
+shortage_bel1 = cp.sources.Commodity(uid='shortage_bel1', outputs=[bel1])
 demand1 = cp.sinks.Simple(uid="demand", inputs=[bel1], val=[1,2,3])
 
 # second system
 sys2 = es.EnergySystem()
-bel2 = Bus(uid="bel2", type="el", shortage_costs=70, balanced=True,
-           shortage=True)
+bel2 = Bus(uid="bel2", type="el", shortage_costs=70, balanced=True)
+shortage_bel2 = cp.sources.Commodity(uid='shortage_bel2', outputs=[bel2])
 demand2 = cp.sinks.Simple(uid="demand1", inputs=[bel2], val=[4,5,6])
 
 # "merge" sys1 and sys2

@@ -48,16 +48,17 @@ em_oil = 0.0750 * 3.6
 ########################### create energysystem components ####################
 
 # resource busses
-bcoal = Bus(uid="coal", type="coal", price=20, balanced=False, excess=False)
-bgas = Bus(uid="gas", type="gas", price=35, balanced=False, excess=False)
-boil = Bus(uid="oil", type="oil", price=40,  balanced=False, excess=False)
-blig = Bus(uid="lignite", type="lignite", balanced=False, price=15,
-           excess=False)
+bcoal = Bus(uid="coal", type="coal", price=20, balanced=False)
+bgas = Bus(uid="gas", type="gas", price=35, balanced=False)
+boil = Bus(uid="oil", type="oil", price=40,  balanced=False)
+blig = Bus(uid="lignite", type="lignite", balanced=False, price=15)
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="el", excess=False,
+b_el = Bus(uid="b_el", type="el",
            shortage=True, shortage_costs=99999)
 b_th = Bus(uid="b_th", type="th", excess=True, excess_costs=0)
+
+excess = sink.Simple(uid="excess", inputs=[b_th], bound_type='min')
 
 # renewable sources (only pv onshore)
 wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el],

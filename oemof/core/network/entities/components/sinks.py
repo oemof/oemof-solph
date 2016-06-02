@@ -8,3 +8,4 @@ class Simple(Sink):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.val = kwargs.get('val', None)
+        self.bound_type = kwargs.get('bound_type', 'fix')

@@ -26,7 +26,7 @@ class EnergySystem_Tests:
         eq_(self.es.entities[0], bus)
         bus2 = Bus(uid='bus-uid2', type='bus-type')
         transformer.Simple(uid='pp_gas', inputs=[bus], outputs=[bus2])
-        ok_(isinstance(self.es.entities[4], transformer.Simple))
+        ok_(isinstance(self.es.entities[2], transformer.Simple))
         self.es.simulation = self.simulation
         ok_(len(self.es.simulation.timesteps) == 5)
 
