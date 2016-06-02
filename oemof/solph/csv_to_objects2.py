@@ -40,6 +40,7 @@ nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
 
+obj_dc = {}
 for idx, row in nodes_flows.iterrows():
 
     # eval to be substituted due to security issues. but works for now..
@@ -47,17 +48,26 @@ for idx, row in nodes_flows.iterrows():
     obj_attrs = [attr for attr in dir(obj)]
     row_dc = dict(zip(row.index.values, row.values))
 
-    # set attributes
+    # save object in dict
+    obj_dc[row['label']] = obj
+
+    # set general attributes
     obj.label = row['label']
 
+    # set attributes for all sources
     if row['class'] == 'Source':
-        obj.outputs = {Bus(label=row['target']): Flow()}
-        print(obj.outputs, type(obj.outputs))
+        if row['target'] not in obj_dc.keys():
+            obj_dc[row['target']] = Bus(label=row['target'])
+        obj.outputs = {obj_dc[row['target']]: Flow()}
+
+
+print(obj_dc)
+for k, v in obj_dc.items():
+    print(k, v, v.outputs, '\n')
 
 #    # only set attributes that exist in class and that have values
 #    # problem: attributes (e.g. fixex, cap_loss, ...) not contained in dir(obj)
+#    # vars(obj) might be a solution
 #    for attr in obj_attrs:
 #        if attr in row_dc.keys() and row_dc[attr]:
 #            print('Exists:', row_dc[attr])
-
-    print(idx, obj)
