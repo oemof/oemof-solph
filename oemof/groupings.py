@@ -67,19 +67,21 @@ class Grouping:
     UID = None
     def __init__(self, key, value=lambda e: [e],
                  merge=lambda new, old: old.extend(new) or old):
-        def insert(e, d):
-            k = key(e)
+        self.key = key
+        self.value = value
+        self.merge = merge
+
+    def __call__(self, e, d):
+            k = self.key(e)
             if k is None:
                 return
             for group in (k if ( isinstance(k, Iterable) and not
                                  isinstance(k, Hashable))
                             else [k]):
-                d[group] = merge(value(e), d[group]) if group in d else value(e)
+                d[group] = ( self.merge(self.value(e), d[group])
+                             if group in d else self.value(e))
 
-        self._insert = insert
 
-    def __call__(self, e, d):
-        self._insert(e, d)
 
 Grouping.UID = Grouping(attrgetter('uid'), value=lambda e: e,
                         merge=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
