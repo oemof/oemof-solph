@@ -90,8 +90,8 @@ for node_cls_str, node_lb, node_subs in one_node(nodes_flows):
     if node_cls_str == 'Transformer':
         kw.update({'conversion_factors':{buses[row.target]:
                         row.conversion_factor for i, row in
-                        subs.iterrows() if row.conversion_factor ==\
-                                            row.conversion_factor}})
+                        node_subs.iterrows() if row.conversion_factor ==\
+                                               conversion_factor}})
     if node_cls_str == 'Storage':
         #TODO: map row fields to attr
         continue
