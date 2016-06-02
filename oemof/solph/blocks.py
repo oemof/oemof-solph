@@ -448,11 +448,6 @@ class InvestmentFlow(SimpleBlock):
         investment_costs = 0
 
         for i, o in self.FLOWS:
-           for t in m.TIMESTEPS:
-               # variable costs of flows
-               if m.flows[i, o].variable_costs[0] is not None:
-                   variable_costs += (m.flow[i, o, t] * m.timeincrement *
-                                      m.flows[i, o].variable_costs[t])
            # fixed costs
            if m.flows[i, o].fixed_costs is not None:
                 fixed_costs += (self.invest[i, o] *
