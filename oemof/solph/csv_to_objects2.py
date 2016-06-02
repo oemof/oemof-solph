@@ -40,14 +40,10 @@ nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
 
-
-def str_to_class(str):
-    return getattr(sys.modules[__name__], str)
-
 for idx, row in nodes_flows.iterrows():
-    # print(idx, row['label'])
-    attributes_set = dict(zip(row.index, row.values))
+    attributes = dict(zip(row.index, row.values))
     # eval to be substituted due to security issues. but works for now..
-    blubb = eval(attributes_set['class'])
-    print(blubb)
-    # first create an object of each class that only contains a label
+    obj = eval(attributes['class'])
+    setattr(obj, 'label', row['label'])
+    print(idx, obj, getattr(obj, 'label'))
+    # setattr(obj.a, 'somefield', 'somevalue')
