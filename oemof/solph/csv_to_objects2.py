@@ -9,6 +9,8 @@ from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source
 bel = Bus(label='el_balance')
 bcoal = Bus(label='coalbus')
 
+# %% new core interface
+
 so = Source(label='coalsource', outputs={bcoal: Flow()})
 
 wind = Source(label='wind',
@@ -31,6 +33,8 @@ stor = Storage(label='stor', inputs={bel: Flow()}, outputs={bel: Flow()},
                outflow_conversion_factor=0.8, initial_capacity=0.5,
                capacity_loss=0.001)
 
+# %% approach to create objects by iterating over dataframe
+
 nodes_flows = pd.read_csv('nodes_flows.csv', sep=',')
 nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
@@ -38,4 +42,4 @@ nodes_flows_seq = nodes_flows_seq.transpose()
 
 for idx, row in nodes_flows.iterrows():
     # print(idx, row['label'])
-    attributes = dict(zip(row.index, row.values))
+    attributes_set = dict(zip(row.index, row.values))
