@@ -41,9 +41,23 @@ nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
 
 for idx, row in nodes_flows.iterrows():
-    attributes = dict(zip(row.index, row.values))
+
     # eval to be substituted due to security issues. but works for now..
-    obj = eval(attributes['class'])
-    setattr(obj, 'label', row['label'])
-    print(idx, obj, getattr(obj, 'label'))
-    # setattr(obj.a, 'somefield', 'somevalue')
+    obj = eval(row['class'])
+    obj_attrs = [attr for attr in dir(obj)]
+    row_dc = dict(zip(row.index.values, row.values))
+
+    # set attributes
+    obj.label = row['label']
+
+    if row['class'] == 'Source':
+        obj.outputs = Bus(label=row['target'])
+        print(obj.outputs, type(obj.outputs))
+
+    # only set attributes that exist and that have values
+    # problem: attributes (e.g. fixex, cap_loss, ...) are contained in dir(obj)
+    for attr in obj_attrs:
+        if attr in row_dc.keys() and row_dc[attr]:
+            print('My attribute:', row_dc[attr])
+
+    print(idx, obj)
