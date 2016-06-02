@@ -51,11 +51,11 @@ for idx, row in nodes_flows.iterrows():
     obj.label = row['label']
 
     if row['class'] == 'Source':
-        obj.outputs = Bus(label=row['target'])
+        obj.outputs = {Bus(label=row['target']): Flow()}
         print(obj.outputs, type(obj.outputs))
 
-#    # only set attributes that exist and that have values
-#    # problem: attributes (e.g. fixex, cap_loss, ...) are contained in dir(obj)
+#    # only set attributes that exist in class and that have values
+#    # problem: attributes (e.g. fixex, cap_loss, ...) not contained in dir(obj)
 #    for attr in obj_attrs:
 #        if attr in row_dc.keys() and row_dc[attr]:
 #            print('Exists:', row_dc[attr])
