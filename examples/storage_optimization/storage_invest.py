@@ -107,7 +107,6 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     lifetime = 20
     wacc = 0.05
     epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
-    print("epc:", epc)
 
     # create storage transformer object for storage
     Storage(
@@ -119,7 +118,7 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
         fixed_costs=35,
-        investment=Investment(ep_costs=115.24258719069128),
+        investment=Investment(ep_costs=epc),
     )
 
     ##########################################################################
@@ -169,7 +168,7 @@ def get_result_dict(energysystem):
             'pv_sum': pv.sum(),
             'pv_inst': pv.max()/0.76474,
             'storage_cap': energysystem.results[storage][storage].invest,
-            # 'objective': energysystem.results.keys()
+            'objective': energysystem.results.objective
             }
 
 
