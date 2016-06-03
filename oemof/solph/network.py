@@ -69,11 +69,13 @@ class Flow:
 Bus = on.Bus
 
 class Sink(on.Sink):
-    pass
+    def __init__(self):
+        super().__init__(self)
+
 
 class Source(on.Source):
-    pass
-
+    def __init__(self):
+        super().__init__(self)
 
 
 class LinearTransformer(on.Transformer):
