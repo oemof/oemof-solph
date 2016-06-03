@@ -10,12 +10,12 @@ show_messages = True
 testdict = {}
 
 
-def check(cdict, runcheck, subdict):
+def check(cdict, runcheck, subdict, new_results):
     if runcheck:
         count = 0
         subdict['run'] = "Okay"
         subdict.setdefault('messages', {})
-        for key, value in results.items():
+        for key, value in new_results.items():
             maxval = cdict[key] + abs(cdict[key]) * tolerance
             minval = cdict[key] - abs(cdict[key]) * tolerance
 
@@ -60,7 +60,7 @@ stor_invest_dict = {8760: {
         'objective': 8.93136532898235e+19}}
 
 check(stor_invest_dict[number_of_timesteps], stor_invest_run,
-      testdict['stor_inv'])
+      testdict['stor_inv'], results)
 
 logger.define_logging()
 for tests in testdict.values():
