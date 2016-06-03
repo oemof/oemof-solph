@@ -10,8 +10,8 @@ New features
 
  * It's now possible to assign a node to multiple groups from one
    :class:`Grouping <oeomof.core.energy_system.Grouping>` by returning
-   :class:`MultipleGroups <oeomof.core.energy_system.MultipleGroups>` from
-   :class:`Grouping <oeomof.core.energy_system.Grouping>`.
+   a list of group keys from the :class:`Grouping's
+   <oeomof.core.energy_system.Grouping>` key parameter.
 
 Documentation
 #############
