@@ -229,7 +229,9 @@ class OperationalModel(po.ConcreteModel):
         # TODO: Maybe make the results dictionary a proper object?
 
         result = UserDict()
-        for i, o in self.flows:
+        result.objective = self.objective()
+        for i,o in self.flows:
+
             result[i] = result.get(i, UserDict())
             result[i][o] = UserList([self.flow[i, o, t].value
                                      for t in self.TIMESTEPS])
