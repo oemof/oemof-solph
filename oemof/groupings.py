@@ -44,26 +44,8 @@ class Grouping:
     ----------
 
     key: callable
-        Called for every :class:`entity <oemof.core.network.Entity>` `e` of the
-        energy system with `e` as the sole argument. Should return the key of
-        the group that `e` should be added to. If `e` should be added to more
-        than one group, return a `list` (or any other non-hashable, iterable)
-        containing the group keys.
-        Return `None` if you don't want to store a group for a specific `e`.
     value: callable, optional
-        A function that should return the actual group obtained from `e`. Like
-        `key`, this is called for every `e` in the energy system, with `e` as
-        the sole argument. If there is no group stored under `key(e)`,
-        `value(e)` will be stored in `groups[key(e)]`. Otherwise
-        `merge(value(e), groups[key(e)])` will be called.
-        The default just wraps an entity in a list, so by default, groups are
-        lists of :class:`entities <oemof.core.network.Entity>`.
     merge: callable, optional
-        This function is called if `group[key(e)]` already exists. In that
-        case, `merge(value(e), group[key(e)])` is called and should return the
-        new group to store under `key(e)`.
-        By default the list of :class:`entities <oemof.core.network.Entity>` is
-        :meth:`extended <list.extend>` with `[e]`.
 
     """
 
@@ -94,6 +76,14 @@ class Grouping:
                 setattr(self, kw, kwargs[kw])
 
     def key(self, e):
+        """
+        Called for every :class:`entity <oemof.core.network.Entity>` `e` of the
+        energy system with `e` as the sole argument. Should return the key of
+        the group that `e` should be added to. If `e` should be added to more
+        than one group, return a `list` (or any other non-hashable, iterable)
+        containing the group keys.
+        Return `None` if you don't want to store a group for a specific `e`.
+        """
         raise NotImplementedError(
                 "There is no default implementation for `Groupings.key`.\n" +
                 "Congratulations, you managed to execute supposedly " +
@@ -102,9 +92,25 @@ class Grouping:
                 "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
+        """
+        A function that should return the actual group obtained from `e`. Like
+        `key`, this is called for every `e` in the energy system, with `e` as
+        the sole argument. If there is no group stored under `key(e)`,
+        `value(e)` will be stored in `groups[key(e)]`. Otherwise
+        `merge(value(e), groups[key(e)])` will be called.
+        The default just wraps an entity in a list, so by default, groups are
+        lists of :class:`entities <oemof.core.network.Entity>`.
+        """
         return [e]
 
     def merge(self, new, old):
+        """
+        This function is called if `group[key(e)]` already exists. In that
+        case, `merge(value(e), group[key(e)])` is called and should return the
+        new group to store under `key(e)`.
+        By default the list of :class:`entities <oemof.core.network.Entity>` is
+        :meth:`extended <list.extend>` with `[e]`.
+        """
         old.extend(new)
         return old
 
