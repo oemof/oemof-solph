@@ -92,8 +92,8 @@ class VariableEfficiencyCHP(CHP):
         self.eta_total = sum(self.eta)
 
         # calculate minimal
-        self.in_min = [self.out_min[0] / self.eta_min[0]]
-        self.in_max = [self.out_max[0] / self.eta[0]]
+        self.in_min = [self.out_min[0] / self.eta_el[0]]
+        self.in_max = [self.out_max[0] / self.eta_el[1]]
 
         A = np.array([[1, self.out_min[0]],
                       [1, self.out_max[0]]])
