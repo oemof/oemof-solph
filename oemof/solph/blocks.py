@@ -121,8 +121,8 @@ class InvestmentStorage(SimpleBlock):
         def _initial_capacity_invest_rule(block, n):
             """Set capacity of last timestep to fixed value of initial_capacity
             """
-            expr = (self.capacity[n, self.t_end] == n.initial_capacity *
-                                                    self.invest[n])
+            expr = (self.capacity[n, self.t_end] == (n.initial_capacity *
+                                                     self.invest[n]))
             return expr
 
         self.initial_capacity_invest = Constraint(
@@ -132,7 +132,7 @@ class InvestmentStorage(SimpleBlock):
             """ Connection between invest_flow of input and invest
             """
             expr = (m.InvestmentFlow.invest[m.INPUTS[n], n] ==
-                        self.invest[n] * n.nominal_input_capacity_ratio)
+                    self.invest[n] * n.nominal_input_capacity_ratio)
             return expr
         self.storage_capacity_input_invest = Constraint(
             self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
@@ -141,7 +141,7 @@ class InvestmentStorage(SimpleBlock):
             """ Connection between invest_flow of output and invest
             """
             expr = (m.InvestmentFlow.invest[n, m.OUTPUTS[n]] ==
-                        self.invest[n] * n.nominal_output_capacity_ratio)
+                    self.invest[n] * n.nominal_output_capacity_ratio)
             return expr
         self.storage_capacity_output_invest = Constraint(
             self.INVESTSTORAGES, rule=_storage_capacity_output_invest_rule)
@@ -574,15 +574,15 @@ class Discrete(SimpleBlock):
 
         def _minimum_flow_rule(block, i, o, t):
             expr = (self.status[i, o, t] *
-                    m.flows[i,o].min[t] * m.flows[i,o].nominal_value >=
-                        m.flow[i, o, t])
+                    m.flows[i, o].min[t] * m.flows[i, o].nominal_value >=
+                    m.flow[i, o, t])
             return expr
         self.minimum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                                        rule=_minimum_flow_rule)
 
         def _maximum_flow_rule(block, i, o, t):
             expr = (self.status[i, o, t] *
-                    m.flows[i,o].max[t] * m.flows[i,o].nominal_value <=
+                    m.flows[i, o].max[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
             return expr
         self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
