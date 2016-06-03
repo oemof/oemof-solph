@@ -89,7 +89,9 @@ class VariableEfficiencyCHP(CHP):
 
         super().__init__(**kwargs)
 
-        self.eta_total = sum(self.eta)
+        self.eta_total = kwargs.get('eta_total')
+
+        self.eta_el = kwargs.get('eta_el')
 
         # calculate minimal
         self.in_min = [self.out_min[0] / self.eta_el[0]]
