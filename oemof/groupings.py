@@ -18,6 +18,28 @@ class Grouping:
     :class:`energy system <oemof.core.energy_system.EnergySystem>` into
     :attr:`groups <oemof.core.energy_system.EnergySystem.groups>`.
 
+    The way :class:`Groupings <Grouping>` work is that each :class:`Grouping`
+    :obj:`g` of an energy system is called whenever an :class:`entity
+    <oemof.core.network.Entity>` is added to the energy system (and for each
+    :class:`entity <oemof.core.network.Entity>` already present, if the energy
+    system is created with existing enties).
+    The call :obj:`g(e, gs)`, where :obj:`e` is an :class:`entity
+    <oemof.core.network.Entity>` and :obj:`gs` is a :attr:`dictionary mapping
+    group keys to groups <oemof.core.energy_system.EnergySystem.groups>`, then
+    uses the three functions :meth:`key <Grouping.key>`, :meth:`value
+    <Grouping.value>` and :meth:`merge <Grouping.merge>` in the following way:
+
+        - :meth:`key(e) <Grouping.key>` is called to obtain a key :obj:`k`
+          under which the group should be stored,
+        - :meth:`value(e) <Grouping.value>` is called to obtain a value
+          :obj:`v` (the actual group) to store under :obj:`k`,
+        - if there is not yet anything stored under :obj:`gs[k]`, :obj:`gs[k]`
+          is set to :obj:`v`. Otherwise :meth:`merge <Grouping.merge>` is used
+          to figure out how to merge :obj:`v` into the old value of
+          :obj:`gs[k]`, i.e. :obj:`gs[k]` is set to :meth:`merge(v, gs[k])
+          <Grouping.merge>`.
+
+
     Parameters
     ----------
 
