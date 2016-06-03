@@ -290,6 +290,8 @@ class OperationalModel(po.ConcreteModel):
 
         # storage optimization results in result dictionary of energysystem
         self.es.results = self.results()
+        self.es.results.objective = self.objective()
+        self.es.results.solver = results
 
         return results
 
