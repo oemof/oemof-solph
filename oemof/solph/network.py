@@ -68,13 +68,11 @@ Bus = on.Bus
 
 
 class Sink(on.Sink):
-    def __init__(self):
-        super().__init__(self)
-
+    pass
 
 class Source(on.Source):
-    def __init__(self):
-        super().__init__(self)
+    pass
+
 
 
 class LinearTransformer(on.Transformer):
