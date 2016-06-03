@@ -122,7 +122,11 @@ class InvestmentStorage(SimpleBlock):
     :math:`\\textrm{~}\\; \\forall n \\in \\textrm{MIN\_INVESTSTORAGES} \\textrm{,}
     \\; \\forall t \\in \\textrm{TIMESTEPS}`.
 
-    etc
+    etc.
+
+    **The following parts of the objective function are created:**
+
+    etc.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
