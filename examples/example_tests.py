@@ -28,6 +28,11 @@ def check(cdict, runcheck, subdict, new_results):
             subdict['results'] = "Okay"
         else:
             subdict['results'] = "{0} error(s)".format(count)
+        skip = list(set(cdict.keys()) - set(new_results.keys()))
+        if len(skip):
+            count += 1
+            subdict['messages'][count] = (
+                "The following tests were skipped: {0}.".format(skip))
     else:
         subdict['run'] = "Failed"
         subdict['results'] = "Failed"
