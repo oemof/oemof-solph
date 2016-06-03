@@ -70,7 +70,7 @@ class Storage(SimpleBlock):
 
         for n in self.STORAGES:
             if n.fixed_costs is not None:
-                n.fixed_costs += n.nominal_capacity * n.fixed_costs
+                fixed_costs += n.nominal_capacity * n.fixed_costs
 
         self.fixed_costs = Expression(expr=fixed_costs)
 
@@ -189,8 +189,7 @@ class InvestmentStorage(SimpleBlock):
                 raise ValueError("Missing value for investment costs!")
 
             if n.fixed_costs is not None:
-                n.fixed_costs += self.invest[n] * n.fixed_costs
-
+                fixed_costs += self.invest[n] * n.fixed_costs
         self.investment_costs = Expression(expr=investment_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
 
