@@ -8,8 +8,6 @@ from oemof.solph.plumbing import OperationalModel
 from oemof.solph.groupings import GROUPINGS
 
 
-
-
 if __name__ == "__main__":
     import pandas as pd
     from oemof.core import energy_system as oces

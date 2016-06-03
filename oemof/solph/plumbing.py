@@ -11,24 +11,24 @@ from .network import Sink, Source, Storage
 from .options import Investment
 
 
-###############################################################################
+# #############################################################################
 #
 # Solph Optimization Models
 #
-###############################################################################
+# #############################################################################
 
 # TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
+
 class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
-    def __init__(self, es):
+    def __init__(self):
         super().__init__()
-
 
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
-    distpatch.
+    dispatch.
 
     Parameters
     ----------
@@ -41,17 +41,15 @@ class OperationalModel(po.ConcreteModel):
     timeindex : DatetimeIndex
 
     """
-
-
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.Storage, blocks.InvestmentFlow,
                          blocks.InvestmentStorage, blocks.Flow,
                          blocks.Discrete]
 
-    def __init__(self, es, *args, **kwargs):
+    def __init__(self, es, **kwargs):
         super().__init__()
 
-        ##########################  Arguments #################################
+        # ########################  Arguments #################################
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
@@ -80,27 +78,27 @@ class OperationalModel(po.ConcreteModel):
         previous_timesteps[0] = self.timesteps[-1]
 
         self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
-        #self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
+        # self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
         #                            initialize=dict(zip(self.TIMESTEPS,
         #                                                previous_timesteps)))
 
         # indexed index set for inputs of nodes (nodes as indices)
         self.INPUTS = po.Set(self.NODES, initialize={
             n: [i for i in n.inputs] for n in self.es.nodes
-                                     if not isinstance(n, Source)
+            if not isinstance(n, Source)
             }
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
         self.OUTPUTS = po.Set(self.NODES, initialize={
             n: [o for o in n.outputs] for n in self.es.nodes
-                                      if not isinstance(n, Sink)
+            if not isinstance(n, Sink)
             }
         )
 
         # pyomo set for all flows in the energy system graph
         self.FLOWS = po.Set(initialize=self.flows.keys(),
-                               ordered=True, dimen=2)
+                            ordered=True, dimen=2)
 
         self.NEGATIVE_GRADIENT_FLOWS = po.Set(
             initialize=[(n, t) for n in self.es.nodes
@@ -114,11 +112,11 @@ class OperationalModel(po.ConcreteModel):
                         if f.positive_gradient[0] is not None],
             ordered=True, dimen=2)
 
-        #ää######################## FLOW VARIABLE #############################
+        # ######################### FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
-                              within=po.NonNegativeReals)
+                           within=po.NonNegativeReals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
@@ -149,7 +147,7 @@ class OperationalModel(po.ConcreteModel):
                                              self.TIMESTEPS,
                                              within=po.NonNegativeReals)
 
-        ############################# CONSTRAINTS #############################
+        # ########################### CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
         for group in self._constraint_groups:
             # create instance for block
@@ -160,9 +158,8 @@ class OperationalModel(po.ConcreteModel):
             # in the group
             block._create(group=self.es.groups.get(group))
 
-        ############################# Objective ###############################
+        # ########################### Objective ###############################
         self.objective_function()
-
 
     def objective_function(self, sense=po.minimize, update=False):
         """
@@ -188,7 +185,6 @@ class OperationalModel(po.ConcreteModel):
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
-
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
@@ -233,7 +229,7 @@ class OperationalModel(po.ConcreteModel):
         # TODO: Maybe make the results dictionary a proper object?
 
         result = UserDict()
-        for i,o in self.flows:
+        for i, o in self.flows:
             result[i] = result.get(i, UserDict())
             result[i][o] = UserList([self.flow[i, o, t].value
                                      for t in self.TIMESTEPS])
@@ -248,7 +244,6 @@ class OperationalModel(po.ConcreteModel):
                         [self.InvestmentStorage.capacity[i, t].value
                          for t in self.TIMESTEPS])
 
-
             if isinstance(self.flows[i,o].investment, Investment):
                 setattr(result[i][o], 'invest',
                         self.InvestmentFlow.invest[i,o].value)
@@ -256,11 +251,9 @@ class OperationalModel(po.ConcreteModel):
                     setattr(result[i][i], 'invest',
                             self.InvestmentStorage.invest[i].value)
 
-
         # TODO: extract duals for all constraints ?
 
         return result
-
 
     def solve(self, solver='glpk', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.

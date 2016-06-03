@@ -26,7 +26,7 @@ class Flow:
         variable will be fixed to actual_value * nominal_value.
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
         """
         # TODO: Check if we can inherit form pyomo.core.base.var _VarData
@@ -62,11 +62,10 @@ class Flow:
         self.discrete = kwargs.get('discrete')
         if self.investment and self.discrete:
             raise ValueError("Investment flows cannot be combined with " +
-                              "discrete flows!")
-
-
+                             "discrete flows!")
 
 Bus = on.Bus
+
 
 class Sink(on.Sink):
     def __init__(self):
@@ -87,22 +86,24 @@ class LinearTransformer(on.Transformer):
         Dictionary containing conversion factors for conversion of inflow
         to specified outflow. Keys are output bus objects.
         The dictionary values can either be a scalar or a sequence with length
-        of timehorizon for simulation.
+        of time horizon for simulation.
 
     Examples
     --------
+    Defining an linear transformer:
+
     >>> bel = Bus()
     >>> bth = Bus()
     >>> trsf = LinearTransformer(conversion_factors={bel: 0.4,
     ...                                              bth: [1, 2, 3]})
     >>> trsf.conversion_factors[bel][3]
     0.4
-
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conversion_factors = {k: Sequence(v)
-            for k,v in kwargs.get('conversion_factors').items()}
+        self.conversion_factors = {
+            k: Sequence(v)
+            for k, v in kwargs.get('conversion_factors').items()}
 
 
 class Storage(on.Transformer):
@@ -124,7 +125,7 @@ class Storage(on.Transformer):
         The capacity of the storage in the first (and last) timestep of
         optimization.
     capacity_loss : numeric (sequence or scalar)
-        The relativ loss of the storage capacity from between two consecutive
+        The relative loss of the storage capacity from between two consecutive
         timesteps.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
@@ -132,7 +133,7 @@ class Storage(on.Transformer):
     outflow_conversion_factor : numeric (sequence or scalar)
         see: inflow_conversion_factor
     capacity_min : numeric (sequence or scalar)
-        The normend minimum capacity of the storage, e.g. a value between 0,1.
+        The nominal minimum capacity of the storage, e.g. a value between 0,1.
         To use different values in every timesteps use a sequence of values.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min

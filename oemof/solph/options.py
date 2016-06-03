@@ -29,11 +29,11 @@ def Sequence(sequence_or_scalar):
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
-    if ( isinstance(sequence_or_scalar, abc.Iterable) and not
-         isinstance(sequence_or_scalar, str) ):
-       return sequence_or_scalar
+    if (isinstance(sequence_or_scalar, abc.Iterable) and not
+            isinstance(sequence_or_scalar, str)):
+        return sequence_or_scalar
     else:
-       return _Sequence(default=sequence_or_scalar)
+        return _Sequence(default=sequence_or_scalar)
 
 
 class _Sequence(UserList):
@@ -93,11 +93,12 @@ class Investment:
         self.maximum = maximum
         self.ep_costs = ep_costs
 
+
 class Discrete:
     """
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        # super().__init__(self, **kwargs)
         self.start_costs = kwargs.get('start_costs')
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
