@@ -4,6 +4,10 @@ v0.0.8 ()
 New features
 ############
 
+ * :class:`Groupings <oemof.groupings.Grouping>` now have their own module:
+   :mod:`oemof.grouping`. For backwards compatibility they are still available
+   from :mod:`energy system <oemof.core.energy_system>` too though.
+
  * It's now possible to assign a node to multiple groups from one
    :class:`Grouping <oeomof.core.energy_system.Grouping>` by returning
    :class:`MultipleGroups <oeomof.core.energy_system.MultipleGroups>` from
