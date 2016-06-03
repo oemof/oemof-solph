@@ -78,7 +78,51 @@ class Storage(SimpleBlock):
 
 
 class InvestmentStorage(SimpleBlock):
-    """
+    """Storage with an :class:`.Investment` object.
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    INVESTSTORAGES
+        A set with all storages containing an Investment object.
+    INITIAL_CAPACITY
+        A set with storages of the set INVESTSTORAGES which have an
+        initial_capacity attribute.
+    MIN_INVESTSTORAGES
+        A set with storages of the set INVESTSTORAGES which have an
+        capacity_min attribute greater than zero for at least one time step.
+
+
+    **The following variables are created:**
+
+    capacity
+        Load of the storage for every time step
+
+    invest
+        Nominal capacity of the storage
+
+
+    **The following constraints are build:**
+
+    Storage balance
+
+    .. math:: l_n(t) = l_n(t_{previous}) \\cdot (1 - C^{loss}(n)) \
+    - \\frac{w_{n, o_n}(t)}{\\eta^{out}_n} \
+    + w_{i_n, n}(t) \\cdot \\eta^{in}_n
+
+    With
+    :math:`\\textrm{~}\\; \\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,}
+    \\; \\forall t \\in \\textrm{TIMESTEPS}`.
+
+    Minimal capacity
+
+    .. math:: l_n(t) <= c_{invest} \cdot c_{min}(t)
+
+    With
+    :math:`\\textrm{~}\\; \\forall n \\in \\textrm{MIN\_INVESTSTORAGES} \\textrm{,}
+    \\; \\forall t \\in \\textrm{TIMESTEPS}`.
+
+    etc
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -116,15 +160,28 @@ class InvestmentStorage(SimpleBlock):
                           bounds=_storage_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
-        self.t_end = len(m.TIMESTEPS) - 1
+        def _storage_balance_rule(block, n, t):
+            """ Returns the storage balance for every storage n in timestep t.
+            """
+            expr = 0
+            expr += block.capacity[n, t]
+            expr += - block.capacity[n, m.previous_timesteps[t]] * (
+                1 - n.capacity_loss[t])
+            expr += (- m.flow[m.INPUTS[n], n, t] *
+                     n.inflow_conversion_factor[t]) * m.timeincrement
+            expr += (m.flow[n, m.OUTPUTS[n], t] /
+                     n.outflow_conversion_factor[t]) * m.timeincrement
+            return expr == 0
+        self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
+                                  rule=_storage_balance_rule)
 
         def _initial_capacity_invest_rule(block, n):
-            """Set capacity of last timestep to fixed value of initial_capacity
+            """Set capacity of last timestep to fixed value of initial_capacity.
             """
             expr = (self.capacity[n, self.t_end] == (n.initial_capacity *
                                                      self.invest[n]))
             return expr
-
+        self.t_end = len(m.TIMESTEPS) - 1
         self.initial_capacity_invest = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
@@ -164,21 +221,6 @@ class InvestmentStorage(SimpleBlock):
         # Set the lower bound of the storage capacity if the attribute exists
         self.min_investstorage = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
-
-        def _storage_balance_rule(block, n, t):
-            """ Returns the storage balance for every storage n in timestep t
-            """
-            expr = 0
-            expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timesteps[t]] * (
-                1 - n.capacity_loss[t])
-            expr += (- m.flow[m.INPUTS[n], n, t] *
-                     n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, m.OUTPUTS[n], t] /
-                     n.outflow_conversion_factor[t]) * m.timeincrement
-            return expr == 0
-        self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
-                                  rule=_storage_balance_rule)
 
     def _objective_expression(self):
         """
