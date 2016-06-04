@@ -76,13 +76,19 @@ class Grouping:
                 setattr(self, kw, kwargs[kw])
 
     def key(self, e):
-        """
-        Called for every :class:`entity <oemof.core.network.Entity>` `e` of the
-        energy system with `e` as the sole argument. Should return the key of
-        the group that `e` should be added to. If `e` should be added to more
-        than one group, return a `list` (or any other non-hashable, iterable)
-        containing the group keys.
-        Return `None` if you don't want to store a group for a specific `e`.
+        """ Obtain a key under which to store the group.
+
+        You have to supply this method yourself using the :obj:`key` parameter
+        when creating :class:`Grouping` instances.
+
+        Called for every :class:`entity <oemof.core.network.Entity>` :obj:`e`
+        of the energy system. Expected to return the key (i.e. a valid
+        :class:`hashable`) under which the group :meth:`value(e)
+        <Grouping.value>` will be stored. If it should be added to more than
+        one group, return a :class:`list` (or any other :class:`non-hashable
+        <Hashable>`, :class:`iterable`) containing the group keys.
+
+        Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
         raise NotImplementedError(
                 "There is no default implementation for `Groupings.key`.\n" +
@@ -92,24 +98,30 @@ class Grouping:
                 "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
-        """
-        A function that should return the actual group obtained from `e`. Like
-        `key`, this is called for every `e` in the energy system, with `e` as
-        the sole argument. If there is no group stored under `key(e)`,
-        `value(e)` will be stored in `groups[key(e)]`. Otherwise
-        `merge(value(e), groups[key(e)])` will be called.
+        """ Generate the group obtained from :obj:`e`.
+
+        This methd returns the actual group obtained from :obj:`e`. Like
+        :meth:`key <Grouping.key>`, it is called for every :obj:`e` in the
+        energy system. If there is no group stored under :meth:`key(e)
+        <Grouping.key>`, :obj:`groups[key(e)]` is set to :meth:`value(e)
+        <Grouping.value>`. Otherwise :meth:`merge(value(e), groups[key(e)])
+        <Grouping.merge>` is called.
+
         The default just wraps an entity in a list, so by default, groups are
         lists of :class:`entities <oemof.core.network.Entity>`.
         """
         return [e]
 
     def merge(self, new, old):
-        """
-        This function is called if `group[key(e)]` already exists. In that
-        case, `merge(value(e), group[key(e)])` is called and should return the
-        new group to store under `key(e)`.
+        """ Merge a known :obj:`old` group with a :obj:`new` one.
+
+        This method is called if there is already a value stored under
+        :obj:`group[key(e)]`. In that case, :meth:`merge(value(e),
+        group[key(e)]) <Grouping.merge>` is called and should return the new
+        group to store under :meth:`key(e) <Grouping.key>`.
+
         By default the list of :class:`entities <oemof.core.network.Entity>` is
-        :meth:`extended <list.extend>` with `[e]`.
+        :meth:`extended <list.extend>` with :obj:`[e]`.
         """
         old.extend(new)
         return old
