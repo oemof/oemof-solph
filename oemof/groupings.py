@@ -7,11 +7,6 @@ except ImportError:
 from operator import attrgetter
 
 
-def _value_error(s):
-    """ Helper function to be able to `raise ValueError` as an expression.
-    """
-    raise ValueError(s)
-
 class Grouping:
     """
     Used to aggregate :class:`entities <oemof.core.network.Entity>` in an
@@ -40,6 +35,8 @@ class Grouping:
           the old value of :obj:`groups[k]`, i.e. :obj:`groups[k]` is set to
           :meth:`merge(v, groups[k]) <Grouping.merge>`.
 
+    Instead of trying to use this class directly, have a look at its
+    subclasses, like :class:`Nodes`, which should cater for most use cases.
 
     Parameters
     ----------
@@ -64,7 +61,7 @@ class Grouping:
         if isinstance(argument, Grouping):
             return argument
         if callable(argument):
-            return Grouping(argument)
+            return Nodes(argument)
         raise NotImplementedError(
                 "Can only create Groupings from Groupings and callables for now.\n" +
                 "  Please add a comment to https://github.com/oemof/oemof/issues/60\n" +
@@ -117,10 +114,10 @@ class Grouping:
         <Grouping.value>`. Otherwise :meth:`merge(value(e), groups[key(e)])
         <Grouping.merge>` is called.
 
-        The default just wraps an entity in a list, so by default, groups are
-        lists of :class:`entities <oemof.core.network.Entity>`.
+        The default returns the :class:`entity <oemof.core.network.Entity>`
+        itself.
         """
-        return [e]
+        return e
 
     def merge(self, new, old):
         """ Merge a known :obj:`old` group with a :obj:`new` one.
@@ -130,11 +127,12 @@ class Grouping:
         group[key(e)]) <Grouping.merge>` is called and should return the new
         group to store under :meth:`key(e) <Grouping.key>`.
 
-        By default the list of :class:`entities <oemof.core.network.Entity>` is
-        :meth:`extended <list.extend>` with :obj:`[e]`.
+        The default behaviour is to raise an error.
         """
-        old.extend(new)
-        return old
+        raise ValueError( "\nGrouping \n  " +
+                          "{}:{}\nand\n  {}:{}\ncollides.\n".format(
+                                id(old), old, id(new), new) +
+                          "Possibly duplicate uids?")
 
     def __call__(self, e, d):
         k = self.key(e)
@@ -147,8 +145,27 @@ class Grouping:
                          if group in d else self.value(e))
 
 
+class Nodes(Grouping):
+    """
+    Modifies :class:`Grouping` to group :class:`entities
+    <oemof.core.network.Entity>` into :class:`lists <list>`.
+    """
+    def value(self, e):
+        """
+        Returns :obj:`[e]`, so groups are lists of :class:`entities
+        <oemof.core.network.Entity>`.
+        """
+        return [e]
 
-Grouping.UID = Grouping(attrgetter('uid'), value=lambda e: e,
-                        merge=lambda e, d: _value_error("Duplicate uid: %s" % e.uid))
+    def merge(self, new, old):
+        """
+        Merges :obj:`new` into :obj:`old` via :meth:`old.extend(new)
+        <list.extend>`.
+        """
+        old.extend(new)
+        return old
+
+
+Grouping.UID = Grouping(attrgetter('uid'))
 
 
