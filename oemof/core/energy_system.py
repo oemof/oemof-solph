@@ -108,14 +108,15 @@ class EnergySystem:
 
     For simple user defined groupings, you can just supply a function that
     computes a key from an :class:`entity <oemof.core.network.Entity>` and the
-    resulting groups will be lists of :class:`entity
+    resulting groups will be sets of :class:`entities
     <oemof.core.network.Entity>` stored under the returned keys, like in this
     example, where :class:`entities <oemof.core.network.Entity>` are grouped by
     their `type`:
 
     >>> es = EnergySystem(groupings=[type])
-    >>> buses = [Bus(uid="Bus {}".format(i)) for i in range(9)]
-    >>> components = [Component(uid="Component {}".format(i)) for i in range(9)]
+    >>> buses = set(Bus(uid="Bus {}".format(i)) for i in range(9))
+    >>> components = set( Component(uid="Component {}".format(i))
+    ...                   for i in range(9))
     >>> buses == es.groups[Bus]
     True
     >>> components == es.groups[Component]

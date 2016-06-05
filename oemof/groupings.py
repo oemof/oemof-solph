@@ -141,21 +141,21 @@ class Grouping:
 class Nodes(Grouping):
     """
     Modifies :class:`Grouping` to group :class:`entities
-    <oemof.core.network.Entity>` into :class:`lists <list>`.
+    <oemof.core.network.Entity>` into :class:`sets <set>`.
     """
     def value(self, e):
         """
-        Returns :obj:`[e]`, so groups are lists of :class:`entities
-        <oemof.core.network.Entity>`.
+        Returns a :class:`set` containing only :obj:`e`, so groups are
+        :class:`sets <set>` of :class:`entities <oemof.core.network.Entity>`.
         """
-        return [e]
+        return set((e,))
 
     def merge(self, new, old):
         """
-        Merges :obj:`new` into :obj:`old` via :meth:`old.extend(new)
-        <list.extend>`.
+        :meth:`Updates <set.update>` :obj:`old` to be the union of :obj:`old`
+        and :obj:`new`.
         """
-        old.extend(new)
+        old.update(new)
         return old
 
 DEFAULT = Grouping(attrgetter('uid'))
