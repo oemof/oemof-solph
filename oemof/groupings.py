@@ -69,13 +69,6 @@ class Grouping:
                 "  developed and any input on how you expect it to work would be\n" +
                 "  appreciated")
 
-    #: The default grouping, which is always present in addition to user
-    #: defined ones. Stores every :class:`entity <oemof.core.network.Entity>`
-    #: in a group of its own under its :attr:`uid
-    #: <oemof.core.network.Entity.uid>` and raises an error if another
-    #: :class:`entity <oemof.core.network.Entity>` with the same :attr:`uid
-    #: <oemof.core.network.Entity.uid>` get's added to the energy system.
-    UID = None
     def __init__(self, key, **kwargs):
         self.key = key
         for kw in ["value", "merge"]:
@@ -165,7 +158,16 @@ class Nodes(Grouping):
         old.extend(new)
         return old
 
+DEFAULT = Grouping(attrgetter('uid'))
+"""
+The default :class:`Grouping`.
 
-Grouping.UID = Grouping(attrgetter('uid'))
-
+This one is always present in an :class:`energy system
+<oemof.core.energy_system.EnergySystem>`. It stores every :class:`entity
+<oemof.core.network.Entity>` under its :attr:`uid
+<oemof.core.network.Entity.uid>` and raises an error if another :class:`entity
+<oemof.core.network.Entity>` with the same :attr:`uid
+<oemof.core.network.Entity.uid>` get's added to the :class:`energy system
+<oemof.core.energy_system.EnergySystem>`.
+"""
 
