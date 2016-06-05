@@ -45,8 +45,17 @@ class Grouping:
     ----------
 
     key: callable
+
+        Extract a :meth:`key <Grouping.key>` for each :class:`entity <oemof.core.network.Entity>` of the
+        :class:`energy system <oemof.core.energy_system.EnergySystem>`.
+
     value: callable, optional
+
+        Overrides the default behaviour of :meth:`value <Grouping.value>`.
+
     merge: callable, optional
+
+        Overrides the default behaviour of :meth:`merge <Grouping.merge>`.
 
     """
 
