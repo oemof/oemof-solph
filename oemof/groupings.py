@@ -56,19 +56,6 @@ class Grouping:
 
     """
 
-    @staticmethod
-    def create(argument):
-        if isinstance(argument, Grouping):
-            return argument
-        if callable(argument):
-            return Nodes(argument)
-        raise NotImplementedError(
-                "Can only create Groupings from Groupings and callables for now.\n" +
-                "  Please add a comment to https://github.com/oemof/oemof/issues/60\n" +
-                "  If you stumble upon this as this feature is currently being\n" +
-                "  developed and any input on how you expect it to work would be\n" +
-                "  appreciated")
-
     def __init__(self, key, **kwargs):
         self.key = key
         for kw in ["value", "merge"]:
