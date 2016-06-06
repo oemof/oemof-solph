@@ -82,7 +82,7 @@ class Grouping:
                 "There is no default implementation for `Groupings.key`.\n" +
                 "Congratulations, you managed to execute supposedly " +
                 "unreachable code.\n" +
-                "Please file a bug at:\n\n    " +
+                "Please let us know by filing a bug at:\n\n    " +
                 "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
