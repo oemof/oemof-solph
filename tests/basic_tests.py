@@ -75,3 +75,15 @@ class EnergySystem_Tests:
         for group in ["Foo", "Bar", "A", "B"]:
             eq_(len(ES.groups[group]), 5)
 
+    def test_grouping_filter_parameter(self):
+        g1 = es.GroupingBase( key=lambda e: "The Special One",
+                              filter=lambda e: "special" in e.uid)
+        g2 = es.Grouping( key=lambda e: "A Subset",
+                          filter=lambda e: "subset" in e.uid)
+        ES = es.EnergySystem(groupings=[g1, g2])
+        special = Entity(uid="special")
+        subset = set(Entity(uid="subset: {}".format(i)) for i in range(10))
+        others = set(Entity(uid="other: {}".format(i)) for i in range(10))
+        eq_(ES.groups["The Special One"], special)
+        eq_(ES.groups["A Subset"], subset)
+
