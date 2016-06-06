@@ -39,6 +39,8 @@ nodes_flows = pd.read_csv('nodes_flows.csv', sep=',')
 nodes_flows_seq = pd.read_csv('nodes_flows_seq.csv', sep=',', header=None)
 nodes_flows_seq.drop(0, axis=1, inplace=True)
 nodes_flows_seq = nodes_flows_seq.transpose()
+nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
+nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
 
 node_dc = {}
 for idx, row in nodes_flows.iterrows():
@@ -57,6 +59,7 @@ for idx, row in nodes_flows.iterrows():
     # eval to be substituted due to security issues. but works for now..
     node = eval(row_dc['class'])
     node.label = row_dc['label']
+
     if node not in node_dc:
         node_dc[row_dc['label']] = node
 
@@ -67,7 +70,11 @@ for idx, row in nodes_flows.iterrows():
                 if row_dc[attr] != 'seq':
                     setattr(node, attr, row_dc[attr])
                 else:
-                    print('seq')
+                    seq = nodes_flows_seq.loc[row_dc['class'], row_dc['label'],
+                                              row_dc['source'], row_dc['target'],
+                                              attr]
+                    seq = [i for i in seq.values]
+                    setattr(node, attr, seq)
 
     # set busses and flows for all sources
     if row_dc['class'] == 'Source':
