@@ -147,8 +147,7 @@ class Nodes(Grouping):
         return old
 
 DEFAULT = Grouping(attrgetter('uid'))
-"""
-The default :class:`Grouping`.
+""" The default :class:`Grouping`.
 
 This one is always present in an :class:`energy system
 <oemof.core.energy_system.EnergySystem>`. It stores every :class:`entity
