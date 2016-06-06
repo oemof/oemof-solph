@@ -87,3 +87,19 @@ class EnergySystem_Tests:
         eq_(ES.groups["The Special One"], special)
         eq_(ES.groups["A Subset"], subset)
 
+    def test_non_callable_group_keys(self):
+        collect_everything = es.Grouping(key="everything")
+        g1 = es.GroupingBase( key="The Special One",
+                              filter=lambda e: "special" in e.uid)
+        g2 = es.Grouping( key="A Subset",
+                          filter=lambda e: "subset" in e.uid)
+        ES = es.EnergySystem(groupings=[g1, g2, collect_everything])
+        special = Entity(uid="special")
+        subset = set(Entity(uid="subset: {}".format(i)) for i in range(2))
+        others = set(Entity(uid="other: {}".format(i)) for i in range(2))
+        everything = subset.union(others)
+        everything.add(special)
+        eq_(ES.groups["The Special One"], special)
+        eq_(ES.groups["A Subset"], subset)
+        eq_(ES.groups["everything"], everything)
+

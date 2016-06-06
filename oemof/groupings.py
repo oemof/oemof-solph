@@ -47,11 +47,11 @@ class Grouping:
     Parameters
     ----------
 
-    key: callable
+    key: callable or hashable
 
-        Extract a :meth:`key <Grouping.key>` for each :class:`entity
-        <oemof.core.network.Entity>` of the :class:`energy system
-        <oemof.core.energy_system.EnergySystem>`.
+        Specifies (if not callable) or extracts (if callable) a :meth:`key
+        <Grouping.key>` for each :class:`entity <oemof.core.network.Entity>` of
+        the :class:`energy system <oemof.core.energy_system.EnergySystem>`.
 
     value: callable, optional
 
@@ -60,7 +60,9 @@ class Grouping:
     filter: callable, optional
 
         If supplied, whatever is returned by :meth:`value` is :func:`filtered
-        <builtins.filter>` through this. See :meth:`filter` for more details.
+        <builtins.filter>` through this. Mostly useful in conjunction with
+        static (i.e. non-callable) :meth:`keys <key>`.
+        See :meth:`filter` for more details.
 
     merge: callable, optional
 
@@ -151,7 +153,7 @@ class Grouping:
 
 
     def __call__(self, e, d):
-        k = self.key(e)
+        k = self.key(e) if callable(self.key) else self.key
         if k is None:
             return
         v = self.value(e)
