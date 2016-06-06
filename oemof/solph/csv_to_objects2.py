@@ -70,8 +70,10 @@ for idx, row in nodes_flows.iterrows():
                 if row_dc[attr] != 'seq':
                     setattr(node, attr, row_dc[attr])
                 else:
-                    seq = nodes_flows_seq.loc[row_dc['class'], row_dc['label'],
-                                              row_dc['source'], row_dc['target'],
+                    seq = nodes_flows_seq.loc[row_dc['class'],
+                                              row_dc['label'],
+                                              row_dc['source'],
+                                              row_dc['target'],
                                               attr]
                     seq = [i for i in seq.values]
                     setattr(node, attr, seq)
@@ -93,10 +95,4 @@ for idx, row in nodes_flows.iterrows():
 print(node_dc)
 for k, v in node_dc.items():
     print(k, v, '\n')
-
-#    # only set attributes that exist in class and that have values
-#    # problem: attributes (e.g. fixex, cap_loss, ...) not contained in dir(node)
-#    # vars(node) might be a solution
-#    for attr in node_attrs:
-#        if attr in row_dc.keys() and row_dc[attr]:
-#            print('Exists:', row_dc[attr])
+node_dc['storage1'].capacity_loss
