@@ -73,5 +73,5 @@ class EnergySystem_Tests:
                                 ("A" if i < 5 else "B"))
                      for i in range(10)]
         for group in ["Foo", "Bar", "A", "B"]:
-            ok_(len(ES.groups[group]) == 5)
+            eq_(len(ES.groups[group]), 5)
 
