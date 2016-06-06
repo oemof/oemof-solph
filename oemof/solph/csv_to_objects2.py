@@ -43,29 +43,46 @@ nodes_flows_seq = nodes_flows_seq.transpose()
 node_dc = {}
 for idx, row in nodes_flows.iterrows():
 
+    # save column labels and row values in dict
     row_dc = dict(zip(row.index.values, row.values))
+
+    # create flow and set attributes
+    flow = Flow()
+    flow_attrs = vars(Flow()).keys()
+    for attr in flow_attrs:
+        if attr in row_dc.keys() and row_dc[attr]:
+            setattr(flow, attr, row_dc[attr])
 
     # eval to be substituted due to security issues. but works for now..
     node = eval(row['class'])
-    node_attrs = [attr for attr in dir(node)]
 
-    # save object in dict
-    if row['label'] not in node_dc.keys():
+    # set node attributes
+    print('Node attributes for: ', node.label, '\n')
+    for attr in row_dc.keys():
+        if attr not in flow_attrs:
+            print(attr)
+    print('\n')
+
+    # save node in dict
+    if node not in node_dc:
         node_dc[row['label']] = node
 
-    # set general attributes
+    # set general node attributes
+    #node_attrs = [attr for attr in dir(node)]
     node.label = row['label']
 
-    # set attributes for specific classes
+    # set attributes for specific nodes
     if row['class'] == 'Source':
         if row['target'] not in node_dc.keys():
             node_dc[row['target']] = Bus(label=row['target'])
         node.outputs = {node_dc[row['target']]: Flow()}
 
+    # create flows and create busses with their attributes
+    #print(vars(Flow()).keys())
+
 
 # %% print stuff
 print(node_dc)
-print(vars(Flow()))
 for k, v in node_dc.items():
     print(k, v, v.outputs, '\n')
 
