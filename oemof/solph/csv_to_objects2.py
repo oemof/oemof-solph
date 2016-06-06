@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from oemof.network import Bus
-from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source
+from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source, Bus
 
 
 # %% new core interface
@@ -43,25 +42,31 @@ nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
 nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
 
 node_dc = {}
+
 for idx, row in nodes_flows.iterrows():
 
     # save column labels and row values in dict
     row_dc = dict(zip(row.index.values, row.values))
 
-    # create flow and set attributes
+    # create flow
     flow = Flow()
     flow_attrs = vars(Flow()).keys()
     for attr in flow_attrs:
         if attr in row_dc.keys() and row_dc[attr]:
-            setattr(flow, attr, row_dc[attr])
+            if row_dc[attr] != 'seq':
+                setattr(flow, attr, row_dc[attr])
+            else:
+                seq = nodes_flows_seq.loc[row_dc['class'],
+                                          row_dc['label'],
+                                          row_dc['source'],
+                                          row_dc['target'],
+                                          attr]
+                seq = [i for i in seq.values]
+                setattr(flow, attr, seq)
 
-    # create node with general attributes and save it in dict
-    # eval to be substituted due to security issues. but works for now..
+    # create node (eval to be substituted due to security issues)
     node = eval(row_dc['class'])
     node.label = row_dc['label']
-
-    if node not in node_dc:
-        node_dc[row_dc['label']] = node
 
     # set node attributes
     for attr in row_dc.keys():
@@ -78,21 +83,42 @@ for idx, row in nodes_flows.iterrows():
                     seq = [i for i in seq.values]
                     setattr(node, attr, seq)
 
-    # set busses and flows for all sources
-    if row_dc['class'] == 'Source':
+    # set inputs and outputs
+    if row_dc['label'] == row_dc['target']:
         if row_dc['target'] not in node_dc.keys():
             node_dc[row_dc['target']] = Bus(label=row_dc['target'])
-        node.outputs = {node_dc[row_dc['target']]: flow}
+        outputs = {node_dc[row_dc['target']]: flow}
 
-    # set busses and flows for all sinks
-    if row_dc['class'] == 'Sink':
-        if row_dc['source'] not in node_dc.keys():
-            node_dc[row_dc['source']] = Bus(label=row_dc['source'])
-        node.inputs = {node_dc[row_dc['source']]: flow}
+    # evtl. besser mit settattr?
+    if row_dc['label'] in node_dc.keys():
+        node_dc[row_dc['label']].outputs = outputs
+#    else:
+#        node_dc[row_dc['label']].outputs.update(outputs)
+
+    # save node in dictionary
+    if node not in node_dc:
+        node_dc[row_dc['label']] = node
+
+
+#            node_dc[row_dc['target']].outputs.update()
+
+#    # set busses and flows for all sources
+#    if row_dc['class'] == 'Source':
+#        if row_dc['target'] not in node_dc.keys():
+#            node_dc[row_dc['target']] = Bus(label=row_dc['target'])
+#        node.outputs = {node_dc[row_dc['target']]: flow}
 
 
 # %% print stuff
-print(node_dc)
-for k, v in node_dc.items():
-    print(k, v, '\n')
-node_dc['storage1'].capacity_loss
+#
+#print(node_dc)
+
+#for k, v in node_dc.items():
+#    print('Label: ', v.label)
+#    print('Outputs', v.outputs)
+#    print('Inputs', v.inputs)
+#    print('\n')
+#
+#print(node_dc['chp1'].conversion_factors)
+#
+#print(node_dc['storage1'].capacity_loss)
