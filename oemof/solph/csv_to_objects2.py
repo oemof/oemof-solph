@@ -55,25 +55,31 @@ for idx, row in nodes_flows.iterrows():
 
     # create node with general attributes and save it in dict
     # eval to be substituted due to security issues. but works for now..
-    node = eval(row['class'])
-    node.label = row['label']
+    node = eval(row_dc['class'])
+    node.label = row_dc['label']
     if node not in node_dc:
-        node_dc[row['label']] = node
+        node_dc[row_dc['label']] = node
 
     # set node attributes
     for attr in row_dc.keys():
-        if attr not in flow_attrs and \
-           attr not in ('class', 'source', 'target'):
-            setattr(node, attr, row_dc[attr])
+        if (attr not in flow_attrs and
+           attr not in ('class', 'source', 'target')):
+                if row_dc[attr] != 'seq':
+                    setattr(node, attr, row_dc[attr])
+                else:
+                    print('seq')
 
-    # set busses and flows per node type
-    if row['class'] == 'Source':
-        if row['target'] not in node_dc.keys():
-            node_dc[row['target']] = Bus(label=row['target'])
-        node.outputs = {node_dc[row['target']]: flow}
+    # set busses and flows for all sources
+    if row_dc['class'] == 'Source':
+        if row_dc['target'] not in node_dc.keys():
+            node_dc[row_dc['target']] = Bus(label=row_dc['target'])
+        node.outputs = {node_dc[row_dc['target']]: flow}
 
-    # create flows and create busses with their attributes
-    #print(vars(Flow()).keys())
+    # set busses and flows for all sinks
+    if row_dc['class'] == 'Sink':
+        if row_dc['source'] not in node_dc.keys():
+            node_dc[row_dc['source']] = Bus(label=row_dc['source'])
+        node.inputs = {node_dc[row_dc['source']]: flow}
 
 
 # %% print stuff
