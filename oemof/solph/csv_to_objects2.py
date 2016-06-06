@@ -53,29 +53,24 @@ for idx, row in nodes_flows.iterrows():
         if attr in row_dc.keys() and row_dc[attr]:
             setattr(flow, attr, row_dc[attr])
 
+    # create node with general attributes and save it in dict
     # eval to be substituted due to security issues. but works for now..
     node = eval(row['class'])
-
-    # set node attributes
-    print('Node attributes for: ', node.label, '\n')
-    for attr in row_dc.keys():
-        if attr not in flow_attrs:
-            print(attr)
-    print('\n')
-
-    # save node in dict
+    node.label = row['label']
     if node not in node_dc:
         node_dc[row['label']] = node
 
-    # set general node attributes
-    #node_attrs = [attr for attr in dir(node)]
-    node.label = row['label']
+    # set node attributes
+    for attr in row_dc.keys():
+        if attr not in flow_attrs and \
+           attr not in ('class', 'source', 'target'):
+            setattr(node, attr, row_dc[attr])
 
-    # set attributes for specific nodes
+    # set busses and flows per node type
     if row['class'] == 'Source':
         if row['target'] not in node_dc.keys():
             node_dc[row['target']] = Bus(label=row['target'])
-        node.outputs = {node_dc[row['target']]: Flow()}
+        node.outputs = {node_dc[row['target']]: flow}
 
     # create flows and create busses with their attributes
     #print(vars(Flow()).keys())
@@ -84,7 +79,7 @@ for idx, row in nodes_flows.iterrows():
 # %% print stuff
 print(node_dc)
 for k, v in node_dc.items():
-    print(k, v, v.outputs, '\n')
+    print(k, v, '\n')
 
 #    # only set attributes that exist in class and that have values
 #    # problem: attributes (e.g. fixex, cap_loss, ...) not contained in dir(node)
