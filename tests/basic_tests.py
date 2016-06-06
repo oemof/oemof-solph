@@ -60,6 +60,7 @@ class EnergySystem_Tests:
             for e in grouped:
                 if isinstance(g, Iterable) and not isinstance(g, str):
                     ok_(e in g)
+
     def test_defining_multiple_groupings_with_one_function(self):
         def assign_to_multiple_groups_in_one_go(n):
             g1 = n.uid[-1]
