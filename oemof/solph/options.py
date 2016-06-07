@@ -104,18 +104,28 @@ class Discrete:
         self.minimum_downtime = kwargs.get('minimum_downtime')
 
 
-def EnergySystemFromCSV(file_nodes_flows, file_nodes_flows_sequences):
-    """
+def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
+                 delimiter=','):
+    """ Creates nodes with their respective flows and sequences from
+    a pre-defined CSV structure. An example has been provided in the
+    development examples
+
+    Parameters
+    ----------
+    file_nodes_flows : string with name of CSV file of nodes and flows
+    file_nodes_flows_sequences : string with name of CSV file of sequences
+    delimiter : delimiter of CSV file
+
     """
 
     import math
     import pandas as pd
-    from oemof.solph.network import (Bus, Source, Sink, Flow, Investment,
+    from oemof.solph.network import (Bus, Source, Sink, Flow,
                                      LinearTransformer, Storage)
     from oemof.solph.options import Sequence
 
-    nodes_flows = pd.read_csv(file_nodes_flows, sep=',')
-    nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=',',
+    nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
+    nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
                                   header=None)
     nodes_flows_seq.drop(0, axis=1, inplace=True)
     nodes_flows_seq = nodes_flows_seq.transpose()
@@ -129,13 +139,13 @@ def EnergySystemFromCSV(file_nodes_flows, file_nodes_flows_sequences):
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
 
-        # create flow
+        # create flow and set flow attributes
         flow = Flow()
         flow_attrs = vars(Flow()).keys()
         for attr in flow_attrs:
             if attr in row.keys() and row[attr]:
                 if row[attr] != 'seq':
-                    setattr(flow, attr, Sequence(row[attr]))  # solph seq
+                    setattr(flow, attr, Sequence(row[attr]))
                 else:
                     seq = nodes_flows_seq.loc[row['class'],
                                               row['label'],
@@ -145,17 +155,17 @@ def EnergySystemFromCSV(file_nodes_flows, file_nodes_flows_sequences):
                     seq = [i for i in seq.values]
                     setattr(flow, attr, seq)
 
-        # create node (eval to be substituted due to security issues)
+        # create node and set node attributes
+        # (attributes must be placed either in the first line or in all lines
+        #  of multiple node entries (flows) in csv file with nodes and flows)
         node = eval(row['class'])
         node.label = row['label']
-
-        # set node attributes (must be the first line of node entries in csv)
         for attr in row.keys():
             if (attr not in flow_attrs and
                attr not in ('class', 'label', 'source', 'target',
                             'conversion_factors')):
                     if row[attr] != 'seq':
-                        setattr(node, attr, Sequence(row[attr]))  # solph seq
+                        setattr(node, attr, Sequence(row[attr]))
                     else:
                         seq = nodes_flows_seq.loc[row['class'],
                                                   row['label'],
@@ -173,7 +183,7 @@ def EnergySystemFromCSV(file_nodes_flows, file_nodes_flows_sequences):
         else:
             inputs = {}
 
-        # set output entry for the current line
+        # create an output entry for the current line
         if row['label'] == row['source']:
             if row['target'] not in nodes.keys():
                 nodes[row['target']] = Bus(label=row['target'])
@@ -181,12 +191,11 @@ def EnergySystemFromCSV(file_nodes_flows, file_nodes_flows_sequences):
         else:
             outputs = {}
 
-        # set conversion_factor entry for the current line
+        # create a conversion_factor entry for the current line
         if row['target'] and not math.isnan(row['conversion_factors']):
             conversion_factors = {nodes[row['target']]:
                                   row['conversion_factors']}
         else:
-            pass
             conversion_factors = {}
 
         # add node to dict and assign attributes depending on
