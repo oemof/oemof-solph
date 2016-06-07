@@ -10,6 +10,8 @@ import oemof.solph as solph
 from oemof.solph.network import (Bus, Source, Sink, Flow, Investment,
                                  LinearTransformer, Storage)
 from oemof.solph import OperationalModel
+from oemof.solph.options import Sequence
+
 
 # %% new core interface
 
@@ -61,7 +63,7 @@ for idx, row in nodes_flows.iterrows():
     for attr in flow_attrs:
         if attr in row_dc.keys() and row_dc[attr]:
             if row_dc[attr] != 'seq':
-                setattr(flow, attr, row_dc[attr]) # row_dc[attr] als solph seq
+                setattr(flow, attr, Sequence(row_dc[attr]))  # solph seq
             else:
                 seq = nodes_flows_seq.loc[row_dc['class'],
                                           row_dc['label'],
@@ -81,7 +83,7 @@ for idx, row in nodes_flows.iterrows():
            attr not in ('class', 'label', 'source', 'target',
                         'conversion_factors')):
                 if row_dc[attr] != 'seq':
-                    setattr(node, attr, row_dc[attr]) # row_dc[attr] als solph seq
+                    setattr(node, attr, Sequence(row_dc[attr]))  # solph seq
                 else:
                     seq = nodes_flows_seq.loc[row_dc['class'],
                                               row_dc['label'],
