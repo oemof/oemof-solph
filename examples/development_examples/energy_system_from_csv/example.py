@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import math
+
 import logging
 import pandas as pd
 
@@ -23,7 +23,7 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
                      delimiter=';')
 
-print(nodes)
+#print(nodes)
 
 # print out nodes
 # errors: confused labels for sources
@@ -35,13 +35,11 @@ for k, v in nodes.items():
         if '_' not in i:
             print(i, ':', getattr(v, str(i)))
 
-#om = OperationalModel(es, timeindex=datetime_index)
+om = OperationalModel(es, timeindex=datetime_index)
 #
-#om.solve(solve_kwargs={'tee': True})
+om.solve(solve_kwargs={'tee': True})
 #
-#om.write('optimization_problem.lp',
-#         io_options={'symbolic_solver_labels': True})
-#
-#om.pprint()
-#
-#logging.info('Done!')
+om.write('optimization_problem.lp',
+         io_options={'symbolic_solver_labels': True})
+
+logging.info('Done!')
