@@ -44,6 +44,14 @@ class Grouping:
     Instead of trying to use this class directly, have a look at its
     subclasses, like :class:`Nodes`, which should cater for most use cases.
 
+    Notes
+    -----
+
+    When overriding methods using any of the constructor parameters, you don't
+    have access to :obj:`self` in the corresponding function. If you need
+    access to :obj:`self`, subclass :class:`Grouping` and override the methods
+    in the subclass.
+
     Parameters
     ----------
 
