@@ -1,11 +1,11 @@
 """ All you need to create groups of stuff in your energy system.
 """
 try:
-    from collections.abc import ( Hashable, Iterable, Mapping,
-                                  MutableMapping as MM)
+    from collections.abc import (Hashable, Iterable, Mapping,
+                                 MutableMapping as MM)
 except ImportError:
-    from collections import ( Hashable, Iterable, Mapping,
-                              MutableMapping as MM)
+    from collections import (Hashable, Iterable, Mapping,
+                             MutableMapping as MM)
 from itertools import filterfalse
 from operator import attrgetter
 
@@ -93,11 +93,11 @@ class Grouping:
         Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
         raise NotImplementedError(
-                "There is no default implementation for `Groupings.key`.\n" +
-                "Congratulations, you managed to execute supposedly " +
-                "unreachable code.\n" +
-                "Please let us know by filing a bug at:\n\n    " +
-                "https://github.com/oemof/oemof/issues\n")
+            "There is no default implementation for `Groupings.key`.\n" +
+            "Congratulations, you managed to execute supposedly " +
+            "unreachable code.\n" +
+            "Please let us know by filing a bug at:\n\n    " +
+            "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
         """ Generate the group obtained from :obj:`e`.
@@ -124,10 +124,10 @@ class Grouping:
 
         The default behaviour is to raise an error.
         """
-        raise ValueError( "\nGrouping \n  " +
-                          "{}:{}\nand\n  {}:{}\ncollides.\n".format(
-                                id(old), old, id(new), new) +
-                          "Possibly duplicate uids?")
+        raise ValueError("\nGrouping \n  " +
+                         "{}:{}\nand\n  {}:{}\ncollides.\n".format(
+                             id(old), old, id(new), new) +
+                         "Possibly duplicate uids?")
 
     def filter(self, group):
         """
@@ -145,11 +145,11 @@ class Grouping:
 
         """
         raise NotImplementedError(
-                "`Groupings.filter` called without being overridden.\n" +
-                "Congratulations, you managed to execute supposedly " +
-                "unreachable code.\n" +
-                "Please let us know by filing a bug at:\n\n    " +
-                "https://github.com/oemof/oemof/issues\n")
+            "`Groupings.filter` called without being overridden.\n" +
+            "Congratulations, you managed to execute supposedly " +
+            "unreachable code.\n" +
+            "Please let us know by filing a bug at:\n\n    " +
+            "https://github.com/oemof/oemof/issues\n")
 
 
     def __call__(self, e, d):
@@ -168,11 +168,11 @@ class Grouping:
             v = (self.filter or (lambda x: x))(v)
         if not v:
             return
-        for group in (k if ( isinstance(k, Iterable) and not
-                             isinstance(k, Hashable))
+        for group in (k if (isinstance(k, Iterable) and not
+                            isinstance(k, Hashable))
                         else [k]):
-            d[group] = ( self.merge(self.value(e), d[group])
-                         if group in d else self.value(e))
+            d[group] = (self.merge(self.value(e), d[group])
+                        if group in d else self.value(e))
 
 
 class Nodes(Grouping):
