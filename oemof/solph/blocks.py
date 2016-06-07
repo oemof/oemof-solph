@@ -182,10 +182,9 @@ class InvestmentStorage(SimpleBlock):
         def _initial_capacity_invest_rule(block, n):
             """Set capacity of last timestep to fixed value of initial_capacity.
             """
-            expr = (self.capacity[n, self.t_end] == (n.initial_capacity *
-                                                     self.invest[n]))
+            expr = (self.capacity[n, m.TIMESTEPS[-1]] == (n.initial_capacity *
+                                                          self.invest[n]))
             return expr
-        self.t_end = len(m.TIMESTEPS) - 1
         self.initial_capacity_invest = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
