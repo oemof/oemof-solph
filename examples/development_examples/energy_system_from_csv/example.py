@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import pandas as pd
 import math
-from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source, Bus
+import logging
+import pandas as pd
 
+from oemof.tools import logger
+from oemof.core import energy_system as core_es
+import oemof.solph as solph
+from oemof.solph.network import (Bus, Source, Sink, Flow, Investment,
+                                 LinearTransformer, Storage)
+from oemof.solph import OperationalModel
 
 # %% new core interface
 
@@ -55,7 +61,7 @@ for idx, row in nodes_flows.iterrows():
     for attr in flow_attrs:
         if attr in row_dc.keys() and row_dc[attr]:
             if row_dc[attr] != 'seq':
-                setattr(flow, attr, row_dc[attr])
+                setattr(flow, attr, row_dc[attr]) # row_dc[attr] als solph seq
             else:
                 seq = nodes_flows_seq.loc[row_dc['class'],
                                           row_dc['label'],
@@ -69,13 +75,13 @@ for idx, row in nodes_flows.iterrows():
     node = eval(row_dc['class'])
     node.label = row_dc['label']
 
-    # set node attributes (must be in first line of node entries in csv)
+    # set node attributes (must be in the first line of node entries in csv)
     for attr in row_dc.keys():
         if (attr not in flow_attrs and
            attr not in ('class', 'label', 'source', 'target',
                         'conversion_factors')):
                 if row_dc[attr] != 'seq':
-                    setattr(node, attr, row_dc[attr])
+                    setattr(node, attr, row_dc[attr]) # row_dc[attr] als solph seq
                 else:
                     seq = nodes_flows_seq.loc[row_dc['class'],
                                               row_dc['label'],
