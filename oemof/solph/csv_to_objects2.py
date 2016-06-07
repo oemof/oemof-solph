@@ -68,7 +68,7 @@ for idx, row in nodes_flows.iterrows():
     node = eval(row_dc['class'])
     node.label = row_dc['label']
 
-    # set node attributes
+    # set node attributes (must be in first line of node entries in csv)
     for attr in row_dc.keys():
         if (attr not in flow_attrs and
            attr not in ('class', 'label', 'source', 'target')):
@@ -83,14 +83,24 @@ for idx, row in nodes_flows.iterrows():
                     seq = [i for i in seq.values]
                     setattr(node, attr, seq)
 
-    # evtl. besser mit settattr?
+    # set inputs
+    if row_dc['label'] == row_dc['target']:
+        # inputs
+        #print(row_dc['label'], row_dc['source'], row_dc['target'])
+        if row_dc['source'] not in node_dc.keys():
+            node_dc[row_dc['source']] = Bus(label=row_dc['source'])
+        inputs = {node_dc[row_dc['source']]: flow}
+
+    # if node exists, update attributes, otherwise add it
     if node.label in node_dc.keys():
         #print('yee', node.label)
+        node.inputs.update(inputs)
         node.outputs = 'Foo'
     else:
+        node.inputs = inputs
         node_dc[node.label] = node
 
-    print(idx, node_dc)
+    #print(idx, node_dc)
 
 
 # %% print stuff
@@ -98,10 +108,8 @@ for idx, row in nodes_flows.iterrows():
 print('\nFinally:\n\n', node_dc)
 
 #for k, v in node_dc.items():
-#    print('Label: ', v.label)
-#    print('Outputs', v.outputs)
-#    print('Inputs', v.inputs)
-#    print('\n')
+#    if type(v).__name__ != 'Bus':
+#        print('Label:', v.label, ' Inputs:', v.inputs)
 
 print(node_dc['chp1'].conversion_factors)
 
