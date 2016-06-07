@@ -65,7 +65,8 @@ class Storage(SimpleBlock):
         self.STORAGES = Set(initialize=[n for n in group])
 
         def _storage_capacity_bound_rule(block, n, t):
-            """ Returns bounds for capacity variable of storage n in timestep t
+            """Rule definition for bounds of capacity variable of storage n
+            in timestep t
             """
             bounds = (n.nominal_capacity * n.capacity_min[t],
                       n.nominal_capacity * n.capacity_max[t])
@@ -82,7 +83,8 @@ class Storage(SimpleBlock):
 
         # storage balance constraint
         def _storage_balance_rule(block, n, t):
-            """ Returns the storage balance for every storage n in timestep t
+            """Rule definition for the storage balance of every storage n and
+            timestep t
             """
             expr = 0
             expr += block.capacity[n, t]
@@ -97,7 +99,9 @@ class Storage(SimpleBlock):
                                   rule=_storage_balance_rule)
 
     def _objective_expression(self):
-        """
+        """Objective expression for storages with no investment.
+        Note: This adds only fixed costs as variable costs are already
+        added in the Block :class:`Flow`.
         """
         if not hasattr(self, 'STORAGES'):
             return 0
@@ -288,7 +292,7 @@ class Flow(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """
+        """ Creates sets, variables and constraints for all standard flows.
 
         Parameters
         ----------
@@ -335,8 +339,8 @@ class Flow(SimpleBlock):
         # ######################### CONSTRAINTS ###############################
 
         def _flow_summed_max_rule(model):
-            """constraint to bound the sum of a flow over all timesteps with
-             maxim"""
+            """Rule definition for build action of max. sum flow constraint.
+            """
             for inp, out in self.SUMMED_MAX_FLOWS:
                 lhs = sum(m.flow[inp, out, ts] * m.timeincrement
                           for ts in m.TIMESTEPS)
@@ -347,8 +351,7 @@ class Flow(SimpleBlock):
         self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
 
         def _flow_summed_min_rule(model):
-            """ Rule for build action. Constraint to bound the sum of a flow
-            over all timesteps with minim.
+            """Rule definition for build action of min. sum flow constraint.
             """
             for inp, out in self.SUMMED_MIN_FLOWS:
                 lhs = sum(m.flow[inp, out, ts] * m.timeincrement
@@ -360,7 +363,7 @@ class Flow(SimpleBlock):
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
         def _positive_gradient_flow_rule(model):
-            """constraint for positive gradient
+            """Rule definition for positive gradient constraint.
             """
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for ts in m.TIMESTEPS:
@@ -376,7 +379,7 @@ class Flow(SimpleBlock):
             rule=_positive_gradient_flow_rule)
 
         def _negative_gradient_flow_rule(model):
-            """constraint for negative gradient
+            """Rule definition for negative gradient constraint.
             """
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
                 for ts in m.TIMESTEPS:
@@ -393,7 +396,8 @@ class Flow(SimpleBlock):
             rule=_negative_gradient_flow_rule)
 
     def _objective_expression(self):
-        """
+        """ Objective expression for all standard flows with fixed costs
+        and variable costs.
         """
         m = self.parent_block()
 
@@ -426,7 +430,8 @@ class InvestmentFlow(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """
+        """Creates sets, variables and constraints for Flow with investment
+        attribute of type class:`.Investment`.
 
         Parameters
         ----------
@@ -460,7 +465,7 @@ class InvestmentFlow(SimpleBlock):
 
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
-            """ Returns bounds for invest_flow variable
+            """Rule definition for bounds of invest variable.
             """
             return 0, m.flows[i, o].investment.maximum
         # create variable bounded for flows with investement attribute
@@ -472,7 +477,8 @@ class InvestmentFlow(SimpleBlock):
         # TODO: Add gradient constraints
 
         def _investflow_bound_rule(block, i, o, t):
-            """ Returns constraint to bound flow variable if flow investment
+            """Rule definition of constraint to bound flow variable
+            of investment flow
             """
             return (m.flow[i, o, t] == (self.invest[i, o] *
                                         m.flows[i, o].actual_value[t]))
@@ -518,7 +524,9 @@ class InvestmentFlow(SimpleBlock):
                                      rule=_summed_min_investflow_rule)
 
     def _objective_expression(self):
-        """
+        """ Objective expression for flows with investment attribute of type
+        class:`.Investment`. The returned costs are fixed, variable and
+        investment costs.
         """
         m = self.parent_block()
         fixed_costs = 0
@@ -545,14 +553,13 @@ class InvestmentFlow(SimpleBlock):
 
 
 class Bus(SimpleBlock):
-    """ Creates emtpy pyomo constraint for bus balance. Construct the
-    constraints with _create method.
+    """
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraints for the BusBalance block.
+        """Creates the balance constraints for the class:`Bus` block.
 
         Parameters
         ----------
@@ -582,15 +589,24 @@ class Bus(SimpleBlock):
 
 
 class LinearTransformer(SimpleBlock):
-    """ Creates pyomo emtpy constraint for linear relation of 1:n flows.
-    Construct the constraints with _create method.
+    """Block for the linear relation of nodes with type
+    class:`.LinearTransformer`
+
+    **The following constraints are created:**
+
+    linear_relation
+
+        .. math:: flow_{i_n, n}(t) * n.conversion_factor[o](t) = \
+        flow_{n, o}(t), \\forall t \\in TIMESTEPS, \
+        \\forall n in group, \\forall o in \\in OUTPUTS(n)
 
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the LinearRelation block.
+        """ Creates the linear constraint for the class:`LinearTransformer`
+        block.
 
         Parameters
         ----------
@@ -623,12 +639,14 @@ class LinearTransformer(SimpleBlock):
 
 class Discrete(SimpleBlock):
     """
+    TODO: Add Discrete block docstring.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the LinearRelation block.
+        """ Creates set, variables, constraints for all flow object with
+        a attribute flow of type class:`.Discrete`.
 
         Parameters
         ----------
@@ -654,6 +672,8 @@ class Discrete(SimpleBlock):
         self.status = Var(self.FLOWS, m.TIMESTEPS, within=Binary)
 
         def _minimum_flow_rule(block, i, o, t):
+            """Rule definition for MILP minimum flow constraints.
+            """
             expr = (self.status[i, o, t] *
                     m.flows[i, o].min[t] * m.flows[i, o].nominal_value >=
                     m.flow[i, o, t])
@@ -662,6 +682,8 @@ class Discrete(SimpleBlock):
                                        rule=_minimum_flow_rule)
 
         def _maximum_flow_rule(block, i, o, t):
+            """Rule definition for MILP maximum flow constraints.
+            """
             expr = (self.status[i, o, t] *
                     m.flows[i, o].max[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
