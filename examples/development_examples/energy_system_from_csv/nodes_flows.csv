@@ -1,6 +1,6 @@
 class;label;source;target;conversion_factors;nominal_value;actual_value;min;max;fixed_costs;variable_costs;summed_max;summed_min;fixed;capacity_loss;outflow_conversion_factor;inflow_conversion_factor;max_capacity?;initial_capacity;some_attribute;nominal_capacity
 Source;wind1;wind1;bus_el1;;100;seq;;;;;;;True;;;;;;;
-Source;solar1;solar1;bus_el1;;100;seq;;;;;;;True;;;;;;;
+Source;solar1;solar1;bus_el1;;150;seq;;;;;;;True;;;;;;;
 Sink;demand1;bus_el1;demand1;;300;seq;;;;;;;True;;;;;;;
 LinearTransformer;chp1;bus_gas1;chp1;;;;;;;;;;;;;;;;;
 LinearTransformer;chp1;chp1;bus_el1;0.36;300;;;seq;;30;;;;;;;;;;
