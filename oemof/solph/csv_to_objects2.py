@@ -85,31 +85,38 @@ for idx, row in nodes_flows.iterrows():
 
     # set inputs
     if row_dc['label'] == row_dc['target']:
-        # inputs
-        #print(row_dc['label'], row_dc['source'], row_dc['target'])
         if row_dc['source'] not in node_dc.keys():
             node_dc[row_dc['source']] = Bus(label=row_dc['source'])
         inputs = {node_dc[row_dc['source']]: flow}
+    else:
+        inputs = {}
+
+    # set outputs
+    if row_dc['label'] == row_dc['source']:
+        if row_dc['target'] not in node_dc.keys():
+            node_dc[row_dc['target']] = Bus(label=row_dc['target'])
+        outputs = {node_dc[row_dc['target']]: flow}
+    else:
+        outputs = {}
 
     # if node exists, update attributes, otherwise add it
     if node.label in node_dc.keys():
-        #print('yee', node.label)
         node.inputs.update(inputs)
-        node.outputs = 'Foo'
+        node.outputs.update(outputs)
     else:
         node.inputs = inputs
+        node.outputs = outputs
         node_dc[node.label] = node
-
-    #print(idx, node_dc)
-
 
 # %% print stuff
 #
-print('\nFinally:\n\n', node_dc)
+#print('\nFinally:\n\n', node_dc)
 
-#for k, v in node_dc.items():
-#    if type(v).__name__ != 'Bus':
-#        print('Label:', v.label, ' Inputs:', v.inputs)
+for k, v in node_dc.items():
+    if type(v).__name__ != 'Bus':
+        print('Label: ', v.label)
+        print('Inputs: ', v.inputs)
+        print('Outputs:', v.outputs)
 
 print(node_dc['chp1'].conversion_factors)
 
