@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+import math
 from oemof.solph import Flow, Storage, LinearTransformer, Sink, Source, Bus
 
 
@@ -71,7 +72,8 @@ for idx, row in nodes_flows.iterrows():
     # set node attributes (must be in first line of node entries in csv)
     for attr in row_dc.keys():
         if (attr not in flow_attrs and
-           attr not in ('class', 'label', 'source', 'target')):
+           attr not in ('class', 'label', 'source', 'target',
+                        'conversion_factors')):
                 if row_dc[attr] != 'seq':
                     setattr(node, attr, row_dc[attr])
                 else:
@@ -83,7 +85,7 @@ for idx, row in nodes_flows.iterrows():
                     seq = [i for i in seq.values]
                     setattr(node, attr, seq)
 
-    # set inputs
+    # create an input entry for the current line
     if row_dc['label'] == row_dc['target']:
         if row_dc['source'] not in node_dc.keys():
             node_dc[row_dc['source']] = Bus(label=row_dc['source'])
@@ -91,7 +93,7 @@ for idx, row in nodes_flows.iterrows():
     else:
         inputs = {}
 
-    # set outputs
+    # set output entry for the current line
     if row_dc['label'] == row_dc['source']:
         if row_dc['target'] not in node_dc.keys():
             node_dc[row_dc['target']] = Bus(label=row_dc['target'])
@@ -99,25 +101,42 @@ for idx, row in nodes_flows.iterrows():
     else:
         outputs = {}
 
-    # if node exists, update attributes, otherwise add it
+    # set conversion_factor entry for the current line
+    if row_dc['target'] and not math.isnan(row_dc['conversion_factors']):
+        conversion_factors = {node_dc[row_dc['target']]:
+                              row_dc['conversion_factors']}
+    else:
+        pass
+        conversion_factors = {}
+
+    # add node to dict and assign attributes depending on
+    # if there are multiple lines per node or not
     if node.label in node_dc.keys():
         node.inputs.update(inputs)
         node.outputs.update(outputs)
+        node.conversion_factors.update(conversion_factors)
     else:
         node.inputs = inputs
         node.outputs = outputs
+        node.conversion_factors = conversion_factors
         node_dc[node.label] = node
 
 # %% print stuff
-#
-#print('\nFinally:\n\n', node_dc)
 
+# Nodes with in and outputs
 for k, v in node_dc.items():
     if type(v).__name__ != 'Bus':
         print('Label: ', v.label)
         print('Inputs: ', v.inputs)
         print('Outputs:', v.outputs)
 
+print('Conversion factors:')
 print(node_dc['chp1'].conversion_factors)
 
+print('Sequence for capacity loss of storage1:')
 print(node_dc['storage1'].capacity_loss)
+
+
+print('Sequences for output flow of solar1:')
+for k, v in node_dc['solar1'].outputs.items():
+    print(k, v.actual_value)
