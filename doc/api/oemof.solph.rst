@@ -4,58 +4,42 @@ oemof.solph package
 Submodules
 ----------
 
-oemof.solph.linear_constraints module
--------------------------------------
+oemof.solph.blocks module
+-------------------------
 
-.. automodule:: oemof.solph.linear_constraints
+.. automodule:: oemof.solph.blocks
     :members:
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.linear_mixed_integer_constraints module
----------------------------------------------------
-
-.. automodule:: oemof.solph.linear_mixed_integer_constraints
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.objective_expressions module
-----------------------------------------
-
-.. automodule:: oemof.solph.objective_expressions
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.optimization_model module
--------------------------------------
-
-.. automodule:: oemof.solph.optimization_model
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.predefined_objectives module
-----------------------------------------
-
-.. automodule:: oemof.solph.predefined_objectives
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.pyomo_fastbuild module
-----------------------------------
-
-.. automodule:: oemof.solph.pyomo_fastbuild
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.variables module
+oemof.solph.groupings module
 ----------------------------
 
-.. automodule:: oemof.solph.variables
+.. automodule:: oemof.solph.groupings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.network module
+--------------------------
+
+.. automodule:: oemof.solph.network
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.options module
+--------------------------
+
+.. automodule:: oemof.solph.options
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.plumbing module
+---------------------------
+
+.. automodule:: oemof.solph.plumbing
     :members:
     :undoc-members:
     :show-inheritance:

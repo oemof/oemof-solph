@@ -21,18 +21,15 @@ class ResultsDataFrame(pd.DataFrame):
     ----------
     result_object : dictionary
         solph result objects
-    bus_uids : list if strings
+    bus_labels : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
 
     Attributes
     ----------
     result_object : dictionary
         solph result objects
-    bus_uids : list if strings
+    bus_labels : list if strings
         List of strings with busses that should be contained in dataframe.
         If not set, all busses are contained.
     bus_types : list if strings
@@ -42,10 +39,7 @@ class ResultsDataFrame(pd.DataFrame):
         Multi-indexed pandas dataframe holding the data from the result object.
         For more information on advanced dataframe indexing see:
         http://pandas.pydata.org/pandas-docs/stable/advanced.html
-    bus_uids : list if strings
-        List of strings with busses that should be contained in dataframe
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
+
     """
 
     def __init__(self, **kwargs):
@@ -57,13 +51,12 @@ class ResultsDataFrame(pd.DataFrame):
             if ('Bus' in str(k.__class__)):
                 for kk, vv in v.items():
                     row = {}
-                    row['bus_uid'] = k.uid
-                    row['bus_type'] = k.type
+                    row['bus_label'] = k.label
                     row['type'] = ('output' if not (isinstance(kk, str)) else
                                    'other')
-                    row['obj_uid'] = 'duals' if (k is kk) else (
+                    row['obj_label'] = 'duals' if (k is kk) else (
                                       kk     if (isinstance(kk, str)) else
-                                      kk.uid)
+                                      kk.label)
                     row['datetime'] = es.time_idx
                     row['val'] = vv
                     rows_list.append(row)
@@ -74,45 +67,41 @@ class ResultsDataFrame(pd.DataFrame):
                         if(k is kk):
                             # self ref. comp. (results[component][component])
                             row = {}
-                            row['bus_uid'] = k.outputs[0].uid
-                            row['bus_type'] = k.outputs[0].type
+                            row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'other'
-                            row['obj_uid'] = k.uid
+                            row['obj_label'] = k.label
                             row['datetime'] = es.time_idx
                             row['val'] = vv
                             rows_list.append(row)
                         else:
                             # bus inputs (only self ref. components)
                             row = {}
-                            row['bus_uid'] = k.outputs[0].uid
-                            row['bus_type'] = k.outputs[0].type
+                            row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'input'
-                            row['obj_uid'] = k.uid
+                            row['obj_label'] = k.label
                             row['datetime'] = es.time_idx
-                            row['val'] = v.get(k.outputs[0])
+                            row['val'] = v.get(list(k.outputs.keys())[0])
                             rows_list.append(row)
                 else:
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
                         row = {}
-                        row['bus_uid'] = kk.uid
-                        row['bus_type'] = kk.type
+                        row['bus_label'] = kk.label
                         row['type'] = 'input'
-                        row['obj_uid'] = k.uid
+                        row['obj_label'] = k.label
                         row['datetime'] = es.time_idx
                         row['val'] = vv
                         rows_list.append(row)
 
         # split date and value lists to tuples
         tuples = [
-            (item['bus_uid'], item['bus_type'], item['type'], item['obj_uid'],
+            (item['bus_label'], item['type'], item['obj_label'],
              date, val)
             for item in rows_list for date, val in zip(item['datetime'],
                                                        item['val'])]
 
         # create multiindexed dataframe
-        index = ['bus_uid', 'bus_type', 'type',
-                 'obj_uid', 'datetime']
+        index = ['bus_label', 'type', 'obj_label', 'datetime']
 
         columns = index + ['val']
 
@@ -125,10 +114,9 @@ class ResultsDataFrame(pd.DataFrame):
 
         Parameters
         ----------
-        bus_uid : string
-        bus_type : string (e.g. "el" or "gas")
+        bus_label : string
         type : string (input/output/other)
-        obj_uid: string
+        obj_label: string
         date_from : string
             Start date selection e.g. "2016-01-01 00:00:00". If not set, the
             whole time range will be plotted.
@@ -137,10 +125,9 @@ class ResultsDataFrame(pd.DataFrame):
             whole time range will be plotted.
 
         """
-        kwargs.setdefault('bus_uid', slice(None))
-        kwargs.setdefault('bus_type', slice(None))
+        kwargs.setdefault('bus_label', slice(None))
         kwargs.setdefault('type', slice(None))
-        kwargs.setdefault('obj_uid', slice(None))
+        kwargs.setdefault('obj_label', slice(None))
         kwargs.setdefault(
             'date_from', self.index.get_level_values('datetime')[0])
         kwargs.setdefault(
@@ -150,22 +137,21 @@ class ResultsDataFrame(pd.DataFrame):
         idx = pd.IndexSlice
 
         subset = self.loc[idx[
-            kwargs['bus_uid'],
-            kwargs['bus_type'],
+            kwargs['bus_label'],
             kwargs['type'],
-            kwargs['obj_uid'],
+            kwargs['obj_label'],
             slice(pd.Timestamp(kwargs['date_from']),
                   pd.Timestamp(kwargs['date_to']))], :]
 
         return subset
 
-    def slice_unstacked(self, unstacklevel='obj_uid', **kwargs):
+    def slice_unstacked(self, unstacklevel='obj_label', **kwargs):
         r"""Method for slicing the ResultsDataFrame. A unstacked
         subset is returned.
 
         Parameters
         ----------
-        unstacklevel : string (default: 'obj_uid')
+        unstacklevel : string (default: 'obj_label')
             Level to unstack the subset of the DataFrame.
         """
         subset = self.slice_by(**kwargs)
@@ -199,7 +185,7 @@ class DataFramePlot(ResultsDataFrame):
         self.subset = kwargs.get('subset')
         self.ax = kwargs.get('ax')
 
-    def slice_unstacked(self, unstacklevel='obj_uid', **kwargs):
+    def slice_unstacked(self, unstacklevel='obj_label', **kwargs):
         r"""Method for slicing the ResultsDataFrame. The subset attribute
         will set to an unstacked subset. The self-attribute is returned to
         allow chaining. This method is an extension of the
@@ -208,12 +194,12 @@ class DataFramePlot(ResultsDataFrame):
 
         Parameters
         ----------
-        unstacklevel : string (default: 'obj_uid')
+        unstacklevel : string (default: 'obj_label')
             Level to unstack the subset of the DataFrame.
         """
         self.subset = super(
             DataFramePlot, self).slice_unstacked(
-                unstacklevel='obj_uid', **kwargs)
+                unstacklevel='obj_label', **kwargs)
         return self
 
     def rearrange_subset(self, order):
@@ -236,7 +222,6 @@ class DataFramePlot(ResultsDataFrame):
             logging.warning(
                 "Columns that are not part of the order list are removed: " +
                 str(missing))
-        print(neworder)
         self.subset = self.subset[neworder]
 
     def color_from_dict(self, colordict):
@@ -356,14 +341,14 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = self.subset.plot(**kwargs)
         return self
 
-    def io_plot(self, bus_uid, cdict, line_kwa={}, lineorder=None, bar_kwa={},
+    def io_plot(self, bus_label, cdict, line_kwa={}, lineorder=None, bar_kwa={},
                 barorder=None, **kwargs):
         r""" Plotting a combined bar and line plot to see the fitting of in-
         and outcomming flows of a bus balance.
 
         Parameters
         ----------
-        bus_uid : string
+        bus_label : string
             Uid of the bus to plot the balance.
         cdict : dictionary
             A dictionary that has all possible components as keys and its
@@ -395,7 +380,7 @@ class DataFramePlot(ResultsDataFrame):
             self.ax = fig.add_subplot(1, 1, 1)
 
         # Create a bar plot for all input flows
-        self.slice_unstacked(bus_uid=bus_uid, type='input', **kwargs)
+        self.slice_unstacked(bus_label=bus_label, type='input', **kwargs)
         if barorder is not None:
             self.rearrange_subset(barorder)
         self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
@@ -403,7 +388,7 @@ class DataFramePlot(ResultsDataFrame):
                          **bar_kwa)
 
         # Create a line plot for all output flows
-        self.slice_unstacked(bus_uid=bus_uid, type='output', **kwargs)
+        self.slice_unstacked(bus_label=bus_label, type='output', **kwargs)
         if lineorder is not None:
             self.rearrange_subset(lineorder)
         # The following changes are made to have the bottom line on top layer
