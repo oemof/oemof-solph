@@ -87,11 +87,11 @@ for idx, row in nodes_flows.iterrows():
     if row_dc['label'] == row_dc['target']:
         if row_dc['target'] not in node_dc.keys():
             node_dc[row_dc['target']] = Bus(label=row_dc['target'])
-        outputs = {node_dc[row_dc['target']]: flow}
+        op = {node_dc[row_dc['target']]: flow}
 
     # evtl. besser mit settattr?
-    if row_dc['label'] in node_dc.keys():
-        node_dc[row_dc['label']].outputs = outputs
+#    if row_dc['label'] in node_dc.keys():
+#        setattr(node_dc[row_dc['label']], label, 'foo')
 #    else:
 #        node_dc[row_dc['label']].outputs.update(outputs)
 
@@ -111,14 +111,14 @@ for idx, row in nodes_flows.iterrows():
 
 # %% print stuff
 #
-#print(node_dc)
+print(node_dc)
 
-#for k, v in node_dc.items():
-#    print('Label: ', v.label)
-#    print('Outputs', v.outputs)
-#    print('Inputs', v.inputs)
-#    print('\n')
-#
-#print(node_dc['chp1'].conversion_factors)
-#
-#print(node_dc['storage1'].capacity_loss)
+for k, v in node_dc.items():
+    print('Label: ', v.label)
+    print('Outputs', v.outputs)
+    print('Inputs', v.inputs)
+    print('\n')
+
+print(node_dc['chp1'].conversion_factors)
+
+print(node_dc['storage1'].capacity_loss)
