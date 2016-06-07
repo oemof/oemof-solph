@@ -35,6 +35,3 @@ om.write('optimization_problem.lp',
 om.pprint()
 
 logging.info('Done!')
-
-
-print(nodes)
