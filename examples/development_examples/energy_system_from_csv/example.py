@@ -23,6 +23,8 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
                      delimiter=';')
 
+print(nodes)
+
 om = OperationalModel(es, timeindex=datetime_index)
 
 om.solve(solve_kwargs={'tee': True})
@@ -33,5 +35,3 @@ om.write('optimization_problem.lp',
 om.pprint()
 
 logging.info('Done!')
-
-print(nodes)
