@@ -86,10 +86,10 @@ class InvestmentStorage(SimpleBlock):
     INVESTSTORAGES
         A set with all storages containing an Investment object.
     INITIAL_CAPACITY
-        A set with storages of the set INVESTSTORAGES which have an
+        A subset of the set INVESTSTORAGES where elements of the set have an
         initial_capacity attribute.
     MIN_INVESTSTORAGES
-        A set with storages of the set INVESTSTORAGES which have an
+        A subset of INVESTSTORAGES where elements of the set have an
         capacity_min attribute greater than zero for at least one time step.
 
 
