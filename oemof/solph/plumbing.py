@@ -45,7 +45,59 @@ class OperationalModel(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
-    timeindex : DatetimeIndex
+    timeindex : pandas DatetimeIndex
+        The timeindex will be used to calculate the timesteps the timeincrement
+        for the optimization model.
+    timesteps : sequence (optional)
+        Timesteps used in the optimization model. If provided as list or
+        pandas.DatetimeIndex the sequence will be used to index the timedepent
+        variables, constraints etc. If not provided we will try to compute
+        this sequence from attr:`timeindex`.
+    timeincrement : float (optional)
+        Timeincrement used in constraints and objective expressions.
+
+
+    **The following sets are created:**
+
+    NODES :
+        A set with all oemof nodes.
+
+    TIMESTEPS :
+        A set with all timesteps for the optimization problem.
+
+    INPUTS :
+        A indexed index set with nodes as indices and associated inputs
+        as elements.
+
+    OUTPUTS :
+        A indexed index set with nodes as indices and associated outputs
+        as elements.
+
+    FLOWS :
+        A 2 dimensional set with all flows. Index: `(source, target)`
+
+    NEGATIVE_GRADIENT_FLOWS :
+        A subset of set FLOWS with all flows where attribute
+        `negative_gradient` is set.
+
+    POSITIVE_GRADIENT_FLOWS :
+        A subset of set FLOWS with all flows where attribute
+        `positive_gradient` is set.
+
+    **The following variables are created:**
+
+    flow
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
+        Note: Bounds of this variable are set depending on attributes of
+              the corresponding flow object.
+
+    negative_flow_gradient :
+        Difference of a flow in consecutive timesteps if flow is reduced
+        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+
+    positive_flow_gradient :
+        Difference of a flow in consecutive timesteps if flow is increased
+        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     """
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
@@ -61,9 +113,16 @@ class OperationalModel(po.ConcreteModel):
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
-        self.timesteps = range(len(self.timeindex))
-        self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
+        self.timesteps = kwargs.get('timesteps')
+        self.timeincrement = kwargs.get('timeincrement')
 
+        if self.timesteps is None:
+            self.timesteps = range(len(self.timeindex))
+        if self.timeincrement is None:
+            self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
+
+        if self.timeindex is None and self.timesteps is None:
+            raise ValueError("Missing timesteps!")
         self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
         self._constraint_groups.extend(kwargs.get('constraint_groups', []))
 
