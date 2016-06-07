@@ -276,6 +276,9 @@ class InvestmentStorage(SimpleBlock):
     def _objective_expression(self):
         """Objective expression with fixed and investement costs.
         """
+        if not hasattr(self, 'INVESTSTORAGES'):
+            return 0
+
         investment_costs = 0
         fixed_costs = 0
 
@@ -540,6 +543,9 @@ class InvestmentFlow(SimpleBlock):
         class:`.Investment`. The returned costs are fixed, variable and
         investment costs.
         """
+        if not hasattr(self, 'FLOWS'):
+            return 0
+
         m = self.parent_block()
         fixed_costs = 0
         variable_costs = 0
