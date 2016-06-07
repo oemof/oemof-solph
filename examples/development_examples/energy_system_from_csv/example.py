@@ -23,7 +23,10 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
                      delimiter=';')
 
+print(nodes)
+
 # print out nodes
+# errors: confused labels for sources
 for k, v in nodes.items():
     attrs = dir(v)
     print('\n OBJ:', k, v)
