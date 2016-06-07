@@ -106,9 +106,11 @@ class InvestmentStorage(SimpleBlock):
 
     Storage balance
 
-    .. math:: l_n(t) = l_n(t_{previous}) \\cdot (1 - C^{loss}(n)) \
-    - \\frac{w_{n, o_n}(t)}{\\eta^{out}_n} \
-    + w_{i_n, n}(t) \\cdot \\eta^{in}_n
+    .. math::
+        capacity(n, t) = & capacity(n, t_{previous}(t)) \\cdot \
+        (1 - capacity_{loss}(n)) \\\\
+        &- \\frac{flow_{n, target(n)}(t)}{conversionfactor_{outflow}(n)} \\\\
+        &+ flow_{source(n), n}(t) \\cdot conversionfactor_{inflow}(n)
 
     With
     :math:`\\textrm{~}\\; \\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,}
@@ -116,7 +118,7 @@ class InvestmentStorage(SimpleBlock):
 
     Minimal capacity
 
-    .. math:: l_n(t) <= c_{invest} \cdot c_{min}(t)
+    .. math:: capacity(n, t) <= invest(n) \cdot capacity_{min}(t)
 
     With
     :math:`\\textrm{~}\\; \\forall n \\in \\textrm{MIN\_INVESTSTORAGES} \\textrm{,}
@@ -126,7 +128,13 @@ class InvestmentStorage(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    etc.
+    .. math::
+        + invest(n) * ep_{costs}(n.investment)
+
+    If fixed costs are set by the user:
+
+    .. math::
+        + invest(n) * fixed_{costs}(n)
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

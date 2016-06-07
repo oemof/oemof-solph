@@ -30,6 +30,13 @@ class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     dispatch.
 
+    **The following sets are created:**
+
+    NODES
+        A set with all nodes of the given energy system.
+    TIMESTEPS
+        A set with all time steps of the given time horizon.
+
     Parameters
     ----------
     es : EnergySystem object
