@@ -229,7 +229,7 @@ class InvestmentStorage(SimpleBlock):
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
         def _storage_capacity_input_invest_rule(block, n):
-            """ Connection between invest_flow of input and invest
+            """Connection between invest_flow of input and invest
             """
             expr = (m.InvestmentFlow.invest[m.INPUTS[n], n] ==
                     self.invest[n] * n.nominal_input_capacity_ratio)
@@ -238,7 +238,7 @@ class InvestmentStorage(SimpleBlock):
             self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
 
         def _storage_capacity_output_invest_rule(block, n):
-            """ Connection between invest_flow of output and invest
+            """Connection between invest_flow of output and invest
             """
             expr = (m.InvestmentFlow.invest[n, m.OUTPUTS[n]] ==
                     self.invest[n] * n.nominal_output_capacity_ratio)
@@ -266,7 +266,7 @@ class InvestmentStorage(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
 
     def _objective_expression(self):
-        """
+        """Objective expression with fixed and investement costs.
         """
         investment_costs = 0
         fixed_costs = 0
@@ -486,7 +486,8 @@ class InvestmentFlow(SimpleBlock):
                                  rule=_investflow_bound_rule)
 
         def _max_investflow_rule(block, i, o, t):
-            """
+            """Rule definition of constraint setting an upper bound of flow
+            variable in investment case.
             """
             expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
                                         self.invest[i, o]))
@@ -495,7 +496,8 @@ class InvestmentFlow(SimpleBlock):
                               rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
-            """
+            """Rule definition of constraint setting a lower bound on flow
+            variable in investment case.
             """
             expr = (m.flow[i, o, t] >= (m.flows[i, o].min[t] *
                                         self.invest[i, o]))
@@ -504,7 +506,8 @@ class InvestmentFlow(SimpleBlock):
                               rule=_min_investflow_rule)
 
         def _summed_max_investflow_rule(block, i, o):
-            """
+            """Rule definition for build action of max. sum flow constraint
+            in investment case.
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement
                         for t in m.TIMESTEPS) <=
@@ -514,7 +517,8 @@ class InvestmentFlow(SimpleBlock):
                                      rule=_summed_max_investflow_rule)
 
         def _summed_min_investflow_rule(block, i, o):
-            """
+            """Rule definition for build action of min. sum flow constraint
+            in investment case.
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement
                         for t in m.TIMESTEPS) >=
