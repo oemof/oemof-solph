@@ -71,7 +71,7 @@ for idx, row in nodes_flows.iterrows():
     # set node attributes
     for attr in row_dc.keys():
         if (attr not in flow_attrs and
-           attr not in ('class', 'source', 'target')):
+           attr not in ('class', 'label', 'source', 'target')):
                 if row_dc[attr] != 'seq':
                     setattr(node, attr, row_dc[attr])
                 else:
@@ -83,41 +83,25 @@ for idx, row in nodes_flows.iterrows():
                     seq = [i for i in seq.values]
                     setattr(node, attr, seq)
 
-    # set inputs and outputs
-    if row_dc['label'] == row_dc['target']:
-        if row_dc['target'] not in node_dc.keys():
-            node_dc[row_dc['target']] = Bus(label=row_dc['target'])
-        op = {node_dc[row_dc['target']]: flow}
-
     # evtl. besser mit settattr?
-#    if row_dc['label'] in node_dc.keys():
-#        setattr(node_dc[row_dc['label']], label, 'foo')
-#    else:
-#        node_dc[row_dc['label']].outputs.update(outputs)
+    if node.label in node_dc.keys():
+        #print('yee', node.label)
+        node.outputs = 'Foo'
+    else:
+        node_dc[node.label] = node
 
-    # save node in dictionary
-    if node not in node_dc:
-        node_dc[row_dc['label']] = node
-
-
-#            node_dc[row_dc['target']].outputs.update()
-
-#    # set busses and flows for all sources
-#    if row_dc['class'] == 'Source':
-#        if row_dc['target'] not in node_dc.keys():
-#            node_dc[row_dc['target']] = Bus(label=row_dc['target'])
-#        node.outputs = {node_dc[row_dc['target']]: flow}
+    print(idx, node_dc)
 
 
 # %% print stuff
 #
-print(node_dc)
+print('\nFinally:\n\n', node_dc)
 
-for k, v in node_dc.items():
-    print('Label: ', v.label)
-    print('Outputs', v.outputs)
-    print('Inputs', v.inputs)
-    print('\n')
+#for k, v in node_dc.items():
+#    print('Label: ', v.label)
+#    print('Outputs', v.outputs)
+#    print('Inputs', v.inputs)
+#    print('\n')
 
 print(node_dc['chp1'].conversion_factors)
 
