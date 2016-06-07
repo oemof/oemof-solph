@@ -8,18 +8,54 @@ from pyomo.core.base.block import SimpleBlock
 
 
 class Storage(SimpleBlock):
-    """
+    """ Storages (no investment)
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    STORAGES
+        A set with all :class:`.Storage` objects
+        (and no attr:`investement` of type :class:`.Investment`)
+
+    **The following variables are created:**
+
+    capacity
+        Capacity (level) for every storage and timestep.
+        The variable of storage s and timestep t can be acessed by:
+        `om.Storage.capacity[s, t]`
+
+    **The following constraints are created:**
+
+    balance
+
+        .. math:: capacity_n(t) = capacity_n(t_{previous}(t)) \\cdot  \
+        (1 - capacity\\_loss_n(t))) \
+        - \\frac{flow_{n, o_n}(t)}{\\eta^{out}_n(t)} \
+        + flow_{i_n, n}(t) \\cdot \\eta^{in}_n(t)
+
+    The constraint of storage s at timestep t can be acessed by
+    `om.Storage.balance[s, t]`
+
+    **The following parts of the objective function are created:**
+
+    fixed_costs :
+
+    .. math:: \\sum_n nominal\\_capacity_n(t) \cdot fixed\\_costs_n
+
+    The fixed costs expression can be accessed by `om.Storage.fixed_costs`
+    and their alue after optimization by: `om.Storage.fixed_costs()`.
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
         """
-
         Parameters
         ----------
         group : list
-            List containing storage objects e.g. groups=[storage1, storage2,..]
+            List containing storage objects.
+            e.g. groups=[storage1, storage2,..]
         """
         m = self.parent_block()
 
