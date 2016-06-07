@@ -15,11 +15,9 @@ logger.define_logging()
 
 timesteps_max = 8760
 
-es = core_es.EnergySystem(groupings=solph.GROUPINGS,
-                          time_idx=[i for i in range(0, timesteps_max)])
+es = core_es.EnergySystem(groupings=solph.GROUPINGS)
 
 datetime_index = pd.date_range('1/1/2016', periods=timesteps_max, freq='60min')
-
 
 nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
@@ -35,3 +33,5 @@ om.write('optimization_problem.lp',
 om.pprint()
 
 logging.info('Done!')
+
+print(nodes)
