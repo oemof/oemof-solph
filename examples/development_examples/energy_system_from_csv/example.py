@@ -13,6 +13,6 @@ from oemof.solph.options import NodesFromCSV
 
 nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
-                     delimiter=',')
+                     delimiter=';')
 
 print(nodes)
