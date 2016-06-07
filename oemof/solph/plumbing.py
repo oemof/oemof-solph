@@ -106,9 +106,16 @@ class OperationalModel(po.ConcreteModel):
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
         self.timeindex = kwargs.get('timeindex')
-        self.timesteps = range(len(self.timeindex))
-        self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
+        self.timesteps = kwargs.get('timesteps')
+        self.timeincrement = kwargs.get('timeincrement')
 
+        if self.timesteps is None:
+            self.timesteps = range(len(self.timeindex))
+        if self.timeincrement is None:
+            self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
+
+        if self.timeindex is None and self.timesteps is None:
+            raise ValueError("Missing timesteps!")
         self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
         self._constraint_groups.extend(kwargs.get('constraint_groups', []))
 
