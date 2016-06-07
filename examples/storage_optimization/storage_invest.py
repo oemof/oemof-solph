@@ -69,10 +69,10 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
 
     logging.info('Create oemof objects')
     # create gas bus
-    bgas = Bus(label="gas_balance")
+    bgas = Bus(label="natural_gas")
 
     # create electricity bus
-    bel = Bus(label="el_balance")
+    bel = Bus(label="electricity")
 
     # create excess component for the electricity bus to allow overproduction
     Sink(label='excess_bel', inputs={bel: Flow()})
@@ -185,7 +185,7 @@ def create_plots(energysystem):
 
     # Plotting the input flows of the electricity bus for January
     myplot = tpd.DataFramePlot(energy_system=energysystem)
-    myplot.slice_unstacked(bus_label="el_balance", type="input",
+    myplot.slice_unstacked(bus_label="electricity", type="input",
                            date_from="2012-01-01 00:00:00",
                            date_to="2012-01-31 00:00:00")
     colorlist = myplot.color_from_dict(cdict)
@@ -196,7 +196,7 @@ def create_plots(energysystem):
     myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
     # Plotting the output flows of the electricity bus for January
-    myplot.slice_unstacked(bus_label="el_balance", type="output")
+    myplot.slice_unstacked(bus_label="electricity", type="output")
     myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
     myplot.ax.legend(loc='upper right')
     myplot.ax.set_ylabel('Power in MW')
@@ -212,7 +212,7 @@ def create_plots(energysystem):
     plt.style.use('grayscale')
 
     handles, labels = myplot.io_plot(
-        bus_label='el_balance', cdict=cdict,
+        bus_label='electricity', cdict=cdict,
         barorder=['pv', 'wind', 'pp_gas', 'storage'],
         lineorder=['demand', 'storage', 'excess_bel'],
         line_kwa={'linewidth': 4},
