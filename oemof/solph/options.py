@@ -102,3 +102,103 @@ class Discrete:
         self.start_costs = kwargs.get('start_costs')
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
+
+
+def EnergySystemFromCSV(file_nodes_flows, file_nodes_flows_sequences):
+    """
+    """
+
+    import math
+    import pandas as pd
+    from oemof.solph.network import (Bus, Source, Sink, Flow, Investment,
+                                     LinearTransformer, Storage)
+    from oemof.solph.options import Sequence
+
+    nodes_flows = pd.read_csv(file_nodes_flows, sep=',')
+    nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=',',
+                                  header=None)
+    nodes_flows_seq.drop(0, axis=1, inplace=True)
+    nodes_flows_seq = nodes_flows_seq.transpose()
+    nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
+    nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
+
+    # iterate over dataframe rows and create objects
+    nodes = {}
+    for i, r in nodes_flows.iterrows():
+
+        # save column labels and row values in dict
+        row = dict(zip(r.index.values, r.values))
+
+        # create flow
+        flow = Flow()
+        flow_attrs = vars(Flow()).keys()
+        for attr in flow_attrs:
+            if attr in row.keys() and row[attr]:
+                if row[attr] != 'seq':
+                    setattr(flow, attr, Sequence(row[attr]))  # solph seq
+                else:
+                    seq = nodes_flows_seq.loc[row['class'],
+                                              row['label'],
+                                              row['source'],
+                                              row['target'],
+                                              attr]
+                    seq = [i for i in seq.values]
+                    setattr(flow, attr, seq)
+
+        # create node (eval to be substituted due to security issues)
+        node = eval(row['class'])
+        node.label = row['label']
+
+        # set node attributes (must be the first line of node entries in csv)
+        for attr in row.keys():
+            if (attr not in flow_attrs and
+               attr not in ('class', 'label', 'source', 'target',
+                            'conversion_factors')):
+                    if row[attr] != 'seq':
+                        setattr(node, attr, Sequence(row[attr]))  # solph seq
+                    else:
+                        seq = nodes_flows_seq.loc[row['class'],
+                                                  row['label'],
+                                                  row['source'],
+                                                  row['target'],
+                                                  attr]
+                        seq = [i for i in seq.values]
+                        setattr(node, attr, seq)
+
+        # create an input entry for the current line
+        if row['label'] == row['target']:
+            if row['source'] not in nodes.keys():
+                nodes[row['source']] = Bus(label=row['source'])
+            inputs = {nodes[row['source']]: flow}
+        else:
+            inputs = {}
+
+        # set output entry for the current line
+        if row['label'] == row['source']:
+            if row['target'] not in nodes.keys():
+                nodes[row['target']] = Bus(label=row['target'])
+            outputs = {nodes[row['target']]: flow}
+        else:
+            outputs = {}
+
+        # set conversion_factor entry for the current line
+        if row['target'] and not math.isnan(row['conversion_factors']):
+            conversion_factors = {nodes[row['target']]:
+                                  row['conversion_factors']}
+        else:
+            pass
+            conversion_factors = {}
+
+        # add node to dict and assign attributes depending on
+        # if there are multiple lines per node or not
+        if node.label in nodes.keys():
+            node.inputs.update(inputs)
+            node.outputs.update(outputs)
+            node.conversion_factors.update(conversion_factors)
+        else:
+            node.inputs = inputs
+            node.outputs = outputs
+            node.conversion_factors = conversion_factors
+            nodes[node.label] = node
+
+    return nodes

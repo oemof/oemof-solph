@@ -29,6 +29,7 @@ so = Source(
 
 si = Sink(
     label="sink",
+    outputs={},
     inputs={ebus: Flow(min=[0, 0, 2], max=[0.1, 0.2, 0.9], nominal_value=10,
                        fixed=True)})
 
