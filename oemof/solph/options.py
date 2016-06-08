@@ -200,20 +200,37 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
-        print('\nBEFORE:', i, node.label, row['label'])
+
+        print('\n########################## ROW:', i)
+        print('\nDICT BEFORE:')
+        for k, v in nodes.items():
+            print(k, v.label)
+
         if node.label in nodes.keys():
             node.inputs.update(inputs)
             node.outputs.update(outputs)
             node.conversion_factors.update(conversion_factors)
-            print('\nAPPENDED:', i, node.label, row['label'])
+            print('\nAPPENDED:', node.label, row['label'])
+            print('\nNODE:', node.label, row['label'])
+            attrs = dir(node)
+            print('--------------------')
+            for i in attrs:
+                if '_' not in i:
+                    print(i, ':', getattr(node, str(i)))
         else:
             node.inputs = inputs
             node.outputs = outputs
             node.conversion_factors = conversion_factors
             nodes[node.label] = node
-            print('\nNEW:', i, node.label, row['label'])
+            print('\nNEW:', node.label, row['label'])
+            print('\nNODE:', node.label, row['label'])
+            attrs = dir(node)
+            print('--------------------')
+            for i in attrs:
+                if '_' not in i:
+                    print(i, ':', getattr(node, str(i)))
 
-        print('\nAFTER:')
+        print('\nDICT AFTER:')
         for k, v in nodes.items():
             print(k, v.label)
 
