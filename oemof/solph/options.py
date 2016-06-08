@@ -136,6 +136,11 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     nodes = {}
     for i, r in nodes_flows.iterrows():
 
+        print('\n########################## ROW:', i)
+        print('\nDICT AT START:')
+        for k, v in nodes.items():
+            print(k, v.label)
+
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
 
@@ -154,6 +159,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               attr]
                     seq = [i for i in seq.values]
                     setattr(flow, attr, seq)
+
+        print('\nDICT AFTER FLOW:')
+        for k, v in nodes.items():
+            print(k, v.label)
 
         # create node and set node attributes
         # (attributes must be placed either in the first line or in all lines
@@ -174,6 +183,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                   attr]
                         seq = [i for i in seq.values]
                         setattr(node, attr, seq)
+
+        print('\nDICT AFTER NODE ATTS:')
+        for k, v in nodes.items():
+            print(k, v.label)
 
         # create an input entry for the current line
         if row['label'] == row['target']:
@@ -201,8 +214,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
 
-        print('\n########################## ROW:', i)
-        print('\nDICT BEFORE:')
+        print('\nDICT BEFORE ASSIGNMENT:')
         for k, v in nodes.items():
             print(k, v.label)
 
@@ -230,7 +242,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                 if '_' not in i:
                     print(i, ':', getattr(node, str(i)))
 
-        print('\nDICT AFTER:')
+        print('\nDICT AFTER ASSIGNMENT:')
         for k, v in nodes.items():
             print(k, v.label)
 
