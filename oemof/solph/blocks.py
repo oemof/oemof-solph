@@ -147,14 +147,12 @@ class InvestmentStorage(SimpleBlock):
     Storage balance
 
     .. math::
-        capacity(n, t) = & capacity(n, t_{previous}(t)) \\cdot \
-        (1 - capacity_{loss}(n)) \\\\
-        &- \\frac{flow_{n, target(n)}(t)}{conversionfactor_{outflow}(n)} \\\\
-        &+ flow_{source(n), n}(t) \\cdot conversionfactor_{inflow}(n)
-
-    With
-    :math:`\\textrm{~}\\; \\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,}
-    \\; \\forall t \\in \\textrm{TIMESTEPS}`.
+        capacity(n, t) = & capacity(n, t\_previous(t)) \\cdot \
+        (1 - capacity\_loss(n)) \\\\
+        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n)) \\\\
+        &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n) \\\\
+        &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \
+        \\; \\forall t \\in \\textrm{TIMESTEPS}
 
     Minimal capacity
 
