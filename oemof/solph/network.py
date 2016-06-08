@@ -138,10 +138,10 @@ class Storage(on.Transformer):
         inflow of the storage.
     outflow_conversion_factor : numeric (sequence or scalar)
         see: inflow_conversion_factor
-    capacity_min : numeric (scalar or array-like)
+    capacity_min : numeric (sequence or scalar)
         The nominal minimum capacity of the storage as fraction of the
         nominal capacity (between 0 and 1, default: 0).
-        To set different values in every timestep use an array-like object.
+        To set different values in every timestep use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
 
