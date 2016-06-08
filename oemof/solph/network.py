@@ -64,15 +64,23 @@ class Flow:
             raise ValueError("Investment flows cannot be combined with " +
                              "discrete flows!")
 
-Bus = on.Bus
+
+class Bus(on.Bus):
+    """A balance object.
+    """
+    pass
 
 
 class Sink(on.Sink):
+    """An object with one input flow.
+    """
     pass
+
 
 class Source(on.Source):
+    """An object with one output flow.
+    """
     pass
-
 
 
 class LinearTransformer(on.Transformer):
