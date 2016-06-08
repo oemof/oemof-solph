@@ -149,13 +149,13 @@ class InvestmentStorage(SimpleBlock):
         (1 - capacity\_loss(n)) \\\\
         &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n)) \\\\
         &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n), \\\\
-        \\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
-        \\forall t \\in \\textrm{TIMESTEPS}.
+        &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
+        &\\forall t \\in \\textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
 
     .. math:: capacity(n, t) <= invest(n) \\cdot capacity\_min(n, t), \\\\
-        \\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
+        \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
         \\forall t \\in \\textrm{TIMESTEPS}.
 
 
@@ -675,9 +675,12 @@ class LinearTransformer(SimpleBlock):
 
     linear_relation
 
-        .. math:: flow_{i_n, n}(t) * n.conversion_factor[o](t) = \
-        flow_{n, o}(t), \\forall t \\in TIMESTEPS, \
-        \\forall n in group, \\forall o in \\in OUTPUTS(n)
+        .. math::
+            flow_{i_n, n}(t) * n.conversion_factor[o](t) = \
+            flow_{n, o}(t), \\\\
+            \\forall t \\in TIMESTEPS, \\\\
+            \\forall n \\in group, \\\\
+            \\forall o \\in OUTPUTS(n)
 
     """
     def __init__(self, *args, **kwargs):

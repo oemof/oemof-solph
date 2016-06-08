@@ -89,7 +89,7 @@ class OperationalModel(po.ConcreteModel):
     flow
         Flow from source to target indexed by FLOWS, TIMESTEPS.
         Note: Bounds of this variable are set depending on attributes of
-              the corresponding flow object.
+        the corresponding flow object.
 
     negative_flow_gradient :
         Difference of a flow in consecutive timesteps if flow is reduced
