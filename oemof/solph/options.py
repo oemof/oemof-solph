@@ -138,7 +138,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
-        print(row)  # TODO: Remove
 
         # create flow and set flow attributes
         flow = Flow()
@@ -158,10 +157,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # create node and set node attributes
         # (attributes must be placed either in the first line or in all lines
-        #  of multiple node entries (flows) in csv file with nodes and flows)
+        #  of multiple node entries (flows) in csv file)
         node = eval(row['class'])
         node.label = row['label']
-        print(node.label, row['label'])  # TODO: Remove
         for attr in row.keys():
             if (attr not in flow_attrs and
                attr not in ('class', 'label', 'source', 'target',
@@ -211,9 +209,12 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             node.outputs = outputs
             node.conversion_factors = conversion_factors
             nodes[node.label] = node
-            print(node.label)  # TODO: Remove
 
-        print(node.label, nodes[node.label].label, row['label']) # TODO: Remove
         print('\n')
+        for k, v in nodes.items():
+            print(k, v.label)
+
+    for k, v in nodes.items():
+        print(k, v.label)
 
     return nodes
