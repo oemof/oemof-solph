@@ -204,11 +204,13 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             node.inputs.update(inputs)
             node.outputs.update(outputs)
             node.conversion_factors.update(conversion_factors)
+            print('\nAPPENDED:', i, node.label, row['label'])
         else:
             node.inputs = inputs
             node.outputs = outputs
             node.conversion_factors = conversion_factors
             nodes[node.label] = node
+            print('\nNEW:', i, node.label, row['label'])
 
         print('\n')
         for k, v in nodes.items():
