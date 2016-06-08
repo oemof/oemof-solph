@@ -168,7 +168,16 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         # (attributes must be placed either in the first line or in all lines
         #  of multiple node entries (flows) in csv file)
         node = eval(row['class'])
+        print('\nDICT AFTER INSTANCE CREATION:')
+        for k, v in nodes.items():
+            print(k, v.label)
+
+        print('LABEL TO BE ASSIGNED:', row['label'])
         node.label = row['label']
+        # delete node at start of iteration!?
+        print('\nDICT AFTER LABEL ASSIGNMENT:')
+        for k, v in nodes.items():
+            print(k, v.label)
         for attr in row.keys():
             if (attr not in flow_attrs and
                attr not in ('class', 'label', 'source', 'target',
