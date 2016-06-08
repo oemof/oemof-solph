@@ -200,6 +200,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
+        print('\nBEFORE:', i, node.label, row['label'])
         if node.label in nodes.keys():
             node.inputs.update(inputs)
             node.outputs.update(outputs)
@@ -212,7 +213,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             nodes[node.label] = node
             print('\nNEW:', i, node.label, row['label'])
 
-        print('\n')
+        print('\nAFTER:')
         for k, v in nodes.items():
             print(k, v.label)
 
