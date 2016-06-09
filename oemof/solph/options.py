@@ -144,7 +144,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # change types (more might be necessary)
         if 'nominal_value' in row:
-            row['nominal_value'] = int(row['nominal_value'])
+            row['nominal_value'] = Sequence(row['nominal_value'])
 
         # create flow and set flow attributes
         flow = Flow()
