@@ -224,13 +224,11 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
+        node.inputs.update(inputs)
+        node.outputs.update(outputs)
         if node.label in nodes.keys():
-            node.inputs.update(inputs)
-            node.outputs.update(outputs)
             node.conversion_factors.update(conversion_factors)
         else:
-            node.inputs = inputs
-            node.outputs = outputs
             node.conversion_factors = conversion_factors
             nodes[node.label] = node
     for k, v in nodes.items():
