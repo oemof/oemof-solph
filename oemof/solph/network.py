@@ -101,7 +101,7 @@ class LinearTransformer(on.Transformer):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {
             k: Sequence(v)
-            for k, v in kwargs.get('conversion_factors').items()}
+            for k, v in kwargs.get('conversion_factors', {}).items()}
 
 
 class Storage(on.Transformer):
