@@ -138,9 +138,14 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         print('\n########################## ROW:', i)
 
+        r = r.dropna()
+
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
 
+        # change type
+        if 'nominal_value' in row:
+            row['nominal_value'] = int(row['nominal_value'])
 
         ############################################## one flow per line
         # create flow and set flow attributes
@@ -218,7 +223,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             outputs = {}
 
         # create a conversion_factor entry for the current line
-        if row['target'] and not math.isnan(row['conversion_factors']):
+        if row['target'] and 'conversion_factors' in row:
             conversion_factors = {nodes[row['target']]:
                                   row['conversion_factors']}
         else:
