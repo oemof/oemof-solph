@@ -175,13 +175,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                    'LinearTransformer': LinearTransformer,
                    'Storage': Storage}
         if row['class'] in classes.keys():
-            node = classes[row['class']]()
+            node = classes[row['class']](label=row['label'])
 
-        print('\n node.label after instance creation', node.label)
-        setattr(node, 'label', row['label'])
-#        node.label = row['label']
-
-        print('\n node.label after label assignment', node.label)
+        print('\n node.label:', node.label)
 
         # delete node at start of iteration!?
         print('\nDICT AFTER LABEL ASSIGNMENT:')
