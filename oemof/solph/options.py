@@ -137,13 +137,12 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     for i, r in nodes_flows.iterrows():
 
         print('\n########################## ROW:', i)
-        print('\nDICT AT START:')
-        for k, v in nodes.items():
-            print(k, v.label)
 
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
 
+
+        ############################################## one flow per line
         # create flow and set flow attributes
         flow = Flow()
         flow_attrs = vars(Flow()).keys()
@@ -159,25 +158,36 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               attr]
                     seq = [i for i in seq.values]
                     setattr(flow, attr, seq)
-
-        print('\nDICT AFTER FLOW:')
-        for k, v in nodes.items():
-            print(k, v.label)
-
         # create node and set node attributes
         # (attributes must be placed either in the first line or in all lines
         #  of multiple node entries (flows) in csv file)
-        node = eval(row['class'])
-        print('\nDICT AFTER INSTANCE CREATION:')
+
+        print('\nDICT BEFORE INSTANCE CREATION:')
         for k, v in nodes.items():
             print(k, v.label)
 
-        print('LABEL TO BE ASSIGNED:', row['label'])
-        node.label = row['label']
+        ######################################### more than one node per line
+        ############# thats why inputs and outputs  and conversion factors, ...
+        ############# have to be appended and accessible attributes
+
+        # to be filled dynamically from dataframe
+        classes = {'Source': Source, 'Sink': Sink,
+                   'LinearTransformer': LinearTransformer,
+                   'Storage': Storage}
+        if row['class'] in classes.keys():
+            node = classes[row['class']]()
+
+        print('\n node.label after instance creation', node.label)
+        setattr(node, 'label', row['label'])
+#        node.label = row['label']
+
+        print('\n node.label after label assignment', node.label)
+
         # delete node at start of iteration!?
         print('\nDICT AFTER LABEL ASSIGNMENT:')
         for k, v in nodes.items():
             print(k, v.label)
+
         for attr in row.keys():
             if (attr not in flow_attrs and
                attr not in ('class', 'label', 'source', 'target',
@@ -192,10 +202,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                   attr]
                         seq = [i for i in seq.values]
                         setattr(node, attr, seq)
-
-        print('\nDICT AFTER NODE ATTS:')
-        for k, v in nodes.items():
-            print(k, v.label)
 
         # create an input entry for the current line
         if row['label'] == row['target']:
@@ -222,39 +228,15 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
-
-        print('\nDICT BEFORE ASSIGNMENT:')
-        for k, v in nodes.items():
-            print(k, v.label)
-
         if node.label in nodes.keys():
             node.inputs.update(inputs)
             node.outputs.update(outputs)
             node.conversion_factors.update(conversion_factors)
-            print('\nAPPENDED:', node.label, row['label'])
-            print('\nNODE:', node.label, row['label'])
-            attrs = dir(node)
-            print('--------------------')
-            for i in attrs:
-                if '_' not in i:
-                    print(i, ':', getattr(node, str(i)))
         else:
             node.inputs = inputs
             node.outputs = outputs
             node.conversion_factors = conversion_factors
             nodes[node.label] = node
-            print('\nNEW:', node.label, row['label'])
-            print('\nNODE:', node.label, row['label'])
-            attrs = dir(node)
-            print('--------------------')
-            for i in attrs:
-                if '_' not in i:
-                    print(i, ':', getattr(node, str(i)))
-
-        print('\nDICT AFTER ASSIGNMENT:')
-        for k, v in nodes.items():
-            print(k, v.label)
-
     for k, v in nodes.items():
         print(k, v.label)
 
