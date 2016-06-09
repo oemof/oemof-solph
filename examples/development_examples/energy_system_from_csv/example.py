@@ -9,7 +9,7 @@ from oemof.core import energy_system as core_es
 import oemof.solph as solph
 from oemof.solph import OperationalModel
 from oemof.solph.options import NodesFromCSV
-
+from collections import Iterable
 
 logger.define_logging()
 
@@ -32,7 +32,11 @@ for k, v in nodes.items():
     print('--------------------')
     for i in attrs:
         if '_' not in i:
-            print(i, ':', getattr(v, str(i)))
+            # dirty hack to print weakref dicts by converting to list
+            o = getattr(v, str(i))
+            if isinstance(o, Iterable) and not isinstance(o, str):
+                o = list(o)
+            print(i, ':',  o)
 
 om = OperationalModel(es, timeindex=datetime_index)
 
