@@ -136,18 +136,16 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     nodes = {}
     for i, r in nodes_flows.iterrows():
 
-        print('\n########################## ROW:', i)
-
+        # drop NaN values from series
         r = r.dropna()
 
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
 
-        # change type
+        # change types (more might be necessary)
         if 'nominal_value' in row:
             row['nominal_value'] = int(row['nominal_value'])
 
-        ############################################## one flow per line
         # create flow and set flow attributes
         flow = Flow()
         flow_attrs = vars(Flow()).keys()
@@ -163,18 +161,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               attr]
                     seq = [i for i in seq.values]
                     setattr(flow, attr, seq)
-        # create node and set node attributes
-        # (attributes must be placed either in the first line or in all lines
-        #  of multiple node entries (flows) in csv file)
 
-        print('\nDICT BEFORE INSTANCE CREATION:')
-        for k, v in nodes.items():
-            print(k, v.label)
-
-        ######################################### more than one node per line
-        ############# thats why inputs and outputs  and conversion factors, ...
-        ############# have to be appended and accessible attributes
-
+        # create node if not existent
         # to be filled dynamically from dataframe
         classes = {'Source': Source, 'Sink': Sink,
                    'LinearTransformer': LinearTransformer,
@@ -184,13 +172,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             if node is None:
                 node = classes[row['class']](label=row['label'])
 
-        print('\n node.label:', node.label)
-
-        # delete node at start of iteration!?
-        print('\nDICT AFTER LABEL ASSIGNMENT:')
-        for k, v in nodes.items():
-            print(k, v.label)
-
+        # set node attributes
+        # (attributes must be placed either in the first line or in all lines
+        #  of multiple node entries (flows) in csv file)
         for attr in row.keys():
             if (attr not in flow_attrs and
                attr not in ('class', 'label', 'source', 'target',
@@ -239,7 +223,5 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         else:
             node.conversion_factors = conversion_factors
             nodes[node.label] = node
-    for k, v in nodes.items():
-        print(k, v.label)
 
     return nodes

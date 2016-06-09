@@ -25,15 +25,14 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
 
 #print(nodes)
 
-## print out nodes
-## errors: confused labels for sources
-#for k, v in nodes.items():
-#    attrs = dir(v)
-#    print('\n OBJ:', k, v)
-#    print('--------------------')
-#    for i in attrs:
-#        if '_' not in i:
-#            print(i, ':', getattr(v, str(i)))
+# print out nodes
+for k, v in nodes.items():
+    attrs = dir(v)
+    print('\n OBJ:', k, v)
+    print('--------------------')
+    for i in attrs:
+        if '_' not in i:
+            print(i, ':', getattr(v, str(i)))
 
 om = OperationalModel(es, timeindex=datetime_index)
 
