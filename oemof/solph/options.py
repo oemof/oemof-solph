@@ -175,7 +175,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                    'LinearTransformer': LinearTransformer,
                    'Storage': Storage}
         if row['class'] in classes.keys():
-            node = classes[row['class']](label=row['label'])
+            node = nodes.get(row['label'])
+            if node is None:
+                node = classes[row['class']](label=row['label'])
 
         print('\n node.label:', node.label)
 
