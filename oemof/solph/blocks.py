@@ -446,7 +446,8 @@ class Flow(SimpleBlock):
                                                           lhs >= rhs)
                     else:
                         pass  # return(Constraint.Skip)
-        self.positive_gradient_constr = Constraint(group, noruleinit=True)
+        self.positive_gradient_constr = Constraint(
+            self.POSITIVE_GRADIENT_FLOWS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule)
 
@@ -462,8 +463,8 @@ class Flow(SimpleBlock):
                                                           lhs >= rhs)
                     else:
                         pass  # return(Constraint.Skip)
-
-        self.negative_gradient_constr = Constraint(group, noruleinit=True)
+        self.negative_gradient_constr = Constraint(
+            self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
@@ -757,7 +758,7 @@ class Discrete(SimpleBlock):
             """Rule definition for MILP minimum flow constraints.
             """
             expr = (self.status[i, o, t] *
-                    m.flows[i, o].min[t] * m.flows[i, o].nominal_value >=
+                    m.flows[i, o].min[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
             return expr
         self.minimum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
@@ -767,7 +768,7 @@ class Discrete(SimpleBlock):
             """Rule definition for MILP maximum flow constraints.
             """
             expr = (self.status[i, o, t] *
-                    m.flows[i, o].max[t] * m.flows[i, o].nominal_value <=
+                    m.flows[i, o].max[t] * m.flows[i, o].nominal_value >=
                     m.flow[i, o, t])
             return expr
         self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,

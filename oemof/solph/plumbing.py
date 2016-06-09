@@ -148,14 +148,14 @@ class OperationalModel(po.ConcreteModel):
         self.INPUTS = po.Set(self.NODES, initialize={
             n: [i for i in n.inputs] for n in self.es.nodes
             if not isinstance(n, Source)
-            }
+            }, ordered=True
         )
 
         # indexed index set for outputs of nodes (nodes as indices)
         self.OUTPUTS = po.Set(self.NODES, initialize={
             n: [o for o in n.outputs] for n in self.es.nodes
             if not isinstance(n, Sink)
-            }
+            }, ordered=True
         )
 
         # pyomo set for all flows in the energy system graph
