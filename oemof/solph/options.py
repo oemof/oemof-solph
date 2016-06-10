@@ -118,7 +118,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
     """
 
-    import math
     import pandas as pd
     from oemof.solph.network import (Bus, Source, Sink, Flow,
                                      LinearTransformer, Storage)
