@@ -218,7 +218,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         # create a conversion_factor entry for the current line
         if row['target'] and 'conversion_factors' in row:
             conversion_factors = {nodes[row['target']]:
-                                  row['conversion_factors']}
+                                  Sequence(row['conversion_factors'])}
         else:
             conversion_factors = {}
 

@@ -130,7 +130,7 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     om = OperationalModel(energysystem, timeindex=energysystem.time_idx)
 
     logging.info('Solve the optimization problem')
-    om.solve(solver='glpk', solve_kwargs={'tee': True})
+    om.solve(solver='gurobi', solve_kwargs={'tee': True})
 
     logging.info('Store lp-file')
     om.write('optimization_problem.lp',
