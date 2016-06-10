@@ -179,7 +179,8 @@ class OperationalModel(po.ConcreteModel):
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
 
-                if self.flows[o, i].nominal_value is not None:
+                if self.flows[o, i].nominal_value is not None and (
+                        self.flows[o, i].discrete is None):
                     # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
