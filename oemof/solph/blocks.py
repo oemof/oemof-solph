@@ -90,9 +90,9 @@ class Storage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[m.INPUTS[n], n, t] *
+            expr += (- m.flow[n._input(), n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, m.OUTPUTS[n], t] /
+            expr += (m.flow[n, n._output(), t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
@@ -216,9 +216,9 @@ class InvestmentStorage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[m.INPUTS[n], n, t] *
+            expr += (- m.flow[n._input(), n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, m.OUTPUTS[n], t] /
+            expr += (m.flow[n, n._output(), t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
@@ -239,7 +239,7 @@ class InvestmentStorage(SimpleBlock):
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[m.INPUTS[n], n] ==
+            expr = (m.InvestmentFlow.invest[n._input(), n] ==
                     self.invest[n] * n.nominal_input_capacity_ratio)
             return expr
         self.storage_capacity_inflow = Constraint(
@@ -250,7 +250,7 @@ class InvestmentStorage(SimpleBlock):
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, m.OUTPUTS[n]] ==
+            expr = (m.InvestmentFlow.invest[n, n._output()] ==
                     self.invest[n] * n.nominal_output_capacity_ratio)
             return expr
         self.storage_capacity_outflow = Constraint(
@@ -713,8 +713,8 @@ class LinearTransformer(SimpleBlock):
             for t in m.TIMESTEPS:
                 for n in group:
                     for o in n.outputs:
-                        lhs = m.flow[m.INPUTS[n], n, t] * \
-                            n.conversion_factors[o][t]
+                        lhs = m.flow[n._input(), n, t] * \
+                              n.conversion_factors[o][t]
                         rhs = m.flow[n, o, t]
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
