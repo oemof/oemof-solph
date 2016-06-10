@@ -21,7 +21,7 @@ datetime_index = pd.date_range('1/1/2012', periods=timesteps_max, freq='60min')
 
 es = core_es.EnergySystem(groupings=solph.GROUPINGS, time_idx=datetime_index)
 
-nodes = NodesFromCSV(file_nodes_flows='nodes_flows_error_storage.csv',
+nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
                      delimiter=',')
 
@@ -42,35 +42,33 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows_error_storage.csv',
 
 om = OperationalModel(es, timeindex=datetime_index)
 
-om.solve(solve_kwargs={'tee': True})
+om.solve(solver='gurobi', solve_kwargs={'tee': True})
 
 om.write('optimization_problem.lp',
          io_options={'symbolic_solver_labels': True})
 
 logging.info('Done!')
 
-#logging.info('Check the results')
-#
-#myresults = tpd.DataFramePlot(energy_system=es)
-#
-#chp1_in = myresults.slice_by(obj_label='chp1', type='input',
-#                               date_from='2012-01-01 00:00:00',
-#                               date_to='2012-12-31 23:00:00')
-#
-#chp1_out = myresults.slice_by(obj_label='chp1', type='output',
-#                              date_from='2012-01-01 00:00:00',
-#                              date_to='2012-12-31 23:00:00')
-#
-#demand = myresults.slice_by(obj_label='demand1',
-#                            date_from='2012-01-01 00:00:00',
-#                            date_to='2012-12-31 23:00:00')
-#
-#wind = myresults.slice_by(obj_label='wind1',
-#                          date_from='2012-01-01 00:00:00',
-#                          date_to='2012-12-31 23:00:00')
-#
-#pv = myresults.slice_by(obj_label='solar1',
-#                        date_from='2012-01-01 00:00:00',
-#                        date_to='2012-12-31 23:00:00')
-#
-#print(demand, pv, chp1_out)
+logging.info('Check the results')
+
+myresults = tpd.DataFramePlot(energy_system=es)
+
+chp1_in = myresults.slice_by(obj_label='chp1', type='input',
+                             date_from='2012-01-01 00:00:00',
+                             date_to='2012-12-31 23:00:00')
+
+chp1_out = myresults.slice_by(obj_label='chp1', type='output',
+                              date_from='2012-01-01 00:00:00',
+                              date_to='2012-12-31 23:00:00')
+
+demand = myresults.slice_by(obj_label='demand1',
+                            date_from='2012-01-01 00:00:00',
+                            date_to='2012-12-31 23:00:00')
+
+wind = myresults.slice_by(obj_label='wind1',
+                          date_from='2012-01-01 00:00:00',
+                          date_to='2012-12-31 23:00:00')
+
+pv = myresults.slice_by(obj_label='solar1',
+                        date_from='2012-01-01 00:00:00',
+                        date_to='2012-12-31 23:00:00')

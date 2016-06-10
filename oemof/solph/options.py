@@ -161,7 +161,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               attr]
                     seq = Sequence(seq.values)
                     setattr(flow, attr, seq)
-                    print(row['label'], flow, attr, len(seq), seq[0:10])
+                    print(row['label'], flow, attr, len(seq), seq[0:10], '...')
 
         # create node if not existent
         # to be filled dynamically from dataframe
@@ -190,7 +190,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                   attr]
                         seq = Sequence(seq.values)
                         setattr(node, attr, seq)
-                        print(row['label'], attr, len(seq), seq[0:10])
+                        print(row['label'], attr, len(seq), seq[0:10], '...')
 
         # create an input entry for the current line
         if row['label'] == row['target']:
