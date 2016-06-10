@@ -106,7 +106,7 @@ class Discrete:
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=','):
+                 delimiter=',', additional_classes={}):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
@@ -172,6 +172,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         classes = {'Source': Source, 'Sink': Sink,
                    'LinearTransformer': LinearTransformer,
                    'Storage': Storage}
+        # upate classes dictionary with additional provided classes
+        classes.update(additional_classes)
         if row['class'] in classes.keys():
             node = nodes.get(row['label'])
             if node is None:
