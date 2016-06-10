@@ -4,6 +4,7 @@
 """
 from collections import abc, UserList
 
+from oemof import network
 
 def Sequence(sequence_or_scalar):
     """ Tests if an object is sequence (except string) or scalar and returns
@@ -224,8 +225,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
         for source, f in inputs.items():
-            source.outputs[node] = f
-        node.outputs.update(outputs)
+            network.flow[source, node] = f
+        for target, f in outputs.items():
+            network.flow[node, target] = f
         if node.label in nodes.keys():
             node.conversion_factors.update(conversion_factors)
         else:
