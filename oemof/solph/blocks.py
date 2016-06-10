@@ -530,9 +530,6 @@ class InvestmentFlow(SimpleBlock):
         self.SUMMED_MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
-        self.MAX_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if g[2].max is not None])
-
         self.MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if sum(
                 [g[2].min[t] for t in m.TIMESTEPS]) > 0])
@@ -566,7 +563,7 @@ class InvestmentFlow(SimpleBlock):
             expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
                                         self.invest[i, o]))
             return expr
-        self.max = Constraint(self.MAX_FLOWS, m.TIMESTEPS,
+        self.max = Constraint(self.FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
