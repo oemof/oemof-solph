@@ -163,11 +163,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               row['source'],
                                               row['target'],
                                               attr]
-                    #seq = [float(i) for i in seq.values]
-                    #seq = seq.values
                     seq = Sequence(seq.values)
                     setattr(flow, attr, seq)
-                    print('foo')
                     print(row['label'], flow, attr, type(seq), len(seq))
 
         # create node if not existent
