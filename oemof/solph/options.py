@@ -148,17 +148,13 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         for i in int_attributes:
             if i in row:
                 row[i] = int(row[i])
-                print('INT ATTR:', i, row[i], type(row[i]))
+                print('ATTR CONVERTED TO INT:', i, row[i], type(row[i]))
 
         seq_attributes = ['actual_value', 'min', 'max', 'positive_gradient',
                           'negative_gradient', 'variable_costs',
                           'capacity_loss', 'inflow_conversion_factor',
                           'outflow_conversion_factor', 'capacity_max',
                           'capacity_min']
-        for i in seq_attributes:
-            if i in row:
-                row[i] = Sequence(row[i])
-                print('SEQ ATTR:', i, row[i], type(row[i]))
 
         # create flow and set flow attributes
         flow = Flow()
@@ -166,17 +162,22 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         for attr in flow_attrs:
             if attr in row.keys() and row[attr]:
                 if row[attr] != 'seq':
+                    if attr in seq_attributes:
+                        row[attr] = Sequence(row[attr])
                     setattr(flow, attr, row[attr])
-                    print('FLOW ATTR:', row['label'], flow, attr, type(row[attr]))
+                    print('FLOW SINGLE ATTR:', row['label'], flow, attr, type(row[attr]))
                 else:
                     seq = nodes_flows_seq.loc[row['class'],
                                               row['label'],
                                               row['source'],
                                               row['target'],
                                               attr]
-                    seq = [i for i in seq.values]
+                    if attr in seq_attributes:
+                        seq = Sequence(seq)
+                    else:
+                        seq = [i for i in seq.values]
                     setattr(flow, attr, seq)
-                    print('FLOW ATTR:', row['label'], flow, attr, type(seq), len(seq), seq[0:10], '...')
+                    print('FLOW SEQ ATTR:', row['label'], flow, attr, type(seq), len(seq), seq[0:10], 'WTF')
 
         # create node if not existent
         # to be filled dynamically from dataframe
@@ -198,17 +199,22 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                attr not in ('class', 'label', 'source', 'target',
                             'conversion_factors')):
                     if row[attr] != 'seq':
+                        if attr in seq_attributes:
+                            row[attr] = Sequence(row[attr])
                         setattr(node, attr, row[attr])
-                        print('NODE ATTR:', row['label'], attr, type(row[attr]))
+                        print('NODE SINGLE ATTR:', row['label'], attr, type(row[attr]))
                     else:
                         seq = nodes_flows_seq.loc[row['class'],
                                                   row['label'],
                                                   row['source'],
                                                   row['target'],
                                                   attr]
-                        seq = [i for i in seq.values]
+                        if attr in seq_attributes:
+                            seq = Sequence(seq)
+                        else:
+                            seq = [i for i in seq.values]
                         setattr(node, attr, seq)
-                        print('NODE ATTR:', row['label'], attr, type(seq), len(seq), seq[0:10], '...')
+                        print('NODE SEQ ATTR:', row['label'], attr, type(seq), len(seq), seq[0:10], 'WTF')
 
         # create an input entry for the current line
         if row['label'] == row['target']:
