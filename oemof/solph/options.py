@@ -163,7 +163,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               row['source'],
                                               row['target'],
                                               attr]
-                    seq = Sequence(seq.values)
+                    seq = [i for i in seq.values]
                     setattr(flow, attr, seq)
                     print(row['label'], flow, attr, type(seq), len(seq))
 
@@ -195,7 +195,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                   row['source'],
                                                   row['target'],
                                                   attr]
-                        seq = Sequence(seq.values)
+                        seq = [i for i in seq.values]
                         setattr(node, attr, seq)
                         print(row['label'], attr, type(seq), len(seq))
 
