@@ -173,6 +173,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                               row['target'],
                                               attr]
                     if attr in seq_attributes:
+                        seq = [i for i in seq]
                         seq = Sequence(seq)
                     else:
                         seq = [i for i in seq.values]
@@ -210,6 +211,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                   row['target'],
                                                   attr]
                         if attr in seq_attributes:
+                            seq = [i for i in seq]
                             seq = Sequence(seq)
                         else:
                             seq = [i for i in seq.values]
