@@ -74,6 +74,32 @@ class Node_Tests:
             "\n  Got unexpected exception:\n" +
             "\n      {}".format(feo(type(exception), exception)[0]))
 
+    def test_that_nodes_do_not_get_undead_flows(self):
+        """ Newly created nodes should only have flows assigned to them.
+
+        A new node `n`, which re-used a previously used label `l`, retained the
+        flows of those nodes which where labeled `l` before `n`. This incorrect
+        behaviour is a problem if somebody wants to use different nodes with
+        the same label in multiple energy systems. While this feature currently
+        isn't used, it also lead to weird behaviour when running tests.
+
+        This test ensures that new nodes only have those flows which are
+        assigned to them on construction.
+        """
+        flow = object()
+        old = Node(label="A reused label")
+        bus = Bus(label="bus", inputs={old: flow})
+        eq_(bus.inputs[old], flow,
+            ("\n  Expected: {}" +
+             "\n  Got     : {} instead").format(flow, bus.inputs[old]))
+        eq_(old.outputs[bus], flow,
+            ("\n  Expected: {}" +
+             "\n  Got     : {} instead").format(flow, old.outputs[bus]))
+        new = Node(label="A reused label")
+        eq_(new.outputs, {},
+            ("\n  Expected an empty dictionary of outputs." +
+             "\n  Got: {} instead").format(new.outputs))
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
