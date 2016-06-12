@@ -108,7 +108,7 @@ class Node:
             __class__.registry.add(self)
 
     def __eq__(self, other):
-        return self.label == other.label
+        return id(self) == id(other)
 
     def __lt__(self, other):
         return self.label < other.label
