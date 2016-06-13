@@ -64,7 +64,7 @@ stor_invest_dict = {8760: {
         'wind_inst': 1000000,
         'pv_sum': 553984766.734176,
         'pv_inst': 582000,
-        'storage_cap': 10969500,
+        'storage_cap': 10805267,
         'objective': 8.93136532898235e+19}}
 
 check(stor_invest_dict[number_of_timesteps], stor_invest_run,
