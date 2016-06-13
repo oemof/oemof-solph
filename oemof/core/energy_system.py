@@ -6,6 +6,7 @@ Created on Mon Jul 20 15:53:14 2015
 """
 
 from functools import partial
+from warnings import warn
 import logging
 import os
 
@@ -19,6 +20,9 @@ from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 def MultipleGroups(*args):
+    warn("`MultipleGroups` is DEPRECATED.\n" +
+         "Just return a list of group keys instead.",
+         DeprecationWarning)
     return list(args)
 
 class EnergySystem:
