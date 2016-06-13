@@ -59,7 +59,8 @@ def initialise_energysystem(number_timesteps=8760):
                                 time_idx=date_time_index)
 
 
-def optimise_storage_size(energysystem, filename="storage_invest.csv"):
+def optimise_storage_size(energysystem, filename="storage_invest.csv",
+                          solvername='glpk'):
     # Read data file
     data = pd.read_csv(filename, sep=",")
 
@@ -130,7 +131,7 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv"):
     om = OperationalModel(energysystem, timeindex=energysystem.time_idx)
 
     logging.info('Solve the optimization problem')
-    om.solve(solver='glpk', solve_kwargs={'tee': True})
+    om.solve(solver=solvername, solve_kwargs={'tee': True})
 
     logging.info('Store lp-file')
     om.write('optimization_problem.lp',
