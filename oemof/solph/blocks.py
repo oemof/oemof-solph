@@ -746,14 +746,15 @@ class Discrete(SimpleBlock):
                                          if g[2].min[0] != 0])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].discrete.start_costs is not None])
+                                  if g[2].discrete.startup_costs is not None])
 
-        self.SHUTDOWNTFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+        self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                   if g[2].discrete.shutdown_costs is not None])
+
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.FLOWS, m.TIMESTEPS, within=Binary)
 
-        if self.STARTCOSTSFLOWS:
+        if self.STARTUPFLOWS:
             self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
                                within=Binary)
         if self.SHUTDOWNFLOWS:
@@ -783,27 +784,33 @@ class Discrete(SimpleBlock):
         def _startup_rule(block, i, o, t):
             """Rule definition for startup constraint of discrete flows.
             """
-            if t >= m.TIMESTEPS[0]:
-                expr = (self.status[i, o, t-1] - self.status[i, o, t] <=
-                            self.startup[i, o, t])
-                return expr
+            if t > m.TIMESTEPS[1]:
+                expr = (self.startup[i, o, t] >= self.status[i, o, t] -
+                            self.status[i, o, t-1])
             else:
-                return Constraint.Skip
+                expr = (self.startup[i, o, t] >= self.status[i, o, t] -
+                            m.flows[i, o].discrete.initial_status)
+            return expr
         self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
+
 
         def _shutdown_rule(block, i, o, t):
             """Rule definition for shutdown constraints of discrete flows.
             """
-            if t >= m.TIMESTEPS[0]:
-                expr = (self.status[i, o, t] - self.status[i, o, t-1] <=
-                            self.shutdown[i, o, t])
-                return expr
+            if t > m.TIMESTEPS[1]:
+                expr = (self.shutdown[i, o, t] >= self.status[i, o, t-1] -
+                            self.status[i, o, t])
             else:
-                return Constraint.Skip
-        self.shutdown_constr = Constraint(self.SHUTDOWNTFLOWS, m.TIMESTEPS,
+               expr = (self.shutdown[i, o, t] >=
+                       m.flows[i, o].discrete.initial_status -
+                           self.status[i, o, t])
+            return expr
+        self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
+        # TODO: Add gradient constraints for discrete block / flows
+        # TODO: Add  min-up/min-downtime constraints
 
     def _objective_expression(self):
         """Objective expression for discrete flows.
@@ -818,19 +825,17 @@ class Discrete(SimpleBlock):
 
         if self.STARTUPFLOWS:
             startcosts += sum(self.startup[i, o, t] *
-                                  m.flows[i, o].discrete.startcosts
-                              for i,o in self.STARTCOSTFLOWS
+                                  m.flows[i, o].discrete.startup_costs
+                              for i,o in self.STARTUPFLOWS
                               for t in m.TIMESTEPS)
             self.startcosts = Expression(expr=startcosts)
 
         if self.SHUTDOWNFLOWS:
             shutdowncosts += sum(self.shutdown[i, o, t] *
                                      m.flows[i, o].discrete.shutdown_costs
-                              for i,o in self.STARTUPFLOWS
+                              for i,o in self.SHUTDOWNFLOWS
                               for t in m.TIMESTEPS)
             self.shudowcosts = Expression(expr=shutdowncosts)
 
         return startcosts + shutdowncosts
 
-        # TODO: Add gradient constraints for discrete block / flows
-        # TODO: Add  min-up/min-downtime constraints

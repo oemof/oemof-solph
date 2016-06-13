@@ -107,10 +107,14 @@ class Discrete:
         startup.
     minimum_downtime : numeric
         Minimum time a flow is forced to zero after shutting down.
+    initial_status : numeric (0 or 1)
+        Integer value indicating the status of the flow in the first timestep
+        (0 = off, 1 = on).
     """
     def __init__(self, **kwargs):
         # super().__init__(self, **kwargs)
-        self.startup_costs = kwargs.get('start_costs')
+        self.startup_costs = kwargs.get('startup_costs')
         self.shutdown_costs = kwargs.get('shutdown_costs')
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
+        self.initial_status = kwargs.get('initial_status', 0)

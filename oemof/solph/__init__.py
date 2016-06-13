@@ -44,7 +44,8 @@ if __name__ == "__main__":
                                                positive_gradient=0.5,
                                                negative_gradient=0.5,
                                                summed_min=2,
-                                               discrete=Discrete())},
+                                               discrete=Discrete(startup_costs=104,
+                                                                 shutdown_costs=99, initial_status=0))},
                              conversion_factors={bel: 0.4})
     stor = Storage(label="stor", inputs={bel: Flow()}, outputs={bel:Flow()},
                    nominal_capacity=50, inflow_conversion_factor=0.9,
