@@ -191,7 +191,7 @@ class Constraint_Tests:
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
-            nominal_capacity=10e4,
+            nominal_capacity=None,
             capacity_loss=0.13,
             nominal_input_capacity_ratio=1 / 6,
             nominal_output_capacity_ratio=1 / 6,
