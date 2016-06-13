@@ -1,9 +1,12 @@
 """ All you need to create groups of stuff in your energy system.
 """
 try:
-    from collections.abc import Hashable, Iterable
+    from collections.abc import ( Hashable, Iterable, Mapping,
+                                  MutableMapping as MM)
 except ImportError:
-    from collections import Hashable, Iterable
+    from collections import ( Hashable, Iterable, Mapping,
+                              MutableMapping as MM)
+from itertools import filterfalse
 
 
 class Grouping:
@@ -28,11 +31,14 @@ class Grouping:
           under which the group should be stored,
         - :meth:`value(e) <Grouping.value>` is called to obtain a value
           :obj:`v` (the actual group) to store under :obj:`k`,
-        - if there is not yet anything stored under :obj:`groups[k]`,
-          :obj:`groups[k]` is set to :obj:`v`. Otherwise :meth:`merge
-          <Grouping.merge>` is used to figure out how to merge :obj:`v` into
-          the old value of :obj:`groups[k]`, i.e. :obj:`groups[k]` is set to
-          :meth:`merge(v, groups[k]) <Grouping.merge>`.
+        - if you supplied a :func:`filter` argument, :obj:`v` is
+          :func:`filtered <builtins.filter>` using that function,
+        - otherwise, if there is not yet anything stored under
+          :obj:`groups[k]`, :obj:`groups[k]` is set to :obj:`v`. Otherwise
+          :meth:`merge <Grouping.merge>` is used to figure out how to merge
+          :obj:`v` into the old value of :obj:`groups[k]`, i.e.
+          :obj:`groups[k]` is set to :meth:`merge(v, groups[k])
+          <Grouping.merge>`.
 
     Instead of trying to use this class directly, have a look at its
     subclasses, like :class:`Nodes`, which should cater for most use cases.
@@ -50,15 +56,21 @@ class Grouping:
 
         Overrides the default behaviour of :meth:`value <Grouping.value>`.
 
+    filter: callable, optional
+
+        If supplied, whatever is returned by :meth:`value` is :func:`filtered
+        <builtins.filter>` through this. See :meth:`filter` for more details.
+
     merge: callable, optional
 
         Overrides the default behaviour of :meth:`merge <Grouping.merge>`.
 
     """
 
-    def __init__(self, key, **kwargs):
+    def __init__(self, key, filter=None, **kwargs):
         self.key = key
-        for kw in ["value", "merge"]:
+        self.filter = filter
+        for kw in ["value", "merge", "filter"]:
             if kw in kwargs:
                 setattr(self, kw, kwargs[kw])
 
@@ -114,9 +126,44 @@ class Grouping:
                                 id(old), old, id(new), new) +
                           "Possibly duplicate uids/labels?")
 
+    def filter(self, group):
+        """
+        :func:`Filter <builtins.filter>` the group returned by :meth:`value`
+        before storing it.
+
+        Should return a boolean value. If the :obj:`group` returned by
+        :meth:`value` is :class:`iterable <collections.abc.Iterable>`, this
+        function is used (via Python's :func:`builtin filter
+        <builtins.filter>`) to select the values which should be retained in
+        :obj:`group`. If :obj:`group` is not :class:`iterable
+        <collections.abc.Iterable>`, it is simply called on :obj:`group` itself
+        and the return value decides whether :obj:`group` is stored
+        (:obj:`True`) or not (:obj:`False`).
+
+        """
+        raise NotImplementedError(
+                "`Groupings.filter` called without being overridden.\n" +
+                "Congratulations, you managed to execute supposedly " +
+                "unreachable code.\n" +
+                "Please let us know by filing a bug at:\n\n    " +
+                "https://github.com/oemof/oemof/issues\n")
+
+
     def __call__(self, e, d):
         k = self.key(e)
         if k is None:
+            return
+        v = self.value(e)
+        if isinstance(v, MM):
+            for k in list(filterfalse(self.filter, v)):
+                v.pop(k)
+        elif isinstance(v, Mapping):
+            v = type(v)((k, v[k]) for k in filter(self.filter, v))
+        elif isinstance(v, Iterable):
+            v = type(v)(filter(self.filter, v))
+        else:
+            v = (self.filter or (lambda x: x))(v)
+        if not v:
             return
         for group in (k if ( isinstance(k, Iterable) and not
                              isinstance(k, Hashable))
