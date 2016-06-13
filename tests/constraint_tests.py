@@ -133,8 +133,8 @@ class Constraint_Tests:
         self.compare_lp_files('fixed_source_variable_sink.lp')
 
     def test_fixed_source_invest_sink(self):
-        """Constraint test with a fixed source and an invest sink which has a
-        summed_max attribute."""
+        """ Wrong constraints for fixed source + invest sink w. `summed_max`.
+        """
 
         bel = Bus(label='electricityBus')
 
