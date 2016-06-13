@@ -43,6 +43,14 @@ class Grouping:
     Instead of trying to use this class directly, have a look at its
     subclasses, like :class:`Nodes`, which should cater for most use cases.
 
+    Notes
+    -----
+
+    When overriding methods using any of the constructor parameters, you don't
+    have access to :obj:`self` in the corresponding function. If you need
+    access to :obj:`self`, subclass :class:`Grouping` and override the methods
+    in the subclass.
+
     Parameters
     ----------
 
@@ -160,7 +168,7 @@ class Grouping:
             for k in list(filterfalse(self.filter, v)):
                 v.pop(k)
         elif isinstance(v, Mapping):
-            v = type(v)((k, v[k]) for k in filter(self.filter, v))
+            v = type(v)((k, v[k]) for k in v if self.filter(k))
         elif isinstance(v, Iterable):
             v = type(v)(filter(self.filter, v))
         else:
