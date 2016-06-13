@@ -740,17 +740,25 @@ class Discrete(SimpleBlock):
 
         m = self.parent_block()
         # ########################## SETS #####################################
-
         self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                          if g[2].min[0] != 0])
 
-        self.STARTCOSTFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+        self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                   if g[2].discrete.start_costs is not None])
 
+        self.SHUTDOWNTFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                  if g[2].discrete.shutdown_costs is not None])
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.FLOWS, m.TIMESTEPS, within=Binary)
+
+        if self.STARTCOSTSFLOWS:
+            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
+                               within=Binary)
+        if self.SHUTDOWNFLOWS:
+            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS,
+                                within=Binary)
 
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints.
@@ -772,5 +780,57 @@ class Discrete(SimpleBlock):
         self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                                        rule=_maximum_flow_rule)
 
+        def _startup_rule(block, i, o, t):
+            """Rule definition for startup constraint of discrete flows.
+            """
+            if t >= m.TIMESTEPS[0]:
+                expr = (self.status[i, o, t-1] - self.status[i, o, t] <=
+                            self.startup[i, o, t])
+                return expr
+            else:
+                return Constraint.Skip
+        self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
+                                         rule=_startup_rule)
+
+        def _shutdown_rule(block, i, o, t):
+            """Rule definition for shutdown constraints of discrete flows.
+            """
+            if t >= m.TIMESTEPS[0]:
+                expr = (self.status[i, o, t] - self.status[i, o, t-1] <=
+                            self.shutdown[i, o, t])
+                return expr
+            else:
+                return Constraint.Skip
+        self.shutdown_constr = Constraint(self.SHUTDOWNTFLOWS, m.TIMESTEPS,
+                                          rule=_shutdown_rule)
+
+
+    def _objective_expression(self):
+        """Objective expression for discrete flows.
+        """
+        if not hasattr(self, 'FLOWS'):
+            return 0
+
+        m = self.parent_block()
+
+        startcosts = 0
+        shutdowncosts = 0
+
+        if self.STARTUPFLOWS:
+            startcosts += sum(self.startup[i, o, t] *
+                                  m.flows[i, o].discrete.startcosts
+                              for i,o in self.STARTCOSTFLOWS
+                              for t in m.TIMESTEPS)
+            self.startcosts = Expression(expr=startcosts)
+
+        if self.SHUTDOWNFLOWS:
+            shutdowncosts += sum(self.shutdown[i, o, t] *
+                                     m.flows[i, o].discrete.shutdown_costs
+                              for i,o in self.STARTUPFLOWS
+                              for t in m.TIMESTEPS)
+            self.shudowcosts = Expression(expr=shutdowncosts)
+
+        return startcosts + shutdowncosts
+
         # TODO: Add gradient constraints for discrete block / flows
-        # TODO: Add objective expression for discrete block / flows
+        # TODO: Add  min-up/min-downtime constraints

@@ -96,9 +96,21 @@ class Investment:
 
 class Discrete:
     """
+    Parameters
+    ----------
+    startup_costs : numeric
+        Costs associated with a start of the flow (representing a unit).
+    shutdown_costs : numeric
+        Costs associated with the shutdown of the flow (representing a unti).
+    minimum_uptime : numeric
+        Minimum time that a flow must be greate then its minimum flow after
+        startup.
+    minimum_downtime : numeric
+        Minimum time a flow is forced to zero after shutting down.
     """
     def __init__(self, **kwargs):
         # super().__init__(self, **kwargs)
-        self.start_costs = kwargs.get('start_costs')
+        self.startup_costs = kwargs.get('start_costs')
+        self.shutdown_costs = kwargs.get('shutdown_costs')
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
