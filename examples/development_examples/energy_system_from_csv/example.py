@@ -117,4 +117,5 @@ area.set_ylabel('Power in MW')
 
 check_bus_balance = df['demand'] - df['solar'] - df['wind'] - df['chp_in'] - \
     df['storage_in'] - df['storage_out']
-print(check_bus_balance)
+if sum(check_bus_balance) < 0.01:
+    print('Bus is balanced')

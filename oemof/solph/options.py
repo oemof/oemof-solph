@@ -167,18 +167,44 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         # create node if not existent and set attributes
         # (attributes must be placed either in the first line or in all lines
         #  of multiple node entries (flows) in csv file)
-        if row['class'] in classes.keys():
-            node = nodes.get(row['label'])
-            if node is None:
-                node = classes[row['class']](label=row['label'])
-        for attr in row.keys():
-            if (attr not in flow_attrs and
-               attr not in ('class', 'label', 'source', 'target',
-                            'conversion_factors')):
+        try:
+            if row['class'] in classes.keys():
+                node = nodes.get(row['label'])
+                if node is None:
+                    node = classes[row['class']](label=row['label'])
+            for attr in row.keys():
+                if (attr not in flow_attrs and
+                   attr not in ('class', 'label', 'source', 'target',
+                                'conversion_factors')):
+                        if row[attr] != 'seq':
+                            if attr in seq_attributes:
+                                row[attr] = Sequence(row[attr])
+                            setattr(node, attr, row[attr])
+                        else:
+                            seq = nodes_flows_seq.loc[row['class'],
+                                                      row['label'],
+                                                      row['source'],
+                                                      row['target'],
+                                                      attr]
+                            if attr in seq_attributes:
+                                seq = [i for i in seq]
+                                seq = Sequence(seq)
+                            else:
+                                seq = [i for i in seq.values]
+                            setattr(node, attr, seq)
+        except:
+            print('Error with node creation in line ', i+2, ' in csv file.')
+            print('Label:', row['label'])
+            raise
+
+        # create flow and set attributes
+        try:
+            for attr in flow_attrs:
+                if attr in row.keys() and row[attr]:
                     if row[attr] != 'seq':
                         if attr in seq_attributes:
                             row[attr] = Sequence(row[attr])
-                        setattr(node, attr, row[attr])
+                        setattr(flow, attr, row[attr])
                     else:
                         seq = nodes_flows_seq.loc[row['class'],
                                                   row['label'],
@@ -190,61 +216,66 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                             seq = Sequence(seq)
                         else:
                             seq = [i for i in seq.values]
-                        setattr(node, attr, seq)
-
-        # create flow and set attributes
-        for attr in flow_attrs:
-            if attr in row.keys() and row[attr]:
-                if row[attr] != 'seq':
-                    if attr in seq_attributes:
-                        row[attr] = Sequence(row[attr])
-                    setattr(flow, attr, row[attr])
-                else:
-                    seq = nodes_flows_seq.loc[row['class'],
-                                              row['label'],
-                                              row['source'],
-                                              row['target'],
-                                              attr]
-                    if attr in seq_attributes:
-                        seq = [i for i in seq]
-                        seq = Sequence(seq)
-                    else:
-                        seq = [i for i in seq.values]
-                    setattr(flow, attr, seq)
+                        setattr(flow, attr, seq)
+        except:
+            print('Error with flow creation in line ', i+2, ' in csv file.')
+            print('Label:', row['label'])
+            raise
 
         # create an input entry for the current line
-        if row['label'] == row['target']:
-            if row['source'] not in nodes.keys():
-                nodes[row['source']] = Bus(label=row['source'])
-            inputs = {nodes[row['source']]: flow}
-        else:
-            inputs = {}
+        try:
+            if row['label'] == row['target']:
+                if row['source'] not in nodes.keys():
+                    nodes[row['source']] = Bus(label=row['source'])
+                inputs = {nodes[row['source']]: flow}
+            else:
+                inputs = {}
+        except:
+            print('Error with input creation in line ', i+2, ' in csv file.')
+            print('Label:', row['label'])
+            raise
 
         # create an output entry for the current line
-        if row['label'] == row['source']:
-            if row['target'] not in nodes.keys():
-                nodes[row['target']] = Bus(label=row['target'])
-            outputs = {nodes[row['target']]: flow}
-        else:
-            outputs = {}
+        try:
+            if row['label'] == row['source']:
+                if row['target'] not in nodes.keys():
+                    nodes[row['target']] = Bus(label=row['target'])
+                outputs = {nodes[row['target']]: flow}
+            else:
+                outputs = {}
+        except:
+            print('Error with output creation in line ', i+2, ' in csv file.')
+            print('Label:', row['label'])
+            raise
 
         # create a conversion_factor entry for the current line
-        if row['target'] and 'conversion_factors' in row:
-            conversion_factors = {nodes[row['target']]:
-                                  Sequence(row['conversion_factors'])}
-        else:
-            conversion_factors = {}
+        try:
+            if row['target'] and 'conversion_factors' in row:
+                conversion_factors = {nodes[row['target']]:
+                                      Sequence(row['conversion_factors'])}
+            else:
+                conversion_factors = {}
+        except:
+            print('Error with conversion factor creation in line ', i+2,
+                  ' in csv file.')
+            print('Label:', row['label'])
+            raise
 
         # add node to dict and assign attributes depending on
         # if there are multiple lines per node or not
-        for source, f in inputs.items():
-            network.flow[source, node] = f
-        for target, f in outputs.items():
-            network.flow[node, target] = f
-        if node.label in nodes.keys():
-            node.conversion_factors.update(conversion_factors)
-        else:
-            node.conversion_factors = conversion_factors
-            nodes[node.label] = node
+        try:
+            for source, f in inputs.items():
+                network.flow[source, node] = f
+            for target, f in outputs.items():
+                network.flow[node, target] = f
+            if node.label in nodes.keys():
+                node.conversion_factors.update(conversion_factors)
+            else:
+                node.conversion_factors = conversion_factors
+                nodes[node.label] = node
+        except:
+            print('Error adding node to dict in line ', i+2, ' in csv file.')
+            print('Label:', row['label'])
+            raise
 
     return nodes
