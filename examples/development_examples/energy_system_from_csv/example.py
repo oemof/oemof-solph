@@ -24,18 +24,18 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq_minimal.csv',
                      delimiter=',')
 
-# print out nodes
-for k, v in nodes.items():
-    attrs = dir(v)
-    print('\n OBJ:', k, type(v))
-    print('--------------------')
-    for i in attrs:
-        if '_' not in i:
-            # dirty hack to print weakref dicts by converting to list
-            o = getattr(v, str(i))
-            if isinstance(o, Iterable) and not isinstance(o, str):
-                o = list(o)
-            print(i, ':', o)
+## print out nodes
+#for k, v in nodes.items():
+#    attrs = dir(v)
+#    print('\n OBJ:', k, type(v))
+#    print('--------------------')
+#    for i in attrs:
+#        if '_' not in i:
+#            # dirty hack to print weakref dicts by converting to list
+#            o = getattr(v, str(i))
+#            if isinstance(o, Iterable) and not isinstance(o, str):
+#                o = list(o)
+#            print(i, ':', o)
 
 om = OperationalModel(es, timeindex=datetime_index)
 
@@ -50,43 +50,55 @@ logging.info('Check the results')
 
 myresults = tpd.DataFramePlot(energy_system=es)
 
-chp1_in = myresults.slice_by(obj_label='chp1', type='input',
-                             date_from='2012-01-01 00:00:00',
-                             date_to='2012-12-31 23:00:00')
-
-chp1_out = myresults.slice_by(obj_label='chp1', type='output',
-                              date_from='2012-01-01 00:00:00',
-                              date_to='2012-12-31 23:00:00')
+date_from = '2012-01-01 00:00:00'
+date_to = '2012-12-31 23:00:00'
 
 demand = myresults.slice_by(obj_label='demand1',
-                            date_from='2012-01-01 00:00:00',
-                            date_to='2012-12-31 23:00:00')
+                            date_from=date_from,
+                            date_to=date_to)
+demand.reset_index(inplace=True)
+demand.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+demand.set_index('datetime', inplace=True)
+
 
 wind = myresults.slice_by(obj_label='wind1',
-                          date_from='2012-01-01 00:00:00',
-                          date_to='2012-12-31 23:00:00')
+                          date_from=date_from,
+                          date_to=date_to)
+wind.reset_index(inplace=True)
+wind.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+wind.set_index('datetime', inplace=True)
 
-pv = myresults.slice_by(obj_label='solar1',
-                        date_from='2012-01-01 00:00:00',
-                        date_to='2012-12-31 23:00:00')
+
+solar = myresults.slice_by(obj_label='solar1',
+                           date_from=date_from,
+                           date_to=date_to)
+solar.reset_index(inplace=True)
+solar.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+solar.set_index('datetime', inplace=True)
 
 
-logging.info('Plot the results')
+chp1_in = myresults.slice_by(obj_label='chp1', type='input',
+                             date_from=date_from,
+                             date_to=date_to)
+chp1_in.reset_index(inplace=True)
+chp1_in.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+chp1_in.set_index('datetime', inplace=True)
 
-cdict = {'wind1': '#5b5bae',
-         'colar1': '#ffde32',
-         'storage1': '#42c77a',
-         'chp1': '#636f6b',
-         'demand1': '#ce4aff'}
 
-# Plotting the input flows of the electricity bus for January
-myplot = tpd.DataFramePlot(energy_system=es)
-myplot.slice_unstacked(bus_label="bus_el1", type="input",
-                       date_from="2012-01-01 00:00:00",
-                       date_to="2012-01-31 00:00:00")
-colorlist = myplot.color_from_dict(cdict)
-myplot.plot(color=colorlist, linewidth=2, title="January 2012")
-myplot.ax.legend(loc='upper right')
-myplot.ax.set_ylabel('Power in MW')
-myplot.ax.set_xlabel('Date')
-myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
+chp1_out = myresults.slice_by(obj_label='chp1', type='output',
+                              date_from=date_from,
+                              date_to=date_to)
+chp1_out.reset_index(inplace=True)
+chp1_out.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+chp1_out.set_index('datetime', inplace=True)
+
+
+df = pd.concat([demand, wind, solar, chp1_in, chp1_out], axis=1)
+df.columns = ['demand', 'wind', 'solar', 'chp1_in', 'chp1_out']
+
+area = df[['wind', 'solar', 'chp1_in', 'chp1_out']].plot(kind='area',
+    stacked=True, alpha=0.5, linewidth=0)
+area.set_title('Unit Commitment')
+area.set_xlabel('Time')
+area.set_ylabel('Power in MW')
+df['demand'].plot(ax=area, color='k', style='--')

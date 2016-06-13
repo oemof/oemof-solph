@@ -1,10 +1,10 @@
 class,label,source,target,conversion_factors,nominal_value,actual_value,min,max,fixed_costs,variable_costs,summed_max,summed_min,fixed,nominal_capacity,capacity_loss,nominal_input_capacity_ratio,nominal_output_capacity_ratio,inflow_conversion_factor,outflow_conversion_factor,initial_capacity,capacity_min,capacity_max
-Source,wind1,wind1,bus_el1,,100,seq,,,,,,,True,,,,,,,,,
-Source,solar1,solar1,bus_el1,,150,seq,,,,,,,True,,,,,,,,,
+Source,wind1,wind1,bus_el1,,30,seq,,,,,,,True,,,,,,,,,
+Source,solar1,solar1,bus_el1,,50,seq,,,,,,,True,,,,,,,,,
 Sink,demand_th,bus_th1,demand_th,,,,,,,,,,,,,,,,,,,
 Sink,demand1,bus_el1,demand1,,300,seq,,,,,,,True,,,,,,,,,
 Source,rgas,rgas,bus_gas1,,,,,,,,1,,,,,,,,,,,
 LinearTransformer,chp1,bus_gas1,chp1,,,,,,,,,,,,,,,,,,,
-LinearTransformer,chp1,chp1,bus_el1,0.36,3000,,,seq,,30,,,,,,,,,,,,
+LinearTransformer,chp1,chp1,bus_el1,0.36,500,,,seq,,30,,,,,,,,,,,,
 Storage,storage1,bus_el1,storage1,,200,,,,,,,,,500,0.1,0.2,0.56,0.97,1,0.5,0.1,1
 Storage,storage1,storage1,bus_el1,,100,,,,,,,,,,,,,,,,,
