@@ -5,7 +5,6 @@ Sink,demand_th,bus_th1,demand_th,,,,,,,,,,,,,,,,,,,
 Sink,demand1,bus_el1,demand1,,300,seq,,,,,,,True,,,,,,,,,
 Source,rgas,rgas,bus_gas1,,,,,,,,1,,,,,,,,,,,
 LinearTransformer,chp1,bus_gas1,chp1,,,,,,,,,,,,,,,,,,,
-LinearTransformer,chp1,chp1,bus_el1,0.36,300,,,seq,,30,,,,,,,,,,,,
-LinearTransformer,chp1,chp1,bus_th1,0.6,100,,,,,15,,,,,,,,,,,,
+LinearTransformer,chp1,chp1,bus_el1,0.36,3000,,,seq,,30,,,,,,,,,,,,
 Storage,storage1,bus_el1,storage1,,200,,,,,,,,,500,0.1,0.2,0.56,0.97,1,0.5,0.1,1
 Storage,storage1,storage1,bus_el1,,100,,,,,,,,,,,,,,,,,
