@@ -34,11 +34,14 @@ def check(cdict, runcheck, subdict):
 
 
 # ********* storage invest example ******************************************
-testdict['stor_inv'] = {'name': "Storage invest example"}
+testdict['stor_inv'] = {'name': "Storage invest example",
+                        'solver': 'cbc'}
+
 number_of_timesteps = 8760
 
 try:
-    esys = storage_invest.initialise_energysystem(number_of_timesteps)
+    esys = storage_invest.initialise_energysystem(
+        number_of_timesteps, testdict['stor_inv']['solver'])
     filepath = os.path.join('storage_optimization', 'storage_invest.csv')
     esys = storage_invest.optimise_storage_size(esys, filename=filepath)
     results = storage_invest.get_result_dict(esys)
@@ -55,15 +58,17 @@ stor_invest_dict = {8760: {
         'wind_inst': 1000000,
         'pv_sum': 553984766.734176,
         'pv_inst': 582000,
-        'storage_cap': 11001216,
+        'storage_cap': 10805267,
         'objective': 8.93136532898235e+19}}
 
 check(stor_invest_dict[number_of_timesteps], stor_invest_run,
       testdict['stor_inv'])
 
 logger.define_logging()
+
 for tests in testdict.values():
     logging.info(tests['name'])
+    logging.info("Used solver: {0}".format(tests['solver']))
     logging.info("Run check: {0}".format(tests['run']))
     logging.info("Result check: {0}".format(tests['results']))
     if show_messages and 'messages' in tests:
