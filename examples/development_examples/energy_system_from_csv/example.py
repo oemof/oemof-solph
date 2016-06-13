@@ -14,14 +14,14 @@ from collections import Iterable
 
 logger.define_logging()
 
-timesteps_max = 25
+timesteps_max = 8760
 
 datetime_index = pd.date_range('1/1/2012', periods=timesteps_max, freq='60min')
 
 es = core_es.EnergySystem(groupings=solph.GROUPINGS, time_idx=datetime_index)
 
 nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
-                     file_nodes_flows_sequences='nodes_flows_seq_minimal.csv',
+                     file_nodes_flows_sequences='nodes_flows_seq.csv',
                      delimiter=',')
 
 ## print out nodes
@@ -75,6 +75,7 @@ wind.set_index('datetime', inplace=True)
 
 
 chp_in = myresults.slice_by(obj_label='chp1', type='input',
+                            bus_label='bus_el1',
                             date_from=date_from, date_to=date_to)
 chp_in.reset_index(inplace=True)
 chp_in.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
@@ -101,19 +102,20 @@ storage_out.set_index('datetime', inplace=True)
 
 # %% dispatch plot
 
-df = pd.concat([demand, wind, solar, chp_in, chp_out, storage_in, storage_out],
+df = pd.concat([-demand, wind, solar, chp_in, chp_out, storage_in,
+                -storage_out],
                axis=1)
 df.columns = ['demand', 'wind', 'solar', 'chp_in', 'chp_out', 'storage_in',
               'storage_out']
 
+df = df['2012-1':'2012-2']
+
 # linear transformer and storage inputs and outputs are still confused
-area_data = df[['solar', 'wind', 'chp_in', 'storage_in']]
+area_data = df[['solar', 'wind', 'chp_in', 'storage_in', 'demand',
+                'storage_out']]
 area = area_data.plot(kind='area', stacked=True, alpha=0.5, linewidth=0)
 area.set_xlabel('Time')
 area.set_ylabel('Power in MW')
-
-dmd = df['demand'] + df['storage_out']
-dmd.plot(ax=area, color='k', style='--')
 
 # %% check energy balance arround bus
 
