@@ -106,7 +106,8 @@ class Discrete:
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', additional_classes={}):
+                 delimiter=',', additional_classes={},
+                 additional_seq_attributes=[]):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
@@ -154,7 +155,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                           'negative_gradient', 'variable_costs',
                           'capacity_loss', 'inflow_conversion_factor',
                           'outflow_conversion_factor', 'capacity_max',
-                          'capacity_min']
+                          'capacity_min'] + additional_seq_attributes
 
         # create flow and set flow attributes
         flow = Flow()
