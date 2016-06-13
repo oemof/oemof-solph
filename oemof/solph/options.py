@@ -205,7 +205,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                         if attr in seq_attributes:
                             row[attr] = Sequence(row[attr])
                         setattr(flow, attr, row[attr])
-                    else:
+                    if row[attr] == 'seq':
                         seq = nodes_flows_seq.loc[row['class'],
                                                   row['label'],
                                                   row['source'],
@@ -217,10 +217,21 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                         else:
                             seq = [i for i in seq.values]
                         setattr(flow, attr, seq)
+                    # This block is only for discrete flows!
+                    if attr == 'discrete' and row[attr] == True:
+                        # create Discrete object for flow
+                        setattr(flow, attr, Discrete())
+                        discrete_attrs = vars(Discrete()).keys()
+                        for dattr in discrete_attrs:
+                            if dattr in row.keys() and row[attr]:
+                                setattr(flow.discrete, dattr, row[dattr])
         except:
             print('Error with flow creation in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
+
+
+
 
         # create an input entry for the current line
         try:
