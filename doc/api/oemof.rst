@@ -12,6 +12,18 @@ Subpackages
     oemof.solph
     oemof.tools
 
+Submodules
+----------
+
+oemof.groupings module
+----------------------
+
+.. automodule:: oemof.groupings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Module contents
 ---------------
 
