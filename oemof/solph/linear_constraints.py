@@ -666,7 +666,7 @@ def add_storage_charge_discharge_limits(model, block):
 
     def storage_charge_limit_rule(block, e, t):
         expr = 0
-        expr += model.w[e, model.I[e][0], t]
+        expr += model.w[model.I[e][0], e, t]
         expr += -(cap_max[e] + block.add_cap[e]) \
             * c_rate_in[e]
         return(expr <= 0)
