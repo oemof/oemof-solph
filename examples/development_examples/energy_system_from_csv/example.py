@@ -116,6 +116,6 @@ df['demand'].plot(ax=area, color='k', style='--')
 
 # %% check energy balance arround bus
 
-check_bus_balance = df['demand'] - df['solar'] - df['wind'] + df['chp_in'] + \
+check_bus_balance = df['demand'] - df['solar'] - df['wind'] - df['chp_in'] - \
     df['storage_in'] - df['storage_out']
 print(check_bus_balance)
