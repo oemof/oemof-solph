@@ -239,7 +239,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     for attr in bus_attrs:
                         if attr in row.keys() and row[attr] is not None:
                             setattr(nodes[row['source']], attr, row[attr])
-                            print('1', row['label'], attr, row[attr])
                 inputs = {nodes[row['source']]: flow}
             else:
                 inputs = {}
@@ -256,7 +255,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     for attr in bus_attrs:
                         if attr in row.keys() and row[attr] is not None:
                             setattr(nodes[row['target']], attr, row[attr])
-                            print('2', row['label'], attr, row[attr])
                 outputs = {nodes[row['target']]: flow}
             else:
                 outputs = {}
