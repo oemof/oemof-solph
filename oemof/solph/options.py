@@ -286,10 +286,12 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             for target, f in outputs.items():
                 network.flow[node, target] = f
             if node.label in nodes.keys():
-                node.conversion_factors.update(conversion_factors)
+                if 'Bus' not in str(type(node)):
+                    node.conversion_factors.update(conversion_factors)
             else:
-                node.conversion_factors = conversion_factors
-                nodes[node.label] = node
+                if 'Bus' not in str(type(node)):
+                    node.conversion_factors = conversion_factors
+                    nodes[node.label] = node
         except:
             print('Error adding node to dict in line', i+2, 'in csv file.')
             print('Label:', row['label'])
