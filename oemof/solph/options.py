@@ -193,7 +193,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                 seq = [i for i in seq.values]
                             setattr(node, attr, seq)
         except:
-            print('Error with node creation in line ', i+2, ' in csv file.')
+            print('Error with node creation in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
 
@@ -218,7 +218,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                             seq = [i for i in seq.values]
                         setattr(flow, attr, seq)
         except:
-            print('Error with flow creation in line ', i+2, ' in csv file.')
+            print('Error with flow creation in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
 
@@ -231,7 +231,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             else:
                 inputs = {}
         except:
-            print('Error with input creation in line ', i+2, ' in csv file.')
+            print('Error with input creation in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
 
@@ -244,7 +244,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             else:
                 outputs = {}
         except:
-            print('Error with output creation in line ', i+2, ' in csv file.')
+            print('Error with output creation in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
 
@@ -256,8 +256,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             else:
                 conversion_factors = {}
         except:
-            print('Error with conversion factor creation in line ', i+2,
-                  ' in csv file.')
+            print('Error with conversion factor creation in line', i+2,
+                  'in csv file.')
             print('Label:', row['label'])
             raise
 
@@ -274,7 +274,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                 node.conversion_factors = conversion_factors
                 nodes[node.label] = node
         except:
-            print('Error adding node to dict in line ', i+2, ' in csv file.')
+            print('Error adding node to dict in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
 
