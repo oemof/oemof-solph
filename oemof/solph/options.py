@@ -182,7 +182,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                 'conversion_factors')):
                         if row[attr] != 'seq':
                             if attr in seq_attributes:
-                                row[attr] = Sequence(row[attr])
+                                row[attr] = Sequence(float(row[attr]))
                             setattr(node, attr, row[attr])
                         else:
                             seq = nodes_flows_seq.loc[row['class'],
@@ -208,7 +208,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                 if attr in row.keys() and row[attr]:
                     if row[attr] != 'seq':
                         if attr in seq_attributes:
-                            row[attr] = Sequence(row[attr])
+                            row[attr] = Sequence(float(row[attr]))
                         setattr(flow, attr, row[attr])
                     if row[attr] == 'seq':
                         seq = nodes_flows_seq.loc[row['class'],
