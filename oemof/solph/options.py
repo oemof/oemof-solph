@@ -127,6 +127,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                      LinearTransformer, Storage)
     from oemof.solph.options import Sequence
 
+    # dataframe creation and manipulation
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
     nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
                                   header=None)
@@ -136,7 +137,20 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
     nodes_flows_seq = nodes_flows_seq.astype(float)
 
-    # iterate over dataframe rows and create objects
+    # class dictionary for dynamic instantiation
+    classes = {'Source': Source, 'Sink': Sink,
+               'LinearTransformer': LinearTransformer,
+               'Storage': Storage}
+    classes.update(additional_classes)
+
+    # attributes that have to be converted into a solph sequence
+    seq_attributes = ['actual_value', 'min', 'max', 'positive_gradient',
+                      'negative_gradient', 'variable_costs',
+                      'capacity_loss', 'inflow_conversion_factor',
+                      'outflow_conversion_factor', 'capacity_max',
+                      'capacity_min'] + additional_seq_attributes
+
+    # iteration over dataframe rows to create objects
     nodes = {}
     for i, r in nodes_flows.iterrows():
 
@@ -146,56 +160,15 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
 
-        # change types (more might be necessary)
-        int_attributes = ['nominal_value']
-        for i in int_attributes:
-            if i in row:
-                row[i] = int(row[i])
-                print('ATTR CONVERTED TO INT:', i, row[i], type(row[i]))
-
-        seq_attributes = ['actual_value', 'min', 'max', 'positive_gradient',
-                          'negative_gradient', 'variable_costs',
-                          'capacity_loss', 'inflow_conversion_factor',
-                          'outflow_conversion_factor', 'capacity_max',
-                          'capacity_min'] + additional_seq_attributes
-
         # create flow and set flow attributes
         flow = Flow()
         flow_attrs = vars(Flow()).keys()
-        for attr in flow_attrs:
-            if attr in row.keys() and row[attr]:
-                if row[attr] != 'seq':
-                    if attr in seq_attributes:
-                        row[attr] = Sequence(row[attr])
-                    setattr(flow, attr, row[attr])
-                    print('FLOW SINGLE ATTR:', row['label'], flow, attr, type(row[attr]))
-                else:
-                    seq = nodes_flows_seq.loc[row['class'],
-                                              row['label'],
-                                              row['source'],
-                                              row['target'],
-                                              attr]
-                    if attr in seq_attributes:
-                        seq = [i for i in seq]
-                        seq = Sequence(seq)
-                    else:
-                        seq = [i for i in seq.values]
-                    setattr(flow, attr, seq)
-                    print('FLOW SEQ ATTR:', row['label'], flow, attr, type(seq), len(seq), seq[0:10], 'WTF')
 
-        # create node if not existent
-        # to be filled dynamically from dataframe
-        classes = {'Source': Source, 'Sink': Sink,
-                   'LinearTransformer': LinearTransformer,
-                   'Storage': Storage}
-        # upate classes dictionary with additional provided classes
-        classes.update(additional_classes)
+        # create node if not existent and set attributes
         if row['class'] in classes.keys():
             node = nodes.get(row['label'])
             if node is None:
                 node = classes[row['class']](label=row['label'])
-
-        # set node attributes
         # (attributes must be placed either in the first line or in all lines
         #  of multiple node entries (flows) in csv file)
         for attr in row.keys():
@@ -220,6 +193,28 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                             seq = [i for i in seq.values]
                         setattr(node, attr, seq)
                         print('NODE SEQ ATTR:', row['label'], attr, type(seq), len(seq), seq[0:10], 'WTF')
+
+        # flow and set attributes
+        for attr in flow_attrs:
+            if attr in row.keys() and row[attr]:
+                if row[attr] != 'seq':
+                    if attr in seq_attributes:
+                        row[attr] = Sequence(row[attr])
+                    setattr(flow, attr, row[attr])
+                    print('FLOW SINGLE ATTR:', row['label'], flow, attr, type(row[attr]))
+                else:
+                    seq = nodes_flows_seq.loc[row['class'],
+                                              row['label'],
+                                              row['source'],
+                                              row['target'],
+                                              attr]
+                    if attr in seq_attributes:
+                        seq = [i for i in seq]
+                        seq = Sequence(seq)
+                    else:
+                        seq = [i for i in seq.values]
+                    setattr(flow, attr, seq)
+                    print('FLOW SEQ ATTR:', row['label'], flow, attr, type(seq), len(seq), seq[0:10], 'WTF')
 
         # create an input entry for the current line
         if row['label'] == row['target']:

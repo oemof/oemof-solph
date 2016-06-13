@@ -14,9 +14,13 @@ from collections import Iterable
 
 logger.define_logging()
 
+date_from = '2012-01-01 00:00:00'
+
+date_to = '2012-12-31 23:00:00'
+
 timesteps_max = 8760
 
-datetime_index = pd.date_range('1/1/2012', periods=timesteps_max, freq='60min')
+datetime_index = pd.date_range(date_from, periods=timesteps_max, freq='60min')
 
 es = core_es.EnergySystem(groupings=solph.GROUPINGS, time_idx=datetime_index)
 
@@ -52,8 +56,7 @@ myresults = tpd.DataFramePlot(energy_system=es)
 
 # %% dirty slicing (to be fixed in to_pandas)
 
-date_from = '2012-01-01 00:00:00'
-date_to = '2012-12-31 23:00:00'
+
 
 demand = myresults.slice_by(obj_label='demand1', date_from=date_from,
                             date_to=date_to)
@@ -107,8 +110,6 @@ df = pd.concat([-demand, wind, solar, chp_in, chp_out, storage_in,
                axis=1)
 df.columns = ['demand', 'wind', 'solar', 'chp_in', 'chp_out', 'storage_in',
               'storage_out']
-
-df = df['2012-1':'2012-2']
 
 # linear transformer and storage inputs and outputs are still confused
 area_data = df[['solar', 'wind', 'chp_in', 'storage_in', 'demand',
