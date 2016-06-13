@@ -60,7 +60,7 @@ def initialise_energysystem(number_timesteps=8760):
 
 
 def optimise_storage_size(energysystem, filename="storage_invest.csv",
-                          solvername='glpk'):
+                          solvername='cbc'):
     # Read data file
     data = pd.read_csv(filename, sep=",")
 

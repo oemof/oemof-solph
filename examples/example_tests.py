@@ -40,7 +40,7 @@ def check(cdict, runcheck, subdict, new_results):
 
 # ********* storage invest example ******************************************
 testdict['stor_inv'] = {'name': "Storage invest example",
-                        'solver': 'glpk'}
+                        'solver': 'cbc'}
 
 number_of_timesteps = 8760
 
