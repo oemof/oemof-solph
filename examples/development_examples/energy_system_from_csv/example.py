@@ -50,6 +50,8 @@ logging.info('Check the results')
 
 myresults = tpd.DataFramePlot(energy_system=es)
 
+# %% dirty slicing (to be fixed in to_pandas)
+
 date_from = '2012-01-01 00:00:00'
 date_to = '2012-12-31 23:00:00'
 
@@ -92,6 +94,7 @@ chp1_out.reset_index(inplace=True)
 chp1_out.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
 chp1_out.set_index('datetime', inplace=True)
 
+# %% dispatch plot
 
 df = pd.concat([demand, wind, solar, chp1_in, chp1_out], axis=1)
 df.columns = ['demand', 'wind', 'solar', 'chp1_in', 'chp1_out']
