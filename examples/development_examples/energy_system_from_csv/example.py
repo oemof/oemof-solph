@@ -112,7 +112,8 @@ area = area_data.plot(kind='area', stacked=True, alpha=0.5, linewidth=0)
 area.set_xlabel('Time')
 area.set_ylabel('Power in MW')
 
-df['demand'].plot(ax=area, color='k', style='--')
+dmd = df['demand'] + df['storage_out']
+dmd.plot(ax=area, color='k', style='--')
 
 # %% check energy balance arround bus
 
