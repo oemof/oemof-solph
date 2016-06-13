@@ -14,7 +14,7 @@ import dill as pickle
 
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
-from oemof.groupings import Grouping
+from oemof.groupings import Nodes as Grouping
 from oemof.network import Node
 from oemof.solph.optimization_model import OptimizationModel as OM
 
