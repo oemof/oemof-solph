@@ -140,7 +140,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
                'LinearTransformer': LinearTransformer,
-               'Storage': Storage, 'Bus': Bus}
+               'Storage': Storage}
     classes.update(additional_classes)
 
     # attributes that have to be converted into a solph sequence
@@ -149,6 +149,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                       'capacity_loss', 'inflow_conversion_factor',
                       'outflow_conversion_factor', 'capacity_max',
                       'capacity_min'] + additional_seq_attributes
+
+    # attributes of different classes
+    flow_attrs = vars(Flow()).keys()
+    bus_attrs = vars(Bus()).keys()
 
     # iteration over dataframe rows to create objects
     nodes = {}
@@ -159,10 +163,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # save column labels and row values in dict
         row = dict(zip(r.index.values, r.values))
-
-        # create flow and set flow attributes
-        flow = Flow()
-        flow_attrs = vars(Flow()).keys()
 
         # create node if not existent and set attributes
         # (attributes must be placed either in the first line or in all lines
@@ -199,6 +199,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
         # create flow and set attributes
         try:
+            flow = Flow()
             for attr in flow_attrs:
                 if attr in row.keys() and row[attr]:
                     if row[attr] != 'seq':
@@ -217,8 +218,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                         else:
                             seq = [i for i in seq.values]
                         setattr(flow, attr, seq)
-                    # This block is only for discrete flows!
-                    if attr == 'discrete' and row[attr] == True:
+                    # this block is only for discrete flows!
+                    if attr == 'discrete' and row[attr] is True:
                         # create Discrete object for flow
                         setattr(flow, attr, Discrete())
                         discrete_attrs = vars(Discrete()).keys()
@@ -229,9 +230,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             print('Error with flow creation in line', i+2, 'in csv file.')
             print('Label:', row['label'])
             raise
-
-
-
 
         # create an input entry for the current line
         try:
