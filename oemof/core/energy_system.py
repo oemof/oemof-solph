@@ -14,7 +14,8 @@ import dill as pickle
 
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
-from oemof.groupings import DEFAULT as BY_UID, Nodes as Grouping
+from oemof.groupings import (DEFAULT as BY_UID, Grouping as GroupingBase,
+                             Nodes as Grouping)
 from oemof.network import Node
 from oemof.solph.optimization_model import OptimizationModel as OM
 
@@ -110,14 +111,15 @@ class EnergySystem:
 
     For simple user defined groupings, you can just supply a function that
     computes a key from an :class:`entity <oemof.core.network.Entity>` and the
-    resulting groups will be lists of :class:`entity
+    resulting groups will be sets of :class:`entities
     <oemof.core.network.Entity>` stored under the returned keys, like in this
     example, where :class:`entities <oemof.core.network.Entity>` are grouped by
     their `type`:
 
     >>> es = EnergySystem(groupings=[type])
-    >>> buses = [Bus(uid="Bus {}".format(i)) for i in range(9)]
-    >>> components = [Component(uid="Component {}".format(i)) for i in range(9)]
+    >>> buses = set(Bus(uid="Bus {}".format(i)) for i in range(9))
+    >>> components = set( Component(uid="Component {}".format(i))
+    ...                   for i in range(9))
     >>> buses == es.groups[Bus]
     True
     >>> components == es.groups[Component]
@@ -131,8 +133,9 @@ class EnergySystem:
         Entity.registry = self
         Node.registry = self
         self.groups = {}
-        self._groupings = [BY_UID] + [ Grouping.create(g)
-                                             for g in kwargs.get('groupings', [])]
+        self._groupings = ( [BY_UID] +
+                            [ g if isinstance(g, GroupingBase) else Grouping(g)
+                              for g in kwargs.get('groupings', [])])
         for e in self.entities:
             for g in self._groupings:
                 g(e, self.groups)
