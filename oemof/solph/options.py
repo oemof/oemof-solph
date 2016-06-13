@@ -106,7 +106,7 @@ class Discrete:
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', additional_classes={},
+                 delimiter=',', timesteps=24, additional_classes={},
                  additional_seq_attributes=[]):
     # TODO : Find a nice way how to add 'additional' arguments for extension
     #        e.g. additional_seq_attributes, additional_classes
@@ -140,7 +140,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
                'LinearTransformer': LinearTransformer,
-               'Storage': Storage}
+               'Storage': Storage, 'Bus': Bus}
     classes.update(additional_classes)
 
     # attributes that have to be converted into a solph sequence
