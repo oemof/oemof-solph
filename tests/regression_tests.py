@@ -4,13 +4,10 @@ from nose.tools import eq_, ok_
 import pandas as pd
 
 from oemof.core.energy_system import EnergySystem as ES, Simulation
-from oemof.core.network.entities import Bus
-from oemof.core.network.entities.components.sinks import Simple as Sink
-from oemof.core.network.entities.components.sources import FixedSource as FS
-from oemof.core.network.entities.components.transformers import Storage
+from oemof.network import Bus
 from oemof.outputlib.to_pandas import ResultsDataFrame as RDF
-from oemof.solph.optimization_model import OptimizationModel as OM
-from oemof.solph import predefined_objectives as po
+from oemof.solph import (Flow, OperationalModel as OM, Sink, Source as FS,
+                         Storage)
 
 class TestSolphAndItsResults:
     def setup(self):
