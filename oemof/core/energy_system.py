@@ -17,7 +17,6 @@ from oemof.core.network.entities.components import transports as transport
 from oemof.groupings import (DEFAULT as BY_UID, Grouping as GroupingBase,
                              Nodes as Grouping)
 from oemof.network import Node
-from oemof.solph.optimization_model import OptimizationModel as OM
 
 
 def MultipleGroups(*args):
@@ -132,7 +131,7 @@ class EnergySystem:
 
         Entity.registry = self
         Node.registry = self
-        self.groups = {}
+        self._groups = {}
         self._groupings = ( [BY_UID] +
                             [ g if isinstance(g, GroupingBase) else Grouping(g)
                               for g in kwargs.get('groupings', [])])
@@ -219,7 +218,11 @@ class EnergySystem:
         self : :class:`EnergySystem`
         """
         if om is None:
-            from oemof.solph.optimization_model import OptimizationModel as OM
+            try:
+                from oemof.solph.optimization_model import \
+                        OptimizationModel as OM
+            except ImportError:
+                from oemof.solph import OperationalModel as OM
             om = OM(energysystem=self)
 
         om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
