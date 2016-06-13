@@ -3,8 +3,7 @@ import logging
 import os.path as ospath
 import re
 
-from nose.tools import eq_, assert_raises
-import numpy as np
+from nose.tools import eq_
 import pandas as pd
 
 from oemof.solph.network import Investment
@@ -14,7 +13,7 @@ from oemof.core import energy_system as core_es
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
-from oemof.tools import create_components as cc, helpers
+from oemof.tools import helpers
 
 logging.disable(logging.INFO)
 
@@ -22,7 +21,7 @@ logging.disable(logging.INFO)
 class Constraint_Tests:
 
     @classmethod
-    def setUpClass(self):
+    def setup_class(self):
         self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
                                             re.DOTALL|re.MULTILINE)
 
@@ -31,7 +30,7 @@ class Constraint_Tests:
         self.tmppath = helpers.extend_basic_path('tmp')
         logging.info(self.tmppath)
 
-    def setUp(self):
+    def setup(self):
         self.energysystem = core_es.EnergySystem(groupings=solph.GROUPINGS,
                                                  time_idx=self.date_time_index)
 
@@ -116,7 +115,6 @@ class Constraint_Tests:
 
         Sink(label='minDemand', inputs={bel: Flow(nominal_value=30,
                                                   min=(.84, .94, .59))})
-
 
         self.compare_lp_files('max_source_min_sink.lp')
 
