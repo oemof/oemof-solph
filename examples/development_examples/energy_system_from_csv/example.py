@@ -55,53 +55,67 @@ myresults = tpd.DataFramePlot(energy_system=es)
 date_from = '2012-01-01 00:00:00'
 date_to = '2012-12-31 23:00:00'
 
-demand = myresults.slice_by(obj_label='demand1',
-                            date_from=date_from,
+demand = myresults.slice_by(obj_label='demand1', date_from=date_from,
                             date_to=date_to)
 demand.reset_index(inplace=True)
 demand.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
 demand.set_index('datetime', inplace=True)
 
+solar = myresults.slice_by(obj_label='solar1', date_from=date_from,
+                           date_to=date_to)
+solar.reset_index(inplace=True)
+solar.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+solar.set_index('datetime', inplace=True)
 
-wind = myresults.slice_by(obj_label='wind1',
-                          date_from=date_from,
+wind = myresults.slice_by(obj_label='wind1', date_from=date_from,
                           date_to=date_to)
 wind.reset_index(inplace=True)
 wind.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
 wind.set_index('datetime', inplace=True)
 
 
-solar = myresults.slice_by(obj_label='solar1',
-                           date_from=date_from,
-                           date_to=date_to)
-solar.reset_index(inplace=True)
-solar.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-solar.set_index('datetime', inplace=True)
+chp_in = myresults.slice_by(obj_label='chp1', type='input',
+                            date_from=date_from, date_to=date_to)
+chp_in.reset_index(inplace=True)
+chp_in.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+chp_in.set_index('datetime', inplace=True)
 
 
-chp1_in = myresults.slice_by(obj_label='chp1', type='input',
-                             date_from=date_from,
-                             date_to=date_to)
-chp1_in.reset_index(inplace=True)
-chp1_in.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-chp1_in.set_index('datetime', inplace=True)
+chp_out = myresults.slice_by(obj_label='chp1', type='output',
+                             date_from=date_from, date_to=date_to)
+chp_out.reset_index(inplace=True)
+chp_out.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+chp_out.set_index('datetime', inplace=True)
 
+storage_in = myresults.slice_by(obj_label='storage1', type='input',
+                                date_from=date_from, date_to=date_to)
+storage_in.reset_index(inplace=True)
+storage_in.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+storage_in.set_index('datetime', inplace=True)
 
-chp1_out = myresults.slice_by(obj_label='chp1', type='output',
-                              date_from=date_from,
-                              date_to=date_to)
-chp1_out.reset_index(inplace=True)
-chp1_out.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-chp1_out.set_index('datetime', inplace=True)
+storage_out = myresults.slice_by(obj_label='storage1', type='output',
+                                 date_from=date_from, date_to=date_to)
+storage_out.reset_index(inplace=True)
+storage_out.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
+storage_out.set_index('datetime', inplace=True)
 
 # %% dispatch plot
 
-df = pd.concat([demand, wind, solar, chp1_in, chp1_out], axis=1)
-df.columns = ['demand', 'wind', 'solar', 'chp1_in', 'chp1_out']
+df = pd.concat([demand, wind, solar, chp_in, chp_out, storage_in, storage_out],
+               axis=1)
+df.columns = ['demand', 'wind', 'solar', 'chp_in', 'chp_out', 'storage_in',
+              'storage_out']
 
-area = df[['wind', 'solar', 'chp1_in', 'chp1_out']].plot(kind='area',
-    stacked=True, alpha=0.5, linewidth=0)
-area.set_title('Unit Commitment')
+# linear transformer and storage inputs and outputs are still confused
+area_data = df[['solar', 'wind', 'chp_in', 'storage_in']]
+area = area_data.plot(kind='area', stacked=True, alpha=0.5, linewidth=0)
 area.set_xlabel('Time')
 area.set_ylabel('Power in MW')
+
 df['demand'].plot(ax=area, color='k', style='--')
+
+# %% check energy balance arround bus
+
+check_bus_balance = df['demand'] - df['solar'] - df['wind'] + df['chp_in'] + \
+    df['storage_in'] - df['storage_out']
+print(check_bus_balance)
