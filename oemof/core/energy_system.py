@@ -14,7 +14,7 @@ import dill as pickle
 
 from oemof.core.network import Entity
 from oemof.core.network.entities.components import transports as transport
-from oemof.groupings import Nodes as Grouping
+from oemof.groupings import DEFAULT as BY_UID, Nodes as Grouping
 from oemof.network import Node
 from oemof.solph.optimization_model import OptimizationModel as OM
 
@@ -130,8 +130,8 @@ class EnergySystem:
 
         Entity.registry = self
         Node.registry = self
-        self._groups = {}
-        self._groupings = [Grouping.UID] + [ Grouping.create(g)
+        self.groups = {}
+        self._groupings = [BY_UID] + [ Grouping.create(g)
                                              for g in kwargs.get('groupings', [])]
         for e in self.entities:
             for g in self._groupings:
