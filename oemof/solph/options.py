@@ -140,7 +140,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
                'LinearTransformer': LinearTransformer,
-               'Storage': Storage}
+               'Storage': Storage, 'Bus': Bus}
     classes.update(additional_classes)
 
     # attributes that have to be converted into a solph sequence
@@ -236,6 +236,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             if row['label'] == row['target']:
                 if row['source'] not in nodes.keys():
                     nodes[row['source']] = Bus(label=row['source'])
+                    for attr in bus_attrs:
+                        if attr in row.keys() and row[attr] is not None:
+                            setattr(nodes[row['source']], attr, row[attr])
+                            print('1', row['label'], attr, row[attr])
                 inputs = {nodes[row['source']]: flow}
             else:
                 inputs = {}
@@ -249,6 +253,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             if row['label'] == row['source']:
                 if row['target'] not in nodes.keys():
                     nodes[row['target']] = Bus(label=row['target'])
+                    for attr in bus_attrs:
+                        if attr in row.keys() and row[attr] is not None:
+                            setattr(nodes[row['target']], attr, row[attr])
+                            print('2', row['label'], attr, row[attr])
                 outputs = {nodes[row['target']]: flow}
             else:
                 outputs = {}
