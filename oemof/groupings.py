@@ -1,11 +1,11 @@
 """ All you need to create groups of stuff in your energy system.
 """
 try:
-    from collections.abc import ( Hashable, Iterable, Mapping,
-                                  MutableMapping as MM)
+    from collections.abc import (Hashable, Iterable, Mapping,
+                                 MutableMapping as MM)
 except ImportError:
-    from collections import ( Hashable, Iterable, Mapping,
-                              MutableMapping as MM)
+    from collections import (Hashable, Iterable, Mapping,
+                             MutableMapping as MM)
 from itertools import filterfalse
 
 
@@ -46,11 +46,11 @@ class Grouping:
     Parameters
     ----------
 
-    key: callable
+    key: callable or hashable
 
-        Extract a :meth:`key <Grouping.key>` for each :class:`entity
-        <oemof.core.network.Entity>` of the :class:`energy system
-        <oemof.core.energy_system.EnergySystem>`.
+        Specifies (if not callable) or extracts (if callable) a :meth:`key
+        <Grouping.key>` for each :class:`entity <oemof.core.network.Entity>` of
+        the :class:`energy system <oemof.core.energy_system.EnergySystem>`.
 
     value: callable, optional
 
@@ -59,7 +59,9 @@ class Grouping:
     filter: callable, optional
 
         If supplied, whatever is returned by :meth:`value` is :func:`filtered
-        <builtins.filter>` through this. See :meth:`filter` for more details.
+        <builtins.filter>` through this. Mostly useful in conjunction with
+        static (i.e. non-callable) :meth:`keys <key>`.
+        See :meth:`filter` for more details.
 
     merge: callable, optional
 
@@ -90,11 +92,11 @@ class Grouping:
         Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
         raise NotImplementedError(
-                "There is no default implementation for `Groupings.key`.\n" +
-                "Congratulations, you managed to execute supposedly " +
-                "unreachable code.\n" +
-                "Please let us know by filing a bug at:\n\n    " +
-                "https://github.com/oemof/oemof/issues\n")
+            "There is no default implementation for `Groupings.key`.\n" +
+            "Congratulations, you managed to execute supposedly " +
+            "unreachable code.\n" +
+            "Please let us know by filing a bug at:\n\n    " +
+            "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
         """ Generate the group obtained from :obj:`e`.
@@ -121,10 +123,10 @@ class Grouping:
 
         The default behaviour is to raise an error.
         """
-        raise ValueError( "\nGrouping \n  " +
-                          "{}:{}\nand\n  {}:{}\ncollides.\n".format(
-                                id(old), old, id(new), new) +
-                          "Possibly duplicate uids/labels?")
+        raise ValueError("\nGrouping \n  " +
+                         "{}:{}\nand\n  {}:{}\ncollides.\n".format(
+                             id(old), old, id(new), new) +
+                         "Possibly duplicate uids/labels?")
 
     def filter(self, group):
         """
@@ -142,15 +144,15 @@ class Grouping:
 
         """
         raise NotImplementedError(
-                "`Groupings.filter` called without being overridden.\n" +
-                "Congratulations, you managed to execute supposedly " +
-                "unreachable code.\n" +
-                "Please let us know by filing a bug at:\n\n    " +
-                "https://github.com/oemof/oemof/issues\n")
+            "`Groupings.filter` called without being overridden.\n" +
+            "Congratulations, you managed to execute supposedly " +
+            "unreachable code.\n" +
+            "Please let us know by filing a bug at:\n\n    " +
+            "https://github.com/oemof/oemof/issues\n")
 
 
     def __call__(self, e, d):
-        k = self.key(e)
+        k = self.key(e) if callable(self.key) else self.key
         if k is None:
             return
         v = self.value(e)
@@ -165,11 +167,11 @@ class Grouping:
             v = (self.filter or (lambda x: x))(v)
         if not v:
             return
-        for group in (k if ( isinstance(k, Iterable) and not
-                             isinstance(k, Hashable))
+        for group in (k if (isinstance(k, Iterable) and not
+                            isinstance(k, Hashable))
                         else [k]):
-            d[group] = ( self.merge(self.value(e), d[group])
-                         if group in d else self.value(e))
+            d[group] = (self.merge(self.value(e), d[group])
+                        if group in d else self.value(e))
 
 
 class Nodes(Grouping):
