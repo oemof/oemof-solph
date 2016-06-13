@@ -57,6 +57,27 @@ c_u_InvestmentFlow_max(storage_electricityBus_2)_:
 +1 flow(storage_electricityBus_2)
 <= 0
 
+c_e_InvestmentStorage_balance(storage_0)_:
++1 InvestmentStorage_capacity(storage_0)
+-0.87 InvestmentStorage_capacity(storage_2)
+-0.96999999999999997 flow(electricityBus_storage_0)
++1.1627906976744187 flow(storage_electricityBus_0)
+= 0
+
+c_e_InvestmentStorage_balance(storage_1)_:
+-0.87 InvestmentStorage_capacity(storage_0)
++1 InvestmentStorage_capacity(storage_1)
+-0.96999999999999997 flow(electricityBus_storage_1)
++1.1627906976744187 flow(storage_electricityBus_1)
+= 0
+
+c_e_InvestmentStorage_balance(storage_2)_:
+-0.87 InvestmentStorage_capacity(storage_1)
++1 InvestmentStorage_capacity(storage_2)
+-0.96999999999999997 flow(electricityBus_storage_2)
++1.1627906976744187 flow(storage_electricityBus_2)
+= 0
+
 c_e_InvestmentStorage_storage_capacity_inflow(storage)_:
 +1 InvestmentFlow_invest(electricityBus_storage)
 -0.16666666666666666 InvestmentStorage_invest(storage)
@@ -81,27 +102,6 @@ c_u_InvestmentStorage_max_capacity(storage_2)_:
 +1 InvestmentStorage_capacity(storage_2)
 -1 InvestmentStorage_invest(storage)
 <= 0
-
-c_e_InvestmentStorage_balance(storage_0)_:
-+1 InvestmentStorage_capacity(storage_0)
--0.87 InvestmentStorage_capacity(storage_2)
--0.96999999999999997 flow(electricityBus_storage_0)
-+1.1627906976744187 flow(storage_electricityBus_0)
-= 0
-
-c_e_InvestmentStorage_balance(storage_1)_:
--0.87 InvestmentStorage_capacity(storage_0)
-+1 InvestmentStorage_capacity(storage_1)
--0.96999999999999997 flow(electricityBus_storage_1)
-+1.1627906976744187 flow(storage_electricityBus_1)
-= 0
-
-c_e_InvestmentStorage_balance(storage_2)_:
--0.87 InvestmentStorage_capacity(storage_1)
-+1 InvestmentStorage_capacity(storage_2)
--0.96999999999999997 flow(electricityBus_storage_2)
-+1.1627906976744187 flow(storage_electricityBus_2)
-= 0
 
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
