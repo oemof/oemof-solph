@@ -42,8 +42,9 @@ class Grouping:
 
     key: callable
 
-        Extract a :meth:`key <Grouping.key>` for each :class:`entity <oemof.core.network.Entity>` of the
-        :class:`energy system <oemof.core.energy_system.EnergySystem>`.
+        Extract a :meth:`key <Grouping.key>` for each :class:`entity
+        <oemof.core.network.Entity>` of the :class:`energy system
+        <oemof.core.energy_system.EnergySystem>`.
 
     value: callable, optional
 
@@ -80,7 +81,7 @@ class Grouping:
                 "There is no default implementation for `Groupings.key`.\n" +
                 "Congratulations, you managed to execute supposedly " +
                 "unreachable code.\n" +
-                "Please file a bug at:\n\n    " +
+                "Please let us know by filing a bug at:\n\n    " +
                 "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
@@ -152,8 +153,7 @@ def _uid_or_str(node_or_entity):
                                else str(node_or_entity))
 
 DEFAULT = Grouping(_uid_or_str)
-"""
-The default :class:`Grouping`.
+""" The default :class:`Grouping`.
 
 This one is always present in an :class:`energy system
 <oemof.core.energy_system.EnergySystem>`. It stores every :class:`entity
