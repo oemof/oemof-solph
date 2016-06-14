@@ -25,19 +25,6 @@ nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
                      delimiter=',')
 
-## print out nodes
-#for k, v in nodes.items():
-#    attrs = dir(v)
-#    print('\n OBJ:', k, type(v))
-#    print('--------------------')
-#    for i in attrs:
-#        if '_' not in i:
-#            # dirty hack to print weakref dicts by converting to list
-#            o = getattr(v, str(i))
-#            if isinstance(o, Iterable) and not isinstance(o, str):
-#                o = list(o)
-#            print(i, ':', o)
-
 om = OperationalModel(es, timeindex=datetime_index)
 
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
