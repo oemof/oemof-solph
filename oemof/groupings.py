@@ -51,6 +51,10 @@ class Grouping:
     access to :obj:`self`, subclass :class:`Grouping` and override the methods
     in the subclass.
 
+    A :class:`Grouping` may be called more than once on the same object
+    :obj:`e`, so one should make sure that user defined :class:`Grouping`
+    :obj:`g` is idempotent, i.e. :obj:`g(e, g(e, d)) == g(e, d)`.
+
     Parameters
     ----------
 
@@ -129,8 +133,11 @@ class Grouping:
         group[key(e)]) <Grouping.merge>` is called and should return the new
         group to store under :meth:`key(e) <Grouping.key>`.
 
-        The default behaviour is to raise an error.
+        The default behaviour is to raise an error if :obj:`new` and :obj:`old`
+        are not identical.
         """
+        if old is new:
+            return old
         raise ValueError("\nGrouping \n  " +
                          "{}:{}\nand\n  {}:{}\ncollides.\n".format(
                              id(old), old, id(new), new) +
