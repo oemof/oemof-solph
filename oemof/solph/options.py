@@ -106,10 +106,8 @@ class Discrete:
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', timesteps=24, additional_classes={},
+                 delimiter=',', additional_classes={},
                  additional_seq_attributes=[]):
-    # TODO : Find a nice way how to add 'additional' arguments for extension
-    #        e.g. additional_seq_attributes, additional_classes
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
@@ -119,8 +117,14 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     file_nodes_flows : string with name of CSV file of nodes and flows
     file_nodes_flows_sequences : string with name of CSV file of sequences
     delimiter : delimiter of CSV file
+    additional_classes : dictionary with additional classes to be used in csv
+                         of type {'MyClass1': MyClass1, ...}
+    additional_seq_attributes : list of strings with attributes that have to be
+                                of type 'solph sequence'
 
     """
+    # TODO : Find a nice way how to add 'additional' arguments for extension
+    #        e.g. additional_seq_attributes, additional_classes
 
     import pandas as pd
     from oemof.solph.network import (Bus, Source, Sink, Flow,
