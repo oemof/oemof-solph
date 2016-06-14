@@ -214,21 +214,14 @@ class EnergySystem:
 
         Entity.registry = self
         Node.registry = self
-        self.results = kwargs.get('results')
-        self.time_idx = kwargs.get('time_idx')
-        self.groupings = kwargs.get('groupings', [])
-        self.group()
-
-    def group(self):
-        """ Groups nodes of energysystem.
-        """
         self._groups = {}
         self._groupings = [Grouping.UID] + [ Grouping.create(g)
-                                             for g in self.groupings]
+                                             for g in kwargs.get('groupings', [])]
         for e in self.entities:
             for g in self._groupings:
                 g(e, self.groups)
-
+        self.results = kwargs.get('results')
+        self.time_idx = kwargs.get('time_idx')
 
     @staticmethod
     def _regroup(entity, groups, groupings):
