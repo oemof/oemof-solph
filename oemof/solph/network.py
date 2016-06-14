@@ -68,7 +68,9 @@ class Flow:
 class Bus(on.Bus):
     """A balance object.
     """
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.balanced = kwargs.get('balanced', True)
 
 
 class Sink(on.Sink):
