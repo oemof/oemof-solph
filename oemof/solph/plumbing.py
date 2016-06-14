@@ -3,11 +3,12 @@
 
 """
 from collections import UserDict, UserList
+from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
-from .network import Sink, Source, Storage
+from .network import Storage, Bus
 from .options import Investment
 
 
@@ -302,7 +303,18 @@ class OperationalModel(po.ConcreteModel):
                     setattr(result[i][i], 'invest',
                             self.InvestmentStorage.invest[i].value)
 
-        # TODO: extract duals for all constraints ?
+        # add results of dual variables for balanced buses
+        if hasattr(self, "dual"):
+            # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]
+            grouped = groupby(sorted(self.Bus.balance.iterkeys()),
+                              lambda pair: pair[0])
+
+            for bus, timesteps in grouped:
+                result[bus] = result.get(bus, UserDict())
+                result[bus][bus] = [self.dual[self.Bus.balance[bus, t]]
+                                    for _, t in timesteps]
+
+
 
         return result
 
