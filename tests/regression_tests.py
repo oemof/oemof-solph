@@ -82,13 +82,3 @@ class TestSolphAndItsResults:
                 "Output from bus (with duals) to sink " +
                 "does not appear in results dataframe.")
 
-
-    def test_investment_defaults(self):
-        for klass in [Storage, FS]:
-            value = klass.optimization_options.get('investment')
-            ok_(not value,
-                "\n  Testing the default value at key 'investment' in \n    `" +
-                str(klass) +
-                ".optimization_options.`\n  Expected `False`, got `" +
-                str(value) + "`.")
-
