@@ -52,6 +52,10 @@ class Grouping:
     access to :obj:`self`, subclass :class:`Grouping` and override the methods
     in the subclass.
 
+    A :class:`Grouping` may be called more than once on the same object
+    :obj:`e`, so one should make sure that user defined :class:`Grouping`
+    :obj:`g` is idempotent, i.e. :obj:`g(e, g(e, d)) == g(e, d)`.
+
     Parameters
     ----------
 
