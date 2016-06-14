@@ -112,11 +112,14 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv",
     # create storage transformer object for storage
     Storage(
         label='storage',
-        inputs={bel: Flow(nominal_value=1000, variable_costs=10e10)},
-        outputs={bel: Flow(nominal_value=1000, variable_costs=10e10)},
+        inputs={bel: Flow(variable_costs=10e10)},
+        outputs={bel: Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
-        nominal_capacity=500,
+        nominal_input_capacity_ratio=1/6,
+        nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
+        fixed_costs=35,
+        investment=Investment(ep_costs=epc),
     )
 
     ##########################################################################
