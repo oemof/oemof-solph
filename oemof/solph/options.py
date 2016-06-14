@@ -284,10 +284,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             for target, f in outputs.items():
                 network.flow[node, target] = f
             if node.label in nodes.keys():
-                if 'Bus' not in str(node.__class__):
+                if not isinstance(node, Bus):
                     node.conversion_factors.update(conversion_factors)
             else:
-                if 'Bus' not in str(node.__class__):
+                if not isinstance(node, Bus):
                     node.conversion_factors = conversion_factors
                     nodes[node.label] = node
         except:
