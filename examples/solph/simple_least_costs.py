@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # solph imports
 from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem)
+                         OperationalModel, EnergySystem, GROUPINGS)
 from oemof.outputlib import to_pandas as tpd
 from oemof.tools import logger
 logger.define_logging()
@@ -22,7 +22,7 @@ data = pd.read_csv("example_data.csv", sep=",")
 datetimeindex = pd.date_range('1/1/2012', periods=168, freq='H')
 
 # create (with out entities) energysystem
-energysystem = EnergySystem()
+energysystem = EnergySystem(groupings=GROUPINGS)
 
 ########################### create energysystem components ####################
 
@@ -39,21 +39,23 @@ b_th = Bus(label="b_th")
 excess = Sink(label="excess")
 
 # renewable sources (only pv onshore)
-wind_on = Source(label="wind_on", outputs=[b_el],
-                                val=data['wind'],
-                                out_max=[66.300], opex_var=0, opex_fix=10)
-pv = Source(label="pv", outputs=[b_el], val=data['pv'],
-                           out_max=[65.300])
+wind_on = Source(label="wind_on",
+                 outputs={b_el: Flow(actual_value=data['wind'],
+                                     nominal_value=66.3)})
+
+pv = Source(label="pv",
+            outputs={b_el: Flow(actual_value=data['pv'],
+                                nominal_value= 65.3)})
 
 # demands
 demand_el = Sink(label="demand_el",
-                 inputs={b_el: Flow(nominal_value=1000,
-                                    actual_value=data['demand_el']/1000,
+                 inputs={b_el: Flow(nominal_value=77000,
+                                    actual_value=data['demand_el'],
                                     fixed=True)})
 
 demand_th = Sink(label="demand_th",
-                 inputs={b_th: Flow(nominal_value=3000,
-                                    actual_value=data['demand_th']*50,
+                 inputs={b_th: Flow(nominal_value=40,
+                                    actual_value=data['demand_th'],
                                     fixed=True)})
 
 # Transformers
@@ -61,33 +63,33 @@ pp_coal = LinearTransformer(label='pp_coal',
                             inputs={bcoal: Flow()},
                             outputs={b_el: Flow(nominal_value=20.2,
                                                 variable_costs=25)},
-                            conversion_factor = {b_el: 0.39})
+                            conversion_factors = {b_el: 0.39})
 
 pp_lig = LinearTransformer(label='pp_lig',
                            inputs={blig: Flow()},
                            outputs={b_el: Flow(nominal_value=11.8,
                                                variable_costs=19)},
-                            conversion_factor = {b_el: 0.41})
+                           conversion_factors = {b_el: 0.41})
 
 pp_gas = LinearTransformer(label='pp_gas',
                            inputs={bgas: Flow()},
                            outputs={b_el: Flow(nominal_value=41,
                                                variable_costs=40)},
-                           conversion_factor = {b_el: 0.50})
+                           conversion_factors = {b_el: 0.50})
 
 pp_oil = LinearTransformer(label='pp_oil',
                            inputs={boil: Flow()},
                            outputs={b_el: Flow(nominal_value=0.1,
                                                variable_costs=50)},
-                            conversion_factor = {b_el: 0.28})
+                           conversion_factors = {b_el: 0.28})
 
 # chp note: order of outputs must match order of 'eta' (see. documentation)
 pp_chp = LinearTransformer(label='pp_chp',
                            inputs={bgas: Flow()},
                            outputs={b_el: Flow(nominal_value=30,
-                                               variable_costs=40),
+                                               variable_costs=42),
                                     b_th: Flow(nominal_value=40)},
-                           onversion_factor = {b_el: 0.3, b_th: 0.4})
+                           conversion_factors = {b_el: 0.3, b_th: 0.4})
 
 ################################# optimization ################################
 # create Optimization model based on energy_system
@@ -96,8 +98,8 @@ om = OperationalModel(es=energysystem, timeindex=datetimeindex)
 # solve with specific optimization options (passed to pyomo)
 om.solve(solve_kwargs={'tee': True,
                        'keepfiles': False})
-# write back results from optimization object to energysystem for
-# post-processing
+
+# write back results from optimization object to energysystem
 om.results()
 
 
