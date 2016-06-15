@@ -26,25 +26,19 @@ class Storage(SimpleBlock):
 
     **The following constraints are created:**
 
-    balance
-
-        .. math:: capacity_n(t) = capacity_n(t_{previous}(t)) \\cdot  \
-        (1 - capacity\\_loss_n(t))) \
-        - \\frac{flow_{n, o_n}(t)}{\\eta^{out}_n(t)} \
-        + flow_{i_n, n}(t) \\cdot \\eta^{in}_n(t)
-
-    The constraint of storage s at timestep t can be acessed by
-    `om.Storage.balance[s, t]`
+    Storage balance :attr:`òm.Storage.balance[n, t]`
+        .. math:: capacity(n, t) = capacity(n, previous(t)) \\cdot  \
+            (1 - capacity\\_loss_n(t))) \
+            - \\frac{flow(n, o, t)}{\\eta(n, o, t)} \\cdot \\tau \
+            + flow(i, n, t) \\cdot \\eta(i, n, t) \\cdot \\tau
 
     **The following parts of the objective function are created:**
 
-    fixed_costs :
-
-    .. math:: \\sum_n nominal\\_capacity_n(t) \cdot fixed\\_costs_n
+    If :attr:`fixed_costs` is set by the user:
+        .. math:: \\sum_n nominal\\_capacity(n, t) \cdot fixed\\_costs(n)
 
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
     and their alue after optimization by: `om.Storage.fixed_costs()`.
-
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -120,6 +114,7 @@ class Storage(SimpleBlock):
 class InvestmentStorage(SimpleBlock):
     """Storage with an :class:`.Investment` object.
 
+
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
@@ -132,7 +127,6 @@ class InvestmentStorage(SimpleBlock):
         A subset of INVESTSTORAGES where elements of the set have an
         capacity_min attribute greater than zero for at least one time step.
 
-
     **The following variables are created:**
 
     capacity :attr:`om.InvestmentStorage.capacity[n, t]`
@@ -143,31 +137,31 @@ class InvestmentStorage(SimpleBlock):
 
 
     **The following constraints are build:**
-
       .. math::
         capacity(n, t) = & capacity(n, t\_previous(t)) \\cdot \
         (1 - capacity\_loss(n)) \\\\
-        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n)) \\\\
-        &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n), \\\\
+        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \\cdot \
+           \\tau) \\\\
+        &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n) \\cdot \
+           \\tau, \\\\
         &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
         &\\forall t \\in \\textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-
-    .. math:: capacity(n, t) <= invest(n) \\cdot capacity\_min(n, t), \\\\
-        \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
-        \\forall t \\in \\textrm{TIMESTEPS}.
+        .. math:: capacity(n, t) <= invest(n) \\cdot capacity\_min(n, t), \\\\
+            \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}.
 
 
     **The following parts of the objective function are created:**
 
-    .. math::
-        \\sum_n invest(n) \\cdot ep\_costs(n)
+    Equivalent periodical costs (investment costs):
+        .. math::
+            \\sum_n invest(n) \\cdot ep\_costs(n)
 
     Additionally, if fixed costs are set by the user:
-
-    .. math::
-        \\sum_n invest(n) \\cdot fixed\_costs(n)
+        .. math::
+            \\sum_n invest(n) \\cdot fixed\_costs(n)
 
     The expression can be acessed by :attr:`om.InvestStorages.fixed_costs` and
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
@@ -301,6 +295,7 @@ class InvestmentStorage(SimpleBlock):
 class Flow(SimpleBlock):
     """ Flow block with definitions for standard flows.
 
+
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
@@ -315,45 +310,43 @@ class Flow(SimpleBlock):
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
 
+
     **The following constraints are build:**
 
     Flow max sum :attr:`om.Flow.summed_max[i, o]`
-
       .. math::
-        \\sum_t flow(i, o, t) \\leq summed\_max(i, o), \\\\
+        \\sum_t flow(i, o, t) \\cdot \\tau \\leq summed\_max(i, o), \\\\
         \\forall (i, o) \\in \\textrm{SUMMED\_MAX\_FLOWS}.
 
     Flow min sum :attr:`om.Flow.summed_min[i, o]`
-
       .. math::
-        \\sum_t flow(i, o, t) \\geq summed\_min(i, o), \\\\
+        \\sum_t flow(i, o, t) \\cdot \\tau \\geq summed\_min(i, o), \\\\
         \\forall (i, o) \\in \\textrm{SUMMED\_MIN\_FLOWS}.
 
-    Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
-
+    Negative gradient constraint \
+    :attr:`om.Flow.negative_gradient_constr[i, o]`:
       .. math:: flow(i, o, t-1) - flow(i, o, t) \\geq \
         negative\_flow\_gradient(i, o, t), \\\\
         \\forall (i, o) \\in \\textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\\\
         \\forall t \\in \\textrm{TIMESTEPS}.
 
-    Positive gradient constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
-
+    Positive gradient constraint \
+    :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \\geq \
             postive\_flow\_gradient(i, o, t), \\\\
             \\forall (i, o) \\in \\textrm{POSITIVE\_GRADIENT\_FLOWS}, \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
+
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
-
-    .. math::
-        \\sum_{(i,o)} \\sum_t flow(i, o, t) \\cdot variable\_costs(i, o, t)
+        .. math::
+            \\sum_{(i,o)} \\sum_t flow(i, o, t) \\cdot variable\_costs(i, o, t)
 
     Additionally, if :attr:`fixed_costs` are set by the user:
-
-    .. math::
-        \\sum_{(i, o)}  nominal\_value(i, o) \\cdot fixed\_costs(i, o)
+        .. math::
+            \\sum_{(i, o)}  nominal\_value(i, o) \\cdot fixed\_costs(i, o)
 
     The expression can be acessed by :attr:`om.Flow.fixed_costs` and
     their value after optimization by :meth:`om.Flow.fixed_costs()` .
@@ -371,9 +364,6 @@ class Flow(SimpleBlock):
             List containing tuples containing flow (f) objects and the
             associated source (s) and target (t)
             of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
-
-
-
         """
         if group is None:
             return None
@@ -497,8 +487,90 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
+    """Block for all flows with :attr:`investment` beeing not None.
+
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    FLOWS
+        A set of flows with the attribute :attr:`invest` of type
+        :class:`.options.Investment`.
+    FIXED_FLOWS
+        A set of flow with the attribute :attr:`fixed` set to `True`
+    SUMMED_MAX_FLOWS
+        A subset of set FLOWS with flows with the attribute :attr:`summed_max`
+        being not None.
+    SUMMED_MIN_FLOWS
+        A subset of set FLOWS with flows with the attribute
+        :attr:`summed_min` being not None.
+    MIN_FLOWS
+        A subset of FLOWS with flows having set a least mininum value for
+        at least one timestep in the optimization model.
+
+
+    **The following variables are created:**
+
+    invest :attr:`om.InvestmentFlow.invest[i, o]`
+        Value of the investment variable (i.e. equivalent to the nominal
+        value of the flows after optimization (indexed by FLOWS)
+
+    **The following constraints are build:**
+
+    Actual value constraint for fixed invest flows \
+    :attr:`om.InvestmentFlow.fixed[i, o, t]`
+         .. math::
+             flow(i, o, t) = actual\_value(i, o, t) \\cdot invest(i, o), \\\\
+             \\forall (i, o) \\in \\textrm{FIXED\_FLOWS}, \\\\
+             \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Lower bound (min) constraint for invest flows \
+    :attr:`om.InvestmentFlow.min[i, o, t]`
+        .. math::
+             flow(i, o, t) \\geq min(i, o, t) \\cdot invest(i, o), \\\\
+             \\forall (i, o) \\in \\textrm{MIN\_FLOWS}, \\\\
+             \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Upper bound (max) constraint for invest flows \
+    :attr:`om.InvestmentFlow.max[i, o, t]`
+        .. math::
+             flow(i, o, t) \\leq max(i, o, t) \\cdot invest(i, o), \\\\
+             \\forall (i, o) \\in \\textrm{FLOWS}, \\\\
+             \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Flow max sum for invest flow :attr:`om.InvestmentFlow.summed_max[i, o]`
+        .. math::
+            \\sum_t flow(i, o, t) \\cdot \\tau \\leq summed\_max(i, o) \
+            \\cdot invest(i, o) \\\\
+            \\forall (i, o) \\in \\textrm{SUMMED\_MAX\_FLOWS}.
+
+    Flow min sum for invest flow :attr:`om.InvestmentFlow.summed_min[i, o]`
+        .. math::
+            \\sum_t flow(i, o, t) \\cdot \\tau \\geq summed\_min(i, o) \
+            \\cdot invest(i, o) \\\\
+            \\forall (i, o) \\in \\textrm{SUMMED\_MIN\_FLOWS}.
+
+
+    **The following parts of the objective function are created:**
+
+    Equivalent periodical costs (epc) expression
+    :attr:`om.InvestmentFlow.investment_costs`:
+        .. math::
+            \\sum_{i,o} invest(i,o) \\cdot ep\_costs(i,o)
+
+    Additionally, if :attr:`variable_costs` are set by the user:
+        .. math::
+            \\sum_{i,o}\\sum_(t)  invest(i,o) \\cdot variable\_costs(i,o,t)
+
+    Additionally, if :attr:`fixed_costs` are set by the user:
+        .. math::
+            \\sum_{i,o} invest(i,o) \\cdot fixed\_costs(i,o)
+
+    The expression can be acessed by :attr:`om.InvestmentFlow.fixed_costs` and
+    their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
+    This works similar for variable costs with :attr:`*.variable_costs` etc.
     """
-    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -521,7 +593,7 @@ class InvestmentFlow(SimpleBlock):
         # ######################### SETS #####################################
         self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
-        self.FIXEDFLOWS = Set(
+        self.FIXED_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].fixed])
 
         self.SUMMED_MAX_FLOWS = Set(initialize=[
@@ -547,14 +619,14 @@ class InvestmentFlow(SimpleBlock):
 
         # TODO: Add gradient constraints
 
-        def _investflow_bound_rule(block, i, o, t):
-            """Rule definition of constraint to bound flow variable
-            of investment flow
+        def _investflow_fixed_rule(block, i, o, t):
+            """Rule definition of constraint to fix flow variable
+            of investment flow to (normed) actual value
             """
             return (m.flow[i, o, t] == (self.invest[i, o] *
                                         m.flows[i, o].actual_value[t]))
-        self.bounds = Constraint(self.FIXEDFLOWS, m.TIMESTEPS,
-                                 rule=_investflow_bound_rule)
+        self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
+                                 rule=_investflow_fixed_rule)
 
         def _max_investflow_rule(block, i, o, t):
             """Rule definition of constraint setting an upper bound of flow
@@ -612,6 +684,11 @@ class InvestmentFlow(SimpleBlock):
         investment_costs = 0
 
         for i, o in self.FLOWS:
+            # variable costs
+            if m.flows[i, o].variable_costs is not None:
+                variable_costs += sum(m.flow[i, o, t] *
+                                          m.variable_costs[i, o][t]
+                                      for t in m.TIMESTEPS)
             # fixed costs
             if m.flows[i, o].fixed_costs is not None:
                 fixed_costs += (self.invest[i, o] *
@@ -631,7 +708,17 @@ class InvestmentFlow(SimpleBlock):
 
 
 class Bus(SimpleBlock):
-    """
+    """Block for all balanced buses.
+
+
+    **The following constraints are build:**
+
+    Bus balance  :attr:`om.Bus.balance[i, o, t]`
+      .. math::
+        \\sum_{i \\in INPUTS(n)} flow(i, n, t) \\cdot \\tau =  \
+        \\sum_{o \\in OUTPUTS(n)} flow(n, o, t) \\cdot \\tau, \\\\
+        \\forall n \\in \\textrm{BUSES},
+        \\forall t \\in \\textrm{TIMESTEPS}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -670,17 +757,16 @@ class LinearTransformer(SimpleBlock):
     """Block for the linear relation of nodes with type
     class:`.LinearTransformer`
 
+
     **The following constraints are created:**
 
-    linear_relation
-
+    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
         .. math::
-            flow_{i_n, n}(t) * n.conversion_factor[o](t) = \
-            flow_{n, o}(t), \\\\
-            \\forall t \\in TIMESTEPS, \\\\
-            \\forall n \\in group, \\\\
-            \\forall o \\in OUTPUTS(n)
-
+            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(n, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
+            \\forall o \\in \\textrm{OUTPUTS(n)}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
