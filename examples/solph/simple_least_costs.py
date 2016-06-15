@@ -19,10 +19,10 @@ logger.define_logging()
 ######################### data & initialization ###############################
 data = pd.read_csv("example_data.csv", sep=",")
 
-datetimeindex = pd.date_range('1/1/2012', periods=4, freq='H')
+datetimeindex = pd.date_range('1/1/2012', periods=168, freq='H')
 
 # create (with out entities) energysystem
-energysystem = EnergySystem(groupings=GROUPINGS)
+energysystem = EnergySystem(groupings=GROUPINGS, time_idx=datetimeindex)
 
 ########################### create energysystem components ####################
 
@@ -43,7 +43,7 @@ excess = Sink(label="excess", inputs={b_el: Flow()})
 wind_on = Source(label="wind_on",
                  outputs={b_el: Flow(actual_value=data['wind'],
                                      nominal_value=66.3,
-                                     fixed=False)})
+                                     fixed=True)})
 
 pv = Source(label="pv",
             outputs={b_el: Flow(actual_value=data['pv'],
@@ -96,7 +96,7 @@ pp_chp = LinearTransformer(label='pp_chp',
 
 ################################# optimization ################################
 # create Optimization model based on energy_system
-om = OperationalModel(es=energysystem, timeindex=datetimeindex)
+om = OperationalModel(es=energysystem)
 
 # solve with specific optimization options (passed to pyomo)
 om.solve(solve_kwargs={'tee': True,

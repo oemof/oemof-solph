@@ -66,14 +66,6 @@ class OperationalModel(po.ConcreteModel):
     TIMESTEPS :
         A set with all timesteps for the optimization problem.
 
-    INPUTS :
-        A indexed index set with nodes as indices and associated inputs
-        as elements.
-
-    OUTPUTS :
-        A indexed index set with nodes as indices and associated outputs
-        as elements.
-
     FLOWS :
         A 2 dimensional set with all flows. Index: `(source, target)`
 
@@ -113,7 +105,7 @@ class OperationalModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
-        self.timeindex = kwargs.get('timeindex')
+        self.timeindex = kwargs.get('timeindex', es.time_idx)
         self.timesteps = kwargs.get('timesteps', range(len(self.timeindex)))
         self.timeincrement = kwargs.get('timeincrement',
                                         self.timeindex.freq.nanos / 3.6e12)
