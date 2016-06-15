@@ -19,7 +19,7 @@ logger.define_logging()
 ######################### data & initialization ###############################
 data = pd.read_csv("example_data.csv", sep=",")
 
-datetimeindex = pd.date_range('1/1/2012', periods=168, freq='H')
+datetimeindex = pd.date_range('1/1/2012', periods=4, freq='H')
 
 # create (with out entities) energysystem
 energysystem = EnergySystem(groupings=GROUPINGS)
@@ -36,20 +36,23 @@ blig = Bus(label="lignite", balanced=False)
 b_el = Bus(label="b_el")
 b_th = Bus(label="b_th")
 
-excess = Sink(label="excess")
+excess = Sink(label="excess", inputs={b_el: Flow()})
+#shortage = Source(label="shortage", outputs={b_el: Flow()})
 
 # renewable sources (only pv onshore)
 wind_on = Source(label="wind_on",
                  outputs={b_el: Flow(actual_value=data['wind'],
-                                     nominal_value=66.3)})
+                                     nominal_value=66.3,
+                                     fixed=False)})
 
 pv = Source(label="pv",
             outputs={b_el: Flow(actual_value=data['pv'],
-                                nominal_value= 65.3)})
+                                nominal_value= 65.3,
+                                fixed=True)})
 
 # demands
 demand_el = Sink(label="demand_el",
-                 inputs={b_el: Flow(nominal_value=77000,
+                 inputs={b_el: Flow(nominal_value=77,
                                     actual_value=data['demand_el'],
                                     fixed=True)})
 
