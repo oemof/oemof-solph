@@ -811,7 +811,78 @@ class LinearTransformer(SimpleBlock):
 
 class Discrete(SimpleBlock):
     """
-    TODO: Add Discrete block docstring.
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    DISCRETE_FLOWS
+        A set of flows with the attribute :attr:`discrete` of type
+        :class:`.options.Discrete`.
+    MIN_FLOWS
+        A subset of set DISCRETE_FLOWS with the attribute :attr:`min`
+        greater than zero for at least one timestep in the simulation horizon.
+    STARTUP_FLOWS
+        A subset of set DISCRETE_FLOWS with the attribute
+        :attr:`startup_costs` being not None.
+    SHUTDOWN_FLOWS
+        A subset of set DISCRETE_FLOWS with the attribute
+        :attr:`shutdown_costs` being not None.
+
+    **The following variable are created:**
+
+    Status variable (binary) :attr:`om.Discrete.status`:
+        Variable indicating if flow is >= 0 indexed by FLOWS
+
+    Startup variable (binary) :attr:`om.Discrete.startup`:
+        Variable indicating startup of flow (component) indexed by
+        STARTUP_FLOWS
+
+    Shutdown variable (binary) :attr:`om.Discrete.shutdown`:
+        Variable indicating shutdown of flow (component) indexed by
+        SHUTDOWN_FLOWS
+
+    **The following constraints are created**:
+
+    Minimum flow constraint :attr:`om.Discrete.min[i,o,t]`
+        .. math::
+            flow(i, o, t) \\geq min(i, o, t) \\cdot nominal\_value \
+                \\cdot status(i, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i, o) \\in \\textrm{DISCRETE\_FLOWS}.
+
+    Maximum flow constraint :attr:`om.Discrete.max[i,o,t]`
+        .. math::
+            flow(i, o, t) \\leq max(i, o, t) \\cdot nominal\_value \
+                \\cdot status(i, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i, o) \\in \\textrm{DISCRETE\_FLOWS}.
+
+    Startup constraint :attr:`om.Discrete.startup_constr[i,o,t]`
+        .. math::
+            startup(i, o, t) \geq \
+                status(i,o,t) - status(i, o, t-1) \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i,o) \\in \\textrm{STARTUP\_FLOWS}.
+
+    Shutdown constraint :attr:`om.Discrete.shutdown_constr[i,o,t]`
+        .. math::
+            shutdown(i, o, t) \geq \
+                status(i, o, t-1) - status(i, o, t) \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i, o) \\in \\textrm{SHUTDOWN\_FLOWS}.
+
+    **The following parts of the objective function are created:**
+
+    If :attr:`discrete.startup_costs` is set by the user:
+        .. math::
+            \\sum_{i, o \\in STARTUP\_FLOWS} \\sum_t  startup(i, o, t) \
+            \\cdot startup\_costs(i, o)
+
+    If :attr:`discrete.shutdown_costs` is set by the user:
+        .. math::
+            \\sum_{i, o \\in SHUTDOWN\_FLOWS} \\sum_t shutdown(i, o, t) \
+                \\cdot shutdown\_costs(i, o)
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -831,10 +902,11 @@ class Discrete(SimpleBlock):
 
         m = self.parent_block()
         # ########################## SETS #####################################
-        self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                         if g[2].min[0] != 0])
+                                         if sum(g[2].min[t]
+                                                for t in m.TIMESTEPS) > 0])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                   if g[2].discrete.startup_costs is not None])
@@ -843,7 +915,7 @@ class Discrete(SimpleBlock):
                                   if g[2].discrete.shutdown_costs is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
-        self.status = Var(self.FLOWS, m.TIMESTEPS, within=Binary)
+        self.status = Var(self.DISCRETE_FLOWS, m.TIMESTEPS, within=Binary)
 
         if self.STARTUPFLOWS:
             self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
@@ -859,8 +931,8 @@ class Discrete(SimpleBlock):
                     m.flows[i, o].min[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
             return expr
-        self.minimum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
-                                       rule=_minimum_flow_rule)
+        self.min= Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                             rule=_minimum_flow_rule)
 
         def _maximum_flow_rule(block, i, o, t):
             """Rule definition for MILP maximum flow constraints.
@@ -869,8 +941,8 @@ class Discrete(SimpleBlock):
                     m.flows[i, o].max[t] * m.flows[i, o].nominal_value >=
                     m.flow[i, o, t])
             return expr
-        self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
-                                       rule=_maximum_flow_rule)
+        self.max = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                              rule=_maximum_flow_rule)
 
         def _startup_rule(block, i, o, t):
             """Rule definition for startup constraint of discrete flows.
