@@ -35,7 +35,7 @@ def constraint_grouping(node):
 
 
 def investment_key(n):
-    for f in n.outputs.values():
+    for f in chain(n.outputs.values(), n.inputs.values()):
         if f.investment is not None:
             return blocks.InvestmentFlow
 
