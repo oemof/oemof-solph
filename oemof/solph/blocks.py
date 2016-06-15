@@ -148,7 +148,7 @@ class InvestmentStorage(SimpleBlock):
         &\\forall t \\in \\textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) <= invest(n) \\cdot capacity\_min(n, t), \\\\
+        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t), \\\\
             \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
@@ -556,15 +556,14 @@ class InvestmentFlow(SimpleBlock):
     Equivalent periodical costs (epc) expression
     :attr:`om.InvestmentFlow.investment_costs`:
         .. math::
-            \\sum_{i,o} invest(i,o) \\cdot ep\_costs(i,o)
+            \\sum_{i, o} invest(i, o) \\cdot ep\_costs(i, o)
 
     Additionally, if :attr:`variable_costs` are set by the user:
         .. math::
-            \\sum_{i,o}\\sum_(t)  invest(i,o) \\cdot variable\_costs(i,o,t)
 
     Additionally, if :attr:`fixed_costs` are set by the user:
         .. math::
-            \\sum_{i,o} invest(i,o) \\cdot fixed\_costs(i,o)
+            \\sum_{i, o} invest(i, o) \\cdot fixed\_costs(i,o)
 
     The expression can be acessed by :attr:`om.InvestmentFlow.fixed_costs` and
     their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
