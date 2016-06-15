@@ -4,12 +4,9 @@ import logging
 import pandas as pd
 
 from oemof.tools import logger
-from oemof.core import energy_system as core_es
-import oemof.solph as solph
-from oemof.solph import OperationalModel
+from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph.options import NodesFromCSV
 from oemof.outputlib import to_pandas as tpd
-from collections import Iterable
 
 
 logger.define_logging()
@@ -19,7 +16,7 @@ date_to = '2012-01-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
-es = core_es.EnergySystem(groupings=solph.GROUPINGS, time_idx=datetime_index)
+es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
 nodes = NodesFromCSV(file_nodes_flows='nodes_flows.csv',
                      file_nodes_flows_sequences='nodes_flows_seq.csv',
