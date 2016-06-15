@@ -686,6 +686,10 @@ class InvestmentFlow(SimpleBlock):
             # variable costs
             flow = m.flows[i, o]
             if flow.variable_costs is not None:
+                for t in m.TIMESTEPS:
+                    print("variabl_costs[{}] == {}".format(
+                        t,
+                        flow.variable_costs[t]))
                 variable_costs += sum(m.flow[i, o, t] * flow.variable_costs[t]
                                       for t in m.TIMESTEPS)
             # fixed costs
