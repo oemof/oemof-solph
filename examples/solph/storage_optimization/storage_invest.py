@@ -41,9 +41,9 @@ from oemof.tools import logger
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import oemof.core as core
 import oemof.solph as solph
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+                         EnergySystem)
 from oemof.solph.network import Investment
 from oemof.solph import OperationalModel
 
@@ -55,8 +55,7 @@ def initialise_energysystem(number_timesteps=8760):
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
 
-    return core.energy_system.EnergySystem(groupings=solph.GROUPINGS,
-                                time_idx=date_time_index)
+    return EnergySystem(groupings=solph.GROUPINGS, time_idx=date_time_index)
 
 
 def optimise_storage_size(energysystem, filename="storage_invest.csv",

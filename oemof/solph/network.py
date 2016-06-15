@@ -4,8 +4,15 @@
 """
 import warnings
 import oemof.network as on
+import oemof.core.energy_system as es
 from .options import Investment
 from .options import Sequence
+
+
+class EnergySystem(es.EnergySystem):
+    """
+    """
+    pass
 
 
 class Flow:

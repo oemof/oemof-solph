@@ -3,18 +3,16 @@
 
 """
 from oemof.solph.network import (Sink, Source, LinearTransformer, Storage, Bus,
-                                 Flow)
+                                 Flow, EnergySystem)
 from oemof.solph.plumbing import OperationalModel
 from oemof.solph.groupings import GROUPINGS
 
 
 if __name__ == "__main__":
     import pandas as pd
-    from oemof.core import energy_system as oces
     from oemof.solph.options import Investment, Discrete
 
-    es = oces.EnergySystem(groupings=GROUPINGS,
-                           time_idx=[1,2,3])
+    es = EnergySystem(groupings=GROUPINGS, time_idx=[1,2,3])
 
     lt = len(es.time_idx)
 
