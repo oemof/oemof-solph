@@ -132,6 +132,7 @@ class EnergySystem:
         Entity.registry = self
         Node.registry = self
         self._groups = {}
+        print("len(groupings): {}".format(len(kwargs.get('groupings', []))))
         self._groupings = ( [BY_UID] +
                             [ g if isinstance(g, GroupingBase) else Grouping(g)
                               for g in kwargs.get('groupings', [])])
@@ -143,20 +144,30 @@ class EnergySystem:
 
     @staticmethod
     def _regroup(entity, groups, groupings):
-        for g in groupings:
+        names = ["UID", "constraints", "investment_flows", "standard_flows",
+                 "discrete_flows"]
+        print("Regrouping.")
+        for i, g in enumerate(groupings):
+            if callable(g.key):
+                print("  {}({}, groups) -> {}".format(names[i], entity, g.key(entity)))
+            else:
+                print("  {}.key == {}".format(names[i], entity, g.key))
             g(entity, groups)
         return groups
 
     def add(self, entity):
         """ Add an `entity` to this energy system.
         """
+        print("Adding Node: {}".format(entity))
         self.entities.append(entity)
         self._groups = partial(self._regroup, entity, self.groups,
                                self._groupings)
 
     @property
     def groups(self):
+        print("`groups` accessed.")
         while callable(self._groups):
+            print("Unwrapping _groups.")
             self._groups = self._groups()
         return self._groups
 

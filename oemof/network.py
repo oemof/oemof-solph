@@ -94,6 +94,7 @@ class Node:
         for optional in ['label']:
             if optional in kwargs:
                 setattr(self, '_' + optional, kwargs[optional])
+        print("Constructing Node: {}".format(self))
         for i in kwargs.get('inputs', {}):
             try:
                 flow[i, self] = kwargs['inputs'].get(i)
