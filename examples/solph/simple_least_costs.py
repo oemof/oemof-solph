@@ -9,103 +9,96 @@ Data: example_data.csv
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# base classes import
-from oemof.core import energy_system as es
-from oemof.core.network.entities import Bus
-from oemof.core.network.entities.components import sinks as sink
-from oemof.core.network.entities.components import sources as source
-from oemof.core.network.entities.components import transformers as transformer
-
 # solph imports
-from oemof.solph.optimization_model import OptimizationModel
-from oemof.solph import predefined_objectives as predefined_objectives
-# results and plotting
+from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
+                         OperationalModel, EnergySystem)
 from oemof.outputlib import to_pandas as tpd
-
-# logging
 from oemof.tools import logger
 logger.define_logging()
 
 ######################### data & initialization ###############################
 data = pd.read_csv("example_data.csv", sep=",")
 
-time_index = pd.date_range('1/1/2012', periods=168, freq='H')
-# create simulation object
-simulation = es.Simulation(solver='glpk', timesteps=range(len(time_index)),
-                           verbose=False, duals=False,
-                           objective_options={
-                             'function': predefined_objectives.minimize_cost})
+datetimeindex = pd.date_range('1/1/2012', periods=168, freq='H')
+
 # create (with out entities) energysystem
-energy_system = es.EnergySystem(simulation=simulation, time_idx=time_index)
-
-
-# emission factors in t/MWh
-em_lig = 0.111 * 3.6
-em_coal = 0.0917 * 3.6
-em_gas = 0.0556 * 3.6
-em_oil = 0.0750 * 3.6
+energysystem = EnergySystem()
 
 ########################### create energysystem components ####################
 
 # resource busses
-bcoal = Bus(uid="coal", type="coal", price=20, balanced=False)
-bgas = Bus(uid="gas", type="gas", price=35, balanced=False)
-boil = Bus(uid="oil", type="oil", price=40,  balanced=False)
-blig = Bus(uid="lignite", type="lignite", balanced=False, price=15)
+bcoal = Bus(label="coal", balanced=False)
+bgas = Bus(label="gas", balanced=False)
+boil = Bus(label="oil", balanced=False)
+blig = Bus(label="lignite", balanced=False)
 
 # electricity and heat
-b_el = Bus(uid="b_el", type="el",
-           shortage=True, shortage_costs=99999)
-b_th = Bus(uid="b_th", type="th", excess=True, excess_costs=0)
+b_el = Bus(label="b_el")
+b_th = Bus(label="b_th")
 
-excess = sink.Simple(uid="excess", inputs=[b_th], bound_type='min')
+excess = Sink(label="excess")
 
 # renewable sources (only pv onshore)
-wind_on = source.DispatchSource(uid="wind_on", outputs=[b_el],
+wind_on = Source(label="wind_on", outputs=[b_el],
                                 val=data['wind'],
                                 out_max=[66.300], opex_var=0, opex_fix=10)
-pv = source.DispatchSource(uid="pv", outputs=[b_el], val=data['pv'],
+pv = Source(label="pv", outputs=[b_el], val=data['pv'],
                            out_max=[65.300])
 
 # demands
-demand_el = sink.Simple(uid="demand_el", inputs=[b_el],
-                        val=data['demand_el']/1000)
-demand_th = sink.Simple(uid="demand_th", inputs=[b_th],
-                        val=data['demand_th']*50)
+demand_el = Sink(label="demand_el",
+                 inputs={b_el: Flow(nominal_value=1000,
+                                    actual_value=data['demand_el']/1000,
+                                    fixed=True)})
+
+demand_th = Sink(label="demand_th",
+                 inputs={b_th: Flow(nominal_value=3000,
+                                    actual_value=data['demand_th']*50,
+                                    fixed=True)})
 
 # Transformers
-pp_coal = transformer.Simple(uid='pp_coal', inputs=[bcoal], outputs=[b_el],
-                             in_max=[None], out_max=[20.200], eta=[0.39],
-                             opex_fix=2, opex_var=25, co2_var=em_coal)
+pp_coal = LinearTransformer(label='pp_coal',
+                            inputs={bcoal: Flow()},
+                            outputs={b_el: Flow(nominal_value=20.2,
+                                                variable_costs=25)},
+                            conversion_factor = {b_el: 0.39})
 
-pp_lig = transformer.Simple(uid='pp_lig', inputs=[blig], outputs=[b_el],
-                            in_max=[None], out_max=[11.800], eta=[0.41],
-                            opex_fix=2, opex_var=19, co2_var=em_lig)
+pp_lig = LinearTransformer(label='pp_lig',
+                           inputs={blig: Flow()},
+                           outputs={b_el: Flow(nominal_value=11.8,
+                                               variable_costs=19)},
+                            conversion_factor = {b_el: 0.41})
 
-pp_gas = transformer.Simple(uid='pp_gas', inputs=[bgas], outputs=[b_el],
-                            in_max=[None], out_max=[41.000], eta=[0.45],
-                            opex_fix=2, opex_var=40, co2_var=em_gas)
+pp_gas = LinearTransformer(label='pp_gas',
+                           inputs={bgas: Flow()},
+                           outputs={b_el: Flow(nominal_value=41,
+                                               variable_costs=40)},
+                           conversion_factor = {b_el: 0.50})
 
-pp_oil = transformer.Simple(uid='pp_oil', inputs=[boil], outputs=[b_el],
-                            in_max=[None], out_max=[0.1000], eta=[0.3],
-                            opex_fix=2, opex_var=50, co2_var=em_oil)
+pp_oil = LinearTransformer(label='pp_oil',
+                           inputs={boil: Flow()},
+                           outputs={b_el: Flow(nominal_value=0.1,
+                                               variable_costs=50)},
+                            conversion_factor = {b_el: 0.28})
+
 # chp note: order of outputs must match order of 'eta' (see. documentation)
-pp_chp = transformer.CHP(uid='pp_chp', inputs=[bgas], outputs=[b_el, b_th],
-                         in_max=[100], out_max=[40, 30],
-                         eta=[0.4, 0.3], opex_fix=0, opex_var=50,
-                         co2_var=em_gas)
+pp_chp = LinearTransformer(label='pp_chp',
+                           inputs={bgas: Flow()},
+                           outputs={b_el: Flow(nominal_value=30,
+                                               variable_costs=40),
+                                    b_th: Flow(nominal_value=40)},
+                           onversion_factor = {b_el: 0.3, b_th: 0.4})
 
 ################################# optimization ################################
 # create Optimization model based on energy_system
-om = OptimizationModel(energysystem=energy_system)
+om = OperationalModel(es=energysystem, timeindex=datetimeindex)
 
 # solve with specific optimization options (passed to pyomo)
 om.solve(solve_kwargs={'tee': True,
-                       'keepfiles': False},
-         solver_cmdline_options={'min': ''})
+                       'keepfiles': False})
 # write back results from optimization object to energysystem for
 # post-processing
-energy_system.results = om.results()
+om.results()
 
 
 ################################## Plotting ###################################
@@ -121,9 +114,9 @@ cdict = {'wind_on': '#00bfff',
          'demand_el': '#fff8dc'}
 # use outputlib
 # create multiindex dataframe with result values
-esplot = tpd.DataFramePlot(energy_system=energy_system)
+esplot = tpd.DataFramePlot(energy_system=energysystem)
 # select input results of electrical bus (i.e. power delivered by plants)
-esplot.slice_unstacked(bus_uid="b_el", type="input")
+esplot.slice_unstacked(bus_label="b_el", type="input")
 # set colorlist for esplot
 colorlist = esplot.color_from_dict(cdict)
 # plot
