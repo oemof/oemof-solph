@@ -711,9 +711,14 @@ class LinearTransformer(SimpleBlock):
             for t in m.TIMESTEPS:
                 for n in group:
                     for o in n.outputs:
-                        lhs = m.flow[n._input(), n, t] * \
-                              n.conversion_factors[o][t]
-                        rhs = m.flow[n, o, t]
+                        try:
+                            lhs = m.flow[n._input(), n, t] * \
+                                  n.conversion_factors[o][t]
+                            rhs = m.flow[n, o, t]
+                        except:
+                            raise ValueError("Error in constraint creation",
+                                             "source: {0}, target: {1}".format(
+                                                 n.label, o.label))
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
