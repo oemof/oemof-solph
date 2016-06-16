@@ -99,7 +99,11 @@ class Flow:
         self.summed_min = kwargs.get('summed_min')
         self.fixed = kwargs.get('fixed', False)
         self.investment = kwargs.get('investment')
-        if self.fixed:
+        if self.fixed and self.actual_value is None:
+            raise ValueError("Can not fix flow value to None. "
+                             "Please set actual_value of the flow")
+
+        elif self.fixed:
             # ToDo: Check if min/max are set by user than raise warning
             # warnings.warn(
             #     "Values for min/max will be ignored if fixed is True.",
