@@ -179,8 +179,8 @@ class Grouping:
             v = type(v)((k, v[k]) for k in v if self.filter(k))
         elif isinstance(v, Iterable):
             v = type(v)(filter(self.filter, v))
-        else:
-            v = (self.filter or (lambda x: x))(v)
+        elif self.filter and not self.filter(v):
+            return
         if not v:
             return
         for group in (k if (isinstance(k, Iterable) and not
