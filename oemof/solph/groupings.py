@@ -48,36 +48,10 @@ standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow,
     filter=lambda stf: stf[2].investment is None)
 
+discrete_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.Discrete,
+    filter=lambda stf: stf[2].discrete is not None)
 
-def discrete_flow_key(n):
-    """Function returns keys for the energysystem attribute :attr:`es.groups`
-    to store flows with :attr:`discrete` being set to an instance of
-    :attr:`oemof.solph.options.Discrete` object.
-    """
-    for f in n.outputs.values():
-        if f.discrete is not None:
-            return blocks.Discrete
-
-
-def discrete_flows(n):
-    """Function returns elements for group in energysystem attribute
-    :attr:`es.groups` with key generated from :meth:`discrete_flow_key`.
-    """
-    return [(n, t, f) for (t, f) in n.outputs.items()
-            if f.discrete is not None]
-
-
-def merge_discrete_flows(n, group):
-    """Extends the group with key returned from :meth:`discrete_flow_key` with
-    elements from meth:`discrete_flows`
-    """
-    group.extend(n)
-    return group
-
-discrete_flow_grouping = core_es.Grouping(
-    key=discrete_flow_key,
-    value=discrete_flows,
-    merge=merge_discrete_flows)
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
              standard_flow_grouping, discrete_flow_grouping]
