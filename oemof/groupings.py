@@ -64,6 +64,11 @@ class Grouping:
         <Grouping.key>` for each :class:`entity <oemof.core.network.Entity>` of
         the :class:`energy system <oemof.core.energy_system.EnergySystem>`.
 
+    constant_key: hashable (optional)
+
+        Specifies a constant :meth:`key <Grouping.key>`. Keys specified using
+        this parameter are not called but taken as is.
+
     value: callable, optional
 
         Overrides the default behaviour of :meth:`value <Grouping.value>`.
@@ -81,8 +86,19 @@ class Grouping:
 
     """
 
-    def __init__(self, key, filter=None, **kwargs):
-        self.key = key
+    def __init__(self, key=None, constant_key=None, filter=None, **kwargs):
+        if key and constant_key:
+            raise TypeError(
+                    "Grouping arguments `key` and `constant_key` are " +
+                    " mutually exclusive.")
+        if constant_key:
+            self.key = lambda _: constant_key
+        elif key:
+            self.key = key
+        else:
+            raise TypeError(
+                "Grouping constructor missing required argument: " +
+                "one of `key` or `constant_key`.")
         self.filter = filter
         for kw in ["value", "merge", "filter"]:
             if kw in kwargs:
