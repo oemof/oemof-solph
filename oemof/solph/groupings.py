@@ -44,35 +44,9 @@ investment_flow_grouping = groupings.FlowsWithNodes(
     # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
     filter=lambda stf: stf[2].investment is not None)
 
-
-def standard_flow_key(n):
-    """Function returns keys for the energysystem attribute :attr:`es.groups`
-    to store all standard flows (no investment, no discrete).
-    """
-    for f in n.outputs.values():
-        if f.investment is None:
-            return blocks.Flow
-
-
-def standard_flows(n):
-    """Function returns elements for group in energysystem attribute
-    :attr:`es.groups` with key generated from :meth:`standard_flow_key`.
-    """
-    return [(n, t, f) for (t, f) in n.outputs.items()
-            if f.investment is None]
-
-
-def merge_standard_flows(n, group):
-    """Extends the group with key returned from :meth:`standard_flow_key` with
-    elements from meth:`standard_flows`
-    """
-    group.extend(n)
-    return group
-
-standard_flow_grouping = core_es.Grouping(
-    key=standard_flow_key,
-    value=standard_flows,
-    merge=merge_standard_flows)
+standard_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.Flow,
+    filter=lambda stf: stf[2].investment is None)
 
 
 def discrete_flow_key(n):
