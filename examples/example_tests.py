@@ -9,8 +9,8 @@ from oemof.tools import logger
 # add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 
-from solph.storage_optimization import storage_invest
-from solph import simple_least_costs
+from storage_optimization import storage_invest
+import simple_least_costs
 
 
 tolerance = 0.001  # percent
@@ -80,34 +80,23 @@ check(stor_invest_dict[number_of_timesteps], stor_invest_run,
       testdict['stor_inv'], results)
 # ********* end of storage invest example *************************************
 
-logger.define_logging()
-for tests in testdict.values():
-    logging.info(tests['name'])
-    logging.info("Used solver: {0}".format(tests['solver']))
-    logging.info("Run check: {0}".format(tests['run']))
-    logging.info("Result check: {0}".format(tests['results']))
-    if show_messages and 'messages' in tests:
-        for message in tests['messages'].values():
-            logging.error(message)
 
 # *********** simple least cost  example **************************************
 testdict['least_costs'] = {'name': "Simple least costs optimization",
                            'solver': 'cbc',
                            'data': 'solph/example_data.csv'}
 
-
-esys = simple_least_costs.initialise_energysystem(periods=2000)
-om = simple_least_costs.simulate(esys,
-                                   filename=testdict['least_costs']['data'],
-                                   solver=testdict['least_costs']['solver'])
-results = simple_least_costs.get_results(esys)
-
-least_costs_run = True
 try:
-    pass
+    esys = simple_least_costs.initialise_energysystem(periods=2000)
+    om = simple_least_costs.simulate(esys,
+                                       filename=testdict['least_costs']['data'],
+                                       solver=testdict['least_costs']['solver'])
+    results = simple_least_costs.get_results(esys)
+    least_costs_run = True
 except Exception as e:
     testdict['least_costs']['messages'] = {'error': e}
     least_costs_run = False
+    results = None
 
 test_results = {'objective': 2947725.249402091,
  ('b_el', 'input', 'pp_chp', 'val'): 11161.357450000065,
@@ -128,6 +117,8 @@ test_results = {'objective': 2947725.249402091,
  ('oil', 'output', 'pp_oil', 'val'): 8.1687949999999994}
 
 check(test_results, least_costs_run, testdict['least_costs'], results)
+# *********** end of simple least cost  example *******************************
+
 
 logger.define_logging()
 for tests in testdict.values():
