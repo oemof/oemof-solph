@@ -1,4 +1,8 @@
 class,label,source,target,conversion_factors,nominal_value,actual_value,min,max,fixed_costs,variable_costs,summed_max,summed_min,fixed,nominal_capacity,capacity_loss,nominal_input_capacity_ratio,nominal_output_capacity_ratio,inflow_conversion_factor,outflow_conversion_factor,initial_capacity,capacity_min,capacity_max,balanced
+Blablubb,and some comments,,about whats happenning,,,,,,,,,,,,,,,,,,,,
+xxxx,fhtfhf,fthft,fthfth,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+hthht,but,something,,,,,,,,,,,,,,,,,,,,,
 Source,wind1,wind1,bus_el1,,30,seq,,,,,,,True,,,,,,,,,,True
 Source,solar1,solar1,bus_el1,,50,seq,,,,,,,True,,,,,,,,,,
 Sink,demand_th,bus_th1,demand_th,,,,,,,,,,,,,,,,,,,,False
