@@ -206,8 +206,7 @@ class Nodes(Grouping):
         :meth:`Updates <set.update>` :obj:`old` to be the union of :obj:`old`
         and :obj:`new`.
         """
-        old.update(new)
-        return old
+        return old.union(new)
 
 DEFAULT = Grouping(attrgetter('uid'))
 """ The default :class:`Grouping`.
