@@ -207,7 +207,7 @@ class Grouping:
 
 class Nodes(Grouping):
     """
-    Modifies :class:`Grouping` to group :class:`entities
+    Specialises :class:`Grouping` to group :class:`entities
     <oemof.core.network.Entity>` into :class:`sets <set>`.
     """
     def value(self, e):
