@@ -5,9 +5,13 @@ import os
 import sys
 from oemof.tools import logger
 
+
 # add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
-from storage_optimization import storage_invest
+
+from solph.storage_optimization import storage_invest
+from solph import simple_least_costs
+
 
 tolerance = 0.001  # percent
 show_messages = True
@@ -85,3 +89,58 @@ for tests in testdict.values():
     if show_messages and 'messages' in tests:
         for message in tests['messages'].values():
             logging.error(message)
+
+# *********** simple least cost  example **************************************
+testdict['least_costs'] = {'name': "Simple least costs optimization",
+                           'solver': 'cbc',
+                           'data': 'solph/example_data.csv'}
+
+
+esys = simple_least_costs.initialise_energysystem(periods=2000)
+om = simple_least_costs.simulate(esys,
+                                   filename=testdict['least_costs']['data'],
+                                   solver=testdict['least_costs']['solver'])
+results = simple_least_costs.get_results(esys)
+
+least_costs_run = True
+try:
+    pass
+except Exception as e:
+    testdict['least_costs']['messages'] = {'error': e}
+    least_costs_run = False
+
+test_results = {'objective': 2947725.249402091,
+ ('b_el', 'input', 'pp_chp', 'val'): 11161.357450000065,
+ ('b_el', 'input', 'pp_coal', 'val'): 33723.047672110595,
+ ('b_el', 'input', 'pp_gas', 'val'): 30412.377779000046,
+ ('b_el', 'input', 'pp_lig', 'val'): 22066.451080999268,
+ ('b_el', 'input', 'pp_oil', 'val'): 2.2872599999999998,
+ ('b_el', 'input', 'pv', 'val'): 7796.8431880300122,
+ ('b_el', 'input', 'wind', 'val'): 28009.549502999955,
+ ('b_el', 'output', 'demand_el', 'val'): 132243.7904593189,
+ ('b_el', 'output', 'excess', 'val'): 928.12139200000013,
+ ('b_th', 'input', 'pp_chp', 'val'): 14881.810039999958,
+ ('b_th', 'output', 'demand_th', 'val'): 14881.80983624002,
+ ('coal', 'output', 'pp_coal', 'val'): 86469.394787298472,
+ ('gas', 'output', 'pp_chp', 'val'): 37204.525720000034,
+ ('gas', 'output', 'pp_gas', 'val'): 60824.751778000136,
+ ('lignite', 'output', 'pp_lig', 'val'): 53820.634704001102,
+ ('oil', 'output', 'pp_oil', 'val'): 8.1687949999999994}
+
+check(test_results, least_costs_run, testdict['least_costs'], results)
+
+logger.define_logging()
+for tests in testdict.values():
+    logging.info(tests['name'])
+    logging.info("Used solver: {0}".format(tests['solver']))
+    logging.info("Run check: {0}".format(tests['run']))
+    logging.info("Result check: {0}".format(tests['results']))
+    if show_messages and 'messages' in tests:
+        for message in tests['messages'].values():
+            logging.error(message)
+
+
+
+
+
+
