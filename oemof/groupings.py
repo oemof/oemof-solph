@@ -194,15 +194,14 @@ class Grouping:
             v = type(v)((k, v[k]) for k in v if self.filter(k))
         elif isinstance(v, Iterable):
             v = type(v)(filter(self.filter, v))
-        else:
-            v = (self.filter or (lambda x: x))(v)
+        elif self.filter and not self.filter(v):
+            return
         if not v:
             return
         for group in (k if (isinstance(k, Iterable) and not
                             isinstance(k, Hashable))
                         else [k]):
-            d[group] = (self.merge(self.value(e), d[group])
-                        if group in d else self.value(e))
+            d[group] = (self.merge(v, d[group]) if group in d else v)
 
 
 class Nodes(Grouping):
@@ -222,8 +221,7 @@ class Nodes(Grouping):
         :meth:`Updates <set.update>` :obj:`old` to be the union of :obj:`old`
         and :obj:`new`.
         """
-        old.update(new)
-        return old
+        return old.union(new)
 
 
 class Flows(Nodes):
