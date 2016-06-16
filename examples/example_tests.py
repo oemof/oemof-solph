@@ -5,8 +5,7 @@ import os
 import sys
 from oemof.tools import logger
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), 'solph'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_optimization import storage_invest
 
 tolerance = 0.001  # percent
