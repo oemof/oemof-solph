@@ -20,6 +20,14 @@ oemof.solph.groupings module
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.models module
+-------------------------
+
+.. automodule:: oemof.solph.models
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 oemof.solph.network module
 --------------------------
 
