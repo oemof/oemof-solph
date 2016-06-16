@@ -6,7 +6,7 @@ try:
 except ImportError:
     from collections import (Hashable, Iterable, Mapping,
                              MutableMapping as MM)
-from itertools import filterfalse
+from itertools import chain, filterfalse
 
 
 class Grouping:
@@ -224,6 +224,25 @@ class Nodes(Grouping):
         """
         old.update(new)
         return old
+
+
+class Flows(Nodes):
+    """
+    Specialises :class:`Grouping` to group the flows connected to :class:`nodes
+    <oemof.network.Node>` into :class:`sets <set>`.
+    Note that this specifically means that the :meth:`key <Flows.key>`, and
+    :meth:`value <Flows.value>` functions act on a set of flows.
+    """
+    def value(self, flows):
+        """
+        Returns a :class:`set` containing only :obj:`flows`, so groups are
+        :class:`sets <set>` of flows.
+        """
+        return set(flows)
+
+    def __call__(self, n, d):
+        flows = set(chain(n.outputs.values(), n.inputs.values()))
+        super().__call__(flows, d)
 
 
 def _uid_or_str(node_or_entity):

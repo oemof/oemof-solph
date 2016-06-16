@@ -12,8 +12,8 @@ from oemof.core.network.entities.components import transformers as transformer
 from oemof.core import energy_system as es
 from oemof.core.network import Entity
 from oemof.core.network.entities import Bus, Component
-from oemof.network import Node
-from oemof.groupings import Nodes
+from oemof.network import Bus as NewBus, Node
+from oemof.groupings import Nodes, Flows
 
 
 class EnergySystem_Tests:
@@ -126,4 +126,13 @@ class EnergySystem_Tests:
         ok_("everything" not in ES.groups)
         ok_(everything in ES.groups)
         eq_(ES.groups[everything], set([node]))
+
+    def test_Flows(self):
+        key = object()
+        ES = es.EnergySystem(groupings=[Flows(key)])
+        flows = (object(), object())
+        bus = NewBus(label="A Bus")
+        node = Node(label="A Node",
+                    inputs={bus: flows[0]}, outputs={bus: flows[1]})
+        eq_(ES.groups[key], set(flows))
 
