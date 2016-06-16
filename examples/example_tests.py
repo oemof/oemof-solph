@@ -16,9 +16,11 @@ import simple_least_costs
 tolerance = 0.001  # percent
 show_messages = True
 testdict = {}
+PASSED = True
 
 
 def check(cdict, runcheck, subdict, new_results):
+    global PASSED
     if runcheck:
         count = 0
         subdict['run'] = "Okay"
@@ -32,6 +34,7 @@ def check(cdict, runcheck, subdict, new_results):
                 subdict['messages'][count] = (
                     "{0}: {1} not between {2} and {3}".format(
                         key, float(value), minval, maxval))
+                PASSED = False
         if count < 1:
             subdict['results'] = "Okay"
         else:
@@ -44,6 +47,7 @@ def check(cdict, runcheck, subdict, new_results):
     else:
         subdict['run'] = "Failed"
         subdict['results'] = "Failed"
+        PASSED = False
 
 
 # ********* storage invest example ******************************************
@@ -129,6 +133,9 @@ for tests in testdict.values():
     if show_messages and 'messages' in tests:
         for message in tests['messages'].values():
             logging.error(message)
+
+if PASSED:
+    logging.info("All examples passed!")
 
 
 
