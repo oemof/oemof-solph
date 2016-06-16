@@ -73,7 +73,13 @@ class EnergySystem_Tests:
                                 ("A" if i < 5 else "B"))
                      for i in range(10)]
         for group in ["Foo", "Bar", "A", "B"]:
-            eq_(len(ES.groups[group]), 5)
+            eq_(len(ES.groups[group]), 5,
+                ("\n  Failed testing length of group '{}'." +
+                 "\n  Expected: 5" +
+                 "\n  Got     : {}" +
+                 "\n  Group   : {}" ).format(
+                     group, len(ES.groups[group]),
+                     sorted([e.uid for e in ES.groups[group]])))
 
     def test_grouping_filter_parameter(self):
         g1 = es.GroupingBase( key=lambda e: "The Special One",
