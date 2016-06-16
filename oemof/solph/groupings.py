@@ -16,11 +16,11 @@ groupings specified like this:
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
 """
-from itertools import chain
 from oemof.core import energy_system as core_es
 from .network import Bus, LinearTransformer, Storage
 from .options import Investment
 from . import blocks
+import oemof.groupings as groupings
 
 
 def constraint_grouping(node):
@@ -39,36 +39,10 @@ def constraint_grouping(node):
         return blocks.Storage
 
 
-def investment_key(n):
-    """Function returns keys for the energysystem attribute :attr:`es.groups`
-    to store flows with :attr:`investment` being set to an instance of
-    :attr:`oemof.solph.options.Investment` object.
-    """
-    for f in chain(n.outputs.values(), n.inputs.values()):
-        if f.investment is not None:
-            return blocks.InvestmentFlow
-
-
-def investment_flows(n):
-    """Function returns elements for group in energysystem attribute
-    :attr:`es.groups` with key generated from :meth:`investment_key`.
-    """
-    return set(chain(((n, t, f) for (t, f) in n.outputs.items()
-                      if f.investment is not None),
-                     ((s, n, f) for (s, f) in n.inputs.items()
-                      if f.investment is not None)))
-
-
-def merge_investment_flows(n, group):
-    """Extends the group with key returned from :meth:`investment_flow_key`
-    with elements from meth:`invesment_flows`
-    """
-    return group.union(n)
-
-investment_flow_grouping = core_es.Grouping(
-    key=investment_key,
-    value=investment_flows,
-    merge=merge_investment_flows)
+investment_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.InvestmentFlow,
+    # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
+    filter=lambda stf: stf[2].investment is not None)
 
 
 def standard_flow_key(n):
