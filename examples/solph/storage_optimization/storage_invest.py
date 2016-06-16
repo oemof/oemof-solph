@@ -36,9 +36,11 @@ from oemof.outputlib import to_pandas as tpd
 
 # Default logger of oemof
 from oemof.tools import logger
+from oemof.tools import helpers
 
 # import oemof base classes to create energy system objects
 import logging
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import oemof.solph as solph
@@ -59,7 +61,7 @@ def initialise_energysystem(number_timesteps=8760):
 
 
 def optimise_storage_size(energysystem, filename="storage_invest.csv",
-                          solvername='cbc'):
+                          solvername='cbc', debug=True):
     # Read data file
     data = pd.read_csv(filename, sep=",")
 
@@ -132,9 +134,11 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv",
     logging.info('Solve the optimization problem')
     om.solve(solver=solvername, solve_kwargs={'tee': True})
 
-    logging.info('Store lp-file')
-    om.write('optimization_problem.lp',
-             io_options={'symbolic_solver_labels': True})
+    if debug:
+        filename = os.path.join(
+            helpers.extend_basic_path('lp_files'), 'storage_invest.lp')
+        logging.info('Store lp-file in {0}.'.format(filename))
+        om.write(filename, io_options={'symbolic_solver_labels': True})
 
     return energysystem
 
