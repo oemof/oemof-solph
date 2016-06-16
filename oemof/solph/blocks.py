@@ -150,7 +150,7 @@ class InvestmentStorage(SimpleBlock):
         &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
         &\\forall t \\in \\textrm{TIMESTEPS}.
 
-    Initial capacity of :attr:`.network.Storage`
+    Initial capacity of :class:`.network.Storage`
         .. math::
           capacity(n, t_{last}) = invest(n) \\cdot
           initial\_capacity(n), \\\\
