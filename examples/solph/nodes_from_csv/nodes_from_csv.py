@@ -35,12 +35,13 @@ logging.info('Check the results')
 
 # %% bugfixing of outputlib
 
-#for k, v in es.results.items():
-#    # results[source][target][list with flows]
-#    # or results[source][source][list with other information]
-#    print(k, v, '\n')
+for k, v in es.results.items():
+    # results[source][target][list with flows]
+    # or results[source][source][list with other information]
+    print(k, v, '\n')
 
 myresults = tpd.DataFramePlot(energy_system=es)
+print(myresults)
 
 # %% dirty slicing (to be fixed in to_pandas)
 
