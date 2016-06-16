@@ -3,7 +3,7 @@
 import logging
 import os
 from oemof.tools import logger
-from storage_optimization import storage_invest
+from solph.storage_optimization import storage_invest
 
 tolerance = 0.001  # percent
 show_messages = True
@@ -45,7 +45,7 @@ testdict['stor_inv'] = {'name': "Storage invest example",
 number_of_timesteps = 8760
 
 esys = storage_invest.initialise_energysystem(number_of_timesteps)
-filepath = os.path.join('storage_optimization', 'storage_invest.csv')
+filepath = os.path.join('solph/storage_optimization', 'storage_invest.csv')
 esys = storage_invest.optimise_storage_size(
     esys, filename=filepath, solvername=testdict['stor_inv']['solver'])
 results = storage_invest.get_result_dict(esys)
