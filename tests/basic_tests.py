@@ -12,6 +12,8 @@ from oemof.core.network.entities.components import transformers as transformer
 from oemof.core import energy_system as es
 from oemof.core.network import Entity
 from oemof.core.network.entities import Bus, Component
+from oemof.network import Bus as NewBus, Node
+from oemof.groupings import Nodes, Flows, FlowsWithNodes as FWNs
 
 
 class EnergySystem_Tests:
@@ -109,4 +111,38 @@ class EnergySystem_Tests:
         eq_(ES.groups["The Special One"], special)
         eq_(ES.groups["A Subset"], subset)
         eq_(ES.groups["everything"], everything)
+
+    def test_constant_group_keys(self):
+        """ Callable keys passed in as `constant_key` should not be called.
+
+        The `constant_key` parameter can be used to specify callable group keys
+        without having to worry about `Grouping`s trying to call them. This
+        test makes sure that the parameter is handled correctly.
+        """
+        everything = lambda: "everything"
+        collect_everything = Nodes(constant_key=everything)
+        ES = es.EnergySystem(groupings=[collect_everything])
+        node = Node(label="A Node")
+        ok_("everything" not in ES.groups)
+        ok_(everything in ES.groups)
+        eq_(ES.groups[everything], set([node]))
+
+    def test_Flows(self):
+        key = object()
+        ES = es.EnergySystem(groupings=[Flows(key)])
+        flows = (object(), object())
+        bus = NewBus(label="A Bus")
+        node = Node(label="A Node",
+                    inputs={bus: flows[0]}, outputs={bus: flows[1]})
+        eq_(ES.groups[key], set(flows))
+
+    def test_FlowsWithNodes(self):
+        key = object()
+        ES = es.EnergySystem(groupings=[FWNs(key)])
+        flows = (object(), object())
+        bus = NewBus(label="A Bus")
+        node = Node(label="A Node",
+                    inputs={bus: flows[0]}, outputs={bus: flows[1]})
+        eq_(ES.groups[key], set(((bus, node, flows[0]),
+                                 (node, bus, flows[1]))))
 

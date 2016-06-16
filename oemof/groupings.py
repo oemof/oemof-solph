@@ -6,7 +6,7 @@ try:
 except ImportError:
     from collections import (Hashable, Iterable, Mapping,
                              MutableMapping as MM)
-from itertools import filterfalse
+from itertools import chain, filterfalse
 
 
 class Grouping:
@@ -64,6 +64,11 @@ class Grouping:
         <Grouping.key>` for each :class:`entity <oemof.core.network.Entity>` of
         the :class:`energy system <oemof.core.energy_system.EnergySystem>`.
 
+    constant_key: hashable (optional)
+
+        Specifies a constant :meth:`key <Grouping.key>`. Keys specified using
+        this parameter are not called but taken as is.
+
     value: callable, optional
 
         Overrides the default behaviour of :meth:`value <Grouping.value>`.
@@ -81,8 +86,19 @@ class Grouping:
 
     """
 
-    def __init__(self, key, filter=None, **kwargs):
-        self.key = key
+    def __init__(self, key=None, constant_key=None, filter=None, **kwargs):
+        if key and constant_key:
+            raise TypeError(
+                    "Grouping arguments `key` and `constant_key` are " +
+                    " mutually exclusive.")
+        if constant_key:
+            self.key = lambda _: constant_key
+        elif key:
+            self.key = key
+        else:
+            raise TypeError(
+                "Grouping constructor missing required argument: " +
+                "one of `key` or `constant_key`.")
         self.filter = filter
         for kw in ["value", "merge", "filter"]:
             if kw in kwargs:
@@ -191,7 +207,7 @@ class Grouping:
 
 class Nodes(Grouping):
     """
-    Modifies :class:`Grouping` to group :class:`entities
+    Specialises :class:`Grouping` to group :class:`entities
     <oemof.core.network.Entity>` into :class:`sets <set>`.
     """
     def value(self, e):
@@ -208,6 +224,47 @@ class Nodes(Grouping):
         """
         old.update(new)
         return old
+
+
+class Flows(Nodes):
+    """
+    Specialises :class:`Grouping` to group the flows connected to :class:`nodes
+    <oemof.network.Node>` into :class:`sets <set>`.
+    Note that this specifically means that the :meth:`key <Flows.key>`, and
+    :meth:`value <Flows.value>` functions act on a set of flows.
+    """
+    def value(self, flows):
+        """
+        Returns a :class:`set` containing only :obj:`flows`, so groups are
+        :class:`sets <set>` of flows.
+        """
+        return set(flows)
+
+    def __call__(self, n, d):
+        flows = set(chain(n.outputs.values(), n.inputs.values()))
+        super().__call__(flows, d)
+
+
+class FlowsWithNodes(Nodes):
+    """
+    Specialises :class:`Grouping` to act on the flows connected to
+    :class:`nodes <oemof.network.Node>` and create :class:`sets <set>` of
+    :obj:`(source, target, flow)` tuples.
+    Note that this specifically means that the :meth:`key <Flows.key>`, and
+    :meth:`value <Flows.value>` functions act on sets like these.
+    """
+    def value(self, tuples):
+        """
+        Returns a :class:`set` containing only :obj:`tuples`, so groups are
+        :class:`sets <set>` of :obj:`tuples`.
+        """
+        return set(tuples)
+
+    def __call__(self, n, d):
+        tuples = set(chain(
+            ((n, t, f) for (t, f) in n.outputs.items()),
+            ((s, n, f) for (s, f) in n.inputs.items())))
+        super().__call__(tuples, d)
 
 
 def _uid_or_str(node_or_entity):
