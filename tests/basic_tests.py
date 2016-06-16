@@ -13,7 +13,7 @@ from oemof.core import energy_system as es
 from oemof.core.network import Entity
 from oemof.core.network.entities import Bus, Component
 from oemof.network import Bus as NewBus, Node
-from oemof.groupings import Nodes, Flows
+from oemof.groupings import Nodes, Flows, FlowsWithNodes as FWNs
 
 
 class EnergySystem_Tests:
@@ -135,4 +135,14 @@ class EnergySystem_Tests:
         node = Node(label="A Node",
                     inputs={bus: flows[0]}, outputs={bus: flows[1]})
         eq_(ES.groups[key], set(flows))
+
+    def test_FlowsWithNodes(self):
+        key = object()
+        ES = es.EnergySystem(groupings=[FWNs(key)])
+        flows = (object(), object())
+        bus = NewBus(label="A Bus")
+        node = Node(label="A Node",
+                    inputs={bus: flows[0]}, outputs={bus: flows[1]})
+        eq_(ES.groups[key], set(((bus, node, flows[0]),
+                                 (node, bus, flows[1]))))
 

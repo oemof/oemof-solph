@@ -245,6 +245,28 @@ class Flows(Nodes):
         super().__call__(flows, d)
 
 
+class FlowsWithNodes(Nodes):
+    """
+    Specialises :class:`Grouping` to act on the flows connected to
+    :class:`nodes <oemof.network.Node>` and create :class:`sets <set>` of
+    :obj:`(source, target, flow)` tuples.
+    Note that this specifically means that the :meth:`key <Flows.key>`, and
+    :meth:`value <Flows.value>` functions act on sets like these.
+    """
+    def value(self, tuples):
+        """
+        Returns a :class:`set` containing only :obj:`tuples`, so groups are
+        :class:`sets <set>` of :obj:`tuples`.
+        """
+        return set(tuples)
+
+    def __call__(self, n, d):
+        tuples = set(chain(
+            ((n, t, f) for (t, f) in n.outputs.items()),
+            ((s, n, f) for (s, f) in n.inputs.items())))
+        super().__call__(tuples, d)
+
+
 def _uid_or_str(node_or_entity):
     """ Helper function to support the transition from `Entitie`s to `Node`s.
     """
