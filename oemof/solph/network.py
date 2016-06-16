@@ -6,7 +6,7 @@ import warnings
 import oemof.network as on
 import oemof.core.energy_system as es
 from .options import Investment
-from .options import Sequence
+from .plumbing import Sequence
 
 
 class EnergySystem(es.EnergySystem):

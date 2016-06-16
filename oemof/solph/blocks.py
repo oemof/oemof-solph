@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+"""Creating sets, variables, constraints and parts of the objective function
+for the specified groups.
 """
 
-"""
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary)
 from pyomo.core.base.block import SimpleBlock
@@ -26,7 +27,7 @@ class Storage(SimpleBlock):
 
     **The following constraints are created:**
 
-    Storage balance :attr:`òm.Storage.balance[n, t]`
+    Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: capacity(n, t) = capacity(n, previous(t)) \\cdot  \
             (1 - capacity\\_loss_n(t))) \
             - \\frac{flow(n, o, t)}{\\eta(n, o, t)} \\cdot \\tau \
@@ -137,6 +138,8 @@ class InvestmentStorage(SimpleBlock):
 
 
     **The following constraints are build:**
+
+    Storage balance
       .. math::
         capacity(n, t) = & capacity(n, t\_previous(t)) \\cdot \
         (1 - capacity\_loss(n)) \\\\
@@ -146,6 +149,13 @@ class InvestmentStorage(SimpleBlock):
            \\tau, \\\\
         &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
         &\\forall t \\in \\textrm{TIMESTEPS}.
+
+    Initial capacity of :attr:`.network.Storage`
+        .. math::
+          capacity(n, t_{last}) = invest(n) \\cdot
+          initial\_capacity(n), \\\\
+          \\forall n \\in \\textrm{INITIAL\_CAPACITY,} \\\\
+          \\forall t \\in \\textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t), \\\\
@@ -295,7 +305,6 @@ class InvestmentStorage(SimpleBlock):
 class Flow(SimpleBlock):
     """ Flow block with definitions for standard flows.
 
-
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
@@ -309,7 +318,6 @@ class Flow(SimpleBlock):
     POSITIVE_GRADIENT_FLWS
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
-
 
     **The following constraints are build:**
 
@@ -336,7 +344,6 @@ class Flow(SimpleBlock):
             postive\_flow\_gradient(i, o, t), \\\\
             \\forall (i, o) \\in \\textrm{POSITIVE\_GRADIENT\_FLOWS}, \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
-
 
     **The following parts of the objective function are created:**
 
@@ -489,7 +496,6 @@ class Flow(SimpleBlock):
 class InvestmentFlow(SimpleBlock):
     """Block for all flows with :attr:`investment` beeing not None.
 
-
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
@@ -507,7 +513,6 @@ class InvestmentFlow(SimpleBlock):
     MIN_FLOWS
         A subset of FLOWS with flows having set a least mininum value for
         at least one timestep in the optimization model.
-
 
     **The following variables are created:**
 
@@ -553,13 +558,10 @@ class InvestmentFlow(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    Equivalent periodical costs (epc) expression
+    Equivalent periodical costs (epc) expression \
     :attr:`om.InvestmentFlow.investment_costs`:
         .. math::
             \\sum_{i, o} invest(i, o) \\cdot ep\_costs(i, o)
-
-    Additionally, if :attr:`variable_costs` are set by the user:
-        .. math::
 
     Additionally, if :attr:`fixed_costs` are set by the user:
         .. math::

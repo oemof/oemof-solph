@@ -36,30 +36,25 @@ from oemof.outputlib import to_pandas as tpd
 
 # Default logger of oemof
 from oemof.tools import logger
+from oemof.tools import helpers
 
 # import oemof base classes to create energy system objects
 import logging
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import oemof.solph as solph
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
-                         EnergySystem)
-from oemof.solph.network import Investment
-from oemof.solph import OperationalModel
 
 
-def initialise_energysystem(number_timesteps=8760):
-    """initialize the energy system
-    """
+def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
+                          debug=True, number_timesteps=8):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
 
-    return EnergySystem(groupings=solph.GROUPINGS, time_idx=date_time_index)
+    energysystem = solph.EnergySystem(
+        groupings=solph.GROUPINGS, time_idx=date_time_index)
 
-
-def optimise_storage_size(energysystem, filename="storage_invest.csv",
-                          solvername='cbc'):
     # Read data file
     data = pd.read_csv(filename, sep=",")
 
@@ -69,37 +64,37 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv",
 
     logging.info('Create oemof objects')
     # create gas bus
-    bgas = Bus(label="natural_gas")
+    bgas = solph.Bus(label="natural_gas")
 
     # create electricity bus
-    bel = Bus(label="electricity")
+    bel = solph.Bus(label="electricity")
 
     # create excess component for the electricity bus to allow overproduction
-    Sink(label='excess_bel', inputs={bel: Flow()})
+    solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
 
     # create commodity object for gas resource
-    Source(label='rgas', outputs={bgas: Flow(nominal_value=194397000,
-                                             summed_max=1)})
+    solph.Source(label='rgas', outputs={bgas: solph.Flow(
+        nominal_value=194397000, summed_max=1)})
 
     # create fixed source object for wind
-    Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
-                                            nominal_value=1000000,
-                                            fixed=True, fixed_costs=20)})
+    solph.Source(label='wind', outputs={bel: solph.Flow(
+        actual_value=data['wind'], nominal_value=1000000, fixed=True,
+        fixed_costs=20)})
 
     # create fixed source object for pv
-    Source(label='pv', outputs={bel: Flow(actual_value=data['pv'],
-                                          nominal_value=582000,
-                                          fixed=True, fixed_costs=15)})
+    solph.Source(label='pv', outputs={bel: solph.Flow(
+        actual_value=data['pv'], nominal_value=582000, fixed=True,
+        fixed_costs=15)})
 
     # create simple sink object for demand
-    Sink(label='demand', inputs={bel: Flow(actual_value=data['demand_el'],
-                                           fixed=True, nominal_value=1)})
+    solph.Sink(label='demand', inputs={bel: solph.Flow(
+        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple transformer object for gas powerplant
-    LinearTransformer(
+    solph.LinearTransformer(
         label="pp_gas",
-        inputs={bgas: Flow()},
-        outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
+        inputs={bgas: solph.Flow()},
+        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
 
     # Calculate ep_costs from capex to compare with old solph
@@ -109,16 +104,16 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv",
     epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
 
     # create storage transformer object for storage
-    Storage(
+    solph.Storage(
         label='storage',
-        inputs={bel: Flow(variable_costs=10e10)},
-        outputs={bel: Flow(variable_costs=10e10)},
+        inputs={bel: solph.Flow(variable_costs=10e10)},
+        outputs={bel: solph.Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
         fixed_costs=35,
-        investment=Investment(ep_costs=epc),
+        investment=solph.Investment(ep_costs=epc),
     )
 
     ##########################################################################
@@ -127,14 +122,16 @@ def optimise_storage_size(energysystem, filename="storage_invest.csv",
 
     logging.info('Optimise the energy system')
 
-    om = OperationalModel(energysystem, timeindex=energysystem.time_idx)
+    om = solph.OperationalModel(energysystem, timeindex=energysystem.time_idx)
 
     logging.info('Solve the optimization problem')
     om.solve(solver=solvername, solve_kwargs={'tee': True})
 
-    logging.info('Store lp-file')
-    om.write('optimization_problem.lp',
-             io_options={'symbolic_solver_labels': True})
+    if debug:
+        filename = os.path.join(
+            helpers.extend_basic_path('lp_files'), 'storage_invest.lp')
+        logging.info('Store lp-file in {0}.'.format(filename))
+        om.write(filename, io_options={'symbolic_solver_labels': True})
 
     return energysystem
 
@@ -230,8 +227,7 @@ def create_plots(energysystem):
 
 if __name__ == "__main__":
     logger.define_logging()
-    esys = initialise_energysystem()
-    esys = optimise_storage_size(esys)
+    esys = optimise_storage_size()
     # esys.dump()
     # esys.restore()
     import pprint as pp
