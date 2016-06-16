@@ -5,6 +5,7 @@ import os
 import sys
 from oemof.tools import logger
 
+# add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_optimization import storage_invest
 
@@ -58,6 +59,7 @@ try:
 except Exception as e:
     testdict['stor_inv']['messages'] = {'error': e}
     stor_invest_run = False
+    results = None
 
 stor_invest_dict = {8760: {
         'pp_gas_sum': 112750260.00000007,
@@ -72,6 +74,7 @@ stor_invest_dict = {8760: {
 
 check(stor_invest_dict[number_of_timesteps], stor_invest_run,
       testdict['stor_inv'], results)
+# ********* end of storage invest example *************************************
 
 logger.define_logging()
 for tests in testdict.values():
