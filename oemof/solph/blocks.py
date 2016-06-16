@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+"""Creating sets, variables, constraints and parts of the objective function
+for the specified groups.
 """
 
-"""
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary)
 from pyomo.core.base.block import SimpleBlock
@@ -26,25 +27,19 @@ class Storage(SimpleBlock):
 
     **The following constraints are created:**
 
-    balance
-
-        .. math:: capacity_n(t) = capacity_n(t_{previous}(t)) \\cdot  \
-        (1 - capacity\\_loss_n(t))) \
-        - \\frac{flow_{n, o_n}(t)}{\\eta^{out}_n(t)} \
-        + flow_{i_n, n}(t) \\cdot \\eta^{in}_n(t)
-
-    The constraint of storage s at timestep t can be acessed by
-    `om.Storage.balance[s, t]`
+    Storage balance :attr:`òm.Storage.balance[n, t]`
+        .. math:: capacity(n, t) = capacity(n, previous(t)) \\cdot  \
+            (1 - capacity\\_loss_n(t))) \
+            - \\frac{flow(n, o, t)}{\\eta(n, o, t)} \\cdot \\tau \
+            + flow(i, n, t) \\cdot \\eta(i, n, t) \\cdot \\tau
 
     **The following parts of the objective function are created:**
 
-    fixed_costs :
-
-    .. math:: \\sum_n nominal\\_capacity_n(t) \cdot fixed\\_costs_n
+    If :attr:`fixed_costs` is set by the user:
+        .. math:: \\sum_n nominal\\_capacity(n, t) \cdot fixed\\_costs(n)
 
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
     and their alue after optimization by: `om.Storage.fixed_costs()`.
-
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,9 +85,9 @@ class Storage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[m.INPUTS[n], n, t] *
+            expr += (- m.flow[n._input(), n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, m.OUTPUTS[n], t] /
+            expr += (m.flow[n, n._output(), t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
@@ -120,6 +115,7 @@ class Storage(SimpleBlock):
 class InvestmentStorage(SimpleBlock):
     """Storage with an :class:`.Investment` object.
 
+
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
@@ -132,49 +128,45 @@ class InvestmentStorage(SimpleBlock):
         A subset of INVESTSTORAGES where elements of the set have an
         capacity_min attribute greater than zero for at least one time step.
 
-
     **The following variables are created:**
 
-    capacity
-        Load of the storage for every time step
+    capacity :attr:`om.InvestmentStorage.capacity[n, t]`
+        Level of the storage (indexed by STORAGES and TIMESTEPS)
 
-    invest
-        Nominal capacity of the storage
+    invest :attr:`om.InvestmentStorage.invest[n, t]`
+        Nominal capacity of the storage (indexed by STORAGES)
 
 
     **The following constraints are build:**
+      .. math::
+        capacity(n, t) = & capacity(n, t\_previous(t)) \\cdot \
+        (1 - capacity\_loss(n)) \\\\
+        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \\cdot \
+           \\tau) \\\\
+        &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n) \\cdot \
+           \\tau, \\\\
+        &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
+        &\\forall t \\in \\textrm{TIMESTEPS}.
 
-    Storage balance
+    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t), \\\\
+            \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}.
 
-    .. math::
-        capacity(n, t) = & capacity(n, t_{previous}(t)) \\cdot \
-        (1 - capacity_{loss}(n)) \\\\
-        &- \\frac{flow_{n, target(n)}(t)}{conversionfactor_{outflow}(n)} \\\\
-        &+ flow_{source(n), n}(t) \\cdot conversionfactor_{inflow}(n)
-
-    With
-    :math:`\\textrm{~}\\; \\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,}
-    \\; \\forall t \\in \\textrm{TIMESTEPS}`.
-
-    Minimal capacity
-
-    .. math:: capacity(n, t) <= invest(n) \cdot capacity_{min}(t)
-
-    With
-    :math:`\\textrm{~}\\; \\forall n \\in \\textrm{MIN\_INVESTSTORAGES} \\textrm{,}
-    \\; \\forall t \\in \\textrm{TIMESTEPS}`.
-
-    etc.
 
     **The following parts of the objective function are created:**
 
-    .. math::
-        + invest(n) * ep_{costs}(n.investment)
+    Equivalent periodical costs (investment costs):
+        .. math::
+            \\sum_n invest(n) \\cdot ep\_costs(n)
 
-    If fixed costs are set by the user:
+    Additionally, if fixed costs are set by the user:
+        .. math::
+            \\sum_n invest(n) \\cdot fixed\_costs(n)
 
-    .. math::
-        + invest(n) * fixed_{costs}(n)
+    The expression can be acessed by :attr:`om.InvestStorages.fixed_costs` and
+    their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
+    This works similar for investment costs with :attr:`*.investment_costs`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -205,7 +197,7 @@ class InvestmentStorage(SimpleBlock):
                             within=NonNegativeReals)
 
         def _storage_investvar_bound_rule(block, n):
-            """ Returns bounds for invest_flow variable
+            """Rule definition to bound the invested storage capacity `invest`.
             """
             return 0, n.investment.maximum
         self.invest = Var(self.INVESTSTORAGES, within=NonNegativeReals,
@@ -213,69 +205,77 @@ class InvestmentStorage(SimpleBlock):
 
         # ######################### CONSTRAINTS ###############################
         def _storage_balance_rule(block, n, t):
-            """ Returns the storage balance for every storage n in timestep t.
+            """Rule definition for the storage energy balance.
             """
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[m.INPUTS[n], n, t] *
+            expr += (- m.flow[n._input(), n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, m.OUTPUTS[n], t] /
+            expr += (m.flow[n, n._output(), t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
 
         def _initial_capacity_invest_rule(block, n):
-            """Set capacity of last timestep to fixed value of initial_capacity.
+            """Rule definition for constraint to connect initial storage
+            capacity with capacity of last timesteps.
             """
             expr = (self.capacity[n, m.TIMESTEPS[-1]] == (n.initial_capacity *
                                                           self.invest[n]))
             return expr
-        self.initial_capacity_invest = Constraint(
+        self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
 
-        def _storage_capacity_input_invest_rule(block, n):
-            """Connection between invest_flow of input and invest
+        def _storage_capacity_inflow_invest_rule(block, n):
+            """Rule definition of constraint connecting the inflow
+            `InvestmentFlow.invest of storage with invested capacity `invest`
+            by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[m.INPUTS[n], n] ==
+            expr = (m.InvestmentFlow.invest[n._input(), n] ==
                     self.invest[n] * n.nominal_input_capacity_ratio)
             return expr
-        self.storage_capacity_input_invest = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_input_invest_rule)
+        self.storage_capacity_inflow = Constraint(
+            self.INVESTSTORAGES, rule=_storage_capacity_inflow_invest_rule)
 
-        def _storage_capacity_output_invest_rule(block, n):
-            """Connection between invest_flow of output and invest
+        def _storage_capacity_outflow_invest_rule(block, n):
+            """Rule definition of constraint connecting outflow
+            `InvestmentFlow.invest` of storage and invested capacity `invest`
+            by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, m.OUTPUTS[n]] ==
+            expr = (m.InvestmentFlow.invest[n, n._output()] ==
                     self.invest[n] * n.nominal_output_capacity_ratio)
             return expr
-        self.storage_capacity_output_invest = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_output_invest_rule)
+        self.storage_capacity_outflow = Constraint(
+            self.INVESTSTORAGES, rule=_storage_capacity_outflow_invest_rule)
 
         def _max_capacity_invest_rule(block, n, t):
-            """Set the upper bound of the storage capacity
+            """Rule definition for upper bound constraint for the storage cap.
             """
             expr = (self.capacity[n, t] <= (n.capacity_max[t] *
                                             self.invest[n]))
             return expr
-        self.max_capacity_invest = Constraint(
+        self.max_capacity = Constraint(
             self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
 
-        def _min_investstorage_rule(block, n, t):
-            """Set the lower bound of the storage capacity
+        def _min_capacity_invest_rule(block, n, t):
+            """Rule definition of lower bound constraint for the storage cap.
             """
             expr = (self.capacity[n, t] <= (n.capacity_min[t] *
                                             self.invest[n]))
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
-        self.min_investstorage = Constraint(
-            self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_investstorage_rule)
+        self.min_capacity = Constraint(
+            self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_capacity_invest_rule)
 
     def _objective_expression(self):
         """Objective expression with fixed and investement costs.
         """
+        if not hasattr(self, 'INVESTSTORAGES'):
+            return 0
+
         investment_costs = 0
         fixed_costs = 0
 
@@ -294,7 +294,64 @@ class InvestmentStorage(SimpleBlock):
 
 
 class Flow(SimpleBlock):
-    """
+    """ Flow block with definitions for standard flows.
+
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    SUMMED_MAX_FLOWS
+        A set of flows with the attribute :attr:`summed_max` being not None.
+    SUMMED_MIN_FLOWS
+        A set of flows with the attribute :attr:`summed_min` being not None.
+    NEGATIVE_GRADIENT_FLOWS
+        A set of flows with the attribute :attr:`negative_gradient` being not
+        None.
+    POSITIVE_GRADIENT_FLWS
+        A set of flows with the attribute :attr:`positive_gradient` being not
+        None
+
+
+    **The following constraints are build:**
+
+    Flow max sum :attr:`om.Flow.summed_max[i, o]`
+      .. math::
+        \\sum_t flow(i, o, t) \\cdot \\tau \\leq summed\_max(i, o), \\\\
+        \\forall (i, o) \\in \\textrm{SUMMED\_MAX\_FLOWS}.
+
+    Flow min sum :attr:`om.Flow.summed_min[i, o]`
+      .. math::
+        \\sum_t flow(i, o, t) \\cdot \\tau \\geq summed\_min(i, o), \\\\
+        \\forall (i, o) \\in \\textrm{SUMMED\_MIN\_FLOWS}.
+
+    Negative gradient constraint \
+    :attr:`om.Flow.negative_gradient_constr[i, o]`:
+      .. math:: flow(i, o, t-1) - flow(i, o, t) \\geq \
+        negative\_flow\_gradient(i, o, t), \\\\
+        \\forall (i, o) \\in \\textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\\\
+        \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Positive gradient constraint \
+    :attr:`om.Flow.positive_gradient_constr[i, o]`:
+        .. math:: flow(i, o, t) - flow(i, o, t-1) \\geq \
+            postive\_flow\_gradient(i, o, t), \\\\
+            \\forall (i, o) \\in \\textrm{POSITIVE\_GRADIENT\_FLOWS}, \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}.
+
+
+    **The following parts of the objective function are created:**
+
+    If :attr:`variable_costs` are set by the user:
+        .. math::
+            \\sum_{(i,o)} \\sum_t flow(i, o, t) \\cdot variable\_costs(i, o, t)
+
+    Additionally, if :attr:`fixed_costs` are set by the user:
+        .. math::
+            \\sum_{(i, o)}  nominal\_value(i, o) \\cdot fixed\_costs(i, o)
+
+    The expression can be acessed by :attr:`om.Flow.fixed_costs` and
+    their value after optimization by :meth:`om.Flow.fixed_costs()` .
+    This works similar for variable costs with :attr:`*.variable_costs`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -308,8 +365,6 @@ class Flow(SimpleBlock):
             List containing tuples containing flow (f) objects and the
             associated source (s) and target (t)
             of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
-
-
         """
         if group is None:
             return None
@@ -379,10 +434,11 @@ class Flow(SimpleBlock):
                         lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
                         rhs = m.positive_flow_gradient[inp, out, ts]
                         self.positive_gradient_constr.add((inp, out, ts),
-                                                          lhs <= rhs)
+                                                          lhs >= rhs)
                     else:
                         pass  # return(Constraint.Skip)
-        self.positive_gradient_constr = Constraint(group, noruleinit=True)
+        self.positive_gradient_constr = Constraint(
+            self.POSITIVE_GRADIENT_FLOWS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule)
 
@@ -392,14 +448,14 @@ class Flow(SimpleBlock):
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
                 for ts in m.TIMESTEPS:
                     if ts > 0:
-                        lhs = m.flow[i, o, t] - m.flow[inp, out, ts-1]
+                        lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
                         rhs = m.positive_flow_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, ts),
-                                                          lhs <= rhs)
+                                                          lhs >= rhs)
                     else:
                         pass  # return(Constraint.Skip)
-
-        self.negative_gradient_constr = Constraint(group, noruleinit=True)
+        self.negative_gradient_constr = Constraint(
+            self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
@@ -432,8 +488,89 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
+    """Block for all flows with :attr:`investment` beeing not None.
+
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    FLOWS
+        A set of flows with the attribute :attr:`invest` of type
+        :class:`.options.Investment`.
+    FIXED_FLOWS
+        A set of flow with the attribute :attr:`fixed` set to `True`
+    SUMMED_MAX_FLOWS
+        A subset of set FLOWS with flows with the attribute :attr:`summed_max`
+        being not None.
+    SUMMED_MIN_FLOWS
+        A subset of set FLOWS with flows with the attribute
+        :attr:`summed_min` being not None.
+    MIN_FLOWS
+        A subset of FLOWS with flows having set a least mininum value for
+        at least one timestep in the optimization model.
+
+
+    **The following variables are created:**
+
+    invest :attr:`om.InvestmentFlow.invest[i, o]`
+        Value of the investment variable (i.e. equivalent to the nominal
+        value of the flows after optimization (indexed by FLOWS)
+
+    **The following constraints are build:**
+
+    Actual value constraint for fixed invest flows \
+    :attr:`om.InvestmentFlow.fixed[i, o, t]`
+         .. math::
+             flow(i, o, t) = actual\_value(i, o, t) \\cdot invest(i, o), \\\\
+             \\forall (i, o) \\in \\textrm{FIXED\_FLOWS}, \\\\
+             \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Lower bound (min) constraint for invest flows \
+    :attr:`om.InvestmentFlow.min[i, o, t]`
+        .. math::
+             flow(i, o, t) \\geq min(i, o, t) \\cdot invest(i, o), \\\\
+             \\forall (i, o) \\in \\textrm{MIN\_FLOWS}, \\\\
+             \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Upper bound (max) constraint for invest flows \
+    :attr:`om.InvestmentFlow.max[i, o, t]`
+        .. math::
+             flow(i, o, t) \\leq max(i, o, t) \\cdot invest(i, o), \\\\
+             \\forall (i, o) \\in \\textrm{FLOWS}, \\\\
+             \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Flow max sum for invest flow :attr:`om.InvestmentFlow.summed_max[i, o]`
+        .. math::
+            \\sum_t flow(i, o, t) \\cdot \\tau \\leq summed\_max(i, o) \
+            \\cdot invest(i, o) \\\\
+            \\forall (i, o) \\in \\textrm{SUMMED\_MAX\_FLOWS}.
+
+    Flow min sum for invest flow :attr:`om.InvestmentFlow.summed_min[i, o]`
+        .. math::
+            \\sum_t flow(i, o, t) \\cdot \\tau \\geq summed\_min(i, o) \
+            \\cdot invest(i, o) \\\\
+            \\forall (i, o) \\in \\textrm{SUMMED\_MIN\_FLOWS}.
+
+
+    **The following parts of the objective function are created:**
+
+    Equivalent periodical costs (epc) expression
+    :attr:`om.InvestmentFlow.investment_costs`:
+        .. math::
+            \\sum_{i, o} invest(i, o) \\cdot ep\_costs(i, o)
+
+    Additionally, if :attr:`variable_costs` are set by the user:
+        .. math::
+
+    Additionally, if :attr:`fixed_costs` are set by the user:
+        .. math::
+            \\sum_{i, o} invest(i, o) \\cdot fixed\_costs(i,o)
+
+    The expression can be acessed by :attr:`om.InvestmentFlow.fixed_costs` and
+    their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
+    This works similar for variable costs with :attr:`*.variable_costs` etc.
     """
-    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -456,7 +593,7 @@ class InvestmentFlow(SimpleBlock):
         # ######################### SETS #####################################
         self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
-        self.FIXEDFLOWS = Set(
+        self.FIXED_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].fixed])
 
         self.SUMMED_MAX_FLOWS = Set(initialize=[
@@ -465,11 +602,9 @@ class InvestmentFlow(SimpleBlock):
         self.SUMMED_MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
-        self.MAX_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if len(g[2].max) != 0])
-
         self.MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if len(g[2].min) != 0])
+            (g[0], g[1]) for g in group if sum(
+                [g[2].min[t] for t in m.TIMESTEPS]) > 0])
 
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
@@ -484,14 +619,14 @@ class InvestmentFlow(SimpleBlock):
 
         # TODO: Add gradient constraints
 
-        def _investflow_bound_rule(block, i, o, t):
-            """Rule definition of constraint to bound flow variable
-            of investment flow
+        def _investflow_fixed_rule(block, i, o, t):
+            """Rule definition of constraint to fix flow variable
+            of investment flow to (normed) actual value
             """
             return (m.flow[i, o, t] == (self.invest[i, o] *
                                         m.flows[i, o].actual_value[t]))
-        self.bounds = Constraint(self.FIXEDFLOWS, m.TIMESTEPS,
-                                 rule=_investflow_bound_rule)
+        self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
+                                 rule=_investflow_fixed_rule)
 
         def _max_investflow_rule(block, i, o, t):
             """Rule definition of constraint setting an upper bound of flow
@@ -500,7 +635,7 @@ class InvestmentFlow(SimpleBlock):
             expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
                                         self.invest[i, o]))
             return expr
-        self.max = Constraint(self.MAX_FLOWS, m.TIMESTEPS,
+        self.max = Constraint(self.FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
@@ -540,6 +675,9 @@ class InvestmentFlow(SimpleBlock):
         class:`.Investment`. The returned costs are fixed, variable and
         investment costs.
         """
+        if not hasattr(self, 'FLOWS'):
+            return 0
+
         m = self.parent_block()
         fixed_costs = 0
         variable_costs = 0
@@ -565,7 +703,17 @@ class InvestmentFlow(SimpleBlock):
 
 
 class Bus(SimpleBlock):
-    """
+    """Block for all balanced buses.
+
+
+    **The following constraints are build:**
+
+    Bus balance  :attr:`om.Bus.balance[i, o, t]`
+      .. math::
+        \\sum_{i \\in INPUTS(n)} flow(i, n, t) \\cdot \\tau =  \
+        \\sum_{o \\in OUTPUTS(n)} flow(n, o, t) \\cdot \\tau, \\\\
+        \\forall n \\in \\textrm{BUSES},
+        \\forall t \\in \\textrm{TIMESTEPS}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -604,14 +752,16 @@ class LinearTransformer(SimpleBlock):
     """Block for the linear relation of nodes with type
     class:`.LinearTransformer`
 
+
     **The following constraints are created:**
 
-    linear_relation
-
-        .. math:: flow_{i_n, n}(t) * n.conversion_factor[o](t) = \
-        flow_{n, o}(t), \\forall t \\in TIMESTEPS, \
-        \\forall n in group, \\forall o in \\in OUTPUTS(n)
-
+    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
+        .. math::
+            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(n, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
+            \\forall o \\in \\textrm{OUTPUTS(n)}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -642,16 +792,92 @@ class LinearTransformer(SimpleBlock):
             for t in m.TIMESTEPS:
                 for n in group:
                     for o in n.outputs:
-                        lhs = m.flow[m.INPUTS[n], n, t] * \
-                            n.conversion_factors[o][t]
-                        rhs = m.flow[n, o, t]
+                        try:
+                            lhs = m.flow[n._input(), n, t] * \
+                                  n.conversion_factors[o][t]
+                            rhs = m.flow[n, o, t]
+                        except:
+                            raise ValueError("Error in constraint creation",
+                                             "source: {0}, target: {1}".format(
+                                                 n.label, o.label))
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
 class Discrete(SimpleBlock):
     """
-    TODO: Add Discrete block docstring.
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    DISCRETE_FLOWS
+        A set of flows with the attribute :attr:`discrete` of type
+        :class:`.options.Discrete`.
+    MIN_FLOWS
+        A subset of set DISCRETE_FLOWS with the attribute :attr:`min`
+        greater than zero for at least one timestep in the simulation horizon.
+    STARTUP_FLOWS
+        A subset of set DISCRETE_FLOWS with the attribute
+        :attr:`startup_costs` being not None.
+    SHUTDOWN_FLOWS
+        A subset of set DISCRETE_FLOWS with the attribute
+        :attr:`shutdown_costs` being not None.
+
+    **The following variable are created:**
+
+    Status variable (binary) :attr:`om.Discrete.status`:
+        Variable indicating if flow is >= 0 indexed by FLOWS
+
+    Startup variable (binary) :attr:`om.Discrete.startup`:
+        Variable indicating startup of flow (component) indexed by
+        STARTUP_FLOWS
+
+    Shutdown variable (binary) :attr:`om.Discrete.shutdown`:
+        Variable indicating shutdown of flow (component) indexed by
+        SHUTDOWN_FLOWS
+
+    **The following constraints are created**:
+
+    Minimum flow constraint :attr:`om.Discrete.min[i,o,t]`
+        .. math::
+            flow(i, o, t) \\geq min(i, o, t) \\cdot nominal\_value \
+                \\cdot status(i, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i, o) \\in \\textrm{DISCRETE\_FLOWS}.
+
+    Maximum flow constraint :attr:`om.Discrete.max[i,o,t]`
+        .. math::
+            flow(i, o, t) \\leq max(i, o, t) \\cdot nominal\_value \
+                \\cdot status(i, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i, o) \\in \\textrm{DISCRETE\_FLOWS}.
+
+    Startup constraint :attr:`om.Discrete.startup_constr[i,o,t]`
+        .. math::
+            startup(i, o, t) \geq \
+                status(i,o,t) - status(i, o, t-1) \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i,o) \\in \\textrm{STARTUP\_FLOWS}.
+
+    Shutdown constraint :attr:`om.Discrete.shutdown_constr[i,o,t]`
+        .. math::
+            shutdown(i, o, t) \geq \
+                status(i, o, t-1) - status(i, o, t) \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (i, o) \\in \\textrm{SHUTDOWN\_FLOWS}.
+
+    **The following parts of the objective function are created:**
+
+    If :attr:`discrete.startup_costs` is set by the user:
+        .. math::
+            \\sum_{i, o \\in STARTUP\_FLOWS} \\sum_t  startup(i, o, t) \
+            \\cdot startup\_costs(i, o)
+
+    If :attr:`discrete.shutdown_costs` is set by the user:
+        .. math::
+            \\sum_{i, o \\in SHUTDOWN\_FLOWS} \\sum_t shutdown(i, o, t) \
+                \\cdot shutdown\_costs(i, o)
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -671,37 +897,103 @@ class Discrete(SimpleBlock):
 
         m = self.parent_block()
         # ########################## SETS #####################################
-
-        self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                         if g[2].min[0] != 0])
+                                         if sum(g[2].min[t]
+                                                for t in m.TIMESTEPS) > 0])
 
-        self.STARTCOSTFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].discrete.start_costs is not None])
+        self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                  if g[2].discrete.startup_costs is not None])
+
+        self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                  if g[2].discrete.shutdown_costs is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
-        self.status = Var(self.FLOWS, m.TIMESTEPS, within=Binary)
+        self.status = Var(self.DISCRETE_FLOWS, m.TIMESTEPS, within=Binary)
+
+        if self.STARTUPFLOWS:
+            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
+                               within=Binary)
+        if self.SHUTDOWNFLOWS:
+            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS,
+                                within=Binary)
 
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints.
             """
             expr = (self.status[i, o, t] *
-                    m.flows[i, o].min[t] * m.flows[i, o].nominal_value >=
+                    m.flows[i, o].min[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
             return expr
-        self.minimum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
-                                       rule=_minimum_flow_rule)
+        self.min= Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                             rule=_minimum_flow_rule)
 
         def _maximum_flow_rule(block, i, o, t):
             """Rule definition for MILP maximum flow constraints.
             """
             expr = (self.status[i, o, t] *
-                    m.flows[i, o].max[t] * m.flows[i, o].nominal_value <=
+                    m.flows[i, o].max[t] * m.flows[i, o].nominal_value >=
                     m.flow[i, o, t])
             return expr
-        self.maximum_flow = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
-                                       rule=_maximum_flow_rule)
+        self.max = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                              rule=_maximum_flow_rule)
+
+        def _startup_rule(block, i, o, t):
+            """Rule definition for startup constraint of discrete flows.
+            """
+            if t > m.TIMESTEPS[1]:
+                expr = (self.startup[i, o, t] >= self.status[i, o, t] -
+                            self.status[i, o, t-1])
+            else:
+                expr = (self.startup[i, o, t] >= self.status[i, o, t] -
+                            m.flows[i, o].discrete.initial_status)
+            return expr
+        self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
+                                         rule=_startup_rule)
+
+
+        def _shutdown_rule(block, i, o, t):
+            """Rule definition for shutdown constraints of discrete flows.
+            """
+            if t > m.TIMESTEPS[1]:
+                expr = (self.shutdown[i, o, t] >= self.status[i, o, t-1] -
+                            self.status[i, o, t])
+            else:
+               expr = (self.shutdown[i, o, t] >=
+                       m.flows[i, o].discrete.initial_status -
+                           self.status[i, o, t])
+            return expr
+        self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
+                                          rule=_shutdown_rule)
 
         # TODO: Add gradient constraints for discrete block / flows
-        # TODO: Add objective expression for discrete block / flows
+        # TODO: Add  min-up/min-downtime constraints
+
+    def _objective_expression(self):
+        """Objective expression for discrete flows.
+        """
+        if not hasattr(self, 'FLOWS'):
+            return 0
+
+        m = self.parent_block()
+
+        startcosts = 0
+        shutdowncosts = 0
+
+        if self.STARTUPFLOWS:
+            startcosts += sum(self.startup[i, o, t] *
+                                  m.flows[i, o].discrete.startup_costs
+                              for i,o in self.STARTUPFLOWS
+                              for t in m.TIMESTEPS)
+            self.startcosts = Expression(expr=startcosts)
+
+        if self.SHUTDOWNFLOWS:
+            shutdowncosts += sum(self.shutdown[i, o, t] *
+                                     m.flows[i, o].discrete.shutdown_costs
+                              for i,o in self.SHUTDOWNFLOWS
+                              for t in m.TIMESTEPS)
+            self.shudowcosts = Expression(expr=shutdowncosts)
+
+        return startcosts + shutdowncosts
+

@@ -4,26 +4,78 @@
 """
 import warnings
 import oemof.network as on
+import oemof.core.energy_system as es
 from .options import Investment
-from .options import Sequence
+from .plumbing import Sequence
+
+
+class EnergySystem(es.EnergySystem):
+    """
+    """
+    pass
 
 
 class Flow:
     """
-    Define a flow between two nodes.
+    Define a flow between two nodes. Note: Some attributes can only take
+    numeric scalar as some may either take scalar or sequences (array-like).
+    If for latter a scalar is passed, this will be internally converted to a
+    sequence.
+
 
     Parameters
     ----------
-    summed_max : float
-        Specific maximum value summed over all timesteps. Will be multiplied
-        with the nominal_value to get the absolute limit. If investment is set
-        the summed_max will be multiplied with the nominal_value_variable.
-    summed_min : float
-        see above
-    actual_value : float or array-like
+    nominal_value : numeric
+        The nominal value of the flow.
+    min : numeric (sequence or scalar)
+        Normend minimum value of the flow. The flow absolute maximum will be
+        calculatet by multiplying :attr:`nominal_value` with :attr:`min`
+    max : numeric (sequence or scalar)
+        Nominal maximum value of the flow. (see. :attr:`min`)
+    actual_value: numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
         nominal_value to get the absolute value. If fixed is True the flow
         variable will be fixed to actual_value * nominal_value.
+    positive_gradient : numeric (sequence or scalar)
+        The maximal positive difference (flow[t-1] < flow[t])
+        of two consecutive flow values.
+    negative_gradient : numeric (sequence or scalar)
+        The maximum negative difference (from[t-1] > flow[t]) of two
+        consecutive timesteps.
+    summed_max : numeric
+        Specific maximum value summed over all timesteps. Will be multiplied
+        with the nominal_value to get the absolute limit. If investment is set
+        the summed_max will be multiplied with the nominal_value_variable.
+    summed_min : numeric
+        see above
+    variable_costs : numeric (sequence or scalar)
+        The costs associated with one unit of the flow.
+    fixed_costs : numeric (sequence or scalar)
+        The costs associated with the absolute nominal_value of the flow.
+    fixed : boolean
+        Boolean value indicating if a flow is fixed during the optimization
+        problem to its ex-ante set value. Used in combination with the
+        :attr:`actual_value`.
+    investment : :class:`oemof.solph.options.Investment` object
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem.
+        Note: This will lead to different behaviour of attributes.
+
+    Examples
+    --------
+    Creating a fixed flow object:
+
+    >>> f = Flow(actual_value=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f.variable_costs[2]
+    5
+    >>> f.actual_value[2]
+    4
+
+    Creating a flow object with time-dependet lower and upper bounds:
+
+    >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
+    >>> f1.max[1]
+    0.99
 
     """
     def __init__(self, **kwargs):
@@ -47,7 +99,11 @@ class Flow:
         self.summed_min = kwargs.get('summed_min')
         self.fixed = kwargs.get('fixed', False)
         self.investment = kwargs.get('investment')
-        if self.fixed:
+        if self.fixed and self.actual_value is None:
+            raise ValueError("Can not fix flow value to None. "
+                             "Please set actual_value of the flow")
+
+        elif self.fixed:
             # ToDo: Check if min/max are set by user than raise warning
             # warnings.warn(
             #     "Values for min/max will be ignored if fixed is True.",
@@ -64,19 +120,30 @@ class Flow:
             raise ValueError("Investment flows cannot be combined with " +
                              "discrete flows!")
 
-Bus = on.Bus
+
+class Bus(on.Bus):
+    """A balance object.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.balanced = kwargs.get('balanced', True)
 
 
 class Sink(on.Sink):
+    """An object with one input flow.
+    """
     pass
+
 
 class Source(on.Source):
+    """An object with one output flow.
+    """
     pass
-
 
 
 class LinearTransformer(on.Transformer):
-    """
+    """A Linear Transformer object.
+
     Parameters
     ----------
 
@@ -101,7 +168,12 @@ class LinearTransformer(on.Transformer):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {
             k: Sequence(v)
-            for k, v in kwargs.get('conversion_factors').items()}
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+
+    def _input(self):
+        """ Returns the first (and only) input of the storage object
+        """
+        return [i for i in self.inputs][0]
 
 
 class Storage(on.Transformer):
@@ -131,8 +203,9 @@ class Storage(on.Transformer):
     outflow_conversion_factor : numeric (sequence or scalar)
         see: inflow_conversion_factor
     capacity_min : numeric (sequence or scalar)
-        The nominal minimum capacity of the storage, e.g. a value between 0,1.
-        To use different values in every timesteps use a sequence of values.
+        The nominal minimum capacity of the storage as fraction of the
+        nominal capacity (between 0 and 1, default: 0).
+        To set different values in every timestep use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
 
@@ -187,6 +260,16 @@ class Storage(on.Transformer):
             if self.investment:
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
+
+    def _input(self):
+        """ Returns the first (and only) input of the storage object
+        """
+        return [i for i in self.inputs][0]
+
+    def _output(self):
+        """ Returns the first (and only) output of the storage object
+        """
+        return [o for o in self.outputs][0]
 
 
 def storage_nominal_value_warning(flow):

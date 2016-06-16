@@ -15,9 +15,9 @@ Contents:
    overview
    installation_and_setup
    developer_notes
-   mathematical_notation
    whats_new
    oemof_core
+   solph
    api
 
 

@@ -480,8 +480,8 @@ def dict2textfile(dic, filename=None, path=None):
 
 
 def download_file(filename, url):
-    '''Copy a file from the given url to the given filename.
-    '''
+    """Copy a file from the given url to the given filename.
+    """
     if not os.path.isfile(filename):
         logging.info('Copying file from {0} to {1}'.format(
             url, filename))

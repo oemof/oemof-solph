@@ -2,371 +2,275 @@
 """
 
 """
-from collections import UserDict, UserList
-import pyomo.environ as po
-from pyomo.opt import SolverFactory
-from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks
-from .network import Sink, Source, Storage
-from .options import Investment
+from collections import abc, UserList
+
+from .. import network
+from .options import Discrete
 
 
-# #############################################################################
-#
-# Solph Optimization Models
-#
-# #############################################################################
-
-# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-
-class ExpansionModel(po.ConcreteModel):
-    """ An energy system model for optimized capacity expansion.
-    """
-    def __init__(self):
-        super().__init__()
-
-
-class OperationalModel(po.ConcreteModel):
-    """ An energy system model for operational simulation with optimized
-    dispatch.
-
-    **The following sets are created:**
-
-    NODES
-        A set with all nodes of the given energy system.
-    TIMESTEPS
-        A set with all time steps of the given time horizon.
+def Sequence(sequence_or_scalar):
+    """ Tests if an object is sequence (except string) or scalar and returns
+    a the original sequence if object is a sequence and a 'emulated' sequence
+    object of class _Sequence if object is a scalar or string.
 
     Parameters
     ----------
-    es : EnergySystem object
-        Object that holds the nodes of an oemof energy system graph
-    constraint_groups : list
-        Solph looks for these groups in the given energy system and uses them
-        to create the constraints of the optimization problem.
-        Defaults to :const:`OperationalModel.CONSTRAINTS`
-    timeindex : pandas DatetimeIndex
-        The timeindex will be used to calculate the timesteps the timeincrement
-        for the optimization model.
-    timesteps : sequence (optional)
-        Timesteps used in the optimization model. If provided as list or
-        pandas.DatetimeIndex the sequence will be used to index the timedepent
-        variables, constraints etc. If not provided we will try to compute
-        this sequence from attr:`timeindex`.
-    timeincrement : float (optional)
-        Timeincrement used in constraints and objective expressions.
+    sequence_or_scalar : array-like or scalar (None, int, etc.)
 
+    Examples
+    --------
+    >>> Sequence([1,2])
+    [1, 2]
 
-    **The following sets are created:**
+    >>> x = Sequence(10)
+    >>> x[0]
+    10
 
-    NODES :
-        A set with all oemof nodes.
-
-    TIMESTEPS :
-        A set with all timesteps for the optimization problem.
-
-    INPUTS :
-        A indexed index set with nodes as indices and associated inputs
-        as elements.
-
-    OUTPUTS :
-        A indexed index set with nodes as indices and associated outputs
-        as elements.
-
-    FLOWS :
-        A 2 dimensional set with all flows. Index: `(source, target)`
-
-    NEGATIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `negative_gradient` is set.
-
-    POSITIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `positive_gradient` is set.
-
-    **The following variables are created:**
-
-    flow
-        Flow from source to target indexed by FLOWS, TIMESTEPS.
-        Note: Bounds of this variable are set depending on attributes of
-              the corresponding flow object.
-
-    negative_flow_gradient :
-        Difference of a flow in consecutive timesteps if flow is reduced
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
-
-    positive_flow_gradient :
-        Difference of a flow in consecutive timesteps if flow is increased
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+    >>> x[10]
+    10
+    >>> print(x)
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
-                         blocks.Storage, blocks.InvestmentFlow,
-                         blocks.InvestmentStorage, blocks.Flow,
-                         blocks.Discrete]
+    if (isinstance(sequence_or_scalar, abc.Iterable) and not
+            isinstance(sequence_or_scalar, str)):
+        return sequence_or_scalar
+    else:
+        return _Sequence(default=sequence_or_scalar)
 
-    def __init__(self, es, **kwargs):
-        super().__init__()
 
-        # ########################  Arguments #################################
+class _Sequence(UserList):
+    """ Emulates a list whose length is not known in advance.
 
-        self.name = kwargs.get('name', 'OperationalModel')
-        self.es = es
-        self.timeindex = kwargs.get('timeindex')
-        self.timesteps = kwargs.get('timesteps')
-        self.timeincrement = kwargs.get('timeincrement')
+    Parameters
+    ----------
+    source:
+    default:
 
-        if self.timesteps is None:
-            self.timesteps = range(len(self.timeindex))
-        if self.timeincrement is None:
-            self.timeincrement = self.timeindex.freq.nanos / 3.6e12  # hours
 
-        if self.timeindex is None and self.timesteps is None:
-            raise ValueError("Missing timesteps!")
-        self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        self._constraint_groups.extend(kwargs.get('constraint_groups', []))
+    Examples
+    --------
+    >>> s = _Sequence(default=42)
+    >>> len(s)
+    0
+    >>> s[2]
+    42
+    >>> len(s)
+    3
+    >>> s[0] = 23
+    >>> s
+    [23, 42, 42]
 
-        # dictionary with all flows containing flow objects as values und
-        # tuple of string representation of oemof nodes (source, target)
-        self.flows = {(source, target): source.outputs[target]
-                      for source in es.nodes
-                      for target in source.outputs}
+    """
+    def __init__(self, *args, **kwargs):
+        self.default = kwargs["default"]
+        super().__init__(*args)
 
-        # ###########################  SETS  ##################################
-        # set with all nodes
-        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+    def __getitem__(self, key):
+        try:
+            return self.data[key]
+        except IndexError:
+            self.data.extend([self.default] * (key - len(self.data) + 1))
+            return self.data[key]
 
-        # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
+    def __setitem__(self, key, value):
+        try:
+            self.data[key] = value
+        except IndexError:
+            self.data.extend([self.default] * (key - len(self.data) + 1))
+            self.data[key] = value
 
-        # previous timesteps
-        previous_timesteps = [x - 1 for x in self.timesteps]
-        previous_timesteps[0] = self.timesteps[-1]
 
-        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
-        # self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
-        #                            initialize=dict(zip(self.TIMESTEPS,
-        #                                                previous_timesteps)))
+def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
+                 delimiter=',', additional_classes={},
+                 additional_seq_attributes=[]):
+    """ Creates nodes with their respective flows and sequences from
+    a pre-defined CSV structure. An example has been provided in the
+    development examples
 
-        # indexed index set for inputs of nodes (nodes as indices)
-        self.INPUTS = po.Set(self.NODES, initialize={
-            n: [i for i in n.inputs] for n in self.es.nodes
-            if not isinstance(n, Source)
-            }
-        )
+    Parameters
+    ----------
+    file_nodes_flows : string with name of CSV file of nodes and flows
+    file_nodes_flows_sequences : string with name of CSV file of sequences
+    delimiter : delimiter of CSV file
+    additional_classes : dictionary with additional classes to be used in csv
+                         of type {'MyClass1': MyClass1, ...}
+    additional_seq_attributes : list of strings with attributes that have to be
+                                of type 'solph sequence'
 
-        # indexed index set for outputs of nodes (nodes as indices)
-        self.OUTPUTS = po.Set(self.NODES, initialize={
-            n: [o for o in n.outputs] for n in self.es.nodes
-            if not isinstance(n, Sink)
-            }
-        )
+    """
+    # TODO : Find a nice way how to add 'additional' arguments for extension
+    #        e.g. additional_seq_attributes, additional_classes
 
-        # pyomo set for all flows in the energy system graph
-        self.FLOWS = po.Set(initialize=self.flows.keys(),
-                            ordered=True, dimen=2)
+    import pandas as pd
+    from .network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
-        self.NEGATIVE_GRADIENT_FLOWS = po.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.negative_gradient[0] is not None],
-            ordered=True, dimen=2)
+    # dataframe creation and manipulation
+    nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
+    nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
+                                  header=None)
+    nodes_flows_seq.drop(0, axis=1, inplace=True)
+    nodes_flows_seq = nodes_flows_seq.transpose()
+    nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
+    nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
+    nodes_flows_seq = nodes_flows_seq.astype(float)
 
-        self.POSITIVE_GRADIENT_FLOWS = po.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.positive_gradient[0] is not None],
-            ordered=True, dimen=2)
+    # class dictionary for dynamic instantiation
+    classes = {'Source': Source, 'Sink': Sink,
+               'LinearTransformer': LinearTransformer,
+               'Storage': Storage, 'Bus': Bus}
+    classes.update(additional_classes)
 
-        # ######################### FLOW VARIABLE #############################
+    # attributes that have to be converted into a solph sequence
+    seq_attributes = ['actual_value', 'min', 'max', 'positive_gradient',
+                      'negative_gradient', 'variable_costs',
+                      'capacity_loss', 'inflow_conversion_factor',
+                      'outflow_conversion_factor', 'capacity_max',
+                      'capacity_min'] + additional_seq_attributes
 
-        # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
-                           within=po.NonNegativeReals)
+    # attributes of different classes
+    flow_attrs = vars(Flow()).keys()
+    bus_attrs = vars(Bus()).keys()
 
-        # loop over all flows and timesteps to set flow bounds / values
-        for (o, i) in self.FLOWS:
-            for t in self.TIMESTEPS:
-                if self.flows[o, i].actual_value[t] is not None and (
-                        self.flows[o, i].nominal_value is not None):
-                    # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = (
-                        self.flows[o, i].actual_value[t] *
-                        self.flows[o, i].nominal_value)
-                    # fix variable if flow is fixed
-                    if self.flows[o, i].fixed:
-                        self.flow[o, i, t].fix()
+    # iteration over dataframe rows to create objects
+    nodes = {}
+    for i, r in nodes_flows.iterrows():
 
-                if self.flows[o, i].nominal_value is not None:
-                    # upper bound of flow variable
-                    self.flow[o, i, t].setub(self.flows[o, i].max[t] *
-                                             self.flows[o, i].nominal_value)
-                    # lower bound of flow variable
-                    self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
-                                             self.flows[o, i].nominal_value)
+        # drop NaN values from series
+        r = r.dropna()
 
-        self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
-                                             self.TIMESTEPS,
-                                             within=po.NonNegativeReals)
+        # save column labels and row values in dict
+        row = dict(zip(r.index.values, r.values))
 
-        self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
-                                             self.TIMESTEPS,
-                                             within=po.NonNegativeReals)
+        # create node if not existent and set attributes
+        # (attributes must be placed either in the first line or in all lines
+        #  of multiple node entries (flows) in csv file)
+        try:
+            if row['class'] in classes.keys():
+                node = nodes.get(row['label'])
+                if node is None:
+                    node = classes[row['class']](label=row['label'])
+            for attr in row.keys():
+                if (attr not in flow_attrs and
+                   attr not in ('class', 'label', 'source', 'target',
+                                'conversion_factors')):
+                        if row[attr] != 'seq':
+                            if attr in seq_attributes:
+                                row[attr] = Sequence(float(row[attr]))
+                            setattr(node, attr, row[attr])
+                        else:
+                            seq = nodes_flows_seq.loc[row['class'],
+                                                      row['label'],
+                                                      row['source'],
+                                                      row['target'],
+                                                      attr]
+                            if attr in seq_attributes:
+                                seq = [i for i in seq]
+                                seq = Sequence(seq)
+                            else:
+                                seq = [i for i in seq.values]
+                            setattr(node, attr, seq)
+        except:
+            print('Error with node creation in line', i+2, 'in csv file.')
+            print('Label:', row['label'])
+            raise
 
-        # ########################### CONSTRAINTS #############################
-        # loop over all constraint groups to add constraints to the model
-        for group in self._constraint_groups:
-            # create instance for block
-            block = group()
-            # Add block to model
-            self.add_component(str(block), block)
-            # create constraints etc. related with block for all nodes
-            # in the group
-            block._create(group=self.es.groups.get(group))
+        # create flow and set attributes
+        try:
+            flow = Flow()
+            for attr in flow_attrs:
+                if attr in row.keys() and row[attr]:
+                    if row[attr] != 'seq':
+                        if attr in seq_attributes:
+                            row[attr] = Sequence(float(row[attr]))
+                        setattr(flow, attr, row[attr])
+                    if row[attr] == 'seq':
+                        seq = nodes_flows_seq.loc[row['class'],
+                                                  row['label'],
+                                                  row['source'],
+                                                  row['target'],
+                                                  attr]
+                        if attr in seq_attributes:
+                            seq = [i for i in seq]
+                            seq = Sequence(seq)
+                        else:
+                            seq = [i for i in seq.values]
+                        setattr(flow, attr, seq)
+                    # this block is only for discrete flows!
+                    if attr == 'discrete' and row[attr] is True:
+                        # create Discrete object for flow
+                        setattr(flow, attr, Discrete())
+                        discrete_attrs = vars(Discrete()).keys()
+                        for dattr in discrete_attrs:
+                            if dattr in row.keys() and row[attr]:
+                                setattr(flow.discrete, dattr, row[dattr])
+        except:
+            print('Error with flow creation in line', i+2, 'in csv file.')
+            print('Label:', row['label'])
+            raise
 
-        # ########################### Objective ###############################
-        self.objective_function()
+        # create an input entry for the current line
+        try:
+            if row['label'] == row['target']:
+                if row['source'] not in nodes.keys():
+                    nodes[row['source']] = Bus(label=row['source'])
+                    for attr in bus_attrs:
+                        if attr in row.keys() and row[attr] is not None:
+                            setattr(nodes[row['source']], attr, row[attr])
+                inputs = {nodes[row['source']]: flow}
+            else:
+                inputs = {}
+        except:
+            print('Error with input creation in line', i+2, 'in csv file.')
+            print('Label:', row['label'])
+            raise
 
-    def objective_function(self, sense=po.minimize, update=False):
-        """
-        """
-        if update:
-            self.del_component('objective')
+        # create an output entry for the current line
+        try:
+            if row['label'] == row['source']:
+                if row['target'] not in nodes.keys():
+                    nodes[row['target']] = Bus(label=row['target'])
+                    for attr in bus_attrs:
+                        if attr in row.keys() and row[attr] is not None:
+                            setattr(nodes[row['target']], attr, row[attr])
+                outputs = {nodes[row['target']]: flow}
+            else:
+                outputs = {}
+        except:
+            print('Error with output creation in line', i+2, 'in csv file.')
+            print('Label:', row['label'])
+            raise
 
-        expr = 0
+        # create a conversion_factor entry for the current line
+        try:
+            if row['target'] and 'conversion_factors' in row:
+                conversion_factors = {nodes[row['target']]:
+                                      Sequence(row['conversion_factors'])}
+            else:
+                conversion_factors = {}
+        except:
+            print('Error with conversion factor creation in line', i+2,
+                  'in csv file.')
+            print('Label:', row['label'])
+            raise
 
-        # Expression for investment flows
-        for block in self.component_data_objects():
-            if hasattr(block, '_objective_expression'):
-                expr += block._objective_expression()
+        # add node to dict and assign attributes depending on
+        # if there are multiple lines per node or not
+        try:
+            for source, f in inputs.items():
+                network.flow[source, node] = f
+            for target, f in outputs.items():
+                network.flow[node, target] = f
+            if node.label in nodes.keys():
+                if not isinstance(node, Bus):
+                    node.conversion_factors.update(conversion_factors)
+            else:
+                if not isinstance(node, Bus):
+                    node.conversion_factors = conversion_factors
+                    nodes[node.label] = node
+        except:
+            print('Error adding node to dict in line', i+2, 'in csv file.')
+            print('Label:', row['label'])
+            raise
 
-        self.objective = po.Objective(sense=sense, expr=expr)
-
-    def receive_duals(self):
-        r""" Method sets solver suffix to extract information about dual
-        variables from solver. Shadowprices (duals) and reduced costs (rc) are
-        set as attributes of the model.
-
-        """
-        self.dual = po.Suffix(direction=po.Suffix.IMPORT)
-        # reduced costs
-        self.rc = po.Suffix(direction=po.Suffix.IMPORT)
-
-    def results(self):
-        """ Returns a nested dictionary of the results of this optimization
-        model.
-
-        The dictionary is keyed by the :class:`Entities
-        <oemof.core.network.Entity>` of the optimization model, that is
-        :meth:`om.results()[s][t] <OptimizationModel.results>`
-        holds the time series representing values attached to the edge (i.e.
-        the flow) from `s` to `t`, where `s` and `t` are instances of
-        :class:`Entity <oemof.core.network.Entity>`.
-
-        Time series belonging only to one object, like e.g. shadow prices of
-        commodities on a certain :class:`Bus
-        <oemof.core.network.entities.Bus>`, dispatch values of a
-        :class:`DispatchSource
-        <oemof.core.network.entities.components.sources.DispatchSource>` or
-        storage values of a
-        :class:`Storage
-        <oemof.core.network.entities.components.transformers.Storage>` are
-        treated as belonging to an edge looping from the object to itself.
-        This means they can be accessed via
-        :meth:`om.results()[object][object] <OptimizationModel.results>`.
-
-        Other result from the optimization model can be accessed like
-        attributes of the flow, e.g. the invest variable for capacity
-        of the storage 'stor' can be accessed like:
-
-        :attr:`om.results()[stor][stor].invest` attribute
-
-        For the investment flow of a 'tranfsformer' trsf to the bus 'bel' this
-        can be accessed with:
-
-        :attr:`om.results()[trsf][bel].invest` attribute
-
-        The value of the objective function is stored under the
-        :attr:`om.results().objective` attribute.
-
-        Note that the optimization model has to be solved prior to invoking
-        this method.
-        """
-        # TODO: Maybe make the results dictionary a proper object?
-
-        result = UserDict()
-        result.objective = self.objective()
-        for i,o in self.flows:
-
-            result[i] = result.get(i, UserDict())
-            result[i][o] = UserList([self.flow[i, o, t].value
-                                     for t in self.TIMESTEPS])
-
-            if isinstance(i, Storage):
-                if i.investment is None:
-                    result[i][i] = UserList(
-                        [self.Storage.capacity[i, t].value
-                         for t in self.TIMESTEPS])
-                else:
-                    result[i][i] = UserList(
-                        [self.InvestmentStorage.capacity[i, t].value
-                         for t in self.TIMESTEPS])
-
-            if isinstance(self.flows[i,o].investment, Investment):
-                setattr(result[i][o], 'invest',
-                        self.InvestmentFlow.invest[i,o].value)
-                if isinstance(i, Storage):
-                    setattr(result[i][i], 'invest',
-                            self.InvestmentStorage.invest[i].value)
-
-        # TODO: extract duals for all constraints ?
-
-        return result
-
-    def solve(self, solver='glpk', solver_io='lp', **kwargs):
-        r""" Takes care of communication with solver to solve the model.
-
-        Parameters
-        ----------
-        solver : string
-            solver to be used e.g. "glpk","gurobi","cplex"
-        solver_io : string
-            pyomo solver interface file format: "lp","python","nl", etc.
-        \**kwargs : keyword arguments
-            Possible keys can be set see below:
-        solve_kwargs : dict
-            Other arguments for the pyomo.opt.SolverFactory.solve() method
-            Example : {"tee":True}
-        cmdline_options : dict
-            Dictionary with command line options for solver e.g.
-            {"mipgap":"0.01"} results in "--mipgap 0.01"
-            {"interior":" "} results in "--interior"
-
-        """
-        solve_kwargs = kwargs.get('solve_kwargs', {})
-        solver_cmdline_options = kwargs.get("cmdline_options", {})
-
-        opt = SolverFactory(solver, solver_io=solver_io)
-        # set command line options
-        options = opt.options
-        for k in solver_cmdline_options:
-            options[k] = solver_cmdline_options[k]
-
-        results = opt.solve(self, **solve_kwargs)
-
-        self.solutions.load_from(results)
-
-        # storage optimization results in result dictionary of energysystem
-        self.es.results = self.results()
-        self.es.results.objective = self.objective()
-        self.es.results.solver = results
-
-        return results
-
-    def relax_problem(self):
-        """ Relaxes integer variables to reals of optimization model self
-        """
-        relaxer = RelaxIntegrality()
-        relaxer._apply_to(self)
-
-        return self
+    return nodes
