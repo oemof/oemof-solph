@@ -82,7 +82,13 @@ class EnergySystem_Tests:
                                 ("A" if i < 5 else "B"))
                      for i in range(10)]
         for group in ["Foo", "Bar", "A", "B"]:
-            eq_(len(ES.groups[group]), 5)
+            eq_(len(ES.groups[group]), 5,
+                ("\n  Failed testing length of group '{}'." +
+                 "\n  Expected: 5" +
+                 "\n  Got     : {}" +
+                 "\n  Group   : {}" ).format(
+                     group, len(ES.groups[group]),
+                     sorted([e.uid for e in ES.groups[group]])))
 
     def test_grouping_filter_parameter(self):
         g1 = es.GroupingBase( key=lambda e: "The Special One",
@@ -95,6 +101,21 @@ class EnergySystem_Tests:
         others = set(Entity(uid="other: {}".format(i)) for i in range(10))
         eq_(ES.groups["The Special One"], special)
         eq_(ES.groups["A Subset"], subset)
+
+    def test_proper_filtering(self):
+        """ `Grouping.filter` should not be "all or nothing".
+
+        There was a bug where, if `Grouping.filter` returned `False` only for
+        some elements of `Grouping.value(e)`, those elements where actually
+        retained.
+        This test makes sure that the bug doesn't resurface again.
+        """
+        g = es.Grouping( key="group",
+                         value=lambda _: set((1, 2, 3, 4)),
+                         filter=lambda x: x % 2 == 0)
+        ES = es.EnergySystem(groupings=[g])
+        special = Entity(uid="object")
+        eq_(ES.groups["group"], set((2, 4)))
 
     def test_non_callable_group_keys(self):
         collect_everything = es.Grouping(key="everything")
