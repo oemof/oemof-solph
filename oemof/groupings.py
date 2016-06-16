@@ -186,8 +186,7 @@ class Grouping:
         for group in (k if (isinstance(k, Iterable) and not
                             isinstance(k, Hashable))
                         else [k]):
-            d[group] = (self.merge(self.value(e), d[group])
-                        if group in d else self.value(e))
+            d[group] = (self.merge(v, d[group]) if group in d else v)
 
 
 class Nodes(Grouping):
