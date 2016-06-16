@@ -24,6 +24,11 @@ from . import blocks
 
 
 def constraint_grouping(node):
+    """Grouping function for constraints.
+
+    This function can be passed in a list to :attr:`groupings` of
+    :class:`oemof.solph.network.EnergySystem`.
+    """
     if isinstance(node, Bus) and node.balanced:
         return blocks.Bus
     if isinstance(node, LinearTransformer):
@@ -35,12 +40,19 @@ def constraint_grouping(node):
 
 
 def investment_key(n):
+    """Function returns keys for the energysystem attribute :attr:`es.groups`
+    to store flows with :attr:`investment` being set to an instance of
+    :attr:`oemof.solph.options.Investment` object.
+    """
     for f in chain(n.outputs.values(), n.inputs.values()):
         if f.investment is not None:
             return blocks.InvestmentFlow
 
 
 def investment_flows(n):
+    """Function returns elements for group in energysystem attribute
+    :attr:`es.groups` with key generated from :meth:`investment_key`.
+    """
     return set(chain(((n, t, f) for (t, f) in n.outputs.items()
                       if f.investment is not None),
                      ((s, n, f) for (s, f) in n.inputs.items()
@@ -48,6 +60,9 @@ def investment_flows(n):
 
 
 def merge_investment_flows(n, group):
+    """Extends the group with key returned from :meth:`investment_flow_key`
+    with elements from meth:`invesment_flows`
+    """
     return group.union(n)
 
 investment_flow_grouping = core_es.Grouping(
@@ -57,17 +72,26 @@ investment_flow_grouping = core_es.Grouping(
 
 
 def standard_flow_key(n):
+    """Function returns keys for the energysystem attribute :attr:`es.groups`
+    to store all standard flows (no investment, no discrete).
+    """
     for f in n.outputs.values():
         if f.investment is None:
             return blocks.Flow
 
 
 def standard_flows(n):
+    """Function returns elements for group in energysystem attribute
+    :attr:`es.groups` with key generated from :meth:`standard_flow_key`.
+    """
     return [(n, t, f) for (t, f) in n.outputs.items()
             if f.investment is None]
 
 
 def merge_standard_flows(n, group):
+    """Extends the group with key returned from :meth:`standard_flow_key` with
+    elements from meth:`standard_flows`
+    """
     group.extend(n)
     return group
 
@@ -78,17 +102,27 @@ standard_flow_grouping = core_es.Grouping(
 
 
 def discrete_flow_key(n):
+    """Function returns keys for the energysystem attribute :attr:`es.groups`
+    to store flows with :attr:`discrete` being set to an instance of
+    :attr:`oemof.solph.options.Discrete` object.
+    """
     for f in n.outputs.values():
         if f.discrete is not None:
             return blocks.Discrete
 
 
 def discrete_flows(n):
+    """Function returns elements for group in energysystem attribute
+    :attr:`es.groups` with key generated from :meth:`discrete_flow_key`.
+    """
     return [(n, t, f) for (t, f) in n.outputs.items()
             if f.discrete is not None]
 
 
 def merge_discrete_flows(n, group):
+    """Extends the group with key returned from :meth:`discrete_flow_key` with
+    elements from meth:`discrete_flows`
+    """
     group.extend(n)
     return group
 

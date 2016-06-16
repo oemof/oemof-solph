@@ -17,20 +17,65 @@ class EnergySystem(es.EnergySystem):
 
 class Flow:
     """
-    Define a flow between two nodes.
+    Define a flow between two nodes. Note: Some attributes can only take
+    numeric scalar as some may either take scalar or sequences (array-like).
+    If for latter a scalar is passed, this will be internally converted to a
+    sequence.
+
 
     Parameters
     ----------
-    summed_max : float
-        Specific maximum value summed over all timesteps. Will be multiplied
-        with the nominal_value to get the absolute limit. If investment is set
-        the summed_max will be multiplied with the nominal_value_variable.
-    summed_min : float
-        see above
-    actual_value : float or array-like
+    nominal_value : numeric
+        The nominal value of the flow.
+    min : numeric (sequence or scalar)
+        Normend minimum value of the flow. The flow absolute maximum will be
+        calculatet by multiplying :attr:`nominal_value` with :attr:`min`
+    max : numeric (sequence or scalar)
+        Nominal maximum value of the flow. (see. :attr:`min`)
+    actual_value: numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
         nominal_value to get the absolute value. If fixed is True the flow
         variable will be fixed to actual_value * nominal_value.
+    positive_gradient : numeric (sequence or scalar)
+        The maximal positive difference (flow[t-1] < flow[t])
+        of two consecutive flow values.
+    negative_gradient : numeric (sequence or scalar)
+        The maximum negative difference (from[t-1] > flow[t]) of two
+        consecutive timesteps.
+    summed_max : numeric
+        Specific maximum value summed over all timesteps. Will be multiplied
+        with the nominal_value to get the absolute limit. If investment is set
+        the summed_max will be multiplied with the nominal_value_variable.
+    summed_min : numeric
+        see above
+    variable_costs : numeric (sequence or scalar)
+        The costs associated with one unit of the flow.
+    fixed_costs : numeric (sequence or scalar)
+        The costs associated with the absolute nominal_value of the flow.
+    fixed : boolean
+        Boolean value indicating if a flow is fixed during the optimization
+        problem to its ex-ante set value. Used in combination with the
+        :attr:`actual_value`.
+    investment : :class:`oemof.solph.options.Investment` object
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem.
+        Note: This will lead to different behaviour of attributes.
+
+    Examples
+    --------
+    Creating a fixed flow object:
+
+    >>> f = Flow(actual_value=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f.variable_costs[2]
+    5
+    >>> f.actual_value[2]
+    4
+
+    Creating a flow object with time-dependet lower and upper bounds:
+
+    >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
+    >>> f1.max[1]
+    0.99
 
     """
     def __init__(self, **kwargs):
@@ -93,7 +138,8 @@ class Source(on.Source):
 
 
 class LinearTransformer(on.Transformer):
-    """
+    """A Linear Transformer object.
+
     Parameters
     ----------
 
