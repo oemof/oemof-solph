@@ -7,7 +7,7 @@ is pretty straightforward.
 
 Data: example_data.csv
 """
-################################# imports #####################################
+# ############################### imports #####################################
 import pandas as pd
 import matplotlib.pyplot as plt
 import logging
@@ -16,9 +16,9 @@ from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
                          OperationalModel, EnergySystem, GROUPINGS)
 from oemof.outputlib import to_pandas as tpd
 from oemof.tools import logger
-logger.define_logging()
 
-######################### data & initialization ###############################
+# ####################### data & initialization ###############################
+
 
 def initialise_energysystem(periods=2000):
     """
@@ -27,14 +27,14 @@ def initialise_energysystem(periods=2000):
 
     return EnergySystem(groupings=GROUPINGS, time_idx=datetimeindex)
 
-########################### create energysystem components ####################
 
+# ######################### create energysystem components ####################
 def simulate(energysystem, filename='example_data.csv', solver='cbc'):
     """
     """
     logging.info("Creating objects")
     data = pd.read_csv(filename, sep=",")
-    # resource busses
+    # resource buses
     bcoal = Bus(label="coal", balanced=False)
     bgas = Bus(label="gas", balanced=False)
     boil = Bus(label="oil", balanced=False)
@@ -45,7 +45,7 @@ def simulate(energysystem, filename='example_data.csv', solver='cbc'):
     b_th = Bus(label="b_th")
 
     Sink(label="excess", inputs={b_el: Flow()})
-    #shortage = Source(label="shortage", outputs={b_el: Flow()})
+    # shortage = Source(label="shortage", outputs={b_el: Flow()})
 
     # Sources
     Source(label="wind",
@@ -55,7 +55,7 @@ def simulate(energysystem, filename='example_data.csv', solver='cbc'):
 
     Source(label="pv",
            outputs={b_el: Flow(actual_value=data['pv'],
-                               nominal_value= 65.3,
+                               nominal_value=65.3,
                                fixed=True)})
 
     # Demands
@@ -72,35 +72,35 @@ def simulate(energysystem, filename='example_data.csv', solver='cbc'):
     # Powerplants
     LinearTransformer(label='pp_coal',
                       inputs={bcoal: Flow()},
-                              outputs={b_el: Flow(nominal_value=20.2,
-                                                  variable_costs=25)},
-                       conversion_factors = {b_el: 0.39})
+                      outputs={b_el: Flow(nominal_value=20.2,
+                                          variable_costs=25)},
+                      conversion_factors={b_el: 0.39})
 
     LinearTransformer(label='pp_lig',
                       inputs={blig: Flow()},
                       outputs={b_el: Flow(nominal_value=11.8,
-                                           variable_costs=19)},
-                      conversion_factors = {b_el: 0.41})
+                                          variable_costs=19)},
+                      conversion_factors={b_el: 0.41})
 
     LinearTransformer(label='pp_gas',
                       inputs={bgas: Flow()},
                       outputs={b_el: Flow(nominal_value=41,
                                           variable_costs=40)},
-                      conversion_factors = {b_el: 0.50})
+                      conversion_factors={b_el: 0.50})
 
     LinearTransformer(label='pp_oil',
                       inputs={boil: Flow()},
                       outputs={b_el: Flow(nominal_value=5,
                                           variable_costs=50)},
-                      conversion_factors = {b_el: 0.28})
+                      conversion_factors={b_el: 0.28})
 
     # CHP
     LinearTransformer(label='pp_chp',
-                               inputs={bgas: Flow()},
-                               outputs={b_el: Flow(nominal_value=30,
-                                                   variable_costs=42),
-                                        b_th: Flow(nominal_value=40)},
-                               conversion_factors = {b_el: 0.3, b_th: 0.4})
+                      inputs={bgas: Flow()},
+                      outputs={b_el: Flow(nominal_value=30,
+                                          variable_costs=42),
+                               b_th: Flow(nominal_value=40)},
+                      conversion_factors={b_el: 0.3, b_th: 0.4})
 
     ################################# optimization ############################
     # create Optimization model based on energy_system
@@ -118,7 +118,7 @@ def simulate(energysystem, filename='example_data.csv', solver='cbc'):
     return om
 
 
-################################## Plotting ###################################
+# ################################ Plotting ###################################
 def plot_results(energysystem):
     logging.info("Plot results")
     # define colors
@@ -142,6 +142,7 @@ def plot_results(energysystem):
     esplot.outside_legend(reverse=True)
     plt.show()
 
+
 def get_results(energysystem):
     """
     """
@@ -151,8 +152,8 @@ def get_results(energysystem):
 
     grouped = myresults.groupby(level=[0, 1, 2]).sum()
     rdict = {r + (k,): v
-            for r, kv in grouped.iterrows()
-            for k, v in kv.to_dict().items()}
+             for r, kv in grouped.iterrows()
+             for k, v in kv.to_dict().items()}
 
     rdict['objective'] = energysystem.results.objective
 
