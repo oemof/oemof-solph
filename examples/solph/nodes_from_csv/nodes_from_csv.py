@@ -5,7 +5,7 @@ import pandas as pd
 
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
-from oemof.solph.options import NodesFromCSV
+from oemof.solph import NodesFromCSV
 from oemof.outputlib import to_pandas as tpd
 
 

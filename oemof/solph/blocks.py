@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+"""Creating sets, variables, constraints and parts of the objective function
+for the specified groups.
 """
 
-"""
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary)
 from pyomo.core.base.block import SimpleBlock
