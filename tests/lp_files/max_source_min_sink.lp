@@ -27,9 +27,9 @@ c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds
-   25.199999999999999 <= flow(electricityBus_minDemand_0) <= 30
-   28.199999999999999 <= flow(electricityBus_minDemand_1) <= 30
-   17.699999999999999 <= flow(electricityBus_minDemand_2) <= 30
+   45.359999999999999 <= flow(electricityBus_minDemand_0) <= 54
+   50.759999999999998 <= flow(electricityBus_minDemand_1) <= 54
+   31.859999999999999 <= flow(electricityBus_minDemand_2) <= 54
    0 <= flow(wind_electricityBus_0) <= 45.899999999999999
    0 <= flow(wind_electricityBus_1) <= 51.299999999999997
    0 <= flow(wind_electricityBus_2) <= 32.939999999999998
