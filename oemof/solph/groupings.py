@@ -45,8 +45,7 @@ investment_flow_grouping = groupings.FlowsWithNodes(
     filter=lambda stf: stf[2].investment is not None)
 
 standard_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.Flow,
-    filter=lambda stf: stf[2].investment is None)
+    constant_key=blocks.Flow)
 
 discrete_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Discrete,
