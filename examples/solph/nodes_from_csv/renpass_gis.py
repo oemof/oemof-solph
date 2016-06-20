@@ -33,16 +33,17 @@ logging.info('Done!')
 
 logging.info('Check the results')
 
-## %% bugfixing of outputlib
-##
-##for k, v in es.results.items():
-##    # results[source][target][list with flows]
-##    # or results[source][source][list with other information]
-##    print(k, v, '\n')
-#
-myresults = tp.ResultsDataFrame(energy_system=es)
+# %% bugfixing of outputlib
+
+for k, v in es.results.items():
+    # results[source][target][list with flows]
+    # or results[source][source][list with other information]
+    print(k, '\n')
+    print(type(v))
 
 # %% output
+
+myresults = tp.ResultsDataFrame(energy_system=es)
 
 DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
                                       date_from=date_from, date_to=date_to,
