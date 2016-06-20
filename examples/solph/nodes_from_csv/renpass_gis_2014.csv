@@ -5,7 +5,7 @@ Source,GL_resource_gas,GL_resource_gas,GL_bus_gas,,,,,,,,,,,,,,,,,,,,
 Source,DE_wind,DE_wind,DE_bus_el,,30,seq,,,,,,,True,,,,,,,,,,True
 Source,DE_solar,DE_solar,DE_bus_el,,50,seq,,,,,,,True,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,
-Sink,DE_load,DE_bus_el,DE_load,,300,seq,,,,,,,,,,,,,,,,,
+Sink,DE_load,DE_bus_el,DE_load,,300,seq,,,,,,,True,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,
 LinearTransformer,DE_pp_gas,GL_bus_gas,DE_pp_gas,,,,,,,,,,,,,,,,,,,,
 LinearTransformer,DE_pp_gas,DE_pp_gas,DE_bus_el,0.4,400,,,,,30,,,,,,,,,,,,,
