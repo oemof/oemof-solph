@@ -67,7 +67,6 @@ class ResultsDataFrame(pd.DataFrame):
                     row['bus_label'] = k.label
                     if k is kk:
                         row['type'] = 'other'
-                        print('other', k, kk)
                     else:
                         row['type'] = 'output'
                     if k is kk:
