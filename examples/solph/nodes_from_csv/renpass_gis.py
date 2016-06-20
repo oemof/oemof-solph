@@ -95,7 +95,7 @@ DE_storage_phs_out.set_index('datetime', inplace=True)
 
 # %% dispatch plot
 
-df = pd.concat([-DE_load, DE_wind, DE_solar, DE_pp_gas_in, DE_pp_gas_out,
+df = pd.concat([-DE_load, DE_wind, DE_solar, DE_pp_gas_in, DE_pp_gas_in,
                 DE_storage_phs_in, -DE_storage_phs_in],
                axis=1)
 df.columns = ['DE_load', 'DE_wind', 'DE_solar', 'DE_pp_gas_in',
