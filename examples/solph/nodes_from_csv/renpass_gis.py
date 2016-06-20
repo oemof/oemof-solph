@@ -41,7 +41,6 @@ logging.info('Check the results')
 ##    print(k, v, '\n')
 #
 myresults = tp.ResultsDataFrame(energy_system=es)
-#print(myresults)
 
 # %% output
 
@@ -52,6 +51,10 @@ DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
 DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
                                        date_from=date_from, date_to=date_to,
                                        formatted=True)
+
+DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
+                                     date_from=date_from, date_to=date_to,
+                                     formatted=True)
 
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
 DE_overall = DE_overall[['DE_solar', 'DE_wind', 'DE_pp_gas', 'DE_storage_phs',
