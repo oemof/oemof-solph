@@ -12,7 +12,7 @@ from oemof.outputlib import to_pandas as tp
 logger.define_logging()
 
 date_from = '2014-01-01 00:00:00'
-date_to = '2014-02-28 23:00:00'
+date_to = '2014-01-28 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
@@ -55,5 +55,8 @@ DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
                                        formatted=True)
 
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
+DE_overall = DE_overall[['DE_solar', 'DE_wind', 'DE_pp_gas', 'DE_storage_phs',
+                         'DE_shortage', 'DE_load', 'DE_storage_phs',
+                         'DE_excess', 'duals']]
 
 area = DE_overall.plot(kind='area', stacked=True)
