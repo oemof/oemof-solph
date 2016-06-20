@@ -145,8 +145,9 @@ class ResultsDataFrame(pd.DataFrame):
 
         return subset
 
-    def slice_unstacked(self, unstacklevel='obj_label', **kwargs):
-        r"""Method for slicing the ResultsDataFrame. A unstacked
+    def slice_unstacked(self, unstacklevel='obj_label',
+                        formatted=False, **kwargs):
+        r"""Method for slicing the ResultsDataFrame. An unstacked
         subset is returned.
 
         Parameters
@@ -157,6 +158,9 @@ class ResultsDataFrame(pd.DataFrame):
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
         subset.columns = subset.columns.droplevel()
+        if formatted is True:
+            subset.reset_index(level=['bus_label', 'type'], drop=True,
+                               inplace=True)
         return subset
 
 
