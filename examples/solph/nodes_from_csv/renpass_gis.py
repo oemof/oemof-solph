@@ -33,13 +33,13 @@ logging.info('Done!')
 
 logging.info('Check the results')
 
-# %% bugfixing of outputlib
-
-for k, v in es.results.items():
-    # results[source][target][list with flows]
-    # or results[source][source][list with other information]
-    print(k, '\n')
-    print(type(v))
+## %% bugfixing of outputlib
+#
+#for k, v in es.results.items():
+#    # results[source][target][list with flows]
+#    # or results[source][source][list with other information]
+#    print(k, '\n')
+#    print(type(v))
 
 # %% output
 
@@ -57,9 +57,11 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
 
+#print(DE_other)
+
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
-DE_overall = DE_overall[['DE_solar', 'DE_wind', 'DE_pp_gas', 'DE_storage_phs',
-                         'DE_shortage', 'DE_load', 'DE_storage_phs',
-                         'DE_excess', 'duals']]
+DE_overall = DE_overall[['DE_solar', 'DE_wind', 'DE_pp_coal', 'DE_pp_gas',
+                         'DE_storage_phs', 'DE_shortage', 'DE_load',
+                         'DE_storage_phs', 'DE_excess']]
 
 area = DE_overall.plot(kind='area', stacked=True)
