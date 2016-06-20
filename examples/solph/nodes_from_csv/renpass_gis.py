@@ -12,7 +12,7 @@ from oemof.outputlib import to_pandas as tp
 logger.define_logging()
 
 date_from = '2014-01-01 00:00:00'
-date_to = '2014-12-28 23:00:00'
+date_to = '2014-03-28 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
@@ -40,73 +40,29 @@ logging.info('Check the results')
 ##    # or results[source][source][list with other information]
 ##    print(k, v, '\n')
 #
-myresults = tp.DataFramePlot(energy_system=es)
+myresults = tp.ResultsDataFrame(energy_system=es)
 #print(myresults)
 
 # %% dirty slicing (to be fixed in to_pandas)
 
-DE_load = myresults.slice_by(obj_label='DE_load', date_from=date_from,
-                             date_to=date_to)
-DE_load.reset_index(inplace=True)
-DE_load.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-DE_load.set_index('datetime', inplace=True)
+DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
+                                      date_from=date_from, date_to=date_to)
+DE_inputs.reset_index(level=[1], drop=True, inplace=True)
 
-DE_solar = myresults.slice_by(obj_label='DE_solar', date_from=date_from,
-                              date_to=date_to)
-DE_solar.reset_index(inplace=True)
-DE_solar.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-DE_solar.set_index('datetime', inplace=True)
-
-DE_wind = myresults.slice_by(obj_label='DE_wind', date_from=date_from,
-                             date_to=date_to)
-DE_wind.reset_index(inplace=True)
-DE_wind.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-DE_wind.set_index('datetime', inplace=True)
-
-
-DE_pp_gas_in = myresults.slice_by(obj_label='DE_pp_gas', type='input',
-                                  date_from=date_from, date_to=date_to)
-DE_pp_gas_in.reset_index(inplace=True)
-DE_pp_gas_in.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-DE_pp_gas_in.set_index('datetime', inplace=True)
-
-
-DE_pp_gas_out = myresults.slice_by(obj_label='DE_pp_gas', type='output',
-                                   date_from=date_from, date_to=date_to)
-DE_pp_gas_out.reset_index(inplace=True)
-DE_pp_gas_out.drop(['bus_label', 'type', 'obj_label'], axis=1, inplace=True)
-DE_pp_gas_out.set_index('datetime', inplace=True)
-
-DE_storage_phs_in = myresults.slice_by(obj_label='DE_storage_phs',
-                                       type='input',
+DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
                                        date_from=date_from, date_to=date_to)
-DE_storage_phs_in.reset_index(inplace=True)
-DE_storage_phs_in.drop(['bus_label', 'type', 'obj_label'], axis=1,
-                       inplace=True)
-DE_storage_phs_in.set_index('datetime', inplace=True)
+DE_outputs.reset_index(level=[1], drop=True, inplace=True)
 
-DE_storage_phs_out = myresults.slice_by(obj_label='DE_storage_phs',
-                                        type='output',
-                                        date_from=date_from, date_to=date_to)
-DE_storage_phs_out.reset_index(inplace=True)
-DE_storage_phs_out.drop(['bus_label', 'type', 'obj_label'], axis=1,
-                        inplace=True)
-DE_storage_phs_out.set_index('datetime', inplace=True)
+DE_bus_el = pd.concat([DE_inputs, DE_outputs], axis=1, ignore_index=False)
 
 # %% dispatch plot
 
-df = pd.concat([-DE_load, DE_wind, DE_solar, DE_pp_gas_in, DE_pp_gas_in,
-                DE_storage_phs_in, -DE_storage_phs_in],
-               axis=1)
-df.columns = ['DE_load', 'DE_wind', 'DE_solar', 'DE_pp_gas_in',
-              'DE_pp_gas_out', 'DE_storage_phs_in', 'DE_storage_phs_out']
-
-# linear transformer and storage inputs and outputs are still confused
-area_data = df[['DE_solar', 'DE_wind', 'DE_pp_gas_out', 'DE_storage_phs_in',
-                'DE_load', 'DE_storage_phs_out']]
-area = area_data.plot(kind='area', stacked=True, alpha=0.5, linewidth=0)
-area.set_xlabel('Time')
-area.set_ylabel('Power in MW')
+## linear transformer and storage inputs and outputs are still confused
+#area_data = df[['DE_solar', 'DE_wind', 'DE_pp_gas_out', 'DE_storage_phs_in',
+#                'DE_load', 'DE_storage_phs_out']]
+#area = area_data.plot(kind='area', stacked=True, alpha=0.5, linewidth=0)
+#area.set_xlabel('Time')
+#area.set_ylabel('Power in MW')
 
 # %% check energy balance arround bus
 
