@@ -50,7 +50,6 @@ DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
                                       formatted=True)
 
 DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
-                                       remove_multiindex=True,
                                        date_from=date_from, date_to=date_to,
                                        formatted=True)
 
