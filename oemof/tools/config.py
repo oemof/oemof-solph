@@ -33,7 +33,7 @@ import os.path as path
 
 try:
     import configparser as cp
-except:
+except ImportError:
     # to be compatible with Python2.7
     import ConfigParser as cp
 
