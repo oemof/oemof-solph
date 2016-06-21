@@ -6,7 +6,7 @@ import pandas as pd
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph import NodesFromCSV
-from oemof.outputlib import to_pandas as tpd
+from oemof.outputlib import DataFramePlot
 
 
 logger.define_logging()
@@ -40,7 +40,7 @@ for k, v in es.results.items():
     # or results[source][source][list with other information]
     print(k, v, '\n')
 
-myresults = tpd.DataFramePlot(energy_system=es)
+myresults = DataFramePlot(energy_system=es)
 print(myresults)
 
 # %% dirty slicing (to be fixed in to_pandas)
