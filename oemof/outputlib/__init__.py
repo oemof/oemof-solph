@@ -1,4 +1,4 @@
- #!/usr/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8
 
 import logging
@@ -42,6 +42,19 @@ class ResultsDataFrame(pd.DataFrame):
 
     """
 
+
+#         results[source][target]
+#         if source == target:
+#           if isinstance(source, 'Bus'):
+#               if isinstance(target.key(), str):
+#                   # duals
+#                   pass
+#               else:
+#                   storage_level
+#         else:
+#             # component logic
+#             pass
+
     def __init__(self, **kwargs):
         # default values if not arguments are passed
         es = kwargs.get('energy_system')
@@ -52,11 +65,16 @@ class ResultsDataFrame(pd.DataFrame):
                 for kk, vv in v.items():
                     row = {}
                     row['bus_label'] = k.label
-                    row['type'] = ('output' if not (isinstance(kk, str)) else
-                                   'other')
-                    row['obj_label'] = 'duals' if (k is kk) else (
-                                      kk     if (isinstance(kk, str)) else
-                                      kk.label)
+                    if k is kk:
+                        row['type'] = 'other'
+                    else:
+                        row['type'] = 'output'
+                    if k is kk:
+                        row['obj_label'] = 'duals'
+                    elif isinstance(kk, str):
+                        row['obj_label'] = 'kk'
+                    else:
+                        row['obj_label'] = kk.label
                     row['datetime'] = es.time_idx
                     row['val'] = vv
                     rows_list.append(row)
@@ -145,8 +163,9 @@ class ResultsDataFrame(pd.DataFrame):
 
         return subset
 
-    def slice_unstacked(self, unstacklevel='obj_label', **kwargs):
-        r"""Method for slicing the ResultsDataFrame. A unstacked
+    def slice_unstacked(self, unstacklevel='obj_label',
+                        formatted=False, **kwargs):
+        r"""Method for slicing the ResultsDataFrame. An unstacked
         subset is returned.
 
         Parameters
@@ -156,7 +175,11 @@ class ResultsDataFrame(pd.DataFrame):
         """
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
-        subset.columns = subset.columns.droplevel()
+        if formatted is True:
+            subset.reset_index(level=['bus_label', 'type'], drop=True,
+                               inplace=True)
+        # user standard insteadt of multi-indexed columns
+        subset.columns = subset.columns.get_level_values(1).unique()
         return subset
 
 
