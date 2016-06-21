@@ -73,8 +73,10 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
 
 def check_version():
     """Returns the actual version number of the used oemof version."""
-    # TODO : Please add this feature if you know how.
-    pass
+    f = open('../../VERSION', 'r')
+    f.read(14)
+    version = f.read().replace('"', '')
+    logging.info("Used oemof version: {0}".format(version))
 
 
 def check_git_branch():
