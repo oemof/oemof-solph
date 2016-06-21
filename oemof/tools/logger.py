@@ -132,18 +132,3 @@ def time_logging(start, text, logging_level='debug'):
         logging.debug(log_str)
     elif logging_level == 'info':
         logging.info(log_str)
-
-
-if __name__ == '__main__':
-    import doctest
-
-    OC = doctest.OutputChecker
-    class AEOutputChecker(OC):
-        def check_output(self, want, got, optionflags):
-            from re import sub
-            if optionflags & doctest.ELLIPSIS:
-                want = sub(r'\[\.\.\.\]', '...', want)
-            return OC.check_output(self, want, got, optionflags)
-
-    doctest.OutputChecker = AEOutputChecker
-    doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
