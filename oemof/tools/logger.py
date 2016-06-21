@@ -1,11 +1,4 @@
-#!/usr/bin/python
 # -*- coding: utf-8
-
-'''
-Author: Uwe Krien (uwe.krien@rl-institut.de)
-Changes by:
-Responsibility: Uwe Krien (uwe.krien@rl-institut.de)
-'''
 
 import os
 import shutil
@@ -14,7 +7,8 @@ import logging.config
 from oemof.tools import helpers
 
 
-def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
+def define_logging(inifile='logging.ini', basicpath=None,
+                   subdir='log_files'):
     r"""Initialise the logger using the logging.conf file in the local path.
 
     Several sentences providing an extended description. Refer to
@@ -69,7 +63,7 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     logging.info('Path for logging: %s' % logpath)
     try:
         check_git_branch()
-    except:
+    except FileNotFoundError:
         check_version()
 
 
@@ -82,9 +76,8 @@ def check_version():
 
 
 def check_git_branch():
-    '''
-    Passes the used brance and commit to the logger
-    '''
+    """Passes the used branch and commit to the logger
+    """
     path = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), os.pardir,
         os.pardir, '.git')
