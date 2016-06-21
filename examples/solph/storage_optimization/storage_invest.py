@@ -32,7 +32,7 @@ The example models the following energy system:
 ###############################################################################
 
 # Outputlib
-from oemof.outputlib import to_pandas as tpd
+from oemof import outputlib
 
 # Default logger of oemof
 from oemof.tools import logger
@@ -47,7 +47,7 @@ import oemof.solph as solph
 
 
 def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
-                          debug=True, number_timesteps=8):
+                          debug=True, number_timesteps=8760):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
@@ -139,7 +139,7 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
 def get_result_dict(energysystem):
     logging.info('Check the results')
     storage = energysystem.groups['storage']
-    myresults = tpd.DataFramePlot(energy_system=energysystem)
+    myresults = outputlib.DataFramePlot(energy_system=energysystem)
 
     pp_gas = myresults.slice_by(obj_label='pp_gas', type='input',
                                 date_from='2012-01-01 00:00:00',
@@ -181,7 +181,7 @@ def create_plots(energysystem):
              'excess_bel': '#555555'}
 
     # Plotting the input flows of the electricity bus for January
-    myplot = tpd.DataFramePlot(energy_system=energysystem)
+    myplot = outputlib.DataFramePlot(energy_system=energysystem)
     myplot.slice_unstacked(bus_label="electricity", type="input",
                            date_from="2012-01-01 00:00:00",
                            date_to="2012-01-31 00:00:00")

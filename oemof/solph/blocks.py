@@ -377,13 +377,15 @@ class Flow(SimpleBlock):
 
         m = self.parent_block()
 
-        # ########################## SETS #####################################
+        # ########################## SETS #################################
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if g[2].summed_max is not None])
+            (g[0], g[1]) for g in group if g[2].summed_max is not None and
+                g[2].nominal_value is not None])
 
         self.SUMMED_MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if g[2].summed_min is not None])
+            (g[0], g[1]) for g in group if g[2].summed_min is not None and
+                g[2].nominal_value is not None])
 
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
