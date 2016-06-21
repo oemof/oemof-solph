@@ -127,7 +127,6 @@ class ResultsDataFrame(pd.DataFrame):
         self.set_index(index, inplace=True)
         self.sort_index(inplace=True)
 
-
     def slice_by(self, **kwargs):
         r""" Method for slicing the ResultsDataFrame. A subset is returned.
 
@@ -176,11 +175,11 @@ class ResultsDataFrame(pd.DataFrame):
         """
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
-        # this doesn't show any effect
-        subset.columns = subset.columns.droplevel()
         if formatted is True:
             subset.reset_index(level=['bus_label', 'type'], drop=True,
                                inplace=True)
+        # user standard insteadt of multi-indexed columns
+        subset.columns = subset.columns.get_level_values(1).unique()
         return subset
 
 
