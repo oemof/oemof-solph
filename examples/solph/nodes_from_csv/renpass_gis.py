@@ -74,10 +74,6 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
 
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
 
-FR_outputs = myresults.slice_unstacked(bus_label="FR_bus_el", type="output",
-                                       date_from=date_from, date_to=date_to,
-                                       formatted=True)
-
 if (DE_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
 
