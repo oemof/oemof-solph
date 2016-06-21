@@ -5,7 +5,7 @@ import pandas as pd
 
 from oemof.core.energy_system import EnergySystem as ES, Simulation
 from oemof.network import Bus
-from oemof.outputlib.to_pandas import ResultsDataFrame as RDF
+from oemof.outputlib import ResultsDataFrame as RDF
 from oemof.solph import (Flow, OperationalModel as OM, Sink, Source as FS,
                          Storage)
 
