@@ -56,29 +56,29 @@ logging.info('Check the results')
 
 myresults = ResultsDataFrame(energy_system=es)
 
-AT_inputs = myresults.slice_unstacked(bus_label="AT_bus_el", type="input",
+DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
                                       date_from=date_from, date_to=date_to,
                                       formatted=True)
-AT_inputs.rename(columns={'AT_storage_phs': 'AT_storage_phs_out'},
+DE_inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
                  inplace=True)
 
-AT_outputs = myresults.slice_unstacked(bus_label="AT_bus_el", type="output",
+DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
                                        date_from=date_from, date_to=date_to,
                                        formatted=True)
-AT_outputs.rename(columns={'AT_storage_phs': 'AT_storage_phs_in'},
+DE_outputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_in'},
                   inplace=True)
 
-AT_other = myresults.slice_unstacked(bus_label="AT_bus_el", type="other",
+DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
 
-AT_overall = pd.concat([AT_inputs, -AT_outputs], axis=1)
+DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
 
-if (AT_overall.sum(axis=1).abs() > 0.0001).any():
+if (DE_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
 
 # %% output: plotting
-plot_data = AT_overall
+plot_data = DE_overall
 dispatch = plot_data.plot(kind='area', stacked=True, linewidth=0)
 dispatch.set_title('Power Plant Dispatch (Without NTCs)')
 dispatch.set_ylabel('Power in MW')
