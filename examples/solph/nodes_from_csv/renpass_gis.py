@@ -16,7 +16,7 @@ logger.define_logging()
 # %% configuration
 
 date_from = '2014-01-01 00:00:00'
-date_to = '2014-01-28 23:00:00'
+date_to = '2014-01-04 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
@@ -39,6 +39,7 @@ nodes = NodesFromCSV(file_nodes_flows='renpass_gis_2014.csv',
                      delimiter=',')
 
 om = OperationalModel(es, timeindex=datetime_index)
+om.receive_duals()
 
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
 
