@@ -16,7 +16,7 @@ logger.define_logging()
 # %% configuration
 
 date_from = '2014-01-01 00:00:00'
-date_to = '2014-01-04 23:00:00'
+date_to = '2014-01-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
@@ -39,6 +39,7 @@ nodes = NodesFromCSV(file_nodes_flows='renpass_gis_2014.csv',
                      delimiter=',')
 
 om = OperationalModel(es, timeindex=datetime_index)
+
 om.receive_duals()
 
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
@@ -86,5 +87,3 @@ dispatch = DE_overall.plot(kind='area', stacked=True, linewidth=0)
 dispatch.set_title('Power Plant Dispatch in Germany')
 dispatch.set_ylabel('Power in MW')
 dispatch.set_xlabel('Date and Time')
-
-prices = DE_other['duals'].plot()
