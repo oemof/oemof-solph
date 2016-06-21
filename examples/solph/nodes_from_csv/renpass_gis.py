@@ -81,7 +81,9 @@ if (DE_overall.sum(axis=1).abs() > 0.0001).any():
 
 
 # %% output: plotting
-area = DE_overall.plot(kind='area', stacked=True, linewidth=0)
-area.set_title('Power Plant Dispatch in Germany')
-area.set_ylabel('Power in MW')
-area.set_xlabel('Date and Time')
+dispatch = DE_overall.plot(kind='area', stacked=True, linewidth=0)
+dispatch.set_title('Power Plant Dispatch in Germany')
+dispatch.set_ylabel('Power in MW')
+dispatch.set_xlabel('Date and Time')
+
+prices = DE_other['duals'].plot()
