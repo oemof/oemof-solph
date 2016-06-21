@@ -6,7 +6,7 @@ import pandas as pd
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph import NodesFromCSV
-from oemof.outputlib import to_pandas as tp
+from oemof.outputlib import ResultsDataFrame
 
 
 logger.define_logging()
@@ -38,7 +38,7 @@ logging.info('Check the results')
 
 # %% output: data
 
-myresults = tp.ResultsDataFrame(energy_system=es)
+myresults = ResultsDataFrame(energy_system=es)
 
 DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
                                       date_from=date_from, date_to=date_to,
