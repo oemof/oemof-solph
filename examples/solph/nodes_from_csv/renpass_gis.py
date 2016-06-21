@@ -2,6 +2,8 @@
 
 import logging
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib
 
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
@@ -11,10 +13,22 @@ from oemof.outputlib import to_pandas as tp
 
 logger.define_logging()
 
+# %% configuration
+
 date_from = '2014-01-01 00:00:00'
 date_to = '2014-01-28 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
+
+# global plotting options
+matplotlib.style.use('ggplot')
+plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['axes.facecolor'] = 'silver'
+plt.rcParams['xtick.color'] = 'k'
+plt.rcParams['ytick.color'] = 'k'
+plt.rcParams['text.color'] = 'k'
+plt.rcParams['axes.labelcolor'] = 'k'
+plt.rcParams.update({'font.size': 18})
 
 # %% model creation and solving
 
@@ -57,10 +71,9 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      formatted=True)
 
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
-DE_overall.columns
-new_order = ['DE_solar', 'DE_storage_phs_out', 'DE_wind', 'DE_pp_coal',
-             'DE_pp_gas', 'DE_shortage', 'DE_excess', 'DE_load',
-             'DE_storage_phs_in']
+new_order = ['DE_solar', 'DE_wind', 'DE_pp_coal',
+             'DE_pp_gas', 'DE_storage_phs_out',
+             'DE_load', 'DE_storage_phs_in']
 DE_overall = DE_overall[new_order]
 
 if (DE_overall.sum(axis=1).abs() > 0.0001).any():
@@ -68,4 +81,7 @@ if (DE_overall.sum(axis=1).abs() > 0.0001).any():
 
 
 # %% output: plotting
-area = DE_overall.plot(kind='area', stacked=True)
+area = DE_overall.plot(kind='area', stacked=True, linewidth=0)
+area.set_title('Power Plant Dispatch in Germany')
+area.set_ylabel('Power in MW')
+area.set_xlabel('Date and Time')
