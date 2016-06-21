@@ -38,7 +38,7 @@ nodes = NodesFromCSV(file_nodes_flows='renpass_gis_2014.csv',
                      file_nodes_flows_sequences='renpass_gis_2014_seq.csv',
                      delimiter=',')
 
-om = OperationalModel(es, timeindex=datetime_index)
+om = OperationalModel(es)
 
 om.receive_duals()
 
@@ -73,13 +73,17 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      formatted=True)
 
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
-new_order = ['DE_solar', 'DE_wind', 'DE_pp_coal',
-             'DE_pp_gas', 'DE_storage_phs_out',
-             'DE_load', 'DE_storage_phs_in']
-DE_overall = DE_overall[new_order]
+#new_order = ['DE_solar', 'DE_wind', 'DE_pp_coal',
+#             'DE_pp_gas', 'DE_storage_phs_out',
+#             'DE_load', 'DE_storage_phs_in']
+#DE_overall = DE_overall[new_order]
 
-if (DE_overall.sum(axis=1).abs() > 0.0001).any():
-    print('Bus not balanced')
+#if (DE_overall.sum(axis=1).abs() > 0.0001).any():
+#    print('Bus not balanced')
+
+FR_outputs = myresults.slice_unstacked(bus_label="FR_bus_el", type="output",
+                                       date_from=date_from, date_to=date_to,
+                                       formatted=True)
 
 
 # %% output: plotting
