@@ -16,6 +16,8 @@ date_to = '2014-01-28 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
+# %% model creation and solving
+
 es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
 nodes = NodesFromCSV(file_nodes_flows='renpass_gis_2014.csv',
@@ -33,35 +35,37 @@ logging.info('Done!')
 
 logging.info('Check the results')
 
-## %% bugfixing of outputlib
-#
-#for k, v in es.results.items():
-#    # results[source][target][list with flows]
-#    # or results[source][source][list with other information]
-#    print(k, '\n')
-#    print(type(v))
 
-# %% output
+# %% output: data
 
 myresults = tp.ResultsDataFrame(energy_system=es)
 
 DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
                                       date_from=date_from, date_to=date_to,
                                       formatted=True)
+DE_inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
+                 inplace=True)
 
 DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
                                        date_from=date_from, date_to=date_to,
                                        formatted=True)
+DE_outputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_in'},
+                  inplace=True)
 
 DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
 
-#print(DE_other)
-
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
-DE_overall = DE_overall[['DE_solar', 'DE_wind', 'DE_pp_coal', 'DE_pp_gas',
-                         'DE_storage_phs', 'DE_shortage', 'DE_load',
-                         'DE_storage_phs', 'DE_excess']]
+DE_overall.columns
+new_order = ['DE_solar', 'DE_storage_phs_out', 'DE_wind', 'DE_pp_coal',
+             'DE_pp_gas', 'DE_shortage', 'DE_excess', 'DE_load',
+             'DE_storage_phs_in']
+DE_overall = DE_overall[new_order]
 
+if (DE_overall.sum(axis=1).abs() > 0.0001).any():
+    print('Bus not balanced')
+
+
+# %% output: plotting
 area = DE_overall.plot(kind='area', stacked=True)
