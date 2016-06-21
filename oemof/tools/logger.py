@@ -8,6 +8,7 @@ Responsibility: Uwe Krien (uwe.krien@rl-institut.de)
 '''
 
 import os
+import shutil
 import logging
 import logging.config
 from oemof.tools import helpers
