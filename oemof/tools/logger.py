@@ -23,10 +23,10 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     ----------
     inifile : string, optional (default: logging.ini)
         Name of the configuration file to define the logger. If no ini-file
-        exist a default ini-file will be downloaded from
-        'http://vernetzen.uni-flensburg.de/~git/logging_default.ini' and used.
+         exist a default ini-file will be copied from 'default_files' and
+         used.
     basicpath : string, optional (default: '.oemof' in HOME)
-        The basicpath for different oemof related informations. By default
+        The basicpath for different oemof related information. By default
         a ".oemof' folder is created in your home directory.
     subdir : string, optional (default: 'log_files')
         The name of the subfolder of the basicpath where the log-files are
@@ -42,9 +42,9 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
 
     Examples
     --------
-    To define the default logge you have to import the python logging library
-    and this function. The first logging message should be the path where the
-    log file is saved to.
+    To define the default logger you have to import the python logging
+     library and this function. The first logging message should be the
+     path where the log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
@@ -54,14 +54,15 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     >>> logging.debug("Hallo")
 
     """
-    url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
     if basicpath is None:
         basicpath = helpers.get_basic_path()
     logpath = helpers.extend_basic_path(subdir)
-    log_filename = os.path.join(basicpath, 'logging.ini')
+    log_filename = os.path.join(basicpath, inifile)
+    default_file = os.path.join(os.path.dirname(
+        os.path.realpath(__file__)), 'default_files', 'logging_default.ini')
     if not os.path.isfile(log_filename):
-        helpers.download_file(log_filename, url)
-    logging.config.fileConfig(os.path.join(basicpath, 'logging.ini'))
+        shutil.copyfile(default_file, log_filename)
+    logging.config.fileConfig(os.path.join(basicpath, inifile))
     logger = logging.getLogger('simpleExample')
     logger.debug('*********************************************************')
     logging.info('Path for logging: %s' % logpath)
