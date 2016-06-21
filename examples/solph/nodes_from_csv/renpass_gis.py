@@ -78,7 +78,11 @@ if (DE_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
 
 # %% output: plotting
-plot_data = DE_overall
+plot_data = DE_overall[
+    ['DE_solar', 'DE_wind',
+     'DE_pp_gas', 'DE_pp_hard_coal', 'DE_pp_lignite', 'DE_pp_uranium',
+     'DE_storage_phs_out', 'DE_shortage',
+     'DE_load', 'DE_storage_phs_in', 'DE_excess']]
 dispatch = plot_data.plot(kind='area', stacked=True, linewidth=0)
 dispatch.set_title('Power Plant Dispatch (Without NTCs)')
 dispatch.set_ylabel('Power in MW')
