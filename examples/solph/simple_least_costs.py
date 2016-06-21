@@ -14,7 +14,7 @@ import logging
 # solph imports
 from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
                          OperationalModel, EnergySystem, GROUPINGS)
-from oemof.outputlib import to_pandas as tpd
+import oemof.outputlib as output
 from oemof.tools import logger
 
 # ####################### data & initialization ###############################
@@ -126,7 +126,7 @@ def plot_results(energysystem):
              'pp_coal': '#838b8b', 'pp_lig': '#8b7355', 'pp_oil': '#000000',
              'pp_chp': '#20b2aa', 'demand_el': '#fff8dc'}
     # create multiindex dataframe with result values
-    esplot = tpd.DataFramePlot(energy_system=energysystem)
+    esplot = output.DataFramePlot(energy_system=energysystem)
     # select input results of electrical bus (i.e. power delivered by plants)
     esplot.slice_unstacked(bus_label="b_el", type="input",
                            date_from='2012-01-01 00:00:00',
@@ -148,7 +148,7 @@ def get_results(energysystem):
     """
     logging.info('Check the results')
 
-    myresults = tpd.DataFramePlot(energy_system=energysystem)
+    myresults = output.DataFramePlot(energy_system=energysystem)
 
     grouped = myresults.groupby(level=[0, 1, 2]).sum()
     rdict = {r + (k,): v
