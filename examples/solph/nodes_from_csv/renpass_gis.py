@@ -73,21 +73,22 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      formatted=True)
 
 DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
-#new_order = ['DE_solar', 'DE_wind', 'DE_pp_coal',
-#             'DE_pp_gas', 'DE_storage_phs_out',
-#             'DE_load', 'DE_storage_phs_in']
-#DE_overall = DE_overall[new_order]
-
-#if (DE_overall.sum(axis=1).abs() > 0.0001).any():
-#    print('Bus not balanced')
 
 FR_outputs = myresults.slice_unstacked(bus_label="FR_bus_el", type="output",
                                        date_from=date_from, date_to=date_to,
                                        formatted=True)
 
+if (DE_overall.sum(axis=1).abs() > 0.0001).any():
+    print('Bus not balanced')
 
 # %% output: plotting
-dispatch = DE_overall.plot(kind='area', stacked=True, linewidth=0)
-dispatch.set_title('Power Plant Dispatch in Germany')
+
+new_order = ['DE_solar', 'DE_wind', 'DE_pp_coal',
+             'DE_pp_gas', 'DE_storage_phs_out',
+             'DE_load', 'DE_storage_phs_in']
+DE_overall_no_NTC = DE_overall[new_order]
+
+dispatch = DE_overall_no_NTC.plot(kind='area', stacked=True, linewidth=0)
+dispatch.set_title('Power Plant Dispatch in Germany (Without NTCs)')
 dispatch.set_ylabel('Power in MW')
 dispatch.set_xlabel('Date and Time')
