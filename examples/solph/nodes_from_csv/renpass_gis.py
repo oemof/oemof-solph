@@ -78,8 +78,8 @@ if (AT_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
 
 # %% output: plotting
-
-dispatch = AT_overall.plot(kind='area', stacked=True, linewidth=0)
+plot_data = AT_overall
+dispatch = plot_data.plot(kind='area', stacked=True, linewidth=0)
 dispatch.set_title('Power Plant Dispatch (Without NTCs)')
 dispatch.set_ylabel('Power in MW')
 dispatch.set_xlabel('Date and Time')
