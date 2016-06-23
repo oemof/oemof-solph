@@ -107,14 +107,11 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        Sink(label='investDemand', inputs={bel: Flow(
-            min=(.84, .94, .59), investment=Investment(ep_costs=500))})
-
         Source(label='wind', outputs={bel: Flow(nominal_value=54,
                                                 max=(.85, .95, .61))})
 
-        Sink(label='minDemand', inputs={bel: Flow(nominal_value=30,
-                                                  min=(.84, .94, .59))})
+        Sink(label='minDemand', inputs={bel: Flow(
+            nominal_value=54, min=(.84, .94, .59), variable_costs=14)})
 
         self.compare_lp_files('max_source_min_sink.lp')
 

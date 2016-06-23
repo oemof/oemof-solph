@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     oemof.core
-    oemof.demandlib
     oemof.outputlib
     oemof.solph
     oemof.tools
@@ -19,6 +18,14 @@ oemof.groupings module
 ----------------------
 
 .. automodule:: oemof.groupings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.network module
+--------------------
+
+.. automodule:: oemof.network
     :members:
     :undoc-members:
     :show-inheritance:
