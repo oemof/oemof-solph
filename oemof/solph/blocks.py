@@ -735,15 +735,20 @@ class Bus(SimpleBlock):
 
         m = self.parent_block()
 
-        self.balance = Constraint(group, noruleinit=True)
+        I = {}
+        O = {}
+        for n in group:
+            I[n] = [i for i in n.inputs]
+            O[n] = [o for o in n.outputs]
 
+        self.balance = Constraint(group, noruleinit=True)
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in group:
                     lhs = sum(m.flow[i, n, t] * m.timeincrement
-                              for i in n.inputs)
+                              for i in I[n])
                     rhs = sum(m.flow[n, o, t] * m.timeincrement
-                              for o in n.outputs)
+                              for o in O[n])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
@@ -789,14 +794,17 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
+        I = {n:n._input() for n in group}
+        O = {n:[o for o in n.outputs.keys()] for n in group}
+
         self.relation = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    for o in n.outputs:
+                    for o in O[n]:
                         try:
-                            lhs = m.flow[n._input(), n, t] * \
+                            lhs = m.flow[I[n], n, t] * \
                                   n.conversion_factors[o][t]
                             rhs = m.flow[n, o, t]
                         except:
