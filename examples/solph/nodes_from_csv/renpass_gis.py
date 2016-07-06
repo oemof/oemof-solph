@@ -4,12 +4,20 @@ import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+from datetime import datetime
 
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
 
+def stopwatch():
+    if not hasattr(stopwatch, "now"):
+        stopwatch.now = datetime.now()
+        return None
+    last = stopwatch.now
+    stopwatch.now = datetime.now()
+    return str(stopwatch.now-last)[0:-4]
 
 logger.define_logging()
 
@@ -38,11 +46,14 @@ nodes = NodesFromCSV(file_nodes_flows='status_quo_2014_detailed.csv',
     file_nodes_flows_sequences='status_quo_2014_detailed_seq.csv',
     delimiter=',')
 
+stopwatch()
 om = OperationalModel(es)
+print("OM creation time: " + stopwatch())
 
 om.receive_duals()
 
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
+print("Optimization time: " + stopwatch())
 
 om.write('optimization_problem.lp',
          io_options={'symbolic_solver_labels': True})
