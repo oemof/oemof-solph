@@ -34,9 +34,9 @@ plt.rcParams.update({'font.size': 18})
 
 es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
-nodes = NodesFromCSV(file_nodes_flows='renpass_gis_2014.csv',
-                     file_nodes_flows_sequences='renpass_gis_2014_seq.csv',
-                     delimiter=',')
+nodes = NodesFromCSV(file_nodes_flows='status_quo_2014_aggregated.csv',
+    file_nodes_flows_sequences='status_quo_2014_aggregated_seq.csv',
+    delimiter=',')
 
 om = OperationalModel(es)
 
