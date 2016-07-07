@@ -11,6 +11,8 @@ Data: example_data.csv
 import pandas as pd
 import matplotlib.pyplot as plt
 import logging
+import os
+
 # solph imports
 from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
                          OperationalModel, EnergySystem, GROUPINGS)
@@ -29,9 +31,11 @@ def initialise_energysystem(periods=2000):
 
 
 # ######################### create energysystem components ####################
-def simulate(energysystem, filename='example_data.csv', solver='cbc'):
+def simulate(energysystem, filename=None, solver='cbc'):
     """
     """
+    if filename is None:
+        filename = os.path.join(os.path.dirname(__file__), 'example_data.csv')
     logging.info("Creating objects")
     data = pd.read_csv(filename, sep=",")
     # resource buses

@@ -5,7 +5,6 @@ import os
 import sys
 from oemof.tools import logger
 
-
 # add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 
@@ -17,6 +16,7 @@ tolerance = 0.001  # percent
 show_messages = True
 testdict = {}
 PASSED = True
+basic_path = os.path.dirname(__file__)
 
 
 def check(cdict, runcheck, subdict, new_results):
@@ -57,7 +57,8 @@ testdict['stor_inv'] = {'name': "Storage invest example",
 number_of_timesteps = 8760
 
 try:
-    filepath = os.path.join('solph/storage_optimization', 'storage_invest.csv')
+    filepath = os.path.join(basic_path, 'solph', 'storage_optimization',
+                            'storage_invest.csv')
     esys = storage_invest.optimise_storage_size(
         number_timesteps=number_of_timesteps, filename=filepath,
         solvername=testdict['stor_inv']['solver'], debug=False)
@@ -87,14 +88,15 @@ check(stor_invest_dict[number_of_timesteps], stor_invest_run,
 
 # *********** simple least cost  example **************************************
 testdict['least_costs'] = {'name': "Simple least costs optimization",
-                           'solver': 'cbc',
-                           'data': 'solph/example_data.csv'}
+                           'solver': 'cbc'}
+
+filename = os.path.join(basic_path, 'solph', 'example_data.csv')
 
 try:
     esys = simple_least_costs.initialise_energysystem(periods=2000)
     om = simple_least_costs.simulate(esys,
-                                       filename=testdict['least_costs']['data'],
-                                       solver=testdict['least_costs']['solver'])
+                                     filename=filename,
+                                     solver=testdict['least_costs']['solver'])
     results = simple_least_costs.get_results(esys)
     least_costs_run = True
 except Exception as e:
@@ -136,6 +138,9 @@ for tests in testdict.values():
 
 if PASSED:
     logging.info("All examples passed!")
+else:
+    logging.info(
+        "Some tests failed. See the output above for more information!")
 
 
 
