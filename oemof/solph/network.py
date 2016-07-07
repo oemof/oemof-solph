@@ -71,7 +71,7 @@ class Flow:
     >>> f.actual_value[2]
     4
 
-    Creating a flow object with time-dependet lower and upper bounds:
+    Creating a flow object with time-depended lower and upper bounds:
 
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
@@ -79,9 +79,7 @@ class Flow:
 
     """
     def __init__(self, **kwargs):
-        """
-        """
-        # TODO: Check if we can inherit form pyomo.core.base.var _VarData
+        # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with

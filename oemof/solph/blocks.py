@@ -21,8 +21,10 @@ class Storage(SimpleBlock):
     **The following variables are created:**
 
     capacity
-        Capacity (level) for every storage and timestep.
-        The variable of storage s and timestep t can be acessed by:
+        Capacity (level) for every storage and timestep. The value for the
+        capacity at the beginning is set by the parameter `initial_capacity` or
+        not set if `initial_capacity` is None.
+        The variable of storage s and timestep t can be accessed by:
         `om.Storage.capacity[s, t]`
 
     **The following constraints are created:**
@@ -141,7 +143,7 @@ class InvestmentStorage(SimpleBlock):
 
     Storage balance
       .. math::
-        capacity(n, t) = & capacity(n, t\_previous(t)) \\cdot \
+        capacity(n, t) =  &capacity(n, t\_previous(t)) \\cdot \
         (1 - capacity\_loss(n)) \\\\
         &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \\cdot \
            \\tau) \\\\
@@ -157,8 +159,23 @@ class InvestmentStorage(SimpleBlock):
           \\forall n \\in \\textrm{INITIAL\_CAPACITY,} \\\\
           \\forall t \\in \\textrm{TIMESTEPS}.
 
-    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+    Connect the invest variables of the storage and the input flow.
+        .. math:: InvestmentFlow.invest(source(n), n) =
+          invest(n) * nominal\_input\_capacity\_ratio(n) \\\\
+          \\forall n \\in \\textrm{INVESTSTORAGES}
+
+    Connect the invest variables of the storage and the output flow.
+        .. math:: InvestmentFlow.invest(n, target(n)) ==
+          invest(n) * nominal_output_capacity_ratio(n) \\\\
+          \\forall n \\in \\textrm{INVESTSTORAGES}
+
+    Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t), \\\\
+            \\forall n \\in \\textrm{MAX\_INVESTSTORAGES,} \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t), \\\\
             \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 

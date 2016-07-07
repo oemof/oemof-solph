@@ -21,6 +21,7 @@ from .options import Investment
 
 # TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
 
+
 class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
