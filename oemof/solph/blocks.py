@@ -213,6 +213,9 @@ class InvestmentStorage(SimpleBlock):
                           bounds=_storage_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
+        i = {n: n._input() for n in group}
+        o = {n: n._output() for n in group}
+
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage energy balance.
             """
@@ -220,9 +223,9 @@ class InvestmentStorage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[n._input(), n, t] *
+            expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, n._output(), t] /
+            expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
@@ -243,7 +246,7 @@ class InvestmentStorage(SimpleBlock):
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n._input(), n] ==
+            expr = (m.InvestmentFlow.invest[i[n], n] ==
                     self.invest[n] * n.nominal_input_capacity_ratio)
             return expr
         self.storage_capacity_inflow = Constraint(
@@ -254,7 +257,7 @@ class InvestmentStorage(SimpleBlock):
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, n._output()] ==
+            expr = (m.InvestmentFlow.invest[n, o[n]] ==
                     self.invest[n] * n.nominal_output_capacity_ratio)
             return expr
         self.storage_capacity_outflow = Constraint(
