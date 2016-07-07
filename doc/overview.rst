@@ -11,7 +11,7 @@ The idea of an open framework
 
 The Open Energy System Modeling Framework has been developed for the modeling and analysis of energy supply systems considering power and heat as well as prospectively mobility. Energy system models often do not have publicly accessible source code and freely available data and are poorly documented. The missing transparency slows down the scientific discussion on  model quality with regard to certain problems such as grid extension. Besides, energy system models are often developed for a certain application and cannot be adjusted (or only with great effort) to other requirements.
 
-The Center for Sustainable Energy Systems (ZNES) together with the Reiner Lemoine Institute (RLI) in Berlin and the Otto-von-Guericke-University of Magdeburg (OVGU) are developing an Open Energy System Modeling Framework (oemof) that addresses these problems by offering a free, open and clearly documented framework for energy system modeling. This transparent approach allows a sound scientific discourse on the underlying models and data. In this way the assessment of quality and significance of undertaken analyses is improved. Moreover, the modular composition of the framework supports the adjustment to a large number of application purposes. The open source approach allows a collaborative development of the framework that offers several advantages:
+The Center for Sustainable Energy Systems (ZNES) together with the Reiner Lemoine Institute (RLI) in Berlin and the Otto-von-Guericke-University of Magdeburg (OVGU) are developing an Open Energy System Modelling Framework (oemof) that addresses these problems by offering a free, open and clearly documented framework for energy system modelling. This transparent approach allows a sound scientific discourse on the underlying models and data. In this way the assessment of quality and significance of undertaken analyses is improved. Moreover, the modular composition of the framework supports the adjustment to a large number of application purposes. The open source approach allows a collaborative development of the framework that offers several advantages:
 
 - **Synergies** - By developing collaboratively synergies between the participating institutes can be utilized.
 
@@ -23,7 +23,7 @@ The Center for Sustainable Energy Systems (ZNES) together with the Reiner Lemoin
 Open Energy System Modeling Framework (oemof)
 -----------------------------------------------
 
-oemof is programmed in Python and uses several Python packages for scientific applications (e.g. mathematical optimisation, network analysis, data analyses), optionally in combination with a PostgreSQL/PostGIS Database. It offers a toolbox of various functionalities needed to build energy system models in high temporal and spatial resolution. For instance, the wind energy feed-in in a model region based on weather data can be modeled, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
+oemof is programmed in Python and uses several Python packages for scientific applications (e.g. mathematical optimisation, network analysis, data analyses), optionally in combination with a PostgreSQL/PostGIS Database. It offers a toolbox of various functionalities needed to build energy system models in high temporal and spatial resolution. For instance, the wind energy feed-in in a model region based on weather data can be modelled, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
 
 The framework consists of packages. For the communication between these packages interfaces are provided. A package again consists of modules that handle a defined task. A linkage of specific modules of the various packages is in oemof called an application (app) and depicts for example a concrete energy system model. The following image shows the underlying concept.
 
@@ -377,67 +377,3 @@ system defined via oemof-entities. These entities are instances of
 oemof base classes (e. g. buses or components). For the definition of variables,
 constraints and an objective function as well as for communication with solvers
 etc. the python packages `Pyomo <http://www.pyomo.org/>`_ is used.
-
-Structure of solph
-------------------------------------------
-At its core solph has a class called *OptimizationModel()* which is a child of
-the pyomo class *ConcreteModel()*. This class contains different methods.
-An important type of methods are so called *assembler* methods. These methods
-correspond exactly to one oemof-base-class. For example the
-*transfomer.Simple()* class of oemof will have a associated method called
-simple_transformer_assembler(). This method groups all necessary constraints
-to model a simple transformer. The constraints expressions are defined in
-extra module (*linear_constraints.py*, *linear_mixed_integer_constraints.py*).
-All necessary constraints related with variables are defined in *variables.py*.
-
-
-Constructor
-^^^^^^^^^^^^
-
-The whole pyomo model is build when instantiating the optimization model.
-This is why the constructor of the  *OptimizationModel()* class plays an
-important role.
-
-The general procedure is as basically follows:
-
-1. Set some options
-2. Create all necessary optimization variables
-3. Loop trough all entities and group existing objects by class
-4. Call the associated *assembler* method for every **group** of objects.
-   This builds constraints to model components.
-5. Build the bus constraints with bus *assembler*.
-6. Build objective *assembler*.
-
-
-Assembler methods
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-The *assembler* methods can be specified in two different ways. Firstly, functions
-from the solph-library called *linear_constraints.py* can be used to add
-constraints to the *assembler*. Secondly, *assembler* methods can use other
-*assembler* methods and then be extended by functions from the library.
-The same holds for the objective *assembler*. The objective function uses
-pre-defined objectives from the solph-library called *objectives.py*. These
-pre-defined objectives are build by the use of objective expressions defined
-in *objective_expressions*. Different objectives for optimization models
-can be selected by setting the option *objective_types* inside the
-*objective_assembler* method.
-
-
-If necessary, the two libraries used be *assemlber* methods can be extended
-and used in methods of *OptimizationModel()* afterwards.
-
-Solve and other
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Moreover, the *OptimizationModel()* class contains a method for solving
-the optimization model.
-
-
-Postprocessing of results
-----------------------------
-To extract values from the optimization problem variables their exist a
-postprossing module containing different functions.
-Results can be written back to the oemof-objects or
-to excel-spreadsheets.
-

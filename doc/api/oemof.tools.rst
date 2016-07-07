@@ -12,34 +12,10 @@ oemof.tools.config module
     :undoc-members:
     :show-inheritance:
 
-oemof.tools.create_components module
-------------------------------------
-
-.. automodule:: oemof.tools.create_components
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.tools.entities_from_csv module
-------------------------------------
-
-.. automodule:: oemof.tools.entities_from_csv
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 oemof.tools.helpers module
 --------------------------
 
 .. automodule:: oemof.tools.helpers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.tools.holiday module
---------------------------
-
-.. automodule:: oemof.tools.holiday
     :members:
     :undoc-members:
     :show-inheritance:
