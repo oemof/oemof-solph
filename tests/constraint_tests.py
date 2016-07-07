@@ -190,6 +190,8 @@ class Constraint_Tests:
             outputs={bel: Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
+            capacity_max = 0.9,
+            capacity_min= 0.1,
             nominal_input_capacity_ratio=1 / 6,
             nominal_output_capacity_ratio=1 / 6,
             inflow_conversion_factor=0.97,

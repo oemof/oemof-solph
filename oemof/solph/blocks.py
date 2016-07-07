@@ -272,7 +272,7 @@ class InvestmentStorage(SimpleBlock):
         def _min_capacity_invest_rule(block, n, t):
             """Rule definition of lower bound constraint for the storage cap.
             """
-            expr = (self.capacity[n, t] <= (n.capacity_min[t] *
+            expr = (self.capacity[n, t] >= (n.capacity_min[t] *
                                             self.invest[n]))
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
