@@ -94,7 +94,8 @@ power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
 power_price = pd.concat([power_price_model, power_price_real], axis=1)
 
 # weekly mean price against historical price
-fig, axes = plt.subplots(nrows=3, ncols=1)
+nrow = 3
+fig, axes = plt.subplots(nrows=nrow, ncols=1)
 power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[0],
                                        title='Daily mean', sharex=True)
 power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[1],
@@ -102,6 +103,8 @@ power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[1],
 power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[2],
                                        title='Montly mean (base)',
                                        sharex=True)
+for i in range(0, nrow):
+    axes[i].set_ylabel('EUR/MWh')
 
 # plot_data = DE_overall[
 #     ['DE_solar', 'DE_wind',
