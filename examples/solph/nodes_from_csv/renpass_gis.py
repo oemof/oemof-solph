@@ -93,8 +93,15 @@ power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
 power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
 power_price = pd.concat([power_price_model, power_price_real], axis=1)
 
-# Weekly mean price against historical price
-power_price.resample('1W').mean().plot(drawstyle='steps-post')
+# weekly mean price against historical price
+fig, axes = plt.subplots(nrows=3, ncols=1)
+power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[0],
+                                       title='Daily mean', sharex=True)
+power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[1],
+                                       title='Weekly mean', sharex=True)
+power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[2],
+                                       title='Montly mean (base)',
+                                       sharex=True)
 
 # plot_data = DE_overall[
 #     ['DE_solar', 'DE_wind',
