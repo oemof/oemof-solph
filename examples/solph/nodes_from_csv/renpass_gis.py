@@ -86,7 +86,16 @@ DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
 if (DE_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
 
-# # %% output: plotting
+# %% output: plotting
+
+power_price_model = DE_other['duals']
+power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
+power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
+power_price = pd.concat([power_price_model, power_price_real], axis=1)
+
+# Weekly mean price against historical price
+power_price.resample('1W').mean().plot(drawstyle='steps-post')
+
 # plot_data = DE_overall[
 #     ['DE_solar', 'DE_wind',
 #      'DE_pp_gas', 'DE_pp_hard_coal', 'DE_pp_lignite', 'DE_pp_uranium',
