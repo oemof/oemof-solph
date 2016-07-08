@@ -24,7 +24,7 @@ logger.define_logging()
 # %% configuration
 
 date_from = '2014-01-01 00:00:00'
-date_to = '2014-01-31 23:00:00'
+date_to = '2014-12-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
