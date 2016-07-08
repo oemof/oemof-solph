@@ -42,9 +42,9 @@ plt.rcParams.update({'font.size': 18})
 
 es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
-nodes = NodesFromCSV(file_nodes_flows='status_quo_2014_aggregated.csv',
-    file_nodes_flows_sequences='status_quo_2014_aggregated_seq.csv',
-    delimiter=',')
+nodes = NodesFromCSV(file_nodes_flows='status_quo_2014_aggr.csv',
+                     file_nodes_flows_sequences='status_quo_2014_aggr_seq.csv',
+                     delimiter=',')
 
 stopwatch()
 om = OperationalModel(es)
@@ -62,29 +62,30 @@ logging.info('Check the results')
 
 # %% output: data
 
-# myresults = ResultsDataFrame(energy_system=es)
-#
-# DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
-#                                       date_from=date_from, date_to=date_to,
-#                                       formatted=True)
-# DE_inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
-#                  inplace=True)
-#
-# DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
-#                                        date_from=date_from, date_to=date_to,
-#                                        formatted=True)
-# DE_outputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_in'},
-#                   inplace=True)
-#
-# DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
-#                                      date_from=date_from, date_to=date_to,
-#                                      formatted=True)
-#
-# DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
-#
-# if (DE_overall.sum(axis=1).abs() > 0.0001).any():
-#     print('Bus not balanced')
-#
+myresults = ResultsDataFrame(energy_system=es)
+
+DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
+                                      date_from=date_from, date_to=date_to,
+                                      formatted=True)
+DE_inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
+                 inplace=True)
+
+DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
+                                       date_from=date_from, date_to=date_to,
+                                       formatted=True)
+
+DE_outputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_in'},
+                  inplace=True)
+
+DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
+                                     date_from=date_from, date_to=date_to,
+                                     formatted=True)
+
+DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
+
+if (DE_overall.sum(axis=1).abs() > 0.0001).any():
+    print('Bus not balanced')
+
 # # %% output: plotting
 # plot_data = DE_overall[
 #     ['DE_solar', 'DE_wind',
