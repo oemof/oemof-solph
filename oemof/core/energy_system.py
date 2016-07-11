@@ -160,36 +160,6 @@ class EnergySystem:
             self._groups = self._groups()
         return self._groups
 
-    # TODO: Condense signature (use Buse)
-    def connect(self, bus1, bus2, in_max, out_max, eta, transport_class):
-        """Create two transport objects to connect two buses of the same type
-        in both directions.
-
-        Parameters
-        ----------
-        bus1, bus2 : core.network.Bus object
-            Two buses to be connected.
-        eta : float
-            Constant efficiency of the transport.
-        in_max : float
-            Maximum input the transport can handle, in $MW$.
-        out_max : float
-            Maximum output which can possibly be obtained when using the
-            transport, in $MW$.
-        transport_class class
-            Transport class to use for the connection
-        """
-        if not transport_class == transport.Simple:
-            logging.error('')
-            raise(TypeError(
-                "Sorry, `EnergySystem.connect` currently only works with" +
-                "a `transport_class` argument of" + str(transport.Simple)))
-        for bus_a, bus_b in [(bus1, bus2), (bus2, bus1)]:
-            uid = str('transport_' + bus_a.uid + bus_b.uid)
-            transport_class(uid=uid, outputs=[bus_a], inputs=[bus_b],
-                            out_max=[out_max], in_max=[in_max], eta=[eta])
-
-
     @property
     def nodes(self):
         return self.entities
