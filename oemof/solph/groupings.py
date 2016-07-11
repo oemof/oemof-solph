@@ -16,7 +16,7 @@ groupings specified like this:
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
 """
-from oemof.core import energy_system as core_es
+from oemof import energy_system as core_es
 from .network import Bus, LinearTransformer, Storage
 from .options import Investment
 from . import blocks
