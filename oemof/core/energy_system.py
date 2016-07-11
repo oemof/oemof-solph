@@ -25,6 +25,7 @@ def MultipleGroups(*args):
          DeprecationWarning)
     return list(args)
 
+
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
 
@@ -167,41 +168,6 @@ class EnergySystem:
     @nodes.setter
     def nodes(self, value):
         self.entities = value
-
-    # TODO: Add concept to make it possible to use another solver library.
-    def optimize(self, om=None):
-        """Start optimizing the energy system using solph.
-
-        Parameters
-        ----------
-        om : :class:`OptimizationModel <oemof.solph.optimization_model.OptimizationModel>`, optional
-            The optimization model used to optimize the :class:`EnergySystem`.
-            If not given, an :class:`OptimizationModel
-            <oemof.solph.optimization_model.OptimizationModel>` instance local
-            to this method is created using the current :class:`EnergySystem`
-            instance as an argument.
-            You only need to supply this if you want to observe any side
-            effects that solving has on the `om`.
-
-        Returns
-        -------
-        self : :class:`EnergySystem`
-        """
-        if om is None:
-            try:
-                from oemof.solph.optimization_model import \
-                        OptimizationModel as OM
-            except ImportError:
-                from oemof.solph import OperationalModel as OM
-            om = OM(energysystem=self)
-
-        om.solve(solver=self.simulation.solver, debug=self.simulation.debug,
-                 verbose=self.simulation.verbose,
-                 duals=self.simulation.duals,
-                 solve_kwargs=self.simulation.solve_kwargs)
-
-        self.results = om.results()
-        return self
 
     def dump(self, dpath=None, filename=None, keep_weather=True):
         r""" Dump an EnergySystem instance.
