@@ -118,8 +118,8 @@ entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
                                   freq='M')
 entsoe_data = entsoe_data[['solar', 'wind', 'uranium',
                            'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
-                           'biomass', 'other_renewable', 'hydro', 'pump',
-                           'consumption', 'import', 'export']]
+                           'biomass', 'hydro', 'pump', 'consumption',
+                           'other_renewable', 'import', 'export']]
 
 entsoe_plot = entsoe_data.resample('1A').sum().plot(kind='bar', stacked=False,
                                                     ax=axes[0])
@@ -131,8 +131,9 @@ entsoe_plot.set_title('ENTSO-E Data')
 model_data = DE_overall[
      ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
       'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
-      'DE_pp_biomass', 'DE_storage_phs_out', 'DE_storage_phs_in',
-      'DE_load',  'DE_shortage', 'DE_excess']]
+      'DE_pp_biomass', 'DE_run_of_river',
+      'DE_storage_phs_out', 'DE_load', 'DE_storage_phs_in',
+      'DE_shortage', 'DE_excess']]
 model_data = model_data/1000
 model_data = model_data.resample('1A').sum()
 model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[1])
