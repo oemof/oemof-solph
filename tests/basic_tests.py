@@ -8,10 +8,10 @@ from nose.tools import ok_, eq_
 import pandas as pd
 import logging
 
-from oemof.core.network.entities.components import transformers as transformer
-from oemof.core import energy_system as es
-from oemof.core.network import Entity
-from oemof.core.network.entities import Bus, Component
+# from oemof.core.network.entities.components import transformers as transformer
+from oemof import energy_system as es
+from oemof.network import Entity
+from oemof.network import Bus, Transformer
 from oemof.network import Bus as NewBus, Node
 from oemof.groupings import Nodes, Flows, FlowsWithNodes as FWNs
 
@@ -20,30 +20,30 @@ class EnergySystem_Tests:
 
     @classmethod
     def setUpClass(self):
-        time_index = pd.date_range('1/1/2012', periods=5, freq='H')
+        self.time_index = pd.date_range('1/1/2012', periods=5, freq='H')
 
-        self.simulation = es.Simulation(timesteps=range(len(time_index)))
+        #timesteps=range(len(time_index)))
 
     def setup(self):
         self.es = es.EnergySystem()
 
     def test_entity_registration(self):
         eq_(Entity.registry, self.es)
-        bus = Bus(uid='bus-uid', type='bus-type')
+        bus = Bus(label='bus-uid', type='bus-type')
         eq_(self.es.entities[0], bus)
-        bus2 = Bus(uid='bus-uid2', type='bus-type')
-        transformer.Simple(uid='pp_gas', inputs=[bus], outputs=[bus2])
-        ok_(isinstance(self.es.entities[2], transformer.Simple))
-        self.es.simulation = self.simulation
-        ok_(len(self.es.simulation.timesteps) == 5)
+        bus2 = Bus(label='bus-uid2', type='bus-type')
+        Transformer(label='pp_gas', inputs=[bus], outputs=[bus2])
+        ok_(isinstance(self.es.entities[2], Transformer))
+        self.es.time_idx = self.time_index
+        ok_(len(self.es.time_idx) == 5)
 
     def test_entity_grouping_on_construction(self):
-        bus = Bus(uid="test bus")
+        bus = Bus(label="test bus")
         ES = es.EnergySystem(entities=[bus])
-        ok_(ES.groups[bus.uid] is bus)
+        ok_(ES.groups[bus.label] is bus)
 
     def test_that_nodes_is_a_proper_alias_for_entities(self):
-        b1, b2 = Bus(uid="B1"), Bus(uid="B2")
+        b1, b2 = Bus(label="B1"), Bus(label="B2")
         eq_(self.es.nodes, [b1, b2])
         empty = []
         self.es.nodes = empty
@@ -57,10 +57,10 @@ class EnergySystem_Tests:
                 return "Group"
         ES = es.EnergySystem(groupings=[by_uid])
 
-        ungrouped = [ Entity(uid="Not in 'Group': {}".format(i))
-                      for i in range(10)]
-        grouped = [ Entity(uid="In 'Group': {}".format(i))
-                    for i in range(10)]
+        ungrouped = [Entity(uid="Not in 'Group': {}".format(i))
+                     for i in range(10)]
+        grouped = [Entity(uid="In 'Group': {}".format(i))
+                   for i in range(10)]
         ok_(None not in ES.groups)
         for g in ES.groups.values():
             for e in ungrouped:
