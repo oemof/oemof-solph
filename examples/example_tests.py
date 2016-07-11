@@ -9,7 +9,7 @@ from oemof.tools import logger
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 
 from storage_optimization import storage_invest
-import simple_least_costs
+from simple_least_costs import simple_least_costs
 
 
 tolerance = 0.001  # percent
@@ -90,7 +90,8 @@ check(stor_invest_dict[number_of_timesteps], stor_invest_run,
 testdict['least_costs'] = {'name': "Simple least costs optimization",
                            'solver': 'cbc'}
 
-filename = os.path.join(basic_path, 'solph', 'example_data.csv')
+filename = os.path.join(basic_path, 'solph', 'simple_least_costs',
+                        'example_data.csv')
 
 try:
     esys = simple_least_costs.initialise_energysystem(periods=2000)
