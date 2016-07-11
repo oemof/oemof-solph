@@ -94,13 +94,15 @@ power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
 power_price = pd.concat([power_price_model, power_price_real], axis=1)
 
 # weekly mean price against historical price
-nrow = 3
+nrow = 4
 fig, axes = plt.subplots(nrows=nrow, ncols=1)
-power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[0],
+power_price.plot(drawstyle='steps-post', ax=axes[0],
+                 title='Hourly price', sharex=True)
+power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[1],
                                        title='Daily mean', sharex=True)
-power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[1],
+power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[2],
                                        title='Weekly mean', sharex=True)
-power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[2],
+power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
                                        title='Montly mean (base)',
                                        sharex=True)
 for i in range(0, nrow):
