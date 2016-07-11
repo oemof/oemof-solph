@@ -86,27 +86,37 @@ DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
 if (DE_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
 
-# %% output: plotting
+## %% output: plotting of prices
+#
+#power_price_model = DE_other['duals']
+#power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
+#power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
+#power_price = pd.concat([power_price_model, power_price_real], axis=1)
+#power_price.to_csv('power_price_comparison_aggr_2014.csv')
+#
+#nrow = 4
+#fig, axes = plt.subplots(nrows=nrow, ncols=1)
+#power_price.plot(drawstyle='steps-post', ax=axes[0],
+#                 title='Hourly price', sharex=True)
+#power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[1],
+#                                       title='Daily mean', sharex=True)
+#power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[2],
+#                                       title='Weekly mean', sharex=True)
+#power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
+#                                       title='Montly mean (base)',
+#                                       sharex=True)
+#for i in range(0, nrow):
+#    axes[i].set_ylabel('EUR/MWh')
 
-power_price_model = DE_other['duals']
-power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
-power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
-power_price = pd.concat([power_price_model, power_price_real], axis=1)
+# %% output: plotting of production
 
-# weekly mean price against historical price
-nrow = 4
-fig, axes = plt.subplots(nrows=nrow, ncols=1)
-power_price.plot(drawstyle='steps-post', ax=axes[0],
-                 title='Hourly price', sharex=True)
-power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[1],
-                                       title='Daily mean', sharex=True)
-power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[2],
-                                       title='Weekly mean', sharex=True)
-power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
-                                       title='Montly mean (base)',
-                                       sharex=True)
-for i in range(0, nrow):
-    axes[i].set_ylabel('EUR/MWh')
+entsoe_data = pd.read_csv('data_DE_2014_ENTSO-E.csv')
+entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
+                                  freq='M')
+entsoe_data = entsoe_data[['solar', 'wind', 'net_gen_nuclear',
+                           'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
+                           'biomass', 'other_renewable', 'hydro', 'pump']]
+entsoe_data.resample('1M').sum().plot(kind='bar', stacked=False)
 
 # plot_data = DE_overall[
 #     ['DE_solar', 'DE_wind',
