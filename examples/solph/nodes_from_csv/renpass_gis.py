@@ -108,15 +108,27 @@ if (DE_overall.sum(axis=1).abs() > 0.0001).any():
 #for i in range(0, nrow):
 #    axes[i].set_ylabel('EUR/MWh')
 
-# %% output: plotting of production
+## %% output: plotting of production
+#
+#entsoe_data = pd.read_csv('data_DE_2014_ENTSO-E.csv')
+#entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
+#                                  freq='M')
+#entsoe_data = entsoe_data[['solar', 'wind', 'uranium',
+#                           'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
+#                           'biomass', 'other_renewable', 'hydro', 'pump',
+#                           'consumption', 'import', 'export']]
+#
+#entsoe_2014_DE = entsoe_data.resample('1A').sum().plot(kind='bar',
+#                                                       stacked=False)
+#entsoe_2014_DE.set_ylabel('Energy in MWh')
+#entsoe_2014_DE.set_xlabel('Date and Time')
+#
+#model_2014_DE = DE_overall[
+#     ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
+#      'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
+#      'DE_pp_biomass', 'DE_storage_phs_out', 'DE_storage_phs_in',
+#      'DE_load',  'DE_shortage', 'DE_excess']]
 
-entsoe_data = pd.read_csv('data_DE_2014_ENTSO-E.csv')
-entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
-                                  freq='M')
-entsoe_data = entsoe_data[['solar', 'wind', 'net_gen_nuclear',
-                           'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
-                           'biomass', 'other_renewable', 'hydro', 'pump']]
-entsoe_data.resample('1M').sum().plot(kind='bar', stacked=False)
 
 # plot_data = DE_overall[
 #     ['DE_solar', 'DE_wind',
