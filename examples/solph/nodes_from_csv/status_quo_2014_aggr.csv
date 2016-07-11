@@ -9,7 +9,7 @@ If time: replace solar and wind feedin for 2014 with real values from OPSD datas
 ### GLOBAL RESOURCES,,,,,,,,,,,,,,,,,
 Source,GL_resource_uranium,GL_resource_uranium,GL_bus_uranium,,,,,4.58,,,,,,,,,
 Source,GL_resource_lignite,GL_resource_lignite,GL_bus_lignite,,,,,11.11,,,,,,,,,
-Source,GL_resource_coal,GL_resource_hard_coal,GL_bus_hard_coal,,,,,19.19,,,,,,,,,
+Source,GL_resource_hard_coal,GL_resource_hard_coal,GL_bus_hard_coal,,,,,19.19,,,,,,,,,
 Source,GL_resource_gas,GL_resource_gas,GL_bus_gas,,,,,27.86,,,,,,,,,
 Source,GL_resource_oil,GL_resource_oil,GL_bus_oil,,,,,48.93,,,,,,,,,
 Source,GL_resource_mixed_fuels,GL_resource_mixed_fuels,GL_bus_mixed_fuels,,,,,12.78,,,,,,,,,

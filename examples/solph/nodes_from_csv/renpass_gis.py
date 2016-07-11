@@ -81,7 +81,7 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
 
-DE_overall = pd.concat([DE_inputs, -DE_outputs], axis=1)
+DE_overall = pd.concat([DE_inputs, DE_outputs], axis=1)
 
 if (DE_overall.sum(axis=1).abs() > 0.0001).any():
     print('Bus not balanced')
@@ -108,34 +108,38 @@ if (DE_overall.sum(axis=1).abs() > 0.0001).any():
 #for i in range(0, nrow):
 #    axes[i].set_ylabel('EUR/MWh')
 
-## %% output: plotting of production
-#
-#entsoe_data = pd.read_csv('data_DE_2014_ENTSO-E.csv')
-#entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
-#                                  freq='M')
-#entsoe_data = entsoe_data[['solar', 'wind', 'uranium',
-#                           'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
-#                           'biomass', 'other_renewable', 'hydro', 'pump',
-#                           'consumption', 'import', 'export']]
-#
-#entsoe_2014_DE = entsoe_data.resample('1A').sum().plot(kind='bar',
-#                                                       stacked=False)
-#entsoe_2014_DE.set_ylabel('Energy in MWh')
-#entsoe_2014_DE.set_xlabel('Date and Time')
-#
-#model_2014_DE = DE_overall[
-#     ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
-#      'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
-#      'DE_pp_biomass', 'DE_storage_phs_out', 'DE_storage_phs_in',
-#      'DE_load',  'DE_shortage', 'DE_excess']]
+# %% output: plotting of production
 
+fig, axes = plt.subplots(nrows=1, ncols=2)
+fig.suptitle('Model validation for 2014', fontsize=30)
 
-# plot_data = DE_overall[
-#     ['DE_solar', 'DE_wind',
-#      'DE_pp_gas', 'DE_pp_hard_coal', 'DE_pp_lignite', 'DE_pp_uranium',
-#      'DE_storage_phs_out', 'DE_shortage',
-#      'DE_load', 'DE_storage_phs_in', 'DE_excess']]
-# dispatch = plot_data.plot(kind='area', stacked=True, linewidth=0)
-# dispatch.set_title('Power Plant Dispatch (Without NTCs)')
-# dispatch.set_ylabel('Power in MW')
-# dispatch.set_xlabel('Date and Time')
+# data from
+# https://www.quandl.com/data/ENTSOE/DE_PROD-Electricity-Production-Germany
+# in GWh
+entsoe_data = pd.read_csv('data_DE_2014_ENTSO-E.csv')
+entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
+                                  freq='M')
+entsoe_data = entsoe_data[['solar', 'wind', 'uranium',
+                           'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
+                           'biomass', 'other_renewable', 'hydro', 'pump',
+                           'consumption', 'import', 'export']]
+
+entsoe_plot = entsoe_data.resample('1A').sum().plot(kind='bar',
+                                                    stacked=False,
+                                                    ax=axes[0])
+entsoe_plot.set_ylabel('Energy in GWh')
+entsoe_plot.set_xlabel('Date and Time')
+entsoe_plot.set_title('ENTSO-E Data')
+
+# data from model in MWh
+model_data = DE_overall[
+     ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
+      'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
+      'DE_pp_biomass', 'DE_storage_phs_out', 'DE_storage_phs_in',
+      'DE_load',  'DE_shortage', 'DE_excess']]
+model_data = model_data/1000
+model_data = model_data.resample('1A').sum()
+model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[1])
+model_plot.set_ylabel('Energy in GWh')
+model_plot.set_xlabel('Date and Time')
+model_plot.set_title('Model Results')
