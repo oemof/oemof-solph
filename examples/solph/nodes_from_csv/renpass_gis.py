@@ -83,8 +83,6 @@ DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
 
 DE_overall = pd.concat([DE_inputs, DE_outputs], axis=1)
 
-if (DE_overall.sum(axis=1).abs() > 0.0001).any():
-    print('Bus not balanced')
 
 # %% output: plotting of prices
 
