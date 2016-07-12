@@ -87,13 +87,14 @@ results = ResultsDataFrame(energy_system=es)
 
 # global plotting options
 matplotlib.style.use('ggplot')
-plt.rcParams['lines.linewidth'] = 2
-plt.rcParams['axes.facecolor'] = 'silver'
-plt.rcParams['xtick.color'] = 'k'
-plt.rcParams['ytick.color'] = 'k'
-plt.rcParams['text.color'] = 'k'
-plt.rcParams['axes.labelcolor'] = 'k'
-plt.rcParams.update({'font.size': 18})
+plt.rcParams.update(plt.rcParamsDefault)
+#plt.rcParams['lines.linewidth'] = 2
+#plt.rcParams['axes.facecolor'] = 'silver'
+#plt.rcParams['xtick.color'] = 'k'
+#plt.rcParams['ytick.color'] = 'k'
+#plt.rcParams['text.color'] = 'k'
+#plt.rcParams['axes.labelcolor'] = 'k'
+#plt.rcParams.update({'font.size': 10})
 
 # quandl data gets downloaded into dataframes
 # see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
@@ -184,7 +185,7 @@ for cc in country_codes:
     pdf_file = PdfPages('validation.pdf')
 
     fig, axes = plt.subplots(nrows=1, ncols=2)
-    fig.suptitle('Model validation for 2014', fontsize=30)
+    #fig.suptitle('Model validation for 2014', fontsize=30)
 
     model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[0])
     model_plot.set_ylabel('Energy in GWh')
@@ -198,5 +199,5 @@ for cc in country_codes:
     entsoe_plot.set_xlabel('Date and Time')
     entsoe_plot.set_title('ENTSO-E Data')
 
-    plt.savefig('validation_'+cc+'.pdf', bbox_inches='tight')
+    plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
