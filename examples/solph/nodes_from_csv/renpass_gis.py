@@ -62,31 +62,31 @@ logging.info('Check the results')
 
 # %% output: data
 
-myresults = ResultsDataFrame(energy_system=es)
+results = ResultsDataFrame(energy_system=es)
 
-DE_inputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="input",
-                                      date_from=date_from, date_to=date_to,
-                                      formatted=True)
-DE_inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
-                 inplace=True)
+inputs = results.slice_unstacked(bus_label="DE_bus_el", type="input",
+                                 date_from=date_from, date_to=date_to,
+                                 formatted=True)
+inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
+              inplace=True)
 
-DE_outputs = myresults.slice_unstacked(bus_label="DE_bus_el", type="output",
-                                       date_from=date_from, date_to=date_to,
-                                       formatted=True)
+outputs = results.slice_unstacked(bus_label="DE_bus_el", type="output",
+                                  date_from=date_from, date_to=date_to,
+                                  formatted=True)
 
-DE_outputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_in'},
-                  inplace=True)
+outputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_in'},
+               inplace=True)
 
-DE_other = myresults.slice_unstacked(bus_label="DE_bus_el", type="other",
-                                     date_from=date_from, date_to=date_to,
-                                     formatted=True)
+other = results.slice_unstacked(bus_label="DE_bus_el", type="other",
+                                date_from=date_from, date_to=date_to,
+                                formatted=True)
 
-DE_overall = pd.concat([DE_inputs, DE_outputs], axis=1)
+overall = pd.concat([inputs, outputs], axis=1)
 
 
 # %% output: plotting of prices
 
-power_price_model = DE_other['duals']
+power_price_model = other['duals']
 power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
 power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
 power_price = pd.concat([power_price_model, power_price_real], axis=1)
@@ -132,13 +132,13 @@ entsoe_plot.set_xlabel('Date and Time')
 entsoe_plot.set_title('ENTSO-E Data')
 
 # data from model in MWh
-model_data = DE_overall[
+model_data = overall[
      ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
       'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
       'DE_pp_biomass', 'DE_run_of_river',
       'DE_storage_phs_out', 'DE_load']]
-powerline_cols = [col for col in DE_overall.columns if 'powerline' in col]
-powerlines = DE_overall[powerline_cols]
+powerline_cols = [col for col in overall.columns if 'powerline' in col]
+powerlines = overall[powerline_cols]
 exports = powerlines[
     [col for col in powerlines.columns if '_DE_' in col]].sum(axis=1)
 exports = exports.to_frame()
