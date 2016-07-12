@@ -123,7 +123,7 @@ entsoe_data.index = pd.date_range(entsoe_data['Date'].iloc[0], periods=12,
 entsoe_data = entsoe_data[['solar', 'wind', 'uranium',
                            'lignite', 'hard_coal', 'gas', 'oil', 'mixed_fuels',
                            'biomass', 'hydro', 'pump', 'consumption',
-                           'other_renewable', 'import', 'export']]
+                           'import', 'export']]
 
 entsoe_plot = entsoe_data.resample('1A').sum().plot(kind='bar', stacked=False,
                                                     ax=axes[0])
@@ -136,9 +136,12 @@ model_data = DE_overall[
      ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
       'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
       'DE_pp_biomass', 'DE_run_of_river',
-      'DE_storage_phs_out', 'DE_load', 'DE_storage_phs_in',
-      'DE_shortage', 'DE_excess']]
+      'DE_storage_phs_out', 'DE_load']]
+powerline_cols = [col for col in DE_overall.columns if 'powerline' in col]
+model_data = pd.concat([model_data, DE_overall[powerline_cols]], axis=1)
 model_data = model_data/1000
+
+# resampling and plot
 model_data = model_data.resample('1A').sum()
 model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[1])
 model_plot.set_ylabel('Energy in GWh')
