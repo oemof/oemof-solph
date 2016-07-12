@@ -138,7 +138,16 @@ model_data = DE_overall[
       'DE_pp_biomass', 'DE_run_of_river',
       'DE_storage_phs_out', 'DE_load']]
 powerline_cols = [col for col in DE_overall.columns if 'powerline' in col]
-model_data = pd.concat([model_data, DE_overall[powerline_cols]], axis=1)
+powerlines = DE_overall[powerline_cols]
+exports = powerlines[
+    [col for col in powerlines.columns if '_DE_' in col]].sum(axis=1)
+exports = exports.to_frame()
+exports.columns = ['export']
+imports = powerlines[
+    [col for col in powerlines.columns if 'DE_' in col]].sum(axis=1)
+imports = imports.to_frame()
+imports.columns = ['import']
+model_data = pd.concat([model_data, imports, exports], axis=1)
 model_data = model_data/1000
 
 # resampling and plot
