@@ -10,6 +10,7 @@ from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
+from matplotlib.backends.backend_pdf import PdfPages
 from Quandl import Quandl
 
 def stopwatch():
@@ -28,16 +29,6 @@ date_from = '2014-01-01 00:00:00'
 date_to = '2014-12-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
-
-# global plotting options
-matplotlib.style.use('ggplot')
-plt.rcParams['lines.linewidth'] = 2
-plt.rcParams['axes.facecolor'] = 'silver'
-plt.rcParams['xtick.color'] = 'k'
-plt.rcParams['ytick.color'] = 'k'
-plt.rcParams['text.color'] = 'k'
-plt.rcParams['axes.labelcolor'] = 'k'
-plt.rcParams.update({'font.size': 18})
 
 # %% model creation and solving
 
@@ -93,6 +84,16 @@ results = ResultsDataFrame(energy_system=es)
 
 
 # %% output: plotting of production (model vs. entso-e dataset)
+
+# global plotting options
+matplotlib.style.use('ggplot')
+plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['axes.facecolor'] = 'silver'
+plt.rcParams['xtick.color'] = 'k'
+plt.rcParams['ytick.color'] = 'k'
+plt.rcParams['text.color'] = 'k'
+plt.rcParams['axes.labelcolor'] = 'k'
+plt.rcParams.update({'font.size': 18})
 
 # quandl data gets downloaded into dataframes
 # see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
@@ -180,6 +181,8 @@ for cc in country_codes:
                                       freq='M')
 
     # plotting
+    pdf_file = PdfPages('validation.pdf')
+
     fig, axes = plt.subplots(nrows=1, ncols=2)
     fig.suptitle('Model validation for 2014', fontsize=30)
 
@@ -194,3 +197,6 @@ for cc in country_codes:
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('Date and Time')
     entsoe_plot.set_title('ENTSO-E Data')
+
+    plt.savefig('validation_'+cc+'.pdf', bbox_inches='tight')
+    plt.close()
