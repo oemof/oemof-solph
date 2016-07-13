@@ -10,7 +10,6 @@ from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
-from matplotlib.backends.backend_pdf import PdfPages
 from Quandl import Quandl
 
 def stopwatch():
@@ -190,7 +189,6 @@ for cc in country_codes:
                                       freq='M')
 
     # plotting
-    pdf_file = PdfPages('validation.pdf')
 
     fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True)
     fig.suptitle('Validation for 2014'+' ('+cc+')', fontsize=16)
