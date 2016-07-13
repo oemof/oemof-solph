@@ -55,32 +55,6 @@ logging.info('Check the results')
 
 results = ResultsDataFrame(energy_system=es)
 
-## %% output: plotting of prices
-#
-#power_price_model = other['duals']
-#power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
-#power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
-#power_price = pd.concat([power_price_model, power_price_real], axis=1)
-#power_price.rename(columns={'price_avg_real': 'reality',
-#                            'duals': 'model'},
-#                   inplace=True)
-#power_price = power_price[['reality', 'model']]
-#power_price.to_csv('power_price_comparison_aggr_2014.csv')
-#
-#nrow = 4
-#fig, axes = plt.subplots(nrows=nrow, ncols=1)
-#power_price.plot(drawstyle='steps-post', ax=axes[0],
-#                 title='Hourly price', sharex=True)
-#power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[1],
-#                                       title='Daily mean', sharex=True)
-#power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[2],
-#                                       title='Weekly mean', sharex=True)
-#power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
-#                                       title='Montly mean (base)',
-#                                       sharex=True)
-#for i in range(0, nrow):
-#    axes[i].set_ylabel('EUR/MWh')
-
 
 # %% output: plotting of production (model vs. entso-e dataset)
 
@@ -146,15 +120,16 @@ for cc in country_codes:
 
     # data from model in MWh
     model_data = overall
+
     powerline_cols = [col for col in overall.columns if 'powerline' in col]
     powerlines = model_data[powerline_cols]
+
     exports = powerlines[
         [col for col in powerlines.columns if cc+'_' in col]].sum(axis=1)
     exports = exports.to_frame()
     imports = powerlines[
         [col for col in powerlines.columns if '_'+cc+'_' in col]].sum(axis=1)
     imports = imports.to_frame()
-
     imports_exports = imports-exports
     imports_exports.columns = ['import_export']
 
@@ -165,6 +140,7 @@ for cc in country_codes:
          if 'shortage' not in col
          if 'excess' not in col]]
     model_data.rename(columns=lambda x: x.replace(cc+'_', ''), inplace=True)
+    # exclude AT as its pps are connected to the german electricity bus
     if cc is not 'AT':
         model_data = model_data[
              ['solar', 'wind', 'pp_uranium', 'pp_lignite', 'pp_hard_coal',
@@ -187,9 +163,9 @@ for cc in country_codes:
                                'other_hydro', 'generation_not_clearly']]
     entsoe_data.index = pd.date_range(entsoe_data.index[0], periods=12,
                                       freq='M')
+    entsoe_data = entsoe_data.resample('1A').sum()
 
     # plotting
-
     fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True)
     fig.suptitle('Validation for 2014'+' ('+cc+')', fontsize=16)
 
@@ -198,12 +174,36 @@ for cc in country_codes:
     model_plot.set_xlabel('Date and Time')
     model_plot.set_title('Model Results')
 
-    entsoe_plot = entsoe_data.resample('1A').sum().plot(kind='bar',
-                                                        stacked=False,
-                                                        ax=axes[1])
+    entsoe_plot = entsoe_data.plot(kind='bar', stacked=False, ax=axes[1])
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('Date and Time')
     entsoe_plot.set_title('ENTSO-E Data')
 
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
+
+# %% output: plotting of prices for Germany
+
+power_price_model = other['duals']
+power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
+power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
+power_price = pd.concat([power_price_model, power_price_real], axis=1)
+power_price.rename(columns={'price_avg_real': 'reality',
+                            'duals': 'model'},
+                   inplace=True)
+power_price = power_price[['reality', 'model']]
+power_price.to_csv('power_price_comparison_aggr_2014.csv')
+
+nrow = 4
+fig, axes = plt.subplots(nrows=nrow, ncols=1)
+power_price.plot(drawstyle='steps-post', ax=axes[0],
+                 title='Hourly price', sharex=True)
+power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[1],
+                                       title='Daily mean', sharex=True)
+power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[2],
+                                       title='Weekly mean', sharex=True)
+power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
+                                       title='Montly mean (base)',
+                                       sharex=True)
+for i in range(0, nrow):
+    axes[i].set_ylabel('EUR/MWh')
