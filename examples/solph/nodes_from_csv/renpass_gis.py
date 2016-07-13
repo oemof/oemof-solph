@@ -207,3 +207,5 @@ power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
                                        sharex=True)
 for i in range(0, nrow):
     axes[i].set_ylabel('EUR/MWh')
+
+plt.show()
