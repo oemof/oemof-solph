@@ -170,7 +170,7 @@ for cc in country_codes:
         model_data = model_data[
              ['solar', 'wind', 'pp_uranium', 'pp_lignite', 'pp_hard_coal',
               'pp_gas', 'pp_oil', 'pp_mixed_fuels', 'pp_biomass',
-              'run_of_river', 'storage_phs_out', 'load', 'imports_exports']]
+              'run_of_river', 'storage_phs_out', 'load', 'import_export']]
     model_data = model_data/1000
     model_data = model_data.resample('1A').sum()
 
