@@ -193,7 +193,7 @@ for cc in country_codes:
     pdf_file = PdfPages('validation.pdf')
 
     fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True)
-    fig.suptitle('Validation for 2014'+'('+cc+')', fontsize=16)
+    fig.suptitle('Validation for 2014'+' ('+cc+')', fontsize=16)
 
     model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[0])
     model_plot.set_ylabel('Energy in GWh')
