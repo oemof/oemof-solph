@@ -86,15 +86,16 @@ results = ResultsDataFrame(energy_system=es)
 # %% output: plotting of production (model vs. entso-e dataset)
 
 # global plotting options
-matplotlib.style.use('ggplot')
 plt.rcParams.update(plt.rcParamsDefault)
-#plt.rcParams['lines.linewidth'] = 2
-#plt.rcParams['axes.facecolor'] = 'silver'
-#plt.rcParams['xtick.color'] = 'k'
-#plt.rcParams['ytick.color'] = 'k'
-#plt.rcParams['text.color'] = 'k'
-#plt.rcParams['axes.labelcolor'] = 'k'
-#plt.rcParams.update({'font.size': 10})
+matplotlib.style.use('ggplot')
+plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['axes.facecolor'] = 'silver'
+plt.rcParams['xtick.color'] = 'k'
+plt.rcParams['ytick.color'] = 'k'
+plt.rcParams['text.color'] = 'k'
+plt.rcParams['axes.labelcolor'] = 'k'
+plt.rcParams.update({'font.size': 10})
+plt.rcParams.update({'legend.fontsize': 6})
 
 # quandl data gets downloaded into dataframes
 # see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
@@ -129,7 +130,7 @@ for cc in country_codes:
     inputs = results.slice_unstacked(bus_label=cc+'_bus_el', type='input',
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
-    inputs.rename(columns={'DE_storage_phs': 'DE_storage_phs_out'},
+    inputs.rename(columns={cc+'_storage_phs': cc+'_storage_phs_out'},
                   inplace=True)
 
     outputs = results.slice_unstacked(bus_label=cc+'_bus_el', type='output',
@@ -146,32 +147,39 @@ for cc in country_codes:
 
     # data from model in MWh
     model_data = overall
-#    model_data = overall[
-#         ['DE_solar', 'DE_wind', 'DE_pp_uranium', 'DE_pp_lignite',
-#          'DE_pp_hard_coal', 'DE_pp_gas', 'DE_pp_oil', 'DE_pp_mixed_fuels',
-#          'DE_pp_biomass', 'DE_run_of_river',
-#          'DE_storage_phs_out', 'DE_load']]
-#    powerline_cols = [col for col in overall.columns if 'powerline' in col]
-#    powerlines = overall[powerline_cols]
-#    exports = powerlines[
-#        [col for col in powerlines.columns if '_DE_' in col]].sum(axis=1)
-#    exports = exports.to_frame()
-#    exports.columns = ['export']
-#    imports = powerlines[
-#        [col for col in powerlines.columns if 'DE_' in col]].sum(axis=1)
-#    imports = imports.to_frame()
-#    imports.columns = ['import']
-#    model_data = pd.concat([model_data, imports, exports], axis=1)
+    powerline_cols = [col for col in overall.columns if 'powerline' in col]
+    powerlines = model_data[powerline_cols]
+    exports = powerlines[
+        [col for col in powerlines.columns if cc+'_' in col]].sum(axis=1)
+    exports = exports.to_frame()
+    imports = powerlines[
+        [col for col in powerlines.columns if '_'+cc+'_' in col]].sum(axis=1)
+    imports = imports.to_frame()
+
+    imports_exports = imports-exports
+    imports_exports.columns = ['import_export']
+
+    model_data = pd.concat([model_data, imports_exports], axis=1)
+    model_data = model_data[
+        [col for col in model_data.columns
+         if 'powerline' not in col
+         if 'shortage' not in col
+         if 'excess' not in col]]
+    model_data.rename(columns=lambda x: x.replace(cc+'_', ''), inplace=True)
+    if cc is not 'AT':
+        model_data = model_data[
+             ['solar', 'wind', 'pp_uranium', 'pp_lignite', 'pp_hard_coal',
+              'pp_gas', 'pp_oil', 'pp_mixed_fuels', 'pp_biomass',
+              'run_of_river', 'storage_phs_out', 'load', 'imports_exports']]
     model_data = model_data/1000
     model_data = model_data.resample('1A').sum()
 
-    # data from ENSTO-E in GWh
+    # data from ENTSO-E in GWh
     idx = 'ENTSOE/' + cc + '_PROD'
-    entsoe_data = Quandl.get(idx, trim_start="2014-01-01",
+    entsoe_data = Quandl.get(idx,
+                             trim_start="2014-01-01",
                              trim_end="2014-12-31",
                              authtoken=auth_tok)
-    entsoe_data.drop(['net_gen_renewable', 'net_gen_hydro',
-                      'Sum', 'net_gen_fossil_fuels'], inplace=True, axis=1)
     entsoe_data.rename(columns=new_colnames, inplace=True)
     entsoe_data = entsoe_data[['solar', 'wind', 'uranium', 'lignite',
                                'hard_coal', 'gas', 'oil', 'mixed_fuels',
@@ -184,7 +192,7 @@ for cc in country_codes:
     # plotting
     pdf_file = PdfPages('validation.pdf')
 
-    fig, axes = plt.subplots(nrows=1, ncols=2)
+    fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True)
     #fig.suptitle('Model validation for 2014', fontsize=30)
 
     model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[0])
