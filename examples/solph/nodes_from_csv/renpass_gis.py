@@ -184,31 +184,36 @@ for cc in country_codes:
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
 
+    # plotting of prices for Germany
+    if cc is 'DE':
+        power_price_model = other['duals']
+        power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
+        power_price_real.set_index(power_price_model.index, drop=True,
+                                   inplace=True)
+        power_price = pd.concat([power_price_model, power_price_real], axis=1)
+        power_price.rename(columns={'price_avg_real': 'reality',
+                                    'duals': 'model'},
+                           inplace=True)
+        power_price = power_price[['reality', 'model']]
+        power_price.to_csv('power_price_comparison_aggr_2014.csv')
 
-# %% output: plotting of prices for Germany
+        nrow = 4
+        fig, axes = plt.subplots(nrows=nrow, ncols=1)
+        power_price.plot(drawstyle='steps-post', ax=axes[0],
+                         title='Hourly price', sharex=True)
+        power_price.resample('1D').mean().plot(drawstyle='steps-post',
+                                               ax=axes[1],
+                                               title='Daily mean',
+                                               sharex=True)
+        power_price.resample('1W').mean().plot(drawstyle='steps-post',
+                                               ax=axes[2],
+                                               title='Weekly mean',
+                                               sharex=True)
+        power_price.resample('1M').mean().plot(drawstyle='steps-post',
+                                               ax=axes[3],
+                                               title='Montly mean (base)',
+                                               sharex=True)
+        for i in range(0, nrow):
+            axes[i].set_ylabel('EUR/MWh')
 
-power_price_model = other['duals']
-power_price_real = pd.read_csv('day_ahead_price_2014_eex.csv')
-power_price_real.set_index(power_price_model.index, drop=True, inplace=True)
-power_price = pd.concat([power_price_model, power_price_real], axis=1)
-power_price.rename(columns={'price_avg_real': 'reality',
-                            'duals': 'model'},
-                   inplace=True)
-power_price = power_price[['reality', 'model']]
-power_price.to_csv('power_price_comparison_aggr_2014.csv')
-
-nrow = 4
-fig, axes = plt.subplots(nrows=nrow, ncols=1)
-power_price.plot(drawstyle='steps-post', ax=axes[0],
-                 title='Hourly price', sharex=True)
-power_price.resample('1D').mean().plot(drawstyle='steps-post', ax=axes[1],
-                                       title='Daily mean', sharex=True)
-power_price.resample('1W').mean().plot(drawstyle='steps-post', ax=axes[2],
-                                       title='Weekly mean', sharex=True)
-power_price.resample('1M').mean().plot(drawstyle='steps-post', ax=axes[3],
-                                       title='Montly mean (base)',
-                                       sharex=True)
-for i in range(0, nrow):
-    axes[i].set_ylabel('EUR/MWh')
-
-plt.show()
+        plt.show()
