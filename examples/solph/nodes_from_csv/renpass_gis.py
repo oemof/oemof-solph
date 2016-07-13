@@ -12,6 +12,7 @@ from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
 from Quandl import Quandl
 
+
 def stopwatch():
     if not hasattr(stopwatch, "now"):
         stopwatch.now = datetime.now()
@@ -22,12 +23,14 @@ def stopwatch():
 
 logger.define_logging()
 
+
 # %% configuration
 
 date_from = '2014-01-01 00:00:00'
 date_to = '2014-12-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
+
 
 # %% model creation and solving
 
@@ -180,6 +183,7 @@ for cc in country_codes:
 
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
+
 
 # %% output: plotting of prices for Germany
 
