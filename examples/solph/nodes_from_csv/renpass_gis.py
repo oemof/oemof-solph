@@ -142,14 +142,15 @@ for cc in country_codes:
          if 'shortage' not in col
          if 'excess' not in col]]
     model_data.rename(columns=lambda x: x.replace(cc+'_', ''), inplace=True)
+    model_data = model_data/1000
+    model_data = model_data.resample('1A').sum()
+
     # exclude AT as its pps are connected to the german electricity bus
     if cc is not 'AT':
         model_data = model_data[
              ['solar', 'wind', 'pp_uranium', 'pp_lignite', 'pp_hard_coal',
               'pp_gas', 'pp_oil', 'pp_mixed_fuels', 'pp_biomass',
               'run_of_river', 'storage_phs_out', 'load', 'import_export']]
-    model_data = model_data/1000
-    model_data = model_data.resample('1A').sum()
 
     # data from ENTSO-E in GWh
     idx = 'ENTSOE/' + cc + '_PROD'
