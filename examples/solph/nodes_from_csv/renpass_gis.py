@@ -148,9 +148,10 @@ for cc in country_codes:
     # exclude AT as its pps are connected to the german electricity bus
     if cc is not 'AT':
         model_data = model_data[
-             ['solar', 'wind', 'pp_uranium', 'pp_lignite', 'pp_hard_coal',
-              'pp_gas', 'pp_oil', 'pp_mixed_fuels', 'pp_biomass',
-              'run_of_river', 'storage_phs_out', 'load', 'import_export']]
+             ['load', 'solar', 'wind', 'pp_uranium', 'pp_lignite',
+              'pp_hard_coal', 'pp_gas', 'pp_oil', 'pp_mixed_fuels',
+              'pp_biomass', 'run_of_river', 'storage_phs_out',
+              'import_export']]
 
     # data from ENTSO-E in GWh
     idx = 'ENTSOE/' + cc + '_PROD'
@@ -159,10 +160,10 @@ for cc in country_codes:
                              trim_end="2014-12-31",
                              authtoken=auth_tok)
     entsoe_data.rename(columns=new_colnames, inplace=True)
-    entsoe_data = entsoe_data[['solar', 'wind', 'uranium', 'lignite',
+    entsoe_data = entsoe_data[['load', 'solar', 'wind', 'uranium', 'lignite',
                                'hard_coal', 'gas', 'oil', 'mixed_fuels',
                                'biomass', 'run_of_river', 'pumped_hydro',
-                               'load', 'import_export', 'other_fossil',
+                               'import_export', 'other_fossil',
                                'other_hydro', 'generation_not_clearly']]
     entsoe_data.index = pd.date_range(entsoe_data.index[0], periods=12,
                                       freq='M')
@@ -176,12 +177,18 @@ for cc in country_codes:
     model_plot.set_ylabel('Energy in GWh')
     model_plot.set_xlabel('Date and Time')
     model_plot.set_title('Model Results')
+    model_plot.set_xticklabels([])
+    model_plot.legend(loc='upper right', ncol=1)
+    # bbox_to_anchor=(1.0, 0.5)
 
     entsoe_plot = entsoe_data.plot(kind='bar', stacked=False, ax=axes[1])
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('Date and Time')
     entsoe_plot.set_title('ENTSO-E Data')
     entsoe_plot.set_xlabel('Date and Time')
+    entsoe_plot.set_xticklabels([])
+    entsoe_plot.legend(loc='upper right', ncol=1)
+    # bbox_to_anchor=(1.0, 0.5)
 
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
