@@ -181,7 +181,7 @@ for cc in country_codes:
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('Date and Time')
     entsoe_plot.set_title('ENTSO-E Data')
-    axes[1].set_xlabel('Date and Time')
+    entsoe_plot.set_xlabel('Date and Time')
 
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
