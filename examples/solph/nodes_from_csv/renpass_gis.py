@@ -176,14 +176,12 @@ for cc in country_codes:
     model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[0])
     model_plot.set_ylabel('Energy in GWh')
     model_plot.set_xlabel('Model Results')
-    # model_plot.set_title('Model Results')
     model_plot.set_xticklabels([])
     model_plot.legend(loc='upper right', ncol=1)
 
     entsoe_plot = entsoe_data.plot(kind='bar', stacked=False, ax=axes[1])
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('ENTSO-E Data')
-    # entsoe_plot.set_title('ENTSO-E Data')
     entsoe_plot.set_xticklabels([])
     entsoe_plot.legend(loc='upper right', ncol=1)
 
