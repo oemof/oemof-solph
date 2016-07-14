@@ -73,10 +73,6 @@ plt.rcParams['axes.labelcolor'] = 'k'
 plt.rcParams.update({'font.size': 10})
 plt.rcParams.update({'legend.fontsize': 6})
 
-# quandl data gets downloaded into dataframes
-# see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
-auth_tok = "QFsHqrY3BqG91_f1Utsj"
-
 # country codes
 country_codes = ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK', 'FR', 'LU', 'NL', 'NO',
                  'PL', 'SE']
@@ -100,6 +96,10 @@ new_colnames = {
                 'exg_saldo': 'import_export',
                 'net_gen_not_clearly': 'generation_not_clearly'
                 }
+
+# quandl data gets downloaded into dataframes in loop
+# see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
+auth_tok = "QFsHqrY3BqG91_f1Utsj"
 
 for cc in country_codes:
 
@@ -181,6 +181,7 @@ for cc in country_codes:
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('Date and Time')
     entsoe_plot.set_title('ENTSO-E Data')
+    axes[1].set_xlabel('Date and Time')
 
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
