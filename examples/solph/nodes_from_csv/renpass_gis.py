@@ -71,7 +71,7 @@ plt.rcParams['ytick.color'] = 'k'
 plt.rcParams['text.color'] = 'k'
 plt.rcParams['axes.labelcolor'] = 'k'
 plt.rcParams.update({'font.size': 10})
-plt.rcParams.update({'legend.fontsize': 6})
+#plt.rcParams.update({'legend.fontsize': 6})
 
 # country codes
 country_codes = ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK', 'FR', 'LU', 'NL', 'NO',
@@ -146,7 +146,7 @@ for cc in country_codes:
     model_data = model_data.resample('1A').sum()
 
     # exclude AT as its pps are connected to the german electricity bus
-    if cc is not 'AT':
+    if cc not in ['AT', 'LU']:
         model_data = model_data[
              ['load', 'solar', 'wind', 'pp_uranium', 'pp_lignite',
               'pp_hard_coal', 'pp_gas', 'pp_oil', 'pp_mixed_fuels',
@@ -177,13 +177,13 @@ for cc in country_codes:
     model_plot.set_ylabel('Energy in GWh')
     model_plot.set_xlabel('Model Results')
     model_plot.set_xticklabels([])
-    model_plot.legend(loc='upper right', ncol=1)
+    model_plot.legend(loc='upper right', ncol=1, fontsize=6)
 
     entsoe_plot = entsoe_data.plot(kind='bar', stacked=False, ax=axes[1])
     entsoe_plot.set_ylabel('Energy in GWh')
     entsoe_plot.set_xlabel('ENTSO-E Data')
     entsoe_plot.set_xticklabels([])
-    entsoe_plot.legend(loc='upper right', ncol=1)
+    entsoe_plot.legend(loc='upper right', ncol=1, fontsize=6)
 
     plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
     plt.close()
