@@ -68,3 +68,7 @@ age_structure = plants[['fuel', 'commissioned']].hist(by='fuel')
 eta_structure = plants[
     ~np.isnan(plants.efficiency_estimate)][
     ['fuel', 'efficiency_estimate']].hist(by='fuel')
+
+plants.groupby(['fuel']).sum()['capacity']
+
+sum(plants.groupby(['fuel']).sum()['capacity'])
