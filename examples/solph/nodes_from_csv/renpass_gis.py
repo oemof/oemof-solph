@@ -26,6 +26,9 @@ logger.define_logging()
 
 # %% configuration
 
+nodes_flows = 'nep_2025_aggr.csv'
+nodes_flows_sequences = 'status_quo_2014_aggr_seq.csv'
+
 date_from = '2014-01-01 00:00:00'
 date_to = '2014-12-31 23:00:00'
 
@@ -36,18 +39,18 @@ datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
 es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
-nodes = NodesFromCSV(file_nodes_flows='nep_2025_aggr.csv',
-                     file_nodes_flows_sequences='status_quo_2014_aggr_seq.csv',
+nodes = NodesFromCSV(file_nodes_flows=nodes_flows,
+                     file_nodes_flows_sequences=nodes_flows_sequences,
                      delimiter=',')
 
 stopwatch()
 om = OperationalModel(es)
-print("OM creation time: " + stopwatch())
+print('OM creation time: ' + stopwatch())
 
 om.receive_duals()
 
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
-print("Optimization time: " + stopwatch())
+print('Optimization time: ' + stopwatch())
 
 logging.info('Done!')
 
@@ -64,7 +67,7 @@ results = ResultsDataFrame(energy_system=es)
 # global plotting options
 plt.rcParams.update(plt.rcParamsDefault)
 matplotlib.style.use('ggplot')
-plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['lines.linewidth'] = 1.2
 plt.rcParams['axes.facecolor'] = 'silver'
 plt.rcParams['xtick.color'] = 'k'
 plt.rcParams['ytick.color'] = 'k'
@@ -103,34 +106,37 @@ auth_tok = "QFsHqrY3BqG91_f1Utsj"
 
 for cc in country_codes:
 
-    inputs = results.slice_unstacked(bus_label=cc+'_bus_el', type='input',
+    inputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='input',
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
-    inputs.rename(columns={cc+'_storage_phs': cc+'_storage_phs_out'},
+    inputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_out'},
                   inplace=True)
 
-    outputs = results.slice_unstacked(bus_label=cc+'_bus_el', type='output',
+    outputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='output',
                                       date_from=date_from, date_to=date_to,
                                       formatted=True)
 
-    outputs.rename(columns={cc+'_storage_phs': cc+'_storage_phs_in'},
+    outputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_in'},
                    inplace=True)
 
-    other = results.slice_unstacked(bus_label=cc+'_bus_el', type='other',
+    other = results.slice_unstacked(bus_label=cc + '_bus_el', type='other',
                                     date_from=date_from, date_to=date_to,
                                     formatted=True)
 
     # data from model in MWh
     model_data = pd.concat([inputs, outputs], axis=1)
 
-    powerline_cols = [col for col in model_data.columns if 'powerline' in col]
+    powerline_cols = [col for col in model_data.columns
+                      if 'powerline' in col]
     powerlines = model_data[powerline_cols]
 
     exports = powerlines[
-        [col for col in powerlines.columns if cc+'_' in col]].sum(axis=1)
+        [col for col in powerlines.columns
+         if cc + '_' in col]].sum(axis=1)
     exports = exports.to_frame()
     imports = powerlines[
-        [col for col in powerlines.columns if '_'+cc+'_' in col]].sum(axis=1)
+        [col for col in powerlines.columns
+         if '_' + cc + '_' in col]].sum(axis=1)
     imports = imports.to_frame()
     imports_exports = imports-exports
     imports_exports.columns = ['import_export']
@@ -141,7 +147,7 @@ for cc in country_codes:
          if 'powerline' not in col
          if 'shortage' not in col
          if 'excess' not in col]]
-    model_data.rename(columns=lambda x: x.replace(cc+'_', ''), inplace=True)
+    model_data.rename(columns=lambda x: x.replace(cc + '_', ''), inplace=True)
     model_data = model_data/1000
     model_data = model_data.resample('1A').sum()
 
@@ -171,7 +177,8 @@ for cc in country_codes:
 
     # plotting
     fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True)
-    fig.suptitle('Validation for 2014'+' ('+cc+')', fontsize=16)
+    fig.suptitle('Annual production(' + cc + ')' + ' for ' + nodes_flows,
+                 fontsize=16)
 
     model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[0])
     model_plot.set_ylabel('Energy in GWh')
@@ -185,7 +192,10 @@ for cc in country_codes:
     entsoe_plot.set_xticklabels([])
     entsoe_plot.legend(loc='upper right', ncol=1, fontsize=6)
 
-    plt.savefig('validation_'+cc+'.pdf', orientation='landscape')
+    plt.savefig('results/results_balance_' + cc + '_' +
+                nodes_flows.replace('.csv', '') + '_' +
+                str(datetime.now()) +
+                '.pdf', orientation='landscape')
     plt.close()
 
     # plotting of prices for Germany
@@ -195,14 +205,22 @@ for cc in country_codes:
         power_price_real.set_index(power_price_model.index, drop=True,
                                    inplace=True)
         power_price = pd.concat([power_price_model, power_price_real], axis=1)
-        power_price.rename(columns={'price_avg_real': 'reality',
-                                    'duals': 'model'},
+        power_price.rename(columns={'price_avg_real': 'eex_day_ahead_2014',
+                                    'duals': 'power_price_model'},
                            inplace=True)
-        power_price = power_price[['reality', 'model']]
-        power_price.to_csv('power_price_comparison_aggr_2014.csv')
 
+        # dispatch and prices in one file
+        power_price = pd.concat([inputs, outputs, power_price], axis=1)
+        power_price.to_csv('dispatch_prices_DE' + nodes_flows)
+
+#        power_price = power_price[
+#            ['power_price_reality', 'eex_day_ahead_2014']]
+        power_price = power_price['power_price_model']
         nrow = 4
         fig, axes = plt.subplots(nrows=nrow, ncols=1)
+        fig.suptitle('Power prices (' + cc + ')' + ' for ' + nodes_flows,
+                     fontsize=16)
+
         power_price.plot(drawstyle='steps-post', ax=axes[0],
                          title='Hourly price', sharex=True)
         power_price.resample('1D').mean().plot(drawstyle='steps-post',
@@ -220,7 +238,8 @@ for cc in country_codes:
         for i in range(0, nrow):
             axes[i].set_ylabel('EUR/MWh')
 
-        plt.show()
-
-        # save prices
-        power_price.to_csv('prices_2014.csv')
+        plt.savefig('results/results_prices_' + cc + '_' +
+                    nodes_flows.replace('.csv', '') + '_' +
+                    str(datetime.now()) +
+                    '.pdf', orientation='landscape')
+        plt.close()
