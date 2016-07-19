@@ -216,33 +216,39 @@ for cc in country_codes:
         power_price = pd.concat([inputs, outputs, power_price], axis=1)
         power_price.to_csv('results/results_dispatch_prices_DE_' + nodes_flows)
 
-#        power_price = power_price[
-#            ['power_price_reality', 'eex_day_ahead_2014']]
-        power_price = power_price['power_price_model']
+        # plot
+        power_price = power_price[['eex_day_ahead_2014', 'power_price_model']]
         nrow = 4
         fig, axes = plt.subplots(nrows=nrow, ncols=1)
         fig.suptitle('Power prices (' + cc + ')' + ' for ' + nodes_flows,
                      fontsize=16)
 
         power_price.plot(drawstyle='steps-post', ax=axes[0],
-                         title='Hourly price', sharex=True, color=cmap(192))
+                         title='Hourly price', sharex=True)
         power_price.resample('1D').mean().plot(drawstyle='steps-post',
                                                ax=axes[1],
                                                title='Daily mean',
-                                               sharex=True, color=cmap(192))
+                                               sharex=True)
         power_price.resample('1W').mean().plot(drawstyle='steps-post',
                                                ax=axes[2],
                                                title='Weekly mean',
-                                               sharex=True, color=cmap(192))
+                                               sharex=True)
         power_price.resample('1M').mean().plot(drawstyle='steps-post',
                                                ax=axes[3],
                                                title='Montly mean (base)',
-                                               sharex=True, color=cmap(192))
+                                               sharex=True)
         for i in range(0, nrow):
             axes[i].set_ylabel('EUR/MWh')
+            axes[i].legend(loc='upper right', ncol=2, fontsize=6)
 
         plt.savefig('results/results_prices_' + cc + '_' +
                     nodes_flows.replace('.csv', '') + '_' +
                     str(datetime.now()) +
                     '.pdf', orientation='landscape')
         plt.close()
+
+        # 15 minute value prices
+        power_price = power_price[
+            ['power_price_model', 'eex_day_ahead_2014']].resample(
+                '15Min').bfill().to_csv(
+                    'results/results_power_price_DE_15_min_' + nodes_flows)
