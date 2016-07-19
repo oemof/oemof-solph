@@ -36,7 +36,7 @@ datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
 es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
-nodes = NodesFromCSV(file_nodes_flows='status_quo_2014_aggr.csv',
+nodes = NodesFromCSV(file_nodes_flows='nep_2025_aggr.csv',
                      file_nodes_flows_sequences='status_quo_2014_aggr_seq.csv',
                      delimiter=',')
 
@@ -221,3 +221,6 @@ for cc in country_codes:
             axes[i].set_ylabel('EUR/MWh')
 
         plt.show()
+
+        # save prices
+        power_price.to_csv('prices_2014.csv')
