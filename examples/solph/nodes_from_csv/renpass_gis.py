@@ -4,8 +4,8 @@ import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib import cm
 from datetime import datetime
-
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
 from oemof.solph import NodesFromCSV
@@ -26,11 +26,11 @@ logger.define_logging()
 
 # %% configuration
 
-nodes_flows = 'nep_2025_aggr.csv'
+nodes_flows = 'nep_2035_aggr.csv'
 nodes_flows_sequences = 'status_quo_2014_aggr_seq.csv'
 
-date_from = '2014-01-01 00:00:00'
-date_to = '2014-12-31 23:00:00'
+date_from = '2035-01-01 00:00:00'
+date_to = '2035-12-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
@@ -75,6 +75,9 @@ plt.rcParams['text.color'] = 'k'
 plt.rcParams['axes.labelcolor'] = 'k'
 plt.rcParams.update({'font.size': 10})
 #plt.rcParams.update({'legend.fontsize': 6})
+
+# colormap for plots
+cmap = cm.Blues
 
 # country codes
 country_codes = ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK', 'FR', 'LU', 'NL', 'NO',
@@ -188,7 +191,7 @@ for cc in country_codes:
 
     entsoe_plot = entsoe_data.plot(kind='bar', stacked=False, ax=axes[1])
     entsoe_plot.set_ylabel('Energy in GWh')
-    entsoe_plot.set_xlabel('ENTSO-E Data')
+    entsoe_plot.set_xlabel('ENTSO-E Data for 2014')
     entsoe_plot.set_xticklabels([])
     entsoe_plot.legend(loc='upper right', ncol=1, fontsize=6)
 
@@ -211,7 +214,7 @@ for cc in country_codes:
 
         # dispatch and prices in one file
         power_price = pd.concat([inputs, outputs, power_price], axis=1)
-        power_price.to_csv('dispatch_prices_DE' + nodes_flows)
+        power_price.to_csv('results/results_dispatch_prices_DE_' + nodes_flows)
 
 #        power_price = power_price[
 #            ['power_price_reality', 'eex_day_ahead_2014']]
@@ -222,19 +225,19 @@ for cc in country_codes:
                      fontsize=16)
 
         power_price.plot(drawstyle='steps-post', ax=axes[0],
-                         title='Hourly price', sharex=True)
+                         title='Hourly price', sharex=True, color=cmap(192))
         power_price.resample('1D').mean().plot(drawstyle='steps-post',
                                                ax=axes[1],
                                                title='Daily mean',
-                                               sharex=True)
+                                               sharex=True, color=cmap(192))
         power_price.resample('1W').mean().plot(drawstyle='steps-post',
                                                ax=axes[2],
                                                title='Weekly mean',
-                                               sharex=True)
+                                               sharex=True, color=cmap(192))
         power_price.resample('1M').mean().plot(drawstyle='steps-post',
                                                ax=axes[3],
                                                title='Montly mean (base)',
-                                               sharex=True)
+                                               sharex=True, color=cmap(192))
         for i in range(0, nrow):
             axes[i].set_ylabel('EUR/MWh')
 
