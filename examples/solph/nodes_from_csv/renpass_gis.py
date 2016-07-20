@@ -74,6 +74,7 @@ plt.rcParams['ytick.color'] = 'k'
 plt.rcParams['text.color'] = 'k'
 plt.rcParams['axes.labelcolor'] = 'k'
 plt.rcParams.update({'font.size': 10})
+plt.rcParams['image.cmap'] = 'Spectral'
 #plt.rcParams.update({'legend.fontsize': 6})
 
 # colormap for plots
@@ -152,6 +153,7 @@ for cc in country_codes:
          if 'excess' not in col]]
     model_data.rename(columns=lambda x: x.replace(cc + '_', ''), inplace=True)
     model_data = model_data/1000
+    model_data_hourly = model_data
     model_data = model_data.resample('1A').sum()
 
     # exclude AT as its pps are connected to the german electricity bus
@@ -252,3 +254,19 @@ for cc in country_codes:
             ['power_price_model', 'eex_day_ahead_2014']].resample(
                 '15Min').bfill().to_csv(
                     'results/results_power_price_DE_15_min_' + nodes_flows)
+
+#    # dispatch
+#    if cc not in ['AT', 'LU']:
+#        model_data_hourly = model_data_hourly.resample('1M').sum()
+#        model_data_hourly.loc[:, 'load'] *= -1
+#        bar = model_data_hourly.plot(kind='bar', stacked=True)
+#        bar.set_ylabel('Energy in GWh')
+#        bar.set_xlabel('Month')
+#        bar.set_xticklabels([i for i in range(1, 13)])
+#        bar.legend(loc='center left', ncol=1, fontsize=5,
+#                   bbox_to_anchor=(0.99, 0.5))
+#        plt.savefig('results/results_dispatch_' + cc + '_' +
+#                    nodes_flows.replace('.csv', '') + '_' +
+#                    str(datetime.now()) +
+#                    '.pdf', orientation='landscape')
+#        plt.close()
