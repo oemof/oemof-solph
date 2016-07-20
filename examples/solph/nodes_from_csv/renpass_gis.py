@@ -157,7 +157,7 @@ for cc in country_codes:
     model_data = model_data.resample('1A').sum()
 
     # exclude AT as its pps are connected to the german electricity bus
-    if cc not in ['AT', 'LU']:
+    if cc not in ['AT', 'LU', 'DE']:
         model_data = model_data[
              ['load', 'solar', 'wind', 'pp_uranium', 'pp_lignite',
               'pp_hard_coal', 'pp_gas', 'pp_oil', 'pp_mixed_fuels',
