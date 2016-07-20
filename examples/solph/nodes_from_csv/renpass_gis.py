@@ -257,6 +257,7 @@ for cc in country_codes:
 
 #    # dispatch
 #    if cc not in ['AT', 'LU']:
+#
 #        model_data_hourly = model_data_hourly.resample('1M').sum()
 #        model_data_hourly.loc[:, 'load'] *= -1
 #        bar = model_data_hourly.plot(kind='bar', stacked=True)
@@ -270,3 +271,18 @@ for cc in country_codes:
 #                    str(datetime.now()) +
 #                    '.pdf', orientation='landscape')
 #        plt.close()
+#
+
+#        nrow = 8
+#        ncol = 2
+#
+#        dispatch = inputs.plot(kind='line', subplots=True, grid=True,
+#                               sharex=False, sharey=False, legend=True,
+#                               title='Dispatch (' + cc + ') for ' +
+#                               nodes_flows.replace('.csv', '.pdf'),
+#                               layout=(nrow, ncol))
+#        for c in range(0, ncol):
+#            for r in range(0, nrow):
+#                dispatch[r, c].set_ylabel('MW')
+#                dispatch[r, c].legend(loc='upper right')
+#        plt.show()
