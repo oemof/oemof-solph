@@ -4,7 +4,7 @@
 """
 import warnings
 import oemof.network as on
-import oemof.core.energy_system as es
+import oemof.energy_system as es
 from .options import Investment
 from .plumbing import Sequence
 

@@ -9,7 +9,7 @@ import pandas as pd
 from oemof.solph.network import Investment
 from oemof.solph import OperationalModel
 
-from oemof.core import energy_system as core_es
+from oemof import energy_system as core_es
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)

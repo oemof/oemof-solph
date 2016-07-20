@@ -1,6 +1,6 @@
 from nose.tools import ok_, eq_
 
-from oemof.core.energy_system import EnergySystem as ES
+from oemof.energy_system import EnergySystem as ES
 from oemof.solph.blocks import InvestmentFlow as IF
 from oemof.solph.network import Investment
 import oemof.solph as solph
