@@ -53,9 +53,10 @@ def check(cdict, runcheck, subdict, new_results):
 
 def check_nosetests():
     testdir = os.path.join(os.path.dirname(__file__), os.pardir)
-    os.chdir(testdir)
+    # os.chdir(testdir)
     argv = sys.argv[:]
     argv.insert(1, "--with-doctest")
+    argv.insert(1, "-w{0}".format(testdir))
     if nose.run(argv=argv):
         time.sleep(0.3)
         print("All nosetests passed!")
