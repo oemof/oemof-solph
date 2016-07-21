@@ -20,5 +20,5 @@ Open questions?
 ------------------
 
 * Impact of gradients: more fluctuations? Also see: Biggar, 2014. The Economics of Electricity Markets, p. 111 ff.
-* Impact of minimum up and downtimes: more fluctuations? Also see: Biggar, 2014. The Economics of Electricity Markets, p. 111 ff.
+* Impact of minimum up and downtimes: more fluctuations? Also see: Biggar, 2014. The Economics of Electricity Markets
 
