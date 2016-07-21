@@ -37,10 +37,10 @@ class Flow:
         nominal_value to get the absolute value. If fixed is True the flow
         variable will be fixed to actual_value * nominal_value.
     positive_gradient : numeric (sequence or scalar)
-        The maximal positive difference (flow[t-1] < flow[t])
+        The normend maximal positive difference (flow[t-1] < flow[t])
         of two consecutive flow values.
     negative_gradient : numeric (sequence or scalar)
-        The maximum negative difference (from[t-1] > flow[t]) of two
+        The normend maximum negative difference (from[t-1] > flow[t]) of two
         consecutive timesteps.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
