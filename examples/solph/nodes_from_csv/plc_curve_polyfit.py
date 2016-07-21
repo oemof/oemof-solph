@@ -36,11 +36,30 @@ z = np.polyfit(df_polyfit['res_load'], df_polyfit['price_real'], 3)
 p = np.poly1d(z)
 
 # save and plot results
-df_polyfit['price_regression'] = p(df_polyfit['res_load'])
+df_polyfit['price_regression_res_load'] = p(df_polyfit['res_load'])
 
-line = df_polyfit[0:24*31][['price_real', 'price_regression',
-    'price_model']].plot(linewidth=1.2, drawstyle='steps')
+p2 = np.poly1d(np.polyfit(df_polyfit['price_model'], df_polyfit['price_real'], 2))
 
-#scatter = df_polyfit.plot(kind='scatter', x='res_load', y='price_real')
+# show values
+df_polyfit.plot(kind='scatter', x='res_load', y='price_real')
+df_polyfit.plot(kind='scatter', x='price_model', y='price_real')
 
+
+df_polyfit['price_regression_price_model'] = p2(df_polyfit['price_real'])
+
+df_polyfit[0:24*31][['price_real', 'price_model']].plot(linewidth=1.2,
+                                                        subplots=True,
+                                                        drawstyle='steps', ylim=[-100,100])
+
+df_polyfit[0:24*31][['price_real', 'price_regression_res_load']].plot(linewidth=1.2,
+                                                                      subplots=True,
+                                                                      drawstyle='steps', ylim=[-100,100])
+
+df_polyfit[0:24*31][['price_real', 'price_regression_price_model']].plot(linewidth=1.2,
+                                                                         subplots=True,
+                                                                         drawstyle='steps', ylim=[-100,100])
+
+
+df_bla = pd.DataFrame(p2(range(10, 80, 1)))
+df_bla.plot()
 plt.show()
