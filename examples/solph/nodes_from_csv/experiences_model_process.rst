@@ -1,4 +1,4 @@
-Documentation of the renpassG!S modelling process (focus market price modeling)
+Documentation of the renpassG!S modelling process (focus on market price modeling)
 =================
 
 Experiences
