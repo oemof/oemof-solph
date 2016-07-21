@@ -12,7 +12,10 @@ Experiences
   they are varying in literature.
   Efficiency classes per energy source only generate smaller steps but do have a significant impact on the price if the classes are quite narrow.
 
-* Still quite undetailed models with only one power plant per energy source and not many assumptions e.g. minimum full-load hours already deliver the right tendencies in the energy system.
+* Still quite undetailed models with only one power plant per energy source and not many assumptions e.g. minimum full-load hours already deliver
+  the right tendencies in the energy system. But with a low capacity resolution (few "big" power plants) some technologies
+  and equivalent variable and marginal costs, some technologies e.g. gas or biomass do not enter the market as observed
+  in reality.
 
 * Gradients (positive and negative) are memory consuming (> 16 GB) and can kill the python instance or solver
 
