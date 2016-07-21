@@ -26,11 +26,11 @@ logger.define_logging()
 
 # %% configuration
 
-nodes_flows = 'nep_2035_aggr.csv'
+nodes_flows = 'nep_2014_aggr.csv'
 nodes_flows_sequences = 'nep_2014_aggr_seq.csv'
 
-date_from = '2035-01-01 00:00:00'
-date_to = '2035-12-31 23:00:00'
+date_from = '2014-01-01 00:00:00'
+date_to = '2014-12-31 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
