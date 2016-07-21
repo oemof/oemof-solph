@@ -26,11 +26,11 @@ logger.define_logging()
 
 # %% configuration
 
-nodes_flows = 'nep_2014_aggr.csv'
-nodes_flows_sequences = 'nep_2014_aggr_seq.csv'
+date_from = '2035-01-01 00:00:00'
+date_to = '2035-12-31 23:00:00'
+nodes_flows = 'nep_2035_aggr.csv'
 
-date_from = '2014-01-01 00:00:00'
-date_to = '2014-12-31 23:00:00'
+nodes_flows_sequences = 'nep_2014_aggr_seq.csv'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
@@ -217,7 +217,7 @@ for cc in country_codes:
         # dispatch and prices in one file
         power_price = pd.concat([inputs, outputs, power_price], axis=1)
         power_price.to_csv('results/results_dispatch_prices_DE_' +
-                           str(datetime.now()) + nodes_flows)
+                           str(datetime.now()) + '_' + nodes_flows)
 
         # plot
         power_price = power_price[['eex_day_ahead_2014', 'power_price_model']]
@@ -255,7 +255,7 @@ for cc in country_codes:
             ['power_price_model', 'eex_day_ahead_2014']].resample(
                 '15Min').bfill().to_csv(
                     'results/results_power_price_DE_15_min_' +
-                    str(datetime.now()) + nodes_flows)
+                    str(datetime.now()) + '_' + nodes_flows)
 
 #    # dispatch
 #    if cc not in ['AT', 'LU']:
