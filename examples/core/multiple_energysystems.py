@@ -7,7 +7,13 @@ Tested with oemof version 0.0.5
 Info:
 simon.hilpert@fh-flensburg.de
 """
-
+import logging
+from oemof.tools import logger
+logger.define_logging()
+msg = "This example does not work anymore and will be removed if not fixed "
+msg += "until v0.1"
+logging.error(msg)
+exit(0)
 from oemof.core import energy_system as es
 from oemof.core.network.entities.buses import Bus
 from oemof.core.network.entities.components import transports as transport
