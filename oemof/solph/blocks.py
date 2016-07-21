@@ -442,7 +442,7 @@ class Flow(SimpleBlock):
                         lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
                         rhs = m.positive_flow_gradient[inp, out, ts]
                         self.positive_gradient_constr.add((inp, out, ts),
-                                                          lhs >= rhs)
+                                                          lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
         self.positive_gradient_constr = Constraint(
@@ -457,9 +457,9 @@ class Flow(SimpleBlock):
                 for ts in m.TIMESTEPS:
                     if ts > 0:
                         lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
-                        rhs = m.positive_flow_gradient[inp, out, ts]
+                        rhs = m.negative_flow_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, ts),
-                                                          lhs >= rhs)
+                                                          lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
         self.negative_gradient_constr = Constraint(
