@@ -33,11 +33,14 @@ df_raw = df_raw[['eex_day_ahead_2014', 'power_price_model']]
 
 
 def price_volatility(price, factor):
+
     price **= factor
+
     if price >= 80.:
         print('real: ', price)
         price = 80
         print('scaled: ', price)
+
     return price
 
 df_raw['price_scaled'] = df_raw['power_price_model'].apply(price_volatility,
