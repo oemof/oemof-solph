@@ -62,15 +62,47 @@ df['price_model_volatility'] = df['price_model'] + \
 
 # %% spread analysis
 
+# data
 df_spread = pd.DataFrame()
+
 df_spread['price_real'] = df['price_real']
 
-df_spread['max'] = df['price_real'].resample('4h').max()
-df_spread['min'] = df['price_real'].resample('4h').min()
-df_spread['spread_4h'] = df_spread['max'] - df_spread['min']
+df_spread['spread_3h'] = df['price_real'].resample('3h').max() - \
+    df['price_real'].resample('3h').min()
 
-# remove NaNs
-df_spread['spread_4h'].plot()
+df_spread['spread_6h'] = df['price_real'].resample('6h').max() - \
+    df['price_real'].resample('6h').min()
+
+df_spread['spread_12h'] = df['price_real'].resample('12h').max() - \
+    df['price_real'].resample('12h').min()
+
+df_spread['spread_24h'] = df['price_real'].resample('24h').max() - \
+    df['price_real'].resample('24h').min()
+
+df_spread['spread_48h'] = df['price_real'].resample('48h').max() - \
+    df['price_real'].resample('48h').min()
+
+df_spread['spread_96h'] = df['price_real'].resample('96h').max() - \
+    df['price_real'].resample('96h').min()
+
+df_spread['spread_192h'] = df['price_real'].resample('192h').max() - \
+    df['price_real'].resample('192h').min()
+
+df_spread
+
+# plot
+
+fig, axes = plt.subplots(nrows=7, sharey=True)
+fig.suptitle('Spread nach Zeitintervall', fontsize=16)
+
+df_spread[['spread_3h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[0])
+df_spread[['spread_6h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[1])
+df_spread[['spread_12h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[2])
+df_spread[['spread_24h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[3])
+df_spread[['spread_48h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[4])
+df_spread[['spread_96h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[5])
+df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[6])
+
 plt.show()
 
 # %% plotting
