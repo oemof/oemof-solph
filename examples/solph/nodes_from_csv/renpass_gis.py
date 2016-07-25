@@ -220,11 +220,13 @@ for cc in country_codes:
 
         # normal distributed random time series
         # with mean and standard deviation of 2014 sample
-        power_price['residuals'] = power_price['eex_day_ahead_2014'] - \
+        power_price['residuals'] = \
+            power_price['eex_day_ahead_2014'] - \
             power_price['power_price_model']
         mu, sigma = 0, power_price['residuals'].std()
         power_price['random_norm'] = np.random.normal(mu, sigma, 8760)
-        power_price['price_model_volatility'] = power_price['price_model'] + \
+        power_price['price_model_volatility'] = \
+            power_price['power_price_model'] + \
             power_price['random_norm']
 
         # save file

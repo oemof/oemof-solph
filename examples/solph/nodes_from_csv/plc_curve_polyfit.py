@@ -60,6 +60,19 @@ df['random_norm'] = np.random.normal(mu, sigma, 8760)
 df['price_model_volatility'] = df['price_model'] + \
                                df['random_norm']
 
+# %% spread analysis
+
+df_spread = pd.DataFrame()
+df_spread['price_real'] = df['price_real']
+
+df_spread['max'] = df['price_real'].resample('4h').max()
+df_spread['min'] = df['price_real'].resample('4h').min()
+df_spread['spread_4h'] = df_spread['max'] - df_spread['min']
+
+# remove NaNs
+df_spread['spread_4h'].plot()
+plt.show()
+
 # %% plotting
 
 #df.plot(kind='scatter', x='res_load', y='price_real')
@@ -93,5 +106,3 @@ df[0:24 * 31][['price_real', 'price_model',
                                                ylim=[-100, 100])
 
 plt.show()
-
-bla = df.resample('1h').mean()
