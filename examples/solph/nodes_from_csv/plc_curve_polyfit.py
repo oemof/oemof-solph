@@ -24,7 +24,7 @@ file = ('results/'
         'results_dispatch_prices_DE_2016-07-21 17:10:21.901285nep_2014_aggr'
         '.csv')
 
-df_raw = pd.read_csv(file)
+df_raw = pd.read_csv(file, index_col=0)
 df_raw.head()
 df_raw.columns
 
@@ -55,9 +55,7 @@ df['residuals'] = df['price_real'] - \
 # with mean and standard deviation of 2014 sample
 mu, sigma = 0, df['residuals'].std()
 
-distribution = np.random.normal(mu, sigma, 8760)
-
-df['random_norm'] = pd.DataFrame(distribution)
+df['random_norm'] = np.random.normal(mu, sigma, 8760)
 
 df['price_model_volatility'] = df['price_model'] + \
                                df['random_norm']
