@@ -24,7 +24,7 @@ file = ('results/'
         'results_dispatch_prices_DE_2016-07-21 17:10:21.901285nep_2014_aggr'
         '.csv')
 
-df_raw = pd.read_csv(file, index_col=0)
+df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
 df_raw.columns
 
@@ -93,3 +93,5 @@ df[0:24 * 31][['price_real', 'price_model',
                                                ylim=[-100, 100])
 
 plt.show()
+
+bla = df.resample('1h').mean()

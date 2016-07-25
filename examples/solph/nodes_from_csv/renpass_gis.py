@@ -2,6 +2,7 @@
 
 import logging
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import cm
@@ -216,6 +217,17 @@ for cc in country_codes:
 
         # dispatch and prices in one file
         power_price = pd.concat([inputs, outputs, power_price], axis=1)
+
+        # normal distributed random time series
+        # with mean and standard deviation of 2014 sample
+        power_price['residuals'] = power_price['eex_day_ahead_2014'] - \
+            power_price['power_price_model']
+        mu, sigma = 0, power_price['residuals'].std()
+        power_price['random_norm'] = np.random.normal(mu, sigma, 8760)
+        power_price['price_model_volatility'] = power_price['price_model'] + \
+            power_price['random_norm']
+
+        # save file
         power_price.to_csv('results/results_dispatch_prices_DE_' +
                            str(datetime.now()) + '_' + nodes_flows)
 
