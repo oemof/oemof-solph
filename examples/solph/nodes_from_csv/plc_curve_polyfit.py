@@ -73,48 +73,50 @@ p = np.poly1d(z)
 # save and plot results
 df_polyfit['price_polynom'] = p(df_polyfit['res_load'])
 
-
-# %% ARMA-GARCH approach
-
 df_polyfit['residuals'] = df_polyfit['price_real'] - \
                           df_polyfit['price_model']
-
-am = arch_model(df_polyfit['residuals'])
-
-res = am.fit(update_freq=5)
-
-print(res.summary())
-
-df_polyfit['cond_volatility'] = res.conditional_volatility
-
-df_polyfit['sum_price_model_cond_volatility_GARCH'] = \
-    df_polyfit['price_model'] + df_polyfit['cond_volatility']
-
-print(df_polyfit[['price_real', 'price_model',
-                  'sum_price_model_cond_volatility_GARCH']].corr())
 
 # %% plotting
 
 #df_polyfit.plot(kind='scatter', x='res_load', y='price_real')
 
-df_polyfit[:][['price_real', 'price_model',
-               'sum_price_model_cond_volatility_GARCH']].plot(linewidth=1.2,
-                                                              subplots=True,
-                                                              drawstyle='steps',
-                                                              color=['grey', 'r', 'b'],
-                                                              ylim=[-100, 100])
+#df_polyfit.plot(kind='scatter',
+#                x='price_real', y='price_model')
 
-df_polyfit[0:24 * 31 * 3][['price_real', 'price_model',
-                           'sum_price_model_cond_volatility_GARCH']].plot(linewidth=1.2,
-                                                                          subplots=False,
-                                                                          drawstyle='steps',
-                                                                          color=['grey', 'r', 'b'],
-                                                                          ylim=[-100, 100])
+#df_polyfit[:][['price_real', 'price_model']].plot(linewidth=1.2, subplots=True,
+#                                                  drawstyle='steps',
+#                                                  color=['grey', 'r', 'b'],
+#                                                  ylim=[-100, 100])
 
-df_polyfit.plot(kind='scatter',
-                x='price_real', y='price_model')
+#residuals = pd.DataFrame()
+#residuals = pd.concat([df_polyfit['residuals'][0:2190],
+#                       df_polyfit['residuals'][2190:4380],
+#                       df_polyfit['residuals'][4380:6570],
+#                       df_polyfit['residuals'][6570:8760]], axis=1)
+#residuals.plot.hist(bins=100, subplots=True, legend=None)
+#residuals.columns=['Q1', 'Q2', 'Q3', 'Q4']
+#
+#residuals.std()
 
-df_polyfit.plot(kind='scatter',
-                x='price_real', y='sum_price_model_cond_volatility_GARCH')
+# create normal distributed random time series
+# with mean and standard deviation of sample
+mu, sigma = 0, df_polyfit['residuals'].std()
+
+distribution = np.random.normal(mu, sigma, 8760)
+
+df_polyfit['random_norm'] = pd.DataFrame(distribution)
+
+df_polyfit['random_norm'].plot.hist(bins=100, title='Price Deviation')
+
+plt.show()
+
+df_polyfit['price_model_volatility'] = df_polyfit['price_model'] + \
+                           df_polyfit['random_norm']
+
+df_polyfit[0:24 * 31][['price_real', 'price_model',
+                       'price_model_volatility']].plot(linewidth=1.2,
+                                                       subplots=True,
+                                                       drawstyle='steps',
+                                                       ylim=[-100, 100])
 
 plt.show()
