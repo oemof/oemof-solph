@@ -94,29 +94,28 @@ plt.close()
 # Generate random numbers of distribution
 df_comp = pd.DataFrame()
 df_comp['real_values'] = df['residuals']
-df_comp['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.93, scale=7.19)
-df_comp['random_norm'] = scipy.stats.norm.rvs(size=8760, loc=1.79, scale=11.19)
+df_comp['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760,
+                                                    loc=1.93, scale=7.19)
+df_comp['random_norm'] = scipy.stats.norm.rvs(size=8760,
+                                              loc=1.79, scale=11.19)
 
-## mean and standard deviation of the fitted distribution
-#mu, sigma = sp.norm.fit(df['residuals'])
-#
-## fitted distribution
-#x = np.linspace(-50, 50, len(df['residuals']))
-#
-#df['fitted'] = sp.norm.pdf(x, loc=mu, scale=sigma)
-#
-## random distribution
-#df['random_norm'] = np.random.normal(mu, sigma, 8760)
-#
-## check
-#df[['residuals', 'fitted', 'random_norm']].describe()
-#
-#df[['residuals', 'fitted', 'random_norm']].plot.hist(bins=100, subplots=True, sharex=True, sharey=False)
-#
-#plt.show()
-#
-#df['price_model_volatility'] = df['price_model'] + \
-#                               df['random_norm']
+# %% mean and standard deviation of the fitted distribution
+df['random_norm'] = scipy.stats.norm.rvs(size=8760, loc=1.79, scale=11.19)
+df['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.93, scale=7.19)
+
+df['price_model_volatility_norm'] = df['price_model'] + \
+                                    df['random_norm']
+
+df['price_model_volatility_hyper'] = df['price_model'] + \
+                                     df['random_hyper']
+# plot
+df[['price_real',
+    'price_model_volatility_norm',
+    'price_model_volatility_hyper']][0:24*31].plot(kind='line', subplots=True,
+                                                   sharex=True, sharey=True,
+                                                   drawstyle='steps')
+
+plt.show()
 
 # %% spread analysis
 
