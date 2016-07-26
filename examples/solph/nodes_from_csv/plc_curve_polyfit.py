@@ -4,6 +4,7 @@ import scipy
 import scipy.stats
 import pandas as pd
 import numpy as np
+import pylab
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -82,6 +83,19 @@ for dist_name in dist_names:
     plt.title(title)
     plt.savefig('results/fit_' + dist_name + '.pdf')
     plt.close()
+
+# Q-Q plot
+dist_name = 'hypsecant'
+scipy.stats.probplot(data, dist=dist_name, plot=plt)
+plt.title('Probability Plot (' + dist_name + ')')
+plt.savefig('results/qq_' + dist_name + '.pdf')
+plt.close()
+
+# Generate random numbers of distribution
+df_comp = pd.DataFrame()
+df_comp['real_values'] = df['residuals']
+df_comp['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.93, scale=7.19)
+df_comp['random_norm'] = scipy.stats.norm.rvs(size=8760, loc=1.79, scale=11.19)
 
 ## mean and standard deviation of the fitted distribution
 #mu, sigma = sp.norm.fit(df['residuals'])
