@@ -50,7 +50,7 @@ df['price_polynom'] = p(df['res_load'])
 df['residuals'] = df['price_real'] - \
                   df['price_model']
 
-# %% create normal distributed volatility
+# %% create distribution-fitted volatility
 
 import numpy as np
 import scipy.stats
@@ -84,7 +84,8 @@ for dist_name in dist_names:
     plt.savefig('results/fit_' + dist_name + '.pdf')
     plt.close()
 
-# Q-Q plot
+# %% QQ Plots and random numbers
+
 dist_name = 'hypsecant'
 scipy.stats.probplot(data, dist=dist_name, plot=plt)
 plt.title('Probability Plot (' + dist_name + ')')
