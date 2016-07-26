@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import scipy
+import scipy.stats
 import pandas as pd
 import numpy as np
-import scipy.stats as sp
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -50,15 +51,58 @@ df['residuals'] = df['price_real'] - \
 
 # %% create normal distributed volatility
 
-# param[0] and param[1] are the mean and
-# the standard deviation of the fitted distribution
-mu, sigma = sp.norm.fit(df['residuals'])
+import numpy as np
+import scipy.stats
+import matplotlib.pyplot as plt
 
-df['random_norm'] = np.random.normal(mu, sigma, 8760)
 
-df['price_model_volatility'] = df['price_model'] + \
-                               df['random_norm']
+# Sample
+data = df['residuals']
 
+# Distributions to check
+dist_names = ['gausshyper', 'norm', 'gamma', 'hypsecant']
+
+for dist_name in dist_names:
+
+    dist = getattr(scipy.stats, dist_name)
+
+    # Fit a normal distribution to the data
+    param = dist.fit(data)
+
+    # Plot the histogram
+    plt.hist(data, bins=100, normed=True, alpha=0.8, color='g')
+
+    # Plot and save the PDF in a PDF file
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, 100)
+    p = dist.pdf(x, *param[:-2], loc=param[-2], scale=param[-1])
+    plt.plot(x, p, 'k', linewidth=2)
+    title = 'Distribution: ' + dist_name + \
+            ' / Fit results: mu = %.2f,  std = %.2f' % (param[0], param[1])
+    plt.title(title)
+    plt.savefig('results/fit_' + dist_name + '.pdf')
+    plt.close()
+
+## mean and standard deviation of the fitted distribution
+#mu, sigma = sp.norm.fit(df['residuals'])
+#
+## fitted distribution
+#x = np.linspace(-50, 50, len(df['residuals']))
+#
+#df['fitted'] = sp.norm.pdf(x, loc=mu, scale=sigma)
+#
+## random distribution
+#df['random_norm'] = np.random.normal(mu, sigma, 8760)
+#
+## check
+#df[['residuals', 'fitted', 'random_norm']].describe()
+#
+#df[['residuals', 'fitted', 'random_norm']].plot.hist(bins=100, subplots=True, sharex=True, sharey=False)
+#
+#plt.show()
+#
+#df['price_model_volatility'] = df['price_model'] + \
+#                               df['random_norm']
 
 # %% spread analysis
 
@@ -109,12 +153,6 @@ df_spread['spread_192h'] = df['price_real'].resample('192h').max() - \
 #residuals.plot.hist(bins=100, subplots=True, legend=None)
 #residuals.columns=['Q1', 'Q2', 'Q3', 'Q4']
 #
-
-df[['residuals', 'random_norm']].plot.hist(bins=100, subplots=True,
-                                           sharex=True, sharey=True,
-                                           layout=(1,2))
-
-plt.show()
 
 #df[0:24 * 31][['price_real', 'price_model',
 #               'price_model_volatility']].plot(linewidth=1.2,
