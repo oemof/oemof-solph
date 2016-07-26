@@ -111,7 +111,7 @@ df['price_model_volatility_hyper'] = df['price_model'] + \
 # plot
 df[['price_real',
     'price_model_volatility_norm',
-    'price_model_volatility_hyper']][0:24*31].plot(kind='line', subplots=True,
+    'price_model_volatility_hyper']][24*31:24*31*2].plot(kind='line', subplots=True,
                                                    sharex=True, sharey=True,
                                                    drawstyle='steps')
 
