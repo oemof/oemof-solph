@@ -51,6 +51,9 @@ auth_tok = "QFsHqrY3BqG91_f1Utsj"
 
 # %% plotting
 
+# dateiauswahl basierend auf unique substring(s), die übergeben werden
+# im standardfall läuft die schleife dann nur 1x durch
+
 for cc in country_codes:
 
     # read model data from model in MWh
