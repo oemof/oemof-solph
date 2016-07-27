@@ -84,6 +84,10 @@ for dist_name in dist_names:
     plt.savefig('results/fit_' + dist_name + '.pdf')
     plt.close()
 
+mean, var, skew, kurt = scipy.stats.hypsecant.stats(moments='mvsk')
+
+print(mean, var, skew, kurt)
+
 # %% QQ Plots and random numbers
 
 dist_name = 'hypsecant'
@@ -176,15 +180,15 @@ df_spread['spread_192h'] = df['price_real'].resample('192h').max() - \
 #
 #plt.show()
 
-#fig, axes = plt.subplots(nrows=7, sharey=True)
-#fig.suptitle('Spread nach Zeitintervall', fontsize=16)
-#
-#df_spread[['spread_3h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[0])
-#df_spread[['spread_6h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[1])
-#df_spread[['spread_12h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[2])
-#df_spread[['spread_24h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[3])
-#df_spread[['spread_48h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[4])
-#df_spread[['spread_96h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[5])
-#df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[6])
-#
-#plt.show()
+fig, axes = plt.subplots(nrows=7, sharey=True)
+fig.suptitle('Spread nach Zeitintervall', fontsize=16)
+
+df_spread[['spread_3h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[0])
+df_spread[['spread_6h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[1])
+df_spread[['spread_12h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[2])
+df_spread[['spread_24h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[3])
+df_spread[['spread_48h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[4])
+df_spread[['spread_96h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[5])
+df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[6])
+
+plt.show()

@@ -1,69 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import cm
-from datetime import datetime
-from oemof.tools import logger
-from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
-from oemof.solph import NodesFromCSV
-from oemof.outputlib import ResultsDataFrame
 from Quandl import Quandl
 
-
-def stopwatch():
-    if not hasattr(stopwatch, "now"):
-        stopwatch.now = datetime.now()
-        return None
-    last = stopwatch.now
-    stopwatch.now = datetime.now()
-    return str(stopwatch.now-last)[0:-4]
-
-logger.define_logging()
-
-
 # %% configuration
-
-date_from = '2025-01-01 00:00:00'
-date_to = '2025-12-31 23:00:00'
-nodes_flows = 'nep_2025_aggr.csv'
-
-nodes_flows_sequences = 'nep_2014_aggr_seq.csv'
-
-datetime_index = pd.date_range(date_from, date_to, freq='60min')
-
-
-# %% model creation and solving
-
-es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
-
-nodes = NodesFromCSV(file_nodes_flows=nodes_flows,
-                     file_nodes_flows_sequences=nodes_flows_sequences,
-                     delimiter=',')
-
-stopwatch()
-om = OperationalModel(es)
-print('OM creation time: ' + stopwatch())
-
-om.receive_duals()
-
-om.solve(solver='gurobi', solve_kwargs={'tee': True})
-print('Optimization time: ' + stopwatch())
-
-logging.info('Done!')
-
-logging.info('Check the results')
-
-
-# %% output: model data
-
-results = ResultsDataFrame(energy_system=es)
-
-
-# %% output: plotting of production (model vs. entso-e dataset)
 
 # global plotting options
 plt.rcParams.update(plt.rcParamsDefault)
@@ -80,10 +24,6 @@ plt.rcParams['image.cmap'] = 'Spectral'
 
 # colormap for plots
 cmap = cm.Blues
-
-# country codes
-country_codes = ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK', 'FR', 'LU', 'NL', 'NO',
-                 'PL', 'SE']
 
 new_colnames = {
                 'net_gen_nuclear': 'uranium',
@@ -109,27 +49,12 @@ new_colnames = {
 # see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
 auth_tok = "QFsHqrY3BqG91_f1Utsj"
 
+# %% plotting
+
 for cc in country_codes:
 
-    inputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='input',
-                                     date_from=date_from, date_to=date_to,
-                                     formatted=True)
-    inputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_out'},
-                  inplace=True)
-
-    outputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='output',
-                                      date_from=date_from, date_to=date_to,
-                                      formatted=True)
-
-    outputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_in'},
-                   inplace=True)
-
-    other = results.slice_unstacked(bus_label=cc + '_bus_el', type='other',
-                                    date_from=date_from, date_to=date_to,
-                                    formatted=True)
-
-    # data from model in MWh
-    model_data = pd.concat([inputs, outputs], axis=1)
+    # read model data from model in MWh
+    model_data =
 
     powerline_cols = [col for col in model_data.columns
                       if 'powerline' in col]
