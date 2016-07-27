@@ -25,7 +25,7 @@ datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
 
 def stopwatch():
-    if not hasattr(stopwatch, "now"):
+    if not hasattr(stopwatch, 'now'):
         stopwatch.now = datetime.now()
         return None
     last = stopwatch.now
