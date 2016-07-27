@@ -19,6 +19,7 @@ nodes_flows = 'nep_2025_aggr.csv'
 
 nodes_flows_sequences = 'nep_2014_aggr_seq.csv'
 
+
 # %% misc.
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
@@ -33,6 +34,7 @@ def stopwatch():
     return str(stopwatch.now-last)[0:-4]
 
 logger.define_logging()
+
 
 # %% model creation and solving
 
@@ -62,6 +64,7 @@ logging.info('Check the results')
 # %% output: create pandas dataframe with results
 
 results = ResultsDataFrame(energy_system=es)
+
 
 # %% postprocessing: write model data to file system for all regions
 
