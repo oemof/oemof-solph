@@ -140,8 +140,6 @@ for file in os.listdir(folder):
                     '.pdf', orientation='landscape')
         plt.close()
 
-        print('Land' + cc)
-
         # plotting of prices for Germany
         if cc == 'DE':
             model_data = pd.read_csv(folder + file, parse_dates=[0],
