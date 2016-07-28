@@ -99,7 +99,7 @@ for cc in country_codes:
     country_data = pd.concat([inputs, outputs, other], axis=1)
 
     file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
-                cc + '_' + '.csv'
+                cc + '.csv'
 
     # save file
     country_data.to_csv(os.path.join(path, file_name))
