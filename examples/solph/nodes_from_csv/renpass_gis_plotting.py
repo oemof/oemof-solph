@@ -88,12 +88,14 @@ for file in os.listdir(folder):
              if 'powerline' not in col
              if 'shortage' not in col
              if 'excess' not in col]]
-        model_data.rename(columns=lambda x: x.replace(cc + '_', ''), inplace=True)
+        model_data.rename(columns=lambda x: x.replace(cc + '_', ''),
+                          inplace=True)
         model_data = model_data/1000
         model_data_hourly = model_data
         model_data = model_data.resample('1A').sum()
 
-        # exclude AT as its pps are connected to the german electricity bus
+        # exclude AT, LU and DE as the pps are connected to the german bus
+        # and the naming doesn't match
         if cc not in ['AT', 'LU', 'DE']:
             model_data = model_data[
                  ['load', 'solar', 'wind', 'pp_uranium', 'pp_lignite',
@@ -108,11 +110,12 @@ for file in os.listdir(folder):
                                  trim_end="2014-12-31",
                                  authtoken=auth_tok)
         entsoe_data.rename(columns=new_colnames, inplace=True)
-        entsoe_data = entsoe_data[['load', 'solar', 'wind', 'uranium', 'lignite',
-                                   'hard_coal', 'gas', 'oil', 'mixed_fuels',
-                                   'biomass', 'run_of_river', 'pumped_hydro',
-                                   'import_export', 'other_fossil',
-                                   'other_hydro', 'generation_not_clearly']]
+        entsoe_data = entsoe_data[['load', 'solar', 'wind', 'uranium',
+                                   'lignite', 'hard_coal', 'gas', 'oil',
+                                   'mixed_fuels', 'biomass', 'run_of_river',
+                                   'pumped_hydro', 'import_export',
+                                   'other_fossil', 'other_hydro',
+                                   'generation_not_clearly']]
         entsoe_data.index = pd.date_range(entsoe_data.index[0], periods=12,
                                           freq='M')
         entsoe_data = entsoe_data.resample('1A').sum()
@@ -140,58 +143,50 @@ for file in os.listdir(folder):
                     '.pdf', orientation='landscape')
         plt.close()
 
-#        # plotting of prices for Germany
-#        if cc is 'DE':
-#            power_price_model = other['duals']
-#            power_price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
-#            power_price_real.set_index(power_price_model.index, drop=True,
-#                                       inplace=True)
-#            power_price = pd.concat([power_price_model, power_price_real], axis=1)
-#            power_price.rename(columns={'price_avg_real': 'eex_day_ahead_2014',
-#                                        'duals': 'power_price_model'},
-#                               inplace=True)
-#
-#            # dispatch and prices in one file
-#            power_price = pd.concat([inputs, outputs, power_price], axis=1)
-#
-#            # normal distributed random time series
-#            # with mean and standard deviation of 2014 sample
-#            power_price['residuals'] = \
-#                power_price['eex_day_ahead_2014'] - \
-#                power_price['power_price_model']
-#            mu, sigma = 0, power_price['residuals'].std()
-#            power_price['random_norm'] = np.random.normal(mu, sigma, 8760)
-#            power_price['price_model_volatility'] = \
-#                power_price['power_price_model'] + \
-#                power_price['random_norm']
-#
-#            # plot
-#            power_price = power_price[['eex_day_ahead_2014', 'power_price_model']]
-#            nrow = 4
-#            fig, axes = plt.subplots(nrows=nrow, ncols=1)
-#            fig.suptitle('Power prices (' + cc + ')' + ' for ' + scenario_name,
-#                         fontsize=16)
-#
-#            power_price.plot(drawstyle='steps-post', ax=axes[0],
-#                             title='Hourly price', sharex=True)
-#            power_price.resample('1D').mean().plot(drawstyle='steps-post',
-#                                                   ax=axes[1],
-#                                                   title='Daily mean',
-#                                                   sharex=True)
-#            power_price.resample('1W').mean().plot(drawstyle='steps-post',
-#                                                   ax=axes[2],
-#                                                   title='Weekly mean',
-#                                                   sharex=True)
-#            power_price.resample('1M').mean().plot(drawstyle='steps-post',
-#                                                   ax=axes[3],
-#                                                   title='Montly mean (base)',
-#                                                   sharex=True)
-#            for i in range(0, nrow):
-#                axes[i].set_ylabel('EUR/MWh')
-#                axes[i].legend(loc='upper right', ncol=2, fontsize=6)
-#
-#            plt.savefig('results/results_prices_' + cc + '_' +
-#                        scenario_name + '_' +
-#                        str(datetime.now()) +
-#                        '.pdf', orientation='landscape')
-#            plt.close()
+        print('Land' + cc)
+
+        # plotting of prices for Germany
+        if cc == 'DE':
+            model_data = pd.read_csv(folder + file, parse_dates=[0],
+                                     index_col=0, keep_date_col=True)
+            power_price_model = model_data['duals']
+            power_price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+            power_price_real.set_index(power_price_model.index, drop=True,
+                                       inplace=True)
+            power_price = pd.concat([power_price_model, power_price_real],
+                                    axis=1)
+            power_price.rename(columns={'price_eur_mwh': 'eex_day_ahead_2014',
+                                        'duals': 'power_price_model'},
+                               inplace=True)
+
+            # plot
+            power_price = power_price[['eex_day_ahead_2014',
+                                       'power_price_model']]
+            nrow = 4
+            fig, axes = plt.subplots(nrows=nrow, ncols=1)
+            fig.suptitle('Power prices (' + cc + ')' + ' for ' + scenario_name,
+                         fontsize=16)
+
+            power_price.plot(drawstyle='steps-post', ax=axes[0],
+                             title='Hourly price', sharex=True)
+            power_price.resample('1D').mean().plot(drawstyle='steps-post',
+                                                   ax=axes[1],
+                                                   title='Daily mean',
+                                                   sharex=True)
+            power_price.resample('1W').mean().plot(drawstyle='steps-post',
+                                                   ax=axes[2],
+                                                   title='Weekly mean',
+                                                   sharex=True)
+            power_price.resample('1M').mean().plot(drawstyle='steps-post',
+                                                   ax=axes[3],
+                                                   title='Montly mean (base)',
+                                                   sharex=True)
+            for i in range(0, nrow):
+                axes[i].set_ylabel('EUR/MWh')
+                axes[i].legend(loc='upper right', ncol=2, fontsize=6)
+
+            plt.savefig('results/results_prices_' + cc + '_' +
+                        scenario_name + '_' +
+                        str(datetime.now()) +
+                        '.pdf', orientation='landscape')
+            plt.close()
