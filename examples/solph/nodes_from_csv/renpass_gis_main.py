@@ -15,7 +15,7 @@ from oemof.outputlib import ResultsDataFrame
 
 date_from = '2025-01-01 00:00:00'
 date_to = '2025-12-31 23:00:00'
-nodes_flows = 'nep_2025_aggr.csv'
+nodes_flows = 'nep_2025.csv'
 
 nodes_flows_sequences = 'nep_2014_aggr_seq.csv'
 
