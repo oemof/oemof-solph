@@ -48,7 +48,7 @@ new_colnames = {
 folder = 'results/'
 
 # unique string name (all result files containing this string are processed)
-scenario_name = 'nep_2025_CH_2016-07-28'
+scenario_name = 'nep_2025_2016-07-28'
 
 # quandl data gets downloaded into dataframes in loop
 # see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
