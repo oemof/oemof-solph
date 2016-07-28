@@ -24,9 +24,6 @@ plt.rcParams.update({'font.size': 10})
 plt.rcParams['image.cmap'] = 'Spectral'
 #plt.rcParams.update({'legend.fontsize': 6})
 
-# colormap for plots
-cmap = cm.Blues
-
 new_colnames = {
                 'net_gen_nuclear': 'uranium',
                 '-> of which lignite': 'lignite',
@@ -47,21 +44,21 @@ new_colnames = {
                 'net_gen_not_clearly': 'generation_not_clearly'
                 }
 
+# folder that contains csv result files
+folder = 'results/'
+
+# unique string name (all result files containing this string are processed)
+scenario_name = 'nep_2014_2016-07-28 09:44:00'
+
 # quandl data gets downloaded into dataframes in loop
 # see: https://www.quandl.com/data/ENTSOE/ or ENTSO-E data portal
 auth_tok = "QFsHqrY3BqG91_f1Utsj"
 
+
 # %% plotting
 
-# dateiauswahl basierend auf unique substring(s), die übergeben werden
-# im standardfall läuft die schleife dann nur 1x durch
-
-scenario_name = 'blablubb'
-folder = 'results/'
-unique_substring = '2016-07-28 09:27'
-
 for file in os.listdir(folder):
-    if unique_substring in file:
+    if scenario_name in file:
         cc = ''.join([c for c in file if c.isupper()])
 
         model_data = pd.read_csv(folder + file, parse_dates=[0], index_col=0,
@@ -122,8 +119,8 @@ for file in os.listdir(folder):
 
         # plotting
         fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True)
-        fig.suptitle('Annual production (' + cc + ')' + ' for ' + scenario_name,
-                     fontsize=16)
+        fig.suptitle('Annual production (' + cc + ')' + ' for ' +
+                     scenario_name, fontsize=16)
 
         model_plot = model_data.plot(kind='bar', stacked=False, ax=axes[0])
         model_plot.set_ylabel('Energy in GWh')
