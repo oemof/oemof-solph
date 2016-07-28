@@ -15,7 +15,7 @@ from oemof.outputlib import ResultsDataFrame
 
 date_from = '2014-01-01 00:00:00'
 date_to = '2014-12-31 23:00:00'
-nodes_flows = 'nep_2025.csv'
+nodes_flows = 'nep_2014.csv'
 
 nodes_flows_sequences = 'nep_2014_seq.csv'
 
@@ -98,8 +98,8 @@ for cc in country_codes:
     # data from model in MWh
     country_data = pd.concat([inputs, outputs, other], axis=1)
 
-    file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + cc + '_' + \
-        date + '.csv'
+    file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
+                cc + '_' + '.csv'
 
     # save file
     country_data.to_csv(os.path.join(path, file_name))
