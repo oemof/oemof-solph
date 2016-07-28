@@ -2,6 +2,8 @@
 
 import os
 import logging
+import scipy
+import scipy.stats
 import pandas as pd
 
 from datetime import datetime
@@ -13,9 +15,9 @@ from oemof.outputlib import ResultsDataFrame
 
 # %% configuration
 
-date_from = '2035-01-01 00:00:00'
-date_to = '2035-12-31 23:00:00'
-nodes_flows = 'nep_2035.csv'
+date_from = '2025-01-01 00:00:00'
+date_to = '2025-12-31 23:00:00'
+nodes_flows = 'nep_2025.csv'
 
 nodes_flows_sequences = 'nep_2014_seq.csv'
 
@@ -78,6 +80,7 @@ date = str(datetime.now())
 
 for cc in country_codes:
 
+    # build single dataframe for electric busses
     inputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='input',
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
@@ -98,8 +101,15 @@ for cc in country_codes:
     # data from model in MWh
     country_data = pd.concat([inputs, outputs, other], axis=1)
 
-    file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
-                cc + '.csv'
+    # add price volatility that's lacking in duals by adding random numbers
+    # of a distribution that best fits the errors between duals for 2014
+    # and the EEX day-ahead prices for 2014 (used in project 'DLSK-SH')
+    if cc == 'DE':
+        country_data['price_volatility'] = \
+            country_data['duals'] + \
+            scipy.stats.hypsecant.rvs(size=8760, loc=1.92710, scale=7.187288)
 
     # save file
+    file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
+                cc + '.csv'
     country_data.to_csv(os.path.join(path, file_name))
