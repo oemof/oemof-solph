@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+
 # global plotting options
 plt.rcParams.update(plt.rcParamsDefault)
 matplotlib.style.use('ggplot')
@@ -21,7 +22,7 @@ plt.rcParams['image.cmap'] = 'Spectral'
 
 # read file
 file = ('results/'
-        'results_dispatch_prices_DE_2016-07-25 15:30:49.914634_nep_2014_aggr'
+        'scenario_nep_2014_2016-07-28 09:44:00.031153_DE_'
         '.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
@@ -35,8 +36,12 @@ df_raw.columns
 residual_load = df_raw['DE_load'] + df_raw['AT_load'] + df_raw['LU_load'] - \
                 df_raw['DE_wind'] - df_raw['AT_wind'] - df_raw['LU_wind'] - \
                 df_raw['DE_solar'] - df_raw['AT_solar'] - df_raw['LU_solar']
-df = pd.concat([residual_load, df_raw['eex_day_ahead_2014'],
-                df_raw['power_price_model']], axis=1)
+
+price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+price_real.index = df_raw.index
+
+df = pd.concat([residual_load, price_real,
+                df_raw['duals']], axis=1)
 df.columns = ['res_load', 'price_real', 'price_model']
 
 # fit polynom of 3rd degree
@@ -50,11 +55,6 @@ df['residuals'] = df['price_real'] - \
                   df['price_model']
 
 # %% create distribution-fitted volatility
-
-import numpy as np
-import scipy.stats
-import matplotlib.pyplot as plt
-
 
 # Sample
 data = df['residuals']
@@ -83,9 +83,7 @@ for dist_name in dist_names:
     plt.savefig('results/fit_' + dist_name + '.pdf')
     plt.close()
 
-mean, var, skew, kurt = scipy.stats.hypsecant.stats(moments='mvsk')
-
-print(mean, var, skew, kurt)
+    print(dist_name, ': ', param)
 
 # %% QQ Plots and random numbers
 
@@ -99,13 +97,19 @@ plt.close()
 df_comp = pd.DataFrame()
 df_comp['real_values'] = df['residuals']
 df_comp['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760,
-                                                    loc=1.93, scale=7.19)
+                                                    loc=1.92710,
+                                                    scale=7.187288)
 df_comp['random_norm'] = scipy.stats.norm.rvs(size=8760,
-                                              loc=1.79, scale=11.19)
+                                              loc=1.78602,
+                                              scale=11.18743)
 
 # %% mean and standard deviation of the fitted distribution
-df['random_norm'] = scipy.stats.norm.rvs(size=8760, loc=1.79, scale=11.19)
-df['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.93, scale=7.19)
+
+df['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.92710,
+                                               scale=7.187288)
+
+df['random_norm'] = scipy.stats.norm.rvs(size=8760, loc=1.78602,
+                                         scale=11.18743)
 
 df['price_model_volatility_norm'] = df['price_model'] + \
                                     df['random_norm']
@@ -115,9 +119,11 @@ df['price_model_volatility_hyper'] = df['price_model'] + \
 # plot
 df[['price_real',
     'price_model_volatility_norm',
-    'price_model_volatility_hyper']][24*31:24*31*2].plot(kind='line', subplots=True,
-                                                   sharex=True, sharey=True,
-                                                   drawstyle='steps')
+    'price_model_volatility_hyper']][24*31:24*31*2].plot(kind='line',
+                                                         subplots=True,
+                                                         sharex=True,
+                                                         sharey=True,
+                                                         drawstyle='steps')
 
 plt.show()
 
@@ -149,6 +155,25 @@ df_spread['spread_96h'] = df['price_real'].resample('96h').max() - \
 df_spread['spread_192h'] = df['price_real'].resample('192h').max() - \
     df['price_real'].resample('192h').min()
 
+fig, axes = plt.subplots(nrows=7, sharey=True)
+fig.suptitle('Spread nach Zeitintervall', fontsize=16)
+
+df_spread[['spread_3h']].dropna().plot(kind='line', drawstyle='steps',
+                                       ax=axes[0])
+df_spread[['spread_6h']].dropna().plot(kind='line', drawstyle='steps',
+                                       ax=axes[1])
+df_spread[['spread_12h']].dropna().plot(kind='line', drawstyle='steps',
+                                        ax=axes[2])
+df_spread[['spread_24h']].dropna().plot(kind='line', drawstyle='steps',
+                                        ax=axes[3])
+df_spread[['spread_48h']].dropna().plot(kind='line', drawstyle='steps',
+                                        ax=axes[4])
+df_spread[['spread_96h']].dropna().plot(kind='line', drawstyle='steps',
+                                        ax=axes[5])
+df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps',
+                                         ax=axes[6])
+
+plt.show()
 
 # %% plotting
 
@@ -178,16 +203,3 @@ df_spread['spread_192h'] = df['price_real'].resample('192h').max() - \
 #                                               ylim=[-100, 100])
 #
 #plt.show()
-
-fig, axes = plt.subplots(nrows=7, sharey=True)
-fig.suptitle('Spread nach Zeitintervall', fontsize=16)
-
-df_spread[['spread_3h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[0])
-df_spread[['spread_6h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[1])
-df_spread[['spread_12h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[2])
-df_spread[['spread_24h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[3])
-df_spread[['spread_48h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[4])
-df_spread[['spread_96h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[5])
-df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps', ax=axes[6])
-
-plt.show()
