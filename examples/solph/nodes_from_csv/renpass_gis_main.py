@@ -15,9 +15,9 @@ from oemof.outputlib import ResultsDataFrame
 
 # %% configuration
 
-date_from = '2035-01-01 00:00:00'
-date_to = '2035-12-31 23:00:00'
-nodes_flows = 'nep_2035.csv'
+date_from = '2014-01-01 00:00:00'
+date_to = '2014-12-31 23:00:00'
+nodes_flows = 'nep_2014.csv'
 
 nodes_flows_sequences = 'nep_2014_seq.csv'
 
@@ -107,7 +107,9 @@ for cc in country_codes:
     if cc == 'DE':
         country_data['price_volatility'] = \
             country_data['duals'] + \
-            scipy.stats.hypsecant.rvs(size=8760, loc=1.92710, scale=7.187288)
+            scipy.stats.hypsecant.rvs(size=8760,
+                                      loc=1.86383591071,
+                                      scale=5.41544622678)
 
     # save file
     file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
