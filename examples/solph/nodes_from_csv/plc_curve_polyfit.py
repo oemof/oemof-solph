@@ -40,8 +40,7 @@ residual_load = df_raw['DE_load'] + df_raw['AT_load'] + df_raw['LU_load'] - \
 price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
 price_real.index = df_raw.index
 
-df = pd.concat([residual_load, price_real,
-                df_raw['duals']], axis=1)
+df = pd.concat([residual_load, price_real, df_raw['duals']], axis=1)
 df.columns = ['res_load', 'price_real', 'price_model']
 
 # fit polynom of 3rd degree
@@ -83,11 +82,19 @@ for dist_name in dist_names:
     plt.savefig('results/fit_' + dist_name + '.pdf')
     plt.close()
 
-    print(dist_name, ': ', param)
+    print(dist_name, ': ', ' mu: ', param[0], ' std: ', param[1])
 
 # %% QQ Plots and random numbers
 
-dist_name = 'hypsecant'
+# Sample
+data = df['residuals']
+
+dist_name = 'norm'
+dist = getattr(scipy.stats, dist_name)
+# Fit a normal distribution to the data
+mu, std = dist.fit(data)
+
+
 scipy.stats.probplot(data, dist=dist_name, plot=plt)
 plt.title('Probability Plot (' + dist_name + ')')
 plt.savefig('results/qq_' + dist_name + '.pdf')
@@ -96,12 +103,7 @@ plt.close()
 # Generate random numbers of distribution
 df_comp = pd.DataFrame()
 df_comp['real_values'] = df['residuals']
-df_comp['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760,
-                                                    loc=1.92710,
-                                                    scale=7.187288)
-df_comp['random_norm'] = scipy.stats.norm.rvs(size=8760,
-                                              loc=1.78602,
-                                              scale=11.18743)
+df_comp['random_dist'] = dist.rvs(size=8760, loc=mu, scale=std)
 
 # %% mean and standard deviation of the fitted distribution
 
@@ -177,29 +179,29 @@ plt.show()
 
 # %% plotting
 
-#df.plot(kind='scatter', x='res_load', y='price_real')
+df.plot(kind='scatter', x='res_load', y='price_real')
 
-#df.plot(kind='scatter',
-#        x='price_real', y='price_model')
+df.plot(kind='scatter',
+        x='price_real', y='price_model')
 
-#df[:][['price_real', 'price_model']].plot(linewidth=1.2, subplots=True,
-#                                          drawstyle='steps',
-#                                          color=['grey', 'r', 'b'],
-#                                          ylim=[-100, 100])
+df[:][['price_real', 'price_model']].plot(linewidth=1.2, subplots=True,
+                                          drawstyle='steps',
+                                          color=['grey', 'r', 'b'],
+                                          ylim=[-100, 100])
 
-#residuals = pd.DataFrame()
-#residuals = pd.concat([df['residuals'][0:2190],
-#                       df['residuals'][2190:4380],
-#                       df['residuals'][4380:6570],
-#                       df['residuals'][6570:8760]], axis=1)
-#residuals.plot.hist(bins=100, subplots=True, legend=None)
-#residuals.columns=['Q1', 'Q2', 'Q3', 'Q4']
-#
+residuals = pd.DataFrame()
+residuals = pd.concat([df['residuals'][0:2190],
+                       df['residuals'][2190:4380],
+                       df['residuals'][4380:6570],
+                       df['residuals'][6570:8760]], axis=1)
+residuals.plot.hist(bins=100, subplots=True, legend=None)
+residuals.columns=['Q1', 'Q2', 'Q3', 'Q4']
 
-#df[0:24 * 31][['price_real', 'price_model',
-#               'price_model_volatility']].plot(linewidth=1.2,
-#                                               subplots=True,
-#                                               drawstyle='steps',
-#                                               ylim=[-100, 100])
-#
-#plt.show()
+
+df[0:24 * 31][['price_real', 'price_model',
+               'price_model_volatility']].plot(linewidth=1.2,
+                                               subplots=True,
+                                               drawstyle='steps',
+                                               ylim=[-100, 100])
+
+plt.show()
