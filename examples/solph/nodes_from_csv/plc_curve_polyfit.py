@@ -22,8 +22,7 @@ plt.rcParams['image.cmap'] = 'Spectral'
 
 # read file
 file = ('results/'
-        'scenario_nep_2014_2016-07-28 09:44:00.031153_DE_'
-        '.csv')
+        'scenario_nep_2014_2016-07-29 12:10:39.331957_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -53,6 +52,7 @@ df['price_polynom'] = p(df['res_load'])
 df['residuals'] = df['price_real'] - \
                   df['price_model']
 
+
 # %% create distribution-fitted volatility
 
 # Sample
@@ -63,9 +63,8 @@ dist_names = ['gausshyper', 'norm', 'gamma', 'hypsecant']
 
 for dist_name in dist_names:
 
+    # Fit distribution to the data
     dist = getattr(scipy.stats, dist_name)
-
-    # Fit a normal distribution to the data
     param = dist.fit(data)
 
     # Plot the histogram
@@ -84,26 +83,26 @@ for dist_name in dist_names:
 
     print(dist_name, ': ', ' mu: ', param[0], ' std: ', param[1])
 
+
 # %% QQ Plots and random numbers
 
 # Sample
 data = df['residuals']
 
-dist_name = 'norm'
-dist = getattr(scipy.stats, dist_name)
-# Fit a normal distribution to the data
-mu, std = dist.fit(data)
+# Distributions to check
+dist_names = ['norm', 'hypsecant']
 
+for dist_name in dist_names:
 
-scipy.stats.probplot(data, dist=dist_name, plot=plt)
-plt.title('Probability Plot (' + dist_name + ')')
-plt.savefig('results/qq_' + dist_name + '.pdf')
-plt.close()
+    # Fit distribution to the data
+    dist = getattr(scipy.stats, dist_name)
+    param = dist.fit(data)
 
-# Generate random numbers of distribution
-df_comp = pd.DataFrame()
-df_comp['real_values'] = df['residuals']
-df_comp['random_dist'] = dist.rvs(size=8760, loc=mu, scale=std)
+    scipy.stats.probplot(data, dist=dist_name, plot=plt)
+    plt.title('Probability Plot (' + dist_name + ')')
+    plt.savefig('results/qq_' + dist_name + '.pdf')
+    plt.close()
+
 
 # %% mean and standard deviation of the fitted distribution
 
@@ -128,6 +127,7 @@ df[['price_real',
                                                          drawstyle='steps')
 
 plt.show()
+
 
 # %% spread analysis
 
@@ -176,6 +176,7 @@ df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps',
                                          ax=axes[6])
 
 plt.show()
+
 
 # %% plotting
 
