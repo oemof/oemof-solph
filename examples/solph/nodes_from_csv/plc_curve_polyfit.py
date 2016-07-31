@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+from scipy.signal import argrelextrema
+
 
 # global plotting options
 plt.rcParams.update(plt.rcParamsDefault)
@@ -52,6 +54,106 @@ df['price_polynom'] = p(df['res_load'])
 df['residuals'] = df['price_real'] - \
                   df['price_model']
 
+# %% detect local minima and maxima
+
+df_peaks = df[['price_real', 'price_model']]['2014-01 01':'2014-02 01']
+
+# detection
+order = 5
+
+
+# np.greater_equal für tableaus
+real_maxima = argrelextrema(df_peaks['price_real'].values, np.greater,
+                            order=order)
+real_maxima = [i for i in real_maxima[0]]
+
+real_minima = argrelextrema(df_peaks['price_real'].values, np.less_equal,
+                            order=order)
+real_minima = [i for i in real_minima[0]]
+
+model_maxima = argrelextrema(df_peaks['price_model'].values, np.greater,
+                             order=order)
+model_maxima = [i for i in model_maxima[0]]
+
+model_minima = argrelextrema(df_peaks['price_model'].values, np.less_equal,
+                             order=order)
+model_minima = [i for i in model_minima[0]]
+
+# get residuals for maxima
+max_residuals = pd.DataFrame()
+max_residuals['residuals'] = df_peaks.iloc[model_maxima]['price_real'] - \
+    df_peaks.iloc[model_maxima]['price_model']
+
+param_max = scipy.stats.norm.fit(max_residuals)
+numbers_max = scipy.stats.norm.rvs(size=len(max_residuals),
+                                   loc=param_max[0],
+                                   scale=param_max[1])
+
+
+# get residuals for minima
+min_residuals = pd.DataFrame()
+min_residuals['residuals'] = df_peaks.iloc[model_minima]['price_real'] - \
+    df_peaks.iloc[model_minima]['price_model']
+param_min = scipy.stats.norm.fit(min_residuals)
+numbers_min = scipy.stats.norm.rvs(size=len(min_residuals),
+                                   loc=param_min[0],
+                                   scale=param_min[1])
+
+# scale prices
+df_peaks['price_scaled'] = df_peaks['price_model']
+df_peaks.ix[model_maxima, 'price_scaled'] *= 1.2
+df_peaks.ix[model_minima, 'price_scaled'] *= 0.8
+
+# plotting
+fig, axes = plt.subplots(nrows=3, sharey=True, sharex=True)
+
+df_peaks[['price_real']].plot(drawstyle='steps', color='r', ax=axes[0],
+                              title='Detected Maxima')
+df_peaks[['price_model']].plot(drawstyle='steps',
+                               markevery=[i for i in model_maxima],
+                               marker='o',
+                               color='b',
+                               ax=axes[0])
+
+df_peaks[['price_real']].plot(drawstyle='steps', color='r', ax=axes[1],
+                              title='Detected Minima')
+df_peaks[['price_model']].plot(drawstyle='steps',
+                               markevery=[i for i in model_minima],
+                               marker='o',
+                               color='b',
+                               ax=axes[1])
+
+df_peaks[['price_real']].plot(drawstyle='steps', color='r', ax=axes[2],
+                              title='Manipulated Data')
+#df_peaks[['price_model']].plot(drawstyle='steps', color='b', ax=axes[2])
+df_peaks[['price_scaled']].plot(drawstyle='steps',
+                                    color='k', ax=axes[2])
+
+plt.show()
+
+# %% find tableaus using an own approach
+
+# data
+df_peaks = df[['price_real', 'price_model']]['2014-02 01':'2014-02 14']
+
+positions = np.where(
+    (df_peaks['price_model'] == df_peaks['price_model'].shift(1)))
+
+# plotting
+fig, axes = plt.subplots(nrows=2, sharey=True, sharex=True)
+fig.suptitle('Maxima', fontsize=16)
+
+df_peaks[['price_real']].plot(drawstyle='steps',
+                              color='r',
+                              ax=axes[0])
+
+df_peaks[['price_model']].plot(drawstyle='steps',
+                               markevery=[i for i in positions],
+                               marker='s',
+                               color='b',
+                               ax=axes[0])
+
+plt.show()
 
 # %% create distribution-fitted volatility
 
@@ -106,8 +208,8 @@ for dist_name in dist_names:
 
 # %% mean and standard deviation of the fitted distribution
 
-df['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.92710,
-                                               scale=7.187288)
+df['random_hyper'] = scipy.stats.hypsecant.rvs(size=8760, loc=1.86383591071,
+                                               scale=5.41544622678)
 
 df['random_norm'] = scipy.stats.norm.rvs(size=8760, loc=1.78602,
                                          scale=11.18743)
@@ -118,13 +220,24 @@ df['price_model_volatility_norm'] = df['price_model'] + \
 df['price_model_volatility_hyper'] = df['price_model'] + \
                                      df['random_hyper']
 # plot
-df[['price_real',
+df[['price_real', 'price_model',
     'price_model_volatility_norm',
-    'price_model_volatility_hyper']][24*31:24*31*2].plot(kind='line',
+    'price_model_volatility_hyper']]['2014-01':'2014-03'].plot(kind='line',
                                                          subplots=True,
                                                          sharex=True,
                                                          sharey=True,
                                                          drawstyle='steps')
+
+plt.show()
+
+# %% real vs. model
+
+df[['price_real', 'price_model']]['2014-01':'2014-01'].plot(kind='line',
+                                                         subplots=False,
+                                                         sharex=True,
+                                                         sharey=True,
+                                                         drawstyle='steps',
+                                                         linewidth=1.6)
 
 plt.show()
 
@@ -177,32 +290,3 @@ df_spread[['spread_192h']].dropna().plot(kind='line', drawstyle='steps',
 
 plt.show()
 
-
-# %% plotting
-
-df.plot(kind='scatter', x='res_load', y='price_real')
-
-df.plot(kind='scatter',
-        x='price_real', y='price_model')
-
-df[:][['price_real', 'price_model']].plot(linewidth=1.2, subplots=True,
-                                          drawstyle='steps',
-                                          color=['grey', 'r', 'b'],
-                                          ylim=[-100, 100])
-
-residuals = pd.DataFrame()
-residuals = pd.concat([df['residuals'][0:2190],
-                       df['residuals'][2190:4380],
-                       df['residuals'][4380:6570],
-                       df['residuals'][6570:8760]], axis=1)
-residuals.plot.hist(bins=100, subplots=True, legend=None)
-residuals.columns=['Q1', 'Q2', 'Q3', 'Q4']
-
-
-df[0:24 * 31][['price_real', 'price_model',
-               'price_model_volatility']].plot(linewidth=1.2,
-                                               subplots=True,
-                                               drawstyle='steps',
-                                               ylim=[-100, 100])
-
-plt.show()
