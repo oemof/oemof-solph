@@ -31,52 +31,103 @@ df_raw.head()
 df_raw.columns
 
 
-# %% polynom fitting
+# %% polynom fitting: residual load
+
+# get imports and exports
+cc = 'DE'
+powerline_cols = [col for col in df_raw.columns
+                  if 'powerline' in col]
+powerlines = df_raw[powerline_cols]
+
+exports = powerlines[
+    [col for col in powerlines.columns
+     if cc + '_' in col]].sum(axis=1)
+df_raw['exports'] = exports
+
+imports = powerlines[
+    [col for col in powerlines.columns
+     if '_' + cc + '_' in col]].sum(axis=1)
+df_raw['imports'] = imports
 
 # prepare dataframe for fit
 residual_load = df_raw['DE_load'] + df_raw['AT_load'] + df_raw['LU_load'] - \
                 df_raw['DE_wind'] - df_raw['AT_wind'] - df_raw['LU_wind'] - \
                 df_raw['DE_solar'] - df_raw['AT_solar'] - df_raw['LU_solar']
 
+# real prices
 price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
 price_real.index = df_raw.index
 
 df = pd.concat([residual_load, price_real, df_raw['duals']], axis=1)
 df.columns = ['res_load', 'price_real', 'price_model']
 
-# fit polynom of 3rd degree
+# fit polynom of 3rd degree to price_real(res_load)
 z = np.polyfit(df['res_load'], df['price_real'], 3)
 p = np.poly1d(z)
+df['price_polynom_res_load'] = p(df['res_load'])
+
+# fit polynom of 3rd degree to price_residuals(price_model)
+df['price_residuals'] = df['price_real'] - df['price_model']
+z = np.polyfit(df['price_model'], df['price_residuals'], 3)
+p = np.poly1d(z)
+df['price_polynom_residuals'] = p(df['price_model'])
+
+# fit polynom of 3rd degree to price_residuals(res_load)
+z = np.polyfit(df['res_load'], df['price_residuals'], 3)
+p = np.poly1d(z)
+df['price_model_residuals_res_load'] = df['price_model'] + p(df['res_load'])
+
+# residuals of real-model
+df['price_residuals'].plot.hist(bins=50, title='price_real - price_model')
+df.plot.scatter(x='price_model', y='price_real')
+df.plot.scatter(x='res_load', y='price_real')
+df.plot.scatter(x='res_load', y='price_residuals')
+plt.plot(df['res_load'],
+         (
+          z[0] * df['res_load'] ** 3 +
+          z[1] * df['res_load'] ** 2 +
+          z[2] * df['res_load'] ** 1 +
+          z[3]
+          ), color='red')
+plt.show()
+
+# show correlations
+print(
+    df[['price_real', 'price_model', 'price_polynom_res_load',
+        'price_model_residuals_res_load', 'price_polynom_residuals']].corr()
+)
 
 # save and plot results
-df['price_polynom'] = p(df['res_load'])
+df[['price_real', 'price_model', 'price_polynom_res_load',
+    'price_model_residuals_res_load']]\
+    ['2014-01 01':'2014-03 01'].plot(subplots=True, drawstyle='steps',
+                                     sharey=True)
+plt.show()
 
-df['residuals'] = df['price_real'] - \
-                  df['price_model']
 
 # %% detect local minima and maxima
 
 df_peaks = df[['price_real', 'price_model']]['2014-01 01':'2014-02 01']
 
+order_max = 2
+order_min = 2
+
 # detection
-order = 5
-
-
 # np.greater_equal für tableaus
 real_maxima = argrelextrema(df_peaks['price_real'].values, np.greater,
-                            order=order)
+                            order=order_max)
 real_maxima = [i for i in real_maxima[0]]
 
-real_minima = argrelextrema(df_peaks['price_real'].values, np.less_equal,
-                            order=order)
+real_minima = argrelextrema(df_peaks['price_real'].values, np.less,
+                            order=order_min)
 real_minima = [i for i in real_minima[0]]
 
 model_maxima = argrelextrema(df_peaks['price_model'].values, np.greater,
-                             order=order)
+                             order=order_max)
 model_maxima = [i for i in model_maxima[0]]
 
-model_minima = argrelextrema(df_peaks['price_model'].values, np.less_equal,
-                             order=order)
+model_minima = argrelextrema(df_peaks['price_model'].values, np.less,
+                             order=order_min)
 model_minima = [i for i in model_minima[0]]
 
 # get residuals for maxima
@@ -101,11 +152,11 @@ numbers_min = scipy.stats.norm.rvs(size=len(min_residuals),
 
 # scale prices
 df_peaks['price_scaled'] = df_peaks['price_model']
-df_peaks.ix[model_maxima, 'price_scaled'] *= 1.2
-df_peaks.ix[model_minima, 'price_scaled'] *= 0.8
+df_peaks.ix[model_maxima, 'price_scaled'] += 20
+df_peaks.ix[model_minima, 'price_scaled'] -= 20
 
 # plotting
-fig, axes = plt.subplots(nrows=3, sharey=True, sharex=True)
+fig, axes = plt.subplots(nrows=2, sharey=True, sharex=True)
 
 df_peaks[['price_real']].plot(drawstyle='steps', color='r', ax=axes[0],
                               title='Detected Maxima')
@@ -123,11 +174,11 @@ df_peaks[['price_model']].plot(drawstyle='steps',
                                color='b',
                                ax=axes[1])
 
-df_peaks[['price_real']].plot(drawstyle='steps', color='r', ax=axes[2],
-                              title='Manipulated Data')
-#df_peaks[['price_model']].plot(drawstyle='steps', color='b', ax=axes[2])
-df_peaks[['price_scaled']].plot(drawstyle='steps',
-                                    color='k', ax=axes[2])
+#df_peaks[['price_real']].plot(drawstyle='steps', color='r', ax=axes[2],
+#                              title='Manipulated Data')
+##df_peaks[['price_model']].plot(drawstyle='steps', color='b', ax=axes[2])
+#df_peaks[['price_scaled']].plot(drawstyle='steps',
+#                                    color='k', ax=axes[2])
 
 plt.show()
 
@@ -141,7 +192,7 @@ positions = np.where(
 
 # plotting
 fig, axes = plt.subplots(nrows=2, sharey=True, sharex=True)
-fig.suptitle('Maxima', fontsize=16)
+fig.suptitle('Detected Tableaus', fontsize=16)
 
 df_peaks[['price_real']].plot(drawstyle='steps',
                               color='r',
@@ -151,7 +202,7 @@ df_peaks[['price_model']].plot(drawstyle='steps',
                                markevery=[i for i in positions],
                                marker='s',
                                color='b',
-                               ax=axes[0])
+                               ax=axes[1])
 
 plt.show()
 
