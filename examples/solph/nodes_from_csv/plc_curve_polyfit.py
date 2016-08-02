@@ -66,6 +66,26 @@ z = np.polyfit(df['res_load'], df['price_real'], 3)
 p = np.poly1d(z)
 df['price_polynom_res_load'] = p(df['res_load'])
 
+####
+
+print(z)
+
+def spot_price(x):
+    coeff = [3.39995259e-13, -6.22068602e-08, 4.48623593e-03, -8.55571083e+01]
+    y = coeff[0] * x ** 3 + \
+        coeff[1] * x ** 2 + \
+        coeff[2] * x ** 1 + \
+        coeff[3]
+    return y
+
+df['test'] = residual_load.apply(spot_price)
+
+df[['price_real', 'test']]['2014-01'].plot()
+plt.show()
+
+####
+
+
 # fit polynom of 3rd degree to price_residuals(price_model)
 df['price_residuals'] = df['price_real'] - df['price_model']
 z = np.polyfit(df['price_model'], df['price_residuals'], 3)
@@ -97,10 +117,16 @@ print(
         'price_model_residuals_res_load', 'price_polynom_residuals']].corr()
 )
 
+# means
+print(
+    df[['price_real', 'price_model', 'price_polynom_res_load',
+        'price_model_residuals_res_load', 'price_polynom_residuals']].mean()
+)
+
 # save and plot results
 df[['price_real', 'price_model', 'price_polynom_res_load',
     'price_model_residuals_res_load']]\
-    ['2014-01 01':'2014-03 01'].plot(subplots=True, drawstyle='steps',
+    ['2014-01 01':'2014-12 01'].plot(subplots=True, drawstyle='steps',
                                      sharey=True)
 plt.show()
 
@@ -209,7 +235,7 @@ plt.show()
 # %% create distribution-fitted volatility
 
 # Sample
-data = df['residuals']
+data = df['price_residuals']
 
 # Distributions to check
 dist_names = ['gausshyper', 'norm', 'gamma', 'hypsecant']
@@ -240,7 +266,7 @@ for dist_name in dist_names:
 # %% QQ Plots and random numbers
 
 # Sample
-data = df['residuals']
+data = df['price_residuals']
 
 # Distributions to check
 dist_names = ['norm', 'hypsecant']
