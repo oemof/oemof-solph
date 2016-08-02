@@ -28,14 +28,19 @@ df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
 df_raw.columns
 
-# %% plot fundamental and polynomial prices
+
+# %% plot fundamental and regression prices
 
 df = df_raw[['price_volatility', 'duals']]
 
 df.plot()
+plt.xlabel('Zeit in h')
+plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
 df[0:24 * 7 * 8].plot()
+plt.xlabel('Zeit in h')
+plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
 df[['price_volatility', 'duals']].describe()
@@ -68,4 +73,27 @@ plt.plot(df['res_load'],
           z[2] * df['res_load'] ** 1 +
           z[3]
           ), color='red')
+plt.xlabel('Residuallast in MW')
+plt.ylabel('Day-Ahead Preis in EUR/MWh')
 plt.show()
+
+
+# %% dispatch plot
+
+df = df_raw
+
+# get imports and exports
+cc = 'DE'
+powerline_cols = [col for col in df.columns
+                  if 'powerline' in col]
+powerlines = df[powerline_cols]
+
+exports = powerlines[
+    [col for col in powerlines.columns
+     if cc + '_' in col]].sum(axis=1)
+df['exports'] = exports
+
+imports = powerlines[
+    [col for col in powerlines.columns
+     if '_' + cc + '_' in col]].sum(axis=1)
+df['imports'] = imports
