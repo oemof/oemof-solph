@@ -133,9 +133,11 @@ en_de = {'run_of_river': 'Laufwasser',
 dispatch_de.rename(columns=en_de, inplace=True)
 
 # area plot. gute woche: '2014-01-21':'2014-01-27'
-dispatch_de['2014-01-21':'2014-01-27'].plot(kind='area', stacked=True,
-                                            linewidth=0, legend='reverse',
-                                            cmap=cm.get_cmap('Spectral'))
+dispatch_de[['Biomasse', 'Kernenergie', 'Braunkohle', 'Steinkohle', 'Gas',
+             'Solar', 'Wind',
+             'Import']]['2014-01-21':'2014-01-27'] \
+             .plot(kind='area', stacked=True, linewidth=0, legend='reverse',
+                   cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Datum')
 plt.ylabel('Leistung in  GW')
 plt.ylim(0, max(dispatch_de.sum(axis=1)) * 1.3)
