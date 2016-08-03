@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import scipy
-import scipy.stats
 import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 
 # global plotting options
@@ -18,11 +17,11 @@ plt.rcParams['ytick.color'] = 'k'
 plt.rcParams['text.color'] = 'k'
 plt.rcParams['axes.labelcolor'] = 'k'
 plt.rcParams.update({'font.size': 10})
-plt.rcParams['image.cmap'] = 'Spectral'
+plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2035_2016-08-02 15:10:24.050450_DE.csv')
+        'scenario_nep_2014_2016-08-02 14:36:17.842782_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -78,22 +77,67 @@ plt.ylabel('Day-Ahead Preis in EUR/MWh')
 plt.show()
 
 
-# %% dispatch plot
+# %% dispatch plot (balance doesn't fit since DE/LU/AT are one bidding area)
 
-df = df_raw
+# country code
+cc = 'DE'
+
+# get fossil and renewable power plants
+fuels = ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
+         'hard_coal', 'gas', 'mixed_fuels', 'oil', 'storage_out', 'load',
+         'storage_in', 'excess', 'shortage']
+
+dispatch = pd.DataFrame()
+
+for f in fuels:
+    cols = [c for c in df_raw.columns if f in c and cc in c]
+    dispatch[f] = df_raw[cols].sum(axis=1)
+
+dispatch.index = df_raw.index
 
 # get imports and exports
-cc = 'DE'
-powerline_cols = [col for col in df.columns
-                  if 'powerline' in col]
-powerlines = df[powerline_cols]
+powerline_cols = [c for c in df_raw.columns if 'powerline' in c]
+powerlines = df_raw[powerline_cols]
 
-exports = powerlines[
-    [col for col in powerlines.columns
-     if cc + '_' in col]].sum(axis=1)
-df['exports'] = exports
+exports = powerlines[[c for c in powerlines.columns
+                      if c.startswith(cc + '_')]]
 
-imports = powerlines[
-    [col for col in powerlines.columns
-     if '_' + cc + '_' in col]].sum(axis=1)
-df['imports'] = imports
+imports = powerlines[[c for c in powerlines.columns
+                      if '_' + cc + '_' in c]]
+
+# exports
+dispatch['imports'] = imports.sum(axis=1)
+dispatch['exports'] = -exports.sum(axis=1)
+dispatch['load'] = -dispatch['load']
+dispatch['storage_in'] = -dispatch['storage_in']
+
+# dict with new column names
+en_de = {'run_of_river': 'Laufwasser',
+         'biomass': 'Biomasse',
+         'solar': 'Solar',
+         'wind': 'Wind',
+         'uranium': 'Kernenergie',
+         'lignite': 'Braunkohle',
+         'hard_coal': 'Steinkohle',
+         'gas': 'Gas',
+         'mixed_fuels': 'Sonstiges',
+         'oil': 'Öl',
+         'storage_out': 'Pumpspeicher',
+         'imports': 'Importe'}
+
+# translation
+dispatch_de = dispatch[
+    ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
+     'hard_coal', 'gas', 'storage_out', 'imports']]
+dispatch_de = dispatch_de.divide(1000)
+dispatch_de.rename(columns=en_de, inplace=True)
+
+# plot
+dispatch_de['2014-01-21':'2014-01-27'].plot(kind='area', stacked=True,
+                                            linewidth=0, legend='reverse',
+                                            cmap=cm.get_cmap('Spectral'))
+plt.xlabel('Datum')
+plt.ylabel('Leistung in  GW')
+plt.ylim(0, max(dispatch_de.sum(axis=1)) * 1.3)
+
+plt.show()
