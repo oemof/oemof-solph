@@ -8,23 +8,14 @@ This overview was developed to make oemof easy to use and develop. It describes 
 The idea of an open framework
 ==============================
 
-The Open Energy System Modeling Framework has been developed for the modeling and analysis of energy supply systems considering power and heat as well as prospectively mobility. Energy system models often do not have publicly accessible source code and freely available data and are poorly documented. The missing transparency slows down the scientific discussion on  model quality with regard to certain problems such as grid extension. Besides, energy system models are often developed for a certain application and cannot be adjusted (or only with great effort) to other requirements.
-
-The Center for Sustainable Energy Systems (ZNES) together with the Reiner Lemoine Institute (RLI) in Berlin and the Otto-von-Guericke-University of Magdeburg (OVGU) are developing an Open Energy System Modelling Framework (oemof) that addresses these problems by offering a free, open and clearly documented framework for energy system modelling. This transparent approach allows a sound scientific discourse on the underlying models and data. In this way the assessment of quality and significance of undertaken analyses is improved. Moreover, the modular composition of the framework supports the adjustment to a large number of application purposes. The open source approach allows a collaborative development of the framework that offers several advantages:
-
-- **Synergies** - By developing collaboratively synergies between the participating institutes can be utilized.
-
-- **Debugging** - Through the input of a larger group of users and developers bugs are identified and fixed at an earlier stage.
-
-- **Advancement** - The oemof-based application profits from further development of the framework.
-
-
-Open Energy System Modeling Framework (oemof)
------------------------------------------------
+The Open Energy System Modeling Framework has been developed for the modeling and analysis of energy supply systems considering power and heat as well as prospectively mobility.
 
 oemof is programmed in Python and uses several Python packages for scientific applications (e.g. mathematical optimisation, network analysis, data analyses), optionally in combination with a PostgreSQL/PostGIS Database. It offers a toolbox of various functionalities needed to build energy system models in high temporal and spatial resolution. For instance, the wind energy feed-in in a model region based on weather data can be modelled, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
 
-The framework consists of packages. For the communication between these packages interfaces are provided. A package again consists of modules that handle a defined task. A linkage of specific modules of the various packages is in oemof called an application (app) and depicts for example a concrete energy system model. The following image shows the underlying concept.
+The framework consists of different packages. For the communication between these packages interfaces are provided. 
+The oemof packages and their modules are used to build what we call 'application' and depicts
+a concrete energy system model (or a subprocess of this model). The following image 
+illustrates this idea:
 
 .. 	image:: framework_concept.svg
    :height: 744px
@@ -33,7 +24,11 @@ The framework consists of packages. For the communication between these packages
    :alt: alternate text
    :align: center
 
-Besides other applications the apps "renpass-gis" and "reegis" are currently developed within the framework. "renpass-gis" enables the simulation of a future European energy system with a high spatial and temporal resolution. Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered. The app "reegis" provides a simulation of a regional heat and power supply system. These two examples show that the modular approach of the framework allows applications with very different objectives. 
+Besides other applications the apps "renpass-gis" and "reegis" are currently developed based on the framework. 
+"renpass-gis" enables the simulation of a future European energy system with a high spatial and temporal resolution. 
+Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered. The app "reegis" provides a simulation of a regional heat and power supply system. 
+These two examples show that the modular approach of the framework allows 
+applications with very different objectives. 
 
 Underlying oemof concept 
 ==============================
@@ -101,6 +96,17 @@ In oemof this would look as follows::
  ptg2(Transformer)   |<--------------------------|       |       |         |
                      |---------------------------------------------------->|
 
+Why are we developing oemof? 
+==============================
+Energy system models often do not have publicly accessible source code and freely available data and are poorly documented. The missing transparency slows down the scientific discussion on  model quality with regard to certain problems such as grid extension. Besides, energy system models are often developed for a certain application and cannot be adjusted (or only with great effort) to other requirements.
+
+The Center for Sustainable Energy Systems (ZNES) together with the Reiner Lemoine Institute (RLI) in Berlin and the Otto-von-Guericke-University of Magdeburg (OVGU) are developing an Open Energy System Modelling Framework (oemof) that addresses these problems by offering a free, open and clearly documented framework for energy system modelling. This transparent approach allows a sound scientific discourse on the underlying models and data. In this way the assessment of quality and significance of undertaken analyses is improved. Moreover, the modular composition of the framework supports the adjustment to a large number of application purposes. The open source approach allows a collaborative development of the framework that offers several advantages:
+
+- **Synergies** - By developing collaboratively synergies between the participating institutes can be utilized.
+
+- **Debugging** - Through the input of a larger group of users and developers bugs are identified and fixed at an earlier stage.
+
+- **Advancement** - The oemof-based application profits from further development of the framework.
 
 Documentation
 ===============
