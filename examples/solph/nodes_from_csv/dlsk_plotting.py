@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2014_2016-08-04 11:28:11.690657_DE.csv')
+        'scenario_nep_2014_2016-08-04 12:04:42.180425_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -96,7 +96,7 @@ for f in fuels:
 dispatch.index = df_raw.index
 
 # get imports and exports and aggregate columns
-cols = [c for c in df_raw.columns if 'powerline' in c]
+cols = [c for c in df_raw.columns if 'powerline' in c and cc in c]
 powerlines = df_raw[cols]
 
 exports = powerlines[[c for c in powerlines.columns
@@ -109,19 +109,21 @@ dispatch['imports'] = imports.sum(axis=1)
 dispatch['exports'] = exports.sum(axis=1)
 
 # get imports and exports and aggregate columns
-phs_in = df_raw[[c for c in df_raw.columns if 'phs_in' in c]]
-phs_out = df_raw[[c for c in df_raw.columns if 'phs_out' in c]]
-phs_level = df_raw[[c for c in df_raw.columns if 'phs_level' in c]]
+phs_in = df_raw[[c for c in df_raw.columns if 'phs_in' in c and cc in c]]
+phs_out = df_raw[[c for c in df_raw.columns if 'phs_out' in c and cc in c]]
+phs_level = df_raw[[c for c in df_raw.columns if 'phs_level' in c and cc in c]]
 
 dispatch['phs_in'] = phs_in.sum(axis=1)
 dispatch['phs_out'] = phs_out.sum(axis=1)
 dispatch['phs_level'] = phs_level.sum(axis=1)
 
+# MW to GW
+dispatch = dispatch.divide(1000)
+
 # translation
 dispatch_de = dispatch[
     ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
-     'hard_coal', 'gas', 'storage_out', 'imports', 'exports']]
-dispatch_de = dispatch_de.divide(1000)
+     'hard_coal', 'gas', 'phs_out', 'load', 'imports', 'exports']]
 
 # dict with new column names
 en_de = {'run_of_river': 'Laufwasser',
@@ -134,21 +136,21 @@ en_de = {'run_of_river': 'Laufwasser',
          'gas': 'Gas',
          'mixed_fuels': 'Sonstiges',
          'oil': 'Öl',
-         'storage_out': 'Pumpspeicher',
+         'phs_out': 'Pumpspeicher',
          'imports': 'Import',
          'exports': 'Export',
          'load': 'Last'}
-dispatch_de.rename(columns=en_de, inplace=True)
+dispatch_de = dispatch_de.rename(columns=en_de)
 
 # area plot. gute woche: '2014-01-21':'2014-01-27'
 dispatch_de[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
-             'Steinkohle', 'Gas', 'Solar', 'Wind',
+             'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
              'Import']]['2014-01-21':'2014-01-27'] \
              .plot(kind='area', stacked=True, linewidth=0, legend='reverse',
                    cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Datum')
 plt.ylabel('Leistung in  GW')
-plt.ylim(0, max(dispatch_de.sum(axis=1)) * 1.3)
+plt.ylim(0, max(dispatch_de.sum(axis=1)) * 0.65)
 plt.show()
 
 # duration curves (sort columns individually)
@@ -156,26 +158,23 @@ curves = pd.concat(
     [dispatch_de[col].sort_values(ascending=False).reset_index(drop=True)
      for col in dispatch_de], axis=1)
 curves[['Kernenergie', 'Braunkohle',
-        'Steinkohle', 'Gas', 'Solar', 'Wind',
+        'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
         'Import', 'Export']].plot(cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
 plt.show()
 
 # duration curves ordered by load (stacked) - storages to be added!
-curves_stacked = pd.concat([dispatch_de,
-                            dispatch['load'].divide(1000),
-                            dispatch['imports'].divide(1000)],
-                           axis=1)
-curves_stacked = curves_stacked.sort_values(by=['load'], ascending=False)
+curves_stacked = dispatch_de
+curves_stacked = curves_stacked.sort_values(by=['Last'], ascending=False)
 curves_stacked.reset_index(drop=True, inplace=True)
 
 curves_stacked[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
-                'Steinkohle', 'Gas', 'Solar', 'Wind',
+                'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
                 'Import']].plot(kind='area', stacked=True,
                                 legend='reverse',
                                 cmap=cm.get_cmap('Spectral'))
-#plt.plot(curves_stacked['load'])
+#plt.plot(curves_stacked['Last'])
 plt.xlabel('Stunden des Jahres geordnet nach der Last (rot)')
 plt.ylabel('Leistung in GW')
 plt.show()
