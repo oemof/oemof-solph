@@ -13,9 +13,9 @@ from oemof.outputlib import ResultsDataFrame
 
 # %% configuration
 
-date_from = '2035-01-01 00:00:00'
-date_to = '2035-12-31 23:00:00'
-nodes_flows = 'nep_2035.csv'
+date_from = '2014-01-01 00:00:00'
+date_to = '2014-12-31 23:00:00'
+nodes_flows = 'nep_2014.csv'
 
 nodes_flows_sequences = 'nep_2014_seq.csv'
 
@@ -158,5 +158,5 @@ for cc in country_codes:
     # sort columns and save as csv file
     file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
                 cc + '.csv'
-    country_data.sort_index(axis=1)
+    country_data.sort_index(axis=1, inplace=True)
     country_data.to_csv(os.path.join(results_path, file_name))

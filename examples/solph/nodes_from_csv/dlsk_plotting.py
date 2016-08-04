@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2014_2016-08-02 14:36:17.842782_DE.csv')
+        'scenario_nep_2014_2016-08-04 11:28:11.690657_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -84,8 +84,8 @@ cc = 'DE'
 
 # get fossil and renewable power plants
 fuels = ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
-         'hard_coal', 'gas', 'mixed_fuels', 'oil', 'storage_out', 'load',
-         'storage_in', 'excess', 'shortage']
+         'hard_coal', 'gas', 'mixed_fuels', 'oil', 'load', 'excess',
+         'shortage']
 
 dispatch = pd.DataFrame()
 
@@ -95,9 +95,9 @@ for f in fuels:
 
 dispatch.index = df_raw.index
 
-# get imports and exports
-powerline_cols = [c for c in df_raw.columns if 'powerline' in c]
-powerlines = df_raw[powerline_cols]
+# get imports and exports and aggregate columns
+cols = [c for c in df_raw.columns if 'powerline' in c]
+powerlines = df_raw[cols]
 
 exports = powerlines[[c for c in powerlines.columns
                       if c.startswith(cc + '_')]]
@@ -105,9 +105,17 @@ exports = powerlines[[c for c in powerlines.columns
 imports = powerlines[[c for c in powerlines.columns
                       if '_' + cc + '_' in c]]
 
-# exports
 dispatch['imports'] = imports.sum(axis=1)
 dispatch['exports'] = exports.sum(axis=1)
+
+# get imports and exports and aggregate columns
+phs_in = df_raw[[c for c in df_raw.columns if 'phs_in' in c]]
+phs_out = df_raw[[c for c in df_raw.columns if 'phs_out' in c]]
+phs_level = df_raw[[c for c in df_raw.columns if 'phs_level' in c]]
+
+dispatch['phs_in'] = phs_in.sum(axis=1)
+dispatch['phs_out'] = phs_out.sum(axis=1)
+dispatch['phs_level'] = phs_level.sum(axis=1)
 
 # translation
 dispatch_de = dispatch[
