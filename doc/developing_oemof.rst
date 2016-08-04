@@ -1,11 +1,9 @@
-Developer Notes
+Developing oemof
 ================
 
-Here we gather important notes for the developing of oemof and elements within
-the framework.
-
-We highly encourage you to contribute to further development of oemof. If you 
-want to collaborate see description below or contact us.
+Here you find important notes for developing oemof and elements within
+the framework. We highly encourage you to contribute to further development 
+of oemof. If you want to collaborate see description below or contact us.
 
 Install the developer version
 -----------------------------

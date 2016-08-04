@@ -14,7 +14,7 @@ Submodules
 oemof.core.energy_system module
 -------------------------------
 
-.. automodule:: oemof.core.energy_system
+.. automodule:: oemof.core.network
     :members:
     :undoc-members:
     :show-inheritance:
