@@ -39,13 +39,6 @@ class EnergySystem:
         <oemof.core.network.Entity>` that should be part of the energy system.
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
-    simulation : core.energy_system.Simulation object
-        Simulation object that contains all necessary attributes to start the
-        solver library. Defined in the :py:class:`Simulation
-        <oemof.core.energy_system.Simulation>` class.
-    regions : list of core.energy_system.Region objects
-        List of regions defined in the :py:class:`Region
-        <oemof.core.energy_system.Simulation>` class.
     time_idx : pandas.index, optional
         Define the time range and increment for the energy system. This is an
         optional parameter but might be import for other functions/methods that
@@ -72,13 +65,6 @@ class EnergySystem:
         <oemof.core.network.Entity>` are automatically added to this list on
         construction.
     groups : dict
-    simulation : core.energy_system.Simulation object
-        Simulation object that contains all necessary attributes to start the
-        solver library. Defined in the :py:class:`Simulation
-        <oemof.core.energy_system.Simulation>` class.
-    regions : list of core.energy_system.Region objects
-        List of regions defined in the :py:class:`Region
-        <oemof.core.energy_system.Simulation>` class.
     results : dictionary
         A dictionary holding the results produced by the energy system.
         Is `None` while no results are produced.
@@ -126,7 +112,7 @@ class EnergySystem:
 
     """
     def __init__(self, **kwargs):
-        for attribute in ['regions', 'entities', 'simulation']:
+        for attribute in ['entities']:
             setattr(self, attribute, kwargs.get(attribute, []))
 
         Entity.registry = self
