@@ -109,6 +109,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
     nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
                                   header=None)
+    nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
     nodes_flows_seq.drop(0, axis=1, inplace=True)
     nodes_flows_seq = nodes_flows_seq.transpose()
     nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
