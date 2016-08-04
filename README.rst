@@ -15,36 +15,15 @@ Installing oemof
 
   sudo pip3 install oemof
 
-Developing oemof
-=====================
-
-We highly encourage you to contribute to further development of oemof. If you want to collaborate install the developer version as described below and pay attention to the developer notes described in the documentation: http://oemof.readthedocs.org/en/latest/developer_notes.html
-
-To install the developer version two steps are necessary:
-
-.. code:: bash
-
-  git clone git@github.com:oemof/oemof.git
-  sudo pip3 install -e /path/to/the/repository
-
-See http://oemof.readthedocs.org/en/latest/installation_and_setup.html for further information on installation and setup.
-
-See the developer version of the full documentation at: http://oemof.readthedocs.org/en/latest/.
-
-Further packages within oemof
-==============================
-
-`Feedinlib <https://github.com/oemof/feedinlib>`_  and `oemof.db <https://github.com/oemof/oemof.db>`_ are part of the oemof framework. They can be used to create energy system models but are not a must.
 
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an application (app) and depicts for example a concrete energy system model.
+The linkage of specific modules of the various packages is called an 
+application (app) and depicts for example a concrete energy system model.
 
-There is one executable example energy system in `Storage optimization  <https://github.com/oemof/oemof/tree/master/examples/storage_optimization>`_.
+There are examples available <https://github.com/oemof/oemof/tree/master/examples/>`_.
 
-Further example apps in development can be found in
-`Development examples  <https://github.com/oemof/oemof/tree/master/examples/development_examples>`_.
 
 License
 =======

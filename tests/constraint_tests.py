@@ -9,7 +9,7 @@ import pandas as pd
 from oemof.solph.network import Investment
 from oemof.solph import OperationalModel
 
-from oemof.core import energy_system as core_es
+from oemof import energy_system as core_es
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
@@ -190,6 +190,8 @@ class Constraint_Tests:
             outputs={bel: Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
+            capacity_max = 0.9,
+            capacity_min= 0.1,
             nominal_input_capacity_ratio=1 / 6,
             nominal_output_capacity_ratio=1 / 6,
             inflow_conversion_factor=0.97,

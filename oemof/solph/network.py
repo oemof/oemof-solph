@@ -4,7 +4,7 @@
 """
 import warnings
 import oemof.network as on
-import oemof.core.energy_system as es
+import oemof.energy_system as es
 from .options import Investment
 from .plumbing import Sequence
 
@@ -37,10 +37,10 @@ class Flow:
         nominal_value to get the absolute value. If fixed is True the flow
         variable will be fixed to actual_value * nominal_value.
     positive_gradient : numeric (sequence or scalar)
-        The maximal positive difference (flow[t-1] < flow[t])
+        The normend maximal positive difference (flow[t-1] < flow[t])
         of two consecutive flow values.
     negative_gradient : numeric (sequence or scalar)
-        The maximum negative difference (from[t-1] > flow[t]) of two
+        The normend maximum negative difference (from[t-1] > flow[t]) of two
         consecutive timesteps.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
@@ -71,7 +71,7 @@ class Flow:
     >>> f.actual_value[2]
     4
 
-    Creating a flow object with time-dependet lower and upper bounds:
+    Creating a flow object with time-depended lower and upper bounds:
 
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
@@ -79,9 +79,7 @@ class Flow:
 
     """
     def __init__(self, **kwargs):
-        """
-        """
-        # TODO: Check if we can inherit form pyomo.core.base.var _VarData
+        # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with

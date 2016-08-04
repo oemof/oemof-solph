@@ -1,10 +1,24 @@
-##########################################
+~~~~~~~~~~~
+oemof-solph
+~~~~~~~~~~~
+
+Solph is an oemof-package, designed to create and solve linear or mixed-integer 
+linear optimization problems. The packages is based on pyomo. To get started 
+with solph, checkout the solph-examples in the `oemof/examples/solph` directory.
+
+The mathematical description of oemof can be found in the API. 
+
+
+More to come...
+
+
+
  Mathematical notation for solph
-##########################################
+------------------------------------
 
 
 Sets 
-----------------------
+^^^^^^^^^^^^^^^
 
 .. math::
    :nowrap:
@@ -27,7 +41,7 @@ Sets
 	\end{tabular}
 
 Variables 
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. math::
    :nowrap:
@@ -55,7 +69,7 @@ Variables
 	\end{tabular}
 
 Parameters 
-----------------------
+^^^^^^^^^^^^^^^^^
 Parameters will be notate with uppercase. 
 
 .. math::

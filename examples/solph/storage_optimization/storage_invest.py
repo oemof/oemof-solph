@@ -124,14 +124,14 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
 
     om = solph.OperationalModel(energysystem, timeindex=energysystem.time_idx)
 
-    logging.info('Solve the optimization problem')
-    om.solve(solver=solvername, solve_kwargs={'tee': True})
-
     if debug:
         filename = os.path.join(
             helpers.extend_basic_path('lp_files'), 'storage_invest.lp')
         logging.info('Store lp-file in {0}.'.format(filename))
         om.write(filename, io_options={'symbolic_solver_labels': True})
+
+    logging.info('Solve the optimization problem')
+    om.solve(solver=solvername, solve_kwargs={'tee': True})
 
     return energysystem
 

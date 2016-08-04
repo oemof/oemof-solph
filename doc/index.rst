@@ -12,12 +12,14 @@ Contents:
    :maxdepth: 2
 
    getting_started
-   overview
+   about_oemof
    installation_and_setup
-   developer_notes
+   using_oemof
+   developing_oemof
    whats_new
-   oemof_core
-   solph
+   oemof_network
+   oemof_solph
+   oemof_outputlib
    api
 
 

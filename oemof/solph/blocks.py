@@ -21,8 +21,10 @@ class Storage(SimpleBlock):
     **The following variables are created:**
 
     capacity
-        Capacity (level) for every storage and timestep.
-        The variable of storage s and timestep t can be acessed by:
+        Capacity (level) for every storage and timestep. The value for the
+        capacity at the beginning is set by the parameter `initial_capacity` or
+        not set if `initial_capacity` is None.
+        The variable of storage s and timestep t can be accessed by:
         `om.Storage.capacity[s, t]`
 
     **The following constraints are created:**
@@ -141,7 +143,7 @@ class InvestmentStorage(SimpleBlock):
 
     Storage balance
       .. math::
-        capacity(n, t) = & capacity(n, t\_previous(t)) \\cdot \
+        capacity(n, t) =  &capacity(n, t\_previous(t)) \\cdot \
         (1 - capacity\_loss(n)) \\\\
         &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \\cdot \
            \\tau) \\\\
@@ -157,8 +159,23 @@ class InvestmentStorage(SimpleBlock):
           \\forall n \\in \\textrm{INITIAL\_CAPACITY,} \\\\
           \\forall t \\in \\textrm{TIMESTEPS}.
 
-    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+    Connect the invest variables of the storage and the input flow.
+        .. math:: InvestmentFlow.invest(source(n), n) =
+          invest(n) * nominal\_input\_capacity\_ratio(n) \\\\
+          \\forall n \\in \\textrm{INVESTSTORAGES}
+
+    Connect the invest variables of the storage and the output flow.
+        .. math:: InvestmentFlow.invest(n, target(n)) ==
+          invest(n) * nominal_output_capacity_ratio(n) \\\\
+          \\forall n \\in \\textrm{INVESTSTORAGES}
+
+    Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t), \\\\
+            \\forall n \\in \\textrm{MAX\_INVESTSTORAGES,} \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}.
+
+    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t), \\\\
             \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
@@ -213,6 +230,9 @@ class InvestmentStorage(SimpleBlock):
                           bounds=_storage_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
+        i = {n: n._input() for n in group}
+        o = {n: n._output() for n in group}
+
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage energy balance.
             """
@@ -220,9 +240,9 @@ class InvestmentStorage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[n._input(), n, t] *
+            expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement
-            expr += (m.flow[n, n._output(), t] /
+            expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement
             return expr == 0
         self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
@@ -243,7 +263,7 @@ class InvestmentStorage(SimpleBlock):
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n._input(), n] ==
+            expr = (m.InvestmentFlow.invest[i[n], n] ==
                     self.invest[n] * n.nominal_input_capacity_ratio)
             return expr
         self.storage_capacity_inflow = Constraint(
@@ -254,7 +274,7 @@ class InvestmentStorage(SimpleBlock):
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, n._output()] ==
+            expr = (m.InvestmentFlow.invest[n, o[n]] ==
                     self.invest[n] * n.nominal_output_capacity_ratio)
             return expr
         self.storage_capacity_outflow = Constraint(
@@ -272,7 +292,7 @@ class InvestmentStorage(SimpleBlock):
         def _min_capacity_invest_rule(block, n, t):
             """Rule definition of lower bound constraint for the storage cap.
             """
-            expr = (self.capacity[n, t] <= (n.capacity_min[t] *
+            expr = (self.capacity[n, t] >= (n.capacity_min[t] *
                                             self.invest[n]))
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
@@ -442,7 +462,7 @@ class Flow(SimpleBlock):
                         lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
                         rhs = m.positive_flow_gradient[inp, out, ts]
                         self.positive_gradient_constr.add((inp, out, ts),
-                                                          lhs >= rhs)
+                                                          lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
         self.positive_gradient_constr = Constraint(
@@ -457,9 +477,9 @@ class Flow(SimpleBlock):
                 for ts in m.TIMESTEPS:
                     if ts > 0:
                         lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
-                        rhs = m.positive_flow_gradient[inp, out, ts]
+                        rhs = m.negative_flow_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, ts),
-                                                          lhs >= rhs)
+                                                          lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
         self.negative_gradient_constr = Constraint(
@@ -735,15 +755,20 @@ class Bus(SimpleBlock):
 
         m = self.parent_block()
 
-        self.balance = Constraint(group, noruleinit=True)
+        I = {}
+        O = {}
+        for n in group:
+            I[n] = [i for i in n.inputs]
+            O[n] = [o for o in n.outputs]
 
+        self.balance = Constraint(group, noruleinit=True)
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in group:
                     lhs = sum(m.flow[i, n, t] * m.timeincrement
-                              for i in n.inputs)
+                              for i in I[n])
                     rhs = sum(m.flow[n, o, t] * m.timeincrement
-                              for o in n.outputs)
+                              for o in O[n])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
@@ -789,14 +814,17 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
+        I = {n:n._input() for n in group}
+        O = {n:[o for o in n.outputs.keys()] for n in group}
+
         self.relation = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    for o in n.outputs:
+                    for o in O[n]:
                         try:
-                            lhs = m.flow[n._input(), n, t] * \
+                            lhs = m.flow[I[n], n, t] * \
                                   n.conversion_factors[o][t]
                             rhs = m.flow[n, o, t]
                         except:

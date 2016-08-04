@@ -2,7 +2,7 @@ from traceback import format_exception_only as feo
 
 from nose.tools import assert_raises, eq_, ok_
 
-from oemof.core.energy_system import EnergySystem as ES
+from oemof.energy_system import EnergySystem as ES
 from oemof.network import Bus, Node, Transformer
 
 

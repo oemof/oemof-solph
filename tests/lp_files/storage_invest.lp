@@ -90,17 +90,32 @@ c_e_InvestmentStorage_storage_capacity_outflow(storage)_:
 
 c_u_InvestmentStorage_max_capacity(storage_0)_:
 +1 InvestmentStorage_capacity(storage_0)
--1 InvestmentStorage_invest(storage)
+-0.90000000000000002 InvestmentStorage_invest(storage)
 <= 0
 
 c_u_InvestmentStorage_max_capacity(storage_1)_:
 +1 InvestmentStorage_capacity(storage_1)
--1 InvestmentStorage_invest(storage)
+-0.90000000000000002 InvestmentStorage_invest(storage)
 <= 0
 
 c_u_InvestmentStorage_max_capacity(storage_2)_:
 +1 InvestmentStorage_capacity(storage_2)
--1 InvestmentStorage_invest(storage)
+-0.90000000000000002 InvestmentStorage_invest(storage)
+<= 0
+
+c_u_InvestmentStorage_min_capacity(storage_0)_:
+-1 InvestmentStorage_capacity(storage_0)
++0.10000000000000001 InvestmentStorage_invest(storage)
+<= 0
+
+c_u_InvestmentStorage_min_capacity(storage_1)_:
+-1 InvestmentStorage_capacity(storage_1)
++0.10000000000000001 InvestmentStorage_invest(storage)
+<= 0
+
+c_u_InvestmentStorage_min_capacity(storage_2)_:
+-1 InvestmentStorage_capacity(storage_2)
++0.10000000000000001 InvestmentStorage_invest(storage)
 <= 0
 
 c_e_ONE_VAR_CONSTANT: 

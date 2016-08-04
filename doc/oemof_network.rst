@@ -1,4 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~
-The oemof core
+oemof-network
 ~~~~~~~~~~~~~~~~~~~~~~
 
+To come...

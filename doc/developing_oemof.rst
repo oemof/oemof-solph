@@ -1,11 +1,9 @@
-Developer Notes
+Developing oemof
 ================
 
-Here we gather important notes for the developing of oemof and elements within
-the framework.
-
-We highly encourage you to contribute to further development of oemof. If you 
-want to collaborate see description below or contact us.
+Here you find important notes for developing oemof and elements within
+the framework. We highly encourage you to contribute to further development 
+of oemof. If you want to collaborate see description below or contact us.
 
 Install the developer version
 -----------------------------
@@ -37,16 +35,22 @@ To collaborate use the pull request functionality of github.
 
 How to create a pull request
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* ...
-* ...
-* Tests must run, see ...
-* Name the related team within the title of the pull request, like "solph: pull request for new feature within solph".
-* Assign a team member.
+* Fork the oemof repository
+* Change, add or remove code
+* Read the developer rules and follow them
+* Add new tests according to what you have done
+* Create a pull request and describe what you have done and why
+* Check if all tests still work including the example tests
 
 Tests
 ^^^^^
-* ...
-* ...
+
+.. role:: bash(code)
+   :language: bash
+   
+Run the following test before pushing a successful merge.
+:bash:`nosetests -w "/path/to/oemof" --with-doctest --doctest-options '+ELLIPSIS'`
+:bash:`python3 path/to/oemof/examples/example_tests.py`
 
 Style guidelines
 ----------------
@@ -124,20 +128,6 @@ Commit message
 
 Use this nice little `tutorial <http://chris.beams.io/posts/git-commit/>`_ to 
 learn how to write a nice commit message.
-
-
-Testing
--------
-
-We use nosetests for testing. Make sure that all tests are successfull before
-merging back into the ``dev``.
-
-.. code:: bash
-
-    cd /path/to/oemof/
-    nosetests3 --with-doctest           # or
-    nosetests3 --with-doctest --rednose # if you like it
-
 
 Issue-Management
 ----------------
