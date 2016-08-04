@@ -10,7 +10,7 @@ from matplotlib import cm
 # global plotting options
 plt.rcParams.update(plt.rcParamsDefault)
 matplotlib.style.use('ggplot')
-plt.rcParams['lines.linewidth'] = 1.5
+plt.rcParams['lines.linewidth'] = 2.5
 plt.rcParams['axes.facecolor'] = 'silver'
 plt.rcParams['xtick.color'] = 'k'
 plt.rcParams['ytick.color'] = 'k'
@@ -133,8 +133,8 @@ en_de = {'run_of_river': 'Laufwasser',
 dispatch_de.rename(columns=en_de, inplace=True)
 
 # area plot. gute woche: '2014-01-21':'2014-01-27'
-dispatch_de[['Biomasse', 'Kernenergie', 'Braunkohle', 'Steinkohle', 'Gas',
-             'Solar', 'Wind',
+dispatch_de[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
+             'Steinkohle', 'Gas', 'Solar', 'Wind',
              'Import']]['2014-01-21':'2014-01-27'] \
              .plot(kind='area', stacked=True, linewidth=0, legend='reverse',
                    cmap=cm.get_cmap('Spectral'))
@@ -147,13 +147,14 @@ plt.show()
 curves = pd.concat(
     [dispatch_de[col].sort_values(ascending=False).reset_index(drop=True)
      for col in dispatch_de], axis=1)
-curves[['Solar', 'Wind', 'Kernenergie', 'Braunkohle',
-        'Steinkohle', 'Pumpspeicher']].plot(linewidth=2)
+curves[['Kernenergie', 'Braunkohle',
+        'Steinkohle', 'Gas', 'Solar', 'Wind',
+        'Import', 'Export']].plot(cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
 plt.show()
 
-# duration curves ordered by load (stacked)
+# duration curves ordered by load (stacked) - storages to be added!
 curves_stacked = pd.concat([dispatch_de,
                             dispatch['load'].divide(1000),
                             dispatch['imports'].divide(1000)],
@@ -161,12 +162,12 @@ curves_stacked = pd.concat([dispatch_de,
 curves_stacked = curves_stacked.sort_values(by=['load'], ascending=False)
 curves_stacked.reset_index(drop=True, inplace=True)
 
-curves_stacked[['Kernenergie', 'Braunkohle',
-                'Steinkohle', 'Gas', 'Solar',
-                'Wind', 'Import', 'Export']].plot(kind='area', stacked=True,
-                                                  legend='reverse',
-                                                  cmap=cm.get_cmap('Spectral'))
-plt.plot(curves_stacked['load'], linewidth=2)
+curves_stacked[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
+                'Steinkohle', 'Gas', 'Solar', 'Wind',
+                'Import']].plot(kind='area', stacked=True,
+                                legend='reverse',
+                                cmap=cm.get_cmap('Spectral'))
+#plt.plot(curves_stacked['load'])
 plt.xlabel('Stunden des Jahres geordnet nach der Last (rot)')
 plt.ylabel('Leistung in GW')
 plt.show()

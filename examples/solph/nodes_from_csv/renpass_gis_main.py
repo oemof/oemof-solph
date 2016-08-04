@@ -82,33 +82,43 @@ for cc in country_codes:
     inputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='input',
                                      date_from=date_from, date_to=date_to,
                                      formatted=True)
-    inputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_out'},
-                  inplace=True)
 
     outputs = results.slice_unstacked(bus_label=cc + '_bus_el', type='output',
                                       date_from=date_from, date_to=date_to,
                                       formatted=True)
 
-    outputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_in'},
-                   inplace=True)
-
     other = results.slice_unstacked(bus_label=cc + '_bus_el', type='other',
                                     date_from=date_from, date_to=date_to,
                                     formatted=True)
-
-    # data from model in MWh
-    country_data = pd.concat([inputs, outputs, other], axis=1)
 
     # add price volatility that's lacking in duals by adding a regression for
     # the EEX day-ahead prices of 2014 (used in project 'DLSK-SH')
     if cc == 'DE':
 
+        for c in ['DE', 'AT', 'LU']:
+
+            # rename redundant columns
+            inputs.rename(columns={c + '_storage_phs':
+                                   c + '_storage_phs_out'},
+                          inplace=True)
+
+            outputs.rename(columns={c + '_storage_phs':
+                                    c + '_storage_phs_in'},
+                           inplace=True)
+
+            other.rename(columns={c + '_storage_phs':
+                                  c + '_storage_phs_level'},
+                         inplace=True)
+
+            # data from model in MWh
+            country_data = pd.concat([inputs, outputs, other], axis=1)
+
         # residual load in bidding area
         residual_load = country_data['DE_load'] + country_data['AT_load'] + \
-                        country_data['LU_load'] - country_data['DE_wind'] - \
-                        country_data['AT_wind'] - country_data['LU_wind'] - \
-                        country_data['DE_solar'] - country_data['AT_solar'] - \
-                        country_data['LU_solar']
+            country_data['LU_load'] - country_data['DE_wind'] - \
+            country_data['AT_wind'] - country_data['LU_wind'] - \
+            country_data['DE_solar'] - country_data['AT_solar'] - \
+            country_data['LU_solar']
 
         # polynomial regression for 2014
         def spot_price(x):
@@ -122,6 +132,21 @@ for cc in country_codes:
 
         # assign data to dataframe
         country_data['price_volatility'] = residual_load.apply(spot_price)
+
+    else:
+
+        # rename redundant columns
+        inputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_out'},
+                      inplace=True)
+
+        outputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_in'},
+                       inplace=True)
+
+        other.rename(columns={cc + '_storage_phs': cc + '_storage_phs_level'},
+                     inplace=True)
+
+        # data from model in MWh
+        country_data = pd.concat([inputs, outputs, other], axis=1)
 
     # save file
     file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
