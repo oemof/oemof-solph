@@ -65,16 +65,23 @@ logging.info('Check the results')
 
 results = ResultsDataFrame(energy_system=es)
 
+# %% postprocessing: write complete result dataframe to file system
 
-# %% postprocessing: write model data to file system for all regions
+results_path = 'results/'
 
-path = 'results/'
+date = str(datetime.now())
+
+file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
+            'results_complete.csv'
+
+results.to_csv(os.path.join(results_path, file_name))
+
+
+# %% postprocessing: write dispatch and prices for all regions to file system
 
 # country codes
 country_codes = ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK', 'FR', 'LU', 'NL', 'NO',
                  'PL', 'SE']
-
-date = str(datetime.now())
 
 for cc in country_codes:
 
@@ -148,7 +155,8 @@ for cc in country_codes:
         # data from model in MWh
         country_data = pd.concat([inputs, outputs, other], axis=1)
 
-    # save file
+    # sort columns and save as csv file
     file_name = 'scenario_' + nodes_flows.replace('.csv', '_') + date + '_' + \
                 cc + '.csv'
-    country_data.to_csv(os.path.join(path, file_name))
+    country_data.sort_index(axis=1)
+    country_data.to_csv(os.path.join(results_path, file_name))
