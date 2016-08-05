@@ -28,21 +28,22 @@ df_raw.head()
 df_raw.columns
 
 
-# %% plot fundamental and regression prices
+# %% plot fundamental and regression prices (1 year)
 
-df = df_raw[['price_volatility', 'duals']]
+df = df_raw[['duals']]
 
-df.plot()
+df.plot(drawstyle='steps')
 plt.xlabel('Zeit in h')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
-df[0:24 * 7 * 8].plot()
+# %% plot fundamental and regression prices (8 weeks)
+df[0:24 * 7 * 8].plot(drawstyle='steps')
 plt.xlabel('Zeit in h')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
-df[['price_volatility', 'duals']].describe()
+df[['duals']].describe()
 
 
 # %% polynom fitting: residual load
@@ -154,7 +155,7 @@ plt.ylabel('Leistung in  GW')
 plt.ylim(0, max(dispatch_de.sum(axis=1)) * 0.65)
 plt.show()
 
-# duration curves (sort columns individually)
+# %% duration curves for power plants
 curves = pd.concat(
     [dispatch_de[col].sort_values(ascending=False).reset_index(drop=True)
      for col in dispatch_de], axis=1)
@@ -165,7 +166,7 @@ plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
 plt.show()
 
-# duration curves ordered by load (stacked) - storages to be added!
+# %% duration curves for power plants ordered by load (stacked)
 curves_stacked = dispatch_de
 curves_stacked = curves_stacked.sort_values(by=['Last'], ascending=False)
 curves_stacked.reset_index(drop=True, inplace=True)
@@ -176,7 +177,6 @@ curves_stacked[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
                 'Import']].plot(kind='area', stacked=True,
                                 legend='reverse',
                                 cmap=cm.get_cmap('Spectral'))
-#plt.plot(curves_stacked['Last'])
 plt.xlabel('Stunden des Jahres geordnet nach der Last')
 plt.ylabel('Leistung in GW')
 plt.show()
@@ -207,11 +207,24 @@ plt.show()
 power_price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
 power_price_real.set_index(df_raw.index, drop=True, inplace=True)
 power_price = pd.concat([power_price_real,
-                         df_raw[['duals', 'price_volatility']]], axis=1)
+                         df_raw[['duals']]], axis=1)
 power_price = pd.concat(
     [power_price[col].sort_values(ascending=False).reset_index(drop=True)
      for col in power_price], axis=1)
 power_price.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Preis in EUR/MWh')
+plt.show()
+
+# %% scaling
+
+df = df_raw[['duals']]
+df['duals_x_1_5'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 1.5
+df['duals_x_2'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 2
+df['duals_x_2'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 3
+
+df[0:24*31].plot(drawstyle='steps')
+plt.show()
+
+df.plot.hist(bins=50, alpha=0.5, subplots=False, cmap=cm.get_cmap('Spectral'))
 plt.show()

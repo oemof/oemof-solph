@@ -98,8 +98,7 @@ for cc in country_codes:
                                     date_from=date_from, date_to=date_to,
                                     formatted=True)
 
-    # add price volatility that's lacking in duals by adding a regression for
-    # the EEX day-ahead prices of 2014 (used in project 'DLSK-SH')
+    # AT, DE and LU are treated as one bidding area
     if cc == 'DE':
 
         for c in ['DE', 'AT', 'LU']:
@@ -119,26 +118,6 @@ for cc in country_codes:
 
             # data from model in MWh
             country_data = pd.concat([inputs, outputs, other], axis=1)
-
-        # residual load in bidding area
-        residual_load = country_data['DE_load'] + country_data['AT_load'] + \
-            country_data['LU_load'] - country_data['DE_wind'] - \
-            country_data['AT_wind'] - country_data['LU_wind'] - \
-            country_data['DE_solar'] - country_data['AT_solar'] - \
-            country_data['LU_solar']
-
-        # polynomial regression for 2014
-        def spot_price(x):
-            coeff = [3.39995259e-13, -6.22068602e-08,
-                     4.48623593e-03, -8.55571083e+01]
-            y = coeff[0] * x ** 3 + \
-                coeff[1] * x ** 2 + \
-                coeff[2] * x ** 1 + \
-                coeff[3]
-            return y
-
-        # assign data to dataframe
-        country_data['price_regression'] = residual_load.apply(spot_price)
 
     else:
 
