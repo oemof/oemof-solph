@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2025_2016-08-05 09:41:23.723491_DE.csv')
+'scenario_nep_2025_2016-08-05 09:41:23.723491_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -226,5 +226,7 @@ df['duals_x_2'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 3
 df[0:24*31].plot(drawstyle='steps')
 plt.show()
 
-df.plot.hist(bins=50, alpha=0.5, subplots=False, cmap=cm.get_cmap('Spectral'))
+# boxplot for a month
+by_month = df[['duals']].groupby(df.index.month)
+by_month.boxplot(subplots=True, layout=(1, 12))
 plt.show()
