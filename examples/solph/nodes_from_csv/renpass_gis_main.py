@@ -138,7 +138,7 @@ for cc in country_codes:
             return y
 
         # assign data to dataframe
-        country_data['price_volatility'] = residual_load.apply(spot_price)
+        country_data['price_regression'] = residual_load.apply(spot_price)
 
     else:
 

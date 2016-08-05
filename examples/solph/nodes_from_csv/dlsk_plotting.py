@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2035_2016-08-05 09:52:46.853097_DE.csv')
+        'scenario_nep_2014_2016-08-04 12:04:42.180425_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -145,7 +145,7 @@ dispatch_de = dispatch_de.rename(columns=en_de)
 # area plot. gute woche: '2014-01-21':'2014-01-27'
 dispatch_de[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
              'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
-             'Import']]['2014-01-21':'2014-01-27'] \
+             'Import']][0:24*7] \
              .plot(kind='area', stacked=True, linewidth=0, legend='reverse',
                    cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Datum')
@@ -199,4 +199,17 @@ cable.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
 plt.ylim(0, max(cable.sum(axis=1)) * 1.2)
+plt.show()
+
+# %% duraction curve for prices
+power_price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+power_price_real.set_index(df_raw.index, drop=True, inplace=True)
+power_price = pd.concat([power_price_real,
+                         df_raw[['duals', 'price_volatility']]], axis=1)
+power_price = pd.concat(
+    [power_price[col].sort_values(ascending=False).reset_index(drop=True)
+     for col in power_price], axis=1)
+power_price.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
+plt.xlabel('Stunden des Jahres')
+plt.ylabel('Preis in EUR/MWh')
 plt.show()
