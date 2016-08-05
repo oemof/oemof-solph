@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2014_2016-08-04 12:04:42.180425_DE.csv')
+        'scenario_nep_2025_2016-08-05 09:41:23.723491_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -123,7 +123,8 @@ dispatch = dispatch.divide(1000)
 # translation
 dispatch_de = dispatch[
     ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
-     'hard_coal', 'gas', 'phs_out', 'load', 'imports', 'exports']]
+     'hard_coal', 'gas', 'oil', 'mixed_fuels', 'phs_out', 'load', 'imports',
+     'exports']]
 
 # dict with new column names
 en_de = {'run_of_river': 'Laufwasser',
@@ -144,8 +145,8 @@ dispatch_de = dispatch_de.rename(columns=en_de)
 
 # area plot. gute woche: '2014-01-21':'2014-01-27'
 dispatch_de[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
-             'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
-             'Import']][0:24*7] \
+             'Steinkohle', 'Gas', 'Öl', 'Sonstiges', 'Solar', 'Wind',
+             'Pumpspeicher', 'Import']][0:24*7] \
              .plot(kind='area', stacked=True, linewidth=0, legend='reverse',
                    cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Datum')
@@ -157,8 +158,8 @@ plt.show()
 curves = pd.concat(
     [dispatch_de[col].sort_values(ascending=False).reset_index(drop=True)
      for col in dispatch_de], axis=1)
-curves[['Kernenergie', 'Braunkohle',
-        'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
+curves[['Kernenergie', 'Braunkohle', 'Steinkohle', 'Gas', 'Öl',
+        'Sonstiges', 'Solar', 'Wind', 'Pumpspeicher',
         'Import', 'Export']].plot(cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
@@ -170,7 +171,8 @@ curves_stacked = curves_stacked.sort_values(by=['Last'], ascending=False)
 curves_stacked.reset_index(drop=True, inplace=True)
 
 curves_stacked[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
-                'Steinkohle', 'Gas', 'Solar', 'Wind', 'Pumpspeicher',
+                'Steinkohle', 'Gas', 'Öl', 'Sonstiges', 'Solar', 'Wind',
+                'Pumpspeicher',
                 'Import']].plot(kind='area', stacked=True,
                                 legend='reverse',
                                 cmap=cm.get_cmap('Spectral'))
