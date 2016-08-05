@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-        'scenario_nep_2014_2016-08-04 12:04:42.180425_DE.csv')
+        'scenario_nep_2035_2016-08-05 09:52:46.853097_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -175,6 +175,28 @@ curves_stacked[['Biomasse', 'Laufwasser', 'Kernenergie', 'Braunkohle',
                                 legend='reverse',
                                 cmap=cm.get_cmap('Spectral'))
 #plt.plot(curves_stacked['Last'])
-plt.xlabel('Stunden des Jahres geordnet nach der Last (rot)')
+plt.xlabel('Stunden des Jahres geordnet nach der Last')
 plt.ylabel('Leistung in GW')
+plt.show()
+
+# %% duration curves for all powerlines
+pls = pd.concat(
+    [powerlines[col].sort_values(ascending=False).reset_index(drop=True)
+     for col in powerlines], axis=1)
+pls.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
+plt.xlabel('Stunden des Jahres')
+plt.ylabel('Leistung in GW')
+plt.show()
+
+# %% duraction curve for one cable e.g. NordLink cable
+cable = df_raw[['DE_NO_powerline', 'NO_DE_powerline']]
+cable = pd.concat(
+    [cable[col].sort_values(ascending=False).reset_index(drop=True)
+     for col in cable], axis=1)
+cable = cable.rename(columns={'DE_NO_powerline': 'DE-NO',
+                              'NO_DE_powerline': 'NO-DE'})
+cable.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
+plt.xlabel('Stunden des Jahres')
+plt.ylabel('Leistung in GW')
+plt.ylim(0, max(cable.sum(axis=1)) * 1.2)
 plt.show()
