@@ -32,19 +32,31 @@ df_raw.columns
 
 df = df_raw[['duals']]
 
+price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+price_real.index = df_raw.index
+
+df = pd.concat([price_real, df], axis=1)
+df.columns = ['price_real', 'price_model']
+
 df.plot(drawstyle='steps')
 plt.xlabel('Zeit in h')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
 # %% plot fundamental and regression prices (8 weeks)
-df[0:24 * 7 * 8].plot(drawstyle='steps')
+
+df = df_raw[['duals']]
+
+price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+price_real.index = df_raw.index
+
+df = pd.concat([price_real, df], axis=1)
+df.columns = ['price_real', 'price_model']
+
+df[(24 * 7)*8:(24 * 7)*16].plot(drawstyle='steps')
 plt.xlabel('Zeit in h')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
-
-df[['duals']].describe()
-
 
 # %% polynom fitting: residual load
 
@@ -219,14 +231,44 @@ plt.show()
 # %% scaling
 
 df = df_raw[['duals']]
-df['duals_x_1_5'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 1.5
-df['duals_x_2'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 2
-df['duals_x_2'] = df['duals'] + (df['duals'].subtract(df['duals'].mean())) * 3
+df['duals_x_1_5'] = df['duals'] + \
+    (df['duals'].subtract(df['duals'].mean())) * 1.5
+df['duals_x_2'] = df['duals'] + \
+    (df['duals'].subtract(df['duals'].mean())) * 2
+df['duals_x_2'] = df['duals'] + \
+    (df['duals'].subtract(df['duals'].mean())) * 3
 
 df[0:24*31].plot(drawstyle='steps')
 plt.show()
 
-# boxplot for a month
-by_month = df[['duals']].groupby(df.index.month)
-by_month.boxplot(subplots=True, layout=(1, 12))
+# %% boxplot for prices: monthly
+
+df = df_raw[['duals']]
+df['dates'] = df.index
+df['month'] = df.index.month
+
+df_box = df.pivot(index='dates', columns='month', values='duals')
+
+bp = df_box.boxplot(showfliers=False, showmeans=True, return_type='dict')
+plt.xlabel('Monat', fontsize=20)
+plt.ylabel('Preis in EUR/MWh', fontsize=22)
+plt.tick_params(axis='y', labelsize=14)
+plt.tick_params(axis='x', labelsize=14)
+plt.legend('')
+
+[[item.set_linewidth(2) for item in bp['boxes']]]
+[[item.set_linewidth(2) for item in bp['fliers']]]
+[[item.set_linewidth(2) for item in bp['medians']]]
+[[item.set_linewidth(2) for item in bp['means']]]
+[[item.set_linewidth(2) for item in bp['whiskers']]]
+[[item.set_linewidth(2) for item in bp['caps']]]
+
+[[item.set_color('k') for item in bp['boxes']]]
+[[item.set_color('k') for item in bp['fliers']]]
+[[item.set_color('k') for item in bp['medians']]]
+[[item.set_color('k') for item in bp['whiskers']]]
+[[item.set_color('k') for item in bp['caps']]]
+
+[[item.set_markerfacecolor('k') for item in bp['means']]]
+
 plt.show()
