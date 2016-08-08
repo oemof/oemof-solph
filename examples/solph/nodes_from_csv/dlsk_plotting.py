@@ -272,3 +272,33 @@ plt.legend('')
 [[item.set_markerfacecolor('k') for item in bp['means']]]
 
 plt.show()
+
+# %% spline interpolation
+
+df = df_raw[['duals']]
+
+price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+price_real.index = df_raw.index
+
+df = pd.concat([price_real, df], axis=1)
+df.columns = ['price_real', 'price_model']
+
+# detect tableus with a constand price
+tableaus = np.where(df['price_model'] == df['price_model'].shift(1))
+tableaus = tableaus[0].tolist()
+
+# set the tableaus to NaN
+df.reset_index(drop=True, inplace=True)
+df['no_tableaus'] = df[~df.index.isin(tableaus)]['price_model']
+df.index = df_raw.index
+
+# check different interpolation methods
+df['linear'] = df['no_tableaus'].interpolate(method='linear')
+#df['cubic'] = df['no_tableaus'].interpolate(method='cubic')
+
+# plot
+df[0:24 * 7 * 6].plot(drawstyle='steps', subplots=False, sharey=True)
+plt.show()
+
+# correlation?
+df.corr()
