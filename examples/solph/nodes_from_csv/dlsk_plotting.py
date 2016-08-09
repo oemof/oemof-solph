@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'Blues'
 
 # read file
 file = ('results/'
-'scenario_nep_2025_2016-08-05 09:41:23.723491_DE.csv')
+        'scenario_nep_2035_ee_plus_25_2016-08-09 16:27:06.904477_DE.csv')
 
 df_raw = pd.read_csv(file, parse_dates=[0], index_col=0, keep_date_col=True)
 df_raw.head()
@@ -87,6 +87,7 @@ plt.plot(df['res_load'],
           ), color='red')
 plt.xlabel('Residuallast in MW')
 plt.ylabel('Day-Ahead Preis in EUR/MWh')
+
 plt.show()
 
 
@@ -273,6 +274,10 @@ plt.legend('')
 
 plt.show()
 
+# %% dispatch of norwegian hydro power plants
+
+
+
 # %% spline interpolation
 
 df = df_raw[['duals']]
@@ -294,11 +299,33 @@ df.index = df_raw.index
 
 # check different interpolation methods
 df['linear'] = df['no_tableaus'].interpolate(method='linear')
-#df['cubic'] = df['no_tableaus'].interpolate(method='cubic')
+df['cubic'] = df['no_tableaus'].interpolate(method='cubic')
 
 # plot
-df[0:24 * 7 * 6].plot(drawstyle='steps', subplots=False, sharey=True)
+df[0:24 * 7 * 8].plot(drawstyle='steps', subplots=False, sharey=True,
+                      linewidth=2)
 plt.show()
 
-# correlation?
+# statistical parameters
 df.corr()
+df.describe()
+
+# %% comparison of prices for sensitivities
+
+df1 = pd.read_csv('results/' +
+                  'scenario_nep_2035_2016-08-05 15:18:42.431986_DE.csv',
+                  parse_dates=[0], index_col=0, keep_date_col=True)
+
+df2 = pd.read_csv('results/' +
+                  'scenario_nep_2035_ee_minus_25_2016-08-09 16:45:40.295183_DE.csv',
+                  parse_dates=[0], index_col=0, keep_date_col=True)
+
+df3 = pd.read_csv('results/' +
+                  'scenario_nep_2035_ee_plus_25_2016-08-09 16:27:06.904477_DE.csv',
+                  parse_dates=[0], index_col=0, keep_date_col=True)
+
+df_prices = pd.DataFrame(index=df1.index)
+df_prices['base'] = df1['duals']
+df_prices['base_ee_minus_25'] = df2['duals']
+df_prices['base_ee_plus_25'] = df3['duals']
+
