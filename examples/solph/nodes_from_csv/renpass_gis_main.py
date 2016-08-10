@@ -13,11 +13,13 @@ from oemof.outputlib import ResultsDataFrame
 
 # %% configuration
 
+scenario_path = 'scenarios/'
+
 date_from = '2035-01-01 00:00:00'
 date_to = '2035-12-31 23:00:00'
-nodes_flows = 'scenarios/nep_2035_ee_minus_25.csv'
 
-nodes_flows_sequences = 'scenarios/nep_2014_seq.csv'
+nodes_flows = 'nep_2035_ee_minus_25.csv'
+nodes_flows_sequences = 'nep_2014_seq.csv'
 
 
 # %% misc.
@@ -40,8 +42,10 @@ logger.define_logging()
 
 es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
 
-nodes = NodesFromCSV(file_nodes_flows=nodes_flows,
-                     file_nodes_flows_sequences=nodes_flows_sequences,
+nodes = NodesFromCSV(file_nodes_flows=os.path.join(
+                         scenario_path, nodes_flows),
+                     file_nodes_flows_sequences=os.path.join(
+                         scenario_path, nodes_flows_sequences),
                      delimiter=',')
 
 stopwatch()
@@ -64,6 +68,7 @@ logging.info('Check the results')
 # %% output: create pandas dataframe with results
 
 results = ResultsDataFrame(energy_system=es)
+
 
 # %% postprocessing: write complete result dataframe to file system
 
