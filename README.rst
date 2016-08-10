@@ -7,7 +7,7 @@ Everybody is welcome to use and/or develop oemof.
 Documentation
 =============
 
-Full documentation can be found at http://oemof.readthedocs.org. Use http://readthedocs.org/projects/oemof to change the version of the documentation. To get the latest news follow us at https://oemof.wordpress.com.
+Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow us at our `wordpress block <https://oemof.wordpress.com>`_.
 
 
 Installing oemof
@@ -33,7 +33,7 @@ Examples
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
 
-There are examples of applications available <https://github.com/oemof/oemof/tree/master/examples/>`_. Make sure to download all files of an folder to get the wanted example run.
+There are `examples of applications <https://github.com/oemof/oemof/tree/master/examples/>`_ available. Make sure to download all files of an folder to get the wanted example run.
 
 
 License
@@ -52,4 +52,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see http://www.gnu.org/licenses/.
