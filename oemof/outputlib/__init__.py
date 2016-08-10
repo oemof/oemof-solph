@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 try:
     import matplotlib.pyplot as plt
-except:
+except ImportError:
     logging.warning('Matplotlib does not work.')
 
 
@@ -41,29 +41,15 @@ class ResultsDataFrame(pd.DataFrame):
         http://pandas.pydata.org/pandas-docs/stable/advanced.html
 
     """
-
-
-#         results[source][target]
-#         if source == target:
-#           if isinstance(source, 'Bus'):
-#               if isinstance(target.key(), str):
-#                   # duals
-#                   pass
-#               else:
-#                   storage_level
-#         else:
-#             # component logic
-#             pass
-
     def __init__(self, **kwargs):
         # default values if not arguments are passed
         es = kwargs.get('energy_system')
 
         rows_list = []
         for k, v in es.results.items():
-            if ('Bus' in str(k.__class__)):
+            if 'Bus' in str(k.__class__):
                 for kk, vv in v.items():
-                    row = {}
+                    row = dict()
                     row['bus_label'] = k.label
                     if k is kk:
                         row['type'] = 'other'
@@ -82,9 +68,9 @@ class ResultsDataFrame(pd.DataFrame):
                 if k in v.keys():
                     # self ref. components (results[component][component])
                     for kk, vv in v.items():
-                        if(k is kk):
+                        if k is kk:
                             # self ref. comp. (results[component][component])
-                            row = {}
+                            row = dict()
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'other'
                             row['obj_label'] = k.label
@@ -93,7 +79,7 @@ class ResultsDataFrame(pd.DataFrame):
                             rows_list.append(row)
                         else:
                             # bus inputs (only self ref. components)
-                            row = {}
+                            row = dict()
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'tobus'
                             row['obj_label'] = k.label
@@ -103,7 +89,7 @@ class ResultsDataFrame(pd.DataFrame):
                 else:
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
-                        row = {}
+                        row = dict()
                         row['bus_label'] = kk.label
                         row['type'] = 'tobus'
                         row['obj_label'] = k.label
@@ -172,6 +158,8 @@ class ResultsDataFrame(pd.DataFrame):
         ----------
         unstacklevel : string (default: 'obj_label')
             Level to unstack the subset of the DataFrame.
+        formatted : boolean
+            missing...
         """
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
@@ -364,8 +352,8 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = self.subset.plot(**kwargs)
         return self
 
-    def io_plot(self, bus_label, cdict, line_kwa={}, lineorder=None, bar_kwa={},
-                barorder=None, **kwargs):
+    def io_plot(self, bus_label, cdict, line_kwa=None, lineorder=None,
+                bar_kwa=None, barorder=None, **kwargs):
         r""" Plotting a combined bar and line plot to see the fitting of in-
         and outcomming flows of a bus balance.
 
@@ -397,6 +385,11 @@ class DataFramePlot(ResultsDataFrame):
             stack line plot. You can use them for further maipulations.
         """
         self.ax = kwargs.get('ax', self.ax)
+
+        if bar_kwa is None:
+            bar_kwa = dict()
+        if line_kwa is None:
+            line_kwa = dict()
 
         if self.ax is None:
             fig = plt.figure()
