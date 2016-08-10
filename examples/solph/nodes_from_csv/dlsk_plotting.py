@@ -313,6 +313,10 @@ plt.show()
 # %% comparison of prices for sensitivities
 
 files = {
+    'nep_2025_base_wrong_costs':
+        'scenario_nep_2025_2016-08-05 09:41:23.723491_DE.csv',
+    'nep_2025_base':
+        'scenario_nep_2025_2016-08-10 14:26:12.390085_DE.csv',
     'nep_2035_base':
         'scenario_nep_2035_2016-08-05 15:18:42.431986_DE.csv',
     'nep_2035_ee_plus_25':
@@ -320,21 +324,21 @@ files = {
     'nep_2035_ee_minus_25':
         'scenario_nep_2035_ee_minus_25_2016-08-09 16:45:40.295183_DE.csv',
     'nep_2035_demand_plus_25':
-        '',
+        'scenario_nep_2035_demand_plus_25_2016-08-10 09:38:10.628613_DE.csv',
     'nep_2035_demand_minus_25':
-        '',
+        'scenario_nep_2035_demand_minus_25_2016-08-10 09:50:48.953929_DE.csv',
     'nep_2035_fuel_plus_25':
-        '',
+        'scenario_nep_2035_fuel_plus_25_2016-08-10 12:10:08.246319_DE.csv',
     'nep_2035_fuel_minus_25':
-        '',
+        'scenario_nep_2035_fuel_minus_25_2016-08-10 12:20:30.690439_DE.csv',
     'nep_2035_co2_plus_25':
-        '',
+        'scenario_nep_2035_co2_plus_25_2016-08-10 12:37:36.981611_DE.csv',
     'nep_2035_co2_minus_25':
-        '',
+        'scenario_nep_2035_co2_minus_25_2016-08-10 12:49:50.740375_DE.csv',
     'nep_2035_nordlink_plus_25':
-        '',
+        'scenario_nep_2035_nordlink_plus_25_2016-08-10 13:00:08.919877_DE.csv',
     'nep_2035_nordlink_minus_25':
-        ''
+        'scenario_nep_2035_nordlink_minus_25_2016-08-10 13:10:34.528303_DE.csv'
 }
 
 df_prices = pd.DataFrame(index=df_raw.index)
@@ -342,12 +346,38 @@ df_prices = pd.DataFrame(index=df_raw.index)
 for k, v in files.items():
     df = pd.read_csv('results/' + v, parse_dates=[0],
                      index_col=0, keep_date_col=True)
+    df.index = df_prices.index
     df_prices[k] = df['duals']
 
-df_prices.describe()
+# save as csv
+df_prices.to_csv('prices.csv')
 
-df_prices['2035-01':'2035-02'].plot(drawstyle='steps')
+#boxplot
+df_prices.sort(inplace=True, axis=1)
+df_prices.plot(kind='box', rot=90)
+plt.tight_layout()
 plt.show()
 
-df_prices.plot(kind='box')
+# duration curves for all scenarios
+df_prices_duration = pd.concat(
+    [df_prices[col].sort_values(ascending=False).reset_index(drop=True)
+     for col in df_prices], axis=1)
+df_prices_duration.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
+plt.xlabel('Stunden des Jahres')
+plt.ylabel('Preis in EUR/MWh')
+plt.tight_layout()
 plt.show()
+
+# duration curves for base scenarios
+df_prices_duration[['nep_2025_base',
+                    'nep_2025_base_wrong_costs',
+                    'nep_2035_base']].plot(legend='reverse',
+                                           cmap=cm.get_cmap('Spectral'))
+plt.xlabel('Stunden des Jahres')
+plt.ylabel('Preis in EUR/MWh')
+plt.tight_layout()
+plt.show()
+
+
+#df_prices['2035-01':'2035-02'].plot(drawstyle='steps')
+#plt.show()
