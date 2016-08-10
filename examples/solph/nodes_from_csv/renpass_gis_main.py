@@ -18,7 +18,7 @@ scenario_path = 'scenarios/'
 date_from = '2035-01-01 00:00:00'
 date_to = '2035-12-31 23:00:00'
 
-nodes_flows = 'nep_2035_ee_minus_25.csv'
+nodes_flows = 'nep_2035_demand_plus_25.csv'
 nodes_flows_sequences = 'nep_2014_seq.csv'
 
 
@@ -52,17 +52,15 @@ stopwatch()
 
 om = OperationalModel(es)
 
-print('OM creation time: ' + stopwatch())
+logging.info('OM creation time: ' + stopwatch())
 
 om.receive_duals()
 
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
 
-print('Optimization time: ' + stopwatch())
+logging.info('Optimization time: ' + stopwatch())
 
-logging.info('Done!')
-
-logging.info('Check the results')
+logging.info('Done! \n Check the results')
 
 
 # %% output: create pandas dataframe with results
@@ -105,34 +103,26 @@ for cc in country_codes:
 
     # AT, DE and LU are treated as one bidding area
     if cc == 'DE':
-
         for c in ['DE', 'AT', 'LU']:
-
             # rename redundant columns
             inputs.rename(columns={c + '_storage_phs':
                                    c + '_storage_phs_out'},
                           inplace=True)
-
             outputs.rename(columns={c + '_storage_phs':
                                     c + '_storage_phs_in'},
                            inplace=True)
-
             other.rename(columns={c + '_storage_phs':
                                   c + '_storage_phs_level'},
                          inplace=True)
 
             # data from model in MWh
             country_data = pd.concat([inputs, outputs, other], axis=1)
-
     else:
-
         # rename redundant columns
         inputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_out'},
                       inplace=True)
-
         outputs.rename(columns={cc + '_storage_phs': cc + '_storage_phs_in'},
                        inplace=True)
-
         other.rename(columns={cc + '_storage_phs': cc + '_storage_phs_level'},
                      inplace=True)
 
