@@ -329,3 +329,10 @@ df_prices['base'] = df1['duals']
 df_prices['base_ee_minus_25'] = df2['duals']
 df_prices['base_ee_plus_25'] = df3['duals']
 
+df_prices.describe()
+
+df_prices['2035-01':'2035-02'].plot(drawstyle='steps')
+plt.show()
+
+df_prices.plot(kind='box')
+plt.show()
