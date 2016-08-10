@@ -1,3 +1,5 @@
+.. _oemof_solph_label:
+
 ~~~~~~~~~~~
 oemof-solph
 ~~~~~~~~~~~
@@ -13,7 +15,7 @@ More to come...
 
 
 
- Mathematical notation for solph
+Mathematical notation for solph
 ------------------------------------
 
 
