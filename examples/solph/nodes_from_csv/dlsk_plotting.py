@@ -278,56 +278,71 @@ plt.show()
 
 
 
-# %% spline interpolation
-
-df = df_raw[['duals']]
-
-price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
-price_real.index = df_raw.index
-
-df = pd.concat([price_real, df], axis=1)
-df.columns = ['price_real', 'price_model']
-
-# detect tableus with a constand price
-tableaus = np.where(df['price_model'] == df['price_model'].shift(1))
-tableaus = tableaus[0].tolist()
-
-# set the tableaus to NaN
-df.reset_index(drop=True, inplace=True)
-df['no_tableaus'] = df[~df.index.isin(tableaus)]['price_model']
-df.index = df_raw.index
-
-# check different interpolation methods
-df['linear'] = df['no_tableaus'].interpolate(method='linear')
-df['cubic'] = df['no_tableaus'].interpolate(method='cubic')
-
-# plot
-df[0:24 * 7 * 8].plot(drawstyle='steps', subplots=False, sharey=True,
-                      linewidth=2)
-plt.show()
-
-# statistical parameters
-df.corr()
-df.describe()
+## %% spline interpolation
+#
+#df = df_raw[['duals']]
+#
+#price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
+#price_real.index = df_raw.index
+#
+#df = pd.concat([price_real, df], axis=1)
+#df.columns = ['price_real', 'price_model']
+#
+## detect tableus with a constand price
+#tableaus = np.where(df['price_model'] == df['price_model'].shift(1))
+#tableaus = tableaus[0].tolist()
+#
+## set the tableaus to NaN
+#df.reset_index(drop=True, inplace=True)
+#df['no_tableaus'] = df[~df.index.isin(tableaus)]['price_model']
+#df.index = df_raw.index
+#
+## check different interpolation methods
+#df['linear'] = df['no_tableaus'].interpolate(method='linear')
+#df['cubic'] = df['no_tableaus'].interpolate(method='cubic')
+#
+## plot
+#df[0:24 * 7 * 8].plot(drawstyle='steps', subplots=False, sharey=True,
+#                      linewidth=2)
+#plt.show()
+#
+## statistical parameters
+#df.corr()
+#df.describe()
 
 # %% comparison of prices for sensitivities
 
-df1 = pd.read_csv('results/' +
-                  'scenario_nep_2035_2016-08-05 15:18:42.431986_DE.csv',
-                  parse_dates=[0], index_col=0, keep_date_col=True)
+files = {
+    'nep_2035_base':
+        'scenario_nep_2035_2016-08-05 15:18:42.431986_DE.csv',
+    'nep_2035_ee_plus_25':
+        'scenario_nep_2035_ee_plus_25_2016-08-09 16:27:06.904477_DE.csv',
+    'nep_2035_ee_minus_25':
+        'scenario_nep_2035_ee_minus_25_2016-08-09 16:45:40.295183_DE.csv',
+    'nep_2035_demand_plus_25':
+        '',
+    'nep_2035_demand_minus_25':
+        '',
+    'nep_2035_fuel_plus_25':
+        '',
+    'nep_2035_fuel_minus_25':
+        '',
+    'nep_2035_co2_plus_25':
+        '',
+    'nep_2035_co2_minus_25':
+        '',
+    'nep_2035_nordlink_plus_25':
+        '',
+    'nep_2035_nordlink_minus_25':
+        ''
+}
 
-df2 = pd.read_csv('results/' +
-                  'scenario_nep_2035_ee_minus_25_2016-08-09 16:45:40.295183_DE.csv',
-                  parse_dates=[0], index_col=0, keep_date_col=True)
+df_prices = pd.DataFrame(index=df_raw.index)
 
-df3 = pd.read_csv('results/' +
-                  'scenario_nep_2035_ee_plus_25_2016-08-09 16:27:06.904477_DE.csv',
-                  parse_dates=[0], index_col=0, keep_date_col=True)
-
-df_prices = pd.DataFrame(index=df1.index)
-df_prices['base'] = df1['duals']
-df_prices['base_ee_minus_25'] = df2['duals']
-df_prices['base_ee_plus_25'] = df3['duals']
+for k, v in files.items():
+    df = pd.read_csv('results/' + v, parse_dates=[0],
+                     index_col=0, keep_date_col=True)
+    df_prices[k] = df['duals']
 
 df_prices.describe()
 
