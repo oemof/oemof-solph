@@ -349,13 +349,20 @@ for k, v in files.items():
     df.index = df_prices.index
     df_prices[k] = df['duals']
 
+# sort by column names
+df_prices.sort(inplace=True, axis=1)
+
 # save as csv
 df_prices.to_csv('prices.csv')
 
 #boxplot
-df_prices.sort(inplace=True, axis=1)
 df_prices.plot(kind='box', rot=90)
 plt.tight_layout()
+plt.show()
+
+# histogram
+df_prices.plot(kind='hist', bins=20, subplots=True, sharex=True,
+               sharey=True, layout=(7, 2))
 plt.show()
 
 # duration curves for all scenarios
