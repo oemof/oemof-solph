@@ -122,7 +122,7 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
 
     logging.info('Optimise the energy system')
 
-    om = solph.OperationalModel(energysystem, timeindex=energysystem.time_idx)
+    om = solph.OperationalModel(energysystem)
 
     if debug:
         filename = os.path.join(
