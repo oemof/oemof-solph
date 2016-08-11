@@ -43,6 +43,7 @@ plt.xlabel('Zeit in h')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
+
 # %% plot fundamental and regression prices (8 weeks)
 
 df = df_raw[['duals']]
@@ -57,6 +58,7 @@ df[(24 * 7)*8:(24 * 7)*16].plot(drawstyle='steps')
 plt.xlabel('Zeit in h')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
+
 
 # %% polynom fitting: residual load
 
@@ -168,6 +170,7 @@ plt.ylabel('Leistung in  GW')
 plt.ylim(0, max(dispatch_de.sum(axis=1)) * 0.65)
 plt.show()
 
+
 # %% duration curves for power plants
 curves = pd.concat(
     [dispatch_de[col].sort_values(ascending=False).reset_index(drop=True)
@@ -178,6 +181,7 @@ curves[['Kernenergie', 'Braunkohle', 'Steinkohle', 'Gas', 'Öl',
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
 plt.show()
+
 
 # %% duration curves for power plants ordered by load (stacked)
 curves_stacked = dispatch_de
@@ -194,6 +198,7 @@ plt.xlabel('Stunden des Jahres geordnet nach der Last')
 plt.ylabel('Leistung in GW')
 plt.show()
 
+
 # %% duration curves for all powerlines
 pls = pd.concat(
     [powerlines[col].sort_values(ascending=False).reset_index(drop=True)
@@ -202,6 +207,7 @@ pls.plot(legend='reverse', cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
 plt.ylabel('Leistung in GW')
 plt.show()
+
 
 # %% duraction curve for one cable e.g. NordLink cable
 cable = df_raw[['DE_NO_powerline', 'NO_DE_powerline']]
@@ -216,6 +222,7 @@ plt.ylabel('Leistung in GW')
 plt.ylim(0, max(cable.sum(axis=1)) * 1.2)
 plt.show()
 
+
 # %% duraction curve for prices
 power_price_real = pd.read_csv('price_eex_day_ahead_2014.csv')
 power_price_real.set_index(df_raw.index, drop=True, inplace=True)
@@ -229,6 +236,7 @@ plt.xlabel('Stunden des Jahres')
 plt.ylabel('Preis in EUR/MWh')
 plt.show()
 
+
 # %% scaling
 
 df = df_raw[['duals']]
@@ -241,6 +249,7 @@ df['duals_x_2'] = df['duals'] + \
 
 df[0:24*31].plot(drawstyle='steps')
 plt.show()
+
 
 # %% boxplot for prices: monthly
 
@@ -273,6 +282,7 @@ plt.legend('')
 [[item.set_markerfacecolor('k') for item in bp['means']]]
 
 plt.show()
+
 
 # %% dispatch of norwegian hydro power plants
 
@@ -310,11 +320,12 @@ plt.show()
 #df.corr()
 #df.describe()
 
+
 # %% comparison of prices for sensitivities
 
 files = {
-    'nep_2025_base_wrong_costs':
-        'scenario_nep_2025_2016-08-05 09:41:23.723491_DE.csv',
+    'nep_2014_base':
+        'scenario_nep_2014_2016-08-04 12:04:42.180425_DE.csv',
     'nep_2025_base':
         'scenario_nep_2025_2016-08-10 14:26:12.390085_DE.csv',
     'nep_2035_base':
@@ -350,19 +361,30 @@ for k, v in files.items():
     df_prices[k] = df['duals']
 
 # sort by column names
-df_prices.sort(inplace=True, axis=1)
+df_prices.sort_index(inplace=True, axis=1)
 
 # save as csv
-df_prices.to_csv('prices.csv')
+df_prices.to_csv('prices_all_scenarios_with_sensivities.csv')
 
-#boxplot
-df_prices.plot(kind='box', rot=90)
+# boxplot
+df_prices.plot(kind='box', rot=90,
+               color={'medians': 'k', 'boxes': 'k', 'whiskers': 'k',
+                      'caps': 'k'})
 plt.tight_layout()
 plt.show()
 
 # histogram
-df_prices.plot(kind='hist', bins=20, subplots=True, sharex=True,
-               sharey=True, layout=(7, 2))
+df_prices[['nep_2014_base', 'nep_2035_demand_minus_25',
+           'nep_2025_base', 'nep_2035_demand_plus_25',
+           'nep_2035_base', 'nep_2035_co2_minus_25',
+           'nep_2035_ee_minus_25', 'nep_2035_co2_plus_25',
+           'nep_2035_ee_plus_25', 'nep_2035_nordlink_minus_25',
+           'nep_2035_fuel_minus_25', 'nep_2035_nordlink_plus_25',
+           'nep_2035_fuel_plus_25']] \
+    .plot(kind='hist', bins=25, normed=True, subplots=True, sharex=True,
+          sharey=True, layout=(7, 2), cmap=cm.get_cmap('Spectral'))
+[ax.legend(loc='upper right') for ax in plt.gcf().axes]
+plt.suptitle('Preise in EUR/MWh (25 Bins)', size=20)
 plt.show()
 
 # duration curves for all scenarios
@@ -376,8 +398,7 @@ plt.tight_layout()
 plt.show()
 
 # duration curves for base scenarios
-df_prices_duration[['nep_2025_base',
-                    'nep_2025_base_wrong_costs',
+df_prices_duration[['nep_2014_base', 'nep_2025_base',
                     'nep_2035_base']].plot(legend='reverse',
                                            cmap=cm.get_cmap('Spectral'))
 plt.xlabel('Stunden des Jahres')
@@ -388,3 +409,113 @@ plt.show()
 
 #df_prices['2035-01':'2035-02'].plot(drawstyle='steps')
 #plt.show()
+
+
+pd.concat([dispatch_de.sum().to_frame().transpose(),
+           dispatch_de.sum().to_frame().transpose()*1.2]).plot(kind='bar',
+                                                           stacked=True)
+plt.show()
+
+
+# %% plot of annual production for scenarios
+
+files = {
+    'nep_2014_base':
+        'scenario_nep_2014_2016-08-04 12:04:42.180425_DE.csv',
+    'nep_2025_base':
+        'scenario_nep_2025_2016-08-10 14:26:12.390085_DE.csv',
+    'nep_2035_base':
+        'scenario_nep_2035_2016-08-05 15:18:42.431986_DE.csv',
+    'nep_2035_ee_plus_25':
+        'scenario_nep_2035_ee_plus_25_2016-08-09 16:27:06.904477_DE.csv',
+    'nep_2035_ee_minus_25':
+        'scenario_nep_2035_ee_minus_25_2016-08-09 16:45:40.295183_DE.csv',
+    'nep_2035_demand_plus_25':
+        'scenario_nep_2035_demand_plus_25_2016-08-10 09:38:10.628613_DE.csv',
+    'nep_2035_demand_minus_25':
+        'scenario_nep_2035_demand_minus_25_2016-08-10 09:50:48.953929_DE.csv',
+    'nep_2035_fuel_plus_25':
+        'scenario_nep_2035_fuel_plus_25_2016-08-10 12:10:08.246319_DE.csv',
+    'nep_2035_fuel_minus_25':
+        'scenario_nep_2035_fuel_minus_25_2016-08-10 12:20:30.690439_DE.csv',
+    'nep_2035_co2_plus_25':
+        'scenario_nep_2035_co2_plus_25_2016-08-10 12:37:36.981611_DE.csv',
+    'nep_2035_co2_minus_25':
+        'scenario_nep_2035_co2_minus_25_2016-08-10 12:49:50.740375_DE.csv',
+    'nep_2035_nordlink_plus_25':
+        'scenario_nep_2035_nordlink_plus_25_2016-08-10 13:00:08.919877_DE.csv',
+    'nep_2035_nordlink_minus_25':
+        'scenario_nep_2035_nordlink_minus_25_2016-08-10 13:10:34.528303_DE.csv'
+}
+
+df_dispatch = pd.DataFrame(index=df_raw.index)
+
+for k, v in files.items():
+    df = pd.read_csv('results/' + v, parse_dates=[0],
+                     index_col=0, keep_date_col=True)
+    df.index = df_dispatch.index
+
+    # country code
+    cc = 'DE'
+
+    # get fossil and renewable power plants
+    fuels = ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
+             'hard_coal', 'gas', 'mixed_fuels', 'oil', 'load', 'excess',
+             'shortage']
+
+    for f in fuels:
+        cols = [c for c in df.columns if f in c and cc in c]
+        df[f] = df[cols].sum(axis=1)
+
+    # get imports and exports and aggregate columns
+    cols = [c for c in df.columns if 'powerline' in c and cc in c]
+    powerlines = df[cols]
+
+    exports = powerlines[[c for c in powerlines.columns
+                          if c.startswith(cc + '_')]]
+
+    imports = powerlines[[c for c in powerlines.columns
+                          if '_' + cc + '_' in c]]
+
+    df['imports'] = imports.sum(axis=1)
+    df['exports'] = exports.sum(axis=1)
+
+    # get imports and exports and aggregate columns
+    phs_in = df[[c for c in df.columns if 'phs_in' in c and cc in c]]
+    phs_out = df[[c for c in df.columns if 'phs_out' in c and cc in c]]
+    phs_level = df[[c for c in df.columns if 'phs_level' in c and cc in c]]
+
+    df['phs_in'] = phs_in.sum(axis=1)
+    df['phs_out'] = phs_out.sum(axis=1)
+    df['phs_level'] = phs_level.sum(axis=1)
+
+    # MW to GW
+    df = df.divide(1000)
+    print(df.sum())
+
+
+# %%
+
+
+# translation
+dispatch_de = dispatch[
+    ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
+     'hard_coal', 'gas', 'oil', 'mixed_fuels', 'phs_out', 'load', 'imports',
+     'exports']]
+
+# dict with new column names
+en_de = {'run_of_river': 'Laufwasser',
+         'biomass': 'Biomasse',
+         'solar': 'Solar',
+         'wind': 'Wind',
+         'uranium': 'Kernenergie',
+         'lignite': 'Braunkohle',
+         'hard_coal': 'Steinkohle',
+         'gas': 'Gas',
+         'mixed_fuels': 'Sonstiges',
+         'oil': 'Öl',
+         'phs_out': 'Pumpspeicher',
+         'imports': 'Import',
+         'exports': 'Export',
+         'load': 'Last'}
+dispatch_de = dispatch_de.rename(columns=en_de)
