@@ -448,12 +448,13 @@ files = {
         'scenario_nep_2035_nordlink_minus_25_2016-08-10 13:10:34.528303_DE.csv'
 }
 
-df_dispatch = pd.DataFrame(index=df_raw.index)
+df_dispatch = pd.DataFrame()
 
 for k, v in files.items():
     df = pd.read_csv('results/' + v, parse_dates=[0],
                      index_col=0, keep_date_col=True)
-    df.index = df_dispatch.index
+
+    df_tmp = pd.DataFrame()
 
     # country code
     cc = 'DE'
@@ -462,10 +463,9 @@ for k, v in files.items():
     fuels = ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
              'hard_coal', 'gas', 'mixed_fuels', 'oil', 'load', 'excess',
              'shortage']
-
     for f in fuels:
         cols = [c for c in df.columns if f in c and cc in c]
-        df[f] = df[cols].sum(axis=1)
+        df_tmp[f] = df[cols].sum(axis=1)
 
     # get imports and exports and aggregate columns
     cols = [c for c in df.columns if 'powerline' in c and cc in c]
@@ -477,45 +477,38 @@ for k, v in files.items():
     imports = powerlines[[c for c in powerlines.columns
                           if '_' + cc + '_' in c]]
 
-    df['imports'] = imports.sum(axis=1)
-    df['exports'] = exports.sum(axis=1)
+    df_tmp['imports'] = imports.sum(axis=1)
+    df_tmp['exports'] = exports.sum(axis=1)
 
     # get imports and exports and aggregate columns
     phs_in = df[[c for c in df.columns if 'phs_in' in c and cc in c]]
     phs_out = df[[c for c in df.columns if 'phs_out' in c and cc in c]]
     phs_level = df[[c for c in df.columns if 'phs_level' in c and cc in c]]
 
-    df['phs_in'] = phs_in.sum(axis=1)
-    df['phs_out'] = phs_out.sum(axis=1)
-    df['phs_level'] = phs_level.sum(axis=1)
+    df_tmp['phs_in'] = phs_in.sum(axis=1)
+    df_tmp['phs_out'] = phs_out.sum(axis=1)
+    df_tmp['phs_level'] = phs_level.sum(axis=1)
 
-    # MW to GW
-    df = df.divide(1000)
-    print(df.sum())
+    # MW to TW
+    df_tmp = df_tmp.divide(1000000)
 
+    # Sum up data (TWh) and adjust index
+    df_tmp = df_tmp.sum().to_frame().transpose()
+    df_tmp.reset_index(drop=True, inplace=True)
+    df_tmp.index = [k]
 
-# %%
+    # append row
+    df_dispatch = df_dispatch.append(df_tmp)
 
+# sort by row index
+df_dispatch.sort_index(inplace=True)
 
-# translation
-dispatch_de = dispatch[
-    ['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
-     'hard_coal', 'gas', 'oil', 'mixed_fuels', 'phs_out', 'load', 'imports',
-     'exports']]
-
-# dict with new column names
-en_de = {'run_of_river': 'Laufwasser',
-         'biomass': 'Biomasse',
-         'solar': 'Solar',
-         'wind': 'Wind',
-         'uranium': 'Kernenergie',
-         'lignite': 'Braunkohle',
-         'hard_coal': 'Steinkohle',
-         'gas': 'Gas',
-         'mixed_fuels': 'Sonstiges',
-         'oil': 'Öl',
-         'phs_out': 'Pumpspeicher',
-         'imports': 'Import',
-         'exports': 'Export',
-         'load': 'Last'}
-dispatch_de = dispatch_de.rename(columns=en_de)
+# plot
+df_dispatch[['run_of_river', 'biomass', 'solar', 'wind', 'uranium', 'lignite',
+             'hard_coal', 'gas', 'mixed_fuels', 'oil', 'imports', 'phs_out']] \
+             .plot(kind='bar', stacked=True, legend='reverse',
+                   cmap=cm.get_cmap('Spectral'))
+plt.ylabel('TWh')
+plt.legend(loc='upper center', ncol=12)
+plt.tight_layout()
+plt.show()
