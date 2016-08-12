@@ -15,11 +15,11 @@ from oemof.outputlib import ResultsDataFrame
 
 scenario_path = 'scenarios/'
 
-date_from = '2035-01-01 00:00:00'
-date_to = '2035-12-31 23:00:00'
+date_from = '2050-01-01 00:00:00'
+date_to = '2050-12-31 23:00:00'
 
-nodes_flows = 'nep_2025.csv'
-nodes_flows_sequences = 'nep_2014_seq.csv'
+nodes_flows = 'znes_2050_dpr.csv'
+nodes_flows_sequences = 'znes_2050_dpr_seq.csv'
 
 
 # %% misc.
