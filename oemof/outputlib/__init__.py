@@ -54,7 +54,7 @@ class ResultsDataFrame(pd.DataFrame):
                     if k is kk:
                         row['type'] = 'other'
                     else:
-                        row['type'] = 'frombus'
+                        row['type'] = 'from_bus'
                     if k is kk:
                         row['obj_label'] = 'duals'
                     elif isinstance(kk, str):
@@ -81,7 +81,7 @@ class ResultsDataFrame(pd.DataFrame):
                             # bus inputs (only self ref. components)
                             row = dict()
                             row['bus_label'] = list(k.outputs.keys())[0].label
-                            row['type'] = 'tobus'
+                            row['type'] = 'to_bus'
                             row['obj_label'] = k.label
                             row['datetime'] = es.time_idx
                             row['val'] = v.get(list(k.outputs.keys())[0])
@@ -91,7 +91,7 @@ class ResultsDataFrame(pd.DataFrame):
                         # bus inputs (results[component][bus])
                         row = dict()
                         row['bus_label'] = kk.label
-                        row['type'] = 'tobus'
+                        row['type'] = 'to_bus'
                         row['obj_label'] = k.label
                         row['datetime'] = es.time_idx
                         row['val'] = vv
@@ -119,7 +119,7 @@ class ResultsDataFrame(pd.DataFrame):
         Parameters
         ----------
         bus_label : string
-        type : string (tobus/frombus/other)
+        type : string (to_bus/from_bus/other)
         obj_label: string
         date_from : string
             Start date selection e.g. "2016-01-01 00:00:00". If not set, the
@@ -396,7 +396,7 @@ class DataFramePlot(ResultsDataFrame):
             self.ax = fig.add_subplot(1, 1, 1)
 
         # Create a bar plot for all input flows
-        self.slice_unstacked(bus_label=bus_label, type='tobus', **kwargs)
+        self.slice_unstacked(bus_label=bus_label, type='to_bus', **kwargs)
         if barorder is not None:
             self.rearrange_subset(barorder)
         self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
@@ -404,7 +404,7 @@ class DataFramePlot(ResultsDataFrame):
                          **bar_kwa)
 
         # Create a line plot for all output flows
-        self.slice_unstacked(bus_label=bus_label, type='frombus', **kwargs)
+        self.slice_unstacked(bus_label=bus_label, type='from_bus', **kwargs)
         if lineorder is not None:
             self.rearrange_subset(lineorder)
         # The following changes are made to have the bottom line on top layer

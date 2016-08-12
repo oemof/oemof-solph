@@ -123,22 +123,22 @@ except Exception as e:
 
 test_results = {
     'objective': 2947725.249402091,
-    ('b_el', 'tobus', 'pp_chp', 'val'): 11161.357450000065,
-    ('b_el', 'tobus', 'pp_coal', 'val'): 33723.047672110595,
-    ('b_el', 'tobus', 'pp_gas', 'val'): 30412.377779000046,
-    ('b_el', 'tobus', 'pp_lig', 'val'): 22066.451080999268,
-    ('b_el', 'tobus', 'pp_oil', 'val'): 2.2872599999999998,
-    ('b_el', 'tobus', 'pv', 'val'): 7796.8431880300122,
-    ('b_el', 'tobus', 'wind', 'val'): 28009.549502999955,
-    ('b_el', 'frombus', 'demand_el', 'val'): 132243.7904593189,
-    ('b_el', 'frombus', 'excess', 'val'): 928.12139200000013,
-    ('b_th', 'tobus', 'pp_chp', 'val'): 14881.810039999958,
-    ('b_th', 'frombus', 'demand_th', 'val'): 14881.80983624002,
-    ('coal', 'frombus', 'pp_coal', 'val'): 86469.394787298472,
-    ('gas', 'frombus', 'pp_chp', 'val'): 37204.525720000034,
-    ('gas', 'frombus', 'pp_gas', 'val'): 60824.751778000136,
-    ('lignite', 'frombus', 'pp_lig', 'val'): 53820.634704001102,
-    ('oil', 'frombus', 'pp_oil', 'val'): 8.1687949999999994}
+    ('b_el', 'to_bus', 'pp_chp', 'val'): 11161.357450000065,
+    ('b_el', 'to_bus', 'pp_coal', 'val'): 33723.047672110595,
+    ('b_el', 'to_bus', 'pp_gas', 'val'): 30412.377779000046,
+    ('b_el', 'to_bus', 'pp_lig', 'val'): 22066.451080999268,
+    ('b_el', 'to_bus', 'pp_oil', 'val'): 2.2872599999999998,
+    ('b_el', 'to_bus', 'pv', 'val'): 7796.8431880300122,
+    ('b_el', 'to_bus', 'wind', 'val'): 28009.549502999955,
+    ('b_el', 'from_bus', 'demand_el', 'val'): 132243.7904593189,
+    ('b_el', 'from_bus', 'excess', 'val'): 928.12139200000013,
+    ('b_th', 'to_bus', 'pp_chp', 'val'): 14881.810039999958,
+    ('b_th', 'from_bus', 'demand_th', 'val'): 14881.80983624002,
+    ('coal', 'from_bus', 'pp_coal', 'val'): 86469.394787298472,
+    ('gas', 'from_bus', 'pp_chp', 'val'): 37204.525720000034,
+    ('gas', 'from_bus', 'pp_gas', 'val'): 60824.751778000136,
+    ('lignite', 'from_bus', 'pp_lig', 'val'): 53820.634704001102,
+    ('oil', 'from_bus', 'pp_oil', 'val'): 8.1687949999999994}
 
 check(test_results, least_costs_run, testdict['least_costs'], results)
 # *********** end of simple least cost  example *******************************
