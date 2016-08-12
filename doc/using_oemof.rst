@@ -38,16 +38,16 @@ The code of the example above:
     bus_2 = Bus(label="bus_2")
 
     # create sink 1
-    Sink(label='sink_1', inputs={bus_1: Flow()})
+    Sink(label='sink_1', inputs={bus_1: []})
     
     # create sink 2
-    Sink(label='sink_2', inputs={bus_2: Flow()})    
+    Sink(label='sink_2', inputs={bus_2: []})    
 
     # create source
-    Source(label='source', outputs={bus_1: Flow()})
+    Source(label='source', outputs={bus_1: []})
 
     # create transformer
-    Transformer(label='transformer', inputs={bus_1: Flow()}, outputs={bus_2: Flow()})
+    Transformer(label='transformer', inputs={bus_1: []}, outputs={bus_2: []})
     
 By now the network library is only the base for the solph library, but it is planed to add some basic functionalities such as network analyses.
 
