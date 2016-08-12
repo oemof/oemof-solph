@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 try:
     import matplotlib.pyplot as plt
-except:
+except ImportError:
     logging.warning('Matplotlib does not work.')
 
 
@@ -41,34 +41,20 @@ class ResultsDataFrame(pd.DataFrame):
         http://pandas.pydata.org/pandas-docs/stable/advanced.html
 
     """
-
-
-#         results[source][target]
-#         if source == target:
-#           if isinstance(source, 'Bus'):
-#               if isinstance(target.key(), str):
-#                   # duals
-#                   pass
-#               else:
-#                   storage_level
-#         else:
-#             # component logic
-#             pass
-
     def __init__(self, **kwargs):
         # default values if not arguments are passed
         es = kwargs.get('energy_system')
 
         rows_list = []
         for k, v in es.results.items():
-            if ('Bus' in str(k.__class__)):
+            if 'Bus' in str(k.__class__):
                 for kk, vv in v.items():
-                    row = {}
+                    row = dict()
                     row['bus_label'] = k.label
                     if k is kk:
                         row['type'] = 'other'
                     else:
-                        row['type'] = 'output'
+                        row['type'] = 'from_bus'
                     if k is kk:
                         row['obj_label'] = 'duals'
                     elif isinstance(kk, str):
@@ -82,9 +68,9 @@ class ResultsDataFrame(pd.DataFrame):
                 if k in v.keys():
                     # self ref. components (results[component][component])
                     for kk, vv in v.items():
-                        if(k is kk):
+                        if k is kk:
                             # self ref. comp. (results[component][component])
-                            row = {}
+                            row = dict()
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'other'
                             row['obj_label'] = k.label
@@ -93,9 +79,9 @@ class ResultsDataFrame(pd.DataFrame):
                             rows_list.append(row)
                         else:
                             # bus inputs (only self ref. components)
-                            row = {}
+                            row = dict()
                             row['bus_label'] = list(k.outputs.keys())[0].label
-                            row['type'] = 'input'
+                            row['type'] = 'to_bus'
                             row['obj_label'] = k.label
                             row['datetime'] = es.time_idx
                             row['val'] = v.get(list(k.outputs.keys())[0])
@@ -103,9 +89,9 @@ class ResultsDataFrame(pd.DataFrame):
                 else:
                     for kk, vv in v.items():
                         # bus inputs (results[component][bus])
-                        row = {}
+                        row = dict()
                         row['bus_label'] = kk.label
-                        row['type'] = 'input'
+                        row['type'] = 'to_bus'
                         row['obj_label'] = k.label
                         row['datetime'] = es.time_idx
                         row['val'] = vv
@@ -133,7 +119,7 @@ class ResultsDataFrame(pd.DataFrame):
         Parameters
         ----------
         bus_label : string
-        type : string (input/output/other)
+        type : string (to_bus/from_bus/other)
         obj_label: string
         date_from : string
             Start date selection e.g. "2016-01-01 00:00:00". If not set, the
@@ -172,6 +158,8 @@ class ResultsDataFrame(pd.DataFrame):
         ----------
         unstacklevel : string (default: 'obj_label')
             Level to unstack the subset of the DataFrame.
+        formatted : boolean
+            missing...
         """
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
@@ -364,8 +352,8 @@ class DataFramePlot(ResultsDataFrame):
         self.ax = self.subset.plot(**kwargs)
         return self
 
-    def io_plot(self, bus_label, cdict, line_kwa={}, lineorder=None, bar_kwa={},
-                barorder=None, **kwargs):
+    def io_plot(self, bus_label, cdict, line_kwa=None, lineorder=None,
+                bar_kwa=None, barorder=None, **kwargs):
         r""" Plotting a combined bar and line plot to see the fitting of in-
         and outcomming flows of a bus balance.
 
@@ -398,12 +386,17 @@ class DataFramePlot(ResultsDataFrame):
         """
         self.ax = kwargs.get('ax', self.ax)
 
+        if bar_kwa is None:
+            bar_kwa = dict()
+        if line_kwa is None:
+            line_kwa = dict()
+
         if self.ax is None:
             fig = plt.figure()
             self.ax = fig.add_subplot(1, 1, 1)
 
         # Create a bar plot for all input flows
-        self.slice_unstacked(bus_label=bus_label, type='input', **kwargs)
+        self.slice_unstacked(bus_label=bus_label, type='to_bus', **kwargs)
         if barorder is not None:
             self.rearrange_subset(barorder)
         self.subset.plot(kind='bar', linewidth=0, stacked=True, width=1,
@@ -411,7 +404,7 @@ class DataFramePlot(ResultsDataFrame):
                          **bar_kwa)
 
         # Create a line plot for all output flows
-        self.slice_unstacked(bus_label=bus_label, type='output', **kwargs)
+        self.slice_unstacked(bus_label=bus_label, type='from_bus', **kwargs)
         if lineorder is not None:
             self.rearrange_subset(lineorder)
         # The following changes are made to have the bottom line on top layer

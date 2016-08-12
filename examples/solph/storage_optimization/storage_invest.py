@@ -141,7 +141,7 @@ def get_result_dict(energysystem):
     storage = energysystem.groups['storage']
     myresults = outputlib.DataFramePlot(energy_system=energysystem)
 
-    pp_gas = myresults.slice_by(obj_label='pp_gas', type='input',
+    pp_gas = myresults.slice_by(obj_label='pp_gas', type='to_bus',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
@@ -182,7 +182,7 @@ def create_plots(energysystem):
 
     # Plotting the input flows of the electricity bus for January
     myplot = outputlib.DataFramePlot(energy_system=energysystem)
-    myplot.slice_unstacked(bus_label="electricity", type="input",
+    myplot.slice_unstacked(bus_label="electricity", type="to_bus",
                            date_from="2012-01-01 00:00:00",
                            date_to="2012-01-31 00:00:00")
     colorlist = myplot.color_from_dict(cdict)
@@ -193,7 +193,7 @@ def create_plots(energysystem):
     myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
     # Plotting the output flows of the electricity bus for January
-    myplot.slice_unstacked(bus_label="electricity", type="output")
+    myplot.slice_unstacked(bus_label="electricity", type="from_bus")
     myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
     myplot.ax.legend(loc='upper right')
     myplot.ax.set_ylabel('Power in MW')

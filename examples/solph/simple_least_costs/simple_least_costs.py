@@ -132,7 +132,7 @@ def plot_results(energysystem):
     # create multiindex dataframe with result values
     esplot = output.DataFramePlot(energy_system=energysystem)
     # select input results of electrical bus (i.e. power delivered by plants)
-    esplot.slice_unstacked(bus_label="b_el", type="input",
+    esplot.slice_unstacked(bus_label="b_el", type="to_bus",
                            date_from='2012-01-01 00:00:00',
                            date_to='2012-01-07 00:00:00')
     # set colorlist for esplot
