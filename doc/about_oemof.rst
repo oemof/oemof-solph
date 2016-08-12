@@ -17,7 +17,7 @@ The oemof packages and their modules are used to build what we call 'application
 a concrete energy system model (or a subprocess of this model). The following image 
 illustrates this idea:
 
-.. 	image:: framework_concept.svg
+.. 	image:: _files/framework_concept.svg
    :height: 744px
    :width: 1052 px
    :scale: 30 %

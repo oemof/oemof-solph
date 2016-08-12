@@ -16,7 +16,7 @@ oemof-network
 =============
 The :ref:`oemof_network_label` library is part of the oemof installation. By now it can be used to define energy systems as a network with components and buses. Every component should be connected to one or more buses. Allowed components are sources, sinks and transformer.
 
-.. 	image:: example_network.svg
+.. 	image:: _files/example_network.svg
    :scale: 30 %
    :alt: alternate text
    :align: center
