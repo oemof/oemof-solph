@@ -11,7 +11,8 @@
 *.pdf
 *.lp
 .idea
-!doc/*.svg
+!doc/_files/*.svg
+!doc/_files/*.png
 !tests/lp_files/*.lp
 doc/_build/
 dist/*
