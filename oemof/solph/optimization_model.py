@@ -405,6 +405,7 @@ class OptimizationModel(po.ConcreteModel):
             options[k] = solver_cmdline_options[k]
         # store results
         logging.info("Handing problem to solver and solving.")
+        logging.info("Used solver: {0}".format(solver))
         results = opt.solve(self, **solve_kwargs)
 
         self.solutions.load_from(results)

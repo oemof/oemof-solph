@@ -26,15 +26,27 @@ Newly added required packages (via PyPi) are installed by performing a manual up
 Documentation
 -------------
 
-See the documentation of the dev branch at
+See the developer version of the documentation of the dev branch at
 `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
 
-Collaboration
--------------
+Collaboration with pull requests
+--------------------------------
 
-We use the collaboration features from Github, see https://github.com/oemof.
+To collaborate use the pull request functionality of github.
 
+How to create a pull request
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ...
+* ...
+* Tests must run, see ...
+* Name the related team within the title of the pull request, like "solph: pull request for new feature within solph".
+* Assign a team member.
+
+Tests
+^^^^^
+* ...
+* ...
 
 Style guidelines
 ----------------
