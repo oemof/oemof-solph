@@ -1,0 +1,29 @@
+v0.1 ()
+++++++++++++++++++++++++++
+
+New features
+############
+
+
+Documentation
+#############
+
+
+Testing
+#######
+
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+ * Stephan Günther
+ * Simon Hilpert
+ * Uwe Krien
