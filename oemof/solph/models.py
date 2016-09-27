@@ -330,6 +330,8 @@ class OperationalModel(po.ConcreteModel):
             Dictionary with command line options for solver e.g.
             {"mipgap":"0.01"} results in "--mipgap 0.01"
             {"interior":" "} results in "--interior"
+            Gurobi solver takes numeric parameter values such as
+            {"method": 2}
 
         """
         solve_kwargs = kwargs.get('solve_kwargs', {})
