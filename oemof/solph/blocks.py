@@ -835,62 +835,62 @@ class LinearTransformer(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class Discrete(SimpleBlock):
+class Binary(SimpleBlock):
     """
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
-    DISCRETE_FLOWS
-        A set of flows with the attribute :attr:`discrete` of type
-        :class:`.options.Discrete`.
+    BINARY_FLOWS
+        A set of flows with the attribute :attr:`binary` of type
+        :class:`.options.Binary`.
     MIN_FLOWS
-        A subset of set DISCRETE_FLOWS with the attribute :attr:`min`
+        A subset of set BINARY_FLOWS with the attribute :attr:`min`
         greater than zero for at least one timestep in the simulation horizon.
     STARTUP_FLOWS
-        A subset of set DISCRETE_FLOWS with the attribute
+        A subset of set BINARY_FLOWS with the attribute
         :attr:`startup_costs` being not None.
     SHUTDOWN_FLOWS
-        A subset of set DISCRETE_FLOWS with the attribute
+        A subset of set BINARY_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
     **The following variable are created:**
 
-    Status variable (binary) :attr:`om.Discrete.status`:
+    Status variable (binary) :attr:`om.Binary.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
 
-    Startup variable (binary) :attr:`om.Discrete.startup`:
+    Startup variable (binary) :attr:`om.Binary.startup`:
         Variable indicating startup of flow (component) indexed by
         STARTUP_FLOWS
 
-    Shutdown variable (binary) :attr:`om.Discrete.shutdown`:
+    Shutdown variable (binary) :attr:`om.Binary.shutdown`:
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWN_FLOWS
 
     **The following constraints are created**:
 
-    Minimum flow constraint :attr:`om.Discrete.min[i,o,t]`
+    Minimum flow constraint :attr:`om.Binary.min[i,o,t]`
         .. math::
             flow(i, o, t) \\geq min(i, o, t) \\cdot nominal\_value \
                 \\cdot status(i, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{DISCRETE\_FLOWS}.
+            \\forall (i, o) \\in \\textrm{BINARY\_FLOWS}.
 
-    Maximum flow constraint :attr:`om.Discrete.max[i,o,t]`
+    Maximum flow constraint :attr:`om.Binary.max[i,o,t]`
         .. math::
             flow(i, o, t) \\leq max(i, o, t) \\cdot nominal\_value \
                 \\cdot status(i, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{DISCRETE\_FLOWS}.
+            \\forall (i, o) \\in \\textrm{BINARY\_FLOWS}.
 
-    Startup constraint :attr:`om.Discrete.startup_constr[i,o,t]`
+    Startup constraint :attr:`om.Binary.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall (i,o) \\in \\textrm{STARTUP\_FLOWS}.
 
-    Shutdown constraint :attr:`om.Discrete.shutdown_constr[i,o,t]`
+    Shutdown constraint :attr:`om.Binary.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\\\
@@ -899,12 +899,12 @@ class Discrete(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    If :attr:`discrete.startup_costs` is set by the user:
+    If :attr:`binary.startup_costs` is set by the user:
         .. math::
             \\sum_{i, o \\in STARTUP\_FLOWS} \\sum_t  startup(i, o, t) \
             \\cdot startup\_costs(i, o)
 
-    If :attr:`discrete.shutdown_costs` is set by the user:
+    If :attr:`binary.shutdown_costs` is set by the user:
         .. math::
             \\sum_{i, o \\in SHUTDOWN\_FLOWS} \\sum_t shutdown(i, o, t) \
                 \\cdot shutdown\_costs(i, o)
@@ -915,12 +915,12 @@ class Discrete(SimpleBlock):
 
     def _create(self, group=None):
         """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.Discrete`.
+        a attribute flow of type class:`.Binary`.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.DiscreteFlow objects for which
+            List of oemof.solph.BinaryFlow objects for which
             the constraints are build.
         """
         if group is None:
@@ -928,20 +928,20 @@ class Discrete(SimpleBlock):
 
         m = self.parent_block()
         # ########################## SETS #####################################
-        self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.BINARY_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                          if sum(g[2].min[t]
                                                 for t in m.TIMESTEPS) > 0])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].discrete.startup_costs is not None])
+                                  if g[2].binary.startup_costs is not None])
 
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].discrete.shutdown_costs is not None])
+                                  if g[2].binary.shutdown_costs is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
-        self.status = Var(self.DISCRETE_FLOWS, m.TIMESTEPS, within=Binary)
+        self.status = Var(self.BINARY_FLOWS, m.TIMESTEPS, within=Binary)
 
         if self.STARTUPFLOWS:
             self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
@@ -971,38 +971,38 @@ class Discrete(SimpleBlock):
                               rule=_maximum_flow_rule)
 
         def _startup_rule(block, i, o, t):
-            """Rule definition for startup constraint of discrete flows.
+            """Rule definition for startup constraint of binary flows.
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
                             self.status[i, o, t-1])
             else:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
-                            m.flows[i, o].discrete.initial_status)
+                            m.flows[i, o].binary.initial_status)
             return expr
         self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
 
 
         def _shutdown_rule(block, i, o, t):
-            """Rule definition for shutdown constraints of discrete flows.
+            """Rule definition for shutdown constraints of binary flows.
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.shutdown[i, o, t] >= self.status[i, o, t-1] -
                             self.status[i, o, t])
             else:
                expr = (self.shutdown[i, o, t] >=
-                       m.flows[i, o].discrete.initial_status -
+                       m.flows[i, o].binary.initial_status -
                            self.status[i, o, t])
             return expr
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
-        # TODO: Add gradient constraints for discrete block / flows
+        # TODO: Add gradient constraints for binary block / flows
         # TODO: Add  min-up/min-downtime constraints
 
     def _objective_expression(self):
-        """Objective expression for discrete flows.
+        """Objective expression for binary flows.
         """
         if not hasattr(self, 'FLOWS'):
             return 0
@@ -1014,14 +1014,14 @@ class Discrete(SimpleBlock):
 
         if self.STARTUPFLOWS:
             startcosts += sum(self.startup[i, o, t] *
-                                  m.flows[i, o].discrete.startup_costs
+                                  m.flows[i, o].binary.startup_costs
                               for i,o in self.STARTUPFLOWS
                               for t in m.TIMESTEPS)
             self.startcosts = Expression(expr=startcosts)
 
         if self.SHUTDOWNFLOWS:
             shutdowncosts += sum(self.shutdown[i, o, t] *
-                                     m.flows[i, o].discrete.shutdown_costs
+                                     m.flows[i, o].binary.shutdown_costs
                               for i,o in self.SHUTDOWNFLOWS
                               for t in m.TIMESTEPS)
             self.shudowcosts = Expression(expr=shutdowncosts)

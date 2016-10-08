@@ -47,10 +47,10 @@ investment_flow_grouping = groupings.FlowsWithNodes(
 standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow)
 
-discrete_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.Discrete,
-    filter=lambda stf: stf[2].discrete is not None)
+binary_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.Binary,
+    filter=lambda stf: stf[2].binary is not None)
 
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
-             standard_flow_grouping, discrete_flow_grouping]
+             standard_flow_grouping, binary_flow_grouping]

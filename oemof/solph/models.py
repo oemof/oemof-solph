@@ -98,7 +98,7 @@ class OperationalModel(po.ConcreteModel):
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.Storage, blocks.InvestmentFlow,
                          blocks.InvestmentStorage, blocks.Flow,
-                         blocks.Discrete]
+                         blocks.Binary]
 
     def __init__(self, es, **kwargs):
         super().__init__()
@@ -175,7 +175,7 @@ class OperationalModel(po.ConcreteModel):
                         self.flow[o, i, t].fix()
 
                 if self.flows[o, i].nominal_value is not None and (
-                        self.flows[o, i].discrete is None):
+                        self.flows[o, i].binary is None):
                     # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
