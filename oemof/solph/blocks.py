@@ -835,7 +835,7 @@ class LinearTransformer(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class Binary(SimpleBlock):
+class BinaryFlow(SimpleBlock):
     """
 
     **The following sets are created:** (-> see basic sets at
@@ -856,41 +856,41 @@ class Binary(SimpleBlock):
 
     **The following variable are created:**
 
-    Status variable (binary) :attr:`om.Binary.status`:
+    Status variable (binary) :attr:`om.BinaryFLow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
 
-    Startup variable (binary) :attr:`om.Binary.startup`:
+    Startup variable (binary) :attr:`om.BinaryFlow.startup`:
         Variable indicating startup of flow (component) indexed by
         STARTUP_FLOWS
 
-    Shutdown variable (binary) :attr:`om.Binary.shutdown`:
+    Shutdown variable (binary) :attr:`om.BinaryFlow.shutdown`:
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWN_FLOWS
 
     **The following constraints are created**:
 
-    Minimum flow constraint :attr:`om.Binary.min[i,o,t]`
+    Minimum flow constraint :attr:`om.BinaryFlow.min[i,o,t]`
         .. math::
             flow(i, o, t) \\geq min(i, o, t) \\cdot nominal\_value \
                 \\cdot status(i, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall (i, o) \\in \\textrm{BINARY\_FLOWS}.
 
-    Maximum flow constraint :attr:`om.Binary.max[i,o,t]`
+    Maximum flow constraint :attr:`om.BinaryFlow.max[i,o,t]`
         .. math::
             flow(i, o, t) \\leq max(i, o, t) \\cdot nominal\_value \
                 \\cdot status(i, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall (i, o) \\in \\textrm{BINARY\_FLOWS}.
 
-    Startup constraint :attr:`om.Binary.startup_constr[i,o,t]`
+    Startup constraint :attr:`om.BinaryFlow.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall (i,o) \\in \\textrm{STARTUP\_FLOWS}.
 
-    Shutdown constraint :attr:`om.Binary.shutdown_constr[i,o,t]`
+    Shutdown constraint :attr:`om.BinaryFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\\\
@@ -915,7 +915,7 @@ class Binary(SimpleBlock):
 
     def _create(self, group=None):
         """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.Binary`.
+        a attribute flow of type class:`.BinaryFlow`.
 
         Parameters
         ----------

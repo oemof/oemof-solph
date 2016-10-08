@@ -19,7 +19,7 @@ class Investment:
         self.ep_costs = ep_costs
 
 
-class Binary:
+class BinaryFlow:
     """
     Parameters
     ----------

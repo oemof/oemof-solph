@@ -48,7 +48,7 @@ standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow)
 
 binary_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.Binary,
+    constant_key=blocks.BinaryFlow,
     filter=lambda stf: stf[2].binary is not None)
 
 
