@@ -114,9 +114,11 @@ class Flow:
                 "Using the investment object the nominal_value is set to None.",
                 SyntaxWarning)
         self.binary = kwargs.get('binary')
+        self.discrete = kwargs.get('discrete')
         if self.investment and self.binary:
             raise ValueError("Investment flows cannot be combined with " +
                              "binary flows!")
+                             
 
 
 class Bus(on.Bus):

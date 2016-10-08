@@ -16,7 +16,6 @@ groupings specified like this:
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
 """
-from oemof import energy_system as core_es
 from .network import Bus, LinearTransformer, Storage
 from .options import Investment
 from . import blocks
@@ -51,6 +50,11 @@ binary_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.BinaryFlow,
     filter=lambda stf: stf[2].binary is not None)
 
+discrete_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.DiscreteFlow,
+    filter=lambda stf: stf[2].discrete is not None)
+
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
-             standard_flow_grouping, binary_flow_grouping]
+             standard_flow_grouping, binary_flow_grouping, 
+             discrete_flow_grouping]

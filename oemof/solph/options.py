@@ -43,3 +43,15 @@ class BinaryFlow:
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
         self.initial_status = kwargs.get('initial_status', 0)
+
+class DiscreteFlow:
+    """
+    Parameters
+    ----------
+    integers : boolean
+        Specifiy domain of flow variable: If True, flow is force to integer
+        values. 
+    """
+    def __init__(self, **kwargs):
+        # super().__init__(self, **kwargs)
+        self.integers = kwargs.get('integers', True)

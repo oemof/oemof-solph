@@ -4,7 +4,7 @@ for the specified groups.
 """
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
-                        NonNegativeReals, Binary)
+                        NonNegativeReals, Binary, NonNegativeIntegers)
 from pyomo.core.base.block import SimpleBlock
 
 
@@ -1028,3 +1028,45 @@ class BinaryFlow(SimpleBlock):
 
         return startcosts + shutdowncosts
 
+class DiscreteFlow(SimpleBlock):
+    """
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    DISCRETE_FLOWS
+        A set of flows with the attribute :attr:`discrete` of type
+        :class:`.options.Discrete`.
+        
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates set, variables, constraints for all flow object with
+        a attribute flow of type class:`.DiscreteFlow`.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.DiscreteFlow objects for which
+            the constraints are build.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+        # ########################## SETS #####################################
+        self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        
+        self.discrete_flow = Var(self.DISCRETE_FLOWS, 
+                                 m.TIMESTEPS, within=NonNegativeIntegers)
+
+
+        def _discrete_flow_rule(block, i, o, t):
+            """Force flow variable to discrete (NonNegativeInteger) values.
+            """
+            expr = (self.discrete_flow[i, o, t] == m.flow[i, o, t])
+            return expr
+        self.integer_flow = Constraint(self.DISCRETE_FLOWS, m.TIMESTEPS,
+                                       rule=_discrete_flow_rule)

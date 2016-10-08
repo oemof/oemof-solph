@@ -98,7 +98,7 @@ class OperationalModel(po.ConcreteModel):
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.Storage, blocks.InvestmentFlow,
                          blocks.InvestmentStorage, blocks.Flow,
-                         blocks.BinaryFlow]
+                         blocks.BinaryFlow, blocks.DiscreteFlow]
 
     def __init__(self, es, **kwargs):
         super().__init__()

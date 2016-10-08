@@ -5,7 +5,7 @@
 from collections import abc, UserList
 
 from .. import network
-from .options import Binary
+from .options import BinaryFlow
 
 
 def Sequence(sequence_or_scalar):
