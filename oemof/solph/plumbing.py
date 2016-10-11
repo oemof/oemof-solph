@@ -208,7 +208,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                             for dattr in binary_attrs:
                                 if dattr in row.keys() and row[attr]:
                                     setattr(flow.binary, dattr, row[dattr])
-                        # this block is only for binary flows!
+                        # this block is only for investment flows!
                         if attr == 'investment' and row[attr] is True:
                             # create binary object for flow
                             setattr(flow, attr, Investment())
