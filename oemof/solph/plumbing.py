@@ -5,7 +5,7 @@
 from collections import abc, UserList
 
 from .. import network
-from .options import BinaryFlow
+from .options import BinaryFlow, Investment
 
 
 def Sequence(sequence_or_scalar):
@@ -203,11 +203,19 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                         # this block is only for binary flows!
                         if attr == 'binary' and row[attr] is True:
                             # create binary object for flow
-                            setattr(flow, attr, Binary())
-                            binary_attrs = vars(Binary()).keys()
+                            setattr(flow, attr, BinaryFlow())
+                            binary_attrs = vars(BinaryFlow()).keys()
                             for dattr in binary_attrs:
                                 if dattr in row.keys() and row[attr]:
                                     setattr(flow.binary, dattr, row[dattr])
+                        # this block is only for binary flows!
+                        if attr == 'investment' and row[attr] is True:
+                            # create binary object for flow
+                            setattr(flow, attr, Investment())
+                            invest_attrs = vars(Investment()).keys()
+                            for dattr in invest_attrs:
+                                if dattr in row.keys() and row[attr]:
+                                    setattr(flow.investment, dattr, row[dattr])
             except:
                 print('Error with flow creation in line', i+2, 'in csv file.')
                 print('Label:', row['label'])
