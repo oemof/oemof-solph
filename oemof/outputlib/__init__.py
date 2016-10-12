@@ -432,7 +432,7 @@ class DataFramePlot(ResultsDataFrame):
         new_df.plot(kind='line', ax=self.ax, color=colorlist,
                     drawstyle='steps-mid', **line_kwa)
 
-        # Adapt the legend to the new oder
+        # Adapt the legend to the new order
         handles, labels = self.ax.get_legend_handles_labels()
         tmp_lab = [x for x in reversed(labels[0:separator])]
         tmp_hand = [x for x in reversed(handles[0:separator])]
