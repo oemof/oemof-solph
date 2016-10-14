@@ -6,13 +6,20 @@ Subpackages
 
 .. toctree::
 
-    oemof.core
     oemof.outputlib
     oemof.solph
     oemof.tools
 
 Submodules
 ----------
+
+oemof.energy_system module
+--------------------------
+
+.. automodule:: oemof.energy_system
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 oemof.groupings module
 ----------------------

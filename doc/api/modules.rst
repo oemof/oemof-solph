@@ -2,6 +2,6 @@ oemof
 =====
 
 .. toctree::
-   :maxdepth: 8
+   :maxdepth: 4
 
    oemof
