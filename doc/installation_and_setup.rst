@@ -4,7 +4,7 @@
 Installation and setup
 ######################
 
-.. contents:: `Current oemof libraries`
+.. contents:: ``
     :depth: 1
     :local:
     :backlinks: top
