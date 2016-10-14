@@ -1,6 +1,13 @@
+.. _installation_and_setup_label:
+
 ######################
 Installation and setup
 ######################
+
+.. contents:: `Current oemof libraries`
+    :depth: 1
+    :local:
+    :backlinks: top
 
 
 Introduction
@@ -17,7 +24,10 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
 .. code:: console
 
-  sudo pip3 install oemof
+  pip3 install oemof
+  
+It is highly recommended to use a virtual environment. See this `tutorial
+<https://docs.python.org/3/tutorial/venv.html>`_ for more help.
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
@@ -25,12 +35,13 @@ If you do not have Python 3 installed
 ---------------------------------------
 
 There are different ways to install Python on your system. 
-One way is to install Python 3 through the Linux repositories. If you are using Ubuntu try executing the following code in your terminal: 
+One way is to install Python 3 through the Linux repositories. If you are using Ubuntu/Debian try executing the following code in your terminal: 
 
 .. code:: console
 
   sudo apt-get install python3
-
+  
+Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it.
 
 Otherwise you can download different versions of Python via https://www.python.org/downloads/.
 
@@ -39,7 +50,7 @@ Required Python packages
 -------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included by default in the installation of Python 3.4 and later versions.
-To install pip for earlier Python versions try executing the following code in your terminal: 
+To install pip for earlier Python versions on Debian/Ubuntu try executing the following code in your terminal or use the software management of you Linux distribution: 
 
 .. code:: console
 
@@ -51,28 +62,11 @@ In order to install a package using pip execute the following and substitute pac
 
 .. code:: console
 
-  sudo pip3 install package_name
+  pip3 install package_name
 
 For further information on how to install Python modules check out https://docs.python.org/3/installing/index.html.
-The following table shows which packages are needed for which oemof library: 
 
-
-+------------+------------+-----------+-----------+--------------------------------+
-| Packages   | solph      | core      |demandlib  |example storage_optimization    |
-+============+============+===========+===========+================================+
-| matplotlib |     x      |     x     |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-| pandas     |     x      |     x     |     x     |     x                          | 
-+------------+------------+-----------+-----------+--------------------------------+
-| numpy      |     x      |     x     |     x     |     x                          |
-+------------+------------+-----------+-----------+--------------------------------+
-| pyomo      |     x      |           |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-| descartes  |            |     x     |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-| shapely    |            |     x     |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-
+Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
  
 
 Solver
@@ -81,6 +75,8 @@ Solver
 In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
 The recommended open-source solver is Cbc (Coin-or branch and cut). 
 See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
+
+For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
 Windows
@@ -122,27 +118,9 @@ In order to install a package using pip execute the following and substitute pac
 
   pip3 install package_name
 
-For further information on how to install Python modules check out https://docs.python.org/3/installing/
-The following table shows which packages are needed for which oemof library: 
-
-
-+------------+------------+-----------+-----------+--------------------------------+
-| Packages   | solph      | core      |demandlib  |example storage_optimization    |
-+============+============+===========+===========+================================+
-| matplotlib |     x      |     x     |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-| pandas     |     x      |     x     |     x     |     x                          | 
-+------------+------------+-----------+-----------+--------------------------------+
-| numpy      |     x      |     x     |     x     |     x                          |
-+------------+------------+-----------+-----------+--------------------------------+
-| pyomo      |     x      |           |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-| descartes  |            |     x     |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-| shapely    |            |     x     |           |                                |
-+------------+------------+-----------+-----------+--------------------------------+
-
+For further information on how to install Python modules check out https://docs.python.org/3/installing/. Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
  
+
 Solver
 -------
 
@@ -150,11 +128,27 @@ In order to use solph you need to install a solver. There are various commercial
 The recommended open-source solver is Cbc (Coin-or branch and cut). 
 See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
 
+For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+
 Mac OS
 =======
 
-Installation guidelines for Mac OS will follow. 
+Installation guidelines for Mac OS are not available at the moment. However it should be possible to install Python 3 and its packages. Have look at the installation guide of Linux or Windows to get an idea what to do.
 
 You can download python here: https://www.python.org/downloads/mac-osx/. For information on the installation process and on how to install python packages see here: https://docs.python.org/3/using/mac.html.
 
+If you are a Mac user please help us to improve this installation guide.
 
+
+Check the installation
+======================
+
+Run the examples to check the installation. The examples can be found ....
+
+To run the solph examples you need to have the CBC solver installed. Otherwise you have to change the solver name in the example file to your solver.
+
+To see the graphs produced by the examples you need to have matplotlib installed. Typically this will look like this:
+
+.. code:: console
+
+  pip3 install matplotlib
