@@ -19,8 +19,9 @@ Use pypi to install the latest oemof version.
 
   pip3 install oemof
   
-The packages feedinlib, demandlib and oemof.db have to be installed separately. See section :ref:`using_oemof_label` for more details.
-  
+The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
+
+If you want to use the latest features, you might want to install the **developer version**. See :ref:`installation_and_setup_label` for more information. The developer version is not recommended for productive use.   
   
 Structure of the oemof cosmos
 =============================
