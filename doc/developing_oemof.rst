@@ -1,3 +1,5 @@
+.. _developing_oemof_label:
+
 Developing oemof
 ================
 
