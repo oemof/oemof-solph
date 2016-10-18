@@ -98,7 +98,8 @@ def get_SF_values(df, datapath, filename="shlp_hour_factors.csv",
         class of building according to bdew classification
 
     """
-    file = os.path.join(datapath, filename)
+    file = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            'bdew_data', filename))
     hour_factors = pd.read_csv(file, index_col=0)
     hour_factors = hour_factors.query(
         'building_class=={0} and shlp_type=="{1}"'
@@ -148,7 +149,8 @@ def get_sigmoid_parameters(datapath, building_class=None, shlp_type=None,
         decider whether warm water load is included in the heat load profile
     """
 
-    file = os.path.join(datapath, filename)
+    file = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            'bdew_data', filename))
     sigmoid = pd.read_csv(file, index_col=0)
     sigmoid = sigmoid.query(
         'building_class=={0} and '.format(building_class) +
@@ -180,7 +182,8 @@ def get_weekday_parameters(df, datapath, filename="shlp_weekday_factors.csv",
     shlp_type : string
         type of standard heat load profile according to bdew
     """
-    file = os.path.join(datapath, filename)
+    file = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            'bdew_data', filename))
     F_df = pd.read_csv(file, index_col=0)
 
     F_df = (F_df.query('shlp_type=="{0}"'.format(shlp_type)))
