@@ -88,9 +88,9 @@ class Storage(SimpleBlock):
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
             expr += (- m.flow[n._input(), n, t] *
-                     n.inflow_conversion_factor[t]) * m.timeincrement
+                     n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, n._output(), t] /
-                     n.outflow_conversion_factor[t]) * m.timeincrement
+                     n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
@@ -241,9 +241,9 @@ class InvestmentStorage(SimpleBlock):
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
             expr += (- m.flow[i[n], n, t] *
-                     n.inflow_conversion_factor[t]) * m.timeincrement
+                     n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
-                     n.outflow_conversion_factor[t]) * m.timeincrement
+                     n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
@@ -433,7 +433,7 @@ class Flow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint.
             """
             for inp, out in self.SUMMED_MAX_FLOWS:
-                lhs = sum(m.flow[inp, out, ts] * m.timeincrement
+                lhs = sum(m.flow[inp, out, ts] * m.timeincrement[ts]
                           for ts in m.TIMESTEPS)
                 rhs = (m.flows[inp, out].summed_max *
                        m.flows[inp, out].nominal_value)
@@ -445,7 +445,7 @@ class Flow(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint.
             """
             for inp, out in self.SUMMED_MIN_FLOWS:
-                lhs = sum(m.flow[inp, out, ts] * m.timeincrement
+                lhs = sum(m.flow[inp, out, ts] * m.timeincrement[ts]
                           for ts in m.TIMESTEPS)
                 rhs = (m.flows[inp, out].summed_min *
                        m.flows[inp, out].nominal_value)
@@ -500,7 +500,7 @@ class Flow(SimpleBlock):
             for t in m.TIMESTEPS:
                 # add variable costs
                 if m.flows[i, o].variable_costs[0] is not None:
-                    variable_costs += (m.flow[i, o, t] * m.timeincrement *
+                    variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
             # add fixed costs if nominal_value is not None
             if (m.flows[i, o].fixed_costs and
@@ -675,7 +675,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
-            expr = (sum(m.flow[i, o, t] * m.timeincrement
+            expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                         for t in m.TIMESTEPS) <=
                     m.flows[i, o].summed_max * self.invest[i, o])
             return expr
@@ -686,7 +686,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
-            expr = (sum(m.flow[i, o, t] * m.timeincrement
+            expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                         for t in m.TIMESTEPS) >=
                     m.flows[i, o].summed_min * self.invest[i, o])
             return expr
@@ -765,9 +765,9 @@ class Bus(SimpleBlock):
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    lhs = sum(m.flow[i, n, t] * m.timeincrement
+                    lhs = sum(m.flow[i, n, t] * m.timeincrement[t]
                               for i in I[n])
-                    rhs = sum(m.flow[n, o, t] * m.timeincrement
+                    rhs = sum(m.flow[n, o, t] * m.timeincrement[t]
                               for o in O[n])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
@@ -1037,7 +1037,7 @@ class DiscreteFlow(SimpleBlock):
     DISCRETE_FLOWS
         A set of flows with the attribute :attr:`discrete` of type
         :class:`.options.Discrete`.
-        
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1058,8 +1058,8 @@ class DiscreteFlow(SimpleBlock):
         m = self.parent_block()
         # ########################## SETS #####################################
         self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
-        
-        self.discrete_flow = Var(self.DISCRETE_FLOWS, 
+
+        self.discrete_flow = Var(self.DISCRETE_FLOWS,
                                  m.TIMESTEPS, within=NonNegativeIntegers)
 
 
