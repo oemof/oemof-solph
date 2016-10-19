@@ -4,6 +4,12 @@ With oemof we provide base packages for energy system modelling and optimisation
 
 Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_label` section.
 
+.. contents::
+    :depth: 1
+    :local:
+    :backlinks: top
+
+
 Documentation
 =============
 
@@ -35,6 +41,12 @@ The linkage of specific modules of the various packages is called an
 application (app) and depicts for example a concrete energy system model.
 
 There are `examples of applications <https://github.com/oemof/oemof/tree/master/examples/>`_ available. Make sure to download all files of an folder to get the wanted example run.
+
+
+Keep in touch
+=============
+
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow us at our `blog <https://oemof.wordpress.com/>`_.
 
 
 License
