@@ -8,10 +8,54 @@ Solph is an oemof-package, designed to create and solve linear or mixed-integer
 linear optimization problems. The packages is based on pyomo. To get started 
 with solph, checkout the solph-examples in the `oemof/examples/solph` directory.
 
-The mathematical description of oemof can be found in the API. 
+.. contents::
+    :depth: 1
+    :local:
+    :backlinks: top
 
+
+How can I use solph?
+--------------------
+
+To use solph you have to install oemof and at least one solver, that can be used together with pyomo. See `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_. You can test it by executing one of the existing examples. Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
+
+Once the example work you are close to your first energy model.
+
+Set up an energy system
+^^^^^^^^^^^^^^^^^^^^^^^
+
+something
+
+
+Add your components to the energy system
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+something
+
+
+Optimise your energy system 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 More to come...
+
+
+Plotting your results
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Link to outputlib
+
+
+Using the investment mode 
+-------------------------
+
+
+Mixed integer problems 
+-----------------------
+
+
+
+Adding additional constraints
+-----------------------------
 
 
 

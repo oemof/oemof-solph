@@ -2,7 +2,7 @@ Oemof stands for "Open Energy System Modelling Framework" and provides a free, o
 
 With oemof we provide base packages for energy system modelling and optimisation.
 
-Everybody is welcome to use and/or develop oemof.
+Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_label` section.
 
 Documentation
 =============
@@ -26,7 +26,7 @@ If you want to use the latest features, you might want to install the **develope
 Structure of the oemof cosmos
 =============================
 
-Oemof is organised in different levels. The basic oemof interfaces are defined by the core libraries. The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries. The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application. Together with some other recommended projects the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
+Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
 
 Examples
 ========

@@ -7,15 +7,21 @@ Here you find important notes for developing oemof and elements within
 the framework. We highly encourage you to contribute to further development 
 of oemof. If you want to collaborate see description below or contact us.
 
+.. contents::
+    :depth: 1
+    :local:
+    :backlinks: top
+
 Install the developer version
 -----------------------------
 
-To install the developer version two steps are necessary:
+To avoid problems make sure you have fully uninstalled previous versions of oemof. Afterwards two steps are necessary to install the developer version:
 
 .. code:: bash
 
   git clone git@github.com:oemof/oemof.git
   sudo pip3 install -e /path/to/the/repository
+   
   
 Newly added required packages (via PyPi) are installed by performing a manual upgrade of oemof. Therefore, run
 
@@ -64,6 +70,13 @@ Docstrings
 
 We decided to use the style of the numpydoc docstrings. See the following link for an
 `example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_.
+
+
+Code commenting
+^^^^^^^^^^^^^^^^
+
+Code comments are block and inline comments in the source code. They can help to understand the code and should be utilized "as much as necessary, as little as possible". When writing comments follow the PEP 0008 style guide: https://www.python.org/dev/peps/pep-0008/#comments.
+
 
 PEP8 (Python Style Guide)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -135,4 +148,10 @@ Issue-Management
 ----------------
 Section about workflow for issues is still missing (when to assign an issue with
 what kind of tracker to whom etc.).
+
+Documentation
+----------------
+
+The general implementation-independent documentation such as installation guide, flow charts, and mathematical models is done via ReStructuredText (rst). The files can be found in the folder */oemof/doc*. For further information on restructured text see: http://docutils.sourceforge.net/rst.html.
+
 
