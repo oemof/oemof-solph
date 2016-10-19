@@ -11,7 +11,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from .network import Storage
 from .options import Investment
-
+from .plumbing import Sequence
 
 # #############################################################################
 #
@@ -56,9 +56,12 @@ class OperationalModel(po.ConcreteModel):
         pandas.DatetimeIndex the sequence will be used to index the timedepent
         variables, constraints etc. If not provided we will try to compute
         this sequence from attr:`timeindex`.
-    timeincrement : float (optional)
+    timeincrement : float or list of floats (optional)
         Timeincrement used in constraints and objective expressions.
-
+        If type is 'float', internally will be converted to
+        solph.plumbing.Sequence() object for timedepent timeincrement.
+        If a list is provided this list will be taken. Default is calculated
+        from timeindex if provided.
 
     **The following sets are created:**
 
@@ -111,6 +114,9 @@ class OperationalModel(po.ConcreteModel):
         self.timesteps = kwargs.get('timesteps', range(len(self.timeindex)))
         self.timeincrement = kwargs.get('timeincrement',
                                         self.timeindex.freq.nanos / 3.6e12)
+
+        # convert to sequence object for timedependet timeincrement
+        self.timeincrement = Sequence(self.timeincrement)
 
         if self.timesteps is None:
             raise ValueError("Missing timesteps!")
