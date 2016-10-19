@@ -9,7 +9,7 @@ linear optimization problems. The packages is based on pyomo. To get started
 with solph, checkout the solph-examples in the `oemof/examples/solph` directory.
 
 .. contents::
-    :depth: 1
+    :depth: 2
     :local:
     :backlinks: top
 
@@ -24,19 +24,176 @@ Once the example work you are close to your first energy model.
 Set up an energy system
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-something
+In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
+
+To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function. the following code example defines the year 2011 in hourly steps. See `pandas date_range guide <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+
+.. code-block:: python
+
+    import pandas as pd
+    my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
+    
+This index can be used to define the EnergySystem:
+
+.. code-block:: python
+
+    import oemof.solph as solph
+    my_energysystem = solph.EnergySystem(time_idx=my_index)
+    
+Now you can start to add the components of the network.
 
 
 Add your components to the energy system
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-something
+If you have defined an instance of the EnergySystem class all components you define will automatically added to your EnergySystem.
+
+Basically there are four types of Nodes and every node has to be connected with one or more buses. The connection between a component and a bus is the flow.
+
+ * Sink (one input, no output)
+ * Source (one output, no input)
+ * Linear_Transformer (one input, n outputs)
+ * Storage (one input, one output)
+
+Using these types it is already possible to set up an simple energy model but more types (e.g. flexible CHP transformer) are being developed. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest.
+
+.. 	image:: _files/oemof_solph_example.svg
+   :scale: 10 %
+   :alt: alternate text
+   :align: center
+   
+the figure shows a simple energy system using the four basic network classes and the Bus class. If you remove the transmission line (transport 1 and transport 2) you get two systems but they are still one energy system in terms of solph and will be optimised at once.
+
+Bus
++++
+
+All flows into and out of a bus are balanced. Therefore an instance of the Bus class represents a grid or network without losses. To define an instance of a Bus only a unique name is necessary.
+To make it easier to connect the bus to a component you can optionally assign a variable for later use.
+
+
+.. code-block:: python
+
+    solph.Bus(label='natural_gas')
+    electricity_bus = solph.Bus(label='electricity')
+
+The following code shows the difference between a bus that is assigned to a variable and one that is not.
+
+.. code-block:: python
+
+    print(my_energsystem.groups['natural_gas']
+    print(electricity_bus)
+
+Flow
+++++
+
+The flow class has to be used to connect. An instance of the Flow class is normally used in combination with the definition of a component. A Flow can be limited by upper and lower bounds (constant or time-dependent) or by summarised limits. For all parameters see the API documentation of the Flow class or the examples of the nodes below. A basic flow can be defined without any parameter.
+
+.. code-block:: python
+
+    solph.Flow()
+  
+
+Sink
+++++
+
+A sink is normally used to define the demand within an energy model but it can also be used to detect excesses. The Sink class is more or less a plug because the needed options are already part of the Flow class (see above).
+
+The example shows the electricity demand of the electricity_bus defined above. The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with. The parameter *'fixed=True'* means that the actual_value can not be changed by the solver.
+
+.. code-block:: python
+
+    solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
+        actual_value=my_demand_series, fixed=True, nominal_value=nominal_demand)})
+        
+In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
+
+.. code-block:: python
+
+    solph.Sink(label='electricity_excess', inputs={electricity_bus: solph.Flow()})
+
+Source
+++++++
+
+A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
+
+While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*). As we do have to pay for imported gas we should set variable costs. Comparable to the demand series an *actual_value* in combination with *'fixed=True'* is used to define the normalised output of a wind power plan. The *nominal_value* sets the installed capacity.
+
+.. code-block:: python
+
+    solph.Source(
+        label='import_natural_gas',
+        outputs={my_energsystem.groups['natural_gas']: solph.Flow(
+            nominal_value=1000, summed_max=1000000, variable_costs=50)})
+
+    solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
+        actual_value=wind_power_feedin_series, nominal_value=1000000, fixed=True)})
+        
+        
+LinearTransformer
++++++++++++++++++
+
+An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device. As the name indicates the efficiency has to constant within one time step to get a linear transformation. You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
+
+.. code-block:: python
+
+    solph.LinearTransformer(
+        label="pp_gas",
+        inputs={my_energsystem.groups['natural_gas']: solph.Flow()},
+        outputs={electricity_bus: solph.Flow(nominal_value=10e10)},
+        conversion_factors={electricity_bus: 0.58})
+
+A CHP power plant would be defined in the same manner. New buses are defined to make the code cleaner:
+
+.. code-block:: python
+
+    b_el = solph.Bus(label='electricity')
+    b_th = solph.Bus(label='heat')
+
+    solph.LinearTransformer(
+        label='pp_chp',
+        inputs={bgas: Flow()},
+        outputs={b_el: Flow(nominal_value=30),
+                 b_th: Flow(nominal_value=40)},
+        conversion_factors={b_el: 0.3, b_th: 0.4})
+        
+
+Storage
++++++++
+
+In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
+
+.. code-block:: python
+
+    solph.Storage(
+        label='storage',
+        inputs={b_el: solph.Flow(variable_costs=10)},
+        outputs={b_el: solph.Flow(variable_costs=10)},
+        capacity_loss=0.001, nominal_value=50,
+        nominal_input_capacity_ratio=1/6,
+        nominal_output_capacity_ratio=1/6,
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 
 Optimise your energy system 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-More to come...
+The typical optimisation of a energy system in solph is the dispatch optimisation which means that the use of the sources is optimised to satisfy the demand. Therefore variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material. You can deviate from this scheme but you should keep it consistent to make it understandable for others.
+
+Cost do have to be monitory cost but could be emissions or other variable units.
+
+Furthermore it is possible to optimise the capacity of different components (see :ref:`investment_mode_label`).
+
+.. code-block:: python
+
+    import os
+    # set up a simple least cost optimisation
+    om = solph.OperationalModel(my_energysystem)
+    
+    # write the lp file for debugging or other reasons
+    om.write(os.path.join(path, 'my_model.lp'), io_options={'symbolic_solver_labels': True})
+
+    # solve the energy model using the CBC solver
+    om.solve(solver='cbc', solve_kwargs={'tee': True})
 
 
 Plotting your results
@@ -45,17 +202,25 @@ Plotting your results
 Link to outputlib
 
 
+.. _investment_mode_label:
+
 Using the investment mode 
 -------------------------
+
+The investment mode can be used....
 
 
 Mixed integer problems 
 -----------------------
 
+To create....
 
 
 Adding additional constraints
 -----------------------------
+
+To add additional constraints....
+
 
 
 
