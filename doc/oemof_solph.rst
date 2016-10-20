@@ -209,10 +209,28 @@ Furthermore it is possible to optimise the capacity of different components (see
     om.solve(solver='cbc', solve_kwargs={'tee': True})
 
 
-Plotting your results
+Analysing your results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Link to outputlib
+If you want to analyse your results, you should first dump you EnergySystem instance, otherwise you have to run the simulation ever again.
+
+.. code-block:: python
+
+    my_energysystem.dump('my_path', 'my_dump.dump')
+    
+To restore the dump you can simply create an EnergySystem instance and restore your dump into it.
+
+.. code-block:: python
+
+    import pandas as pd
+    import oemof.solph as solph
+    my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
+    new_energysystem = solph.EnergySystem(time_idx=my_index)
+    new_energysystem.restore('my_path', 'my_dump.dump')
+    
+If you do not define path....
+
+Now you can plot or save results... see outputlib for more details...
 
 
 .. _investment_mode_label:
