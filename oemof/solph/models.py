@@ -53,13 +53,13 @@ class OperationalModel(po.ConcreteModel):
         for the optimization model.
     timesteps : sequence (optional)
         Timesteps used in the optimization model. If provided as list or
-        pandas.DatetimeIndex the sequence will be used to index the timedepent
-        variables, constraints etc. If not provided we will try to compute
-        this sequence from attr:`timeindex`.
+        pandas.DatetimeIndex the sequence will be used to index the time
+        dependent variables, constraints etc. If not provided we will try to
+        compute this sequence from attr:`timeindex`.
     timeincrement : float or list of floats (optional)
         Timeincrement used in constraints and objective expressions.
         If type is 'float', internally will be converted to
-        solph.plumbing.Sequence() object for timedepent timeincrement.
+        solph.plumbing.Sequence() object for time dependent timeincrement.
         If a list is provided this list will be taken. Default is calculated
         from timeindex if provided.
 
@@ -228,7 +228,7 @@ class OperationalModel(po.ConcreteModel):
 
     def receive_duals(self):
         r""" Method sets solver suffix to extract information about dual
-        variables from solver. Shadowprices (duals) and reduced costs (rc) are
+        variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
 
         """
