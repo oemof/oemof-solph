@@ -82,21 +82,25 @@ The following code shows the difference between a bus that is assigned to a vari
 
     print(my_energsystem.groups['natural_gas']
     print(electricity_bus)
+.. note:: See the :py:class:`~oemof.solph.blocks.Bus` block for all information about the mathematical background.
+
 
 Flow
 ++++
 
-The flow class has to be used to connect. An instance of the Flow class is normally used in combination with the definition of a component. A Flow can be limited by upper and lower bounds (constant or time-dependent) or by summarised limits. For all parameters see the API documentation of the Flow class or the examples of the nodes below. A basic flow can be defined without any parameter.
+The flow class has to be used to connect. An instance of the Flow class is normally used in combination with the definition of a component. A Flow can be limited by upper and lower bounds (constant or time-dependent) or by summarised limits. For all parameters see the API documentation of the :py:class:`~oemof.solph.network.Flow` class or the examples of the nodes below. A basic flow can be defined without any parameter.
 
 .. code-block:: python
 
     solph.Flow()
+    
+.. note:: See the :py:class:`~oemof.solph.blocks.Flow` block for all information about the mathematical background.
   
 
 Sink
 ++++
 
-A sink is normally used to define the demand within an energy model but it can also be used to detect excesses. The Sink class is more or less a plug because the needed options are already part of the Flow class (see above).
+A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
 The example shows the electricity demand of the electricity_bus defined above. The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with. The parameter *'fixed=True'* means that the actual_value can not be changed by the solver.
 
@@ -110,6 +114,9 @@ In contrast to the demand sink the excess sink has normally less restrictions bu
 .. code-block:: python
 
     solph.Sink(label='electricity_excess', inputs={electricity_bus: solph.Flow()})
+    
+.. note:: The Sink class is only a plug and provides no additional constraints or variables.
+    
 
 Source
 ++++++
@@ -128,6 +135,8 @@ While a wind power plant will have an hourly feed-in depending on the weather co
     solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
         actual_value=wind_power_feedin_series, nominal_value=1000000, fixed=True)})
         
+.. note:: The Source class is only a plug and provides no additional constraints or variables.        
+    
         
 LinearTransformer
 +++++++++++++++++
@@ -155,12 +164,14 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
         outputs={b_el: Flow(nominal_value=30),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
+
+.. note:: See the :py:class:`~oemof.solph.blocks.LinearTransformer` block for all information about the mathematical background.
         
 
 Storage
 +++++++
 
-In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
+In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module. The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*. Furthermore an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.network.Storage` class.
 
 .. code-block:: python
 
@@ -172,6 +183,8 @@ In contrast to the three classes above the storage class is a pure solph class a
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
+        
+.. note:: See the :py:class:`~oemof.solph.blocks.Storage` block for all information about the mathematical background.
 
 
 Optimise your energy system 
