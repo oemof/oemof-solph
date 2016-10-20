@@ -26,14 +26,10 @@ import oemof.energy_system as es
 class EnergySystem(es.EnergySystem):
     """ Solph EnergySystem class
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # if groupings is not specified, set default solph GROUPINGS
+    def __init__(self, **kwargs):
         if kwargs.get('groupings') is None:
-            raise ValueError("No groupings provided. If you don't want to " \
-                             "use your own groupings. You can use GROUPINGS "\
-                             "from oemof.solph.groupings module.")
+            kwargs['groupings'] = GROUPINGS
+        super().__init__(**kwargs)
 
 
 def constraint_grouping(node):
