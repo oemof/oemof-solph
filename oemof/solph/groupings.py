@@ -20,6 +20,20 @@ from .network import Bus, LinearTransformer, Storage
 from .options import Investment
 from . import blocks
 import oemof.groupings as groupings
+import oemof.energy_system as es
+
+
+class EnergySystem(es.EnergySystem):
+    """ Solph EnergySystem class
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # if groupings is not specified, set default solph GROUPINGS
+        if kwargs.get('groupings') is None:
+            raise ValueError("No groupings provided. If you don't want to " \
+                             "use your own groupings. You can use GROUPINGS "\
+                             "from oemof.solph.groupings module.")
 
 
 def constraint_grouping(node):
