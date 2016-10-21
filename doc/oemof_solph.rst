@@ -230,7 +230,7 @@ To restore the dump you can simply create an EnergySystem instance and restore y
     
 If you call dump/restore with any parameters, the dump will be stored as *'es_dump.oemof'* into the *'.oemof/dumps/'* folder created in your HOME directory. 
 
-In the outputlib the results will be converted to a pandas MultiIndexDataFrame. This makes it easy to plot, save or process the results. See :ref:`oemof_outputlib_label` for more information.
+In the outputlib the results will be converted to a pandas MultiIndex DataFrame. This makes it easy to plot, save or process the results. See :ref:`oemof_outputlib_label` for more information.
 
 
 .. _investment_mode_label:
