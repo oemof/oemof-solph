@@ -216,7 +216,7 @@ If you want to analyse your results, you should first dump you EnergySystem inst
 
 .. code-block:: python
 
-    my_energysystem.dump('my_path', 'my_dump.dump')
+    my_energysystem.dump('my_path', 'my_dump.oemof')
     
 To restore the dump you can simply create an EnergySystem instance and restore your dump into it.
 
@@ -226,11 +226,11 @@ To restore the dump you can simply create an EnergySystem instance and restore y
     import oemof.solph as solph
     my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
     new_energysystem = solph.EnergySystem(time_idx=my_index)
-    new_energysystem.restore('my_path', 'my_dump.dump')
+    new_energysystem.restore('my_path', 'my_dump.oemof')
     
-If you do not define path....
+If you call dump/restore with any parameters, the dump will be stored as *'es_dump.oemof'* into the *'.oemof/dumps/'* folder created in your HOME directory. 
 
-Now you can plot or save results... see outputlib for more details...
+In the outputlib the results will be converted to a pandas MultiIndexDataFrame. This makes it easy to plot, save or process the results. See :ref:`oemof_outputlib_label` for more information.
 
 
 .. _investment_mode_label:
