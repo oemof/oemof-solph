@@ -34,8 +34,8 @@ class EnergySystem_Tests:
         bus2 = Bus(label='bus-uid2', type='bus-type')
         Transformer(label='pp_gas', inputs=[bus], outputs=[bus2])
         ok_(isinstance(self.es.entities[2], Transformer))
-        self.es.time_idx = self.time_index
-        ok_(len(self.es.time_idx) == 5)
+        self.es.timeindex = self.time_index
+        ok_(len(self.es.timeindex) == 5)
 
     def test_entity_grouping_on_construction(self):
         bus = Bus(label="test bus")

@@ -32,11 +32,11 @@ class Constraint_Tests:
 
     def setup(self):
         self.energysystem = core_es.EnergySystem(groupings=solph.GROUPINGS,
-                                                 time_idx=self.date_time_index)
+                                                 timeindex=self.date_time_index)
 
     def compare_lp_files(self, filename, ignored=None):
         om = OperationalModel(self.energysystem,
-                              timeindex=self.energysystem.time_idx)
+                              timeindex=self.energysystem.timeindex)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
         new_filename = ospath.join(self.tmppath, tmp_filename)
         om.write(new_filename, io_options={'symbolic_solver_labels': True})
