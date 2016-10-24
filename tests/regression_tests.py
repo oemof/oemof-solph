@@ -16,7 +16,7 @@ class TestSolphAndItsResults:
         self.failed = False
 
         tix = pd.period_range('1970-01-01', periods=1, freq='H')
-        self.es = ES(time_idx=tix)
+        self.es = ES(timeindex=tix)
 
     # TODO: Fix this test so that it works with the new solph and can be
     #       re-enabled.

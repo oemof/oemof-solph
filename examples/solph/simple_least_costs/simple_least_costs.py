@@ -27,7 +27,7 @@ def initialise_energysystem(periods=2000):
     """
     datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
 
-    return EnergySystem(groupings=GROUPINGS, time_idx=datetimeindex)
+    return EnergySystem(groupings=GROUPINGS, timeindex=datetimeindex)
 
 
 # ######################### create energysystem components ####################

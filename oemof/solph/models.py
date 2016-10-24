@@ -110,7 +110,7 @@ class OperationalModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
-        self.timeindex = kwargs.get('timeindex', es.time_idx)
+        self.timeindex = kwargs.get('timeindex', es.timeindex)
         self.timesteps = kwargs.get('timesteps', range(len(self.timeindex)))
         self.timeincrement = kwargs.get('timeincrement',
                                         self.timeindex.freq.nanos / 3.6e12)
