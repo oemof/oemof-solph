@@ -31,8 +31,8 @@ illustrates this idea:
 
 Besides other applications the apps "renpass-gis" and "reegis" are currently developed based on the framework. 
 "renpass-gis" enables the simulation of a future European energy system with a high spatial and temporal resolution. 
-Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered. The app "reegis" provides a simulation of a regional heat and power supply system. 
-These two examples show that the modular approach of the framework allows 
+Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered. The app "reegis" provides a simulation of a regional heat and power supply system. Another application is HESYSOPT which is desined to simulate combined heat and power systems with MILP on the component level. 
+These three examples show that the modular approach of the framework allows
 applications with very different objectives. 
 
 
@@ -41,12 +41,12 @@ applications with very different objectives.
 Why should I contribute?
 ========================
 
- * You do not want to start at the very beginning. You are not the first one, who wants to set up energy models. You can just set on existing code.
+ * You do not want to start at the very beginning. - You are not the first one, who wants to set up a energy system model. So why not start with on existing code?
  * You want your code to be more stable. - If other people use your code, they may find bugs or will have ideas to improve it.
- * Tired of "write-only-code". - If you want to understand your code a year after you have written it you have to document it anyway. why not joining a group and do it together.
+ * Tired of "write-only-code". - Developing as part of a framework encourages you to document sufficiently, so that after years you may still understand your own code. 
  * You want to talk to other people when you are deadlocked. - People are even more willing to help, if they are interested in what you are doing because they can use it afterwards.
  
-We know, sometimes it is difficult to start on an existing concept. It will take some time to understand it and you will need extra time to document you own stuff. But once you understand the libraries you will get lots of interesting features, always with the option to fit them to your own needs. We will do our best to help you.
+We know, sometimes it is difficult to start on an existing concept. It will take some time to understand it and you will need extra time to document your own stuff. But once you understand the libraries you will get lots of interesting features, always with the option to fit them to your own needs.
 
 Just contact us, if you have any questions.
 
