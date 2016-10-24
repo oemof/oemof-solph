@@ -280,7 +280,7 @@ The following code shows a storage with an investment object.
         investment=solph.Investment(ep_costs=epc))
 
 
-Mixed integer problems
+Mixed Integer (Linear) Problems
 -----------------------
 
 Solph also allows you to model components with respect to more technical details.
@@ -305,13 +305,19 @@ you have to do is invoke class instance inside your Flow() - declaration:
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The created LinearTransformer will no force the flow variable of its input (gas)
-to be of the domain discrete, i.e. {min, ... 10, 11, 12, ..., max}.The BinaryFlow()
-object if the 'electrical' flow will create a 'status' variable for the flow.
-This will be used to model for example Pmin/Pmax constraints, but also start up
-constraints etc. if correponding attributes of the class are provided. For more
+The created LinearTransformer will now force the flow variable of its input (gas)
+to be of the domain discrete, i.e. {min, ... 10, 11, 12, ..., max}. The BinaryFlow()
+object of the 'electrical' flow will create a 'status' variable for the flow.
+This will be used to model for example Pmin/Pmax constraints if the attribute `min`
+of the flow is set. It will also be used to include start up constraints and costs
+if correponding attributes of the class are provided. For more
 information see API of BinaryFlow() class and its corresponding block class:
 :py:class:`~oemof.solph.blocks.BinaryFlow`.
+
+.. note:: The usage of these classes can sometimes be tricky as there are many interdenpendencies. So
+          check out the examples and do not hesitate to ask the developers, if your model does
+          not work as exspected.
+
 
 
 Adding additional constraints
