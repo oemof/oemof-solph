@@ -61,7 +61,7 @@ class ResultsDataFrame(pd.DataFrame):
                         row['obj_label'] = 'kk'
                     else:
                         row['obj_label'] = kk.label
-                    row['datetime'] = es.time_idx
+                    row['datetime'] = es.timeindex
                     row['val'] = vv
                     rows_list.append(row)
             else:
@@ -74,7 +74,7 @@ class ResultsDataFrame(pd.DataFrame):
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'other'
                             row['obj_label'] = k.label
-                            row['datetime'] = es.time_idx
+                            row['datetime'] = es.timeindex
                             row['val'] = vv
                             rows_list.append(row)
                         else:
@@ -83,7 +83,7 @@ class ResultsDataFrame(pd.DataFrame):
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'to_bus'
                             row['obj_label'] = k.label
-                            row['datetime'] = es.time_idx
+                            row['datetime'] = es.timeindex
                             row['val'] = v.get(list(k.outputs.keys())[0])
                             rows_list.append(row)
                 else:
@@ -93,7 +93,7 @@ class ResultsDataFrame(pd.DataFrame):
                         row['bus_label'] = kk.label
                         row['type'] = 'to_bus'
                         row['obj_label'] = k.label
-                        row['datetime'] = es.time_idx
+                        row['datetime'] = es.timeindex
                         row['val'] = vv
                         rows_list.append(row)
 
