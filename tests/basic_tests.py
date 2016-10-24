@@ -20,7 +20,7 @@ class EnergySystem_Tests:
 
     @classmethod
     def setUpClass(self):
-        self.time_index = pd.date_range('1/1/2012', periods=5, freq='H')
+        self.timeindex = pd.date_range('1/1/2012', periods=5, freq='H')
 
         #timesteps=range(len(time_index)))
 
@@ -34,7 +34,7 @@ class EnergySystem_Tests:
         bus2 = Bus(label='bus-uid2', type='bus-type')
         Transformer(label='pp_gas', inputs=[bus], outputs=[bus2])
         ok_(isinstance(self.es.entities[2], Transformer))
-        self.es.timeindex = self.time_index
+        self.es.timeindex = self.timeindex
         ok_(len(self.es.timeindex) == 5)
 
     def test_entity_grouping_on_construction(self):
