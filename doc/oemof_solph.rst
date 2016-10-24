@@ -333,3 +333,17 @@ Mathematical description of solph
 To get the the mathematical equations you have to check out the docstrings
 of the classes in the modules: :py:mod:`~oemof.solph.blocks` and
 :py:mod:`~oemof.solph.models`.
+
+
+The Grouping module (Sets)
+-----------------------------------------------------
+To construct constraints,
+variables and obejctive expressions inside the :py:mod:`~oemof.solph.blocks`
+and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Consequently,
+certain constraints are created for all elements of a sepecific group. Thus
+mathematically the groups depict sets of elements inside the model.
+
+The grouping is handeld by the solph grouping module :py:mod:`~oemof.solph.groupings`
+which is based on the oemof core :py:mod:`~oemof.groupings` functionalities. You
+do not need to understand how the underlying functionality works. Instead, checkout
+how the solph grouping module is used to create groups.
