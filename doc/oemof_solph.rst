@@ -283,7 +283,7 @@ The following code shows a storage with an investment object.
 Mixed integer problems
 -----------------------
 
-Solph also allows you to model components with more respect to technical details.
+Solph also allows you to model components with respect to more technical details.
 For example you can model a mimimal power production (Pmin-Constraint) within
 oemof. Therefore, the following two classes exist in the oemof.solph.options
 module: :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
@@ -317,7 +317,7 @@ information see API of BinaryFlow() class and its corresponding block class:
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your oemof.solph.models.OperationalModel().
+You can add additional constraints to your :py:class:`~oemof.solph.models.OperationalModel`.
 For now, you have to check out the examples in the directory
 exmaples/solph/flexible_modelling.
 
