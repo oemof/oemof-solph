@@ -187,6 +187,8 @@ In contrast to the three classes above the storage class is a pure solph class a
 .. note:: See the :py:class:`~oemof.solph.blocks.Storage` block for all information about the mathematical background.
 
 
+.. _oemof_solph_optimise_es_label:
+
 Optimise your energy system 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -238,7 +240,39 @@ In the outputlib the results will be converted to a pandas MultiIndex DataFrame.
 Using the investment mode 
 -------------------------
 
-The investment mode can be used....
+As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation. Based on investment costs you can compare the usage of existing components against building up new capacity. The annual savings by building up new capacity has therefore compensate the annuity of the investment costs (the time period does not have to be on year but depends on your Datetime index).
+
+See the API of the :py:class:`~oemof.solph.options.Investment class to see all possible parameters.
+
+Basically an instance of the investment class can be added to a Flow or a Storage. Adding an investment object the *nominal_value* or *nominal_capacity* should not be set. All parameters the usually refer to the *nominal_value/capacity* will now refer to the investment variable. There it is still possible to set bounds depending on the capacity that will be build.
+
+For example if you want to find out what would be the optimal capacity of a wind power plant to decrease the costs of an existing energy system you can define this model and add an investment source. The *wind_power_time_series* has to be a normalised feed-in time series of you wind power plant.
+
+.. code-block:: python
+  
+    solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
+        actual_value=wind_power_time_series, fixed=True,
+	investment=solph.Investment(ep_costs=epc))})
+
+The periodical cost are typically calculated as follows:
+
+.. code-block:: python
+
+    capex = 1000  # investment cost
+    lifetime = 20  # llife expectancy
+    wacc = 0.05  # weighted average capital cost 
+    epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
+
+The following code shows a storage with an investment object. 
+
+.. code-block:: python
+
+    solph.Storage(
+        label='storage', capacity_loss=0.01, 
+        inputs={electricity: solph.Flow()}, outputs={electricity: solph.Flow()},
+        nominal_input_capacity_ratio=1/6, nominal_output_capacity_ratio=1/6,
+        inflow_conversion_factor=0.99, outflow_conversion_factor=0.8,
+        investment=solph.Investment(ep_costs=epc))
 
 
 Mixed integer problems 
