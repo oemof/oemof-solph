@@ -4,6 +4,8 @@ This module provides a highlevel layer for reading and writing config files.
 There must be a file called "config.ini" in the root-folder of the project.
 The file has to be of the following structure to be imported correctly.
 
+.. code-block::
+
     # this is a comment \n
     # the filestructure is like: \n
      \n

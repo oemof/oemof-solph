@@ -33,7 +33,7 @@ class BinaryFlow:
     minimum_downtime : numeric
         Minimum time a flow is forced to zero after shutting down.
     initial_status : numeric (0 or 1)
-        Integer value indicating the status of the flow in the first timestep
+        Integer value indicating the status of the flow in the first time step
         (0 = off, 1 = on).
     """
     def __init__(self, **kwargs):
@@ -44,12 +44,13 @@ class BinaryFlow:
         self.minimum_downtime = kwargs.get('minimum_downtime')
         self.initial_status = kwargs.get('initial_status', 0)
 
+
 class DiscreteFlow:
     """
     Parameters
     ----------
     integers : boolean
-        Specifiy domain of flow variable: If True, flow is force to integer
+        Specify domain of flow variable: If True, flow is force to integer
         values. 
     """
     def __init__(self, **kwargs):
