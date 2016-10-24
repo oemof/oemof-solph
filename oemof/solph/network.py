@@ -213,7 +213,13 @@ class Storage(on.Transformer):
         To set different values in every timestep use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
-
+        
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created:
+     * :py:class:`~oemof.solph.blocks.Storage`,
+     * :py:class:`~oemof.solph.blocks.InvestmentStorage` (only if Investment object
+       present)
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
