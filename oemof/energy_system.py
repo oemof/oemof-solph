@@ -39,7 +39,7 @@ class EnergySystem:
         <oemof.core.network.Entity>` that should be part of the energy system.
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
-    time_idx : pandas.index, optional
+    timeindex : pandas.index, optional
         Define the time range and increment for the energy system. This is an
         optional parameter but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
@@ -73,7 +73,7 @@ class EnergySystem:
         <oemof.solph.optimization_model.OptimizationModel.results>`.
         See the documentation of that method for a detailed description of the
         structure of the results dictionary.
-    time_idx : pandas.index, optional
+    timeindex : pandas.index, optional
         Define the time range and increment for the energy system. This is an
         optional atribute but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
@@ -125,7 +125,7 @@ class EnergySystem:
             for g in self._groupings:
                 g(e, self.groups)
         self.results = kwargs.get('results')
-        self.time_idx = kwargs.get('time_idx')
+        self.timeindex = kwargs.get('timeindex')
 
     @staticmethod
     def _regroup(entity, groups, groupings):

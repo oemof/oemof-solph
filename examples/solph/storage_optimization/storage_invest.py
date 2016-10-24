@@ -53,7 +53,7 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
                                     freq='H')
 
     energysystem = solph.EnergySystem(
-        groupings=solph.GROUPINGS, time_idx=date_time_index)
+        groupings=solph.GROUPINGS, timeindex=date_time_index)
 
     # Read data file
     data = pd.read_csv(filename, sep=",")
