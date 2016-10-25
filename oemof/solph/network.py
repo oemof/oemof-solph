@@ -68,6 +68,13 @@ class Flow:
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
 
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Flow`
+     * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
+       Investment object is present)
+
     Examples
     --------
     Creating a fixed flow object:
@@ -127,9 +134,14 @@ class Flow:
                              "binary flows!")
                              
 
-
 class Bus(on.Bus):
-    """A balance object.
+    """A balance object. Every node has to be connected to Bus.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Bus`
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -170,6 +182,11 @@ class LinearTransformer(on.Transformer):
     ...                                              bth: [1, 2, 3]})
     >>> trsf.conversion_factors[bel][3]
     0.4
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.LinearTransformer`
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -215,12 +232,18 @@ class Storage(on.Transformer):
         To set different values in every timestep use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
+    investment : :class:`oemof.solph.options.Investment` object
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem. Note: This will refer all attributes to an
+        investment variable instead of to the nominal_capacity. The
+        nominal_capacity should not be set (or set to None) if an investment
+        object is used.
         
     Notes
     -----
-    The following sets, variables, constraints and objective parts are created:
-     * :py:class:`~oemof.solph.blocks.Storage`,
-     * :py:class:`~oemof.solph.blocks.InvestmentStorage` (only if Investment object
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object present)
+     * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
        present)
     """
     def __init__(self, *args, **kwargs):
