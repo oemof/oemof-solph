@@ -338,7 +338,7 @@ of the classes in the modules: :py:mod:`~oemof.solph.blocks` and
 The Grouping module (Sets)
 -----------------------------------------------------
 To construct constraints,
-variables and obejctive expressions inside the :py:mod:`~oemof.solph.blocks`
+variables and objective expressions inside the :py:mod:`~oemof.solph.blocks`
 and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Consequently,
 certain constraints are created for all elements of a sepecific group. Thus
 mathematically the groups depict sets of elements inside the model.
@@ -347,3 +347,22 @@ The grouping is handeld by the solph grouping module :py:mod:`~oemof.solph.group
 which is based on the oemof core :py:mod:`~oemof.groupings` functionalities. You
 do not need to understand how the underlying functionality works. Instead, checkout
 how the solph grouping module is used to create groups.
+
+The simpelst form is a function that looks at every node of the energy system and
+returns a key for the group depending e.g. on node attributes:
+
+.. code-block:: python
+
+    def constraint_grouping(node):
+        if isinstance(node, Bus) and node.balanced:
+            return blocks.Bus
+        if isinstance(node, LinearTransformer):
+            return blocks.LinearTransformer
+   GROUPINGS = [constraint_grouping]
+
+This function can be passed in a list to :attr:`groupings` of
+:class:`oemof.solph.network.EnergySystem`. So that we end up with two groups,
+one with all LinearTransformers and one with all Buses that are balanced. These
+groups are simply stored in a dictionary. There are some advanced functionalities
+to group two connected nodes with their connecting flow and others
+(see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
