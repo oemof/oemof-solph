@@ -1,4 +1,4 @@
-v0.1 (November 1, 2016)
+v0.1.0 (November 1, 2016)
 ++++++++++++++++++++++++++
 
 API changes
