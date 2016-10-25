@@ -228,18 +228,19 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                     setattr(flow.binary, battr, row[battr])
                         # this block is only for investment flows!
                         if attr == 'investment' and row[attr] is True:
-                           if isinstance (node, Storage):
-                               # set the flows of the storage to Investment as
-                               # without attributes, as costs etc are set at the
-                               # node
-                               setattr(flow, attr, Investment())
-                           else:
+                            if isinstance (node, Storage):
+                                # set the flows of the storage to Investment as
+                                # without attributes, as costs etc are set at
+                                # the node
+                                setattr(flow, attr, Investment())
+                            else:
                                 # create binary object for flow
-                               setattr(flow, attr, Investment())
-                               invest_attrs = vars(Investment()).keys()
-                               for iattr in invest_attrs:
-                                   if iattr in row.keys() and row[attr]:
-                                       setattr(flow.investment, iattr, row[iattr])
+                                setattr(flow, attr, Investment())
+                                invest_attrs = vars(Investment()).keys()
+                                for iattr in invest_attrs:
+                                    if iattr in row.keys() and row[attr]:
+                                        setattr(flow.investment, iattr,
+                                                row[iattr])
             except:
                 print('Error with flow creation in line', i+2, 'in csv file.')
                 print('Label:', row['label'])
