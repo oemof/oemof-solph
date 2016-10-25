@@ -40,7 +40,7 @@ Documentation
 Testing
 #######
 
- * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof_base/issues/201>`_)
+ * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof_base/issues/160>`_)
 
 Bug fixes
 #########
