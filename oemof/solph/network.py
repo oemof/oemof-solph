@@ -23,6 +23,9 @@ class EnergySystem(es.EnergySystem):
     """
 
     def __init__(self, *args, **kwargs):
+        # Doing imports at runtime is generally frowned upon, but should work
+        # for now. See the TODO in :func:`constraint_grouping
+        # <oemof.solph.groupings.constraint_grouping>` for more information.
         from . import GROUPINGS
         kwargs['groupings'] = GROUPINGS + kwargs.get('groupings', [])
         super().__init__(*args, **kwargs)
