@@ -19,8 +19,8 @@ def sos2_costs(block, group):
 
     """
     block.NL_INVESTSTORAGES = Set(ordered=True,
-                                 initialize=[n for n in group
-                               if isinstance(n.investment.ep_costs, list)])
+                                  initialize=[n for n in group
+                                  if isinstance(n.investment.ep_costs, list)])
     # variable to be used in objective expression
     block.nl_investcosts = Var(block.NL_INVESTSTORAGES)
     # create dicts for initialization
