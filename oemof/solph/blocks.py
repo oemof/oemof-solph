@@ -300,7 +300,7 @@ class InvestmentStorage(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_capacity_invest_rule)
 
         ####################### ONLY FOR NONLINEAR INVESTMENT #################
-        self.nl_investcosts = bc.sos2_costs(block=self, group=group)
+        bc.sos2_costs(block=self, group=group)
 
         #######################################################################
 
