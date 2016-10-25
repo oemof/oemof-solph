@@ -4,9 +4,21 @@
 """
 import warnings
 import oemof.network as on
+import oemof.energy_system as es
 from .options import Investment
 from .plumbing import Sequence
 
+class EnergySystem(es.EnergySystem):
+    """ Solph EnergySystem class
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # if groupings is not specified, set default solph GROUPINGS
+        if kwargs.get('groupings') is None:
+            raise ValueError("No groupings provided. If you don't want to " \
+                             "use your own groupings. You can use GROUPINGS "\
+                             "from oemof.solph.groupings module.")
 
 class Flow:
     """
