@@ -38,7 +38,7 @@ This index can be used to define the EnergySystem:
 .. code-block:: python
 
     import oemof.solph as solph
-    my_energysystem = solph.EnergySystem(time_idx=my_index)
+    my_energysystem = solph.EnergySystem(timeindex=my_index)
 
 Now you can start to add the components of the network.
 
@@ -229,7 +229,7 @@ To restore the dump you can simply create an EnergySystem instance and restore y
     import pandas as pd
     import oemof.solph as solph
     my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
-    new_energysystem = solph.EnergySystem(time_idx=my_index)
+    new_energysystem = solph.EnergySystem(timeindex=my_index)
     new_energysystem.restore('my_path', 'my_dump.oemof')
 
 If you call dump/restore with any parameters, the dump will be stored as *'es_dump.oemof'* into the *'.oemof/dumps/'* folder created in your HOME directory.
