@@ -49,6 +49,7 @@ How to create a pull request
 * Read the :ref:`style_guidlines_label` and follow them
 * Add new tests according to what you have done
 * Add/change the documentation (new feature, API changes ...)
+* Add a whatsnew entry and your name to Contributors
 * Check if all tests still work including the example tests
 
 Tests
