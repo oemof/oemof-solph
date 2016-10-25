@@ -242,7 +242,6 @@ In the outputlib the results will be converted to a pandas MultiIndex DataFrame.
 Using the investment mode
 -------------------------
 
-
 As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation. Based on investment costs you can compare the usage of existing components against building up new capacity. The annual savings by building up new capacity has therefore compensate the annuity of the investment costs (the time period does not have to be on year but depends on your Datetime index).
 
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
