@@ -9,16 +9,24 @@ from .options import Investment
 from .plumbing import Sequence
 
 class EnergySystem(es.EnergySystem):
-    """ Solph EnergySystem class
+    """ A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
+
+    In order to work in tandem with solph, instances of this class always use
+    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
+    supplied via the `groupings` keyword argument, :const:`solph.GROUPINGS
+    <oemof.solph.GROUPINGS>` is prepended to those.
+
+    If you know what you are doing and want to use solph without
+    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
+    :class:`core's EnergySystem <oemof.core.energy_system.EnergySystem>`
+    directly.
     """
+
     def __init__(self, *args, **kwargs):
+        from . import GROUPINGS
+        kwargs['groupings'] = GROUPINGS + kwargs.get('groupings', [])
         super().__init__(*args, **kwargs)
 
-        # if groupings is not specified, set default solph GROUPINGS
-        if kwargs.get('groupings') is None:
-            raise ValueError("No groupings provided. If you don't want to " \
-                             "use your own groupings. You can use GROUPINGS "\
-                             "from oemof.solph.groupings module.")
 
 class Flow:
     """
