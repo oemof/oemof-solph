@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Optional classes to be added to a network class.
 """
-
+import logging
 
 class Investment:
     """
@@ -9,14 +9,24 @@ class Investment:
     ----------
     maximum : float
         Maximum of the additional invested capacity
-    ep_costs : float
+    ep_costs : float or list of tuples
         Equivalent periodical costs for the investment, if period is one
         year these costs are equal to the equivalent annual costs.
-
+        If a list of tuples with base points, i.e [(size1, costs1), ...]
+        is provided it will be tried to create approximated invest costs
+        with the base points.
     """
     def __init__(self, maximum=float('+inf'), ep_costs=0):
         self.maximum = maximum
         self.ep_costs = ep_costs
+        if isinstance(self.ep_costs, list):
+            if False in [isinstance(i, tuple) for i in ep_costs]:
+                raise ValueError("You need to provide a list of tuples or a "
+                                 "scalar to 'ep_costs' attribute!")
+            else:
+                logging.info(
+                    "Investment object will cause "
+                    "approximated nonlinear costs with sos2-set constraints!")
 
 
 class BinaryFlow:
@@ -51,7 +61,7 @@ class DiscreteFlow:
     ----------
     integers : boolean
         Specify domain of flow variable: If True, flow is force to integer
-        values. 
+        values.
     """
     def __init__(self, **kwargs):
         # super().__init__(self, **kwargs)
