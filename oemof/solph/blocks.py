@@ -6,7 +6,7 @@ for the specified groups.
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)
 from pyomo.core.base.block import SimpleBlock
-
+from . import block_constraints as bc
 
 class Storage(SimpleBlock):
     """ Storages (no investment)
@@ -299,6 +299,11 @@ class InvestmentStorage(SimpleBlock):
         self.min_capacity = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_capacity_invest_rule)
 
+        ####################### ONLY FOR NONLINEAR INVESTMENT #################
+        self.nl_investcosts = bc.sos2_costs(block=self, group=group)
+
+        #######################################################################
+
     def _objective_expression(self):
         """Objective expression with fixed and investement costs.
         """
@@ -310,7 +315,11 @@ class InvestmentStorage(SimpleBlock):
 
         for n in self.INVESTSTORAGES:
             if n.investment.ep_costs is not None:
-                investment_costs += self.invest[n] * n.investment.ep_costs
+                # if a list is passed we assume nonlinear costs
+                if isinstance(n.investment.ep_costs, list):
+                    investment_costs += self.nl_investcosts[n]
+                else:
+                    investment_costs += self.invest[n] * n.investment.ep_costs
             else:
                 raise ValueError("Missing value for investment costs!")
 
