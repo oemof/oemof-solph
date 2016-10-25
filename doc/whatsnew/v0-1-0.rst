@@ -4,7 +4,7 @@ v0.1 (November 1, 2016)
 API changes
 ###########
 
- * demandlib is no longer part of the oemof package but an own package (https://github.com/oemof/demandlib)
+ * demandlib is no longer part of the oemof package but an own package (`demandlib <https://github.com/oemof/demandlib>`_)
 
 
 New features
