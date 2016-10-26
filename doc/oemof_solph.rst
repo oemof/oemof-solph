@@ -364,3 +364,13 @@ one with all LinearTransformers and one with all Buses that are balanced. These
 groups are simply stored in a dictionary. There are some advanced functionalities
 to group two connected nodes with their connecting flow and others
 (see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
+
+
+Using the CSV reader
+-----------------------------------------------------
+
+Alternatively to a manual creation of energy system component objects as describe above, these can also be created from a pre-defined csv-structure via a csv-reader.
+Technically speaking, the csv-reader is just a simple parser that creates oemof nodes and their respective flows are created by interating line by line through.
+The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
+
+Both, investment and operational models can be modelled. Two examples and more information about the functionality can be found in the example folder.
