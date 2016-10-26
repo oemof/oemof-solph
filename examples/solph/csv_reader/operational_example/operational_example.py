@@ -11,13 +11,10 @@ from oemof.outputlib import ResultsDataFrame
 
 
 def run_example(config):
-
     # misc.
     datetime_index = pd.date_range(config['date_from'],
                                    config['date_to'],
                                    freq='60min')
-
-    logger.define_logging()
 
     # model creation and solving
     logging.info('Starting optimization')
@@ -91,6 +88,8 @@ def create_result_dict(results):
 
 
 if __name__ == "__main__":
+
+    logger.define_logging()
 
     # configuration
     cfg = {
