@@ -1,5 +1,11 @@
-v0.0.8 ()
+v0.1.0 (November 1, 2016)
 ++++++++++++++++++++++++++
+
+API changes
+###########
+
+ * demandlib is no longer part of the oemof package but an own package (`demandlib <https://github.com/oemof/demandlib>`_)
+
 
 New features
 ############
@@ -24,24 +30,33 @@ New features
       enabling a more concise way of filtering group contents than using
       :meth:`value <oemof.groupings.Grouping.value>`.
 
+
 Documentation
 #############
+
+ * Complete revision of the documentation. We hope it is now more intuitiv and easier to understand.
 
 
 Testing
 #######
 
+ * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof_base/issues/160>`_)
 
 Bug fixes
 #########
 
+ * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof_base/issues/201>`_)
+
 
 Other changes
 #############
+
+ * Travis CI will no check PR's automatically
 
 
 Contributors
 ############
 
  * Stephan Günther
-
+ * Simon Hilpert
+ * Uwe Krien
