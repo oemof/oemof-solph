@@ -25,10 +25,10 @@ Generally, applications can be developed highly individually by the use of one o
 The following image illustrates this idea.
 
 .. 	image:: _files/framework_concept.svg
-   :height: 744px
+   :height: 475px
    :width: 1052 px
    :scale: 30 %
-   :alt: alternate text
+   :alt: The idea of Open Energy System Modelling Framework (oemof)
    :align: center
 
 Among other applications, the apps 'renpassG!S' and 'reegis' are currently developed based on the framework. 
