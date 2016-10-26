@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_optimization import storage_invest
 from simple_least_costs import simple_least_costs
 from flexible_modelling import add_constraints
+from csv_reader.operational_example import operational_example
 
 
 tolerance = 0.001  # percent
@@ -176,6 +177,37 @@ test_results = {}
 
 check(test_results, flexible_model_run, testdict['flexible_modelling'])
 # *********** end of flexible modelling example ********************************
+
+# *********** csv reader operational example ***********************************
+testdict['csv_operational'] = {
+    'name': "Operational model with csv reader",
+    'solver': 'cbc',
+    'verbose': False,
+    'scenario_path': os.path.join(os.path.dirname(__file__), 'solph',
+                                  'csv_reader', 'operational_example',
+                                  'scenarios'),
+    'date_from': '2030-01-01 00:00:00',
+    'date_to': '2030-01-14 23:00:00',
+    'nodes_flows': 'example_energy_system.csv',
+    'nodes_flows_sequences': 'example_energy_system_seq.csv', }
+
+try:
+    res = operational_example.run_example(config=testdict['csv_operational'])
+    results = operational_example.create_result_dict(res)
+    operational_csv_run = True
+except Exception as e:
+    testdict['csv_operational']['messages'] = {'error': e}
+    operational_csv_run = False
+    results = None
+
+test_results = {
+    'objective': 2326255732.5299315,
+    'R2_storage_phs': 88911.484028,
+    'R2_wind': 1758697.51,
+    'R2_R1_powerline': 2.277989e+06}
+
+check(test_results, operational_csv_run, testdict['csv_operational'], results)
+# *********** end of csv reader operational example ****************************
 
 
 logger.define_logging()
