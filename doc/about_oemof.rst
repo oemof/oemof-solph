@@ -41,7 +41,13 @@ These three examples show that the modular approach of the framework allows appl
 Application Examples
 ==============================
 
-Should we just provide a link-list and a gallery of the apps here? It might be a good appetizer like on the PyPSA webpage.
+So far, two applications are publicly available and continiously developed in these locations:
+
+ * `renpassG!S <https://github.com/znes/renpass_gis>`_.
+ * `HESYSOPT <https://github.com/znes/HESYSOPT>`_.
+
+More examples and a screenshot gallery will shortly be published on `oemof's official web homepage <https://oemof.wordpress.com/>`_.
+
 
 Why are we developing oemof? 
 ==============================
