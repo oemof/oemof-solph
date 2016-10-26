@@ -93,7 +93,9 @@ if __name__ == "__main__":
 
     # configuration
     cfg = {
-        'scenario_path': 'scenarios/',
+        'scenario_path': os.path.join(os.path.dirname(__file__), 'solph',
+                                      'csv_reader', 'operational_example',
+                                      'scenarios'),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': 'example_energy_system.csv',
