@@ -10,11 +10,11 @@ from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
 
 
-def run_example(cfg):
+def run_example(config):
 
     # misc.
-    datetime_index = pd.date_range(cfg['date_from'],
-                                   cfg['date_to'],
+    datetime_index = pd.date_range(config['date_from'],
+                                   config['date_to'],
                                    freq='60min')
 
     logger.define_logging()
@@ -24,17 +24,17 @@ def run_example(cfg):
 
     es = EnergySystem(groupings=GROUPINGS, timeindex=datetime_index)
 
-    nodes = NodesFromCSV(file_nodes_flows=os.path.join(
-                             cfg['scenario_path'],
-                             cfg['nodes_flows']),
-                         file_nodes_flows_sequences=os.path.join(
-                             cfg['scenario_path'],
-                             cfg['nodes_flows_sequences']),
-                         delimiter=',')
+    NodesFromCSV(file_nodes_flows=os.path.join(
+                             config['scenario_path'],
+                             config['nodes_flows']),
+                 file_nodes_flows_sequences=os.path.join(
+                             config['scenario_path'],
+                             config['nodes_flows_sequences']),
+                 delimiter=',')
 
     om = OperationalModel(es)
     om.receive_duals()
-    om.solve(solver=cfg['solver'], solve_kwargs={'tee': True})
+    om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
     logging.info('Done! \n Check the results')
 
@@ -76,6 +76,20 @@ def plotting(results):
     r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
 
 
+def create_result_dict(results):
+    """Create a result dictionary for testing purposes."""
+    tmp_dict = {
+        'R2_wind': results['time_series'].loc[
+            pd.IndexSlice['R2_bus_el', 'to_bus', 'R2_wind']].sum(),
+        'R2_R1_powerline': results['time_series'].loc[
+            pd.IndexSlice['R2_bus_el', 'from_bus', 'R2_R1_powerline']].sum(),
+        'R2_storage_phs': results['time_series'].loc[pd.IndexSlice[
+            'R2_bus_el', 'from_bus', 'R2_storage_phs']].sum(),
+        'objective': results['objective'],
+    }
+    return tmp_dict
+
+
 if __name__ == "__main__":
 
     # configuration
@@ -86,9 +100,12 @@ if __name__ == "__main__":
         'nodes_flows': 'example_energy_system.csv',
         'nodes_flows_sequences': 'example_energy_system_seq.csv',
         'results_path': 'results/',  # has to be created in advance!
-        'solver': 'glpk'
+        'solver': 'glpk',
+        'verbose': True,
     }
 
-    results = run_example(cfg=cfg)  # results['objective'] can be added to test
+    my_results = run_example(config=cfg)
 
-    # plotting(results)
+    # print(create_result_dict(my_results))
+
+    # plotting(my_results)
