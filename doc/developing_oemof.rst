@@ -59,8 +59,8 @@ Tests
    :language: bash
    
 Run the following test before pushing a successful merge.
-:bash:`nosetests -w "/path/to/oemof" --with-doctest --doctest-options '+ELLIPSIS'`
-:bash:`python3 path/to/oemof/examples/example_tests.py`
+:bash:`nosetests -w "/path/to/oemof" --with-doctest`
+:bash:`python3 path/to/oemof/examples/oemof_full_test.py`
 
 .. _style_guidlines_label:
 
