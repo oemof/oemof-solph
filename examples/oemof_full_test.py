@@ -11,6 +11,7 @@ from oemof.tools import logger
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_optimization import storage_invest
 from simple_least_costs import simple_least_costs
+from flexible_modelling import add_constraints
 
 
 tolerance = 0.001  # percent
@@ -20,9 +21,9 @@ PASSED = True
 basic_path = os.path.dirname(__file__)
 
 
-def check(cdict, runcheck, subdict, new_results):
+def check(cdict, runcheck, subdict, new_results=None):
     global PASSED
-    if runcheck:
+    if runcheck and new_results is not None:
         count = 0
         subdict['run'] = "Okay"
         subdict.setdefault('messages', {})
@@ -45,6 +46,9 @@ def check(cdict, runcheck, subdict, new_results):
             count += 1
             subdict['messages'][count] = (
                 "The following tests were skipped: {0}.".format(skip))
+    elif runcheck and new_results is None:
+        subdict['run'] = "Okay"
+        subdict['results'] = "No results to check - Okay"
     else:
         subdict['run'] = "Failed"
         subdict['results'] = "Failed"
@@ -53,7 +57,6 @@ def check(cdict, runcheck, subdict, new_results):
 
 def check_nosetests():
     testdir = os.path.join(os.path.dirname(__file__), os.pardir)
-    # os.chdir(testdir)
     argv = sys.argv[:]
     argv.insert(1, "--with-doctest")
     argv.insert(1, "-w{0}".format(testdir))
@@ -143,9 +146,27 @@ test_results = {
 check(test_results, least_costs_run, testdict['least_costs'], results)
 # *********** end of simple least cost  example *******************************
 
+# *********** flexible modelling example ***************************************
+testdict['flexible_modelling'] = {'name': "Flexible Modelling",
+                                  'solver': 'cbc'}
+
+try:
+    add_constraints.run_example()
+    flexible_model_run = True
+except Exception as e:
+    testdict['flexible_modelling']['messages'] = {'error': e}
+    flexible_model_run = False
+    results = None
+
+test_results = {}
+
+check(test_results, flexible_model_run, testdict['flexible_modelling'])
+# *********** end of flexible modelling example ********************************
+
 
 logger.define_logging()
 for tests in testdict.values():
+    logging.info('*********************************************')
     logging.info(tests['name'])
     logging.info("Used solver: {0}".format(tests['solver']))
     logging.info("Run check: {0}".format(tests['run']))
