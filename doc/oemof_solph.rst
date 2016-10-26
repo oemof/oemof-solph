@@ -390,7 +390,7 @@ Using the CSV reader
 -----------------------------------------------------
 
 Alternatively to a manual creation of energy system component objects as describe above, these can also be created from a pre-defined csv-structure via a csv-reader.
-Technically speaking, the csv-reader is just a simple parser that creates oemof nodes and their respective flows by interating line by line through a texts files.
+Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by interating line by line through texts files of a specific format.
 The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-Both, investment and operational models can be modelled. Two examples and more information about the functionality can be found in the example folder.
+Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the example folder.
