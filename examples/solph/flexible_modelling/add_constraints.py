@@ -14,7 +14,7 @@ from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
                          OperationalModel, EnergySystem, GROUPINGS)
 
 
-def run_example():
+def run_example(solver='cbc'):
     # ##### creating an oemof solph optimization model, nothing special here ###
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(groupings=GROUPINGS,
@@ -78,8 +78,8 @@ def run_example():
                                          rule=_inflow_share_rule)
     # solve and write results to dictionary
     # you may print the model with om.pprint()
-    om.solve()
-    print(om.results())
+    om.solve(solvername=solver)
+    om.results()
 
 if __name__ == "__main__":
     run_example()
