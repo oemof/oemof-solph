@@ -33,7 +33,7 @@ The following image illustrates this idea.
 
 It gets clear that applications can be build flexibly using different libraries.
 Furthermore, single components of applications can be substituted easily if different functionalities are needed.
-This allows for individual application development and provides all degrees of freedom left to the developer
+This allows for individual application development and provides all degrees of freedom to the developer
 which is particularly relevant in environments such as scientific work groups that often work spatially distributed.
 
 Among other applications, the apps 'renpassG!S' and 'reegis' are currently developed based on the framework. 
