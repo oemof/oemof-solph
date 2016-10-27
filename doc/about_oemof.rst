@@ -20,7 +20,7 @@ It offers a toolbox of various features needed to build energy system models in 
 For instance, the wind energy feed-in in a model region can be modelled based on weather data, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
 
 The framework consists of different libraries. For the communication between these libraries different interfaces are provided. 
-The oemof libraries and their modules are used to build what we call an 'application' (app) and depicts a concrete energy system model (or a subprocess of this model).
+The oemof libraries and their modules are used to build what we call an 'application' (app) which depicts a concrete energy system model or a subprocess of this model.
 Generally, applications can be developed highly individually by the use of one or more libraries depending on the scope and purpose.
 The following image illustrates this idea.
 
