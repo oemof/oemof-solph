@@ -93,8 +93,7 @@ if __name__ == "__main__":
 
     # configuration
     cfg = {
-        'scenario_path': os.path.join(os.path.dirname(__file__), 'solph',
-                                      'csv_reader', 'operational_example',
+        'scenario_path': os.path.join(os.path.dirname(__file__),
                                       'scenarios'),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
@@ -107,6 +106,6 @@ if __name__ == "__main__":
 
     my_results = run_example(config=cfg)
 
-    # print(create_result_dict(my_results))
+    plotting(my_results)
 
-    # plotting(my_results)
+    # print(create_result_dict(my_results))
