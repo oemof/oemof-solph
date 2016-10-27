@@ -31,6 +31,11 @@ The following image illustrates this idea.
    :alt: The idea of Open Energy System Modelling Framework (oemof)
    :align: center
 
+It gets clear that applications can be build flexibly using different libraries.
+Furthermore, single components of applications can be substituted easily if different functionalities are needed.
+This allows for individual application development and provides all degrees of freedom left to the developer
+which is particularly relevant in environments such as scientific work groups that often work spatially distributed.
+
 Among other applications, the apps 'renpassG!S' and 'reegis' are currently developed based on the framework. 
 'renpassG!S' enables the simulation of a future European energy system with a high spatial and temporal resolution. 
 Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered.
