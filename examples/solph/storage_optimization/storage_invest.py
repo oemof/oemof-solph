@@ -56,7 +56,8 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
         groupings=solph.GROUPINGS, timeindex=date_time_index)
 
     # Read data file
-    data = pd.read_csv(filename, sep=",")
+    full_filename = os.path.join(os.path.dirname(__file__), filename)
+    data = pd.read_csv(full_filename, sep=",")
 
     ##########################################################################
     # Create oemof object
