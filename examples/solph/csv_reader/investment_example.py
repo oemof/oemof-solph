@@ -29,8 +29,13 @@ def run_investment_example():
 
     es = EnergySystem(groupings=GROUPINGS, timeindex=datetime_index)
 
-    nodes = NodesFromCSV(file_nodes_flows='data/nodes_flows.csv',
-                         file_nodes_flows_sequences='data/nodes_flows_seq.csv',
+    data_path = os.path.join(os.path.dirname(__file__), 'data')
+
+    nodes = NodesFromCSV(file_nodes_flows=os.path.join(data_path,
+                                                       'nodes_flows.csv'),
+                         file_nodes_flows_sequences=os.path.join(
+                             data_path,
+                             'nodes_flows_seq.csv'),
                          delimiter=',')
 
     stopwatch()
