@@ -225,7 +225,8 @@ def create_plots(energysystem):
 
     plt.show()
 
-if __name__ == "__main__":
+
+def run_storage_invest_example():
     logger.define_logging()
     esys = optimise_storage_size()
     # esys.dump()
@@ -233,3 +234,7 @@ if __name__ == "__main__":
     import pprint as pp
     pp.pprint(get_result_dict(esys))
     # create_plots(esys)
+
+
+if __name__ == "__main__":
+    run_storage_invest_example()
