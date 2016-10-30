@@ -30,7 +30,6 @@ setup(name='oemof',
                         'numpy >= 1.7.0',
                         'pandas >= 0.18.0',
                         'pyomo >= 4.2.0, != 4.3.11377'],
-      tests_require=['matplotlib'],
       entry_points={
           'console_scripts': [
               'oemof_examples = examples.examples:examples']}
