@@ -69,11 +69,8 @@ def define_logging(inifile='logging.ini', basicpath=None,
 
 def check_version():
     """Returns the actual version number of the used oemof version."""
-    filename = os.path.join(os.path.dirname(__file__), os.path.pardir,
-                            os.path.pardir, 'VERSION')
-    f = open(filename, 'r')
-    f.read(14)
-    version = f.read().replace('"', '')
+    import oemof
+    version = oemof.__version__
     logging.info("Used oemof version: {0}".format(version))
 
 
