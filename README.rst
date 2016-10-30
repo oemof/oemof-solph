@@ -40,7 +40,11 @@ Examples
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
 
-There are `examples of applications <https://github.com/oemof/oemof/tree/master/examples/>`_ available. Make sure to download all files of an folder to get the wanted example run.
+You can execute `examples of solph applications <https://github.com/oemof/oemof/tree/master/examples/solph/>`_ from command-line by
+
+.. code:: bash
+
+  oemof_examples
 
 
 Keep in touch
