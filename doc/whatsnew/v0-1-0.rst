@@ -10,6 +10,12 @@ API changes
 New features
 ############
 
+ * Solph's :class:`EnergySystem <oemof.solph.network.EnergySystem>` now
+   automatically uses solph's :const:`GROUPINGS
+   <oemof.solph.groupings.GROUPINGS>` in addition to any user supplied
+   ones.
+   See the API documentation for more information.
+
  * :class:`Groupings <oemof.groupings.Grouping>` have more features, more
    documentation and should be usable by now:
 
