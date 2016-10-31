@@ -90,14 +90,18 @@ def create_result_dict(results):
 def run_operational_example():
     logger.define_logging()
 
+    filepath = os.path.join(os.path.dirname(__file__), 'scenarios')
+
     # configuration
     cfg = {
         'scenario_path': os.path.join(os.path.dirname(__file__),
                                       'scenarios'),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
-        'nodes_flows': 'example_energy_system.csv',
-        'nodes_flows_sequences': 'example_energy_system_seq.csv',
+        'nodes_flows': os.path.join(filepath, 'example_energy_system.csv'),
+        'nodes_flows_sequences': os.path.join(
+            filepath,
+            'example_energy_system_seq.csv'),
         'results_path': 'results/',  # has to be created in advance!
         'solver': 'glpk',
         'verbose': True,

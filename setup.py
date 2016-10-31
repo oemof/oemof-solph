@@ -30,7 +30,7 @@ setup(name='oemof',
               os.path.join('solph',
                            'csv_reader',
                            'operational_example',
-                           'data',
+                           'scenarios',
                            '*.csv'),
               os.path.join('solph', 'simple_least_costs','*.csv'),
               os.path.join('solph', 'storage_optimization','*.csv')
