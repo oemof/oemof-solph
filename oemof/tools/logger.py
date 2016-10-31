@@ -8,7 +8,7 @@ from oemof.tools import helpers
 
 
 def define_logging(inifile='logging.ini', basicpath=None,
-                   subdir='log_files'):
+                   subdir='log_files', log_version=True):
     r"""Initialise the logger using the logging.conf file in the local path.
 
     Several sentences providing an extended description. Refer to
@@ -26,6 +26,9 @@ def define_logging(inifile='logging.ini', basicpath=None,
     subdir : string, optional (default: 'log_files')
         The name of the subfolder of the basicpath where the log-files are
         stored.
+    log_version : boolean
+        If True the actual version or commit is logged while initialising the
+        logger.
 
     Notes
     -----
@@ -61,10 +64,11 @@ def define_logging(inifile='logging.ini', basicpath=None,
     logger = logging.getLogger('simpleExample')
     logger.debug('*********************************************************')
     logging.info('Path for logging: %s' % logpath)
-    try:
-        check_git_branch()
-    except FileNotFoundError:
-        check_version()
+    if log_version:
+        try:
+            check_git_branch()
+        except FileNotFoundError:
+            check_version()
 
 
 def check_version():
