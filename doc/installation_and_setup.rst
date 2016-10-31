@@ -159,6 +159,7 @@ You can choose from the list of examples
  * simple_least_costs
  * investment
  * flexible_modelling
+ * operational_example
 
 For example
 

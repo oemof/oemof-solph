@@ -87,8 +87,7 @@ def create_result_dict(results):
     return tmp_dict
 
 
-if __name__ == "__main__":
-
+def run_operational_example():
     logger.define_logging()
 
     # configuration
@@ -109,3 +108,9 @@ if __name__ == "__main__":
     plotting(my_results)
 
     # print(create_result_dict(my_results))
+
+
+if __name__ == "__main__":
+    run_operational_example()
+
+
