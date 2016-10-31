@@ -1,4 +1,4 @@
-from .solph.csv_reader.investment_example import run_investment_example
+from .solph.csv_reader.investment_example.investment_example import run_investment_example
 from .solph.flexible_modelling.add_constraints import run_add_constraints_example
 from .solph.simple_least_costs.simple_least_costs import run_simple_least_costs_example
 from .solph.storage_optimization.storage_invest import run_storage_invest_example

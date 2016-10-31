@@ -22,7 +22,11 @@ setup(name='oemof',
       packages=find_packages(),
       package_data={
           'examples': [
-              os.path.join('solph', 'csv_reader', 'data','*.csv'),
+              os.path.join('solph',
+                           'csv_reader',
+                           'investment_example',
+                           'data',
+                           '*.csv'),
               os.path.join('solph', 'simple_least_costs','*.csv'),
               os.path.join('solph', 'storage_optimization','*.csv')
           ]},
