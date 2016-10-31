@@ -2,7 +2,7 @@ Oemof stands for "Open Energy System Modelling Framework" and provides a free, o
 
 With oemof we provide base packages for energy system modelling and optimisation.
 
-Everybody is welcome to use and/or develop oemof. Read our `'Why should I contribute' <about_oemof.html#why-should-i-contribute>`_ section.
+Everybody is welcome to use and/or develop oemof. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 
 .. contents::
     :depth: 1
@@ -25,9 +25,9 @@ Use pypi to install the latest oemof version.
 
   pip3 install oemof
   
-The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <using_oemof.html>`_ for more details about all oemof packages.
+The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.   
+If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.   
   
 Structure of the oemof cosmos
 =============================
@@ -40,7 +40,7 @@ Examples
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
 
-There are `examples of applications <https://github.com/oemof/oemof/tree/master/examples/>`_ available. Make sure to download all files of an folder to get the wanted example run.
+There are `examples of applications <https://github.com/oemof/oemof/tree/dev/examples/>`_ available. Make sure to download all files of an folder to get the wanted example run.
 
 
 Keep in touch
