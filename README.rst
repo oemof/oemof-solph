@@ -2,7 +2,7 @@ Oemof stands for "Open Energy System Modelling Framework" and provides a free, o
 
 With oemof we provide base packages for energy system modelling and optimisation.
 
-Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_label` section.
+Everybody is welcome to use and/or develop oemof. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 
 .. contents::
     :depth: 1
@@ -25,9 +25,9 @@ Use pypi to install the latest oemof version.
 
   pip3 install oemof
   
-The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
+The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
-If you want to use the latest features, you might want to install the **developer version**. See :ref:`developing_oemof_label` for more information. The developer version is not recommended for productive use.   
+If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.   
   
 Structure of the oemof cosmos
 =============================
@@ -46,7 +46,7 @@ You can execute `examples of solph applications <https://github.com/oemof/oemof/
 
   oemof_examples
 
-Further reading in the :ref:`_check_installation_label`
+Further reading in the :ref:`check_installation_label`.
 
 
 Keep in touch

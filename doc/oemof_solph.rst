@@ -86,7 +86,8 @@ The following code shows the difference between a bus that is assigned to a vari
 
     print(my_energsystem.groups['natural_gas']
     print(electricity_bus)
-.. note:: See the :py:class:`~oemof.solph.blocks.Bus` block for all information about the mathematical background.
+    
+.. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
 
 
 Flow
@@ -100,7 +101,7 @@ For all parameters see the API documentation of the :py:class:`~oemof.solph.netw
 
     solph.Flow()
 
-.. note:: See the :py:class:`~oemof.solph.blocks.Flow` block for all information about the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.Flow` class for all parameters and the mathematical background.
 
 
 Sink
@@ -177,7 +178,7 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-.. note:: See the :py:class:`~oemof.solph.blocks.LinearTransformer` block for all information about the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
 
 
 Storage
@@ -198,8 +199,7 @@ Furthermore an efficiency for loading, unloading and a capacity loss per time in
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-.. note:: See the :py:class:`~oemof.solph.blocks.Storage` block for all information about the mathematical background.
-
+.. note:: See the :py:class:`~oemof.solph.network.Storage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_optimise_es_label:
