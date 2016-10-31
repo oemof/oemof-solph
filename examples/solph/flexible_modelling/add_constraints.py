@@ -3,7 +3,7 @@
 This script shows how to a an individual constraint to the oemof solph
 OperationalModel.
 The constraint we add forces a flow to be greater or equal a certain share
-of all inflows of its target bus. Moreover we will set a emission constraint.
+of all inflows of its target bus. Moreover we will set an emission constraint.
 
 31.10.2016
 simon.hilpert@uni-flensburg.de
@@ -15,7 +15,7 @@ from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
 
 
 def run_example(solver='cbc'):
-    # ##### creating an oemof solph optimization model, nothing special here ###
+    # creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(groupings=GROUPINGS,
                       timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
@@ -39,7 +39,6 @@ def run_example(solver='cbc'):
                                           variable_costs=10)},
                       conversion_factors={b_el: 0.41})
 
-
     # create the model
     om = OperationalModel(es=es)
 
@@ -49,25 +48,22 @@ def run_example(solver='cbc'):
             om.flows[s,t].emission_factor = 0.27 # t/MWh
         if s is blig:
             om.flows[s,t].emission_factor = 0.39 # t/MWh
-
     emission_limit = 60e3
 
+    # add the outflow share
     om.flows[(boil, pp_oil)].outflow_share = [1, 0.5, 0, 0.3]
 
     # Now we are going to add a 'sub-model' and add a user specific constraint
     # first we add ad pyomo Block() instance that we can use to add our
     # constraints. Then, we add this Block to our previous defined
-    # OperationalModel instance and add a constraint
-
-    # Define an emtpy concrete model as container or sub-model for added
-    # constraints etc..
+    # OperationalModel instance and add the constraints.
     myblock = po.Block()
 
     # create a pyomo set with the flows (i.e. list of tuples),
     # there will of course be only one flow inside this set, the one we used to
     # add outflow_share
     myblock.MYFLOWS = po.Set(initialize=[k for (k, v) in om.flows.items()
-                                         if hasattr(v, 'inflow_share')])
+                                         if hasattr(v, 'outflow_share')])
 
    # pyomo does not need a po.Set, we can use a simple list as well
     myblock.COMMODITYFLOWS = [k for (k,v) in om.flows.items()
@@ -86,8 +82,8 @@ def run_example(solver='cbc'):
         return expr
         myblock.inflow_share = po.Constraint(myblock.MYFLOWS, om.TIMESTEPS,
                                           rule=_inflow_share_rule)
-        # add emission constraint
-        myblock.emission_constr = po.Constraint(expr=(
+    # add emission constraint
+    myblock.emission_constr = po.Constraint(expr=(
             sum(om.flow[i, o, t] for (i,o) in myblock.COMMODITYFLOWS
                                  for t in om.TIMESTEPS) <= emission_limit))
 
