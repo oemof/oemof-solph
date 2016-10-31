@@ -722,8 +722,13 @@ class InvestmentFlow(SimpleBlock):
                                 m.flows[i, o].fixed_costs)
             # investment costs
             if m.flows[i, o].investment.ep_costs is not None:
-                investment_costs += (self.invest[i, o] *
-                                     m.flows[i, o].investment.ep_costs)
+                if isinstance(m.flows[i, o].investment.ep_costs, list):
+                    raise NotImplementedError("You passed a list to the " +
+                       "'ep_costs' attr. Approximated nonlinear cost are not" +
+                       " implemented for invest-flows!")
+                else:
+                    investment_costs += (self.invest[i, o] *
+                                         m.flows[i, o].investment.ep_costs)
             else:
                 raise ValueError("Missing value for investment costs!")
 
