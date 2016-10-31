@@ -8,6 +8,7 @@ import oemof.energy_system as es
 from .options import Investment
 from .plumbing import Sequence
 
+
 class EnergySystem(es.EnergySystem):
     """ A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
 
@@ -44,24 +45,23 @@ class Flow:
     nominal_value : numeric
         The nominal value of the flow.
     min : numeric (sequence or scalar)
-        Normend minimum value of the flow. The flow absolute maximum will be
-        calculatet by multiplying :attr:`nominal_value` with :attr:`min`
+        Normed minimum value of the flow. The flow absolute maximum will be
+        calculated by multiplying :attr:`nominal_value` with :attr:`min`
     max : numeric (sequence or scalar)
         Nominal maximum value of the flow. (see. :attr:`min`)
     actual_value: numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
         nominal_value to get the absolute value. If fixed is True the flow
-        variable will be fixed to actual_value * nominal_value.
+        variable will be fixed to actual_value * :attr:`nominal_value`.
     positive_gradient : numeric (sequence or scalar)
-        The normend maximal positive difference (flow[t-1] < flow[t])
+        The normed maximal positive difference (flow[t-1] < flow[t])
         of two consecutive flow values.
     negative_gradient : numeric (sequence or scalar)
-        The normend maximum negative difference (from[t-1] > flow[t]) of two
+        The normed maximum negative difference (from[t-1] > flow[t]) of two
         consecutive timesteps.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
-        with the nominal_value to get the absolute limit. If investment is set
-        the summed_max will be multiplied with the nominal_value_variable.
+        with the nominal_value to get the absolute limit.
     summed_min : numeric
         see above
     variable_costs : numeric (sequence or scalar)
@@ -74,8 +74,16 @@ class Flow:
         :attr:`actual_value`.
     investment : :class:`oemof.solph.options.Investment` object
         Object indicating if a nominal_value of the flow is determined by
-        the optimization problem.
-        Note: This will lead to different behaviour of attributes.
+        the optimization problem. Note: This will refer all attributes to an
+        investment variable instead of to the nominal_value. The nominal_value
+        should not be set (or set to None) if an investment object is used.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Flow`
+     * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
+       Investment object is present)
 
     Examples
     --------
@@ -136,9 +144,14 @@ class Flow:
                              "binary flows!")
                              
 
-
 class Bus(on.Bus):
-    """A balance object.
+    """A balance object. Every node has to be connected to Bus.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Bus`
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -179,6 +192,11 @@ class LinearTransformer(on.Transformer):
     ...                                              bth: [1, 2, 3]})
     >>> trsf.conversion_factors[bel][3]
     0.4
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.LinearTransformer`
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -224,7 +242,19 @@ class Storage(on.Transformer):
         To set different values in every timestep use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
-
+    investment : :class:`oemof.solph.options.Investment` object
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem. Note: This will refer all attributes to an
+        investment variable instead of to the nominal_capacity. The
+        nominal_capacity should not be set (or set to None) if an investment
+        object is used.
+        
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object present)
+     * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
+       present)
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

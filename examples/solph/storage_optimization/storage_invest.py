@@ -47,12 +47,13 @@ import oemof.solph as solph
 
 
 def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
-                          debug=True, number_timesteps=8760):
+                          debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
 
-    energysystem = solph.EnergySystem(time_idx=date_time_index)
+    energysystem = solph.EnergySystem(
+        groupings=solph.GROUPINGS, timeindex=date_time_index)
 
     # Read data file
     data = pd.read_csv(filename, sep=",")
@@ -73,7 +74,7 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
 
     # create commodity object for gas resource
     solph.Source(label='rgas', outputs={bgas: solph.Flow(
-        nominal_value=194397000, summed_max=1)})
+        nominal_value=194397000 * number_timesteps / 8760, summed_max=1)})
 
     # create fixed source object for wind
     solph.Source(label='wind', outputs={bel: solph.Flow(
@@ -130,7 +131,7 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
         om.write(filename, io_options={'symbolic_solver_labels': True})
 
     logging.info('Solve the optimization problem')
-    om.solve(solver=solvername, solve_kwargs={'tee': True})
+    om.solve(solver=solvername, solve_kwargs={'tee': tee_switch})
 
     return energysystem
 

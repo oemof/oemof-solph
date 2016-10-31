@@ -44,10 +44,12 @@ To collaborate use the pull request functionality of github.
 How to create a pull request
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Fork the oemof repository
+* Create a pull request and describe what you will do and why
 * Change, add or remove code
-* Read the developer rules and follow them
+* Read the :ref:`style_guidlines_label` and follow them
 * Add new tests according to what you have done
-* Create a pull request and describe what you have done and why
+* Add/change the documentation (new feature, API changes ...)
+* Add a whatsnew entry and your name to Contributors
 * Check if all tests still work including the example tests
 
 Tests
@@ -57,8 +59,10 @@ Tests
    :language: bash
    
 Run the following test before pushing a successful merge.
-:bash:`nosetests -w "/path/to/oemof" --with-doctest --doctest-options '+ELLIPSIS'`
-:bash:`python3 path/to/oemof/examples/example_tests.py`
+:bash:`nosetests -w "/path/to/oemof" --with-doctest`
+:bash:`python3 path/to/oemof/examples/oemof_full_test.py`
+
+.. _style_guidlines_label:
 
 Style guidelines
 ----------------

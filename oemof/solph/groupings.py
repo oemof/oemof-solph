@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ list:  Groupings needed on an energy system for it to work with solph.
 
-TODO: Maybe move this to the module docstring? It shoule be somewhere prominent
+TODO: Maybe move this to the module docstring? It should be somewhere prominent
       so solph user's immediately see that they need to use :const:`GROUPINGS`
       when they want to create an energy system for use with solph.
 

@@ -53,13 +53,13 @@ class OperationalModel(po.ConcreteModel):
         for the optimization model.
     timesteps : sequence (optional)
         Timesteps used in the optimization model. If provided as list or
-        pandas.DatetimeIndex the sequence will be used to index the timedepent
-        variables, constraints etc. If not provided we will try to compute
-        this sequence from attr:`timeindex`.
+        pandas.DatetimeIndex the sequence will be used to index the time
+        dependent variables, constraints etc. If not provided we will try to
+        compute this sequence from attr:`timeindex`.
     timeincrement : float or list of floats (optional)
         Timeincrement used in constraints and objective expressions.
         If type is 'float', internally will be converted to
-        solph.plumbing.Sequence() object for timedepent timeincrement.
+        solph.plumbing.Sequence() object for time dependent timeincrement.
         If a list is provided this list will be taken. Default is calculated
         from timeindex if provided.
 
@@ -110,12 +110,12 @@ class OperationalModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
-        self.timeindex = kwargs.get('timeindex', es.time_idx)
+        self.timeindex = kwargs.get('timeindex', es.timeindex)
         self.timesteps = kwargs.get('timesteps', range(len(self.timeindex)))
         self.timeincrement = kwargs.get('timeincrement',
                                         self.timeindex.freq.nanos / 3.6e12)
 
-        # convert to sequence object for timedependet timeincrement
+        # convert to sequence object for time dependent timeincrement
         self.timeincrement = Sequence(self.timeincrement)
 
         if self.timesteps is None:
@@ -228,7 +228,7 @@ class OperationalModel(po.ConcreteModel):
 
     def receive_duals(self):
         r""" Method sets solver suffix to extract information about dual
-        variables from solver. Shadowprices (duals) and reduced costs (rc) are
+        variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
 
         """
@@ -265,7 +265,7 @@ class OperationalModel(po.ConcreteModel):
 
         :attr:`om.results()[stor][stor].invest` attribute
 
-        For the investment flow of a 'tranfsformer' trsf to the bus 'bel' this
+        For the investment flow of a 'transformer' trsf to the bus 'bel' this
         can be accessed with:
 
         :attr:`om.results()[trsf][bel].invest` attribute
@@ -280,7 +280,7 @@ class OperationalModel(po.ConcreteModel):
 
         result = UserDict()
         result.objective = self.objective()
-        for i,o in self.flows:
+        for i, o in self.flows:
 
             result[i] = result.get(i, UserDict())
             result[i][o] = UserList([self.flow[i, o, t].value
@@ -296,9 +296,9 @@ class OperationalModel(po.ConcreteModel):
                         [self.InvestmentStorage.capacity[i, t].value
                          for t in self.TIMESTEPS])
 
-            if isinstance(self.flows[i,o].investment, Investment):
+            if isinstance(self.flows[i, o].investment, Investment):
                 setattr(result[i][o], 'invest',
-                        self.InvestmentFlow.invest[i,o].value)
+                        self.InvestmentFlow.invest[i, o].value)
                 if isinstance(i, Storage):
                     setattr(result[i][i], 'invest',
                             self.InvestmentStorage.invest[i].value)
@@ -314,8 +314,6 @@ class OperationalModel(po.ConcreteModel):
                 result[bus][bus] = [self.dual[self.Bus.balance[bus, t]]
                                     for _, t in timesteps]
 
-
-
         return result
 
     def solve(self, solver='glpk', solver_io='lp', **kwargs):
@@ -329,6 +327,9 @@ class OperationalModel(po.ConcreteModel):
             pyomo solver interface file format: "lp","python","nl", etc.
         \**kwargs : keyword arguments
             Possible keys can be set see below:
+
+        Other Parameters
+        ----------------
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {"tee":True}

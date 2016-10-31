@@ -20,6 +20,7 @@ Contents:
    oemof_network
    oemof_solph
    oemof_outputlib
+   oemof_tools
    api
 
 
