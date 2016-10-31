@@ -27,8 +27,8 @@ def sos2_costs(block, group):
     cost_points = {}
     capacity_points = {}
     for n in block.NL_INVESTSTORAGES:
-        cost_points[n] = [i[0] for i in n.investment.ep_costs]
-        capacity_points[n] = [i[1] for i in  n.investment.ep_costs]
+        cost_points[n] = [i[1] for i in n.investment.ep_costs]
+        capacity_points[n] = [i[0] for i in  n.investment.ep_costs]
 
     def SOS_indices_init(block, n):
         """ Set for the points for each storage
