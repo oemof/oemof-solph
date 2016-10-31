@@ -46,12 +46,14 @@ Bug fixes
 #########
 
  * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof_base/issues/201>`_)
+ * More path fixes regarding installation via pip
 
 
 Other changes
 #############
 
  * Travis CI will no check PR's automatically
+ * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof_base/issues/227>`_)
 
 
 Contributors
@@ -60,3 +62,4 @@ Contributors
  * Stephan Günther
  * Simon Hilpert
  * Uwe Krien
+ * Guido Pleßmann
