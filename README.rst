@@ -1,50 +1,53 @@
-Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented model to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
+Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented toolbox to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
 
 With oemof we provide base packages for energy system modelling and optimisation.
+
+Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_label` section.
+
+.. contents::
+    :depth: 1
+    :local:
+    :backlinks: top
+
 
 Documentation
 =============
 
-Full documentation can be found at http://oemof.readthedocs.org.
+Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow us at our `wordpress block <https://oemof.wordpress.com>`_.
 
 
 Installing oemof
 =====================
 
-.. code:: bash
-
-  sudo pip3 install oemof
-
-Developing oemof
-=====================
-
-We highly encourage you to contribute to further development of oemof. If you want to collaborate install the developer version as described below and pay attention to the developer notes described in the documentation: http://oemof.readthedocs.org/en/latest/developer_notes.html
-
-To install the developer version two steps are necessary:
+Use pypi to install the latest oemof version.
 
 .. code:: bash
 
-  git clone git@github.com:oemof/oemof.git
-  sudo pip3 install -e /path/to/the/repository
+  pip3 install oemof
+  
+The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
 
-See http://oemof.readthedocs.org/en/latest/installation_and_setup.html for further information on installation and setup.
+If you want to use the latest features, you might want to install the **developer version**. See :ref:`developing_oemof_label` for more information. The developer version is not recommended for productive use.   
+  
+Structure of the oemof cosmos
+=============================
 
-See the developer version of the full documentation at: http://oemof.readthedocs.org/en/latest/.
-
-Further packages within oemof
-==============================
-
-`Feedinlib <https://github.com/oemof/feedinlib>`_  and `oemof.db <https://github.com/oemof/oemof.db>`_ are part of the oemof framework. They can be used to create energy system models but are not a must.
+Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
 
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an application (app) and depicts for example a concrete energy system model.
+The linkage of specific modules of the various packages is called an 
+application (app) and depicts for example a concrete energy system model.
 
-There is one executable example energy system in `Storage optimization  <https://github.com/oemof/oemof/tree/master/examples/storage_optimization>`_.
+There are `examples of applications <https://github.com/oemof/oemof/tree/master/examples/>`_ available. Make sure to download all files of an folder to get the wanted example run.
 
-Further example apps in development can be found in
-`Development examples  <https://github.com/oemof/oemof/tree/master/examples/development_examples>`_.
+
+Keep in touch
+=============
+
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow us at our `blog <https://oemof.wordpress.com/>`_.
+
 
 License
 =======
@@ -62,4 +65,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see http://www.gnu.org/licenses/.

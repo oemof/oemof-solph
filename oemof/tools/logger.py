@@ -1,19 +1,14 @@
-#!/usr/bin/python
 # -*- coding: utf-8
 
-'''
-Author: Uwe Krien (uwe.krien@rl-institut.de)
-Changes by:
-Responsibility: Uwe Krien (uwe.krien@rl-institut.de)
-'''
-
 import os
+import shutil
 import logging
 import logging.config
 from oemof.tools import helpers
 
 
-def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
+def define_logging(inifile='logging.ini', basicpath=None,
+                   subdir='log_files'):
     r"""Initialise the logger using the logging.conf file in the local path.
 
     Several sentences providing an extended description. Refer to
@@ -23,10 +18,10 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     ----------
     inifile : string, optional (default: logging.ini)
         Name of the configuration file to define the logger. If no ini-file
-        exist a default ini-file will be downloaded from
-        'http://vernetzen.uni-flensburg.de/~git/logging_default.ini' and used.
+         exist a default ini-file will be copied from 'default_files' and
+         used.
     basicpath : string, optional (default: '.oemof' in HOME)
-        The basicpath for different oemof related informations. By default
+        The basicpath for different oemof related information. By default
         a ".oemof' folder is created in your home directory.
     subdir : string, optional (default: 'log_files')
         The name of the subfolder of the basicpath where the log-files are
@@ -42,9 +37,9 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
 
     Examples
     --------
-    To define the default logge you have to import the python logging library
-    and this function. The first logging message should be the path where the
-    log file is saved to.
+    To define the default logger you have to import the python logging
+     library and this function. The first logging message should be the
+     path where the log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
@@ -54,33 +49,37 @@ def define_logging(inifile='logging.ini', basicpath=None, subdir='log_files'):
     >>> logging.debug("Hallo")
 
     """
-    url = 'http://vernetzen.uni-flensburg.de/~git/logging_default.ini'
     if basicpath is None:
         basicpath = helpers.get_basic_path()
     logpath = helpers.extend_basic_path(subdir)
-    log_filename = os.path.join(basicpath, 'logging.ini')
+    log_filename = os.path.join(basicpath, inifile)
+    default_file = os.path.join(os.path.dirname(
+        os.path.realpath(__file__)), 'default_files', 'logging_default.ini')
     if not os.path.isfile(log_filename):
-        helpers.download_file(log_filename, url)
-    logging.config.fileConfig(os.path.join(basicpath, 'logging.ini'))
+        shutil.copyfile(default_file, log_filename)
+    logging.config.fileConfig(os.path.join(basicpath, inifile))
     logger = logging.getLogger('simpleExample')
     logger.debug('*********************************************************')
     logging.info('Path for logging: %s' % logpath)
     try:
         check_git_branch()
-    except:
+    except FileNotFoundError:
         check_version()
 
 
 def check_version():
     """Returns the actual version number of the used oemof version."""
-    # TODO : Please add this feature if you know how.
-    pass
+    filename = os.path.join(os.path.dirname(__file__), os.path.pardir,
+                            os.path.pardir, 'VERSION')
+    f = open(filename, 'r')
+    f.read(14)
+    version = f.read().replace('"', '')
+    logging.info("Used oemof version: {0}".format(version))
 
 
 def check_git_branch():
-    '''
-    Passes the used brance and commit to the logger
-    '''
+    """Passes the used branch and commit to the logger
+    """
     path = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), os.pardir,
         os.pardir, '.git')
@@ -103,16 +102,29 @@ def check_git_branch():
         last_commit,
         name_branch))
 
-if __name__ == '__main__':
-    import doctest
 
-    OC = doctest.OutputChecker
-    class AEOutputChecker(OC):
-        def check_output(self, want, got, optionflags):
-            from re import sub
-            if optionflags & doctest.ELLIPSIS:
-                want = sub(r'\[\.\.\.\]', '...', want)
-            return OC.check_output(self, want, got, optionflags)
+def time_logging(start, text, logging_level='debug'):
+    """
+    Logs the time between the given start time and the actual time. A text
+    and the debug level is variable.
 
-    doctest.OutputChecker = AEOutputChecker
-    doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
+    Parameters
+    ----------
+    start : float
+        start time
+    text : string
+        text to describe the log
+    logging_level : string
+        logging_level [default='debug']
+    """
+    import time
+    end_time = time.time() - start
+    hours = int(end_time / 3600)
+    minutes = int(end_time / 60 - hours * 60)
+    seconds = int(end_time - hours * 3600 - minutes * 60)
+    time_string = ' %0d:%02d:%02d hours' % (hours, minutes, seconds)
+    log_str = text + time_string
+    if logging_level == 'debug':
+        logging.debug(log_str)
+    elif logging_level == 'info':
+        logging.info(log_str)

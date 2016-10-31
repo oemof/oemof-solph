@@ -1,0 +1,65 @@
+v0.1.0 (November 1, 2016)
+++++++++++++++++++++++++++
+
+API changes
+###########
+
+ * demandlib is no longer part of the oemof package but an own package (`demandlib <https://github.com/oemof/demandlib>`_)
+
+
+New features
+############
+
+ * :class:`Groupings <oemof.groupings.Grouping>` have more features, more
+   documentation and should be usable by now:
+
+    * They moved to their own module: :mod:`oemof.groupings`. For backwards
+      compatibility they are still available from :mod:`energy system
+      <oemof.core.energy_system>` too though.
+
+    * It's possible to assign a node to multiple groups from one
+      :class:`Grouping <oemof.groupings.Grouping>` by returning a list of group
+      keys from :meth:`key <oemof.groupings.Grouping.key>`.
+
+    * If you use a non callable object as the :meth:`key
+      <oemof.groupings.Grouping.key>` parameter to :class:`Groupings
+      <oemof.groupings.Grouping>`, the constructor will not make an attempt to
+      call them, but use the object directly as a key.
+
+    * There's now a :meth:`filter <oemof.groupings.Grouping.filter>` parameter,
+      enabling a more concise way of filtering group contents than using
+      :meth:`value <oemof.groupings.Grouping.value>`.
+
+
+Documentation
+#############
+
+ * Complete revision of the documentation. We hope it is now more intuitiv and easier to understand.
+
+
+Testing
+#######
+
+ * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof_base/issues/160>`_)
+
+Bug fixes
+#########
+
+ * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof_base/issues/201>`_)
+ * More path fixes regarding installation via pip
+
+
+Other changes
+#############
+
+ * Travis CI will no check PR's automatically
+ * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof_base/issues/227>`_)
+
+
+Contributors
+############
+
+ * Stephan Günther
+ * Simon Hilpert
+ * Uwe Krien
+ * Guido Pleßmann

@@ -17,11 +17,11 @@ setup(name='oemof',
       author='oemof developing group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
-      namespace_package = ['oemof'],
+      namespace_package=['oemof'],
       packages=find_packages(),
       package_dir={'oemof': 'oemof'},
       install_requires=['dill',
                         'numpy >= 1.7.0',
-                        'pandas >= 0.17.0',
+                        'pandas >= 0.18.0',
                         'pyomo >= 4.2.0, != 4.3.11377']
      )
