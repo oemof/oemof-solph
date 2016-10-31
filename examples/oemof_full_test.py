@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_optimization import storage_invest
 from simple_least_costs import simple_least_costs
 from flexible_modelling import add_constraints
+from csv_reader.operational_example import operational_example
 
 
 tolerance = 0.001  # percent
@@ -71,8 +72,8 @@ def check_nosetests():
 
 
 # ********* storage invest example ******************************************
-testdict['stor_inv'] = {'name': "Storage invest example",
-                        'solver': 'cbc'}
+key = 'stor_inv'
+testdict[key] = {'name': "Storage invest example", 'solver': 'cbc'}
 
 number_of_timesteps = 500
 
@@ -81,14 +82,14 @@ try:
                             'storage_invest.csv')
     esys = storage_invest.optimise_storage_size(
         number_timesteps=number_of_timesteps, filename=filepath,
-        solvername=testdict['stor_inv']['solver'], debug=False,
+        solvername=testdict[key]['solver'], debug=False,
         tee_switch=False)
     results = storage_invest.get_result_dict(esys)
-    stor_invest_run = True
+    testdict[key]['run'] = True
 
 except Exception as e:
-    testdict['stor_inv']['messages'] = {'error': e}
-    stor_invest_run = False
+    testdict[key]['messages'] = {'error': e}
+    testdict[key]['run'] = False
     results = None
 
 stor_invest_dict = {8760: {
@@ -113,14 +114,14 @@ stor_invest_dict = {8760: {
         'wind_sum': 391216886.0,
                     }}
 
-check(stor_invest_dict[number_of_timesteps], stor_invest_run,
-      testdict['stor_inv'], results)
+check(stor_invest_dict[number_of_timesteps], testdict[key]['run'],
+      testdict[key], results)
 # ********* end of storage invest example *************************************
 
 
 # *********** simple least cost  example **************************************
-testdict['least_costs'] = {'name': "Simple least costs optimization",
-                           'solver': 'cbc'}
+key = 'least_costs'
+testdict[key] = {'name': "Simple least costs optimization", 'solver': 'cbc'}
 
 filename = os.path.join(basic_path, 'solph', 'simple_least_costs',
                         'example_data.csv')
@@ -129,13 +130,13 @@ try:
     esys = simple_least_costs.initialise_energysystem(periods=2000)
     om = simple_least_costs.simulate(esys,
                                      filename=filename,
-                                     solver=testdict['least_costs']['solver'],
+                                     solver=testdict[key]['solver'],
                                      tee_switch=False)
     results = simple_least_costs.get_results(esys)
-    least_costs_run = True
+    testdict[key]['run'] = True
 except Exception as e:
-    testdict['least_costs']['messages'] = {'error': e}
-    least_costs_run = False
+    testdict[key]['messages'] = {'error': e}
+    testdict[key]['run'] = False
     results = None
 
 test_results = {
@@ -157,25 +158,57 @@ test_results = {
     ('lignite', 'from_bus', 'pp_lig', 'val'): 53820.634704001102,
     ('oil', 'from_bus', 'pp_oil', 'val'): 8.1687949999999994}
 
-check(test_results, least_costs_run, testdict['least_costs'], results)
+check(test_results, testdict[key]['run'], testdict[key], results)
 # *********** end of simple least cost  example *******************************
 
 # *********** flexible modelling example ***************************************
-testdict['flexible_modelling'] = {'name': "Flexible Modelling",
-                                  'solver': 'cbc'}
+key = 'flexible_modelling'
+testdict[key] = {'name': "Flexible Modelling",
+                 'solver': 'cbc'}
 
 try:
-    add_constraints.run_example(testdict['flexible_modelling']['solver'])
-    flexible_model_run = True
+    add_constraints.run_example(testdict[key]['solver'])
+    testdict[key]['run'] = True
 except Exception as e:
-    testdict['flexible_modelling']['messages'] = {'error': e}
-    flexible_model_run = False
+    testdict[key]['messages'] = {'error': e}
+    testdict[key]['run'] = False
     results = None
 
 test_results = {}
 
-check(test_results, flexible_model_run, testdict['flexible_modelling'])
+check(test_results, testdict[key]['run'], testdict[key])
 # *********** end of flexible modelling example ********************************
+
+# *********** csv reader operational example ***********************************
+key = 'csv_operational'
+testdict[key] = {
+    'name': "Operational model with csv reader",
+    'solver': 'cbc',
+    'verbose': False,
+    'scenario_path': os.path.join(basic_path, 'solph', 'csv_reader',
+                                  'operational_example', 'scenarios'),
+    'date_from': '2030-01-01 00:00:00',
+    'date_to': '2030-01-14 23:00:00',
+    'nodes_flows': 'example_energy_system.csv',
+    'nodes_flows_sequences': 'example_energy_system_seq.csv', }
+
+try:
+    res = operational_example.run_example(config=testdict[key])
+    results = operational_example.create_result_dict(res)
+    testdict[key]['run'] = True
+except Exception as e:
+    testdict[key]['messages'] = {'error': e}
+    operational_csv_run = False
+    results = None
+
+test_results = {
+    'objective': 2326255732.5299315,
+    'R2_storage_phs': 88911.484028,
+    'R2_wind': 1758697.51,
+    'R2_R1_powerline': 2.277989e+06}
+
+check(test_results, testdict[key]['run'], testdict[key], results)
+# *********** end of csv reader operational example ****************************
 
 
 logger.define_logging()
