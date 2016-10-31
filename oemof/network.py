@@ -129,7 +129,7 @@ class Node:
     def inputs(self):
         # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
         #       Find a way to replace it.
-        #       This can also have unintuitive behaviour sinc adding new
+        #       This can also have unintuitive behaviour since adding new
         #       associations to the returned mapping will NOT add a new input
         #       flow to this node.
         return {k: flow(k, self) for k in flow._in_edges.get(self, ())}
@@ -176,7 +176,7 @@ class Entity:
     inputs : list
         List of Entities acting as input to this Entity.
     outputs : list
-        List of Entities acting as output from this Enity.
+        List of Entities acting as output from this Entity.
     geo_data : shapely.geometry object
         Geo-spatial data with informations for location/region-shape. The
         geometry can be a polygon/multi-polygon for regions, a line fore
