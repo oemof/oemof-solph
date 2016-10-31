@@ -78,10 +78,8 @@ testdict[key] = {'name': "Storage invest example", 'solver': 'cbc'}
 number_of_timesteps = 500
 
 try:
-    filepath = os.path.join(basic_path, 'solph', 'storage_optimization',
-                            'storage_invest.csv')
     esys = storage_invest.optimise_storage_size(
-        number_timesteps=number_of_timesteps, filename=filepath,
+        number_timesteps=number_of_timesteps,
         solvername=testdict[key]['solver'], debug=False,
         tee_switch=False)
     results = storage_invest.get_result_dict(esys)
@@ -118,18 +116,13 @@ check(stor_invest_dict[number_of_timesteps], testdict[key]['run'],
       testdict[key], results)
 # ********* end of storage invest example *************************************
 
-
 # *********** simple least cost  example **************************************
 key = 'least_costs'
 testdict[key] = {'name': "Simple least costs optimization", 'solver': 'cbc'}
 
-filename = os.path.join(basic_path, 'solph', 'simple_least_costs',
-                        'example_data.csv')
-
 try:
     esys = simple_least_costs.initialise_energysystem(periods=2000)
     om = simple_least_costs.simulate(esys,
-                                     filename=filename,
                                      solver=testdict[key]['solver'],
                                      tee_switch=False)
     results = simple_least_costs.get_results(esys)
@@ -167,12 +160,11 @@ testdict[key] = {'name': "Flexible Modelling",
                  'solver': 'cbc'}
 
 try:
-    add_constraints.run_example(testdict[key]['solver'])
+    add_constraints.run_add_constraints_example(testdict[key]['solver'])
     testdict[key]['run'] = True
 except Exception as e:
     testdict[key]['messages'] = {'error': e}
     testdict[key]['run'] = False
-    results = None
 
 test_results = {}
 
