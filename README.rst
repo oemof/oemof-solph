@@ -46,7 +46,7 @@ You can execute `examples of solph applications <oemof_solph.html#solph-examples
 
   oemof_examples
 
-Further reading in the :ref:`check_installation_label`.
+Further reading in the `'Run examples to check the installation' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html#run-examples-to-check-the-installation>`_ section.
 
 
 Keep in touch
