@@ -55,7 +55,8 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
     energysystem = solph.EnergySystem(timeindex=date_time_index)
 
     # Read data file
-    data = pd.read_csv(filename, sep=",")
+    full_filename = os.path.join(os.path.dirname(__file__), filename)
+    data = pd.read_csv(full_filename, sep=",")
 
     ##########################################################################
     # Create oemof object
@@ -224,7 +225,8 @@ def create_plots(energysystem):
 
     plt.show()
 
-if __name__ == "__main__":
+
+def run_storage_invest_example():
     logger.define_logging()
     esys = optimise_storage_size()
     # esys.dump()
@@ -232,3 +234,7 @@ if __name__ == "__main__":
     import pprint as pp
     pp.pprint(get_result_dict(esys))
     create_plots(esys)
+
+
+if __name__ == "__main__":
+    run_storage_invest_example()

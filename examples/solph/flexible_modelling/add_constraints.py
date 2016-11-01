@@ -14,8 +14,8 @@ from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
                          OperationalModel, EnergySystem, GROUPINGS)
 
 
-def run_example(solver='cbc'):
-    # creating an oemof solph optimization model, nothing special here ##
+def run_add_constraints_example(solver='cbc'):
+    # ##### creating an oemof solph optimization model, nothing special here ###
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
     # add some nodes
@@ -91,4 +91,4 @@ def run_example(solver='cbc'):
     om.solve()
 
 if __name__ == "__main__":
-    run_example()
+    run_add_constraints_example()

@@ -163,10 +163,15 @@ def get_results(energysystem):
 
     return rdict
 
-if __name__ == "__main__":
+
+def run_simple_least_costs_example():
     import pprint as pp
     logger.define_logging()
     esys = initialise_energysystem()
     om = simulate(esys)
     plot_results(esys)
     pp.pprint(get_results(esys))
+
+
+if __name__ == "__main__":
+    run_simple_least_costs_example()
