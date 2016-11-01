@@ -78,6 +78,8 @@ try:
     esys = storage_invest.optimise_storage_size(
         number_timesteps=number_of_timesteps, filename=filepath,
         solvername=testdict['stor_inv']['solver'], debug=False)
+    esys.dump()
+    esys.restore()
     results = storage_invest.get_result_dict(esys)
     stor_invest_run = True
 
