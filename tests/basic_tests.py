@@ -74,7 +74,7 @@ class EnergySystem_Tests:
         def assign_to_multiple_groups_in_one_go(n):
             g1 = n.uid[-1]
             g2 = n.uid[0:3]
-            return es.MultipleGroups(g1, g2)
+            return [g1, g2]
 
         ES = es.EnergySystem(groupings=[assign_to_multiple_groups_in_one_go])
         entities = [ Entity(uid=("Foo: " if i % 2 == 0 else "Bar: ") +

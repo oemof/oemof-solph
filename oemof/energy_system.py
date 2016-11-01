@@ -18,13 +18,6 @@ from oemof.groupings import (DEFAULT as BY_UID, Grouping as GroupingBase,
 from oemof.network import Node
 
 
-def MultipleGroups(*args):
-    warn("`MultipleGroups` is DEPRECATED.\n" +
-         "Just return a list of group keys instead.",
-         DeprecationWarning)
-    return list(args)
-
-
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
 
