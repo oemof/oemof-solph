@@ -54,7 +54,7 @@ New features
 Documentation
 #############
 
- * Complete revision of the documentation. We hope it is now more intuitiv and easier to understand.
+ * Complete revision of the documentation. We hope it is now more intuitive and easier to understand.
 
 
 Testing
@@ -72,7 +72,7 @@ Bug fixes
 Other changes
 #############
 
- * Travis CI will no check PR's automatically
+ * Travis CI will now check PR's automatically
  * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof_base/issues/227>`_)
 
 
