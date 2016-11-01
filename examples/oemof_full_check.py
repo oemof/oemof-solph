@@ -83,6 +83,8 @@ def run_example_checks():
             number_timesteps=number_of_timesteps,
             solvername=testdict[key]['solver'], debug=False,
             tee_switch=False)
+        esys.dump()
+        esys.restore()
         results = storage_invest.get_result_dict(esys)
         testdict[key]['run'] = True
 
