@@ -35,9 +35,9 @@ class BinaryFlow:
     startup_costs : numeric
         Costs associated with a start of the flow (representing a unit).
     shutdown_costs : numeric
-        Costs associated with the shutdown of the flow (representing a unti).
+        Costs associated with the shutdown of the flow (representing a until).
     minimum_uptime : numeric
-        Minimum time that a flow must be greate then its minimum flow after
+        Minimum time that a flow must be greater then its minimum flow after
         startup.
     minimum_downtime : numeric
         Minimum time a flow is forced to zero after shutting down.

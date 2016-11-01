@@ -99,8 +99,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                 of type 'solph sequence'
 
     """
-    # TODO : Find a nice way how to add 'additional' arguments for extension
-    #        e.g. additional_seq_attributes, additional_classes
 
     import pandas as pd
     from .network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
@@ -154,7 +152,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     node = nodes.get(row['label'])
                     if node is None:
                         node = classes[row['class']](label=row['label'])
-                # for the if check below we use all flow_attrs except investment
+                # for the if check below we use all flow_attrs except
+                # investment
                 # because for storages investment needs to be set as a node
                 # attribute (and a flow attribute)
                 flow_attrs_ = [i for i in flow_attrs if i != 'investment']
@@ -168,8 +167,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                 # again from investment storage the next lines
                                 # are a little hacky as we need to create an
                                 # solph.options.Investment() object
-                                if (isinstance(node, Storage)
-                                        and attr=='investment'):
+                                if (isinstance(node, Storage) and
+                                        attr == 'investment'):
                                     setattr(node, attr, Investment())
                                     invest_attrs = vars(Investment()).keys()
                                     for iattr in invest_attrs:
@@ -228,18 +227,19 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                     setattr(flow.binary, battr, row[battr])
                         # this block is only for investment flows!
                         if attr == 'investment' and row[attr] is True:
-                           if isinstance (node, Storage):
-                               # set the flows of the storage to Investment as
-                               # without attributes, as costs etc are set at the
-                               # node
-                               setattr(flow, attr, Investment())
-                           else:
+                            if isinstance(node, Storage):
+                                # set the flows of the storage to Investment as
+                                # without attributes, as costs etc are set at
+                                # the node
+                                setattr(flow, attr, Investment())
+                            else:
                                 # create binary object for flow
-                               setattr(flow, attr, Investment())
-                               invest_attrs = vars(Investment()).keys()
-                               for iattr in invest_attrs:
-                                   if iattr in row.keys() and row[attr]:
-                                       setattr(flow.investment, iattr, row[iattr])
+                                setattr(flow, attr, Investment())
+                                invest_attrs = vars(Investment()).keys()
+                                for iattr in invest_attrs:
+                                    if iattr in row.keys() and row[attr]:
+                                        setattr(flow.investment, iattr,
+                                                row[iattr])
             except:
                 print('Error with flow creation in line', i+2, 'in csv file.')
                 print('Label:', row['label'])

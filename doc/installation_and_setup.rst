@@ -140,6 +140,8 @@ You can download python here: https://www.python.org/downloads/mac-osx/. For inf
 If you are a Mac user please help us to improve this installation guide.
 
 
+.. _check_installation_label:
+
 Check the installation
 ======================
 

@@ -17,7 +17,8 @@ with solph, checkout the solph-examples in the `oemof/examples/solph` directory.
 How can I use solph?
 --------------------
 
-To use solph you have to install oemof and at least one solver, that can be used together with pyomo. See `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_. You can test it by executing one of the existing examples. Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
+To use solph you have to install oemof and at least one solver, which can be used together with pyomo. See `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+You can test it by executing one of the existing examples. Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
 
 Once the example work you are close to your first energy model.
 
@@ -26,7 +27,8 @@ Set up an energy system
 
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
 
-To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function. the following code example defines the year 2011 in hourly steps. See `pandas date_range guide <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function.
+The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
 
 .. code-block:: python
 
@@ -46,23 +48,25 @@ Now you can start to add the components of the network.
 Add your components to the energy system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you have defined an instance of the EnergySystem class all components you define will automatically added to your EnergySystem.
+If you have defined an instance of the EnergySystem class all components you define will automatically be added to your EnergySystem.
 
-Basically there are four types of Nodes and every node has to be connected with one or more buses. The connection between a component and a bus is the flow.
+Basically, there are four types of Nodes and every node has to be connected with one or more buses. The connection between a component and a bus is the flow.
 
  * Sink (one input, no output)
  * Source (one output, no input)
- * Linear_Transformer (one input, n outputs)
+ * LinearTransformer (one input, n outputs)
  * Storage (one input, one output)
 
-Using these types it is already possible to set up an simple energy model but more types (e.g. flexible CHP transformer) are being developed. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest.
+Using these types it is already possible to set up an simple energy model. But more types (e.g. flexible CHP transformer) are currently being developed.
+You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest.
 
 .. 	image:: _files/oemof_solph_example.svg
    :scale: 10 %
    :alt: alternate text
    :align: center
 
-the figure shows a simple energy system using the four basic network classes and the Bus class. If you remove the transmission line (transport 1 and transport 2) you get two systems but they are still one energy system in terms of solph and will be optimised at once.
+The figure shows a simple energy system using the four basic network classes and the Bus class.
+If you remove the transmission line (transport 1 and transport 2) you get two systems but they are still one energy system in terms of solph and will be optimised at once.
 
 Bus
 +++
@@ -82,19 +86,22 @@ The following code shows the difference between a bus that is assigned to a vari
 
     print(my_energsystem.groups['natural_gas']
     print(electricity_bus)
-.. note:: See the :py:class:`~oemof.solph.blocks.Bus` block for all information about the mathematical background.
+    
+.. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
 
 
 Flow
 ++++
 
-The flow class has to be used to connect. An instance of the Flow class is normally used in combination with the definition of a component. A Flow can be limited by upper and lower bounds (constant or time-dependent) or by summarised limits. For all parameters see the API documentation of the :py:class:`~oemof.solph.network.Flow` class or the examples of the nodes below. A basic flow can be defined without any parameter.
+The flow class has to be used to connect. An instance of the Flow class is normally used in combination with the definition of a component.
+A Flow can be limited by upper and lower bounds (constant or time-dependent) or by summarised limits.
+For all parameters see the API documentation of the :py:class:`~oemof.solph.network.Flow` class or the examples of the nodes below. A basic flow can be defined without any parameter.
 
 .. code-block:: python
 
     solph.Flow()
 
-.. note:: See the :py:class:`~oemof.solph.blocks.Flow` block for all information about the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.Flow` class for all parameters and the mathematical background.
 
 
 Sink
@@ -102,7 +109,9 @@ Sink
 
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
-The example shows the electricity demand of the electricity_bus defined above. The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with. The parameter *'fixed=True'* means that the actual_value can not be changed by the solver.
+The example shows the electricity demand of the electricity_bus defined above.
+The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
+The parameter *'fixed=True'* means that the actual_value can not be changed by the solver.
 
 .. code-block:: python
 
@@ -123,7 +132,9 @@ Source
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
-While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*). As we do have to pay for imported gas we should set variable costs. Comparable to the demand series an *actual_value* in combination with *'fixed=True'* is used to define the normalised output of a wind power plan. The *nominal_value* sets the installed capacity.
+While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*).
+As we do have to pay for imported gas we should set variable costs.
+Comparable to the demand series an *actual_value* in combination with *'fixed=True'* is used to define the normalised output of a wind power plan. The *nominal_value* sets the installed capacity.
 
 .. code-block:: python
 
@@ -141,7 +152,9 @@ While a wind power plant will have an hourly feed-in depending on the weather co
 LinearTransformer
 +++++++++++++++++
 
-An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device. As the name indicates the efficiency has to constant within one time step to get a linear transformation. You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
+An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device.
+As the name indicates the efficiency has to constant within one time step to get a linear transformation.
+You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
 .. code-block:: python
 
@@ -165,13 +178,15 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-.. note:: See the :py:class:`~oemof.solph.blocks.LinearTransformer` block for all information about the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
 
 
 Storage
 +++++++
 
-In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module. The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*. Furthermore an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.network.Storage` class.
+In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
+The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*.
+Furthermore an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.network.Storage` class.
 
 .. code-block:: python
 
@@ -184,17 +199,17 @@ In contrast to the three classes above the storage class is a pure solph class a
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-.. note:: See the :py:class:`~oemof.solph.blocks.Storage` block for all information about the mathematical background.
-
+.. note:: See the :py:class:`~oemof.solph.network.Storage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_optimise_es_label:
 
 Optimise your energy system
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The typical optimisation of a energy system in solph is the dispatch optimisation which means that the use of the sources is optimised to satisfy the demand. Therefore variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material. You can deviate from this scheme but you should keep it consistent to make it understandable for others.
+The typical optimisation of a energy system in solph is the dispatch optimisation which means that the use of the sources is optimised to satisfy the demand at least costs.
+Therefore variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material.
+You can deviate from this scheme but you should keep it consistent to make it understandable for others.
 
 Cost do have to be monitory cost but could be emissions or other variable units.
 
@@ -216,7 +231,7 @@ Furthermore it is possible to optimise the capacity of different components (see
 Analysing your results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to analyse your results, you should first dump you EnergySystem instance, otherwise you have to run the simulation ever again.
+If you want to analyse your results, you should first dump your EnergySystem instance, otherwise you have to run the simulation again.
 
 .. code-block:: python
 
@@ -242,14 +257,17 @@ In the outputlib the results will be converted to a pandas MultiIndex DataFrame.
 Using the investment mode
 -------------------------
 
-
-As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation. Based on investment costs you can compare the usage of existing components against building up new capacity. The annual savings by building up new capacity has therefore compensate the annuity of the investment costs (the time period does not have to be on year but depends on your Datetime index).
+As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
+Based on investment costs you can compare the usage of existing components against building up new capacity.
+The annual savings by building up new capacity has therefore compensate the annuity of the investment costs (the time period does not have to be on year but depends on your Datetime index).
 
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
 
-Basically an instance of the investment class can be added to a Flow or a Storage. Adding an investment object the *nominal_value* or *nominal_capacity* should not be set. All parameters the usually refer to the *nominal_value/capacity* will now refer to the investment variable. There it is still possible to set bounds depending on the capacity that will be build.
+Basically an instance of the investment class can be added to a Flow or a Storage. Adding an investment object the *nominal_value* or *nominal_capacity* should not be set.
+All parameters the usually refer to the *nominal_value/capacity* will now refer to the investment variable. There it is still possible to set bounds depending on the capacity that will be build.
 
-For example if you want to find out what would be the optimal capacity of a wind power plant to decrease the costs of an existing energy system you can define this model and add an investment source. The *wind_power_time_series* has to be a normalised feed-in time series of you wind power plant.
+For example if you want to find out what would be the optimal capacity of a wind power plant to decrease the costs of an existing energy system you can define this model and add an investment source.
+The *wind_power_time_series* has to be a normalised feed-in time series of you wind power plant.
 
 .. code-block:: python
 
@@ -366,3 +384,13 @@ one with all LinearTransformers and one with all Buses that are balanced. These
 groups are simply stored in a dictionary. There are some advanced functionalities
 to group two connected nodes with their connecting flow and others
 (see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
+
+
+Using the CSV reader
+-----------------------------------------------------
+
+Alternatively to a manual creation of energy system component objects as describe above, these can also be created from a pre-defined csv-structure via a csv-reader.
+Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by interating line by line through texts files of a specific format.
+The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
+
+Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the example folder.

@@ -31,7 +31,7 @@ def initialise_energysystem(periods=2000):
 
 
 # ######################### create energysystem components ####################
-def simulate(energysystem, filename=None, solver='cbc'):
+def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     """
     """
     if filename is None:
@@ -114,7 +114,7 @@ def simulate(energysystem, filename=None, solver='cbc'):
     # solve with specific optimization options (passed to pyomo)
     logging.info("Solve optimization problem")
     om.solve(soler=solver,
-             solve_kwargs={'tee': True, 'keepfiles': False})
+             solve_kwargs={'tee': tee_switch, 'keepfiles': False})
 
     # write back results from optimization object to energysystem
     om.results()

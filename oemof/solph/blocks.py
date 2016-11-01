@@ -41,7 +41,7 @@ class Storage(SimpleBlock):
         .. math:: \\sum_n nominal\\_capacity(n, t) \cdot fixed\\_costs(n)
 
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
-    and their alue after optimization by: `om.Storage.fixed_costs()`.
+    and their value after optimization by: `om.Storage.fixed_costs()`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -190,7 +190,7 @@ class InvestmentStorage(SimpleBlock):
         .. math::
             \\sum_n invest(n) \\cdot fixed\_costs(n)
 
-    The expression can be acessed by :attr:`om.InvestStorages.fixed_costs` and
+    The expression can be accessed by :attr:`om.InvestStorages.fixed_costs` and
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
     This works similar for investment costs with :attr:`*.investment_costs`.
     """
@@ -297,7 +297,8 @@ class InvestmentStorage(SimpleBlock):
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
         self.min_capacity = Constraint(
-            self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_capacity_invest_rule)
+            self.MIN_INVESTSTORAGES, m.TIMESTEPS,
+            rule=_min_capacity_invest_rule)
 
         ####################### ONLY FOR NONLINEAR INVESTMENT #################
         sos_nodes = [n for n in group
@@ -347,7 +348,7 @@ class Flow(SimpleBlock):
     NEGATIVE_GRADIENT_FLOWS
         A set of flows with the attribute :attr:`negative_gradient` being not
         None.
-    POSITIVE_GRADIENT_FLWS
+    POSITIVE_GRADIENT_FLOWS
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
 
@@ -373,7 +374,7 @@ class Flow(SimpleBlock):
     Positive gradient constraint \
     :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \\geq \
-            postive\_flow\_gradient(i, o, t), \\\\
+            positive\_flow\_gradient(i, o, t), \\\\
             \\forall (i, o) \\in \\textrm{POSITIVE\_GRADIENT\_FLOWS}, \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
@@ -387,7 +388,7 @@ class Flow(SimpleBlock):
         .. math::
             \\sum_{(i, o)}  nominal\_value(i, o) \\cdot fixed\_costs(i, o)
 
-    The expression can be acessed by :attr:`om.Flow.fixed_costs` and
+    The expression can be accessed by :attr:`om.Flow.fixed_costs` and
     their value after optimization by :meth:`om.Flow.fixed_costs()` .
     This works similar for variable costs with :attr:`*.variable_costs`.
     """
@@ -413,11 +414,11 @@ class Flow(SimpleBlock):
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None and
-                g[2].nominal_value is not None])
+            g[2].nominal_value is not None])
 
         self.SUMMED_MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None and
-                g[2].nominal_value is not None])
+            g[2].nominal_value is not None])
 
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
@@ -528,7 +529,7 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
-    """Block for all flows with :attr:`investment` beeing not None.
+    """Block for all flows with :attr:`investment` being not None.
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
@@ -545,7 +546,7 @@ class InvestmentFlow(SimpleBlock):
         A subset of set FLOWS with flows with the attribute
         :attr:`summed_min` being not None.
     MIN_FLOWS
-        A subset of FLOWS with flows having set a least mininum value for
+        A subset of FLOWS with flows having set a least minimum value for
         at least one timestep in the optimization model.
 
     **The following variables are created:**
@@ -601,7 +602,7 @@ class InvestmentFlow(SimpleBlock):
         .. math::
             \\sum_{i, o} invest(i, o) \\cdot fixed\_costs(i,o)
 
-    The expression can be acessed by :attr:`om.InvestmentFlow.fixed_costs` and
+    The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
     their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
     This works similar for variable costs with :attr:`*.variable_costs` etc.
     """
@@ -661,7 +662,7 @@ class InvestmentFlow(SimpleBlock):
             return (m.flow[i, o, t] == (self.invest[i, o] *
                                         m.flows[i, o].actual_value[t]))
         self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
-                                 rule=_investflow_fixed_rule)
+                                rule=_investflow_fixed_rule)
 
         def _max_investflow_rule(block, i, o, t):
             """Rule definition of constraint setting an upper bound of flow
@@ -778,7 +779,6 @@ class Bus(SimpleBlock):
             I[n] = [i for i in n.inputs]
             O[n] = [o for o in n.outputs]
 
-        self.balance = Constraint(group, noruleinit=True)
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in group:
@@ -790,6 +790,7 @@ class Bus(SimpleBlock):
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
                         block.balance.add((n, t), expr)
+        self.balance = Constraint(group, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
@@ -831,8 +832,8 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n:n._input() for n in group}
-        O = {n:[o for o in n.outputs.keys()] for n in group}
+        I = {n: n._input() for n in group}
+        O = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
 
@@ -952,10 +953,10 @@ class BinaryFlow(SimpleBlock):
                                                 for t in m.TIMESTEPS) > 0])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].binary.startup_costs is not None])
+                                if g[2].binary.startup_costs is not None])
 
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].binary.shutdown_costs is not None])
+                                 if g[2].binary.shutdown_costs is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.BINARY_FLOWS, m.TIMESTEPS, within=Binary)
@@ -974,8 +975,8 @@ class BinaryFlow(SimpleBlock):
                     m.flows[i, o].min[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
             return expr
-        self.min= Constraint(self.MIN_FLOWS, m.TIMESTEPS,
-                             rule=_minimum_flow_rule)
+        self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+                              rule=_minimum_flow_rule)
 
         def _maximum_flow_rule(block, i, o, t):
             """Rule definition for MILP maximum flow constraints.
@@ -992,25 +993,24 @@ class BinaryFlow(SimpleBlock):
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
-                            self.status[i, o, t-1])
+                        self.status[i, o, t-1])
             else:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
-                            m.flows[i, o].binary.initial_status)
+                        m.flows[i, o].binary.initial_status)
             return expr
         self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
-
 
         def _shutdown_rule(block, i, o, t):
             """Rule definition for shutdown constraints of binary flows.
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.shutdown[i, o, t] >= self.status[i, o, t-1] -
-                            self.status[i, o, t])
+                        self.status[i, o, t])
             else:
-               expr = (self.shutdown[i, o, t] >=
-                       m.flows[i, o].binary.initial_status -
-                           self.status[i, o, t])
+                expr = (self.shutdown[i, o, t] >=
+                        m.flows[i, o].binary.initial_status -
+                        self.status[i, o, t])
             return expr
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
@@ -1021,7 +1021,7 @@ class BinaryFlow(SimpleBlock):
     def _objective_expression(self):
         """Objective expression for binary flows.
         """
-        if not hasattr(self, 'FLOWS'):
+        if not hasattr(self, 'BINARY_FLOWS'):
             return 0
 
         m = self.parent_block()
@@ -1031,19 +1031,20 @@ class BinaryFlow(SimpleBlock):
 
         if self.STARTUPFLOWS:
             startcosts += sum(self.startup[i, o, t] *
-                                  m.flows[i, o].binary.startup_costs
-                              for i,o in self.STARTUPFLOWS
+                              m.flows[i, o].binary.startup_costs
+                              for i, o in self.STARTUPFLOWS
                               for t in m.TIMESTEPS)
             self.startcosts = Expression(expr=startcosts)
 
         if self.SHUTDOWNFLOWS:
             shutdowncosts += sum(self.shutdown[i, o, t] *
-                                     m.flows[i, o].binary.shutdown_costs
-                              for i,o in self.SHUTDOWNFLOWS
-                              for t in m.TIMESTEPS)
+                                 m.flows[i, o].binary.shutdown_costs
+                                 for i, o in self.SHUTDOWNFLOWS
+                                 for t in m.TIMESTEPS)
             self.shudowcosts = Expression(expr=shutdowncosts)
 
         return startcosts + shutdowncosts
+
 
 class DiscreteFlow(SimpleBlock):
     """
@@ -1078,7 +1079,6 @@ class DiscreteFlow(SimpleBlock):
 
         self.discrete_flow = Var(self.DISCRETE_FLOWS,
                                  m.TIMESTEPS, within=NonNegativeIntegers)
-
 
         def _discrete_flow_rule(block, i, o, t):
             """Force flow variable to discrete (NonNegativeInteger) values.
