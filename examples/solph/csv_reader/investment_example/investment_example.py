@@ -27,7 +27,7 @@ def run_investment_example():
 
     datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
-    es = EnergySystem(groupings=GROUPINGS, timeindex=datetime_index)
+    es = EnergySystem(timeindex=datetime_index)
 
     data_path = os.path.join(os.path.dirname(__file__), 'data')
 

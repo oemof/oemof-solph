@@ -1,14 +1,34 @@
 v0.1.0 (November 1, 2016)
 ++++++++++++++++++++++++++
 
+The framework provides the basis for a great range of different energy 
+system model types, ranging from LP bottom-up (power and heat) economic dispatch 
+models with optional investment to MILP operational unit commitment models. 
+
+With v0.1.0 we refactored oemof (not backward compatible!) to bring the 
+implementation in line with the general concept. Hence, the API of components 
+has changed significantly and we introduced the new 'Flow' component. Besides 
+an extensive grouping functionality for automatic creation of constraints based 
+on component input data the documentation has been revised.
+
+We provide examples to show the broad range of possible applications and the 
+frameworks flexibility. 
+
+
 API changes
 ###########
-
+ 
  * demandlib is no longer part of the oemof package but an own package (`demandlib <https://github.com/oemof/demandlib>`_)
 
 
 New features
 ############
+
+ * Solph's :class:`EnergySystem <oemof.solph.network.EnergySystem>` now
+   automatically uses solph's :const:`GROUPINGS
+   <oemof.solph.groupings.GROUPINGS>` in addition to any user supplied
+   ones.
+   See the API documentation for more information.
 
  * :class:`Groupings <oemof.groupings.Grouping>` have more features, more
    documentation and should be usable by now:

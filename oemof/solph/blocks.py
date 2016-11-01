@@ -1004,7 +1004,7 @@ class BinaryFlow(SimpleBlock):
     def _objective_expression(self):
         """Objective expression for binary flows.
         """
-        if not hasattr(self, 'FLOWS'):
+        if not hasattr(self, 'BINARY_FLOWS'):
             return 0
 
         m = self.parent_block()

@@ -19,7 +19,7 @@ def run_example(config):
     # model creation and solving
     logging.info('Starting optimization')
 
-    es = EnergySystem(groupings=GROUPINGS, timeindex=datetime_index)
+    es = EnergySystem(timeindex=datetime_index)
 
     NodesFromCSV(file_nodes_flows=os.path.join(
                              config['scenario_path'],

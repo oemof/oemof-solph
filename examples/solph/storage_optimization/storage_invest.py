@@ -47,13 +47,12 @@ import oemof.solph as solph
 
 
 def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
-                          debug=True, number_timesteps=500, tee_switch=True):
+                          debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
 
-    energysystem = solph.EnergySystem(
-        groupings=solph.GROUPINGS, timeindex=date_time_index)
+    energysystem = solph.EnergySystem(timeindex=date_time_index)
 
     # Read data file
     full_filename = os.path.join(os.path.dirname(__file__), filename)
@@ -234,7 +233,7 @@ def run_storage_invest_example():
     # esys.restore()
     import pprint as pp
     pp.pprint(get_result_dict(esys))
-    # create_plots(esys)
+    create_plots(esys)
 
 
 if __name__ == "__main__":
