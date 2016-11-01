@@ -13,8 +13,7 @@ import os
 import dill as pickle
 
 from oemof.network import Entity
-from oemof.groupings import (DEFAULT as BY_UID, Grouping as GroupingBase,
-                             Nodes)
+from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 from oemof.network import Node
 
 
@@ -112,7 +111,7 @@ class EnergySystem:
         Node.registry = self
         self._groups = {}
         self._groupings = ( [BY_UID] +
-                            [ g if isinstance(g, GroupingBase) else Nodes(g)
+                            [ g if isinstance(g, Grouping) else Nodes(g)
                               for g in kwargs.get('groupings', [])])
         for e in self.entities:
             for g in self._groupings:

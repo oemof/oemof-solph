@@ -13,7 +13,7 @@ from oemof import energy_system as es
 from oemof.network import Entity
 from oemof.network import Bus, Transformer
 from oemof.network import Bus as NewBus, Node
-from oemof.groupings import Nodes, Flows, FlowsWithNodes as FWNs
+from oemof.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
 
 
 class EnergySystem_Tests:
@@ -91,8 +91,8 @@ class EnergySystem_Tests:
                      sorted([e.uid for e in ES.groups[group]])))
 
     def test_grouping_filter_parameter(self):
-        g1 = es.GroupingBase( key=lambda e: "The Special One",
-                              filter=lambda e: "special" in e.uid)
+        g1 = Grouping( key=lambda e: "The Special One",
+                       filter=lambda e: "special" in e.uid)
         g2 = Nodes( key=lambda e: "A Subset",
                     filter=lambda e: "subset" in e.uid)
         ES = es.EnergySystem(groupings=[g1, g2])
@@ -118,8 +118,8 @@ class EnergySystem_Tests:
 
     def test_non_callable_group_keys(self):
         collect_everything = Nodes(key="everything")
-        g1 = es.GroupingBase( key="The Special One",
-                              filter=lambda e: "special" in e.uid)
+        g1 = Grouping( key="The Special One",
+                       filter=lambda e: "special" in e.uid)
         g2 = Nodes(key="A Subset", filter=lambda e: "subset" in e.uid)
         ES = es.EnergySystem(groupings=[g1, g2, collect_everything])
         special = Entity(uid="special")
