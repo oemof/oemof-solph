@@ -49,7 +49,7 @@ The code of the example above:
     # create transformer
     Transformer(label='transformer', inputs={bus_1: []}, outputs={bus_2: []})
     
-By now the network library is mainly used as the base for the solph library.  
+The network class is aimed to be very generic and might have some network analyse tools in the future. By now the network library is mainly used as the base for the solph library.  
 
 oemof-solph
 ===========

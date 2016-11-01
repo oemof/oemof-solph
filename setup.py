@@ -9,6 +9,7 @@
 """
 
 from setuptools import find_packages, setup
+import os
 
 import oemof
 
@@ -19,9 +20,26 @@ setup(name='oemof',
       description='The open energy modelling framework',
       namespace_package=['oemof'],
       packages=find_packages(),
-      package_dir={'oemof': 'oemof'},
+      package_data={
+          'examples': [
+              os.path.join('solph',
+                           'csv_reader',
+                           'investment_example',
+                           'data',
+                           '*.csv'),
+              os.path.join('solph',
+                           'csv_reader',
+                           'operational_example',
+                           'scenarios',
+                           '*.csv'),
+              os.path.join('solph', 'simple_least_costs','*.csv'),
+              os.path.join('solph', 'storage_optimization','*.csv')
+          ]},
       install_requires=['dill',
                         'numpy >= 1.7.0',
                         'pandas >= 0.18.0',
-                        'pyomo >= 4.2.0, != 4.3.11377']
+                        'pyomo >= 4.2.0, != 4.3.11377'],
+      entry_points={
+          'console_scripts': [
+              'oemof_examples = examples.examples:examples']}
      )

@@ -4,9 +4,7 @@
 oemof-solph
 ~~~~~~~~~~~
 
-Solph is an oemof-package, designed to create and solve linear or mixed-integer
-linear optimization problems. The packages is based on pyomo. To get started
-with solph, checkout the solph-examples in the `oemof/examples/solph` directory.
+Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The packages is based on pyomo. To create an energy system model the :ref:`oemof_network_label` ist used and extended by components such as storages. To get started with solph, checkout the solph-examples in the :ref:`solph_examples_label` section. 
 
 .. contents::
     :depth: 2
@@ -393,4 +391,36 @@ Alternatively to a manual creation of energy system component objects as describ
 Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by interating line by line through texts files of a specific format.
 The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the example folder.
+Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_label` section.
+
+
+.. _solph_examples_label:
+
+Solph Examples
+--------------
+
+The following examples are available for solph. See section ":ref:`check_installation_label`" to learn how to execute the examples directly.
+
+Csv_reader
+^^^^^^^^^^
+
+The csv-reader provides an easy to use interface to the solph library. The objects are defined using csv-files and are automatically created. There are two examples available.
+
+ * Operational example (:download:`source file <../examples/solph/csv_reader/operational_example/operational_example.py>`, :download:`data file 1 <../examples/solph/csv_reader/operational_example/scenarios/example_energy_system.csv>`, :download:`data file 2 <../examples/solph/csv_reader/operational_example/scenarios/example_energy_system_seq.csv>`)
+ * Investment example (:download:`source file <../examples/solph/csv_reader/investment_example/investment_example.py>`, :download:`data file 1 <../examples/solph/csv_reader/investment_example/data/nodes_flows.csv>`, :download:`data file 2 <../examples/solph/csv_reader/investment_example/data/nodes_flows_seq.csv>`).
+
+Flexible modelling
+^^^^^^^^^^^^^^^^^^^^
+
+It is also possible to pass constraints to the model that are not provided by solph but defined in your application. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
+
+Simple_least_costs
+^^^^^^^^^^^^^^^^^^^
+
+A least cost optimisation is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. (:download:`source file <../examples/solph/simple_least_costs/simple_least_costs.py>`, :download:`data file <../examples/solph/simple_least_costs/example_data.csv>`).
+
+Storage_optimization
+^^^^^^^^^^^^^^^^^^^^
+
+The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_optimization/storage_invest.py>`, :download:`data file <../examples/solph/storage_optimization/storage_invest.csv>`).
+

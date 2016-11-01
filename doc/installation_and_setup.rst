@@ -119,7 +119,9 @@ In order to install a package using pip execute the following and substitute pac
   pip3 install package_name
 
 For further information on how to install Python modules check out https://docs.python.org/3/installing/. Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
- 
+
+
+.. _solver_label:
 
 Solver
 -------
@@ -142,15 +144,27 @@ If you are a Mac user please help us to improve this installation guide.
 
 .. _check_installation_label:
 
-Check the installation
-======================
+Run examples to check the installation
+============================================
 
-Run the examples to check the installation. The examples can be found ....
-
-To run the solph examples you need to have the CBC solver installed. Otherwise you have to change the solver name in the example file to your solver.
-
-To see the graphs produced by the examples you need to have matplotlib installed. Typically this will look like this:
+Run the examples to check the installation. From the command-line execute
 
 .. code:: console
 
-  pip3 install matplotlib
+  oemof_example <name-of-example>
+
+You can choose from the list of examples
+
+ * storage_invest
+ * simple_least_costs
+ * investment
+ * flexible_modelling
+ * operational_example
+
+For example
+
+.. code:: console
+
+  oemof_example simple_least_costs
+
+If you want to run solph examples you need to have the CBC solver installed, see :ref:`_check_installation_label`.
