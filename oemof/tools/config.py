@@ -1,39 +1,33 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep  5 12:26:40 2014
-
-:module-author: steffen
-:filename: config.py
-
-
 This module provides a highlevel layer for reading and writing config files.
 There must be a file called "config.ini" in the root-folder of the project.
 The file has to be of the following structure to be imported correctly.
 
-# this is a comment \n
-# the filestructure is like: \n
- \n
-[netCDF] \n
-RootFolder = c://netCDF \n
-FilePrefix = cd2- \n
- \n
-[mySQL] \n
-host = localhost \n
-user = guest \n
-password = root \n
-database = znes \n
- \n
-[SectionName] \n
-OptionName = value \n
-Option2 = value2 \n
+.. code-block:: ini
 
-
+    # this is a comment \n
+    # the filestructure is like: \n
+     \n
+    [netCDF] \n
+    RootFolder = c://netCDF \n
+    FilePrefix = cd2- \n
+     \n
+    [mySQL] \n
+    host = localhost \n
+    user = guest \n
+    password = root \n
+    database = znes \n
+     \n
+    [SectionName] \n
+    OptionName = value \n
+    Option2 = value2 \n
 """
 import os.path as path
 
 try:
     import configparser as cp
-except:
+except ImportError:
     # to be compatible with Python2.7
     import ConfigParser as cp
 
@@ -59,17 +53,19 @@ def init():
 
 def get(section, key):
     """
-    returns the value of a given key of a given section of the main
-    config file.
 
-    :param section: the section.
-    :type section: str.
-    :param key: the key.
-    :type key: str.
+    Parameters
+    ----------
+    section : str
+        Section of the config file
+    key : str
+        Key of the config file
 
-    :returns: the value which will be casted to float, int or boolean.
-              if no cast is successfull, the raw string will be returned.
-
+    Returns
+    -------
+    float, int, str, boolean
+        The value which will be casted to float, int or boolean. If no cast is
+        successful, the raw string will be returned.
     """
     if not _loaded:
         init()
@@ -87,17 +83,16 @@ def get(section, key):
 
 def set(section, key, value):
     """
-    sets a value to a [section] key - pair.
-    if the section doesn't exist yet, it will be created.
 
-    :param section: the section.
-    :type section: str.
-    :param key: the key.
-    :type key: str.
-    :param value: the value.
-    :type value: float, int, str.
+    Parameters
+    ----------
+    section : str
+        Section of the config file
+    key : str
+        Key of the config file
+    value : float, int, str, boolean
+        Value for the given key.
     """
-
     if not _loaded:
         init()
 
