@@ -142,8 +142,8 @@ If you are a Mac user please help us to improve this installation guide.
 
 .. _check_installation_label:
 
-Check the installation
-======================
+Run examples to check the installation
+============================================
 
 Run the examples to check the installation. The examples can be found ....
 
