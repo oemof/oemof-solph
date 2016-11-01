@@ -300,7 +300,10 @@ class InvestmentStorage(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS, rule=_min_capacity_invest_rule)
 
         ####################### ONLY FOR NONLINEAR INVESTMENT #################
-        bc.sos2_costs(block=self, group=group)
+        sos_nodes = [n for n in group
+                     if isinstance(n.investment.ep_costs, list)]
+        if sos_nodes:
+            bc.sos_costs(block=self, nodes=sos_nodes, sos_type=2)
 
         #######################################################################
 
@@ -317,7 +320,7 @@ class InvestmentStorage(SimpleBlock):
             if n.investment.ep_costs is not None:
                 # if a list is passed we assume nonlinear costs
                 if isinstance(n.investment.ep_costs, list):
-                    investment_costs += self.nl_investcosts[n]
+                    investment_costs += self.SOS_costs[n]
                 else:
                     investment_costs += self.invest[n] * n.investment.ep_costs
             else:

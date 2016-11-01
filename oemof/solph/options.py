@@ -25,8 +25,7 @@ class Investment:
                                  "scalar to 'ep_costs' attribute!")
             else:
                 logging.info(
-                    "Investment object will cause "
-                    "approximated nonlinear costs with sos2-set constraints!")
+                    "Investment object will cause SOS-set constraints!")
 
 
 class BinaryFlow:
