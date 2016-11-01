@@ -30,12 +30,12 @@ New features
    ones.
    See the API documentation for more information.
 
- * :class:`Groupings <oemof.groupings.Grouping>` have more features, more
-   documentation and should be usable by now:
+ * The :class:`groupings <oemof.groupings.Grouping>` introduced in version
+   0.0.5 now have more features, more documentation and should generally be
+   pretty usable:
 
-    * They moved to their own module: :mod:`oemof.groupings`. For backwards
-      compatibility they are still available from :mod:`energy system
-      <oemof.core.energy_system>` too though.
+    * They moved to their own module: :mod:`oemof.groupings` and deprecated
+      constructs ensuring compatibility with prior versions have been removed.
 
     * It's possible to assign a node to multiple groups from one
       :class:`Grouping <oemof.groupings.Grouping>` by returning a list of group
