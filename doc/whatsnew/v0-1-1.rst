@@ -1,0 +1,43 @@
+v0.1.1 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+ 
+
+
+
+New features
+############
+
+
+
+
+Documentation
+#############
+
+
+
+
+Testing
+#######
+
+
+
+Bug fixes
+#########
+
+
+
+
+Other changes
+#############
+
+
+
+
+Contributors
+############
+
+
