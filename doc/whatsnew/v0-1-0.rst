@@ -83,3 +83,4 @@ Contributors
  * Simon Hilpert
  * Uwe Krien
  * Guido Pleßmann
+ * Cord Kaldemeyer
