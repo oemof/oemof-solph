@@ -6,7 +6,8 @@ import pandas as pd
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    logging.warning('Matplotlib does not work.')
+    plt = None
+    logging.warning('Matplotlib could not be imported. Plotting will not work.')
 
 
 class ResultsDataFrame(pd.DataFrame):
@@ -22,16 +23,16 @@ class ResultsDataFrame(pd.DataFrame):
     result_object : dictionary
         solph result objects
     bus_labels : list if strings
-        List of strings with busses that should be contained in dataframe.
-        If not set, all busses are contained.
+        List of strings with buses that should be contained in dataframe.
+        If not set, all buses are contained.
 
     Attributes
     ----------
     result_object : dictionary
         solph result objects
     bus_labels : list if strings
-        List of strings with busses that should be contained in dataframe.
-        If not set, all busses are contained.
+        List of strings with buses that should be contained in dataframe.
+        If not set, all buses are contained.
     bus_types : list if strings
         List of strings with bus types that should be contained in dataframe.
         If not set, all bus types are contained.
@@ -61,7 +62,7 @@ class ResultsDataFrame(pd.DataFrame):
                         row['obj_label'] = 'kk'
                     else:
                         row['obj_label'] = kk.label
-                    row['datetime'] = es.time_idx
+                    row['datetime'] = es.timeindex
                     row['val'] = vv
                     rows_list.append(row)
             else:
@@ -74,7 +75,7 @@ class ResultsDataFrame(pd.DataFrame):
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'other'
                             row['obj_label'] = k.label
-                            row['datetime'] = es.time_idx
+                            row['datetime'] = es.timeindex
                             row['val'] = vv
                             rows_list.append(row)
                         else:
@@ -83,7 +84,7 @@ class ResultsDataFrame(pd.DataFrame):
                             row['bus_label'] = list(k.outputs.keys())[0].label
                             row['type'] = 'to_bus'
                             row['obj_label'] = k.label
-                            row['datetime'] = es.time_idx
+                            row['datetime'] = es.timeindex
                             row['val'] = v.get(list(k.outputs.keys())[0])
                             rows_list.append(row)
                 else:
@@ -93,7 +94,7 @@ class ResultsDataFrame(pd.DataFrame):
                         row['bus_label'] = kk.label
                         row['type'] = 'to_bus'
                         row['obj_label'] = k.label
-                        row['datetime'] = es.time_idx
+                        row['datetime'] = es.timeindex
                         row['val'] = vv
                         rows_list.append(row)
 
@@ -104,7 +105,7 @@ class ResultsDataFrame(pd.DataFrame):
             for item in rows_list for date, val in zip(item['datetime'],
                                                        item['val'])]
 
-        # create multiindexed dataframe
+        # create MultiIndex DataFrame
         index = ['bus_label', 'type', 'obj_label', 'datetime']
 
         columns = index + ['val']
@@ -116,8 +117,8 @@ class ResultsDataFrame(pd.DataFrame):
     def slice_by(self, **kwargs):
         r""" Method for slicing the ResultsDataFrame. A subset is returned.
 
-        Parameters
-        ----------
+        Other Parameters
+        ----------------
         bus_label : string
         type : string (to_bus/from_bus/other)
         obj_label: string
@@ -166,7 +167,7 @@ class ResultsDataFrame(pd.DataFrame):
         if formatted is True:
             subset.reset_index(level=['bus_label', 'type'], drop=True,
                                inplace=True)
-        # user standard insteadt of multi-indexed columns
+        # user standard instead of multi-indexed columns
         subset.columns = subset.columns.get_level_values(1).unique()
         return subset
 
@@ -237,7 +238,7 @@ class DataFramePlot(ResultsDataFrame):
 
     def color_from_dict(self, colordict):
         r""" Method to convert a dictionary containing the components and its
-        colors to a color list that can be directly useed with the color
+        colors to a color list that can be directly used with the color
         parameter of the pandas plotting method.
 
         Parameters
@@ -268,7 +269,7 @@ class DataFramePlot(ResultsDataFrame):
         Parameters
         ----------
         tick_distance : real
-            The disctance between to ticks in hours. If not set autoticks are
+            The distance between to ticks in hours. If not set autoticks are
             set (see number_autoticks).
         number_autoticks : int (default: 3)
             The number of ticks on the time axis, independent of the time
@@ -302,6 +303,9 @@ class DataFramePlot(ResultsDataFrame):
             stack-plots to have the legend in the same order as the stacks.
         plotshare : real (default: 0.9)
             Share of the plot area to create space for the legend (0 to 1).
+
+        Other Parameters
+        ----------------
         loc : string (default: 'center left')
             Location of the plot.
         bbox_to_anchor : tuple (default: (1, 0.5))
@@ -311,11 +315,11 @@ class DataFramePlot(ResultsDataFrame):
         handles : list of handles
             A list of handels if they are already modified by another function
             or method. Normally these handles will be automatically taken from
-            the artis object.
+            the artist object.
         lables : list of labels
             A list of labels if they are already modified by another function
             or method. Normally these handles will be automatically taken from
-            the artis object.
+            the artist object.
         Note
         ----
         All keyword arguments (kwargs) will be directly passed to the
@@ -355,7 +359,7 @@ class DataFramePlot(ResultsDataFrame):
     def io_plot(self, bus_label, cdict, line_kwa=None, lineorder=None,
                 bar_kwa=None, barorder=None, **kwargs):
         r""" Plotting a combined bar and line plot to see the fitting of in-
-        and outcomming flows of a bus balance.
+        and out-coming flows of a bus balance.
 
         Parameters
         ----------
@@ -381,8 +385,8 @@ class DataFramePlot(ResultsDataFrame):
         Returns
         -------
         handles, labels
-            Manipulated labels to correct the unsual construction of the
-            stack line plot. You can use them for further maipulations.
+            Manipulated labels to correct the unusual construction of the
+            stack line plot. You can use them for further manipulations.
         """
         self.ax = kwargs.get('ax', self.ax)
 
@@ -423,6 +427,7 @@ class DataFramePlot(ResultsDataFrame):
         if lineorder is None:
             new_df.sort_index(axis=1, ascending=False, inplace=True)
         else:
+            lineorder = list(lineorder)
             lineorder.reverse()
             new_df = new_df[lineorder]
         colorlist = self.color_from_dict(cdict)

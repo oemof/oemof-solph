@@ -26,7 +26,7 @@ date_to = '2050-01-01 23:00:00'
 
 datetime_index = pd.date_range(date_from, date_to, freq='60min')
 
-es = EnergySystem(groupings=GROUPINGS, time_idx=datetime_index)
+es = EnergySystem(groupings=GROUPINGS, timeindex=datetime_index)
 
 nodes = NodesFromCSV(file_nodes_flows='data/nodes_flows.csv',
                      file_nodes_flows_sequences='data/nodes_flows_seq.csv',
