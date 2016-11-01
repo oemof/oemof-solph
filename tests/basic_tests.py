@@ -93,8 +93,8 @@ class EnergySystem_Tests:
     def test_grouping_filter_parameter(self):
         g1 = es.GroupingBase( key=lambda e: "The Special One",
                               filter=lambda e: "special" in e.uid)
-        g2 = es.Grouping( key=lambda e: "A Subset",
-                          filter=lambda e: "subset" in e.uid)
+        g2 = Nodes( key=lambda e: "A Subset",
+                    filter=lambda e: "subset" in e.uid)
         ES = es.EnergySystem(groupings=[g1, g2])
         special = Entity(uid="special")
         subset = set(Entity(uid="subset: {}".format(i)) for i in range(10))
@@ -110,19 +110,17 @@ class EnergySystem_Tests:
         retained.
         This test makes sure that the bug doesn't resurface again.
         """
-        g = es.Grouping( key="group",
-                         value=lambda _: set((1, 2, 3, 4)),
-                         filter=lambda x: x % 2 == 0)
+        g = Nodes( key="group", value=lambda _: set((1, 2, 3, 4)),
+                   filter=lambda x: x % 2 == 0)
         ES = es.EnergySystem(groupings=[g])
         special = Entity(uid="object")
         eq_(ES.groups["group"], set((2, 4)))
 
     def test_non_callable_group_keys(self):
-        collect_everything = es.Grouping(key="everything")
+        collect_everything = Nodes(key="everything")
         g1 = es.GroupingBase( key="The Special One",
                               filter=lambda e: "special" in e.uid)
-        g2 = es.Grouping( key="A Subset",
-                          filter=lambda e: "subset" in e.uid)
+        g2 = Nodes(key="A Subset", filter=lambda e: "subset" in e.uid)
         ES = es.EnergySystem(groupings=[g1, g2, collect_everything])
         special = Entity(uid="special")
         subset = set(Entity(uid="subset: {}".format(i)) for i in range(2))
