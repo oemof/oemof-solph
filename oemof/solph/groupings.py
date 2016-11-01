@@ -28,6 +28,16 @@ def constraint_grouping(node):
     This function can be passed in a list to :attr:`groupings` of
     :class:`oemof.solph.network.EnergySystem`.
     """
+    # TODO: Refactor this for looser coupling between modules.
+    # This code causes an unwanted tight coupling between the `groupings` and
+    # `network` modules, resulting in having to do an import at runtime in the
+    # init method of solph's `EnergySystem`. A better way would be to add a
+    # method (maybe `constraints`, `constraint_group`, `constraint_type` or
+    # something like that) to solph's node hirarchy, which gets overriden in
+    # each subclass to return the appropriate value. Then we can just call the
+    # method here.
+    # This even gives other users/us the ability to customize/extend how
+    # constraints are grouped by overriding the method in future subclasses.
     if isinstance(node, Bus) and node.balanced:
         return blocks.Bus
     if isinstance(node, LinearTransformer):

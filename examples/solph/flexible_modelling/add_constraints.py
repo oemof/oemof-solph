@@ -17,8 +17,7 @@ from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
 def run_example(solver='cbc'):
     # creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
-    es = EnergySystem(groupings=GROUPINGS,
-                      timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
+    es = EnergySystem(timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
     # add some nodes
     boil = Bus(label="oil", balanced=False)
     blig = Bus(label="lignite", balanced=False)
