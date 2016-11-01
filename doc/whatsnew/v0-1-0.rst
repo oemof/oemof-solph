@@ -7,9 +7,9 @@ models with optional investment to MILP operational unit commitment models.
 
 With v0.1.0 we refactored oemof (not backward compatible!) to bring the 
 implementation in line with the general concept. Hence, the API of components 
-has changed significantly and we introduced a the new 'Flow' component. Besides 
+has changed significantly and we introduced the new 'Flow' component. Besides 
 an extensive grouping functionality for automatic creation of constraints based 
-on component input data. 
+on component input data the documentation has been revised.
 
 We provide examples to show the broad range of possible applications and the 
 frameworks flexibility. 
