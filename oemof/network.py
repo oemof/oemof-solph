@@ -87,10 +87,30 @@ class Node:
 
     """
 
+    # TODO: Doing this _state/__getstate__/__setstate__ dance is
+    #       necessary to fix issues #186 and #203. But there must be
+    #       some more elegant solution. So in the long run, either this,
+    #       or dump/restore should be refactored so that storing the
+    #       initialization arguments is not necessary.
+    #       The culprit seems to be that inputs/outputs are actually
+    #       stored in the `_Edge` class and pickle can't make that jump.
+    #       But more sophisticated research and minimal test cases are
+    #       needed to confirm that.
+
     registry = None
-    __slots__ = ["__weakref__", "_label"]
+    __slots__ = ["__weakref__", "_label", "_state"]
 
     def __init__(self, *args, **kwargs):
+        self._state = (args, kwargs)
+        self.__setstate__(self._state)
+        if __class__.registry is not None:
+            __class__.registry.add(self)
+
+    def __getstate__(self):
+        return self._state
+
+    def __setstate__(self, state):
+        args, kwargs = state
         for optional in ['label']:
             if optional in kwargs:
                 setattr(self, '_' + optional, kwargs[optional])
@@ -104,8 +124,6 @@ class Node:
                 flow[self, o] = kwargs['outputs'].get(o)
             except AttributeError:
                 flow[self, o] = None
-        if __class__.registry is not None:
-            __class__.registry.add(self)
 
     def __eq__(self, other):
         return id(self) == id(other)
@@ -129,7 +147,7 @@ class Node:
     def inputs(self):
         # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
         #       Find a way to replace it.
-        #       This can also have unintuitive behaviour sinc adding new
+        #       This can also have unintuitive behaviour since adding new
         #       associations to the returned mapping will NOT add a new input
         #       flow to this node.
         return {k: flow(k, self) for k in flow._in_edges.get(self, ())}
@@ -176,7 +194,7 @@ class Entity:
     inputs : list
         List of Entities acting as input to this Entity.
     outputs : list
-        List of Entities acting as output from this Enity.
+        List of Entities acting as output from this Entity.
     geo_data : shapely.geometry object
         Geo-spatial data with informations for location/region-shape. The
         geometry can be a polygon/multi-polygon for regions, a line fore

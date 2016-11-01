@@ -67,16 +67,6 @@ In order to install a package using pip execute the following and substitute pac
 For further information on how to install Python modules check out https://docs.python.org/3/installing/index.html.
 
 Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
- 
-
-Solver
--------
-
-In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
-The recommended open-source solver is Cbc (Coin-or branch and cut). 
-See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
-
-For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
 Windows
@@ -119,16 +109,7 @@ In order to install a package using pip execute the following and substitute pac
   pip3 install package_name
 
 For further information on how to install Python modules check out https://docs.python.org/3/installing/. Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
- 
 
-Solver
--------
-
-In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
-The recommended open-source solver is Cbc (Coin-or branch and cut). 
-See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
-
-For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 Mac OS
 =======
@@ -140,17 +121,41 @@ You can download python here: https://www.python.org/downloads/mac-osx/. For inf
 If you are a Mac user please help us to improve this installation guide.
 
 
+.. _solver_label:
+
+Install solver to use solph
+===========================
+
+In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
+The recommended open-source solver is Cbc (Coin-or branch and cut). 
+See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
+
+For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+
+
 .. _check_installation_label:
 
-Check the installation
-======================
+Run examples to check the installation
+============================================
 
-Run the examples to check the installation. The examples can be found ....
-
-To run the solph examples you need to have the CBC solver installed. Otherwise you have to change the solver name in the example file to your solver.
-
-To see the graphs produced by the examples you need to have matplotlib installed. Typically this will look like this:
+Run the examples to check the installation. From the command-line execute
 
 .. code:: console
 
-  pip3 install matplotlib
+  oemof_example <name-of-example>
+
+You can choose from the list of examples
+
+ * storage_invest (solph)
+ * simple_least_costs (solph)
+ * investment (solph)
+ * flexible_modelling (solph)
+ * operational_example (solph)
+
+For example
+
+.. code:: console
+
+  oemof_example simple_least_costs
+
+If you want to run solph examples you need to have the CBC solver installed, see the ":ref:`solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.

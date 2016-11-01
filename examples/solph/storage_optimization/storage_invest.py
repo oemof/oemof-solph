@@ -47,16 +47,16 @@ import oemof.solph as solph
 
 
 def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
-                          debug=True, number_timesteps=500, tee_switch=True):
+                          debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
 
-    energysystem = solph.EnergySystem(
-        groupings=solph.GROUPINGS, timeindex=date_time_index)
+    energysystem = solph.EnergySystem(timeindex=date_time_index)
 
     # Read data file
-    data = pd.read_csv(filename, sep=",")
+    full_filename = os.path.join(os.path.dirname(__file__), filename)
+    data = pd.read_csv(full_filename, sep=",")
 
     ##########################################################################
     # Create oemof object
@@ -225,11 +225,16 @@ def create_plots(energysystem):
 
     plt.show()
 
-if __name__ == "__main__":
+
+def run_storage_invest_example():
     logger.define_logging()
     esys = optimise_storage_size()
     # esys.dump()
     # esys.restore()
     import pprint as pp
     pp.pprint(get_result_dict(esys))
-    # create_plots(esys)
+    create_plots(esys)
+
+
+if __name__ == "__main__":
+    run_storage_invest_example()

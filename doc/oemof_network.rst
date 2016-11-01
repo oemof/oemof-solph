@@ -6,7 +6,7 @@ oemof-network
 
 The modeling of energy supply systems and its variety of components has a cleary structured approach within the oemof framework. Thus, energy supply systems with different levels of complexity can be based on equal basic module blocks. Those form an universal basic structure.
 
-An *node* is either a *bus* or a *component*. A bus is always connected with one or several components. Likewise components are always connected with one or several buses. Based on their characteristics they are divided into several sub types. *Transformers* have input and output, e.g. a gas turbine takes from a bus of type 'gas' and feeds into a bus of type 'electricity'. With additional information like parameters and transfer functions input and output can be specified. Using the example of a gas turbine the resource consumption (input) is related to the provided end energy (output) by means of an conversion factor. A *sink* has only an input but no output. With *sink* consumers like households can be modeled. A *source* has exactly one output but no input. Thus for example, wind energy and photovoltaic plants can be modeled. Components of type *transport* have like transformers input and output. However, corresponding buses are always of the same type, e.g. electricity. With components of type transport transmission lines can be modeled for example.
+An *node* is either a *bus* or a *component*. A bus is always connected with one or several components. Likewise components are always connected with one or several buses. Based on their characteristics they are divided into several sub types. *Transformers* have input and output, e.g. a gas turbine takes from a bus of type 'gas' and feeds into a bus of type 'electricity'. With additional information like parameters and transfer functions input and output can be specified. Using the example of a gas turbine the resource consumption (input) is related to the provided end energy (output) by means of an conversion factor. Components of type *transformer* can also be used to model transmission lines. A *sink* has only an input but no output. With *sink* consumers like households can be modeled. A *source* has exactly one output but no input. Thus for example, wind energy and photovoltaic plants can be modeled.
 
 Components and buses can be combined to an energy system. Buses are nodes, connected among each other through edges which are the inputs and outputs of the components. Such a model can be interpreted mathematically as bipartite graph as buses are solely connected to components and vice versa. Thereby the in- and outputs of the components are the directed edges of the graph. The buses themselves are the nodes of the graph.
 
@@ -34,20 +34,20 @@ In oemof this would look as follows::
                 input/output  r1_gas   r1_el   r2_el   r2_th   r2_coal   r2_gas
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
-      wt1(Source)    |------------------>|       |       |       |         |
+       wt1(Source)   |------------------>|       |       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
-        dm1(Sink)    |<------------------|       |       |       |         |
+         dm1(Sink)   |<------------------|       |       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
- gt1(Transformer)    |<---------|        |       |       |       |         |
+  gt1(Transformer)   |<---------|        |       |       |       |         |
                      |------------------>|       |       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
-   cb1(Transport)    |          |        |------>|       |       |         |
+  cb1(Transformer)   |          |        |------>|       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
- cp2(Transformer)    |<------------------------------------------|         |
+  cp2(Transformer)   |<------------------------------------------|         |
                      |-------------------------->|       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
@@ -56,10 +56,10 @@ In oemof this would look as follows::
                      |---------------------------------->|       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
-        dm2(Sink)    |<--------------------------|       |       |         |
+         dm2(Sink)   |<--------------------------|       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
-   cb2(Transport)    |          |        |<------|       |       |         |
+  cb2(Transformer)   |          |        |<------|       |       |         |
                      |          |        |       |       |       |         |
                      |          |        |       |       |       |         |
  ptg2(Transformer)   |<--------------------------|       |       |         |

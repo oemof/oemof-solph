@@ -18,18 +18,25 @@ frameworks flexibility.
 API changes
 ###########
  
- * demandlib is no longer part of the oemof package but an own package (`demandlib <https://github.com/oemof/demandlib>`_)
+ * The demandlib is no longer part of the oemof package. It has its own
+   package now: (`demandlib <https://github.com/oemof/demandlib>`_)
 
 
 New features
 ############
 
- * :class:`Groupings <oemof.groupings.Grouping>` have more features, more
-   documentation and should be usable by now:
+ * Solph's :class:`EnergySystem <oemof.solph.network.EnergySystem>` now
+   automatically uses solph's :const:`GROUPINGS
+   <oemof.solph.groupings.GROUPINGS>` in addition to any user supplied
+   ones.
+   See the API documentation for more information.
 
-    * They moved to their own module: :mod:`oemof.groupings`. For backwards
-      compatibility they are still available from :mod:`energy system
-      <oemof.core.energy_system>` too though.
+ * The :class:`groupings <oemof.groupings.Grouping>` introduced in version
+   0.0.5 now have more features, more documentation and should generally be
+   pretty usable:
+
+    * They moved to their own module: :mod:`oemof.groupings` and deprecated
+      constructs ensuring compatibility with prior versions have been removed.
 
     * It's possible to assign a node to multiple groups from one
       :class:`Grouping <oemof.groupings.Grouping>` by returning a list of group
@@ -48,7 +55,7 @@ New features
 Documentation
 #############
 
- * Complete revision of the documentation. We hope it is now more intuitiv and easier to understand.
+ * Complete revision of the documentation. We hope it is now more intuitive and easier to understand.
 
 
 Testing
@@ -66,7 +73,7 @@ Bug fixes
 Other changes
 #############
 
- * Travis CI will no check PR's automatically
+ * Travis CI will now check PR's automatically
  * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof_base/issues/227>`_)
 
 
@@ -77,3 +84,4 @@ Contributors
  * Simon Hilpert
  * Uwe Krien
  * Guido Pleßmann
+ * Cord Kaldemeyer
