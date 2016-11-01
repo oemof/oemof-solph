@@ -50,7 +50,7 @@ You can execute examples of solph applications (:ref:`solph_examples_label`) fro
 
   oemof_examples
 
-Further reading in the :ref:`check_installation_label`
+Further reading in the ':ref:`check_installation_label`' section.
 
 
 Keep in touch
