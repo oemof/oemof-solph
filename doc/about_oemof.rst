@@ -46,10 +46,12 @@ These three examples show that the modular approach of the framework allows appl
 Application Examples
 ==============================
 
-So far, two applications are publicly available and continiously developed in these locations:
+Some applications are publicly available and continiously developed in these locations:
 
  * `renpassG!S <https://github.com/znes/renpass_gis>`_.
  * `HESYSOPT <https://github.com/znes/HESYSOPT>`_.
+ * `reegis_HP <https://github.com/rl-institut/reegis_hp>`_
+ * `eos <https://github.com/rl-institut/eos>`_
 
 More examples and a screenshot gallery will shortly be published on `oemof's official web homepage <https://oemof.wordpress.com/>`_.
 
