@@ -34,11 +34,13 @@ setup(name='oemof',
                            '*.csv'),
               os.path.join('solph', 'simple_least_costs','*.csv'),
               os.path.join('solph', 'storage_optimization','*.csv')
-          ]},
+          ],
+            'oemof': [os.path.join('tools', 'default_files', '*.ini')]},
       install_requires=['dill',
                         'numpy >= 1.7.0',
                         'pandas >= 0.18.0',
-                        'pyomo >= 4.2.0, != 4.3.11377'],
+                        'pyomo >= 4.2.0, != 4.3.11377',
+                        'matplotlib'],
       entry_points={
           'console_scripts': [
               'oemof_examples = examples.examples:examples']}
