@@ -40,7 +40,7 @@ Examples
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
 
-You can execute `examples of solph applications <oemof_solph.html#solph-examples>`_ from command-line by
+You can execute `examples of solph applications <http://oemof.readthedocs.io/en/latest/oemof_solph.html#solph-examples>`_ from command-line by
 
 .. code:: bash
 
