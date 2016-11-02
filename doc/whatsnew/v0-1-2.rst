@@ -1,0 +1,45 @@
+v0.1.2 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+ 
+
+
+
+New features
+############
+
+
+
+
+Documentation
+#############
+
+
+
+
+Testing
+#######
+
+
+
+Bug fixes
+#########
+
+
+
+
+Other changes
+#############
+
+
+
+
+Contributors
+############
+ 
+ * Gasdf
+ * dsfa
+
