@@ -40,6 +40,6 @@ Other changes
 Contributors
 ############
  
- * Gasdf
- * dsfa
+ * First
+ * Second
 
