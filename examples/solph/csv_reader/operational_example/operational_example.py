@@ -103,7 +103,7 @@ def run_operational_example():
             filepath,
             'example_energy_system_seq.csv'),
         'results_path': 'results/',  # has to be created in advance!
-        'solver': 'glpk',
+        'solver': 'cbc',
         'verbose': True,
     }
 
