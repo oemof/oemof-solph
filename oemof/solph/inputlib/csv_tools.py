@@ -3,7 +3,7 @@
 import pandas as pd
 import os
 import logging
-from .. import network
+from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import Sequence
 from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
