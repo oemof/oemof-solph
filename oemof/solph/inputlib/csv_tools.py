@@ -244,31 +244,35 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
     return nodes
 
-
-def resample_sequences(seq_base_file=None, output_path=None,
-                       samples=None, file_prefix=None):
+def resample_sequence(seq_base_file=None, output_path=None,
+                       samples=None, file_prefix=None, file_suffix='_seq',
+                       header=[0,1,2,3,4]):
     """
-    This function is for resampling the sequence csv-data file. The files are
-    read  from the specified directory, resampled and, written back to the
-    directory. Note that the sequence files are expected to have a timeindex
-    column that can be parsed by pandas, with entries like:
-    '2014-01-01 00:00:00+00:00'
+    This function can be used for resampling the sequence csv-data file.
+    The file is read  from the specified path: `seq_base_file`, resampled and,
+    written back to the a specified directory. Note that the sequence files
+    are expected to have a timeindex column that can be parsed by
+    pandas, with entries like: '2014-01-01 00:00:00+00:00'
 
 
     Parameters
     ----------
-    seq_path : string
-        Path of the directory with sequence files. NOTE: Only files with
-        *seq.csv are considere for resampling.
+    seq_base_file : string
+        File that contains data to be resampled.
     output_path : string
-        File for resampled seq-files. If no path is specified, attr:`seq_path`
-        will be used.
+        Path for resampled seq-files. If no path is specified,
+        attr:`seq_base_file` path will be used.
     samples : list
         List of strings with the resampling rate e.g. ['4H', '2H']. See
         `pandas.DataFrame.resample` method for more information on format.
     file_prefix : string
         String that is put as prefix of the file name, i.e. filename is created
-        by: file_prefix+freq+'_seq.csv'
+        by: `file_prefix+s+file_suffix+'.csv'`
+    file_suffix : string
+        Sring that is put as suffix (before .csv), default is '_seq'. See also
+        file_prefix.
+    header : list
+        List of integers to specifiy the header lines
     """
     if samples is None :
         raise ValueError('Missing sample attribute. Please specifiy!')
@@ -283,7 +287,7 @@ def resample_sequences(seq_base_file=None, output_path=None,
 
     # read the file and parse the dates from the first column (index 0)
     seq = pd.read_csv(os.path.join(seq_path, seq_file),
-                      header=[0, 1, 2, 3, 4], parse_dates=[0])
+                      header=header, parse_dates=[0])
 
     # store the first column name for reuse
     first_col = seq.columns[0]
@@ -310,7 +314,7 @@ def resample_sequences(seq_base_file=None, output_path=None,
             file_prefix = seq_file.split('seq')[0]
             logging.info('Setting filename prefix to: {}'.format(file_prefix))
 
-        filename = os.path.join(output_path, file_prefix+s+'_seq.csv')
+        filename = os.path.join(output_path, file_prefix+s+file_suffix+'.csv')
         logging.info('Writing sample file to {0}.'.format(filename))
         seq_sampled.to_csv(filename, index=False)
     return seq_sampled
