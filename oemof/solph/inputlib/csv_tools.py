@@ -18,13 +18,18 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
     Parameters
     ----------
-    file_nodes_flows : string with name of CSV file of nodes and flows
-    file_nodes_flows_sequences : string with name of CSV file of sequences
-    delimiter : delimiter of CSV file
-    additional_classes : dictionary with additional classes to be used in csv
-                         of type {'MyClass1': MyClass1, ...}
-    additional_seq_attributes : list of strings with attributes that have to be
-                                of type 'solph sequence'
+    file_nodes_flows : string
+        Name of CSV file with nodes and flows
+    file_nodes_flows_sequences : string
+        Name of of CSV file containing sequences
+    delimiter : str
+        Delimiter of CSV file
+    additional_classes : dict
+        Dictionary containing additional classes to be recognized inside the
+        csv reader. Looks like: {'MyClass1': MyClass1, ...}
+    additional_seq_attributes : list
+        List of string with attributes that have to be of type 'solph sequence'
+        and that shall be recognized inside the csv file.
 
     """
 
