@@ -83,7 +83,19 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
-If you do not have Python 3 installed
+Using Anaconda (an easy way for Windows users)
+----------------------------------------------
+
+Skip the steps you have already done. Check your architecture first (32/64 bit)
+
+Install oemof
+
+ 1. Download latest Anaconda from `here <https://www.continuum.io/downloads#windows>`_ (64 or 32 bit)
+ 2. Install Anaconda
+ 3. Open the 'Anaconda Prompt' and typ: :code:`pip install oemof`
+ 
+
+WinPython
 ---------------------------------------
 
 To install python3 download the winpython version suitable for your system from http://winpython.sourceforge.net/ and follow the installation instructions.
@@ -93,7 +105,17 @@ Next, set the system’s PATH variable to include directories that include pytho
 .. code:: console
 
   C:\winpython;C:\winpython\python\Lib\site-packages\;C:\windpython\python\Scripts\; 
+  
+Solver
+------
 
+You do not have to install both solvers. Oemof recommends the CBC solver. But sometimes its worth comparing the results of different solvers.
+
+ 1. Downloaded CBC from here (`64 <http://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <http://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
+ 2. Download GLPK from `here (64/32 bit) <https://sourceforge.net/projects/winglpk/https://sourceforge.net/projects/winglpk/>`_
+ 3. Unpacked CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
+ 4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
+ 5. Restart Windows
 
 
 Required Python packages
@@ -138,7 +160,7 @@ For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver note
 Run examples to check the installation
 ============================================
 
-Run the examples to check the installation. From the command-line execute
+Run the examples to check the installation. From the command-line (or Anaconda Prompt) execute
 
 .. code:: console
 
