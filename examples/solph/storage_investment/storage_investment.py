@@ -37,14 +37,18 @@ from oemof import outputlib
 # Default logger of oemof
 from oemof.tools import logger
 from oemof.tools import helpers
+import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
 import logging
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
-import oemof.solph as solph
+import warnings
 
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
 
 
 def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
@@ -242,9 +246,16 @@ def run_storage_investment_example(**kwargs):
     esys = optimise_storage_size(**kwargs)
     # esys.dump()
     # esys.restore()
-    import pprint as pp
-    pp.pprint(get_result_dict(esys))
-    create_plots(esys)
+
+    if plt is not None:
+        create_plots(esys)
+    else:
+        import pprint as pp
+        pp.pprint(get_result_dict(esys))
+        msg = ("\nIt is not possible to plot the results, due to a missing " +
+               "python package: 'matplotlib'. \nType 'pip install " +
+               "matplotlib' to see the plots.")
+        warnings.warn(msg)
 
 
 if __name__ == "__main__":
