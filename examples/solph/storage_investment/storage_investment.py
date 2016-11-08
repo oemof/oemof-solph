@@ -46,7 +46,8 @@ import matplotlib.pyplot as plt
 import oemof.solph as solph
 
 
-def optimise_storage_size(filename="storage_investment.csv", solvername='cbc',
+
+def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
                           debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
@@ -131,7 +132,7 @@ def optimise_storage_size(filename="storage_investment.csv", solvername='cbc',
         om.write(filename, io_options={'symbolic_solver_labels': True})
 
     logging.info('Solve the optimization problem')
-    om.solve(solver=solvername, solve_kwargs={'tee': tee_switch})
+    om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     return energysystem
 
@@ -226,9 +227,9 @@ def create_plots(energysystem):
     plt.show()
 
 
-def run_storage_investment_example():
+def run_storage_investment_example(**kwargs):
     logger.define_logging()
-    esys = optimise_storage_size()
+    esys = optimise_storage_size(**kwargs)
     # esys.dump()
     # esys.restore()
     import pprint as pp

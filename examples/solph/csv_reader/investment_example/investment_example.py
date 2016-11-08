@@ -18,7 +18,7 @@ def stopwatch():
     return str(stopwatch.now-last)[0:-4]
 
 
-def run_investment_example():
+def run_investment_example(solver='cbc'):
     logger.define_logging()
 
     # %% model creation and solving
@@ -46,7 +46,7 @@ def run_investment_example():
 
     #om.receive_duals()
 
-    om.solve(solver='cbc', solve_kwargs={'tee': True})
+    om.solve(solver=solver, solve_kwargs={'tee': True})
 
     logging.info('Optimization time: ' + stopwatch())
 

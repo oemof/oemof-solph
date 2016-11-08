@@ -81,7 +81,7 @@ def run_example_checks():
     try:
         esys = storage_investment.optimise_storage_size(
             number_timesteps=number_of_timesteps,
-            solvername=testdict[key]['solver'], debug=False,
+            solver=testdict[key]['solver'], debug=False,
             tee_switch=False)
         esys.dump()
         esys.restore()

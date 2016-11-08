@@ -88,7 +88,7 @@ def run_add_constraints_example(solver='cbc'):
 
     # solve and write results to dictionary
     # you may print the model with om.pprint()
-    om.solve()
+    om.solve(solver=solver)
 
 if __name__ == "__main__":
     run_add_constraints_example()

@@ -31,16 +31,18 @@ def examples():
 
     example = args.example
 
+    solver = 'cbc'
+
     if example == 'investment':
-        run_investment_example()
+        run_investment_example(solver=solver)
     elif example == 'flexible_modelling':
-        run_add_constraints_example()
+        run_add_constraints_example(solver=solver)
     elif example == 'simple_least_costs':
-        run_simple_dispatch_example()
+        run_simple_dispatch_example(solver=solver)
     elif example == 'storage_invest':
-        run_storage_investment_example()
+        run_storage_investment_example(solver=solver)
     elif example == 'operational_example':
-        run_operational_example()
+        run_operational_example(solver=solver)
     else:
         parser.print_help()
         sys.exit(1)

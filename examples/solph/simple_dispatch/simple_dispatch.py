@@ -164,11 +164,11 @@ def get_results(energysystem):
     return rdict
 
 
-def run_simple_dispatch_example():
+def run_simple_dispatch_example(**kwargs):
     import pprint as pp
     logger.define_logging()
     esys = initialise_energysystem()
-    om = simulate(esys)
+    simulate(esys, **kwargs)
     plot_results(esys)
     pp.pprint(get_results(esys))
 

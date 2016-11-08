@@ -87,7 +87,7 @@ def create_result_dict(results):
     return tmp_dict
 
 
-def run_operational_example():
+def run_operational_example(solver='cbc'):
     logger.define_logging()
 
     filepath = os.path.join(os.path.dirname(__file__), 'scenarios')
@@ -103,7 +103,7 @@ def run_operational_example():
             filepath,
             'example_energy_system_seq.csv'),
         'results_path': 'results/',  # has to be created in advance!
-        'solver': 'cbc',
+        'solver': solver,
         'verbose': True,
     }
 
