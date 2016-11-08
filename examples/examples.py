@@ -1,7 +1,7 @@
 from .solph.csv_reader.investment_example.investment_example import run_investment_example
 from .solph.flexible_modelling.add_constraints import run_add_constraints_example
-from .solph.simple_least_costs.simple_least_costs import run_simple_least_costs_example
-from .solph.storage_optimization.storage_invest import run_storage_invest_example
+from .solph.simple_dispatch.simple_dispatch import run_simple_dispatch_example
+from .solph.storage_investment.storage_investment import run_storage_investment_example
 from .solph.csv_reader.operational_example.operational_example import run_operational_example
 
 import argparse
@@ -36,9 +36,9 @@ def examples():
     elif example == 'flexible_modelling':
         run_add_constraints_example()
     elif example == 'simple_least_costs':
-        run_simple_least_costs_example()
+        run_simple_dispatch_example()
     elif example == 'storage_invest':
-        run_storage_invest_example()
+        run_storage_investment_example()
     elif example == 'operational_example':
         run_operational_example()
     else:

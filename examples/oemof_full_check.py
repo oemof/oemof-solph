@@ -9,8 +9,8 @@ from oemof.tools import logger
 
 # add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
-from storage_optimization import storage_invest
-from simple_least_costs import simple_least_costs
+from storage_investment import storage_investment
+from simple_dispatch import simple_dispatch
 from flexible_modelling import add_constraints
 from csv_reader.operational_example import operational_example
 
@@ -79,13 +79,13 @@ def run_example_checks():
     number_of_timesteps = 500
 
     try:
-        esys = storage_invest.optimise_storage_size(
+        esys = storage_investment.optimise_storage_size(
             number_timesteps=number_of_timesteps,
             solvername=testdict[key]['solver'], debug=False,
             tee_switch=False)
         esys.dump()
         esys.restore()
-        results = storage_invest.get_result_dict(esys)
+        results = storage_investment.get_result_dict(esys)
         testdict[key]['run'] = True
 
     except Exception as e:
@@ -124,11 +124,11 @@ def run_example_checks():
     testdict[key] = {'name': "Simple least costs optimization", 'solver': 'cbc'}
 
     try:
-        esys = simple_least_costs.initialise_energysystem(periods=2000)
-        simple_least_costs.simulate(esys,
+        esys = simple_dispatch.initialise_energysystem(periods=2000)
+        simple_dispatch.simulate(esys,
                                     solver=testdict[key]['solver'],
                                     tee_switch=False)
-        results = simple_least_costs.get_results(esys)
+        results = simple_dispatch.get_results(esys)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}

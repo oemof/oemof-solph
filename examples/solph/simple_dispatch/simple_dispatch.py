@@ -15,7 +15,7 @@ import os
 
 # solph imports
 from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem, GROUPINGS)
+                         OperationalModel, EnergySystem)
 import oemof.outputlib as output
 from oemof.tools import logger
 
@@ -35,7 +35,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     """
     """
     if filename is None:
-        filename = os.path.join(os.path.dirname(__file__), 'example_data.csv')
+        filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
     logging.info("Creating objects")
     data = pd.read_csv(filename, sep=",")
     # resource buses
@@ -164,7 +164,7 @@ def get_results(energysystem):
     return rdict
 
 
-def run_simple_least_costs_example():
+def run_simple_dispatch_example():
     import pprint as pp
     logger.define_logging()
     esys = initialise_energysystem()
@@ -174,4 +174,4 @@ def run_simple_least_costs_example():
 
 
 if __name__ == "__main__":
-    run_simple_least_costs_example()
+    run_simple_dispatch_example()
