@@ -20,10 +20,10 @@ def examples():
         epilog='''
         List of examples
 
-         * storage_invest
-         * simple_least_costs
+         * storage_investment
+         * simple_dispatch
          * investment
-         * flexible_modelling
+         * add_constraints
          * operational_example
          ''')
     parser.add_argument('example', type=str,
@@ -41,11 +41,11 @@ def examples():
 
     if example == 'investment':
         run_investment_example(solver=solver)
-    elif example == 'flexible_modelling':
+    elif example == 'add_constraints':
         run_add_constraints_example(solver=solver)
-    elif example == 'simple_least_costs':
+    elif example == 'simple_dispatch':
         run_simple_dispatch_example(solver=solver)
-    elif example == 'storage_invest':
+    elif example == 'storage_investment':
         run_storage_investment_example(solver=solver)
     elif example == 'operational_example':
         run_operational_example(solver=solver)
