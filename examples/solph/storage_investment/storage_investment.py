@@ -138,6 +138,16 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
 
 
 def get_result_dict(energysystem):
+    """Shows how to extract single time series from DataFrame.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
+    """
     logging.info('Check the results')
     storage = energysystem.groups['storage']
     myresults = outputlib.DataFramePlot(energy_system=energysystem)

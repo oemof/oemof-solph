@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 
 from oemof.tools import logger
-from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
+from oemof.solph import OperationalModel, EnergySystem
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
 
@@ -116,5 +116,3 @@ def run_operational_example(solver='cbc'):
 
 if __name__ == "__main__":
     run_operational_example()
-
-

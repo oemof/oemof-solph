@@ -73,7 +73,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                             actual_value=data['demand_th'],
                             fixed=True)})
 
-    # Powerplants
+    # Power plants
     LinearTransformer(label='pp_coal',
                       inputs={bcoal: Flow()},
                       outputs={b_el: Flow(nominal_value=20.2,
@@ -106,7 +106,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                b_th: Flow(nominal_value=40)},
                       conversion_factors={b_el: 0.3, b_th: 0.4})
 
-    ################################# optimization ############################
+    # ################################ optimization ############################
     # create Optimization model based on energy_system
     logging.info("Create optimization problem")
     om = OperationalModel(es=energysystem)
@@ -148,7 +148,15 @@ def plot_results(energysystem):
 
 
 def get_results(energysystem):
-    """
+    """Shows how to extract single time series from DataFrame.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
     """
     logging.info('Check the results')
 

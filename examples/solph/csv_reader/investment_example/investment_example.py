@@ -6,7 +6,7 @@ import pandas as pd
 
 from datetime import datetime
 from oemof.tools import logger
-from oemof.solph import OperationalModel, EnergySystem, GROUPINGS, NodesFromCSV
+from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
 
 
 def stopwatch():
@@ -31,12 +31,10 @@ def run_investment_example(solver='cbc'):
 
     data_path = os.path.join(os.path.dirname(__file__), 'data')
 
-    nodes = NodesFromCSV(file_nodes_flows=os.path.join(data_path,
-                                                       'nodes_flows.csv'),
-                         file_nodes_flows_sequences=os.path.join(
-                             data_path,
-                             'nodes_flows_seq.csv'),
-                         delimiter=',')
+    NodesFromCSV(file_nodes_flows=os.path.join(data_path, 'nodes_flows.csv'),
+                 file_nodes_flows_sequences=os.path.join(data_path,
+                                                         'nodes_flows_seq.csv'),
+                 delimiter=',')
 
     stopwatch()
 
@@ -44,7 +42,7 @@ def run_investment_example(solver='cbc'):
 
     logging.info('OM creation time: ' + stopwatch())
 
-    #om.receive_duals()
+    # om.receive_duals()
 
     om.solve(solver=solver, solve_kwargs={'tee': True})
 
@@ -55,4 +53,3 @@ def run_investment_example(solver='cbc'):
 
 if __name__ == '__main__':
     run_investment_example()
-

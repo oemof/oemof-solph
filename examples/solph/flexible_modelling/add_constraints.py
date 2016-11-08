@@ -11,7 +11,7 @@ simon.hilpert@uni-flensburg.de
 import pyomo.environ as po
 import pandas as pd
 from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem, GROUPINGS)
+                         OperationalModel, EnergySystem)
 
 
 def run_add_constraints_example(solver='cbc'):
@@ -41,12 +41,12 @@ def run_add_constraints_example(solver='cbc'):
     # create the model
     om = OperationalModel(es=es)
 
-    # add specific emission values to flow objects if source is a commidty bus
-    for s,t in om.flows.keys():
+    # add specific emission values to flow objects if source is a commodity bus
+    for s, t in om.flows.keys():
         if s is boil:
-            om.flows[s,t].emission_factor = 0.27 # t/MWh
+            om.flows[s, t].emission_factor = 0.27  # t/MWh
         if s is blig:
-            om.flows[s,t].emission_factor = 0.39 # t/MWh
+            om.flows[s, t].emission_factor = 0.39  # t/MWh
     emission_limit = 60e3
 
     # add the outflow share
@@ -64,27 +64,29 @@ def run_add_constraints_example(solver='cbc'):
     myblock.MYFLOWS = po.Set(initialize=[k for (k, v) in om.flows.items()
                                          if hasattr(v, 'outflow_share')])
 
-   # pyomo does not need a po.Set, we can use a simple list as well
-    myblock.COMMODITYFLOWS = [k for (k,v) in om.flows.items()
-                          if hasattr(v, 'emission_factor')]
+    # pyomo does not need a po.Set, we can use a simple list as well
+    myblock.COMMODITYFLOWS = [k for (k, v) in om.flows.items()
+                              if hasattr(v, 'emission_factor')]
 
-    # add the submodel to the oemof OperationalModel instance
+    # add the sub-model to the oemof OperationalModel instance
     om.add_component('MyBlock', myblock)
-    # pyomo rule definition
-    # here we can use all objects from the block or the om object, in this case
-    # we don't need anything from the block except the newly defined set MYFLOWS
+
     def _inflow_share_rule(m, s, e, t):
-        """
+        """pyomo rule definition: Here we can use all objects from the block or
+        the om object, in this case we don't need anything from the block except
+         the newly defined set MYFLOWS.
         """
         expr = (om.flow[s, e, t] >= om.flows[s, e].outflow_share[t] *
-               sum(om.flow[i, o, t] for (i, o) in om.FLOWS if o==e))
+                sum(om.flow[i, o, t] for (i, o) in om.FLOWS if o == e))
         return expr
-        myblock.inflow_share = po.Constraint(myblock.MYFLOWS, om.TIMESTEPS,
-                                          rule=_inflow_share_rule)
+
+    myblock.inflow_share = po.Constraint(myblock.MYFLOWS, om.TIMESTEPS,
+                                         rule=_inflow_share_rule)
     # add emission constraint
     myblock.emission_constr = po.Constraint(expr=(
-            sum(om.flow[i, o, t] for (i,o) in myblock.COMMODITYFLOWS
-                                 for t in om.TIMESTEPS) <= emission_limit))
+            sum(om.flow[i, o, t]
+                for (i, o) in myblock.COMMODITYFLOWS
+                for t in om.TIMESTEPS) <= emission_limit))
 
     # solve and write results to dictionary
     # you may print the model with om.pprint()

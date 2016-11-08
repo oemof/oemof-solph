@@ -1,11 +1,17 @@
-from .solph.csv_reader.investment_example.investment_example import run_investment_example
-from .solph.flexible_modelling.add_constraints import run_add_constraints_example
-from .solph.simple_dispatch.simple_dispatch import run_simple_dispatch_example
-from .solph.storage_investment.storage_investment import run_storage_investment_example
-from .solph.csv_reader.operational_example.operational_example import run_operational_example
+from .solph.csv_reader.investment_example.investment_example import (
+    run_investment_example)
+from .solph.flexible_modelling.add_constraints import (
+    run_add_constraints_example)
+from .solph.simple_dispatch.simple_dispatch import (
+    run_simple_dispatch_example)
+from .solph.storage_investment.storage_investment import (
+    run_storage_investment_example)
+from .solph.csv_reader.operational_example.operational_example import (
+    run_operational_example)
 
 import argparse
 import sys
+
 
 def examples():
     parser = argparse.ArgumentParser(
@@ -21,9 +27,9 @@ def examples():
          * operational_example
          ''')
     parser.add_argument('example', type=str,
-                    help='Example name (from list of examples)')
+                        help='Example name (from list of examples)')
 
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
