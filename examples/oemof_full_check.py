@@ -174,10 +174,10 @@ def run_example_checks():
     check(test_results, testdict[key]['run'], testdict[key])
     # *********** end of flexible modelling example ****************************
 
-    # *********** csv reader dispatch example *******************************
-    key = 'csv_operational'
+    # *********** csv reader dispatch example **********************************
+    key = 'csv_reader_dispatch'
     testdict[key] = {
-        'name': "Operational model with csv reader",
+        'name': "Dispatch model with csv reader",
         'solver': 'cbc',
         'verbose': False,
         'scenario_path': os.path.join(basic_path, 'solph', 'csv_reader',
@@ -188,7 +188,7 @@ def run_example_checks():
         'nodes_flows_sequences': 'example_energy_system_seq.csv', }
 
     try:
-        res = dispatch.run_dispatch_example(config=testdict[key])
+        res = dispatch.run_example(config=testdict[key])
         results = dispatch.create_result_dict(res)
         testdict[key]['run'] = True
     except Exception as e:

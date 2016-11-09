@@ -1,4 +1,4 @@
-from .solph.csv_reader.investment_example.investment_example import (
+from .solph.csv_reader.investment.investment import (
     run_investment_example)
 from .solph.flexible_modelling.add_constraints import (
     run_add_constraints_example)
