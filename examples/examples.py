@@ -22,9 +22,9 @@ def examples():
 
          * storage_investment
          * simple_dispatch
-         * investment
+         * csv_reader_investment
+         * csv_reader_dispatch
          * add_constraints
-         * dispatch
          ''')
     parser.add_argument('example', type=str,
                         help='Example name (from list of examples)')
@@ -39,7 +39,7 @@ def examples():
 
     solver = 'cbc'
 
-    if example == 'investment':
+    if example == 'csv_reader_investment':
         run_investment_example(solver=solver)
     elif example == 'add_constraints':
         run_add_constraints_example(solver=solver)
@@ -47,7 +47,7 @@ def examples():
         run_simple_dispatch_example(solver=solver)
     elif example == 'storage_investment':
         run_storage_investment_example(solver=solver)
-    elif example == 'dispatch':
+    elif example == 'csv_reader_dispatch':
         run_dispatch_example(solver=solver)
     else:
         parser.print_help()
