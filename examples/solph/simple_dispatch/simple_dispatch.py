@@ -113,7 +113,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
 
     # solve with specific optimization options (passed to pyomo)
     logging.info("Solve optimization problem")
-    om.solve(soler=solver,
+    om.solve(solver=solver,
              solve_kwargs={'tee': tee_switch, 'keepfiles': False})
 
     # write back results from optimization object to energysystem
