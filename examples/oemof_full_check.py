@@ -13,7 +13,7 @@ from storage_investment import storage_investment
 from simple_dispatch import simple_dispatch
 from flexible_modelling import add_constraints
 from csv_reader.dispatch import dispatch
-
+from csv_reader.investment import investment
 
 tolerance = 0.001  # percent
 show_messages = True
@@ -204,6 +204,23 @@ def run_example_checks():
 
     check(test_results, testdict[key]['run'], testdict[key], results)
     # *********** end of csv reader operational example ************************
+
+    # *********** csv reader investment example ********************************
+    key = 'csv_reader_investment'
+    testdict[key] = {'name': "Investment model with csv reader",
+                     'solver': 'cbc'}
+
+    try:
+        investment.run_investment_example(solver=testdict[key]['solver'])
+        testdict[key]['run'] = True
+    except Exception as e:
+        testdict[key]['messages'] = {'error': e}
+        testdict[key]['run'] = False
+
+    test_results = {}
+
+    check(test_results, testdict[key]['run'], testdict[key])
+    # *********** end of flexible modelling example ****************************
 
     logger.define_logging()
     for tests in testdict.values():
