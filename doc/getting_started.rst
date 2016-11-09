@@ -17,7 +17,7 @@ Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_
 Documentation
 =============
 
-Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow us at our `wordpress block <https://oemof.wordpress.com>`_.
+Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow us at our `wordpress blog <https://oemof.wordpress.com>`_.
 
 
 Installing oemof
