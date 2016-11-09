@@ -35,10 +35,14 @@ def run_example(config):
 
     logging.info('Done!')
 
-    logging.info('The results can be found in {0}'.format(config['results_path']))
-
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
+
+
+    if('results_path' in config.keys()):
+    	results.to_csv(os.path.join(config['results_path'], 'results.csv'))
+
+    	logging.info('The results can be found in {0}'.format(config['results_path']))    
 
     rdict = {
         'objective': es.results.objective,
@@ -103,7 +107,7 @@ def run_dispatch_example(solver='cbc'):
         'nodes_flows_sequences': os.path.join(
             filepath,
             'example_energy_system_seq.csv'),
-        'results_path': 'results/',  # has to be created in advance!
+        #'results_path': 'results/',  # folder has to be created in advance!
         'solver': solver,
         'verbose': True,
     }
