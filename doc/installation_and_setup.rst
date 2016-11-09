@@ -92,7 +92,7 @@ Install oemof
 
  1. Download latest Anaconda from `here <https://www.continuum.io/downloads#windows>`_ (64 or 32 bit)
  2. Install Anaconda
- 3. Open the 'Anaconda Prompt' and typ: :code:`pip install oemof`
+ 3. Open the 'Anaconda Prompt' and type: :code:`pip install oemof`
  
 
 WinPython
