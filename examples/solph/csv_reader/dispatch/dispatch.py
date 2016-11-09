@@ -87,7 +87,7 @@ def create_result_dict(results):
     return tmp_dict
 
 
-def run_operational_example(solver='cbc'):
+def run_dispatch_example(solver='cbc'):
     logger.define_logging()
 
     filepath = os.path.join(os.path.dirname(__file__), 'scenarios')
@@ -115,4 +115,4 @@ def run_operational_example(solver='cbc'):
 
 
 if __name__ == "__main__":
-    run_operational_example()
+    run_dispatch_example()

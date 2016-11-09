@@ -12,7 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_investment import storage_investment
 from simple_dispatch import simple_dispatch
 from flexible_modelling import add_constraints
-from csv_reader.operational_example import operational_example
+from csv_reader.dispatch import dispatch
 
 
 tolerance = 0.001  # percent
@@ -174,22 +174,22 @@ def run_example_checks():
     check(test_results, testdict[key]['run'], testdict[key])
     # *********** end of flexible modelling example ****************************
 
-    # *********** csv reader operational example *******************************
+    # *********** csv reader dispatch example *******************************
     key = 'csv_operational'
     testdict[key] = {
         'name': "Operational model with csv reader",
         'solver': 'cbc',
         'verbose': False,
         'scenario_path': os.path.join(basic_path, 'solph', 'csv_reader',
-                                      'operational_example', 'scenarios'),
+                                      'dispatch', 'scenarios'),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': 'example_energy_system.csv',
         'nodes_flows_sequences': 'example_energy_system_seq.csv', }
 
     try:
-        res = operational_example.run_example(config=testdict[key])
-        results = operational_example.create_result_dict(res)
+        res = dispatch.run_dispatch_example(config=testdict[key])
+        results = dispatch.create_result_dict(res)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
