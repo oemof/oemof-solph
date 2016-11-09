@@ -203,7 +203,7 @@ def run_example_checks():
         'R2_R1_powerline': 2.277989e+06}
 
     check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of csv reader operational example ************************
+    # *********** end of csv reader dispatch example ***************************
 
     # *********** csv reader investment example ********************************
     key = 'csv_reader_investment'
@@ -220,7 +220,7 @@ def run_example_checks():
     test_results = {}
 
     check(test_results, testdict[key]['run'], testdict[key])
-    # *********** end of flexible modelling example ****************************
+    # *********** end of csv reader investment example *************************
 
     logger.define_logging()
     for tests in testdict.values():
