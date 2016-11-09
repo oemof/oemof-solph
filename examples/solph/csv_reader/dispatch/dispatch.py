@@ -41,7 +41,6 @@ def run_example(config):
 
     if('results_path' in config.keys()):
     	results.to_csv(os.path.join(config['results_path'], 'results.csv'))
-
     	logging.info('The results can be found in {0}'.format(config['results_path']))    
 
     rdict = {
