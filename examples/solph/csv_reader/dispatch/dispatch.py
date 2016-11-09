@@ -33,7 +33,9 @@ def run_example(config):
     om.receive_duals()
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
-    logging.info('Done! \n Check the results')
+    logging.info('Done!')
+
+    logging.info('The results can be found in {0}'.format(config['results_path']))
 
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
@@ -94,8 +96,7 @@ def run_dispatch_example(solver='cbc'):
 
     # configuration
     cfg = {
-        'scenario_path': os.path.join(os.path.dirname(__file__),
-                                      'scenarios'),
+        'scenario_path': os.path.join(os.path.dirname(__file__)),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': os.path.join(filepath, 'example_energy_system.csv'),

@@ -48,7 +48,7 @@ def run_investment_example(solver='cbc'):
 
     logging.info('Optimization time: ' + stopwatch())
 
-    logging.info('Done! \n Check the results')
+    logging.info('Done!')
 
 
 if __name__ == '__main__':
