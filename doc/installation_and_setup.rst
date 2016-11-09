@@ -99,18 +99,10 @@ Using WinPython (community driven)
 
 Skip the steps you have already done. Check your architecture first (32/64 bit)
 
-Install oemof
-
-<<<<<<< HEAD
- 1. Download latest Anaconda from `here <https://www.continuum.io/downloads#windows>`_ (64 or 32 bit)
- 2. Install Anaconda
- 3. Open the 'Anaconda Prompt' and type: :code:`pip install oemof`
-=======
  1. Download latest `WinPython <http://winpython.github.io>`_ for Python 3.x (64 or 32 bit)
  2. Install WinPython
- 3. Open the 'WinPython Command Prompt' and typ: :code:`pip install oemof`
+ 3. Open the 'WinPython Command Prompt' and type: :code:`pip install oemof`
  4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples
->>>>>>> 9a54ec9... include new experience with installation process
  
 
 Using Anaconda (by Continuum Analytics)
@@ -118,11 +110,9 @@ Using Anaconda (by Continuum Analytics)
 
 Skip the steps you have already done. Check your architecture first (32/64 bit)
 
-Install oemof
-
  1. Download latest `Anaconda <https://www.continuum.io/downloads#windows>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
- 3. Open the 'Anaconda Prompt' and typ: :code:`pip install oemof`
+ 3. Open the 'Anaconda Prompt' and type: :code:`pip install oemof`
  4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples
  
 .. _windows_solver_label: 
@@ -173,7 +163,7 @@ If you are a Mac user please help us to improve this installation guide.
 Run examples to check the installation
 ============================================
 
-Run the examples to check the installation. From the command-line (or Anaconda Prompt) execute
+Run the examples to check the installation. From the command-line (or Anaconda Prompt / WinPython Command Prompt) execute:
 
 .. code:: console
 
