@@ -15,19 +15,20 @@ of oemof. If you want to collaborate see description below or contact us.
 Install the developer version
 -----------------------------
 
-To avoid problems make sure you have fully uninstalled previous versions of oemof. Afterwards two steps are necessary to install the developer version:
+To avoid problems make sure you have fully uninstalled previous versions of oemof. It is highly recommended to use a virtual environment. See this `tutorial
+<https://docs.python.org/3/tutorial/venv.html>`_ for more help. Afterwards two steps are necessary to install the developer version:
 
 .. code:: bash
 
   git clone git@github.com:oemof/oemof.git
-  sudo pip3 install -e /path/to/the/repository
+  pip3 install -e /path/to/the/repository
    
   
 Newly added required packages (via PyPi) are installed by performing a manual upgrade of oemof. Therefore, run
 
 .. code:: bash
 
-  sudo pip3 install --upgrade -e /path/to/the/repository
+  pip3 install --upgrade -e /path/to/the/repository
   
 Documentation
 -------------

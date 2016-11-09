@@ -20,14 +20,12 @@ Linux
 If you have Python 3 installed
 ---------------------------------
 
-As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have Python 3 you can install oemof by using pip. Run the following code in your terminal:
+As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have Python 3 you can install oemof by using pip. It is highly recommended to use a virtual environment. See this `tutorial
+<https://docs.python.org/3/tutorial/venv.html>`_ for more help. Run the following code in your python environment:
 
 .. code:: console
 
   pip3 install oemof
-  
-It is highly recommended to use a virtual environment. See this `tutorial
-<https://docs.python.org/3/tutorial/venv.html>`_ for more help.
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
@@ -40,10 +38,22 @@ One way is to install Python 3 through the Linux repositories. If you are using 
 .. code:: console
 
   sudo apt-get install python3
+  sudo apt-get install python3-pip
   
 Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it.
 
 Otherwise you can download different versions of Python via https://www.python.org/downloads/.
+
+Solver
+----------------
+
+In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
+
+There are two common OpenSource solvers available (CBC, GLPK), while oemof recommends CBC (Coin-or branch and cut). But sometimes its worth comparing the results of different solvers.
+
+To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
+
+To learn how to install the solvers (CBC, GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
 Required Python packages
@@ -83,39 +93,54 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
-Using Anaconda (an easy way for Windows users)
+
+Using WinPython (community driven)
+---------------------------------------
+
+Skip the steps you have already done. Check your architecture first (32/64 bit)
+
+Install oemof
+
+<<<<<<< HEAD
+ 1. Download latest Anaconda from `here <https://www.continuum.io/downloads#windows>`_ (64 or 32 bit)
+ 2. Install Anaconda
+ 3. Open the 'Anaconda Prompt' and type: :code:`pip install oemof`
+=======
+ 1. Download latest `WinPython <http://winpython.github.io>`_ for Python 3.x (64 or 32 bit)
+ 2. Install WinPython
+ 3. Open the 'WinPython Command Prompt' and typ: :code:`pip install oemof`
+ 4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples
+>>>>>>> 9a54ec9... include new experience with installation process
+ 
+
+Using Anaconda (by Continuum Analytics)
 ----------------------------------------------
 
 Skip the steps you have already done. Check your architecture first (32/64 bit)
 
 Install oemof
 
- 1. Download latest Anaconda from `here <https://www.continuum.io/downloads#windows>`_ (64 or 32 bit)
+ 1. Download latest `Anaconda <https://www.continuum.io/downloads#windows>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
- 3. Open the 'Anaconda Prompt' and type: :code:`pip install oemof`
+ 3. Open the 'Anaconda Prompt' and typ: :code:`pip install oemof`
+ 4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples
  
+.. _windows_solver_label: 
 
-WinPython
----------------------------------------
+Windows Solver
+----------------
 
-To install python3 download the winpython version suitable for your system from http://winpython.sourceforge.net/ and follow the installation instructions.
+In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
 
-Next, set the system’s PATH variable to include directories that include python components and packages. To do this go to *My Computer -> Properties -> Advanced System Settings -> Environment Variables*. In the User Variables section, edit or create the PATH statement to include the following (make sure to replace the path to winpython by your own path): 
-
-.. code:: console
-
-  C:\winpython;C:\winpython\python\Lib\site-packages\;C:\windpython\python\Scripts\; 
-  
-Solver
-------
-
-You do not have to install both solvers. Oemof recommends the CBC solver. But sometimes its worth comparing the results of different solvers.
+You do not have to install both solvers. Oemof recommends the CBC (Coin-or branch and cut) solver. But sometimes its worth comparing the results of different solvers (e.g. GLPK).
 
  1. Downloaded CBC from here (`64 <http://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <http://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
  2. Download GLPK from `here (64/32 bit) <https://sourceforge.net/projects/winglpk/https://sourceforge.net/projects/winglpk/>`_
  3. Unpacked CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
  5. Restart Windows
+ 
+For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
 Required Python packages
@@ -128,7 +153,7 @@ In order to install a package using pip execute the following and substitute pac
 
 .. code:: console
 
-  pip3 install package_name
+  pip install package_name
 
 For further information on how to install Python modules check out https://docs.python.org/3/installing/. Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
 
@@ -141,18 +166,6 @@ Installation guidelines for Mac OS are not available at the moment. However it s
 You can download python here: https://www.python.org/downloads/mac-osx/. For information on the installation process and on how to install python packages see here: https://docs.python.org/3/using/mac.html.
 
 If you are a Mac user please help us to improve this installation guide.
-
-
-.. _solver_label:
-
-Install solver to use solph
-===========================
-
-In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
-The recommended open-source solver is Cbc (Coin-or branch and cut). 
-See the CBC wiki for download and installation instructions: https://projects.coin-or.org/CoinBinary.
-
-For other solvers (GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
 .. _check_installation_label:
