@@ -37,16 +37,21 @@ from oemof import outputlib
 # Default logger of oemof
 from oemof.tools import logger
 from oemof.tools import helpers
+import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
 import logging
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
-import oemof.solph as solph
+import warnings
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
 
 
-def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
+def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
                           debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
@@ -131,12 +136,22 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
         om.write(filename, io_options={'symbolic_solver_labels': True})
 
     logging.info('Solve the optimization problem')
-    om.solve(solver=solvername, solve_kwargs={'tee': tee_switch})
+    om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     return energysystem
 
 
 def get_result_dict(energysystem):
+    """Shows how to extract single time series from DataFrame.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
+    """
     logging.info('Check the results')
     storage = energysystem.groups['storage']
     myresults = outputlib.DataFramePlot(energy_system=energysystem)
@@ -226,15 +241,22 @@ def create_plots(energysystem):
     plt.show()
 
 
-def run_storage_invest_example():
+def run_storage_investment_example(**kwargs):
     logger.define_logging()
-    esys = optimise_storage_size()
+    esys = optimise_storage_size(**kwargs)
     # esys.dump()
     # esys.restore()
-    import pprint as pp
-    pp.pprint(get_result_dict(esys))
-    create_plots(esys)
+
+    if plt is not None:
+        create_plots(esys)
+    else:
+        import pprint as pp
+        pp.pprint(get_result_dict(esys))
+        msg = ("\nIt is not possible to plot the results, due to a missing " +
+               "python package: 'matplotlib'. \nType 'pip install " +
+               "matplotlib' to see the plots.")
+        warnings.warn(msg)
 
 
 if __name__ == "__main__":
-    run_storage_invest_example()
+    run_storage_investment_example()

@@ -1,11 +1,17 @@
-from .solph.csv_reader.investment_example.investment_example import run_investment_example
-from .solph.flexible_modelling.add_constraints import run_add_constraints_example
-from .solph.simple_least_costs.simple_least_costs import run_simple_least_costs_example
-from .solph.storage_optimization.storage_invest import run_storage_invest_example
-from .solph.csv_reader.operational_example.operational_example import run_operational_example
+from .solph.csv_reader.investment.investment import (
+    run_investment_example)
+from .solph.flexible_modelling.add_constraints import (
+    run_add_constraints_example)
+from .solph.simple_dispatch.simple_dispatch import (
+    run_simple_dispatch_example)
+from .solph.storage_investment.storage_investment import (
+    run_storage_investment_example)
+from .solph.csv_reader.dispatch.dispatch import (
+    run_dispatch_example)
 
 import argparse
 import sys
+
 
 def examples():
     parser = argparse.ArgumentParser(
@@ -14,16 +20,16 @@ def examples():
         epilog='''
         List of examples
 
-         * storage_invest
-         * simple_least_costs
-         * investment
-         * flexible_modelling
-         * operational_example
+         * storage_investment
+         * simple_dispatch
+         * csv_reader_investment
+         * csv_reader_dispatch
+         * add_constraints
          ''')
     parser.add_argument('example', type=str,
-                    help='Example name (from list of examples)')
+                        help='Example name (from list of examples)')
 
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
@@ -31,16 +37,18 @@ def examples():
 
     example = args.example
 
-    if example == 'investment':
-        run_investment_example()
-    elif example == 'flexible_modelling':
-        run_add_constraints_example()
-    elif example == 'simple_least_costs':
-        run_simple_least_costs_example()
-    elif example == 'storage_invest':
-        run_storage_invest_example()
-    elif example == 'operational_example':
-        run_operational_example()
+    solver = 'cbc'
+
+    if example == 'csv_reader_investment':
+        run_investment_example(solver=solver)
+    elif example == 'add_constraints':
+        run_add_constraints_example(solver=solver)
+    elif example == 'simple_dispatch':
+        run_simple_dispatch_example(solver=solver)
+    elif example == 'storage_investment':
+        run_storage_investment_example(solver=solver)
+    elif example == 'csv_reader_dispatch':
+        run_dispatch_example(solver=solver)
     else:
         parser.print_help()
         sys.exit(1)

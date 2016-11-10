@@ -5,9 +5,11 @@ import logging
 import pandas as pd
 
 from oemof.tools import logger
-from oemof.solph import OperationalModel, EnergySystem, GROUPINGS
+from oemof.solph import OperationalModel, EnergySystem
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
+
+from matplotlib import pyplot as plt
 
 
 def run_example(config):
@@ -33,10 +35,16 @@ def run_example(config):
     om.receive_duals()
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
-    logging.info('Done! \n Check the results')
+    logging.info("Done!")
 
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
+
+    results.to_csv(os.path.join(config['results_path'], 'results.csv'))
+    logging.info("The results can be found in {0}".format(
+        config['results_path']))
+    logging.info("Read the documentation (outputlib) to learn how to process " +
+                 "the results.")
 
     rdict = {
         'objective': es.results.objective,
@@ -47,6 +55,13 @@ def run_example(config):
 
 
 def plotting(results):
+    """ Plotting some results
+
+    Parameters
+    ----------
+    results : dictionary
+        Solph's results dictionary.
+    """
 
     # plotting (exemplary)
     # thesis:
@@ -72,6 +87,8 @@ def plotting(results):
     # scatterplot: can our thesis can be confirmed?
     r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
 
+    plt.show()
+
 
 def create_result_dict(results):
     """Create a result dictionary for testing purposes."""
@@ -87,25 +104,23 @@ def create_result_dict(results):
     return tmp_dict
 
 
-def run_operational_example():
+def run_dispatch_example(solver='cbc'):
     logger.define_logging()
-
-    filepath = os.path.join(os.path.dirname(__file__), 'scenarios')
 
     # configuration
     cfg = {
-        'scenario_path': os.path.join(os.path.dirname(__file__),
-                                      'scenarios'),
+        'scenario_path': os.path.join(os.path.dirname(__file__), 'scenarios'),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
-        'nodes_flows': os.path.join(filepath, 'example_energy_system.csv'),
-        'nodes_flows_sequences': os.path.join(
-            filepath,
-            'example_energy_system_seq.csv'),
-        'results_path': 'results/',  # has to be created in advance!
-        'solver': 'glpk',
-        'verbose': True,
+        'nodes_flows': 'example_energy_system.csv',
+        'nodes_flows_sequences': 'example_energy_system_seq.csv',
+        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
+        'solver': solver,
+        'verbose': False,  # Set to True to see solver outputs
     }
+
+    if not os.path.isdir(cfg['results_path']):
+        os.mkdir(cfg['results_path'])
 
     my_results = run_example(config=cfg)
 
@@ -115,6 +130,4 @@ def run_operational_example():
 
 
 if __name__ == "__main__":
-    run_operational_example()
-
-
+    run_dispatch_example()

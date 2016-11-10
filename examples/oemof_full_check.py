@@ -9,11 +9,11 @@ from oemof.tools import logger
 
 # add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
-from storage_optimization import storage_invest
-from simple_least_costs import simple_least_costs
+from storage_investment import storage_investment
+from simple_dispatch import simple_dispatch
 from flexible_modelling import add_constraints
-from csv_reader.operational_example import operational_example
-
+from csv_reader.dispatch import dispatch
+from csv_reader.investment import investment
 
 tolerance = 0.001  # percent
 show_messages = True
@@ -79,13 +79,13 @@ def run_example_checks():
     number_of_timesteps = 500
 
     try:
-        esys = storage_invest.optimise_storage_size(
+        esys = storage_investment.optimise_storage_size(
             number_timesteps=number_of_timesteps,
-            solvername=testdict[key]['solver'], debug=False,
+            solver=testdict[key]['solver'], debug=False,
             tee_switch=False)
         esys.dump()
         esys.restore()
-        results = storage_invest.get_result_dict(esys)
+        results = storage_investment.get_result_dict(esys)
         testdict[key]['run'] = True
 
     except Exception as e:
@@ -124,11 +124,11 @@ def run_example_checks():
     testdict[key] = {'name': "Simple least costs optimization", 'solver': 'cbc'}
 
     try:
-        esys = simple_least_costs.initialise_energysystem(periods=2000)
-        simple_least_costs.simulate(esys,
+        esys = simple_dispatch.initialise_energysystem(periods=2000)
+        simple_dispatch.simulate(esys,
                                     solver=testdict[key]['solver'],
                                     tee_switch=False)
-        results = simple_least_costs.get_results(esys)
+        results = simple_dispatch.get_results(esys)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -174,22 +174,22 @@ def run_example_checks():
     check(test_results, testdict[key]['run'], testdict[key])
     # *********** end of flexible modelling example ****************************
 
-    # *********** csv reader operational example *******************************
-    key = 'csv_operational'
+    # *********** csv reader dispatch example **********************************
+    key = 'csv_reader_dispatch'
     testdict[key] = {
-        'name': "Operational model with csv reader",
+        'name': "Dispatch model with csv reader",
         'solver': 'cbc',
         'verbose': False,
         'scenario_path': os.path.join(basic_path, 'solph', 'csv_reader',
-                                      'operational_example', 'scenarios'),
+                                      'dispatch', 'scenarios'),
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': 'example_energy_system.csv',
         'nodes_flows_sequences': 'example_energy_system_seq.csv', }
 
     try:
-        res = operational_example.run_example(config=testdict[key])
-        results = operational_example.create_result_dict(res)
+        res = dispatch.run_example(config=testdict[key])
+        results = dispatch.create_result_dict(res)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -203,7 +203,24 @@ def run_example_checks():
         'R2_R1_powerline': 2.277989e+06}
 
     check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of csv reader operational example ************************
+    # *********** end of csv reader dispatch example ***************************
+
+    # *********** csv reader investment example ********************************
+    key = 'csv_reader_investment'
+    testdict[key] = {'name': "Investment model with csv reader",
+                     'solver': 'cbc'}
+
+    try:
+        investment.run_investment_example(solver=testdict[key]['solver'])
+        testdict[key]['run'] = True
+    except Exception as e:
+        testdict[key]['messages'] = {'error': e}
+        testdict[key]['run'] = False
+
+    test_results = {}
+
+    check(test_results, testdict[key]['run'], testdict[key])
+    # *********** end of csv reader investment example *************************
 
     logger.define_logging()
     for tests in testdict.values():

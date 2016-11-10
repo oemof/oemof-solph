@@ -15,7 +15,7 @@ import os
 
 # solph imports
 from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem, GROUPINGS)
+                         OperationalModel, EnergySystem)
 import oemof.outputlib as output
 from oemof.tools import logger
 
@@ -35,7 +35,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     """
     """
     if filename is None:
-        filename = os.path.join(os.path.dirname(__file__), 'example_data.csv')
+        filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
     logging.info("Creating objects")
     data = pd.read_csv(filename, sep=",")
     # resource buses
@@ -73,7 +73,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                             actual_value=data['demand_th'],
                             fixed=True)})
 
-    # Powerplants
+    # Power plants
     LinearTransformer(label='pp_coal',
                       inputs={bcoal: Flow()},
                       outputs={b_el: Flow(nominal_value=20.2,
@@ -106,14 +106,14 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                b_th: Flow(nominal_value=40)},
                       conversion_factors={b_el: 0.3, b_th: 0.4})
 
-    ################################# optimization ############################
+    # ################################ optimization ############################
     # create Optimization model based on energy_system
     logging.info("Create optimization problem")
     om = OperationalModel(es=energysystem)
 
     # solve with specific optimization options (passed to pyomo)
     logging.info("Solve optimization problem")
-    om.solve(soler=solver,
+    om.solve(solver=solver,
              solve_kwargs={'tee': tee_switch, 'keepfiles': False})
 
     # write back results from optimization object to energysystem
@@ -148,7 +148,15 @@ def plot_results(energysystem):
 
 
 def get_results(energysystem):
-    """
+    """Shows how to extract single time series from DataFrame.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
     """
     logging.info('Check the results')
 
@@ -164,14 +172,14 @@ def get_results(energysystem):
     return rdict
 
 
-def run_simple_least_costs_example():
+def run_simple_dispatch_example(**kwargs):
     import pprint as pp
     logger.define_logging()
     esys = initialise_energysystem()
-    om = simulate(esys)
+    simulate(esys, **kwargs)
     plot_results(esys)
     pp.pprint(get_results(esys))
 
 
 if __name__ == "__main__":
-    run_simple_least_costs_example()
+    run_simple_dispatch_example()
