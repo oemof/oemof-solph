@@ -38,11 +38,8 @@ One way is to install Python 3 through the Linux repositories. If you are using 
 .. code:: console
 
   sudo apt-get install python3
-  sudo apt-get install python3-pip
   
-Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it.
-
-Otherwise you can download different versions of Python via https://www.python.org/downloads/.
+Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it. Otherwise you can download different versions of Python via https://www.python.org/downloads/.
 
 Solver
 ----------------
