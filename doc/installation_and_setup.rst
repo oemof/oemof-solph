@@ -91,7 +91,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip3 install oemof
 
-If you do not yet have pip installed, see section "Required Python packages" below for further help.
+If you do not yet have pip installed, see section "Required Python packages" below for further help or use WinPython/Anaconda (see below).
 
 
 Using WinPython (community driven)
