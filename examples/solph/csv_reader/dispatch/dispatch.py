@@ -35,15 +35,16 @@ def run_example(config):
     om.receive_duals()
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
-    logging.info('Done!')
+    logging.info("Done!")
 
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
 
-
-    if('results_path' in config.keys()):
-    	results.to_csv(os.path.join(config['results_path'], 'results.csv'))
-    	logging.info('The results can be found in {0}'.format(config['results_path']))    
+    results.to_csv(os.path.join(config['results_path'], 'results.csv'))
+    logging.info("The results can be found in {0}".format(
+        config['results_path']))
+    logging.info("Read the documentation (outputlib) to learn how to process " +
+                 "the results.")
 
     rdict = {
         'objective': es.results.objective,
@@ -113,9 +114,13 @@ def run_dispatch_example(solver='cbc'):
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': 'example_energy_system.csv',
         'nodes_flows_sequences': 'example_energy_system_seq.csv',
+        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
         'solver': solver,
         'verbose': True,
     }
+
+    if not os.path.isdir(cfg['results_path']):
+        os.mkdir(cfg['results_path'])
 
     my_results = run_example(config=cfg)
 
