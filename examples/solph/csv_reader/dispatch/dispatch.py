@@ -54,6 +54,13 @@ def run_example(config):
 
 
 def plotting(results):
+    """ Plotting some results
+
+    Parameters
+    ----------
+    results : dictionary
+        Solph's results dictionary.
+    """
 
     # plotting (exemplary)
     # thesis:
