@@ -1,15 +1,11 @@
 v0.1.2 ()
 ++++++++++++++++++++++++++
 
-
-API changes
-###########
- 
-
-
-
 New features
 ############
+
+* revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof_base/issues/238>`_)
+* 
 
 
 
@@ -40,6 +36,8 @@ Other changes
 Contributors
 ############
  
- * First
- * Second
+ * Cord Kaldemeyer
+ * Guido Plessmann
+ * Uwe Krien
+ * Simon Hilpert
 
