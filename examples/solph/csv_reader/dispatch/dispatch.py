@@ -116,7 +116,7 @@ def run_dispatch_example(solver='cbc'):
         'nodes_flows_sequences': 'example_energy_system_seq.csv',
         'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
         'solver': solver,
-        'verbose': True,
+        'verbose': False,  # Set to True to see solver outputs
     }
 
     if not os.path.isdir(cfg['results_path']):
