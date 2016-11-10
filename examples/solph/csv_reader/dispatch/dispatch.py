@@ -9,6 +9,8 @@ from oemof.solph import OperationalModel, EnergySystem
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
 
+from matplotlib import pyplot as plt
+
 
 def run_example(config):
     # misc.
@@ -76,6 +78,8 @@ def plotting(results):
 
     # scatterplot: can our thesis can be confirmed?
     r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
+
+    plt.show()
 
 
 def create_result_dict(results):
