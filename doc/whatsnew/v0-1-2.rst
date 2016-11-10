@@ -4,10 +4,8 @@ v0.1.2 ()
 New features
 ############
 
-* revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof_base/issues/238>`_)
-* 
-
-
+* revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof_base/issues/238>`_, `issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
+* add option to choose solver when executing the examples (`issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
 
 
 Documentation
