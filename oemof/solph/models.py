@@ -120,8 +120,8 @@ class OperationalModel(po.ConcreteModel):
 
         if self.timesteps is None:
             raise ValueError("Missing timesteps!")
-        self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        self._constraint_groups.extend(kwargs.get('constraint_groups', []))
+        self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
+                                   kwargs.get('constraint_groups', []))
 
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
