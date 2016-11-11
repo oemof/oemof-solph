@@ -1,17 +1,10 @@
 v0.1.2 ()
 ++++++++++++++++++++++++++
 
-
-API changes
-###########
- 
-
-
-
 New features
 ############
 
-
+* New transformer class added (child class of LinearTransformer). This class will represent transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof_base/issues/248>`_)
 
 
 Documentation
@@ -40,6 +33,5 @@ Other changes
 Contributors
 ############
  
- * First
- * Second
+ * Uwe Krien
 
