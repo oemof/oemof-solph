@@ -262,16 +262,16 @@ The annual savings by building up new capacity has therefore compensate the annu
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
 
 Basically an instance of the investment class can be added to a Flow or a Storage. Adding an investment object the *nominal_value* or *nominal_capacity* should not be set.
-All parameters the usually refer to the *nominal_value/capacity* will now refer to the investment variable. There it is still possible to set bounds depending on the capacity that will be build.
+All parameters that usually refer to the *nominal_value/capacity* will now refer to the investment variable. It is also possible to set a maximum limit for the capacity that can be build.
 
 For example if you want to find out what would be the optimal capacity of a wind power plant to decrease the costs of an existing energy system you can define this model and add an investment source.
-The *wind_power_time_series* has to be a normalised feed-in time series of you wind power plant.
+The *wind_power_time_series* has to be a normalised feed-in time series of you wind power plant. The maximum value might be caused by limited space for wind turbines.
 
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
         actual_value=wind_power_time_series, fixed=True,
-	investment=solph.Investment(ep_costs=epc))})
+	investment=solph.Investment(ep_costs=epc, maximum=50000))})
 
 The periodical cost are typically calculated as follows:
 
@@ -292,6 +292,8 @@ The following code shows a storage with an investment object.
         nominal_input_capacity_ratio=1/6, nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.99, outflow_conversion_factor=0.8,
         investment=solph.Investment(ep_costs=epc))
+        
+.. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
 
 
 Mixed Integer (Linear) Problems
