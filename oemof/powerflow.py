@@ -114,19 +114,22 @@ if __name__ == "__main__":
     es = EnergySystem(groupings=GROUPINGS)
     # do not now why this must be added explicitly, usally it should work
     # without explicit adding
+    es.add(Bus(label='Coal'))
 
-    #
     for i in range(3):
         es.add(Bus(label="My Bus {}".format(i)))
 
     for i in range(3):
         es.add(Line(label='My Line {}'.format(i), reactance=10+i,
-                    inputs={es.groups['My Bus {}'.format(i)]: Flow()},
-                    outputs={es.groups['My Bus {}'.format((i+1)%3)]: Flow()}
+                    inputs={
+                        es.groups['My Bus {}'.format(i)]: Flow()},
+                    outputs={
+                        es.groups['My Bus {}'.format((i+1)%3)]: Flow()}
                     )
                 )
     es.add(Generator(label='My gen 0',
-                     inputs={},
+                     inputs={
+                         es.groups['Coal']: Flow()},
                      outputs={
                          es.groups['My Bus 0']: Flow(nominal_value=100,
                                                      variable_costs=50)}
@@ -140,4 +143,3 @@ if __name__ == "__main__":
                 )
 
     es.populate_network()
-
