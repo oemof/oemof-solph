@@ -24,7 +24,6 @@ class EnergySystem(energy_system.EnergySystem):
     def populate_network(self):
         """
         """
-
         for n in self.groups.get(Bus, []):
             self.network.add('Bus', n.label)
 
@@ -32,7 +31,9 @@ class EnergySystem(energy_system.EnergySystem):
             self.network.add('Line', n.label,
                              bus0=list(n.inputs.keys())[0].label,
                              bus1=list(n.outputs.keys())[0].label,
-                             x=n.reactance)
+                             x=n.reactance,
+                             s_nom=list(n.outputs.values())[0].nominal_value)
+
         for n in self.groups.get(Generator, []):
             # get the output bus
             out = list(n.outputs.keys())[0]
@@ -47,6 +48,9 @@ class EnergySystem(energy_system.EnergySystem):
             self.network.add('Load', n.label,
                              bus=k.label,
                              p_set=n.inputs[k].nominal_value)
+
+    def results(self):
+        pass
 
 
 class Flow:
@@ -120,11 +124,12 @@ if __name__ == "__main__":
         es.add(Bus(label="My Bus {}".format(i)))
 
     for i in range(3):
-        es.add(Line(label='My Line {}'.format(i), reactance=10+i,
+        es.add(Line(label='My Line {}'.format(i), reactance=0.001,
                     inputs={
                         es.groups['My Bus {}'.format(i)]: Flow()},
                     outputs={
-                        es.groups['My Bus {}'.format((i+1)%3)]: Flow()}
+                        es.groups['My Bus {}'.format((i+1)%3)]:
+                            Flow(nominal_value=60)}
                     )
                 )
     es.add(Generator(label='My gen 0',
@@ -135,6 +140,14 @@ if __name__ == "__main__":
                                                      variable_costs=50)}
                      )
                 )
+    es.add(Generator(label='My gen 1',
+                     inputs={
+                         es.groups['Coal']: Flow()},
+                     outputs={
+                         es.groups['My Bus 1']: Flow(nominal_value=100,
+                                                     variable_costs=25)}
+                     )
+                )
     es.add(Demand(label='My load 0',
                   inputs={
                       es.groups['My Bus 2']: Flow(nominal_value=100)},
@@ -143,3 +156,6 @@ if __name__ == "__main__":
                 )
 
     es.populate_network()
+    es.network.lopf()
+
+    print(es.network.generators_t.p)
