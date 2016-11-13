@@ -399,8 +399,8 @@ Csv_reader
 
 The csv-reader provides an easy to use interface to the solph library. The objects are defined using csv-files and are automatically created. There are two examples available.
 
- * Operational example (:download:`source file <../examples/solph/csv_reader/operational_example/operational_example.py>`, :download:`data file 1 <../examples/solph/csv_reader/operational_example/scenarios/example_energy_system.csv>`, :download:`data file 2 <../examples/solph/csv_reader/operational_example/scenarios/example_energy_system_seq.csv>`)
- * Investment example (:download:`source file <../examples/solph/csv_reader/investment_example/investment_example.py>`, :download:`data file 1 <../examples/solph/csv_reader/investment_example/data/nodes_flows.csv>`, :download:`data file 2 <../examples/solph/csv_reader/investment_example/data/nodes_flows_seq.csv>`).
+ * Dispatch example (:download:`source file <../examples/solph/csv_reader/dispatch/dispatch.py>`, :download:`data file 1 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system.csv>`, :download:`data file 2 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system_seq.csv>`)
+ * Investment example (:download:`source file <../examples/solph/csv_reader/investment/investment.py>`, :download:`data file 1 <../examples/solph/csv_reader/investment/data/nodes_flows.csv>`, :download:`data file 2 <../examples/solph/csv_reader/investment/data/nodes_flows_seq.csv>`).
 
 .. _solph_examples_flex_label:
 
@@ -409,13 +409,13 @@ Flexible modelling
 
 It is also possible to pass constraints to the model that are not provided by solph but defined in your application. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
 
-Simple_least_costs
+Dispatch modelling
 ^^^^^^^^^^^^^^^^^^^
 
-A least cost optimisation is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. (:download:`source file <../examples/solph/simple_least_costs/simple_least_costs.py>`, :download:`data file <../examples/solph/simple_least_costs/example_data.csv>`).
+Dispatch modelling is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. (:download:`source file <../examples/solph/simple_dispatch/simple_dispatch.py>`, :download:`data file <../examples/solph/simple_dispatch/input_data.csv>`).
 
-Storage_optimization
-^^^^^^^^^^^^^^^^^^^^
+Storage investment
+^^^^^^^^^^^^^^^^^^
 
-The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_optimization/storage_invest.py>`, :download:`data file <../examples/solph/storage_optimization/storage_invest.csv>`).
+The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_investment/storage_investment.py>`, :download:`data file <../examples/solph/storage_investment/storage_investment.csv>`).
 

@@ -168,16 +168,16 @@ Run the examples to check the installation. From the command-line (or Anaconda P
 
 You can choose from the list of examples
 
- * storage_invest (solph)
- * simple_least_costs (solph)
- * investment (solph)
+ * storage_investment (solph)
+ * simple_dispatch (solph)
+ * csv_reader_investment (solph)
  * flexible_modelling (solph)
- * operational_example (solph)
+ * csv_reader_dispatch (solph)
 
 For example
 
 .. code:: console
 
-  oemof_example simple_least_costs
+  oemof_example simple_dispatch
 
 If you want to run solph examples you need to have the CBC solver installed, see the ":ref:`solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
