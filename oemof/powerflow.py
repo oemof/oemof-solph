@@ -4,7 +4,12 @@
 Open questions:
  - We usually have transformers for lines. We need to decide where to put
    physical properties of the pypsa line (node, inflow or ouflow?).
+ - How do we differentiate between 'carrier' and 'bus' ? do we use ElectricalBus
+ - If we had HUB, this would be easier: Hub -> Bus, Hub -> CommodityHub
 
+oemof feedback questions
+ - Why does the energysystem not hold the optimization model? I think it might
+   make sense to put it together etc.
 
 """
 import network
@@ -21,7 +26,7 @@ class EnergySystem(energy_system.EnergySystem):
         self.network = pypsa.Network()
 
 
-    def populate_network(self):
+    def _populate_network(self):
         """
         """
         for n in self.groups.get(Bus, []):
@@ -49,8 +54,26 @@ class EnergySystem(energy_system.EnergySystem):
                              bus=k.label,
                              p_set=n.inputs[k].nominal_value)
 
-    def results(self):
-        pass
+
+
+    def linear_optimal_power_flow(self):
+        """
+        This mehtod will take the oemof object and fill the pypsa network
+        to perform
+        """
+        # where can we put this?
+
+        self.generators = {(source.label, target.label): source.outputs[target]
+                           for source in es.groups[Generator]
+                           for target in source.outputs}
+        self._populate_network()
+        self.network.lopf()
+
+        # TODO: extract pyomo model results to produc
+        # 'standard oemof result dict'
+        self.lopf_results = {}
+
+
 
 
 class Flow:
@@ -68,6 +91,7 @@ class Bus(network.Bus):
         """
         """
         super().__init__(*args, **kwargs)
+
 
 class Line(network.Transformer):
     """
@@ -88,8 +112,9 @@ class Generator(network.Transformer):
         """
         """
         super().__init__(self, *args, **kwargs)
-
-
+        self.conversion_factors = {
+            k: v
+            for k, v in kwargs.get('conversion_factors', {}).items()}
 
 class Demand(network.Sink):
     """
@@ -99,11 +124,12 @@ class Demand(network.Sink):
         """
         super().__init__(self, *args, **kwargs)
 
-
+# just for now, we wil have commitybus or something similar later
+commodities = ['Coal', 'gas', 'lignite']
 def node_grouping(node):
     """
     """
-    if isinstance(node, Bus):
+    if isinstance(node, Bus) and node.label not in commodities:
         return Bus
     if isinstance(node, Demand):
         return Demand
@@ -137,7 +163,8 @@ if __name__ == "__main__":
                          es.groups['Coal']: Flow()},
                      outputs={
                          es.groups['My Bus 0']: Flow(nominal_value=100,
-                                                     variable_costs=50)}
+                                                     variable_costs=50)},
+                     conversion_factors = {es.groups['My Bus 0']: 0.4}
                      )
                 )
     es.add(Generator(label='My gen 1',
@@ -155,7 +182,7 @@ if __name__ == "__main__":
                      )
                 )
 
-    es.populate_network()
-    es.network.lopf()
+    #es._populate_network()
+    es.linear_optimal_power_flow()
 
     print(es.network.generators_t.p)
