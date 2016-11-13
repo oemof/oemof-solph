@@ -8,7 +8,7 @@ from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
 from pyomo.core.base.block import SimpleBlock
 from .plumbing import LConstraint, LExpression, linear_constraint
 import timeit
-fast_build = True
+
 
 class Storage(SimpleBlock):
     """ Storages (no investment)
@@ -818,7 +818,7 @@ class LinearTransformer(SimpleBlock):
         I = {n: n._input() for n in group}
         O = {n: [o for o in n.outputs.keys()] for n in group}
 
-        fast_build = False
+        fast_build = True
         start = timeit.default_timer()
         if not fast_build:
             self.relation = Constraint(group, noruleinit=True)
@@ -845,15 +845,16 @@ class LinearTransformer(SimpleBlock):
                         lhs = LExpression(variables=[(n.conversion_factors[o][t],
                                                       m.flow[I[n], n, t])])
                         rhs = LExpression(variables=[(1, m.flow[n, o, t])])
-                    input_output_relation[n, o, t] = LConstraint(lhs, '==', rhs)
+                        input_output_relation[(n, o, t)] = LConstraint(lhs, '==', rhs)
 
-            linear_constraint(self, 'relation_build',
+            linear_constraint(self, 'relation',
                               input_output_relation,
                               indices=[k for k in input_output_relation.keys()])
-
+            import pdb
+            pdb.set_trace()
         stop = timeit.default_timer()
-        #print('Time for relation constraint, fast {}: '.format(str(fast_build)),
-        #      stop - start)
+        print('Time for relation constraint, fast {}: '.format(str(fast_build)),
+              stop - start)
 
 
 class BinaryFlow(SimpleBlock):
