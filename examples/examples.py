@@ -28,6 +28,12 @@ def examples():
          ''')
     parser.add_argument('example', type=str,
                         help='Example name (from list of examples)')
+    parser.add_argument('--solver', '-s',
+                        default='cbc',
+                        help="Note that chosen solver must be installed and "
+                             "linked to Pyomo.",
+                        dest='solver',
+                        choices=['cbc', 'glpk', 'gurobi'])
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -37,7 +43,7 @@ def examples():
 
     example = args.example
 
-    solver = 'cbc'
+    solver = args.solver
 
     if example == 'csv_reader_investment':
         run_investment_example(solver=solver)

@@ -166,7 +166,7 @@ Run the examples to check the installation. From the command-line (or Anaconda P
 
 .. code:: console
 
-  oemof_example <name-of-example>
+  oemof_example <name-of-example> [-s <name-of-solver>]
 
 You can choose from the list of examples
 
@@ -182,4 +182,4 @@ For example
 
   oemof_example simple_dispatch
 
-If you want to run solph examples you need to have the CBC solver installed, see the ":ref:`solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
+If you want to run solph examples you need to have installed the CBC solver or any other solver that is specified by the user, see the ":ref:`solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
