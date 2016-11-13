@@ -818,7 +818,7 @@ class LinearTransformer(SimpleBlock):
         I = {n: n._input() for n in group}
         O = {n: [o for o in n.outputs.keys()] for n in group}
 
-        fast_build = True
+        fast_build = False
         start = timeit.default_timer()
         if not fast_build:
             self.relation = Constraint(group, noruleinit=True)
@@ -842,16 +842,15 @@ class LinearTransformer(SimpleBlock):
             for t in m.TIMESTEPS:
                 for n in group:
                     for o in O[n]:
-                        lhs = LExpression(variables=[(n.conversion_factors[o][t],
-                                                      m.flow[I[n], n, t])])
-                        rhs = LExpression(variables=[(1, m.flow[n, o, t])])
+                        lhs = LExpression(variables=[
+                            (n.conversion_factors[o][t], m.flow[I[n], n, t]),
+                            (-1, m.flow[n, o, t])])
+                        rhs = LExpression()
                         input_output_relation[(n, o, t)] = LConstraint(lhs, '==', rhs)
 
             linear_constraint(self, 'relation',
                               input_output_relation,
                               indices=[k for k in input_output_relation.keys()])
-            import pdb
-            pdb.set_trace()
         stop = timeit.default_timer()
         print('Time for relation constraint, fast {}: '.format(str(fast_build)),
               stop - start)
