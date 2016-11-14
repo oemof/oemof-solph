@@ -52,10 +52,27 @@ class EnergySystem(energy_system.EnergySystem):
         for n in self.groups.get(Generator, []):
             # get the output bus
             out = list(n.outputs.keys())[0]
+            if n.outputs[out].fixed:
+                dispatch = 'variable'
+            else:
+                dispatch = 'flexible'
+            if isinstance(n.outputs[out].investment, Investment):
+                invest = True
+                capital_cost = n.outputs[out].investment.ep_costs
+            else:
+                invest = False
+                capital_cost = 0
             self.network.add('Generator', n.label,
                              bus=out.label,
                              p_nom=n.outputs[out].nominal_value,
-                             marginal_cost=n.outputs[out].variable_costs)
+                             dispatch=dispatch,
+                             p_nom_extendable=invest,
+                             capital_costs=capital_cost,
+                             marginal_cost=n.outputs[out].variable_costs,
+                             p_min_pu=n.outputs[out].min,
+                             p_max_pu=n.outputs[out].max,
+                             p_min_pu_fixed=n.outputs[out].min,
+                             p_max_pu_fixed=n.outputs[out].max)
 
         for n in self.groups.get(Demand, []):
             # get the output bus
@@ -72,17 +89,19 @@ class EnergySystem(energy_system.EnergySystem):
         for n in self.groups.get(Storage, []):
             if isinstance(n.investment, Investment) :
                 invest = True
+                capital_costs = n.investment.ep_costs
             else:
                 invest = False
-            b = list(n.outputs.keys())[0]
+                capital_costs = 0
 
+            b = list(n.outputs.keys())[0]
             self.network.add("Store", n.label,
                              bus=b.label,
                              e_nom = n.nominal_capacity,
                              e_cyclic=True,  # Whats this for ????
                              e_nom_extendable=invest,
                              standing_loss=n.capacity_loss,
-                             capital_cost=n.investment.ep_costs)
+                             capital_cost=capital_costs)
 
     def linear_optimal_power_flow(self):
         """
@@ -96,7 +115,9 @@ class EnergySystem(energy_system.EnergySystem):
                            for target in source.outputs}
         self._create_network()
         self._populate_network()
-        self.network.lopf()
+        # this is kind of strange, but we need to pass snapshots to the lopf
+        # method, otherwise it'll be 'now' and this won't work with a set timeindex
+        self.network.lopf(snapshots=self.network.snapshots)
 
         # TODO: extract pyomo model results to produc
         # 'standard oemof result dict'
@@ -108,7 +129,11 @@ class Flow:
     def __init__(self, *args, **kwargs):
         self.nominal_value = kwargs.get('nominal_value', 1)
         self.variable_costs = kwargs.get('variable_costs', 0)
-        self.actual_value = kwargs.get('actual_value', Sequence(1))
+        self.actual_value = kwargs.get('actual_value', 1)
+        self.min = kwargs.get('min', 0)
+        self.max = kwargs.get('max', 1)
+        self.fixed = kwargs.get('fixed', False)
+        self.investment = kwargs.get('investment', False)
 
 class Bus(network.Bus):
     """
@@ -222,7 +247,7 @@ if __name__ == "__main__":
                          es.groups['My Bus 0']: Flow(variable_costs=25)},
                      nominal_capacity = 1,
                      capacity_loss  = 0.009,
-                     investment = Investment(ep_costs=10)
+                     investment = Investment(ep_costs=100000)
                      )
                 )
     es.add(Demand(label='My load 0',
