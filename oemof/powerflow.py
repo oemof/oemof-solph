@@ -6,6 +6,8 @@ Open questions:
    physical properties of the pypsa line (node, inflow or ouflow?).
  - How do we differentiate between 'carrier' and 'bus' ? do we use ElectricalBus
  - If we had HUB, this would be easier: Hub -> Bus, Hub -> CommodityHub
+ - Creating generator as source? would be enough for pyPSA, but we should
+   probably stick with transformer
 
 oemof feedback questions
  - Why does the energysystem not hold the optimization model? I think it might
@@ -14,6 +16,7 @@ oemof feedback questions
 """
 import network
 import energy_system
+from solph import Investment
 import pypsa
 
 class EnergySystem(energy_system.EnergySystem):
@@ -49,12 +52,25 @@ class EnergySystem(energy_system.EnergySystem):
 
         for n in self.groups.get(Demand, []):
             # get the output bus
-            k = list(n.inputs.keys())[0]
+            b = list(n.inputs.keys())[0]
             self.network.add('Load', n.label,
-                             bus=k.label,
-                             p_set=n.inputs[k].nominal_value)
+                             bus=b.label,
+                             p_set=n.inputs[b].nominal_value)
 
+        for n in self.groups.get(Storage, []):
+            if isinstance(n.investment, Investment) :
+                invest = True
+            else:
+                invest = False
+            b = list(n.outputs.keys())[0]
 
+            self.network.add("Store", n.label,
+                             bus=b.label,
+                             e_nom = n.nominal_capacity,
+                             e_cyclic=True,  # Whats this for ????
+                             e_nom_extendable=invest,
+                             standing_loss=n.capacity_loss,
+                             capital_cost=n.investment.ep_costs)
 
     def linear_optimal_power_flow(self):
         """
@@ -72,9 +88,6 @@ class EnergySystem(energy_system.EnergySystem):
         # TODO: extract pyomo model results to produc
         # 'standard oemof result dict'
         self.lopf_results = {}
-
-
-
 
 class Flow:
     """
@@ -100,10 +113,19 @@ class Line(network.Transformer):
         """
         """
         super().__init__(*args, **kwargs)
-
         self.reactance = kwargs.get('reactance')
 
 
+class Storage(network.Transformer):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        """
+        super().__init__(*args, **kwargs)
+        self.nominal_capacity = kwargs.get('nominal_capacity', 0.0)
+        self.capacity_loss = kwargs.get('capacity_loss', 0.0)
+        self.investment = kwargs.get('investment', False)
 
 class Generator(network.Transformer):
     """
@@ -137,6 +159,8 @@ def node_grouping(node):
         return Generator
     if isinstance(node, Line):
         return Line
+    if isinstance(node, Storage):
+        return Storage
 
 
 if __name__ == "__main__":
@@ -173,6 +197,16 @@ if __name__ == "__main__":
                      outputs={
                          es.groups['My Bus 1']: Flow(nominal_value=100,
                                                      variable_costs=25)}
+                     )
+                )
+    es.add(Storage(label='My stor 1',
+                     inputs={
+                         es.groups['My Bus 0']: Flow()},
+                     outputs={
+                         es.groups['My Bus 0']: Flow(variable_costs=25)},
+                     nominal_capacity = 1,
+                     capacity_loss  = 0.009,
+                     investment = Investment(ep_costs=10)
                      )
                 )
     es.add(Demand(label='My load 0',
