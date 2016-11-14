@@ -8,6 +8,8 @@ Open questions:
  - If we had HUB, this would be easier: Hub -> Bus, Hub -> CommodityHub
  - Creating generator as source? would be enough for pyPSA, but we should
    probably stick with transformer
+ - How do we handle timeseries? Especially multiplication of normed values
+   with absolute value for specific pypsa attributes ?
 
 oemof feedback questions
  - Why does the energysystem not hold the optimization model? I think it might
@@ -17,6 +19,7 @@ oemof feedback questions
 import network
 import energy_system
 from solph import Investment
+from oemof.solph.plumbing import Sequence
 import pypsa
 
 class EnergySystem(energy_system.EnergySystem):
@@ -26,8 +29,12 @@ class EnergySystem(energy_system.EnergySystem):
         """
         """
         super().__init__(*args, **kwargs)
-        self.network = pypsa.Network()
+        self.timeindex = kwargs.get('timeindex')
 
+    def _create_network(self):
+        self.network = pypsa.Network()
+        if self.timeindex is not None:
+            self.network.set_snapshots(self.timeindex)
 
     def _populate_network(self):
         """
@@ -53,9 +60,14 @@ class EnergySystem(energy_system.EnergySystem):
         for n in self.groups.get(Demand, []):
             # get the output bus
             b = list(n.inputs.keys())[0]
+            # this works but we need to make that better because otherwise
+            # we loop a lot everywhere
+            p_set = [n.inputs[b].actual_value[t] * n.inputs[b].nominal_value
+                     for t in range(len(self.timeindex))]
+
             self.network.add('Load', n.label,
                              bus=b.label,
-                             p_set=n.inputs[b].nominal_value)
+                             p_set=p_set)
 
         for n in self.groups.get(Storage, []):
             if isinstance(n.investment, Investment) :
@@ -82,6 +94,7 @@ class EnergySystem(energy_system.EnergySystem):
         self.generators = {(source.label, target.label): source.outputs[target]
                            for source in es.groups[Generator]
                            for target in source.outputs}
+        self._create_network()
         self._populate_network()
         self.network.lopf()
 
@@ -95,7 +108,7 @@ class Flow:
     def __init__(self, *args, **kwargs):
         self.nominal_value = kwargs.get('nominal_value', 1)
         self.variable_costs = kwargs.get('variable_costs', 0)
-
+        self.actual_value = kwargs.get('actual_value', Sequence(1))
 
 class Bus(network.Bus):
     """
@@ -164,8 +177,11 @@ def node_grouping(node):
 
 
 if __name__ == "__main__":
+    import pandas as pd
+
     GROUPINGS = [node_grouping]
-    es = EnergySystem(groupings=GROUPINGS)
+    es = EnergySystem(groupings=GROUPINGS,
+                      timeindex=pd.date_range('2014', periods=3, freq='H'))
     # do not now why this must be added explicitly, usally it should work
     # without explicit adding
     es.add(Bus(label='Coal'))
@@ -211,11 +227,12 @@ if __name__ == "__main__":
                 )
     es.add(Demand(label='My load 0',
                   inputs={
-                      es.groups['My Bus 2']: Flow(nominal_value=100)},
+                      es.groups['My Bus 2']: Flow(nominal_value=100,
+                                                  actual_value=[0.1, 0.3, 0.4])},
                   outputs={}
                      )
                 )
-
+    #es._create_network()
     #es._populate_network()
     es.linear_optimal_power_flow()
 
