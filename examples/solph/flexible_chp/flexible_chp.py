@@ -103,12 +103,12 @@ def optimise_storage_size(energysystem, filename="flexible_chp.csv",
         outputs={bel: solph.Flow(nominal_value=10e10)},
         conversion_factors={bel: 0.38})
 
-    solph.LinearTransformer(
-        label='chp_gas',
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=3e10),
-                 bth: solph.Flow(nominal_value=4e10)},
-        conversion_factors={bel: 0.3, bth: 0.4})
+    # solph.LinearTransformer(
+    #     label='chp_gas',
+    #     inputs={bgas: solph.Flow()},
+    #     outputs={bel: solph.Flow(nominal_value=3e10),
+    #              bth: solph.Flow(nominal_value=5e10)},
+    #     conversion_factors={bel: 0.3, bth: 0.5})
 
     # create simple transformer object for gas powerplant
     solph.LinearTransformer(
@@ -116,6 +116,15 @@ def optimise_storage_size(energysystem, filename="flexible_chp.csv",
         inputs={bgas: solph.Flow()},
         outputs={bth: solph.Flow(nominal_value=10e10)},
         conversion_factors={bth: 0.8})
+
+    solph.VariableFractionTransformer(
+        label='chp_gas',
+        inputs={bgas: solph.Flow()},
+        outputs={bel: solph.Flow(nominal_value=3e10),
+                 bth: solph.Flow(nominal_value=4e10)},
+        conversion_factors={bel: 0.3, bth: 0.514},
+        power_loss_index={bel: 0.12}, efficiency_condensing={bel: 0.55}
+        )
 
     ##########################################################################
     # Optimise the energy system and plot the results
@@ -170,7 +179,7 @@ def create_plots(energysystem):
     plt.show()
 
     # Plotting a combined stacked plot
-    fig = plt.figure(figsize=(24, 14))
+    fig = plt.figure()
     plt.rc('legend', **{'fontsize': 19})
     plt.rcParams.update({'font.size': 19})
     plt.style.use('grayscale')

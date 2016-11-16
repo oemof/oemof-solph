@@ -204,10 +204,34 @@ class LinearTransformer(on.Transformer):
             k: Sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-    def _input(self):
+    def input(self):
         """ Returns the first (and only) input of the storage object
         """
         return [i for i in self.inputs][0]
+
+
+class VariableFractionTransformer(LinearTransformer):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.efficiency_condensing = {
+            k: Sequence(v)
+            for k, v in kwargs.get('efficiency_condensing', {}).items()}
+        self.power_loss_index = {
+            k: Sequence(v)
+            for k, v in kwargs.get('power_loss_index', {}).items()}
+        self.label_main_flow = list(self.power_loss_index.keys())[0]
+
+    def main_output(self):
+        """
+        """
+        return [o for o in self.outputs if self.label_main_flow == o.label][0]
+
+    def tapped_output(self):
+        """
+        """
+        return [o for o in self.outputs if self.label_main_flow != o.label][0]
 
 
 class Storage(on.Transformer):

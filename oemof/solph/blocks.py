@@ -815,7 +815,7 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n: n._input() for n in group}
+        I = {n: n.input() for n in group}
         O = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
@@ -834,6 +834,85 @@ class LinearTransformer(SimpleBlock):
                                                  n.label, o.label))
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
+
+
+class VariableFractionTransformer(SimpleBlock):
+    """Block for the linear relation of nodes with type
+    class:`.VariableFractionTransformer`
+
+    **The following constraints are created:**
+
+    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
+        .. math::
+            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(n, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
+            \\forall o \\in \\textrm{OUTPUTS(n)}.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def set_value(self, value):
+        pass
+
+    def clear(self):
+        pass
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`LinearTransformer`
+        block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.LinearTransformers (trsf) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
+            is created for all existing relations of the inputs and all outputs
+            of the transformer. The components inside the list need to hold
+            a attribute `conversion_factors` of type dict containing the
+            conversion factors from inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        for n in group:
+            n.power_heat_index = [
+                n.conversion_factors[m.es.groups[n.main_output().label]][t] /
+                n.conversion_factors[m.es.groups[n.tapped_output().label]][t]
+                for t in m.TIMESTEPS
+            ]
+
+        def _fuel_consumption_rule(block):
+            """
+            """
+            for t in m.TIMESTEPS:
+                for n in group:
+                    lhs = m.flow[n.input(), n, t]
+                    rhs = (
+                        (m.flow[n, n.main_output(), t] +
+                         m.flow[n, n.tapped_output(), t] *
+                         n.power_loss_index[t]) /
+                        n.efficiency_condensing
+                        )
+                    block.fuel_consumption.add((n, t), (lhs == rhs))
+        self.fuel_consumption = Constraint(group, noruleinit=True)
+        self.fuel_consumption_build = BuildAction(rule=_fuel_consumption_rule)
+
+        def _power_to_heat_rule(block):
+            """
+            """
+            for t in m.TIMESTEPS:
+                for n in group:
+                    lhs = m.flow[n, n.main_output(), t]
+                    rhs = (m.flow[n, n.tapped_output(), t] *
+                           n.power_heat_index[t])
+                    block.power_heat.add((n, t), (lhs >= rhs))
+        self.power_heat = Constraint(group, noruleinit=True)
+        self.power_heat_build = BuildAction(rule=_power_to_heat_rule)
 
 
 class BinaryFlow(SimpleBlock):
