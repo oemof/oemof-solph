@@ -175,7 +175,6 @@ class LinearTransformer(on.Transformer):
 
     Parameters
     ----------
-
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of inflow
         to specified outflow. Keys are output bus objects.
@@ -211,14 +210,35 @@ class LinearTransformer(on.Transformer):
 
 
 class VariableFractionTransformer(LinearTransformer):
-    """
+    """A linear transformer with more then one output, where the fraction of
+    the output flows is variable. By now it is restricted to two output flows.
+
+    A main output has to be defined. The main output will be reduced if more
+    the tapped output is increasing. Therefore a loss index has to be defined
+    for this flow. Furthermore a maximum efficiency has to be defined if the
+    whole flow is led to the main output (tapped_output = 0). The state with
+    the maximum tapped_output is described with the conversion factors
+    equivalent to the LinearTransformer.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+    efficiency_condensing : dict
+        dasf
+    main_flow_loss_index : dict
+        The index to describe the reduction of the main flow according to the
+        increase of the tapped flow.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.efficiency_condensing = {
             k: Sequence(v)
             for k, v in kwargs.get('efficiency_condensing', {}).items()}
-        self.power_loss_index = {
+        self.main_flow_loss_index = {
             k: Sequence(v)
             for k, v in kwargs.get('power_loss_index', {}).items()}
         self.label_main_flow = list(self.power_loss_index.keys())[0]
