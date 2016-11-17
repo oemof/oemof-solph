@@ -87,9 +87,9 @@ class Storage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[n._input(), n, t] *
+            expr += (- m.flow[n.input(), n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
-            expr += (m.flow[n, n._output(), t] /
+            expr += (m.flow[n, n.output(), t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
@@ -230,8 +230,8 @@ class InvestmentStorage(SimpleBlock):
                           bounds=_storage_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
-        i = {n: n._input() for n in group}
-        o = {n: n._output() for n in group}
+        i = {n: n.input() for n in group}
+        o = {n: n.output() for n in group}
 
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage energy balance.
@@ -815,7 +815,7 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n: n._input() for n in group}
+        I = {n: n.input() for n in group}
         O = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
