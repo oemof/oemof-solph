@@ -240,18 +240,13 @@ class VariableFractionTransformer(LinearTransformer):
             for k, v in kwargs.get('efficiency_condensing', {}).items()}
         self.main_flow_loss_index = {
             k: Sequence(v)
-            for k, v in kwargs.get('power_loss_index', {}).items()}
-        self.label_main_flow = list(self.power_loss_index.keys())[0]
+            for k, v in kwargs.get('main_flow_loss_index', {}).items()}
 
-    def main_output(self):
-        """
-        """
-        return [o for o in self.outputs if self.label_main_flow == o.label][0]
-
-    def tapped_output(self):
-        """
-        """
-        return [o for o in self.outputs if self.label_main_flow != o.label][0]
+        label_main_flow = str(list(self.main_flow_loss_index.keys())[0])
+        self.main_output = [o for o in self.outputs
+                            if label_main_flow == o.label][0]
+        self.tapped_output = [o for o in self.outputs
+                              if label_main_flow != o.label][0]
 
 
 class Storage(on.Transformer):
