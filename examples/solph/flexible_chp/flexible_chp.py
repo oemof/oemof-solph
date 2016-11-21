@@ -172,25 +172,7 @@ def create_plots(energysystem):
              'excess_bel': '#f22222',
              'excess_bel_2': '#f22222'}
 
-    # Plotting the input flows of the electricity bus for January
     myplot = outputlib.DataFramePlot(energy_system=energysystem)
-    myplot.slice_unstacked(bus_label="electricity", type="to_bus")
-    colorlist = myplot.color_from_dict(cdict)
-    myplot.plot(color=colorlist, linewidth=2, title="January 2012")
-    myplot.ax.legend(loc='upper right')
-    myplot.ax.set_ylabel('Power in MW')
-    myplot.ax.set_xlabel('Date')
-    myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
-
-    # Plotting the output flows of the electricity bus for January
-    myplot.slice_unstacked(bus_label="electricity", type="from_bus")
-    myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
-    myplot.ax.legend(loc='upper right')
-    myplot.ax.set_ylabel('Power in MW')
-    myplot.ax.set_xlabel('Date')
-    myplot.set_datetime_ticks()
-
-    plt.show()
 
     # Plotting a combined stacked plot
     fig = plt.figure(figsize=(18, 9))
