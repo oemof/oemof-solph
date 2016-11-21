@@ -54,9 +54,9 @@ except ImportError:
     plt = None
 
 
-def initialise_energy_system(number_timesteps=8760):
+def initialise_energy_system(number_timesteps=192):
     logging.info('Initialize the energy system')
-    date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
+    date_time_index = pd.date_range('5/5/2012', periods=number_timesteps,
                                     freq='H')
 
     return solph.EnergySystem(timeindex=date_time_index)
@@ -82,48 +82,56 @@ def optimise_storage_size(energysystem, filename="flexible_chp.csv",
 
     # create electricity bus
     bel = solph.Bus(label="electricity")
+    bel2 = solph.Bus(label="electricity_2")
     bth = solph.Bus(label="heat")
+    bth2 = solph.Bus(label="heat_2")
 
     # create excess component for the elec/heat bus to allow overproduction
-    solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
+    solph.Sink(label='excess_bth_2', inputs={bth2: solph.Flow()})
     solph.Sink(label='excess_bth', inputs={bth: solph.Flow()})
+    solph.Sink(label='excess_bel_2', inputs={bel2: solph.Flow()})
+    solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
 
     # create simple sink object for electrical demand
     solph.Sink(label='demand_el', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+    solph.Sink(label='demand_el_2', inputs={bel2: solph.Flow(
+        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple sink object for heat demand
     solph.Sink(label='demand_th', inputs={bth: solph.Flow(
-        actual_value=data['demand_th'] * 741000, fixed=True, nominal_value=1)})
+        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+    solph.Sink(label='demand_th_2', inputs={bth2: solph.Flow(
+        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+
+    solph.LinearTransformer(
+        label='fixed_chp_gas',
+        inputs={bgas: solph.Flow()},
+        outputs={bel: solph.Flow(nominal_value=0),
+                 bth: solph.Flow(nominal_value=0)},
+        conversion_factors={bel: 0.3, bth: 0.5})
 
     # create simple transformer object for gas powerplant
-    solph.LinearTransformer(
-        label="elec_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10)},
-        conversion_factors={bel: 0.38})
-
     # solph.LinearTransformer(
-    #     label='chp_gas',
-    #     inputs={bgas: solph.Flow()},
-    #     outputs={bel: solph.Flow(nominal_value=3e10),
-    #              bth: solph.Flow(nominal_value=5e10)},
-    #     conversion_factors={bel: 0.3, bth: 0.5})
+    #      label="heat_gas",
+    #      inputs={bgas: solph.Flow()},
+    #      outputs={bth2: solph.Flow(nominal_value=10e10)},
+    #      conversion_factors={bth2: 0.8})
 
-    # create simple transformer object for gas powerplant
     solph.LinearTransformer(
-        label="heat_gas",
+        label='fixed_chp_gas_2',
         inputs={bgas: solph.Flow()},
-        outputs={bth: solph.Flow(nominal_value=10e10)},
-        conversion_factors={bth: 0.8})
+        outputs={bel2: solph.Flow(nominal_value=3e10),
+                 bth2: solph.Flow(nominal_value=4e10)},
+        conversion_factors={bel2: 0.3, bth2: 0.5})
 
     solph.VariableFractionTransformer(
-        label='chp_gas',
+        label='variable_chp_gas',
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=3e10),
                  bth: solph.Flow(nominal_value=4e10)},
-        conversion_factors={bel: 0.3, bth: 0.514},
-        power_loss_index={bel: 0.12}, efficiency_condensing={bel: 0.55}
+        conversion_factors={bel: 0.3, bth: 0.5},
+        main_flow_loss_index={bel: 0.4}, efficiency_condensing={bel: 0.5}
         )
 
     ##########################################################################
@@ -150,13 +158,19 @@ def create_plots(energysystem):
 
     logging.info('Plot the results')
 
-    cdict = {'chp_gas': '#42c77a',
-             'elec_gas': '#636f6b',
+    cdict = {'variable_chp_gas': '#42c77a',
+             'fixed_chp_gas': '#20b4b6',
+             'fixed_chp_gas_2': '#20b4b6',
              'heat_gas': '#12341f',
              'demand_th': '#5b5bae',
-             'demand_el': '#ce4aff',
-             'excess_bth': '#ffde32',
-             'excess_bel': '#555555'}
+             'demand_th_2': '#5b5bae',
+             'demand_el': '#5b5bae',
+             'demand_el_2': '#5b5bae',
+             'free': '#ffde32',
+             'excess_bth': '#f22222',
+             'excess_bth_2': '#f22222',
+             'excess_bel': '#f22222',
+             'excess_bel_2': '#f22222'}
 
     # Plotting the input flows of the electricity bus for January
     myplot = outputlib.DataFramePlot(energy_system=energysystem)
@@ -179,40 +193,59 @@ def create_plots(energysystem):
     plt.show()
 
     # Plotting a combined stacked plot
-    fig = plt.figure()
-    plt.rc('legend', **{'fontsize': 19})
-    plt.rcParams.update({'font.size': 19})
-    plt.style.use('grayscale')
+    fig = plt.figure(figsize=(18, 9))
+    plt.rc('legend', **{'fontsize': 13})
+    plt.rcParams.update({'font.size': 13})
 
     handles, labels = myplot.io_plot(
         bus_label='electricity', cdict=cdict,
-        barorder=['chp_gas', 'elec_gas'],
+        barorder=['variable_chp_gas', 'fixed_chp_gas'],
         lineorder=['demand_el', 'excess_bel'],
         line_kwa={'linewidth': 4},
-        ax=fig.add_subplot(2, 1, 1),
-        date_from="2012-05-01 00:00:00",
-        date_to="2012-05-15 00:00:00",
-        )
+        ax=fig.add_subplot(2, 2, 2))
     myplot.ax.set_ylabel('Power in MW')
-    myplot.ax.set_xlabel('Date')
-    myplot.ax.set_title("Electricity bus")
-    myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
+    myplot.ax.set_xlabel('')
+    myplot.ax.set_title("Electricity output (flexible chp)")
+    myplot.ax.get_xaxis().set_visible(False)
     myplot.outside_legend(handles=handles, labels=labels)
 
     handles, labels = myplot.io_plot(
         bus_label='heat', cdict=cdict,
-        barorder=['chp_gas', 'heat_gas'],
+        barorder=['variable_chp_gas', 'fixed_chp_gas', 'heat_gas'],
         lineorder=['demand_th', 'excess_bth'],
         line_kwa={'linewidth': 4},
-        ax=fig.add_subplot(2, 1, 2),
-        date_from="2012-05-01 00:00:00",
-        date_to="2012-05-15 00:00:00",
-    )
+        ax=fig.add_subplot(2, 2, 4))
     myplot.ax.set_ylabel('Power in MW')
     myplot.ax.set_xlabel('Date')
-    myplot.ax.set_title("Electricity bus")
-    myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
+    myplot.ax.set_ylim([0, 600000])
+    myplot.ax.set_title("Heat output (flexible chp)")
+    myplot.set_datetime_ticks(tick_distance=48, date_format='%d-%m-%y')
     myplot.outside_legend(handles=handles, labels=labels)
+
+    myplot.io_plot(
+        bus_label='electricity_2', cdict=cdict,
+        barorder=['variable_chp_gas', 'fixed_chp_gas_2'],
+        lineorder=['demand_el_2', 'excess_bel_2'],
+        line_kwa={'linewidth': 4},
+        ax=fig.add_subplot(2, 2, 1))
+    myplot.ax.set_ylabel('Power in MW')
+    myplot.ax.set_xlabel('')
+    myplot.ax.get_xaxis().set_visible(False)
+    myplot.ax.set_title("Electricity output (fixed chp)")
+    myplot.ax.legend_.remove()
+
+    myplot.io_plot(
+        bus_label='heat_2', cdict=cdict,
+        barorder=['fixed_chp_gas_2'],
+        lineorder=['demand_th_2', 'excess_bth_2'],
+        line_kwa={'linewidth': 4},
+        ax=fig.add_subplot(2, 2, 3))
+    myplot.ax.set_ylabel('Power in MW')
+    myplot.ax.set_ylim([0, 600000])
+    myplot.ax.set_xlabel('Date')
+    myplot.ax.set_title("Heat output (fixed chp)")
+    myplot.set_datetime_ticks(tick_distance=48, date_format='%d-%m-%y')
+    myplot.ax.legend_.remove()
 
     plt.show()
 
@@ -221,7 +254,7 @@ def run_storage_investment_example(**kwargs):
     logger.define_logging()
     plot_only = False
 
-    esys = initialise_energy_system(8760)
+    esys = initialise_energy_system(192)
     if not plot_only:
         esys = optimise_storage_size(esys, **kwargs)
         esys.dump()
