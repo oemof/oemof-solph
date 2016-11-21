@@ -185,7 +185,12 @@ def run_example_checks():
         'date_from': '2030-01-01 00:00:00',
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': 'example_energy_system.csv',
-        'nodes_flows_sequences': 'example_energy_system_seq.csv', }
+        'nodes_flows_sequences': 'example_energy_system_seq.csv',
+        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
+    }
+
+    if not os.path.isdir(testdict[key]['results_path']):
+        os.mkdir(testdict[key]['results_path'])
 
     try:
         res = dispatch.run_example(config=testdict[key])
