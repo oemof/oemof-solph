@@ -237,7 +237,7 @@ class VariableFractionTransformer(LinearTransformer):
     >>> bel = Bus(label='electricityBus')
     >>> bth = Bus(label='heatBus')
     >>> bgas = Bus(label='commodityBus')
-    >>> VariableFractionTransformer(
+    >>> vft = VariableFractionTransformer(
     ...    label='variable_chp_gas',
     ...    inputs={bgas: Flow(nominal_value=10e10)},
     ...    outputs={bel: Flow(), bth: Flow()},
