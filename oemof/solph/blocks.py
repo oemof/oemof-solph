@@ -881,8 +881,8 @@ class VariableFractionTransformer(SimpleBlock):
 
         for n in group:
             n.power_heat_index = [
-                n.conversion_factors[m.es.groups[n.main_output().label]][t] /
-                n.conversion_factors[m.es.groups[n.tapped_output().label]][t]
+                n.conversion_factors[m.es.groups[n.main_output.label]][t] /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
                 for t in m.TIMESTEPS
             ]
 
@@ -893,10 +893,10 @@ class VariableFractionTransformer(SimpleBlock):
                 for n in group:
                     lhs = m.flow[n.input(), n, t]
                     rhs = (
-                        (m.flow[n, n.main_output(), t] +
-                         m.flow[n, n.tapped_output(), t] *
-                         n.power_loss_index[t]) /
-                        n.efficiency_condensing
+                        (m.flow[n, n.main_output, t] +
+                         m.flow[n, n.tapped_output, t] *
+                         n.main_flow_loss_index[t]) /
+                        n.efficiency_condensing[t]
                         )
                     block.fuel_consumption.add((n, t), (lhs == rhs))
         self.fuel_consumption = Constraint(group, noruleinit=True)
@@ -907,8 +907,8 @@ class VariableFractionTransformer(SimpleBlock):
             """
             for t in m.TIMESTEPS:
                 for n in group:
-                    lhs = m.flow[n, n.main_output(), t]
-                    rhs = (m.flow[n, n.tapped_output(), t] *
+                    lhs = m.flow[n, n.main_output, t]
+                    rhs = (m.flow[n, n.tapped_output, t] *
                            n.power_heat_index[t])
                     block.power_heat.add((n, t), (lhs >= rhs))
         self.power_heat = Constraint(group, noruleinit=True)

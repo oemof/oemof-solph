@@ -235,14 +235,15 @@ class VariableFractionTransformer(LinearTransformer):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.efficiency_condensing = {
-            k: Sequence(v)
-            for k, v in kwargs.get('efficiency_condensing', {}).items()}
-        self.main_flow_loss_index = {
-            k: Sequence(v)
-            for k, v in kwargs.get('main_flow_loss_index', {}).items()}
+        self.efficiency_condensing = [
+            Sequence(v)
+            for k, v in kwargs.get('efficiency_condensing', {}).items()][0]
+        self.main_flow_loss_index = [
+            Sequence(v)
+            for k, v in kwargs.get('main_flow_loss_index', {}).items()][0]
 
-        label_main_flow = str(list(self.main_flow_loss_index.keys())[0])
+        label_main_flow = str([
+            k for k, v in kwargs.get('main_flow_loss_index', {}).items()][0])
         self.main_output = [o for o in self.outputs
                             if label_main_flow == o.label][0]
         self.tapped_output = [o for o in self.outputs
