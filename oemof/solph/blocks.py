@@ -781,12 +781,17 @@ class LinearTransformer(SimpleBlock):
     """Block for the linear relation of nodes with type
     class:`.LinearTransformer`
 
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    LINEAR_TRANSFORMERS
+        A set with all :class:`~oemof.solph.network.LinearTransformer` objects.
 
     **The following constraints are created:**
 
     Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(i, n, t) \\cdot conversion\_factor(n, o, t) = \
             flow(n, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
@@ -838,17 +843,33 @@ class LinearTransformer(SimpleBlock):
 
 class VariableFractionTransformer(SimpleBlock):
     """Block for the linear relation of nodes with type
-    class:`.VariableFractionTransformer`
+    :class:`~oemof.solph.network.VariableFractionTransformer`
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    VARIABLE_FRACTION_TRANSFORMERS
+        A set with all
+        :class:`~oemof.solph.network.VariableFractionTransformer` objects.
 
     **The following constraints are created:**
 
-    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
+    Variable fraction relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
-            flow(n, o, t), \\\\
+            flow(input, n, t) = \\\\
+            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
+            main\_flow\_loss\_index(n, t)) /\\\\
+            efficiency\_condensing(n, t)\\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
-            \\forall o \\in \\textrm{OUTPUTS(n)}.
+            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
+    Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+        .. math::
+            flow(n, main\_output, t) = flow(n, tapped\_output, t) \\cdot \\\\
+            conversion\_factor(n, main\_output, t) / \
+            conversion\_factor(n, tapped\_output, t\\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
