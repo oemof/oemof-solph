@@ -43,7 +43,9 @@ class Flow:
     Parameters
     ----------
     nominal_value : numeric
-        The nominal value of the flow.
+        The nominal value of the flow. If this value is set the corresponding
+        optimization variable of the flow object will be bounded by this value
+        multiplied with min(lower bound)/max(upper bound).
     min : numeric (sequence or scalar)
         Normed minimum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`min`
@@ -51,8 +53,9 @@ class Flow:
         Nominal maximum value of the flow. (see. :attr:`min`)
     actual_value: numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
-        nominal_value to get the absolute value. If fixed is True the flow
-        variable will be fixed to actual_value * :attr:`nominal_value`.
+        nominal\_value to get the absolute value. If fixed attr is set to True
+        the flow variable will be fixed to actual_value * :attr:`nominal_value`
+        , I.e. this value is set exgoneous.
     positive_gradient : numeric (sequence or scalar)
         The normed maximal positive difference (flow[t-1] < flow[t])
         of two consecutive flow values.
@@ -65,7 +68,8 @@ class Flow:
     summed_min : numeric
         see above
     variable_costs : numeric (sequence or scalar)
-        The costs associated with one unit of the flow.
+        The costs associated with one unit of the flow. If this is set the costs
+        will be added to the objective expression of the optimization problem.
     fixed_costs : numeric (sequence or scalar)
         The costs associated with the absolute nominal_value of the flow.
     fixed : boolean
@@ -77,6 +81,13 @@ class Flow:
         the optimization problem. Note: This will refer all attributes to an
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
+    binary :  :class:`oemof.solph.options.BinaryFlow` object
+        If an binary flow object is added here, the flow constraints will
+        be altered significantly as the mathematical model for the flow
+        will be different, i.e. constraint etc from
+        :class:`oemof.solph.blocks.BinaryFlow` will be used instead of
+        :class:`oemof.solph.blocks.Flow`. Note: this does not work in
+        combination with the investment attribute set at the moment.
 
     Notes
     -----
@@ -84,6 +95,9 @@ class Flow:
      * :py:class:`~oemof.solph.blocks.Flow`
      * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
        Investment object is present)
+     * :py:class:`~oemof.solph.blocks.BinaryFlow` (If
+        binary  object is present, CAUTION: replaces
+        :py:class:`~oemof.solph.blocks.Flow` class)
 
     Examples
     --------
@@ -142,7 +156,7 @@ class Flow:
         if self.investment and self.binary:
             raise ValueError("Investment flows cannot be combined with " +
                              "binary flows!")
-                             
+
 
 class Bus(on.Bus):
     """A balance object. Every node has to be connected to Bus.
@@ -248,7 +262,7 @@ class Storage(on.Transformer):
         investment variable instead of to the nominal_capacity. The
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
-        
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
