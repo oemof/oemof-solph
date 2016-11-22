@@ -44,7 +44,7 @@ def initialise_energy_system(number_timesteps=192):
     return solph.EnergySystem(timeindex=date_time_index)
 
 
-def optimise_storage_size(energysystem, filename="flexible_chp.csv",
+def optimise_storage_size(energysystem, filename="variable_chp.csv",
                           solver='cbc', debug=True, tee_switch=True):
 
     # Read data file
@@ -261,7 +261,7 @@ def create_plots(energysystem):
     plt.show()
 
 
-def run_storage_investment_example(**kwargs):
+def run_variable_chp_example(**kwargs):
     logger.define_logging()
     plot_only = False
 
@@ -275,8 +275,7 @@ def run_storage_investment_example(**kwargs):
         esys.restore()
 
     if plt is not None:
-        # create_plots(esys)
-        pass
+        create_plots(esys)
     else:
         msg = ("\nIt is not possible to plot the results, due to a missing " +
                "python package: 'matplotlib'. \nType 'pip install " +
@@ -288,4 +287,4 @@ def run_storage_investment_example(**kwargs):
 
 
 if __name__ == "__main__":
-    run_storage_investment_example()
+    run_variable_chp_example()
