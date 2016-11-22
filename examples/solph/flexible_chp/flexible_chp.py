@@ -4,29 +4,11 @@
 General description:
 ---------------------
 
-The example models the following energy system:
-
-                  input/output  bgas     bel      bth
-                       |          |        |       |
-                       |          |        |       |
-                       |          |        |       |
- rgas(Commodity)       |--------->|        |       |
-                       |          |        |       |
- demand_el(Sink)       |<------------------|       |
-                       |          |        |       |
- demand_th (Sink)      |<--------------------------|
-                       |          |        |       |
-                       |<---------|        |       |
- chp_gas(Transformer)  |------------------>|       |
-                       |-------------------------->|
-                       |          |        |       |
- heat_gas(Transformer) |<---------|        |       |
-                       |-------------------------->|
-                       |          |        |       |
- elec_gas(Transformer) |<---------|        |       |
-                       |------------------>|       |
-                       |          |        |       |
-
+This example is not a real use case of an energy system but an example to show
+how a variable combined heat and power plant (chp) works in contrast to a fixed
+chp (eg. block device). Both chp plants distribute power and heat to a separate
+heat and power Bus with a heat and power demand. The plot shows that the fixed
+chp plant produces heat and power excess and therefore needs more natural gas.
 
 """
 
@@ -88,18 +70,18 @@ def optimise_storage_size(energysystem, filename="flexible_chp.csv",
 
     # create excess component for the elec/heat bus to allow overproduction
     solph.Sink(label='excess_bth_2', inputs={bth2: solph.Flow()})
-    solph.Sink(label='excess_bth', inputs={bth: solph.Flow()})
+    solph.Sink(label='excess_therm', inputs={bth: solph.Flow()})
     solph.Sink(label='excess_bel_2', inputs={bel2: solph.Flow()})
-    solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
+    solph.Sink(label='excess_elec', inputs={bel: solph.Flow()})
 
     # create simple sink object for electrical demand
-    solph.Sink(label='demand_el', inputs={bel: solph.Flow(
+    solph.Sink(label='demand_elec', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
     solph.Sink(label='demand_el_2', inputs={bel2: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple sink object for heat demand
-    solph.Sink(label='demand_th', inputs={bth: solph.Flow(
+    solph.Sink(label='demand_therm', inputs={bth: solph.Flow(
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
     solph.Sink(label='demand_th_2', inputs={bth2: solph.Flow(
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
@@ -110,13 +92,6 @@ def optimise_storage_size(energysystem, filename="flexible_chp.csv",
         outputs={bel: solph.Flow(nominal_value=0),
                  bth: solph.Flow(nominal_value=0)},
         conversion_factors={bel: 0.3, bth: 0.5})
-
-    # create simple transformer object for gas powerplant
-    # solph.LinearTransformer(
-    #      label="heat_gas",
-    #      inputs={bgas: solph.Flow()},
-    #      outputs={bth2: solph.Flow(nominal_value=10e10)},
-    #      conversion_factors={bth2: 0.8})
 
     solph.LinearTransformer(
         label='fixed_chp_gas_2',
@@ -154,6 +129,24 @@ def optimise_storage_size(energysystem, filename="flexible_chp.csv",
     return energysystem
 
 
+def get_result_dict(energysystem):
+    logging.info('Check the results')
+    myresults = outputlib.ResultsDataFrame(energy_system=energysystem)
+
+    res = dict()
+
+    res['natural_gas'] = myresults.slice_by(
+        bus_typ='natural_gas', obj_label='rgas', type='to_bus').sum()[0]
+    res['input_variable_chp'] = myresults.slice_by(
+        bus_typ='natural_gas', obj_label='variable_chp_gas', type='from_bus'
+        ).sum()[0]
+    res['input_fixed_chp'] = myresults.slice_by(
+        bus_typ='natural_gas', obj_label='fixed_chp_gas_2', type='from_bus'
+        ).sum()[0]
+    res['objective'] = energysystem.results.objective
+    return res
+
+
 def create_plots(energysystem):
 
     logging.info('Plot the results')
@@ -162,72 +155,108 @@ def create_plots(energysystem):
              'fixed_chp_gas': '#20b4b6',
              'fixed_chp_gas_2': '#20b4b6',
              'heat_gas': '#12341f',
-             'demand_th': '#5b5bae',
+             'demand_therm': '#5b5bae',
              'demand_th_2': '#5b5bae',
-             'demand_el': '#5b5bae',
+             'demand_elec': '#5b5bae',
              'demand_el_2': '#5b5bae',
              'free': '#ffde32',
-             'excess_bth': '#f22222',
+             'excess_therm': '#f22222',
              'excess_bth_2': '#f22222',
-             'excess_bel': '#f22222',
-             'excess_bel_2': '#f22222'}
+             'excess_elec': '#f22222',
+             'excess_el_2': '#f22222'}
 
     myplot = outputlib.DataFramePlot(energy_system=energysystem)
 
-    # Plotting a combined stacked plot
+    # Plotting
     fig = plt.figure(figsize=(18, 9))
     plt.rc('legend', **{'fontsize': 13})
     plt.rcParams.update({'font.size': 13})
+    fig.subplots_adjust(left=0.07, bottom=0.12, right=0.86, top=0.93,
+                        wspace=0.03, hspace=0.2)
 
-    handles, labels = myplot.io_plot(
-        bus_label='electricity', cdict=cdict,
-        barorder=['variable_chp_gas', 'fixed_chp_gas'],
-        lineorder=['demand_el', 'excess_bel'],
-        line_kwa={'linewidth': 4},
-        ax=fig.add_subplot(2, 2, 2))
-    myplot.ax.set_ylabel('Power in MW')
-    myplot.ax.set_xlabel('')
-    myplot.ax.set_title("Electricity output (flexible chp)")
-    myplot.ax.get_xaxis().set_visible(False)
-    myplot.outside_legend(handles=handles, labels=labels)
-
-    handles, labels = myplot.io_plot(
-        bus_label='heat', cdict=cdict,
-        barorder=['variable_chp_gas', 'fixed_chp_gas', 'heat_gas'],
-        lineorder=['demand_th', 'excess_bth'],
-        line_kwa={'linewidth': 4},
-        ax=fig.add_subplot(2, 2, 4))
-    myplot.ax.set_ylabel('Power in MW')
-    myplot.ax.set_xlabel('Date')
-    myplot.ax.set_ylim([0, 600000])
-    myplot.ax.set_title("Heat output (flexible chp)")
-    myplot.set_datetime_ticks(tick_distance=48, date_format='%d-%m-%y')
-    myplot.outside_legend(handles=handles, labels=labels)
-
+    # subplot of electricity bus (fixed chp) [1]
     myplot.io_plot(
         bus_label='electricity_2', cdict=cdict,
-        barorder=['variable_chp_gas', 'fixed_chp_gas_2'],
+        barorder=['fixed_chp_gas_2'],
         lineorder=['demand_el_2', 'excess_bel_2'],
         line_kwa={'linewidth': 4},
-        ax=fig.add_subplot(2, 2, 1))
+        ax=fig.add_subplot(3, 2, 1))
     myplot.ax.set_ylabel('Power in MW')
     myplot.ax.set_xlabel('')
     myplot.ax.get_xaxis().set_visible(False)
     myplot.ax.set_title("Electricity output (fixed chp)")
     myplot.ax.legend_.remove()
 
+    # subplot of electricity bus (variable chp) [2]
+    handles, labels = myplot.io_plot(
+        bus_label='electricity', cdict=cdict,
+        barorder=['variable_chp_gas', 'fixed_chp_gas'],
+        lineorder=['demand_elec', 'excess_elec'],
+        line_kwa={'linewidth': 4},
+        ax=fig.add_subplot(3, 2, 2))
+    myplot.ax.get_yaxis().set_visible(False)
+    myplot.ax.set_xlabel('')
+    myplot.ax.get_xaxis().set_visible(False)
+    myplot.ax.set_title("Electricity output (variable chp)")
+    myplot.outside_legend(handles=handles, labels=labels, plotshare=1)
+
+    # subplot of heat bus (fixed chp) [3]
     myplot.io_plot(
         bus_label='heat_2', cdict=cdict,
         barorder=['fixed_chp_gas_2'],
         lineorder=['demand_th_2', 'excess_bth_2'],
         line_kwa={'linewidth': 4},
-        ax=fig.add_subplot(2, 2, 3))
+        ax=fig.add_subplot(3, 2, 3))
     myplot.ax.set_ylabel('Power in MW')
     myplot.ax.set_ylim([0, 600000])
-    myplot.ax.set_xlabel('Date')
+    myplot.ax.get_xaxis().set_visible(False)
     myplot.ax.set_title("Heat output (fixed chp)")
-    myplot.set_datetime_ticks(tick_distance=48, date_format='%d-%m-%y')
     myplot.ax.legend_.remove()
+
+    # subplot of heat bus (variable chp) [4]
+    handles, labels = myplot.io_plot(
+        bus_label='heat', cdict=cdict,
+        barorder=['variable_chp_gas', 'fixed_chp_gas', 'heat_gas'],
+        lineorder=['demand_therm', 'excess_therm'],
+        line_kwa={'linewidth': 4},
+        ax=fig.add_subplot(3, 2, 4))
+    myplot.ax.set_ylim([0, 600000])
+    myplot.ax.get_yaxis().set_visible(False)
+    myplot.ax.get_xaxis().set_visible(False)
+    myplot.ax.set_title("Heat output (variable chp)")
+    myplot.outside_legend(handles=handles, labels=labels, plotshare=1)
+
+    # subplot of efficiency (fixed chp) [5]
+    ngas = myplot.loc['natural_gas', 'from_bus', 'fixed_chp_gas_2']['val']
+    elec = myplot.loc['electricity_2', 'to_bus', 'fixed_chp_gas_2']['val']
+    heat = myplot.loc['heat_2', 'to_bus', 'fixed_chp_gas_2']['val']
+    e_ef = elec.div(ngas)
+    h_ef = heat.div(ngas)
+    df = pd.concat([h_ef, e_ef], axis=1)
+    my_ax = df.plot(ax=fig.add_subplot(3, 2, 5), linewidth=2)
+    my_ax.set_ylabel('efficiency')
+    my_ax.set_ylim([0, 0.55])
+    my_ax.set_xlabel('Date')
+    my_ax.set_title('Efficiency (fixed chp)')
+    my_ax.legend_.remove()
+
+    # subplot of efficiency (variable chp) [6]
+    ngas = myplot.loc['natural_gas', 'from_bus', 'variable_chp_gas']['val']
+    elec = myplot.loc['electricity', 'to_bus', 'variable_chp_gas']['val']
+    heat = myplot.loc['heat', 'to_bus', 'variable_chp_gas']['val']
+    e_ef = elec.div(ngas)
+    h_ef = heat.div(ngas)
+    e_ef.name = 'electricity           '
+    h_ef.name = 'heat'
+    df = pd.concat([h_ef, e_ef], axis=1)
+    my_ax = df.plot(ax=fig.add_subplot(3, 2, 6), linewidth=2)
+    my_ax.set_ylim([0, 0.55])
+    my_ax.get_yaxis().set_visible(False)
+    my_ax.set_xlabel('Date')
+    my_ax.set_title('Efficiency (variable chp)')
+    box = my_ax.get_position()
+    my_ax.set_position([box.x0, box.y0, box.width * 1, box.height])
+    my_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1)
 
     plt.show()
 
@@ -235,6 +264,8 @@ def create_plots(energysystem):
 def run_storage_investment_example(**kwargs):
     logger.define_logging()
     plot_only = False
+
+    kwargs.setdefault('tee_switch', False)
 
     esys = initialise_energy_system(192)
     if not plot_only:
@@ -244,12 +275,16 @@ def run_storage_investment_example(**kwargs):
         esys.restore()
 
     if plt is not None:
-        create_plots(esys)
+        # create_plots(esys)
+        pass
     else:
         msg = ("\nIt is not possible to plot the results, due to a missing " +
                "python package: 'matplotlib'. \nType 'pip install " +
                "matplotlib' to see the plots.")
         warnings.warn(msg)
+
+    for k, v in get_result_dict(esys).items():
+        logging.info('{0}: {1}'.format(k, v))
 
 
 if __name__ == "__main__":
