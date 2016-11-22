@@ -146,12 +146,13 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
+.. _linear_transformer_class_label:
 
 LinearTransformer
 +++++++++++++++++
 
 An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device.
-As the name indicates the efficiency has to constant within one time step to get a linear transformation.
+As the name indicates the efficiency has to be constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
 .. code-block:: python
@@ -177,6 +178,27 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 .. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
+
+VariableFractionTransformer
++++++++++++++++++++++++++++
+
+The VariableFractionTransformer inherits the :ref:`linear_transformer_class_label` class. An instance of the VariableFractionTransformer class can represent a flexible combined heat and power (chp) plant. By now this class is restricted to one input and two output flows.
+As the name indicates the efficiency has to constant within one time step to get a linear transformation.
+You can define a different efficiency for every time step but this series has to be predefined and cannot be changed within the optimisation. In contrast to the LinearTransformer a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (efficiency_condensing).
+
+.. code-block:: python
+
+    solph.VariableFractionTransformer(
+        label='variable_chp_gas',
+        inputs={bgas: solph.Flow(nominal_value=10e10)},
+        outputs={bel: solph.Flow(), bth: solph.Flow()},
+        conversion_factors={bel: 0.3, bth: 0.5},
+        efficiency_condensing={bel: 0.5}
+        )
+
+The key of the *'efficiency_condensing'* parameter will indicate the main flow. In the example above the flow to the Bus *'bel'* is the main flow and the flow to the Bus *'bth'* is the tapped flow.
+
+.. note:: See the :py:class:`~oemof.solph.network.VariableFractionTransformer` class for all parameters and the mathematical background.
 
 
 Storage
@@ -392,7 +414,7 @@ Both, investment and dispatch (operational) models can be modelled. Two examples
 Solph Examples
 --------------
 
-The following examples are available for solph. See section ":ref:`check_installation_label`" to learn how to execute the examples directly. Be aware that the CBC solver has to be installed to run the examples (:ref:`solver_label`). If you want to use a different solver you can download the examples below and change the solver name manually.
+The following examples are available for solph. See section ":ref:`check_installation_label`" to learn how to execute the examples directly. Be aware that the CBC solver has to be installed to run the examples. If you want to use a different solver you can download the examples below and change the solver name manually.
 
 .. _solph_examples_csv_label:
 
