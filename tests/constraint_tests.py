@@ -12,7 +12,8 @@ from oemof.solph import OperationalModel
 from oemof import energy_system as core_es
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+                         VariableFractionTransformer)
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -190,8 +191,8 @@ class Constraint_Tests:
             outputs={bel: Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
-            capacity_max = 0.9,
-            capacity_min= 0.1,
+            capacity_max=0.9,
+            capacity_min=0.1,
             nominal_input_capacity_ratio=1 / 6,
             nominal_output_capacity_ratio=1 / 6,
             inflow_conversion_factor=0.97,
@@ -200,3 +201,19 @@ class Constraint_Tests:
             investment=Investment(ep_costs=145, maximum=234))
 
         self.compare_lp_files('storage_invest.lp')
+
+    def test_variable_chp(self):
+        """
+        """
+        bel = Bus(label='electricityBus')
+        bth = Bus(label='heatBus')
+        bgas = Bus(label='commodityBus')
+
+        VariableFractionTransformer(
+            label='variable_chp_gas',
+            inputs={bgas: solph.Flow(nominal_value=100)},
+            outputs={bel: solph.Flow(), bth: solph.Flow()},
+            conversion_factors={bel: 0.3, bth: 0.5},
+            main_flow_loss_index={bel: 0.4}, efficiency_condensing={bel: 0.5})
+
+        self.compare_lp_files('variable_chp.lp')
