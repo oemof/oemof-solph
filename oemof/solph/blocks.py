@@ -901,39 +901,46 @@ class VariableFractionTransformer(SimpleBlock):
         m = self.parent_block()
 
         for n in group:
-            n.power_heat_index = [
+            n.flow_relation_index = [
                 n.conversion_factors[m.es.groups[n.main_output.label]][t] /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
                 for t in m.TIMESTEPS
             ]
+            n.main_flow_loss_index = [
+                (n.efficiency_condensing[t] -
+                 n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                for t in m.TIMESTEPS
+            ]
 
-        def _fuel_consumption_rule(block):
-            """
+        def _input_output_relation_rule(block):
+            """Connection between input, main output and tapped output.
             """
             for t in m.TIMESTEPS:
-                for n in group:
-                    lhs = m.flow[n.input(), n, t]
+                for g in group:
+                    lhs = m.flow[g.input(), g, t]
                     rhs = (
-                        (m.flow[n, n.main_output, t] +
-                         m.flow[n, n.tapped_output, t] *
-                         n.main_flow_loss_index[t]) /
-                        n.efficiency_condensing[t]
+                        (m.flow[g, g.main_output, t] +
+                         m.flow[g, g.tapped_output, t] *
+                         g.main_flow_loss_index[t]) /
+                        g.efficiency_condensing[t]
                         )
-                    block.fuel_consumption.add((n, t), (lhs == rhs))
-        self.fuel_consumption = Constraint(group, noruleinit=True)
-        self.fuel_consumption_build = BuildAction(rule=_fuel_consumption_rule)
+                    block.input_output_relation.add((n, t), (lhs == rhs))
+        self.input_output_relation = Constraint(group, noruleinit=True)
+        self.input_output_relation_build = BuildAction(
+            rule=_input_output_relation_rule)
 
-        def _power_to_heat_rule(block):
-            """
+        def _out_flow_relation_rule(block):
+            """Relation between main and tapped output in full chp mode.
             """
             for t in m.TIMESTEPS:
-                for n in group:
-                    lhs = m.flow[n, n.main_output, t]
-                    rhs = (m.flow[n, n.tapped_output, t] *
-                           n.power_heat_index[t])
-                    block.power_heat.add((n, t), (lhs >= rhs))
-        self.power_heat = Constraint(group, noruleinit=True)
-        self.power_heat_build = BuildAction(rule=_power_to_heat_rule)
+                for g in group:
+                    lhs = m.flow[g, g.main_output, t]
+                    rhs = (m.flow[g, g.tapped_output, t] *
+                           g.flow_relation_index[t])
+                    block.out_flow_relation.add((g, t), (lhs >= rhs))
+        self.out_flow_relation = Constraint(group, noruleinit=True)
+        self.out_flow_relation_build = BuildAction(rule=_out_flow_relation_rule)
 
 
 class BinaryFlow(SimpleBlock):

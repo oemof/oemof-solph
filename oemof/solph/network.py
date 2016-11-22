@@ -228,22 +228,19 @@ class VariableFractionTransformer(LinearTransformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
     efficiency_condensing : dict
-        dasf
-    main_flow_loss_index : dict
-        The index to describe the reduction of the main flow according to the
-        increase of the tapped flow.
+        The efficiency of the main flow if there is no tapped flow.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, efficiency_condensing, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.efficiency_condensing = [
-            Sequence(v)
-            for k, v in kwargs.get('efficiency_condensing', {}).items()][0]
-        self.main_flow_loss_index = [
-            Sequence(v)
-            for k, v in kwargs.get('main_flow_loss_index', {}).items()][0]
+            Sequence(v) for k, v in efficiency_condensing.items()][0]
 
-        label_main_flow = str([
-            k for k, v in kwargs.get('main_flow_loss_index', {}).items()][0])
+        label_main_flow = str([k for k, v in efficiency_condensing.items()][0])
         self.main_output = [o for o in self.outputs
                             if label_main_flow == o.label][0]
         self.tapped_output = [o for o in self.outputs
