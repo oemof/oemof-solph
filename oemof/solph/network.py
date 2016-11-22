@@ -95,6 +95,9 @@ class Flow:
      * :py:class:`~oemof.solph.blocks.Flow`
      * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
        Investment object is present)
+     * :py:class:`~oemof.solph.blocks.BinaryFlow` (If
+        binary  object is present, CAUTION: replaces
+        :py:class:`~oemof.solph.blocks.Flow` class)
 
     Examples
     --------
