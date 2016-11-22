@@ -228,7 +228,21 @@ class VariableFractionTransformer(LinearTransformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
     efficiency_condensing : dict
-        The efficiency of the main flow if there is no tapped flow.
+        The efficiency of the main flow if there is no tapped flow. Only one key
+        is allowed. Use one of the keys of the conversion factors. The key
+        indicates the main flow. The other output flow is the tapped flow.
+
+    Examples
+    --------
+    >>> bel = Bus(label='electricityBus')
+    >>> bth = Bus(label='heatBus')
+    >>> bgas = Bus(label='commodityBus')
+    >>> VariableFractionTransformer(
+    ...    label='variable_chp_gas',
+    ...    inputs={bgas: Flow(nominal_value=10e10)},
+    ...    outputs={bel: Flow(), bth: Flow()},
+    ...    conversion_factors={bel: 0.3, bth: 0.5},
+    ...    efficiency_condensing={bel: 0.5})
 
     Notes
     -----
