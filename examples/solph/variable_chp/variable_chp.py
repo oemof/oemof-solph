@@ -88,25 +88,23 @@ def optimise_storage_size(energysystem, filename="variable_chp.csv",
 
     solph.LinearTransformer(
         label='fixed_chp_gas',
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=0),
-                 bth: solph.Flow(nominal_value=0)},
+        inputs={bgas: solph.Flow(nominal_value=0)},
+        outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5})
 
     solph.LinearTransformer(
         label='fixed_chp_gas_2',
-        inputs={bgas: solph.Flow()},
-        outputs={bel2: solph.Flow(nominal_value=3e10),
-                 bth2: solph.Flow(nominal_value=4e10)},
+        inputs={bgas: solph.Flow(nominal_value=10e10)},
+        outputs={bel2: solph.Flow(), bth2: solph.Flow()},
         conversion_factors={bel2: 0.3, bth2: 0.5})
 
     solph.VariableFractionTransformer(
         label='variable_chp_gas',
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=3e10),
-                 bth: solph.Flow(nominal_value=4e10)},
+        inputs={bgas: solph.Flow(nominal_value=10e10)},
+        outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5},
-        main_flow_loss_index={bel: 0.4}, efficiency_condensing={bel: 0.5}
+        # main_flow_loss_index={bel: 0.4},
+        efficiency_condensing={bel: 0.5}
         )
 
     ##########################################################################
@@ -163,7 +161,7 @@ def create_plots(energysystem):
              'excess_therm': '#f22222',
              'excess_bth_2': '#f22222',
              'excess_elec': '#f22222',
-             'excess_el_2': '#f22222'}
+             'excess_bel_2': '#f22222'}
 
     myplot = outputlib.DataFramePlot(energy_system=energysystem)
 
