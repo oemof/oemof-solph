@@ -37,67 +37,73 @@ except ImportError:
 
 
 def initialise_energy_system(number_timesteps=192):
+    """Create an energy system"""
     logging.info('Initialize the energy system')
+
+    # create time index for 192 hours in May.
     date_time_index = pd.date_range('5/5/2012', periods=number_timesteps,
                                     freq='H')
-
     return solph.EnergySystem(timeindex=date_time_index)
 
 
 def optimise_storage_size(energysystem, filename="variable_chp.csv",
                           solver='cbc', debug=True, tee_switch=True):
 
-    # Read data file
+    # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
 
     ##########################################################################
-    # Create oemof object
+    # Create oemof.solph objects
     ##########################################################################
 
-    logging.info('Create oemof objects')
-    # create gas bus
+    logging.info('Create oemof.solph objects')
+
+    # create natural gas bus
     bgas = solph.Bus(label="natural_gas")
 
     # create commodity object for gas resource
     solph.Source(label='rgas', outputs={bgas: solph.Flow(variable_costs=50)})
 
-    # create electricity bus
+    # create two electricity buses and two heat buses
     bel = solph.Bus(label="electricity")
     bel2 = solph.Bus(label="electricity_2")
     bth = solph.Bus(label="heat")
     bth2 = solph.Bus(label="heat_2")
 
-    # create excess component for the elec/heat bus to allow overproduction
+    # create excess components for the elec/heat bus to allow overproduction
     solph.Sink(label='excess_bth_2', inputs={bth2: solph.Flow()})
     solph.Sink(label='excess_therm', inputs={bth: solph.Flow()})
     solph.Sink(label='excess_bel_2', inputs={bel2: solph.Flow()})
     solph.Sink(label='excess_elec', inputs={bel: solph.Flow()})
 
-    # create simple sink object for electrical demand
+    # create simple sink object for electrical demand for each electrical bus
     solph.Sink(label='demand_elec', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
     solph.Sink(label='demand_el_2', inputs={bel2: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
-    # create simple sink object for heat demand
+    # create simple sink object for heat demand for each thermal bus
     solph.Sink(label='demand_therm', inputs={bth: solph.Flow(
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
     solph.Sink(label='demand_th_2', inputs={bth2: solph.Flow(
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
 
+    # This is just a dummy transformer with a nominal input of zero
     solph.LinearTransformer(
         label='fixed_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=0)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5})
 
+    # create a fixed transformer to distribute to the heat_2 and elec_2 buses
     solph.LinearTransformer(
         label='fixed_chp_gas_2',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel2: solph.Flow(), bth2: solph.Flow()},
         conversion_factors={bel2: 0.3, bth2: 0.5})
 
+    # create a fixed transformer to distribute to the heat and elec buses
     solph.VariableFractionTransformer(
         label='variable_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
@@ -127,6 +133,17 @@ def optimise_storage_size(energysystem, filename="variable_chp.csv",
 
 
 def get_result_dict(energysystem):
+    """Get some representative results.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Results of the optimisation.
+
+    """
     logging.info('Check the results')
     myresults = outputlib.ResultsDataFrame(energy_system=energysystem)
 
@@ -145,7 +162,13 @@ def get_result_dict(energysystem):
 
 
 def create_plots(energysystem):
+    """Create a plot with 6 tiles that shows the difference between the
+    LinearTransformer and the VariableFractionTransformer used for chp plants.
 
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+    """
     logging.info('Plot the results')
 
     cdict = {'variable_chp_gas': '#42c77a',
@@ -260,11 +283,12 @@ def create_plots(energysystem):
 
 def run_variable_chp_example(**kwargs):
     logger.define_logging()
-    plot_only = False
+    plot_only = False  # set to True if you want to plot your stored results
 
+    # Switch to True to show the solver output
     kwargs.setdefault('tee_switch', False)
 
-    esys = initialise_energy_system(192)
+    esys = initialise_energy_system()
     if not plot_only:
         esys = optimise_storage_size(esys, **kwargs)
         esys.dump()
