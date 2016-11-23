@@ -227,7 +227,7 @@ class VariableFractionTransformer(LinearTransformer):
         to specified outflow. Keys are output bus objects.
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
-    efficiency_condensing : dict
+    conversion_factor_single_flow : dict
         The efficiency of the main flow if there is no tapped flow. Only one key
         is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
@@ -242,17 +242,17 @@ class VariableFractionTransformer(LinearTransformer):
     ...    inputs={bgas: Flow(nominal_value=10e10)},
     ...    outputs={bel: Flow(), bth: Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
-    ...    efficiency_condensing={bel: 0.5})
+    ...    conversion_factor_single_flow={bel: 0.5})
 
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
     """
-    def __init__(self, efficiency_condensing, *args, **kwargs):
+    def __init__(self, conversion_factor_single_flow, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.efficiency_condensing = {
-            k: Sequence(v) for k, v in efficiency_condensing.items()}
+        self.conversion_factor_single_flow = {
+            k: Sequence(v) for k, v in conversion_factor_single_flow.items()}
 
 
 class Storage(on.Transformer):

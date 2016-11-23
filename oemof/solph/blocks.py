@@ -902,19 +902,20 @@ class VariableFractionTransformer(SimpleBlock):
 
         for n in group:
             n.label_main_flow = str(
-                [k for k, v in n.efficiency_condensing.items()][0])
+                [k for k, v in n.conversion_factor_single_flow.items()][0])
             n.main_output = [o for o in n.outputs
                              if n.label_main_flow == o.label][0]
             n.tapped_output = [o for o in n.outputs
                                if n.label_main_flow != o.label][0]
-            n.efficiency_condensing_sq = (
-                n.efficiency_condensing[m.es.groups[n.main_output.label]])
+            n.conversion_factor_single_flow_sq = (
+                n.conversion_factor_single_flow[
+                    m.es.groups[n.main_output.label]])
             n.flow_relation_index = [
                 n.conversion_factors[m.es.groups[n.main_output.label]][t] /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
                 for t in m.TIMESTEPS]
             n.main_flow_loss_index = [
-                (n.efficiency_condensing_sq[t] -
+                (n.conversion_factor_single_flow_sq[t] -
                  n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
                 for t in m.TIMESTEPS]
@@ -929,7 +930,7 @@ class VariableFractionTransformer(SimpleBlock):
                         (m.flow[g, g.main_output, t] +
                          m.flow[g, g.tapped_output, t] *
                          g.main_flow_loss_index[t]) /
-                        g.efficiency_condensing_sq[t]
+                        g.conversion_factor_single_flow_sq[t]
                         )
                     block.input_output_relation.add((n, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, noruleinit=True)

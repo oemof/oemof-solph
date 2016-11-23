@@ -109,7 +109,7 @@ def optimise_storage_size(energysystem, filename="variable_chp.csv",
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5},
-        efficiency_condensing={bel: 0.5}
+        conversion_factor_single_flow={bel: 0.5}
         )
 
     ##########################################################################

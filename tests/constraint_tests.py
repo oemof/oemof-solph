@@ -214,6 +214,6 @@ class Constraint_Tests:
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
-            main_flow_loss_index={bel: 0.4}, efficiency_condensing={bel: 0.5})
+            conversion_factor_single_flow={bel: 0.5})
 
         self.compare_lp_files('variable_chp.lp')
