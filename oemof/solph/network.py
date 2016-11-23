@@ -251,14 +251,8 @@ class VariableFractionTransformer(LinearTransformer):
     """
     def __init__(self, efficiency_condensing, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.efficiency_condensing = [
-            Sequence(v) for k, v in efficiency_condensing.items()][0]
-
-        label_main_flow = str([k for k, v in efficiency_condensing.items()][0])
-        self.main_output = [o for o in self.outputs
-                            if label_main_flow == o.label][0]
-        self.tapped_output = [o for o in self.outputs
-                              if label_main_flow != o.label][0]
+        self.efficiency_condensing = {
+            k: Sequence(v) for k, v in efficiency_condensing.items()}
 
 
 class Storage(on.Transformer):

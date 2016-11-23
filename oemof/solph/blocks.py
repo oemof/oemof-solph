@@ -854,7 +854,7 @@ class VariableFractionTransformer(SimpleBlock):
 
     **The following constraints are created:**
 
-    Variable fraction relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+    Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
             flow(input, n, t) = \\\\
             (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
@@ -901,17 +901,23 @@ class VariableFractionTransformer(SimpleBlock):
         m = self.parent_block()
 
         for n in group:
+            n.label_main_flow = str(
+                [k for k, v in n.efficiency_condensing.items()][0])
+            n.main_output = [o for o in n.outputs
+                             if n.label_main_flow == o.label][0]
+            n.tapped_output = [o for o in n.outputs
+                               if n.label_main_flow != o.label][0]
+            n.efficiency_condensing_sq = (
+                n.efficiency_condensing[m.es.groups[n.main_output.label]])
             n.flow_relation_index = [
                 n.conversion_factors[m.es.groups[n.main_output.label]][t] /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
-                for t in m.TIMESTEPS
-            ]
+                for t in m.TIMESTEPS]
             n.main_flow_loss_index = [
-                (n.efficiency_condensing[t] -
+                (n.efficiency_condensing_sq[t] -
                  n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
-                for t in m.TIMESTEPS
-            ]
+                for t in m.TIMESTEPS]
 
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output.
@@ -923,7 +929,7 @@ class VariableFractionTransformer(SimpleBlock):
                         (m.flow[g, g.main_output, t] +
                          m.flow[g, g.tapped_output, t] *
                          g.main_flow_loss_index[t]) /
-                        g.efficiency_condensing[t]
+                        g.efficiency_condensing_sq[t]
                         )
                     block.input_output_relation.add((n, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, noruleinit=True)
