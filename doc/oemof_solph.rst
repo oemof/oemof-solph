@@ -196,10 +196,14 @@ You can define a different efficiency for every time step but this series has to
         efficiency_condensing={bel: 0.5}
         )
 
-The key of the *'efficiency_condensing'* parameter will indicate the main flow. In the example above the flow to the Bus *'bel'* is the main flow and the flow to the Bus *'bth'* is the tapped flow.
+The key of the *'efficiency_condensing'* parameter will indicate the main flow. In the example above the flow to the Bus *'bel'* is the main flow and the flow to the Bus *'bth'* is the tapped flow. The following plot shows how the variable chp (right) works in contrast to a fixed chp (left). the plot is the output of the :ref:`variable_chp_examples_label` below.
+
+.. 	image:: _files/variable_chp_plot.svg
+   :scale: 10 %
+   :alt: variable_chp_plot.svg
+   :align: center
 
 .. note:: See the :py:class:`~oemof.solph.network.VariableFractionTransformer` class for all parameters and the mathematical background.
-
 
 Storage
 +++++++
@@ -443,3 +447,16 @@ Storage_optimization
 
 The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_investment/storage_investment.py>`, :download:`data file <../examples/solph/storage_investment/storage_investment.csv>`).
 
+.. _variable_chp_examples_label:
+
+Variable chp
+^^^^^^^^^^^^
+
+This example is not a real use case of an energy system but an example to show how a variable combined heat and power plant (chp) works in contrast to a fixed chp (eg. block device).
+
+.. 	image:: _files/example_variable_chp.svg
+   :scale: 10 %
+   :alt: example_variable_chp.svg
+   :align: center
+
+Both chp plants distribute power and heat to a separate heat and power Bus with a heat and power demand. The plot shows that the fixed chp plant produces heat and power excess and therefore needs more natural gas. (:download:`source file <../examples/solph/variable_chp/variable_chp.py>`, :download:`data file <../examples/solph/variable_chp/variable_chp.csv>`)
