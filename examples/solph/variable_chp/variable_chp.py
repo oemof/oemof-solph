@@ -122,7 +122,7 @@ def optimise_storage_size(energysystem, filename="variable_chp.csv",
 
     if debug:
         filename = os.path.join(
-            helpers.extend_basic_path('lp_files'), 'storage_invest.lp')
+            helpers.extend_basic_path('lp_files'), 'variable_chp.lp')
         logging.info('Store lp-file in {0}.'.format(filename))
         om.write(filename, io_options={'symbolic_solver_labels': True})
 
