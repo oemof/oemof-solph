@@ -10,7 +10,9 @@ from .plumbing import Sequence
 
 
 class EnergySystem(es.EnergySystem):
-    """ A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
+    """ A variant of
+        :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
+        specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
@@ -142,7 +144,7 @@ class Flow:
         if self.investment and self.binary:
             raise ValueError("Investment flows cannot be combined with " +
                              "binary flows!")
-                             
+
 
 class Bus(on.Bus):
     """A balance object. Every node has to be connected to Bus.
@@ -210,15 +212,15 @@ class LinearTransformer(on.Transformer):
 
 
 class VariableFractionTransformer(LinearTransformer):
-    """A linear transformer with more then one output, where the fraction of
+    """A linear transformer with more than one output, where the fraction of
     the output flows is variable. By now it is restricted to two output flows.
 
-    A main output has to be defined. The main output will be reduced if more
-    the tapped output is increasing. Therefore a loss index has to be defined
-    for this flow. Furthermore a maximum efficiency has to be defined if the
-    whole flow is led to the main output (tapped_output = 0). The state with
-    the maximum tapped_output is described with the conversion factors
-    equivalent to the LinearTransformer.
+    One main output flow has to be defined and is tapped by the remaining flow.
+    Thus, the main output will be reduced if the tapped output increases.
+    Therefore a loss index has to be defined. Furthermore a maximum efficiency
+    has to be specified if the whole flow is led to the main output
+    (tapped_output = 0). The state with the maximum tapped_output is described
+    through conversion factors equivalent to the LinearTransformer.
 
     Parameters
     ----------
@@ -228,8 +230,8 @@ class VariableFractionTransformer(LinearTransformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
     conversion_factor_single_flow : dict
-        The efficiency of the main flow if there is no tapped flow. Only one key
-        is allowed. Use one of the keys of the conversion factors. The key
+        The efficiency of the main flow if there is no tapped flow. Only one
+        key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
     Examples
@@ -293,7 +295,7 @@ class Storage(on.Transformer):
         investment variable instead of to the nominal_capacity. The
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
-        
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
