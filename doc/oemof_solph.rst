@@ -182,9 +182,7 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
 VariableFractionTransformer
 +++++++++++++++++++++++++++
 
-The VariableFractionTransformer inherits the :ref:`linear_transformer_class_label` class. An instance of the VariableFractionTransformer class can represent a flexible combined heat and power (chp) plant. By now this class is restricted to one input and two output flows.
-As the name indicates the efficiency has to constant within one time step to get a linear transformation.
-You can define a different efficiency for every time step but this series has to be predefined and cannot be changed within the optimisation. In contrast to the LinearTransformer a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The VariableFractionTransformer inherits from the :ref:`linear_transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -196,7 +194,7 @@ You can define a different efficiency for every time step but this series has to
         conversion_factor_single_flow={bel: 0.5}
         )
 
-The key of the *'conversion_factor_single_flow'* parameter will indicate the main flow. In the example above the flow to the Bus *'bel'* is the main flow and the flow to the Bus *'bth'* is the tapped flow. The following plot shows how the variable chp (right) works in contrast to a fixed chp (left). the plot is the output of the :ref:`variable_chp_examples_label` below.
+The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'bel'* is the main flow and the flow to the Bus *'bth'* is the tapped flow. The following plot shows how the variable chp (right) shedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
