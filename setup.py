@@ -9,6 +9,7 @@
 """
 
 from setuptools import find_packages, setup
+import os
 
 import oemof
 
@@ -19,6 +20,8 @@ setup(name='oemof',
       description='The open energy modelling framework',
       namespace_package = ['oemof'],
       packages=find_packages(),
+      package_data={'oemof': [os.path.join(
+                              'tools', 'default_files', '*.ini')]},
       package_dir={'oemof': 'oemof'},
       install_requires=['dill',
                         'numpy >= 1.7.0',
