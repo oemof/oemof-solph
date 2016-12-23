@@ -20,8 +20,13 @@ setup(name='oemof',
       description='The open energy modelling framework',
       namespace_package = ['oemof'],
       packages=find_packages(),
-      package_data={'oemof': [os.path.join(
-                              'tools', 'default_files', '*.ini')]},
+      package_data={
+          'oemof': [os.path.join('tools', 'default_files', '*.ini')],
+          'examples': [
+              os.path.join('*.csv'),
+              os.path.join('storage_optimization',
+                           '*.csv')
+          ]},
       package_dir={'oemof': 'oemof'},
       install_requires=['dill',
                         'numpy >= 1.7.0',
