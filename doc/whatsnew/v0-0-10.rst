@@ -1,28 +1,7 @@
 v0.0.10 ()
 ++++++++++++++++++++++++++
 
-New features
-############
-
- 
-
-Documentation
-#############
-
-
-Testing
-####### 
-
-
-Bug fixes
-#########
-
- 
 Other changes
 #############
-
-
-Contributors
-############
-
-
+Add default logging.ini to repository to avoid dependency with external server.
+Add example data files to setup.py.
