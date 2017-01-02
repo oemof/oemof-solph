@@ -407,12 +407,19 @@ The csv-reader provides an easy to use interface to the solph library. The objec
 Flexible modelling
 ^^^^^^^^^^^^^^^^^^^^
 
-It is also possible to pass constraints to the model that are not provided by solph but defined in your application. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
+It is also possible to pass constraints to the model that are not provided by solph but defined in your application. 
+Inside this example two different kind of constraints are added: (1) emission constraints, (2)
+shared constraints between flows. To understand the example it might be useful to know a little bit about
+the pyomo-package and how constraints are defined, moreover you should have understood the basic underlying oemof
+structure. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
 
 Dispatch modelling
 ^^^^^^^^^^^^^^^^^^^
 
-Dispatch modelling is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. (:download:`source file <../examples/solph/simple_dispatch/simple_dispatch.py>`, :download:`data file <../examples/solph/simple_dispatch/input_data.csv>`).
+Dispatch modelling is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. In this example
+a least cost dispatch of different generators that meet an inelastic demand is undertaken. Some of the generators are renewable energies with
+marginal costs if zero. Additionally, it shows how combined heat and power units may be easily modelled as well.
+(:download:`source file <../examples/solph/simple_dispatch/simple_dispatch.py>`, :download:`data file <../examples/solph/simple_dispatch/input_data.csv>`).
 
 Storage investment
 ^^^^^^^^^^^^^^^^^^
