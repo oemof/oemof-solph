@@ -244,6 +244,53 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
     return nodes
 
+
+def merge_csv_files(path=None, output_path=None, write=True):
+    """
+    Merge csv files from a specified directory. All files with 'seq' will be
+    merged and all other files. Make sure that no other csv-files than the ones
+    to be merged are inside the specified directory.
+
+    Parameters
+    ----------
+    path: str
+        Path to the directory where csv files are stored
+    output_path : str
+        Path where the merged files are written to (default is `path` above)
+    write : boolean
+        Indicating if new, merged dataframes should be written to csv
+
+    Returns
+    -------
+    Tuple of dataframes (nodes_flows, nodes_flows_seq)
+    """
+    if output_path is None:
+        output_path = path
+
+    files = [f for f in os.listdir(path) if f.endswith('.csv')]
+
+    nodes_flows = pd.DataFrame()
+    nodes_flows_seq = pd.DataFrame()
+
+    for f in files:
+        if 'seq' in f:
+            tmp_df = pd.read_csv(os.path.join(path, f), index_col=[0],
+                                 header=[0,1,2,3,4])
+            nodes_flows_seq  = pd.concat([nodes_flows_seq, tmp_df], axis=1)
+        else:
+            tmp_df = pd.read_csv(os.path.join(path, f))
+            nodes_flows = pd.concat([nodes_flows, tmp_df])
+
+    #import pdb
+    #pdb.set_trace()
+    if write == True:
+        nodes_flows.to_csv('merged_nodes_flows.csv', index=False)
+        nodes_flows_seq.to_csv('merged_nodes_flows_seq.csv')
+
+    return nodes_flows, nodes_flows_seq
+
+
+
 def resample_sequence(seq_base_file=None, output_path=None,
                        samples=None, file_prefix=None, file_suffix='_seq',
                        header=[0,1,2,3,4]):
