@@ -284,8 +284,10 @@ def merge_csv_files(path=None, output_path=None, write=True):
     #import pdb
     #pdb.set_trace()
     if write == True:
-        nodes_flows.to_csv('merged_nodes_flows.csv', index=False)
-        nodes_flows_seq.to_csv('merged_nodes_flows_seq.csv')
+        nodes_flows.to_csv(os.path.join(output_path,
+                                        'merged_nodes_flows.csv'), index=False)
+        nodes_flows_seq.to_csv(os.path.join(output_path,
+                                            'merged_nodes_flows_seq.csv'))
 
     return nodes_flows, nodes_flows_seq
 
