@@ -280,6 +280,7 @@ class OperationalModel(po.ConcreteModel):
 
         result = UserDict()
         result.objective = self.objective()
+        investment = UserDict()
         for i, o in self.flows:
 
             result[i] = result.get(i, UserDict())
@@ -299,10 +300,11 @@ class OperationalModel(po.ConcreteModel):
             if isinstance(self.flows[i, o].investment, Investment):
                 setattr(result[i][o], 'invest',
                         self.InvestmentFlow.invest[i, o].value)
+                investment[(i, o)] = self.InvestmentFlow.invest[i, o].value
                 if isinstance(i, Storage):
                     setattr(result[i][i], 'invest',
                             self.InvestmentStorage.invest[i].value)
-
+                    investment[(i,i)] = self.InvestmentStorage.invest[i].value
         # add results of dual variables for balanced buses
         if hasattr(self, "dual"):
             # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]
@@ -313,6 +315,8 @@ class OperationalModel(po.ConcreteModel):
                 result[bus] = result.get(bus, UserDict())
                 result[bus][bus] = [self.dual[self.Bus.balance[bus, t]]
                                     for _, t in timesteps]
+
+        result.investment = investment
 
         return result
 
