@@ -835,6 +835,60 @@ class LinearTransformer(SimpleBlock):
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
+class ElectricalLine(SimpleBlock):
+    """Block for the linear relation of nodes with type
+    class:`.LinearTransformer`
+
+
+    **The following constraints are created:**
+
+    Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
+        .. math::
+            flow(n, o, t) =  1 / reactance(n, t) \\cdot ()
+            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{ELECTRICAL\_LINES}.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`ElectricalLine`
+        block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.ElectricalLine (eline) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [eline1, eline2, ...]. The components inside the
+            list need to hold a attribute `reactance` of type Sequence
+            containing the reactance of the line.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        I = {n: n._input() for n in group}
+        O = {n: n._output() for n in group}
+
+        self.electrical_flow = Constraint(group, noruleinit=True)
+        def _input_output_relation(block):
+            for t in m.TIMESTEPS:
+                for n in group:
+                        try:
+                            lhs = m.flow[n, O[n], t]
+                            rhs = 1 / n.reactance[t] * (
+                                m.voltage_angle[I[n], t] -
+                                    m.voltage_angle[O[n], t])
+                        except:
+                            raise ValueError("Error in constraint creation",
+                                             "of node {}".format(n.label))
+                        block.electrical_flow.add((n, t), (lhs == rhs))
+        self.electrical_flow_build = BuildAction(rule=_input_output_relation)
+
+
 
 class BinaryFlow(SimpleBlock):
     """

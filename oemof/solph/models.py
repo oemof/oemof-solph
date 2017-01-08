@@ -9,7 +9,7 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
-from .network import Storage
+from .network import Storage, ElectricalBus
 from .options import Investment
 from .plumbing import Sequence
 
@@ -101,7 +101,8 @@ class OperationalModel(po.ConcreteModel):
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.Storage, blocks.InvestmentFlow,
                          blocks.InvestmentStorage, blocks.Flow,
-                         blocks.BinaryFlow, blocks.DiscreteFlow]
+                         blocks.BinaryFlow, blocks.DiscreteFlow,
+                         blocks.ElectricalLine]
 
     def __init__(self, es, **kwargs):
         super().__init__()
@@ -196,6 +197,12 @@ class OperationalModel(po.ConcreteModel):
         self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
                                              self.TIMESTEPS,
                                              within=po.NonNegativeReals)
+
+        ######################### voltage angle variables #####################
+        self.ELECTRICAL_LINES = po.Set(initialize=[n for n in self.es.nodes
+                                       if isinstance(n, ElectricalBus)])
+
+        self.voltage_angle = po.Var(self.ELECTRICAL_LINES, self.TIMESTEPS)
 
         # ########################### CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model

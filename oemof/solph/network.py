@@ -171,6 +171,23 @@ class Bus(on.Bus):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
 
+class ElectricalBus(Bus):
+    """A electrical bus object. Every node has to be connected to Bus. This
+    Bus is used in combination with ElectricalLine objects for linear optimal
+    power flow (lopf) simulations
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Bus`
+    The objects are also used inside:
+     * :py:class:`~oemof.solph.blocks.ElectricalLine`
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.voltage_angle_max = kwargs.get('voltage_angle_max', 100)
+
 
 class Sink(on.Sink):
     """An object with one input flow.
@@ -221,7 +238,39 @@ class LinearTransformer(on.Transformer):
     def _input(self):
         """ Returns the first (and only) input of the storage object
         """
+        print(self.label)
         return [i for i in self.inputs][0]
+
+
+class ElectricalLine(on.Transformer):
+    """A Electrical Line to used in linear optimal power flow calculations.
+
+    Parameters
+    ----------
+    reactance : float or array of floats
+        Reactance of the line to be modelled
+
+    Notes
+    ------
+    * To use this object the connected buses need to be of the type
+   `py:class:`~oemof.solph.network.ElectricalBus`.
+    * This object uses the outflow as reference. Please ignore the inflow
+    of this component for parameter setting.
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reactance = Sequence(kwargs.get('reactance', 0.00001))
+
+    def _input(self):
+        """ Returns the first (and only) input of the line object
+        """
+        return [i for i in self.inputs][0]
+
+    def _output(self):
+        """ Returns the first (and only) output of the line object
+        """
+        return [o for o in self.outputs][0]
 
 
 class Storage(on.Transformer):
