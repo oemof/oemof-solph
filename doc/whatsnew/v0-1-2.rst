@@ -11,7 +11,7 @@ API changes
 New features
 ############
 
-
+* Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
 
 
 Documentation
@@ -40,6 +40,6 @@ Other changes
 Contributors
 ############
  
- * First
+ * Simon Hilpert
  * Second
 
