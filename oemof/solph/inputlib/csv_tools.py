@@ -30,6 +30,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     additional_seq_attributes : list
         List of string with attributes that have to be of type 'solph sequence'
         and that shall be recognized inside the csv file.
+    addational_flow_attributes : list
+        List of string with attributes that shall be recognized inside the
+        csv file and set as flow attribute
 
     """
 
