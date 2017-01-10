@@ -284,13 +284,16 @@ def merge_csv_files(path=None, output_path=None, write=True):
             tmp_df = pd.read_csv(os.path.join(path, f))
             nodes_flows = pd.concat([nodes_flows, tmp_df])
 
-    #import pdb
-    #pdb.set_trace()
     if write == True:
         nodes_flows.to_csv(os.path.join(output_path,
                                         'merged_nodes_flows.csv'), index=False)
-        nodes_flows_seq.to_csv(os.path.join(output_path,
-                                            'merged_nodes_flows_seq.csv'))
+        if isinstance(nodes_flows_seq.columns, pd.MultiIndex):
+            nodes_flows_seq.to_csv(os.path.join(output_path,
+                                   'merged_nodes_flows_seq.csv'))
+        else:
+            raise ValueError('Columns of merge seq-csvfile is not Multiindex.'
+                             'Did you use unique column-headers across all '
+                             'files?')
 
     return nodes_flows, nodes_flows_seq
 
