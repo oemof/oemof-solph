@@ -58,7 +58,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 License
 =======
 
-Copyright (C) 2016 oemof developing group
+Copyright (C) 2017 oemof developing group
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
