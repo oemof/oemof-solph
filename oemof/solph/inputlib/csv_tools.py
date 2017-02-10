@@ -3,6 +3,8 @@
 import pandas as pd
 import os
 import logging
+from shutil import copyfile
+
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import Sequence
@@ -414,3 +416,66 @@ def update_parameter(name, pattern, query_col, target_col, data, object_path,
             data.loc[object_id])
     scenario.to_csv(os.path.join(scenario_path, name + '.csv'))
 
+
+def update_sequence(name, pattern, data, object_path, scenario_path='scenarios',
+                    backup=True):
+    """
+    Updating sequences in a csv file (oemof csv format).
+
+    Parameters
+    ----------
+    name : str
+        basic name of the csv file
+    pattern : str
+        Basic string containing a format placeholder
+    data : pandas.Series
+        Series containing the data to update the parameters. Column names must
+        equal to object names.
+    object_path : str
+        Path to a csv file containing a list of object names separated by a
+        line break.
+    scenario_path
+        Path where the scenario files can be found (default: 'scenarios')
+    backup : boolean
+        Will create an back of the unchanged file if set to True.
+
+    Notes
+    -----
+    The scenario files should end with '.csv'.
+    The sequence file should have the same name with an additional '_seq'.
+    For example: my_example.csv, my_example_seq.csv
+    """
+    full_path_seq = os.path.join(scenario_path, name + '_seq')
+    objects = pd.read_csv(object_path, index_col=0)
+
+    # Create backup file if backup is True
+    if backup:
+        copyfile(full_path_seq + '.csv', full_path_seq + '.csv.backup')
+
+    # Load table with 'label' as column name
+    columns = pd.read_csv(full_path_seq + '.csv', header=1, nrows=1).columns
+    tmp_csv = pd.read_csv(full_path_seq + '.csv', skiprows=5, names=columns,
+                          parse_dates=True, index_col=0)
+
+    # Write data into pandas table
+    for object_id in objects.index:
+        tmp_csv[pattern.format(object_id)] = list(data[object_id])
+
+    # Extract the header
+    with open(full_path_seq + '.csv') as csv_file:
+        head = [next(csv_file, x) for x in range(5)]
+
+    # Write data to tmp file using pandas and read it again to get a text block.
+    tmp_csv.to_csv(full_path_seq + '~.csv', header=False)
+    with open(full_path_seq + '~.csv') as tmp_file:
+        body = tmp_file.read()
+
+    # Write data to temporary file for not overwriting existing data
+    # Writer header and body.
+    with open(full_path_seq + '~.csv', 'w') as csv_file:
+        for line in head:
+            csv_file.write(line)
+        csv_file.write(body)
+
+    # Overwrite input file with result file if no error occurred
+    os.rename(full_path_seq + '~.csv', full_path_seq + '.csv')
