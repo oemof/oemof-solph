@@ -374,7 +374,7 @@ def resample_sequence(seq_base_file=None, output_path=None, samples=None,
     return seq_sampled
 
 
-def update_parameter(name, pattern, query_col, target_col, data, object_path,
+def update_parameter(name, pattern, query_col, target_col, data, object_names,
                      scenario_path='scenarios'):
     """
     Updating parameters in a csv file (oemof csv format).
@@ -393,9 +393,8 @@ def update_parameter(name, pattern, query_col, target_col, data, object_path,
     data : pandas.Series
         Series containing the data to update the parameters. Index values must
         be equal to the object names.
-    object_path : str
-        Path to a csv file containing a list of object names separated by a
-        line break.
+    object_names : iterable
+        List of names of the objects (regions, power lines).
     scenario_path
         Path where the scenario files can be found (default: 'scenarios')
 
@@ -406,19 +405,18 @@ def update_parameter(name, pattern, query_col, target_col, data, object_path,
     For example: my_example.csv, my_example_seq.csv
 
     """
-    objects = pd.read_csv(object_path, index_col=0)
     scenario = pd.read_csv(os.path.join(scenario_path, name + '.csv'),
                            index_col='class')
 
-    for object_id in objects.index:
+    for object_id in object_names:
         label = pattern.format(object_id)
         scenario.loc[scenario[query_col] == label, target_col] = (
             data.loc[object_id])
     scenario.to_csv(os.path.join(scenario_path, name + '.csv'))
 
 
-def update_sequence(name, pattern, data, object_path, scenario_path='scenarios',
-                    backup=True):
+def update_sequence(name, pattern, data, object_names,
+                    scenario_path='scenarios', backup=True):
     """
     Updating sequences in a csv file (oemof csv format).
 
@@ -431,9 +429,8 @@ def update_sequence(name, pattern, data, object_path, scenario_path='scenarios',
     data : pandas.Series
         Series containing the data to update the parameters. Column names must
         equal to object names.
-    object_path : str
-        Path to a csv file containing a list of object names separated by a
-        line break.
+    object_names : iterable
+        List of names of the objects (regions, power lines).
     scenario_path
         Path where the scenario files can be found (default: 'scenarios')
     backup : boolean
@@ -446,7 +443,6 @@ def update_sequence(name, pattern, data, object_path, scenario_path='scenarios',
     For example: my_example.csv, my_example_seq.csv
     """
     full_path_seq = os.path.join(scenario_path, name + '_seq')
-    objects = pd.read_csv(object_path, index_col=0)
 
     # Create backup file if backup is True
     if backup:
@@ -458,7 +454,7 @@ def update_sequence(name, pattern, data, object_path, scenario_path='scenarios',
                           parse_dates=True, index_col=0)
 
     # Write data into pandas table
-    for object_id in objects.index:
+    for object_id in object_names:
         tmp_csv[pattern.format(object_id)] = list(data[object_id])
 
     # Extract the header
