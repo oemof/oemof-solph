@@ -375,7 +375,7 @@ def resample_sequence(seq_base_file=None, output_path=None, samples=None,
 
 
 def update_parameter(name, pattern, query_col, target_col, data, object_names,
-                     scenario_path='scenarios'):
+                     scenario_path):
     """
     Updating parameters in a csv file (oemof csv format).
 
@@ -396,7 +396,7 @@ def update_parameter(name, pattern, query_col, target_col, data, object_names,
     object_names : iterable
         List of names of the objects (regions, power lines).
     scenario_path
-        Path where the scenario files can be found (default: 'scenarios')
+        Path where the scenario files can be found
 
     Notes
     -----
@@ -416,7 +416,7 @@ def update_parameter(name, pattern, query_col, target_col, data, object_names,
 
 
 def update_sequence(name, pattern, data, object_names,
-                    scenario_path='scenarios', backup=True):
+                    scenario_path, backup=True):
     """
     Updating sequences in a csv file (oemof csv format).
 
@@ -432,9 +432,10 @@ def update_sequence(name, pattern, data, object_names,
     object_names : iterable
         List of names of the objects (regions, power lines).
     scenario_path
-        Path where the scenario files can be found (default: 'scenarios')
+        Path where the scenario files can be found
     backup : boolean
         Will create an back of the unchanged file if set to True.
+        (default: True)
 
     Notes
     -----
