@@ -370,3 +370,47 @@ def resample_sequence(seq_base_file=None, output_path=None, samples=None,
         logging.info('Writing sample file to {0}.'.format(filename))
         seq_sampled.to_csv(filename, index=False)
     return seq_sampled
+
+
+def update_parameter(name, pattern, query_col, target_col, data, object_path,
+                     scenario_path='scenarios'):
+    """
+    Updating parameters in a csv file (oemof csv format).
+
+    Parameters
+    ----------
+    name : str
+        basic name of the csv file
+    pattern : str
+        Basic string containing a format placeholder
+    query_col : str
+        column name in which the the search string (pattern + object name) can
+        be found.
+    target_col : str
+        column name in which the parameter should be changed
+    data : pandas.Series
+        Series containing the data to update the parameters. Index values must
+        be equal to the object names.
+    object_path : str
+        Path to a csv file containing a list of object names separated by a
+        line break.
+    scenario_path
+        Path where the scenario files can be found (default: 'scenarios')
+
+    Notes
+    -----
+    The scenario files should end with '.csv'.
+    The sequence file should have the same name with an additional '_seq'.
+    For example: my_example.csv, my_example_seq.csv
+
+    """
+    objects = pd.read_csv(object_path, index_col=0)
+    scenario = pd.read_csv(os.path.join(scenario_path, name + '.csv'),
+                           index_col='class')
+
+    for object_id in objects.index:
+        label = pattern.format(object_id)
+        scenario.loc[scenario[query_col] == label, target_col] = (
+            data.loc[object_id])
+    scenario.to_csv(os.path.join(scenario_path, name + '.csv'))
+
