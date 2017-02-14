@@ -17,7 +17,7 @@ Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_
 Documentation
 =============
 
-Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow us at our `wordpress blog <https://oemof.wordpress.com>`_.
+Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 
 
 Installing oemof
@@ -56,7 +56,7 @@ Further reading in the ':ref:`check_installation_label`' section.
 Keep in touch
 =============
 
-You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow us at our `blog <https://oemof.wordpress.com/>`_.
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at`oemof.org <https://oemof.org/>`_.
 
 
 License
