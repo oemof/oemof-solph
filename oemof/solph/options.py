@@ -14,12 +14,43 @@ class Investment:
     ep_costs : float
         Equivalent periodical costs for the investment, if period is one
         year these costs are equal to the equivalent annual costs.
+    invest_costs : float
+        Specific investmet costs, if ep_cost are to be calculated
+        (do not set 'ep_costs' then)
+    wacc : float
+        Weighted average cost of capital to be used in ep_costs calculation
+    lifetime : float
+        Lifetime of component/flow investment to be used in ep_costs
+        calculation
 
     """
-    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0):
+    def __init__(self, maximum=float('+inf'), minimum=0, invest_costs=None,
+                 ep_costs=None, wacc=0.08, lifetime=20):
         self.maximum = maximum
         self.minimum = minimum
+        self.wacc = wacc
+        self.lifetime = lifetime
+        self.invest_costs = invest_costs
         self.ep_costs = ep_costs
+        self._calc_ep_costs()
+
+    def _calc_ep_costs(self):
+        """
+        """
+        if self.invest_costs is None:
+            if self.ep_costs is None:
+                self.ep_costs = 0
+        else:
+            if self.ep_costs is None:
+                self.ep_costs = (self.invest_costs *
+                    (self.wacc * (1 + self.wacc) ** self.lifetime) /
+                        ((1 + self.wacc) ** self.lifetime - 1))
+            else:
+                logging.info('Attribute ep_costs already set.' +
+            'Recalculating ep_costs based on invest_costs, wacc and lifetime!')
+                self.ep_costs = (self.invest_costs *
+                    (self.wacc * (1 + self.wacc) ** self.lifetime) /
+                        ((1 + self.wacc) ** self.lifetime - 1))
 
 
 class BinaryFlow:
