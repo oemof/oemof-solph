@@ -31,6 +31,7 @@ class Investment:
         self.wacc = wacc
         self.lifetime = lifetime
         self.invest_costs = invest_costs
+
         self.ep_costs = ep_costs
         self._calc_ep_costs()
 
