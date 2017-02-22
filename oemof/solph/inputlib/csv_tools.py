@@ -216,8 +216,19 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             # create a conversion_factor entry for the current line
             try:
                 if row['target'] and 'conversion_factors' in row:
-                    conversion_factors = {nodes[row['target']]:
-                                          Sequence(row['conversion_factors'])}
+                    if row['conversion_factors'] == 'seq':
+                        seq = nodes_flows_seq.loc[row['class'],
+                                                  row['label'],
+                                                  row['source'],
+                                                  row['target'],
+                                                  'conversion_factors']
+                        seq = [i for i in seq]
+                        seq = Sequence(seq)
+                        conversion_factors = {nodes[row['target']]: seq}
+                    else:
+                        conversion_factors = \
+                            {nodes[row['target']]:
+                                Sequence(float(row['conversion_factors']))}
                 else:
                     conversion_factors = {}
             except:
