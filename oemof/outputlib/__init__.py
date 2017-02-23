@@ -160,7 +160,7 @@ class ResultsDataFrame(pd.DataFrame):
         unstacklevel : string (default: 'obj_label')
             Level to unstack the subset of the DataFrame.
         formatted : boolean
-            missing...
+
         """
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
@@ -169,6 +169,27 @@ class ResultsDataFrame(pd.DataFrame):
                                inplace=True)
         # user standard instead of multi-indexed columns
         subset.columns = subset.columns.get_level_values(1).unique()
+        return subset
+
+    def slice_bus_balance(self, **kwargs):
+        r"""Method for slicing the ResultsDataFrame. An balance around a bus
+        with inputs, outputs and other values is returned.
+
+        Parameters
+        ----------
+        bus_label : string
+
+        """
+        inputs = self.slice_unstacked(bus_label=kwargs['bus_label'],
+                                      type='to_bus',
+                                      formatted=True)
+        outputs = self.slice_unstacked(bus_label=kwargs['bus_label'],
+                                       type='from_bus',
+                                       formatted=True)
+        other = self.slice_unstacked(bus_label=kwargs['bus_label'],
+                                     type='other',
+                                     formatted=True)
+        subset = pd.concat([inputs, outputs, other], axis=1)
         return subset
 
 
