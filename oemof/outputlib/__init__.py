@@ -186,10 +186,7 @@ class ResultsDataFrame(pd.DataFrame):
         outputs = self.slice_unstacked(bus_label=kwargs['bus_label'],
                                        type='from_bus',
                                        formatted=True)
-        other = self.slice_unstacked(bus_label=kwargs['bus_label'],
-                                     type='other',
-                                     formatted=True)
-        subset = pd.concat([inputs, outputs, other], axis=1)
+        subset = pd.concat([inputs, outputs], axis=1)
         return subset
 
 
