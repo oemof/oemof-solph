@@ -36,8 +36,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
 
     """
 
-
-
     # dataframe creation and manipulation
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
     nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
@@ -289,13 +287,13 @@ def merge_csv_files(path=None, output_path=None, write=True):
     for f in files:
         if 'seq' in f:
             tmp_df = pd.read_csv(os.path.join(path, f), index_col=[0],
-                                 header=[0,1,2,3,4])
-            nodes_flows_seq  = pd.concat([nodes_flows_seq, tmp_df], axis=1)
+                                 header=[0, 1, 2, 3, 4])
+            nodes_flows_seq = pd.concat([nodes_flows_seq, tmp_df], axis=1)
         else:
             tmp_df = pd.read_csv(os.path.join(path, f))
             nodes_flows = pd.concat([nodes_flows, tmp_df])
 
-    if write == True:
+    if write is True:
         nodes_flows.to_csv(os.path.join(output_path,
                                         'merged_nodes_flows.csv'), index=False)
         if isinstance(nodes_flows_seq.columns, pd.MultiIndex):
@@ -309,10 +307,9 @@ def merge_csv_files(path=None, output_path=None, write=True):
     return nodes_flows, nodes_flows_seq
 
 
-
 def resample_sequence(seq_base_file=None, output_path=None,
-                       samples=None, file_prefix=None, file_suffix='_seq',
-                       header=[0,1,2,3,4]):
+                      samples=None, file_prefix=None, file_suffix='_seq',
+                      header=[0, 1, 2, 3, 4]):
     """
     This function can be used for resampling the sequence csv-data file.
     The file is read  from the specified path: `seq_base_file`, resampled and,
@@ -340,10 +337,11 @@ def resample_sequence(seq_base_file=None, output_path=None,
     header : list
         List of integers to specifiy the header lines
     """
-    if samples is None :
+    if samples is None:
         raise ValueError('Missing sample attribute. Please specifiy!')
     if output_path is None:
-        logging.info("No output_path specified, setting output_path to seq_path!")
+        logging.info('No output_path specified' +
+                     ', setting output_path to seq_path!')
         output_path = seq_base_file
 
     if not os.path.exists(output_path):
@@ -369,9 +367,8 @@ def resample_sequence(seq_base_file=None, output_path=None,
         else:
             seq[col] = seq[col].astype(float)
 
-    #pdb.set_trace()
     for s in samples:
-    # resample dataframes
+        # resample dataframes
         seq_sampled = seq.resample(s).mean()
         # assign the resampled datetimeindex values to the first columns,
         # replacing the -999999
