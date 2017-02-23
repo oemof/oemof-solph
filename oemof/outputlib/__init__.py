@@ -180,13 +180,12 @@ class ResultsDataFrame(pd.DataFrame):
         bus_label : string
 
         """
-        inputs = self.slice_unstacked(bus_label=kwargs['bus_label'],
-                                      type='to_bus',
+        dfs = []
+        for l in self.index.levels[1]:
+            df = self.slice_unstacked(bus_label=kwargs['bus_label'], type=l,
                                       formatted=True)
-        outputs = self.slice_unstacked(bus_label=kwargs['bus_label'],
-                                       type='from_bus',
-                                       formatted=True)
-        subset = pd.concat([inputs, outputs], axis=1)
+            dfs.append(df)
+        subset = pd.concat(dfs, axis=1)
         return subset
 
 
