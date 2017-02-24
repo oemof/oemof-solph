@@ -11,7 +11,7 @@ from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                  delimiter=',', additional_classes={},
-                 additional_seq_attributes=[], addtional_flow_attributes=[]):
+                 additional_seq_attributes=[], additional_flow_attributes=[]):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
@@ -27,10 +27,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     additional_classes : dict
         Dictionary containing additional classes to be recognized inside the
         csv reader. Looks like: {'MyClass1': MyClass1, ...}
-    additional_seq_attributes : list
+    additional_seq_attributes : iterable
         List of string with attributes that have to be of type 'solph sequence'
         and that shall be recognized inside the csv file.
-    addational_flow_attributes : list
+    additional_flow_attributes : iterable
         List of string with attributes that shall be recognized inside the
         csv file and set as flow attribute
 
@@ -61,7 +61,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                       'capacity_min'] + additional_seq_attributes
 
     # attributes of different classes
-    flow_attrs = list(vars(Flow()).keys()) + addtional_flow_attributes
+    flow_attrs = list(vars(Flow()).keys()) + additional_flow_attributes
     bus_attrs = vars(Bus()).keys()
 
     # iteration over dataframe rows to create objects
