@@ -10,8 +10,9 @@ from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', additional_classes={},
-                 additional_seq_attributes=[], additional_flow_attributes=[]):
+                 delimiter=',', additional_classes=None,
+                 additional_seq_attributes=None,
+                 additional_flow_attributes=None):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
@@ -35,6 +36,13 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         csv file and set as flow attribute
 
     """
+    # Check attributes for None values
+    if additional_classes is None:
+        additional_classes = dict()
+    if additional_seq_attributes is None:
+        additional_seq_attributes = list()
+    if additional_flow_attributes is None:
+        additional_flow_attributes = list()
 
     # dataframe creation and manipulation
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
