@@ -164,7 +164,7 @@ Run the examples to check the installation. From the command-line (or Anaconda P
 
 .. code:: console
 
-  oemof_example <name-of-example>
+  oemof_examples <name-of-example>
 
 You can choose from the list of examples
 
@@ -178,6 +178,6 @@ For example
 
 .. code:: console
 
-  oemof_example simple_least_costs
+  oemof_examples simple_least_costs
 
 If you want to run solph examples you need to have the CBC solver installed, see the ":ref:`solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
