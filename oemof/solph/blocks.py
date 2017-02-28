@@ -845,11 +845,11 @@ class LinearM1Transformer(SimpleBlock):
 
     Linear relation :attr:`om.LinearM1Transformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(i, n, t) \\cdot conversion_factor(i, n, t) = \
             flow(n, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
-            \\forall o \\in \\textrm{OUTPUTS(n)}.
+            \\forall n \\in \\textrm{LINEAR\_M1\_TRANSFORMERS}, \\\\
+            \\forall i \\in \\textrm{INPUTS(n)}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
