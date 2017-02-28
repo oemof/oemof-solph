@@ -70,8 +70,9 @@ class Flow:
     variable_costs : numeric (sequence or scalar)
         The costs associated with one unit of the flow. If this is set the costs
         will be added to the objective expression of the optimization problem.
-    fixed_costs : numeric (sequence or scalar)
-        The costs associated with the absolute nominal_value of the flow.
+    fixed_costs : numeric
+        The costs of the whole period associated with the absolute nominal_value
+        of the flow.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
