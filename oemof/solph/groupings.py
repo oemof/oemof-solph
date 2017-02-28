@@ -16,7 +16,7 @@ groupings specified like this:
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
 """
-from .network import Bus, LinearTransformer, Storage
+from .network import Bus, LinearTransformer, LinearM1Transformer, Storage
 from .options import Investment
 from . import blocks
 import oemof.groupings as groupings
@@ -42,6 +42,8 @@ def constraint_grouping(node):
         return blocks.Bus
     if isinstance(node, LinearTransformer):
         return blocks.LinearTransformer
+    if isinstance(node, LinearM1Transformer):
+        return blocks.LinearM1Transformer
     if isinstance(node, Storage) and isinstance(node.investment, Investment):
         return blocks.InvestmentStorage
     if isinstance(node, Storage):
@@ -66,5 +68,5 @@ discrete_flow_grouping = groupings.FlowsWithNodes(
 
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
-             standard_flow_grouping, binary_flow_grouping, 
+             standard_flow_grouping, binary_flow_grouping,
              discrete_flow_grouping]

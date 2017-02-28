@@ -836,6 +836,63 @@ class LinearTransformer(SimpleBlock):
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
+class LinearM1Transformer(SimpleBlock):
+    """Block for the linear relation of nodes with type
+    class:`.LinearM1Transformer`
+
+
+    **The following constraints are created:**
+
+    Linear relation :attr:`om.LinearM1Transformer.relation[i,o,t]`
+        .. math::
+            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(n, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
+            \\forall o \\in \\textrm{OUTPUTS(n)}.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`LinearM1Transformer`
+        block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.LinearM1Transformers (trsf) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
+            is created for all existing relations of the inputs and all outputs
+            of the transformer. The components inside the list need to hold
+            a attribute `conversion_factors` of type dict containing the
+            conversion factors from inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        I = {n: [i for i in n.inputs.keys()] for n in group}
+        O = {n: n._output() for n in group}
+
+        self.relation = Constraint(group, noruleinit=True)
+
+        def _input_output_relation(block):
+            for t in m.TIMESTEPS:
+                for n in group:
+                    for i in I[n]:
+                        try:
+                            lhs = m.flow[n, O[n], t]
+
+                            rhs = m.flow[i, n, t] * n.conversion_factors[i][t]
+                        except:
+                            raise ValueError("Error in constraint creation",
+                                             "source: {0}, target: {1}".format(
+                                                 i.label, n.label))
+                        block.relation.add((n, i, t), (lhs == rhs))
+        self.relation_build = BuildAction(rule=_input_output_relation)
 
 class BinaryFlow(SimpleBlock):
     """

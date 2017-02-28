@@ -219,10 +219,48 @@ class LinearTransformer(on.Transformer):
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
     def _input(self):
-        """ Returns the first (and only) input of the storage object
+        """ Returns the first (and only) input of the transformer object
         """
         return [i for i in self.inputs][0]
 
+class LinearM1Transformer(on.Transformer):
+    """A Linear M:1 Transformer object.
+
+    Parameters
+    ----------
+
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow(s)
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+
+    Examples
+    --------
+    Defining an linear transformer:
+
+    >>> bel = Bus()
+    >>> bth = Bus()
+    >>> trsf = LinearM1Transformer(conversion_factors={gas: 0.4,
+    ...                                                biomass: [1, 2, 3]})
+    >>> trsf.conversion_factors[gas][3]
+    0.4
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.LinearTransformer`
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conversion_factors = {
+            k: Sequence(v)
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+
+    def _output(self):
+        """ Returns the first (and only) output of the transformer object
+        """
+        return [i for i in self.outputs][0]
 
 class Storage(on.Transformer):
     """
