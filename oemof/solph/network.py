@@ -10,7 +10,9 @@ from .plumbing import Sequence
 
 
 class EnergySystem(es.EnergySystem):
-    """ A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
+    """
+    A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
+     specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
@@ -223,6 +225,7 @@ class LinearTransformer(on.Transformer):
         """
         return [i for i in self.inputs][0]
 
+
 class LinearM1Transformer(on.Transformer):
     """A Linear M:1 Transformer object.
 
@@ -261,6 +264,7 @@ class LinearM1Transformer(on.Transformer):
         """ Returns the first (and only) output of the transformer object
         """
         return [i for i in self.outputs][0]
+
 
 class Storage(on.Transformer):
     """

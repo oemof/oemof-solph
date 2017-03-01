@@ -836,6 +836,7 @@ class LinearTransformer(SimpleBlock):
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
+
 class LinearM1Transformer(SimpleBlock):
     """Block for the linear relation of nodes with type
     class:`.LinearM1Transformer`
@@ -893,6 +894,7 @@ class LinearM1Transformer(SimpleBlock):
                                                  i.label, n.label))
                         block.relation.add((n, i, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
+
 
 class BinaryFlow(SimpleBlock):
     """
