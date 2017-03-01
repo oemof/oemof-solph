@@ -12,7 +12,8 @@ from oemof.solph import OperationalModel
 from oemof import energy_system as core_es
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+                         LinearM1Transformer)
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -190,8 +191,8 @@ class Constraint_Tests:
             outputs={bel: Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
-            capacity_max = 0.9,
-            capacity_min= 0.1,
+            capacity_max=0.9,
+            capacity_min=0.1,
             nominal_input_capacity_ratio=1 / 6,
             nominal_output_capacity_ratio=1 / 6,
             inflow_conversion_factor=0.97,
@@ -200,3 +201,36 @@ class Constraint_Tests:
             investment=Investment(ep_costs=145, maximum=234))
 
         self.compare_lp_files('storage_invest.lp')
+
+    def test_linear_m1transformer(self):
+        """Constraint test of a LinearM1Transformer without Investment.
+        """
+        bgas = Bus(label='gasBus')
+        bbms = Bus(label='biomassBus')
+        bel = Bus(label='electricityBus')
+
+        LinearM1Transformer(
+            label='powerplantGasCoal',
+            inputs={bbms: Flow(), bgas: Flow()},
+            outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
+            conversion_factors={bgas: 0.4, bbms: 0.1})
+
+        self.compare_lp_files('linear_m1_transformer.lp')
+
+    def test_linear_m1transformer_invest(self):
+        """Constraint test of a LinearM1Transformer with Investment.
+        """
+
+        bgas = Bus(label='gasBus')
+        bcoal = Bus(label='coalBus')
+        bel = Bus(label='electricityBus')
+
+        LinearM1Transformer(
+            label='powerplant_gas_coal',
+            inputs={bgas: Flow(), bcoal: Flow()},
+            outputs={bel: Flow(variable_costs=50,
+                               investment=Investment(maximum=1000, ep_costs=20))
+                     },
+            conversion_factors={bgas: 0.58, bcoal: 0.2})
+
+        self.compare_lp_files('linear_m1_transformer_invest.lp')
