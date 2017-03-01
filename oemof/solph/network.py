@@ -239,8 +239,8 @@ class LinearM1Transformer(on.Transformer):
     --------
     Defining an linear transformer:
 
-    >>> bel = Bus()
-    >>> bth = Bus()
+    >>> gas = Bus()
+    >>> biomass = Bus()
     >>> trsf = LinearM1Transformer(conversion_factors={gas: 0.4,
     ...                                                biomass: [1, 2, 3]})
     >>> trsf.conversion_factors[gas][3]
