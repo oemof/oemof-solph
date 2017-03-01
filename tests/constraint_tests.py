@@ -234,3 +234,37 @@ class Constraint_Tests:
             conversion_factors={bgas: 0.58, bcoal: 0.2})
 
         self.compare_lp_files('linear_m1_transformer_invest.lp')
+
+    def test_linear_transformer_chp(self):
+        """Constraint test of a LinearTransformer without Investment
+        (two outputs).
+        """
+        bgas = Bus(label='gasBus')
+        bheat = Bus(label='heatBus')
+        bel = Bus(label='electricityBus')
+
+        LinearTransformer(
+            label='CHPpowerplantGas',
+            inputs={bgas: Flow(nominal_value=10e10, variable_costs=50)},
+            outputs={bel: Flow(), bheat: Flow()},
+            conversion_factors={bel: 0.4, bheat: 0.5})
+
+        self.compare_lp_files('linear_transformer_chp.lp')
+
+    def test_linear_transformer_chp_invest(self):
+        """Constraint test of a LinearTransformer with Investment (two outputs).
+        """
+
+        bgas = Bus(label='gasBus')
+        bheat = Bus(label='heatBus')
+        bel = Bus(label='electricityBus')
+
+        LinearTransformer(
+            label='chp_powerplant_gas',
+            inputs={bgas: Flow(variable_costs=50,
+                               investment=Investment(maximum=1000, ep_costs=20))
+                    },
+            outputs={bel: Flow(), bheat: Flow()},
+            conversion_factors={bel: 0.4, bheat: 0.5})
+
+        self.compare_lp_files('linear_transformer_chp_invest.lp')
