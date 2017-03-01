@@ -3,6 +3,8 @@
 import pandas as pd
 import os
 import logging
+from shutil import copyfile
+
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import Sequence
@@ -35,8 +37,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
         csv file and set as flow attribute
 
     """
-
-
 
     # dataframe creation and manipulation
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
@@ -261,11 +261,11 @@ def merge_csv_files(path=None, output_path=None, write=True):
     output_path : str
         Path where the merged files are written to (default is `path` above)
     write : boolean
-        Indicating if new, merged dataframes should be written to csv
+        Indicating if new, merged DataFrames should be written to csv
 
     Returns
     -------
-    Tuple of dataframes (nodes_flows, nodes_flows_seq)
+    Tuple of DataFrames (nodes_flows, nodes_flows_seq)
     """
     if output_path is None:
         output_path = path
@@ -278,13 +278,13 @@ def merge_csv_files(path=None, output_path=None, write=True):
     for f in files:
         if 'seq' in f:
             tmp_df = pd.read_csv(os.path.join(path, f), index_col=[0],
-                                 header=[0,1,2,3,4])
-            nodes_flows_seq  = pd.concat([nodes_flows_seq, tmp_df], axis=1)
+                                 header=[0, 1, 2, 3, 4])
+            nodes_flows_seq = pd.concat([nodes_flows_seq, tmp_df], axis=1)
         else:
             tmp_df = pd.read_csv(os.path.join(path, f))
             nodes_flows = pd.concat([nodes_flows, tmp_df])
 
-    if write == True:
+    if write:
         nodes_flows.to_csv(os.path.join(output_path,
                                         'merged_nodes_flows.csv'), index=False)
         if isinstance(nodes_flows_seq.columns, pd.MultiIndex):
@@ -298,17 +298,15 @@ def merge_csv_files(path=None, output_path=None, write=True):
     return nodes_flows, nodes_flows_seq
 
 
-
-def resample_sequence(seq_base_file=None, output_path=None,
-                       samples=None, file_prefix=None, file_suffix='_seq',
-                       header=[0,1,2,3,4]):
+def resample_sequence(seq_base_file=None, output_path=None, samples=None,
+                      file_prefix=None, file_suffix='_seq',
+                      header=[0, 1, 2, 3, 4]):
     """
     This function can be used for resampling the sequence csv-data file.
     The file is read  from the specified path: `seq_base_file`, resampled and,
     written back to the a specified directory. Note that the sequence files
     are expected to have a timeindex column that can be parsed by
     pandas, with entries like: '2014-01-01 00:00:00+00:00'
-
 
     Parameters
     ----------
@@ -324,15 +322,16 @@ def resample_sequence(seq_base_file=None, output_path=None,
         String that is put as prefix of the file name, i.e. filename is created
         by: `file_prefix+s+file_suffix+'.csv'`
     file_suffix : string
-        Sring that is put as suffix (before .csv), default is '_seq'. See also
+        String that is put as suffix (before .csv), default is '_seq'. See also
         file_prefix.
     header : list
-        List of integers to specifiy the header lines
+        List of integers to specify the header lines
     """
-    if samples is None :
-        raise ValueError('Missing sample attribute. Please specifiy!')
+    if samples is None:
+        raise ValueError('Missing sample attribute. Please specify!')
     if output_path is None:
-        logging.info("No output_path specified, setting output_path to seq_path!")
+        logging.info(
+            "No output_path specified, setting output_path to seq_path!")
         output_path = seq_base_file
 
     if not os.path.exists(output_path):
@@ -358,9 +357,9 @@ def resample_sequence(seq_base_file=None, output_path=None,
         else:
             seq[col] = seq[col].astype(float)
 
-    #pdb.set_trace()
+    # pdb.set_trace()
     for s in samples:
-    # resample dataframes
+        # resample dataframes
         seq_sampled = seq.resample(s).mean()
         # assign the resampled datetimeindex values to the first columns,
         # replacing the -999999
@@ -373,3 +372,107 @@ def resample_sequence(seq_base_file=None, output_path=None,
         logging.info('Writing sample file to {0}.'.format(filename))
         seq_sampled.to_csv(filename, index=False)
     return seq_sampled
+
+
+def update_parameter(name, pattern, query_col, target_col, data, object_names,
+                     scenario_path):
+    """
+    Updating parameters in a csv file (oemof csv format).
+
+    Parameters
+    ----------
+    name : str
+        basic name of the csv file
+    pattern : str
+        Basic string containing a format placeholder
+    query_col : str
+        column name in which the the search string (pattern + object name) can
+        be found.
+    target_col : str
+        column name in which the parameter should be changed
+    data : pandas.Series
+        Series containing the data to update the parameters. Index values must
+        be equal to the object names.
+    object_names : iterable
+        List of names of the objects (regions, power lines).
+    scenario_path
+        Path where the scenario files can be found
+
+    Notes
+    -----
+    The scenario files should end with '.csv'.
+    The sequence file should have the same name with an additional '_seq'.
+    For example: my_example.csv, my_example_seq.csv
+
+    """
+    scenario = pd.read_csv(os.path.join(scenario_path, name + '.csv'),
+                           index_col='class')
+
+    for object_id in object_names:
+        label = pattern.format(object_id)
+        scenario.loc[scenario[query_col] == label, target_col] = (
+            data.loc[object_id])
+    scenario.to_csv(os.path.join(scenario_path, name + '.csv'))
+
+
+def update_sequence(name, pattern, data, object_names,
+                    scenario_path, backup=True):
+    """
+    Updating sequences in a csv file (oemof csv format).
+
+    Parameters
+    ----------
+    name : str
+        basic name of the csv file
+    pattern : str
+        Basic string containing a format placeholder
+    data : pandas.Series
+        Series containing the data to update the parameters. Column names must
+        equal to object names.
+    object_names : iterable
+        List of names of the objects (regions, power lines).
+    scenario_path
+        Path where the scenario files can be found
+    backup : boolean
+        Will create an back of the unchanged file if set to True.
+        (default: True)
+
+    Notes
+    -----
+    The scenario files should end with '.csv'.
+    The sequence file should have the same name with an additional '_seq'.
+    For example: my_example.csv, my_example_seq.csv
+    """
+    full_path_seq = os.path.join(scenario_path, name + '_seq')
+
+    # Create backup file if backup is True
+    if backup:
+        copyfile(full_path_seq + '.csv', full_path_seq + '.csv.backup')
+
+    # Load table with 'label' as column name
+    columns = pd.read_csv(full_path_seq + '.csv', header=1, nrows=1).columns
+    tmp_csv = pd.read_csv(full_path_seq + '.csv', skiprows=5, names=columns,
+                          parse_dates=True, index_col=0)
+
+    # Write data into pandas table
+    for object_id in object_names:
+        tmp_csv[pattern.format(object_id)] = list(data[object_id])
+
+    # Extract the header
+    with open(full_path_seq + '.csv') as csv_file:
+        head = [next(csv_file, x) for x in range(5)]
+
+    # Write data to tmp file using pandas and read it again to get a text block.
+    tmp_csv.to_csv(full_path_seq + '~.csv', header=False)
+    with open(full_path_seq + '~.csv') as tmp_file:
+        body = tmp_file.read()
+
+    # Write data to temporary file for not overwriting existing data
+    # Writer header and body.
+    with open(full_path_seq + '~.csv', 'w') as csv_file:
+        for line in head:
+            csv_file.write(line)
+        csv_file.write(body)
+
+    # Overwrite input file with result file if no error occurred
+    os.rename(full_path_seq + '~.csv', full_path_seq + '.csv')
