@@ -171,7 +171,7 @@ class ResultsDataFrame(pd.DataFrame):
         subset.columns = subset.columns.get_level_values(1).unique()
         return subset
 
-    def slice_bus_balance(self, **kwargs):
+    def slice_bus_balance(self, bus_label):
         r"""Method for slicing the ResultsDataFrame. An balance around a bus
         with inputs, outputs and other values is returned.
 
@@ -182,7 +182,7 @@ class ResultsDataFrame(pd.DataFrame):
         """
         dfs = []
         for l in self.index.levels[1]:
-            df = self.slice_unstacked(bus_label=kwargs['bus_label'], type=l,
+            df = self.slice_unstacked(bus_label=bus_label, type=l,
                                       formatted=True)
             dfs.append(df)
         subset = pd.concat(dfs, axis=1)
