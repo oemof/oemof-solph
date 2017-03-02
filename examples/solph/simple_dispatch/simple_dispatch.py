@@ -14,8 +14,8 @@ import logging
 import os
 
 # solph imports
-from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem)
+from oemof.solph import (Sink, Source, LinearTransformer, LinearM1Transformer,
+                         Bus, Flow, OperationalModel, EnergySystem)
 import oemof.outputlib as output
 from oemof.tools import logger
 
@@ -106,6 +106,17 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                b_th: Flow(nominal_value=40)},
                       conversion_factors={b_el: 0.3, b_th: 0.4})
 
+    # heatpump playground
+    b_heat_source = Bus(label="b_heat_source")
+
+    Source(label="heat_source",
+           outputs={b_heat_source: Flow(nominal_value=30, fixed=False)})
+
+    LinearM1Transformer(label='heat_pump',
+                        inputs={b_el: Flow(), b_heat_source: Flow()},
+                        outputs={b_th: Flow(nominal_value=10)},
+                        conversion_factors={b_el: 2.0, b_heat_source: 1.0})
+
     # ################################ optimization ############################
     # create Optimization model based on energy_system
     logging.info("Create optimization problem")
@@ -114,7 +125,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     # solve with specific optimization options (passed to pyomo)
     logging.info("Solve optimization problem")
     om.solve(solver=solver,
-             solve_kwargs={'tee': tee_switch, 'keepfiles': False})
+             solve_kwargs={'tee': tee_switch, 'keepfiles': True})
 
     # write back results from optimization object to energysystem
     om.results()
@@ -123,28 +134,28 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
 
 
 # ################################ Plotting ###################################
-def plot_results(energysystem):
-    logging.info("Plot results")
-    # define colors
-    cdict = {'wind': '#00bfff', 'pv': '#ffd700', 'pp_gas': '#8b1a1a',
-             'pp_coal': '#838b8b', 'pp_lig': '#8b7355', 'pp_oil': '#000000',
-             'pp_chp': '#20b2aa', 'demand_el': '#fff8dc'}
-    # create multiindex dataframe with result values
-    esplot = output.DataFramePlot(energy_system=energysystem)
-    # select input results of electrical bus (i.e. power delivered by plants)
-    esplot.slice_unstacked(bus_label="b_el", type="to_bus",
-                           date_from='2012-01-01 00:00:00',
-                           date_to='2012-01-07 00:00:00')
-    # set colorlist for esplot
-    colorlist = esplot.color_from_dict(cdict)
-
-    esplot.plot(color=colorlist, title="January 2016", stacked=True, width=1,
-                lw=0.1, kind='bar')
-    esplot.ax.set_ylabel('Power in MW')
-    esplot.ax.set_xlabel('Date')
-    esplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m')
-    esplot.outside_legend(reverse=True)
-    plt.show()
+#def plot_results(energysystem):
+#    logging.info("Plot results")
+#    # define colors
+#    cdict = {'wind': '#00bfff', 'pv': '#ffd700', 'pp_gas': '#8b1a1a',
+#             'pp_coal': '#838b8b', 'pp_lig': '#8b7355', 'pp_oil': '#000000',
+#             'pp_chp': '#20b2aa', 'demand_el': '#fff8dc'}
+#    # create multiindex dataframe with result values
+#    esplot = output.DataFramePlot(energy_system=energysystem)
+#    # select input results of electrical bus (i.e. power delivered by plants)
+#    esplot.slice_unstacked(bus_label="b_el", type="to_bus",
+#                           date_from='2012-01-01 00:00:00',
+#                           date_to='2012-01-07 00:00:00')
+#    # set colorlist for esplot
+#    colorlist = esplot.color_from_dict(cdict)
+#
+#    esplot.plot(color=colorlist, title="January 2016", stacked=True, width=1,
+#                lw=0.1, kind='bar')
+#    esplot.ax.set_ylabel('Power in MW')
+#    esplot.ax.set_xlabel('Date')
+#    esplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m')
+#    esplot.outside_legend(reverse=True)
+#    plt.show()
 
 
 def get_results(energysystem):
@@ -179,7 +190,25 @@ def run_simple_dispatch_example(**kwargs):
     simulate(esys, **kwargs)
     plot_results(esys)
     pp.pprint(get_results(esys))
-
+    return esys
 
 if __name__ == "__main__":
-    run_simple_dispatch_example()
+    es = run_simple_dispatch_example()
+    df = output.ResultsDataFrame(energy_system=es)
+
+    idx = pd.IndexSlice
+
+    df_b_el = df.loc[idx['b_el', ['from_bus'], 'heat_pump', :]].unstack([0, 1, 2])
+    df_b_el.columns = df_b_el.columns.droplevel([0, 1, 2])
+
+    df_b_heat_source = df.loc[idx['b_heat_source', ['from_bus'], :, :]].unstack([0, 1, 2])
+    df_b_heat_source.columns = df_b_heat_source.columns.droplevel([0, 1, 2])
+
+    df_b_th = df.loc[idx['b_th', ['to_bus'], 'heat_pump', :]].unstack([0, 1, 2])
+    df_b_th.columns = df_b_th.columns.droplevel([0, 1, 2])
+
+    hp_df = pd.concat([df_b_el, df_b_heat_source,  df_b_th], axis=1)
+    hp_df.columns = ['Q heat source', 'P compressor', 'Q out']
+    hp_df.plot(kind='line', drawstyle='steps-post', subplots=True, grid=True)
+    print(hp_df.corr())
+    print(hp_df.head())
