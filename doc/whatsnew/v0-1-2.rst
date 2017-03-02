@@ -5,7 +5,9 @@ New features
 ############
 
 * New transformer class added: VariableFractionTransformer (child class of LinearTransformer). This class will represent transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof/pull/248>`_)
-
+* Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
+* Add module to store input data in multiple csv files and merge by preprocessing
+* Allow to slice all information arround busses via a new method of the ResultsDataFrame
 
 Documentation
 #############
@@ -21,7 +23,7 @@ Testing
 Bug fixes
 #########
 
-
+* Allow conversion factors as a sequence in the CSV reader
 
 
 Other changes
@@ -34,4 +36,6 @@ Contributors
 ############
  
  * Uwe Krien
+ * Simon Hilpert
+ * Cord Kaldemeyer
 

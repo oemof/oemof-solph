@@ -99,7 +99,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
  1. Download latest `WinPython <http://winpython.github.io>`_ for Python 3.x (64 or 32 bit)
  2. Install WinPython
  3. Open the 'WinPython Command Prompt' and type: :code:`pip install oemof`
- 4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples
+ 4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
  
 
 Using Anaconda (by Continuum Analytics)
@@ -109,8 +109,19 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
 
  1. Download latest `Anaconda <https://www.continuum.io/downloads#windows>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
- 3. Open the 'Anaconda Prompt' and type: :code:`pip install oemof`
- 4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples
+
+ 3. Create a virtual environment
+
+      *This step is necessary if you want to use oemof's solph package and your Anaconda version comes with python 3.5. It is also recommended by Anaconda 
+      (For more information on virtual environments in Anaconda see* `here <https://conda.io/docs/using/envs.html>`_). *If you do not want to use a virtual environment skip to step 4.*
+
+      * Open the 'Anaconda Prompt' and create a virtual environment by typing: :code:`conda create -n yourenvname python=x.x`. Choose python 3.3 or 3.4.
+      
+      * Activate your virtual environment by typing: :code:`activate yourenvname`
+      
+
+ 4. In 'Anaconda Prompt' type: :code:`pip install oemof`
+ 5. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
  
 .. _windows_solver_label: 
 
@@ -164,7 +175,7 @@ Run the examples to check the installation. From the command-line (or Anaconda P
 
 .. code:: console
 
-  oemof_example <name-of-example>
+  oemof_examples <name-of-example>
 
 You can choose from the list of examples
 
@@ -178,6 +189,6 @@ For example
 
 .. code:: console
 
-  oemof_example simple_least_costs
+  oemof_examples simple_least_costs
 
 If you want to run solph examples you need to have the CBC solver installed, see the ":ref:`solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
