@@ -886,7 +886,6 @@ class LinearM1Transformer(SimpleBlock):
                     for i in I[n]:
                         try:
                             lhs = m.flow[n, O[n], t]
-
                             rhs = m.flow[i, n, t] * n.conversion_factors[i][t]
                         except:
                             raise ValueError("Error in constraint creation",
