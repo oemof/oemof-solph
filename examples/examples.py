@@ -8,6 +8,7 @@ from .solph.storage_investment.storage_investment import (
     run_storage_investment_example)
 from .solph.csv_reader.dispatch.dispatch import (
     run_dispatch_example)
+from . import test_installation
 
 import argparse
 import sys
@@ -20,6 +21,7 @@ def examples():
         epilog='''
         List of examples
 
+         * test_installation
          * storage_investment
          * simple_dispatch
          * csv_reader_investment
@@ -55,6 +57,8 @@ def examples():
         run_storage_investment_example(solver=solver)
     elif example == 'csv_reader_dispatch':
         run_dispatch_example(solver=solver)
+    elif example == 'test_installation':
+        test_installation.run_test_example()
     else:
         parser.print_help()
         sys.exit(1)
