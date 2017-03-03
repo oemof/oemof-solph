@@ -112,10 +112,12 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     Source(label="heat_source",
            outputs={b_heat_source: Flow(nominal_value=30, fixed=False)})
 
+    cop = 3
+
     LinearM1Transformer(label='heat_pump',
                         inputs={b_el: Flow(), b_heat_source: Flow()},
                         outputs={b_th: Flow(nominal_value=10)},
-                        conversion_factors={b_el: 2.0, b_heat_source: 1.0})
+                        conversion_factors={b_el: 1/(1-1/cop), b_heat_source: cop})
 
     # ################################ optimization ############################
     # create Optimization model based on energy_system
@@ -188,7 +190,7 @@ def run_simple_dispatch_example(**kwargs):
     logger.define_logging()
     esys = initialise_energysystem()
     simulate(esys, **kwargs)
-    plot_results(esys)
+    #plot_results(esys)
     pp.pprint(get_results(esys))
     return esys
 
