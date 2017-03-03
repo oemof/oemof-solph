@@ -147,10 +147,10 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
 
-LinearTransformer
-+++++++++++++++++
+LinearTransformer (1xM)
++++++++++++++++++++++++
 
-An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device.
+An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device. It can have one input flow and m output flows.
 As the name indicates the efficiency has to constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
@@ -177,6 +177,43 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 .. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
+
+
+LinearTransformer (Mx1)
++++++++++++++++++++++++
+
+An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device. It can have m input flows and one output flow.
+As the name indicates the efficiency has to constant within one time step to get a linear transformation.
+You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
+
+.. code-block:: python
+
+    solph.LinearM1Transformer(
+        label="pp_gas",
+        inputs={my_energsystem.groups['natural_gas']: solph.Flow()},
+        outputs={electricity_bus: solph.Flow(nominal_value=10e10)},
+        conversion_factors={electricity_bus: 0.58})
+
+A heat pump would be defined in the same manner. New buses are defined to make the code cleaner:
+
+.. code-block:: python
+
+    b_el = solph.Bus(label='electricity')
+    b_th_low = solph.Bus(label='low_temp_heat')
+    b_th_high = solph.Bus(label='high_temp_heat')
+    
+    cop = 3  # coefficient of performance of the heat pump
+
+    solph.LinearM1Transformer(
+        label='pp_chp',
+        inputs={bus_elec: Flow(), bus_low_temp_heat: Flow()},
+        outputs={bus_th_high: Flow()},
+        conversion_factors={bus_elec: cop,
+                            b_th_low: cop/(cop-1)})
+                            
+If the low temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and therefore 1x1-Transformer is sufficient.
+
+.. note:: See the :py:class:`~oemof.solph.network.LinearM1Transformer` class for all parameters and the mathematical background.
 
 
 Storage
