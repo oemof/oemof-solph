@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Dispatch optimisation using oemof's csv-reader.
+"""
 
 import os
 import logging
@@ -13,7 +16,7 @@ from matplotlib import pyplot as plt
 
 
 def run_example(config):
-    # misc.
+    # creation of an hourly datetime_index
     datetime_index = pd.date_range(config['date_from'],
                                    config['date_to'],
                                    freq='60min')
@@ -21,8 +24,10 @@ def run_example(config):
     # model creation and solving
     logging.info('Starting optimization')
 
+    # initialisation of the energy system
     es = EnergySystem(timeindex=datetime_index)
 
+    # adding all nodes and flows to the energy system (data taken from csv-file)
     NodesFromCSV(file_nodes_flows=os.path.join(
                              config['scenario_path'],
                              config['nodes_flows']),
@@ -31,8 +36,11 @@ def run_example(config):
                              config['nodes_flows_sequences']),
                  delimiter=',')
 
+    # creation of a least cost model from the energy system
     om = OperationalModel(es)
     om.receive_duals()
+
+    # solving the linear problem using the given solver
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
     logging.info("Done!")
@@ -40,6 +48,7 @@ def run_example(config):
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
 
+    # writing results to a csv-file
     results.to_csv(os.path.join(config['results_path'], 'results.csv'))
     logging.info("The results can be found in {0}".format(
         config['results_path']))
@@ -119,11 +128,14 @@ def run_dispatch_example(solver='cbc'):
         'verbose': False,  # Set to True to see solver outputs
     }
 
+    # create results path if it does not exist
     if not os.path.isdir(cfg['results_path']):
         os.mkdir(cfg['results_path'])
 
+    # run optimisation
     my_results = run_example(config=cfg)
 
+    # plot results
     plotting(my_results)
 
     # print(create_result_dict(my_results))
