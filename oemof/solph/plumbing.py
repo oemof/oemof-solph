@@ -12,7 +12,7 @@ def Sequence(sequence_or_scalar):
 
     Parameters
     ----------
-    sequence_or_scalar : array-like or scalar (None, int, etc.)
+    sequence_or_scalar : array-like or scalar (None, int, float, etc.)
 
     Examples
     --------

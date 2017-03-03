@@ -6,7 +6,9 @@ New features
 
 * revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof_base/issues/238>`_, `issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
 * add option to choose solver when executing the examples (`issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
-
+* Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
+* Add module to store input data in multiple csv files and merge by preprocessing
+* Allow to slice all information arround busses via a new method of the ResultsDataFrame
 
 Documentation
 #############
@@ -22,7 +24,7 @@ Testing
 Bug fixes
 #########
 
-
+* Allow conversion factors as a sequence in the CSV reader
 
 
 Other changes
