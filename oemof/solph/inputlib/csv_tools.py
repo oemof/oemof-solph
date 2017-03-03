@@ -9,6 +9,166 @@ from ..plumbing import Sequence
 from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
 
+def function1(row, nodes, classes, flow_attrs, seq_attributes, nodes_flows_seq,
+              i):
+    """
+    create node if not existent and set attributes
+    (attributes must be placed either in the first line or in all
+    lines of multiple node entries (flows) in csv file)
+    """
+    try:
+        if row['class'] in classes.keys():
+            node = nodes.get(row['label'])
+            if node is None:
+                node = classes[row['class']](label=row['label'])
+        # for the if check below we use all flow_attrs except
+        # investment
+        # because for storages investment needs to be set as a node
+        # attribute (and a flow attribute)
+        flow_attrs_ = [i for i in flow_attrs if i != 'investment']
+        for attr in row.keys():
+            if (attr not in flow_attrs_ and
+               attr not in ('class', 'label', 'source', 'target',
+                            'conversion_factors')):
+                    if row[attr] != 'seq':
+                        if attr in seq_attributes:
+                            row[attr] = Sequence(float(row[attr]))
+                        # again from investment storage the next lines
+                        # are a little hacky as we need to create an
+                        # solph.options.Investment() object
+                        if (isinstance(node, Storage) and
+                                attr == 'investment'):
+                            setattr(node, attr, Investment())
+                            invest_attrs = vars(Investment()).keys()
+                            for iattr in invest_attrs:
+                                if iattr in row.keys() and row[attr]:
+                                    setattr(node.investment,
+                                            iattr, row[iattr])
+                        # for all 'normal' attributes
+                        else:
+                            setattr(node, attr, row[attr])
+
+                    else:
+                        seq = nodes_flows_seq.loc[row['class'],
+                                                  row['label'],
+                                                  row['source'],
+                                                  row['target'],
+                                                  attr]
+                        if attr in seq_attributes:
+                            seq = [i for i in seq]
+                            seq = Sequence(seq)
+                        else:
+                            seq = [i for i in seq.values]
+                        setattr(node, attr, seq)
+    except:
+        print('Error with node creation in line', i+2, 'in csv file.')
+        print('Label:', row['label'])
+        raise
+    return node
+
+
+def function2(row, node, flow_attrs, seq_attributes, nodes_flows_seq, i):
+    """create flow and set attributes
+    """
+    try:
+        flow = Flow()
+        for attr in flow_attrs:
+            if attr in row.keys() and row[attr]:
+                if row[attr] != 'seq':
+                    if attr in seq_attributes:
+                        row[attr] = Sequence(float(row[attr]))
+                    setattr(flow, attr, row[attr])
+                if row[attr] == 'seq':
+                    seq = nodes_flows_seq.loc[row['class'],
+                                              row['label'],
+                                              row['source'],
+                                              row['target'],
+                                              attr]
+                    if attr in seq_attributes:
+                        seq = [i for i in seq]
+                        seq = Sequence(seq)
+                    else:
+                        seq = [i for i in seq.values]
+                    setattr(flow, attr, seq)
+                # this block is only for binary flows!
+                if attr == 'binary' and row[attr] is True:
+                    # create binary object for flow
+                    setattr(flow, attr, BinaryFlow())
+                    binary_attrs = vars(BinaryFlow()).keys()
+                    for battr in binary_attrs:
+                        if battr in row.keys() and row[attr]:
+                            setattr(flow.binary, battr, row[battr])
+                # this block is only for investment flows!
+                if attr == 'investment' and row[attr] is True:
+                    if isinstance(node, Storage):
+                        # set the flows of the storage to Investment as
+                        # without attributes, as costs etc are set at
+                        # the node
+                        setattr(flow, attr, Investment())
+                    else:
+                        # create binary object for flow
+                        setattr(flow, attr, Investment())
+                        invest_attrs = vars(Investment()).keys()
+                        for iattr in invest_attrs:
+                            if iattr in row.keys() and row[attr]:
+                                setattr(flow.investment, iattr,
+                                        row[iattr])
+    except:
+        print('Error with flow creation in line', i + 2, 'in csv file.')
+        print('Label:', row['label'])
+        raise
+    return flow
+
+
+def function3(row, nodes, flow, bus_attrs, type1, type2, i):
+    """create an output entry for the current lin
+    """
+    try:
+        if row['label'] == row[type1]:
+            if row[type2] not in nodes.keys():
+                nodes[row[type2]] = Bus(label=row[type2])
+                for attr in bus_attrs:
+                    if attr in row.keys() and row[attr] is not None:
+                        setattr(nodes[row[type2]], attr, row[attr])
+            tmp = {nodes[row[type2]]: flow}
+        else:
+            tmp = {}
+    except:
+        print('Error with output creation in line', i + 2,
+              'in csv file.')
+        print('Label:', row['label'])
+        raise
+    return tmp
+
+
+def function4(row, nodes, nodes_flows_seq, i):
+    """create a conversion_factor entry for the current lin
+    """
+    try:
+        if row['target'] and 'conversion_factors' in row:
+            if row['conversion_factors'] == 'seq':
+                seq = nodes_flows_seq.loc[row['class'],
+                                          row['label'],
+                                          row['source'],
+                                          row['target'],
+                                          'conversion_factors']
+                seq = [i for i in seq]
+                seq = Sequence(seq)
+                conversion_factors = {nodes[row['target']]: seq}
+            else:
+                conversion_factors = {
+                    nodes[row['target']]:
+                        Sequence(float(row['conversion_factors']))}
+        else:
+            conversion_factors = {}
+    except:
+        print('Error with conversion factor creation in line', i + 2,
+              'in csv file.')
+        print('Label:', row['label'])
+        raise
+    return conversion_factors
+
+
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                  delimiter=',', additional_classes=None,
                  additional_seq_attributes=None,
@@ -85,163 +245,22 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             # save column labels and row values in dict
             row = dict(zip(r.index.values, r.values))
 
-            # create node if not existent and set attributes
-            # (attributes must be placed either in the first line or in all
-            #  lines of multiple node entries (flows) in csv file)
-            try:
-                if row['class'] in classes.keys():
-                    node = nodes.get(row['label'])
-                    if node is None:
-                        node = classes[row['class']](label=row['label'])
-                # for the if check below we use all flow_attrs except
-                # investment
-                # because for storages investment needs to be set as a node
-                # attribute (and a flow attribute)
-                flow_attrs_ = [i for i in flow_attrs if i != 'investment']
-                for attr in row.keys():
-                    if (attr not in flow_attrs_ and
-                       attr not in ('class', 'label', 'source', 'target',
-                                    'conversion_factors')):
-                            if row[attr] != 'seq':
-                                if attr in seq_attributes:
-                                    row[attr] = Sequence(float(row[attr]))
-                                # again from investment storage the next lines
-                                # are a little hacky as we need to create an
-                                # solph.options.Investment() object
-                                if (isinstance(node, Storage) and
-                                        attr == 'investment'):
-                                    setattr(node, attr, Investment())
-                                    invest_attrs = vars(Investment()).keys()
-                                    for iattr in invest_attrs:
-                                        if iattr in row.keys() and row[attr]:
-                                            setattr(node.investment,
-                                                    iattr, row[iattr])
-                                # for all 'normal' attributes
-                                else:
-                                    setattr(node, attr, row[attr])
-
-                            else:
-                                seq = nodes_flows_seq.loc[row['class'],
-                                                          row['label'],
-                                                          row['source'],
-                                                          row['target'],
-                                                          attr]
-                                if attr in seq_attributes:
-                                    seq = [i for i in seq]
-                                    seq = Sequence(seq)
-                                else:
-                                    seq = [i for i in seq.values]
-                                setattr(node, attr, seq)
-            except:
-                print('Error with node creation in line', i+2, 'in csv file.')
-                print('Label:', row['label'])
-                raise
+            # function1
+            node = function1(row, nodes, classes, flow_attrs, seq_attributes,
+                             nodes_flows_seq, i)
 
             # create flow and set attributes
-            try:
-                flow = Flow()
-                for attr in flow_attrs:
-                    if attr in row.keys() and row[attr]:
-                        if row[attr] != 'seq':
-                            if attr in seq_attributes:
-                                row[attr] = Sequence(float(row[attr]))
-                            setattr(flow, attr, row[attr])
-                        if row[attr] == 'seq':
-                            seq = nodes_flows_seq.loc[row['class'],
-                                                      row['label'],
-                                                      row['source'],
-                                                      row['target'],
-                                                      attr]
-                            if attr in seq_attributes:
-                                seq = [i for i in seq]
-                                seq = Sequence(seq)
-                            else:
-                                seq = [i for i in seq.values]
-                            setattr(flow, attr, seq)
-                        # this block is only for binary flows!
-                        if attr == 'binary' and row[attr] is True:
-                            # create binary object for flow
-                            setattr(flow, attr, BinaryFlow())
-                            binary_attrs = vars(BinaryFlow()).keys()
-                            for battr in binary_attrs:
-                                if battr in row.keys() and row[attr]:
-                                    setattr(flow.binary, battr, row[battr])
-                        # this block is only for investment flows!
-                        if attr == 'investment' and row[attr] is True:
-                            if isinstance(node, Storage):
-                                # set the flows of the storage to Investment as
-                                # without attributes, as costs etc are set at
-                                # the node
-                                setattr(flow, attr, Investment())
-                            else:
-                                # create binary object for flow
-                                setattr(flow, attr, Investment())
-                                invest_attrs = vars(Investment()).keys()
-                                for iattr in invest_attrs:
-                                    if iattr in row.keys() and row[attr]:
-                                        setattr(flow.investment, iattr,
-                                                row[iattr])
-            except:
-                print('Error with flow creation in line', i+2, 'in csv file.')
-                print('Label:', row['label'])
-                raise
+            flow = function2(row, node, flow_attrs, seq_attributes,
+                             nodes_flows_seq, i)
 
-            # create an input entry for the current line
-            try:
-                if row['label'] == row['target']:
-                    if row['source'] not in nodes.keys():
-                        nodes[row['source']] = Bus(label=row['source'])
-                        for attr in bus_attrs:
-                            if attr in row.keys() and row[attr] is not None:
-                                setattr(nodes[row['source']], attr, row[attr])
-                    inputs = {nodes[row['source']]: flow}
-                else:
-                    inputs = {}
-            except:
-                print('Error with input creation in line', i+2, 'in csv file.')
-                print('Label:', row['label'])
-                raise
+            # inputs, outputs and conversion_factors
+            inputs = function3(row, nodes, flow, bus_attrs, 'target', 'source',
+                               i)
+            
+            outputs = function3(row, nodes, flow, bus_attrs, 'source', 'target',
+                                i)
 
-            # create an output entry for the current line
-            try:
-                if row['label'] == row['source']:
-                    if row['target'] not in nodes.keys():
-                        nodes[row['target']] = Bus(label=row['target'])
-                        for attr in bus_attrs:
-                            if attr in row.keys() and row[attr] is not None:
-                                setattr(nodes[row['target']], attr, row[attr])
-                    outputs = {nodes[row['target']]: flow}
-                else:
-                    outputs = {}
-            except:
-                print('Error with output creation in line', i+2,
-                      'in csv file.')
-                print('Label:', row['label'])
-                raise
-
-            # create a conversion_factor entry for the current line
-            try:
-                if row['target'] and 'conversion_factors' in row:
-                    if row['conversion_factors'] == 'seq':
-                        seq = nodes_flows_seq.loc[row['class'],
-                                                  row['label'],
-                                                  row['source'],
-                                                  row['target'],
-                                                  'conversion_factors']
-                        seq = [i for i in seq]
-                        seq = Sequence(seq)
-                        conversion_factors = {nodes[row['target']]: seq}
-                    else:
-                        conversion_factors = \
-                            {nodes[row['target']]:
-                                Sequence(float(row['conversion_factors']))}
-                else:
-                    conversion_factors = {}
-            except:
-                print('Error with conversion factor creation in line', i+2,
-                      'in csv file.')
-                print('Label:', row['label'])
-                raise
+            conversion_factors = function4(row, nodes, nodes_flows_seq, i)
 
             # add node to dict and assign attributes depending on
             # if there are multiple lines per node or not
