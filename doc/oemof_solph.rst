@@ -205,7 +205,7 @@ A heat pump would be defined in the same manner. New buses are defined to make t
     cop = 3  # coefficient of performance of the heat pump
 
     solph.LinearM1Transformer(
-        label='pp_chp',
+        label='heat_pump',
         inputs={bus_elec: Flow(), bus_low_temp_heat: Flow()},
         outputs={bus_th_high: Flow()},
         conversion_factors={bus_elec: cop,
