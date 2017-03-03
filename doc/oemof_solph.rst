@@ -150,9 +150,9 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 LinearTransformer (1xM)
 +++++++++++++++++++++++
 
-An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device. It can have one input flow and m output flows.
-As the name indicates the efficiency has to constant within one time step to get a linear transformation.
-You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
+An instance of the LinearTransformer class can represent a node with one input flow an m output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device.
+As the name indicates the efficiency has to be constant within one time step to get a linear transformation.
+You can define a different efficiency for every time step (e.g. the thermal powerplant efficiency according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
 .. code-block:: python
 
@@ -182,8 +182,8 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
 LinearTransformer (Mx1)
 +++++++++++++++++++++++
 
-An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device. It can have m input flows and one output flow.
-As the name indicates the efficiency has to constant within one time step to get a linear transformation.
+An instance of the LinearTransformer class can represent a node with m input flows an one output flows such as a heat pump, additional heat supply or any kind of a process where two input flows are reduced to one output flow.
+As the name indicates the efficiency has be to constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
 .. code-block:: python
