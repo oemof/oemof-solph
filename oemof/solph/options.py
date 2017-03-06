@@ -10,7 +10,7 @@ class Investment:
     maximum : float
         Maximum of the additional invested capacity
     minimum : float
-        Mininm of the addtional invested capacity
+        Minimum of the addtional invested capacity
     ep_costs : float
         Equivalent periodical costs for the investment, if period is one
         year these costs are equal to the equivalent annual costs.
