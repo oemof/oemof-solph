@@ -42,17 +42,17 @@ class OperationalModel(po.ConcreteModel):
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
     timeindex : pandas DatetimeIndex
-        The timeindex will be used to calculate the timesteps the timeincrement
-        for the optimization model.
+        The time index will be used to calculate the timesteps and the
+        time increment for the optimization model.
     timesteps : sequence (optional)
         Timesteps used in the optimization model. If provided as list or
         pandas.DatetimeIndex the sequence will be used to index the time
         dependent variables, constraints etc. If not provided we will try to
         compute this sequence from attr:`timeindex`.
     timeincrement : float or list of floats (optional)
-        Timeincrement used in constraints and objective expressions.
-        If type is 'float', internally will be converted to
-        solph.plumbing.Sequence() object for time dependent timeincrement.
+        Time increment used in constraints and objective expressions.
+        If type is 'float', will be converted internally to
+        solph.plumbing.Sequence() object for time dependent time increment.
         If a list is provided this list will be taken. Default is calculated
         from timeindex if provided.
 
