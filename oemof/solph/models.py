@@ -33,13 +33,6 @@ class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     dispatch.
 
-    **The following sets are created:**
-
-    NODES
-        A set with all nodes of the given energy system.
-    TIMESTEPS
-        A set with all time steps of the given time horizon.
-
     Parameters
     ----------
     es : EnergySystem object
@@ -66,10 +59,10 @@ class OperationalModel(po.ConcreteModel):
     **The following sets are created:**
 
     NODES :
-        A set with all oemof nodes.
+        A set with all nodes of the given energy system.
 
     TIMESTEPS :
-        A set with all timesteps for the optimization problem.
+        A set with all timesteps of the given time horizon.
 
     FLOWS :
         A 2 dimensional set with all flows. Index: `(source, target)`
