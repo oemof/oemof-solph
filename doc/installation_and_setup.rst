@@ -110,15 +110,15 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
  1. Download latest `Anaconda <https://www.continuum.io/downloads#windows>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
 
- 3. Create a virtual environment
+ 3. Open 'Anaconda Prompt' to create and activate a virtual environment by typing:
 
-      *This step is necessary if you want to use oemof's solph package and your Anaconda version comes with python 3.5. It is also recommended by Anaconda 
-      (For more information on virtual environments in Anaconda see* `here <https://conda.io/docs/using/envs.html>`_). *If you do not want to use a virtual environment skip to step 4.*
+    .. code-block:: console
 
-      * Open the 'Anaconda Prompt' and create a virtual environment by typing: :code:`conda create -n yourenvname python=x.x`. Choose python 3.3 or 3.4.
-      
-      * Activate your virtual environment by typing: :code:`activate yourenvname`
-      
+       conda create -n yourenvname python=3.4
+       activate yourenvname
+
+    *It is recommended to use python 3.4. Some users reported that oemof does not work with
+    Windows + Anaconda + Python 3.5*
 
  4. In 'Anaconda Prompt' type: :code:`pip install oemof`
  5. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
