@@ -40,6 +40,25 @@ One way is to install Python 3 through the Linux repositories. If you are using 
   sudo apt-get install python3
   
 Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it. Otherwise you can download different versions of Python via https://www.python.org/downloads/.
+Using Anaconda (by Continuum Analytics)
+----------------------------------------------
+
+Skip the steps you have already done. Check your architecture first (32/64 bit)
+
+ 1. Download latest `Anaconda <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
+ 2. Install Anaconda
+
+ 3. Open terminal to create and activate a virtual environment by typing:
+
+    .. code-block:: console
+
+       conda create -n yourenvname python=3.4
+       source activate yourenvname
+
+ 4. In terminal type: :code:`pip install oemof`
+ 5. Install a :ref:`linux_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
+ 
+.. _linux_solver_label:
 
 Solver
 ----------------
