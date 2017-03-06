@@ -53,7 +53,7 @@ class DiscreteFlow:
     Parameters
     ----------
     integers : boolean
-        Specify domain of flow variable: If True, flow is force to integer
+        Specify domain of flow variable: If True, flow is forced to integer
         values.
     """
     def __init__(self, **kwargs):
