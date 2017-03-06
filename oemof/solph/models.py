@@ -220,7 +220,7 @@ class OperationalModel(po.ConcreteModel):
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
-        r""" Method sets solver suffix to extract information about dual
+        """ Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
 
