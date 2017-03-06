@@ -225,6 +225,7 @@ class OperationalModel(po.ConcreteModel):
         set as attributes of the model.
 
         """
+        # shadow prices
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
