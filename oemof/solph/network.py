@@ -223,7 +223,7 @@ class LinearTransformer(on.Transformer):
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
     def _input(self):
-        """ Returns the first (and only) input of the storage object
+        """ Returns the first (and only) input of the transformer object
         """
         return [i for i in self.inputs][0]
 
