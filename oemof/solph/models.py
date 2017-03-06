@@ -270,8 +270,7 @@ class OperationalModel(po.ConcreteModel):
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
-        # TODO: Maybe make the results dictionary a proper object?
-
+        # TODO: Make the results dictionary a proper object?
         result = UserDict()
         result.objective = self.objective()
         investment = UserDict()
@@ -298,7 +297,7 @@ class OperationalModel(po.ConcreteModel):
                 if isinstance(i, Storage):
                     setattr(result[i][i], 'invest',
                             self.InvestmentStorage.invest[i].value)
-                    investment[(i,i)] = self.InvestmentStorage.invest[i].value
+                    investment[(i, i)] = self.InvestmentStorage.invest[i].value
         # add results of dual variables for balanced buses
         if hasattr(self, "dual"):
             # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]
