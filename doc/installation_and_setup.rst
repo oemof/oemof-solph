@@ -29,17 +29,18 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
 If you do not yet have pip installed, see section "Required Python packages" below for further help.
 
-If you do not have Python 3 installed
----------------------------------------
+Using Linux repositories to install Python
+---------------------------------------------
 
-There are different ways to install Python on your system. 
-One way is to install Python 3 through the Linux repositories. If you are using Ubuntu/Debian try executing the following code in your terminal: 
+Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it. 
+If you are using Ubuntu/Debian try executing the following code in your terminal: 
 
 .. code:: console
 
   sudo apt-get install python3
   
-Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it. Otherwise you can download different versions of Python via https://www.python.org/downloads/.
+You can also download different versions of Python via https://www.python.org/downloads/.
+
 Using Anaconda (by Continuum Analytics)
 ----------------------------------------------
 
