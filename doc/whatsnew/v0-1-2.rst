@@ -12,8 +12,8 @@ New features
 ############
 
 * Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
-* Add module to store input data in multiple csv files and merge by 
-preprocessing
+* Add module to store input data in multiple csv files and merge by preprocessing
+* Allow to slice all information arround busses via a new method of the ResultsDataFrame
 
 Documentation
 #############
@@ -29,18 +29,20 @@ Testing
 Bug fixes
 #########
 
-
+* Allow conversion factors as a sequence in the CSV reader
 
 
 Other changes
 #############
 
+* speed up constraint-building process by removing unnecessary method call
 
 
 
 Contributors
 ############
  
+ * Uwe Krien
  * Simon Hilpert
- * Second
+ * Cord Kaldemeyer
 
