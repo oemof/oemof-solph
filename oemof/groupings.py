@@ -214,7 +214,7 @@ class Nodes(Grouping):
         Returns a :class:`set` containing only :obj:`e`, so groups are
         :class:`sets <set>` of :class:`entities <oemof.core.network.Entity>`.
         """
-        return set((e,))
+        return {e}
 
     def merge(self, new, old):
         """
