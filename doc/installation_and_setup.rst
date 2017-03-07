@@ -26,7 +26,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip install oemof
 
-If you do not yet have pip installed, see section "Required Python packages" below for further help.
+If you do not yet have pip installed in your python environment, see section :ref:`additional_packages_Linux` below for further help.
 
 Using Linux repositories to install Python
 ---------------------------------------------
@@ -91,9 +91,10 @@ Check the solver installation by executing the test_oemof example (see :ref:`che
 
 To learn how to install (other) solvers (CBC, GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
+.. _additional_packages_Linux:
 
-Required Python packages
--------------------------
+Additional Python packages
+--------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included by default in the installation of Python 3.4 and later versions.
 To install pip for earlier Python versions on Debian/Ubuntu try executing the following code in your terminal or use the software management of you Linux distribution: 
@@ -127,7 +128,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip install oemof
 
-If pip is not part of your python environment, see section "Required Python packages" below for further help or use WinPython/Anaconda (see below).
+If pip is not part of your python environment, see section :ref:`additional_packages_Win` below for further help or use WinPython/Anaconda (see below).
 
 
 Using WinPython (community driven)
@@ -180,7 +181,9 @@ You do not have to install both solvers. Oemof recommends the CBC (Coin-or branc
 For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
-Required Python packages
+.. _additional_packages_Win:
+
+Additional Python packages
 --------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included in the winpython download. 
