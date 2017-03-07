@@ -146,6 +146,11 @@ class EnergySystem:
     def nodes(self, value):
         self.entities = value
 
+    def flows(self):
+        return {(source, target): source.outputs[target]
+                      for source in self.nodes
+                      for target in source.outputs}
+
     def dump(self, dpath=None, filename=None, keep_weather=True):
         r""" Dump an EnergySystem instance.
         """
