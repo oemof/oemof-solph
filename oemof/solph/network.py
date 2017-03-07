@@ -10,7 +10,8 @@ from .plumbing import Sequence
 
 
 class EnergySystem(es.EnergySystem):
-    """ A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
+    """ A variant of :class:`EnergySystem
+    <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
@@ -23,13 +24,13 @@ class EnergySystem(es.EnergySystem):
     directly.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from . import GROUPINGS
         kwargs['groupings'] = GROUPINGS + kwargs.get('groupings', [])
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
 
 class Flow:
@@ -203,8 +204,10 @@ class LinearTransformer(on.Transformer):
 
     >>> bel = Bus()
     >>> bth = Bus()
+    >>> bng = Bus()
     >>> trsf = LinearTransformer(conversion_factors={bel: 0.4,
-    ...                                              bth: [1, 2, 3]})
+    ...                                              bth: [1, 2, 3]},
+    ...                          inputs={bng: Flow()})
     >>> trsf.conversion_factors[bel][3]
     0.4
 
@@ -219,10 +222,7 @@ class LinearTransformer(on.Transformer):
             k: Sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-    def _input(self):
-        """ Returns the first (and only) input of the storage object
-        """
-        return [i for i in self.inputs][0]
+        # self.input = [i for i in self.inputs][0]
 
 
 class Storage(on.Transformer):
@@ -241,7 +241,7 @@ class Storage(on.Transformer):
     nominal_input_capacity_ratio : numeric
         see: nominal_output_capacity_ratio
     initial_capacity : numeric
-        The capacity of the storage in the first (and last) timestep of
+        The capacity of the storage in the first (and last) time step of
         optimization.
     capacity_loss : numeric (sequence or scalar)
         The relative loss of the storage capacity from between two consecutive
@@ -254,7 +254,7 @@ class Storage(on.Transformer):
     capacity_min : numeric (sequence or scalar)
         The nominal minimum capacity of the storage as fraction of the
         nominal capacity (between 0 and 1, default: 0).
-        To set different values in every timestep use a sequence.
+        To set different values in every time step use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
     investment : :class:`oemof.solph.options.Investment` object
@@ -322,15 +322,8 @@ class Storage(on.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
-    def _input(self):
-        """ Returns the first (and only) input of the storage object
-        """
-        return [i for i in self.inputs][0]
-
-    def _output(self):
-        """ Returns the first (and only) output of the storage object
-        """
-        return [o for o in self.outputs][0]
+        # self.input = [i for i in self.inputs][0]
+        # self.output = [o for o in self.outputs][0]
 
 
 def storage_nominal_value_warning(flow):
