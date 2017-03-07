@@ -12,7 +12,7 @@ def Sequence(sequence_or_scalar):
 
     Parameters
     ----------
-    sequence_or_scalar : array-like or scalar (None, int, float, etc.)
+    sequence_or_scalar : array-like, None, int, float
 
     Examples
     --------
@@ -76,5 +76,3 @@ class _Sequence(UserList):
         except IndexError:
             self.data.extend([self.default] * (key - len(self.data) + 1))
             self.data[key] = value
-
-
