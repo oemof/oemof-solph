@@ -45,7 +45,7 @@ Using Virtualenv (community driven)
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
- 1. Install virtualenv using the package management of your Linux distribution, pip install or install it from source (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation/>`_
+ 1. Install virtualenv using the package management of your Linux distribution, pip install or install it from source (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation/>`_)
  2. Open terminal to create and activate a virtual environment by typing:
 
     .. code-block:: console
