@@ -35,7 +35,7 @@ Bug fixes
 Other changes
 #############
 
-
+* Clean up the code according to pep8 and pylint
 
 
 Contributors
