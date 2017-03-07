@@ -207,7 +207,7 @@ class LinearTransformer(on.Transformer):
             k: Sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-        self.input = [i for i in self.inputs][0]
+        # self.input = [i for i in self.inputs][0]
 
 
 class Storage(on.Transformer):
@@ -307,8 +307,8 @@ class Storage(on.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
-        self.input = [i for i in self.inputs][0]
-        self.output = [o for o in self.outputs][0]
+        # self.input = [i for i in self.inputs][0]
+        # self.output = [o for o in self.outputs][0]
 
 
 def storage_nominal_value_warning(flow):
