@@ -147,8 +147,8 @@ class EnergySystem:
 
     def flows(self):
         return {(source, target): source.outputs[target]
-                      for source in self.nodes
-                      for target in source.outputs}
+                for source in self.nodes
+                for target in source.outputs}
 
     def dump(self, dpath=None, filename=None):
         r""" Dump an EnergySystem instance.
