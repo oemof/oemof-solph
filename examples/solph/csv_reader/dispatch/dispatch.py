@@ -27,7 +27,8 @@ def run_example(config):
     # initialisation of the energy system
     es = EnergySystem(timeindex=datetime_index)
 
-    # adding all nodes and flows to the energy system (data taken from csv-file)
+    # adding all nodes and flows to the energy system
+    # (data taken from csv-file)
     NodesFromCSV(file_nodes_flows=os.path.join(
                              config['scenario_path'],
                              config['nodes_flows']),
