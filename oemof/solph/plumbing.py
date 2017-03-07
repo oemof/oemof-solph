@@ -5,7 +5,7 @@
 from collections import abc, UserList
 
 
-def Sequence(sequence_or_scalar):
+def sequence(sequence_or_scalar):
     """ Tests if an object is sequence (except string) or scalar and returns
     a the original sequence if object is a sequence and a 'emulated' sequence
     object of class _Sequence if object is a scalar or string.
@@ -16,10 +16,10 @@ def Sequence(sequence_or_scalar):
 
     Examples
     --------
-    >>> Sequence([1,2])
+    >>> sequence([1,2])
     [1, 2]
 
-    >>> x = Sequence(10)
+    >>> x = sequence(10)
     >>> x[0]
     10
 

@@ -6,7 +6,7 @@ import warnings
 import oemof.network as on
 import oemof.energy_system as es
 from .options import Investment
-from .plumbing import Sequence
+from .plumbing import sequence
 
 
 class EnergySystem(es.EnergySystem):
@@ -127,12 +127,12 @@ class Flow:
         # information afterwards when creating objects.
 
         self.nominal_value = kwargs.get('nominal_value')
-        self.min = Sequence(kwargs.get('min', 0))
-        self.max = Sequence(kwargs.get('max', 1))
-        self.actual_value = Sequence(kwargs.get('actual_value'))
-        self.positive_gradient = Sequence(kwargs.get('positive_gradient'))
-        self.negative_gradient = Sequence(kwargs.get('negative_gradient'))
-        self.variable_costs = Sequence(kwargs.get('variable_costs'))
+        self.min = sequence(kwargs.get('min', 0))
+        self.max = sequence(kwargs.get('max', 1))
+        self.actual_value = sequence(kwargs.get('actual_value'))
+        self.positive_gradient = sequence(kwargs.get('positive_gradient'))
+        self.negative_gradient = sequence(kwargs.get('negative_gradient'))
+        self.variable_costs = sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed_max = kwargs.get('summed_max')
         self.summed_min = kwargs.get('summed_min')
@@ -147,8 +147,8 @@ class Flow:
             # warnings.warn(
             #     "Values for min/max will be ignored if fixed is True.",
             #     SyntaxWarning)
-            self.min = Sequence(0)
-            self.max = Sequence(1)
+            self.min = sequence(0)
+            self.max = sequence(1)
         if self.investment and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
@@ -219,7 +219,7 @@ class LinearTransformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {
-            k: Sequence(v)
+            k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
     def _input(self):
@@ -283,15 +283,15 @@ class Storage(on.Transformer):
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_output_capacity_ratio', 0.2)
         self.initial_capacity = kwargs.get('initial_capacity')
-        self.capacity_loss = Sequence(kwargs.get('capacity_loss', 0))
-        self.inflow_conversion_factor = Sequence(
+        self.capacity_loss = sequence(kwargs.get('capacity_loss', 0))
+        self.inflow_conversion_factor = sequence(
             kwargs.get(
                 'inflow_conversion_factor', 1))
-        self.outflow_conversion_factor = Sequence(
+        self.outflow_conversion_factor = sequence(
             kwargs.get(
                 'outflow_conversion_factor', 1))
-        self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
-        self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
+        self.capacity_max = sequence(kwargs.get('capacity_max', 1))
+        self.capacity_min = sequence(kwargs.get('capacity_min', 0))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
         # Check investment

@@ -5,7 +5,7 @@ import os
 import logging
 from oemof import network
 from ..options import BinaryFlow, Investment
-from ..plumbing import Sequence
+from ..plumbing import sequence
 from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
 
@@ -104,7 +104,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                     'conversion_factors')):
                             if row[attr] != 'seq':
                                 if attr in seq_attributes:
-                                    row[attr] = Sequence(float(row[attr]))
+                                    row[attr] = sequence(float(row[attr]))
                                 # again from investment storage the next lines
                                 # are a little hacky as we need to create an
                                 # solph.options.Investment() object
@@ -128,7 +128,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                           attr]
                                 if attr in seq_attributes:
                                     seq = [i for i in seq]
-                                    seq = Sequence(seq)
+                                    seq = sequence(seq)
                                 else:
                                     seq = [i for i in seq.values]
                                 setattr(node, attr, seq)
@@ -144,7 +144,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     if attr in row.keys() and row[attr]:
                         if row[attr] != 'seq':
                             if attr in seq_attributes:
-                                row[attr] = Sequence(float(row[attr]))
+                                row[attr] = sequence(float(row[attr]))
                             setattr(flow, attr, row[attr])
                         if row[attr] == 'seq':
                             seq = nodes_flows_seq.loc[row['class'],
@@ -154,7 +154,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                       attr]
                             if attr in seq_attributes:
                                 seq = [i for i in seq]
-                                seq = Sequence(seq)
+                                seq = sequence(seq)
                             else:
                                 seq = [i for i in seq.values]
                             setattr(flow, attr, seq)
@@ -229,12 +229,12 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                                                   row['target'],
                                                   'conversion_factors']
                         seq = [i for i in seq]
-                        seq = Sequence(seq)
+                        seq = sequence(seq)
                         conversion_factors = {nodes[row['target']]: seq}
                     else:
                         conversion_factors = \
                             {nodes[row['target']]:
-                                Sequence(float(row['conversion_factors']))}
+                                sequence(float(row['conversion_factors']))}
                 else:
                     conversion_factors = {}
             except:

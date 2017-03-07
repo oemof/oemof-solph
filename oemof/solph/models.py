@@ -11,7 +11,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from .network import Storage
 from .options import Investment
-from .plumbing import Sequence
+from .plumbing import sequence
 
 # #############################################################################
 #
@@ -109,7 +109,7 @@ class OperationalModel(po.ConcreteModel):
                                         self.timeindex.freq.nanos / 3.6e12)
 
         # convert to sequence object for time dependent timeincrement
-        self.timeincrement = Sequence(self.timeincrement)
+        self.timeincrement = sequence(self.timeincrement)
 
         if self.timesteps is None:
             raise ValueError("Missing timesteps!")
