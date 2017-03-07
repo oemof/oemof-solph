@@ -61,7 +61,7 @@ Warning: If you have an older version of virtualenv you should update pip :code:
 Using Anaconda (by Continuum Analytics)
 ----------------------------------------------
 
-Skip the steps you have already done. Check your architecture first (32/64 bit)
+Skip the steps you have already done. Check your architecture first (32/64 bit).
 
  1. Download latest `Anaconda <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
@@ -87,7 +87,9 @@ There are two common OpenSource solvers available (CBC, GLPK), while oemof recom
 
 To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
 
-To learn how to install the solvers (CBC, GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+Check the solver installation by executing the test_oemof example (see :ref:`check_installation_label` ).
+
+To learn how to install (other) solvers (CBC, GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
 Required Python packages
