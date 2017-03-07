@@ -95,7 +95,20 @@ def plotting(results):
 
     # scatterplot: can our thesis can be confirmed?
     r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
+    plt.show()
 
+    # get all nodes around R1
+    r1_balance = results.slice_bus_balance('R1_bus_el')
+
+    # plot the output of two power plants
+    power_plants = ['R1_pp_lignite', 'R1_pp_hard_coal']
+    ax = r1_balance[power_plants].plot(kind='line', subplots=True,
+                                       legend=False, linewidth=2.5)
+    ax[0].set_title('Lignite')
+    ax[0].set_ylabel('Power in MW')
+    ax[1].set_title('Hard coal')
+    ax[1].set_ylabel('Power in MW')
+    ax[1].set_xlabel('Date')
     plt.show()
 
 
