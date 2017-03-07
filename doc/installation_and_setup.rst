@@ -200,7 +200,17 @@ Installation guidelines for Mac OS are not available at the moment. However it s
 
 You can download python here: https://www.python.org/downloads/mac-osx/. For information on the installation process and on how to install python packages see here: https://docs.python.org/3/using/mac.html.
 
-If you are a Mac user please help us to improve this installation guide.
+If you are a Mac user please help us to improve this installation guide. As we do not have Mac usere we could not test the following approaches, but they should work.
+
+Virtualenv: http://sourabhbajaj.com/mac-setup/Python/README.html
+
+Anaconda: https://www.continuum.io/downloads#osx
+
+You have to install a solver if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful.
+
+CBC-solver: https://projects.coin-or.org/Cbc
+
+GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
 
 .. _check_installation_label:
