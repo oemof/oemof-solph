@@ -51,7 +51,7 @@ def run_example(config):
         'time_series': results
     }
 
-    return rdict, om, es
+    return rdict
 
 
 def plotting(results):
@@ -86,20 +86,7 @@ def plotting(results):
 
     # scatterplot: can our thesis can be confirmed?
     r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
-    plt.show()
 
-    # get all nodes around R1
-    r1_balance = results.slice_bus_balance('R1_bus_el')
-
-    # plot the output of two power plants
-    power_plants = ['R1_pp_lignite', 'R1_pp_hard_coal']
-    ax = r1_balance[power_plants].plot(kind='line', subplots=True,
-                                       legend=False, linewidth=2.5)
-    ax[0].set_title('Lignite')
-    ax[0].set_ylabel('Power in MW')
-    ax[1].set_title('Hard coal')
-    ax[1].set_ylabel('Power in MW')
-    ax[1].set_xlabel('Date')
     plt.show()
 
 
@@ -135,14 +122,12 @@ def run_dispatch_example(solver='cbc'):
     if not os.path.isdir(cfg['results_path']):
         os.mkdir(cfg['results_path'])
 
-    my_results, om, es = run_example(config=cfg)
+    my_results = run_example(config=cfg)
 
     plotting(my_results)
-
-    return om, es
 
     # print(create_result_dict(my_results))
 
 
 if __name__ == "__main__":
-    om, es = run_dispatch_example()
+    run_dispatch_example()
