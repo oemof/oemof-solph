@@ -33,7 +33,7 @@ def run_investment_example(solver='cbc'):
 
     NodesFromCSV(file_nodes_flows=os.path.join(data_path, 'nodes_flows.csv'),
                  file_nodes_flows_sequences=os.path.join(data_path,
-                                                         'nodes_flows_seq.csv'),
+                 'nodes_flows_seq.csv'),
                  delimiter=',')
 
     stopwatch()
