@@ -49,12 +49,17 @@ def run_example(config):
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
 
-    # writing results to a csv-file
-    results.to_csv(os.path.join(config['results_path'], 'results.csv'))
+    # write results per bus to a csv-file
+    busses = results.index.levels[0]
+    for bus in busses:
+        result_file = 'results_' + bus + '.csv'
+        results.slice_bus_balance(bus).to_csv(
+                os.path.join(config['results_path'], result_file))
+
     logging.info("The results can be found in {0}".format(
         config['results_path']))
-    logging.info("Read the documentation (outputlib) to learn how to process " +
-                 "the results.")
+    logging.info("Read the documentation (outputlib) to learn how" +
+                 " to process the results.")
 
     rdict = {
         'objective': es.results.objective,
