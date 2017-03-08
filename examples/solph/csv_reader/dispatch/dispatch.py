@@ -49,12 +49,9 @@ def run_example(config):
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
 
-    # write results per bus to a csv-file
-    busses = results.index.levels[0]
-    for bus in busses:
-        result_file = 'results_' + bus + '.csv'
-        results.slice_bus_balance(bus).to_csv(
-                os.path.join(config['results_path'], result_file))
+    # write results for selected busses to single csv files
+    results.bus_balance_to_csv(bus_labels=['R1_bus_el', 'R2_bus_el'],
+                               output_path='results/')
 
     logging.info("The results can be found in {0}".format(
         config['results_path']))
