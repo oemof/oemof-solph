@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8
 
+import os
 import logging
 import pandas as pd
 try:
@@ -187,6 +188,25 @@ class ResultsDataFrame(pd.DataFrame):
             dfs.append(df)
         subset = pd.concat(dfs, axis=1)
         return subset
+
+    def bus_balance_to_csv(self, bus_labels=None, output_path=''):
+        r"""Method for saving bus balances of the ResultsDataFrame as single
+        csv files. A balance around each bus with inputs, outputs and other
+        values is saved for a passed list of bus labels. If no labels are
+        passed, all busses are saved. Additionally, an output path for the
+        files can be specified.
+
+        Parameters
+        ----------
+        bus_labels : list of strings
+        output_path : string
+
+        """
+        if bus_labels is None:
+            bus_labels = self.index.levels[0]
+        for bus in bus_labels:
+            self.slice_bus_balance(bus).to_csv(
+                    os.path.join(output_path, bus + '.csv'))
 
 
 class DataFramePlot(ResultsDataFrame):
