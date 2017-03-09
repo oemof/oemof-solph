@@ -1,16 +1,10 @@
 v0.1.2 ()
 ++++++++++++++++++++++++++
 
-
-API changes
-###########
- 
-
-
-
 New features
 ############
 
+* New transformer class added: VariableFractionTransformer (child class of LinearTransformer). This class will represent transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof/pull/248>`_)
 * Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
 * Add economics module to calculate investment annuities (more to come in future  versions)
 * Add module to store input data in multiple csv files and merge by preprocessing

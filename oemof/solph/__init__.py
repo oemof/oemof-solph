@@ -3,7 +3,8 @@
 
 """
 from oemof.solph.network import (Sink, Source, LinearTransformer, Storage, Bus,
-                                 Flow, EnergySystem)
+                                 Flow, EnergySystem,
+                                 VariableFractionTransformer)
 from oemof.solph.models import OperationalModel
 from oemof.solph.groupings import GROUPINGS
 from oemof.solph.options import (Investment, BinaryFlow, DiscreteFlow)
