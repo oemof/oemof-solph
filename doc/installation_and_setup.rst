@@ -87,9 +87,9 @@ There are two common OpenSource solvers available (CBC, GLPK), while oemof recom
 
 To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
 
-Check the solver installation by executing the test_oemof example (see :ref:`check_installation_label` ).
+Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
 
-To learn how to install (other) solvers (CBC, GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+To learn how to install (other) solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 .. _additional_packages_Linux:
 
@@ -175,6 +175,8 @@ You do not have to install both solvers. Oemof recommends the CBC (Coin-or branc
  3. Unpacked CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
  5. Restart Windows
+
+Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
  
 For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
@@ -225,15 +227,16 @@ Run the examples to check the installation. From the command-line (or Anaconda P
 
 .. code:: console
 
-  oemof_examples <name-of-example>
+  oemof_examples <name-of-example> [-s <name-of-solver>]
 
 You can choose from the list of examples
 
- * storage_invest (solph)
- * simple_least_costs (solph)
- * investment (solph)
+ * test_installation
+ * storage_investment (solph)
+ * simple_dispatch (solph)
+ * csv_reader_investment (solph)
  * flexible_modelling (solph)
- * operational_example (solph)
+ * csv_reader_dispatch (solph)
 
 For example
 

@@ -8,13 +8,16 @@ of all inflows of its target bus. Moreover we will set an emission constraint.
 31.10.2016
 simon.hilpert@uni-flensburg.de
 """
+import logging
 import pyomo.environ as po
 import pandas as pd
 from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
                          OperationalModel, EnergySystem)
 
 
-def run_add_constraints_example(solver='cbc'):
+def run_add_constraints_example(solver='cbc', nologg=False):
+    if not nologg:
+        logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ###
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
@@ -91,7 +94,7 @@ def run_add_constraints_example(solver='cbc'):
     # solve and write results to dictionary
     # you may print the model with om.pprint()
     om.solve(solver=solver)
-    print("Successfully finished.")
+    logging.info("Successfully finished.")
 
 if __name__ == "__main__":
     run_add_constraints_example()

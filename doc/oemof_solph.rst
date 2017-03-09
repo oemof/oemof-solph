@@ -416,7 +416,7 @@ Both, investment and dispatch (operational) models can be modelled. Two examples
 Solph Examples
 --------------
 
-The following examples are available for solph. See section ":ref:`check_installation_label`" to learn how to execute the examples directly. Be aware that the CBC solver has to be installed to run the examples. If you want to use a different solver you can download the examples below and change the solver name manually.
+The following examples are available for solph. See section ":ref:`check_installation_label`" to learn how to execute the examples directly. Be aware that the CBC solver has to be installed to run the examples (:ref:`solver_label`). If you want to use a different solver you can download the examples below and change the solver name manually.
 
 .. _solph_examples_csv_label:
 
@@ -425,7 +425,7 @@ Csv_reader
 
 The csv-reader provides an easy to use interface to the solph library. The objects are defined using csv-files and are automatically created. There are two examples available.
 
- * Operational example (:download:`source file <../examples/solph/csv_reader/dispatch/dispatch.py>`, :download:`data file 1 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system.csv>`, :download:`data file 2 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system_seq.csv>`)
+ * Dispatch example (:download:`source file <../examples/solph/csv_reader/dispatch/dispatch.py>`, :download:`data file 1 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system.csv>`, :download:`data file 2 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system_seq.csv>`)
  * Investment example (:download:`source file <../examples/solph/csv_reader/investment/investment.py>`, :download:`data file 1 <../examples/solph/csv_reader/investment/data/nodes_flows.csv>`, :download:`data file 2 <../examples/solph/csv_reader/investment/data/nodes_flows_seq.csv>`).
 
 .. _solph_examples_flex_label:
@@ -433,15 +433,22 @@ The csv-reader provides an easy to use interface to the solph library. The objec
 Flexible modelling
 ^^^^^^^^^^^^^^^^^^^^
 
-It is also possible to pass constraints to the model that are not provided by solph but defined in your application. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
+It is also possible to pass constraints to the model that are not provided by solph but defined in your application. 
+Inside this example two different kind of constraints are added: (1) emission constraints, (2)
+shared constraints between flows. To understand the example it might be useful to know a little bit about
+the pyomo-package and how constraints are defined, moreover you should have understood the basic underlying oemof
+structure. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
 
-Simple_least_costs
+Dispatch modelling
 ^^^^^^^^^^^^^^^^^^^
 
-A least cost optimisation is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. (:download:`source file <../examples/solph/simple_dispatch/simple_dispatch.py>`, :download:`data file <../examples/solph/simple_dispatch/input_data.csv>`).
+Dispatch modelling is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. In this example
+a least cost dispatch of different generators that meet an inelastic demand is undertaken. Some of the generators are renewable energies with
+marginal costs if zero. Additionally, it shows how combined heat and power units may be easily modelled as well.
+(:download:`source file <../examples/solph/simple_dispatch/simple_dispatch.py>`, :download:`data file <../examples/solph/simple_dispatch/input_data.csv>`).
 
-Storage_optimization
-^^^^^^^^^^^^^^^^^^^^
+Storage investment
+^^^^^^^^^^^^^^^^^^
 
 The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_investment/storage_investment.py>`, :download:`data file <../examples/solph/storage_investment/storage_investment.csv>`).
 
