@@ -146,12 +146,13 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
+.. _linear_transformer_class_label:
 
 LinearTransformer
 +++++++++++++++++
 
 An instance of the LinearTransformer class can represent a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device.
-As the name indicates the efficiency has to constant within one time step to get a linear transformation.
+As the name indicates the efficiency has to be constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
 .. code-block:: python
@@ -178,6 +179,29 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
 
 .. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
 
+VariableFractionTransformer
++++++++++++++++++++++++++++
+
+The VariableFractionTransformer inherits from the :ref:`linear_transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+
+.. code-block:: python
+
+    solph.VariableFractionTransformer(
+        label='variable_chp_gas',
+        inputs={bgas: solph.Flow(nominal_value=10e10)},
+        outputs={bel: solph.Flow(), bth: solph.Flow()},
+        conversion_factors={bel: 0.3, bth: 0.5},
+        conversion_factor_single_flow={bel: 0.5}
+        )
+
+The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'bel'* is the main flow and the flow to the Bus *'bth'* is the tapped flow. The following plot shows how the variable chp (right) shedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
+
+.. 	image:: _files/variable_chp_plot.svg
+   :scale: 10 %
+   :alt: variable_chp_plot.svg
+   :align: center
+
+.. note:: See the :py:class:`~oemof.solph.network.VariableFractionTransformer` class for all parameters and the mathematical background.
 
 Storage
 +++++++
@@ -428,3 +452,16 @@ Storage investment
 
 The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_investment/storage_investment.py>`, :download:`data file <../examples/solph/storage_investment/storage_investment.csv>`).
 
+.. _variable_chp_examples_label:
+
+Variable chp
+^^^^^^^^^^^^
+
+This example is not a real use case of an energy system but an example to show how a variable combined heat and power plant (chp) works in contrast to a fixed chp (eg. block device).
+
+.. 	image:: _files/example_variable_chp.svg
+   :scale: 10 %
+   :alt: example_variable_chp.svg
+   :align: center
+
+Both chp plants distribute power and heat to a separate heat and power Bus with a heat and power demand. The plot shows that the fixed chp plant produces heat and power excess and therefore needs more natural gas. (:download:`source file <../examples/solph/variable_chp/variable_chp.py>`, :download:`data file <../examples/solph/variable_chp/variable_chp.csv>`)

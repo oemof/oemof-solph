@@ -16,7 +16,8 @@ groupings specified like this:
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
 """
-from .network import Bus, LinearTransformer, Storage
+from .network import (Bus, LinearTransformer, Storage,
+                      VariableFractionTransformer)
 from .options import Investment
 from . import blocks
 import oemof.groupings as groupings
@@ -40,6 +41,8 @@ def constraint_grouping(node):
     # constraints are grouped by overriding the method in future subclasses.
     if isinstance(node, Bus) and node.balanced:
         return blocks.Bus
+    if isinstance(node, VariableFractionTransformer):
+        return blocks.VariableFractionTransformer
     if isinstance(node, LinearTransformer):
         return blocks.LinearTransformer
     if isinstance(node, Storage) and isinstance(node.investment, Investment):
