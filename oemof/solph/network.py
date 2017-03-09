@@ -224,8 +224,8 @@ class LinearTransformer(on.Transformer):
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
 
-class LinearM1Transformer(on.Transformer):
-    """A Linear M:1 Transformer object.
+class LinearN1Transformer(on.Transformer):
+    """A Linear N:1 Transformer object.
 
     Parameters
     ----------
@@ -242,7 +242,7 @@ class LinearM1Transformer(on.Transformer):
 
     >>> gas = Bus()
     >>> biomass = Bus()
-    >>> trsf = LinearM1Transformer(conversion_factors={gas: 0.4,
+    >>> trsf = LinearN1Transformer(conversion_factors={gas: 0.4,
     ...                                                biomass: [1, 2, 3]})
     >>> trsf.conversion_factors[gas][3]
     0.4
