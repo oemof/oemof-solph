@@ -10,8 +10,9 @@ from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', additional_classes={},
-                 additional_seq_attributes=[], addtional_flow_attributes=[]):
+                 delimiter=',', additional_classes=None,
+                 additional_seq_attributes=None,
+                 additional_flow_attributes=None):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
@@ -27,16 +28,21 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     additional_classes : dict
         Dictionary containing additional classes to be recognized inside the
         csv reader. Looks like: {'MyClass1': MyClass1, ...}
-    additional_seq_attributes : list
+    additional_seq_attributes : iterable
         List of string with attributes that have to be of type 'solph sequence'
         and that shall be recognized inside the csv file.
-    addational_flow_attributes : list
+    additional_flow_attributes : iterable
         List of string with attributes that shall be recognized inside the
         csv file and set as flow attribute
 
     """
-
-
+    # Check attributes for None values
+    if additional_classes is None:
+        additional_classes = dict()
+    if additional_seq_attributes is None:
+        additional_seq_attributes = list()
+    if additional_flow_attributes is None:
+        additional_flow_attributes = list()
 
     # dataframe creation and manipulation
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
@@ -63,7 +69,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                       'capacity_min'] + additional_seq_attributes
 
     # attributes of different classes
-    flow_attrs = list(vars(Flow()).keys()) + addtional_flow_attributes
+    flow_attrs = list(vars(Flow()).keys()) + additional_flow_attributes
     bus_attrs = vars(Bus()).keys()
 
     # iteration over dataframe rows to create objects
@@ -216,8 +222,19 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             # create a conversion_factor entry for the current line
             try:
                 if row['target'] and 'conversion_factors' in row:
-                    conversion_factors = {nodes[row['target']]:
-                                          Sequence(row['conversion_factors'])}
+                    if row['conversion_factors'] == 'seq':
+                        seq = nodes_flows_seq.loc[row['class'],
+                                                  row['label'],
+                                                  row['source'],
+                                                  row['target'],
+                                                  'conversion_factors']
+                        seq = [i for i in seq]
+                        seq = Sequence(seq)
+                        conversion_factors = {nodes[row['target']]: seq}
+                    else:
+                        conversion_factors = \
+                            {nodes[row['target']]:
+                                Sequence(float(row['conversion_factors']))}
                 else:
                     conversion_factors = {}
             except:
@@ -278,13 +295,13 @@ def merge_csv_files(path=None, output_path=None, write=True):
     for f in files:
         if 'seq' in f:
             tmp_df = pd.read_csv(os.path.join(path, f), index_col=[0],
-                                 header=[0,1,2,3,4])
-            nodes_flows_seq  = pd.concat([nodes_flows_seq, tmp_df], axis=1)
+                                 header=[0, 1, 2, 3, 4])
+            nodes_flows_seq = pd.concat([nodes_flows_seq, tmp_df], axis=1)
         else:
             tmp_df = pd.read_csv(os.path.join(path, f))
             nodes_flows = pd.concat([nodes_flows, tmp_df])
 
-    if write == True:
+    if write is True:
         nodes_flows.to_csv(os.path.join(output_path,
                                         'merged_nodes_flows.csv'), index=False)
         if isinstance(nodes_flows_seq.columns, pd.MultiIndex):
@@ -298,10 +315,9 @@ def merge_csv_files(path=None, output_path=None, write=True):
     return nodes_flows, nodes_flows_seq
 
 
-
 def resample_sequence(seq_base_file=None, output_path=None,
-                       samples=None, file_prefix=None, file_suffix='_seq',
-                       header=[0,1,2,3,4]):
+                      samples=None, file_prefix=None, file_suffix='_seq',
+                      header=[0, 1, 2, 3, 4]):
     """
     This function can be used for resampling the sequence csv-data file.
     The file is read  from the specified path: `seq_base_file`, resampled and,
@@ -329,10 +345,11 @@ def resample_sequence(seq_base_file=None, output_path=None,
     header : list
         List of integers to specifiy the header lines
     """
-    if samples is None :
+    if samples is None:
         raise ValueError('Missing sample attribute. Please specifiy!')
     if output_path is None:
-        logging.info("No output_path specified, setting output_path to seq_path!")
+        logging.info('No output_path specified' +
+                     ', setting output_path to seq_path!')
         output_path = seq_base_file
 
     if not os.path.exists(output_path):
@@ -358,9 +375,8 @@ def resample_sequence(seq_base_file=None, output_path=None,
         else:
             seq[col] = seq[col].astype(float)
 
-    #pdb.set_trace()
     for s in samples:
-    # resample dataframes
+        # resample dataframes
         seq_sampled = seq.resample(s).mean()
         # assign the resampled datetimeindex values to the first columns,
         # replacing the -999999

@@ -125,9 +125,7 @@ class OperationalModel(po.ConcreteModel):
 
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
-        self.flows = {(source, target): source.outputs[target]
-                      for source in es.nodes
-                      for target in source.outputs}
+        self.flows = es.flows()
 
         # ###########################  SETS  ##################################
         # set with all nodes
