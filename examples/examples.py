@@ -4,8 +4,6 @@ from .solph.csv_reader.dispatch.dispatch import run_dispatch_example
 from .solph.variable_chp.variable_chp import run_variable_chp_example
 from .solph.storage_investment.storage_investment import (
     run_storage_investment_example)
-from .solph.csv_reader.dispatch.dispatch import (
-    run_dispatch_example)
 from . import test_installation
 from .solph.flexible_modelling.add_constraints import (
     run_add_constraints_example)
