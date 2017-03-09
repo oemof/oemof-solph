@@ -905,6 +905,7 @@ class VariableFractionTransformer(SimpleBlock):
         m = self.parent_block()
 
         for n in group:
+            n.inflow = list(n.inputs)[0]
             n.label_main_flow = str(
                 [k for k, v in n.conversion_factor_single_flow.items()][0])
             n.main_output = [o for o in n.outputs
@@ -929,7 +930,7 @@ class VariableFractionTransformer(SimpleBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-                    lhs = m.flow[g.input(), g, t]
+                    lhs = m.flow[g.inflow, g, t]
                     rhs = (
                         (m.flow[g, g.main_output, t] +
                          m.flow[g, g.tapped_output, t] *
