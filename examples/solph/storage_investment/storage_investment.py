@@ -37,6 +37,7 @@ from oemof import outputlib
 # Default logger of oemof
 from oemof.tools import logger
 from oemof.tools import helpers
+from oemof.tools import economics
 import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
@@ -102,11 +103,9 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
 
-    # Calculate ep_costs from capex to compare with old solph
-    capex = 1000
-    lifetime = 20
-    wacc = 0.05
-    epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
+    # If the period is one year the equivalent periodical costs (epc) of an
+    # investment are equal to the annuity. Use oemof's economic tools.
+    epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     # create storage transformer object for storage
     solph.Storage(

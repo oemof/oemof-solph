@@ -12,6 +12,7 @@ New features
 ############
 
 * Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
+* Add economics module to calculate investment annuities (more to come in future  versions)
 * Add module to store input data in multiple csv files and merge by preprocessing
 * Allow to slice all information arround busses via a new method of the ResultsDataFrame
 
