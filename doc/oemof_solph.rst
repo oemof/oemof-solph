@@ -4,7 +4,7 @@
 oemof-solph
 ~~~~~~~~~~~
 
-Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The packages is based on pyomo. To create an energy system model the :ref:`oemof_network_label` ist used and extended by components such as storages. To get started with solph, checkout the solph-examples in the :ref:`solph_examples_label` section. 
+Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The packages is based on pyomo. To create an energy system model the :ref:`oemof_network_label` ist used and extended by components such as storages. To get started with solph, checkout the solph-examples in the :ref:`solph_examples_label` section.
 
 .. contents::
     :depth: 2
@@ -84,7 +84,7 @@ The following code shows the difference between a bus that is assigned to a vari
 
     print(my_energsystem.groups['natural_gas']
     print(electricity_bus)
-    
+
 .. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
 
 
@@ -179,7 +179,7 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
 .. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
 
 
-LinearTransformer (Mx1)
+LinearTransformer (Nx1)
 +++++++++++++++++++++++
 
 An instance of the LinearTransformer class can represent a node with m input flows an one output flows such as a heat pump, additional heat supply or any kind of a process where two input flows are reduced to one output flow.
@@ -188,7 +188,7 @@ You can define a different efficiency for every time step (e.g. the COP of an ai
 
 .. code-block:: python
 
-    solph.LinearM1Transformer(
+    solph.LinearN1Transformer(
         label="pp_gas",
         inputs={my_energsystem.groups['natural_gas']: solph.Flow()},
         outputs={electricity_bus: solph.Flow(nominal_value=10e10)},
@@ -201,19 +201,19 @@ A heat pump would be defined in the same manner. New buses are defined to make t
     b_el = solph.Bus(label='electricity')
     b_th_low = solph.Bus(label='low_temp_heat')
     b_th_high = solph.Bus(label='high_temp_heat')
-    
+
     cop = 3  # coefficient of performance of the heat pump
 
-    solph.LinearM1Transformer(
+    solph.LinearN1Transformer(
         label='heat_pump',
         inputs={bus_elec: Flow(), bus_low_temp_heat: Flow()},
         outputs={bus_th_high: Flow()},
         conversion_factors={bus_elec: cop,
                             b_th_low: cop/(cop-1)})
-                            
+
 If the low temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and therefore 1x1-Transformer is sufficient.
 
-.. note:: See the :py:class:`~oemof.solph.network.LinearM1Transformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.LinearN1Transformer` class for all parameters and the mathematical background.
 
 
 Storage
@@ -329,7 +329,7 @@ The following code shows a storage with an investment object.
         nominal_input_capacity_ratio=1/6, nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.99, outflow_conversion_factor=0.8,
         investment=solph.Investment(ep_costs=epc))
-        
+
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
 
 
