@@ -29,6 +29,7 @@ Bug fixes
 Other changes
 #############
 
+* speed up constraint-building process by removing unnecessary method call
 
 
 
