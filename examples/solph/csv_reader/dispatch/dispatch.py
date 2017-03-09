@@ -74,7 +74,7 @@ def plotting(results):
     results : dictionary
         Solph's results dictionary.
     """
-
+    logging.info("Showing plots")
     # plotting (exemplary)
     # thesis:
     # since R2 has more installed renewable energy capacities than R1, we

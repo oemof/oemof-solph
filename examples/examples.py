@@ -48,13 +48,13 @@ def examples():
     solver = args.solver
 
     if example == 'csv_reader_investment':
-        run_investment_example(solver=solver)
+        run_investment_example(solver=solver, verbose=False)
     elif example == 'add_constraints':
         run_add_constraints_example(solver=solver)
     elif example == 'simple_dispatch':
-        run_simple_dispatch_example(solver=solver)
+        run_simple_dispatch_example(solver=solver, tee_switch=False)
     elif example == 'storage_investment':
-        run_storage_investment_example(solver=solver)
+        run_storage_investment_example(solver=solver, tee_switch=False)
     elif example == 'csv_reader_dispatch':
         run_dispatch_example(solver=solver)
     elif example == 'test_installation':
