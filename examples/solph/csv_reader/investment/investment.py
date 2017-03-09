@@ -19,8 +19,9 @@ def stopwatch():
     return str(stopwatch.now-last)[0:-4]
 
 
-def run_investment_example(solver='cbc', verbose=True):
-    logger.define_logging()
+def run_investment_example(solver='cbc', verbose=True, nologg=False):
+    if not nologg:
+        logger.define_logging()
 
     # %% model creation and solving
     date_from = '2050-01-01 00:00:00'

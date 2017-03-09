@@ -163,7 +163,8 @@ def run_example_checks():
                      'solver': 'cbc'}
 
     try:
-        add_constraints.run_add_constraints_example(testdict[key]['solver'])
+        add_constraints.run_add_constraints_example(testdict[key]['solver'],
+                                                    nologg=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -193,7 +194,7 @@ def run_example_checks():
         os.mkdir(testdict[key]['results_path'])
 
     try:
-        res = dispatch.run_example(config=testdict[key])
+        res = dispatch.run_example(config=testdict[key], )
         results = dispatch.create_result_dict(res)
         testdict[key]['run'] = True
     except Exception as e:
@@ -216,7 +217,8 @@ def run_example_checks():
                      'solver': 'cbc'}
 
     try:
-        investment.run_investment_example(solver=testdict[key]['solver'])
+        investment.run_investment_example(solver=testdict[key]['solver'],
+                                          verbose=False, nologg=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
