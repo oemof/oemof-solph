@@ -14,7 +14,7 @@ import logging
 import os
 
 # solph imports
-from oemof.solph import (Sink, Source, LinearTransformer, LinearM1Transformer,
+from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
                          Bus, Flow, OperationalModel, EnergySystem)
 import oemof.outputlib as output
 from oemof.tools import logger
@@ -112,7 +112,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     Source(label="heat_source", outputs={b_heat_source: Flow()})
 
     cop = 3
-    LinearM1Transformer(label='heat_pump',
+    LinearN1Transformer(label='heat_pump',
                         inputs={b_el: Flow(), b_heat_source: Flow()},
                         outputs={b_th: Flow(nominal_value=10)},
                         conversion_factors={b_el: cop,
