@@ -44,32 +44,32 @@ c_e_Bus_balance(gasBus_2)_:
 +1 flow(gasBus_powerplantGasCoal_2)
 = 0
 
-c_e_LinearM1Transformer_relation(powerplantGasCoal_biomassBus_0)_:
+c_e_LinearN1Transformer_relation(powerplantGasCoal_biomassBus_0)_:
 -0.10000000000000001 flow(biomassBus_powerplantGasCoal_0)
 +1 flow(powerplantGasCoal_electricityBus_0)
 = 0
 
-c_e_LinearM1Transformer_relation(powerplantGasCoal_biomassBus_1)_:
+c_e_LinearN1Transformer_relation(powerplantGasCoal_biomassBus_1)_:
 -0.10000000000000001 flow(biomassBus_powerplantGasCoal_1)
 +1 flow(powerplantGasCoal_electricityBus_1)
 = 0
 
-c_e_LinearM1Transformer_relation(powerplantGasCoal_biomassBus_2)_:
+c_e_LinearN1Transformer_relation(powerplantGasCoal_biomassBus_2)_:
 -0.10000000000000001 flow(biomassBus_powerplantGasCoal_2)
 +1 flow(powerplantGasCoal_electricityBus_2)
 = 0
 
-c_e_LinearM1Transformer_relation(powerplantGasCoal_gasBus_0)_:
+c_e_LinearN1Transformer_relation(powerplantGasCoal_gasBus_0)_:
 -0.40000000000000002 flow(gasBus_powerplantGasCoal_0)
 +1 flow(powerplantGasCoal_electricityBus_0)
 = 0
 
-c_e_LinearM1Transformer_relation(powerplantGasCoal_gasBus_1)_:
+c_e_LinearN1Transformer_relation(powerplantGasCoal_gasBus_1)_:
 -0.40000000000000002 flow(gasBus_powerplantGasCoal_1)
 +1 flow(powerplantGasCoal_electricityBus_1)
 = 0
 
-c_e_LinearM1Transformer_relation(powerplantGasCoal_gasBus_2)_:
+c_e_LinearN1Transformer_relation(powerplantGasCoal_gasBus_2)_:
 -0.40000000000000002 flow(gasBus_powerplantGasCoal_2)
 +1 flow(powerplantGasCoal_electricityBus_2)
 = 0
