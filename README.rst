@@ -17,13 +17,15 @@ Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_
 
 
 Installing oemof
-=====================
+================
 
 Use pypi to install the latest oemof version.
 
 .. code:: bash
 
-  pip3 install oemof
+  pip install oemof
+
+For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 

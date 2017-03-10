@@ -10,9 +10,7 @@ Installation and setup
     :backlinks: top
 
 
-Introduction
-============
-Following you find guidelines for the installation process for different operation systems. 
+Following you find guidelines for the installation process for different operation systems.
 
 Linux
 =====
