@@ -7,13 +7,13 @@ import sys
 import nose
 from oemof.tools import logger
 
-# add path for solph examples
 sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_investment import storage_investment
 from simple_dispatch import simple_dispatch
 from flexible_modelling import add_constraints
 from csv_reader.dispatch import dispatch
 from csv_reader.investment import investment
+from variable_chp import variable_chp
 
 tolerance = 0.001  # percent
 show_messages = True
@@ -94,16 +94,16 @@ def run_example_checks():
         results = None
 
     stor_invest_dict = {8760: {
-            'pp_gas_sum': 112750260.00000007,
-            'demand_sum': 2255000000.000008,
-            'demand_max': 368693.14440990007,
-            'wind_sum': 3085699499.7,
-            'wind_inst': 1000000,
-            'pv_sum': 553984766.734176,
-            'pv_inst': 582000,
-            'storage_cap': 10805267,
-            'objective': 8.93136532898235e+19},
-                        500: {
+        'pp_gas_sum': 112750260.00000007,
+        'demand_sum': 2255000000.000008,
+        'demand_max': 368693.14440990007,
+        'wind_sum': 3085699499.7,
+        'wind_inst': 1000000,
+        'pv_sum': 553984766.734176,
+        'pv_inst': 582000,
+        'storage_cap': 10805267,
+        'objective': 8.93136532898235e+19},
+        500: {
             'demand_max': 341499.463487,
             'demand_sum': 1.339972e+08,
             'objective': 2.806796142614384e+17,
@@ -113,7 +113,7 @@ def run_example_checks():
             'storage_cap': 615506.94,
             'wind_inst': 999979.9978,
             'wind_sum': 391216886.0,
-                        }}
+        }}
 
     check(stor_invest_dict[number_of_timesteps], testdict[key]['run'],
           testdict[key], results)
@@ -126,8 +126,8 @@ def run_example_checks():
     try:
         esys = simple_dispatch.initialise_energysystem(periods=2000)
         simple_dispatch.simulate(esys,
-                                    solver=testdict[key]['solver'],
-                                    tee_switch=False)
+                                 solver=testdict[key]['solver'],
+                                 tee_switch=False)
         results = simple_dispatch.get_results(esys)
         testdict[key]['run'] = True
     except Exception as e:
@@ -168,7 +168,8 @@ def run_example_checks():
                      'solver': 'cbc'}
 
     try:
-        add_constraints.run_add_constraints_example(testdict[key]['solver'])
+        add_constraints.run_add_constraints_example(testdict[key]['solver'],
+                                                    nologg=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -198,7 +199,7 @@ def run_example_checks():
         os.mkdir(testdict[key]['results_path'])
 
     try:
-        res = dispatch.run_example(config=testdict[key])
+        res = dispatch.run_example(config=testdict[key], )
         results = dispatch.create_result_dict(res)
         testdict[key]['run'] = True
     except Exception as e:
@@ -221,7 +222,8 @@ def run_example_checks():
                      'solver': 'cbc'}
 
     try:
-        investment.run_investment_example(solver=testdict[key]['solver'])
+        investment.run_investment_example(solver=testdict[key]['solver'],
+                                          verbose=False, nologg=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -231,6 +233,31 @@ def run_example_checks():
 
     check(test_results, testdict[key]['run'], testdict[key])
     # *********** end of csv reader investment example *************************
+
+    # ********* variable chp example *******************************************
+    key = 'variable_chp'
+    testdict[key] = {'name': "Variable CHP example", 'solver': 'cbc'}
+
+    try:
+        esys = variable_chp.initialise_energy_system(192)
+        esys = variable_chp.optimise_storage_size(
+            esys, solver=testdict[key]['solver'], tee_switch=False)
+        results = variable_chp.get_result_dict(esys)
+        testdict[key]['run'] = True
+
+    except Exception as e:
+        testdict[key]['messages'] = {'error': e}
+        testdict[key]['run'] = False
+        results = None
+
+    variable_chp_dict = {
+        'objective': 14267160965.0,
+        'input_fixed_chp': 157717049.49999994,
+        'natural_gas': 285343219.29999995,
+        'input_variable_chp': 127626169.47000004}
+
+    check(variable_chp_dict, testdict[key]['run'], testdict[key], results)
+    # ********* end of storage invest example **********************************
 
     logger.define_logging()
     for tests in testdict.values():
@@ -251,6 +278,7 @@ def run_example_checks():
         text = "Some example tests failed."
         text += "See the output above for more information!"
         print(text)
+
 
 if __name__ == "__main__":
     run_example_checks()

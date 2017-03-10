@@ -48,8 +48,11 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     b_el = Bus(label="b_el")
     b_th = Bus(label="b_th")
 
+    # adding an excess variable can help to avoid infeasible problems
     Sink(label="excess", inputs={b_el: Flow()})
-    # shortage = Source(label="shortage", outputs={b_el: Flow()})
+
+    # adding an excess variable can help to avoid infeasible problems
+    # Source(label="shortage", outputs={b_el: Flow(variable_costs=200)})
 
     # Sources
     Source(label="wind",
@@ -62,7 +65,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                nominal_value=65.3,
                                fixed=True)})
 
-    # Demands
+    # Demands (electricity/heat)
     Sink(label="demand_el",
          inputs={b_el: Flow(nominal_value=85,
                             actual_value=data['demand_el'],
@@ -141,12 +144,15 @@ def plot_results(energysystem):
     cdict = {'wind': '#00bfff', 'pv': '#ffd700', 'pp_gas': '#8b1a1a',
              'pp_coal': '#838b8b', 'pp_lig': '#8b7355', 'pp_oil': '#000000',
              'pp_chp': '#20b2aa', 'demand_el': '#fff8dc'}
+
     # create multiindex dataframe with result values
     esplot = output.DataFramePlot(energy_system=energysystem)
+
     # select input results of electrical bus (i.e. power delivered by plants)
     esplot.slice_unstacked(bus_label="b_el", type="to_bus",
                            date_from='2012-01-01 00:00:00',
                            date_to='2012-01-07 00:00:00')
+
     # set colorlist for esplot
     colorlist = esplot.color_from_dict(cdict)
 

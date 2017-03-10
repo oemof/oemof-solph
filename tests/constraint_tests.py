@@ -13,7 +13,7 @@ from oemof import energy_system as core_es
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
-                         LinearN1Transformer)
+                         LinearN1Transformer, VariableFractionTransformer)
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -53,7 +53,8 @@ class Constraint_Tests:
                 def remove(pattern, lines):
                     if not pattern:
                         return lines
-                    return re.subn(pattern, "", "\n".join(lines))[0].split("\n")
+                    return re.subn(pattern, "",
+                                   "\n".join(lines))[0].split("\n")
 
                 expected = remove(ignored,
                                   chop_trailing_whitespace(
@@ -97,7 +98,8 @@ class Constraint_Tests:
             label='powerplant_gas',
             inputs={bgas: Flow()},
             outputs={bel: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000, ep_costs=20))
+                               investment=Investment(maximum=1000,
+                                                     ep_costs=20))
                      },
             conversion_factors={bel: 0.58})
 
@@ -229,7 +231,8 @@ class Constraint_Tests:
             label='powerplant_gas_coal',
             inputs={bgas: Flow(), bcoal: Flow()},
             outputs={bel: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000, ep_costs=20))
+                               investment=Investment(maximum=1000,
+                                                     ep_costs=20))
                      },
             conversion_factors={bgas: 0.58, bcoal: 0.2})
 
@@ -262,9 +265,26 @@ class Constraint_Tests:
         LinearTransformer(
             label='chp_powerplant_gas',
             inputs={bgas: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000, ep_costs=20))
+                               investment=Investment(maximum=1000,
+                                                     ep_costs=20))
                     },
             outputs={bel: Flow(), bheat: Flow()},
             conversion_factors={bel: 0.4, bheat: 0.5})
 
         self.compare_lp_files('linear_transformer_chp_invest.lp')
+
+    def test_variable_chp(self):
+        """
+        """
+        bel = Bus(label='electricityBus')
+        bth = Bus(label='heatBus')
+        bgas = Bus(label='commodityBus')
+
+        VariableFractionTransformer(
+            label='variable_chp_gas',
+            inputs={bgas: solph.Flow(nominal_value=100)},
+            outputs={bel: solph.Flow(), bth: solph.Flow()},
+            conversion_factors={bel: 0.3, bth: 0.5},
+            conversion_factor_single_flow={bel: 0.5})
+
+        self.compare_lp_files('variable_chp.lp')

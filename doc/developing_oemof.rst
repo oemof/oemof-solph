@@ -15,7 +15,7 @@ of oemof. If you want to collaborate see description below or contact us.
 Install the developer version
 -----------------------------
 
-To avoid problems make sure you have fully uninstalled previous versions of oemof. It is highly recommended to use a virtual environment. See this `tutorial
+To avoid problems make sure you have fully uninstalled previous versions of oemof. It is highly recommended to use a virtual environment. See this `virtualenv tutorial
 <https://docs.python.org/3/tutorial/venv.html>`_ for more help. Afterwards two steps are necessary to install the developer version:
 
 .. code:: bash
@@ -149,7 +149,7 @@ Differences are:
 Commit message
 ^^^^^^^^^^^^^^
 
-Use this nice little `tutorial <http://chris.beams.io/posts/git-commit/>`_ to 
+Use this nice little `commit tutorial <http://chris.beams.io/posts/git-commit/>`_ to 
 learn how to write a nice commit message.
 
 Issue-Management
