@@ -201,11 +201,9 @@ For further information on how to install Python modules check out https://docs.
 Mac OS
 ======
 
-Installation guidelines for Mac OS are not available at the moment. However it should be possible to install Python 3 and its packages. Have look at the installation guide of Linux or Windows to get an idea what to do.
+Installation guidelines for Mac OS are still incomplete and not tested. As we do not have Mac users we could not test the following approaches, but they should work. If you are a Mac user please help us to improve this installation guide. Have look at the installation guide of Linux or Windows to get an idea what to do.
 
 You can download python here: https://www.python.org/downloads/mac-osx/. For information on the installation process and on how to install python packages see here: https://docs.python.org/3/using/mac.html.
-
-If you are a Mac user please help us to improve this installation guide. As we do not have Mac users we could not test the following approaches, but they should work.
 
 Virtualenv: http://sourabhbajaj.com/mac-setup/Python/README.html
 
