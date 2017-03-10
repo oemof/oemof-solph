@@ -24,7 +24,7 @@ class Constraint_Tests:
     @classmethod
     def setup_class(self):
         self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
-                                            re.DOTALL|re.MULTILINE)
+                                            re.DOTALL | re.MULTILINE)
 
         self.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
