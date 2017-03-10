@@ -10,9 +10,9 @@ from .plumbing import Sequence
 
 
 class EnergySystem(es.EnergySystem):
-    """ A variant of
-        :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
-        specially tailored to solph.
+    """
+    A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
+     specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
@@ -70,11 +70,12 @@ class Flow:
     summed_min : numeric
         see above
     variable_costs : numeric (sequence or scalar)
-        The costs associated with one unit of the flow. If this is set the costs
-        will be added to the objective expression of the optimization problem.
+        The costs associated with one unit of the flow. If this is set the
+        costs will be added to the objective expression of the optimization
+        problem.
     fixed_costs : numeric
-        The costs of the whole period associated with the absolute nominal_value
-        of the flow.
+        The costs of the whole period associated with the absolute
+        nominal_value of the flow.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
@@ -152,7 +153,8 @@ class Flow:
         if self.investment and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
-                "Using the investment object the nominal_value is set to None.",
+                "Using the investment object the nominal_value",
+                " is set to None.",
                 SyntaxWarning)
         self.binary = kwargs.get('binary')
         self.discrete = kwargs.get('discrete')
@@ -221,6 +223,46 @@ class LinearTransformer(on.Transformer):
         self.conversion_factors = {
             k: Sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
+
+
+class LinearN1Transformer(on.Transformer):
+    """A Linear N:1 Transformer object.
+
+    Parameters
+    ----------
+
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow(s)
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+
+    Examples
+    --------
+    Defining an linear transformer:
+
+    >>> gas = Bus()
+    >>> biomass = Bus()
+    >>> trsf = LinearN1Transformer(conversion_factors={gas: 0.4,
+    ...                                                biomass: [1, 2, 3]})
+    >>> trsf.conversion_factors[gas][3]
+    0.4
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.LinearN1Transformer`
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conversion_factors = {
+            k: Sequence(v)
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+
+    def _output(self):
+        """ Returns the first (and only) output of the transformer object
+        """
+        return [i for i in self.outputs][0]
 
 
 class VariableFractionTransformer(LinearTransformer):
@@ -311,7 +353,8 @@ class Storage(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object present)
+     * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object
+     present)
      * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
        present)
     """

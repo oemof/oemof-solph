@@ -14,8 +14,8 @@ import logging
 import os
 
 # solph imports
-from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem)
+from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
+                         Bus, Flow, OperationalModel, EnergySystem)
 import oemof.outputlib as output
 from oemof.tools import logger
 
@@ -109,7 +109,19 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                b_th: Flow(nominal_value=40)},
                       conversion_factors={b_el: 0.3, b_th: 0.4})
 
-    # ################################ optimization ############################
+    # Heatpump with a coefficient of performance (COP) of 3
+    b_heat_source = Bus(label="b_heat_source")
+
+    Source(label="heat_source", outputs={b_heat_source: Flow()})
+
+    cop = 3
+    LinearN1Transformer(label='heat_pump',
+                        inputs={b_el: Flow(), b_heat_source: Flow()},
+                        outputs={b_th: Flow(nominal_value=10)},
+                        conversion_factors={b_el: cop,
+                                            b_heat_source: cop/(cop-1)})
+
+# ################################ optimization ###############################
     # create Optimization model based on energy_system
     logging.info("Create optimization problem")
     om = OperationalModel(es=energysystem)
@@ -117,7 +129,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     # solve with specific optimization options (passed to pyomo)
     logging.info("Solve optimization problem")
     om.solve(solver=solver,
-             solve_kwargs={'tee': tee_switch, 'keepfiles': False})
+             solve_kwargs={'tee': tee_switch, 'keepfiles': True})
 
     # write back results from optimization object to energysystem
     om.results()
@@ -185,7 +197,6 @@ def run_simple_dispatch_example(**kwargs):
     simulate(esys, **kwargs)
     plot_results(esys)
     pp.pprint(get_results(esys))
-
 
 if __name__ == "__main__":
     run_simple_dispatch_example()

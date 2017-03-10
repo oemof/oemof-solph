@@ -13,7 +13,7 @@ from oemof import energy_system as core_es
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
-                         VariableFractionTransformer)
+                         LinearN1Transformer, VariableFractionTransformer)
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -24,7 +24,7 @@ class Constraint_Tests:
     @classmethod
     def setup_class(self):
         self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
-                                            re.DOTALL|re.MULTILINE)
+                                            re.DOTALL | re.MULTILINE)
 
         self.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
@@ -53,7 +53,8 @@ class Constraint_Tests:
                 def remove(pattern, lines):
                     if not pattern:
                         return lines
-                    return re.subn(pattern, "", "\n".join(lines))[0].split("\n")
+                    return re.subn(pattern, "",
+                                   "\n".join(lines))[0].split("\n")
 
                 expected = remove(ignored,
                                   chop_trailing_whitespace(
@@ -97,7 +98,8 @@ class Constraint_Tests:
             label='powerplant_gas',
             inputs={bgas: Flow()},
             outputs={bel: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000, ep_costs=20))
+                               investment=Investment(maximum=1000,
+                                                     ep_costs=20))
                      },
             conversion_factors={bel: 0.58})
 
@@ -201,6 +203,75 @@ class Constraint_Tests:
             investment=Investment(ep_costs=145, maximum=234))
 
         self.compare_lp_files('storage_invest.lp')
+
+    def test_linear_n1transformer(self):
+        """Constraint test of a LinearN1Transformer without Investment.
+        """
+        bgas = Bus(label='gasBus')
+        bbms = Bus(label='biomassBus')
+        bel = Bus(label='electricityBus')
+
+        LinearN1Transformer(
+            label='powerplantGasCoal',
+            inputs={bbms: Flow(), bgas: Flow()},
+            outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
+            conversion_factors={bgas: 0.4, bbms: 0.1})
+
+        self.compare_lp_files('linear_n1_transformer.lp')
+
+    def test_linear_n1transformer_invest(self):
+        """Constraint test of a LinearN1Transformer with Investment.
+        """
+
+        bgas = Bus(label='gasBus')
+        bcoal = Bus(label='coalBus')
+        bel = Bus(label='electricityBus')
+
+        LinearN1Transformer(
+            label='powerplant_gas_coal',
+            inputs={bgas: Flow(), bcoal: Flow()},
+            outputs={bel: Flow(variable_costs=50,
+                               investment=Investment(maximum=1000,
+                                                     ep_costs=20))
+                     },
+            conversion_factors={bgas: 0.58, bcoal: 0.2})
+
+        self.compare_lp_files('linear_n1_transformer_invest.lp')
+
+    def test_linear_transformer_chp(self):
+        """Constraint test of a LinearTransformer without Investment
+        (two outputs).
+        """
+        bgas = Bus(label='gasBus')
+        bheat = Bus(label='heatBus')
+        bel = Bus(label='electricityBus')
+
+        LinearTransformer(
+            label='CHPpowerplantGas',
+            inputs={bgas: Flow(nominal_value=10e10, variable_costs=50)},
+            outputs={bel: Flow(), bheat: Flow()},
+            conversion_factors={bel: 0.4, bheat: 0.5})
+
+        self.compare_lp_files('linear_transformer_chp.lp')
+
+    def test_linear_transformer_chp_invest(self):
+        """Constraint test of a LinearTransformer with Investment (two outputs).
+        """
+
+        bgas = Bus(label='gasBus')
+        bheat = Bus(label='heatBus')
+        bel = Bus(label='electricityBus')
+
+        LinearTransformer(
+            label='chp_powerplant_gas',
+            inputs={bgas: Flow(variable_costs=50,
+                               investment=Investment(maximum=1000,
+                                                     ep_costs=20))
+                    },
+            outputs={bel: Flow(), bheat: Flow()},
+            conversion_factors={bel: 0.4, bheat: 0.5})
+
+        self.compare_lp_files('linear_transformer_chp_invest.lp')
 
     def test_variable_chp(self):
         """

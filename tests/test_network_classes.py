@@ -117,4 +117,3 @@ class EnergySystem_Nodes_Integration_Tests:
         b2 = Bus(label='<B2>')
         Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
         ok_(isinstance(self.es.entities[2], Transformer))
-
