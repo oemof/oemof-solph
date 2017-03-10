@@ -19,7 +19,7 @@ Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_
 Installing oemof
 ================
 
-Use pypi to install the latest oemof version.
+If you have a working Python3 environment, use pypi to install the latest oemof version.
 
 .. code:: bash
 
