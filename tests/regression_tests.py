@@ -8,7 +8,10 @@ from oemof.network import Bus
 from oemof.outputlib import ResultsDataFrame as RDF
 from oemof.solph import (Flow, OperationalModel as OM, Sink, Source as FS,
                          Storage)
+import oemof
 
+def test_version_metadata():
+    ok_(oemof.__version__)
 
 class TestSolphAndItsResults:
     def setup(self):
