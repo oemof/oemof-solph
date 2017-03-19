@@ -127,7 +127,7 @@ def run_example_checks():
         esys = simple_dispatch.initialise_energysystem(periods=2000)
         simple_dispatch.simulate(esys,
                                  solver=testdict[key]['solver'],
-                                 tee_switch=False)
+                                 tee_switch=False, keep=False)
         results = simple_dispatch.get_results(esys)
         testdict[key]['run'] = True
     except Exception as e:
