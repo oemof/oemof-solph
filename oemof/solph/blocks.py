@@ -6,6 +6,8 @@ for the specified groups.
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)
 from pyomo.core.base.block import SimpleBlock
+from .plumbing import LConstraint, LExpression, linear_constraint
+import timeit
 
 
 class Storage(SimpleBlock):
@@ -729,7 +731,6 @@ class InvestmentFlow(SimpleBlock):
 
         return fixed_costs + variable_costs + investment_costs
 
-
 class Bus(SimpleBlock):
     """Block for all balanced buses.
 
@@ -766,19 +767,18 @@ class Bus(SimpleBlock):
             I[n] = [i for i in n.inputs]
             O[n] = [o for o in n.outputs]
 
-        def _busbalance_rule(block):
-            for t in m.TIMESTEPS:
-                for n in group:
-                    lhs = sum(m.flow[i, n, t] * m.timeincrement[t]
-                              for i in I[n])
-                    rhs = sum(m.flow[n, o, t] * m.timeincrement[t]
-                              for o in O[n])
-                    expr = (lhs == rhs)
-                    # no inflows no outflows yield: 0 == 0 which is True
-                    if expr is not True:
-                        block.balance.add((n, t), expr)
-        self.balance = Constraint(group, noruleinit=True)
-        self.balance_build = BuildAction(rule=_busbalance_rule)
+        balance = {}
+        for t in m.TIMESTEPS:
+            for n in group:
+                lhs = LExpression(variables=
+                                     [(m.timeincrement[t], m.flow[i, n, t])
+                                      for i in I[n]])
+                rhs = LExpression(variables=
+                                     [(m.timeincrement[t], m.flow[n, o, t])
+                                      for o in O[n]])
+                balance[n, t] = LConstraint(lhs, '==', rhs)
+        linear_constraint(self, 'balance', balance, list(group), m.TIMESTEPS)
+
 
 
 class LinearTransformer(SimpleBlock):
@@ -827,22 +827,42 @@ class LinearTransformer(SimpleBlock):
         I = {n: [i for i in n.inputs][0] for n in group}
         O = {n: [o for o in n.outputs.keys()] for n in group}
 
-        self.relation = Constraint(group, noruleinit=True)
+        fast_build = False
+        start = timeit.default_timer()
+        if not fast_build:
+            self.relation = Constraint(group, noruleinit=True)
+            def _input_output_relation(block):
+                for t in m.TIMESTEPS:
+                    for n in group:
+                        for o in O[n]:
+                            try:
+                                lhs = m.flow[I[n], n, t] * \
+                                      n.conversion_factors[o][t]
+                                rhs = m.flow[n, o, t]
+                            except:
+                                raise ValueError("Error in constraint creation",
+                                                 "source: {0}, target: {1}".format(
+                                                     n.label, o.label))
+                            block.relation.add((n, o, t), (lhs == rhs))
+            self.relation_build = BuildAction(rule=_input_output_relation)
 
-        def _input_output_relation(block):
+        if fast_build:
+            input_output_relation = {}
             for t in m.TIMESTEPS:
                 for n in group:
                     for o in O[n]:
-                        try:
-                            lhs = m.flow[I[n], n, t] * \
-                                  n.conversion_factors[o][t]
-                            rhs = m.flow[n, o, t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 n.label, o.label))
-                        block.relation.add((n, o, t), (lhs == rhs))
-        self.relation_build = BuildAction(rule=_input_output_relation)
+                        lhs = LExpression(variables=[
+                            (n.conversion_factors[o][t], m.flow[I[n], n, t]),
+                            (-1, m.flow[n, o, t])])
+                        rhs = LExpression()
+                        input_output_relation[(n, o, t)] = LConstraint(lhs, '==', rhs)
+
+            linear_constraint(self, 'relation',
+                              input_output_relation,
+                              indices=[k for k in input_output_relation.keys()])
+        stop = timeit.default_timer()
+        print('Time for relation constraint, fast {}: '.format(str(fast_build)),
+              stop - start)
 
 
 class LinearN1Transformer(SimpleBlock):
