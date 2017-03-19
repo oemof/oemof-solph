@@ -74,7 +74,10 @@ def define_logging(inifile='logging.ini', basicpath=None,
 def check_version():
     """Returns the actual version number of the used oemof version."""
     import oemof
-    version = oemof.__version__
+    try:
+        version = oemof.__version__
+    except AttributeError:
+        version = 'No version found due to internal error.'
     logging.info("Used oemof version: {0}".format(version))
 
 
