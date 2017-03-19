@@ -56,7 +56,7 @@ class Flow:
         Specific value for the flow variable. Will be multiplied with the
         nominal\_value to get the absolute value. If fixed attr is set to True
         the flow variable will be fixed to actual_value * :attr:`nominal_value`
-        , I.e. this value is set exgoneous.
+        , I.e. this value is set exogenous.
     positive_gradient : numeric (sequence or scalar)
         The normed maximal positive difference (flow[t-1] < flow[t])
         of two consecutive flow values.
@@ -255,7 +255,7 @@ class LinearN1Transformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {
-            k: Sequence(v)
+            k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
     def _output(self):
@@ -307,7 +307,7 @@ class VariableFractionTransformer(LinearTransformer):
     def __init__(self, conversion_factor_single_flow, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factor_single_flow = {
-            k: Sequence(v) for k, v in conversion_factor_single_flow.items()}
+            k: sequence(v) for k, v in conversion_factor_single_flow.items()}
 
 
 class Storage(on.Transformer):
