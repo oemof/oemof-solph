@@ -12,7 +12,7 @@ from oemof.solph import blocks
 from .network import Storage
 from .options import Investment
 from .plumbing import Sequence
-
+from .mixins import ConstraintMixin
 # #############################################################################
 #
 # Solph Optimization Models
@@ -29,7 +29,7 @@ class ExpansionModel(po.ConcreteModel):
         super().__init__()
 
 
-class OperationalModel(po.ConcreteModel):
+class OperationalModel(po.ConcreteModel, ConstraintMixin):
     """ An energy system model for operational simulation with optimized
     dispatch.
 
