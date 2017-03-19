@@ -34,7 +34,7 @@ Other changes
 #############
 
 * speed up constraint-building process by removing unnecessary method call
-
+* Clean up the code according to pep8 and pylint
 
 
 Contributors

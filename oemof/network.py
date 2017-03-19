@@ -1,5 +1,5 @@
 from functools import total_ordering
-from weakref import WeakKeyDictionary as WKD, WeakSet as WS
+from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 """
 This package (along with its subpackages) contains the classes used to model
 energy systems. An energy system is modelled as a graph/network of entities
@@ -9,7 +9,7 @@ connected.
 """
 
 
-class _Edges():
+class _Edges:
     """ Internal utility class keeping track of known edges.
 
     As this is currently quite dirty and hackish, it should be treated as an
@@ -18,16 +18,18 @@ class _Edges():
     now it simply hides most of the dirty secrets of the :class:`Node` class.
 
     """
-    _in_edges = WKD()
-    _flows = WKD()
+    _in_edges = WeKeDi()
+    _flows = WeKeDi()
+
     def __getitem__(self, key):
-        self._flows[key] = self._flows.get(key, WKD())
+        self._flows[key] = self._flows.get(key, WeKeDi())
         return self._flows[key]
+
     def __setitem__(self, key, value):
         source, target = key
-        self._in_edges[target] = self._in_edges.get(target, WS())
+        self._in_edges[target] = self._in_edges.get(target, WeSe())
         self._in_edges[target].add(source)
-        self._flows[source] = self._flows.get(source, WKD())
+        self._flows[source] = self._flows.get(source, WeKeDi())
         self._flows[source][target] = value
 
     def __call__(self, *keys):
@@ -38,6 +40,7 @@ class _Edges():
 
 
 flow = _Edges()
+
 
 @total_ordering
 class Node:
@@ -140,8 +143,7 @@ class Node:
     @property
     def label(self):
         return (self._label if hasattr(self, "_label")
-                            else "<{} #0x{:x}>".format(type(self).__name__,
-                                                       id(self)))
+                else "<{} #0x{:x}>".format(type(self).__name__, id(self)))
 
     @property
     def inputs(self):
@@ -235,7 +237,8 @@ class Entity:
 
         # TODO: @Gunni Yupp! Add docstring.
     def add_regions(self, regions):
-        'Add regions to self.regions'
+        """Add regions to self.regions
+        """
         self.regions.extend(regions)
         for region in regions:
             if self not in region.entities:

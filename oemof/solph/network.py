@@ -6,13 +6,13 @@ import warnings
 import oemof.network as on
 import oemof.energy_system as es
 from .options import Investment
-from .plumbing import Sequence
+from .plumbing import sequence
 
 
 class EnergySystem(es.EnergySystem):
     """
     A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
-     specially tailored to solph.
+    specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
@@ -41,7 +41,6 @@ class Flow:
     If for latter a scalar is passed, this will be internally converted to a
     sequence.
 
-
     Parameters
     ----------
     nominal_value : numeric
@@ -57,7 +56,7 @@ class Flow:
         Specific value for the flow variable. Will be multiplied with the
         nominal\_value to get the absolute value. If fixed attr is set to True
         the flow variable will be fixed to actual_value * :attr:`nominal_value`
-        , I.e. this value is set exgoneous.
+        , I.e. this value is set exogenous.
     positive_gradient : numeric (sequence or scalar)
         The normed maximal positive difference (flow[t-1] < flow[t])
         of two consecutive flow values.
@@ -128,12 +127,12 @@ class Flow:
         # information afterwards when creating objects.
 
         self.nominal_value = kwargs.get('nominal_value')
-        self.min = Sequence(kwargs.get('min', 0))
-        self.max = Sequence(kwargs.get('max', 1))
-        self.actual_value = Sequence(kwargs.get('actual_value'))
-        self.positive_gradient = Sequence(kwargs.get('positive_gradient'))
-        self.negative_gradient = Sequence(kwargs.get('negative_gradient'))
-        self.variable_costs = Sequence(kwargs.get('variable_costs'))
+        self.min = sequence(kwargs.get('min', 0))
+        self.max = sequence(kwargs.get('max', 1))
+        self.actual_value = sequence(kwargs.get('actual_value'))
+        self.positive_gradient = sequence(kwargs.get('positive_gradient'))
+        self.negative_gradient = sequence(kwargs.get('negative_gradient'))
+        self.variable_costs = sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.summed_max = kwargs.get('summed_max')
         self.summed_min = kwargs.get('summed_min')
@@ -148,12 +147,12 @@ class Flow:
             # warnings.warn(
             #     "Values for min/max will be ignored if fixed is True.",
             #     SyntaxWarning)
-            self.min = Sequence(0)
-            self.max = Sequence(1)
+            self.min = sequence(0)
+            self.max = sequence(1)
         if self.investment and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
-                "Using the investment object the nominal_value",
+                "Using the investment object the nominal_value" +
                 " is set to None.",
                 SyntaxWarning)
         self.binary = kwargs.get('binary')
@@ -221,7 +220,7 @@ class LinearTransformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {
-            k: Sequence(v)
+            k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
 
@@ -256,13 +255,13 @@ class LinearN1Transformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factors = {
-            k: Sequence(v)
+            k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-    def _output(self):
-        """ Returns the first (and only) output of the transformer object
-        """
-        return [i for i in self.outputs][0]
+    # def _output(self):
+    #     """ Returns the first (and only) output of the transformer object
+    #     """
+    #     return [i for i in self.outputs][0]
 
 
 class VariableFractionTransformer(LinearTransformer):
@@ -308,7 +307,7 @@ class VariableFractionTransformer(LinearTransformer):
     def __init__(self, conversion_factor_single_flow, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factor_single_flow = {
-            k: Sequence(v) for k, v in conversion_factor_single_flow.items()}
+            k: sequence(v) for k, v in conversion_factor_single_flow.items()}
 
 
 class Storage(on.Transformer):
@@ -354,7 +353,7 @@ class Storage(on.Transformer):
     -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object
-     present)
+       present)
      * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
        present)
     """
@@ -366,15 +365,15 @@ class Storage(on.Transformer):
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_output_capacity_ratio', 0.2)
         self.initial_capacity = kwargs.get('initial_capacity')
-        self.capacity_loss = Sequence(kwargs.get('capacity_loss', 0))
-        self.inflow_conversion_factor = Sequence(
+        self.capacity_loss = sequence(kwargs.get('capacity_loss', 0))
+        self.inflow_conversion_factor = sequence(
             kwargs.get(
                 'inflow_conversion_factor', 1))
-        self.outflow_conversion_factor = Sequence(
+        self.outflow_conversion_factor = sequence(
             kwargs.get(
                 'outflow_conversion_factor', 1))
-        self.capacity_max = Sequence(kwargs.get('capacity_max', 1))
-        self.capacity_min = Sequence(kwargs.get('capacity_min', 0))
+        self.capacity_max = sequence(kwargs.get('capacity_max', 1))
+        self.capacity_min = sequence(kwargs.get('capacity_min', 0))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
         # Check investment

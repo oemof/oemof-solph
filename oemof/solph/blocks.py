@@ -884,7 +884,7 @@ class LinearN1Transformer(SimpleBlock):
         m = self.parent_block()
 
         I = {n: [i for i in n.inputs.keys()] for n in group}
-        O = {n: n._output() for n in group}
+        O = {n: [o for o in n.outputs][0] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
 

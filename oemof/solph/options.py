@@ -10,7 +10,7 @@ class Investment:
     maximum : float
         Maximum of the additional invested capacity
     minimum : float
-        Mininm of the addtional invested capacity
+        Minimum of the addtional invested capacity
     ep_costs : float
         Equivalent periodical costs for the investment, if period is one
         year these costs are equal to the equivalent annual costs.
@@ -53,7 +53,7 @@ class DiscreteFlow:
     Parameters
     ----------
     integers : boolean
-        Specify domain of flow variable: If True, flow is force to integer
+        Specify domain of flow variable: If True, flow is forced to integer
         values.
     """
     def __init__(self, **kwargs):

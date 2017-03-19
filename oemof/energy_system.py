@@ -6,7 +6,6 @@ Created on Mon Jul 20 15:53:14 2015
 """
 
 from functools import partial
-from warnings import warn
 import logging
 import os
 
@@ -110,9 +109,9 @@ class EnergySystem:
         Entity.registry = self
         Node.registry = self
         self._groups = {}
-        self._groupings = ( [BY_UID] +
-                            [ g if isinstance(g, Grouping) else Nodes(g)
-                              for g in kwargs.get('groupings', [])])
+        self._groupings = ([BY_UID] +
+                           [g if isinstance(g, Grouping) else Nodes(g)
+                            for g in kwargs.get('groupings', [])])
         for e in self.entities:
             for g in self._groupings:
                 g(e, self.groups)
@@ -148,10 +147,10 @@ class EnergySystem:
 
     def flows(self):
         return {(source, target): source.outputs[target]
-                      for source in self.nodes
-                      for target in source.outputs}
+                for source in self.nodes
+                for target in source.outputs}
 
-    def dump(self, dpath=None, filename=None, keep_weather=True):
+    def dump(self, dpath=None, filename=None):
         r""" Dump an EnergySystem instance.
         """
         if dpath is None:
@@ -188,4 +187,3 @@ class EnergySystem:
             dpath, filename)))
         logging.debug(msg)
         return msg
-

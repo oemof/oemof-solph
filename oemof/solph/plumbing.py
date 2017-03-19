@@ -5,21 +5,21 @@
 from collections import abc, UserList
 
 
-def Sequence(sequence_or_scalar):
+def sequence(sequence_or_scalar):
     """ Tests if an object is sequence (except string) or scalar and returns
     a the original sequence if object is a sequence and a 'emulated' sequence
     object of class _Sequence if object is a scalar or string.
 
     Parameters
     ----------
-    sequence_or_scalar : array-like or scalar (None, int, float, etc.)
+    sequence_or_scalar : array-like, None, int, float
 
     Examples
     --------
-    >>> Sequence([1,2])
+    >>> sequence([1,2])
     [1, 2]
 
-    >>> x = Sequence(10)
+    >>> x = sequence(10)
     >>> x[0]
     10
 
@@ -76,5 +76,3 @@ class _Sequence(UserList):
         except IndexError:
             self.data.extend([self.default] * (key - len(self.data) + 1))
             self.data[key] = value
-
-
