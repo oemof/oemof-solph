@@ -30,6 +30,10 @@ def define_logging(inifile='logging.ini', basicpath=None,
         If True the actual version or commit is logged while initialising the
         logger.
 
+    Returns
+    -------
+    str : Place where the log file is stored.
+
     Notes
     -----
     By default the INFO level is printed on the screen and the debug level
@@ -61,6 +65,10 @@ def define_logging(inifile='logging.ini', basicpath=None,
     if not os.path.isfile(log_filename):
         shutil.copyfile(default_file, log_filename)
     logging.config.fileConfig(os.path.join(basicpath, inifile))
+    try:
+        returnpath = logging.getLoggerClass().root.handlers[1].baseFilename
+    except AttributeError:
+        returnpath = None
     logger = logging.getLogger('simpleExample')
     logger.debug('*********************************************************')
     logging.info('Path for logging: %s' % logpath)
@@ -69,6 +77,7 @@ def define_logging(inifile='logging.ini', basicpath=None,
             check_git_branch()
         except FileNotFoundError:
             check_version()
+    return returnpath
 
 
 def check_version():
