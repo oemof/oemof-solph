@@ -193,7 +193,6 @@ class LinearTransformer(on.Transformer):
 
     Parameters
     ----------
-
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of inflow
         to specified outflow. Keys are output bus objects.
@@ -206,8 +205,10 @@ class LinearTransformer(on.Transformer):
 
     >>> bel = Bus()
     >>> bth = Bus()
+    >>> bng = Bus()
     >>> trsf = LinearTransformer(conversion_factors={bel: 0.4,
-    ...                                              bth: [1, 2, 3]})
+    ...                                              bth: [1, 2, 3]},
+    ...                          inputs={bng: Flow()})
     >>> trsf.conversion_factors[bel][3]
     0.4
 
@@ -222,10 +223,91 @@ class LinearTransformer(on.Transformer):
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-    def _input(self):
-        """ Returns the first (and only) input of the transformer object
+
+class LinearN1Transformer(on.Transformer):
+    """A Linear N:1 Transformer object.
+
+    Parameters
+    ----------
+
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow(s)
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+
+    Examples
+    --------
+    Defining an linear transformer:
+
+    >>> gas = Bus()
+    >>> biomass = Bus()
+    >>> trsf = LinearN1Transformer(conversion_factors={gas: 0.4,
+    ...                                                biomass: [1, 2, 3]})
+    >>> trsf.conversion_factors[gas][3]
+    0.4
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.LinearN1Transformer`
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conversion_factors = {
+            k: Sequence(v)
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+
+    def _output(self):
+        """ Returns the first (and only) output of the transformer object
         """
-        return [i for i in self.inputs][0]
+        return [i for i in self.outputs][0]
+
+
+class VariableFractionTransformer(LinearTransformer):
+    """A linear transformer with more than one output, where the fraction of
+    the output flows is variable. By now it is restricted to two output flows.
+
+    One main output flow has to be defined and is tapped by the remaining flow.
+    Thus, the main output will be reduced if the tapped output increases.
+    Therefore a loss index has to be defined. Furthermore a maximum efficiency
+    has to be specified if the whole flow is led to the main output
+    (tapped_output = 0). The state with the maximum tapped_output is described
+    through conversion factors equivalent to the LinearTransformer.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+    conversion_factor_single_flow : dict
+        The efficiency of the main flow if there is no tapped flow. Only one
+        key is allowed. Use one of the keys of the conversion factors. The key
+        indicates the main flow. The other output flow is the tapped flow.
+
+    Examples
+    --------
+    >>> bel = Bus(label='electricityBus')
+    >>> bth = Bus(label='heatBus')
+    >>> bgas = Bus(label='commodityBus')
+    >>> vft = VariableFractionTransformer(
+    ...    label='variable_chp_gas',
+    ...    inputs={bgas: Flow(nominal_value=10e10)},
+    ...    outputs={bel: Flow(), bth: Flow()},
+    ...    conversion_factors={bel: 0.3, bth: 0.5},
+    ...    conversion_factor_single_flow={bel: 0.5})
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
+    """
+    def __init__(self, conversion_factor_single_flow, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conversion_factor_single_flow = {
+            k: Sequence(v) for k, v in conversion_factor_single_flow.items()}
 
 
 class Storage(on.Transformer):
@@ -244,7 +326,7 @@ class Storage(on.Transformer):
     nominal_input_capacity_ratio : numeric
         see: nominal_output_capacity_ratio
     initial_capacity : numeric
-        The capacity of the storage in the first (and last) timestep of
+        The capacity of the storage in the first (and last) time step of
         optimization.
     capacity_loss : numeric (sequence or scalar)
         The relative loss of the storage capacity from between two consecutive
@@ -257,7 +339,7 @@ class Storage(on.Transformer):
     capacity_min : numeric (sequence or scalar)
         The nominal minimum capacity of the storage as fraction of the
         nominal capacity (between 0 and 1, default: 0).
-        To set different values in every timestep use a sequence.
+        To set different values in every time step use a sequence.
     capacity_max : numeric (sequence or scalar)
         see: capacity_min
     investment : :class:`oemof.solph.options.Investment` object
@@ -325,16 +407,6 @@ class Storage(on.Transformer):
             if self.investment:
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
-
-    def _input(self):
-        """ Returns the first (and only) input of the storage object
-        """
-        return [i for i in self.inputs][0]
-
-    def _output(self):
-        """ Returns the first (and only) output of the storage object
-        """
-        return [o for o in self.outputs][0]
 
 
 def storage_nominal_value_warning(flow):

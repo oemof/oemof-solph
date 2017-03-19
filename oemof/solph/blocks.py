@@ -59,6 +59,9 @@ class Storage(SimpleBlock):
         if group is None:
             return None
 
+        I = {n: [i for i in n.inputs][0] for n in group}
+        O = {n: [o for o in n.outputs][0] for n in group}
+
         self.STORAGES = Set(initialize=[n for n in group])
 
         def _storage_capacity_bound_rule(block, n, t):
@@ -87,9 +90,9 @@ class Storage(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[n._input(), n, t] *
+            expr += (- m.flow[I[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
-            expr += (m.flow[n, n._output(), t] /
+            expr += (m.flow[n, O[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
@@ -230,8 +233,8 @@ class InvestmentStorage(SimpleBlock):
                           bounds=_storage_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
-        i = {n: n._input() for n in group}
-        o = {n: n._output() for n in group}
+        i = {n: [i for i in n.inputs][0] for n in group}
+        o = {n: [o for o in n.outputs][0] for n in group}
 
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage energy balance.
@@ -782,12 +785,17 @@ class LinearTransformer(SimpleBlock):
     """Block for the linear relation of nodes with type
     class:`.LinearTransformer`
 
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    LINEAR_TRANSFORMERS
+        A set with all :class:`~oemof.solph.network.LinearTransformer` objects.
 
     **The following constraints are created:**
 
     Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion_factor(n, o, t) = \
+            flow(i, n, t) \\cdot conversion\_factor(n, o, t) = \
             flow(n, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
@@ -816,7 +824,7 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n: n._input() for n in group}
+        I = {n: [i for i in n.inputs][0] for n in group}
         O = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
@@ -835,6 +843,175 @@ class LinearTransformer(SimpleBlock):
                                                  n.label, o.label))
                         block.relation.add((n, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
+
+
+class LinearN1Transformer(SimpleBlock):
+    """Block for the linear relation of nodes with type
+    class:`.LinearN1Transformer`
+
+
+    **The following constraints are created:**
+
+    Linear relation :attr:`om.LinearN1Transformer.relation[i,o,t]`
+        .. math::
+            flow(i, n, t) \\cdot conversion_factor(i, n, t) = \
+            flow(n, o, t), \\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{LINEAR\_N1\_TRANSFORMERS}, \\\\
+            \\forall i \\in \\textrm{INPUTS(n)}.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`LinearN1Transformer`
+        block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.LinearN1Transformers (trsf) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
+            is created for all existing relations of the inputs and all outputs
+            of the transformer. The components inside the list need to hold
+            a attribute `conversion_factors` of type dict containing the
+            conversion factors from inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        I = {n: [i for i in n.inputs.keys()] for n in group}
+        O = {n: n._output() for n in group}
+
+        self.relation = Constraint(group, noruleinit=True)
+
+        def _input_output_relation(block):
+            for t in m.TIMESTEPS:
+                for n in group:
+                    for i in I[n]:
+                        try:
+                            lhs = m.flow[n, O[n], t]
+                            rhs = m.flow[i, n, t] * n.conversion_factors[i][t]
+                        except:
+                            raise ValueError("Error in constraint creation",
+                                             "source: {0}, target: {1}".format(
+                                                 i.label, n.label))
+                        block.relation.add((n, i, t), (lhs == rhs))
+        self.relation_build = BuildAction(rule=_input_output_relation)
+
+
+class VariableFractionTransformer(SimpleBlock):
+    """Block for the linear relation of nodes with type
+    :class:`~oemof.solph.network.VariableFractionTransformer`
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    VARIABLE_FRACTION_TRANSFORMERS
+        A set with all
+        :class:`~oemof.solph.network.VariableFractionTransformer` objects.
+
+    **The following constraints are created:**
+
+    Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+        .. math::
+            flow(input, n, t) = \\\\
+            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
+            main\_flow\_loss\_index(n, t)) /\\\\
+            efficiency\_condensing(n, t)\\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
+    Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+        .. math::
+            flow(n, main\_output, t) = flow(n, tapped\_output, t) \\cdot \\\\
+            conversion\_factor(n, main\_output, t) / \
+            conversion\_factor(n, tapped\_output, t\\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def set_value(self, value):
+        pass
+
+    def clear(self):
+        pass
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`LinearTransformer`
+        block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.LinearTransformers (trsf) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
+            is created for all existing relations of the inputs and all outputs
+            of the transformer. The components inside the list need to hold
+            a attribute `conversion_factors` of type dict containing the
+            conversion factors from inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        for n in group:
+            n.inflow = list(n.inputs)[0]
+            n.label_main_flow = str(
+                [k for k, v in n.conversion_factor_single_flow.items()][0])
+            n.main_output = [o for o in n.outputs
+                             if n.label_main_flow == o.label][0]
+            n.tapped_output = [o for o in n.outputs
+                               if n.label_main_flow != o.label][0]
+            n.conversion_factor_single_flow_sq = (
+                n.conversion_factor_single_flow[
+                    m.es.groups[n.main_output.label]])
+            n.flow_relation_index = [
+                n.conversion_factors[m.es.groups[n.main_output.label]][t] /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                for t in m.TIMESTEPS]
+            n.main_flow_loss_index = [
+                (n.conversion_factor_single_flow_sq[t] -
+                 n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                for t in m.TIMESTEPS]
+
+        def _input_output_relation_rule(block):
+            """Connection between input, main output and tapped output.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+                    lhs = m.flow[g.inflow, g, t]
+                    rhs = (
+                        (m.flow[g, g.main_output, t] +
+                         m.flow[g, g.tapped_output, t] *
+                         g.main_flow_loss_index[t]) /
+                        g.conversion_factor_single_flow_sq[t]
+                        )
+                    block.input_output_relation.add((n, t), (lhs == rhs))
+        self.input_output_relation = Constraint(group, noruleinit=True)
+        self.input_output_relation_build = BuildAction(
+            rule=_input_output_relation_rule)
+
+        def _out_flow_relation_rule(block):
+            """Relation between main and tapped output in full chp mode.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+                    lhs = m.flow[g, g.main_output, t]
+                    rhs = (m.flow[g, g.tapped_output, t] *
+                           g.flow_relation_index[t])
+                    block.out_flow_relation.add((g, t), (lhs >= rhs))
+        self.out_flow_relation = Constraint(group, noruleinit=True)
+        self.out_flow_relation_build = BuildAction(
+                rule=_out_flow_relation_rule)
 
 
 class BinaryFlow(SimpleBlock):

@@ -17,13 +17,15 @@ Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_
 
 
 Installing oemof
-=====================
+================
 
-Use pypi to install the latest oemof version.
+If you have a working Python3 environment, use pypi to install the latest oemof version.
 
 .. code:: bash
 
-  pip3 install oemof
+  pip install oemof
+
+For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
@@ -52,7 +54,7 @@ Further reading in the `'Run examples to check the installation' <http://oemof.r
 Keep in touch
 =============
 
-You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at`oemof.org <https://oemof.org/>`_.
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 
 License

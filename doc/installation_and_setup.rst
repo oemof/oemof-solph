@@ -10,15 +10,13 @@ Installation and setup
     :backlinks: top
 
 
-Introduction
-============
-Following you find guidelines for the installation process for different operation systems. 
+Following you find guidelines for the installation process for different operation systems.
 
 Linux
-======
+=====
 
 If you have Python 3 installed
----------------------------------
+------------------------------
 
 As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. It is highly recommended to use a virtual environment. See this `tutorial <https://docs.python.org/3/tutorial/venv.html>`_ for more help or see the sections below. If you already have a Python 3 environment you can install oemof using pip:
 
@@ -26,10 +24,10 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip install oemof
 
-If you do not yet have pip installed, see section "Required Python packages" below for further help.
+If you do not yet have pip installed in your python environment, see section :ref:`additional_packages_Linux` below for further help.
 
 Using Linux repositories to install Python
----------------------------------------------
+------------------------------------------
 
 Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it. 
 If you are using Ubuntu/Debian try executing the following code in your terminal: 
@@ -41,11 +39,11 @@ If you are using Ubuntu/Debian try executing the following code in your terminal
 You can also download different versions of Python via https://www.python.org/downloads/.
 
 Using Virtualenv (community driven)
----------------------------------------
+-----------------------------------
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
- 1. Install virtualenv using the package management of your Linux distribution, pip install or install it from source (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation/>`_
+ 1. Install virtualenv using the package management of your Linux distribution, pip install or install it from source (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation/>`_)
  2. Open terminal to create and activate a virtual environment by typing:
 
     .. code-block:: console
@@ -59,7 +57,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit).
 Warning: If you have an older version of virtualenv you should update pip :code:`pip install --upgrade pip`.
 
 Using Anaconda (by Continuum Analytics)
-----------------------------------------------
+---------------------------------------
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
@@ -79,7 +77,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit).
 .. _linux_solver_label:
 
 Solver
-----------------
+------
 
 In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
 
@@ -87,13 +85,14 @@ There are two common OpenSource solvers available (CBC, GLPK), while oemof recom
 
 To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
 
-Check the solver installation by executing the test_oemof example (see :ref:`check_installation_label` ).
+Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
 
-To learn how to install (other) solvers (CBC, GLPK, Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+To learn how to install (other) solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
+.. _additional_packages_Linux:
 
-Required Python packages
--------------------------
+Additional Python packages
+--------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included by default in the installation of Python 3.4 and later versions.
 To install pip for earlier Python versions on Debian/Ubuntu try executing the following code in your terminal or use the software management of you Linux distribution: 
@@ -104,7 +103,7 @@ To install pip for earlier Python versions on Debian/Ubuntu try executing the fo
 
 For further information refer to https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel.
 
-In order to install a package using pip execute the following and substitute package_name by the desired package:
+In order to install a package using pip execute the following and substitute package_name by the desired package (e.g. virtualenv):
 
 .. code:: console
 
@@ -112,14 +111,12 @@ In order to install a package using pip execute the following and substitute pac
 
 For further information on how to install Python modules check out https://docs.python.org/3/installing/index.html.
 
-Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
-
 
 Windows
-========
+=======
 
 If you have Python 3 installed
---------------------------------
+------------------------------
 
 As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have a working Python 3 environment you can install oemof by using pip. Run the following code in the command window of your python environment:
 
@@ -127,11 +124,11 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip install oemof
 
-If pip is not part of your python environment, see section "Required Python packages" below for further help or use WinPython/Anaconda (see below).
+If pip is not part of your python environment, see section :ref:`additional_packages_Win` below for further help or use WinPython/Anaconda (see below).
 
 
 Using WinPython (community driven)
----------------------------------------
+----------------------------------
 
 Skip the steps you have already done. Check your architecture first (32/64 bit)
 
@@ -142,7 +139,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
  
 
 Using Anaconda (by Continuum Analytics)
-----------------------------------------------
+---------------------------------------
 
 Skip the steps you have already done. Check your architecture first (32/64 bit)
 
@@ -165,7 +162,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
 .. _windows_solver_label: 
 
 Windows Solver
-----------------
+--------------
 
 In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
 
@@ -176,11 +173,15 @@ You do not have to install both solvers. Oemof recommends the CBC (Coin-or branc
  3. Unpacked CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
  5. Restart Windows
+
+Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
  
 For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
-Required Python packages
+.. _additional_packages_Win:
+
+Additional Python packages
 --------------------------
 
 To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included in the winpython download. 
@@ -196,13 +197,11 @@ For further information on how to install Python modules check out https://docs.
 
 
 Mac OS
-=======
+======
 
-Installation guidelines for Mac OS are not available at the moment. However it should be possible to install Python 3 and its packages. Have look at the installation guide of Linux or Windows to get an idea what to do.
+Installation guidelines for Mac OS are still incomplete and not tested. As we do not have Mac users we could not test the following approaches, but they should work. If you are a Mac user please help us to improve this installation guide. Have look at the installation guide of Linux or Windows to get an idea what to do.
 
 You can download python here: https://www.python.org/downloads/mac-osx/. For information on the installation process and on how to install python packages see here: https://docs.python.org/3/using/mac.html.
-
-If you are a Mac user please help us to improve this installation guide. As we do not have Mac usere we could not test the following approaches, but they should work.
 
 Virtualenv: http://sourabhbajaj.com/mac-setup/Python/README.html
 
@@ -218,21 +217,22 @@ GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 .. _check_installation_label:
 
 Run examples to check the installation
-============================================
+======================================
 
 Run the examples to check the installation. From the command-line (or Anaconda Prompt / WinPython Command Prompt) execute:
 
 .. code:: console
 
-  oemof_examples <name-of-example>
+  oemof_examples <name-of-example> [-s <name-of-solver>]
 
 You can choose from the list of examples
 
- * storage_invest (solph)
- * simple_least_costs (solph)
- * investment (solph)
+ * test_installation
+ * storage_investment (solph)
+ * simple_dispatch (solph)
+ * csv_reader_investment (solph)
  * flexible_modelling (solph)
- * operational_example (solph)
+ * csv_reader_dispatch (solph)
 
 For example
 

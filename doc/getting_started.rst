@@ -1,6 +1,6 @@
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 Getting started
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented toolbox to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
 
@@ -21,13 +21,15 @@ Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_
 
 
 Installing oemof
-=====================
+================
 
-Use pypi to install the latest oemof version.
+If you have a working Python3 environment, use pypi to install the latest oemof version.
 
 .. code:: bash
 
-  pip3 install oemof
+  pip install oemof
+
+For more details have a look at :ref:`_installation_and_setup_label`.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
 

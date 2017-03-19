@@ -1,19 +1,17 @@
 v0.1.2 ()
 ++++++++++++++++++++++++++
 
-
-API changes
-###########
- 
-
-
-
 New features
 ############
 
+* Revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof_base/issues/238>`_, `issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
+* Add option to choose solver when executing the examples (`issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
+* New transformer class added: VariableFractionTransformer (child class of LinearTransformer). This class will represent transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof/pull/248>`_)
 * Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
+* Add economics module to calculate investment annuities (more to come in future  versions)
 * Add module to store input data in multiple csv files and merge by preprocessing
-* Allow to slice all information arround busses via a new method of the ResultsDataFrame
+* Allow to slice all information around busses via a new method of the ResultsDataFrame
+* Add the option to save formatted balances around busses as single csv files via a new method of the ResultsDataFrame
 
 Documentation
 #############
@@ -35,13 +33,15 @@ Bug fixes
 Other changes
 #############
 
+* speed up constraint-building process by removing unnecessary method call
 * Clean up the code according to pep8 and pylint
 
 
 Contributors
 ############
  
+ * Cord Kaldemeyer
+ * Guido Plessmann
  * Uwe Krien
  * Simon Hilpert
- * Cord Kaldemeyer
 
