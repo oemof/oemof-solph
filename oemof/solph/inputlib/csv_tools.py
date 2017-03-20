@@ -120,8 +120,8 @@ class SolphScenario:
         self.p.loc[idx, columns] = values
         self.p = self.p.sortlevel()
 
-    def add_sequences(self, idx, sequence):
-        self.s[idx[0], idx[1], idx[2], idx[3], idx[4]] = sequence
+    def add_sequences(self, idx, seq):
+        self.s[idx[0], idx[1], idx[2], idx[3], idx[4]] = seq
 
     def add_comment_line(self, comment, sort_entry):
         self.p.loc[('### {0}'.format(comment), '', '', ''),
