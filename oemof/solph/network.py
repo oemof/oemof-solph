@@ -258,11 +258,6 @@ class LinearN1Transformer(on.Transformer):
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-    # def _output(self):
-    #     """ Returns the first (and only) output of the transformer object
-    #     """
-    #     return [i for i in self.outputs][0]
-
 
 class VariableFractionTransformer(LinearTransformer):
     """A linear transformer with more than one output, where the fraction of
