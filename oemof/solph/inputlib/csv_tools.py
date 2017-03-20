@@ -289,16 +289,18 @@ def function4(row, nodes, nodes_flows_seq, i):
     return conversion_factors
 
 
-def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', additional_classes=None,
-                 additional_seq_attributes=None,
-                 additional_flow_attributes=None):
+def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
+                   nodes_flows=None, nodes_flows_seq=None, delimiter=',',
+                   additional_classes=None, additional_seq_attributes=None,
+                   additional_flow_attributes=None):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
 
     Parameters
     ----------
+    nodes_flows_seq : pandas.DataFrame
+    nodes_flows : pandas.DataFrame
     file_nodes_flows : string
         Name of CSV file with nodes and flows
     file_nodes_flows_sequences : string
@@ -324,16 +326,19 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     if additional_flow_attributes is None:
         additional_flow_attributes = list()
 
-    # dataframe creation and manipulation
-    nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
-    nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
-                                  header=None)
-    nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
-    nodes_flows_seq.drop(0, axis=1, inplace=True)
-    nodes_flows_seq = nodes_flows_seq.transpose()
-    nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
-    nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
-    nodes_flows_seq = nodes_flows_seq.astype(float)
+    # DataFrame creation and manipulation
+    if nodes_flows is None:
+        nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
+
+    if nodes_flows_seq is None:
+        nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
+                                      header=None)
+        nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
+        nodes_flows_seq.drop(0, axis=1, inplace=True)
+        nodes_flows_seq = nodes_flows_seq.transpose()
+        nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
+        nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
+        nodes_flows_seq = nodes_flows_seq.astype(float)
 
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
