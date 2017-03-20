@@ -29,7 +29,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
   pip install oemof
 
-For more details have a look at :ref:`_installation_and_setup_label`.
+For more details have a look at :ref:`installation_and_setup_label`.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
 
