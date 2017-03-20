@@ -289,6 +289,11 @@ def function4(row, nodes, nodes_flows_seq, i):
     return conversion_factors
 
 
+def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, **kwargs):
+    """Keep old name to keep the API."""
+    nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences, **kwargs)
+
+
 def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
                    nodes_flows=None, nodes_flows_seq=None, delimiter=',',
                    additional_classes=None, additional_seq_attributes=None,
