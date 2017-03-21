@@ -39,15 +39,10 @@ class SolphScenario(EnergySystem):
         self.p = pd.DataFrame(columns=PARAMETER + tuple(additional_parameter),
                               index=my_index)
 
-    def create_sequence_table(self, datetime_index=None, year=None,
-                              interval=None):
+    def create_sequence_table(self, datetime_index=None):
         """Create an empty sequence table."""
-        if interval is None:
-            interval = '60min'
         if datetime_index is None:
-            date_from = '{0}-01-01 00:00:00'.format(year)
-            date_to = '{0}-12-31 23:00:00'.format(year)
-            datetime_index = pd.date_range(date_from, date_to, freq=interval)
+            datetime_index = self.timeindex
 
         my_index = pd.MultiIndex(
             levels=[[1], [2], [3], [4], [5]], labels=[[0], [0], [0], [0], [0]],
@@ -61,9 +56,7 @@ class SolphScenario(EnergySystem):
         """Create empty scenario tables (sequence and parameter)."""
         self.create_parameter_table(
             additional_parameter=kwargs.get('additional_parameter'))
-        self.create_sequence_table(datetime_index=kwargs.get('datetime_index'),
-                                   year=kwargs.get('year'),
-                                   interval=kwargs.get('interval'))
+        self.create_sequence_table(datetime_index=kwargs.get('datetime_index'))
 
     def read_parameter_table(self, filename=None):
         """Read existing parameter table from file."""
@@ -78,14 +71,10 @@ class SolphScenario(EnergySystem):
         self.s = pd.read_csv(filename, header=[0, 1, 2, 3, 4], parse_dates=True,
                              index_col=0)
 
-    def read_tables(self, name=None, scenario_path=None):
+    def read_tables(self, parameterfile=None, sequencefile=None):
         """Read existing scenario tables (parameter and sequence)"""
-        if name is not None:
-            self.name = name
-        if scenario_path is not None:
-            self.path = scenario_path
-        self.read_parameter_table()
-        self.read_sequence_table()
+        self.read_parameter_table(parameterfile)
+        self.read_sequence_table(sequencefile)
 
     def write_parameter_table(self, filename=None):
         """Write parameter table to file."""
@@ -101,14 +90,10 @@ class SolphScenario(EnergySystem):
             filename = path.join(self.path, self.name + '_seq.csv')
         self.s.to_csv(filename)
 
-    def write_tables(self, name=None, scenario_path=None):
+    def write_tables(self, parameterfile=None, sequencefile=None):
         """Write scenario tables into two separate files."""
-        if name is not None:
-            self.name = name
-        if scenario_path is not None:
-            self.path = scenario_path
-        self.write_parameter_table()
-        self.write_sequence_table()
+        self.write_parameter_table(parameterfile)
+        self.write_sequence_table(sequencefile)
 
     def create_nodes(self):
         """
@@ -403,7 +388,7 @@ def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
             # inputs, outputs and conversion_factors
             inputs = function3(row, nodes, flow, bus_attrs, 'target', 'source',
                                i)
-            
+
             outputs = function3(row, nodes, flow, bus_attrs, 'source', 'target',
                                 i)
 
