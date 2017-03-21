@@ -44,4 +44,5 @@ Contributors
  * Guido Plessmann
  * Uwe Krien
  * Simon Hilpert
+ * Stephan Günther
 
