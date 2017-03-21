@@ -19,9 +19,10 @@ PARAMETER = (
 INDEX = ('class', 'label', 'source', 'target')
 
 
-class SolphScenario:
+class SolphScenario(EnergySystem):
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.p = kwargs.get('parameters')
         self.s = kwargs.get('sequences')
         self.path = kwargs.get('path', path.dirname(path.realpath(__file__)))
