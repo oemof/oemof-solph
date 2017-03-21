@@ -110,12 +110,27 @@ class SolphScenario:
         self.write_sequence_table()
 
     def create_nodes(self):
-        """Create nodes for a solph.energysystem."""
-        # Todo: self.p and self.s has to be adapt to have the shape needed by
-        # Todo: the 'nodes_from_csv' function.
-        df_p = self.p
-        df_s = self.s
-        nodes_from_csv(nodes_flows=df_p, nodes_flows_seq=df_s)
+        """
+        Create nodes for a solph.energysystem
+
+        Notes
+        -----
+        At the moment the nodes_from_csv function does not accept Multiindex
+        DataFrames therefore the DataFrames need to be reshaped.
+        """
+        tmp1 = pd.DataFrame(
+            index=self.s.columns).reset_index().transpose().reset_index()
+        tmp2 = self.s.reset_index()
+        for n in range(len(tmp2.columns.levels) - 1):
+            tmp2.columns = tmp2.columns.droplevel(0)
+        length = len(tmp1.columns)
+        tmp1.columns = list(range(length))
+        tmp2.columns = list(range(length))
+
+        # noinspection PyTypeChecker
+        return nodes_from_csv(
+            nodes_flows=self.p.reset_index(),
+            nodes_flows_seq=pd.concat([tmp1, tmp2], ignore_index=True))
 
     def add_parameters(self, idx, columns, values):
         self.p.loc[idx, columns] = values
@@ -339,12 +354,12 @@ def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
     if nodes_flows_seq is None:
         nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
                                       header=None)
-        nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
-        nodes_flows_seq.drop(0, axis=1, inplace=True)
-        nodes_flows_seq = nodes_flows_seq.transpose()
-        nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
-        nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
-        nodes_flows_seq = nodes_flows_seq.astype(float)
+    nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
+    nodes_flows_seq.drop(0, axis=1, inplace=True)
+    nodes_flows_seq = nodes_flows_seq.transpose()
+    nodes_flows_seq.set_index([0, 1, 2, 3, 4], inplace=True)
+    nodes_flows_seq.columns = range(0, len(nodes_flows_seq.columns))
+    nodes_flows_seq = nodes_flows_seq.astype(float)
 
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
