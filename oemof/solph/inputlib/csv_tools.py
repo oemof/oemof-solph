@@ -80,9 +80,8 @@ class SolphScenario(EnergySystem):
         """Write parameter table to file."""
         if filename is None:
             filename = path.join(self.path, self.name + '.csv')
-        self.p = self.p.fillna('')
         self.p.sort_values('sort_index', inplace=True)
-        self.p.to_csv(filename)
+        self.p.fillna('').to_csv(filename)
 
     def write_sequence_table(self, filename=None):
         """Write sequence table to file."""
@@ -367,7 +366,6 @@ def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
     # iteration over dataframe rows to create objects
     nodes = {}
     for i, r in nodes_flows.iterrows():
-
         # check if current line holds valid data or is just for visual purposes
         # e.g. a blank line or a line that contains data explanations
         if isinstance(r['class'], str) and r['class'] in classes.keys():
