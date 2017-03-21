@@ -72,7 +72,7 @@ class SolphScenario:
     def read_sequence_table(self, filename=None):
         """Read existing parameter table from file."""
         if filename is None:
-            filename = path.join(self.path, self.name + '_seq_.csv')
+            filename = path.join(self.path, self.name + '_seq.csv')
         self.s = pd.read_csv(filename, header=[0, 1, 2, 3, 4], parse_dates=True,
                              index_col=0)
 
