@@ -57,6 +57,7 @@ class SolphScenario:
         self.s = df
 
     def create_tables(self, **kwargs):
+        """Create empty scenario tables (sequence and parameter)."""
         self.create_parameter_table(
             additional_parameter=kwargs.get('additional_parameter'))
         self.create_sequence_table(datetime_index=kwargs.get('datetime_index'),
