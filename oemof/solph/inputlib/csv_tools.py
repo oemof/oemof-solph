@@ -7,7 +7,8 @@ import logging
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import sequence
-from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+                       EnergySystem)
 
 
 PARAMETER = (
