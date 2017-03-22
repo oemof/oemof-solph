@@ -168,7 +168,7 @@ class ResultsDataFrame(pd.DataFrame):
         if formatted is True:
             subset.reset_index(level=['bus_label', 'type'], drop=True,
                                inplace=True)
-        # user standard instead of multi-indexed columns
+        # use standard instead of multi-indexed columns
         subset.columns = subset.columns.get_level_values(1).unique()
         return subset
 
@@ -187,6 +187,8 @@ class ResultsDataFrame(pd.DataFrame):
                                       formatted=True)
             dfs.append(df)
         subset = pd.concat(dfs, axis=1)
+        # use standard instead of multi-indexed columns
+        subset.columns = [v for v in subset.columns]
         return subset
 
     def bus_balance_to_csv(self, bus_labels=None, output_path=''):
