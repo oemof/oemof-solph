@@ -43,10 +43,16 @@ class ResultsDataFrame(pd.DataFrame):
         http://pandas.pydata.org/pandas-docs/stable/advanced.html
 
     """
-    def __init__(self, **kwargs):
+    def __init__(self, energy_system=None, filename=None):
         # default values if not arguments are passed
-        es = kwargs.get('energy_system')
+        if energy_system:
+            self.from_energy_system(energy_system)
+        elif filename:
+            self.from_file(filename)
+        else:
+            super().__init__()
 
+    def from_energy_system(self, es):
         rows_list = []
         for k, v in es.results.items():
             if 'Bus' in str(k.__class__):
@@ -114,6 +120,10 @@ class ResultsDataFrame(pd.DataFrame):
         super().__init__(tuples, columns=columns)
         self.set_index(index, inplace=True)
         self.sort_index(inplace=True)
+
+    def from_file(self, filename):
+        df = pd.read_csv(filename, index_col=[0, 1, 2, 3], parse_dates=True)
+        super().__init__(df)
 
     def slice_by(self, **kwargs):
         r""" Method for slicing the ResultsDataFrame. A subset is returned.
