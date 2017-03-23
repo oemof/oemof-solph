@@ -131,10 +131,10 @@ class SolphScenario(EnergySystem):
         self.p = self.p.sortlevel()
 
 
-def function1(row, nodes, classes, flow_attrs, seq_attributes, nodes_flows_seq,
-              i):
+def create_node(row, nodes, classes, flow_attrs, seq_attributes,
+                nodes_flows_seq, i):
     """
-    create node if not existent and set attributes
+    create node if not existent and set attributes for the current line
     (attributes must be placed either in the first line or in all
     lines of multiple node entries (flows) in csv file)
     """
@@ -144,8 +144,7 @@ def function1(row, nodes, classes, flow_attrs, seq_attributes, nodes_flows_seq,
             if node is None:
                 node = classes[row['class']](label=row['label'])
         # for the if check below we use all flow_attrs except
-        # investment
-        # because for storages investment needs to be set as a node
+        # investment because for storages investment needs to be set as a node
         # attribute (and a flow attribute)
         flow_attrs_ = [i for i in flow_attrs if i != 'investment']
         for attr in row.keys():
@@ -189,8 +188,8 @@ def function1(row, nodes, classes, flow_attrs, seq_attributes, nodes_flows_seq,
     return node
 
 
-def function2(row, node, flow_attrs, seq_attributes, nodes_flows_seq, i):
-    """create flow and set attributes
+def create_flow(row, node, flow_attrs, seq_attributes, nodes_flows_seq, i):
+    """create flow and set attributes for the current line
     """
     try:
         flow = Flow()
@@ -242,9 +241,8 @@ def function2(row, node, flow_attrs, seq_attributes, nodes_flows_seq, i):
     return flow
 
 
-def function3(row, nodes, flow, bus_attrs, type1, type2, i):
-    """create an output entry for the current lin
-    """
+def create_output_entry(row, nodes, flow, bus_attrs, type1, type2, i):
+    """create an output entry for the current line"""
     try:
         if row['label'] == row[type1]:
             if row[type2] not in nodes.keys():
@@ -263,9 +261,8 @@ def function3(row, nodes, flow, bus_attrs, type1, type2, i):
     return tmp
 
 
-def function4(row, nodes, nodes_flows_seq, i):
-    """create a conversion_factor entry for the current lin
-    """
+def create_conversion_factors(row, nodes, nodes_flows_seq, i):
+    """create a conversion_factor entry for the current line"""
     try:
         if row['target'] and 'conversion_factors' in row:
             if row['conversion_factors'] == 'seq':
@@ -338,8 +335,8 @@ def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
         nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
 
     if nodes_flows_seq is None:
-        nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences, sep=delimiter,
-                                      header=None)
+        nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences,
+                                      sep=delimiter, header=None)
     nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
     nodes_flows_seq.drop(0, axis=1, inplace=True)
     nodes_flows_seq = nodes_flows_seq.transpose()
@@ -376,22 +373,24 @@ def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
             # save column labels and row values in dict
             row = dict(zip(r.index.values, r.values))
 
-            # function1
-            node = function1(row, nodes, classes, flow_attrs, seq_attributes,
-                             nodes_flows_seq, i)
+            # create node and set attributes
+            node = create_node(row, nodes, classes, flow_attrs, seq_attributes,
+                               nodes_flows_seq, i)
 
             # create flow and set attributes
-            flow = function2(row, node, flow_attrs, seq_attributes,
-                             nodes_flows_seq, i)
+            flow = create_flow(row, node, flow_attrs, seq_attributes,
+                               nodes_flows_seq, i)
 
-            # inputs, outputs and conversion_factors
-            inputs = function3(row, nodes, flow, bus_attrs, 'target', 'source',
-                               i)
+            # create inputs, outputs
+            inputs = create_output_entry(row, nodes, flow, bus_attrs,
+                                         'target', 'source', i)
 
-            outputs = function3(row, nodes, flow, bus_attrs, 'source', 'target',
-                                i)
+            outputs = create_output_entry(row, nodes, flow, bus_attrs,
+                                          'source', 'target', i)
 
-            conversion_factors = function4(row, nodes, nodes_flows_seq, i)
+            # create conversion factors
+            conversion_factors = create_conversion_factors(row, nodes,
+                                                           nodes_flows_seq, i)
 
             # add node to dict and assign attributes depending on
             # if there are multiple lines per node or not
