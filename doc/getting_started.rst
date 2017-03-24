@@ -29,7 +29,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
   pip install oemof
 
-For more details have a look at :ref:`_installation_and_setup_label`.
+For more details have a look at :ref:`installation_and_setup_label`.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
 
@@ -58,7 +58,7 @@ Further reading in the ':ref:`check_installation_label`' section.
 Keep in touch
 =============
 
-You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at`oemof.org <https://oemof.org/>`_.
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 
 License
