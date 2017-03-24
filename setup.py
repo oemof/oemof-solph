@@ -18,6 +18,7 @@ setup(name='oemof',
       author='oemof developing group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
+      url='https://oemof.org/',
       namespace_package=['oemof'],
       packages=find_packages(),
       package_data={
