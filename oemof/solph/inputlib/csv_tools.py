@@ -134,9 +134,10 @@ class SolphScenario(EnergySystem):
 def create_node(row, nodes, classes, flow_attrs, seq_attributes,
                 nodes_flows_seq, i):
     """
-    create node if not existent and set attributes for the current line
+    Create node if not existent and set attributes for the current line
     (attributes must be placed either in the first line or in all
-    lines of multiple node entries (flows) in csv file)
+    lines of multiple node entries (flows) in csv file and be unique
+    to assign them either to a node or flow object)
     """
     try:
         if row['class'] in classes.keys():
@@ -189,7 +190,9 @@ def create_node(row, nodes, classes, flow_attrs, seq_attributes,
 
 
 def create_flow(row, node, flow_attrs, seq_attributes, nodes_flows_seq, i):
-    """create flow and set attributes for the current line
+    """
+    Create flow and set attributes for the current line
+    (based on attributes that only belong to the flow object)
     """
     try:
         flow = Flow()
@@ -242,7 +245,10 @@ def create_flow(row, node, flow_attrs, seq_attributes, nodes_flows_seq, i):
 
 
 def create_output_entry(row, nodes, flow, bus_attrs, type1, type2, i):
-    """create an output entry for the current line"""
+    """
+    Create an output entry for the current line
+    (a dict for the nodes outputs of type {node1: flow1, node2: flow2})
+    """
     try:
         if row['label'] == row[type1]:
             if row[type2] not in nodes.keys():
@@ -262,7 +268,10 @@ def create_output_entry(row, nodes, flow, bus_attrs, type1, type2, i):
 
 
 def create_conversion_factors(row, nodes, nodes_flows_seq, i):
-    """create a conversion_factor entry for the current line"""
+    """
+    Create a conversion_factor entry for the current line
+    (a dict for the conversion factors of type {node1: eta1, node2: eta2})
+    """
     try:
         if row['target'] and 'conversion_factors' in row:
             if row['conversion_factors'] == 'seq':
