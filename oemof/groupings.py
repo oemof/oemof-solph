@@ -2,10 +2,10 @@
 """
 try:
     from collections.abc import (Hashable, Iterable, Mapping,
-                                 MutableMapping as MM)
+                                 MutableMapping as MuMa)
 except ImportError:
     from collections import (Hashable, Iterable, Mapping,
-                             MutableMapping as MM)
+                             MutableMapping as MuMa)
 from itertools import chain, filterfalse
 
 
@@ -181,13 +181,12 @@ class Grouping:
             "Please let us know by filing a bug at:\n\n    " +
             "https://github.com/oemof/oemof/issues\n")
 
-
     def __call__(self, e, d):
         k = self.key(e) if callable(self.key) else self.key
         if k is None:
             return
         v = self.value(e)
-        if isinstance(v, MM):
+        if isinstance(v, MuMa):
             for k in list(filterfalse(self.filter, v)):
                 v.pop(k)
         elif isinstance(v, Mapping):
@@ -200,7 +199,7 @@ class Grouping:
             return
         for group in (k if (isinstance(k, Iterable) and not
                             isinstance(k, Hashable))
-                        else [k]):
+                      else [k]):
             d[group] = (self.merge(v, d[group]) if group in d else v)
 
 
@@ -214,7 +213,7 @@ class Nodes(Grouping):
         Returns a :class:`set` containing only :obj:`e`, so groups are
         :class:`sets <set>` of :class:`entities <oemof.core.network.Entity>`.
         """
-        return set((e,))
+        return {e}
 
     def merge(self, new, old):
         """
@@ -269,7 +268,7 @@ def _uid_or_str(node_or_entity):
     """ Helper function to support the transition from `Entitie`s to `Node`s.
     """
     return (node_or_entity.uid if hasattr(node_or_entity, "uid")
-                               else str(node_or_entity))
+            else str(node_or_entity))
 
 DEFAULT = Grouping(_uid_or_str)
 """ The default :class:`Grouping`.
@@ -282,4 +281,3 @@ This one is always present in an :class:`energy system
 <oemof.core.network.Entity.uid>` get's added to the :class:`energy system
 <oemof.core.energy_system.EnergySystem>`.
 """
-

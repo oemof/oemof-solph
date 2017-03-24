@@ -37,16 +37,22 @@ from oemof import outputlib
 # Default logger of oemof
 from oemof.tools import logger
 from oemof.tools import helpers
+from oemof.tools import economics
+import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
 import logging
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
-import oemof.solph as solph
+import warnings
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
 
 
-def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
+def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
                           debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
@@ -63,7 +69,7 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
     ##########################################################################
 
     logging.info('Create oemof objects')
-    # create gas bus
+    # create natural gas bus
     bgas = solph.Bus(label="natural_gas")
 
     # create electricity bus
@@ -72,38 +78,36 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
     # create excess component for the electricity bus to allow overproduction
     solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
 
-    # create commodity object for gas resource
+    # create source object representing the natural gas commodity (annual limit)
     solph.Source(label='rgas', outputs={bgas: solph.Flow(
         nominal_value=194397000 * number_timesteps / 8760, summed_max=1)})
 
-    # create fixed source object for wind
+    # create fixed source object representing wind power plants
     solph.Source(label='wind', outputs={bel: solph.Flow(
         actual_value=data['wind'], nominal_value=1000000, fixed=True,
         fixed_costs=20)})
 
-    # create fixed source object for pv
+    # create fixed source object representing pv power plants
     solph.Source(label='pv', outputs={bel: solph.Flow(
         actual_value=data['pv'], nominal_value=582000, fixed=True,
         fixed_costs=15)})
 
-    # create simple sink object for demand
+    # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
-    # create simple transformer object for gas powerplant
+    # create simple transformer object representing a gas power plant
     solph.LinearTransformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
 
-    # Calculate ep_costs from capex to compare with old solph
-    capex = 1000
-    lifetime = 20
-    wacc = 0.05
-    epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
+    # If the period is one year the equivalent periodical costs (epc) of an
+    # investment are equal to the annuity. Use oemof's economic tools.
+    epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 
-    # create storage transformer object for storage
+    # create storage object representing a battery
     solph.Storage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
@@ -122,37 +126,54 @@ def optimise_storage_size(filename="storage_invest.csv", solvername='cbc',
 
     logging.info('Optimise the energy system')
 
+    # initialise the operational model
     om = solph.OperationalModel(energysystem)
 
+    # if debug is true an lp-file will be written
     if debug:
         filename = os.path.join(
             helpers.extend_basic_path('lp_files'), 'storage_invest.lp')
         logging.info('Store lp-file in {0}.'.format(filename))
         om.write(filename, io_options={'symbolic_solver_labels': True})
 
+    # if tee_switch is true solver messages will be displayed
     logging.info('Solve the optimization problem')
-    om.solve(solver=solvername, solve_kwargs={'tee': tee_switch})
+    om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     return energysystem
 
 
 def get_result_dict(energysystem):
+    """Shows how to extract single time series from results.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
+    """
     logging.info('Check the results')
     storage = energysystem.groups['storage']
     myresults = outputlib.DataFramePlot(energy_system=energysystem)
 
+    # electrical output of natural gas power plant
     pp_gas = myresults.slice_by(obj_label='pp_gas', type='to_bus',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
+    # electrical demand
     demand = myresults.slice_by(obj_label='demand',
                                 date_from='2012-01-01 00:00:00',
                                 date_to='2012-12-31 23:00:00')
 
+    # electrical output of wind power plant
     wind = myresults.slice_by(obj_label='wind',
                               date_from='2012-01-01 00:00:00',
                               date_to='2012-12-31 23:00:00')
 
+    # electrical output of pv power plant
     pv = myresults.slice_by(obj_label='pv',
                             date_from='2012-01-01 00:00:00',
                             date_to='2012-12-31 23:00:00')
@@ -170,7 +191,16 @@ def get_result_dict(energysystem):
 
 
 def create_plots(energysystem):
+    """Shows how to create plots from the results.
 
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
+    """
     logging.info('Plot the results')
 
     cdict = {'wind': '#5b5bae',
@@ -180,7 +210,7 @@ def create_plots(energysystem):
              'demand': '#ce4aff',
              'excess_bel': '#555555'}
 
-    # Plotting the input flows of the electricity bus for January
+    # Plotting the input flows of the electricity bus for January (line plot)
     myplot = outputlib.DataFramePlot(energy_system=energysystem)
     myplot.slice_unstacked(bus_label="electricity", type="to_bus",
                            date_from="2012-01-01 00:00:00",
@@ -192,7 +222,7 @@ def create_plots(energysystem):
     myplot.ax.set_xlabel('Date')
     myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
 
-    # Plotting the output flows of the electricity bus for January
+    # Plotting the output flows of the electricity bus (line plot)
     myplot.slice_unstacked(bus_label="electricity", type="from_bus")
     myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
     myplot.ax.legend(loc='upper right')
@@ -202,7 +232,8 @@ def create_plots(energysystem):
 
     plt.show()
 
-    # Plotting a combined stacked plot
+    # Plotting the balance around the electricity plot for one week using a
+    # combined stacked plot
     fig = plt.figure(figsize=(24, 14))
     plt.rc('legend', **{'fontsize': 19})
     plt.rcParams.update({'font.size': 19})
@@ -226,15 +257,27 @@ def create_plots(energysystem):
     plt.show()
 
 
-def run_storage_invest_example():
+def run_storage_investment_example(**kwargs):
     logger.define_logging()
-    esys = optimise_storage_size()
+    esys = optimise_storage_size(**kwargs)
+
+    # ** Dump an energy system **
     # esys.dump()
+
+    # ** Restore an energy system **
+    # esys = solph.EnergySystem()
     # esys.restore()
-    import pprint as pp
-    pp.pprint(get_result_dict(esys))
-    create_plots(esys)
+
+    if plt is not None:
+        create_plots(esys)
+    else:
+        import pprint as pp
+        pp.pprint(get_result_dict(esys))
+        msg = ("\nIt is not possible to plot the results, due to a missing " +
+               "python package: 'matplotlib'. \nType 'pip install " +
+               "matplotlib' to see the plots.")
+        warnings.warn(msg)
 
 
 if __name__ == "__main__":
-    run_storage_invest_example()
+    run_storage_investment_example()

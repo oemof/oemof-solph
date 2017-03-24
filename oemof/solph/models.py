@@ -11,7 +11,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from .network import Storage
 from .options import Investment
-from .plumbing import Sequence
+from .plumbing import sequence
 
 # #############################################################################
 #
@@ -33,13 +33,6 @@ class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     dispatch.
 
-    **The following sets are created:**
-
-    NODES
-        A set with all nodes of the given energy system.
-    TIMESTEPS
-        A set with all time steps of the given time horizon.
-
     Parameters
     ----------
     es : EnergySystem object
@@ -49,27 +42,27 @@ class OperationalModel(po.ConcreteModel):
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
     timeindex : pandas DatetimeIndex
-        The timeindex will be used to calculate the timesteps the timeincrement
-        for the optimization model.
+        The time index will be used to calculate the timesteps and the
+        time increment for the optimization model.
     timesteps : sequence (optional)
         Timesteps used in the optimization model. If provided as list or
         pandas.DatetimeIndex the sequence will be used to index the time
         dependent variables, constraints etc. If not provided we will try to
         compute this sequence from attr:`timeindex`.
     timeincrement : float or list of floats (optional)
-        Timeincrement used in constraints and objective expressions.
-        If type is 'float', internally will be converted to
-        solph.plumbing.Sequence() object for time dependent timeincrement.
+        Time increment used in constraints and objective expressions.
+        If type is 'float', will be converted internally to
+        solph.plumbing.Sequence() object for time dependent time increment.
         If a list is provided this list will be taken. Default is calculated
         from timeindex if provided.
 
     **The following sets are created:**
 
     NODES :
-        A set with all oemof nodes.
+        A set with all nodes of the given energy system.
 
     TIMESTEPS :
-        A set with all timesteps for the optimization problem.
+        A set with all timesteps of the given time horizon.
 
     FLOWS :
         A 2 dimensional set with all flows. Index: `(source, target)`
@@ -99,6 +92,8 @@ class OperationalModel(po.ConcreteModel):
 
     """
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
+                         blocks.LinearN1Transformer,
+                         blocks.VariableFractionTransformer,
                          blocks.Storage, blocks.InvestmentFlow,
                          blocks.InvestmentStorage, blocks.Flow,
                          blocks.BinaryFlow, blocks.DiscreteFlow]
@@ -116,18 +111,16 @@ class OperationalModel(po.ConcreteModel):
                                         self.timeindex.freq.nanos / 3.6e12)
 
         # convert to sequence object for time dependent timeincrement
-        self.timeincrement = Sequence(self.timeincrement)
+        self.timeincrement = sequence(self.timeincrement)
 
         if self.timesteps is None:
             raise ValueError("Missing timesteps!")
-        self._constraint_groups = OperationalModel.CONSTRAINT_GROUPS
-        self._constraint_groups.extend(kwargs.get('constraint_groups', []))
+        self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
+                                   kwargs.get('constraint_groups', []))
 
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
-        self.flows = {(source, target): source.outputs[target]
-                      for source in es.nodes
-                      for target in source.outputs}
+        self.flows = es.flows()
 
         # ###########################  SETS  ##################################
         # set with all nodes
@@ -227,11 +220,12 @@ class OperationalModel(po.ConcreteModel):
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
-        r""" Method sets solver suffix to extract information about dual
+        """ Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
 
         """
+        # shadow prices
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
@@ -276,10 +270,10 @@ class OperationalModel(po.ConcreteModel):
         Note that the optimization model has to be solved prior to invoking
         this method.
         """
-        # TODO: Maybe make the results dictionary a proper object?
-
+        # TODO: Make the results dictionary a proper object?
         result = UserDict()
         result.objective = self.objective()
+        investment = UserDict()
         for i, o in self.flows:
 
             result[i] = result.get(i, UserDict())
@@ -299,10 +293,11 @@ class OperationalModel(po.ConcreteModel):
             if isinstance(self.flows[i, o].investment, Investment):
                 setattr(result[i][o], 'invest',
                         self.InvestmentFlow.invest[i, o].value)
+                investment[(i, o)] = self.InvestmentFlow.invest[i, o].value
                 if isinstance(i, Storage):
                     setattr(result[i][i], 'invest',
                             self.InvestmentStorage.invest[i].value)
-
+                    investment[(i, i)] = self.InvestmentStorage.invest[i].value
         # add results of dual variables for balanced buses
         if hasattr(self, "dual"):
             # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]
@@ -313,6 +308,8 @@ class OperationalModel(po.ConcreteModel):
                 result[bus] = result.get(bus, UserDict())
                 result[bus][bus] = [self.dual[self.Bus.balance[bus, t]]
                                     for _, t in timesteps]
+
+        result.investment = investment
 
         return result
 

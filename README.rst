@@ -13,17 +13,19 @@ Everybody is welcome to use and/or develop oemof. Read our `'Why should I contri
 Documentation
 =============
 
-Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project side <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news and follow us visit our `website <https://www.oemof.org>`_.
+Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project site <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 
 
 Installing oemof
-=====================
+================
 
-Use pypi to install the latest oemof version.
+If you have a working Python3 environment, use pypi to install the latest oemof version.
 
 .. code:: bash
 
-  pip3 install oemof
+  pip install oemof
+
+For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
@@ -52,13 +54,13 @@ Further reading in the `'Run examples to check the installation' <http://oemof.r
 Keep in touch
 =============
 
-You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow us at our `blog <https://oemof.wordpress.com/>`_.
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 
 License
 =======
 
-Copyright (C) 2016 oemof developing group
+Copyright (C) 2017 oemof developing group
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

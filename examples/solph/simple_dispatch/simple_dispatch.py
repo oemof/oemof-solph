@@ -14,8 +14,8 @@ import logging
 import os
 
 # solph imports
-from oemof.solph import (Sink, Source, LinearTransformer, Bus, Flow,
-                         OperationalModel, EnergySystem, GROUPINGS)
+from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
+                         Bus, Flow, OperationalModel, EnergySystem)
 import oemof.outputlib as output
 from oemof.tools import logger
 
@@ -31,11 +31,12 @@ def initialise_energysystem(periods=2000):
 
 
 # ######################### create energysystem components ####################
-def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
+def simulate(energysystem, filename=None, solver='cbc', tee_switch=True,
+             keep=True):
     """
     """
     if filename is None:
-        filename = os.path.join(os.path.dirname(__file__), 'example_data.csv')
+        filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
     logging.info("Creating objects")
     data = pd.read_csv(filename, sep=",")
     # resource buses
@@ -48,8 +49,11 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
     b_el = Bus(label="b_el")
     b_th = Bus(label="b_th")
 
+    # adding an excess variable can help to avoid infeasible problems
     Sink(label="excess", inputs={b_el: Flow()})
-    # shortage = Source(label="shortage", outputs={b_el: Flow()})
+
+    # adding an excess variable can help to avoid infeasible problems
+    # Source(label="shortage", outputs={b_el: Flow(variable_costs=200)})
 
     # Sources
     Source(label="wind",
@@ -62,7 +66,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                nominal_value=65.3,
                                fixed=True)})
 
-    # Demands
+    # Demands (electricity/heat)
     Sink(label="demand_el",
          inputs={b_el: Flow(nominal_value=85,
                             actual_value=data['demand_el'],
@@ -73,7 +77,7 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                             actual_value=data['demand_th'],
                             fixed=True)})
 
-    # Powerplants
+    # Power plants
     LinearTransformer(label='pp_coal',
                       inputs={bcoal: Flow()},
                       outputs={b_el: Flow(nominal_value=20.2,
@@ -106,15 +110,27 @@ def simulate(energysystem, filename=None, solver='cbc', tee_switch=True):
                                b_th: Flow(nominal_value=40)},
                       conversion_factors={b_el: 0.3, b_th: 0.4})
 
-    ################################# optimization ############################
+    # Heatpump with a coefficient of performance (COP) of 3
+    b_heat_source = Bus(label="b_heat_source")
+
+    Source(label="heat_source", outputs={b_heat_source: Flow()})
+
+    cop = 3
+    LinearN1Transformer(label='heat_pump',
+                        inputs={b_el: Flow(), b_heat_source: Flow()},
+                        outputs={b_th: Flow(nominal_value=10)},
+                        conversion_factors={b_el: cop,
+                                            b_heat_source: cop/(cop-1)})
+
+# ################################ optimization ###############################
     # create Optimization model based on energy_system
     logging.info("Create optimization problem")
     om = OperationalModel(es=energysystem)
 
     # solve with specific optimization options (passed to pyomo)
     logging.info("Solve optimization problem")
-    om.solve(soler=solver,
-             solve_kwargs={'tee': tee_switch, 'keepfiles': False})
+    om.solve(solver=solver,
+             solve_kwargs={'tee': tee_switch, 'keepfiles': keep})
 
     # write back results from optimization object to energysystem
     om.results()
@@ -129,12 +145,15 @@ def plot_results(energysystem):
     cdict = {'wind': '#00bfff', 'pv': '#ffd700', 'pp_gas': '#8b1a1a',
              'pp_coal': '#838b8b', 'pp_lig': '#8b7355', 'pp_oil': '#000000',
              'pp_chp': '#20b2aa', 'demand_el': '#fff8dc'}
+
     # create multiindex dataframe with result values
     esplot = output.DataFramePlot(energy_system=energysystem)
+
     # select input results of electrical bus (i.e. power delivered by plants)
     esplot.slice_unstacked(bus_label="b_el", type="to_bus",
                            date_from='2012-01-01 00:00:00',
                            date_to='2012-01-07 00:00:00')
+
     # set colorlist for esplot
     colorlist = esplot.color_from_dict(cdict)
 
@@ -148,7 +167,15 @@ def plot_results(energysystem):
 
 
 def get_results(energysystem):
-    """
+    """Shows how to extract single time series from DataFrame.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
     """
     logging.info('Check the results')
 
@@ -164,14 +191,13 @@ def get_results(energysystem):
     return rdict
 
 
-def run_simple_least_costs_example():
+def run_simple_dispatch_example(**kwargs):
     import pprint as pp
     logger.define_logging()
     esys = initialise_energysystem()
-    om = simulate(esys)
+    simulate(esys, **kwargs)
     plot_results(esys)
     pp.pprint(get_results(esys))
 
-
 if __name__ == "__main__":
-    run_simple_least_costs_example()
+    run_simple_dispatch_example()

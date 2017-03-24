@@ -8,6 +8,10 @@ from oemof.network import Bus
 from oemof.outputlib import ResultsDataFrame as RDF
 from oemof.solph import (Flow, OperationalModel as OM, Sink, Source as FS,
                          Storage)
+import oemof
+
+def test_version_metadata():
+    ok_(oemof.__version__)
 
 class TestSolphAndItsResults:
     def setup(self):
@@ -24,8 +28,8 @@ class TestSolphAndItsResults:
     def test_issue_74(self):
         Storage.optimization_options.update({'investment': True})
         bus = Bus(uid="bus")
-        store = Storage(uid="store", inputs=[bus], outputs=[bus], c_rate_out=0.1,
-                        c_rate_in=0.1)
+        store = Storage(uid="store", inputs=[bus], outputs=[bus],
+                        c_rate_out=0.1, c_rate_in=0.1)
         sink = Sink(uid="sink", inputs=[bus], val=[1])
 
         es = self.es
@@ -81,4 +85,3 @@ class TestSolphAndItsResults:
             ok_(False,
                 "Output from bus (with duals) to sink " +
                 "does not appear in results dataframe.")
-

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8
 
+import os
 import logging
 import pandas as pd
 try:
@@ -160,16 +161,54 @@ class ResultsDataFrame(pd.DataFrame):
         unstacklevel : string (default: 'obj_label')
             Level to unstack the subset of the DataFrame.
         formatted : boolean
-            missing...
+
         """
         subset = self.slice_by(**kwargs)
         subset = subset.unstack(level=unstacklevel)
         if formatted is True:
             subset.reset_index(level=['bus_label', 'type'], drop=True,
                                inplace=True)
-        # user standard instead of multi-indexed columns
+        # use standard instead of multi-indexed columns
         subset.columns = subset.columns.get_level_values(1).unique()
         return subset
+
+    def slice_bus_balance(self, bus_label):
+        r"""Method for slicing the ResultsDataFrame. An balance around a bus
+        with inputs, outputs and other values is returned.
+
+        Parameters
+        ----------
+        bus_label : string
+
+        """
+        dfs = []
+        for l in self.index.levels[1]:
+            df = self.slice_unstacked(bus_label=bus_label, type=l,
+                                      formatted=True)
+            dfs.append(df)
+        subset = pd.concat(dfs, axis=1)
+        # use standard instead of multi-indexed columns
+        subset.columns = [v for v in subset.columns]
+        return subset
+
+    def bus_balance_to_csv(self, bus_labels=None, output_path=''):
+        r"""Method for saving bus balances of the ResultsDataFrame as single
+        csv files. A balance around each bus with inputs, outputs and other
+        values is saved for a passed list of bus labels. If no labels are
+        passed, all busses are saved. Additionally, an output path for the
+        files can be specified.
+
+        Parameters
+        ----------
+        bus_labels : list of strings
+        output_path : string
+
+        """
+        if bus_labels is None:
+            bus_labels = self.index.levels[0]
+        for bus in bus_labels:
+            self.slice_bus_balance(bus).to_csv(
+                    os.path.join(output_path, bus + '.csv'))
 
 
 class DataFramePlot(ResultsDataFrame):
