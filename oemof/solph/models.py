@@ -12,7 +12,7 @@ from oemof.solph import blocks
 from .network import Storage
 from .options import Investment
 from .plumbing import sequence
-from ..outputlib import to_dict
+from ..outputlib import result_dict
 
 # #############################################################################
 #
@@ -235,7 +235,7 @@ class OperationalModel(po.ConcreteModel):
         """ Returns a nested dictionary of the results of this optimization
         """
 
-        result = to_dict(self)
+        result = result_dict(self)
 
         return result
 
