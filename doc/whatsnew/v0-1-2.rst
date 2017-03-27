@@ -1,4 +1,4 @@
-v0.1.2 ()
+v0.1.2 (March 27, 2017)
 ++++++++++++++++++++++++++
 
 New features
@@ -17,12 +17,7 @@ New features
 Documentation
 #############
 
-
-
-
-Testing
-#######
-
+* Improve the installation guide.
 
 
 Bug fixes
