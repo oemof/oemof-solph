@@ -29,15 +29,15 @@ Bug fixes
 Other changes
 #############
 
-* speed up constraint-building process by removing unnecessary method call
+* Speed up constraint-building process by removing unnecessary method call
 * Clean up the code according to pep8 and pylint
 
 
 Contributors
 ############
 
- * Cord Kaldemeyer
- * Guido Plessmann
- * Uwe Krien
- * Simon Hilpert
- * Stephan Günther
+* Cord Kaldemeyer
+* Guido Plessmann
+* Uwe Krien
+* Simon Hilpert
+* Stephan Günther
