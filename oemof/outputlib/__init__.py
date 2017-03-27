@@ -9,7 +9,7 @@ try:
 except ImportError:
     plt = None
     logging.warning('Matplotlib could not be imported. Plotting will not work.')
-
+from .to_dict import to_dict
 
 class ResultsDataFrame(pd.DataFrame):
     r"""Creates a multi-indexed pandas dataframe from a solph result object
