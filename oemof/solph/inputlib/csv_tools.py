@@ -2,6 +2,7 @@
 
 import pandas as pd
 import os
+import warnings
 import os.path as path
 import logging
 from oemof import network
@@ -423,6 +424,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, delimiter=',',
     delimiter : str
         Delimiter of CSV file
     """
+    msg = ("\nNodesFromCSV will be removed in oemof v0.2.0. " +
+           "\nUse the 'create_nodes' method of the 'Scenario' class instead.")
+    warnings.warn(msg, FutureWarning)
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
     nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences,
                                   sep=delimiter, header=None)
@@ -448,6 +452,9 @@ def merge_csv_files(path=None, output_path=None, write=True):
     -------
     Tuple of dataframes (nodes_flows, nodes_flows_seq)
     """
+    msg = ("\nmerge_csv_files will be removed in oemof v0.2.0. " +
+           "\nUse pandas.concat and the 'Scenario' class instead.")
+    warnings.warn(msg, FutureWarning)
     if output_path is None:
         output_path = path
 
@@ -509,6 +516,10 @@ def resample_sequence(seq_base_file=None, output_path=None,
     header : list
         List of integers to specifiy the header lines
     """
+    msg = ("\nmerge_csv_files will be removed in oemof v0.2.0. " +
+           "\nUse pandas.DataFrame.reindex and the 'Scenario' class instead.")
+    warnings.warn(msg, FutureWarning)
+
     if samples is None:
         raise ValueError('Missing sample attribute. Please specifiy!')
     if output_path is None:
