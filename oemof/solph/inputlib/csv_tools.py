@@ -298,11 +298,6 @@ def create_conversion_factors(row, nodes, nodes_flows_seq, i):
     return conversion_factors
 
 
-def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, **kwargs):
-    """Keep old name to keep the API."""
-    nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences, **kwargs)
-
-
 def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
                   additional_seq_attributes=None,
                   additional_flow_attributes=None):
@@ -314,12 +309,6 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
     ----------
     nodes_flows_seq : pandas.DataFrame
     nodes_flows : pandas.DataFrame
-    file_nodes_flows : string
-        Name of CSV file with nodes and flows
-    file_nodes_flows_sequences : string
-        Name of of CSV file containing sequences
-    delimiter : str
-        Delimiter of CSV file
     additional_classes : dict
         Dictionary containing additional classes to be recognized inside the
         csv reader. Looks like: {'MyClass1': MyClass1, ...}
@@ -340,12 +329,6 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
         additional_flow_attributes = list()
 
     # DataFrame creation and manipulation
-    if nodes_flows is None:
-        nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
-
-    if nodes_flows_seq is None:
-        nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences,
-                                      sep=delimiter, header=None)
     nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
     nodes_flows_seq.drop(0, axis=1, inplace=True)
     nodes_flows_seq = nodes_flows_seq.transpose()
@@ -421,6 +404,29 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
                 raise
 
     return nodes
+
+# **************** deprecated *************************************************
+
+
+def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, delimiter=',',
+                 **kwargs):
+    """ Creates nodes with their respective flows and sequences from
+    a pre-defined CSV structure. An example has been provided in the
+    development examples
+
+    Parameters
+    ----------
+    file_nodes_flows : string
+        Name of CSV file with nodes and flows
+    file_nodes_flows_sequences : string
+        Name of of CSV file containing sequences
+    delimiter : str
+        Delimiter of CSV file
+    """
+    nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
+    nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences,
+                                  sep=delimiter, header=None)
+    nodes_from_df(nodes_flows, nodes_flows_seq, **kwargs)
 
 
 def merge_csv_files(path=None, output_path=None, write=True):
