@@ -13,6 +13,9 @@ import os
 
 import oemof
 
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 setup(name='oemof',
       version=oemof.__version__,
       author='oemof developing group',
@@ -20,6 +23,7 @@ setup(name='oemof',
       description='The open energy modelling framework',
       url='https://oemof.org/',
       namespace_package=['oemof'],
+      long_description=read('README.rst'),
       packages=find_packages(),
       package_data={
           'examples': [
