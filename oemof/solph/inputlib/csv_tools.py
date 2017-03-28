@@ -114,7 +114,7 @@ class SolphScenario(EnergySystem):
         tmp2.columns = list(range(length))
 
         # noinspection PyTypeChecker
-        return nodes_from_csv(
+        return nodes_from_df(
             nodes_flows=self.p.reset_index(),
             nodes_flows_seq=pd.concat([tmp1, tmp2], ignore_index=True),
             **kwargs)
@@ -303,10 +303,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, **kwargs):
     nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences, **kwargs)
 
 
-def nodes_from_csv(file_nodes_flows=None, file_nodes_flows_sequences=None,
-                   nodes_flows=None, nodes_flows_seq=None, delimiter=',',
-                   additional_classes=None, additional_seq_attributes=None,
-                   additional_flow_attributes=None):
+def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
+                  additional_seq_attributes=None,
+                  additional_flow_attributes=None):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
