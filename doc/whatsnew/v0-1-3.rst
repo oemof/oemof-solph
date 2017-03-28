@@ -6,6 +6,11 @@ Bug fixes
 
 * fix examples (`issue #298 <https://github.com/oemof/oemof_base/issues/298>`_)
 
+Documentation
+#############
+
+* Adapt installation guide.
+
 Contributors
 ############
  
