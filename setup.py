@@ -38,6 +38,7 @@ setup(name='oemof',
                            'scenarios',
                            '*.csv'),
               os.path.join('solph', 'simple_dispatch','*.csv'),
+              os.path.join('solph', 'variable_chp','*.csv'),
               os.path.join('solph', 'storage_investment','*.csv')
           ],
             'oemof': [os.path.join('tools', 'default_files', '*.ini')]},
