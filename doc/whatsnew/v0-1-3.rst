@@ -1,32 +1,13 @@
-v0.1.3dev ()
+v0.1.3dev (March 28, 2017)
 ++++++++++++++++++++++++++
-
-
-API changes
-###########
- 
-
-New features
-############
-
-
-Documentation
-#############
-
 
 Bug fixes
 #########
 
-
-Testing
-#######
-
-
-Other changes
-#############
-
-
+* fix examples (`issue #298 <https://github.com/oemof/oemof_base/issues/298>`_)
 
 Contributors
 ############
-
+ 
+ * Uwe Krien
+ * Stephan Günther
