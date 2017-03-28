@@ -301,13 +301,14 @@ def create_conversion_factors(row, nodes, nodes_flows_seq, i):
 
 def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
                   additional_seq_attributes=None,
-                  additional_flow_attributes=None):
+                  additional_flow_attributes=None, old_api=False):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
 
     Parameters
     ----------
+
     nodes_flows_seq : pandas.DataFrame
     nodes_flows : pandas.DataFrame
     additional_classes : dict
@@ -319,6 +320,8 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
     additional_flow_attributes : iterable
         List of string with attributes that shall be recognized inside the
         csv file and set as flow attribute
+    old_api : boolean
+        DEPRECATED: Set to True if DataFrames in the old shape are passed.
 
     """
     # Check attributes for None values
@@ -328,6 +331,20 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
         additional_seq_attributes = list()
     if additional_flow_attributes is None:
         additional_flow_attributes = list()
+
+    if old_api is False:
+        tmp1 = pd.DataFrame(index=nodes_flows_seq.columns
+                            ).reset_index().transpose().reset_index()
+        tmp2 = nodes_flows_seq.reset_index()
+        for n in range(len(tmp2.columns.levels) - 1):
+            tmp2.columns = tmp2.columns.droplevel(0)
+        length = len(tmp1.columns)
+        tmp1.columns = list(range(length))
+        tmp2.columns = list(range(length))
+
+        # noinspection PyTypeChecker
+        nodes_flows = nodes_flows.reset_index()
+        nodes_flows_seq = pd.concat([tmp1, tmp2], ignore_index=True)
 
     # DataFrame creation and manipulation
     nodes_flows_seq.dropna(axis=0, how='all', inplace=True)
@@ -430,7 +447,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, delimiter=',',
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
     nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences,
                                   sep=delimiter, header=None)
-    nodes_from_df(nodes_flows, nodes_flows_seq, **kwargs)
+    nodes_from_df(nodes_flows, nodes_flows_seq, old_api=True, **kwargs)
 
 
 def merge_csv_files(path=None, output_path=None, write=True):
