@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
+"""Creating models with their general sets, variables, constraints and parts
+of the objective function.
 """
 
-"""
-
-from collections import UserDict, UserList
-from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
+# from oemof.solph.components import blocks # from __init__.py in components
 from oemof.solph import blocks
-from .network import Storage
-from .options import Investment
 from .plumbing import sequence
 from ..outputlib import result_dict
 
