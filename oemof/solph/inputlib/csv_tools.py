@@ -315,10 +315,10 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
         Dictionary containing additional classes to be recognized inside the
         csv reader. Looks like: {'MyClass1': MyClass1, ...}
     additional_seq_attributes : iterable
-        List of string with attributes that have to be of type 'solph sequence'
-        and that shall be recognized inside the csv file.
+        List of strings with attributes that have to be of type
+        'solph sequence' and that shall be recognized inside the csv file.
     additional_flow_attributes : iterable
-        List of string with attributes that shall be recognized inside the
+        List of strings with attributes that shall be recognized inside the
         csv file and set as flow attribute
     old_api : boolean
         DEPRECATED: Set to True if DataFrames in the old shape are passed.
