@@ -31,7 +31,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
     remove_nodes: list of string
         Nodes to be removed e.g. ['node1', node2')]
 
-    remove_nodes_with_substrings: list of substrings
+    remove_nodes_with_substrings: list of strings
         Nodes that contain substrings to be removed e.g. ['elec_', 'heat_')]
 
     remove_edges: list of string tuples
