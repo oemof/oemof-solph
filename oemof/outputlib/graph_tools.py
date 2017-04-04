@@ -11,7 +11,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
           remove_edges=None, node_color='#AFAFAF', edge_color='#CFCFCF',
           plot=True, node_size=2000):
     """
-    Draw a directed graph for the passed energy system.
+    Create a `networkx.DiGraph` for the passed energy system and plot it.
 
     Parameters
     ----------
