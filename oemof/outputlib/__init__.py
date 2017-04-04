@@ -4,6 +4,7 @@
 import os
 import logging
 import pandas as pd
+import graph_tools
 try:
     import matplotlib.pyplot as plt
 except ImportError:
