@@ -13,18 +13,18 @@ except ImportError:
     logging.warning('Networkx could not be imported. Plotting will not work.')
 
 
-def graph(es, om, edge_labels=True, remove_nodes=None,
-          remove_nodes_with_substrings=None, remove_edges=None,
-          node_color='#AFAFAF', edge_color='#CFCFCF',
+def graph(energy_system, optimization_model, edge_labels=True,
+          remove_nodes=None, remove_nodes_with_substrings=None,
+          remove_edges=None, node_color='#AFAFAF', edge_color='#CFCFCF',
           plot=True, node_size=2000):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
 
     Parameters
     ----------
-    es : `oemof.solph.network.EnergySystem`
+    energy_system : `oemof.solph.network.EnergySystem`
 
-    om : `oemof.solph.models.OperationalModel`
+    optimization_model : `oemof.solph.models.OperationalModel`
 
     edge_labels: Boolean
 
