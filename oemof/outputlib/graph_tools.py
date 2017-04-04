@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 """Modules for creating and manipulating energy system graphs."""
 
-import pylab as plt
-import networkx as nx
-from networkx.drawing.nx_agraph import graphviz_layout
+import logging
+try:
+    import pylab as plt
+except ImportError:
+    logging.warning('Pylab could not be imported. Plotting will not work.')
+try:
+    import networkx as nx
+    from networkx.drawing.nx_agraph import graphviz_layout
+except ImportError:
+    logging.warning('Networkx could not be imported. Plotting will not work.')
 
 
 def graph(energy_system, optimization_model, edge_labels=True,
@@ -47,7 +54,6 @@ def graph(energy_system, optimization_model, edge_labels=True,
     Needs graphviz and networkx (>= v.1.11) to work properly.
     Tested on Ubuntu 16.04 x64.
     """
-
     # construct graph from nodes and flows
     G = nx.DiGraph()
     for n in energy_system.nodes:
