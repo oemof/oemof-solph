@@ -160,5 +160,9 @@ def run_dispatch_example(solver='cbc'):
 
 if __name__ == "__main__":
     es, om = run_dispatch_example()
-    gt.graph(energy_system=es, optimization_model=om,
-             remove_nodes_with_substrings=['#'])
+
+    # create graph which could be exported into different formats
+    # https://networkx.github.io/documentation/networkx-1.10/reference/
+    # readwrite.html
+    mygraph = gt.graph(energy_system=es, optimization_model=om,
+                       remove_nodes_with_substrings=['#'])
