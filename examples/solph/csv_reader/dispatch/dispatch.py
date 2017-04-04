@@ -11,6 +11,7 @@ from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
+from oemof.outputlib import graph_tools as gt
 
 from matplotlib import pyplot as plt
 
@@ -63,7 +64,7 @@ def run_example(config):
         'time_series': results
     }
 
-    return rdict
+    return rdict, es, om
 
 
 def plotting(results):
@@ -149,13 +150,15 @@ def run_dispatch_example(solver='cbc'):
         os.mkdir(cfg['results_path'])
 
     # run optimisation
-    my_results = run_example(config=cfg)
+    my_results, es, om = run_example(config=cfg)
 
     # plot results
     plotting(my_results)
 
-    # print(create_result_dict(my_results))
+    return es, om
 
 
 if __name__ == "__main__":
-    run_dispatch_example()
+    es, om = run_dispatch_example()
+    gt.graph(energy_system=es, optimization_model=om,
+             remove_nodes_with_substrings=['#'])
