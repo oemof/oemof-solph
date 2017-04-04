@@ -91,7 +91,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
     pos = graphviz_layout(G)
     nx.draw(G, pos=pos, **options)
 
-    # add edge labels for all edges or a defined subset
+    # add edge labels for all edges
     if edge_labels is True:
         labels = nx.get_edge_attributes(G, 'weight')
         nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
