@@ -63,7 +63,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
     >>> b_gas = Bus(label='b_gas', balanced=False)
     >>> b_el = Bus(label='b_el')
     >>> demand = Sink(label='demand_el', \n
-        inputs={b_el: Flow(nominal_value=85,
+        inputs={b_el: Flow(nominal_value=85, \n
         actual_value=[0.5, 0.25, 0.75], \n
         fixed=True)})
     >>> pp_gas = LinearTransformer(label='pp_gas', \n
