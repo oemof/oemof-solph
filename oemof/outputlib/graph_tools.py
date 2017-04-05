@@ -126,8 +126,10 @@ def graph(energy_system, optimization_model, edge_labels=True,
             nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
 
         # show output
-        if plot is True and plt:
+        if plot is True and plt is not None:
             plt.show()
+        else:
+            logging.warning("Graph cannot be shown due to missing packages.")
 
     else:
         logging.warning("Graph cannot be drawn due to missing packages.")
