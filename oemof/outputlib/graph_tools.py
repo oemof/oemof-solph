@@ -2,15 +2,22 @@
 """Modules for creating and manipulating energy system graphs."""
 
 import logging
+import warnings
+import pandas as pd
+from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
+                         OperationalModel, EnergySystem)
 try:
-    import pylab as plt
+    import matplotlib as plt
 except ImportError:
-    logging.warning('Pylab could not be imported. Plotting will not work.')
+    logging.warning('Matplotlib could not be imported.',
+                    ' Plotting will not work.')
 try:
     import networkx as nx
     from networkx.drawing.nx_agraph import graphviz_layout
 except ImportError:
     logging.warning('Networkx could not be imported. Plotting will not work.')
+
+warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 
 
 def graph(energy_system, optimization_model, edge_labels=True,
@@ -48,6 +55,26 @@ def graph(energy_system, optimization_model, edge_labels=True,
 
     node_size : integer
         Size of nodes.
+
+    Examples
+    --------
+    >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
+    >>> es = EnergySystem(timeindex=datetimeindex)
+    >>> b_gas = Bus(label='b_gas', balanced=False)
+    >>> b_el = Bus(label='b_el')
+    >>> demand = Sink(label='demand_el',
+                      inputs={b_el: Flow(nominal_value=85,
+                                         actual_value=[0.5, 0.25, 0.75],
+                                         fixed=True)})
+    >>> pp_gas = LinearTransformer(label='pp_gas',
+                                   inputs={b_gas: Flow()},
+                                   outputs={b_el: Flow(nominal_value=41,
+                                                       variable_costs=40)},
+                                   conversion_factors={b_el: 0.5})
+    >>> om = OperationalModel(es=es)
+    >>> my_graph = graph(es, om, plot=False)
+    >>> print(my_graph.nodes())
+    ['demand_el', 'b_el', 'pp_gas', 'b_gas']
 
     Notes
     -----
@@ -101,3 +128,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
         plt.show()
 
     return G
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
