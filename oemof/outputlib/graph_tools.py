@@ -7,7 +7,7 @@ import pandas as pd
 from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
                          OperationalModel, EnergySystem)
 try:
-    import matplotlib as plt
+    from matplotlib import pyplot as plt
 except ImportError:
     plt = None
     logging.warning('Matplotlib could not be imported.',
