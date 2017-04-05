@@ -9,12 +9,15 @@ from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
 try:
     import matplotlib as plt
 except ImportError:
+    plt = None
     logging.warning('Matplotlib could not be imported.',
                     ' Plotting will not work.')
 try:
     import networkx as nx
     from networkx.drawing.nx_agraph import graphviz_layout
 except ImportError:
+    nx = None
+    graphviz_layout = None
     logging.warning('Networkx could not be imported. Plotting will not work.')
 
 warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
@@ -80,50 +83,55 @@ def graph(energy_system, optimization_model, edge_labels=True,
     Tested on Ubuntu 16.04 x64.
     """
     # construct graph from nodes and flows
-    G = nx.DiGraph()
-    for n in energy_system.nodes:
-        G.add_node(n.label)
-    for s, t in optimization_model.flows:
-        if optimization_model.flows[s, t].nominal_value is None:
-            G.add_edge(s.label, t.label)
-        else:
-            G.add_edge(s.label, t.label,
-                       weight=optimization_model.flows[s, t].nominal_value)
+    if nx:
+        G = nx.DiGraph()
+        for n in energy_system.nodes:
+            G.add_node(n.label)
+        for s, t in optimization_model.flows:
+            if optimization_model.flows[s, t].nominal_value is None:
+                G.add_edge(s.label, t.label)
+            else:
+                G.add_edge(s.label, t.label,
+                           weight=optimization_model.flows[s, t].nominal_value)
 
-    # remove nodes and edges based on precise labels
-    if remove_nodes is not None:
-        G.remove_nodes_from(remove_nodes)
-    if remove_edges is not None:
-        G.remove_edges_from(remove_edges)
-
-    # remove nodes based on substrings
-    if remove_nodes_with_substrings is not None:
-        for i in remove_nodes_with_substrings:
-            remove_nodes = [v.label for v in energy_system.nodes
-                            if i in v.label]
+        # remove nodes and edges based on precise labels
+        if remove_nodes is not None:
             G.remove_nodes_from(remove_nodes)
+        if remove_edges is not None:
+            G.remove_edges_from(remove_edges)
 
-    # set drawing options
-    options = {
-     'prog': 'dot',
-     'with_labels': True,
-     'node_color': node_color,
-     'edge_color': edge_color,
-     'node_size': node_size
-    }
+        # remove nodes based on substrings
+        if remove_nodes_with_substrings is not None:
+            for i in remove_nodes_with_substrings:
+                remove_nodes = [v.label for v in energy_system.nodes
+                                if i in v.label]
+                G.remove_nodes_from(remove_nodes)
 
-    # draw graph
-    pos = graphviz_layout(G)
-    nx.draw(G, pos=pos, **options)
+        # set drawing options
+        options = {
+         'prog': 'dot',
+         'with_labels': True,
+         'node_color': node_color,
+         'edge_color': edge_color,
+         'node_size': node_size
+        }
 
-    # add edge labels for all edges
-    if edge_labels is True:
-        labels = nx.get_edge_attributes(G, 'weight')
-        nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
+        # draw graph
+        pos = graphviz_layout(G)
+        nx.draw(G, pos=pos, **options)
 
-    # show output
-    if plot is True:
-        plt.show()
+        # add edge labels for all edges
+        if edge_labels is True:
+            labels = nx.get_edge_attributes(G, 'weight')
+            nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
+
+        # show output
+        if plot is True and plt:
+            plt.show()
+
+    else:
+        logging.warning("Graph cannot be drawn due to missing packages.")
+        G = None
 
     return G
 
