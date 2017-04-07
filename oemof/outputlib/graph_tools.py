@@ -27,6 +27,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
           plot=True, node_size=2000):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
+    See http://networkx.readthedocs.io/en/latest/ for more information.
 
     Parameters
     ----------
@@ -60,6 +61,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
     Examples
     --------
     >>> import pandas as pd
+    >>> import networkx as nx
     >>> from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
     ...                          OperationalModel, EnergySystem)
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
@@ -77,6 +79,9 @@ def graph(energy_system, optimization_model, edge_labels=True,
     ...                            conversion_factors={b_el: 0.5})
     >>> om = OperationalModel(es=es)
     >>> my_graph = graph(energy_system=es, optimization_model=om, plot=False)
+    >>> # export graph as .graphml for programs like Yed where it can be
+    >>> # sorted and customized. this is especially helpful for large graphs
+    >>> # nx.write_graphml(my_graph, "my_graph.graphml")
     >>> [my_graph.has_node(n)
     ...  for n in ['b_gas', 'b_el', 'pp_gas', 'demand_el']]
     [True, True, True, True]
