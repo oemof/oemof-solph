@@ -65,17 +65,20 @@ def graph(energy_system, optimization_model, edge_labels=True,
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
     >>> b_el = Bus(label='b_el')
-    >>> demand = Sink(label='demand_el', \n
-        inputs={b_el: Flow(nominal_value=85, \n
-        actual_value=[0.5, 0.25, 0.75], \n
-        fixed=True)})
-    >>> pp_gas = LinearTransformer(label='pp_gas', \n
-        inputs={b_gas: Flow()}, \n
-        outputs={b_el: Flow(nominal_value=41, variable_costs=40)})
+    >>> demand = Sink(label='demand_el',
+    ...               inputs = {b_el: Flow(nominal_value=85,
+    ...                         actual_value=[0.5, 0.25, 0.75],
+    ...                         fixed=True)})
+    >>> pp_gas = LinearTransformer(label='pp_gas',
+    ...                            inputs={b_gas: Flow()},
+    ...                            outputs={b_el: Flow(nominal_value=41,
+    ...                                                variable_costs=40)},
+    ...                            conversion_factors={b_el: 0.5})
     >>> om = OperationalModel(es=es)
     >>> my_graph = graph(energy_system=es, optimization_model=om, plot=False)
-    >>> print(my_graph.nodes())
-    ['demand_el', 'b_el', 'pp_gas', 'b_gas']
+    >>> [my_graph.has_node(n)
+    ...  for n in ['b_gas', 'b_el', 'pp_gas', 'demand_el']]
+    [True, True, True, True]
 
     Notes
     -----
