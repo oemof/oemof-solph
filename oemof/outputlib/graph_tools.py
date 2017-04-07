@@ -36,6 +36,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
     optimization_model : `oemof.solph.models.OperationalModel`
 
     edge_labels: Boolean
+        Use nominal values of flow as edge label
 
     remove_nodes: list of string
         Nodes to be removed e.g. ['node1', node2')]
