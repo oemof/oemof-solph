@@ -3,9 +3,7 @@
 
 import logging
 import warnings
-import pandas as pd
-from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
-                         OperationalModel, EnergySystem)
+
 try:
     from matplotlib import pyplot as plt
 except ImportError:
@@ -61,6 +59,9 @@ def graph(energy_system, optimization_model, edge_labels=True,
 
     Examples
     --------
+    >>> import pandas as pd
+    >>> from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
+    ...                          OperationalModel, EnergySystem)
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
