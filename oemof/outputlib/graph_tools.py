@@ -35,10 +35,10 @@ def graph(energy_system, optimization_model, edge_labels=True,
 
     optimization_model : `oemof.solph.models.OperationalModel`
 
-    edge_labels: Boolean
+    edge_labels: boolean
         Use nominal values of flow as edge label
 
-    remove_nodes: list of string
+    remove_nodes: list of strings
         Nodes to be removed e.g. ['node1', node2')]
 
     remove_nodes_with_substrings: list of strings
@@ -50,7 +50,7 @@ def graph(energy_system, optimization_model, edge_labels=True,
     node_color : string
         Hex color code oder matplotlib color for node color.
 
-    edge_color
+    edge_color : string
         Hex color code oder matplotlib color for edge color.
 
     plot : boolean
