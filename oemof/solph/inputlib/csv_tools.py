@@ -6,7 +6,8 @@ import logging
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import sequence
-from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from oemof.solph.network import (Bus, Source, Sink, LinearTransformer, Storage)
+from oemof.solph.flows import Flow
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
