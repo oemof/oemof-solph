@@ -5,7 +5,7 @@
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
-from .options import Investment
+from oemof.solph.options import Investment
 from .plumbing import sequence
 
 
