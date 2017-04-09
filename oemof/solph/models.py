@@ -6,7 +6,6 @@ of the objective function.
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-# from oemof.solph.components import blocks # from __init__.py in components
 from oemof.solph import blocks
 from .plumbing import sequence
 from ..outputlib import result_dict
@@ -236,7 +235,7 @@ class OperationalModel(po.ConcreteModel):
 
         return result
 
-    def solve(self, solver='glpk', solver_io='lp', **kwargs):
+    def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
 
         Parameters
