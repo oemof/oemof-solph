@@ -6,7 +6,7 @@ import re
 from nose.tools import eq_
 import pandas as pd
 
-from oemof.solph.network import Investment
+from oemof.solph.options import Investment
 from oemof.solph import OperationalModel
 
 from oemof import energy_system as core_es

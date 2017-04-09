@@ -17,9 +17,10 @@ groupings specified like this:
 
 """
 
-from .network import (Bus, LinearTransformer, Storage, LinearN1Transformer,
-                      VariableFractionTransformer)
-from .options import Investment
+from oemof.solph.network import (Bus, LinearTransformer, Storage,
+                                 LinearN1Transformer,
+                                 VariableFractionTransformer)
+from oemof.solph.options import Investment
 from . import blocks
 import oemof.groupings as groupings
 

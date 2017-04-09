@@ -2,7 +2,7 @@ from nose.tools import ok_, eq_
 
 from oemof.energy_system import EnergySystem as ES
 from oemof.solph.blocks import InvestmentFlow as IF
-from oemof.solph.network import Investment
+from oemof.solph.options import Investment
 import oemof.solph as solph
 
 
@@ -37,4 +37,3 @@ class Grouping_Tests:
         ok_(self.es.groups.get(IF),
             ("Expected InvestmentFlow group to be nonempty.\n" +
              "Got: {}").format(self.es.groups.get(IF)))
-
