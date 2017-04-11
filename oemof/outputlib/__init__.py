@@ -29,9 +29,9 @@ class ResultsDataFrame(pd.DataFrame):
 
     def __init__(self, energy_system=None, filename=None):
         # default values if not arguments are passed
-        if energy_system:
+        if energy_system is not None:
             self.from_energy_system(energy_system)
-        elif filename:
+        elif filename is not None:
             self.from_file(filename)
         else:
             super().__init__()
