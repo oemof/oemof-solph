@@ -21,10 +21,10 @@ except ImportError:
 warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 
 
-def graph(energy_system, optimization_model, edge_labels=True,
+def graph(energy_system, optimization_model=None, edge_labels=True,
           remove_nodes=None, remove_nodes_with_substrings=None,
           remove_edges=None, node_color='#AFAFAF', edge_color='#CFCFCF',
-          plot=True, node_size=2000):
+          plot=True, node_size=2000, with_labels=True, arrows=True):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -58,6 +58,13 @@ def graph(energy_system, optimization_model, edge_labels=True,
 
     node_size : integer
         Size of nodes.
+
+    with_labels : boolean
+        Draw node labels.
+
+    arrows : boolean
+        Draw arrows on directed edges. Works only if an optimization_model has
+        been passed.
 
     Examples
     --------
@@ -95,14 +102,25 @@ def graph(energy_system, optimization_model, edge_labels=True,
     # construct graph from nodes and flows
     if nx:
         G = nx.DiGraph()
+
+        # add nodes
         for n in energy_system.nodes:
             G.add_node(n.label)
-        for s, t in optimization_model.flows:
-            if optimization_model.flows[s, t].nominal_value is None:
-                G.add_edge(s.label, t.label)
-            else:
-                G.add_edge(s.label, t.label,
-                           weight=optimization_model.flows[s, t].nominal_value)
+
+        # add labeled flows on directed edge if an optimization_model has been
+        # passed or undirected edge otherwise
+        if optimization_model:
+            for s, t in optimization_model.flows:
+                if optimization_model.flows[s, t].nominal_value is None:
+                    G.add_edge(s.label, t.label)
+                else:
+                    weight = optimization_model.flows[s, t].nominal_value
+                    G.add_edge(s.label, t.label, weight=weight)
+        else:
+            arrows = False
+            for n in energy_system.nodes:
+                for i in n.inputs.keys():
+                    G.add_edge(n.label, i.label)
 
         # remove nodes and edges based on precise labels
         if remove_nodes is not None:
@@ -120,10 +138,11 @@ def graph(energy_system, optimization_model, edge_labels=True,
         # set drawing options
         options = {
          'prog': 'dot',
-         'with_labels': True,
+         'with_labels': with_labels,
          'node_color': node_color,
          'edge_color': edge_color,
-         'node_size': node_size
+         'node_size': node_size,
+         'arrows': arrows
         }
 
         # draw graph
