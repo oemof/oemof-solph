@@ -6,7 +6,8 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
-    logging.warning('Matplotlib could not be imported. Plotting will not work.')
+    logging.warning('Matplotlib could not be imported.',
+                    ' Plotting will not work.')
 
 
 class ResultsDataFrame(pd.DataFrame):
@@ -19,32 +20,29 @@ class ResultsDataFrame(pd.DataFrame):
 
     Parameters
     ----------
-    result_object : dictionary
-        solph result objects
-    bus_labels : list if strings
-        List of strings with buses that should be contained in dataframe.
-        If not set, all buses are contained.
-
-    Attributes
-    ----------
-    result_object : dictionary
-        solph result objects
-    bus_labels : list if strings
-        List of strings with buses that should be contained in dataframe.
-        If not set, all buses are contained.
-    bus_types : list if strings
-        List of strings with bus types that should be contained in dataframe.
-        If not set, all bus types are contained.
-    data_frame : pandas dataframe
-        Multi-indexed pandas dataframe holding the data from the result object.
-        For more information on advanced dataframe indexing see:
-        http://pandas.pydata.org/pandas-docs/stable/advanced.html
-
+    energy_system : oemof.solph.EnergySystem
+        A solved energy system model.
+    filename : str
+        A file name (including path) to a stored ResultsDataFrame
     """
-    def __init__(self, **kwargs):
-        # default values if not arguments are passed
-        es = kwargs.get('energy_system')
 
+    def __init__(self, energy_system=None, filename=None):
+        # default values if not arguments are passed
+        if energy_system is not None:
+            self.from_energy_system(energy_system)
+        elif filename is not None:
+            self.from_file(filename)
+        else:
+            super().__init__()
+
+    def from_energy_system(self, es):
+        """
+        Create a ResultsDataFrame from a solved energy system model.
+
+        Parameters
+        ----------
+        es : oemof.solph.EnergySystem
+        """
         rows_list = []
         for k, v in es.results.items():
             if 'Bus' in str(k.__class__):
@@ -112,6 +110,18 @@ class ResultsDataFrame(pd.DataFrame):
         super().__init__(tuples, columns=columns)
         self.set_index(index, inplace=True)
         self.sort_index(inplace=True)
+
+    def from_file(self, filename):
+        """
+        Read a stored ResultsDataFrame (csv-file).
+
+        Parameters
+        ----------
+        filename : str
+            File name inclusive path.
+        """
+        df = pd.read_csv(filename, index_col=[0, 1, 2, 3], parse_dates=True)
+        super().__init__(df)
 
     def slice_by(self, **kwargs):
         r""" Method for slicing the ResultsDataFrame. A subset is returned.
