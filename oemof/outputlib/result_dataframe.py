@@ -176,6 +176,7 @@ class ResultsDataFrame(pd.DataFrame):
         if formatted is True:
             subset.reset_index(level=['bus_label', 'type'], drop=True,
                                inplace=True)
+            subset.sort_index(axis=1, inplace=True)
         # use standard instead of multi-indexed columns
         subset.columns = subset.columns.get_level_values(1).unique()
         return subset
