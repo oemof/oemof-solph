@@ -7,7 +7,6 @@ import warnings
 try:
     from matplotlib import pyplot as plt
 except ImportError:
-    plt = None
     logging.warning('Matplotlib could not be imported.',
                     ' Plotting will not work.')
 try:
@@ -155,10 +154,8 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
             nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
 
         # show output
-        if plot is True and plt is not None:
+        if plot is True:
             plt.show()
-        else:
-            logging.warning("Graph cannot be shown due to missing packages.")
 
     else:
         logging.warning("Graph cannot be drawn due to missing packages.")
