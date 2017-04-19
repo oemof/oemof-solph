@@ -1033,7 +1033,7 @@ class BinaryFlow(SimpleBlock):
         A subset of set BINARY_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
-    **The following variable are created:**
+    **The following variable are created**:
 
     Status variable (binary) :attr:`om.BinaryFLow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS

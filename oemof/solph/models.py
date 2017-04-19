@@ -56,7 +56,7 @@ class OperationalModel(po.ConcreteModel):
         If a list is provided this list will be taken. Default is calculated
         from timeindex if provided.
 
-    **The following sets are created:**
+    **The following sets are created**:
 
     NODES :
         A set with all nodes of the given energy system.
@@ -75,7 +75,7 @@ class OperationalModel(po.ConcreteModel):
         A subset of set FLOWS with all flows where attribute
         `positive_gradient` is set.
 
-    **The following variables are created:**
+    **The following variables are created**:
 
     flow
         Flow from source to target indexed by FLOWS, TIMESTEPS.
