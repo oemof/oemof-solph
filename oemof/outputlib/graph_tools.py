@@ -2,6 +2,7 @@
 """Modules for creating and manipulating energy system graphs."""
 
 import logging
+import re
 import warnings
 
 try:
@@ -12,9 +13,11 @@ except ImportError:
 try:
     import networkx as nx
     from networkx.drawing.nx_agraph import graphviz_layout
+    import pygraphviz
 except ImportError:
     nx = None
     graphviz_layout = None
+    pygraphviz = None
     logging.warning('Networkx could not be imported. Plotting will not work.')
 
 warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
@@ -163,6 +166,12 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
     return G
 
+
+for o in [graph]:
+    if (((nx is None) or (graphviz_layout is None) or (pygraphviz is None)) and
+        (getattr(o, "__doc__") is not None)):
+        o.__doc__ = re.sub(r"((^|\n)\s*)>>>", r"\1>>",
+                           re.sub(r"((^|\n)\s*)\.\.\.", r"\1..", o.__doc__))
 
 if __name__ == '__main__':
     import doctest
