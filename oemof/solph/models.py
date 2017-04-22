@@ -6,6 +6,7 @@
 from collections import UserDict, UserList
 from itertools import groupby
 import pyomo.environ as po
+import pandas as pd
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
@@ -229,6 +230,33 @@ class OperationalModel(po.ConcreteModel):
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
+
+    def results_to_components(self):
+        """ Writes back results from the optimization model to the oemof
+        solph flow object
+        """
+
+        # for all flows write to actual values
+        values = pd.Series(self.flow.get_values())
+
+        # get all flows with investment (or use om.InvestmentFlow.invest?)
+        investment_flows = [f for f in self.InvestmentFlow.FLOWS]
+
+        slicer = pd.IndexSlice
+
+        for i in values.index:
+            self.flows[i[0], i[1]].actual_value = \
+                values.loc[slicer[i[0], i[1]],:].values
+
+            # if flow is in investment flows -> write result to "nominal_value"
+            if (i[0], i[1]) in investment_flows:
+                self.flows[i[0], i[1]].nominal_value = \
+                    self.InvestmentFlow.invest[i[0], i[1]].value
+
+        # write back storage investment
+        [setattr(s, 'nominal_capacity', self.InvestmentStorage.invest[s])
+         for s in self.InvestmentStorage.INVESTSTORAGES]
+
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
