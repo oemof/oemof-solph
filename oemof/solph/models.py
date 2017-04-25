@@ -98,9 +98,24 @@ class OperationalModel(po.ConcreteModel):
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
+        # dict helper: {'period1': 0, 'period2': 1, ...}
+        d = dict(zip(set(es.timeindex.year),
+                     range(len(set(es.timeindex.year)))))
+
         # pyomo set for timesteps of optimization problem
+        self.TIMEINDEX = po.Set(
+            initialize=list(zip([d[a] for a in es.timeindex.year],
+                                range(len(es.timeindex)))),
+            ordered=True)
+
+        self.PERIODS = po.Set(initialize=range(len(set(es.timeindex.year))))
+
         self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
 
+        # TODO: Make this robust
+        self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS) /
+                                              len(self.PERIODS)))
+                                 for a in self.PERIODS}
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.timesteps]
         previous_timesteps[0] = self.timesteps[-1]
@@ -129,30 +144,30 @@ class OperationalModel(po.ConcreteModel):
         # ######################### FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX,
                            within=po.NonNegativeReals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
-            for t in self.TIMESTEPS:
+            for a, t in self.TIMEINDEX:
                 if self.flows[o, i].actual_value[t] is not None and (
                         self.flows[o, i].nominal_value is not None):
                     # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = (
+                    self.flow[o, i, a, t].value = (
                         self.flows[o, i].actual_value[t] *
                         self.flows[o, i].nominal_value)
                     # fix variable if flow is fixed
                     if self.flows[o, i].fixed:
-                        self.flow[o, i, t].fix()
+                        self.flow[o, i, a, t].fix()
 
                 if self.flows[o, i].nominal_value is not None and (
                         self.flows[o, i].binary is None):
                     # upper bound of flow variable
-                    self.flow[o, i, t].setub(self.flows[o, i].max[t] *
-                                             self.flows[o, i].nominal_value)
+                    self.flow[o, i, a, t].setub(self.flows[o, i].max[t] *
+                                                self.flows[o, i].nominal_value)
                     # lower bound of flow variable
-                    self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
-                                             self.flows[o, i].nominal_value)
+                    self.flow[o, i, a, t].setlb(self.flows[o, i].min[t] *
+                                                self.flows[o, i].nominal_value)
 
         self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
                                              self.TIMESTEPS,
