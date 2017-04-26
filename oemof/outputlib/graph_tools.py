@@ -49,8 +49,10 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     remove_edges: list of string tuples
         Edges to be removed e.g. [('resource_gas', 'gas_balance')]
 
-    node_color : string
-        Hex color code oder matplotlib color for node color.
+    node_color : string or dict of strings
+        Hex color code oder matplotlib color for node colors e.g. '#ADADAD'
+        for all nodes or {'bus_heat': 'red', 'pp_lignite': '#BEBEBE'}
+        for different colored nodes
 
     edge_color : string
         Hex color code oder matplotlib color for edge color.
@@ -136,6 +138,16 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
                 remove_nodes = [v.label for v in energy_system.nodes
                                 if i in v.label]
                 G.remove_nodes_from(remove_nodes)
+
+        # add colors for nodes
+        if isinstance(node_color, dict):
+            color_map = []
+            for n in G:
+                if n in node_color.keys():
+                    color_map.append(node_color[n])
+                else:
+                    color_map.append('#AFAFAF')
+            node_color = color_map
 
         # set drawing options
         options = {
