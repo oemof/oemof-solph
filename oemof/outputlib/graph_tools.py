@@ -50,7 +50,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         Edges to be removed e.g. [('resource_gas', 'gas_balance')]
 
     node_color : string or dict of strings
-        Hex color code oder matplotlib color for node colors e.g. '#ADADAD'
+        Hex color code or matplotlib color for node colors e.g. '#ADADAD'
         for all nodes or {'bus_heat': 'red', 'pp_lignite': '#BEBEBE'}
         for different colored nodes
 
