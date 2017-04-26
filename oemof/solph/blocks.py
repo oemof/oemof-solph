@@ -1247,10 +1247,10 @@ class DiscreteFlow(SimpleBlock):
         self.discrete_flow = Var(self.DISCRETE_FLOWS,
                                  m.TIMESTEPS, within=NonNegativeIntegers)
 
-        def _discrete_flow_rule(block, i, o, t):
+        def _discrete_flow_rule(block, i, o, a, t):
             """Force flow variable to discrete (NonNegativeInteger) values.
             """
-            expr = (self.discrete_flow[i, o, t] == m.flow[i, o, t])
+            expr = (self.discrete_flow[i, o, t] == m.flow[i, o, a, t])
             return expr
-        self.integer_flow = Constraint(self.DISCRETE_FLOWS, m.TIMESTEPS,
+        self.integer_flow = Constraint(self.DISCRETE_FLOWS, m.TIMEINDEX,
                                        rule=_discrete_flow_rule)
