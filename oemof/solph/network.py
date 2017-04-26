@@ -5,7 +5,7 @@
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
-from .options import Investment
+from .options import Investment, Expansion
 from .plumbing import sequence
 
 
@@ -149,7 +149,7 @@ class Flow:
             #     SyntaxWarning)
             self.min = sequence(0)
             self.max = sequence(1)
-        if self.investment and self.nominal_value is not None:
+        if isinstance(self.investment, Investment) and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
                 "Using the investment object the nominal_value" +
@@ -372,7 +372,8 @@ class Storage(on.Transformer):
         self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
         # Check investment
-        if self.investment and self.nominal_capacity is not None:
+        if (self.investment and self.nominal_capacity is not None and
+            isinstance(self.investment, Investment)):
             self.nominal_capacity = None
             warnings.warn(
                 "Using the investment object the nominal_capacity is set to" +
@@ -387,7 +388,8 @@ class Storage(on.Transformer):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                if not isinstance(flow.investment, Investment):
+                if (not isinstance(flow.investment, Investment)
+                    and not isinstance(flow.investment, Expansion)):
                     flow.investment = Investment()
 
         # Check output flows for nominal value
@@ -400,7 +402,8 @@ class Storage(on.Transformer):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                if not isinstance(flow.investment, Investment):
+                if (not isinstance(flow.investment, Investment)
+                    and not isinstance(flow.investment, Expansion)):
                     flow.investment = Investment()
 
 

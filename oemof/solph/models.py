@@ -9,6 +9,7 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
+from oemof.solph import network
 from .network import Storage
 from .options import Investment
 from .plumbing import sequence
@@ -25,8 +26,179 @@ from .plumbing import sequence
 class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
-    def __init__(self):
+
+    CONSTRAINT_GROUPS = [blocks.ExpansionFlow,
+                         blocks.Flow,
+                         blocks.Bus,
+                         blocks.LinearTransformer]
+
+    def __init__(self, es, **kwargs):
         super().__init__()
+
+        # ########################  Arguments #################################
+
+        self.name = kwargs.get('name', 'ExpansionModel')
+        self.es = es
+
+        self.period_increment = sequence(kwargs.get('period_increment', 1))
+
+        # TODO: Create timeincrement based on timeindex
+        self.timeincrement = kwargs.get('timeincrement', sequence(1))
+
+        self._constraint_groups = (ExpansionModel.CONSTRAINT_GROUPS +
+                                   kwargs.get('constraint_groups', []))
+
+        # dictionary with all flows containing flow objects as values und
+        # tuple of string representation of oemof nodes (predecessor, successor)
+        self.flows = es.flows()
+
+        # ###########################  SETS  ##################################
+        # set with all nodes
+        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+
+        # pyomo set for timeindex of optimization problem
+        # dict helper: {'year1': 0, 'year2': 1, ...}
+        d = dict(zip(self.es.timeindex.keys(),
+                     range(len(self.es.timeindex))))
+
+        self.TIMEINDEX = po.Set(
+            initialize=list(zip(
+                [d[a] for a in es.timeindex for t in es.timeindex[a]],
+                range(len([t  for a in es.timeindex for t in es.timeindex[a]])))),
+                                ordered=True)
+
+        self.TIMESTEPS = range(len([t  for a in es.timeindex
+                                       for t in es.timeindex[a]]))
+        # pyomo set for all flows in the energy system graph
+        self.FLOWS = po.Set(initialize=self.flows.keys(),
+                            ordered=True, dimen=2)
+
+        self.PERIODS =  po.Set(initialize=range(len(es.timeindex)),
+                               ordered=True)
+
+        self.PERIOD_TIMESTEPS = {
+            d[a]: self.TIMESTEPS[d[a]*len(es.timeindex[a]):
+                                 (1+d[a])*len(es.timeindex[a])]
+                for a in es.timeindex}
+
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX,
+                           within=po.NonNegativeReals)
+
+        # ########################### CONSTRAINTS #############################
+        # loop over all constraint groups to add constraints to the model
+        for group in self._constraint_groups:
+            # create instance for block
+            block = group()
+            # Add block to model
+
+            self.add_component(str(block), block)
+            # create constraints etc. related with block for all nodes
+            # in the group
+            block._create(group=self.es.groups.get(group))
+
+        # ########################### Objective ###############################
+
+        self.objective_function()
+
+
+    def system_constraints(self):
+        """
+        """
+        buses = [n for n in self.es.nodes
+                 if isinstance(n, network.Bus) and n.sector == 'electricity']
+
+        P = {n:[i for i in n.inputs] for n in buses}
+        #S = {n:[i for i in n.outputs] for n in buses}
+
+        # TODO: Calculate System Demand (SD), System Peak Load (SPL)
+        SPL = 100 # self.es.SPL
+        SD = 120  # self.es.SD
+        SE = 1000 # self.es.SEL
+
+        def _capacity_margin_rule(model):
+            """ Eq. 14 [1]
+            """
+            for a, t in self.TIMEINDEX:
+                lhs = 0
+                rhs = 0
+                for n in buses:
+                    lhs += sum(self.ExpansionFlow.expanded_flow[p,n,a] *
+                               self.flows[p,n].nominal_value *
+                               self.flows[p,n].system_potential['capacity']
+                               for p in P[n]
+                               if (p,n) in self.ExpansionFlow.EXPANSION_FLOWS)
+                rhs = SPL * self.es.capacity_margin
+                self.capacity_margin.add((a,t), lhs >= rhs)
+        self.capacity_margin = po.Constraint(self.TIMEINDEX, noruleinit=True)
+        self.capacity_margin_build = po.BuildAction(rule=_capacity_margin_rule)
+
+        def _reserve_margin_rule(model):
+            """ Eq. 15 [1]
+            """
+            # TODO: add
+            for a, t in  self.TIMEINDEX:
+                lhs = 0
+                rhs = 0
+                for n in buses:
+                    lhs += sum(self.ExpansionFlow.reserve_flow[p,n,a,t] *
+                               self.flows[p,n].system_potential['reserve']
+                               for p in P[n]
+                               if (p,n) in self.ExpansionFlow.EXPANSION_FLOWS)
+                rhs = SD * self.es.reserve_margin
+                self.reserve_margin.add((a,t), lhs >= rhs)
+        self.reserve_margin = po.Constraint(self.TIMEINDEX, noruleinit=True)
+        self.reserve_margin_build = po.BuildAction(rule=_reserve_margin_rule)
+
+        def _system_inertia_rule(model):
+            """ Eq. 16 [1]
+            """
+            # TODO: add
+            for a, t in self.TIMEINDEX:
+                lhs = 0
+                rhs = 0
+                for n in buses:
+                    lhs += sum(self.ExpansionFlow.active_flow[p,n,a,t] *
+                               self.flows[p,n].nominal_value *
+                               self.flows[p, n].system_potential['inertia']
+                               for p in P[n]
+                               if (p,n) in self.ExpansionFlow.EXPANSION_FLOWS)
+                rhs = SD * self.es.reserve_margin
+                self.system_inertia.add((a,t), lhs >= rhs)
+        self.system_inertia = po.Constraint(self.TIMEINDEX, noruleinit=True)
+        self.system_inertia_build = po.BuildAction(rule=_system_inertia_rule)
+
+        def _system_emission_rule(model):
+            """ Eq. 17 [1]
+            """
+            # TODO: add
+            for a, t in self.TIMEINDEX:
+                lhs = 0
+                rhs = 0
+                for n in buses:
+                    lhs += sum(self.flow[p,n,a,t] *
+                               self.flows[p,n].emission
+                               for p in P[n])
+                rhs = SE
+                self.emissions.add((a,t), lhs <= rhs)
+        self.emissions = po.Constraint(self.TIMEINDEX, noruleinit=True)
+        self.emissions_build = po.BuildAction(rule=_system_emission_rule)
+
+
+
+    def objective_function(self, sense=po.minimize, update=False):
+        """
+        """
+        if update:
+            self.del_component('objective')
+
+        expr = 0
+
+        # Expression for investment flows
+        for block in self.component_data_objects():
+            if hasattr(block, '_objective_expression'):
+                expr += block._objective_expression()
+
+        self.objective = po.Objective(sense=sense, expr=expr)
 
 
 class OperationalModel(po.ConcreteModel):

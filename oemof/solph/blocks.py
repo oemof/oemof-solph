@@ -6,7 +6,7 @@ for the specified groups.
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)
 from pyomo.core.base.block import SimpleBlock
-
+from . import models
 
 class Storage(SimpleBlock):
     """ Storages (no investment)
@@ -1245,12 +1245,263 @@ class DiscreteFlow(SimpleBlock):
         self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.discrete_flow = Var(self.DISCRETE_FLOWS,
-                                 m.TIMESTEPS, within=NonNegativeIntegers)
+                                 m.TIMEINDEX, within=NonNegativeIntegers)
 
-        def _discrete_flow_rule(block, i, o, t):
+        def _discrete_flow_rule(block, i, o, a, t):
             """Force flow variable to discrete (NonNegativeInteger) values.
             """
-            expr = (self.discrete_flow[i, o, t] == m.flow[i, o, t])
+            expr = (self.discrete_flow[i, o, a, t] == m.flow[i, o, a, t])
             return expr
-        self.integer_flow = Constraint(self.DISCRETE_FLOWS, m.TIMESTEPS,
+        self.integer_flow = Constraint(self.DISCRETE_FLOWS, m.TIMEINDEX,
                                        rule=_discrete_flow_rule)
+
+
+class ExpansionFlow(SimpleBlock):
+    """ ExpansionFlow block with definitions for standard flows
+
+    Most equations based on: [1] Heuberger et.al (section. 3.2/3.4)
+    .
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates sets, variables and constraints for all standard flows.
+
+        Parameters
+        ----------
+        group : list
+            List containing tuples containing flow (f) objects and the
+            associated source (s) and target (t)
+            of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        # ########################## SETS #################################
+        # set for all expansion flows
+        self.EXPANSION_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+
+        # ########################## VARIABLES ############################
+
+        self.reserve_flow = Var(self.EXPANSION_FLOWS, m.TIMEINDEX,
+                                within=NonNegativeReals)
+
+        def _expand_rule(block, p, s, a):
+            """ Rule to define the bounds of the integer expansion variable
+            defined for every flow and every period (Eq. 5,7 [1])
+            """
+            if a == m.PERIODS.first():
+                return ( m.flows[p,s].investment.initial,
+                         m.flows[p,s].investment.initial )
+            else:
+                return ( 0, m.flows[p,s].investment.maximum )
+
+        self.expanded_flow = Var(self.EXPANSION_FLOWS, m.PERIODS,
+                                  within=NonNegativeIntegers,
+                                  bounds=_expand_rule)
+
+        def _expansion_rate_rule(block, p, s, a):
+            """ Rule to define the bounds of the integer exansion rate
+            variable defined for every flow and every year (Eq. 6 [1])
+            """
+            return ( 0, m.flows[p,s].investment.max_rate * m.period_increment[a])
+
+        self.flow_expand_rate = Var(self.EXPANSION_FLOWS,
+                                    m.PERIODS,
+                                    within=NonNegativeIntegers,
+                                    bounds=_expansion_rate_rule)
+
+        # integer variable defining how many expanded flows are active per
+        # period
+        self.active_flow = Var(self.EXPANSION_FLOWS, m.TIMEINDEX,
+                                within=NonNegativeIntegers)
+
+        # ########################## CONSTRAINTS ##########################
+
+        def _flow_max_rule(model):
+            """Rule definition for build action of max flow constraint. (Eq. 19 [1])
+            """
+            # TODO: Check for max[t] -> allow timeseries slice in sequence
+            for a, t in m.TIMEINDEX:
+                for p, s in self.EXPANSION_FLOWS:
+                    lhs = m.flow[p,s,a,t]
+                    if m.flows[p,s].system_potential['reserve']:
+                        lhs += self.reserve_flow[p,s,a,t]
+                    rhs = (m.flows[p,s].nominal_value *
+                           self.active_flow[p,s,a,t] *
+                           m.flows[p,s].max[0])
+
+                    self.flow_max.add((p,s,a,t), lhs <= rhs)
+
+        self.flow_max = Constraint(self.EXPANSION_FLOWS, m.TIMEINDEX,
+                                   noruleinit=True)
+        self.flow_max_build = BuildAction(rule=_flow_max_rule)
+
+
+        def _expansion_flow_rule(model):
+            """Rule definition for expansion of flows (Eq 8-10 [1])
+            """
+            for a in m.PERIODS:
+                for p,s in self.EXPANSION_FLOWS:
+                    if a > m.PERIODS.first():
+                        LTi = int(m.flows[p,s].investment.lifetime_initial /
+                                  m.period_increment[a])
+                        LT = int(m.flows[p,s].investment.lifetime /
+                                 m.period_increment[a])
+                        if a <= LTi+1:
+                            lhs = self.expanded_flow[p,s,a]
+                            rhs = (self.expanded_flow[p,s,a-1] -
+                                   self.flow_expand_rate[p,s,a-LTi] +
+                                   self.flow_expand_rate[p,s,a])
+                        if a >= LTi+1 and a <= LT+1:
+                            lhs = self.expanded_flow[p,s,a]
+                            rhs = (self.expanded_flow[p,s,a-1] +
+                                   self.flow_expand_rate[p,s,a])
+                        if a > LT+1:
+                            lhs = self.expanded_flow[p,s,a]
+                            rhs = (self.expanded_flow[p,s,a-1] -
+                                   self.flow_expand_rate[p,s,a-LT] +
+                                   self.flow_expand_rate[p,s,a])
+
+                        self.expansion_flow_constraint.add((p,s,a), lhs == rhs)
+
+        self.expansion_flow_constraint = Constraint(self.EXPANSION_FLOWS,
+                                                   m.PERIODS,
+                                                   noruleinit=True)
+        self.expansion_flow_build = BuildAction(rule=_expansion_flow_rule)
+
+        def _active_flow_limit_rule(model):
+            """Rule definition for maximum of active flows (Eq 11 [1])
+            """
+            for a,t in m.TIMEINDEX:
+                for p,s in self.EXPANSION_FLOWS:
+                    expr = self.active_flow[p,s,a,t] <= self.expanded_flow[p,s,a]
+                    self.active_flow_limit.add((p,s,a,t), expr)
+
+        self.active_flow_limit = Constraint(self.EXPANSION_FLOWS, m.TIMEINDEX,
+                                            noruleinit=True)
+        self.active_flow_limit_build = BuildAction(rule=_active_flow_limit_rule)
+
+
+class ExpansionStorage(SimpleBlock):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+        """
+        m = self.parent_block()
+        if group is None:
+            return None
+
+        # ########################## SETS #####################################
+
+        self.EXPANSIONSTORAGES = Set(initialize=[n for n in group])
+
+        self.INITIAL_CAPACITY = Set(initialize=[
+            n for n in group if n.initial_capacity is not None])
+
+        # The capacity is set as a non-negative variable, therefore it makes no
+        # sense to create an additional constraint if the lower bound is zero
+        # for all time steps.
+        self.MIN_EXPANSIONSTORAGES = Set(
+            initialize=[n for n in group if sum(
+                [n.capacity_min[t] for t in m.TIMESTEPS]) > 0])
+
+        # ######################### Variables  ################################
+        self.capacity = Var(self.EXPANSIONSTORAGES, m.TIMEINDEX,
+                            within=NonNegativeReals)
+
+        def _storage_expansionvar_bound_rule(block, n, a):
+            """Rule definition to bound the invested storage capacity `expand`.
+            """
+            return 0, n.investment.maximum
+        self.expand = Var(self.EXPANSIONSTORAGES, m.PERIODS,
+                          within=NonNegativeReals,
+                          bounds=_storage_expansionvar_bound_rule)
+
+        # ######################### CONSTRAINTS ###############################
+        i = {n: [i for i in n.inputs][0] for n in group}
+        o = {n: [o for o in n.outputs][0] for n in group}
+
+        def _storage_balance_rule(block, n, a, t):
+            """Rule definition for the storage energy balance.
+            """
+            expr = 0
+            expr += block.capacity[n, t]
+            expr += - block.capacity[n, m.previous_timesteps[t]] * (
+                1 - n.capacity_loss[t])
+            expr += (- m.flow[i[n], n, a, t] *
+                     n.inflow_conversion_factor[t]) * m.timeincrement[t]
+            expr += (m.flow[n, o[n], a, t] /
+                     n.outflow_conversion_factor[t]) * m.timeincrement[t]
+            return expr == 0
+        self.balance = Constraint(self.INVESTSTORAGES, m.TIMEINDEX,
+                                  rule=_storage_balance_rule)
+
+        def _initial_capacity_invest_rule(block, n):
+            """Rule definition for constraint to connect initial storage
+            capacity with capacity of last timesteps.
+            """
+            expr = (self.capacity[n, m.PERIODS[-1], m.TIMESTEPS[-1]] ==
+                       (n.nominal_capacity * n.capacitiy_initial))
+            return expr
+        self.initial_capacity = Constraint(
+            self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+
+        def _storage_capacity_inflow_invest_rule(block, n, a):
+            """Rule definition of constraint connecting the inflow
+            `InvestmentFlow.invest of storage with invested capacity `invest`
+            by nominal_capacity__inflow_ratio
+            """
+            expr = (m.ExpansionFlow.expand[i[n], n, a] ==
+                    m.ExpansionFlow.expanded_flow[i[n], n, a] *
+                    m.flows[i[n], n].nominal_value *
+                    n.nominal_input_capacity_ratio)
+            return expr
+        self.storage_capacity_inflow = Constraint(
+            self.INVESTSTORAGES, m.PERIODS,
+            rule=_storage_capacity_inflow_invest_rule)
+
+        def _storage_capacity_outflow_invest_rule(block, n, a):
+            """Rule definition of constraint connecting outflow
+            `InvestmentFlow.invest` of storage and invested capacity `invest`
+            by nominal_capacity__outflow_ratio
+            """
+            expr = (m.ExpansionFlow.expand[n, o[n], a] ==
+                    m.ExpansionFlow.expanded_flow[n, o[n], a] *
+                    m.flows[n, o[n]].nominal_value *
+                    n.nominal_output_capacity_ratio)
+            return expr
+        self.storage_capacity_outflow = Constraint(
+            self.INVESTSTORAGES, self.PERIODS,
+            rule=_storage_capacity_outflow_invest_rule)
+
+        def _max_capacity_invest_rule(block, n, a, t):
+            """Rule definition for upper bound constraint for the storage cap.
+            """
+            expr = (self.capacity[n, a, t] <= (n.capacity_max[t] *
+                                               self.expand[n, a]))
+            return expr
+        self.max_capacity = Constraint(
+            self.INVESTSTORAGES, m.TIMEINDEX, rule=_max_capacity_invest_rule)
+
+        def _min_capacity_invest_rule(block, n, a, t):
+            """Rule definition of lower bound constraint for the storage cap.
+            """
+            expr = (self.capacity[n, a, t] >= (n.capacity_min[t] *
+                                               self.expand[n, a]))
+            return expr
+        # Set the lower bound of the storage capacity if the attribute exists
+        self.min_capacity = Constraint(
+            self.MIN_INVESTSTORAGES, m.TIMESTEPS,
+            rule=_min_capacity_invest_rule)
+
+
+
+

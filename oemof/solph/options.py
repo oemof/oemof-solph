@@ -16,10 +16,27 @@ class Investment:
         year these costs are equal to the equivalent annual costs.
 
     """
-    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0):
+    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0, **kwargs):
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
+
+
+class Expansion:
+    """
+    Parameters
+    ----------
+
+
+    """
+    def __init__(self, initial=0, maximum=None, max_rate=0,
+                 lifetime_initial=20, lifetime=20):
+        self.initial = initial
+        self.maximum = maximum
+        self.max_rate = max_rate
+        self.lifetime_initial = lifetime_initial
+        self.lifetime = lifetime
+
 
 
 class BinaryFlow:
