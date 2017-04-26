@@ -134,8 +134,8 @@ class Flow:
         self.negative_gradient = sequence(kwargs.get('negative_gradient'))
         self.variable_costs = sequence(kwargs.get('variable_costs'))
         self.fixed_costs = kwargs.get('fixed_costs')
-        self.summed_max = kwargs.get('summed_max')
-        self.summed_min = kwargs.get('summed_min')
+        self.summed_max = sequence(kwargs.get('summed_max'))
+        self.summed_min = sequence(kwargs.get('summed_min'))
         self.fixed = kwargs.get('fixed', False)
         self.investment = kwargs.get('investment')
         if self.fixed and self.actual_value is None:
