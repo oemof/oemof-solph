@@ -103,18 +103,18 @@ class Scenario:
         """
         self.create_parameter_table(
             additional_parameter=kwargs.get('additional_parameter'))
-        self.create_sequence_table(datetime_index=kwargs.get('datetime_index'))
+        self.create_sequence_table(datetime_index)
 
     def read_parameter_table(self, filename=None):
         """Read existing parameter table from file."""
         if filename is None:
-            filename = path.join(self.path, self.name + '.csv')
+            filename = path.join(self.scenario_path, self.name + '.csv')
         self.p = pd.read_csv(filename, index_col=[0, 1, 2, 3])
 
     def read_sequence_table(self, filename=None):
         """Read existing parameter table from file."""
         if filename is None:
-            filename = path.join(self.path, self.name + '_seq.csv')
+            filename = path.join(self.scenario_path, self.name + '_seq.csv')
         self.s = pd.read_csv(filename, header=[0, 1, 2, 3, 4], parse_dates=True,
                              index_col=0)
 
@@ -126,14 +126,14 @@ class Scenario:
     def write_parameter_table(self, filename=None):
         """Write parameter table to file."""
         if filename is None:
-            filename = path.join(self.path, self.name + '.csv')
+            filename = path.join(self.scenario_path, self.name + '.csv')
         self.p.sort_values('sort_index', inplace=True)
         self.p.fillna('').to_csv(filename)
 
     def write_sequence_table(self, filename=None):
         """Write sequence table to file."""
         if filename is None:
-            filename = path.join(self.path, self.name + '_seq.csv')
+            filename = path.join(self.scenario_path, self.name + '_seq.csv')
         self.s.to_csv(filename)
 
     def write_tables(self, parameterfile=None, sequencefile=None):
