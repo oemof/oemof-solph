@@ -8,8 +8,7 @@ import logging
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import sequence
-from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
-                       EnergySystem)
+from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
 
 
 PARAMETER = (
@@ -21,7 +20,7 @@ PARAMETER = (
 INDEX = ('class', 'label', 'source', 'target')
 
 
-class SolphScenario(EnergySystem):
+class Scenario:
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -41,11 +40,8 @@ class SolphScenario(EnergySystem):
         self.p = pd.DataFrame(columns=PARAMETER + tuple(additional_parameter),
                               index=my_index)
 
-    def create_sequence_table(self, datetime_index=None):
+    def create_sequence_table(self, datetime_index):
         """Create an empty sequence table."""
-        if datetime_index is None:
-            datetime_index = self.timeindex
-
         my_index = pd.MultiIndex(
             levels=[[1], [2], [3], [4], [5]], labels=[[0], [0], [0], [0], [0]],
             names=INDEX + ('attributes',))
