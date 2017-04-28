@@ -46,14 +46,13 @@ class Scenario:
     >>> my_path = os.path.join('my_folder', 'my_scenarios')
     >>> my_name = 'cool_scenario_name'
     >>> my_timeindex = pd.date_range('2012-01-01', '2012-12-31', freq='60min')
+    >>> my_es = solph.EnergySystem(timeindex=my_timeindex)
     >>> my_scenario = solph.Scenario(scenario_path=my_path, name=my_name)
     >>> # The following works if the files are named:
     >>> # "cool_scenario_name.csv" and "cool_scenario_name_seq.csv"
     >>> # Otherwise you have to pass the full path to the read_tables method. 
     >>> my_scenario.read_tables()  # doctest: +SKIP
-    >>> nodes = my_scenario.create_nodes()  # doctest: +SKIP
-    >>> my_es = solph.EnergySystem(timeindex=my_timeindex)  # doctest: +SKIP
-    >>> my_es.add(nodes)  # doctest: +SKIP
+    >>> my_scenario.create_nodes()  # doctest: +SKIP
     """
 
     def __init__(self, scenario_path=None, name=None, p=None, s=None):
