@@ -56,12 +56,14 @@ class Scenario:
     >>> my_es.add(nodes)  # doctest: +SKIP
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.p = kwargs.get('parameters')
-        self.s = kwargs.get('sequences')
-        self.path = kwargs.get('path', path.dirname(path.realpath(__file__)))
-        self.name = kwargs.get('name')
+    def __init__(self, scenario_path=None, name=None, p=None, s=None):
+        logging.warning(
+            "Scenario class is still experimental. API may change frequently.")
+        if scenario_path is None:
+            self.scenario_path = path.dirname(path.realpath(__file__))
+        self.name = name
+        self.p = p
+        self.s = s
 
     def create_parameter_table(self, additional_parameter=None):
         """Create an empty parameter table."""
