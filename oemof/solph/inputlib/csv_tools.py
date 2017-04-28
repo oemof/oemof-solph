@@ -60,6 +60,8 @@ class Scenario:
             "Scenario class is still experimental. API may change frequently.")
         if scenario_path is None:
             self.scenario_path = path.dirname(path.realpath(__file__))
+        else:
+            self.scenario_path = scenario_path
         self.name = name
         self.p = p
         self.s = s
@@ -360,6 +362,7 @@ def nodes_from_df(nodes_flows, nodes_flows_seq, additional_classes=None,
         tmp1 = pd.DataFrame(index=nodes_flows_seq.columns
                             ).reset_index().transpose().reset_index()
         tmp2 = nodes_flows_seq.reset_index()
+
         for n in range(len(tmp2.columns.levels) - 1):
             tmp2.columns = tmp2.columns.droplevel(0)
         length = len(tmp1.columns)
