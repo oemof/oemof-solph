@@ -140,29 +140,9 @@ class Scenario:
         self.write_parameter_table(parameterfile)
         self.write_sequence_table(sequencefile)
 
-    def create_nodes(self, **kwargs):
-        """
-        Create nodes for a solph.energysystem
-
-        Notes
-        -----
-        At the moment the nodes_from_csv function does not accept Multiindex
-        DataFrames therefore the DataFrames need to be reshaped.
-        """
-        tmp1 = pd.DataFrame(
-            index=self.s.columns).reset_index().transpose().reset_index()
-        tmp2 = self.s.reset_index()
-        for n in range(len(tmp2.columns.levels) - 1):
-            tmp2.columns = tmp2.columns.droplevel(0)
-        length = len(tmp1.columns)
-        tmp1.columns = list(range(length))
-        tmp2.columns = list(range(length))
-
-        # noinspection PyTypeChecker
-        return nodes_from_df(
-            nodes_flows=self.p.reset_index(),
-            nodes_flows_seq=pd.concat([tmp1, tmp2], ignore_index=True),
-            **kwargs)
+    def create_nodes(self):
+        """Create nodes for a solph.energysystem"""
+        return nodes_from_df(nodes_flows=self.p, nodes_flows_seq=self.s)
 
     def add_parameters(self, idx, columns, values):
         self.p.loc[idx, columns] = values
