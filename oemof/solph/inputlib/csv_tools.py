@@ -21,6 +21,40 @@ INDEX = ('class', 'label', 'source', 'target')
 
 
 class Scenario:
+    """
+    EXPERIMENTAL. API may change frequently.
+    Defining an oemof energy system scenario.
+    
+    Parameters
+    ----------
+    scenario_path : str
+        Path where the scenario can be dumped. 
+    name : str
+        Name of the scenario. Will be the base part of the filename
+    p : pandas.DataFrame
+        oemof parameter table.
+    s : pandas.DataFrame
+        oemof sequence table.
+        
+    Examples
+    --------
+    Use the following example if you want to use the Scenario class instead of
+    the NodesFromCSV function.
+    
+    >>> import os
+    >>> import oemof.solph as solph
+    >>> my_path = os.path.join('my_folder', 'my_scenarios')
+    >>> my_name = 'cool_scenario_name'
+    >>> my_timeindex = pd.date_range('2012-01-01', '2012-12-31', freq='60min')
+    >>> my_scenario = solph.Scenario(scenario_path=my_path, name=my_name)
+    >>> # The following works if the files are named:
+    >>> # "cool_scenario_name.csv" and "cool_scenario_name_seq.csv"
+    >>> # Otherwise you have to pass the full path to the read_tables method. 
+    >>> my_scenario.read_tables()  # doctest: +SKIP
+    >>> nodes = my_scenario.create_nodes()  # doctest: +SKIP
+    >>> my_es = solph.EnergySystem(timeindex=my_timeindex)  # doctest: +SKIP
+    >>> my_es.add(nodes)  # doctest: +SKIP
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
