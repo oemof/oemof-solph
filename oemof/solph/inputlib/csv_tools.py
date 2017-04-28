@@ -473,9 +473,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences, delimiter=',',
     delimiter : str
         Delimiter of CSV file
     """
-    msg = ("\nNodesFromCSV will be removed in oemof v0.2.0. " +
-           "\nUse the 'create_nodes' method of the 'Scenario' class instead.")
-    warnings.warn(msg, FutureWarning)
+    # msg = ("\nNodesFromCSV will be removed in oemof v0.2.0. " +
+    #        "\nUse the 'create_nodes' method of the 'Scenario' class instead.")
+    # warnings.warn(msg, FutureWarning)
     nodes_flows = pd.read_csv(file_nodes_flows, sep=delimiter)
     nodes_flows_seq = pd.read_csv(file_nodes_flows_sequences,
                                   sep=delimiter, header=None)
