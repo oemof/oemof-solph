@@ -77,7 +77,14 @@ class Scenario:
                               index=my_index)
 
     def create_sequence_table(self, datetime_index):
-        """Create an empty sequence table."""
+        """
+        Create an empty sequence table.
+        
+        Parameters
+        ----------
+        datetime_index : pandas.DatetimeIndex
+            Datetime index.
+        """
         my_index = pd.MultiIndex(
             levels=[[1], [2], [3], [4], [5]], labels=[[0], [0], [0], [0], [0]],
             names=INDEX + ('attributes',))
@@ -86,8 +93,14 @@ class Scenario:
         del df[1, 2, 3, 4, 5]
         self.s = df
 
-    def create_tables(self, **kwargs):
-        """Create empty scenario tables (sequence and parameter)."""
+    def create_tables(self, datetime_index, **kwargs):
+        """Create empty scenario tables (sequence and parameter).
+                
+        Parameters
+        ----------
+        datetime_index : pandas.DatetimeIndex
+            Datetime index.
+        """
         self.create_parameter_table(
             additional_parameter=kwargs.get('additional_parameter'))
         self.create_sequence_table(datetime_index=kwargs.get('datetime_index'))
