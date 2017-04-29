@@ -84,8 +84,8 @@ class Model(po.ConcreteModel):
         # convert to sequence object for time dependent timeincrement
         self.timeincrement = sequence(self.timeincrement)
 
-        self._constraint_groups = (type(self).CONSTRAINT_GROUPS +
-                                   kwargs.get('constraint_groups', []))
+        self._constraint_groups = (type(self).MODEL_GROUPS +
+                                   kwargs.get('model_groups', []))
 
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)

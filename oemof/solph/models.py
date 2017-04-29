@@ -12,8 +12,8 @@ from ..outputlib import result_dict
 
 class DispatchModel(base.Model):
     """ An energy system model for operational simulation with optimized
-    dispatch. This class subclasses from BaseModel. See this class for more
-    information on class attributes etc.
+    dispatch. This class subclasses from oemof.solph.base.Model.
+    See this class for more information on class attributes etc.
 
     **The following additioanl sets are created**
 
@@ -36,10 +36,10 @@ class DispatchModel(base.Model):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
-                         blocks.LinearN1Transformer,
-                         blocks.VariableFractionTransformer,
-                         blocks.Storage, blocks.Flow]
+    MODEL_GROUPS = [blocks.Bus, blocks.LinearTransformer,
+                    blocks.LinearN1Transformer,
+                    blocks.VariableFractionTransformer,
+                    blocks.Storage, blocks.Flow]
 
     def __init__(self, es, **kwargs):
         super().__init__()
@@ -59,7 +59,7 @@ class DispatchModel(base.Model):
 
 
     def add_flow(self):
-        """
+        """ Specific `add_flow` method for `DispatchModel` class.
         """
         # non-negative pyomo variable for all existing flows in energysystem
         self.flow = po.Var(self.FLOWS, self.TIMEINDEX,
