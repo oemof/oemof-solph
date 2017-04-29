@@ -4,7 +4,7 @@ from ..solph.network import Storage
 from ..solph.options import Investment
 
 
-def result_dict(om):
+def result_dict(model):
     """ Returns a nested dictionary of the results of an optimization
     model.
 
@@ -44,45 +44,48 @@ def result_dict(om):
     Note that the optimization model has to be solved prior to invoking
     this method.
     """
-    # TODO: Make the results dictionary a proper object?
+   # TODO: Make the results dictionary a proper object?
     result = UserDict()
-    result.objective = om.objective()
+    result.objective = model.objective()
     investment = UserDict()
-    for i, o in om.flows:
+    for i, o in model.flows:
 
         result[i] = result.get(i, UserDict())
-        result[i][o] = UserList([om.flow[i, o, t].value
-                                 for t in om.TIMESTEPS])
+        result[i][o] = UserList([model.flow[i, o, a, t].value
+                                 for a, t in model.TIMEINDEX])
 
         if isinstance(i, Storage):
             if i.investment is None:
                 result[i][i] = UserList(
-                    [om.Storage.capacity[i, t].value
-                     for t in om.TIMESTEPS])
+                    [model.Storage.capacity[i, t].value
+                     for t in model.TIMESTEPS])
             else:
                 result[i][i] = UserList(
-                    [om.InvestmentStorage.capacity[i, t].value
-                     for t in om.TIMESTEPS])
+                    [model.InvestmentStorage.capacity[i, t].value
+                     for t in model.TIMESTEPS])
 
-        if isinstance(om.flows[i, o].investment, Investment):
+        if isinstance(model.flows[i, o].investment, Investment):
             setattr(result[i][o], 'invest',
-                    om.InvestmentFlow.invest[i, o].value)
-            investment[(i, o)] = om.InvestmentFlow.invest[i, o].value
+                    model.InvestmentFlow.invest[i, o].value)
+            investment[(i, o)] = model.InvestmentFlow.invest[i, o].value
             if isinstance(i, Storage):
                 setattr(result[i][i], 'invest',
-                        om.InvestmentStorage.invest[i].value)
-                investment[(i, i)] = om.InvestmentStorage.invest[i].value
+                        model.InvestmentStorage.invest[i].value)
+                investment[(i, i)] = model.InvestmentStorage.invest[i].value
     # add results of dual variables for balanced buses
-    if hasattr(om, "dual"):
+    if hasattr(model, "dual"):
         # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]
-        grouped = groupby(sorted(om.Bus.balance.iterkeys()),
+        #import pdb; pdb.set_trace()
+        grouped = groupby(sorted(model.Bus.balance.iterkeys()),
                           lambda pair: pair[0])
 
         for bus, timesteps in grouped:
             result[bus] = result.get(bus, UserDict())
-            result[bus][bus] = [om.dual[om.Bus.balance[bus, t]]
-                                for _, t in timesteps]
+            result[bus][bus] = [model.dual[model.Bus.balance[bus, a, t]]
+                                for _, a, t in timesteps]
 
     result.investment = investment
+
+        return result
 
     return result
