@@ -51,8 +51,8 @@ def result_dict(model):
     for i, o in model.flows:
 
         result[i] = result.get(i, UserDict())
-        result[i][o] = UserList([model.flow[i, o, a, t].value
-                                 for a, t in model.TIMEINDEX])
+        result[i][o] = UserList([model.flow[i, o, p, t].value
+                                 for p, t in model.TIMEINDEX])
 
         if isinstance(i, Storage):
             if i.investment is None:
