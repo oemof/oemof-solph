@@ -61,7 +61,7 @@ Using Anaconda
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
- 1. Download latest `Anaconda <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
+ 1. Download latest `Anaconda (Linux) <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
 
  3. Open terminal to create and activate a virtual environment by typing:
@@ -197,7 +197,7 @@ For further information on how to install Python modules check out https://docs.
 
 
 Mac OSX
-======
+=======
 
 Installation guidelines for Mac OS are still incomplete and not tested. As we do not have Mac users we could not test the following approaches, but they should work. If you are a Mac user please help us to improve this installation guide. Have look at the installation guide of Linux or Windows to get an idea what to do.
 
@@ -234,10 +234,17 @@ You can choose from the list of examples
  * flexible_modelling (solph)
  * csv_reader_dispatch (solph)
 
-For example
+Test the installation and the installed solver:
+
+.. code:: console
+
+  oemof_examples test_installation
+  
+Execute an example with different solver (default: 'cbc').
 
 .. code:: console
 
   oemof_examples simple_least_costs
+  oemof_examples simple_least_costs -s glpk
 
-If you want to run solph examples you need to have the CBC solver installed, see the ":ref:`linux_solver_label`" or ":ref:`windows_solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
+If you want to run solph examples you need to have a solver installed (recommended: cbc), see the ":ref:`linux_solver_label`" or ":ref:`windows_solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.

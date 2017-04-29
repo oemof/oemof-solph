@@ -53,7 +53,7 @@ class OperationalModel(po.ConcreteModel):
         If a list is provided this list will be taken. Default is calculated
         from timeindex if provided.
 
-    **The following sets are created:**
+    **The following sets are created**:
 
     NODES :
         A set with all nodes of the given energy system.
@@ -72,7 +72,7 @@ class OperationalModel(po.ConcreteModel):
         A subset of set FLOWS with all flows where attribute
         `positive_gradient` is set.
 
-    **The following variables are created:**
+    **The following variables are created**:
 
     flow
         Flow from source to target indexed by FLOWS, TIMESTEPS.
@@ -107,8 +107,10 @@ class OperationalModel(po.ConcreteModel):
         self.timeincrement = kwargs.get('timeincrement',
                                         self.timeindex.freq.nanos / 3.6e12)
 
+        self.period_type = kwargs.get('period_type', 'year')
         # convert to sequence object for time dependent timeincrement
         self.timeincrement = sequence(self.timeincrement)
+
 
         if self.timesteps is None:
             raise ValueError("Missing timesteps!")
@@ -119,13 +121,33 @@ class OperationalModel(po.ConcreteModel):
         # tuple of string representation of oemof nodes (source, target)
         self.flows = es.flows()
 
+
         # ###########################  SETS  ##################################
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
+        # dict helper: {'period1': 0, 'period2': 1, ...}
+        periods = getattr(es.timeindex, self.period_type)
+        d = dict(zip(set(periods),range(len(set(periods)))))
+
+        # TODO: claculate period incerment based on  d
+        self.periodincrement = sequence(1)
+
         # pyomo set for timesteps of optimization problem
+        self.TIMEINDEX = po.Set(
+            initialize=list(zip([d[a] for a in periods],
+                                range(len(es.timeindex)))),
+                                ordered=True)
+
+        self.PERIODS = po.Set(initialize=range(len(set(periods))))
+
         self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
 
+        # TODO: Make this robust
+        self.PERIOD_TIMESTEPS = {a: range( int( len(self.TIMESTEPS) /
+                                                len(self.PERIODS) )
+                                         )
+                                 for a in self.PERIODS}
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.timesteps]
         previous_timesteps[0] = self.timesteps[-1]
@@ -154,29 +176,29 @@ class OperationalModel(po.ConcreteModel):
         # ######################### FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX,
                            within=po.NonNegativeReals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
-            for t in self.TIMESTEPS:
+            for a, t in self.TIMEINDEX:
                 if self.flows[o, i].actual_value[t] is not None and (
                         self.flows[o, i].nominal_value is not None):
                     # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = (
+                    self.flow[o, i, a, t].value = (
                         self.flows[o, i].actual_value[t] *
                         self.flows[o, i].nominal_value)
                     # fix variable if flow is fixed
                     if self.flows[o, i].fixed:
-                        self.flow[o, i, t].fix()
+                        self.flow[o, i, a, t].fix()
 
                 if self.flows[o, i].nominal_value is not None and (
                         self.flows[o, i].binary is None):
                     # upper bound of flow variable
-                    self.flow[o, i, t].setub(self.flows[o, i].max[t] *
+                    self.flow[o, i, a, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
                     # lower bound of flow variable
-                    self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
+                    self.flow[o, i, a, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
 
         self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
