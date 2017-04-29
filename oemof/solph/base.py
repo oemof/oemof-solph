@@ -3,7 +3,7 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from .plumbing import sequence
 
-class BaseModel(po.ConcreteModel):
+class Model(po.ConcreteModel):
     """
 
     An energy generic solph energy system model that serves as basis for other

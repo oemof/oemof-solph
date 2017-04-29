@@ -6,11 +6,11 @@ of the objective function.
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks, core
+from oemof.solph import blocks, base
 from .plumbing import sequence
 from ..outputlib import result_dict
 
-class DispatchModel(core.BaseModel):
+class DispatchModel(base.Model):
     """ An energy system model for operational simulation with optimized
     dispatch. This class subclasses from BaseModel. See this class for more
     information on class attributes etc.
