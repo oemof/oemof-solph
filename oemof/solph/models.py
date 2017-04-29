@@ -6,25 +6,95 @@ of the objective function.
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks
+from oemof.solph import blocks, core
 from .plumbing import sequence
 from ..outputlib import result_dict
 
-# #############################################################################
-#
-# Solph Optimization Models
-#
-# #############################################################################
+class DispatchModel(core.BaseModel):
+    """ An energy system model for operational simulation with optimized
+    dispatch. This class subclasses from BaseModel. See this class for more
+    information on class attributes etc.
 
-# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
+    **The following additioanl sets are created**
 
+    NEGATIVE_GRADIENT_FLOWS :
+        A subset of set FLOWS with all flows where attribute
+        `negative_gradient` is set.
 
-class ExpansionModel(po.ConcreteModel):
-    """ An energy system model for optimized capacity expansion.
+    POSITIVE_GRADIENT_FLOWS :
+        A subset of set FLOWS with all flows where attribute
+        `positive_gradient` is set.
+
+    **The following additional variables are created**:
+
+    negative_flow_gradient :
+        Difference of a flow in consecutive timesteps if flow is reduced
+        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+
+    positive_flow_gradient :
+        Difference of a flow in consecutive timesteps if flow is increased
+        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+
     """
-    def __init__(self):
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
+                         blocks.LinearN1Transformer,
+                         blocks.VariableFractionTransformer,
+                         blocks.Storage, blocks.Flow]
+
+    def __init__(self, es, **kwargs):
         super().__init__()
 
+
+        self.NEGATIVE_GRADIENT_FLOWS = po.Set(
+            initialize=[(n, t) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.negative_gradient[0] is not None],
+            ordered=True, dimen=2)
+
+        self.POSITIVE_GRADIENT_FLOWS = po.Set(
+            initialize=[(n, t) for n in self.es.nodes
+                        for (t, f) in n.outputs.items()
+                        if f.positive_gradient[0] is not None],
+            ordered=True, dimen=2)
+
+
+    def add_flow(self):
+        """
+        """
+        # non-negative pyomo variable for all existing flows in energysystem
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX,
+                           within=po.NonNegativeReals)
+
+        # loop over all flows and timesteps to set flow bounds / values
+        for (o, i) in self.FLOWS:
+            for a, t in self.TIMEINDEX:
+                if self.flows[o, i].actual_value[t] is not None and (
+                        self.flows[o, i].nominal_value is not None):
+                    # pre- optimized value of flow variable
+                    self.flow[o, i, a, t].value = (
+                        self.flows[o, i].actual_value[t] *
+                        self.flows[o, i].nominal_value)
+                    # fix variable if flow is fixed
+                    if self.flows[o, i].fixed:
+                        self.flow[o, i, a, t].fix()
+
+                    # upper bound of flow variable
+                    self.flow[o, i, a, t].setub(self.flows[o, i].max[t] *
+                                             self.flows[o, i].nominal_value)
+                    # lower bound of flow variable
+                    self.flow[o, i, a, t].setlb(self.flows[o, i].min[t] *
+                                             self.flows[o, i].nominal_value)
+
+        self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
+                                             self.TIMEINDEX,
+                                             within=po.NonNegativeReals)
+
+        self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
+                                             self.TIMEINDEX,
+                                             within=po.NonNegativeReals)
+
+
+# *************************** depreceaded **********************************
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
