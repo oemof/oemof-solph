@@ -18,7 +18,7 @@ Documentation
 =============
 
 Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project site <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow our `website <https://www.oemof.org>`_.
-To download the documentation as a file, you can choose from `pdf <http://readthedocs.org/projects/oemof/downloads/pdf/stable/>`_, `html <http://readthedocs.org/projects/oemof/downloads/htmlzip/stable/>`_, or `Epub <http://readthedocs.org/projects/oemof/downloads/epub/stable/>`_ (also found, clicking on the arrow in the left lower corner).
+To download the documentation as a file, you can choose from `pdf <http://readthedocs.org/projects/oemof/downloads/pdf/stable/>`_, `html <http://readthedocs.org/projects/oemof/downloads/htmlzip/stable/>`_, or `Epub <http://readthedocs.org/projects/oemof/downloads/epub/stable/>`_ (also found on `readthedocs <http://oemof.readthedocs.org>`_, clicking on the arrow in the left lower corner).
 
 
 Installing oemof
