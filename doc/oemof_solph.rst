@@ -270,7 +270,7 @@ The typical optimisation of a energy system in solph is the dispatch optimisatio
 Therefore variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material.
 You can deviate from this scheme but you should keep it consistent to make it understandable for others.
 
-Cost do have to be monitory cost but could be emissions or other variable units.
+Cost do not have to be monitory cost but could be emissions or other variable units.
 
 Furthermore it is possible to optimise the capacity of different components (see :ref:`investment_mode_label`).
 
