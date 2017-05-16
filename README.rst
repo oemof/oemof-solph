@@ -57,6 +57,12 @@ Keep in touch
 You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 
+Citing oemof
+============
+
+We use the zenodo project to get a DOI for each version. `Search zenodo for the right citation of your oemof version <https://zenodo.org/search?page=1&size=20&q=oemof>`_.
+
+
 License
 =======
 
