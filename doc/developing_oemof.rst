@@ -20,7 +20,7 @@ To avoid problems make sure you have fully uninstalled previous versions of oemo
 
 .. code:: bash
 
-  git clone git@github.com:oemof/oemof.git
+  git clone https://git@github.com:oemof/oemof.git
   pip3 install -e /path/to/the/repository
    
   
