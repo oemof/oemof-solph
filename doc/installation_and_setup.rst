@@ -231,9 +231,10 @@ You can choose from the list of examples
  * storage_investment (solph)
  * simple_dispatch (solph)
  * csv_reader_investment (solph)
- * flexible_modelling (solph)
  * csv_reader_dispatch (solph)
-
+ * add_constraints (solph)
+ * variable_chp (solph)
+  
 Test the installation and the installed solver:
 
 .. code:: console
