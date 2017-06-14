@@ -31,7 +31,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
   pip install oemof
 
-For more details have a look at :ref:`installation_and_setup_label`.
+For more details have a look at :ref:`installation_and_setup_label`. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
 
