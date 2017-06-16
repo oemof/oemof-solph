@@ -51,6 +51,8 @@ You can execute `examples of solph applications <http://oemof.readthedocs.io/en/
 
 Further reading in the `'Run examples to check the installation' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html#run-examples-to-check-the-installation>`_ section.
 
+An additional collection of oemof examples can be found in the `oemof example repository <https://github.com/oemof/examples>`_.
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
 Keep in touch
 =============
