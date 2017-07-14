@@ -115,6 +115,9 @@ For further information on how to install Python modules check out https://docs.
 Windows
 =======
 
+If you are new to Python check out the `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows. It will guide you step by step through the installation process, starting
+with the installation of Python using WinPython, all the way to executing your first oemof example.
+
 If you have Python 3 installed
 ------------------------------
 

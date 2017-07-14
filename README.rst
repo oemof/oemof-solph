@@ -26,7 +26,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
   pip install oemof
 
-For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section.
+For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
@@ -51,6 +51,8 @@ You can execute `examples of solph applications <http://oemof.readthedocs.io/en/
 
 Further reading in the `'Run examples to check the installation' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html#run-examples-to-check-the-installation>`_ section.
 
+An additional collection of oemof examples can be found in the `oemof example repository <https://github.com/oemof/examples>`_.
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
 Keep in touch
 =============
