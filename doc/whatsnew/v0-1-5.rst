@@ -15,6 +15,7 @@ New features
 Documentation
 #############
 
+* Proofread
 
 Bug fixes
 #########
@@ -32,3 +33,4 @@ Other changes
 Contributors
 ############
 
+* Jens-Olaf Delfs
