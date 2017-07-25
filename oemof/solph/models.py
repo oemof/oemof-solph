@@ -12,22 +12,13 @@ from oemof.solph import blocks
 from .network import Storage
 from .options import Investment
 from .plumbing import sequence
+import logging
 
 # #############################################################################
 #
 # Solph Optimization Models
 #
 # #############################################################################
-
-# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-
-
-class ExpansionModel(po.ConcreteModel):
-    """ An energy system model for optimized capacity expansion.
-    """
-    def __init__(self):
-        super().__init__()
-
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
@@ -349,12 +340,32 @@ class OperationalModel(po.ConcreteModel):
 
         results = opt.solve(self, **solve_kwargs)
 
-        self.solutions.load_from(results)
+        status = results["Solver"][0]["Status"].key
+        termination_condition = results["Solver"][0]["Termination condition"].key
 
-        # storage optimization results in result dictionary of energysystem
-        self.es.results = self.results()
-        self.es.results.objective = self.objective()
-        self.es.results.solver = results
+        if status == "ok" and termination_condition == "optimal":
+            logging.info("Optimization successful...")
+            self.solutions.load_from(results)
+
+            # storage optimization results in result dictionary of energysystem
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+
+        elif status == "warning" and termination_condition == "other":
+            logging.warning("Optimization might be sub-optimal. Writing \
+                             output anyway...")
+            self.solutions.load_from(results)
+
+            # storage optimization results in result dictionary of energysystem
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        else:
+            logging.error("Optimization failed with status %s and terminal condition %s"
+                         % (status,termination_condition))
+
+
 
         return results
 
