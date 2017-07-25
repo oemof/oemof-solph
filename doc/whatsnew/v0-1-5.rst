@@ -15,7 +15,7 @@ New features
 Documentation
 #############
 
-* Proofread
+* Proofread (`issue #320 <https://github.com/oemof/oemof_base/issues/320>`_)
 
 Bug fixes
 #########
@@ -34,3 +34,5 @@ Contributors
 ############
 
 * Jens-Olaf Delfs
+* Cord Kaldemeyer
+* Uwe Krien
