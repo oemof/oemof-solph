@@ -61,7 +61,7 @@ Using Anaconda
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
- 1. Download latest `Anaconda <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
+ 1. Download latest `Anaconda (Linux) <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
 
  3. Open terminal to create and activate a virtual environment by typing:
@@ -114,6 +114,9 @@ For further information on how to install Python modules check out https://docs.
 
 Windows
 =======
+
+If you are new to Python check out the `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows. It will guide you step by step through the installation process, starting
+with the installation of Python using WinPython, all the way to executing your first oemof example.
 
 If you have Python 3 installed
 ------------------------------
@@ -197,7 +200,7 @@ For further information on how to install Python modules check out https://docs.
 
 
 Mac OSX
-======
+=======
 
 Installation guidelines for Mac OS are still incomplete and not tested. As we do not have Mac users we could not test the following approaches, but they should work. If you are a Mac user please help us to improve this installation guide. Have look at the installation guide of Linux or Windows to get an idea what to do.
 
@@ -231,9 +234,10 @@ You can choose from the list of examples
  * storage_investment (solph)
  * simple_dispatch (solph)
  * csv_reader_investment (solph)
- * flexible_modelling (solph)
  * csv_reader_dispatch (solph)
-
+ * add_constraints (solph)
+ * variable_chp (solph)
+  
 Test the installation and the installed solver:
 
 .. code:: console
