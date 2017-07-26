@@ -86,8 +86,8 @@ class OperationalModel(po.ConcreteModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # dict helper: {'period1': 0, 'period2': 1, ...}
-        d = dict(zip(set(es.timeindex.year),
-                     range(len(set(es.timeindex.year)))))
+        periods = set(getattr(es.timeindex, 'year'))
+        d = dict(zip(periods, range(len(periods))))
 
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
@@ -98,8 +98,9 @@ class OperationalModel(po.ConcreteModel):
                                 range(len(self.es.timeindex)))),
             ordered=True)
 
-        self.PERIODS = po.Set(initialize=range(
-            len(set(self.es.timeindex.year))))
+        self.PERIODS = po.Set(initialize=range(len(periods)))
+
+        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
 
         # TODO: Make this robust
         self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS) /
