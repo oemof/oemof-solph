@@ -99,16 +99,17 @@ class OperationalModel(po.ConcreteModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # dict helper: {'period1': 0, 'period2': 1, ...}
-        d = dict(zip(set(es.timeindex.year),
-                     range(len(set(es.timeindex.year)))))
+        periods = getattr(es.timeindex, 'year')
+        d = dict(zip(set(periods),
+                     range(len(set(periods)))))
 
         # pyomo set for timesteps of optimization problem
         self.TIMEINDEX = po.Set(
-            initialize=list(zip([d[a] for a in es.timeindex.year],
+            initialize=list(zip([d[a] for a in periods],
                                 range(len(es.timeindex)))),
             ordered=True)
 
-        self.PERIODS = po.Set(initialize=range(len(set(es.timeindex.year))))
+        self.PERIODS = po.Set(initialize=range(len(set(periods))))
 
         self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
 
