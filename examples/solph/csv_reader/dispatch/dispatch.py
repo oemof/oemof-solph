@@ -46,6 +46,7 @@ def run_example(config, draw_graph=False):
     # different formats
     # https://networkx.github.io/documentation/networkx-1.10/reference/
     # readwrite.html
+    logging.warning("Graph plots do not work unless 'networkx' is installed.")
     if draw_graph:
         mygraph = gt.graph(energy_system=es, optimization_model=om,
                            remove_nodes_with_substrings=['#'])
