@@ -8,11 +8,11 @@ from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks
 from .network import Storage
+from oemof.solph import blocks
 from .options import Investment
 from .plumbing import sequence
-from ..outputlib import result_dict
+from ..outputlib import result_dictionary
 
 # #############################################################################
 #
@@ -235,7 +235,7 @@ class OperationalModel(po.ConcreteModel):
         """ Returns a nested dictionary of the results of this optimization
         """
 
-        result = result_dict(self)
+        result = result_dictionary.result_dict(self)
 
         return result
 
