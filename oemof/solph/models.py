@@ -13,22 +13,13 @@ from oemof.solph import blocks
 from .options import Investment
 from .plumbing import sequence
 from ..outputlib import result_dictionary
+import logging
 
 # #############################################################################
 #
 # Solph Optimization Models
 #
 # #############################################################################
-
-# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-
-
-class ExpansionModel(po.ConcreteModel):
-    """ An energy system model for optimized capacity expansion.
-    """
-    def __init__(self):
-        super().__init__()
-
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
@@ -42,20 +33,6 @@ class OperationalModel(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
-    timeindex : pandas DatetimeIndex
-        The time index will be used to calculate the timesteps and the
-        time increment for the optimization model.
-    timesteps : sequence (optional)
-        Timesteps used in the optimization model. If provided as list or
-        pandas.DatetimeIndex the sequence will be used to index the time
-        dependent variables, constraints etc. If not provided we will try to
-        compute this sequence from attr:`timeindex`.
-    timeincrement : float or list of floats (optional)
-        Time increment used in constraints and objective expressions.
-        If type is 'float', will be converted internally to
-        solph.plumbing.Sequence() object for time dependent time increment.
-        If a list is provided this list will be taken. Default is calculated
-        from timeindex if provided.
 
     **The following sets are created**:
 
@@ -106,16 +83,10 @@ class OperationalModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
-        self.timeindex = kwargs.get('timeindex', es.timeindex)
-        self.timesteps = kwargs.get('timesteps', range(len(self.timeindex)))
-        self.timeincrement = kwargs.get('timeincrement',
-                                        self.timeindex.freq.nanos / 3.6e12)
+        self.timeindex = es.timeindex
+        self.timesteps = range(len(self.timeindex))
+        self.timeincrement = sequence(self.timeindex.freq.nanos / 3.6e12)
 
-        # convert to sequence object for time dependent timeincrement
-        self.timeincrement = sequence(self.timeincrement)
-
-        if self.timesteps is None:
-            raise ValueError("Missing timesteps!")
         self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
                                    kwargs.get('constraint_groups', []))
 
@@ -275,12 +246,32 @@ class OperationalModel(po.ConcreteModel):
 
         results = opt.solve(self, **solve_kwargs)
 
-        self.solutions.load_from(results)
+        status = results["Solver"][0]["Status"].key
+        termination_condition = results["Solver"][0]["Termination condition"].key
 
-        # storage optimization results in result dictionary of energysystem
-        self.es.results = self.results()
-        self.es.results.objective = self.objective()
-        self.es.results.solver = results
+        if status == "ok" and termination_condition == "optimal":
+            logging.info("Optimization successful...")
+            self.solutions.load_from(results)
+
+            # storage optimization results in result dictionary of energysystem
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+
+        elif status == "warning" and termination_condition == "other":
+            logging.warning("Optimization might be sub-optimal. Writing \
+                             output anyway...")
+            self.solutions.load_from(results)
+
+            # storage optimization results in result dictionary of energysystem
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        else:
+            logging.error("Optimization failed with status %s and terminal condition %s"
+                         % (status,termination_condition))
+
+
 
         return results
 
