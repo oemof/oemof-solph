@@ -259,7 +259,7 @@ class OperationalModel(po.ConcreteModel):
             self.es.results.solver = results
 
         elif status == "warning" and termination_condition == "other":
-            logging.warning("Optimization might be sub-optimal. Writing \
+            logging.info("Optimization might be sub-optimal. Writing \
                              output anyway...")
             self.solutions.load_from(results)
 
@@ -268,7 +268,7 @@ class OperationalModel(po.ConcreteModel):
             self.es.results.objective = self.objective()
             self.es.results.solver = results
         else:
-            logging.error("Optimization failed with status %s and terminal condition %s"
+            logging.info("Optimization failed with status %s and terminal condition %s"
                          % (status,termination_condition))
 
 
