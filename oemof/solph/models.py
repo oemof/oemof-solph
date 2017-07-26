@@ -206,7 +206,7 @@ class OperationalModel(po.ConcreteModel):
         """ Returns a nested dictionary of the results of this optimization
         """
 
-        result = result_dictionary.result_dict(self)
+        result = result_dictionary.results_to_dict(self)
 
         return result
 

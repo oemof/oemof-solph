@@ -4,7 +4,7 @@ from ..solph.network import Storage
 from ..solph.options import Investment
 
 
-def result_dict(om):
+def results_to_dict(om):
     """ Returns a nested dictionary of the results of an optimization
     model.
 
