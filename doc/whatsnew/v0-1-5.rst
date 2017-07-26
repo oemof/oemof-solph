@@ -9,10 +9,13 @@ API changes
 New features
 ############
 
+* Add an outputlib module to draw and plot energy system graphs using networx.
+
 
 Documentation
 #############
 
+* Proofread (`issue #320 <https://github.com/oemof/oemof_base/issues/320>`_)
 
 Bug fixes
 #########
@@ -30,3 +33,6 @@ Other changes
 Contributors
 ############
 
+* Jens-Olaf Delfs
+* Cord Kaldemeyer
+* Uwe Krien

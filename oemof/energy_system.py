@@ -8,6 +8,7 @@ Created on Mon Jul 20 15:53:14 2015
 from functools import partial
 import logging
 import os
+import pandas as pd
 
 import dill as pickle
 
@@ -30,10 +31,8 @@ class EnergySystem:
         <oemof.core.network.Entity>` that should be part of the energy system.
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
-    timeindex : pandas.index, optional
-        Define the time range and increment for the energy system. This is an
-        optional parameter but might be import for other functions/methods that
-        use the EnergySystem class as an input parameter.
+    timeindex : pandas.datetimeindex
+        Define the time range and increment for the energy system.
     groupings : list
         The elements of this list are used to construct :class:`Groupings
         <oemof.core.energy_system.Grouping>` or they are used directly if they
@@ -116,7 +115,9 @@ class EnergySystem:
             for g in self._groupings:
                 g(e, self.groups)
         self.results = kwargs.get('results')
-        self.timeindex = kwargs.get('timeindex')
+        self.timeindex = kwargs.get('timeindex',
+                                    pd.date_range(start=pd.to_datetime('today'),
+                                                  periods=1, freq='H'))
 
     @staticmethod
     def _regroup(entity, groups, groupings):
