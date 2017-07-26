@@ -247,37 +247,45 @@ class OperationalModel(po.ConcreteModel):
         results = opt.solve(self, **solve_kwargs)
 
         status = results["Solver"][0]["Status"].key
-        termination_condition = results["Solver"][0]["Termination condition"].key
+        termination_condition = \
+            results["Solver"][0]["Termination condition"].key
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
             self.solutions.load_from(results)
-
-            # storage optimization results in result dictionary of energysystem
+            # storage results in result dictionary of energy system
             self.es.results = self.results()
             self.es.results.objective = self.objective()
             self.es.results.solver = results
-
-        elif status == "warning" and termination_condition == "other":
-            logging.info("Optimization might be sub-optimal. Writing \
-                             output anyway...")
+        elif status == "ok" and termination_condition == "unknown":
+            logging.warning("Optimization with unknown termination condition."
+                            + " Writing output anyway...")
             self.solutions.load_from(results)
-
-            # storage optimization results in result dictionary of energysystem
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        elif status == "warning" and termination_condition == "other":
+            logging.warning("Optimization might be sub-optimal."
+                            + " Writing output anyway...")
+            self.solutions.load_from(results)
+            # storage results in result dictionary of energy system
             self.es.results = self.results()
             self.es.results.objective = self.objective()
             self.es.results.solver = results
         else:
-            logging.info("Optimization failed with status %s and terminal condition %s"
-                         % (status,termination_condition))
-
-
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+            logging.error(
+                "Optimization failed with status %s and terminal condition %s"
+                % (status, termination_condition))
 
         return results
 
     def relax_problem(self):
-        """ Relaxes integer variables to reals of optimization model self
-        """
+        """Relaxes integer variables to reals of optimization model self."""
         relaxer = RelaxIntegrality()
         relaxer._apply_to(self)
 
