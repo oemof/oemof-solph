@@ -8,11 +8,13 @@ from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
+
+from .network import Storage
 from oemof.solph import blocks
 from oemof.solph import network
-from .network import Storage
 from .options import Investment
 from .plumbing import sequence
+from ..outputlib import result_dictionary
 import logging
 
 # #############################################################################
@@ -20,9 +22,6 @@ import logging
 # Solph Optimization Models
 #
 # #############################################################################
-
-<<<<<<< HEAD
-# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
 
 
 class ExpansionModel(po.ConcreteModel):
@@ -406,44 +405,8 @@ class OperationalModel(po.ConcreteModel):
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
-        model.
-
-        The dictionary is keyed by the :class:`Entities
-        <oemof.core.network.Entity>` of the optimization model, that is
-        :meth:`om.results()[s][t] <OptimizationModel.results>`
-        holds the time series representing values attached to the edge (i.e.
-        the flow) from `s` to `t`, where `s` and `t` are instances of
-        :class:`Entity <oemof.core.network.Entity>`.
-
-        Time series belonging only to one object, like e.g. shadow prices of
-        commodities on a certain :class:`Bus
-        <oemof.core.network.entities.Bus>`, dispatch values of a
-        :class:`DispatchSource
-        <oemof.core.network.entities.components.sources.DispatchSource>` or
-        storage values of a
-        :class:`Storage
-        <oemof.core.network.entities.components.transformers.Storage>` are
-        treated as belonging to an edge looping from the object to itself.
-        This means they can be accessed via
-        :meth:`om.results()[object][object] <OptimizationModel.results>`.
-
-        Other result from the optimization model can be accessed like
-        attributes of the flow, e.g. the invest variable for capacity
-        of the storage 'stor' can be accessed like:
-
-        :attr:`om.results()[stor][stor].invest` attribute
-
-        For the investment flow of a 'transformer' trsf to the bus 'bel' this
-        can be accessed with:
-
-        :attr:`om.results()[trsf][bel].invest` attribute
-
-        The value of the objective function is stored under the
-        :attr:`om.results().objective` attribute.
-
-        Note that the optimization model has to be solved prior to invoking
-        this method.
         """
+<<<<<<< HEAD
         # TODO: Make the results dictionary a proper object?
         result = UserDict()
         result.objective = self.objective()
@@ -485,6 +448,10 @@ class OperationalModel(po.ConcreteModel):
                                     for _, a, t in timesteps]
 
         result.investment = investment
+=======
+
+        result = result_dictionary.result_dict(self)
+>>>>>>> dev
 
         return result
 
@@ -525,37 +492,45 @@ class OperationalModel(po.ConcreteModel):
         results = opt.solve(self, **solve_kwargs)
 
         status = results["Solver"][0]["Status"].key
-        termination_condition = results["Solver"][0]["Termination condition"].key
+        termination_condition = \
+            results["Solver"][0]["Termination condition"].key
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
             self.solutions.load_from(results)
-
-            # storage optimization results in result dictionary of energysystem
+            # storage results in result dictionary of energy system
             self.es.results = self.results()
             self.es.results.objective = self.objective()
             self.es.results.solver = results
-
-        elif status == "warning" and termination_condition == "other":
-            logging.warning("Optimization might be sub-optimal. Writing \
-                             output anyway...")
+        elif status == "ok" and termination_condition == "unknown":
+            logging.warning("Optimization with unknown termination condition."
+                            + " Writing output anyway...")
             self.solutions.load_from(results)
-
-            # storage optimization results in result dictionary of energysystem
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        elif status == "warning" and termination_condition == "other":
+            logging.warning("Optimization might be sub-optimal."
+                            + " Writing output anyway...")
+            self.solutions.load_from(results)
+            # storage results in result dictionary of energy system
             self.es.results = self.results()
             self.es.results.objective = self.objective()
             self.es.results.solver = results
         else:
-            logging.error("Optimization failed with status %s and terminal condition %s"
-                         % (status,termination_condition))
-
-
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+            logging.error(
+                "Optimization failed with status %s and terminal condition %s"
+                % (status, termination_condition))
 
         return results
 
     def relax_problem(self):
-        """ Relaxes integer variables to reals of optimization model self
-        """
+        """Relaxes integer variables to reals of optimization model self."""
         relaxer = RelaxIntegrality()
         relaxer._apply_to(self)
 
