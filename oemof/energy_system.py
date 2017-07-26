@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 20 15:53:14 2015
-
-@author: uwe
-"""
 
 from functools import partial
 import logging

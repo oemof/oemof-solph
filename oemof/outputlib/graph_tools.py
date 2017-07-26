@@ -18,7 +18,7 @@ except ImportError:
     nx = None
     graphviz_layout = None
     pygraphviz = None
-    logging.warning('Networkx could not be imported. Plotting will not work.')
+
 
 warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 
