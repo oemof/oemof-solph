@@ -11,7 +11,8 @@ from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem
 from oemof.solph import NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
-from oemof.outputlib import graph_tools as gt
+from oemof.outputlib import results_to_multiindex
+#from oemof.outputlib import graph_tools as gt
 
 from matplotlib import pyplot as plt
 
@@ -42,31 +43,35 @@ def run_example(config, draw_graph=False):
     om = OperationalModel(es)
     om.receive_duals()
 
-    # create a graph of the energy system which could be exported into
-    # different formats
-    # https://networkx.github.io/documentation/networkx-1.10/reference/
-    # readwrite.html
-    logging.warning("Graph plots do not work unless 'networkx' is installed.")
-    if draw_graph:
-        mygraph = gt.graph(energy_system=es, optimization_model=om,
-                           remove_nodes_with_substrings=['#'])
+    # # create a graph of the energy system which could be exported into
+    # # different formats
+    # # https://networkx.github.io/documentation/networkx-1.10/reference/
+    # # readwrite.html
+    # logging.warning("Graph plots do not work unless 'networkx' is installed.")
+    # if draw_graph:
+    #     mygraph = gt.graph(energy_system=es, optimization_model=om,
+    #                        remove_nodes_with_substrings=['#'])
 
     # solving the linear problem using the given solver
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
     logging.info("Done!")
 
+    # create multi-indexed pandas dataframe
+    midf = results_to_multiindex(om)
+    print(midf)
+
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
 
-    # write results for selected busses to single csv files
-    results.bus_balance_to_csv(bus_labels=['R1_bus_el', 'R2_bus_el'],
-                               output_path=config['results_path'])
-
-    logging.info("The results can be found in {0}".format(
-        config['results_path']))
-    logging.info("Read the documentation (outputlib) to learn how" +
-                 " to process the results.")
+    # # write results for selected busses to single csv files
+    # results.bus_balance_to_csv(bus_labels=['R1_bus_el', 'R2_bus_el'],
+    #                            output_path=config['results_path'])
+    #
+    # logging.info("The results can be found in {0}".format(
+    #     config['results_path']))
+    # logging.info("Read the documentation (outputlib) to learn how" +
+    #              " to process the results.")
 
     rdict = {
         'objective': es.results.objective,
@@ -162,7 +167,7 @@ def run_dispatch_example(solver='cbc'):
     my_results = run_example(config=cfg, draw_graph=True)
 
     # plot results
-    plotting(my_results)
+    #plotting(my_results)
 
     # print(create_result_dict(my_results))
     #return es, om
