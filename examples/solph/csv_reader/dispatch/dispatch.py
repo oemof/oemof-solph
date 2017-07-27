@@ -58,7 +58,7 @@ def run_example(config, draw_graph=False):
     logging.info("Done!")
 
     # create multi-indexed pandas dataframe
-    midf = results_to_multiindex(om)
+    midf = results_to_multiindex(es, om)
     print(midf)
 
     # create pandas dataframe with results
