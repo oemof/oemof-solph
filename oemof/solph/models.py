@@ -10,24 +10,17 @@ from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks, custom
 from .network import Storage
+from oemof.solph import blocks
 from .options import Investment
 from .plumbing import sequence
+from ..outputlib import result_dictionary
+import logging
 
 # #############################################################################
 #
 # Solph Optimization Models
 #
 # #############################################################################
-
-# TODO: Add an nice capacity expansion model ala temoa/osemosys ;)
-
-
-class ExpansionModel(po.ConcreteModel):
-    """ An energy system model for optimized capacity expansion.
-    """
-    def __init__(self):
-        super().__init__()
-
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
@@ -41,20 +34,6 @@ class OperationalModel(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`OperationalModel.CONSTRAINTS`
-    timeindex : pandas DatetimeIndex
-        The time index will be used to calculate the timesteps and the
-        time increment for the optimization model.
-    timesteps : sequence (optional)
-        Timesteps used in the optimization model. If provided as list or
-        pandas.DatetimeIndex the sequence will be used to index the time
-        dependent variables, constraints etc. If not provided we will try to
-        compute this sequence from attr:`timeindex`.
-    timeincrement : float or list of floats (optional)
-        Time increment used in constraints and objective expressions.
-        If type is 'float', will be converted internally to
-        solph.plumbing.Sequence() object for time dependent time increment.
-        If a list is provided this list will be taken. Default is calculated
-        from timeindex if provided.
 
     **The following sets are created**:
 
@@ -105,16 +84,10 @@ class OperationalModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', 'OperationalModel')
         self.es = es
-        self.timeindex = kwargs.get('timeindex', es.timeindex)
-        self.timesteps = kwargs.get('timesteps', range(len(self.timeindex)))
-        self.timeincrement = kwargs.get('timeincrement',
-                                        self.timeindex.freq.nanos / 3.6e12)
+        self.timeindex = es.timeindex
+        self.timesteps = range(len(self.timeindex))
+        self.timeincrement = sequence(self.timeindex.freq.nanos / 3.6e12)
 
-        # convert to sequence object for time dependent timeincrement
-        self.timeincrement = sequence(self.timeincrement)
-
-        if self.timesteps is None:
-            raise ValueError("Missing timesteps!")
         self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
                                    kwargs.get('constraint_groups', []))
 
@@ -232,84 +205,9 @@ class OperationalModel(po.ConcreteModel):
 
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
-        model.
-
-        The dictionary is keyed by the :class:`Entities
-        <oemof.core.network.Entity>` of the optimization model, that is
-        :meth:`om.results()[s][t] <OptimizationModel.results>`
-        holds the time series representing values attached to the edge (i.e.
-        the flow) from `s` to `t`, where `s` and `t` are instances of
-        :class:`Entity <oemof.core.network.Entity>`.
-
-        Time series belonging only to one object, like e.g. shadow prices of
-        commodities on a certain :class:`Bus
-        <oemof.core.network.entities.Bus>`, dispatch values of a
-        :class:`DispatchSource
-        <oemof.core.network.entities.components.sources.DispatchSource>` or
-        storage values of a
-        :class:`Storage
-        <oemof.core.network.entities.components.transformers.Storage>` are
-        treated as belonging to an edge looping from the object to itself.
-        This means they can be accessed via
-        :meth:`om.results()[object][object] <OptimizationModel.results>`.
-
-        Other result from the optimization model can be accessed like
-        attributes of the flow, e.g. the invest variable for capacity
-        of the storage 'stor' can be accessed like:
-
-        :attr:`om.results()[stor][stor].invest` attribute
-
-        For the investment flow of a 'transformer' trsf to the bus 'bel' this
-        can be accessed with:
-
-        :attr:`om.results()[trsf][bel].invest` attribute
-
-        The value of the objective function is stored under the
-        :attr:`om.results().objective` attribute.
-
-        Note that the optimization model has to be solved prior to invoking
-        this method.
         """
-        # TODO: Make the results dictionary a proper object?
-        result = UserDict()
-        result.objective = self.objective()
-        investment = UserDict()
-        for i, o in self.flows:
 
-            result[i] = result.get(i, UserDict())
-            result[i][o] = UserList([self.flow[i, o, t].value
-                                     for t in self.TIMESTEPS])
-
-            if isinstance(i, Storage):
-                if i.investment is None:
-                    result[i][i] = UserList(
-                        [self.Storage.capacity[i, t].value
-                         for t in self.TIMESTEPS])
-                else:
-                    result[i][i] = UserList(
-                        [self.InvestmentStorage.capacity[i, t].value
-                         for t in self.TIMESTEPS])
-
-            if isinstance(self.flows[i, o].investment, Investment):
-                setattr(result[i][o], 'invest',
-                        self.InvestmentFlow.invest[i, o].value)
-                investment[(i, o)] = self.InvestmentFlow.invest[i, o].value
-                if isinstance(i, Storage):
-                    setattr(result[i][i], 'invest',
-                            self.InvestmentStorage.invest[i].value)
-                    investment[(i, i)] = self.InvestmentStorage.invest[i].value
-        # add results of dual variables for balanced buses
-        if hasattr(self, "dual"):
-            # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]
-            grouped = groupby(sorted(self.Bus.balance.iterkeys()),
-                              lambda pair: pair[0])
-
-            for bus, timesteps in grouped:
-                result[bus] = result.get(bus, UserDict())
-                result[bus][bus] = [self.dual[self.Bus.balance[bus, t]]
-                                    for _, t in timesteps]
-
-        result.investment = investment
+        result = result_dictionary.result_dict(self)
 
         return result
 
@@ -349,18 +247,46 @@ class OperationalModel(po.ConcreteModel):
 
         results = opt.solve(self, **solve_kwargs)
 
-        self.solutions.load_from(results)
+        status = results["Solver"][0]["Status"].key
+        termination_condition = \
+            results["Solver"][0]["Termination condition"].key
 
-        # storage optimization results in result dictionary of energysystem
-        self.es.results = self.results()
-        self.es.results.objective = self.objective()
-        self.es.results.solver = results
+        if status == "ok" and termination_condition == "optimal":
+            logging.info("Optimization successful...")
+            self.solutions.load_from(results)
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        elif status == "ok" and termination_condition == "unknown":
+            logging.warning("Optimization with unknown termination condition."
+                            + " Writing output anyway...")
+            self.solutions.load_from(results)
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        elif status == "warning" and termination_condition == "other":
+            logging.warning("Optimization might be sub-optimal."
+                            + " Writing output anyway...")
+            self.solutions.load_from(results)
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+        else:
+            # storage results in result dictionary of energy system
+            self.es.results = self.results()
+            self.es.results.objective = self.objective()
+            self.es.results.solver = results
+            logging.error(
+                "Optimization failed with status %s and terminal condition %s"
+                % (status, termination_condition))
 
         return results
 
     def relax_problem(self):
-        """ Relaxes integer variables to reals of optimization model self
-        """
+        """Relaxes integer variables to reals of optimization model self."""
         relaxer = RelaxIntegrality()
         relaxer._apply_to(self)
 

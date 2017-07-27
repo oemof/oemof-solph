@@ -4,12 +4,13 @@ v0.1.5 ()
 
 API changes
 ###########
- 
+
 
 New features
 ############
 
 * Add an outputlib module to draw and plot energy system graphs using networx.
+* Sort columns of result dataframe lexicographically.
 
 
 Documentation
