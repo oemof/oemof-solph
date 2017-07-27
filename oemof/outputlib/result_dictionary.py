@@ -1,6 +1,6 @@
 from collections import UserDict, UserList
 from itertools import groupby
-from ..solph.network import Storage
+from ..solph.custom import GenericStorage as Storage
 from ..solph.options import Investment
 
 
@@ -57,11 +57,11 @@ def result_dict(om):
         if isinstance(i, Storage):
             if i.investment is None:
                 result[i][i] = UserList(
-                    [om.Storage.capacity[i, t].value
+                    [om.GenericStorageBlock.capacity[i, t].value
                      for t in om.TIMESTEPS])
             else:
                 result[i][i] = UserList(
-                    [om.InvestmentStorage.capacity[i, t].value
+                    [om.GenericInvestmentStorageBlock.capacity[i, t].value
                      for t in om.TIMESTEPS])
 
         if isinstance(om.flows[i, o].investment, Investment):
@@ -70,8 +70,8 @@ def result_dict(om):
             investment[(i, o)] = om.InvestmentFlow.invest[i, o].value
             if isinstance(i, Storage):
                 setattr(result[i][i], 'invest',
-                        om.InvestmentStorage.invest[i].value)
-                investment[(i, i)] = om.InvestmentStorage.invest[i].value
+                        om.GenericInvestmentStorageBlock.invest[i].value)
+                investment[(i, i)] = om.GenericInvestmentStorageBlock.invest[i].value
     # add results of dual variables for balanced buses
     if hasattr(om, "dual"):
         # grouped = [(b1, [(b1, 0), (b1, 1)]), (b2, [(b2, 0), (b2, 1)])]

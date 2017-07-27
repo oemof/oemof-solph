@@ -455,15 +455,11 @@ CONSTRAINT_GROUPS = set()
 
 def custom_grouping(node):
     val = None
-
     if isinstance(node, GenericStorage) and isinstance(node.investment, Investment):
         val = GenericInvestmentStorageBlock
-    if isinstance(node, GenericStorage):
+    if isinstance(node, GenericStorage) and not isinstance(node.investment, Investment):
         val = GenericStorageBlock
 
-    CONSTRAINT_GROUPS.add(val)
-    return val
-
-
-# Add your block to the CUSTOM_CONSTRAINTS_GROUPINGS list
-GROUPINGS = [custom_grouping]
+    if val is not None:
+        CONSTRAINT_GROUPS.add(val)
+        return val

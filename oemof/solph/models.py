@@ -8,8 +8,6 @@ from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks, custom
-from .network import Storage
 from oemof.solph import blocks
 from .options import Investment
 from .plumbing import sequence

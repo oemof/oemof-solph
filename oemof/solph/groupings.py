@@ -17,7 +17,7 @@ groupings specified like this:
 
 """
 
-from .network import (Bus, LinearTransformer, Storage, LinearN1Transformer,
+from .network import (Bus, LinearTransformer, LinearN1Transformer,
                       VariableFractionTransformer)
 from .options import Investment
 from . import blocks

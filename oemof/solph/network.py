@@ -30,9 +30,9 @@ class EnergySystem(es.EnergySystem):
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from . import GROUPINGS
-        from .custom import GROUPINGS as CUSTOM_GROUPINGS
+        from .custom import custom_grouping
         kwargs['groupings'] = (GROUPINGS +
-                               CUSTOM_GROUPINGS +
+                               [custom_grouping] +
                                kwargs.get('groupings', []))
         super().__init__(**kwargs)
 
