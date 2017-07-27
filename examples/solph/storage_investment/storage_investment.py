@@ -128,7 +128,6 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
 
     # initialise the operational model
     om = solph.OperationalModel(energysystem)
-
     # if debug is true an lp-file will be written
     if debug:
         filename = os.path.join(

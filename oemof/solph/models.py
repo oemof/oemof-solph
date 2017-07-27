@@ -8,7 +8,7 @@ from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks
+from oemof.solph import blocks, custom
 from .options import Investment
 from .plumbing import sequence
 from ..outputlib import result_dictionary
@@ -73,7 +73,7 @@ class OperationalModel(po.ConcreteModel):
                          blocks.VariableFractionTransformer,
                          blocks.InvestmentFlow, blocks.Flow,
                          blocks.BinaryFlow, blocks.DiscreteFlow] + \
-                         list(custom.CONSTRAINT_GROUPS)
+                         [i for i in custom.CONSTRAINT_GROUPS]
 
     def __init__(self, es, **kwargs):
         super().__init__()
