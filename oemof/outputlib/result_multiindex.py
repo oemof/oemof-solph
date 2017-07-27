@@ -11,29 +11,25 @@ def results_to_multiindex(es, om):
     model.
     """
 
+    # dataframe for sequences
     rows = []
-
-    for i, o in om.flows:  # .items() ?
-
+    for i, o in om.flows:
         row = dict()
         row['source'] = i
         row['target'] = o
         row['datetime'] = es.timeindex
         row['val'] = [om.flow[i, o, t].value for t in om.TIMESTEPS]
-
         rows.append(row)
 
-    # split date and value lists to tuples
+    # create a list of tuples where each tuple represents
+    # a row of the dataframe to be created
     tuples = [
         (item['source'], item['target'], date, val)
         for item in rows for date, val
         in zip(item['datetime'], item['val'])
     ]
 
-    # print(rows)
-    # print(tuples)
-
-    # create MultiIndex DataFrame
+    # create dataframe
     index = ['source', 'target', 'datetime']
     columns = index + ['val']
     df = pd.DataFrame(tuples, columns=columns)
