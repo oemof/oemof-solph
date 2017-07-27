@@ -48,10 +48,6 @@ def constraint_grouping(node):
         return blocks.LinearTransformer
     if isinstance(node, LinearN1Transformer):
         return blocks.LinearN1Transformer
-    if isinstance(node, Storage) and isinstance(node.investment, Investment):
-        return blocks.InvestmentStorage
-    if isinstance(node, Storage):
-        return blocks.Storage
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(

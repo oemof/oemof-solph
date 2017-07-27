@@ -108,7 +108,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     # create storage object representing a battery
-    solph.Storage(
+    solph.custom.GenericStorage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},

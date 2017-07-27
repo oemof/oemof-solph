@@ -2,7 +2,7 @@
 
 
 """
-from oemof.solph.network import (Sink, Source, LinearTransformer, Storage, Bus,
+from oemof.solph.network import (Sink, Source, LinearTransformer, Bus,
                                  Flow, EnergySystem, LinearN1Transformer,
                                  VariableFractionTransformer)
 
