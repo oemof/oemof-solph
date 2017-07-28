@@ -55,7 +55,7 @@ except ImportError:
 
 
 def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
-                          debug=True, number_timesteps=24**7*4, tee_switch=True):
+                          debug=True, number_timesteps=24*7*12, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
@@ -146,7 +146,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     res = results_to_multiindex(energysystem, om)
     print(res[(sto, sto)]['sequences'])
     print(res[(sto, sto)]['scalars'])
-    res[(sto, sto)]['scalars'].plot(kind='line')
+    res[(sto, sto)]['sequences'].plot(kind='line')
     plt.show()
 
     return energysystem
