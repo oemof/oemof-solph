@@ -4,38 +4,27 @@ from ..solph.network import Storage
 from ..solph.options import Investment
 import numpy as np
 import pandas as pd
+import itertools
 
 
 def results_to_multiindex(es, om):
-    """ Returns a multi-indexed dataframe of the results of an optimization
-    model.
+    """
+    Returns a multi-indexed dataframe of the results of an optimization model.
     """
 
-    # dataframe for sequences
-    rows = []
-    for i, o in om.flows:
-        row = dict()
-        row['source'] = i
-        row['target'] = o
-        row['datetime'] = es.timeindex
-        row['val'] = [om.flow[i, o, t].value for t in om.TIMESTEPS]
-        rows.append(row)
-
-    # create a list of tuples where each tuple represents
-    # a row of the dataframe to be created
-    tuples = [
-        (item['source'], item['target'], date, val)
-        for item in rows for date, val
-        in zip(item['datetime'], item['val'])
-    ]
-
     # create dataframe
-    index = ['source', 'target', 'datetime']
-    columns = index + ['val']
-    df = pd.DataFrame(tuples, columns=columns)
-    df.set_index(index, inplace=True)
+    tuples = [(l, s, n) for l, s in om.flows for n in es.timeindex]
+    levels = ['source', 'target', 'datetime']
+    df = pd.DataFrame(tuples, columns=levels)
+
+    # add columns
+    df['value'] = [om.flow[i, o, t].value
+                   for i, o in om.flows for t in om.TIMESTEPS]
+    df['value2'] = [om.flow[i, o, t].value + 2
+                    for i, o in om.flows for t in om.TIMESTEPS]
+
+    # set multi-index
+    df.set_index(levels, inplace=True)
     df.sort_index(inplace=True)
 
-    print(df)
-
-    return None
+    return print(df)
