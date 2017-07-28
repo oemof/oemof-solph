@@ -9,6 +9,7 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks, custom
+from pyomo.core.base.block import SimpleBlock
 from .options import Investment
 from .plumbing import sequence
 from ..outputlib import result_dictionary
@@ -72,8 +73,7 @@ class OperationalModel(po.ConcreteModel):
                          blocks.LinearN1Transformer,
                          blocks.VariableFractionTransformer,
                          blocks.InvestmentFlow, blocks.Flow,
-                         blocks.BinaryFlow, blocks.DiscreteFlow] + \
-                         [i for i in custom.CONSTRAINT_GROUPS]
+                         blocks.BinaryFlow, blocks.DiscreteFlow]
 
     def __init__(self, es, **kwargs):
         super().__init__()
@@ -87,8 +87,12 @@ class OperationalModel(po.ConcreteModel):
         self.timeincrement = sequence(self.timeindex.freq.nanos / 3.6e12)
 
         self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
+
                                    kwargs.get('constraint_groups', []))
 
+        self._constraint_groups += [i for i in self.es.groups
+                                    if hasattr(i, 'CONSTRAINT_GROUP') and
+                                    i not in self._constraint_groups]
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
         self.flows = es.flows()

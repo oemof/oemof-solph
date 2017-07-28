@@ -5,7 +5,8 @@ associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 """
 from pyomo.core.base.block import SimpleBlock
-
+from pyomo.environ import (Set, NonNegativeReals, Var, Constraint, Expression,
+                           BuildAction)
 import oemof.network as on
 from .options import Investment
 from .plumbing import sequence
@@ -160,6 +161,8 @@ class GenericStorageBlock(SimpleBlock):
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
     and their value after optimization by: `om.Storage.fixed_costs()`.
     """
+    CONSTRAINT_GROUP = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -321,6 +324,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
     This works similar for investment costs with :attr:`*.investment_costs`.
     """
+    CONSTRAINT_GROUP = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -451,15 +456,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 # End of storage invest block
 # ------------------------------------------------------------------------------
-CONSTRAINT_GROUPS = set()
-
 def custom_grouping(node):
-    val = None
     if isinstance(node, GenericStorage) and isinstance(node.investment, Investment):
-        val = GenericInvestmentStorageBlock
+        return GenericInvestmentStorageBlock
     if isinstance(node, GenericStorage) and not isinstance(node.investment, Investment):
-        val = GenericStorageBlock
-
-    if val is not None:
-        CONSTRAINT_GROUPS.add(val)
-        return val
+        return GenericStorageBlock
