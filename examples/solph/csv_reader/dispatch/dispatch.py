@@ -59,7 +59,7 @@ def run_example(config, draw_graph=False):
 
     # create multi-indexed pandas dataframe
     midf = results_to_multiindex(es, om)
-    print(midf)
+    #print(midf)
 
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
