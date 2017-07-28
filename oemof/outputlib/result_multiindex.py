@@ -13,7 +13,7 @@ def results_to_multiindex(es, om):
 
     # create empty dict with flow tuples as keys
     results = {(k, v):
-               {'scalars': pd.DataFrame(),
+               {'scalars': pd.Series(),
                 'sequences': pd.DataFrame(index=es.timeindex)}
                for k, v in dict.fromkeys(om.flows)}
 
@@ -38,9 +38,12 @@ def results_to_multiindex(es, om):
 
         # investment (scalars)
         if isinstance(om.flows[source, target].investment, Investment):
+            results[(source, target)] = \
+                {'scalars': pd.Series()}
             results[(source, target)]['scalars']['investment'] = \
                 om.InvestmentFlow.invest[source, target].value
             if isinstance(source, Storage):
+                results[(source, source)].update({'scalars': pd.Series()})
                 results[(source, source)]['scalars']['investment'] = \
                     om.InvestmentStorage.invest[source].value
 
