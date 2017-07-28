@@ -10,11 +10,12 @@ def results_to_multiindex(es, om):
     Returns a multi-indexed dataframe of the results of an optimization model.
     """
 
-    # create empty dict with flows
-    results = {(source, target): None for source, target in om.flows}
+    # create empty dict
+    results = {}
 
-    # add data
-    for source, target in om. flows:
+    # add data for flows
+    results = {(source, target): None for source, target in om.flows}
+    for source, target in om.flows:
         data = [om.flow[source, target, t].value for t in om.TIMESTEPS]
         results[(source, target)] = pd.DataFrame(data, index=es.timeindex)
 
