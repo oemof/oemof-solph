@@ -984,8 +984,7 @@ class VariableFractionTransformer(SimpleBlock):
                 for t in m.TIMESTEPS]
 
         def _input_output_relation_rule(block):
-            """Connection between input, main output and tapped output.
-            """
+            """Connection between input, main output and tapped output."""
             for t in m.TIMESTEPS:
                 for g in group:
                     lhs = m.flow[g.inflow, g, t]
@@ -1001,8 +1000,7 @@ class VariableFractionTransformer(SimpleBlock):
             rule=_input_output_relation_rule)
 
         def _out_flow_relation_rule(block):
-            """Relation between main and tapped output in full chp mode.
-            """
+            """Relation between main and tapped output in full chp mode."""
             for t in m.TIMESTEPS:
                 for g in group:
                     lhs = m.flow[g, g.main_output, t]
