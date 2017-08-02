@@ -20,12 +20,12 @@ def results_to_multiindex(es, om):
     results = {(k, v): container for k, v in dict.fromkeys(om.flows)}
 
     # add keys for all nodes
-    nodes = {(k1, k1): container for k1, k2 in results.keys()
-             if issubclass(type(k1), Node)}
+    nodes_source = {(k1, k1): container for k1, k2 in results.keys()
+                    if issubclass(type(k1), Node)}
     nodes_target = {(k2, k2): container for k1, k2 in results.keys()
                     if issubclass(type(k2), Node)}
-    nodes.update(nodes_target)
-    results.update(nodes)
+    nodes_source.update(nodes_target)
+    results.update(nodes_source)
 
     # TODO: add data blockwise
 
