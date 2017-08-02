@@ -3,6 +3,7 @@ from itertools import groupby
 from ..solph.network import Bus
 from ..solph.network import Storage
 from ..solph.options import Investment
+from oemof.network import Node
 import pandas as pd
 
 
@@ -11,20 +12,28 @@ def results_to_multiindex(es, om):
     Returns a multi-indexed dataframe of the results of an optimization model.
     """
 
-    # create empty dict with flow tuples as keys
-    results = {(k, v):
-               {'scalars': pd.Series(),
-                'sequences': pd.DataFrame(index=es.timeindex)}
-               for k, v in dict.fromkeys(om.flows)}
+    # create data container for scalars and sequences
+    container = {'scalars': pd.Series(),
+                 'sequences': pd.DataFrame(index=es.timeindex)}
+
+    # create empty dict with keys for all flows
+    results = {(k, v): container for k, v in dict.fromkeys(om.flows)}
+
+    # add keys for all nodes
+    nodes_source = {(k1, k1): container for k1, k2 in results.keys()
+                    if issubclass(type(k1), Node)}
+    nodes_target = {(k2, k2): container for k1, k2 in results.keys()
+                    if issubclass(type(k1), Node)}
+    nodes_source.update(nodes_target)
 
     # add data
     for source, target in om.flows:
 
-        # flows (sequences)
+        # flows
         data = [om.flow[source, target, t].value for t in om.TIMESTEPS]
         results[(source, target)]['sequences']['value'] = data
 
-        # storages (sequences)
+        # storages
         if isinstance(source, Storage):
             results[(source, source)] = \
                 {'sequences': pd.DataFrame(index=es.timeindex)}
@@ -36,7 +45,7 @@ def results_to_multiindex(es, om):
                         for t in om.TIMESTEPS]
             results[(source, source)]['sequences']['soc'] = data
 
-        # investment (scalars)
+        # investment
         if isinstance(om.flows[source, target].investment, Investment):
             results[(source, target)] = \
                 {'scalars': pd.Series()}
@@ -46,10 +55,5 @@ def results_to_multiindex(es, om):
                 results[(source, source)].update({'scalars': pd.Series()})
                 results[(source, source)]['scalars']['investment'] = \
                     om.InvestmentStorage.invest[source].value
-
-        # # buses
-        # if hasattr(om, 'dual'):
-        #     if isinstance(source, Bus):
-
 
     return results
