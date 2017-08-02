@@ -16,15 +16,18 @@ def results_to_multiindex(es, om):
     container = {'scalars': pd.Series(),
                  'sequences': pd.DataFrame(index=es.timeindex)}
 
-    # create empty dict with keys for all flows
+    # create dict with keys for flows
     results = {(k, v): container for k, v in dict.fromkeys(om.flows)}
 
     # add keys for all nodes
-    nodes_source = {(k1, k1): container for k1, k2 in results.keys()
-                    if issubclass(type(k1), Node)}
+    nodes = {(k1, k1): container for k1, k2 in results.keys()
+             if issubclass(type(k1), Node)}
     nodes_target = {(k2, k2): container for k1, k2 in results.keys()
-                    if issubclass(type(k1), Node)}
-    nodes_source.update(nodes_target)
+                    if issubclass(type(k2), Node)}
+    nodes.update(nodes_target)
+    results.update(nodes)
+
+    # TODO: add data blockwise
 
     # add data
     for source, target in om.flows:
