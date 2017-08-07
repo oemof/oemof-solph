@@ -24,29 +24,37 @@ def results_to_multiindex(es, om):
     # get unique keys (n1, n1) for nodes
     nodes_source = {(k1, k1): container for k1, k2 in results.keys()
                     if issubclass(type(k1), Node)}
-
     nodes_target = {(k2, k2): container for k1, k2 in results.keys()
                     if issubclass(type(k2), Node)}
-
     nodes_source.update(nodes_target)
 
     # add them to the results
     results.update(nodes_source)
 
-    # get all variables (including their block)
+    # get all variables including their block
     block_vars = []
-    for var in om.component_data_objects(Var):
-        block_vars.append(var.parent_component())
+    for bv in om.component_data_objects(Var):
+        block_vars.append(bv.parent_component())
     block_vars = list(set(block_vars))
 
-    # write into dict
-    dc = {i: bv[i].value for bv in block_vars for i in getattr(bv, '_index')}
+    # write them into a dict with tuple keys (block_name, var_name, var_index)
+    dc = {(str(bv).split('.')[0], str(bv).split('.')[-1], i): bv[i].value
+          for bv in block_vars for i in getattr(bv, '_index')}
 
-    print(dc)
+    # create a pandas dataframe
+    df = pd.DataFrame(list(dc.items()), columns=['tuple', 'value'])
+    df['block_name'] = df['tuple'].str[0]
+    df['variable_name'] = df['tuple'].str[1]
+    df['variable_index'] = df['tuple'].str[2]
+    df.drop('tuple', axis=1, inplace=True)
 
-    # dict keys as index value as column
-    # get individual indices of specific block
-    # walk over results[(n, n)] and get all values in bla if key contained
+    print(df.head(), df.info())
+
+    # from here on split the dataframe component-wise into frames/series
+    # which are saved within the result-dict
+    # idea: some apply/map function solution combined with grouping per
+    #       component that creates a generic structure? in any case vectorized.
+    #       the function could also integrate the whole dict creation, etc.
 
     # TODO: add data blockwise from pyomo model
 
