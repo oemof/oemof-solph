@@ -57,22 +57,27 @@ def results_to_multiindex(es, om):
 
     # get all variables (including their block)
     block_vars = []
-
-    for v in om.component_data_objects(Var):
-        block_vars.append(str(v.parent_component()))
-
-    block_vars = list(set(block_vars))  # preserve unique values
+    for var in om.component_data_objects(Var):
+        block_vars.append(str(var.parent_component()))
+    block_vars = list(set(block_vars))
 
     print(block_vars)
 
     # get individual indices of specific block
 
-    # get values for single components from block
-    print(dir(om.InvestmentStorage.invest))
+    # get values for single components from block e.g. Storage.capacity
+    print(dir(om.Storage.capacity))
 
     # for scalars
-    bla = {i: om.InvestmentStorage.invest[i].value for i in om.InvestmentStorage.invest._index}
+    bla = {i: om.Storage.capacity[i].value for i in om.Storage.capacity._index}
+
+    # dict keys as index value as column
+    # -> appending to dataframe/series makes it generically
+    #bla = sorted(bla.items())
+
     print(bla)
+
+    # walk over results[(n, n)] and get all values in bla if key contained
 
     # TODO: add data blockwise from pyomo model
 
