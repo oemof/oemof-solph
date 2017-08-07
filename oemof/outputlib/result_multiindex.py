@@ -48,19 +48,30 @@ def results_to_multiindex(es, om):
     # 1. get all component keys/labels that are not sources, sinks, flows, lts
     # 2. walk through component_data_objects and get data for these keys
 
-    blocks = []
-    for v in om.component_data_objects(Var):
+
         #print(str(v), v.value)
         #print(dir(v))
-
         #print(v.index()[0])
         #blocks.append(str(v.index()[0]))
-
-        blocks.append(str(v.parent_component()))
         #blocks.append(str(v.parent_block()))
 
-    blocks = list(set(blocks)) # preserve unique values
-    print(blocks)
+    # get all variables (including their block)
+    block_vars = []
+
+    for v in om.component_data_objects(Var):
+        block_vars.append(v.parent_component())
+
+    block_vars = list(set(block_vars))  # preserve unique values
+
+    print(block_vars)
+
+    # get individual indices of specific block
+
+    # get values for single components from block
+    print(dir(om.InvestmentStorage.invest))
+    for i in om.InvestmentStorage.invest._index:
+        print(i)
+        print(om.InvestmentStorage.invest[i].value)
 
     # TODO: add data blockwise from pyomo model
 
