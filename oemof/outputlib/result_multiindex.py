@@ -59,7 +59,7 @@ def results_to_multiindex(es, om):
     block_vars = []
 
     for v in om.component_data_objects(Var):
-        block_vars.append(v.parent_component())
+        block_vars.append(str(v.parent_component()))
 
     block_vars = list(set(block_vars))  # preserve unique values
 
@@ -70,6 +70,7 @@ def results_to_multiindex(es, om):
     # get values for single components from block
     print(dir(om.InvestmentStorage.invest))
 
+    # for scalars
     bla = {i: om.InvestmentStorage.invest[i].value for i in om.InvestmentStorage.invest._index}
     print(bla)
 
