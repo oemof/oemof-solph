@@ -33,50 +33,19 @@ def results_to_multiindex(es, om):
     # add them to the results
     results.update(nodes_source)
 
-    # print(dir(om.Storage))
-    # print(type(om.Storage))
-    # print(om.Storage.block_data_objects)
-    print('Data (constraints):')
-
-
-    # # get block of param/variable?
-    # components = {v.index()[0]: v.value for v in om.component_data_objects(Var)
-    #               if (v.index()[0], v.index()[1]) not in results.keys()}
-    # print(components)
-
-
-    # 1. get all component keys/labels that are not sources, sinks, flows, lts
-    # 2. walk through component_data_objects and get data for these keys
-
-
-        #print(str(v), v.value)
-        #print(dir(v))
-        #print(v.index()[0])
-        #blocks.append(str(v.index()[0]))
-        #blocks.append(str(v.parent_block()))
-
     # get all variables (including their block)
     block_vars = []
     for var in om.component_data_objects(Var):
-        block_vars.append(str(var.parent_component()))
+        block_vars.append(var.parent_component())
     block_vars = list(set(block_vars))
 
-    print(block_vars)
+    # write into dict
+    dc = {i: bv[i].value for bv in block_vars for i in getattr(bv, '_index')}
 
-    # get individual indices of specific block
-
-    # get values for single components from block e.g. Storage.capacity
-    print(dir(om.Storage.capacity))
-
-    # for scalars
-    bla = {i: om.Storage.capacity[i].value for i in om.Storage.capacity._index}
+    print(dc)
 
     # dict keys as index value as column
-    # -> appending to dataframe/series makes it generically
-    #bla = sorted(bla.items())
-
-    print(bla)
-
+    # get individual indices of specific block
     # walk over results[(n, n)] and get all values in bla if key contained
 
     # TODO: add data blockwise from pyomo model
