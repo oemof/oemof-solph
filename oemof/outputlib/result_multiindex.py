@@ -39,30 +39,28 @@ def results_to_multiindex(es, om):
     print('Data (constraints):')
 
 
-    # get block of param/variable?
+    # # get block of param/variable?
+    # components = {v.index()[0]: v.value for v in om.component_data_objects(Var)
+    #               if (v.index()[0], v.index()[1]) not in results.keys()}
+    # print(components)
+
+
+    # 1. get all component keys/labels that are not sources, sinks, flows, lts
+    # 2. walk through component_data_objects and get data for these keys
+
     blocks = []
     for v in om.component_data_objects(Var):
         #print(str(v), v.value)
-
         #print(dir(v))
 
-        print(str(v.index()))
+        #print(v.index()[0])
+        #blocks.append(str(v.index()[0]))
 
-        #blocks.append(str(v.parent_component()))
+        blocks.append(str(v.parent_component()))
         #blocks.append(str(v.parent_block()))
 
-    #print(blocks)
-
-    # for obj in om.LinearTransformer.component_data_objects(ctype=Constraint, active=True, sort=True, descend_into=True):
-    #     print(obj)
-    #     print(dir(obj))
-    #     #print(obj.cname())
-
-    # print(om.LinearTransformer.component_data_objects)
-    # print(om.Storage.component_data_objects)
-    # for var in om.Storage.component_data_objects(ctype=po.Var, active=True,
-    #                                              sort=True, descend_into=True):
-    #     print(var)
+    blocks = list(set(blocks)) # preserve unique values
+    print(blocks)
 
     # TODO: add data blockwise from pyomo model
 
