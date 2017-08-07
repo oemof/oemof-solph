@@ -69,9 +69,9 @@ def results_to_multiindex(es, om):
 
     # get values for single components from block
     print(dir(om.InvestmentStorage.invest))
-    for i in om.InvestmentStorage.invest._index:
-        print(i)
-        print(om.InvestmentStorage.invest[i].value)
+
+    bla = {i: om.InvestmentStorage.invest[i].value for i in om.InvestmentStorage.invest._index}
+    print(bla)
 
     # TODO: add data blockwise from pyomo model
 
