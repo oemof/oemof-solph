@@ -23,7 +23,10 @@ import logging
 #
 # #############################################################################
 
+<<<<<<< 1506a7c3dae200f5283308aa69acc2b05e4aaba5
 
+=======
+>>>>>>> Add draft for expansion model example
 class ExpansionModel(po.ConcreteModel):
     """ An energy system model for optimized capacity expansion.
     """
@@ -201,9 +204,6 @@ class ExpansionModel(po.ConcreteModel):
 
         self.objective = po.Objective(sense=sense, expr=expr)
 
-
-=======
->>>>>>> dev
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
     dispatch.
