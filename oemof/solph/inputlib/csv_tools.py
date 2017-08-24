@@ -6,7 +6,8 @@ import logging
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import sequence
-from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+                       VariableFractionTransformer)
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
@@ -58,7 +59,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
                'LinearTransformer': LinearTransformer,
-               'Storage': Storage, 'Bus': Bus}
+               'Storage': Storage, 'Bus': Bus,
+               'VariableFractionTransformer': VariableFractionTransformer}
     classes.update(additional_classes)
 
     # attributes that have to be converted into a solph sequence
@@ -66,6 +68,7 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                       'negative_gradient', 'variable_costs',
                       'capacity_loss', 'inflow_conversion_factor',
                       'outflow_conversion_factor', 'capacity_max',
+                      'conversion_factor_single_flow',
                       'capacity_min'] + additional_seq_attributes
 
     # attributes of different classes
