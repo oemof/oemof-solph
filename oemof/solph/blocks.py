@@ -963,7 +963,6 @@ class VariableFractionTransformer(SimpleBlock):
         m = self.parent_block()
 
         for n in group:
-            print(n.label, n.inputs, type(n.inputs))
             n.inflow = list(n.inputs)[0]
             n.label_main_flow = str(
                 [k for k, v in n.conversion_factor_single_flow.items()][0])
