@@ -11,6 +11,7 @@ New features
 
 * Add an outputlib module to draw and plot energy system graphs using networx.
 * Sort columns of result dataframe lexicographically.
+* Make the CSV reader work with VariableFractionTransformer objects
 
 
 Documentation
