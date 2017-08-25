@@ -251,9 +251,10 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
             try:
                 if row['target'] and 'conversion_factor_single_flow' in row:
                     if row['conversion_factor_single_flow'] == 'seq':
-                        seq = nodes_flows_seq.loc[row['class'], row['label'],
-                                                  row['source'], row['target'],
-                                                  'conversion_factor_single_flow']
+                        seq = nodes_flows_seq.loc[
+                            row['class'], row['label'],
+                            row['source'], row['target'],
+                            'conversion_factor_single_flow']
                         seq = [i for i in seq]
                         seq = sequence(seq)
                         conversion_factor_single_flow = \
@@ -261,7 +262,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     else:
                         conversion_factor_single_flow = \
                             {nodes[row['target']]:
-                                row['conversion_factor_single_flow']}
+                             sequence(
+                                float(row['conversion_factor_single_flow']))}
                 else:
                     conversion_factor_single_flow = {}
             except:
