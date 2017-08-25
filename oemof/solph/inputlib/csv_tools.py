@@ -68,7 +68,6 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                       'negative_gradient', 'variable_costs',
                       'capacity_loss', 'inflow_conversion_factor',
                       'outflow_conversion_factor', 'capacity_max',
-                      'conversion_factor_single_flow',
                       'capacity_min'] + additional_seq_attributes
 
     # attributes of different classes
@@ -246,6 +245,31 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                 print('Label:', row['label'])
                 raise
 
+            # create a conversion_factor_single_flow entry for the current line
+            # only affects for nodes of type VariableFractionTransformer and
+            # the attribute has to be set in the first line
+            try:
+                if row['target'] and 'conversion_factor_single_flow' in row:
+                    if row['conversion_factor_single_flow'] == 'seq':
+                        seq = nodes_flows_seq.loc[row['class'], row['label'],
+                                                  row['source'], row['target'],
+                                                  'conversion_factor_single_flow']
+                        seq = [i for i in seq]
+                        seq = sequence(seq)
+                        conversion_factor_single_flow = \
+                            {nodes[row['target']]: seq}
+                    else:
+                        conversion_factor_single_flow = \
+                            {nodes[row['target']]:
+                                row['conversion_factor_single_flow']}
+                else:
+                    conversion_factor_single_flow = {}
+            except:
+                print('Error with  creation of conversion factor of single',
+                      'flow in line', i+2, 'in csv file.')
+                print('Label:', row['label'])
+                raise
+
             # add node to dict and assign attributes depending on
             # if there are multiple lines per node or not
             try:
@@ -260,6 +284,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     if not isinstance(node, Bus):
                         node.conversion_factors = conversion_factors
                         nodes[node.label] = node
+                    if isinstance(node, VariableFractionTransformer):
+                        node.conversion_factor_single_flow = \
+                            conversion_factor_single_flow
             except:
                 print('Error adding node to dict in line', i+2, 'in csv file.')
                 print('Label:', row['label'])
