@@ -14,22 +14,22 @@ def results_to_multiindex(es, om):
     Returns a multi-indexed dataframe of the results of an optimization model.
     """
 
-    # create data container for scalars and sequences
-    container = {'scalars': pd.Series(),
-                 'sequences': pd.DataFrame(index=es.timeindex)}
-
-    # create dict with keys (n1, n2) for flows
-    results = {(k, v): container for k, v in dict.fromkeys(om.flows)}
-
-    # get unique keys (n1, n1) for nodes
-    nodes_source = {(k1, k1): container for k1, k2 in results.keys()
-                    if issubclass(type(k1), Node)}
-    nodes_target = {(k2, k2): container for k1, k2 in results.keys()
-                    if issubclass(type(k2), Node)}
-    nodes_source.update(nodes_target)
-
-    # add them to the results
-    results.update(nodes_source)
+    # # create data container for scalars and sequences
+    # container = {'scalars': pd.Series(),
+    #              'sequences': pd.DataFrame(index=es.timeindex)}
+    #
+    # # add it to a result dict with keys (n1, n2) for flows
+    # results = {(k, v): container for k, v in dict.fromkeys(om.flows)}
+    #
+    # # get unique keys (n1, n1) for nodes
+    # nodes_source = {(k1, k1): container for k1, k2 in results.keys()
+    #                 if issubclass(type(k1), Node)}
+    # nodes_target = {(k2, k2): container for k1, k2 in results.keys()
+    #                 if issubclass(type(k2), Node)}
+    # nodes_source.update(nodes_target)
+    #
+    # # add them to the result dict
+    # results.update(nodes_source)
 
     # get all variables including their block
     block_vars = []
@@ -46,9 +46,24 @@ def results_to_multiindex(es, om):
     df['block_name'] = df['tuple'].str[0]
     df['variable_name'] = df['tuple'].str[1]
     df['variable_index'] = df['tuple'].str[2]
-    df.drop('tuple', axis=1, inplace=True)
+    #df.drop('tuple', axis=1, inplace=True)
+    #isinstance(obj, tuple)
+    #df['is_tuple'] = df['variable_index'].apply(lambda x: isinstance(x, tuple))
+    #df['tup'] = df['tuple'].apply(lambda x: tuple(i for i in x if isinstance(i, tuple)))
 
-    print(df.head(), df.info())
+    def my_fun(v):
+        for i in v:
+            if isinstance(i, tuple):
+                return i
+            elif issubclass(type(i), Node):
+                return (i,)
+            else:
+                pass
+
+    df['tup'] = df['tuple'].map(my_fun)
+
+    print(df.head())
+    df.to_csv('bla.csv')
 
     # from here on split the dataframe component-wise into frames/series
     # which are saved within the result-dict
@@ -56,36 +71,4 @@ def results_to_multiindex(es, om):
     #       component that creates a generic structure? in any case vectorized.
     #       the function could also integrate the whole dict creation, etc.
 
-    # TODO: add data blockwise from pyomo model
-
-    # # add data
-    # for source, target in om.flows:
-    #
-    #     # flows
-    #     data = [om.flow[source, target, t].value for t in om.TIMESTEPS]
-    #     results[(source, target)]['sequences']['value'] = data
-    #
-    #     # storages
-    #     if isinstance(source, Storage):
-    #         results[(source, source)] = \
-    #             {'sequences': pd.DataFrame(index=es.timeindex)}
-    #         if source.investment is None:
-    #             data = [om.Storage.capacity[source, t].value
-    #                     for t in om.TIMESTEPS]
-    #         else:
-    #             data = [om.InvestmentStorage.capacity[source, t].value
-    #                     for t in om.TIMESTEPS]
-    #         results[(source, source)]['sequences']['soc'] = data
-    #
-    #     # investment
-    #     if isinstance(om.flows[source, target].investment, Investment):
-    #         results[(source, target)] = \
-    #             {'scalars': pd.Series()}
-    #         results[(source, target)]['scalars']['investment'] = \
-    #             om.InvestmentFlow.invest[source, target].value
-    #         if isinstance(source, Storage):
-    #             results[(source, source)].update({'scalars': pd.Series()})
-    #             results[(source, source)]['scalars']['investment'] = \
-    #                 om.InvestmentStorage.invest[source].value
-
-    return results
+    #return results
