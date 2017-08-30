@@ -144,10 +144,12 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
 
     # create multi-indexed pandas dataframe
     res = results_to_multiindex(energysystem, om)
-    print(res[(sto, sto)]['sequences'])
-    print(res[(sto, sto)]['scalars'])
-    res[(sto, sto)]['sequences'].plot(kind='line')
-    plt.show()
+
+    #print(res[(sto, sto)]['sequences'])
+    #print(res[(sto, sto)]['scalars'])
+
+    # res[(sto, sto)]['sequences'].plot(kind='line')
+    # plt.show()
 
     return energysystem
 
