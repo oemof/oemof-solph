@@ -146,11 +146,12 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     results = results_to_dict(energysystem, om)
 
     # component results including investment vars
-    # scalars
+    # scalars are saved within a pandas series and sequences within a dataframe
     print(results[(sto,)]['scalars'].head())
     print(results[(sto,)]['sequences'].head())
 
     # flow results including investment vars
+    # scalars are saved within a pandas series and sequences within a dataframe
     print(results[(sto, bel)]['scalars'].head())
     print(results[(sto, bel)]['sequences'].head())
     print(results[(bel, dem)]['sequences'].head())
