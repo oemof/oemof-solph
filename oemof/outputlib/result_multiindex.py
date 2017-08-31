@@ -51,7 +51,7 @@ def results_to_multiindex(es, om):
     #df['is_tuple'] = df['variable_index'].apply(lambda x: isinstance(x, tuple))
     #df['tup'] = df['tuple'].apply(lambda x: tuple(i for i in x if isinstance(i, tuple)))
 
-    def my_fun(v):
+    def my_fun1(v):
         for i in v:
             if isinstance(i, tuple):
                 return i
@@ -60,7 +60,12 @@ def results_to_multiindex(es, om):
             else:
                 pass
 
-    df['tup'] = df['tuple'].map(my_fun)
+    df['tup'] = df['tuple'].map(my_fun1)
+
+    def my_fun2(v):
+        return all(issubclass(type(x), Node) for x in v)
+
+    df['tup2'] = df['tup'].map(my_fun2)
 
     print(df.head())
     df.to_csv('bla.csv')
