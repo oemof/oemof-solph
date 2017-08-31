@@ -60,17 +60,12 @@ def results_to_multiindex(es, om):
     df.sort_values(['tuples', 'timestep'], ascending=[True, True],
                    inplace=True)
 
-    #print(df.head())
-    #df.to_csv('df.csv')
+    results = {k: v[['timestep', 'variable_name', 'value']]
+               for k, v in df.groupby('tuples')}
 
-    dfs = {k: v[['timestep', 'variable_name', 'value']]
-           for k, v in df.groupby('tuples')}
+    for k, v in results.items():
+        results[k].set_index('timestep', inplace=True)
+        results[k] = results[k].pivot(columns='variable_name', values='value')
+        results[k].index = es.timeindex
 
-    # for k, v in dfs.items():
-    #     v.set_index('timestep', inplace=True)
-    #     v = v.pivot(columns='variable_name', values='value')
-    #     v.index = es.timeindex
-    #     v.to_csv(str(k) + '.csv')
-    #     print(k, v.head())
-
-    #return results
+    return results
