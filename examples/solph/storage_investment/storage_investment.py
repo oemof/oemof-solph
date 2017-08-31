@@ -142,7 +142,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     logging.info('Solve the optimization problem')
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
-    # create multi-indexed pandas dataframe
+    # create a dictionary with the results
     results = results_to_dict(energysystem, om)
 
     # component results including investment vars
