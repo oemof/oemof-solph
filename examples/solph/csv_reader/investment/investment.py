@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from datetime import datetime
-from oemof.outputlib import results_to_dict
+from oemof.outputlib import results_to_dictionary
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
@@ -70,7 +70,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    results = results_to_dict(es, om)
+    results = results_to_dictionary(es, om)
 
     # flow ids that include investment results
     ids = {'REGION1_pp_uranium': 'REGION1_bus_el',

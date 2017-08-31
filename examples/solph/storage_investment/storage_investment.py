@@ -38,7 +38,7 @@ from oemof import outputlib
 from oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics
-from oemof.outputlib import results_to_dict
+from oemof.outputlib import results_to_dictionary
 import oemof.solph as solph
 
 
@@ -143,7 +143,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     # create a dictionary with the results
-    results = results_to_dict(energysystem, om)
+    results = results_to_dictionary(energysystem, om)
 
     # component results including investment vars
     # scalars are saved within a pandas series and sequences within a dataframe
