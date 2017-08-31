@@ -14,21 +14,19 @@ def results_to_multiindex(es, om):
     Returns a multi-indexed dataframe of the results of an optimization model.
     """
 
-    # get all variables including their block
+    # get all pyomo variables including their block
     block_vars = []
     for bv in om.component_data_objects(Var):
         block_vars.append(bv.parent_component())
     block_vars = list(set(block_vars))
 
-    # write them into a dict with tuple keys (block_name, var_name, var_index)
+    # write them into a dict with tuples as keys
     dc = {(str(bv).split('.')[0], str(bv).split('.')[-1], i): bv[i].value
           for bv in block_vars for i in getattr(bv, '_index')}
 
-    # create a pandas dataframe
-    df = pd.DataFrame(list(dc.items()), columns=['tuple', 'value'])
-    df['block_name'] = df['tuple'].str[0]
-    df['variable_name'] = df['tuple'].str[1]
-    df['variable_index'] = df['tuple'].str[2]
+    # use this to create a pandas dataframe
+    df = pd.DataFrame(list(dc.items()), columns=['pyomo_tuple', 'value'])
+    df['variable_name'] = df['pyomo_tuple'].str[1]
 
     def get_tuple(v):
         for i in v:
@@ -39,7 +37,7 @@ def results_to_multiindex(es, om):
             else:
                 pass
 
-    df['tuples'] = df['tuple'].map(get_tuple)
+    df['oemof_tuple'] = df['pyomo_tuple'].map(get_tuple)
 
     def get_timestep(v):
         if all(issubclass(type(x), Node) for x in v):
@@ -47,7 +45,7 @@ def results_to_multiindex(es, om):
         else:
             return v[-1]
 
-    df['timestep'] = df['tuples'].map(get_timestep)
+    df['timestep'] = df['oemof_tuple'].map(get_timestep)
 
     def remove_timestep(v):
         if all(issubclass(type(x), Node) for x in v):
@@ -55,13 +53,13 @@ def results_to_multiindex(es, om):
         else:
             return v[:-1]
 
-    df['tuples'] = df['tuples'].map(remove_timestep)
+    df['oemof_tuple'] = df['oemof_tuple'].map(remove_timestep)
 
-    df.sort_values(['tuples', 'timestep'], ascending=[True, True],
+    df.sort_values(['oemof_tuple', 'timestep'], ascending=[True, True],
                    inplace=True)
 
     results = {k: v[['timestep', 'variable_name', 'value']]
-               for k, v in df.groupby('tuples')}
+               for k, v in df.groupby('oemof_tuple')}
 
     my_dc = {}
     for k, v in results.items():
