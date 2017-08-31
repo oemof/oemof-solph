@@ -72,7 +72,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     # create multi-indexed pandas dataframe
     results = results_to_dict(es, om)
 
-    # flows with investment results
+    # flow ids that include investment results
     ids = {'REGION1_pp_uranium': 'REGION1_bus_el',
            'REGION1_pp_lignite': 'REGION1_bus_el',
            'REGION1_pp_hard_coal': 'REGION1_bus_el',
@@ -85,11 +85,11 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
            'REGION1_bus_el': 'REGION1_storage_phs',
            'REGION1_storage_phs': 'REGION1_bus_el'}
 
-    # aggregation
+    # data aggregation
     invest_results = pd.Series()
     for k, v in ids.items():
-        tuple = (es.groups[k], es.groups[v])
-        tmp = results[tuple]['scalars']
+        flow_tuple = (es.groups[k], es.groups[v])
+        tmp = results[flow_tuple]['scalars']
         tmp.index = [k]
         data = [invest_results, tmp]
         invest_results = pd.concat(data, ignore_index=False)
