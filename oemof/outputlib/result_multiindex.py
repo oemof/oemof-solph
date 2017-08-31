@@ -63,9 +63,13 @@ def results_to_multiindex(es, om):
     results = {k: v[['timestep', 'variable_name', 'value']]
                for k, v in df.groupby('tuples')}
 
+    my_dc = {}
     for k, v in results.items():
         results[k].set_index('timestep', inplace=True)
         results[k] = results[k].pivot(columns='variable_name', values='value')
         results[k].index = es.timeindex
+        scalars = results[k].loc[:, results[k].isnull().any()].dropna().iloc[0]
+        sequences = results[k].loc[:, ~(results[k].isnull().any())]
+        my_dc[k] = {'scalars': scalars, 'sequences': sequences}
 
-    return results
+    return my_dc

@@ -95,7 +95,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
         fixed_costs=15)})
 
     # create simple sink object representing the electrical demand
-    solph.Sink(label='demand', inputs={bel: solph.Flow(
+    dem = solph.Sink(label='demand', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple transformer object representing a gas power plant
@@ -145,13 +145,25 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     # create multi-indexed pandas dataframe
     results = results_to_multiindex(energysystem, om)
 
-    print(results.keys())
+    # component results including investment vars
+    # scalars
+    print(results[(sto,)]['scalars'].head())
+    print(results[(sto,)]['sequences'].head())
 
-    print(results[(sto,)]['invest'])
+    # flow results including investment vars
+    print(results[(sto, bel)]['scalars'].head())
+    print(results[(sto, bel)]['sequences'].head())
+    print(results[(bel, dem)]['sequences'].head())
 
-    ax = results[(sto,)]['capacity'].plot(kind='line', drawstyle='steps')
-    results[(sto, bel)]['flow'].plot(kind='line', drawstyle='steps', ax=ax)
-    results[(bel, sto)]['flow'].plot(kind='line', drawstyle='steps', ax=ax)
+    # simple plotting example
+    ax = results[(sto,)]['sequences']['capacity'].plot(kind='line')
+    results[(sto, bel)]['sequences'].plot(kind='line', ax=ax)
+    results[(bel, sto)]['sequences'].plot(kind='line', ax=ax)
+    results[(bel, dem)]['sequences'].plot(kind='line', ax=ax)
+    ax.legend(['Storage level', 'Storage out', 'Storage in', 'Demand'])
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Power in MW / Energy in MWh')
+    ax.set_title('Some easy plotting')
     plt.show()
 
     return energysystem
