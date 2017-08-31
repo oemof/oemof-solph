@@ -160,7 +160,8 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     results[(sto, bel)]['sequences'].plot(kind='line', ax=ax)
     results[(bel, sto)]['sequences'].plot(kind='line', ax=ax)
     results[(bel, dem)]['sequences'].plot(kind='line', ax=ax)
-    ax.legend(['Storage level', 'Storage out', 'Storage in', 'Demand'])
+    ax.legend(['Storage level', 'Storage out', 'Storage in', 'Demand'],
+              loc='upper right')
     ax.set_xlabel('Date')
     ax.set_ylabel('Power in MW / Energy in MWh')
     ax.set_title('Some easy plotting')
