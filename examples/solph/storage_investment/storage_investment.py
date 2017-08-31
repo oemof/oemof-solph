@@ -38,7 +38,7 @@ from oemof import outputlib
 from oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics
-from oemof.outputlib import results_to_multiindex
+from oemof.outputlib import results_to_dict
 import oemof.solph as solph
 
 
@@ -143,7 +143,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     # create multi-indexed pandas dataframe
-    results = results_to_multiindex(energysystem, om)
+    results = results_to_dict(energysystem, om)
 
     # component results including investment vars
     # scalars
@@ -155,17 +155,17 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     print(results[(sto, bel)]['sequences'].head())
     print(results[(bel, dem)]['sequences'].head())
 
-    # simple plotting example
-    ax = results[(sto,)]['sequences']['capacity'].plot(kind='line')
-    results[(sto, bel)]['sequences'].plot(kind='line', ax=ax)
-    results[(bel, sto)]['sequences'].plot(kind='line', ax=ax)
-    results[(bel, dem)]['sequences'].plot(kind='line', ax=ax)
-    ax.legend(['Storage level', 'Storage out', 'Storage in', 'Demand'],
-              loc='upper right')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Power in MW / Energy in MWh')
-    ax.set_title('Some easy plotting')
-    plt.show()
+    # # simple plotting example
+    # ax = results[(sto,)]['sequences']['capacity'].plot(kind='line')
+    # results[(sto, bel)]['sequences'].plot(kind='line', ax=ax)
+    # results[(bel, sto)]['sequences'].plot(kind='line', ax=ax)
+    # results[(bel, dem)]['sequences'].plot(kind='line', ax=ax)
+    # ax.legend(['Storage level', 'Storage out', 'Storage in', 'Demand'],
+    #           loc='upper right')
+    # ax.set_xlabel('Date')
+    # ax.set_ylabel('Power in MW / Energy in MWh')
+    # ax.set_title('Some easy plotting')
+    # plt.show()
 
     return energysystem
 

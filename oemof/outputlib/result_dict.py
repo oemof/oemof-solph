@@ -52,7 +52,7 @@ def remove_timestep(x):
         return x[:-1]
 
 
-def results_to_multiindex(es, om):
+def results_to_dict(es, om):
     """
     Create a result dictionary with all optimization data.
 
