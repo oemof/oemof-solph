@@ -14,23 +14,6 @@ def results_to_multiindex(es, om):
     Returns a multi-indexed dataframe of the results of an optimization model.
     """
 
-    # # create data container for scalars and sequences
-    # container = {'scalars': pd.Series(),
-    #              'sequences': pd.DataFrame(index=es.timeindex)}
-    #
-    # # add it to a result dict with keys (n1, n2) for flows
-    # results = {(k, v): container for k, v in dict.fromkeys(om.flows)}
-    #
-    # # get unique keys (n1, n1) for nodes
-    # nodes_source = {(k1, k1): container for k1, k2 in results.keys()
-    #                 if issubclass(type(k1), Node)}
-    # nodes_target = {(k2, k2): container for k1, k2 in results.keys()
-    #                 if issubclass(type(k2), Node)}
-    # nodes_source.update(nodes_target)
-    #
-    # # add them to the result dict
-    # results.update(nodes_source)
-
     # get all variables including their block
     block_vars = []
     for bv in om.component_data_objects(Var):
@@ -46,12 +29,8 @@ def results_to_multiindex(es, om):
     df['block_name'] = df['tuple'].str[0]
     df['variable_name'] = df['tuple'].str[1]
     df['variable_index'] = df['tuple'].str[2]
-    #df.drop('tuple', axis=1, inplace=True)
-    #isinstance(obj, tuple)
-    #df['is_tuple'] = df['variable_index'].apply(lambda x: isinstance(x, tuple))
-    #df['tup'] = df['tuple'].apply(lambda x: tuple(i for i in x if isinstance(i, tuple)))
 
-    def my_fun1(v):
+    def get_tuple(v):
         for i in v:
             if isinstance(i, tuple):
                 return i
@@ -60,20 +39,38 @@ def results_to_multiindex(es, om):
             else:
                 pass
 
-    df['tup'] = df['tuple'].map(my_fun1)
+    df['tuples'] = df['tuple'].map(get_tuple)
 
-    def my_fun2(v):
-        return all(issubclass(type(x), Node) for x in v)
+    def get_timestep(v):
+        if all(issubclass(type(x), Node) for x in v):
+            return 0
+        else:
+            return v[-1]
 
-    df['tup2'] = df['tup'].map(my_fun2)
+    df['timestep'] = df['tuples'].map(get_timestep)
 
-    print(df.head())
-    df.to_csv('bla.csv')
+    def remove_timestep(v):
+        if all(issubclass(type(x), Node) for x in v):
+            return v
+        else:
+            return v[:-1]
 
-    # from here on split the dataframe component-wise into frames/series
-    # which are saved within the result-dict
-    # idea: some apply/map function solution combined with grouping per
-    #       component that creates a generic structure? in any case vectorized.
-    #       the function could also integrate the whole dict creation, etc.
+    df['tuples'] = df['tuples'].map(remove_timestep)
+
+    df.sort_values(['tuples', 'timestep'], ascending=[True, True],
+                   inplace=True)
+
+    #print(df.head())
+    #df.to_csv('df.csv')
+
+    dfs = {k: v[['timestep', 'variable_name', 'value']]
+           for k, v in df.groupby('tuples')}
+
+    for k, v in dfs.items():
+        v.set_index('timestep', inplace=True)
+        v = v.pivot(columns='variable_name', values='value')
+        v.index = es.timeindex
+        v.to_csv(str(k) + '.csv')
+        print(k, v.head())
 
     #return results
