@@ -69,7 +69,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     logging.info('Done!')
 
-    # create multi-indexed pandas dataframe
+    # create a dictionary with the results
     results = results_to_dict(es, om)
 
     # flow ids that include investment results
