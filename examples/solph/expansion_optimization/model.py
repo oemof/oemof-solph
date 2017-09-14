@@ -19,15 +19,23 @@ energysystem = solph.EnergySystem(timeindex=timeindex)
 # create electricity bus
 bel = solph.Bus(label="bel")
 bel.sector = 'electricity'
-# create excess component for the electricity bus to allow overproduction
+
+
 solph.Sink(label='excess_el', inputs={bel: solph.Flow()})
 
-# create fixed source object representing wind power plants
-solph.Source(label='wind', outputs={bel: solph.Flow(
-    actual_value=2, nominal_value=1, fixed=True,
-    fixed_costs=20)})
 
-# create simple transformer object representing a gas power plant
+solph.Source(label='wind',
+             outputs={bel:
+                solph.Flow(actual_value=1,
+                           fixed=True,
+                           investment=solph.Expansion())})
+
+solph.Source(label="pv",
+             outputs={bel:
+                solph.Flow(actual_value=1,
+                           fixed=True,
+                           investment=solph.Expansion())})
+
 solph.Source(
     label="pp_gas",
     outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50,
