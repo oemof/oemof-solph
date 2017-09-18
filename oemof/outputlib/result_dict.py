@@ -52,15 +52,13 @@ def remove_timestep(x):
         return x[:-1]
 
 
-def results_to_dict(es, om):
+def results_to_df(es, om):
     """
-    Create a result dictionary with all optimization data.
+    Create a result dataframe with all optimization data.
 
-    Results from Pyomo are written into a dictionary of pandas objects where
-    a Series holds all scalar values and a dataframe all sequences for nodes
-    and flows.
-    The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
-    and flows e.g. `results[(n,n)]['sequences']`.
+    Results from Pyomo are written into pandas DataFrame where separate columns
+    are created for the variable index e.g. for tuples of the flows and
+    components or the timesteps.
     """
     # get all pyomo variables including their block
     block_vars = []
@@ -85,6 +83,21 @@ def results_to_dict(es, om):
 
     # order the data by oemof tuple and timestep
     df = df.sort_values(['oemof_tuple', 'timestep'], ascending=[True, True])
+
+    return df
+
+
+def results_to_dict(es, om):
+    """
+    Create a result dictionary from the result DataFrame.
+
+    Results from Pyomo are written into a dictionary of pandas objects where
+    a Series holds all scalar values and a dataframe all sequences for nodes
+    and flows.
+    The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
+    and flows e.g. `results[(n,n)]['sequences']`.
+    """
+    df = results_to_df(es, om)
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {k: v[['timestep', 'variable_name', 'value']]
