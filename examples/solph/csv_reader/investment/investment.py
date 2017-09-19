@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from datetime import datetime
-from oemof.outputlib import results_to_dict
+from oemof.outputlib import results_to_dict, node_results
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
@@ -72,36 +72,42 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     # create a dictionary with the results
     results = results_to_dict(es, om)
 
-    # flow ids that include investment results
-    ids = {'REGION1_pp_uranium': 'REGION1_bus_el',
-           'REGION1_pp_lignite': 'REGION1_bus_el',
-           'REGION1_pp_hard_coal': 'REGION1_bus_el',
-           'REGION1_pp_lignite': 'REGION1_bus_el',
-           'REGION1_pp_gas': 'REGION1_bus_el',
-           'REGION1_pp_oil': 'REGION1_bus_el',
-           'REGION1_pp_biomass': 'REGION1_bus_el',
-           'REGION1_wind': 'REGION1_bus_el',
-           'REGION1_solar': 'REGION1_bus_el',
-           'REGION1_bus_el': 'REGION1_storage_phs',
-           'REGION1_storage_phs': 'REGION1_bus_el'}
+    # get node results
+    region1 = node_results(results, es.groups['REGION1_bus_el'])
 
-    # data aggregation
-    invest_results = pd.Series()
-    for k, v in ids.items():
-        flow_tuple = (es.groups[k], es.groups[v])
-        tmp = results[flow_tuple]['scalars']
-        tmp.index = [k]
-        data = [invest_results, tmp]
-        invest_results = pd.concat(data, ignore_index=False)
+    print(region1['sequences'].head())
+    print(region1['scalars'])
 
-    # plot results
-    invest_results.index = [str.replace(k, 'REGION1_', '') for k in ids.keys()]
-    ax = invest_results.plot(kind='bar')
-    ax.set_xlabel('Technology')
-    ax.set_ylabel('Installed capacity in MW')
-    ax.set_title('Some easy plotting')
-    plt.tight_layout()
-    plt.show()
+    # # flow ids that include investment results
+    # ids = {'REGION1_pp_uranium': 'REGION1_bus_el',
+    #        'REGION1_pp_lignite': 'REGION1_bus_el',
+    #        'REGION1_pp_hard_coal': 'REGION1_bus_el',
+    #        'REGION1_pp_lignite': 'REGION1_bus_el',
+    #        'REGION1_pp_gas': 'REGION1_bus_el',
+    #        'REGION1_pp_oil': 'REGION1_bus_el',
+    #        'REGION1_pp_biomass': 'REGION1_bus_el',
+    #        'REGION1_wind': 'REGION1_bus_el',
+    #        'REGION1_solar': 'REGION1_bus_el',
+    #        'REGION1_bus_el': 'REGION1_storage_phs',
+    #        'REGION1_storage_phs': 'REGION1_bus_el'}
+    #
+    # # data aggregation
+    # invest_results = pd.Series()
+    # for k, v in ids.items():
+    #     flow_tuple = (es.groups[k], es.groups[v])
+    #     tmp = results[flow_tuple]['scalars']
+    #     tmp.index = [k]
+    #     data = [invest_results, tmp]
+    #     invest_results = pd.concat(data, ignore_index=False)
+    #
+    # # plot results
+    # invest_results.index = [str.replace(k, 'REGION1_', '') for k in ids.keys()]
+    # ax = invest_results.plot(kind='bar')
+    # ax.set_xlabel('Technology')
+    # ax.set_ylabel('Installed capacity in MW')
+    # ax.set_title('Some easy plotting')
+    # plt.tight_layout()
+    # plt.show()
 
 
 if __name__ == '__main__':

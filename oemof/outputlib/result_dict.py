@@ -115,3 +115,24 @@ def results_to_dict(es, om):
         results[k] = {'scalars': scalars, 'sequences': sequences}
 
     return results
+
+
+def node_results(results, node):
+    """
+    Get results for a single node e.g. a Bus or Component.
+
+    Results are written into a dictionary which is keyed by 'scalars' and
+    'sequences' holding respective data in a pandas Series and DataFrame.
+    """
+    # tuples should be column names
+    sequences = {k: v['sequences'] for k, v in results.items() if node in k}
+    sequences = pd.concat(sequences.values(), axis=1, ignore_index=False)
+
+    scalars = {k: v['scalars'] for k, v in results.items() if node in k}
+    scalars = pd.concat(scalars.values(), axis=0, ignore_index=False)
+
+    filtered = {}
+    filtered['sequences'] = sequences
+    filtered['scalars'] = scalars
+
+    return filtered
