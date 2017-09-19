@@ -70,47 +70,43 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    results_complete = results_to_dict(es, om)
+    results = results_to_dict(es, om)
 
-    # get node results (bus)
-    region1 = node_results(results_complete, es.groups['REGION1_bus_el'])
+    # standard api: results for a flow
+    my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
+    print(results[my_id]['scalars'])
+    print(results[my_id]['sequences'].describe())
+
+    # standard api: results for a component
+    my_id = (es.groups['REGION1_storage_phs'],)
+    print(results[my_id]['scalars'])
+    print(results[my_id]['sequences'].describe())
+
+    # slicing functions: get all node results (bus)
+    region1 = node_results(results, es.groups['REGION1_bus_el'])
     print(region1['sequences'].max())
     print(region1['scalars'])
 
-    region1['scalars'].plot(kind='barh')
-    plt.tight_layout()
+    # slicing functions: get all node results (component)
+    phs = node_results(results, es.groups['REGION1_storage_phs'])
+    print(phs['sequences'].max())
+    print(phs['scalars'])
+
+    # example plot for sequences
+    phs['sequences'].columns = ['P-IN', 'P-OUT', 'CAP']
+    ax = phs['sequences'].plot(kind='line', drawstyle='steps-post')
+    ax.set_title('Dispatch results')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Power (MW) / Energy (MWh)')
     plt.show()
 
-    # # flow ids that include investment results
-    # ids = {'REGION1_pp_uranium': 'REGION1_bus_el',
-    #        'REGION1_pp_lignite': 'REGION1_bus_el',
-    #        'REGION1_pp_hard_coal': 'REGION1_bus_el',
-    #        'REGION1_pp_lignite': 'REGION1_bus_el',
-    #        'REGION1_pp_gas': 'REGION1_bus_el',
-    #        'REGION1_pp_oil': 'REGION1_bus_el',
-    #        'REGION1_pp_biomass': 'REGION1_bus_el',
-    #        'REGION1_wind': 'REGION1_bus_el',
-    #        'REGION1_solar': 'REGION1_bus_el',
-    #        'REGION1_bus_el': 'REGION1_storage_phs',
-    #        'REGION1_storage_phs': 'REGION1_bus_el'}
-    #
-    # # data aggregation
-    # invest_results = pd.Series()
-    # for k, v in ids.items():
-    #     flow_tuple = (es.groups[k], es.groups[v])
-    #     tmp = results[flow_tuple]['scalars']
-    #     tmp.index = [k]
-    #     data = [invest_results, tmp]
-    #     invest_results = pd.concat(data, ignore_index=False)
-    #
-    # # plot results
-    # invest_results.index = [str.replace(k, 'REGION1_', '') for k in ids.keys()]
-    # ax = invest_results.plot(kind='bar')
-    # ax.set_xlabel('Technology')
-    # ax.set_ylabel('Installed capacity in MW')
-    # ax.set_title('Some easy plotting')
-    # plt.tight_layout()
-    # plt.show()
+    # example plot for scalars
+    phs['scalars'].index = ['P-IN', 'P-OUT', 'CAP']
+    ax = phs['scalars'].plot(kind='bar')
+    ax.set_title('Investment results')
+    ax.set_xlabel('')
+    ax.set_ylabel('Storage investment in MWh / MW')
+    plt.show()
 
 if __name__ == '__main__':
     run_investment_example()
