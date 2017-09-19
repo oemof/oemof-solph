@@ -124,15 +124,20 @@ def node_results(results, node):
     Results are written into a dictionary which is keyed by 'scalars' and
     'sequences' holding respective data in a pandas Series and DataFrame.
     """
+    # data should be sorted
+    filtered = {}
+
     # tuples should be column names
     sequences = {k: v['sequences'] for k, v in results.items() if node in k}
-    sequences = pd.concat(sequences.values(), axis=1, ignore_index=False)
+    tuples = ['(%s)' % ', '.join([j.label for j in i])
+              for i in sequences.keys()]
+    filtered['sequences'] = pd.concat(sequences.values(), axis=1)
+    filtered['sequences'].columns = zip(tuples, filtered['sequences'].columns)
 
     scalars = {k: v['scalars'] for k, v in results.items() if node in k}
-    scalars = pd.concat(scalars.values(), axis=0, ignore_index=False)
-
-    filtered = {}
-    filtered['sequences'] = sequences
-    filtered['scalars'] = scalars
+    tuples = ['(%s)' % ', '.join([j.label for j in i])
+              for i in scalars.keys()]
+    filtered['scalars'] = pd.concat(scalars.values(), axis=0)
+    filtered['scalars'].index = zip(tuples, filtered['scalars'].index)
 
     return filtered

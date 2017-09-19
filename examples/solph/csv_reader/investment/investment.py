@@ -73,7 +73,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     results = results_to_dict(es, om)
 
     # get node results
-    region1 = node_results(results, es.groups['REGION1_bus_el'])
+    region1 = node_results(results, es.groups['REGION1_storage_phs'])
 
     print(region1['sequences'].head())
     print(region1['scalars'])
