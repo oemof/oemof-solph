@@ -70,13 +70,16 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    results = results_to_dict(es, om)
+    results_complete = results_to_dict(es, om)
 
-    # get node results
-    region1 = node_results(results, es.groups['REGION1_storage_phs'])
-
-    print(region1['sequences'].head())
+    # get node results (bus)
+    region1 = node_results(results_complete, es.groups['REGION1_bus_el'])
+    print(region1['sequences'].max())
     print(region1['scalars'])
+
+    region1['scalars'].plot(kind='barh')
+    plt.tight_layout()
+    plt.show()
 
     # # flow ids that include investment results
     # ids = {'REGION1_pp_uranium': 'REGION1_bus_el',
@@ -108,7 +111,6 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     # ax.set_title('Some easy plotting')
     # plt.tight_layout()
     # plt.show()
-
 
 if __name__ == '__main__':
     run_investment_example()
