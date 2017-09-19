@@ -132,7 +132,6 @@ def node_results(results, node):
     tuples = [str(tup) for tup in sequences.keys()]
     filtered['sequences'] = pd.concat(sequences.values(), axis=1)
     filtered['sequences'].columns = zip(tuples, filtered['sequences'].columns)
-    filtered['sequences'].name = 'sequences'
     filtered['sequences'].sort_index(axis=1, inplace=True)
 
     # create a series with tuples as index labels for scalars
@@ -141,7 +140,6 @@ def node_results(results, node):
     tuples = [str(tup) for tup in scalars.keys()]
     filtered['scalars'] = pd.concat(scalars.values(), axis=0)
     filtered['scalars'].index = zip(tuples, filtered['scalars'].index)
-    filtered['scalars'].name = 'scalars'
     filtered['scalars'].sort_index(axis=0, inplace=True)
 
     return filtered
