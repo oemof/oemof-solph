@@ -96,6 +96,8 @@ def results_to_dict(es, om):
     and flows.
     The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
+
+    @TODO: Duals have to be added as sequences at least for busses
     """
     df = results_to_df(es, om)
 
