@@ -140,6 +140,9 @@ class Node:
     def __str__(self):
         return str(self.label)
 
+    def __repr__(self):
+        return self.label
+
     @property
     def label(self):
         return (self._label if hasattr(self, "_label")
