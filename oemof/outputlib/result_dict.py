@@ -6,6 +6,7 @@ Information about the possible usage is provided within the examples.
 """
 
 import pandas as pd
+from itertools import groupby
 from oemof.network import Node
 from pyomo.core.base.var import Var
 
@@ -97,7 +98,6 @@ def results_to_dict(es, om):
     The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
 
-    @TODO: Duals have to be added as sequences at least for busses
     """
     df = results_to_df(es, om)
 
@@ -115,6 +115,17 @@ def results_to_dict(es, om):
         scalars = df_dict[k].loc[:, df_dict[k].isnull().any()].dropna().iloc[0]
         sequences = df_dict[k].loc[:, ~(df_dict[k].isnull().any())]
         results[k] = {'scalars': scalars, 'sequences': sequences}
+
+    # add dual variables for bus constraints
+    if hasattr(om, 'dual'):
+        grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
+        for bus, timesteps in grouped:
+            duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
+            df = pd.DataFrame({'duals': duals}, index=es.timeindex)
+            if (bus,) not in results.keys():
+                results[(bus,)] = {'sequences': df, 'scalars': pd.Series()}
+            else:
+                results[(bus,)]['sequences']['duals'] = duals
 
     return results
 
