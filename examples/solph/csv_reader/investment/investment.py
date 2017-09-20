@@ -27,6 +27,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     # %% model creation and solving
     date_from = '2050-01-01 00:00:00'
+
     date_to = '2050-01-01 23:00:00'
 
     datetime_index = pd.date_range(date_from, date_to, freq='60min')
@@ -107,6 +108,8 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     ax.set_xlabel('')
     ax.set_ylabel('Storage investment in MWh / MW')
     plt.show()
+
+    print(results[(es.groups['REGION1_bus_el'],)]['sequences'])
 
 if __name__ == '__main__':
     run_investment_example()
