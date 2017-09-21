@@ -14,6 +14,9 @@ def node_results(results, node):
 
     Results are written into a dictionary which is keyed by 'scalars' and
     'sequences' holding respective data in a pandas Series and DataFrame.
+
+    @ TODO: somehow the relation between the variable name and flow/comp
+            has to be integrated in the dataframe/series columns/index
     """
     filtered = {}
 
@@ -22,7 +25,7 @@ def node_results(results, node):
                if node in k and not (v['scalars'].empty)}
     tuples = [str(tup) for tup in scalars.keys()]
     filtered['scalars'] = pd.concat(scalars.values(), axis=0)
-    filtered['scalars'].index = zip(tuples, filtered['scalars'].index)
+    # filtered['scalars'].index = zip(tuples, filtered['scalars'].index)
     filtered['scalars'].sort_index(axis=0, inplace=True)
 
     # create a dataframe with tuples as column labels for sequences
@@ -30,7 +33,7 @@ def node_results(results, node):
                  if node in k and not (v['sequences'].empty)}
     tuples = [str(tup) for tup in sequences.keys()]
     filtered['sequences'] = pd.concat(sequences.values(), axis=1)
-    filtered['sequences'].columns = zip(tuples, filtered['sequences'].columns)
+    # filtered['sequences'].columns = zip(tuples, filtered['sequences'].columns)
     filtered['sequences'].sort_index(axis=1, inplace=True)
 
     return filtered
