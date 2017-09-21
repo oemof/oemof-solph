@@ -38,9 +38,7 @@ from oemof import outputlib
 from oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics
-from oemof.outputlib import results_to_dict
 import oemof.solph as solph
-
 
 # import oemof base classes to create energy system objects
 import logging
@@ -55,7 +53,7 @@ except ImportError:
 
 
 def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
-                          debug=True, number_timesteps=24*7*12, tee_switch=True):
+                          debug=True, number_timesteps=8760, tee_switch=True):
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
@@ -95,7 +93,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
         fixed_costs=15)})
 
     # create simple sink object representing the electrical demand
-    dem = solph.Sink(label='demand', inputs={bel: solph.Flow(
+    solph.Sink(label='demand', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple transformer object representing a gas power plant
@@ -110,7 +108,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     # create storage object representing a battery
-    sto = solph.Storage(
+    solph.Storage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -142,147 +140,121 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     logging.info('Solve the optimization problem')
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
-    # create a dictionary with the results
-    results = results_to_dict(energysystem, om)
-
-    # component results including investment vars
-    # scalars are saved within a pandas series and sequences within a dataframe
-    print(results[(sto,)]['scalars'].head())
-    print(results[(sto,)]['sequences'].head())
-
-    # flow results including investment vars
-    # scalars are saved within a pandas series and sequences within a dataframe
-    print(results[(sto, bel)]['scalars'].head())
-    print(results[(sto, bel)]['sequences'].head())
-    print(results[(bel, dem)]['sequences'].head())
-
-    # simple plotting example
-    ax = results[(sto,)]['sequences']['capacity'].plot(kind='line')
-    results[(sto, bel)]['sequences'].plot(kind='line', ax=ax)
-    results[(bel, sto)]['sequences'].plot(kind='line', ax=ax)
-    results[(bel, dem)]['sequences'].plot(kind='line', ax=ax)
-    ax.legend(['Storage level', 'Storage out', 'Storage in', 'Demand'],
-              loc='upper right')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Power in MW / Energy in MWh')
-    ax.set_title('Some easy plotting')
-    plt.show()
-
     return energysystem
 
 
-# def get_result_dict(energysystem):
-#     """Shows how to extract single time series from results.
-#
-#     Parameters
-#     ----------
-#     energysystem : solph.EnergySystem
-#
-#     Returns
-#     -------
-#     dict : Some results.
-#     """
-#     logging.info('Check the results')
-#     storage = energysystem.groups['storage']
-#     myresults = outputlib.DataFramePlot(energy_system=energysystem)
-#
-#     # electrical output of natural gas power plant
-#     pp_gas = myresults.slice_by(obj_label='pp_gas', type='to_bus',
-#                                 date_from='2012-01-01 00:00:00',
-#                                 date_to='2012-12-31 23:00:00')
-#
-#     # electrical demand
-#     demand = myresults.slice_by(obj_label='demand',
-#                                 date_from='2012-01-01 00:00:00',
-#                                 date_to='2012-12-31 23:00:00')
-#
-#     # electrical output of wind power plant
-#     wind = myresults.slice_by(obj_label='wind',
-#                               date_from='2012-01-01 00:00:00',
-#                               date_to='2012-12-31 23:00:00')
-#
-#     # electrical output of pv power plant
-#     pv = myresults.slice_by(obj_label='pv',
-#                             date_from='2012-01-01 00:00:00',
-#                             date_to='2012-12-31 23:00:00')
-#
-#     return {'pp_gas_sum': pp_gas.sum(),
-#             'demand_sum': demand.sum(),
-#             'demand_max': demand.max(),
-#             'wind_sum': wind.sum(),
-#             'wind_inst': wind.max()/0.99989,
-#             'pv_sum': pv.sum(),
-#             'pv_inst': pv.max()/0.76474,
-#             'storage_cap': energysystem.results[storage][storage].invest,
-#             'objective': energysystem.results.objective
-#             }
-#
-#
-# def create_plots(energysystem):
-#     """Shows how to create plots from the results.
-#
-#     Parameters
-#     ----------
-#     energysystem : solph.EnergySystem
-#
-#     Returns
-#     -------
-#     dict : Some results.
-#     """
-#     logging.info('Plot the results')
-#
-#     cdict = {'wind': '#5b5bae',
-#              'pv': '#ffde32',
-#              'storage': '#42c77a',
-#              'pp_gas': '#636f6b',
-#              'demand': '#ce4aff',
-#              'excess_bel': '#555555'}
-#
-#     # Plotting the input flows of the electricity bus for January (line plot)
-#     myplot = outputlib.DataFramePlot(energy_system=energysystem)
-#     myplot.slice_unstacked(bus_label="electricity", type="to_bus",
-#                            date_from="2012-01-01 00:00:00",
-#                            date_to="2012-01-31 00:00:00")
-#     colorlist = myplot.color_from_dict(cdict)
-#     myplot.plot(color=colorlist, linewidth=2, title="January 2012")
-#     myplot.ax.legend(loc='upper right')
-#     myplot.ax.set_ylabel('Power in MW')
-#     myplot.ax.set_xlabel('Date')
-#     myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
-#
-#     # Plotting the output flows of the electricity bus (line plot)
-#     myplot.slice_unstacked(bus_label="electricity", type="from_bus")
-#     myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
-#     myplot.ax.legend(loc='upper right')
-#     myplot.ax.set_ylabel('Power in MW')
-#     myplot.ax.set_xlabel('Date')
-#     myplot.set_datetime_ticks()
-#
-#     plt.show()
-#
-#     # Plotting the balance around the electricity plot for one week using a
-#     # combined stacked plot
-#     fig = plt.figure(figsize=(24, 14))
-#     plt.rc('legend', **{'fontsize': 19})
-#     plt.rcParams.update({'font.size': 19})
-#     plt.style.use('grayscale')
-#
-#     handles, labels = myplot.io_plot(
-#         bus_label='electricity', cdict=cdict,
-#         barorder=['pv', 'wind', 'pp_gas', 'storage'],
-#         lineorder=['demand', 'storage', 'excess_bel'],
-#         line_kwa={'linewidth': 4},
-#         ax=fig.add_subplot(1, 1, 1),
-#         date_from="2012-06-01 00:00:00",
-#         date_to="2012-06-8 00:00:00",
-#         )
-#     myplot.ax.set_ylabel('Power in MW')
-#     myplot.ax.set_xlabel('Date')
-#     myplot.ax.set_title("Electricity bus")
-#     myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
-#     myplot.outside_legend(handles=handles, labels=labels)
-#
-#     plt.show()
+def get_result_dict(energysystem):
+    """Shows how to extract single time series from results.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
+    """
+    logging.info('Check the results')
+    storage = energysystem.groups['storage']
+    myresults = outputlib.DataFramePlot(energy_system=energysystem)
+
+    # electrical output of natural gas power plant
+    pp_gas = myresults.slice_by(obj_label='pp_gas', type='to_bus',
+                                date_from='2012-01-01 00:00:00',
+                                date_to='2012-12-31 23:00:00')
+
+    # electrical demand
+    demand = myresults.slice_by(obj_label='demand',
+                                date_from='2012-01-01 00:00:00',
+                                date_to='2012-12-31 23:00:00')
+
+    # electrical output of wind power plant
+    wind = myresults.slice_by(obj_label='wind',
+                              date_from='2012-01-01 00:00:00',
+                              date_to='2012-12-31 23:00:00')
+
+    # electrical output of pv power plant
+    pv = myresults.slice_by(obj_label='pv',
+                            date_from='2012-01-01 00:00:00',
+                            date_to='2012-12-31 23:00:00')
+
+    return {'pp_gas_sum': pp_gas.sum(),
+            'demand_sum': demand.sum(),
+            'demand_max': demand.max(),
+            'wind_sum': wind.sum(),
+            'wind_inst': wind.max()/0.99989,
+            'pv_sum': pv.sum(),
+            'pv_inst': pv.max()/0.76474,
+            'storage_cap': energysystem.results[storage][storage].invest,
+            'objective': energysystem.results.objective
+            }
+
+
+def create_plots(energysystem):
+    """Shows how to create plots from the results.
+
+    Parameters
+    ----------
+    energysystem : solph.EnergySystem
+
+    Returns
+    -------
+    dict : Some results.
+    """
+    logging.info('Plot the results')
+
+    cdict = {'wind': '#5b5bae',
+             'pv': '#ffde32',
+             'storage': '#42c77a',
+             'pp_gas': '#636f6b',
+             'demand': '#ce4aff',
+             'excess_bel': '#555555'}
+
+    # Plotting the input flows of the electricity bus for January (line plot)
+    myplot = outputlib.DataFramePlot(energy_system=energysystem)
+    myplot.slice_unstacked(bus_label="electricity", type="to_bus",
+                           date_from="2012-01-01 00:00:00",
+                           date_to="2012-01-31 00:00:00")
+    colorlist = myplot.color_from_dict(cdict)
+    myplot.plot(color=colorlist, linewidth=2, title="January 2012")
+    myplot.ax.legend(loc='upper right')
+    myplot.ax.set_ylabel('Power in MW')
+    myplot.ax.set_xlabel('Date')
+    myplot.set_datetime_ticks(date_format='%d-%m-%Y', tick_distance=24*7)
+
+    # Plotting the output flows of the electricity bus (line plot)
+    myplot.slice_unstacked(bus_label="electricity", type="from_bus")
+    myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2)
+    myplot.ax.legend(loc='upper right')
+    myplot.ax.set_ylabel('Power in MW')
+    myplot.ax.set_xlabel('Date')
+    myplot.set_datetime_ticks()
+
+    plt.show()
+
+    # Plotting the balance around the electricity plot for one week using a
+    # combined stacked plot
+    fig = plt.figure(figsize=(24, 14))
+    plt.rc('legend', **{'fontsize': 19})
+    plt.rcParams.update({'font.size': 19})
+    plt.style.use('grayscale')
+
+    handles, labels = myplot.io_plot(
+        bus_label='electricity', cdict=cdict,
+        barorder=['pv', 'wind', 'pp_gas', 'storage'],
+        lineorder=['demand', 'storage', 'excess_bel'],
+        line_kwa={'linewidth': 4},
+        ax=fig.add_subplot(1, 1, 1),
+        date_from="2012-06-01 00:00:00",
+        date_to="2012-06-8 00:00:00",
+        )
+    myplot.ax.set_ylabel('Power in MW')
+    myplot.ax.set_xlabel('Date')
+    myplot.ax.set_title("Electricity bus")
+    myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
+    myplot.outside_legend(handles=handles, labels=labels)
+
+    plt.show()
 
 
 def run_storage_investment_example(**kwargs):
@@ -296,15 +268,15 @@ def run_storage_investment_example(**kwargs):
     # esys = solph.EnergySystem()
     # esys.restore()
 
-    # if plt is not None:
-    #     create_plots(esys)
-    # else:
-    #     import pprint as pp
-    #     pp.pprint(get_result_dict(esys))
-    #     msg = ("\nIt is not possible to plot the results, due to a missing " +
-    #            "python package: 'matplotlib'. \nType 'pip install " +
-    #            "matplotlib' to see the plots.")
-    #     warnings.warn(msg)
+    if plt is not None:
+        create_plots(esys)
+    else:
+        import pprint as pp
+        pp.pprint(get_result_dict(esys))
+        msg = ("\nIt is not possible to plot the results, due to a missing " +
+               "python package: 'matplotlib'. \nType 'pip install " +
+               "matplotlib' to see the plots.")
+        warnings.warn(msg)
 
 
 if __name__ == "__main__":
