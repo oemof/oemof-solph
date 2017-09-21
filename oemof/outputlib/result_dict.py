@@ -88,7 +88,7 @@ def results_to_df(es, om):
     return df
 
 
-def results_to_dict(es, om):
+def results_to_dict(es, om, keys_as_strings=False):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -126,5 +126,9 @@ def results_to_dict(es, om):
                 results[(bus,)] = {'sequences': df, 'scalars': pd.Series()}
             else:
                 results[(bus,)]['sequences']['duals'] = duals
+
+    # convert all keys from object to string tuples
+    if keys_as_strings is True:
+        results = {tuple([str(e) for e in k]): v for k, v in results.items()}
 
     return results
