@@ -94,6 +94,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     print(phs['scalars'])
 
     # example plot for sequences
+    phs['sequences'].drop('my_sequence_var', axis=1, inplace=True)
     phs['sequences'].columns = ['P-IN', 'P-OUT', 'CAP']
     ax = phs['sequences'].plot(kind='line', drawstyle='steps-post')
     ax.set_title('Dispatch results')
@@ -102,6 +103,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     plt.show()
 
     # example plot for scalars
+    phs['scalars'].drop('my_scalar_var', axis=0, inplace=True)
     phs['scalars'].index = ['P-IN', 'P-OUT', 'CAP']
     ax = phs['scalars'].plot(kind='bar')
     ax.set_title('Investment results')
