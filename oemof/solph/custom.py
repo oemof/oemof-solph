@@ -124,7 +124,7 @@ def storage_nominal_value_warning(flow):
 
 
 # ------------------------------------------------------------------------------
-# Start of storage invest block
+# Start of generic storage block
 # ------------------------------------------------------------------------------
 class GenericStorageBlock(SimpleBlock):
     """ Storages (no investment)
@@ -217,6 +217,7 @@ class GenericStorageBlock(SimpleBlock):
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
+
 
     def _objective_expression(self):
         """Objective expression for storages with no investment.
@@ -432,6 +433,20 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS,
             rule=_min_capacity_invest_rule)
 
+        # checking add. vars
+        self.my_scalar_var = Var(self.INVESTSTORAGES, within=NonNegativeReals,
+                                 bounds=(0, 10000), initialize=5000)
+        self.my_sequence_var = Var(self.INVESTSTORAGES, m.TIMESTEPS,
+                                   within=NonNegativeReals,
+                                   bounds=(0, 10000), initialize=5000)
+        # self.my_var = Var(self.STORAGES, m.TIMESTEPS, bounds=(0, 100))
+        # # storage balance constraint
+        # def _test_rule(block, n, t):
+        #     expr = 0
+        #     expr += block.my_var[n, t]
+        #     return expr >= 0
+        # self.test = Constraint(self.STORAGES, m.TIMESTEPS, rule=_test_rule)
+
     def _objective_expression(self):
         """Objective expression with fixed and investement costs.
         """
@@ -453,9 +468,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.fixed_costs = Expression(expr=fixed_costs)
 
         return fixed_costs + investment_costs
+
 # ------------------------------------------------------------------------------
-# End of storage invest block
+# End of generic storage invest block
 # ------------------------------------------------------------------------------
+
 def custom_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment, Investment):
         return GenericInvestmentStorageBlock
