@@ -439,13 +439,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.my_sequence_var = Var(self.INVESTSTORAGES, m.TIMESTEPS,
                                    within=NonNegativeReals,
                                    bounds=(0, 10000), initialize=5000)
-        # self.my_var = Var(self.STORAGES, m.TIMESTEPS, bounds=(0, 100))
-        # # storage balance constraint
-        # def _test_rule(block, n, t):
-        #     expr = 0
-        #     expr += block.my_var[n, t]
-        #     return expr >= 0
-        # self.test = Constraint(self.STORAGES, m.TIMESTEPS, rule=_test_rule)
+
 
     def _objective_expression(self):
         """Objective expression with fixed and investement costs.
