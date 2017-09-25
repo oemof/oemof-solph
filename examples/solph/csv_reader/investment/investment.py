@@ -113,9 +113,14 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     # use strings as keys instead of objects
     results = results_to_dict(es, om, keys_as_strings=True)
-    print(results[('REGION1_bus_el',)]['sequences'].head())
     bus1 = node_results(results, 'REGION1_bus_el')
-    print(bus1['sequences'].describe())
+    print(bus1['sequences'].head())
+
+    phs = node_results(results, 'REGION1_storage_phs')
+    print(phs['scalars'])
+    print(phs['sequences'].head())
+    phs['sequences'].plot(kind='line', drawstyle='steps-post')
+    plt.show()
 
 if __name__ == '__main__':
     run_investment_example()
