@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from datetime import datetime
-from oemof.outputlib import results, node_results
+from oemof.outputlib import results, views
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
@@ -71,7 +71,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    opt_results = results(es, om)
+    opt_results = results.results(es, om)
 
     # standard api: results for a flow
     my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
@@ -85,15 +85,15 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     # slicing functions: get all node results (bus)
     # works with node objects and string labels as argument
-    region1 = node_results(opt_results, es.groups['REGION1_bus_el'])
-    region1 = node_results(opt_results, 'REGION1_bus_el')
+    region1 = views.node(opt_results, es.groups['REGION1_bus_el'])
+    region1 = views.node(opt_results, 'REGION1_bus_el')
     print(region1['sequences'].max())
     print(region1['scalars'])
 
     # slicing functions: get all node results (component)
     # works with node objects and string labels as argument
-    phs = node_results(opt_results, es.groups['REGION1_storage_phs'])
-    phs = node_results(opt_results, 'REGION1_storage_phs')
+    phs = views.node(opt_results, es.groups['REGION1_storage_phs'])
+    phs = views.node(opt_results, 'REGION1_storage_phs')
     print(phs['sequences'].max())
     print(phs['scalars'])
 

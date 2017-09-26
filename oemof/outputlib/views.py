@@ -20,7 +20,7 @@ def keys_as_strings(results):
     return results
 
 
-def node_results(results, node):
+def node(results, node):
     """
     Obtain results for a single node e.g. a Bus or Component.
 

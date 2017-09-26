@@ -33,7 +33,7 @@ The example models the following energy system:
 
 # Outputlib
 from oemof import outputlib
-from oemof.outputlib import results, node_results
+from oemof.outputlib import results, views
 
 # Default logger of oemof
 from oemof.tools import logger
@@ -141,10 +141,10 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     # check if the new result object is working for custom components
-    opt_results = results(energysystem, om)
+    opt_results = results.(energysystem, om)
     print(opt_results[(storage,)]['sequences'].head())
     print(opt_results[(storage,)]['scalars'])
-    custom_storage = node_results(opt_results, 'storage')
+    custom_storage = views.node(opt_results, 'storage')
     custom_storage['sequences'].plot(kind='line', drawstyle='steps-post')
     plt.show()
 
