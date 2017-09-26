@@ -53,7 +53,7 @@ def remove_timestep(x):
         return x[:-1]
 
 
-def dataframe(es, om):
+def dataframe(om):
     """
     Create a result dataframe with all optimization data.
 
@@ -98,7 +98,7 @@ def results(es, om):
     The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
     """
-    df = dataframe(es, om)
+    df = dataframe(om)
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {k: v[['timestep', 'variable_name', 'value']]
