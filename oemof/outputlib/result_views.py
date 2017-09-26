@@ -32,8 +32,6 @@ def node_results(results, node):
     if type(node) is str:
         results = keys_as_strings(results)
 
-    # check if also multiple nodes can be passed to slice for flows
-
     filtered = {}
 
     # create a series with tuples as index labels for scalars
