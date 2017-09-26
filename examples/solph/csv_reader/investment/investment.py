@@ -84,18 +84,23 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     print(results[my_id]['sequences'].describe())
 
     # slicing functions: get all node results (bus)
+    # works with node objects and string labels as argument
     region1 = node_results(results, es.groups['REGION1_bus_el'])
+    region1 = node_results(results, 'REGION1_bus_el')
     print(region1['sequences'].max())
     print(region1['scalars'])
 
     # slicing functions: get all node results (component)
+    # works with node objects and string labels as argument
     phs = node_results(results, es.groups['REGION1_storage_phs'])
+    phs = node_results(results, 'REGION1_storage_phs')
     print(phs['sequences'].max())
     print(phs['scalars'])
 
     # example plot for sequences
-    phs['sequences'].drop('my_sequence_var', axis=1, inplace=True)
-    phs['sequences'].columns = ['P-IN', 'P-OUT', 'CAP']
+    cols = [c for c in phs['sequences'].columns if 'my_sequence_var' not in c]
+    phs['sequences'] = phs['sequences'][cols]
+    phs['sequences'].columns = ['P-IN', 'CAP', 'P-OUT']
     ax = phs['sequences'].plot(kind='line', drawstyle='steps-post')
     ax.set_title('Dispatch results')
     ax.set_xlabel('Time')
@@ -103,24 +108,16 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     plt.show()
 
     # example plot for scalars
-    phs['scalars'].drop('my_scalar_var', axis=0, inplace=True)
-    phs['scalars'].index = ['P-IN', 'P-OUT', 'CAP']
+    idx = [i for i in phs['scalars'].index if 'my_scalar_var' not in i]
+    phs['scalars'] = phs['scalars'][idx]
+    phs['scalars'].index = ['P-IN', 'CAP', 'P-OUT']
     ax = phs['scalars'].plot(kind='bar')
     ax.set_title('Investment results')
     ax.set_xlabel('')
     ax.set_ylabel('Storage investment in MWh / MW')
     plt.show()
 
-    # use strings as keys instead of objects
-    results = results_to_dict(es, om, keys_as_strings=True)
-    bus1 = node_results(results, 'REGION1_bus_el')
-    print(bus1['sequences'].head())
 
-    phs = node_results(results, 'REGION1_storage_phs')
-    print(phs['scalars'])
-    print(phs['sequences'].head())
-    phs['sequences'].plot(kind='line', drawstyle='steps-post')
-    plt.show()
 
 if __name__ == '__main__':
     run_investment_example()

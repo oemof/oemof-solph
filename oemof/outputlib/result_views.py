@@ -8,16 +8,32 @@ import itertools
 import pandas as pd
 
 
+def keys_as_strings(results):
+    """
+    Convert the dictionary keys to strings.
+
+    All tuple keys of the result object e.g. results[(pp1, bus1)] are converted
+    into strings that represent the object labels e.g. results[('pp1','bus1')].
+    """
+    results = {tuple([str(e) for e in k]): v for k, v in results.items()}
+
+    return results
+
+
 def node_results(results, node):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
+    Either a node or its label string can be passed.
     Results are written into a dictionary which is keyed by 'scalars' and
     'sequences' holding respective data in a pandas Series and DataFrame.
-
-    @ TODO: somehow the relation between the variable name and flow/comp
-            has to be integrated in the dataframe/series columns/index
     """
+    # convert to keys if only a string is passed
+    if type(node) is str:
+        results = keys_as_strings(results)
+
+    # check if also multiple nodes can be passed to slice for flows
+
     filtered = {}
 
     # create a series with tuples as index labels for scalars
