@@ -70,9 +70,6 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     logging.info('Done!')
 
-    # import
-    from oemof.outputlib import results, node_results
-
     # create a dictionary with the results
     opt_results = results(es, om)
 
