@@ -35,12 +35,12 @@ def node(results, node):
 
     # create a series with tuples as index labels for scalars
     scalars = {k: v['scalars'] for k, v in results.items()
-               if node in k and not (v['scalars'].empty)}
+               if node in k and not v['scalars'].empty}
     filtered['scalars'] = pd.concat(scalars.values(), axis=0)
 
     # assign index values
     idx = {k: [c for c in v['scalars'].index] for k, v in results.items()
-           if node in k and not (v['scalars'].empty)}
+           if node in k and not v['scalars'].empty}
     idx = [tuple((k, m) for m in v) for k, v in idx.items()]
     idx = [i for sublist in idx for i in sublist]
     filtered['scalars'].index = idx
@@ -48,12 +48,12 @@ def node(results, node):
 
     # create a dataframe with tuples as column labels for sequences
     sequences = {k: v['sequences'] for k, v in results.items()
-                 if node in k and not (v['sequences'].empty)}
+                 if node in k and not v['sequences'].empty}
     filtered['sequences'] = pd.concat(sequences.values(), axis=1)
 
     # assign column names
     cols = {k: [c for c in v['sequences'].columns] for k, v in results.items()
-            if node in k and not (v['sequences'].empty)}
+            if node in k and not v['sequences'].empty}
     cols = [tuple((k, m) for m in v) for k, v in cols.items()]
     cols = [c for sublist in cols for c in sublist]
     filtered['sequences'].columns = cols
