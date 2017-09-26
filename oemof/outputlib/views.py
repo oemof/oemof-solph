@@ -4,7 +4,6 @@ Modules for providing convenient views for solph results.
 
 Information about the possible usage is provided within the examples.
 """
-import itertools
 import pandas as pd
 
 
