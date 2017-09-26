@@ -33,7 +33,7 @@ The example models the following energy system:
 
 # Outputlib
 from oemof import outputlib
-from oemof.outputlib import results_to_dict, node_results
+from oemof.outputlib import results, node_results
 
 # Default logger of oemof
 from oemof.tools import logger
@@ -109,7 +109,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     # create storage object representing a battery
-    solph.custom.GenericStorage(
+    storage = solph.custom.GenericStorage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -141,11 +141,11 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     # check if the new result object is working for custom components
-    results = results_to_dict(energysystem, om, keys_as_strings=True)
-    print(results[('storage',)]['sequences'].head())
-    print(results[('storage',)]['scalars'])
-    custom_storage = node_results(results, 'storage')
-    custom_storage['sequences'].plot(kind='line')
+    opt_results = results(energysystem, om)
+    print(opt_results[(storage,)]['sequences'].head())
+    print(opt_results[(storage,)]['scalars'])
+    custom_storage = node_results(opt_results, 'storage')
+    custom_storage['sequences'].plot(kind='line', drawstyle='steps-post')
     plt.show()
 
     return energysystem
