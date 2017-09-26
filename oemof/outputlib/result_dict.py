@@ -88,7 +88,7 @@ def results_to_df(es, om):
     return df
 
 
-def results_to_dict(es, om):
+def results(es, om):
     """
     Create a result dictionary from the result DataFrame.
 

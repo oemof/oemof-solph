@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from datetime import datetime
-from oemof.outputlib import results_to_dict, node_results
+from oemof.outputlib import results, node_results
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
@@ -53,14 +53,14 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     logging.info('Optimization time: ' + stopwatch())
 
-    results = ResultsDataFrame(energy_system=es)
+    results_old = ResultsDataFrame(energy_system=es)
 
     results_path = os.path.join(os.path.expanduser("~"), 'csv_invest')
 
     if not os.path.isdir(results_path):
         os.mkdir(results_path)
 
-    results.to_csv(os.path.join(results_path, 'results.csv'))
+    results_old.to_csv(os.path.join(results_path, 'results.csv'))
 
     logging.info("The results can be found in {0}".format(results_path))
     logging.info("Read the documentation (outputlib) to learn how" +
@@ -70,30 +70,33 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     logging.info('Done!')
 
+    # import
+    from oemof.outputlib import results, node_results
+
     # create a dictionary with the results
-    results = results_to_dict(es, om)
+    opt_results = results(es, om)
 
     # standard api: results for a flow
     my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
-    print(results[my_id]['scalars'])
-    print(results[my_id]['sequences'].describe())
+    print(opt_results[my_id]['scalars'])
+    print(opt_results[my_id]['sequences'].describe())
 
     # standard api: results for a component
     my_id = (es.groups['REGION1_storage_phs'],)
-    print(results[my_id]['scalars'])
-    print(results[my_id]['sequences'].describe())
+    print(opt_results[my_id]['scalars'])
+    print(opt_results[my_id]['sequences'].describe())
 
     # slicing functions: get all node results (bus)
     # works with node objects and string labels as argument
-    region1 = node_results(results, es.groups['REGION1_bus_el'])
-    region1 = node_results(results, 'REGION1_bus_el')
+    region1 = node_results(opt_results, es.groups['REGION1_bus_el'])
+    region1 = node_results(opt_results, 'REGION1_bus_el')
     print(region1['sequences'].max())
     print(region1['scalars'])
 
     # slicing functions: get all node results (component)
     # works with node objects and string labels as argument
-    phs = node_results(results, es.groups['REGION1_storage_phs'])
-    phs = node_results(results, 'REGION1_storage_phs')
+    phs = node_results(opt_results, es.groups['REGION1_storage_phs'])
+    phs = node_results(opt_results, 'REGION1_storage_phs')
     print(phs['sequences'].max())
     print(phs['scalars'])
 
