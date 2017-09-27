@@ -7,7 +7,7 @@ Information about the possible usage is provided within the examples.
 import pandas as pd
 
 
-def keys_as_strings(results):
+def convert_keys_to_strings(results):
     """
     Convert the dictionary keys to strings.
 
@@ -29,7 +29,7 @@ def node(results, n):
     """
     # convert to keys if only a string is passed
     if type(n) is str:
-        results = keys_as_strings(results)
+        results = convert_keys_to_strings(results)
 
     filtered = {}
 
