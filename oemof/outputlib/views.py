@@ -14,12 +14,12 @@ def keys_as_strings(results):
     All tuple keys of the result object e.g. results[(pp1, bus1)] are converted
     into strings that represent the object labels e.g. results[('pp1','bus1')].
     """
-    results = {tuple([str(e) for e in k]): v for k, v in results.items()}
+    converted = {tuple([str(e) for e in k]): v for k, v in results.items()}
 
-    return results
+    return converted
 
 
-def node(results, node):
+def node(results, n):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
@@ -28,19 +28,19 @@ def node(results, node):
     'sequences' holding respective data in a pandas Series and DataFrame.
     """
     # convert to keys if only a string is passed
-    if type(node) is str:
+    if type(n) is str:
         results = keys_as_strings(results)
 
     filtered = {}
 
     # create a series with tuples as index labels for scalars
     scalars = {k: v['scalars'] for k, v in results.items()
-               if node in k and not v['scalars'].empty}
+               if n in k and not v['scalars'].empty}
     filtered['scalars'] = pd.concat(scalars.values(), axis=0)
 
     # assign index values
     idx = {k: [c for c in v['scalars'].index] for k, v in results.items()
-           if node in k and not v['scalars'].empty}
+           if n in k and not v['scalars'].empty}
     idx = [tuple((k, m) for m in v) for k, v in idx.items()]
     idx = [i for sublist in idx for i in sublist]
     filtered['scalars'].index = idx
@@ -48,12 +48,12 @@ def node(results, node):
 
     # create a dataframe with tuples as column labels for sequences
     sequences = {k: v['sequences'] for k, v in results.items()
-                 if node in k and not v['sequences'].empty}
+                 if n in k and not v['sequences'].empty}
     filtered['sequences'] = pd.concat(sequences.values(), axis=1)
 
     # assign column names
     cols = {k: [c for c in v['sequences'].columns] for k, v in results.items()
-            if node in k and not v['sequences'].empty}
+            if n in k and not v['sequences'].empty}
     cols = [tuple((k, m) for m in v) for k, v in cols.items()]
     cols = [c for sublist in cols for c in sublist]
     filtered['sequences'].columns = cols
