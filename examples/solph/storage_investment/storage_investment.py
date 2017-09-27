@@ -141,7 +141,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
     # check if the new result object is working for custom components
-    opt_results = results.results(energysystem, om)
+    opt_results = results.create_results(energysystem, om)
     print(opt_results[(storage,)]['sequences'].head())
     print(opt_results[(storage,)]['scalars'])
     custom_storage = views.node(opt_results, 'storage')
