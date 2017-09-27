@@ -85,15 +85,15 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     # slicing functions: get all node results (bus)
     # works with node objects and string labels as argument
-    region1 = views.node(opt_results, es.groups['REGION1_bus_el'])
-    region1 = views.node(opt_results, 'REGION1_bus_el')
+    region1 = views.get_node(opt_results, es.groups['REGION1_bus_el'])
+    region1 = views.get_node(opt_results, 'REGION1_bus_el')
     print(region1['sequences'].max())
     print(region1['scalars'])
 
     # slicing functions: get all node results (component)
     # works with node objects and string labels as argument
-    phs = views.node(opt_results, es.groups['REGION1_storage_phs'])
-    phs = views.node(opt_results, 'REGION1_storage_phs')
+    phs = views.get_node(opt_results, es.groups['REGION1_storage_phs'])
+    phs = views.get_node(opt_results, 'REGION1_storage_phs')
     print(phs['sequences'].max())
     print(phs['scalars'])
 

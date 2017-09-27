@@ -144,7 +144,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     opt_results = results.create_results(energysystem, om)
     print(opt_results[(storage,)]['sequences'].head())
     print(opt_results[(storage,)]['scalars'])
-    custom_storage = views.node(opt_results, 'storage')
+    custom_storage = views.get_node(opt_results, 'storage')
     custom_storage['sequences'].plot(kind='line', drawstyle='steps-post')
     plt.show()
 

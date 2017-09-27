@@ -19,7 +19,7 @@ def convert_keys_to_strings(results):
     return converted
 
 
-def node(results, n):
+def get_node(results, n):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
