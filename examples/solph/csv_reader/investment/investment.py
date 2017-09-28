@@ -71,7 +71,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    opt_results = results.create_results(es, om)
+    opt_results = results.get_results(es, om)
 
     # standard api: results for a flow
     my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
