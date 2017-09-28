@@ -119,13 +119,15 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     plt.show()
 
     # picke result
-    #my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
-    str_result = views.convert_keys_to_strings(result)
-    pickle.dump(str_result, open('result.p', 'wb'))
+    #str_result = views.convert_keys_to_strings(result)
+    #pickle.dump(str_result, open('result.p', 'wb'))
+    pickle.dump(result, open('result.p', 'wb'))
     my_result = pickle.load(open('result.p', 'rb'))
 
-    my_id = ('REGION1_pp_oil', 'REGION1_bus_el')
-    print(my_result.keys())
+
+    # my_id = ('REGION1_pp_oil', 'REGION1_bus_el')
+    # print(my_result.keys())
+    my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
     print(my_result[my_id]['scalars'])
 
 
