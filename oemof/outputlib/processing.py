@@ -88,7 +88,7 @@ def create_dataframe(om):
     return df
 
 
-def get_results(es, om):
+def results(es, om):
     """
     Create a result dictionary from the result DataFrame.
 

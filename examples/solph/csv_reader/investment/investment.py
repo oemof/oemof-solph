@@ -72,7 +72,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    result = processing.get_results(es, om)
+    result = processing.results(es, om)
 
     # standard api: results for a flow
     my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
@@ -86,15 +86,15 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     # slicing functions: get all node result (bus)
     # works with node objects and string labels as argument
-    region1 = views.get_node(result, es.groups['REGION1_bus_el'])
-    region1 = views.get_node(result, 'REGION1_bus_el')
+    region1 = views.node(result, es.groups['REGION1_bus_el'])
+    region1 = views.node(result, 'REGION1_bus_el')
     print(region1['sequences'].max())
     print(region1['scalars'])
 
     # slicing functions: get all node result (component)
     # works with node objects and string labels as argument
-    phs = views.get_node(result, es.groups['REGION1_storage_phs'])
-    phs = views.get_node(result, 'REGION1_storage_phs')
+    phs = views.node(result, es.groups['REGION1_storage_phs'])
+    phs = views.node(result, 'REGION1_storage_phs')
     print(phs['sequences'].max())
     print(phs['scalars'])
 
@@ -118,17 +118,12 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     ax.set_ylabel('Storage investment in MWh / MW')
     plt.show()
 
-    # picke result
-    #str_result = views.convert_keys_to_strings(result)
-    #pickle.dump(str_result, open('result.p', 'wb'))
-    pickle.dump(result, open('result.p', 'wb'))
-    my_result = pickle.load(open('result.p', 'rb'))
-
-
-    # my_id = ('REGION1_pp_oil', 'REGION1_bus_el')
-    # print(my_result.keys())
-    my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
-    print(my_result[my_id]['scalars'])
+    # # picke result @gnn: the following does not work
+    # pickle.dump(str_result, open('result.p', 'wb'))
+    # pickle.dump(result, open('result.p', 'wb'))
+    # my_result = pickle.load(open('result.p', 'rb'))
+    # my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
+    # print(my_result[my_id]['scalars'])
 
 
 if __name__ == '__main__':
