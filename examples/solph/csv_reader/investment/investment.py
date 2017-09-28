@@ -4,9 +4,10 @@ import os
 import logging
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 
 from datetime import datetime
-from oemof.outputlib import results, views
+from oemof.outputlib import processing, views
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
 from oemof.outputlib import ResultsDataFrame
@@ -71,29 +72,29 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     logging.info('Done!')
 
     # create a dictionary with the results
-    opt_results = results.get_results(es, om)
+    result = processing.get_results(es, om)
 
     # standard api: results for a flow
     my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
-    print(opt_results[my_id]['scalars'])
-    print(opt_results[my_id]['sequences'].describe())
+    print(result[my_id]['scalars'])
+    print(result[my_id]['sequences'].describe())
 
-    # standard api: results for a component
+    # standard api: result for a component
     my_id = (es.groups['REGION1_storage_phs'],)
-    print(opt_results[my_id]['scalars'])
-    print(opt_results[my_id]['sequences'].describe())
+    print(result[my_id]['scalars'])
+    print(result[my_id]['sequences'].describe())
 
-    # slicing functions: get all node results (bus)
+    # slicing functions: get all node result (bus)
     # works with node objects and string labels as argument
-    region1 = views.get_node(opt_results, es.groups['REGION1_bus_el'])
-    region1 = views.get_node(opt_results, 'REGION1_bus_el')
+    region1 = views.get_node(result, es.groups['REGION1_bus_el'])
+    region1 = views.get_node(result, 'REGION1_bus_el')
     print(region1['sequences'].max())
     print(region1['scalars'])
 
-    # slicing functions: get all node results (component)
+    # slicing functions: get all node result (component)
     # works with node objects and string labels as argument
-    phs = views.get_node(opt_results, es.groups['REGION1_storage_phs'])
-    phs = views.get_node(opt_results, 'REGION1_storage_phs')
+    phs = views.get_node(result, es.groups['REGION1_storage_phs'])
+    phs = views.get_node(result, 'REGION1_storage_phs')
     print(phs['sequences'].max())
     print(phs['scalars'])
 
@@ -102,7 +103,7 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     phs['sequences'] = phs['sequences'][cols]
     phs['sequences'].columns = ['P-IN', 'CAP', 'P-OUT']
     ax = phs['sequences'].plot(kind='line', drawstyle='steps-post')
-    ax.set_title('Dispatch results')
+    ax.set_title('Dispatch result')
     ax.set_xlabel('Time')
     ax.set_ylabel('Power (MW) / Energy (MWh)')
     plt.show()
@@ -112,11 +113,20 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
     phs['scalars'] = phs['scalars'][idx]
     phs['scalars'].index = ['P-IN', 'CAP', 'P-OUT']
     ax = phs['scalars'].plot(kind='bar')
-    ax.set_title('Investment results')
+    ax.set_title('Investment result')
     ax.set_xlabel('')
     ax.set_ylabel('Storage investment in MWh / MW')
     plt.show()
 
+    # picke result
+    #my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
+    str_result = views.convert_keys_to_strings(result)
+    pickle.dump(str_result, open('result.p', 'wb'))
+    my_result = pickle.load(open('result.p', 'rb'))
+
+    my_id = ('REGION1_pp_oil', 'REGION1_bus_el')
+    print(my_result.keys())
+    print(my_result[my_id]['scalars'])
 
 
 if __name__ == '__main__':
