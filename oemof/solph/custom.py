@@ -4,12 +4,16 @@ This module is designed to hold custom components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 """
+
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Set, NonNegativeReals, Var, Constraint, Expression,
                            BuildAction)
+import numpy as np
 import oemof.network as on
+import warnings
 from .options import Investment
 from .plumbing import sequence
+
 
 # ------------------------------------------------------------------------------
 # Start of generic storage component
@@ -218,7 +222,6 @@ class GenericStorageBlock(SimpleBlock):
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
 
-
     def _objective_expression(self):
         """Objective expression for storages with no investment.
         Note: This adds only fixed costs as variable costs are already
@@ -301,12 +304,14 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \\forall n \\in \\textrm{INVESTSTORAGES}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t), \\\\
+        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t),
+            \\\\
             \\forall n \\in \\textrm{MAX\_INVESTSTORAGES,} \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t), \\\\
+        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t),
+            \\\\
             \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
@@ -440,10 +445,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                    within=NonNegativeReals,
                                    bounds=(0, 10000), initialize=5000)
 
-
     def _objective_expression(self):
-        """Objective expression with fixed and investement costs.
-        """
+        """Objective expression with fixed and investement costs."""
         if not hasattr(self, 'INVESTSTORAGES'):
             return 0
 
@@ -467,8 +470,93 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # End of generic storage invest block
 # ------------------------------------------------------------------------------
 
+
+# ------------------------------------------------------------------------------
+# Start of generic CHP component
+# ------------------------------------------------------------------------------
+class GenericCHP(on.Transformer):
+    """
+
+    Parameters
+    ----------
+    nominal_capacity : numeric
+        Absolute nominal capacity of the storage
+    nominal_input_capacity_ratio :  numeric
+        Ratio between the nominal inflow of the storage and its capacity.
+    investment : :class:`oemof.solph.options.Investment` object
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem. Note: This will refer all attributes to an
+        investment variable instead of to the nominal_capacity. The
+        nominal_capacity should not be set (or set to None) if an investment
+        object is used.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.GenericCHP` (if no Investment object
+       present)
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.P_el_max = kwargs.get('P_el_max')
+        self.P_el_min = kwargs.get('P_el_min')
+        self.Q_min = kwargs.get('Q_min')
+        self.Eta_el_max = kwargs.get('Eta_el_max')
+        self.Eta_el_min = kwargs.get('Eta_el_min')
+        self.Beta = kwargs.get('Q_min')
+        self.fixed_costs = kwargs.get('fixed_costs')
+
+    def _calculate_alphas(self):
+        """
+        Calculate alpha coefficients.
+
+        A system of linear equations is created from passed capacities and
+        efficiencies and solved to calculate both coefficients.
+        """
+        A = np.array([[1, self.P_el_min], [1, self.P_el_max]])
+        b = np.array([self.P_el_min/self.Eta_el_min,
+                      self.P_el_max/self.Eta_el_max])
+        x = np.linalg.solve(A, b)
+        alpha1, alpha2 = x[0], x[1]
+
+        return alpha1, alpha2
+
+    @property
+    def alpha1(self):
+        """Getter for first alpha coefficient."""
+        try:
+            alphas = self._calculate_alphas()
+        except AttributeError:
+            print("All electric capacities and efficiencies have to be " +
+                  "defined to calculate alpha coefficients!")
+        return alphas[0]
+
+    @property
+    def alpha2(self):
+        """Getter for second alpha coefficient."""
+        try:
+            alphas = self._calculate_alphas()
+        except AttributeError:
+            print("All electric capacities and efficiencies have to be " +
+                  "defined to calculate alpha coefficients!")
+        return alphas[1]
+
+
+def storage_nominal_value_warning(flow):
+    msg = ("The nominal_value should not be set for {0} flows of storages." +
+           "The value will be overwritten by the product of the " +
+           "nominal_capacity and the nominal_{0}_capacity_ratio.")
+    warnings.warn(msg.format(flow), SyntaxWarning)
+
+
+# ------------------------------------------------------------------------------
+# End of generic CHP component
+# ------------------------------------------------------------------------------
+
 def custom_grouping(node):
-    if isinstance(node, GenericStorage) and isinstance(node.investment, Investment):
+    if isinstance(node, GenericStorage) and isinstance(node.investment,
+                                                       Investment):
         return GenericInvestmentStorageBlock
-    if isinstance(node, GenericStorage) and not isinstance(node.investment, Investment):
+    if isinstance(node, GenericStorage) and not isinstance(node.investment,
+                                                           Investment):
         return GenericStorageBlock
