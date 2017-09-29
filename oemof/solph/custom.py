@@ -554,6 +554,56 @@ def storage_nominal_value_warning(flow):
 # End of generic CHP component
 # ------------------------------------------------------------------------------
 
+
+# ------------------------------------------------------------------------------
+# Start of generic CHP block
+# ------------------------------------------------------------------------------
+
+
+class GenericCHPBlock(SimpleBlock):
+    """
+    Block for the linear relation of nodes with type class:`.GenericCHP`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """Create the linear constraint for the class:`.GenericCHP`. block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.GenericCHP (gchp) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [gchp1, gchp2, gchp3, ...].
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        I = {n: [i for i in n.inputs][0] for n in group}
+        O = {n: [o for o in n.outputs.keys()] for n in group}
+
+        self.relation = Constraint(group, noruleinit=True)
+
+        def _input_output_relation(block):
+            for t in m.TIMESTEPS:
+                for n in group:
+                    for o in O[n]:
+                        try:
+                            lhs = m.flow[I[n], n, t] * \
+                                  n.conversion_factors[o][t]
+                            rhs = m.flow[n, o, t]
+                        except:
+                            raise ValueError("Error in constraint creation",
+                                             "source: {0}, target: {1}".format(
+                                                 n.label, o.label))
+                        block.relation.add((n, o, t), (lhs == rhs))
+        self.relation_build = BuildAction(rule=_input_output_relation)
+
+
 def custom_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment,
                                                        Investment):
@@ -561,3 +611,5 @@ def custom_grouping(node):
     if isinstance(node, GenericStorage) and not isinstance(node.investment,
                                                            Investment):
         return GenericStorageBlock
+    if isinstance(node, GenericCHP):
+        return GenericCHPBlock
