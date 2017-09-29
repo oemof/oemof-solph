@@ -11,13 +11,14 @@ import oemof.solph as solph
 from oemof.outputlib import processing, views
 
 
-# data with sequences
+# read sequence data
 data = pd.read_csv('data.csv', sep=",")
 
-# print(data['demand_el'], len(data))
+# select periods
+periods = len(data[1:24*31])
 
 # create an energy system
-idx = pd.date_range('1/1/2017', periods=len(data), freq='H')
+idx = pd.date_range('1/1/2017', periods=periods, freq='H')
 es = solph.EnergySystem(timeindex=idx)
 
 # create busses
@@ -40,7 +41,7 @@ pp_gas = solph.LinearTransformer(label='pp_gas', inputs={bgas: solph.Flow()},
 # create generic CHP component
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow()},
+                               outputs={bel: solph.Flow(variable_costs=40)},
                                P_el_max=100,
                                P_el_min=50,
                                Q_el_min=50,
@@ -59,7 +60,7 @@ results = processing.results(es, om)
 data = views.node(results, 'bel')
 data['sequences'][(('bel', 'demand'), 'flow')] = \
     data['sequences'][(('bel', 'demand'), 'flow')] * -1
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post')
+ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
 ax.set_title('Dispatch')
 ax.set_xlabel('')
 ax.set_ylabel('Power in MW')
