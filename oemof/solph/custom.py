@@ -479,23 +479,25 @@ class GenericCHP(on.Transformer):
 
     Parameters
     ----------
-    nominal_capacity : numeric
-        Absolute nominal capacity of the storage
-    nominal_input_capacity_ratio :  numeric
-        Ratio between the nominal inflow of the storage and its capacity.
-    investment : :class:`oemof.solph.options.Investment` object
-        Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        investment variable instead of to the nominal_capacity. The
-        nominal_capacity should not be set (or set to None) if an investment
-        object is used.
+    P_el_max : numeric
+        Some description
+    P_el_min : numeric
+        Some description
+    Q_min : numeric
+        Some description
+    Eta_el_max : numeric
+        Some description
+    Eta_el_min : numeric
+        Some description
+    Beta : numeric
+        Some description
 
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCHP` (if no Investment object
-       present)
+     * :py:class:`~oemof.solph.blocks.GenericCHP`
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.P_el_max = kwargs.get('P_el_max')
@@ -504,7 +506,6 @@ class GenericCHP(on.Transformer):
         self.Eta_el_max = kwargs.get('Eta_el_max')
         self.Eta_el_min = kwargs.get('Eta_el_min')
         self.Beta = kwargs.get('Q_min')
-        self.fixed_costs = kwargs.get('fixed_costs')
 
     def _calculate_alphas(self):
         """
