@@ -500,12 +500,14 @@ class GenericCHP(on.Transformer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.P = kwargs.get('P')
+        self.Q = kwargs.get('Q')
         self.P_el_max = kwargs.get('P_el_max')
         self.P_el_min = kwargs.get('P_el_min')
         self.Q_min = kwargs.get('Q_min')
         self.Eta_el_max = kwargs.get('Eta_el_max')
         self.Eta_el_min = kwargs.get('Eta_el_min')
-        self.Beta = kwargs.get('Q_min')
+        self.Beta = kwargs.get('Beta')
 
     def _calculate_alphas(self):
         """
@@ -565,43 +567,88 @@ class GenericCHPBlock(SimpleBlock):
     Block for the linear relation of nodes with type class:`.GenericCHP`.
     """
 
+    CONSTRAINT_GROUP = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Create the linear constraint for the class:`.GenericCHP`. block.
-
+        """
         Parameters
         ----------
         group : list
-            List of oemof.solph.GenericCHP (gchp) objects for which
-            the linear relation of inputs and outputs is created
-            e.g. group = [gchp1, gchp2, gchp3, ...].
+            List containing storage objects.
+            e.g. groups=[storage1, storage2,..]
         """
+        m = self.parent_block()
+
         if group is None:
             return None
 
-        m = self.parent_block()
+        # I = {n: [i for i in n.inputs] for n in group}
+        # O = {n: [o for o in n.outputs] for n in group}
+        # print(I, O)
 
-        I = {n: [i for i in n.inputs][0] for n in group}
-        O = {n: [o for o in n.outputs.keys()] for n in group}
+        for n in group:
+            n.inflow = list(n.inputs)[0]
+            n.outflow1 = list(n.outputs)[0]
+            n.outflow2 = list(n.outputs)[1]
 
-        self.relation = Constraint(group, noruleinit=True)
+        self.GENERICCHPS = Set(initialize=[n for n in group])
 
-        def _input_output_relation(block):
-            for t in m.TIMESTEPS:
-                for n in group:
-                    for o in O[n]:
-                        try:
-                            lhs = m.flow[I[n], n, t] * \
-                                  n.conversion_factors[o][t]
-                            rhs = m.flow[n, o, t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 n.label, o.label))
-                        block.relation.add((n, o, t), (lhs == rhs))
-        self.relation_build = BuildAction(rule=_input_output_relation)
+
+    #     def _storage_capacity_bound_rule(block, n, t):
+    #         """Rule definition for bounds of capacity variable of storage n
+    #         in timestep t
+    #         """
+    #         bounds = (n.nominal_capacity * n.capacity_min[t],
+    #                   n.nominal_capacity * n.capacity_max[t])
+    #         return bounds
+    #     self.capacity = Var(self.STORAGES, m.TIMESTEPS,
+    #                         bounds=_storage_capacity_bound_rule)
+    #
+    #     # set the initial capacity of the storage
+    #     for n in group:
+    #         if n.initial_capacity is not None:
+    #             self.capacity[n, m.timesteps[-1]] = (n.initial_capacity *
+    #                                                  n.nominal_capacity)
+    #             self.capacity[n, m.timesteps[-1]].fix()
+    #
+    #     # storage balance constraint
+    #     def _storage_balance_rule(block, n, t):
+    #         """Rule definition for the storage balance of every storage n and
+    #         timestep t
+    #         """
+    #         expr = 0
+    #         expr += block.capacity[n, t]
+    #         expr += - block.capacity[n, m.previous_timesteps[t]] * (
+    #             1 - n.capacity_loss[t])
+    #         expr += (- m.flow[I[n], n, t] *
+    #                  n.inflow_conversion_factor[t]) * m.timeincrement[t]
+    #         expr += (m.flow[n, O[n], t] /
+    #                  n.outflow_conversion_factor[t]) * m.timeincrement[t]
+    #         return expr == 0
+    #     self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
+    #                               rule=_storage_balance_rule)
+    #
+    # def _objective_expression(self):
+    #     """Objective expression for storages with no investment.
+    #     Note: This adds only fixed costs as variable costs are already
+    #     added in the Block :class:`Flow`.
+    #     """
+    #     if not hasattr(self, 'STORAGES'):
+    #         return 0
+    #
+    #     fixed_costs = 0
+    #
+    #     for n in self.STORAGES:
+    #         if n.fixed_costs is not None:
+    #             fixed_costs += n.nominal_capacity * n.fixed_costs
+    #
+    #     self.fixed_costs = Expression(expr=fixed_costs)
+    #
+    #     return fixed_costs
+
 
 
 def custom_grouping(node):

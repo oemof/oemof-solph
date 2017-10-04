@@ -39,28 +39,30 @@ pp_gas = solph.LinearTransformer(label='pp_gas', inputs={bgas: solph.Flow()},
                                                           variable_costs=50)},
                                  conversion_factors={bel: 0.50})
 
-# create storage object
-storage = solph.custom.GenericStorage(
-    label='storage',
-    inputs={bel: solph.Flow(variable_costs=0)},
-    outputs={bel: solph.Flow(variable_costs=0)},
-    capacity_loss=0.0, nominal_capacity=50,
-    nominal_input_capacity_ratio=1/6,
-    nominal_output_capacity_ratio=1/6,
-    inflow_conversion_factor=0.9, outflow_conversion_factor=0.9
-)
+# # create storage object
+# storage = solph.custom.GenericStorage(
+#     label='storage',
+#     inputs={bel: solph.Flow(variable_costs=0)},
+#     outputs={bel: solph.Flow(variable_costs=0)},
+#     capacity_loss=0.0, nominal_capacity=50,
+#     nominal_input_capacity_ratio=1/6,
+#     nominal_output_capacity_ratio=1/6,
+#     inflow_conversion_factor=0.9, outflow_conversion_factor=0.9
+# )
 
 # create generic CHP component
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(variable_costs=40),
-                                        bth: solph.Flow(variable_costs=0)},
+                               outputs={bel: solph.Flow(),
+                                        bth: solph.Flow()},
+                               P=bel, Q=bth,
                                P_el_max=100,
                                P_el_min=50,
                                Q_el_min=50,
                                Eta_el_max=0.56,
                                Eta_el_min=0.46,
                                Beta=0.227)
+
 
 # create a optimization problem and solve it
 om = solph.OperationalModel(es)
@@ -69,12 +71,12 @@ om.solve(solver='gurobi', solve_kwargs={'tee': True})
 # create result object
 results = processing.results(es, om)
 
-# # plot results
-# data = views.node(results, 'bel')
-# data['sequences'][(('bel', 'demand'), 'flow')] = \
-#     data['sequences'][(('bel', 'demand'), 'flow')] * -1
-# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_title('Dispatch')
-# ax.set_xlabel('')
-# ax.set_ylabel('Power in MW')
-# plt.show()
+# plot results
+data = views.node(results, 'bel')
+data['sequences'][(('bel', 'demand'), 'flow')] = \
+    data['sequences'][(('bel', 'demand'), 'flow')] * -1
+ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+ax.set_title('Dispatch')
+ax.set_xlabel('')
+ax.set_ylabel('Power in MW')
+plt.show()
