@@ -38,6 +38,17 @@ pp_gas = solph.LinearTransformer(label='pp_gas', inputs={bgas: solph.Flow()},
                                                           variable_costs=50)},
                                  conversion_factors={bel: 0.50})
 
+# create storage object
+storage = solph.custom.GenericStorage(
+    label='storage',
+    inputs={bel: solph.Flow(variable_costs=0)},
+    outputs={bel: solph.Flow(variable_costs=0)},
+    capacity_loss=0.0, nominal_capacity=50,
+    nominal_input_capacity_ratio=1/6,
+    nominal_output_capacity_ratio=1/6,
+    inflow_conversion_factor=0.9, outflow_conversion_factor=0.9
+)
+
 # create generic CHP component
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
