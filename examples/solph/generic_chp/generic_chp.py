@@ -24,6 +24,7 @@ es = solph.EnergySystem(timeindex=idx)
 # create busses
 bgas = solph.Bus(label='bgas')
 bel = solph.Bus(label='bel')
+bth = solph.Bus(label='bth')
 
 # create source object representing the natural gas commodity
 rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
@@ -52,7 +53,8 @@ storage = solph.custom.GenericStorage(
 # create generic CHP component
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(variable_costs=40)},
+                               outputs={bel: solph.Flow(variable_costs=40),
+                                        bth: solph.Flow(variable_costs=0)},
                                P_el_max=100,
                                P_el_min=50,
                                Q_el_min=50,
@@ -67,12 +69,12 @@ om.solve(solver='gurobi', solve_kwargs={'tee': True})
 # create result object
 results = processing.results(es, om)
 
-# plot results
-data = views.node(results, 'bel')
-data['sequences'][(('bel', 'demand'), 'flow')] = \
-    data['sequences'][(('bel', 'demand'), 'flow')] * -1
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_title('Dispatch')
-ax.set_xlabel('')
-ax.set_ylabel('Power in MW')
-plt.show()
+# # plot results
+# data = views.node(results, 'bel')
+# data['sequences'][(('bel', 'demand'), 'flow')] = \
+#     data['sequences'][(('bel', 'demand'), 'flow')] * -1
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Power in MW')
+# plt.show()
