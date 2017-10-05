@@ -38,11 +38,13 @@ class EnergySystem(es.EnergySystem):
 
 
 class Flow:
-    """
-    Define a flow between two nodes. Note: Some attributes can only take
-    numeric scalar as some may either take scalar or sequences (array-like).
-    If for latter a scalar is passed, this will be internally converted to a
-    sequence.
+    """ Defines a flow between two nodes.
+
+    Keyword arguments are used to set the attributes of this flow. Parameters
+    which are handled specially are noted below.
+    For the case where a parameter can be either a scalar or a sequence, a
+    scalar value will be converted to a sequence containing the scalar value at
+    every index. This sequence is then stored under the paramter's key.
 
     Parameters
     ----------
