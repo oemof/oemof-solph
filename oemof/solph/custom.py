@@ -509,12 +509,9 @@ class GenericCHP(on.Transformer):
         A system of linear equations is created from passed capacities and
         efficiencies and solved to calculate both coefficients.
         """
-        A = np.array([[1, self.outputs[self.electrical_bus[0]].P_el_min],
-                      [1, self.outputs[self.electrical_bus[0]].P_el_max]])
-        b = np.array([self.outputs[self.electrical_bus[0]].P_el_min /
-                      self.outputs[self.electrical_bus[0]].Eta_el_min,
-                      self.outputs[self.electrical_bus[0]].P_el_max /
-                      self.outputs[self.electrical_bus[0]].Eta_el_max])
+        A = np.array([[1, self.P_el_min], [1, self.P_el_max]])
+        b = np.array([self.P_el_min / self.Eta_el_min,
+                      self.P_el_max / self.Eta_el_max])
         x = np.linalg.solve(A, b)
         alpha1, alpha2 = x[0], x[1]
 
@@ -592,16 +589,8 @@ class GenericCHPBlock(SimpleBlock):
 
         print(I, O, FI, FO)
 
-        # # get electrical and thermal bus/flow by existing flow attributes
-        # #  if getattr(fo, 'my_attr', None)
-        # print('#####')
-        # for k, v in FO.items():
-        #     for i in v:
-        #         if hasattr(i, 'my_attr'):
-        #             print('found', i.my_attr)
-        #
-        # test = [FO[n] for n in group if hasattr(FO[n], 'actual_value')]
-        # print('test', test)
+        # gleichsetzen von flows und variablen. dann intern weitermachen!
+        # sie user meeting modell
 
         # for n in group:
         #     print('FLOW IN', m.flows[I[n][0], n])
