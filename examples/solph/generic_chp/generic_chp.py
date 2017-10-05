@@ -51,32 +51,34 @@ pp_gas = solph.LinearTransformer(label='pp_gas', inputs={bgas: solph.Flow()},
 # )
 
 # create generic CHP component
+# TODO: why are passed busses internally converted to tuples!?
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(),
-                                        bth: solph.Flow()},
-                               P=bel, Q=bth,
-                               P_el_max=100,
-                               P_el_min=50,
-                               Q_el_min=50,
-                               Eta_el_max=0.56,
-                               Eta_el_min=0.46,
+                               outputs={bel: solph.Flow(
+                                            P_el_max=100,
+                                            P_el_min=50,
+                                            Eta_el_max=0.56,
+                                            Eta_el_min=0.46),
+                                        bth: solph.Flow(Q_el_min=50)},
+                               fuel_bus=bgas, electrical_bus=bel,
+                               thermal_bus=bth,
                                Beta=0.227)
 
+print(ccgt.alpha1, ccgt.alpha2)
 
-# create a optimization problem and solve it
-om = solph.OperationalModel(es)
-om.solve(solver='gurobi', solve_kwargs={'tee': True})
-
-# create result object
-results = processing.results(es, om)
-
-# plot results
-data = views.node(results, 'bel')
-data['sequences'][(('bel', 'demand'), 'flow')] = \
-    data['sequences'][(('bel', 'demand'), 'flow')] * -1
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_title('Dispatch')
-ax.set_xlabel('')
-ax.set_ylabel('Power in MW')
-plt.show()
+# # create a optimization problem and solve it
+# om = solph.OperationalModel(es)
+# om.solve(solver='gurobi', solve_kwargs={'tee': True})
+#
+# # create result object
+# results = processing.results(es, om)
+#
+# # plot results
+# data = views.node(results, 'bel')
+# data['sequences'][(('bel', 'demand'), 'flow')] = \
+#     data['sequences'][(('bel', 'demand'), 'flow')] * -1
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Power in MW')
+# plt.show()

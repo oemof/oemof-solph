@@ -479,17 +479,7 @@ class GenericCHP(on.Transformer):
 
     Parameters
     ----------
-    P_el_max : numeric
-        Some description
-    P_el_min : numeric
-        Some description
-    Q_min : numeric
-        Some description
-    Eta_el_max : numeric
-        Some description
-    Eta_el_min : numeric
-        Some description
-    Beta : numeric
+    Bla : numeric
         Some description
 
     Notes
@@ -508,6 +498,9 @@ class GenericCHP(on.Transformer):
         self.Eta_el_max = kwargs.get('Eta_el_max')
         self.Eta_el_min = kwargs.get('Eta_el_min')
         self.Beta = kwargs.get('Beta')
+        self.electrical_bus = kwargs.get('electrical_bus'),
+        self.fuel_bus = kwargs.get('fuel_bus'),
+        self.thermal_bus = kwargs.get('thermal_bus')
 
     def _calculate_alphas(self):
         """
@@ -516,9 +509,12 @@ class GenericCHP(on.Transformer):
         A system of linear equations is created from passed capacities and
         efficiencies and solved to calculate both coefficients.
         """
-        A = np.array([[1, self.P_el_min], [1, self.P_el_max]])
-        b = np.array([self.P_el_min/self.Eta_el_min,
-                      self.P_el_max/self.Eta_el_max])
+        A = np.array([[1, self.outputs[self.electrical_bus[0]].P_el_min],
+                      [1, self.outputs[self.electrical_bus[0]].P_el_max]])
+        b = np.array([self.outputs[self.electrical_bus[0]].P_el_min /
+                      self.outputs[self.electrical_bus[0]].Eta_el_min,
+                      self.outputs[self.electrical_bus[0]].P_el_max /
+                      self.outputs[self.electrical_bus[0]].Eta_el_max])
         x = np.linalg.solve(A, b)
         alpha1, alpha2 = x[0], x[1]
 
@@ -589,10 +585,32 @@ class GenericCHPBlock(SimpleBlock):
         # O = {n: [o for o in n.outputs] for n in group}
         # print(I, O)
 
-        for n in group:
-            n.inflow = list(n.inputs)[0]
-            n.outflow1 = list(n.outputs)[0]
-            n.outflow2 = list(n.outputs)[1]
+        I = {n: [i for i in n.inputs] for n in group}
+        O = {n: [o for o in n.outputs] for n in group}
+        FI = {n: [o for o in n.outputs.values()] for n in group}
+        FO = {n: [o for o in n.outputs.values()] for n in group}
+
+        print(I, O, FI, FO)
+
+        # # get electrical and thermal bus/flow by existing flow attributes
+        # #  if getattr(fo, 'my_attr', None)
+        # print('#####')
+        # for k, v in FO.items():
+        #     for i in v:
+        #         if hasattr(i, 'my_attr'):
+        #             print('found', i.my_attr)
+        #
+        # test = [FO[n] for n in group if hasattr(FO[n], 'actual_value')]
+        # print('test', test)
+
+        # for n in group:
+        #     print('FLOW IN', m.flows[I[n][0], n])
+        #     print('FLOW OUT', m.flows[n, O[n][0]])
+
+        # for n in group:
+        #     n.inflow = list(n.inputs)[0]
+        #     n.outflow1 = list(n.outputs)[0]
+        #     n.outflow2 = list(n.outputs)[1]
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
