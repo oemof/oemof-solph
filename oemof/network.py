@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
+""" Classes used to model energy supply systems.
+
+This package (along with its subpackages) contains the classes used to model
+energy systems. An energy system is modelled as a graph/network of nodes
+with very specific constraints on which types of nodes are allowed to be
+connected.
+"""
+
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
-"""
-This package (along with its subpackages) contains the classes used to model
-energy systems. An energy system is modelled as a graph/network of entities
-with very specific constraints on which types of entities are allowed to be
-connected.
-
-"""
 
 
 class _Edges:
@@ -16,8 +18,8 @@ class _Edges:
     internal implementation detail with an unstable interface. Maye it can be
     converted to a fully fledged useful :python:`Edge` class later on, but for
     now it simply hides most of the dirty secrets of the :class:`Node` class.
-
     """
+
     _in_edges = WeKeDi()
     _flows = WeKeDi()
 
@@ -185,9 +187,9 @@ class Transformer(Component):
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
 #       summary.
 class Entity:
-    r"""
-    The most abstract type of vertex in an energy system graph. Since each
-    entity in an energy system has to be uniquely identifiable and
+    r"""The most abstract type of vertex in an energy system graph.
+
+    Since each entity in an energy system has to be uniquely identifiable and
     connected (either via input or via output) to at least one other
     entity, these properties are collected here so that they are shared
     with descendant classes.
@@ -216,6 +218,7 @@ class Entity:
         :attr:`entities <oemof.core.energy_system.EnergySystem.entities>`
         attribute on construction.
     """
+
     optimization_options = {}
 
     registry = None
@@ -240,8 +243,7 @@ class Entity:
 
         # TODO: @Gunni Yupp! Add docstring.
     def add_regions(self, regions):
-        """Add regions to self.regions
-        """
+        """Add regions to self.regions."""
         self.regions.extend(regions)
         for region in regions:
             if self not in region.entities:
