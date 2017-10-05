@@ -136,7 +136,7 @@ class Flow:
             'variable_costs', 'min', 'max']
         defaults = {'fixed': False, 'min': 0, 'max': 1}
 
-        for attribute in scalars + sequences:
+        for attribute in set(scalars + sequences + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
             setattr(self, attribute,
                     sequence(value) if attribute in sequences else value)
