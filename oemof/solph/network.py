@@ -38,11 +38,13 @@ class EnergySystem(es.EnergySystem):
 
 
 class Flow:
-    """
-    Define a flow between two nodes. Note: Some attributes can only take
-    numeric scalar as some may either take scalar or sequences (array-like).
-    If for latter a scalar is passed, this will be internally converted to a
-    sequence.
+    """ Defines a flow between two nodes.
+
+    Keyword arguments are used to set the attributes of this flow. Parameters
+    which are handled specially are noted below.
+    For the case where a parameter can be either a scalar or a sequence, a
+    scalar value will be converted to a sequence containing the scalar value at
+    every index. This sequence is then stored under the paramter's key.
 
     Parameters
     ----------
@@ -129,18 +131,18 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        self.nominal_value = kwargs.get('nominal_value')
-        self.min = sequence(kwargs.get('min', 0))
-        self.max = sequence(kwargs.get('max', 1))
-        self.actual_value = sequence(kwargs.get('actual_value'))
-        self.positive_gradient = sequence(kwargs.get('positive_gradient'))
-        self.negative_gradient = sequence(kwargs.get('negative_gradient'))
-        self.variable_costs = sequence(kwargs.get('variable_costs'))
-        self.fixed_costs = kwargs.get('fixed_costs')
-        self.summed_max = kwargs.get('summed_max')
-        self.summed_min = kwargs.get('summed_min')
-        self.fixed = kwargs.get('fixed', False)
-        self.investment = kwargs.get('investment')
+        scalars = ['nominal_value', 'actual_value', 'fixed_costs',
+            'summed_max', 'summed_min', 'investment', 'binary', 'discrete',
+            'fixed']
+        sequences = ['positive_gradient', 'negative_gradient',
+            'variable_costs', 'min', 'max']
+        defaults = {'fixed': False, 'min': 0, 'max': 1}
+
+        for attribute in set(scalars + sequences + list(kwargs)):
+            value = kwargs.get(attribute, defaults.get(attribute))
+            setattr(self, attribute,
+                    sequence(value) if attribute in sequences else value)
+
         if self.fixed and self.actual_value is None:
             raise ValueError("Can not fix flow value to None. "
                              "Please set actual_value of the flow")
@@ -158,8 +160,6 @@ class Flow:
                 "Using the investment object the nominal_value" +
                 " is set to None.",
                 SyntaxWarning)
-        self.binary = kwargs.get('binary')
-        self.discrete = kwargs.get('discrete')
         if self.investment and self.binary:
             raise ValueError("Investment flows cannot be combined with " +
                              "binary flows!")
