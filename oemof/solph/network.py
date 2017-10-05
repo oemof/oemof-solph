@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
+""" Classes used to model energy supply systems within solh.
+
+Classes are derived from oemof core network classes and adapted for specific
+optimization tasks. An energy system is modelled as a graph/network of nodes
+with very specific constraints on which types of nodes are allowed to be
+connected.
 """
 
-"""
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
-from .options import Investment
 from .plumbing import sequence
 
 
 class EnergySystem(es.EnergySystem):
-    """
-    A variant of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
-    specially tailored to solph.
+    """ A variant of :class:`EnergySystem
+    <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
@@ -38,7 +41,7 @@ class EnergySystem(es.EnergySystem):
 
 
 class Flow:
-    """ Defines a flow between two nodes.
+    r""" Defines a flow between two nodes.
 
     Keyword arguments are used to set the attributes of this flow. Parameters
     which are handled specially are noted below.
@@ -124,6 +127,7 @@ class Flow:
     0.99
 
     """
+
     def __init__(self, **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
@@ -131,11 +135,10 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        scalars = ['nominal_value', 'actual_value', 'fixed_costs',
-            'summed_max', 'summed_min', 'investment', 'binary', 'discrete',
-            'fixed']
-        sequences = ['positive_gradient', 'negative_gradient',
-            'variable_costs', 'min', 'max']
+        scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
+                   'investment', 'binary', 'discrete', 'fixed']
+        sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
+                     'variable_costs', 'min', 'max']
         defaults = {'fixed': False, 'min': 0, 'max': 1}
 
         for attribute in set(scalars + sequences + list(kwargs)):
@@ -174,6 +177,7 @@ class Bus(on.Bus):
      * :py:class:`~oemof.solph.blocks.Bus`
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
