@@ -585,8 +585,11 @@ class GenericCHPBlock(SimpleBlock):
         # ELECTRICAL_FLOWS = {n: [o for o in n.outputs if o is n.electrical_bus] for n in group}
         #print('TADA', HEAT_FLOWS, ELECTRICAL_FLOWS)
 
-        BLA = {n: [n.heat_bus, n.electrical_bus] for n in group}
-        print(BLA)
+        # @gnn: somehow n.electrical_bus is a tuple here (bel,) even if
+        # is passed as a single object in examples/generic_chp/generic_chp.py
+        # I don't really understand why..
+        TEST = {n: [n.heat_bus, n.electrical_bus] for n in group}
+        print(TEST)
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 

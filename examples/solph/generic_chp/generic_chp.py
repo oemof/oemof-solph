@@ -57,8 +57,7 @@ print('Why?', bth, bel)
 
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(),
-                                        bth: solph.Flow()},
+                               outputs={bel: solph.Flow(), bth: solph.Flow()},
                                P_el_max=100, P_el_min=50,
                                Eta_el_max=0.56, Eta_el_min=0.46,
                                Q_el_min=50,
