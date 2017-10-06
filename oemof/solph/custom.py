@@ -585,6 +585,9 @@ class GenericCHPBlock(SimpleBlock):
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.Q = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
 
         def _h_flow_connection_rule(block, n, t):
@@ -595,6 +598,24 @@ class GenericCHPBlock(SimpleBlock):
             return expr == 0
         self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_h_flow_connection_rule)
+
+        def _q_flow_connection_rule(block, n, t):
+            """Link heat flow to component outflow."""
+            expr = 0
+            expr += self.Q[n, t]
+            expr += - m.flow[n, FQ[n][0], t]
+            return expr == 0
+        self.q_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_q_flow_connection_rule)
+
+        def _p_flow_connection_rule(block, n, t):
+            """Link power flow to component outflow."""
+            expr = 0
+            expr += self.P[n, t]
+            expr += - m.flow[n, FP[n][0], t]
+            return expr == 0
+        self.p_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_p_flow_connection_rule)
 
 
 def custom_grouping(node):
