@@ -660,9 +660,9 @@ class GenericCHPBlock(SimpleBlock):
         def _P_restriction_rule(block, n, t):
             """Restrict P depending on fuel and heat flow."""
             expr = 0
-            expr += - self.P[n, t]
-            expr += self.H_F[n, t] - self.Q[n, t] - self.H_L_FG[n, t]
-            expr += - n.Q_CW_min
+            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
+            expr += n.Q_CW_min * self.Y[n, t]
+            expr += - self.H_F[n, t]
             return expr <= 0
         self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                         rule=_P_restriction_rule)
