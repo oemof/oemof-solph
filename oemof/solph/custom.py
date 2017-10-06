@@ -6,8 +6,8 @@ module holds the class definition and the block directly located by each other.
 """
 
 from pyomo.core.base.block import SimpleBlock
-from pyomo.environ import (Set, NonNegativeReals, Var, Constraint, Expression,
-                           BuildAction)
+from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
+                           Expression, BuildAction)
 import numpy as np
 import oemof.network as on
 import warnings
@@ -492,11 +492,11 @@ class GenericCHP(on.Transformer):
         super().__init__(*args, **kwargs)
         self.P = kwargs.get('P')
         self.Q = kwargs.get('Q')
-        self.P_el_max = kwargs.get('P_el_max')
-        self.P_el_min = kwargs.get('P_el_min')
-        self.Q_min = kwargs.get('Q_min')
-        self.Eta_el_max = kwargs.get('Eta_el_max')
-        self.Eta_el_min = kwargs.get('Eta_el_min')
+        self.P_max_woDH = kwargs.get('P_max_woDH')
+        self.P_min_woDH = kwargs.get('P_min_woDH')
+        self.Q_CW_min = kwargs.get('Q_CW_min')
+        self.Eta_el_max_woDH = kwargs.get('Eta_el_max_woDH')
+        self.Eta_el_min_woDH = kwargs.get('Eta_el_min_woDH')
         self.Beta = kwargs.get('Beta')
         self.electrical_bus = kwargs.get('electrical_bus'),
         self.heat_bus = kwargs.get('heat_bus')
@@ -508,9 +508,9 @@ class GenericCHP(on.Transformer):
         A system of linear equations is created from passed capacities and
         efficiencies and solved to calculate both coefficients.
         """
-        A = np.array([[1, self.P_el_min], [1, self.P_el_max]])
-        b = np.array([self.P_el_min / self.Eta_el_min,
-                      self.P_el_max / self.Eta_el_max])
+        A = np.array([[1, self.P_min_woDH], [1, self.P_max_woDH]])
+        b = np.array([self.P_min_woDH / self.Eta_el_min_woDH,
+                      self.P_max_woDH / self.Eta_el_max_woDH])
         x = np.linalg.solve(A, b)
         alpha1, alpha2 = x[0], x[1]
 
@@ -577,23 +577,24 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
-        H = {n: [i for i in n.inputs] for n in group}
-        Q = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
-        P = {n: [o for o in n.outputs if o is not n.heat_bus] for n in group}
-        print(H, Q, P)
+        FH = {n: [i for i in n.inputs] for n in group}
+        FQ = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
+        FP = {n: [o for o in n.outputs if o is not n.heat_bus] for n in group}
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
+        # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
 
-        def _f_flow_connection_rule(block, n, t):
+        def _h_flow_connection_rule(block, n, t):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += - m.flow[H[n][0], n, t]
+            expr += - m.flow[FH[n][0], n, t]
             return expr == 0
-        self.f_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_f_flow_connection_rule)
+        self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_h_flow_connection_rule)
 
 
 def custom_grouping(node):
