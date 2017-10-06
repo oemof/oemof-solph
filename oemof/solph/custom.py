@@ -588,6 +588,7 @@ class GenericCHPBlock(SimpleBlock):
         # @gnn: somehow n.electrical_bus is a tuple here (bel,) even if
         # is passed as a single object in examples/generic_chp/generic_chp.py
         # I don't really understand why..
+        print([n.electrical_bus for n in group])
         TEST = {n: [n.heat_bus, n.electrical_bus] for n in group}
         print(TEST)
 
