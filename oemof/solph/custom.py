@@ -577,30 +577,20 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
-        I = {n: [i for i in n.inputs] for n in group}
-        O = {n: [o for o in n.outputs] for n in group}
-
-        # FUEL_FLOWS = {n: [i for i in n.inputs] for n in group}
-        # HEAT_FLOWS = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
-        # ELECTRICAL_FLOWS = {n: [o for o in n.outputs if o is n.electrical_bus] for n in group}
-        #print('TADA', HEAT_FLOWS, ELECTRICAL_FLOWS)
-
-        # @gnn: somehow n.electrical_bus is a tuple here (bel,) even if
-        # is passed as a single object in examples/generic_chp/generic_chp.py
-        # I don't really understand why..
-        print([n.electrical_bus for n in group])
-        TEST = {n: [n.heat_bus, n.electrical_bus] for n in group}
-        print(TEST)
+        H = {n: [i for i in n.inputs] for n in group}
+        Q = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
+        P = {n: [o for o in n.outputs if o is not n.heat_bus] for n in group}
+        print(H, Q, P)
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
-        self.F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
 
         def _f_flow_connection_rule(block, n, t):
             """Link fuel consumption to component inflow."""
             expr = 0
-            expr += self.F[n, t]
-            expr += - m.flow[I[n][0], n, t]
+            expr += self.H_F[n, t]
+            expr += - m.flow[H[n][0], n, t]
             return expr == 0
         self.f_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_f_flow_connection_rule)
