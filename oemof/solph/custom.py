@@ -500,6 +500,7 @@ class GenericCHP(on.Transformer):
         self.Beta = kwargs.get('Beta')
         self.electrical_bus = kwargs.get('electrical_bus'),
         self.heat_bus = kwargs.get('heat_bus')
+        self.fixed_costs = kwargs.get('fixed_costs')
 
     def _calculate_alphas(self):
         """
@@ -665,6 +666,25 @@ class GenericCHPBlock(SimpleBlock):
             return expr <= 0
         self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                         rule=_P_restriction_rule)
+
+
+    def _objective_expression(self):
+        """Objective expression for generic CHPs with no investment.
+        Note: This adds only fixed costs as variable costs are already
+        added in the Block :class:`Flow`.
+        """
+        if not hasattr(self, 'GENERICCHPS'):
+            return 0
+
+        fixed_costs = 0
+
+        for n in self.GENERICCHPS:
+            if n.fixed_costs is not None:
+                fixed_costs += n.P_max_woDH * n.fixed_costs
+
+        self.fixed_costs = Expression(expr=fixed_costs)
+
+        return fixed_costs
 
 
 def custom_grouping(node):
