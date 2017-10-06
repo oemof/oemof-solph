@@ -15,63 +15,69 @@ from oemof.outputlib import processing, views
 data = pd.read_csv('data.csv', sep=",")
 
 # select periods
-periods = len(data[1:24*31])
+periods = len(data[1:24])
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
 es = solph.EnergySystem(timeindex=idx)
 
-# create busses
+# resources
 bgas = solph.Bus(label='bgas')
-bel = solph.Bus(label='bel')
-bth = solph.Bus(label='bth')
 
-# create source object representing the natural gas commodity
 rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 
-# create simple sink object representing the electrical demand
-demand = solph.Sink(label='demand', inputs={bel: solph.Flow(fixed=True,
-                    actual_value=data['demand_el'], nominal_value=100)})
+# heat
+bth = solph.Bus(label='bth')
 
-# create simple transformer object representing a gas power plant
-pp_gas = solph.LinearTransformer(label='pp_gas', inputs={bgas: solph.Flow()},
-                                 outputs={bel: solph.Flow(nominal_value=300,
-                                                          variable_costs=50)},
-                                 conversion_factors={bel: 0.50})
+source_th = solph.Source(label='source_th', outputs={bth: solph.Flow(
+                         variable_costs=1000)})
 
-# # create storage object
-# storage = solph.custom.GenericStorage(
-#     label='storage',
-#     inputs={bel: solph.Flow(variable_costs=0)},
-#     outputs={bel: solph.Flow(variable_costs=0)},
-#     capacity_loss=0.0, nominal_capacity=50,
-#     nominal_input_capacity_ratio=1/6,
-#     nominal_output_capacity_ratio=1/6,
-#     inflow_conversion_factor=0.9, outflow_conversion_factor=0.9
-# )
+demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
+                       actual_value=data['demand_el'], nominal_value=100)})
 
-# create generic CHP component
+# power
+bel = solph.Bus(label='bel')
+
+source_el = solph.Source(label='source_el', outputs={bel: solph.Flow(
+                         variable_costs=1000)})
+
+demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(fixed=True,
+                       actual_value=data['demand_el'], nominal_value=187)})
+
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(), bth: solph.Flow()},
-                               P_max_woDH=100, P_min_woDH=50,
-                               Eta_el_max_woDH=0.56, Eta_el_min_woDH=0.46,
-                               Q_CW_min=50,
+                               outputs={bel: solph.Flow(nominal_value=187,
+                                                        variable_costs=300),
+                                        bth: solph.Flow()},
+                               P_max_woDH=187, P_min_woDH=80,
+                               Eta_el_max_woDH=0.49, Eta_el_min_woDH=0.41,
+                               Q_CW_min=28,
                                electrical_bus=bel,
                                heat_bus=bth,
-                               Beta=0.227)
-
-print(ccgt.alpha1, ccgt.alpha2)
+                               Beta=0.21)
 
 # create a optimization problem and solve it
 om = solph.OperationalModel(es)
-om.solve(solver='gurobi', solve_kwargs={'tee': True})
 
-# # create result object
-# results = processing.results(es, om)
-#
-# print(results[(ccgt,)]['sequences'].head())
-#
+# debugging
+#om.pprint()
+om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
+
+# solve model
+#om.solve(solver='gurobi', solve_kwargs={'tee': True})
+
+# create result object
+results = processing.results(es, om)
+
+results[(ccgt,)]['sequences']['PQ'] = \
+    results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
+
+print(results[(ccgt,)]['sequences'].describe())
+print(results[(ccgt,)]['sequences'].head())
+
+# results[(ccgt,)]['sequences'].plot(kind='line', drawstyle='steps-post')
+# plt.show()
+
 # # plot results
 # data = views.node(results, 'bel')
 # data['sequences'][(('bel', 'demand'), 'flow')] = \
