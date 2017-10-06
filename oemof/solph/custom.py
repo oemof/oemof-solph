@@ -498,7 +498,7 @@ class GenericCHP(on.Transformer):
         self.Eta_el_max_woDH = kwargs.get('Eta_el_max_woDH')
         self.Eta_el_min_woDH = kwargs.get('Eta_el_min_woDH')
         self.Beta = kwargs.get('Beta')
-        self.electrical_bus = kwargs.get('electrical_bus'),
+        self.electrical_bus = kwargs.get('electrical_bus')
         self.heat_bus = kwargs.get('heat_bus')
         self.fixed_costs = kwargs.get('fixed_costs')
 
@@ -642,8 +642,8 @@ class GenericCHPBlock(SimpleBlock):
         def _H_F_3_rule(block, n, t):
             """Set upper value of operating range via H_F."""
             expr = 0
-            expr += - self.H_F[n, t]
-            expr += self.Y[n, t] * (n.P_max_woDH / n.Eta_el_max_woDH)
+            expr += self.H_F[n, t]
+            expr += - self.Y[n, t] * (n.P_max_woDH / n.Eta_el_max_woDH)
             return expr <= 0
         self.H_F_3 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_3_rule)
@@ -651,8 +651,8 @@ class GenericCHPBlock(SimpleBlock):
         def _H_F_4_rule(block, n, t):
             """Set lower value of operating range via H_F."""
             expr = 0
-            expr += - self.H_F[n, t]
-            expr += self.Y[n, t] * (n.P_min_woDH / n.Eta_el_min_woDH)
+            expr += self.H_F[n, t]
+            expr += - self.Y[n, t] * (n.P_min_woDH / n.Eta_el_min_woDH)
             return expr >= 0
         self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
