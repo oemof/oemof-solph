@@ -52,27 +52,30 @@ pp_gas = solph.LinearTransformer(label='pp_gas', inputs={bgas: solph.Flow()},
 
 # create generic CHP component
 # TODO: why are passed busses internally converted to tuples!?
+
+print('Why?', bth, bel)
+
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
                                outputs={bel: solph.Flow(),
                                         bth: solph.Flow()},
-                               P_el_max=100,
-                               P_el_min=50,
-                               Eta_el_max=0.56,
-                               Eta_el_min=0.46,
+                               P_el_max=100, P_el_min=50,
+                               Eta_el_max=0.56, Eta_el_min=0.46,
                                Q_el_min=50,
-                               fuel_bus=bgas, electrical_bus=bel,
-                               thermal_bus=bth,
+                               electrical_bus=bel,
+                               heat_bus=bth,
                                Beta=0.227)
 
 print(ccgt.alpha1, ccgt.alpha2)
 
-# # create a optimization problem and solve it
-# om = solph.OperationalModel(es)
-# om.solve(solver='gurobi', solve_kwargs={'tee': True})
-#
+# create a optimization problem and solve it
+om = solph.OperationalModel(es)
+om.solve(solver='gurobi', solve_kwargs={'tee': True})
+
 # # create result object
 # results = processing.results(es, om)
+#
+# print(results[(ccgt,)]['sequences'].head())
 #
 # # plot results
 # data = views.node(results, 'bel')

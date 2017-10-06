@@ -499,8 +499,7 @@ class GenericCHP(on.Transformer):
         self.Eta_el_min = kwargs.get('Eta_el_min')
         self.Beta = kwargs.get('Beta')
         self.electrical_bus = kwargs.get('electrical_bus'),
-        self.fuel_bus = kwargs.get('fuel_bus'),
-        self.thermal_bus = kwargs.get('thermal_bus')
+        self.heat_bus = kwargs.get('heat_bus')
 
     def _calculate_alphas(self):
         """
@@ -578,84 +577,29 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
-        # I = {n: [i for i in n.inputs] for n in group}
-        # O = {n: [o for o in n.outputs] for n in group}
-        # print(I, O)
-
         I = {n: [i for i in n.inputs] for n in group}
         O = {n: [o for o in n.outputs] for n in group}
-        FI = {n: [o for o in n.outputs.values()] for n in group}
-        FO = {n: [o for o in n.outputs.values()] for n in group}
 
-        print(I, O, FI, FO)
+        # FUEL_FLOWS = {n: [i for i in n.inputs] for n in group}
+        # HEAT_FLOWS = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
+        # ELECTRICAL_FLOWS = {n: [o for o in n.outputs if o is n.electrical_bus] for n in group}
+        #print('TADA', HEAT_FLOWS, ELECTRICAL_FLOWS)
 
-        # gleichsetzen von flows und variablen. dann intern weitermachen!
-        # sie user meeting modell
-
-        # for n in group:
-        #     print('FLOW IN', m.flows[I[n][0], n])
-        #     print('FLOW OUT', m.flows[n, O[n][0]])
-
-        # for n in group:
-        #     n.inflow = list(n.inputs)[0]
-        #     n.outflow1 = list(n.outputs)[0]
-        #     n.outflow2 = list(n.outputs)[1]
+        BLA = {n: [n.heat_bus, n.electrical_bus] for n in group}
+        print(BLA)
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
+        self.F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
 
-    #     def _storage_capacity_bound_rule(block, n, t):
-    #         """Rule definition for bounds of capacity variable of storage n
-    #         in timestep t
-    #         """
-    #         bounds = (n.nominal_capacity * n.capacity_min[t],
-    #                   n.nominal_capacity * n.capacity_max[t])
-    #         return bounds
-    #     self.capacity = Var(self.STORAGES, m.TIMESTEPS,
-    #                         bounds=_storage_capacity_bound_rule)
-    #
-    #     # set the initial capacity of the storage
-    #     for n in group:
-    #         if n.initial_capacity is not None:
-    #             self.capacity[n, m.timesteps[-1]] = (n.initial_capacity *
-    #                                                  n.nominal_capacity)
-    #             self.capacity[n, m.timesteps[-1]].fix()
-    #
-    #     # storage balance constraint
-    #     def _storage_balance_rule(block, n, t):
-    #         """Rule definition for the storage balance of every storage n and
-    #         timestep t
-    #         """
-    #         expr = 0
-    #         expr += block.capacity[n, t]
-    #         expr += - block.capacity[n, m.previous_timesteps[t]] * (
-    #             1 - n.capacity_loss[t])
-    #         expr += (- m.flow[I[n], n, t] *
-    #                  n.inflow_conversion_factor[t]) * m.timeincrement[t]
-    #         expr += (m.flow[n, O[n], t] /
-    #                  n.outflow_conversion_factor[t]) * m.timeincrement[t]
-    #         return expr == 0
-    #     self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
-    #                               rule=_storage_balance_rule)
-    #
-    # def _objective_expression(self):
-    #     """Objective expression for storages with no investment.
-    #     Note: This adds only fixed costs as variable costs are already
-    #     added in the Block :class:`Flow`.
-    #     """
-    #     if not hasattr(self, 'STORAGES'):
-    #         return 0
-    #
-    #     fixed_costs = 0
-    #
-    #     for n in self.STORAGES:
-    #         if n.fixed_costs is not None:
-    #             fixed_costs += n.nominal_capacity * n.fixed_costs
-    #
-    #     self.fixed_costs = Expression(expr=fixed_costs)
-    #
-    #     return fixed_costs
-
+        def _f_flow_connection_rule(block, n, t):
+            """Link fuel consumption to component inflow."""
+            expr = 0
+            expr += self.F[n, t]
+            expr += - m.flow[I[n][0], n, t]
+            return expr == 0
+        self.f_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_f_flow_connection_rule)
 
 
 def custom_grouping(node):
