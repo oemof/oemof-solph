@@ -509,6 +509,11 @@ class GenericCHP(on.Transformer):
         A system of linear equations is created from passed capacities and
         efficiencies and solved to calculate both coefficients.
         """
+        # TODO:
+        # 1. check if all required params have the same dimension
+        # 2. get dimension and calculate alphas
+        #    (list comprehension using lambda?)
+
         A = np.array([[1, self.P_min_woDH], [1, self.P_max_woDH]])
         b = np.array([self.P_min_woDH / self.Eta_el_min_woDH,
                       self.P_max_woDH / self.Eta_el_max_woDH])
@@ -580,14 +585,22 @@ class GenericCHPBlock(SimpleBlock):
 
         FH = {n: [i for i in n.inputs] for n in group}
         FQ = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
-        FP = {n: [o for o in n.outputs if o is n.electrical_bus] for n in group}
+        FP = {n: [o for o in n.outputs if o is n.electrical_bus]
+              for n in group}
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
+        # @TODO:
+        #   1. set P_max, P_min, Q_min as bounds properly or use attributes
+        #      instead or create flows internally in constructor and pass params
+        #   2. declare Qmin, etc. as params over time and align equations
+
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.H_L_FG = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.H_L_FG = Var(self.GENERICCHPS, m.TIMESTEPS,
+                          within=NonNegativeReals)
+        self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS,
+                          within=NonNegativeReals)
         self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.Q = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)

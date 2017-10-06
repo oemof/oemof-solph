@@ -73,11 +73,12 @@ print(results[(ccgt,)]['sequences'].head())
 
 
 # plot CCET
-ax = results[(ccgt,)]['sequences'].plot(kind='scatter', x='Q', y='P',
-                                        grid=True)
+data = results[(ccgt,)]['sequences']
+ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
 ax.set_xlabel('Q (MW)')
 ax.set_ylabel('P (MW)')
 plt.show()
+
 
 # # plot bus
 # data = views.node(results, 'bel')
