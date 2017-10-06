@@ -585,6 +585,7 @@ class GenericCHPBlock(SimpleBlock):
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.H_L_FG = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.Q = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
@@ -616,6 +617,54 @@ class GenericCHPBlock(SimpleBlock):
             return expr == 0
         self.p_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_p_flow_connection_rule)
+
+        def _H_F_1_rule(block, n, t):
+            """Set P_woDH depending on H_F."""
+            expr = 0
+            expr += - self.H_F[n, t]
+            expr += n.alpha1 * self.Y[n, t]
+            expr += n.alpha2 * self.P_woDH[n, t]
+            return expr == 0
+        self.H_F_1 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                rule=_H_F_1_rule)
+
+        def _H_F_2_rule(block, n, t):
+            """Determine relation between H_F, P and Q."""
+            expr = 0
+            expr += - self.H_F[n, t]
+            expr += n.alpha1 * self.Y[n, t]
+            expr += n.alpha2 * (self.P[n, t] + n.Beta * self.Q[n, t])
+            return expr == 0
+        self.H_F_2 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                rule=_H_F_2_rule)
+
+        def _H_F_3_rule(block, n, t):
+            """Set upper value of operating range via H_F."""
+            expr = 0
+            expr += - self.H_F[n, t]
+            expr += self.Y[n, t] * (n.P_max_woDH / n.Eta_el_max_woDH)
+            return expr <= 0
+        self.H_F_3 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                rule=_H_F_3_rule)
+
+        def _H_F_4_rule(block, n, t):
+            """Set lower value of operating range via H_F."""
+            expr = 0
+            expr += - self.H_F[n, t]
+            expr += self.Y[n, t] * (n.P_min_woDH / n.Eta_el_min_woDH)
+            return expr >= 0
+        self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                rule=_H_F_4_rule)
+
+        def _P_restriction_rule(block, n, t):
+            """Restrict P depending on fuel and heat flow."""
+            expr = 0
+            expr += - self.P[n, t]
+            expr += self.H_F[n, t] - self.Q[n, t] - self.H_L_FG[n, t]
+            expr += - n.Q_CW_min
+            return expr <= 0
+        self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                        rule=_P_restriction_rule)
 
 
 def custom_grouping(node):
