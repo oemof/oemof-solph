@@ -580,7 +580,7 @@ class GenericCHPBlock(SimpleBlock):
 
         FH = {n: [i for i in n.inputs] for n in group}
         FQ = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
-        FP = {n: [o for o in n.outputs if o is not n.heat_bus] for n in group}
+        FP = {n: [o for o in n.outputs if o is n.electrical_bus] for n in group}
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
