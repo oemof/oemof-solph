@@ -502,57 +502,6 @@ class GenericCHP(on.Transformer):
         self.heat_bus = kwargs.get('heat_bus')
         self.fixed_costs = kwargs.get('fixed_costs')
 
-    def _calculate_alphas(self):
-        """
-        Calculate alpha coefficients.
-
-        A system of linear equations is created from passed capacities and
-        efficiencies and solved to calculate both coefficients.
-        """
-        alpha1, alpha2 = [], []
-
-        attrs = [self.P_min_woDH, self.Eta_el_min_woDH,
-                 self.P_max_woDH, self.Eta_el_max_woDH]
-        max_length = max([len(a) for a in attrs])
-
-        if all(len(a) == max_length for a in attrs):
-            if max_length == 0:
-                max_length += 1  # increment dimension for scalars from 0 to 1
-            for i in range(0, max_length):
-                A = np.array([[1, self.P_min_woDH[i]],
-                              [1, self.P_max_woDH[i]]])
-                b = np.array([self.P_min_woDH[i] / self.Eta_el_min_woDH[i],
-                              self.P_max_woDH[i] / self.Eta_el_max_woDH[i]])
-                x = np.linalg.solve(A, b)
-                alpha1.append(x[0])
-                alpha2.append(x[1])
-        else:
-            error_message = ('Attributes to calculate alphas ' +
-                             'must be of same dimension.')
-            raise ValueError(error_message)
-
-        return alpha1, alpha2
-
-    @property
-    def alpha1(self):
-        """Getter for first alpha coefficient."""
-        try:
-            alphas = self._calculate_alphas()
-        except AttributeError:
-            print("All electric capacities and efficiencies have to be " +
-                  "defined to calculate alpha coefficients!")
-        return alphas[0]
-
-    @property
-    def alpha2(self):
-        """Getter for second alpha coefficient."""
-        try:
-            alphas = self._calculate_alphas()
-        except AttributeError:
-            print("All electric capacities and efficiencies have to be " +
-                  "defined to calculate alpha coefficients!")
-        return alphas[1]
-
 
 def storage_nominal_value_warning(flow):
     msg = ("The nominal_value should not be set for {0} flows of storages." +
@@ -581,8 +530,49 @@ class GenericCHPBlock(SimpleBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def _convert_to_sequence(self, m=None, node=None, attrs=None):
+        """Set param constant over time if it is not passed time-dependent."""
+        if not all(len(getattr(node, a)) == len(m.TIMESTEPS) for a in attrs):
+            for a in attrs:
+                seq = sequence([getattr(node, a)[0] for t in m.TIMESTEPS])
+                setattr(node, a, seq)
+        return node
+
+    def _calculate_alphas(self, node=None, attrs=None):
+        """
+        Calculate alpha coefficients.
+
+        A system of linear equations is created from passed capacities and
+        efficiencies and solved to calculate both coefficients.
+        """
+        alpha1, alpha2 = [], []
+
+        attrs = [node.P_min_woDH, node.Eta_el_min_woDH,
+                 node.P_max_woDH, node.Eta_el_max_woDH]
+        max_length = max([len(a) for a in attrs])
+
+        if all(len(a) == max_length for a in attrs):
+            if max_length == 0:
+                max_length += 1  # increment dimension for scalars from 0 to 1
+            for i in range(0, max_length):
+                A = np.array([[1, node.P_min_woDH[i]],
+                              [1, node.P_max_woDH[i]]])
+                b = np.array([node.P_min_woDH[i] / node.Eta_el_min_woDH[i],
+                              node.P_max_woDH[i] / node.Eta_el_max_woDH[i]])
+                x = np.linalg.solve(A, b)
+                alpha1.append(x[0])
+                alpha2.append(x[1])
+        else:
+            error_message = ('Attributes to calculate alphas ' +
+                             'must be of same dimension.')
+            raise ValueError(error_message)
+
+        return alpha1, alpha2
+
     def _create(self, group=None):
         """
+        Create constraints for GenericCHPBlock.
+
         Parameters
         ----------
         group : list
@@ -594,10 +584,21 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
-        FH = {n: [i for i in n.inputs] for n in group}
-        FQ = {n: [o for o in n.outputs if o is n.heat_bus] for n in group}
-        FP = {n: [o for o in n.outputs if o is n.electrical_bus]
-              for n in group}
+        for n in group:
+
+            # assign in and outflows
+            FH = {n: [i for i in n.inputs]}
+            FQ = {n: [o for o in n.outputs if o is n.heat_bus]}
+            FP = {n: [o for o in n.outputs if o is n.electrical_bus]}
+
+            # convert scalar attributes into sequences
+            attrs = ['P_max_woDH', 'P_min_woDH', 'Eta_el_max_woDH',
+                     'Eta_el_min_woDH', 'Q_CW_min', 'Beta']
+            n = self._convert_to_sequence(m, n, attrs)
+
+            # calculate alpha coefficients
+            n.alpha1 = self._calculate_alphas(n, attrs)[0]
+            n.alpha2 = self._calculate_alphas(n, attrs)[1]
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
@@ -607,6 +608,7 @@ class GenericCHPBlock(SimpleBlock):
         #   2. declare Qmin, etc. as params over time and align equations
         #   3. if these are flow attributes, these can be accessed via
         #      FQ[0].attribute_name
+        # update flows by heat_bus={bla: {attr1: 1, attr2: 'foo'}}
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
@@ -649,8 +651,8 @@ class GenericCHPBlock(SimpleBlock):
             """Set P_woDH depending on H_F."""
             expr = 0
             expr += - self.H_F[n, t]
-            expr += n.alpha1 * self.Y[n, t]
-            expr += n.alpha2 * self.P_woDH[n, t]
+            expr += n.alpha1[t] * self.Y[n, t]
+            expr += n.alpha2[t] * self.P_woDH[n, t]
             return expr == 0
         self.H_F_1 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_1_rule)
@@ -659,8 +661,8 @@ class GenericCHPBlock(SimpleBlock):
             """Determine relation between H_F, P and Q."""
             expr = 0
             expr += - self.H_F[n, t]
-            expr += n.alpha1 * self.Y[n, t]
-            expr += n.alpha2 * (self.P[n, t] + n.Beta * self.Q[n, t])
+            expr += n.alpha1[t] * self.Y[n, t]
+            expr += n.alpha2[t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
             return expr == 0
         self.H_F_2 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_2_rule)
@@ -669,7 +671,7 @@ class GenericCHPBlock(SimpleBlock):
             """Set upper value of operating range via H_F."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += - self.Y[n, t] * (n.P_max_woDH / n.Eta_el_max_woDH)
+            expr += - self.Y[n, t] * (n.P_max_woDH[t] / n.Eta_el_max_woDH[t])
             return expr <= 0
         self.H_F_3 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_3_rule)
@@ -678,7 +680,7 @@ class GenericCHPBlock(SimpleBlock):
             """Set lower value of operating range via H_F."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += - self.Y[n, t] * (n.P_min_woDH / n.Eta_el_min_woDH)
+            expr += - self.Y[n, t] * (n.P_min_woDH[t] / n.Eta_el_min_woDH[t])
             return expr >= 0
         self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
@@ -687,15 +689,15 @@ class GenericCHPBlock(SimpleBlock):
             """Restrict P depending on fuel and heat flow."""
             expr = 0
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
-            expr += n.Q_CW_min * self.Y[n, t]
+            expr += n.Q_CW_min[t] * self.Y[n, t]
             expr += - self.H_F[n, t]
             return expr <= 0
         self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                         rule=_P_restriction_rule)
 
-
     def _objective_expression(self):
         """Objective expression for generic CHPs with no investment.
+
         Note: This adds only fixed costs as variable costs are already
         added in the Block :class:`Flow`.
         """
