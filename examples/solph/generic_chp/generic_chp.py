@@ -41,32 +41,18 @@ bel = solph.Bus(label='bel')
 demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
                        variable_costs=data['price_el'])})
 
-# # test sequence conversion
-# ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
-#                                inputs={bgas: solph.Flow()},
-#                                outputs={bel: solph.Flow(fixed_costs=1000,
-#                                                         variable_costs=10),
-#                                         bth: solph.Flow()},
-#                                P_max_woDH=[187 for p in range(0, periods)],
-#                                P_min_woDH=[80 for p in range(0, periods)],
-#                                Eta_el_max_woDH=[0.49 for p in range(0, periods)],
-#                                Eta_el_min_woDH=[0.41 for p in range(0, periods)],
-#                                Q_CW_min=[60 for p in range(0, periods)],
-#                                Beta=[21 for p in range(0, periods)],
-#                                electrical_bus=bel, heat_bus=bth)
-
 # test sequence conversion
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
                                outputs={bel: solph.Flow(fixed_costs=1000,
                                                         variable_costs=10),
                                         bth: solph.Flow()},
-                               P_max_woDH=187,
-                               P_min_woDH=80,
-                               Eta_el_max_woDH=0.49,
-                               Eta_el_min_woDH=0.41,
-                               Q_CW_min=60,
-                               Beta=21,
+                               P_max_woDH=[187 for p in range(0, periods)],
+                               P_min_woDH=[80 for p in range(0, periods)],
+                               Eta_el_max_woDH=[0.49 for p in range(0, periods)],
+                               Eta_el_min_woDH=[0.41 for p in range(0, periods)],
+                               Q_CW_min=[60 for p in range(0, periods)],
+                               Beta=[21 for p in range(0, periods)],
                                electrical_bus=bel, heat_bus=bth)
 
 # # nicer API?
