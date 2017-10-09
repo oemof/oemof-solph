@@ -43,7 +43,7 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(investment=solph.options.Investment(ep_costs=10, minimum=187, maximum=1000), fixed_costs=1000, variable_costs=10),
+                               outputs={bel: solph.Flow(fixed_costs=1000, variable_costs=10),
                                         bth: solph.Flow()},
                                P_max_woDH=187, P_min_woDH=80,
                                Eta_el_max_woDH=0.49, Eta_el_min_woDH=0.41,
@@ -80,7 +80,6 @@ results[(ccgt,)]['sequences']['PQ'] = \
 
 print(results[(ccgt,)]['sequences'].describe())
 print(results[(ccgt,)]['sequences'].head())
-print(results[(ccgt, bel)]['scalars'].head())
 
 
 # # plot CCET
