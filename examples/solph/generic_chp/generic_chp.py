@@ -15,7 +15,7 @@ from oemof.outputlib import processing, views
 data = pd.read_csv('data.csv', sep=",")
 
 # select periods
-periods = len(data[1:24*31])
+periods = len(data[1:24*365])
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
@@ -30,7 +30,7 @@ rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 bth = solph.Bus(label='bth')
 
 source_th = solph.Sink(label='source_th',
-                       outputs={bth: solph.Flow(fixed_costs=100000, variable_costs=1000)})
+                       outputs={bth: solph.Flow(variable_costs=10)})
 
 demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
                        actual_value=data['demand_el'], nominal_value=100)})
@@ -44,15 +44,14 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 # test sequence conversion
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(fixed_costs=1000,
-                                                        variable_costs=10),
+                               outputs={bel: solph.Flow(variable_costs=10),
                                         bth: solph.Flow()},
                                P_max_woDH=[187 for p in range(0, periods)],
                                P_min_woDH=[80 for p in range(0, periods)],
                                Eta_el_max_woDH=[0.49 for p in range(0, periods)],
                                Eta_el_min_woDH=[0.41 for p in range(0, periods)],
                                Q_CW_min=[60 for p in range(0, periods)],
-                               Beta=[21 for p in range(0, periods)],
+                               Beta=[0.21 for p in range(0, periods)],
                                electrical_bus=bel, heat_bus=bth)
 
 # # nicer API?
@@ -81,12 +80,12 @@ print(results[(ccgt,)]['sequences'].describe())
 print(results[(ccgt,)]['sequences'].head())
 
 
-# # plot CCET
-# data = results[(ccgt,)]['sequences']
-# ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
-# ax.set_xlabel('Q (MW)')
-# ax.set_ylabel('P (MW)')
-# plt.show()
+# plot CCET
+data = results[(ccgt,)]['sequences']
+ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
+ax.set_xlabel('Q (MW)')
+ax.set_ylabel('P (MW)')
+plt.show()
 
 
 # # plot bus
