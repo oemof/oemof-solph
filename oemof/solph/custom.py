@@ -497,10 +497,10 @@ class GenericCHP(on.Transformer):
         self.Q_CW_min = sequence(kwargs.get('Q_CW_min'))
         self.Eta_el_max_woDH = sequence(kwargs.get('Eta_el_max_woDH'))
         self.Eta_el_min_woDH = sequence(kwargs.get('Eta_el_min_woDH'))
-        self.Beta = sequence(kwargs.get('Beta'))
         self.electrical_bus = kwargs.get('electrical_bus')
         self.heat_bus = kwargs.get('heat_bus')
-        self.fixed_costs = kwargs.get('fixed_costs')
+        self.Beta = sequence(kwargs.get('Beta'))
+        self.fixed_costs = sequence(kwargs.get('fixed_costs'))
 
 
 def storage_nominal_value_warning(flow):
@@ -603,6 +603,8 @@ class GenericCHPBlock(SimpleBlock):
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
         # @TODO:
+        #   0. does it make sense to set flow attrs subsequently since they are created at first?
+        #   yes, in the base class!
         #   1. set P_max, P_min, Q_min as bounds properly or use attributes
         #      instead or create flows internally in constructor and pass params
         #   2. declare Qmin, etc. as params over time and align equations
