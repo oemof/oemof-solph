@@ -30,7 +30,7 @@ rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 bth = solph.Bus(label='bth')
 
 source_th = solph.Sink(label='source_th',
-                       outputs={bth: solph.Flow(variable_costs=10)})
+                       outputs={bth: solph.Flow(variable_costs=1000)})
 
 demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
                        actual_value=data['demand_el'], nominal_value=100)})
@@ -48,15 +48,23 @@ ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                         bth: solph.Flow()},
                                P_max_woDH=[187 for p in range(0, periods)],
                                P_min_woDH=[80 for p in range(0, periods)],
-                               Eta_el_max_woDH=[0.49 for p in range(0, periods)],
-                               Eta_el_min_woDH=[0.41 for p in range(0, periods)],
-                               Q_CW_min=[60 for p in range(0, periods)],
-                               Beta=[0.21 for p in range(0, periods)],
+                               Eta_el_max_woDH=[0.57 for p in range(0, periods)],
+                               Eta_el_min_woDH=[0.54 for p in range(0, periods)],
+                               Q_CW_min=[28 for p in range(0, periods)],
+                               Beta=[0.12 for p in range(0, periods)],
                                electrical_bus=bel, heat_bus=bth)
 
 # # nicer API?
-# # TODO: update flow attributes
-# # electrical_bus={bel: {P_max_woDH=187, P_min_woDH=80}}
+# # TODOs:
+# # - update flow attributes in trf.inputs and outputs already in network class
+# #   with dict values
+# ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
+#                                fuel_bus=bgas,
+#                                electrical_bus={bel: {'P_max_woDH': 187,
+#                                                      'P_min_woDH': 80,
+#                                                      'Eta_el_max_woDH': 0.57,
+#                                                      'Eta_el_min_woDH': 0.54}},
+#                                heat_bus={bth: {'Q_CW_min': 28, 'Beta': 0.12}})
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)
