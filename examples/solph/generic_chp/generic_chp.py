@@ -50,7 +50,17 @@ ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                Q_CW_min=60, electrical_bus=bel, heat_bus=bth,
                                Beta=0.21)
 
-# create a optimization problem and solve it
+# nicer API?
+# ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
+#                                fuel_bus={bgas: None,
+#                                heat_bus={bheat: {Q_CW_min=60}},
+#                                electrical_bus={bel: {P_max_woDH=187,
+#                                                      P_min_woDH=80,
+#                                                      Eta_el_max_woDH=0.49,
+#                                                      Eta_el_min_woDH=0.41}},
+#                                Beta=0.21)
+
+# create an optimization problem and solve it
 om = solph.OperationalModel(es)
 
 # debugging
