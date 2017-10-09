@@ -492,12 +492,12 @@ class GenericCHP(on.Transformer):
         super().__init__(*args, **kwargs)
         self.P = kwargs.get('P')
         self.Q = kwargs.get('Q')
-        self.P_max_woDH = kwargs.get('P_max_woDH')
-        self.P_min_woDH = kwargs.get('P_min_woDH')
-        self.Q_CW_min = kwargs.get('Q_CW_min')
-        self.Eta_el_max_woDH = kwargs.get('Eta_el_max_woDH')
-        self.Eta_el_min_woDH = kwargs.get('Eta_el_min_woDH')
-        self.Beta = kwargs.get('Beta')
+        self.P_max_woDH = sequence(kwargs.get('P_max_woDH'))
+        self.P_min_woDH = sequence(kwargs.get('P_min_woDH'))
+        self.Q_CW_min = sequence(kwargs.get('Q_CW_min'))
+        self.Eta_el_max_woDH = sequence(kwargs.get('Eta_el_max_woDH'))
+        self.Eta_el_min_woDH = sequence(kwargs.get('Eta_el_min_woDH'))
+        self.Beta = sequence(kwargs.get('Beta'))
         self.electrical_bus = kwargs.get('electrical_bus')
         self.heat_bus = kwargs.get('heat_bus')
         self.fixed_costs = kwargs.get('fixed_costs')
@@ -509,16 +509,27 @@ class GenericCHP(on.Transformer):
         A system of linear equations is created from passed capacities and
         efficiencies and solved to calculate both coefficients.
         """
-        # TODO:
-        # 1. check if all required params have the same dimension
-        # 2. get dimension and calculate alphas
-        #    (list comprehension using lambda?)
+        alpha1, alpha2 = [], []
 
-        A = np.array([[1, self.P_min_woDH], [1, self.P_max_woDH]])
-        b = np.array([self.P_min_woDH / self.Eta_el_min_woDH,
-                      self.P_max_woDH / self.Eta_el_max_woDH])
-        x = np.linalg.solve(A, b)
-        alpha1, alpha2 = x[0], x[1]
+        attrs = [self.P_min_woDH, self.Eta_el_min_woDH,
+                 self.P_max_woDH, self.Eta_el_max_woDH]
+        max_length = max([len(a) for a in attrs])
+
+        if all(len(a) == max_length for a in attrs):
+            if max_length == 0:
+                max_length += 1  # increment dimension for scalars from 0 to 1
+            for i in range(0, max_length):
+                A = np.array([[1, self.P_min_woDH[i]],
+                              [1, self.P_max_woDH[i]]])
+                b = np.array([self.P_min_woDH[i] / self.Eta_el_min_woDH[i],
+                              self.P_max_woDH[i] / self.Eta_el_max_woDH[i]])
+                x = np.linalg.solve(A, b)
+                alpha1.append(x[0])
+                alpha2.append(x[1])
+        else:
+            error_message = ('Attributes to calculate alphas ' +
+                             'must be of same dimension.')
+            raise ValueError(error_message)
 
         return alpha1, alpha2
 
