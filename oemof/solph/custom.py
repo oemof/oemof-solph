@@ -594,6 +594,8 @@ class GenericCHPBlock(SimpleBlock):
         #   1. set P_max, P_min, Q_min as bounds properly or use attributes
         #      instead or create flows internally in constructor and pass params
         #   2. declare Qmin, etc. as params over time and align equations
+        #   3. if these are flow attributes, these can be accessed via
+        #      FQ[0].attribute_name
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
