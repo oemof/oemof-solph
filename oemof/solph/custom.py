@@ -545,7 +545,11 @@ class GenericCHPBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _convert_to_sequence(self, m=None, node=None, attrs=None):
-        """Set param constant over time if it is not passed time-dependent."""
+        """
+        Set param constant over time.
+
+        If it is not passed time-dependent e.g. only a scalar is passed
+        a param is set to this value for all timesteps."""
         if not all(len(getattr(node, a)) == len(m.TIMESTEPS) for a in attrs):
             for a in attrs:
                 seq = sequence([getattr(node, a)[0] for t in m.TIMESTEPS])
@@ -617,8 +621,6 @@ class GenericCHPBlock(SimpleBlock):
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
         # @TODO:
-        #   0. does it make sense to set flow attrs subsequently since they are created at first?
-        #   yes, in the base class!
         #   1. set P_max, P_min, Q_min as bounds properly or use attributes
         #      instead or create flows internally in constructor and pass params
         #   2. declare Qmin, etc. as params over time and align equations

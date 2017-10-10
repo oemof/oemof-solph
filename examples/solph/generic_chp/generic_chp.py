@@ -54,10 +54,7 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 #                                Beta=[0.12 for p in range(0, periods)],
 #                                electrical_bus=bel, heat_bus=bth)
 
-# # nicer API?
-# # TODOs:
-# # - update flow attributes in trf.inputs and outputs already in network class
-# #   with dict values
+# nicer API?
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                fuel_bus={bgas: solph.Flow()},
                                electrical_bus={bel: solph.Flow(
@@ -69,11 +66,9 @@ ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                Beta=0.12)
 
 
-ccgt.inputs[bgas] = solph.Flow()
-print([k for k in ccgt.inputs.keys()])
-
-ccgt.outputs[bgas] = solph.Flow()
+print([k for k in bgas.outputs.keys()])
 print([k for k in ccgt.outputs.keys()])
+print([v for v in ccgt.electrical_bus.values()][0].P_max_woDH)
 
 #print([k for k in ccgt.outputs.keys()])
 # # create an optimization problem and solve it
