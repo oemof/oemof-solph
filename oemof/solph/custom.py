@@ -591,18 +591,6 @@ class GenericCHPBlock(SimpleBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _convert_to_sequence(self, m=None, node=None, attrs=None):
-        """
-        Set param constant over time.
-
-        If it is not passed time-dependent e.g. only a scalar is passed
-        a param is set to this value for all timesteps."""
-        if not all(len(getattr(node, a)) == len(m.TIMESTEPS) for a in attrs):
-            for a in attrs:
-                seq = sequence([getattr(node, a)[0] for t in m.TIMESTEPS])
-                setattr(node, a, seq)
-        return node
-
     def _create(self, group=None):
         """
         Create constraints for GenericCHPBlock.
@@ -625,20 +613,7 @@ class GenericCHPBlock(SimpleBlock):
             FQ = {n: [o for o in n.outputs if o is n.heat_bus]}
             FP = {n: [o for o in n.outputs if o is n.electrical_bus]}
 
-            # convert scalar attributes into sequences
-            attrs = ['P_max_woDH', 'P_min_woDH', 'Eta_el_max_woDH',
-                     'Eta_el_min_woDH', 'Q_CW_min', 'Beta']
-            n = self._convert_to_sequence(m, n, attrs)
-
         self.GENERICCHPS = Set(initialize=[n for n in group])
-
-        # @TODO:
-        #   1. set P_max, P_min, Q_min as bounds properly or use attributes
-        #      instead or create flows internally in constructor and pass params
-        #   2. declare Qmin, etc. as params over time and align equations
-        #   3. if these are flow attributes, these can be accessed via
-        #      FQ[0].attribute_name
-        # update flows by heat_bus={bla: {attr1: 1, attr2: 'foo'}}
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
@@ -681,8 +656,8 @@ class GenericCHPBlock(SimpleBlock):
             """Set P_woDH depending on H_F."""
             expr = 0
             expr += - self.H_F[n, t]
-            expr += n.alpha1[t] * self.Y[n, t]
-            expr += n.alpha2[t] * self.P_woDH[n, t]
+            expr += n.alphas[0][t] * self.Y[n, t]
+            expr += n.alpha2[1][t] * self.P_woDH[n, t]
             return expr == 0
         self.H_F_1 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_1_rule)
@@ -691,8 +666,8 @@ class GenericCHPBlock(SimpleBlock):
             """Determine relation between H_F, P and Q."""
             expr = 0
             expr += - self.H_F[n, t]
-            expr += n.alpha1[t] * self.Y[n, t]
-            expr += n.alpha2[t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
+            expr += n.alphas[0][t] * self.Y[n, t]
+            expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
             return expr == 0
         self.H_F_2 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_2_rule)
