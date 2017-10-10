@@ -474,6 +474,18 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 # Start of generic CHP component
 # ------------------------------------------------------------------------------
+
+# # nicer API?
+# # TODOs:
+# # - update flow attributes in trf.inputs and outputs already in network class
+# #   with dict values
+# ccgt = solph.custom.GenericCHP(label='pp_generic_chp', fuel_bus={bgas: None},
+#                                electrical_bus={bel: {'P_max_woDH': 187,
+#                                                      'P_min_woDH': 80,
+#                                                      'Eta_el_max_woDH': 0.57,
+#                                                      'Eta_el_min_woDH': 0.54}},
+#                                heat_bus={bth: {'Q_CW_min': 28, 'Beta': 0.12}})
+
 class GenericCHP(on.Transformer):
     """
 
@@ -490,18 +502,18 @@ class GenericCHP(on.Transformer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.P = kwargs.get('P')
-        self.Q = kwargs.get('Q')
-        self.P_max_woDH = sequence(kwargs.get('P_max_woDH'))
-        self.P_min_woDH = sequence(kwargs.get('P_min_woDH'))
-        self.Q_CW_min = sequence(kwargs.get('Q_CW_min'))
-        self.Eta_el_max_woDH = sequence(kwargs.get('Eta_el_max_woDH'))
-        self.Eta_el_min_woDH = sequence(kwargs.get('Eta_el_min_woDH'))
+
+        self.fuel_bus = kwargs.get('fuel_bus')
         self.electrical_bus = kwargs.get('electrical_bus')
         self.heat_bus = kwargs.get('heat_bus')
         self.Beta = sequence(kwargs.get('Beta'))
         self.fixed_costs = sequence(kwargs.get('fixed_costs'))
 
+        # map specific flows to standard API
+        #print(kwargs.get('fuel_bus'))
+        self.inputs.update(kwargs.get('fuel_bus'))
+        self.outputs.update(kwargs.get('electrical_bus'))
+        self.outputs.update(kwargs.get('heat_bus'))
 
 def storage_nominal_value_warning(flow):
     msg = ("The nominal_value should not be set for {0} flows of storages." +

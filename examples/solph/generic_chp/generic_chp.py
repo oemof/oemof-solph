@@ -41,72 +41,83 @@ bel = solph.Bus(label='bel')
 demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
                        variable_costs=data['price_el'])})
 
-# test sequence conversion
-ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
-                               inputs={bgas: solph.Flow()},
-                               outputs={bel: solph.Flow(variable_costs=10),
-                                        bth: solph.Flow()},
-                               P_max_woDH=[187 for p in range(0, periods)],
-                               P_min_woDH=[80 for p in range(0, periods)],
-                               Eta_el_max_woDH=[0.57 for p in range(0, periods)],
-                               Eta_el_min_woDH=[0.54 for p in range(0, periods)],
-                               Q_CW_min=[28 for p in range(0, periods)],
-                               Beta=[0.12 for p in range(0, periods)],
-                               electrical_bus=bel, heat_bus=bth)
+# # test sequence conversion
+# ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
+#                                inputs={bgas: solph.Flow()},
+#                                outputs={bel: solph.Flow(variable_costs=10),
+#                                         bth: solph.Flow()},
+#                                P_max_woDH=[187 for p in range(0, periods)],
+#                                P_min_woDH=[80 for p in range(0, periods)],
+#                                Eta_el_max_woDH=[0.57 for p in range(0, periods)],
+#                                Eta_el_min_woDH=[0.54 for p in range(0, periods)],
+#                                Q_CW_min=[28 for p in range(0, periods)],
+#                                Beta=[0.12 for p in range(0, periods)],
+#                                electrical_bus=bel, heat_bus=bth)
 
 # # nicer API?
 # # TODOs:
 # # - update flow attributes in trf.inputs and outputs already in network class
 # #   with dict values
-# ccgt = solph.custom.GenericCHP(label='pp_generic_chp', fuel_bus={bgas: None},
-#                                electrical_bus={bel: {'P_max_woDH': 187,
-#                                                      'P_min_woDH': 80,
-#                                                      'Eta_el_max_woDH': 0.57,
-#                                                      'Eta_el_min_woDH': 0.54}},
-#                                heat_bus={bth: {'Q_CW_min': 28, 'Beta': 0.12}})
-
-# create an optimization problem and solve it
-om = solph.OperationalModel(es)
-
-# debugging
-#om.pprint()
-om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
-
-# solve model
-om.solve(solver='gurobi', solve_kwargs={'tee': True})
-
-# create result object
-results = processing.results(es, om)
-
-results[(ccgt,)]['sequences'].to_csv('CCET.csv')
-
-results[(ccgt,)]['sequences']['PQ'] = \
-    results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
-
-print(results[(ccgt,)]['sequences'].describe())
-print(results[(ccgt,)]['sequences'].head())
+ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
+                               fuel_bus={bgas: solph.Flow()},
+                               electrical_bus={bel: solph.Flow(
+                                                     P_max_woDH=187,
+                                                     P_min_woDH=80,
+                                                     Eta_el_max_woDH=0.57,
+                                                     Eta_el_min_woDH=0.54)},
+                               heat_bus={bth: solph.Flow(Q_CW_min=28)},
+                               Beta=0.12)
 
 
-# plot CCET
-data = results[(ccgt,)]['sequences']
-ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
-ax.set_xlabel('Q (MW)')
-ax.set_ylabel('P (MW)')
-plt.show()
+ccgt.inputs[bgas] = solph.Flow()
+print([k for k in ccgt.inputs.keys()])
 
+ccgt.outputs[bgas] = solph.Flow()
+print([k for k in ccgt.outputs.keys()])
 
+#print([k for k in ccgt.outputs.keys()])
+# # create an optimization problem and solve it
+# om = solph.OperationalModel(es)
+#
+# # debugging
+# #om.pprint()
+# om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
+#
+# # solve model
+# om.solve(solver='gurobi', solve_kwargs={'tee': True})
+#
+# # create result object
+# results = processing.results(es, om)
+#
+# results[(ccgt,)]['sequences'].to_csv('CCET.csv')
+#
+# results[(ccgt,)]['sequences']['PQ'] = \
+#     results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
+#
+# print(results[(ccgt,)]['sequences'].describe())
+# print(results[(ccgt,)]['sequences'].head())
+#
+#
+# # plot CCET
+# data = results[(ccgt,)]['sequences']
+# ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
+# ax.set_xlabel('Q (MW)')
+# ax.set_ylabel('P (MW)')
+# plt.show()
+#
+#
+# # # plot bus
+# # data = views.node(results, 'bel')
+# # ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# # ax.set_title('Dispatch')
+# # ax.set_xlabel('')
+# # ax.set_ylabel('Power (MW)')
+# # plt.show()
+#
 # # plot bus
-# data = views.node(results, 'bel')
+# data = views.node(results, 'bth')
 # ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
 # ax.set_title('Dispatch')
 # ax.set_xlabel('')
-# ax.set_ylabel('Power (MW)')
+# ax.set_ylabel('Heat flow (MW)')
 # plt.show()
-
-# plot bus
-data = views.node(results, 'bth')
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_title('Dispatch')
-ax.set_xlabel('')
-ax.set_ylabel('Heat flow (MW)')
-plt.show()
