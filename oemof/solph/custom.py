@@ -508,14 +508,60 @@ class GenericCHP(on.Transformer):
         self.heat_bus = kwargs.get('heat_bus')
         self.Beta = sequence(kwargs.get('Beta'))
         self.fixed_costs = sequence(kwargs.get('fixed_costs'))
+        self._alphas = None
 
         # map specific flows to standard API
         # (still hacky until @gnn fixes Node class)
-        fuel_bus = [k for k in kwargs.get('fuel_bus').keys()][0]
-        fuel_flow = [v for v in kwargs.get('fuel_bus').values()][0]
+        fuel_bus, fuel_flow = self.fuel_bus.popitem()
         fuel_bus.outputs.update({self: fuel_flow})
         self.outputs.update(kwargs.get('electrical_bus'))
         self.outputs.update(kwargs.get('heat_bus'))
+
+    def _calculate_alphas(self):
+        """
+        Calculate alpha coefficients.
+
+        A system of linear equations is created from passed capacities and
+        efficiencies and solved to calculate both coefficients.
+        """
+        alphas = [[], []]
+
+        eb = next(iter(self.electrical_bus))
+        attrs = [self.electrical_bus[eb].P_min_woDH,
+                 self.electrical_bus[eb].Eta_el_min_woDH,
+                 self.electrical_bus[eb].P_max_woDH,
+                 self.electrical_bus[eb].Eta_el_max_woDH]
+
+        length = [len(a) for a in attrs if not isinstance(a, (int, float))]
+        max_length = max(length)
+
+        if all(len(a) == max_length for a in attrs):
+            if max_length == 0:
+                max_length += 1  # increment dimension for scalars from 0 to 1
+            for i in range(0, max_length):
+                A = np.array([[1, self.electrical_bus[eb].P_min_woDH[i]],
+                              [1, self.electrical_bus[eb].P_max_woDH[i]]])
+                b = np.array([self.electrical_bus[eb].P_min_woDH[i] /
+                              self.electrical_bus[eb].Eta_el_min_woDH[i],
+                              self.electrical_bus[eb].P_max_woDH[i] /
+                              self.electrical_bus[eb].Eta_el_max_woDH[i]])
+                x = np.linalg.solve(A, b)
+                alphas[0].append(x[0])
+                alphas[1].append(x[1])
+        else:
+            error_message = ('Attributes to calculate alphas ' +
+                             'must be of same dimension.')
+            raise ValueError(error_message)
+
+        self._alphas = alphas
+
+    @property
+    def alphas(self):
+        """Compute or return the _alphas attribute."""
+        if self._alphas is None:
+            self._calculate_alphas()
+
+        return self._alphas
 
 def storage_nominal_value_warning(flow):
     msg = ("The nominal_value should not be set for {0} flows of storages." +
@@ -556,37 +602,6 @@ class GenericCHPBlock(SimpleBlock):
                 setattr(node, a, seq)
         return node
 
-    def _calculate_alphas(self, node=None, attrs=None):
-        """
-        Calculate alpha coefficients.
-
-        A system of linear equations is created from passed capacities and
-        efficiencies and solved to calculate both coefficients.
-        """
-        alpha1, alpha2 = [], []
-
-        attrs = [node.P_min_woDH, node.Eta_el_min_woDH,
-                 node.P_max_woDH, node.Eta_el_max_woDH]
-        max_length = max([len(a) for a in attrs])
-
-        if all(len(a) == max_length for a in attrs):
-            if max_length == 0:
-                max_length += 1  # increment dimension for scalars from 0 to 1
-            for i in range(0, max_length):
-                A = np.array([[1, node.P_min_woDH[i]],
-                              [1, node.P_max_woDH[i]]])
-                b = np.array([node.P_min_woDH[i] / node.Eta_el_min_woDH[i],
-                              node.P_max_woDH[i] / node.Eta_el_max_woDH[i]])
-                x = np.linalg.solve(A, b)
-                alpha1.append(x[0])
-                alpha2.append(x[1])
-        else:
-            error_message = ('Attributes to calculate alphas ' +
-                             'must be of same dimension.')
-            raise ValueError(error_message)
-
-        return alpha1, alpha2
-
     def _create(self, group=None):
         """
         Create constraints for GenericCHPBlock.
@@ -613,10 +628,6 @@ class GenericCHPBlock(SimpleBlock):
             attrs = ['P_max_woDH', 'P_min_woDH', 'Eta_el_max_woDH',
                      'Eta_el_min_woDH', 'Q_CW_min', 'Beta']
             n = self._convert_to_sequence(m, n, attrs)
-
-            # calculate alpha coefficients
-            n.alpha1 = self._calculate_alphas(n, attrs)[0]
-            n.alpha2 = self._calculate_alphas(n, attrs)[1]
 
         self.GENERICCHPS = Set(initialize=[n for n in group])
 

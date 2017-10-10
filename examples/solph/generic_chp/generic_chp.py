@@ -58,17 +58,15 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                fuel_bus={bgas: solph.Flow()},
                                electrical_bus={bel: solph.Flow(
-                                                     P_max_woDH=187,
-                                                     P_min_woDH=80,
-                                                     Eta_el_max_woDH=0.57,
-                                                     Eta_el_min_woDH=0.54)},
-                               heat_bus={bth: solph.Flow(Q_CW_min=28)},
+                                                     P_max_woDH=[187],
+                                                     P_min_woDH=[80],
+                                                     Eta_el_max_woDH=[0.57],
+                                                     Eta_el_min_woDH=[0.54])},
+                               heat_bus={bth: solph.Flow(Q_CW_min=[28])},
                                Beta=0.12)
 
 
-print([k for k in bgas.outputs.keys()])
-print([k for k in ccgt.outputs.keys()])
-print([v for v in ccgt.electrical_bus.values()][0].P_max_woDH)
+print(ccgt.alphas)
 
 #print([k for k in ccgt.outputs.keys()])
 # # create an optimization problem and solve it
