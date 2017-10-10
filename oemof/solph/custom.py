@@ -563,6 +563,7 @@ class GenericCHP(on.Transformer):
 
         return self._alphas
 
+
 def storage_nominal_value_warning(flow):
     msg = ("The nominal_value should not be set for {0} flows of storages." +
            "The value will be overwritten by the product of the " +
