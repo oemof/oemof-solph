@@ -510,8 +510,10 @@ class GenericCHP(on.Transformer):
         self.fixed_costs = sequence(kwargs.get('fixed_costs'))
 
         # map specific flows to standard API
-        #print(kwargs.get('fuel_bus'))
-        self.inputs.update(kwargs.get('fuel_bus'))
+        # (still hacky until @gnn fixes Node class)
+        fuel_bus = [k for k in kwargs.get('fuel_bus').keys()][0]
+        fuel_flow = [v for v in kwargs.get('fuel_bus').values()][0]
+        fuel_bus.outputs.update({self: fuel_flow})
         self.outputs.update(kwargs.get('electrical_bus'))
         self.outputs.update(kwargs.get('heat_bus'))
 
