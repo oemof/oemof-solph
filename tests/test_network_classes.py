@@ -104,6 +104,50 @@ class Node_Tests:
             ("\n  Expected an empty dictionary of outputs." +
              "\n  Got: {} instead").format(new.outputs))
 
+    def test_modifying_outputs_after_construction(self):
+        """ One should be able to add and delete outputs of a node.
+        """
+        node = Node()
+        bus = Bus()
+        flow = object()
+        eq_(node.outputs, {},
+            ("\n  Expected an empty dictionary of outputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.outputs,
+                dict(node.outputs)))
+        node.outputs[bus] = flow
+        eq_(node.outputs[bus], flow,
+            ("\n  Expected {} as `node.outputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
+        del node.outputs[bus]
+        eq_(node.outputs, {},
+            ("\n  Expected an empty dictionary of outputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.outputs,
+                dict(node.outputs)))
+
+    def test_modifying_inputs_after_construction(self):
+        """ One should be able to add and delete inputs of a node.
+        """
+        node = Node()
+        bus = Bus()
+        flow = object()
+        eq_(node.inputs, {},
+            ("\n  Expected an empty dictionary of inputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.inputs,
+                dict(node.inputs)))
+        node.inputs[bus] = flow
+        eq_(node.inputs[bus], flow,
+            ("\n  Expected {} as `node.inputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
+        del node.inputs[bus]
+        eq_(node.inputs, {},
+            ("\n  Expected an empty dictionary of inputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.inputs,
+                dict(node.inputs)))
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
