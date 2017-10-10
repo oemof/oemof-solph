@@ -1,3 +1,4 @@
+from collections import MutableMapping as MM
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 """
@@ -40,6 +41,35 @@ class _Edges:
 
 
 flow = _Edges()
+
+
+class Inputs(MM):
+    """ A special helper to map `n1.inputs[n2]` to `n2.outputs[n1]`.
+    """
+    # TODO: Find a way to improve this.
+    #       This is still ugly, but at least now one can add and delete inputs
+    #       after a node's construction. This whole network handling is somehow
+    #       getting out of hand with it's ugliness though. I really should find
+    #       a way to use a proper graph library. Or rewrite this stuff in way
+    #       so that I'm confident enough to make this a standalone graph
+    #       library.
+    def __init__(self, target):
+        self.target = target
+
+    def __getitem__(self, key):
+        return flow(key, self.target)
+
+    def __delitem__(self, key):
+        return flow(key).__delitem__(self.target)
+
+    def __setitem__(self, key, value):
+        return flow(key).__setitem__(self.target, value)
+
+    def __iter__(self):
+        return flow._in_edges.get(self.target, ()).__iter__()
+
+    def __len__(self):
+        return flow._in_edges.get(self.target, ()).__len__()
 
 
 @total_ordering
@@ -101,9 +131,13 @@ class Node:
     #       needed to confirm that.
 
     registry = None
-    __slots__ = ["__weakref__", "_label", "_state"]
+    __slots__ = ["__weakref__", "_label", "_inputs", "_state"]
 
     def __init__(self, *args, **kwargs):
+        # TODO: This introduces a circular reference, because now `self` is
+        #       stored as an attribute of `_inputs`.
+        #       Check whether this messes up Python's garbage collection.
+        self._inputs = Inputs(self)
         self._state = (args, kwargs)
         self.__setstate__(self._state)
         if __class__.registry is not None:
@@ -147,12 +181,7 @@ class Node:
 
     @property
     def inputs(self):
-        # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
-        #       Find a way to replace it.
-        #       This can also have unintuitive behaviour since adding new
-        #       associations to the returned mapping will NOT add a new input
-        #       flow to this node.
-        return {k: flow(k, self) for k in flow._in_edges.get(self, ())}
+        return self._inputs
 
     @property
     def outputs(self):
