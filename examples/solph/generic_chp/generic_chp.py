@@ -56,13 +56,13 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 
 # nicer API?
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
-                               fuel_bus={bgas: solph.Flow()},
-                               electrical_bus={bel: solph.Flow(
+                               fuel_input={bgas: solph.Flow()},
+                               electrical_output={bel: solph.Flow(
                                                      P_max_woDH=[187 for p in range(0, periods)],
                                                      P_min_woDH=[80 for p in range(0, periods)],
                                                      Eta_el_max_woDH=[0.57 for p in range(0, periods)],
                                                      Eta_el_min_woDH=[0.54 for p in range(0, periods)])},
-                               heat_bus={bth: solph.Flow(Q_CW_min=[28 for p in range(0, periods)])},
+                               heat_output={bth: solph.Flow(Q_CW_min=[28 for p in range(0, periods)])},
                                Beta=[0.12 for p in range(0, periods)])
 
 # create an optimization problem and solve it

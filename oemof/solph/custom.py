@@ -503,19 +503,22 @@ class GenericCHP(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fuel_bus = kwargs.get('fuel_bus')
-        self.electrical_bus = kwargs.get('electrical_bus')
-        self.heat_bus = kwargs.get('heat_bus')
+        self.fuel_input = kwargs.get('fuel_input')
+        self.electrical_output = kwargs.get('electrical_output')
+        self.heat_output = kwargs.get('heat_output')
         self.Beta = sequence(kwargs.get('Beta'))
         self.fixed_costs = sequence(kwargs.get('fixed_costs'))
         self._alphas = None
 
         # map specific flows to standard API
         # (still hacky until @gnn fixes Node class)
-        fuel_bus, fuel_flow = self.fuel_bus.popitem()
+        fuel_bus = list(self.fuel_input.keys())[0]
+        fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
-        self.outputs.update(kwargs.get('electrical_bus'))
-        self.outputs.update(kwargs.get('heat_bus'))
+        self.outputs.update(kwargs.get('electrical_output'))
+        self.outputs.update(kwargs.get('heat_output'))
+
+        # TODO: add property to convert attribute dimensions if scalars passed
 
     def _calculate_alphas(self):
         """
@@ -526,11 +529,11 @@ class GenericCHP(on.Transformer):
         """
         alphas = [[], []]
 
-        eb = next(iter(self.electrical_bus))
-        attrs = [self.electrical_bus[eb].P_min_woDH,
-                 self.electrical_bus[eb].Eta_el_min_woDH,
-                 self.electrical_bus[eb].P_max_woDH,
-                 self.electrical_bus[eb].Eta_el_max_woDH]
+        eb = next(iter(self.electrical_output))
+        attrs = [self.electrical_output[eb].P_min_woDH,
+                 self.electrical_output[eb].Eta_el_min_woDH,
+                 self.electrical_output[eb].P_max_woDH,
+                 self.electrical_output[eb].Eta_el_max_woDH]
 
         length = [len(a) for a in attrs if not isinstance(a, (int, float))]
         max_length = max(length)
@@ -539,12 +542,12 @@ class GenericCHP(on.Transformer):
             if max_length == 0:
                 max_length += 1  # increment dimension for scalars from 0 to 1
             for i in range(0, max_length):
-                A = np.array([[1, self.electrical_bus[eb].P_min_woDH[i]],
-                              [1, self.electrical_bus[eb].P_max_woDH[i]]])
-                b = np.array([self.electrical_bus[eb].P_min_woDH[i] /
-                              self.electrical_bus[eb].Eta_el_min_woDH[i],
-                              self.electrical_bus[eb].P_max_woDH[i] /
-                              self.electrical_bus[eb].Eta_el_max_woDH[i]])
+                A = np.array([[1, self.electrical_output[eb].P_min_woDH[i]],
+                              [1, self.electrical_output[eb].P_max_woDH[i]]])
+                b = np.array([self.electrical_output[eb].P_min_woDH[i] /
+                              self.electrical_output[eb].Eta_el_min_woDH[i],
+                              self.electrical_output[eb].P_max_woDH[i] /
+                              self.electrical_output[eb].Eta_el_max_woDH[i]])
                 x = np.linalg.solve(A, b)
                 alphas[0].append(x[0])
                 alphas[1].append(x[1])
@@ -606,13 +609,6 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
-        for n in group:
-
-            # assign in and outflows
-            FH = {n: [i for i in n.inputs]}
-            FQ = {n: [o for o in n.outputs if o is n.heat_bus]}
-            FP = {n: [o for o in n.outputs if o is n.electrical_bus]}
-
         self.GENERICCHPS = Set(initialize=[n for n in group])
 
         # variables
@@ -629,7 +625,7 @@ class GenericCHPBlock(SimpleBlock):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += - m.flow[FH[n][0], n, t]
+            expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
         self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_h_flow_connection_rule)
@@ -638,7 +634,7 @@ class GenericCHPBlock(SimpleBlock):
             """Link heat flow to component outflow."""
             expr = 0
             expr += self.Q[n, t]
-            expr += - m.flow[n, FQ[n][0], t]
+            expr += - m.flow[n, list(n.heat_output.keys())[0], t]
             return expr == 0
         self.q_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_q_flow_connection_rule)
@@ -647,7 +643,7 @@ class GenericCHPBlock(SimpleBlock):
             """Link power flow to component outflow."""
             expr = 0
             expr += self.P[n, t]
-            expr += - m.flow[n, FP[n][0], t]
+            expr += - m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
         self.p_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_p_flow_connection_rule)
@@ -657,7 +653,7 @@ class GenericCHPBlock(SimpleBlock):
             expr = 0
             expr += - self.H_F[n, t]
             expr += n.alphas[0][t] * self.Y[n, t]
-            expr += n.alpha2[1][t] * self.P_woDH[n, t]
+            expr += n.alphas[1][t] * self.P_woDH[n, t]
             return expr == 0
         self.H_F_1 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_1_rule)
@@ -676,7 +672,9 @@ class GenericCHPBlock(SimpleBlock):
             """Set upper value of operating range via H_F."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += - self.Y[n, t] * (n.P_max_woDH[t] / n.Eta_el_max_woDH[t])
+            expr += - self.Y[n, t] * \
+                (list(n.electrical_output.values())[0].P_max_woDH[t] /
+                 list(n.electrical_output.values())[0].Eta_el_max_woDH[t])
             return expr <= 0
         self.H_F_3 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_3_rule)
@@ -685,7 +683,9 @@ class GenericCHPBlock(SimpleBlock):
             """Set lower value of operating range via H_F."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += - self.Y[n, t] * (n.P_min_woDH[t] / n.Eta_el_min_woDH[t])
+            expr += - self.Y[n, t] * \
+                (list(n.electrical_output.values())[0].P_min_woDH[t] /
+                 list(n.electrical_output.values())[0].Eta_el_min_woDH[t])
             return expr >= 0
         self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
@@ -694,7 +694,7 @@ class GenericCHPBlock(SimpleBlock):
             """Restrict P depending on fuel and heat flow."""
             expr = 0
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
-            expr += n.Q_CW_min[t] * self.Y[n, t]
+            expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
             expr += - self.H_F[n, t]
             return expr <= 0
         self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
