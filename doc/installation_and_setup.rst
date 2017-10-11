@@ -248,7 +248,7 @@ Execute an example with different solver (default: 'cbc').
 
 .. code:: console
 
-  oemof_examples simple_least_costs
-  oemof_examples simple_least_costs -s glpk
+  oemof_examples simple_dispatch
+  oemof_examples simple_dispatch -s glpk
 
 If you want to run solph examples you need to have a solver installed (recommended: cbc), see the ":ref:`linux_solver_label`" or ":ref:`windows_solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
