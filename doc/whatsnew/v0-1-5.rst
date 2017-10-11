@@ -11,6 +11,13 @@ New features
 
 * Add an outputlib module to draw and plot energy system graphs using networkx.
 * Sort columns of result dataframe lexicographically.
+* It's now possible to modify a :class:`node <oemof.network.Node>`'s
+  :attr:`inputs <oemof.network.Node.inputs>` and `outputs
+  <oemof.network.Node.outputs>` by inserting and removing :class:`node
+  <oemof.network.Node>`s to and from the correspoding dictionaries.
+  :attr:`Outputs <oemof.network.Node.outputs>` where already working
+  previously, but due to an implementation quirk, :attr:`inputs
+  <oemof.network.Node.inputs>` did not behave as expected. This is now fixed.
 
 
 Documentation
@@ -37,3 +44,4 @@ Contributors
 * Jens-Olaf Delfs
 * Cord Kaldemeyer
 * Uwe Krien
+* Stephan Günther
