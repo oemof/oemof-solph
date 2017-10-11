@@ -824,25 +824,25 @@ class LinearTransformer(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n: [i for i in n.inputs][0] for n in group}
-        O = {n: [o for o in n.outputs.keys()] for n in group}
-
-        self.relation = Constraint(group, noruleinit=True)
-
-        def _input_output_relation(block):
-            for t in m.TIMESTEPS:
-                for n in group:
-                    for o in O[n]:
-                        try:
-                            lhs = m.flow[I[n], n, t] * \
-                                  n.conversion_factors[o][t]
-                            rhs = m.flow[n, o, t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 n.label, o.label))
-                        block.relation.add((n, o, t), (lhs == rhs))
-        self.relation_build = BuildAction(rule=_input_output_relation)
+        # I = {n: [i for i in n.inputs][0] for n in group}
+        # O = {n: [o for o in n.outputs.keys()] for n in group}
+        #
+        # self.relation = Constraint(group, noruleinit=True)
+        #
+        # def _input_output_relation(block):
+        #     for t in m.TIMESTEPS:
+        #         for n in group:
+        #             for o in O[n]:
+        #                 try:
+        #                     lhs = m.flow[I[n], n, t] * \
+        #                           n.conversion_factors[o][t]
+        #                     rhs = m.flow[n, o, t]
+        #                 except:
+        #                     raise ValueError("Error in constraint creation",
+        #                                      "source: {0}, target: {1}".format(
+        #                                          n.label, o.label))
+        #                 block.relation.add((n, o, t), (lhs == rhs))
+        # self.relation_build = BuildAction(rule=_input_output_relation)
 
 
 class LinearN1Transformer(SimpleBlock):
@@ -1033,7 +1033,7 @@ class BinaryFlow(SimpleBlock):
         A subset of set BINARY_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
-    **The following variable are created**:
+    **The following variable are created:**
 
     Status variable (binary) :attr:`om.BinaryFLow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
