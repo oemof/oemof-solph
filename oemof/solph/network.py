@@ -299,10 +299,12 @@ class VariableFractionTransformer(LinearTransformer):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
     """
-    def __init__(self, conversion_factor_single_flow, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factor_single_flow = {
-            k: sequence(v) for k, v in conversion_factor_single_flow.items()}
+            k: sequence(v)
+            for k, v
+            in kwargs.get('conversion_factor_single_flow', {}).items()}
 
 
 class Storage(on.Transformer):

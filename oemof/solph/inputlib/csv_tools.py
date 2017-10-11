@@ -6,7 +6,8 @@ import logging
 from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import sequence
-from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage)
+from ..network import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+                       VariableFractionTransformer)
 
 
 def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
@@ -58,7 +59,8 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
                'LinearTransformer': LinearTransformer,
-               'Storage': Storage, 'Bus': Bus}
+               'Storage': Storage, 'Bus': Bus,
+               'VariableFractionTransformer': VariableFractionTransformer}
     classes.update(additional_classes)
 
     # attributes that have to be converted into a solph sequence
@@ -243,6 +245,33 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                 print('Label:', row['label'])
                 raise
 
+            # create a conversion_factor_single_flow entry for the current line
+            # only affects for nodes of type VariableFractionTransformer and
+            # the attribute has to be set in the first line
+            try:
+                if row['target'] and 'conversion_factor_single_flow' in row:
+                    if row['conversion_factor_single_flow'] == 'seq':
+                        seq = nodes_flows_seq.loc[
+                            row['class'], row['label'],
+                            row['source'], row['target'],
+                            'conversion_factor_single_flow']
+                        seq = [i for i in seq]
+                        seq = sequence(seq)
+                        conversion_factor_single_flow = \
+                            {nodes[row['target']]: seq}
+                    else:
+                        conversion_factor_single_flow = \
+                            {nodes[row['target']]:
+                             sequence(
+                                float(row['conversion_factor_single_flow']))}
+                else:
+                    conversion_factor_single_flow = {}
+            except:
+                print('Error with  creation of conversion factor of single',
+                      'flow in line', i+2, 'in csv file.')
+                print('Label:', row['label'])
+                raise
+
             # add node to dict and assign attributes depending on
             # if there are multiple lines per node or not
             try:
@@ -257,6 +286,9 @@ def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
                     if not isinstance(node, Bus):
                         node.conversion_factors = conversion_factors
                         nodes[node.label] = node
+                    if isinstance(node, VariableFractionTransformer):
+                        node.conversion_factor_single_flow = \
+                            conversion_factor_single_flow
             except:
                 print('Error adding node to dict in line', i+2, 'in csv file.')
                 print('Label:', row['label'])
