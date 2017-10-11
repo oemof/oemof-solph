@@ -19,7 +19,7 @@ groupings specified like this:
 
 from .network import (Bus, LinearTransformer, Storage, LinearN1Transformer,
                       VariableFractionTransformer)
-from .options import Investment
+from .options import Investment, Expansion
 from . import blocks
 import oemof.groupings as groupings
 
@@ -50,6 +50,8 @@ def constraint_grouping(node):
         return blocks.LinearN1Transformer
     if isinstance(node, Storage) and isinstance(node.investment, Investment):
         return blocks.InvestmentStorage
+    if isinstance(node, Storage) and isinstance(node.investment, Expansion):
+        return blocks.ExpansionStorage
     if isinstance(node, Storage):
         return blocks.Storage
 
@@ -57,10 +59,14 @@ def constraint_grouping(node):
 investment_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.InvestmentFlow,
     # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
-    filter=lambda stf: stf[2].investment is not None)
+    filter=lambda stf: isinstance(stf[2].investment, Investment))
 
 standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow)
+
+expansion_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.ExpansionFlow,
+    filter=lambda stf: isinstance(stf[2].investment, Expansion))
 
 binary_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.BinaryFlow,
@@ -73,4 +79,4 @@ discrete_flow_grouping = groupings.FlowsWithNodes(
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
              standard_flow_grouping, binary_flow_grouping,
-             discrete_flow_grouping]
+             discrete_flow_grouping, expansion_flow_grouping]
