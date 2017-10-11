@@ -519,6 +519,7 @@ class GenericCHP(on.Transformer):
         self.outputs.update(kwargs.get('heat_output'))
 
         # TODO: add property to convert attribute dimensions if scalars passed
+        # simple dict comprehension with max() would be sufficient
 
     def _calculate_alphas(self):
         """
@@ -529,7 +530,8 @@ class GenericCHP(on.Transformer):
         """
         alphas = [[], []]
 
-        eb = next(iter(self.electrical_output))
+        eb = list(self.electrical_output.keys())[0]
+
         attrs = [self.electrical_output[eb].P_min_woDH,
                  self.electrical_output[eb].Eta_el_min_woDH,
                  self.electrical_output[eb].P_max_woDH,
