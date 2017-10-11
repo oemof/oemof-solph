@@ -43,7 +43,7 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 
 # generic chp
 ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
-                               fuel_input={bgas: solph.Flow()},
+                               fuel_input={bgas: solph.Flow(foo='bar')},
                                electrical_output={bel: solph.Flow(
                                                      P_max_woDH=[217.35 for p in range(0, periods)],
                                                      P_min_woDH=[89.10 for p in range(0, periods)],
@@ -52,8 +52,11 @@ ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                heat_output={bth: solph.Flow(Q_CW_min=[27.85 for p in range(0, periods)], variable_costs=1)},
                                Beta=[0.12 for p in range(0, periods)])
 
-print({k: v for k, v in ccgt.inputs.items()})
-print({k: v for k, v in ccgt.outputs.items()})
+# inputs are changed via bus output and thus empty (and they work)
+print({k: dir(v) for k, v in ccgt.inputs.items()})
+
+# outputs seem to be set correctly
+print({k: dir(v) for k, v in ccgt.outputs.items()})
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)
@@ -63,45 +66,10 @@ om = solph.OperationalModel(es)
 om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 
 # solve model
-om.solve(solver='gurobi', solve_kwargs={'tee': True})
+om.solve(solver='glpk', solve_kwargs={'tee': True})
 
-# create result object
-results = processing.results(es, om)
-
-results[(ccgt,)]['sequences'].to_csv('CCET.csv')
-
-results[(ccgt,)]['sequences']['PQ'] = \
-    results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
-
-print(results[(ccgt,)]['sequences'].describe())
-print(results[(ccgt,)]['sequences'].head())
-
-# plot CCET (line)
-data = results[(ccgt,)]['sequences']
-ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_xlabel('Time')
-ax.set_ylabel('(MW)')
-plt.show()
-
-# # plot CCET (scatter)
-# data = results[(ccgt,)]['sequences']
-# ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
-# ax.set_xlabel('Q (MW)')
-# ax.set_ylabel('P (MW)')
-# plt.show()
-
-# # plot bus
-# data = views.node(results, 'bel')
-# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_title('Dispatch')
-# ax.set_xlabel('')
-# ax.set_ylabel('Power (MW)')
-# plt.show()
-
-# # plot bus
-# data = views.node(results, 'bth')
-# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_title('Dispatch')
-# ax.set_xlabel('')
-# ax.set_ylabel('Heat flow (MW)')
-# plt.show()
+# @gnn, simnh: have a look at the LP-file!
+# why are the flows into the heat and electrical bus not included in the
+# respective balances?! because inputs and outputs are changed subsequently!?
+# -> see in the network classes constructor (custom.py)
+# weirdly, the flows are existent and included in the objective function...
