@@ -32,7 +32,6 @@ The example models the following energy system:
 ###############################################################################
 
 # Outputlib
-from oemof import outputlib
 from oemof.outputlib import processing, views
 
 # Default logger of oemof
@@ -45,7 +44,6 @@ import oemof.solph as solph
 import logging
 import os
 import pandas as pd
-import warnings
 
 try:
     import matplotlib.pyplot as plt
@@ -54,7 +52,9 @@ except ImportError:
 
 
 def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
-                          debug=True, number_timesteps=24 * 7 * 8, tee_switch=True):
+                          debug=True, number_timesteps=24 * 7 * 8,
+                          tee_switch=True, silent=False):
+
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=number_timesteps,
                                     freq='H')
@@ -140,21 +140,32 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     logging.info('Solve the optimization problem')
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
+    # Check dump and restore
+    energysystem.dump()
+    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem.restore()
+
     # check if the new result object is working for custom components
     results = processing.results(energysystem, om)
-    print(results[(storage,)]['sequences'].head())
-    print(results[(storage,)]['scalars'])
+    if not silent:
+        print(results[(storage,)]['sequences'].head())
+        print(results[(storage,)]['scalars'])
     custom_storage = views.node(results, 'storage')
-    custom_storage['sequences'].plot(kind='line', drawstyle='steps-post')
-    plt.show()
+    electricity_bus = views.node(results, 'electricity')
 
-    return energysystem
+    if plt is not None and not silent:
+        custom_storage['sequences'].plot(kind='line', drawstyle='steps-post')
+        plt.show()
+        electricity_bus['sequences'].plot(kind='line', drawstyle='steps-post')
+        plt.show()
 
+    my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
+    my_results['storage_invest'] = results[(storage,)]['scalars']['invest']
 
-def run_storage_investment_example(**kwargs):
-    logger.define_logging()
-    esys = optimise_storage_size(**kwargs)
+    return my_results
 
 
 if __name__ == "__main__":
-    run_storage_investment_example()
+    logger.define_logging()
+    import pprint as pp
+    pp.pprint(optimise_storage_size())
