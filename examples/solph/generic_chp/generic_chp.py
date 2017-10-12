@@ -50,15 +50,23 @@ pp_working = solph.LinearTransformer(
 
 # power plant (error with subsequently set outputs)
 pp_not_working = solph.LinearTransformer(label='chp_gas_not_working',
-                                         conversion_factors={bel: 0.5, bth: 0.5})
+                                         conversion_factors={bel: 0.5,
+                                                             bth: 0.5})
+
 # in/outputs seem to be set correctly
 # but only input flows occur in bus balances
 # see LP file!
-pp_not_working.outputs.update({bel: solph.Flow(nominal_value=100, variable_costs=2),
-                               bth: solph.Flow(nominal_value=100, variable_costs=2)})
+pp_not_working.outputs.update({bel: solph.Flow(nominal_value=100,
+                                               variable_costs=2),
+                               bth: solph.Flow(nominal_value=100,
+                                               variable_costs=2)})
 pp_not_working.inputs.update({bgas: solph.Flow()})
-print('Outputs: ', {k.label: v for k, v in pp_not_working.outputs.items()})
-print('Inputs: ', {k.label: v for k, v in pp_not_working.inputs.items()})
+
+for node in [bel, pp_working, pp_not_working]:
+    print('### inputs/outputs after updating outputs manually')
+    print('Node', node.label)
+    print('Outputs: ', {k.label: v for k, v in node.outputs.items()})
+    print('Inputs: ', {k.label: v for k, v in node.inputs.items()})
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)
