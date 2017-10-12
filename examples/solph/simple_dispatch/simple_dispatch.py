@@ -40,8 +40,8 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
 
     # an excess and a shortage variable can help to avoid infeasible problems
     excess_el = Sink(label='excess_el', inputs={bel: Flow()})
-    shortage_el = Source(label='shortage_el',
-                         outputs={bel: Flow(variable_costs=200)})
+    # shortage_el = Source(label='shortage_el',
+    #                      outputs={bel: Flow(variable_costs=200)})
 
     # sources
     wind = Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
