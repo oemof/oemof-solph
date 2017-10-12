@@ -9,6 +9,7 @@ Data: example_data.csv
 from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
                          Bus, Flow, OperationalModel, EnergySystem)
 from oemof.outputlib import processing, views
+import os
 import pandas as pd
 try:
     import matplotlib.pyplot as plt
@@ -16,14 +17,14 @@ except ImportError:
     plt = None
 
 
-def optimize(periods=24*60, plot=plt):
+def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
     """Create an energy system and optimize the dispatch at least costs."""
-
     # ####################### initialize and provide data #####################
 
     datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
     energysystem = EnergySystem(timeindex=datetimeindex)
-    data = pd.read_csv('input_data.csv', sep=",")
+    filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
+    data = pd.read_csv(filename, sep=",")
 
     # ######################### create energysystem components ################
 
@@ -110,7 +111,7 @@ def optimize(periods=24*60, plot=plt):
     optimization_model = OperationalModel(es=energysystem)
 
     # solve problem
-    optimization_model.solve(solver='cbc',
+    optimization_model.solve(solver=solver,
                              solve_kwargs={'tee': True, 'keepfiles': False})
 
     # write back results from optimization object to energysystem
@@ -139,11 +140,11 @@ def optimize(periods=24*60, plot=plt):
         plt.show()
 
     # generate results to be evaluated in tests
-    rdict = data['sequences'].head(5).to_dict()
+    rdict = data['sequences'].sum(axis=0).to_dict()
     print(rdict)
 
     return rdict
 
 
 if __name__ == "__main__":
-    optimize()
+    run_simple_dispatch_example()
