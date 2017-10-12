@@ -76,16 +76,12 @@ def run_example_checks():
     key = 'stor_inv'
     testdict[key] = {'name': "Storage invest example", 'solver': 'cbc'}
 
-    number_of_timesteps = 500
-
     try:
-        esys = storage_investment.optimise_storage_size(
-            number_timesteps=number_of_timesteps,
+        results = storage_investment.optimise_storage_size(
+            number_timesteps=500,
             solver=testdict[key]['solver'], debug=False,
-            tee_switch=False)
-        esys.dump()
-        esys.restore()
-        results = storage_investment.get_result_dict(esys)
+            tee_switch=False, silent=True)
+
         testdict[key]['run'] = True
 
     except Exception as e:
@@ -93,30 +89,21 @@ def run_example_checks():
         testdict[key]['run'] = False
         results = None
 
-    stor_invest_dict = {8760: {
-        'pp_gas_sum': 112750260.00000007,
-        'demand_sum': 2255000000.000008,
-        'demand_max': 368693.14440990007,
-        'wind_sum': 3085699499.7,
-        'wind_inst': 1000000,
-        'pv_sum': 553984766.734176,
-        'pv_inst': 582000,
-        'storage_cap': 10805267,
-        'objective': 8.93136532898235e+19},
-        500: {
-            'demand_max': 341499.463487,
-            'demand_sum': 1.339972e+08,
-            'objective': 2.806796142614384e+17,
-            'pp_gas_sum': 6.435517e+06,
-            'pv_inst': 260771.373277,
-            'pv_sum': 9.806339e+06,
-            'storage_cap': 615506.94,
-            'wind_inst': 999979.9978,
-            'wind_sum': 391216886.0,
-        }}
+    stor_invest_dict = {
+        'storage_invest': 615506.93999999994,
+        (('electricity', 'demand'), 'flow'): 133997181.20832705,
+        (('electricity', 'excess_bel'), 'flow'): 273149694.8592003,
+        (('electricity', 'storage'), 'flow'): 1559331.1879999998,
+        (('pp_gas', 'electricity'), 'flow'): 6435517.1424000021,
+        (('pv', 'electricity'), 'flow'): 9806339.1483599972,
+        (('storage', 'electricity'), 'flow'): 1247464.9504000004,
+        (('wind', 'electricity'), 'flow'): 391216886.0}
 
-    check(stor_invest_dict[number_of_timesteps], testdict[key]['run'],
-          testdict[key], results)
+    # der = {
+    #         'objective': 2.806796142614384e+17,
+    #     }
+
+    check(stor_invest_dict, testdict[key]['run'], testdict[key], results)
     # ********* end of storage invest example *********************************
 
     # *********** simple dispatch example *************************************
@@ -243,7 +230,7 @@ def run_example_checks():
         'input_variable_chp': 127626169.47000004}
 
     check(variable_chp_dict, testdict[key]['run'], testdict[key], results)
-    # ********* end of storage invest example *********************************
+    # ********* end of variable chp example ***********************************
 
     logger.define_logging()
     for tests in testdict.values():
