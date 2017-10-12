@@ -9,15 +9,14 @@ import pandas as pd
 
 from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem
-from oemof.solph import NodesFromCSV
+from oemof.solph import nodes_from_csv
 from oemof.outputlib import ResultsDataFrame
-from oemof.outputlib import results_to_multiindex
-#from oemof.outputlib import graph_tools as gt
+from oemof.outputlib import graph_tools as gt
 
 from matplotlib import pyplot as plt
 
 
-def run_example(config, draw_graph=False):
+def run_example(config):
     # creation of an hourly datetime_index
     datetime_index = pd.date_range(config['date_from'],
                                    config['date_to'],
@@ -31,54 +30,41 @@ def run_example(config, draw_graph=False):
 
     # adding all nodes and flows to the energy system
     # (data taken from csv-file)
-    NodesFromCSV(file_nodes_flows=os.path.join(
+    nodes_from_csv(file_nodes_flows=os.path.join(
                              config['scenario_path'],
                              config['nodes_flows']),
-                 file_nodes_flows_sequences=os.path.join(
+                   file_nodes_flows_sequences=os.path.join(
                              config['scenario_path'],
                              config['nodes_flows_sequences']),
-                 delimiter=',')
+                   delimiter=',')
 
     # creation of a least cost model from the energy system
     om = OperationalModel(es)
     om.receive_duals()
-
-    # # create a graph of the energy system which could be exported into
-    # # different formats
-    # # https://networkx.github.io/documentation/networkx-1.10/reference/
-    # # readwrite.html
-    # logging.warning("Graph plots do not work unless 'networkx' is installed.")
-    # if draw_graph:
-    #     mygraph = gt.graph(energy_system=es, optimization_model=om,
-    #                        remove_nodes_with_substrings=['#'])
 
     # solving the linear problem using the given solver
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
     logging.info("Done!")
 
-    # create multi-indexed pandas dataframe
-    midf = results_to_multiindex(es, om)
-    print(midf)
-
     # create pandas dataframe with results
     results = ResultsDataFrame(energy_system=es)
 
-    # # write results for selected busses to single csv files
-    # results.bus_balance_to_csv(bus_labels=['R1_bus_el', 'R2_bus_el'],
-    #                            output_path=config['results_path'])
-    #
-    # logging.info("The results can be found in {0}".format(
-    #     config['results_path']))
-    # logging.info("Read the documentation (outputlib) to learn how" +
-    #              " to process the results.")
+    # write results for selected busses to single csv files
+    results.bus_balance_to_csv(bus_labels=['R1_bus_el', 'R2_bus_el'],
+                               output_path=config['results_path'])
+
+    logging.info("The results can be found in {0}".format(
+        config['results_path']))
+    logging.info("Read the documentation (outputlib) to learn how" +
+                 " to process the results.")
 
     rdict = {
         'objective': es.results.objective,
         'time_series': results
     }
 
-    return rdict
+    return rdict, es, om
 
 
 def plotting(results):
@@ -112,7 +98,7 @@ def plotting(results):
     r2['residual_load'] = r2['residual_load']/r2['residual_load'].max()
 
     # scatterplot: can our thesis can be confirmed?
-    r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline', grid=True)
+    r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
     plt.show()
 
     # get all nodes around R1
@@ -121,7 +107,7 @@ def plotting(results):
     # plot the output of two power plants
     power_plants = ['R1_pp_lignite', 'R1_pp_hard_coal']
     ax = r1_balance[power_plants].plot(kind='line', subplots=True,
-                                       legend=False, linewidth=2.5, grid=True)
+                                       legend=False, linewidth=2.5)
     ax[0].set_title('Lignite')
     ax[0].set_ylabel('Power in MW')
     ax[1].set_title('Hard coal')
@@ -164,14 +150,19 @@ def run_dispatch_example(solver='cbc'):
         os.mkdir(cfg['results_path'])
 
     # run optimisation
-    my_results = run_example(config=cfg, draw_graph=True)
+    my_results, es, om = run_example(config=cfg)
 
     # plot results
-    #plotting(my_results)
+    plotting(my_results)
 
-    # print(create_result_dict(my_results))
-    #return es, om
+    return es, om
 
 
 if __name__ == "__main__":
-    run_dispatch_example()
+    es, om = run_dispatch_example()
+
+    # create graph which could be exported into different formats
+    # https://networkx.github.io/documentation/networkx-1.10/reference/
+    # readwrite.html
+    mygraph = gt.graph(energy_system=es, optimization_model=om,
+                       remove_nodes_with_substrings=['#'])

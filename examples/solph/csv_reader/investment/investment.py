@@ -2,14 +2,11 @@
 
 import os
 import logging
-import matplotlib.pyplot as plt
 import pandas as pd
-import pickle
 
 from datetime import datetime
-from oemof.outputlib import processing, views
 from oemof.tools import logger
-from oemof.solph import OperationalModel, EnergySystem, NodesFromCSV
+from oemof.solph import OperationalModel, EnergySystem, nodes_from_csv
 from oemof.outputlib import ResultsDataFrame
 
 
@@ -28,7 +25,6 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     # %% model creation and solving
     date_from = '2050-01-01 00:00:00'
-
     date_to = '2050-01-01 23:00:00'
 
     datetime_index = pd.date_range(date_from, date_to, freq='60min')
@@ -37,10 +33,10 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     data_path = os.path.join(os.path.dirname(__file__), 'data')
 
-    NodesFromCSV(file_nodes_flows=os.path.join(data_path, 'nodes_flows.csv'),
-                 file_nodes_flows_sequences=os.path.join(data_path,
-                 'nodes_flows_seq.csv'),
-                 delimiter=',')
+    nodes_from_csv(file_nodes_flows=os.path.join(data_path, 'nodes_flows.csv'),
+                   file_nodes_flows_sequences=os.path.join(data_path,
+                   'nodes_flows_seq.csv'),
+                   delimiter=',')
 
     stopwatch()
 
@@ -54,14 +50,14 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
 
     logging.info('Optimization time: ' + stopwatch())
 
-    results_old = ResultsDataFrame(energy_system=es)
+    results = ResultsDataFrame(energy_system=es)
 
     results_path = os.path.join(os.path.expanduser("~"), 'csv_invest')
 
     if not os.path.isdir(results_path):
         os.mkdir(results_path)
 
-    results_old.to_csv(os.path.join(results_path, 'results.csv'))
+    results.to_csv(os.path.join(results_path, 'results.csv'))
 
     logging.info("The results can be found in {0}".format(results_path))
     logging.info("Read the documentation (outputlib) to learn how" +
@@ -70,60 +66,6 @@ def run_investment_example(solver='cbc', verbose=True, nologg=False):
                  "DataFrame with pandas.")
 
     logging.info('Done!')
-
-    # create a dictionary with the results
-    result = processing.results(es, om)
-
-    # standard api: results for a flow
-    my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
-    print(result[my_id]['scalars'])
-    print(result[my_id]['sequences'].describe())
-
-    # standard api: result for a component
-    my_id = (es.groups['REGION1_storage_phs'],)
-    print(result[my_id]['scalars'])
-    print(result[my_id]['sequences'].describe())
-
-    # slicing functions: get all node result (bus)
-    # works with node objects and string labels as argument
-    region1 = views.node(result, es.groups['REGION1_bus_el'])
-    region1 = views.node(result, 'REGION1_bus_el')
-    print(region1['sequences'].max())
-    print(region1['scalars'])
-
-    # slicing functions: get all node result (component)
-    # works with node objects and string labels as argument
-    phs = views.node(result, es.groups['REGION1_storage_phs'])
-    phs = views.node(result, 'REGION1_storage_phs')
-    print(phs['sequences'].max())
-    print(phs['scalars'])
-
-    # example plot for sequences
-    cols = [c for c in phs['sequences'].columns if 'my_sequence_var' not in c]
-    phs['sequences'] = phs['sequences'][cols]
-    phs['sequences'].columns = ['P-IN', 'CAP', 'P-OUT']
-    ax = phs['sequences'].plot(kind='line', drawstyle='steps-post')
-    ax.set_title('Dispatch result')
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Power (MW) / Energy (MWh)')
-    plt.show()
-
-    # example plot for scalars
-    idx = [i for i in phs['scalars'].index if 'my_scalar_var' not in i]
-    phs['scalars'] = phs['scalars'][idx]
-    phs['scalars'].index = ['P-IN', 'CAP', 'P-OUT']
-    ax = phs['scalars'].plot(kind='bar')
-    ax.set_title('Investment result')
-    ax.set_xlabel('')
-    ax.set_ylabel('Storage investment in MWh / MW')
-    plt.show()
-
-    # # picke result @gnn: the following does not work
-    # pickle.dump(str_result, open('result.p', 'wb'))
-    # pickle.dump(result, open('result.p', 'wb'))
-    # my_result = pickle.load(open('result.p', 'rb'))
-    # my_id = (es.groups['REGION1_pp_oil'], es.groups['REGION1_bus_el'])
-    # print(my_result[my_id]['scalars'])
 
 
 if __name__ == '__main__':

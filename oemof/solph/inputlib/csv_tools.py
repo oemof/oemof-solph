@@ -10,10 +10,10 @@ from ..network import (Bus, Source, Sink, Flow, LinearTransformer)
 from ..custom import GenericStorage as Storage
 
 
-def NodesFromCSV(file_nodes_flows, file_nodes_flows_sequences,
-                 delimiter=',', additional_classes=None,
-                 additional_seq_attributes=None,
-                 additional_flow_attributes=None):
+def nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences,
+                   delimiter=',', additional_classes=None,
+                   additional_seq_attributes=None,
+                   additional_flow_attributes=None):
     """ Creates nodes with their respective flows and sequences from
     a pre-defined CSV structure. An example has been provided in the
     development examples
