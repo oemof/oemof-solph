@@ -51,7 +51,7 @@ def examples():
     elif example == 'add_constraints':
         run_add_constraints_example(solver=solver)
     elif example == 'simple_dispatch':
-        run_simple_dispatch_example(solver=solver, tee_switch=False)
+        run_simple_dispatch_example(solver=solver)
     elif example == 'storage_investment':
         run_storage_investment_example(solver=solver, tee_switch=False)
     elif example == 'csv_reader_dispatch':

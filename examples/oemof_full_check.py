@@ -72,7 +72,7 @@ def check_nosetests():
 
 
 def run_example_checks():
-    # ********* storage invest example *****************************************
+    # ********* storage invest example ****************************************
     key = 'stor_inv'
     testdict[key] = {'name': "Storage invest example", 'solver': 'cbc'}
 
@@ -117,18 +117,15 @@ def run_example_checks():
 
     check(stor_invest_dict[number_of_timesteps], testdict[key]['run'],
           testdict[key], results)
-    # ********* end of storage invest example **********************************
+    # ********* end of storage invest example *********************************
 
-    # *********** simple least cost  example ***********************************
+    # *********** simple dispatch example *************************************
     key = 'least_costs'
-    testdict[key] = {'name': "Simple least costs optimization", 'solver': 'cbc'}
+    testdict[key] = {'name': "Simple dispatch optimization",
+                     'solver': 'cbc'}
 
     try:
-        esys = simple_dispatch.initialise_energysystem(periods=2000)
-        simple_dispatch.simulate(esys,
-                                 solver=testdict[key]['solver'],
-                                 tee_switch=False, keep=False)
-        results = simple_dispatch.get_results(esys)
+        results = simple_dispatch.run_simple_dispatch_example()
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -136,33 +133,22 @@ def run_example_checks():
         results = None
 
     test_results = {
-        'objective': 2919760.79345538,
-        ('b_el', 'from_bus', 'demand_el', 'val'): 132243.7904593189,
-        ('b_el', 'from_bus', 'excess', 'val'): 444.60716131999982,
-        ('b_el', 'from_bus', 'heat_pump', 'val'): 931.24215460999926,
-        ('b_el', 'to_bus', 'pp_chp', 'val'): 9066.0625217479828,
-        ('b_el', 'to_bus', 'pp_coal', 'val'): 35676.475654468377,
-        ('b_el', 'to_bus', 'pp_gas', 'val'): 30412.376285770013,
-        ('b_el', 'to_bus', 'pp_lig', 'val'): 22656.045354479214,
-        ('b_el', 'to_bus', 'pp_oil', 'val'): 2.2872602799999999,
-        ('b_el', 'to_bus', 'pv', 'val'): 7796.8431880300122,
-        ('b_el', 'to_bus', 'wind', 'val'): 28009.549502999955,
-        ('b_heat_source', 'from_bus', 'heat_pump', 'val'): 1862.4843137140017,
-        ('b_heat_source', 'to_bus', 'heat_source', 'val'): 1862.4843137140017,
-        ('b_th', 'from_bus', 'demand_th', 'val'): 14881.80983624002,
-        ('b_th', 'to_bus', 'heat_pump', 'val'): 2793.7264708619978,
-        ('b_th', 'to_bus', 'pp_chp', 'val'): 12088.083361442017,
-        ('coal', 'from_bus', 'pp_coal', 'val'): 91478.143053327163,
-        ('gas', 'from_bus', 'pp_chp', 'val'): 30220.208378289819,
-        ('gas', 'from_bus', 'pp_gas', 'val'): 60824.752549570097,
-        ('lignite', 'from_bus', 'pp_lig', 'val'): 55258.647579137803,
-        ('oil', 'from_bus', 'pp_oil', 'val'): 8.1687867099999991
+        (('wind', 'bel'), 'flow'): 19504.415509800005,
+        (('pv', 'bel'), 'flow'): 4205.0081990299996,
+        (('bel', 'demand_el'), 'flow'): 95893.690674837926,
+        (('bel', 'excess_el'), 'flow'): 353.30769076999997,
+        (('pp_chp', 'bel'), 'flow'): 7043.259944773984,
+        (('pp_lig', 'bel'), 'flow'): 16320.727254279591,
+        (('pp_gas', 'bel'), 'flow'): 23848.364613840022,
+        (('pp_coal', 'bel'), 'flow'): 25958.774628000549,
+        (('pp_oil', 'bel'), 'flow'): 2.2872602799999999,
+        (('bel', 'heat_pump'), 'flow'): 635.8390440710001
     }
 
     check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of simple least cost  example ****************************
+    # *********** end of simple dispatch example ******************************
 
-    # *********** flexible modelling example ***********************************
+    # *********** flexible modelling example **********************************
     key = 'flexible_modelling'
     testdict[key] = {'name': "Flexible Modelling",
                      'solver': 'cbc'}
@@ -178,9 +164,9 @@ def run_example_checks():
     test_results = {}
 
     check(test_results, testdict[key]['run'], testdict[key])
-    # *********** end of flexible modelling example ****************************
+    # *********** end of flexible modelling example ***************************
 
-    # *********** csv reader dispatch example **********************************
+    # *********** csv reader dispatch example *********************************
     key = 'csv_reader_dispatch'
     testdict[key] = {
         'name': "Dispatch model with csv reader",
@@ -214,9 +200,9 @@ def run_example_checks():
         'R2_R1_powerline': 2.277989e+06}
 
     check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of csv reader dispatch example ***************************
+    # *********** end of csv reader dispatch example **************************
 
-    # *********** csv reader investment example ********************************
+    # *********** csv reader investment example *******************************
     key = 'csv_reader_investment'
     testdict[key] = {'name': "Investment model with csv reader",
                      'solver': 'cbc'}
@@ -232,9 +218,9 @@ def run_example_checks():
     test_results = {}
 
     check(test_results, testdict[key]['run'], testdict[key])
-    # *********** end of csv reader investment example *************************
+    # *********** end of csv reader investment example ************************
 
-    # ********* variable chp example *******************************************
+    # ********* variable chp example ******************************************
     key = 'variable_chp'
     testdict[key] = {'name': "Variable CHP example", 'solver': 'cbc'}
 
@@ -257,7 +243,7 @@ def run_example_checks():
         'input_variable_chp': 127626169.47000004}
 
     check(variable_chp_dict, testdict[key]['run'], testdict[key], results)
-    # ********* end of storage invest example **********************************
+    # ********* end of storage invest example *********************************
 
     logger.define_logging()
     for tests in testdict.values():
