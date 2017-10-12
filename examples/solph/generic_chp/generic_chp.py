@@ -62,8 +62,8 @@ pp_not_working.outputs.update({bel: solph.Flow(nominal_value=100,
                                                variable_costs=2)})
 pp_not_working.inputs.update({bgas: solph.Flow()})
 
-for node in [bel, pp_working, pp_not_working]:
-    print('### inputs/outputs after updating outputs manually')
+print('### inputs/outputs after updating outputs manually')
+for node in [bel, bgas, bth, pp_working, pp_not_working]:
     print('Node', node.label)
     print('Outputs: ', {k.label: v for k, v in node.outputs.items()})
     print('Inputs: ', {k.label: v for k, v in node.inputs.items()})
