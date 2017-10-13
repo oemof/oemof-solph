@@ -111,9 +111,15 @@ def results(es, om):
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
         df_dict[k].index = es.timeindex
-        scalars = df_dict[k].loc[:, df_dict[k].isnull().any()].dropna().iloc[0]
-        sequences = df_dict[k].loc[:, ~(df_dict[k].isnull().any())]
-        results[k] = {'scalars': scalars, 'sequences': sequences}
+        try:
+            condition = df_dict[k].isnull().any()
+            scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
+            sequences = df_dict[k].loc[:, ~(condition)]
+            results[k] = {'scalars': scalars, 'sequences': sequences}
+        except IndexError:
+            error_message = ('Cannot access index on result data. ' +
+                             'Did the optimization terminate without errors?')
+            raise IndexError(error_message)
 
     # add dual variables for bus constraints
     if hasattr(om, 'dual'):

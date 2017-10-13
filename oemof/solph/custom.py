@@ -468,17 +468,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # Start of generic CHP component
 # ------------------------------------------------------------------------------
 
-# # nicer API?
-# # TODOs:
-# # - update flow attributes in trf.inputs and outputs already in network class
-# #   with dict values
-# ccgt = solph.custom.GenericCHP(label='pp_generic_chp', fuel_bus={bgas: None},
-#                                electrical_bus={bel: {'P_max_woDH': 187,
-#                                                      'P_min_woDH': 80,
-#                                                      'Eta_el_max_woDH': 0.57,
-#                                                      'Eta_el_min_woDH': 0.54}},
-#                                heat_bus={bth: {'Q_CW_min': 28, 'Beta': 0.12}})
-
 class GenericCHP(on.Transformer):
     """
 
