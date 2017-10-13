@@ -207,14 +207,28 @@ def run_example_checks():
                      'solver': 'cbc'}
 
     try:
-        investment.run_investment_example(solver=testdict[key]['solver'],
-                                          verbose=False, nologg=True)
+        investment.run_csv_reader_investment_example(
+            solver=testdict[key]['solver'], verbose=False, nologg=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
         testdict[key]['run'] = False
 
-    test_results = {}
+    test_results = {
+        (('REGION1_pp_oil', 'REGION1_bus_el'), 'flow'): 849251.37833000079,
+        (('REGION1_pp_gas', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_bus_el', 'REGION1_excess'), 'flow'): 271668.42666399997,
+        (('REGION1_pp_hard_coal', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_bus_el',), 'duals'): 29927.322138395313,
+        (('REGION1_storage_phs', 'REGION1_bus_el'), 'flow'): 98097.2121920000,
+        (('REGION1_bus_el', 'REGION1_storage_phs'), 'flow'): 121107.668965000,
+        (('REGION1_wind', 'REGION1_bus_el'), 'flow'): 2935897.092189997,
+        (('REGION1_pp_biomass', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_pp_lignite', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_pp_uranium', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_bus_el', 'REGION1_load'), 'flow'): 3490469.5819933019,
+        (('REGION1_shortage', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_solar', 'REGION1_bus_el'), 'flow'): 0.0}
 
     check(test_results, testdict[key]['run'], testdict[key])
     # *********** end of csv reader investment example ************************

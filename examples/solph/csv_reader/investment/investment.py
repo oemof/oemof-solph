@@ -1,72 +1,84 @@
 # -*- coding: utf-8 -*-
+"""
+Dispatch optimisation using oemof's csv-reader.
+"""
 
 import os
-import logging
 import pandas as pd
 
-from datetime import datetime
-from oemof.tools import logger
-from oemof.solph import OperationalModel, EnergySystem, nodes_from_csv
-from oemof.outputlib import ResultsDataFrame
+from oemof.solph import OperationalModel, EnergySystem
+from oemof.solph import nodes_from_csv
+from oemof.outputlib import processing, views
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+
+# configuration
+cfg = {
+    'scenario_path': os.path.join(os.path.dirname(__file__), 'data'),
+    'date_from': '2030-01-01 00:00:00',
+    'date_to': '2030-01-14 23:00:00',
+    'nodes_flows': 'nodes_flows.csv',
+    'nodes_flows_sequences': 'nodes_flows_seq.csv',
+    'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
+    'solver': 'cbc',
+    'verbose': False  # Set to True to see solver outputs
+}
 
 
-def stopwatch():
-    if not hasattr(stopwatch, 'now'):
-        stopwatch.now = datetime.now()
-        return None
-    last = stopwatch.now
-    stopwatch.now = datetime.now()
-    return str(stopwatch.now-last)[0:-4]
+def run_csv_reader_investment_example(config=cfg):
 
+    # creation of an hourly datetime_index
+    datetime_index = pd.date_range(config['date_from'],
+                                   config['date_to'],
+                                   freq='60min')
 
-def run_investment_example(solver='cbc', verbose=True, nologg=False):
-    if not nologg:
-        logger.define_logging()
-
-    # %% model creation and solving
-    date_from = '2050-01-01 00:00:00'
-    date_to = '2050-01-01 23:00:00'
-
-    datetime_index = pd.date_range(date_from, date_to, freq='60min')
-
+    # initialisation of the energy system
     es = EnergySystem(timeindex=datetime_index)
 
-    data_path = os.path.join(os.path.dirname(__file__), 'data')
-
-    nodes_from_csv(file_nodes_flows=os.path.join(data_path, 'nodes_flows.csv'),
-                   file_nodes_flows_sequences=os.path.join(data_path,
-                   'nodes_flows_seq.csv'),
+    # adding all nodes and flows to the energy system
+    # (data taken from csv-file)
+    nodes_from_csv(file_nodes_flows=os.path.join(
+                             config['scenario_path'],
+                             config['nodes_flows']),
+                   file_nodes_flows_sequences=os.path.join(
+                             config['scenario_path'],
+                             config['nodes_flows_sequences']),
                    delimiter=',')
 
-    stopwatch()
-
+    # creation of a least cost model from the energy system
     om = OperationalModel(es)
-
-    logging.info('OM creation time: ' + stopwatch())
-
     om.receive_duals()
 
-    om.solve(solver=solver, solve_kwargs={'tee': verbose})
+    # solving the linear problem using the given solver
+    om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
-    logging.info('Optimization time: ' + stopwatch())
+    # generic result object
+    results = processing.results(es=es, om=om)
 
-    results = ResultsDataFrame(energy_system=es)
+    data = views.node(results, 'REGION1_bus_el')
 
-    results_path = os.path.join(os.path.expanduser("~"), 'csv_invest')
+    print('Optimization successful. Printing some results:',
+          data['sequences'].info(), data['scalars'])
 
-    if not os.path.isdir(results_path):
-        os.mkdir(results_path)
+    # plot data if matplotlib is installed
+    # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
+    if plt is not None:
+        ax = data['sequences'].sum(axis=0).plot(kind='barh')
+        ax.set_title('Sums for optimization period')
+        ax.set_xlabel('Energy (MWh)')
+        ax.set_ylabel('Flow')
+        plt.tight_layout()
+        plt.show()
 
-    results.to_csv(os.path.join(results_path, 'results.csv'))
+    # generate results to be evaluated in tests
+    rdict = data['sequences'].sum(axis=0).to_dict()
 
-    logging.info("The results can be found in {0}".format(results_path))
-    logging.info("Read the documentation (outputlib) to learn how" +
-                 " to process the results.")
-    logging.info("Or search the web to learn how to handle a MultiIndex" +
-                 "DataFrame with pandas.")
+    print(rdict)
 
-    logging.info('Done!')
+    return rdict
 
 
-if __name__ == '__main__':
-    run_investment_example()
+if __name__ == "__main__":
+    run_csv_reader_investment_example()
