@@ -23,12 +23,11 @@ cfg = {
     'nodes_flows_sequences': 'nodes_flows_seq.csv',
     'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
     'solver': 'cbc',
-    'verbose': False  # Set to True to see solver outputs
+    'verbose': True  # Set to True to see solver outputs
 }
 
 
 def run_csv_reader_investment_example(config=cfg):
-
     # creation of an hourly datetime_index
     datetime_index = pd.date_range(config['date_from'],
                                    config['date_to'],
@@ -59,12 +58,13 @@ def run_csv_reader_investment_example(config=cfg):
 
     data = views.node(results, 'REGION1_bus_el')
 
-    print('Optimization successful. Printing some results:',
-          data['sequences'].info(), data['scalars'])
+    if config['verbose']:
+        print('Optimization successful. Printing some results:',
+              data['sequences'].info(), data['scalars'])
 
     # plot data if matplotlib is installed
     # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    if plt is not None:
+    if plt is not None and config['verbose']:
         ax = data['sequences'].sum(axis=0).plot(kind='barh')
         ax.set_title('Sums for optimization period')
         ax.set_xlabel('Energy (MWh)')
@@ -75,7 +75,8 @@ def run_csv_reader_investment_example(config=cfg):
     # generate results to be evaluated in tests
     rdict = data['sequences'].sum(axis=0).to_dict()
 
-    print(rdict)
+    if config['verbose']:
+        print(rdict)
 
     return rdict
 

@@ -23,7 +23,7 @@ cfg = {
     'nodes_flows_sequences': 'example_energy_system_seq.csv',
     'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
     'solver': 'cbc',
-    'verbose': False  # Set to True to see solver outputs
+    'verbose': True  # Set to True to see solver outputs
 }
 
 
@@ -59,12 +59,13 @@ def run_csv_reader_dispatch_example(config=cfg):
 
     data = views.node(results, 'R1_bus_el')
 
-    print('Optimization successful. Printing some results:',
-          data['sequences'].info())
+    if config['verbose']:
+        print('Optimization successful. Printing some results:',
+              data['sequences'].info())
 
     # plot data if matplotlib is installed
     # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    if plt is not None:
+    if plt is not None and config['verbose']:
         ax = data['sequences'].sum(axis=0).plot(kind='barh')
         ax.set_title('Sums for optimization period')
         ax.set_xlabel('Energy (MWh)')

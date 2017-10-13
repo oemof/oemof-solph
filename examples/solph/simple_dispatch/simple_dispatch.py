@@ -17,7 +17,8 @@ except ImportError:
     plt = None
 
 
-def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
+def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
+                                silent=False):
     """Create an energy system and optimize the dispatch at least costs."""
     # ####################### initialize and provide data #####################
 
@@ -112,7 +113,7 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
 
     # solve problem
     optimization_model.solve(solver=solver,
-                             solve_kwargs={'tee': True, 'keepfiles': False})
+                             solve_kwargs={'tee': tee_var, 'keepfiles': False})
 
     # write back results from optimization object to energysystem
     optimization_model.results()
@@ -129,12 +130,13 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
     # variables are used
     data = views.node(results, 'bel')
 
-    print('Optimization successful. Printing some results:',
-          data['sequences'].info())
+    if not silent:
+        print('Optimization successful. Printing some results:',
+              data['sequences'].info())
 
     # plot data if matplotlib is installed
     # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    if plt is not None:
+    if plt is not None and not silent:
         ax = data['sequences'].sum(axis=0).plot(kind='barh')
         ax.set_title('Sums for optimization period')
         ax.set_xlabel('Energy (MWh)')
