@@ -68,8 +68,40 @@ om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 # solve model
 om.solve(solver='glpk', solve_kwargs={'tee': True})
 
-# @gnn, simnh: have a look at the LP-file!
-# why are the flows into the heat and electrical bus not included in the
-# respective balances?! because inputs and outputs are changed subsequently!?
-# -> see in the network classes constructor (custom.py)
-# weirdly, the flows are existent and included in the objective function...
+# create result object
+results = processing.results(es, om)
+
+results[(ccgt,)]['sequences']['PQ'] = \
+    results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
+print(results[(ccgt,)]['sequences'].describe())
+print(results[(ccgt,)]['sequences'].head())
+
+# plot CCET (line)
+data = results[(ccgt,)]['sequences']
+ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
+ax.set_xlabel('Time')
+ax.set_ylabel('(MW)')
+plt.show()
+
+# # plot CCET (scatter)
+# data = results[(ccgt,)]['sequences']
+# ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
+# ax.set_xlabel('Q (MW)')
+# ax.set_ylabel('P (MW)')
+# plt.show()
+
+# # plot bus
+# data = views.node(results, 'bel')
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Power (MW)')
+# plt.show()
+
+# # plot bus
+# data = views.node(results, 'bth')
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Heat flow (MW)')
+# plt.show()
