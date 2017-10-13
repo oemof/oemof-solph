@@ -35,8 +35,11 @@ class _Edges:
 
     def __call__(self, *keys):
         result = self
-        for k in keys:
-            result = result[k]
+        try:
+            for k in keys:
+                result = result[k]
+        except KeyError as e:
+            pass
         return result
 
 
