@@ -123,6 +123,10 @@ class Node_Tests:
         eq_(node.outputs[bus], flow,
             ("\n  Expected {} as `node.outputs[bus]`." +
              "\n  Got    : {} instead").format(flow, node.outputs[bus]))
+        eq_(node.outputs, {bus: flow},
+            ("\n  Expected {} as `node.outputs`." +
+             "\n  Got    : {} (== {}) instead").format(
+                {bus: flow}, node.outputs,dict(node.outputs)))
         del node.outputs[bus]
         eq_(node.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
@@ -146,6 +150,10 @@ class Node_Tests:
         eq_(node.inputs[bus], flow,
             ("\n  Expected {} as `node.inputs[bus]`." +
              "\n  Got    : {} instead").format(flow, node.inputs[bus]))
+        eq_(node.inputs, {bus: flow},
+            ("\n  Expected {} as `node.inputs`." +
+             "\n  Got    : {} (== {}) instead").format(
+                {bus: flow}, node.inputs,dict(node.inputs)))
         del node.inputs[bus]
         eq_(node.inputs, {},
             ("\n  Expected an empty dictionary of inputs." +
