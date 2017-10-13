@@ -33,7 +33,7 @@ def check(cdict, runcheck, subdict, new_results=None):
             maxval = cdict[key] + abs(cdict[key]) * tolerance
             minval = cdict[key] - abs(cdict[key]) * tolerance
 
-            if not ((float(value) > minval) and (float(value) < maxval)):
+            if not ((float(value) >= minval) and (float(value) <= maxval)):
                 count += 1
                 subdict['messages'][count] = (
                     "{0}: {1} not between {2} and {3}".format(
@@ -172,8 +172,7 @@ def run_example_checks():
         os.mkdir(testdict[key]['results_path'])
 
     try:
-        res = dispatch.run_example(config=testdict[key], )
-        results = dispatch.create_result_dict(res)
+        results = dispatch.run_csv_reader_dispatch_example(config=testdict[key], )
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -181,10 +180,23 @@ def run_example_checks():
         results = None
 
     test_results = {
-        'objective': 2326255732.5299315,
-        'R2_storage_phs': 88911.484028,
-        'R2_wind': 1758697.51,
-        'R2_R1_powerline': 2.277989e+06}
+        (('R1_pp_gas', 'R1_bus_el'), 'flow'): 0.0,
+        (('R1_pp_hard_coal', 'R1_bus_el'), 'flow'): 1031265.0381399998,
+        (('R1_pp_oil', 'R1_bus_el'), 'flow'): 0.0,
+        (('R1_pp_uranium', 'R1_bus_el'), 'flow'): 1428000.0,
+        (('R1_pp_lignite', 'R1_bus_el'), 'flow'): 1410321.1378500001,
+        (('R1_bus_el', 'R1_excess'), 'flow'): 0.0,
+        (('R1_bus_el', 'R1_load'), 'flow'): 8326012.1175384959,
+        (('R1_bus_el', 'R1_R2_powerline'), 'flow'): 0.0,
+        (('R1_solar', 'R1_bus_el'), 'flow'): 109133.28500000003,
+        (('R1_run_of_river', 'R1_bus_el'), 'flow'): 1092000.0,
+        (('R1_wind', 'R1_bus_el'), 'flow'): 472390.93500000017,
+        (('R1_bus_el',), 'duals'): 13325.791131000004,
+        (('R2_R1_powerline', 'R1_bus_el'), 'flow'): 2209649.7471529995,
+        (('R1_shortage', 'R1_bus_el'), 'flow'): 0.0,
+        (('R1_pp_biomass', 'R1_bus_el'), 'flow'): 180136.44901700001,
+        (('R1_pp_mixed_fuels', 'R1_bus_el'), 'flow'): 393115.52601000009}
+
 
     check(test_results, testdict[key]['run'], testdict[key], results)
     # *********** end of csv reader dispatch example **************************
