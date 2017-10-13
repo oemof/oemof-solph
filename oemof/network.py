@@ -22,6 +22,13 @@ class _Edges:
     _in_edges = WeKeDi()
     _flows = WeKeDi()
 
+    def __delitem__(self, key):
+        source, target = key
+        self._in_edges[target].remove(source)
+        del self._flows[source][target]
+        if not self._flows[source]:
+            del self._flows[source]
+
     def __getitem__(self, key):
         self._flows[key] = self._flows.get(key, WeKeDi())
         return self._flows[key]
@@ -63,10 +70,10 @@ class Inputs(MM):
         return flow(key, self.target)
 
     def __delitem__(self, key):
-        return flow(key).__delitem__(self.target)
+        return flow().__delitem__((key, self.target))
 
     def __setitem__(self, key, value):
-        return flow(key).__setitem__(self.target, value)
+        return flow().__setitem__((key, self.target), value)
 
     def __iter__(self):
         return flow._in_edges.get(self.target, ()).__iter__()
