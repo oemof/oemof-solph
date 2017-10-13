@@ -438,13 +438,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             self.MIN_INVESTSTORAGES, m.TIMESTEPS,
             rule=_min_capacity_invest_rule)
 
-        # checking add. vars
-        self.my_scalar_var = Var(self.INVESTSTORAGES, within=NonNegativeReals,
-                                 bounds=(0, 10000), initialize=5000)
-        self.my_sequence_var = Var(self.INVESTSTORAGES, m.TIMESTEPS,
-                                   within=NonNegativeReals,
-                                   bounds=(0, 10000), initialize=5000)
-
     def _objective_expression(self):
         """Objective expression with fixed and investement costs."""
         if not hasattr(self, 'INVESTSTORAGES'):
