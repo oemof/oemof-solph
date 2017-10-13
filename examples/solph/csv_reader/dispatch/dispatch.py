@@ -54,10 +54,6 @@ def run_csv_reader_dispatch_example(config=cfg):
     # solving the linear problem using the given solver
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
-    # create results path if it does not exist
-    if not os.path.isdir(cfg['results_path']):
-        os.mkdir(cfg['results_path'])
-
     # generic result object
     results = processing.results(es=es, om=om)
 
