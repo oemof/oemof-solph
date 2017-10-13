@@ -25,6 +25,9 @@ Bug fixes
 Testing
 #######
 
+* LP-file tests are now normalized so that lp-files are rewritten to not
+  have negative right hand sides for equations. This means we are now
+  safe from Pyomo changing signs on both sides of the equation on us.
 
 Other changes
 #############

@@ -62,6 +62,29 @@ class Constraint_Tests:
                 generated = remove(ignored,
                                    chop_trailing_whitespace(
                                        generated_file.readlines()))
+
+                def normalize_to_positive_results(lines):
+                    negative_result_indices = [n
+                        for n, line in enumerate(lines)
+                        if re.match("^= -", line)]
+                    equation_start_indices = [
+                        [n for n in reversed(range(0, nri))
+                           if re.match('.*:$', lines[n])][0]+1
+                        for nri in negative_result_indices]
+                    for (start, end) in zip(
+                            equation_start_indices,
+                            negative_result_indices):
+                        for n in range(start, end):
+                            lines[n] = ('-'
+                                if lines[n] and lines[n][0] == '+'
+                                else '+' if lines[n]
+                                         else lines[n]) + lines[n][1:]
+                        lines[end] = '= ' + lines[end][3:]
+                    return lines
+
+                expected = normalize_to_positive_results(expected)
+                generated = normalize_to_positive_results(generated)
+
                 eq_(generated, expected,
                     "Failed matching expected with generated lp file:\n" +
                     "\n".join(unified_diff(expected, generated,
