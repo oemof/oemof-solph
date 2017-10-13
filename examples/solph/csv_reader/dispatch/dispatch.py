@@ -4,26 +4,35 @@ Dispatch optimisation using oemof's csv-reader.
 """
 
 import os
-import logging
 import pandas as pd
 
-from oemof.tools import logger
 from oemof.solph import OperationalModel, EnergySystem
 from oemof.solph import nodes_from_csv
-from oemof.outputlib import ResultsDataFrame
-from oemof.outputlib import graph_tools as gt
+from oemof.outputlib import processing, views
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
 
-from matplotlib import pyplot as plt
+# configuration
+cfg = {
+    'scenario_path': os.path.join(os.path.dirname(__file__), 'scenarios'),
+    'date_from': '2030-01-01 00:00:00',
+    'date_to': '2030-01-14 23:00:00',
+    'nodes_flows': 'example_energy_system.csv',
+    'nodes_flows_sequences': 'example_energy_system_seq.csv',
+    'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
+    'solver': 'cbc',
+    'verbose': False,  # Set to True to see solver outputs
+}
 
 
-def run_example(config):
+def run_csv_reader_dispatch_example(config=cfg):
+
     # creation of an hourly datetime_index
     datetime_index = pd.date_range(config['date_from'],
                                    config['date_to'],
                                    freq='60min')
-
-    # model creation and solving
-    logging.info('Starting optimization')
 
     # initialisation of the energy system
     es = EnergySystem(timeindex=datetime_index)
@@ -45,124 +54,33 @@ def run_example(config):
     # solving the linear problem using the given solver
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
-    logging.info("Done!")
-
-    # create pandas dataframe with results
-    results = ResultsDataFrame(energy_system=es)
-
-    # write results for selected busses to single csv files
-    results.bus_balance_to_csv(bus_labels=['R1_bus_el', 'R2_bus_el'],
-                               output_path=config['results_path'])
-
-    logging.info("The results can be found in {0}".format(
-        config['results_path']))
-    logging.info("Read the documentation (outputlib) to learn how" +
-                 " to process the results.")
-
-    rdict = {
-        'objective': es.results.objective,
-        'time_series': results
-    }
-
-    return rdict, es, om
-
-
-def plotting(results):
-    """ Plotting some results
-
-    Parameters
-    ----------
-    results : dictionary
-        Solph's results dictionary.
-    """
-    logging.info("Showing plots")
-    # plotting (exemplary)
-    # thesis:
-    # since R2 has more installed renewable energy capacities than R1, we
-    # assume that energy is likely to be transmitted from R2 to R1 in times
-    # with a low residual load
-
-    results = results['time_series']
-
-    # create a dataframe with all inputs/outputs in region2
-    r2_inputs = results.slice_unstacked(bus_label='R2_bus_el',
-                                        type='to_bus',
-                                        formatted=True)
-    r2_outputs = results.slice_unstacked(bus_label='R2_bus_el',
-                                         type='from_bus',
-                                         formatted=True)
-    r2 = pd.concat([r2_inputs, r2_outputs], axis=1)
-
-    # calculation of normed residual load
-    r2['residual_load'] = (r2['R2_load'] - r2['R2_wind'] - r2['R2_solar'])
-    r2['residual_load'] = r2['residual_load']/r2['residual_load'].max()
-
-    # scatterplot: can our thesis can be confirmed?
-    r2.plot(kind='scatter', x='residual_load', y='R2_R1_powerline')
-    plt.show()
-
-    # get all nodes around R1
-    r1_balance = results.slice_bus_balance('R1_bus_el')
-
-    # plot the output of two power plants
-    power_plants = ['R1_pp_lignite', 'R1_pp_hard_coal']
-    ax = r1_balance[power_plants].plot(kind='line', subplots=True,
-                                       legend=False, linewidth=2.5)
-    ax[0].set_title('Lignite')
-    ax[0].set_ylabel('Power in MW')
-    ax[1].set_title('Hard coal')
-    ax[1].set_ylabel('Power in MW')
-    ax[1].set_xlabel('Date')
-    plt.show()
-
-
-def create_result_dict(results):
-    """Create a result dictionary for testing purposes."""
-    tmp_dict = {
-        'R2_wind': results['time_series'].loc[
-            pd.IndexSlice['R2_bus_el', 'to_bus', 'R2_wind']].sum(),
-        'R2_R1_powerline': results['time_series'].loc[
-            pd.IndexSlice['R2_bus_el', 'from_bus', 'R2_R1_powerline']].sum(),
-        'R2_storage_phs': results['time_series'].loc[pd.IndexSlice[
-            'R2_bus_el', 'from_bus', 'R2_storage_phs']].sum(),
-        'objective': results['objective'],
-    }
-    return tmp_dict
-
-
-def run_dispatch_example(solver='cbc'):
-    logger.define_logging()
-
-    # configuration
-    cfg = {
-        'scenario_path': os.path.join(os.path.dirname(__file__), 'scenarios'),
-        'date_from': '2030-01-01 00:00:00',
-        'date_to': '2030-01-14 23:00:00',
-        'nodes_flows': 'example_energy_system.csv',
-        'nodes_flows_sequences': 'example_energy_system_seq.csv',
-        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
-        'solver': solver,
-        'verbose': False,  # Set to True to see solver outputs
-    }
-
     # create results path if it does not exist
     if not os.path.isdir(cfg['results_path']):
         os.mkdir(cfg['results_path'])
 
-    # run optimisation
-    my_results, es, om = run_example(config=cfg)
+    # generic result object
+    results = processing.results(es=es, om=om)
 
-    # plot results
-    plotting(my_results)
+    data = views.node(results, 'R1_bus_el')
 
-    return es, om
+    print('Optimization successful. Printing some results:',
+          data['sequences'].info())
+
+    # plot data if matplotlib is installed
+    # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
+    if plt is not None:
+        ax = data['sequences'].sum(axis=0).plot(kind='barh')
+        ax.set_title('Sums for optimization period')
+        ax.set_xlabel('Energy (MWh)')
+        ax.set_ylabel('Flow')
+        plt.tight_layout()
+        plt.show()
+
+    # generate results to be evaluated in tests
+    rdict = data['sequences'].sum(axis=0).to_dict()
+
+    return rdict
 
 
 if __name__ == "__main__":
-    es, om = run_dispatch_example()
-
-    # create graph which could be exported into different formats
-    # https://networkx.github.io/documentation/networkx-1.10/reference/
-    # readwrite.html
-    mygraph = gt.graph(energy_system=es, optimization_model=om,
-                       remove_nodes_with_substrings=['#'])
+    run_csv_reader_dispatch_example()
