@@ -112,7 +112,8 @@ def run_example_checks():
                      'solver': 'cbc'}
 
     try:
-        results = simple_dispatch.run_simple_dispatch_example()
+        results = simple_dispatch.run_simple_dispatch_example(tee_var=False,
+                                                              silent=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -172,7 +173,7 @@ def run_example_checks():
         os.mkdir(testdict[key]['results_path'])
 
     try:
-        results = dispatch.run_csv_reader_dispatch_example(config=testdict[key], )
+        results = dispatch.run_csv_reader_dispatch_example(config=testdict[key])
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -197,18 +198,26 @@ def run_example_checks():
         (('R1_pp_biomass', 'R1_bus_el'), 'flow'): 180136.44901700001,
         (('R1_pp_mixed_fuels', 'R1_bus_el'), 'flow'): 393115.52601000009}
 
-
     check(test_results, testdict[key]['run'], testdict[key], results)
     # *********** end of csv reader dispatch example **************************
 
     # *********** csv reader investment example *******************************
     key = 'csv_reader_investment'
     testdict[key] = {'name': "Investment model with csv reader",
-                     'solver': 'cbc'}
+                     'solver': 'cbc',
+                     'scenario_path': os.path.join(basic_path, 'solph',
+                                                   'csv_reader', 'investment',
+                                                   'data'),
+                     'date_from': '2030-01-01 00:00:00',
+                     'date_to': '2030-01-14 23:00:00',
+                     'nodes_flows': 'nodes_flows.csv',
+                     'nodes_flows_sequences': 'nodes_flows_seq.csv',
+                     'results_path': os.path.join(os.path.expanduser("~"),
+                                                  'csv_dispatch'),
+                     'verbose': False}
 
     try:
-        investment.run_csv_reader_investment_example(
-            solver=testdict[key]['solver'], verbose=False, nologg=True)
+        investment.run_csv_reader_investment_example(testdict[key])
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
