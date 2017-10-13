@@ -239,8 +239,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_n1_transformer_invest.lp')
 
     def test_linear_transformer_chp(self):
-        """Constraint test of a LinearTransformer without Investment
-        (two outputs).
+        """Constraint test of a LinearTransformer without Investment (two outputs).
         """
         bgas = Bus(label='gasBus')
         bheat = Bus(label='heatBus')
