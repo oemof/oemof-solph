@@ -161,6 +161,43 @@ class Node_Tests:
                 node.inputs,
                 dict(node.inputs)))
 
+    def test_output_input_symmetry_after_modification(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        flow = "flow"
+
+        n1.outputs[n2] = flow
+        eq_(n2.inputs, {n1: flow})
+
+    def test_input_output_symmetry_after_modification(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        flow = "flow"
+
+        n1.inputs[n2] = flow
+        eq_(n2.outputs, {n1: flow})
+
+    def test_updating_inputs(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        n1n2 = "n1n2"
+
+        n2.inputs.update({n1: n1n2})
+        eq_(n2.inputs[n1], n1n2)
+        eq_(n2.inputs, {n1: n1n2})
+        eq_(n1.outputs[n2], n1n2)
+        eq_(n1.outputs, {n2: n1n2})
+
+    def test_updating_outputs(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        n1n2 = "n1n2"
+
+        n1.outputs.update({n2: n1n2})
+        eq_(n2.inputs[n1], n1n2)
+        eq_(n2.inputs, {n1: n1n2})
+        eq_(n1.outputs[n2], n1n2)
+        eq_(n1.outputs, {n2: n1n2})
 
 class EnergySystem_Nodes_Integration_Tests:
 
