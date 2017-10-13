@@ -6,14 +6,15 @@ import re
 from nose.tools import eq_
 import pandas as pd
 
-from oemof.solph.network import Investment
+from oemof.solph import Investment
 from oemof.solph import OperationalModel
 
 from oemof import energy_system as core_es
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
                          LinearN1Transformer, VariableFractionTransformer)
+
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -168,7 +169,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        Storage(
+        solph.custom.GenericStorage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
@@ -187,7 +188,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        Storage(
+        solph.custom.GenericStorage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
