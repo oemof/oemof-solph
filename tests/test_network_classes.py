@@ -111,9 +111,9 @@ class Node_Tests:
     def test_modifying_outputs_after_construction(self):
         """ One should be able to add and delete outputs of a node.
         """
-        node = Node()
-        bus = Bus()
-        flow = object()
+        node = Node("N1")
+        bus = Node("N2")
+        flow = "flow"
         eq_(node.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
              "\n  Got: {} (== {}) instead").format(
@@ -133,9 +133,10 @@ class Node_Tests:
     def test_modifying_inputs_after_construction(self):
         """ One should be able to add and delete inputs of a node.
         """
-        node = Node()
-        bus = Bus()
-        flow = object()
+        node = Node("N1")
+        bus = Bus("N2")
+        flow = "flow"
+
         eq_(node.inputs, {},
             ("\n  Expected an empty dictionary of inputs." +
              "\n  Got: {} (== {}) instead").format(
