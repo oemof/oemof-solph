@@ -7,6 +7,10 @@ from oemof.network import Bus, Node, Transformer
 
 
 class Node_Tests:
+
+    def setup(self):
+        self.energysystem = ES()
+
     def test_that_attributes_cannot_be_added(self):
         node = Node()
         with assert_raises(AttributeError):
