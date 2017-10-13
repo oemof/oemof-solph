@@ -6,11 +6,11 @@ solve it with the solph module. Results are plotted with outputlib.
 Data: example_data.csv
 """
 
+import os
+import pandas as pd
 from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
                          Bus, Flow, OperationalModel, EnergySystem)
 from oemof.outputlib import processing, views
-import os
-import pandas as pd
 try:
     import matplotlib.pyplot as plt
 except ImportError:
@@ -129,6 +129,9 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
     # variables are used
     data = views.node(results, 'bel')
 
+    print('Optimization successful. Printing some results:',
+          data['sequences'].info())
+
     # plot data if matplotlib is installed
     # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
     if plt is not None:
@@ -141,7 +144,6 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, plot=plt):
 
     # generate results to be evaluated in tests
     rdict = data['sequences'].sum(axis=0).to_dict()
-    print(rdict)
 
     return rdict
 
