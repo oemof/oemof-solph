@@ -23,7 +23,7 @@ cfg = {
     'nodes_flows_sequences': 'example_energy_system_seq.csv',
     'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
     'solver': 'cbc',
-    'verbose': False,  # Set to True to see solver outputs
+    'verbose': False  # Set to True to see solver outputs
 }
 
 
