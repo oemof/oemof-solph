@@ -66,7 +66,7 @@ om = solph.OperationalModel(es)
 om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 
 # solve model
-om.solve(solver='glpk', solve_kwargs={'tee': True})
+om.solve(solver='cbc', solve_kwargs={'tee': True})
 
 # create result object
 results = processing.results(es, om)
