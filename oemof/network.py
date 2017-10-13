@@ -10,6 +10,8 @@ connected.
 """
 
 
+# TODO: Given that `_Edges` now also has `__delitem__`, it should probably
+#       inherit from `MutableMapping`.
 class _Edges:
     """ Internal utility class keeping track of known edges.
 
@@ -33,6 +35,10 @@ class _Edges:
         self._flows[key] = self._flows.get(key, WeKeDi())
         return self._flows[key]
 
+    # TODO: This whole "tuples as keys" thing bytes me way to often.
+    #       Generalize this to `__setitem__(self, key, *keys_and_value)` and
+    #       use nested dictionaries.
+    #       See also `__delitem__` above, which has the same problem.
     def __setitem__(self, key, value):
         source, target = key
         self._in_edges[target] = self._in_edges.get(target, WeSe())
