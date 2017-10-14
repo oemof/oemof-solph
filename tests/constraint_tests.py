@@ -9,7 +9,6 @@ import pandas as pd
 from oemof.solph import Investment
 from oemof.solph import OperationalModel
 
-from oemof import energy_system as core_es
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
@@ -33,8 +32,7 @@ class Constraint_Tests:
         logging.info(self.tmppath)
 
     def setup(self):
-        self.energysystem = core_es.EnergySystem(groupings=solph.GROUPINGS,
-                                                 timeindex=self.date_time_index)
+        self.energysystem = solph.EnergySystem(timeindex=self.date_time_index)
 
     def compare_lp_files(self, filename, ignored=None):
         om = OperationalModel(self.energysystem,
