@@ -6,14 +6,14 @@ import re
 from nose.tools import eq_
 import pandas as pd
 
-from oemof.solph import Investment
+from oemof.solph.network import Investment
 from oemof.solph import OperationalModel
 
+from oemof import energy_system as core_es
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
                          LinearN1Transformer, VariableFractionTransformer)
-
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -32,7 +32,8 @@ class Constraint_Tests:
         logging.info(self.tmppath)
 
     def setup(self):
-        self.energysystem = solph.EnergySystem(timeindex=self.date_time_index)
+        self.energysystem = core_es.EnergySystem(groupings=solph.GROUPINGS,
+                                                 timeindex=self.date_time_index)
 
     def compare_lp_files(self, filename, ignored=None):
         om = OperationalModel(self.energysystem,
@@ -167,7 +168,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        solph.custom.GenericStorage(
+        Storage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
@@ -186,7 +187,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        solph.custom.GenericStorage(
+        Storage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
@@ -238,8 +239,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_n1_transformer_invest.lp')
 
     def test_linear_transformer_chp(self):
-        """Constraint test of a LinearTransformer without Investment
-        (two outputs).
+        """Constraint test of a LinearTransformer without Investment (two outputs).
         """
         bgas = Bus(label='gasBus')
         bheat = Bus(label='heatBus')

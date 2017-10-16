@@ -1,44 +1,126 @@
-# -*- coding: utf-8 -*-
-""" Classes used to model energy supply systems.
-
-This package (along with its subpackages) contains the classes used to model
-energy systems. An energy system is modelled as a graph/network of nodes
-with very specific constraints on which types of nodes are allowed to be
-connected.
-"""
-
+from collections import MutableMapping as MM
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
+"""
+This package (along with its subpackages) contains the classes used to model
+energy systems. An energy system is modelled as a graph/network of entities
+with very specific constraints on which types of entities are allowed to be
+connected.
+
+"""
 
 
-class _Edges:
+class Inputs(MM):
+    """ A special helper to map `n1.inputs[n2]` to `n2.outputs[n1]`.
+    """
+    def __init__(self, flows, target):
+        self.flows = flows
+        self.target = target
+
+    def __getitem__(self, key):
+        return self.flows.__getitem__((key, self.target))
+
+    def __delitem__(self, key):
+        return self.flows.__delitem__((key, self.target))
+
+    def __setitem__(self, key, value):
+        return self.flows.__setitem__((key, self.target), value)
+
+    def __iter__(self):
+        return self.flows._in_edges.get(self.target, ()).__iter__()
+
+    def __len__(self):
+        return self.flows._in_edges.get(self.target, ()).__len__()
+
+
+class Outputs(MM):
+    """ Helper that intercepts modifications to update `Inputs` symmetrically.
+    """
+    def __init__(self, flows, source):
+        self.flows = flows
+        self.source = source
+
+    def __getitem__(self, key):
+        return self.flows.__getitem__((self.source, key))
+
+    def __delitem__(self, key):
+        return self.flows.__delitem__((self.source, key))
+
+    def __setitem__(self, key, value):
+        return self.flows.__setitem__((self.source, key), value)
+
+    def __iter__(self):
+        return self.flows._out_edges.get(self.source, ()).__iter__()
+
+    def __len__(self):
+        return self.flows._out_edges.get(self.source, ()).__len__()
+
+
+class _Edges(MM):
     """ Internal utility class keeping track of known edges.
 
     As this is currently quite dirty and hackish, it should be treated as an
     internal implementation detail with an unstable interface. Maye it can be
     converted to a fully fledged useful :python:`Edge` class later on, but for
     now it simply hides most of the dirty secrets of the :class:`Node` class.
-    """
 
+    """
     _in_edges = WeKeDi()
-    _flows = WeKeDi()
+    _out_edges = WeKeDi()
+    # TODO: Either figure out how to use weak references here, or convert the
+    #       whole graph datastructure to normal dictionaries.
+    #       Background: I had to stop wrestling with the garbage collector,
+    #                   because python doesn't allow weak references to tuples
+    #                   and I couldn't figure out a way to key edges in a way
+    #                   that the endpoints of the edge get garbage collected
+    #                   once no other references to them exist anymore.
+    #       I guess the best way would be to use normal dictionarier, stop
+    #       using a global variable for all edges and put a member variable
+    #       for all it's edges on an energy system.
+    _flows = {}
+
+    def __delitem__(self, key):
+        source, target = key
+
+        # TODO: Refactor this to not have duplicate code.
+        self._in_edges[target].remove(source)
+        if not self._in_edges[target]:
+          del self._in_edges[target]
+
+        self._out_edges[source].remove(target)
+        if not self._out_edges[source]:
+          del self._out_edges[source]
+
+        del self._flows[key]
 
     def __getitem__(self, key):
-        self._flows[key] = self._flows.get(key, WeKeDi())
-        return self._flows[key]
+        return self._flows.__getitem__(key)
 
     def __setitem__(self, key, value):
         source, target = key
+        # TODO: Refactor this to remove duplicate code.
         self._in_edges[target] = self._in_edges.get(target, WeSe())
         self._in_edges[target].add(source)
-        self._flows[source] = self._flows.get(source, WeKeDi())
-        self._flows[source][target] = value
 
-    def __call__(self, *keys):
-        result = self
-        for k in keys:
-            result = result[k]
-        return result
+        self._out_edges[source] = self._out_edges.get(source, WeSe())
+        self._out_edges[source].add(target)
+
+        self._flows.__setitem__(key, value)
+
+    def __call__(self, source=None, target=None):
+        if ((source is None) and (target is None)):
+            return None
+        if (source is None):
+            return Inputs(self, target)
+        if (target is None):
+            return Outputs(self, source)
+        return self._flows[source, target]
+
+    def __iter__(self):
+        return self._flows.__iter__()
+
+    def __len__(self):
+        return self._flows.__len__()
 
 
 flow = _Edges()
@@ -103,7 +185,7 @@ class Node:
     #       needed to confirm that.
 
     registry = None
-    __slots__ = ["__weakref__", "_label", "_state"]
+    __slots__ = ["__weakref__", "_label", "_inputs", "_state"]
 
     def __init__(self, *args, **kwargs):
         self._state = (args, kwargs)
@@ -142,9 +224,6 @@ class Node:
     def __str__(self):
         return str(self.label)
 
-    def __repr__(self):
-        return self.label
-
     @property
     def label(self):
         return (self._label if hasattr(self, "_label")
@@ -152,16 +231,11 @@ class Node:
 
     @property
     def inputs(self):
-        # TODO: Accessing :class:`Flow`'s `_in_edges` is kinda ugly.
-        #       Find a way to replace it.
-        #       This can also have unintuitive behaviour since adding new
-        #       associations to the returned mapping will NOT add a new input
-        #       flow to this node.
-        return {k: flow(k, self) for k in flow._in_edges.get(self, ())}
+        return Inputs(flow, self)
 
     @property
     def outputs(self):
-        return flow(self)
+        return Outputs(flow, self)
 
 
 class Bus(Node):
@@ -187,9 +261,9 @@ class Transformer(Component):
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
 #       summary.
 class Entity:
-    r"""The most abstract type of vertex in an energy system graph.
-
-    Since each entity in an energy system has to be uniquely identifiable and
+    r"""
+    The most abstract type of vertex in an energy system graph. Since each
+    entity in an energy system has to be uniquely identifiable and
     connected (either via input or via output) to at least one other
     entity, these properties are collected here so that they are shared
     with descendant classes.
@@ -218,7 +292,6 @@ class Entity:
         :attr:`entities <oemof.core.energy_system.EnergySystem.entities>`
         attribute on construction.
     """
-
     optimization_options = {}
 
     registry = None
@@ -243,7 +316,8 @@ class Entity:
 
         # TODO: @Gunni Yupp! Add docstring.
     def add_regions(self, regions):
-        """Add regions to self.regions."""
+        """Add regions to self.regions
+        """
         self.regions.extend(regions)
         for region in regions:
             if self not in region.entities:
