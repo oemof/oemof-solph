@@ -15,7 +15,7 @@ from oemof.outputlib import processing, views
 data = pd.read_csv('data.csv', sep=",")
 
 # select periods
-periods = len(data[1:24])
+periods = len(data)
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
@@ -47,23 +47,23 @@ pp_gas = solph.LinearTransformer(label='pp_gas',
                                                           variable_costs=40)},
                                  conversion_factors={bel: 0.50})
 
-# # generic chp
-# ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
-#                                fuel_input={bgas: solph.Flow(foo='bar')},
-#                                electrical_output={bel: solph.Flow(
-#                                                      P_max_woDH=[217.35 for p in range(0, periods)],
-#                                                      P_min_woDH=[89.10 for p in range(0, periods)],
-#                                                      Eta_el_max_woDH=[0.57 for p in range(0, periods)],
-#                                                      Eta_el_min_woDH=[0.47 for p in range(0, periods)])},
-#                                heat_output={bth: solph.Flow(Q_CW_min=[27.85 for p in range(0, periods)], variable_costs=1)},
-#                                Beta=[0.12 for p in range(0, periods)])
+# generic chp
+ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
+                               fuel_input={bgas: solph.Flow()},
+                               electrical_output={bel: solph.Flow(
+                                                     P_max_woDH=[217.35 for p in range(0, periods)],
+                                                     P_min_woDH=[89.10 for p in range(0, periods)],
+                                                     Eta_el_max_woDH=[0.57 for p in range(0, periods)],
+                                                     Eta_el_min_woDH=[0.47 for p in range(0, periods)])},
+                               heat_output={bth: solph.Flow(Q_CW_min=[27.85 for p in range(0, periods)], variable_costs=1)},
+                               Beta=[0.12 for p in range(0, periods)])
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)
 
 # debugging
 #om.pprint()
-om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
+#om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 
 # solve model
 om.solve(solver='cbc', solve_kwargs={'tee': True})
@@ -71,32 +71,30 @@ om.solve(solver='cbc', solve_kwargs={'tee': True})
 # create result object
 results = processing.results(om)
 
-# results[(ccgt,)]['sequences']['PQ'] = \
-#     results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
-# print(results[(ccgt,)]['sequences'].describe())
-# print(results[(ccgt,)]['sequences'].head())
-#
-# # plot CCET (line)
-# data = results[(ccgt,)]['sequences']
-# ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_xlabel('Time')
-# ax.set_ylabel('(MW)')
-# plt.show()
+# store as csv
+data = results[(ccgt,)]['sequences'].to_csv('CCET.csv')
 
-# # plot CCET (scatter)
-# data = results[(ccgt,)]['sequences']
-# ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
-# ax.set_xlabel('Q (MW)')
-# ax.set_ylabel('P (MW)')
-# plt.show()
-
-# plot bus
-data = views.node(results, 'bel')
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_title('Dispatch')
-ax.set_xlabel('')
-ax.set_ylabel('Power (MW)')
+# plot CCET (line)
+data = results[(ccgt,)]['sequences']
+ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
+ax.set_xlabel('Time')
+ax.set_ylabel('(MW)')
 plt.show()
+
+# plot CCET (scatter)
+data = results[(ccgt,)]['sequences']
+ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
+ax.set_xlabel('Q (MW)')
+ax.set_ylabel('P (MW)')
+plt.show()
+
+# # plot bus
+# data = views.node(results, 'bel')
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Power (MW)')
+# plt.show()
 
 # # plot bus
 # data = views.node(results, 'bth')
