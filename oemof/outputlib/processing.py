@@ -133,3 +133,41 @@ def results(om):
                 results[(bus,)]['sequences']['duals'] = duals
 
     return results
+
+
+def meta_results(om, undefined=False):
+    """
+    Fetch some meta data from the Solver. Feel free to add more keys.
+
+    Valid keys of the resulting dictionary are: 'objective', 'problem',
+    'solver'.
+
+    om : oemof.solph.OperationalModel
+        A solved Model.
+    undefined : bool
+        By default (False) only defined keys can be found in the dictionary.
+        Set to True to get also the undefined keys.
+
+    Returns
+    -------
+    dict
+    """
+    meta_res = {'objective': om.objective()}
+    for k1 in ['Problem', 'Solver']:
+        k1 = k1.lower()
+        meta_res[k1] = {}
+        for k2, v2 in om.es.results.solver[k1][0].items():
+            try:
+                if str(om.es.results.solver[k1][0][k2]) == '<undefined>':
+                    if undefined:
+                        meta_res[k1][k2] = str(
+                            om.es.results.solver[k1][0][k2])
+                else:
+                    meta_res[k1][k2] = om.es.results.solver[k1][0][k2]
+            except TypeError:
+                if undefined:
+                    msg = "Cannot fetch meta results of type {0}"
+                    meta_res[k1][k2] = msg.format(
+                        type(om.es.results.solver[k1][0][k2]))
+
+    return meta_res

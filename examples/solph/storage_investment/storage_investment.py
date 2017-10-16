@@ -31,19 +31,18 @@ The example models the following energy system:
 # imports
 ###############################################################################
 
-# Outputlib
-from oemof.outputlib import processing, views
-
 # Default logger of oemof
 from oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics
-import oemof.solph as solph
 
-# import oemof base classes to create energy system objects
+import oemof.solph as solph
+from oemof.outputlib import processing, views
+
 import logging
 import os
 import pandas as pd
+import pprint as pp
 
 try:
     import matplotlib.pyplot as plt
@@ -161,6 +160,10 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
 
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
     my_results['storage_invest'] = results[(storage,)]['scalars']['invest']
+
+    if not silent:
+        meta_results = processing.meta_results(om)
+        pp.pprint(meta_results)
 
     return my_results
 
