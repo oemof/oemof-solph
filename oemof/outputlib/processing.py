@@ -153,21 +153,22 @@ def meta_results(om, undefined=False):
     dict
     """
     meta_res = {'objective': om.objective()}
+
     for k1 in ['Problem', 'Solver']:
         k1 = k1.lower()
         meta_res[k1] = {}
-        for k2, v2 in om.es.results.solver[k1][0].items():
+        for k2, v2 in om.es.results[k1][0].items():
             try:
-                if str(om.es.results.solver[k1][0][k2]) == '<undefined>':
+                if str(om.es.results[k1][0][k2]) == '<undefined>':
                     if undefined:
                         meta_res[k1][k2] = str(
-                            om.es.results.solver[k1][0][k2])
+                            om.es.results[k1][0][k2])
                 else:
-                    meta_res[k1][k2] = om.es.results.solver[k1][0][k2]
+                    meta_res[k1][k2] = om.es.results[k1][0][k2]
             except TypeError:
                 if undefined:
                     msg = "Cannot fetch meta results of type {0}"
                     meta_res[k1][k2] = msg.format(
-                        type(om.es.results.solver[k1][0][k2]))
+                        type(om.es.results[k1][0][k2]))
 
     return meta_res
