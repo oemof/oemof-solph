@@ -88,7 +88,7 @@ def create_dataframe(om):
     return df
 
 
-def results(es, om):
+def results(om):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -110,7 +110,7 @@ def results(es, om):
     for k, v in df_dict.items():
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
-        df_dict[k].index = es.timeindex
+        df_dict[k].index = om.es.timeindex
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
@@ -126,7 +126,7 @@ def results(es, om):
         grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
-            df = pd.DataFrame({'duals': duals}, index=es.timeindex)
+            df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
             if (bus,) not in results.keys():
                 results[(bus,)] = {'sequences': df, 'scalars': pd.Series()}
             else:

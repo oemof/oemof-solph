@@ -146,7 +146,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     energysystem.restore()
 
     # check if the new result object is working for custom components
-    results = processing.results(energysystem, om)
+    results = processing.results(om)
     if not silent:
         print(results[(storage,)]['sequences'].head())
         print(results[(storage,)]['scalars'])

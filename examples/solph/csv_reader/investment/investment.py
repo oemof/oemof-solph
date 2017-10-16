@@ -54,7 +54,7 @@ def run_csv_reader_investment_example(config=cfg):
     om.solve(solver=config['solver'], solve_kwargs={'tee': config['verbose']})
 
     # generic result object
-    results = processing.results(es=es, om=om)
+    results = processing.results(om=om)
 
     data = views.node(results, 'REGION1_bus_el')
 

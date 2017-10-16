@@ -69,7 +69,7 @@ om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 om.solve(solver='cbc', solve_kwargs={'tee': True})
 
 # create result object
-results = processing.results(es, om)
+results = processing.results(om)
 
 results[(ccgt,)]['sequences']['PQ'] = \
     results[(ccgt,)]['sequences']['P'] / results[(ccgt,)]['sequences']['Q']
