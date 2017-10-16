@@ -12,7 +12,7 @@ from oemof.solph import blocks, custom
 from pyomo.core.base.block import SimpleBlock
 from .options import Investment
 from .plumbing import sequence
-from oemof.outputlib import processing
+from ..outputlib import processing
 import logging
 
 # #############################################################################
@@ -258,29 +258,21 @@ class OperationalModel(po.ConcreteModel):
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
             self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
         elif status == "ok" and termination_condition == "unknown":
             logging.warning("Optimization with unknown termination condition."
                             + " Writing output anyway...")
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
             self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
         elif status == "warning" and termination_condition == "other":
             logging.warning("Optimization might be sub-optimal."
                             + " Writing output anyway...")
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
             self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
         else:
             # storage results in result dictionary of energy system
             self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
             logging.error(
                 "Optimization failed with status %s and terminal condition %s"
                 % (status, termination_condition))
