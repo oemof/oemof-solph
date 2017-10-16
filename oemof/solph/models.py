@@ -12,7 +12,7 @@ from oemof.solph import blocks, custom
 from pyomo.core.base.block import SimpleBlock
 from .options import Investment
 from .plumbing import sequence
-from ..outputlib import result_dictionary
+from oemof.outputlib import processing
 import logging
 
 # #############################################################################
@@ -209,11 +209,11 @@ class OperationalModel(po.ConcreteModel):
         """ Returns a nested dictionary of the results of this optimization
         """
 
-        result = result_dictionary.results_to_dict(self)
+        result = processing.results(self)
 
         return result
 
-    def solve(self, solver='glpk', solver_io='lp', **kwargs):
+    def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
 
         Parameters
