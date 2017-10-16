@@ -247,10 +247,8 @@ def run_example_checks():
     testdict[key] = {'name': "Variable CHP example", 'solver': 'cbc'}
 
     try:
-        esys = variable_chp.initialise_energy_system(192)
-        esys = variable_chp.optimise_storage_size(
-            esys, solver=testdict[key]['solver'], tee_switch=False)
-        results = variable_chp.get_result_dict(esys)
+        results = variable_chp.run_variable_chp_example(
+            192, solver=testdict[key]['solver'], tee_switch=False)
         testdict[key]['run'] = True
 
     except Exception as e:
@@ -260,9 +258,10 @@ def run_example_checks():
 
     variable_chp_dict = {
         'objective': 14267160965.0,
-        'input_fixed_chp': 157717049.49999994,
-        'natural_gas': 285343219.29999995,
-        'input_variable_chp': 127626169.47000004}
+        (('natural_gas', 'fixed_chp_gas'), 'flow'): 0.0,
+        (('natural_gas', 'fixed_chp_gas_2'), 'flow'): 157717049.49999994,
+        (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
+        (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
 
     check(variable_chp_dict, testdict[key]['run'], testdict[key], results)
     # ********* end of variable chp example ***********************************

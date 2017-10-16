@@ -146,6 +146,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
 
     # check if the new result object is working for custom components
     results = processing.results(om)
+
     if not silent:
         print(results[(storage,)]['sequences'].head())
         print(results[(storage,)]['scalars'])
@@ -170,5 +171,4 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
 
 if __name__ == "__main__":
     logger.define_logging()
-    import pprint as pp
     pp.pprint(optimise_storage_size())
