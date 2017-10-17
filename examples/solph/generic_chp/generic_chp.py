@@ -59,7 +59,7 @@ ccet = solph.custom.GenericCHP(
 om = solph.OperationalModel(es)
 
 # debugging
-#om.write('generic_chp.lp', io_options={'symbolic_solver_labels': True})
+om.write('generic_chp.lp', io_options={'symbolic_solver_labels': True})
 
 # solve model
 om.solve(solver='gurobi', solve_kwargs={'tee': True})

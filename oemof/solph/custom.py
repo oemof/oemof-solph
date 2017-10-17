@@ -470,11 +470,35 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
 class GenericCHP(on.Transformer):
     """
+    Component `GenericCHP` to model (combined cycle) extraction or
+    back-pressure turbines.
+
+    The full set of equations is described in:
+    Mollenhauer, E., Christidis, A. & Tsatsaronis, G.
+    Int J Energy Environ Eng (2016) 7: 167.
+    https://doi.org/10.1007/s40095-016-0204-6
 
     Parameters
     ----------
-    Bla : numeric
-        Some description
+    fuel_input : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the fuel input.
+    electrical_output : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the electrical output. Related parameters like `P_max_woDH` are
+        passed as attributes of the `oemof.Flow` object.
+    heat_output : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the heat output. Related parameters like `Q_CW_min` are passed as
+        attributes of the `oemof.Flow` object.
+    Beta : list of numerical values
+        Beta values in same dimension as all other parameters (length of
+        optimization period).
+    back_pressure : boolean
+        Flag to use back-pressure characteristics. Works of set to `True` and
+        `Q_CW_min` set to zero. See paper above for more information.
+    fixed_costs : numerical value
+        Fixed costs for length of optimization period.
 
     Notes
     -----
