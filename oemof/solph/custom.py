@@ -489,6 +489,7 @@ class GenericCHP(on.Transformer):
         self.electrical_output = kwargs.get('electrical_output')
         self.heat_output = kwargs.get('heat_output')
         self.Beta = sequence(kwargs.get('Beta'))
+        self.back_pressure = kwargs.get('back_pressure')
         self.fixed_costs = kwargs.get('fixed_costs')
         self._alphas = None
 
@@ -498,9 +499,6 @@ class GenericCHP(on.Transformer):
         fuel_bus.outputs.update({self: fuel_flow})
         self.outputs.update(kwargs.get('electrical_output'))
         self.outputs.update(kwargs.get('heat_output'))
-
-        # TODO: add property to convert attribute dimensions if scalars passed
-        # simple dict comprehension with max() would be sufficient
 
     def _calculate_alphas(self):
         """
@@ -679,7 +677,10 @@ class GenericCHPBlock(SimpleBlock):
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
             expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
             expr += - self.H_F[n, t]
-            return expr <= 0
+            if n.back_pressure is False:
+                return expr <= 0
+            else:
+                return expr == 0
         self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                         rule=_P_restriction_rule)
 

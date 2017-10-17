@@ -42,6 +42,7 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
                        variable_costs=data['price_el'])})
 
 # generic chp
+# (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
 ccet = solph.custom.GenericCHP(
     label='combined_cycle_extraction_turbine',
     fuel_input={bgas: solph.Flow()},
@@ -51,7 +52,8 @@ ccet = solph.custom.GenericCHP(
         Eta_el_max_woDH=[0.57 for p in range(0, periods)],
         Eta_el_min_woDH=[0.47 for p in range(0, periods)])},
     heat_output={bth: solph.Flow(Q_CW_min=[27.85 for p in range(0, periods)])},
-    Beta=[0.12 for p in range(0, periods)], fixed_costs=300)
+    Beta=[0.12 for p in range(0, periods)], back_pressure=False,
+    fixed_costs=300)
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)
