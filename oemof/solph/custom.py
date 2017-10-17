@@ -478,6 +478,8 @@ class GenericCHP(on.Transformer):
     Int J Energy Environ Eng (2016) 7: 167.
     https://doi.org/10.1007/s40095-016-0204-6
 
+    Also have a look at the examples on how to use it.
+
     Parameters
     ----------
     fuel_input : dict
