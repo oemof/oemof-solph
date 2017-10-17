@@ -493,7 +493,6 @@ class GenericCHP(on.Transformer):
         self._alphas = None
 
         # map specific flows to standard API
-        # (still hacky until @gnn fixes Node class)
         fuel_bus = list(self.fuel_input.keys())[0]
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
