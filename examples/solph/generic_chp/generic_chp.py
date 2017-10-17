@@ -15,7 +15,7 @@ from oemof.outputlib import processing, views
 data = pd.read_csv('data.csv', sep=",")
 
 # select periods
-periods = len(data)
+periods = len(data[0:24])
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
@@ -56,7 +56,8 @@ ccgt = solph.custom.GenericCHP(label='pp_generic_chp',
                                                      Eta_el_max_woDH=[0.57 for p in range(0, periods)],
                                                      Eta_el_min_woDH=[0.47 for p in range(0, periods)])},
                                heat_output={bth: solph.Flow(Q_CW_min=[27.85 for p in range(0, periods)], variable_costs=1)},
-                               Beta=[0.12 for p in range(0, periods)])
+                               Beta=[0.12 for p in range(0, periods)],
+                               fixed_costs=300)
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)

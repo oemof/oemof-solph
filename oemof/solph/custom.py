@@ -489,7 +489,7 @@ class GenericCHP(on.Transformer):
         self.electrical_output = kwargs.get('electrical_output')
         self.heat_output = kwargs.get('heat_output')
         self.Beta = sequence(kwargs.get('Beta'))
-        self.fixed_costs = sequence(kwargs.get('fixed_costs'))
+        self.fixed_costs = kwargs.get('fixed_costs')
         self._alphas = None
 
         # map specific flows to standard API
@@ -695,15 +695,15 @@ class GenericCHPBlock(SimpleBlock):
 
         fixed_costs = 0
 
-        # m = self.parent_block()
-        #
-        # for n in self.GENERICCHPS:
-        #     if n.fixed_costs is not None:
-        #         P_max = max([n.P_max_woDH[t] for t in m.TIMESTEPS])
-        #         fixed_costs += P_max * n.fixed_costs
-        #         #fixed_costs += n.P_max_woDH * n.fixed_costs
-        #
-        # self.fixed_costs = Expression(expr=fixed_costs)
+        m = self.parent_block()
+
+        for n in self.GENERICCHPS:
+            if n.fixed_costs is not None:
+                P_max = [list(n.electrical_output.values())[0].P_max_woDH[t]
+                         for t in m.TIMESTEPS]
+                fixed_costs += max(P_max) * n.fixed_costs
+
+        self.fixed_costs = Expression(expr=fixed_costs)
 
         return fixed_costs
 
