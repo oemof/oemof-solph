@@ -329,6 +329,16 @@ class InvestmentStorage(SimpleBlock):
 class Flow(SimpleBlock):
     """ Flow block with definitions for standard flows.
 
+    **The following variables are created**:
+
+    negative_gradient :
+        Difference of a flow in consecutive timesteps if flow is reduced
+        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+
+    positive_gradient :
+        Difference of a flow in consecutive timesteps if flow is increased
+        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
@@ -422,10 +432,10 @@ class Flow(SimpleBlock):
         # ######################### Variables  ################################
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
-                                          m.TIMESTEPS)
+                                     m.TIMESTEPS)
 
         self.negative_gradient = Var(self.NEGATIVE_GRADIENT_FLOWS,
-                                          m.TIMESTEPS)
+                                     m.TIMESTEPS)
 
         # set upper bound of gradient variable
         for i, o, f in group:

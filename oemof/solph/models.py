@@ -60,14 +60,6 @@ class OperationalModel(po.ConcreteModel):
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
-    negative_flow_gradient :
-        Difference of a flow in consecutive timesteps if flow is reduced
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
-
-    positive_flow_gradient :
-        Difference of a flow in consecutive timesteps if flow is increased
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
-
     """
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.LinearN1Transformer,
