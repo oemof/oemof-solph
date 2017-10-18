@@ -1,7 +1,3 @@
-"""
-
-
-"""
 from oemof.solph.network import (Sink, Source, LinearTransformer, Bus,
                                  Flow, EnergySystem, LinearN1Transformer)
 from oemof.solph.models import OperationalModel
