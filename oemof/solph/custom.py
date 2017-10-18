@@ -613,8 +613,8 @@ class GenericCHPBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List containing storage objects.
-            e.g. groups=[storage1, storage2,..]
+            List containing `GenericCHP` objects.
+            e.g. groups=[ghcp1, gchp2,..]
         """
         m = self.parent_block()
 
@@ -885,7 +885,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
                                if n.label_main_flow != o.label][0]
             n.conversion_factor_single_flow_sq = (
                 n.conversion_factor_single_flow[
-                    m.es.groups[n.ma    in_output.label]])
+                    m.es.groups[n.main_output.label]])
             n.flow_relation_index = [
                 n.conversion_factors[m.es.groups[n.main_output.label]][t] /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
@@ -976,6 +976,53 @@ class GenericCAES(Transformer):
 # ------------------------------------------------------------------------------
 # End of generic CAES component
 # ------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
+# Start of CAES block
+# ------------------------------------------------------------------------------
+
+class GenericCAESBlock(SimpleBlock):
+    """Block for nodes of class:`.GenericCAES`."""
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+        Create constraints for GenericCAESBlock.
+
+        Parameters
+        ----------
+        group : list
+            List containing `.GenericCAES` objects.
+            e.g. groups=[gcaes1, gcaes2,..]
+        """
+        m = self.parent_block()
+
+        if group is None:
+            return None
+
+        self.GENERICCAES = Set(initialize=[n for n in group])
+
+        # variables
+        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+
+        def _h_flow_connection_rule(block, n, t):
+            """Link fuel consumption to component inflow."""
+            expr = 0
+            expr += self.H_F[n, t]
+            expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
+            return expr == 0
+        self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_h_flow_connection_rule)
+
+# ------------------------------------------------------------------------------
+# End of CAES block
+# ------------------------------------------------------------------------------
+
 
 def custom_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment,
