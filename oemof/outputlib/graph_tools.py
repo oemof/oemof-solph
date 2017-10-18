@@ -70,8 +70,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         Draw arrows on directed edges. Works only if an optimization_model has
         been passed.
     layout : string
-        networkx graph layout, one of: neato, dot, twopi, circo, fdp, nop, wc,
-        acyclic, gvpr, gvcolor, ccomps, sccmap, tred, sfdp.
+        networkx graph layout, one of: neato, dot, twopi, circo, fdp, sfdp.
 
     Examples
     --------
