@@ -26,7 +26,8 @@ warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 def graph(energy_system, optimization_model=None, edge_labels=True,
           remove_nodes=None, remove_nodes_with_substrings=None,
           remove_edges=None, node_color='#AFAFAF', edge_color='#CFCFCF',
-          plot=True, node_size=2000, with_labels=True, arrows=True):
+          plot=True, node_size=2000, with_labels=True, arrows=True,
+          layout='neato'):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -68,6 +69,9 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     arrows : boolean
         Draw arrows on directed edges. Works only if an optimization_model has
         been passed.
+    layout : string
+        networkx graph layout, one of: neato, dot, twopi, circo, fdp, nop, wc,
+        acyclic, gvpr, gvcolor, ccomps, sccmap, tred, sfdp.
 
     Examples
     --------
@@ -153,7 +157,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         }
 
         # draw graph
-        pos = graphviz_layout(G)
+        pos = graphviz_layout(G, prog=layout)
         nx.draw(G, pos=pos, **options)
 
         # add edge labels for all edges
