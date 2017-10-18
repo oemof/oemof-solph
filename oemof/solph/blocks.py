@@ -358,14 +358,14 @@ class Flow(SimpleBlock):
     Negative gradient constraint \
     :attr:`om.Flow.negative_gradient_constr[i, o]`:
       .. math:: flow(i, o, t-1) - flow(i, o, t) \\geq \
-        negative\_flow\_gradient(i, o, t), \\\\
+        negative\_gradient(i, o, t), \\\\
         \\forall (i, o) \\in \\textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\\\
         \\forall t \\in \\textrm{TIMESTEPS}.
 
     Positive gradient constraint \
     :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \\geq \
-            positive\_flow\_gradient(i, o, t), \\\\
+            positive\__gradient(i, o, t), \\\\
             \\forall (i, o) \\in \\textrm{POSITIVE\_GRADIENT\_FLOWS}, \\\\
             \\forall t \\in \\textrm{TIMESTEPS}.
 
@@ -420,15 +420,22 @@ class Flow(SimpleBlock):
                         if g[2].positive_gradient[0] is not None])
 
         # ######################### Variables  ################################
+
+        self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
+                                          m.TIMESTEPS)
+
+        self.negative_gradient = Var(self.NEGATIVE_GRADIENT_FLOWS,
+                                          m.TIMESTEPS)
+
         # set upper bound of gradient variable
         for i, o, f in group:
             if m.flows[i, o].positive_gradient[0] is not None:
                 for t in m.TIMESTEPS:
-                    m.positive_flow_gradient[i, o, t].setub(
+                    self.positive_gradient[i, o, t].setub(
                         f.positive_gradient[t] * f.nominal_value)
             if m.flows[i, o].negative_gradient[0] is not None:
                 for t in m.TIMESTEPS:
-                    m.negative_flow_gradient[i, o, t].setub(
+                    self.negative_gradient[i, o, t].setub(
                         f.negative_gradient[t] * f.nominal_value)
 
         # ######################### CONSTRAINTS ###############################
@@ -464,7 +471,7 @@ class Flow(SimpleBlock):
                 for ts in m.TIMESTEPS:
                     if ts > 0:
                         lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
-                        rhs = m.positive_flow_gradient[inp, out, ts]
+                        rhs = self.positive_gradient[inp, out, ts]
                         self.positive_gradient_constr.add((inp, out, ts),
                                                           lhs <= rhs)
                     else:
@@ -481,7 +488,7 @@ class Flow(SimpleBlock):
                 for ts in m.TIMESTEPS:
                     if ts > 0:
                         lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
-                        rhs = m.negative_flow_gradient[inp, out, ts]
+                        rhs = self.negative_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, ts),
                                                           lhs <= rhs)
                     else:

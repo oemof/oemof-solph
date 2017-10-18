@@ -116,18 +116,6 @@ class OperationalModel(po.ConcreteModel):
         self.FLOWS = po.Set(initialize=self.flows.keys(),
                             ordered=True, dimen=2)
 
-        self.NEGATIVE_GRADIENT_FLOWS = po.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.negative_gradient[0] is not None],
-            ordered=True, dimen=2)
-
-        self.POSITIVE_GRADIENT_FLOWS = po.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.positive_gradient[0] is not None],
-            ordered=True, dimen=2)
-
         # ######################### FLOW VARIABLE #############################
 
         # non-negative pyomo variable for all existing flows in energysystem
@@ -155,14 +143,6 @@ class OperationalModel(po.ConcreteModel):
                     # lower bound of flow variable
                     self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
                                              self.flows[o, i].nominal_value)
-
-        self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
-                                             self.TIMESTEPS,
-                                             within=po.NonNegativeReals)
-
-        self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
-                                             self.TIMESTEPS,
-                                             within=po.NonNegativeReals)
 
         # ########################### CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
