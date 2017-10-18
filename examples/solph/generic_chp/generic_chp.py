@@ -33,7 +33,7 @@ source_th = solph.Source(label='source_th',
                          outputs={bth: solph.Flow(variable_costs=15)})
 
 demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
-                       actual_value=data['demand_el'], nominal_value=100)})
+                       actual_value=data['demand_el'], nominal_value=90)})
 
 # power
 bel = solph.Bus(label='bel')
@@ -46,16 +46,16 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 ccet = solph.custom.GenericCHP(
     label='combined_cycle_extraction_turbine',
     fuel_input={bgas: solph.Flow(
-        H_L_FG_share=[0.17 for p in range(0, periods)])},
+        H_L_FG_share=data['H_L_FG_share'])},
     electrical_output={bel: solph.Flow(
-        P_max_woDH=[217.35 for p in range(0, periods)],
-        P_min_woDH=[89.10 for p in range(0, periods)],
-        Eta_el_max_woDH=[0.57 for p in range(0, periods)],
-        Eta_el_min_woDH=[0.47 for p in range(0, periods)])},
+        P_max_woDH=data['P_max_woDH'],
+        P_min_woDH=data['P_min_woDH'],
+        Eta_el_max_woDH=data['Eta_el_max_woDH'],
+        Eta_el_min_woDH=data['Eta_el_min_woDH'])},
     heat_output={bth: solph.Flow(
-        Q_CW_min=[27.85 for p in range(0, periods)])},
-    Beta=[0.12 for p in range(0, periods)], back_pressure=False,
-    fixed_costs=300)
+        Q_CW_min=data['Q_CW_min'])},
+    Beta=data['Beta'], back_pressure=False,
+    fixed_costs=0)
 
 # create an optimization problem and solve it
 om = solph.OperationalModel(es)

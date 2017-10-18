@@ -471,13 +471,16 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
 class GenericCHP(Transformer):
     """
-    Component `GenericCHP` to model (combined cycle) extraction or
-    back-pressure turbines.
+    Component `GenericCHP` to model combined heat and power plants such as
+    (combined cycle) extraction or back-pressure turbines.
 
     The full set of equations is described in:
     Mollenhauer, E., Christidis, A. & Tsatsaronis, G.
     Int J Energy Environ Eng (2016) 7: 167.
     https://doi.org/10.1007/s40095-016-0204-6
+
+    Only one adaption for the parameter `H_L_FG_share`has been made to
+    set the flue gas losses `H_L_FG` as share of the fuel flow `H_F`.
 
     Also have a look at the examples on how to use it.
 
