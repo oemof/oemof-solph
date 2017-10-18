@@ -19,8 +19,10 @@ from .plumbing import sequence
 # ------------------------------------------------------------------------------
 # Start of generic storage component
 # ------------------------------------------------------------------------------
+
 class GenericStorage(Transformer):
     """
+    Component `GenericStorage` to model with basic characteristics of storages.
 
     Parameters
     ----------
@@ -66,6 +68,7 @@ class GenericStorage(Transformer):
      * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
        present)
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
@@ -123,6 +126,7 @@ def storage_nominal_value_warning(flow):
            "The value will be overwritten by the product of the " +
            "nominal_capacity and the nominal_{0}_capacity_ratio.")
     warnings.warn(msg.format(flow), SyntaxWarning)
+
 # ------------------------------------------------------------------------------
 # End of generic storage component
 # ------------------------------------------------------------------------------
@@ -131,8 +135,9 @@ def storage_nominal_value_warning(flow):
 # ------------------------------------------------------------------------------
 # Start of generic storage block
 # ------------------------------------------------------------------------------
+
 class GenericStorageBlock(SimpleBlock):
-    """ Storages (no investment)
+    r"""Storage without an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
@@ -166,6 +171,7 @@ class GenericStorageBlock(SimpleBlock):
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
     and their value after optimization by: `om.Storage.fixed_costs()`.
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -250,8 +256,7 @@ class GenericStorageBlock(SimpleBlock):
 # Start of generic storage invest block
 # ------------------------------------------------------------------------------
 class GenericInvestmentStorageBlock(SimpleBlock):
-    """Storage with an :class:`.Investment` object.
-
+    r"""Storage with an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
@@ -331,6 +336,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
     This works similar for investment costs with :attr:`*.investment_costs`.
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -471,11 +477,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
 class GenericCHP(Transformer):
     """
-    Component `GenericCHP` to model combined heat and power plants such as
-    (combined cycle) extraction or back-pressure turbines.
+    Component `GenericCHP` to model combined heat and power plants.
+
+    Can be used to model (combined cycle) extraction or back-pressure turbines
+    and used a mixed-integer linear formulation. Thus, it induces more
+    computational effort than the `VariableFractionTransformer` for the
+    benefit of higher accuracy.
 
     The full set of equations is described in:
     Mollenhauer, E., Christidis, A. & Tsatsaronis, G.
+    Evaluation of an energy- and exergy-based generic modeling
+    approach of combined heat and power plants
     Int J Energy Environ Eng (2016) 7: 167.
     https://doi.org/10.1007/s40095-016-0204-6
 
@@ -577,14 +589,6 @@ class GenericCHP(Transformer):
 
         return self._alphas
 
-
-def storage_nominal_value_warning(flow):
-    msg = ("The nominal_value should not be set for {0} flows of storages." +
-           "The value will be overwritten by the product of the " +
-           "nominal_capacity and the nominal_{0}_capacity_ratio.")
-    warnings.warn(msg.format(flow), SyntaxWarning)
-
-
 # ------------------------------------------------------------------------------
 # End of generic CHP component
 # ------------------------------------------------------------------------------
@@ -594,11 +598,8 @@ def storage_nominal_value_warning(flow):
 # Start of generic CHP block
 # ------------------------------------------------------------------------------
 
-
 class GenericCHPBlock(SimpleBlock):
-    """
-    Block for the linear relation of nodes with type class:`.GenericCHP`.
-    """
+    """Block for the linear relation of nodes with type class:`.GenericCHP`."""
 
     CONSTRAINT_GROUP = True
 
@@ -748,12 +749,19 @@ class GenericCHPBlock(SimpleBlock):
         return fixed_costs
 
 # ------------------------------------------------------------------------------
-# Start of VariableFractionTransformer component
+# End of generic CHP block
 # ------------------------------------------------------------------------------
 
 
+# ------------------------------------------------------------------------------
+# Start of VariableFractionTransformer component
+# ------------------------------------------------------------------------------
+
 class VariableFractionTransformer(LinearTransformer):
-    """A linear transformer with more than one output, where the fraction of
+    """
+    Component `GenericCHP` to model combined heat and power plants.
+
+    A linear transformer with more than one output, where the fraction of
     the output flows is variable. By now it is restricted to two output flows.
 
     One main output flow has to be defined and is tapped by the remaining flow.
@@ -792,6 +800,7 @@ class VariableFractionTransformer(LinearTransformer):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
     """
+
     def __init__(self, conversion_factor_single_flow, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factor_single_flow = {
@@ -806,7 +815,6 @@ class VariableFractionTransformer(LinearTransformer):
 # ------------------------------------------------------------------------------
 # Start of VariableFractionTransformer block
 # ------------------------------------------------------------------------------
-
 
 class VariableFractionTransformerBlock(SimpleBlock):
     """Block for the linear relation of nodes with type
@@ -877,7 +885,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
                                if n.label_main_flow != o.label][0]
             n.conversion_factor_single_flow_sq = (
                 n.conversion_factor_single_flow[
-                    m.es.groups[n.main_output.label]])
+                    m.es.groups[n.ma    in_output.label]])
             n.flow_relation_index = [
                 n.conversion_factors[m.es.groups[n.main_output.label]][t] /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
@@ -918,11 +926,56 @@ class VariableFractionTransformerBlock(SimpleBlock):
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
 
-
 # ------------------------------------------------------------------------------
 # End of VariableFractionTransformer block
 # ------------------------------------------------------------------------------
 
+
+# ------------------------------------------------------------------------------
+# Start of generic CAES component
+# ------------------------------------------------------------------------------
+
+class GenericCAES(Transformer):
+    """
+    Component `GenericCAES` to model arbitrary compressed air energy storages.
+
+    The full set of equations is described in:
+    Kaldemeyer, C.; Boysen, C.; Tuschy, I.
+    A Generic Formulation of Compressed Air Energy Storage as
+    Mixed Integer Linear Program – Unit Commitment of Specific
+    Technical Concepts in Arbitrary Market Environments
+    Materials Today: Proceedings 00 (2018) 0000–0000
+    [currently in review]
+
+    Parameters
+    ----------
+    fuel_input : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the fuel input.
+    electrical_output : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the electrical output.
+    heat_output : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the electrical output.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.GenericCAES`
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fuel_input = kwargs.get('fuel_input')
+        self.electrical_output = kwargs.get('electrical_output')
+        self.heat_output = kwargs.get('electrical_output')
+        self.params = kwargs.get('params')
+
+# ------------------------------------------------------------------------------
+# End of generic CAES component
+# ------------------------------------------------------------------------------
 
 def custom_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment,
