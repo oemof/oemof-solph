@@ -698,6 +698,16 @@ class GenericCHPBlock(SimpleBlock):
         self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
 
+        def _H_L_FG_share_rule(block, n, t):
+            """Set flue gas losses as share of fuel flow (not in paper)."""
+            expr = 0
+            expr += - self.H_L_FG[n, t]
+            expr += self.H_F[n, t] * \
+                list(n.fuel_input.values())[0].H_L_FG_share[t]
+            return expr == 0
+        self.H_L_FG_share = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                       rule=_H_L_FG_share_rule)
+
         def _P_restriction_rule(block, n, t):
             """Restrict P depending on fuel and heat flow."""
             expr = 0

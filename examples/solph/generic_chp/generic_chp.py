@@ -45,13 +45,15 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
 ccet = solph.custom.GenericCHP(
     label='combined_cycle_extraction_turbine',
-    fuel_input={bgas: solph.Flow()},
+    fuel_input={bgas: solph.Flow(
+        H_L_FG_share=[0.17 for p in range(0, periods)])},
     electrical_output={bel: solph.Flow(
         P_max_woDH=[217.35 for p in range(0, periods)],
         P_min_woDH=[89.10 for p in range(0, periods)],
         Eta_el_max_woDH=[0.57 for p in range(0, periods)],
         Eta_el_min_woDH=[0.47 for p in range(0, periods)])},
-    heat_output={bth: solph.Flow(Q_CW_min=[27.85 for p in range(0, periods)])},
+    heat_output={bth: solph.Flow(
+        Q_CW_min=[27.85 for p in range(0, periods)])},
     Beta=[0.12 for p in range(0, periods)], back_pressure=False,
     fixed_costs=300)
 
