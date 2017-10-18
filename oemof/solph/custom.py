@@ -10,8 +10,8 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 import numpy as np
 import warnings
-from oemof.network import (Bus, Transformer)
-from oemof.solph import Flow
+from oemof.network import Bus, Transformer
+from oemof.solph import Flow, LinearTransformer
 from .options import Investment
 from .plumbing import sequence
 
@@ -739,7 +739,7 @@ class GenericCHPBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 
-class VariableFractionTransformer(Transformer):
+class VariableFractionTransformer(LinearTransformer):
     """A linear transformer with more than one output, where the fraction of
     the output flows is variable. By now it is restricted to two output flows.
 
