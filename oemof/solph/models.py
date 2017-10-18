@@ -71,7 +71,6 @@ class OperationalModel(po.ConcreteModel):
     """
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.LinearN1Transformer,
-                         blocks.VariableFractionTransformer,
                          blocks.InvestmentFlow, blocks.Flow,
                          blocks.BinaryFlow, blocks.DiscreteFlow]
 

@@ -9,8 +9,9 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 import numpy as np
-import oemof.network as on
 import warnings
+from oemof.network import (Bus, Transformer)
+from oemof.solph import Flow
 from .options import Investment
 from .plumbing import sequence
 
@@ -18,7 +19,7 @@ from .plumbing import sequence
 # ------------------------------------------------------------------------------
 # Start of generic storage component
 # ------------------------------------------------------------------------------
-class GenericStorage(on.Transformer):
+class GenericStorage(Transformer):
     """
 
     Parameters
@@ -468,7 +469,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # Start of generic CHP component
 # ------------------------------------------------------------------------------
 
-class GenericCHP(on.Transformer):
+class GenericCHP(Transformer):
     """
     Component `GenericCHP` to model (combined cycle) extraction or
     back-pressure turbines.
@@ -733,6 +734,182 @@ class GenericCHPBlock(SimpleBlock):
 
         return fixed_costs
 
+# ------------------------------------------------------------------------------
+# Start of VariableFractionTransformer component
+# ------------------------------------------------------------------------------
+
+
+class VariableFractionTransformer(Transformer):
+    """A linear transformer with more than one output, where the fraction of
+    the output flows is variable. By now it is restricted to two output flows.
+
+    One main output flow has to be defined and is tapped by the remaining flow.
+    Thus, the main output will be reduced if the tapped output increases.
+    Therefore a loss index has to be defined. Furthermore a maximum efficiency
+    has to be specified if the whole flow is led to the main output
+    (tapped_output = 0). The state with the maximum tapped_output is described
+    through conversion factors equivalent to the LinearTransformer.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of inflow
+        to specified outflow. Keys are output bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+    conversion_factor_single_flow : dict
+        The efficiency of the main flow if there is no tapped flow. Only one
+        key is allowed. Use one of the keys of the conversion factors. The key
+        indicates the main flow. The other output flow is the tapped flow.
+
+    Examples
+    --------
+    >>> bel = Bus(label='electricityBus')
+    >>> bth = Bus(label='heatBus')
+    >>> bgas = Bus(label='commodityBus')
+    >>> vft = VariableFractionTransformer(
+    ...    label='variable_chp_gas',
+    ...    inputs={bgas: Flow(nominal_value=10e10)},
+    ...    outputs={bel: Flow(), bth: Flow()},
+    ...    conversion_factors={bel: 0.3, bth: 0.5},
+    ...    conversion_factor_single_flow={bel: 0.5})
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
+    """
+    def __init__(self, conversion_factor_single_flow, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conversion_factor_single_flow = {
+            k: sequence(v) for k, v in conversion_factor_single_flow.items()}
+
+
+# ------------------------------------------------------------------------------
+# End of VariableFractionTransformer component
+# ------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
+# Start of VariableFractionTransformer block
+# ------------------------------------------------------------------------------
+
+
+class VariableFractionTransformerBlock(SimpleBlock):
+    """Block for the linear relation of nodes with type
+    :class:`~oemof.solph.network.VariableFractionTransformer`
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.OperationalModel` )
+
+    VARIABLE_FRACTION_TRANSFORMERS
+        A set with all
+        :class:`~oemof.solph.network.VariableFractionTransformer` objects.
+
+    **The following constraints are created:**
+
+    Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+        .. math::
+            flow(input, n, t) = \\\\
+            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
+            main\_flow\_loss\_index(n, t)) /\\\\
+            efficiency\_condensing(n, t)\\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
+    Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+        .. math::
+            flow(n, main\_output, t) = flow(n, tapped\_output, t) \\cdot \\\\
+            conversion\_factor(n, main\_output, t) / \
+            conversion\_factor(n, tapped\_output, t\\\\
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def set_value(self, value):
+        pass
+
+    def clear(self):
+        pass
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`LinearTransformer`
+        block.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.LinearTransformers (trsf) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
+            is created for all existing relations of the inputs and all outputs
+            of the transformer. The components inside the list need to hold
+            a attribute `conversion_factors` of type dict containing the
+            conversion factors from inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        for n in group:
+            n.inflow = list(n.inputs)[0]
+            n.label_main_flow = str(
+                [k for k, v in n.conversion_factor_single_flow.items()][0])
+            n.main_output = [o for o in n.outputs
+                             if n.label_main_flow == o.label][0]
+            n.tapped_output = [o for o in n.outputs
+                               if n.label_main_flow != o.label][0]
+            n.conversion_factor_single_flow_sq = (
+                n.conversion_factor_single_flow[
+                    m.es.groups[n.main_output.label]])
+            n.flow_relation_index = [
+                n.conversion_factors[m.es.groups[n.main_output.label]][t] /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                for t in m.TIMESTEPS]
+            n.main_flow_loss_index = [
+                (n.conversion_factor_single_flow_sq[t] -
+                 n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                for t in m.TIMESTEPS]
+
+        def _input_output_relation_rule(block):
+            """Connection between input, main output and tapped output.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+                    lhs = m.flow[g.inflow, g, t]
+                    rhs = (
+                        (m.flow[g, g.main_output, t] +
+                         m.flow[g, g.tapped_output, t] *
+                         g.main_flow_loss_index[t]) /
+                        g.conversion_factor_single_flow_sq[t]
+                        )
+                    block.input_output_relation.add((n, t), (lhs == rhs))
+        self.input_output_relation = Constraint(group, noruleinit=True)
+        self.input_output_relation_build = BuildAction(
+            rule=_input_output_relation_rule)
+
+        def _out_flow_relation_rule(block):
+            """Relation between main and tapped output in full chp mode.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+                    lhs = m.flow[g, g.main_output, t]
+                    rhs = (m.flow[g, g.tapped_output, t] *
+                           g.flow_relation_index[t])
+                    block.out_flow_relation.add((g, t), (lhs >= rhs))
+        self.out_flow_relation = Constraint(group, noruleinit=True)
+        self.out_flow_relation_build = BuildAction(
+                rule=_out_flow_relation_rule)
+
+
+# ------------------------------------------------------------------------------
+# End of VariableFractionTransformer block
+# ------------------------------------------------------------------------------
+
 
 def custom_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment,
@@ -743,3 +920,5 @@ def custom_grouping(node):
         return GenericStorageBlock
     if isinstance(node, GenericCHP):
         return GenericCHPBlock
+    if isinstance(node, VariableFractionTransformer):
+        return VariableFractionTransformerBlock

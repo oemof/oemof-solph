@@ -100,7 +100,7 @@ def run_variable_chp_example(number_timesteps=192,
         conversion_factors={bel2: 0.3, bth2: 0.5})
 
     # create a fixed transformer to distribute to the heat and elec buses
-    solph.VariableFractionTransformer(
+    solph.custom.VariableFractionTransformer(
         label='variable_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},

@@ -12,7 +12,8 @@ from oemof.solph import OperationalModel
 import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
-                         LinearN1Transformer, VariableFractionTransformer)
+                         LinearN1Transformer)
+from oemof.solph.custom import VariableFractionTransformer
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
