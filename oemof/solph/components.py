@@ -702,18 +702,18 @@ class GenericCHPBlock(SimpleBlock):
         self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
 
-        def _H_L_FG_share_rule(block, n, t):
+        def _H_L_FG_max_rule(block, n, t):
             """Set flue gas losses as share of fuel flow (not in paper)."""
             expr = 0
             expr += - self.H_L_FG_max[n, t]
             expr += self.H_F[n, t] * \
                 list(n.fuel_input.values())[0].H_L_FG_share_max[t]
             return expr == 0
-        self.H_L_FG_share = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                       rule=_H_L_FG_share_rule)
+        self.H_L_FG_max_definition = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                                rule=_H_L_FG_max_rule)
 
-        def _P_restriction_rule(block, n, t):
-            """Restrict P depending on fuel and heat flow."""
+        def _Q_max_restriction_rule(block, n, t):
+            """Restrict Q depending on fuel and eletrical flow."""
             expr = 0
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_max[n, t]
             expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
@@ -722,8 +722,8 @@ class GenericCHPBlock(SimpleBlock):
                 return expr == 0
             else:
                 return expr <= 0
-        self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                        rule=_P_restriction_rule)
+        self.Q_max_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_Q_max_restriction_rule)
 
     def _objective_expression(self):
         """Objective expression for generic CHPs with no investment.
