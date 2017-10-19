@@ -12,7 +12,8 @@ from oemof.outputlib import processing, views
 
 
 # read sequence data
-data = pd.read_csv('data.csv', sep=",")
+file_name = 'ccet.csv'
+data = pd.read_csv(file_name, sep=",")
 
 # select periods
 periods = len(data)-1
@@ -30,10 +31,10 @@ rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 bth = solph.Bus(label='bth')
 
 source_th = solph.Source(label='source_th',
-                         outputs={bth: solph.Flow(variable_costs=60)})
+                         outputs={bth: solph.Flow(variable_costs=1000)})
 
 demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
-                       actual_value=data['demand_th'], nominal_value=100)})
+                       actual_value=data['demand_th'], nominal_value=200)})
 
 # power
 bel = solph.Bus(label='bel')
@@ -61,7 +62,7 @@ ccet = solph.custom.GenericCHP(
 om = solph.OperationalModel(es)
 
 # debugging
-om.write('generic_chp.lp', io_options={'symbolic_solver_labels': True})
+#om.write('generic_chp.lp', io_options={'symbolic_solver_labels': True})
 
 # solve model
 om.solve(solver='gurobi', solve_kwargs={'tee': True})
@@ -70,34 +71,36 @@ om.solve(solver='gurobi', solve_kwargs={'tee': True})
 results = processing.results(om)
 
 # store as csv
-data = results[(ccet,)]['sequences'].to_csv('ccet.csv')
-
-# plot CCET (line)
-data = results[(ccet,)]['sequences']
-ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_xlabel('Time')
-ax.set_ylabel('(MW)')
-plt.show()
+data = results[(ccet,)]['sequences'].to_csv('results_' + file_name)
 
 # plot CCET (scatter)
 data = results[(ccet,)]['sequences']
 ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
 ax.set_xlabel('Q (MW)')
 ax.set_ylabel('P (MW)')
-plt.show()
+plt.savefig('plot_' + file_name + '.pdf', format='pdf', dpi=600)
+plt.close()
+#plt.show()
 
-# plot bus
-data = views.node(results, 'bel')
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_title('Dispatch')
-ax.set_xlabel('')
-ax.set_ylabel('Power (MW)')
-plt.show()
-
-# plot bus
-data = views.node(results, 'bth')
-ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-ax.set_title('Dispatch')
-ax.set_xlabel('')
-ax.set_ylabel('Heat flow (MW)')
-plt.show()
+# # plot CCET (line)
+# data = results[(ccet,)]['sequences']
+# ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_xlabel('Time')
+# ax.set_ylabel('(MW)')
+# plt.show()
+#
+# # plot bus
+# data = views.node(results, 'bel')
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Power (MW)')
+# plt.show()
+#
+# # plot bus
+# data = views.node(results, 'bth')
+# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+# ax.set_title('Dispatch')
+# ax.set_xlabel('')
+# ax.set_ylabel('Heat flow (MW)')
+# plt.show()
