@@ -11,7 +11,7 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
 import numpy as np
 import warnings
 from oemof.network import Bus, Transformer
-from oemof.solph import Flow, LinearTransformer
+from oemof.solph import Flow, Transformer
 from .options import Investment
 from .plumbing import sequence
 
@@ -757,7 +757,7 @@ class GenericCHPBlock(SimpleBlock):
 # Start of VariableFractionTransformer component
 # ------------------------------------------------------------------------------
 
-class VariableFractionTransformer(LinearTransformer):
+class VariableFractionTransformer(Transformer):
     """
     Component `GenericCHP` to model combined heat and power plants.
 

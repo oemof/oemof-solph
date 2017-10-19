@@ -11,7 +11,7 @@ from oemof.solph import OperationalModel
 
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
+from oemof.solph import (Bus, Source, Sink, Flow, Transformer,
                          LinearN1Transformer)
 from oemof.solph.components import VariableFractionTransformer
 from oemof.tools import helpers
@@ -78,7 +78,7 @@ class Constraint_Tests:
 
         bel = Bus(label='electricity')
 
-        LinearTransformer(
+        Transformer(
             label='powerplantGas',
             inputs={bgas: Flow()},
             outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
@@ -94,7 +94,7 @@ class Constraint_Tests:
 
         bel = Bus(label='electricity')
 
-        LinearTransformer(
+        Transformer(
             label='powerplant_gas',
             inputs={bgas: Flow()},
             outputs={bel: Flow(variable_costs=50,
@@ -245,7 +245,7 @@ class Constraint_Tests:
         bheat = Bus(label='heatBus')
         bel = Bus(label='electricityBus')
 
-        LinearTransformer(
+        Transformer(
             label='CHPpowerplantGas',
             inputs={bgas: Flow(nominal_value=10e10, variable_costs=50)},
             outputs={bel: Flow(), bheat: Flow()},
@@ -261,7 +261,7 @@ class Constraint_Tests:
         bheat = Bus(label='heatBus')
         bel = Bus(label='electricityBus')
 
-        LinearTransformer(
+        Transformer(
             label='chp_powerplant_gas',
             inputs={bgas: Flow(variable_costs=50,
                                investment=Investment(maximum=1000,

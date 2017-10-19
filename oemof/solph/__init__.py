@@ -1,4 +1,4 @@
-from oemof.solph.network import (Sink, Source, LinearTransformer, Bus,
+from oemof.solph.network import (Sink, Source, Transformer, Bus,
                                  Flow, EnergySystem, LinearN1Transformer)
 from oemof.solph.models import OperationalModel
 from oemof.solph.groupings import GROUPINGS

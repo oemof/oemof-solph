@@ -6,7 +6,7 @@ import logging
 from oemof import network
 from ..options import NonConvex, Investment
 from ..plumbing import sequence
-from ..network import (Bus, Source, Sink, Flow, LinearTransformer)
+from ..network import (Bus, Source, Sink, Flow, Transformer)
 from ..components import GenericStorage as Storage
 
 
@@ -58,7 +58,7 @@ def nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences,
 
     # class dictionary for dynamic instantiation
     classes = {'Source': Source, 'Sink': Sink,
-               'LinearTransformer': LinearTransformer,
+               'LinearTransformer': Transformer,
                'Storage': Storage, 'Bus': Bus}
     classes.update(additional_classes)
 

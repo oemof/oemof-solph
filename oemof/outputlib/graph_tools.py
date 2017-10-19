@@ -75,7 +75,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     Examples
     --------
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
     ...                          OperationalModel, EnergySystem)
     >>> from oemof.outputlib import graph_tools as gt
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')

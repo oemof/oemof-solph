@@ -17,7 +17,7 @@ groupings specified like this:
 
 """
 
-from .network import (Bus, LinearTransformer, LinearN1Transformer)
+from .network import (Bus, Transformer, LinearN1Transformer)
 from .options import Investment
 from . import blocks
 import oemof.groupings as groupings
@@ -41,8 +41,8 @@ def constraint_grouping(node):
     # constraints are grouped by overriding the method in future subclasses.
     if isinstance(node, Bus) and node.balanced:
         return blocks.Bus
-    if type(node) == LinearTransformer:
-        return blocks.LinearTransformer
+    if type(node) == Transformer:
+        return blocks.Transformer
     if isinstance(node, LinearN1Transformer):
         return blocks.LinearN1Transformer
 
