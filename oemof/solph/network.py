@@ -136,7 +136,7 @@ class Flow:
         # information afterwards when creating objects.
 
         scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
-                   'investment', 'binary', 'discrete', 'fixed']
+                   'investment', 'binary', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
         defaults = {'fixed': False, 'min': 0, 'max': 1}

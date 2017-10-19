@@ -111,6 +111,9 @@ class Flow(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group
                         if g[2].positive_gradient[0] is not None])
 
+        self.INTEGER_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group
+                        if g[2].integer])
         # ######################### Variables  ################################
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
@@ -119,6 +122,8 @@ class Flow(SimpleBlock):
         self.negative_gradient = Var(self.NEGATIVE_GRADIENT_FLOWS,
                                      m.TIMESTEPS)
 
+        self.integer_flow = Var(self.INTEGER_FLOWS,
+                                m.TIMESTEPS, within=NonNegativeIntegers)
         # set upper bound of gradient variable
         for i, o, f in group:
             if m.flows[i, o].positive_gradient[0] is not None:
@@ -189,6 +194,14 @@ class Flow(SimpleBlock):
             self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
+
+        def _integer_flow_rule(block, i, o, t):
+            """Force flow variable to NonNegativeInteger values.
+            """
+            return (self.integer_flow[i, o, t] == m.flow[i, o, t])
+
+        self.integer_flow_constr = Constraint(self.INTEGER_FLOWS, m.TIMESTEPS,
+                                              rule=_integer_flow_rule)
 
     def _objective_expression(self):
         """ Objective expression for all standard flows with fixed costs
@@ -793,46 +806,3 @@ class BinaryFlow(SimpleBlock):
             self.shudowcosts = Expression(expr=shutdowncosts)
 
         return startcosts + shutdowncosts
-
-
-class DiscreteFlow(SimpleBlock):
-    """
-
-    **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
-
-    DISCRETE_FLOWS
-        A set of flows with the attribute :attr:`discrete` of type
-        :class:`.options.Discrete`.
-
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.DiscreteFlow`.
-
-        Parameters
-        ----------
-        group : list
-            List of oemof.solph.DiscreteFlow objects for which
-            the constraints are build.
-        """
-        if group is None:
-            return None
-
-        m = self.parent_block()
-        # ########################## SETS #####################################
-        self.DISCRETE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
-
-        self.discrete_flow = Var(self.DISCRETE_FLOWS,
-                                 m.TIMESTEPS, within=NonNegativeIntegers)
-
-        def _discrete_flow_rule(block, i, o, t):
-            """Force flow variable to discrete (NonNegativeInteger) values.
-            """
-            expr = (self.discrete_flow[i, o, t] == m.flow[i, o, t])
-            return expr
-        self.integer_flow = Constraint(self.DISCRETE_FLOWS, m.TIMESTEPS,
-                                       rule=_discrete_flow_rule)
