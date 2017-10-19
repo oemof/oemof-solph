@@ -15,7 +15,7 @@ from oemof.outputlib import processing, views
 data = pd.read_csv('data.csv', sep=",")
 
 # select periods
-periods = len(data[0:8759])
+periods = len(data)-1
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
@@ -30,10 +30,10 @@ rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 bth = solph.Bus(label='bth')
 
 source_th = solph.Source(label='source_th',
-                         outputs={bth: solph.Flow(variable_costs=15)})
+                         outputs={bth: solph.Flow(variable_costs=60)})
 
 demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
-                       actual_value=data['demand_el'], nominal_value=90)})
+                       actual_value=data['demand_th'], nominal_value=100)})
 
 # power
 bel = solph.Bus(label='bel')
