@@ -627,8 +627,6 @@ class GenericCHPBlock(SimpleBlock):
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.H_L_FG_max = Var(self.GENERICCHPS, m.TIMESTEPS,
                               within=NonNegativeReals)
-        self.H_L_FG_min = Var(self.GENERICCHPS, m.TIMESTEPS,
-                              within=NonNegativeReals)
         self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS,
                           within=NonNegativeReals)
         self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
@@ -726,6 +724,36 @@ class GenericCHPBlock(SimpleBlock):
                 return expr <= 0
         self.Q_max_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_Q_max_restriction_rule)
+
+        # for motoric CHPs a minimum restriction for heat flows can be added
+        for n in group:
+            if hasattr(list(n.fuel_input.values())[0], 'H_L_FG_share_min'):
+
+                self.H_L_FG_min = Var(self.GENERICCHPS, m.TIMESTEPS,
+                                      within=NonNegativeReals)
+
+                def _H_L_FG_min_rule(block, n, t):
+                    """Set min. flue gas loss as fuel flow share."""
+                    expr = 0
+                    expr += - self.H_L_FG_min[n, t]
+                    expr += self.H_F[n, t] * \
+                        list(n.fuel_input.values())[0].H_L_FG_share_min[t]
+                    return expr == 0
+                self.H_L_FG_min_definition = Constraint(self.GENERICCHPS,
+                                                        m.TIMESTEPS,
+                                                        rule=_H_L_FG_min_rule)
+
+                def _Q_min_restriction_rule(block, n, t):
+                    """Set minimum Q depending on fuel and eletrical flow."""
+                    expr = 0
+                    expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
+                    expr += list(n.heat_output.values())[0].Q_CW_min[t] \
+                        * self.Y[n, t]
+                    expr += - self.H_F[n, t]
+                    return expr >= 0
+                self.Q_min_restriction = Constraint(self.GENERICCHPS,
+                                                    m.TIMESTEPS,
+                                                    rule=_Q_min_restriction_rule)
 
     def _objective_expression(self):
         """Objective expression for generic CHPs with no investment.

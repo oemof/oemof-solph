@@ -12,7 +12,7 @@ from oemof.outputlib import processing, views
 
 
 # read sequence data
-file_name = 'ccet.csv'
+file_name = 'motoric.csv'
 data = pd.read_csv(file_name, sep=",")
 
 # select periods
@@ -47,7 +47,8 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 ccet = solph.components.GenericCHP(
     label='combined_cycle_extraction_turbine',
     fuel_input={bgas: solph.Flow(
-        H_L_FG_share_max=data['H_L_FG_share_max'])},
+        H_L_FG_share_max=data['H_L_FG_share_max'],
+        H_L_FG_share_min=data['H_L_FG_share_min'])},
     electrical_output={bel: solph.Flow(
         P_max_woDH=data['P_max_woDH'],
         P_min_woDH=data['P_min_woDH'],
