@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Optional classes to be added to a network class.
-"""
+"""Optional classes to be added to a network class."""
 
 
 class Investment:
@@ -22,7 +21,7 @@ class Investment:
         self.ep_costs = ep_costs
 
 
-class BinaryFlow:
+class NonConvex:
     """
     Parameters
     ----------
@@ -46,16 +45,3 @@ class BinaryFlow:
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
         self.initial_status = kwargs.get('initial_status', 0)
-
-
-class DiscreteFlow:
-    """
-    Parameters
-    ----------
-    integers : boolean
-        Specify domain of flow variable: If True, flow is forced to integer
-        values.
-    """
-    def __init__(self, **kwargs):
-        # super().__init__(self, **kwargs)
-        self.integers = kwargs.get('integers', True)
