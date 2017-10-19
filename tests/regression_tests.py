@@ -6,7 +6,7 @@ import pandas as pd
 from oemof.energy_system import EnergySystem as ES
 from oemof.network import Bus
 from oemof.solph import (Flow, OperationalModel as OM, Sink, Source as FS)
-from oemof.solph.custom import GenericStorage as Storage
+from oemof.solph.components import GenericStorage as Storage
 import oemof
 
 

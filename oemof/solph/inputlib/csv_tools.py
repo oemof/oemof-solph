@@ -4,10 +4,10 @@ import pandas as pd
 import os
 import logging
 from oemof import network
-from ..options import BinaryFlow, Investment
+from ..options import NonConvex, Investment
 from ..plumbing import sequence
 from ..network import (Bus, Source, Sink, Flow, LinearTransformer)
-from ..custom import GenericStorage as Storage
+from ..components import GenericStorage as Storage
 
 
 def nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences,
@@ -159,14 +159,14 @@ def nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences,
                             else:
                                 seq = [i for i in seq.values]
                             setattr(flow, attr, seq)
-                        # this block is only for binary flows!
+                        # this block is only for nonconvex flows!
                         if attr == 'binary' and row[attr] is True:
-                            # create binary object for flow
-                            setattr(flow, attr, BinaryFlow())
-                            binary_attrs = vars(BinaryFlow()).keys()
-                            for battr in binary_attrs:
+                            # create nonconvex object for flow
+                            setattr(flow, attr, NonConvex())
+                            nonconvex_attrs = vars(NonConvex()).keys()
+                            for battr in nonconvex_attrs:
                                 if battr in row.keys() and row[attr]:
-                                    setattr(flow.binary, battr, row[battr])
+                                    setattr(flow.nonconvex, battr, row[battr])
                         # this block is only for investment flows!
                         if attr == 'investment' and row[attr] is True:
                             if isinstance(node, Storage):

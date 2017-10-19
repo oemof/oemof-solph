@@ -2,15 +2,10 @@
 """
 
 """
-
-from collections import UserDict, UserList
-from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks, custom
-from pyomo.core.base.block import SimpleBlock
-from .options import Investment
+from oemof.solph import blocks
 from .plumbing import sequence
 from ..outputlib import processing
 import logging
@@ -20,6 +15,7 @@ import logging
 # Solph Optimization Models
 #
 # #############################################################################
+
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
@@ -45,14 +41,6 @@ class OperationalModel(po.ConcreteModel):
     FLOWS :
         A 2 dimensional set with all flows. Index: `(source, target)`
 
-    NEGATIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `negative_gradient` is set.
-
-    POSITIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `positive_gradient` is set.
-
     **The following variables are created**:
 
     flow
@@ -64,7 +52,7 @@ class OperationalModel(po.ConcreteModel):
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.LinearN1Transformer,
                          blocks.InvestmentFlow, blocks.Flow,
-                         blocks.BinaryFlow, blocks.DiscreteFlow]
+                         blocks.NonConvexFlow]
 
     def __init__(self, es, **kwargs):
         super().__init__()
@@ -127,14 +115,16 @@ class OperationalModel(po.ConcreteModel):
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
 
-                if self.flows[o, i].nominal_value is not None and (
-                        self.flows[o, i].binary is None):
+                if self.flows[o, i].nominal_value is not None:
                     # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
-                    # lower bound of flow variable
-                    self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
-                                             self.flows[o, i].nominal_value)
+
+                    if self.flows[o, i].nonconvex is None:
+                        # lower bound of flow variable
+                        self.flow[o, i, t].setlb(
+                            self.flows[o, i].min[t] *
+                            self.flows[o, i].nominal_value)
 
         # ########################### CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model

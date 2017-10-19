@@ -13,7 +13,7 @@ import oemof.solph as solph
 
 from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
                          LinearN1Transformer)
-from oemof.solph.custom import VariableFractionTransformer
+from oemof.solph.components import VariableFractionTransformer
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -168,7 +168,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        solph.custom.GenericStorage(
+        solph.components.GenericStorage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
@@ -187,7 +187,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        solph.custom.GenericStorage(
+        solph.components.GenericStorage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},

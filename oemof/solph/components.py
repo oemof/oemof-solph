@@ -1024,7 +1024,7 @@ class GenericCAESBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 
-def custom_grouping(node):
+def component_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment,
                                                        Investment):
         return GenericInvestmentStorageBlock
