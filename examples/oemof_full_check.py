@@ -33,7 +33,7 @@ def check(cdict, runcheck, subdict, new_results=None):
             maxval = cdict[key] + abs(cdict[key]) * tolerance
             minval = cdict[key] - abs(cdict[key]) * tolerance
 
-            if not ((float(value) > minval) and (float(value) < maxval)):
+            if not ((float(value) >= minval) and (float(value) <= maxval)):
                 count += 1
                 subdict['messages'][count] = (
                     "{0}: {1} not between {2} and {3}".format(
@@ -72,20 +72,16 @@ def check_nosetests():
 
 
 def run_example_checks():
-    # ********* storage invest example *****************************************
+    # ********* storage invest example ****************************************
     key = 'stor_inv'
     testdict[key] = {'name': "Storage invest example", 'solver': 'cbc'}
 
-    number_of_timesteps = 500
-
     try:
-        esys = storage_investment.optimise_storage_size(
-            number_timesteps=number_of_timesteps,
+        results = storage_investment.optimise_storage_size(
+            number_timesteps=500,
             solver=testdict[key]['solver'], debug=False,
-            tee_switch=False)
-        esys.dump()
-        esys.restore()
-        results = storage_investment.get_result_dict(esys)
+            tee_switch=False, silent=True)
+
         testdict[key]['run'] = True
 
     except Exception as e:
@@ -93,42 +89,31 @@ def run_example_checks():
         testdict[key]['run'] = False
         results = None
 
-    stor_invest_dict = {8760: {
-        'pp_gas_sum': 112750260.00000007,
-        'demand_sum': 2255000000.000008,
-        'demand_max': 368693.14440990007,
-        'wind_sum': 3085699499.7,
-        'wind_inst': 1000000,
-        'pv_sum': 553984766.734176,
-        'pv_inst': 582000,
-        'storage_cap': 10805267,
-        'objective': 8.93136532898235e+19},
-        500: {
-            'demand_max': 341499.463487,
-            'demand_sum': 1.339972e+08,
-            'objective': 2.806796142614384e+17,
-            'pp_gas_sum': 6.435517e+06,
-            'pv_inst': 260771.373277,
-            'pv_sum': 9.806339e+06,
-            'storage_cap': 615506.94,
-            'wind_inst': 999979.9978,
-            'wind_sum': 391216886.0,
-        }}
+    stor_invest_dict = {
+        'storage_invest': 615506.93999999994,
+        (('electricity', 'demand'), 'flow'): 133997181.20832705,
+        (('electricity', 'excess_bel'), 'flow'): 273149694.8592003,
+        (('electricity', 'storage'), 'flow'): 1559331.1879999998,
+        (('pp_gas', 'electricity'), 'flow'): 6435517.1424000021,
+        (('pv', 'electricity'), 'flow'): 9806339.1483599972,
+        (('storage', 'electricity'), 'flow'): 1247464.9504000004,
+        (('wind', 'electricity'), 'flow'): 391216886.0}
 
-    check(stor_invest_dict[number_of_timesteps], testdict[key]['run'],
-          testdict[key], results)
-    # ********* end of storage invest example **********************************
+    # der = {
+    #         'objective': 2.806796142614384e+17,
+    #     }
 
-    # *********** simple least cost  example ***********************************
+    check(stor_invest_dict, testdict[key]['run'], testdict[key], results)
+    # ********* end of storage invest example *********************************
+
+    # *********** simple dispatch example *************************************
     key = 'least_costs'
-    testdict[key] = {'name': "Simple least costs optimization", 'solver': 'cbc'}
+    testdict[key] = {'name': "Simple dispatch optimization",
+                     'solver': 'cbc'}
 
     try:
-        esys = simple_dispatch.initialise_energysystem(periods=2000)
-        simple_dispatch.simulate(esys,
-                                 solver=testdict[key]['solver'],
-                                 tee_switch=False, keep=False)
-        results = simple_dispatch.get_results(esys)
+        results = simple_dispatch.run_simple_dispatch_example(tee_var=False,
+                                                              silent=True)
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -136,33 +121,22 @@ def run_example_checks():
         results = None
 
     test_results = {
-        'objective': 2919760.79345538,
-        ('b_el', 'from_bus', 'demand_el', 'val'): 132243.7904593189,
-        ('b_el', 'from_bus', 'excess', 'val'): 444.60716131999982,
-        ('b_el', 'from_bus', 'heat_pump', 'val'): 931.24215460999926,
-        ('b_el', 'to_bus', 'pp_chp', 'val'): 9066.0625217479828,
-        ('b_el', 'to_bus', 'pp_coal', 'val'): 35676.475654468377,
-        ('b_el', 'to_bus', 'pp_gas', 'val'): 30412.376285770013,
-        ('b_el', 'to_bus', 'pp_lig', 'val'): 22656.045354479214,
-        ('b_el', 'to_bus', 'pp_oil', 'val'): 2.2872602799999999,
-        ('b_el', 'to_bus', 'pv', 'val'): 7796.8431880300122,
-        ('b_el', 'to_bus', 'wind', 'val'): 28009.549502999955,
-        ('b_heat_source', 'from_bus', 'heat_pump', 'val'): 1862.4843137140017,
-        ('b_heat_source', 'to_bus', 'heat_source', 'val'): 1862.4843137140017,
-        ('b_th', 'from_bus', 'demand_th', 'val'): 14881.80983624002,
-        ('b_th', 'to_bus', 'heat_pump', 'val'): 2793.7264708619978,
-        ('b_th', 'to_bus', 'pp_chp', 'val'): 12088.083361442017,
-        ('coal', 'from_bus', 'pp_coal', 'val'): 91478.143053327163,
-        ('gas', 'from_bus', 'pp_chp', 'val'): 30220.208378289819,
-        ('gas', 'from_bus', 'pp_gas', 'val'): 60824.752549570097,
-        ('lignite', 'from_bus', 'pp_lig', 'val'): 55258.647579137803,
-        ('oil', 'from_bus', 'pp_oil', 'val'): 8.1687867099999991
+        (('wind', 'bel'), 'flow'): 19504.415509800005,
+        (('pv', 'bel'), 'flow'): 4205.0081990299996,
+        (('bel', 'demand_el'), 'flow'): 95893.690674837926,
+        (('bel', 'excess_el'), 'flow'): 353.30769076999997,
+        (('pp_chp', 'bel'), 'flow'): 7043.259944773984,
+        (('pp_lig', 'bel'), 'flow'): 16320.727254279591,
+        (('pp_gas', 'bel'), 'flow'): 23848.364613840022,
+        (('pp_coal', 'bel'), 'flow'): 25958.774628000549,
+        (('pp_oil', 'bel'), 'flow'): 2.2872602799999999,
+        (('bel', 'heat_pump'), 'flow'): 635.8390440710001
     }
 
     check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of simple least cost  example ****************************
+    # *********** end of simple dispatch example ******************************
 
-    # *********** flexible modelling example ***********************************
+    # *********** flexible modelling example **********************************
     key = 'flexible_modelling'
     testdict[key] = {'name': "Flexible Modelling",
                      'solver': 'cbc'}
@@ -178,9 +152,9 @@ def run_example_checks():
     test_results = {}
 
     check(test_results, testdict[key]['run'], testdict[key])
-    # *********** end of flexible modelling example ****************************
+    # *********** end of flexible modelling example ***************************
 
-    # *********** csv reader dispatch example **********************************
+    # *********** csv reader dispatch example *********************************
     key = 'csv_reader_dispatch'
     testdict[key] = {
         'name': "Dispatch model with csv reader",
@@ -192,15 +166,14 @@ def run_example_checks():
         'date_to': '2030-01-14 23:00:00',
         'nodes_flows': 'example_energy_system.csv',
         'nodes_flows_sequences': 'example_energy_system_seq.csv',
-        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch'),
+        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch')
     }
 
     if not os.path.isdir(testdict[key]['results_path']):
         os.mkdir(testdict[key]['results_path'])
 
     try:
-        res = dispatch.run_example(config=testdict[key], )
-        results = dispatch.create_result_dict(res)
+        results = dispatch.run_csv_reader_dispatch_example(config=testdict[key])
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
@@ -208,41 +181,74 @@ def run_example_checks():
         results = None
 
     test_results = {
-        'objective': 2326255732.5299315,
-        'R2_storage_phs': 88911.484028,
-        'R2_wind': 1758697.51,
-        'R2_R1_powerline': 2.277989e+06}
+        (('R1_pp_gas', 'R1_bus_el'), 'flow'): 0.0,
+        (('R1_pp_hard_coal', 'R1_bus_el'), 'flow'): 1031265.0381399998,
+        (('R1_pp_oil', 'R1_bus_el'), 'flow'): 0.0,
+        (('R1_pp_uranium', 'R1_bus_el'), 'flow'): 1428000.0,
+        (('R1_pp_lignite', 'R1_bus_el'), 'flow'): 1410321.1378500001,
+        (('R1_bus_el', 'R1_excess'), 'flow'): 0.0,
+        (('R1_bus_el', 'R1_load'), 'flow'): 8326012.1175384959,
+        (('R1_bus_el', 'R1_R2_powerline'), 'flow'): 0.0,
+        (('R1_solar', 'R1_bus_el'), 'flow'): 109133.28500000003,
+        (('R1_run_of_river', 'R1_bus_el'), 'flow'): 1092000.0,
+        (('R1_wind', 'R1_bus_el'), 'flow'): 472390.93500000017,
+        (('R1_bus_el',), 'duals'): 13325.791131000004,
+        (('R2_R1_powerline', 'R1_bus_el'), 'flow'): 2209649.7471529995,
+        (('R1_shortage', 'R1_bus_el'), 'flow'): 0.0,
+        (('R1_pp_biomass', 'R1_bus_el'), 'flow'): 180136.44901700001,
+        (('R1_pp_mixed_fuels', 'R1_bus_el'), 'flow'): 393115.52601000009}
 
     check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of csv reader dispatch example ***************************
+    # *********** end of csv reader dispatch example **************************
 
-    # *********** csv reader investment example ********************************
+    # *********** csv reader investment example *******************************
     key = 'csv_reader_investment'
     testdict[key] = {'name': "Investment model with csv reader",
-                     'solver': 'cbc'}
+                     'solver': 'cbc',
+                     'scenario_path': os.path.join(basic_path, 'solph',
+                                                   'csv_reader', 'investment',
+                                                   'data'),
+                     'date_from': '2030-01-01 00:00:00',
+                     'date_to': '2030-01-14 23:00:00',
+                     'nodes_flows': 'nodes_flows.csv',
+                     'nodes_flows_sequences': 'nodes_flows_seq.csv',
+                     'results_path': os.path.join(os.path.expanduser("~"),
+                                                  'csv_dispatch'),
+                     'verbose': False}
 
     try:
-        investment.run_investment_example(solver=testdict[key]['solver'],
-                                          verbose=False, nologg=True)
+        investment.run_csv_reader_investment_example(testdict[key])
         testdict[key]['run'] = True
     except Exception as e:
         testdict[key]['messages'] = {'error': e}
         testdict[key]['run'] = False
 
-    test_results = {}
+    test_results = {
+        (('REGION1_pp_oil', 'REGION1_bus_el'), 'flow'): 849251.37833000079,
+        (('REGION1_pp_gas', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_bus_el', 'REGION1_excess'), 'flow'): 271668.42666399997,
+        (('REGION1_pp_hard_coal', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_bus_el',), 'duals'): 29927.322138395313,
+        (('REGION1_storage_phs', 'REGION1_bus_el'), 'flow'): 98097.2121920000,
+        (('REGION1_bus_el', 'REGION1_storage_phs'), 'flow'): 121107.668965000,
+        (('REGION1_wind', 'REGION1_bus_el'), 'flow'): 2935897.092189997,
+        (('REGION1_pp_biomass', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_pp_lignite', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_pp_uranium', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_bus_el', 'REGION1_load'), 'flow'): 3490469.5819933019,
+        (('REGION1_shortage', 'REGION1_bus_el'), 'flow'): 0.0,
+        (('REGION1_solar', 'REGION1_bus_el'), 'flow'): 0.0}
 
     check(test_results, testdict[key]['run'], testdict[key])
-    # *********** end of csv reader investment example *************************
+    # *********** end of csv reader investment example ************************
 
-    # ********* variable chp example *******************************************
+    # ********* variable chp example ******************************************
     key = 'variable_chp'
     testdict[key] = {'name': "Variable CHP example", 'solver': 'cbc'}
 
     try:
-        esys = variable_chp.initialise_energy_system(192)
-        esys = variable_chp.optimise_storage_size(
-            esys, solver=testdict[key]['solver'], tee_switch=False)
-        results = variable_chp.get_result_dict(esys)
+        results = variable_chp.run_variable_chp_example(
+            192, solver=testdict[key]['solver'], tee_switch=False)
         testdict[key]['run'] = True
 
     except Exception as e:
@@ -252,12 +258,13 @@ def run_example_checks():
 
     variable_chp_dict = {
         'objective': 14267160965.0,
-        'input_fixed_chp': 157717049.49999994,
-        'natural_gas': 285343219.29999995,
-        'input_variable_chp': 127626169.47000004}
+        (('natural_gas', 'fixed_chp_gas'), 'flow'): 0.0,
+        (('natural_gas', 'fixed_chp_gas_2'), 'flow'): 157717049.49999994,
+        (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
+        (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
 
     check(variable_chp_dict, testdict[key]['run'], testdict[key], results)
-    # ********* end of storage invest example **********************************
+    # ********* end of variable chp example ***********************************
 
     logger.define_logging()
     for tests in testdict.values():

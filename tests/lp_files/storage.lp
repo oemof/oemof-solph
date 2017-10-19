@@ -27,23 +27,23 @@ c_e_Bus_balance(electricityBus_2)_:
 +1 flow(storage_electricityBus_2)
 = 0
 
-c_e_Storage_balance(storage_0)_:
-+1 Storage_capacity(storage_0)
--0.87 Storage_capacity(storage_2)
+c_e_GenericStorageBlock_balance(storage_0)_:
++1 GenericStorageBlock_capacity(storage_0)
+-0.87 GenericStorageBlock_capacity(storage_2)
 -0.96999999999999997 flow(electricityBus_storage_0)
 +1.1627906976744187 flow(storage_electricityBus_0)
 = 0
 
-c_e_Storage_balance(storage_1)_:
--0.87 Storage_capacity(storage_0)
-+1 Storage_capacity(storage_1)
+c_e_GenericStorageBlock_balance(storage_1)_:
+-0.87 GenericStorageBlock_capacity(storage_0)
++1 GenericStorageBlock_capacity(storage_1)
 -0.96999999999999997 flow(electricityBus_storage_1)
 +1.1627906976744187 flow(storage_electricityBus_1)
 = 0
 
-c_e_Storage_balance(storage_2)_:
--0.87 Storage_capacity(storage_1)
-+1 Storage_capacity(storage_2)
+c_e_GenericStorageBlock_balance(storage_2)_:
+-0.87 GenericStorageBlock_capacity(storage_1)
++1 GenericStorageBlock_capacity(storage_2)
 -0.96999999999999997 flow(electricityBus_storage_2)
 +1.1627906976744187 flow(storage_electricityBus_2)
 = 0
@@ -58,7 +58,7 @@ bounds
    0 <= flow(storage_electricityBus_0) <= 16666.666666666664
    0 <= flow(storage_electricityBus_1) <= 16666.666666666664
    0 <= flow(storage_electricityBus_2) <= 16666.666666666664
-   0 <= Storage_capacity(storage_0) <= 100000
-   0 <= Storage_capacity(storage_1) <= 100000
-   0 <= Storage_capacity(storage_2) <= 100000
+   0 <= GenericStorageBlock_capacity(storage_0) <= 100000
+   0 <= GenericStorageBlock_capacity(storage_1) <= 100000
+   0 <= GenericStorageBlock_capacity(storage_2) <= 100000
 end

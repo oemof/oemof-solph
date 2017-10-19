@@ -6,14 +6,14 @@ import re
 from nose.tools import eq_
 import pandas as pd
 
-from oemof.solph.network import Investment
+from oemof.solph.options import Investment
 from oemof.solph import OperationalModel
 
-from oemof import energy_system as core_es
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer, Storage,
-                         LinearN1Transformer, VariableFractionTransformer)
+from oemof.solph import (Bus, Source, Sink, Flow, LinearTransformer,
+                         LinearN1Transformer)
+from oemof.solph.components import VariableFractionTransformer
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -32,7 +32,7 @@ class Constraint_Tests:
         logging.info(self.tmppath)
 
     def setup(self):
-        self.energysystem = core_es.EnergySystem(groupings=solph.GROUPINGS,
+        self.energysystem = solph.EnergySystem(groupings=solph.GROUPINGS,
                                                  timeindex=self.date_time_index)
 
     def compare_lp_files(self, filename, ignored=None):
@@ -168,7 +168,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        Storage(
+        solph.components.GenericStorage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
@@ -187,7 +187,7 @@ class Constraint_Tests:
         """
         bel = Bus(label='electricityBus')
 
-        Storage(
+        solph.components.GenericStorage(
             label='storage',
             inputs={bel: Flow(variable_costs=56)},
             outputs={bel: Flow(variable_costs=24)},
@@ -239,8 +239,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_n1_transformer_invest.lp')
 
     def test_linear_transformer_chp(self):
-        """Constraint test of a LinearTransformer without Investment
-        (two outputs).
+        """Constraint test of a LinearTransformer without Investment (two outputs).
         """
         bgas = Bus(label='gasBus')
         bheat = Bus(label='heatBus')
