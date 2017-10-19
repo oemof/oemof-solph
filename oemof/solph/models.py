@@ -2,15 +2,10 @@
 """
 
 """
-
-from collections import UserDict, UserList
-from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks, custom
-from pyomo.core.base.block import SimpleBlock
-from .options import Investment
+from oemof.solph import blocks
 from .plumbing import sequence
 from ..outputlib import processing
 import logging
@@ -20,6 +15,7 @@ import logging
 # Solph Optimization Models
 #
 # #############################################################################
+
 
 class OperationalModel(po.ConcreteModel):
     """ An energy system model for operational simulation with optimized
