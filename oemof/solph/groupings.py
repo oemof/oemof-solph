@@ -41,7 +41,7 @@ def constraint_grouping(node):
     # constraints are grouped by overriding the method in future subclasses.
     if isinstance(node, Bus) and node.balanced:
         return blocks.Bus
-    if isinstance(node, LinearTransformer):
+    if type(node) == LinearTransformer:
         return blocks.LinearTransformer
     if isinstance(node, LinearN1Transformer):
         return blocks.LinearN1Transformer
