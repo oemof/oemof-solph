@@ -34,6 +34,9 @@ class Flow(SimpleBlock):
     POSITIVE_GRADIENT_FLOWS
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
+    INTEGER_FLOWS
+        A set of flows wher the attribute :attr:`integer` is True (forces flow
+        to only take integer values)
 
     **The following constraints are build:**
 
@@ -615,62 +618,62 @@ class LinearN1Transformer(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class BinaryFlow(SimpleBlock):
+class NonConvexFlow(SimpleBlock):
     """
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
 
-    BINARY_FLOWS
-        A set of flows with the attribute :attr:`binary` of type
-        :class:`.options.Binary`.
+
+        A set of flows with the attribute :attr:`nonconvex` of type
+        :class:`.options.NonConvex`.
     MIN_FLOWS
-        A subset of set BINARY_FLOWS with the attribute :attr:`min`
+        A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
         greater than zero for at least one timestep in the simulation horizon.
     STARTUP_FLOWS
-        A subset of set BINARY_FLOWS with the attribute
+        A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`startup_costs` being not None.
     SHUTDOWN_FLOWS
-        A subset of set BINARY_FLOWS with the attribute
+        A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
     **The following variable are created:**
 
-    Status variable (binary) :attr:`om.BinaryFLow.status`:
+    Status variable (binary) :attr:`om.NonConvexFlow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
 
-    Startup variable (binary) :attr:`om.BinaryFlow.startup`:
+    Startup variable (binary) :attr:`om.NonConvexFlow.startup`:
         Variable indicating startup of flow (component) indexed by
         STARTUP_FLOWS
 
-    Shutdown variable (binary) :attr:`om.BinaryFlow.shutdown`:
+    Shutdown variable (binary) :attr:`om.NonConvexFlow.shutdown`:
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWN_FLOWS
 
     **The following constraints are created**:
 
-    Minimum flow constraint :attr:`om.BinaryFlow.min[i,o,t]`
+    Minimum flow constraint :attr:`om.NonConvexFlow.min[i,o,t]`
         .. math::
             flow(i, o, t) \\geq min(i, o, t) \\cdot nominal\_value \
                 \\cdot status(i, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{BINARY\_FLOWS}.
+            \\forall (i, o) \\in \\textrm{NONCONVEX\_FLOWS}.
 
-    Maximum flow constraint :attr:`om.BinaryFlow.max[i,o,t]`
+    Maximum flow constraint :attr:`om.NonConvexFlow.max[i,o,t]`
         .. math::
             flow(i, o, t) \\leq max(i, o, t) \\cdot nominal\_value \
                 \\cdot status(i, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{BINARY\_FLOWS}.
+            \\forall (i, o) \\in \\textrm{NONCONVEX\_FLOWS}.
 
-    Startup constraint :attr:`om.BinaryFlow.startup_constr[i,o,t]`
+    Startup constraint :attr:`om.NonConvexFlow.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall (i,o) \\in \\textrm{STARTUP\_FLOWS}.
 
-    Shutdown constraint :attr:`om.BinaryFlow.shutdown_constr[i,o,t]`
+    Shutdown constraint :attr:`om.NonConvexFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\\\
@@ -679,12 +682,12 @@ class BinaryFlow(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    If :attr:`binary.startup_costs` is set by the user:
+    If :attr:`nonconvex.startup_costs` is set by the user:
         .. math::
             \\sum_{i, o \\in STARTUP\_FLOWS} \\sum_t  startup(i, o, t) \
             \\cdot startup\_costs(i, o)
 
-    If :attr:`binary.shutdown_costs` is set by the user:
+    If :attr:`nonconvex.shutdown_costs` is set by the user:
         .. math::
             \\sum_{i, o \\in SHUTDOWN\_FLOWS} \\sum_t shutdown(i, o, t) \
                 \\cdot shutdown\_costs(i, o)
@@ -695,12 +698,12 @@ class BinaryFlow(SimpleBlock):
 
     def _create(self, group=None):
         """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.BinaryFlow`.
+        a attribute flow of type class:`.NonConvexFlow`.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.BinaryFlow objects for which
+            List of oemof.solph.NonConvexFlow objects for which
             the constraints are build.
         """
         if group is None:
@@ -708,20 +711,20 @@ class BinaryFlow(SimpleBlock):
 
         m = self.parent_block()
         # ########################## SETS #####################################
-        self.BINARY_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                          if sum(g[2].min[t]
                                                 for t in m.TIMESTEPS) > 0])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                if g[2].binary.startup_costs is not None])
+                                if g[2].nonconvex.startup_costs is not None])
 
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                 if g[2].binary.shutdown_costs is not None])
+                                 if g[2].nonconvex.shutdown_costs is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
-        self.status = Var(self.BINARY_FLOWS, m.TIMESTEPS, within=Binary)
+        self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
         if self.STARTUPFLOWS:
             self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
@@ -751,39 +754,39 @@ class BinaryFlow(SimpleBlock):
                               rule=_maximum_flow_rule)
 
         def _startup_rule(block, i, o, t):
-            """Rule definition for startup constraint of binary flows.
+            """Rule definition for startup constraint of nonconvex flows.
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
                         self.status[i, o, t-1])
             else:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
-                        m.flows[i, o].binary.initial_status)
+                        m.flows[i, o].nonconvex.initial_status)
             return expr
         self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
 
         def _shutdown_rule(block, i, o, t):
-            """Rule definition for shutdown constraints of binary flows.
+            """Rule definition for shutdown constraints of nonconvex flows.
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.shutdown[i, o, t] >= self.status[i, o, t-1] -
                         self.status[i, o, t])
             else:
                 expr = (self.shutdown[i, o, t] >=
-                        m.flows[i, o].binary.initial_status -
+                        m.flows[i, o].nonconvex.initial_status -
                         self.status[i, o, t])
             return expr
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
-        # TODO: Add gradient constraints for binary block / flows
+        # TODO: Add gradient constraints for nonconvex block / flows
         # TODO: Add  min-up/min-downtime constraints
 
     def _objective_expression(self):
-        """Objective expression for binary flows.
+        """Objective expression for nonconvex flows.
         """
-        if not hasattr(self, 'BINARY_FLOWS'):
+        if not hasattr(self, 'NONCONVEX_FLOWS'):
             return 0
 
         m = self.parent_block()
@@ -793,14 +796,14 @@ class BinaryFlow(SimpleBlock):
 
         if self.STARTUPFLOWS:
             startcosts += sum(self.startup[i, o, t] *
-                              m.flows[i, o].binary.startup_costs
+                              m.flows[i, o].nonconvex.startup_costs
                               for i, o in self.STARTUPFLOWS
                               for t in m.TIMESTEPS)
             self.startcosts = Expression(expr=startcosts)
 
         if self.SHUTDOWNFLOWS:
             shutdowncosts += sum(self.shutdown[i, o, t] *
-                                 m.flows[i, o].binary.shutdown_costs
+                                 m.flows[i, o].nonconvex.shutdown_costs
                                  for i, o in self.SHUTDOWNFLOWS
                                  for t in m.TIMESTEPS)
             self.shudowcosts = Expression(expr=shutdowncosts)

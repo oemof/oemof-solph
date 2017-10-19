@@ -92,11 +92,11 @@ class Flow:
         the optimization problem. Note: This will refer all attributes to an
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
-    binary :  :class:`oemof.solph.options.BinaryFlow` object
-        If an binary flow object is added here, the flow constraints will
+    nonconvex :  :class:`oemof.solph.options.NonConvex` object
+        If an nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
         will be different, i.e. constraint etc from
-        :class:`oemof.solph.blocks.BinaryFlow` will be used instead of
+        :class:`oemof.solph.blocks.NonConvexFlow` will be used instead of
         :class:`oemof.solph.blocks.Flow`. Note: this does not work in
         combination with the investment attribute set at the moment.
 
@@ -106,9 +106,9 @@ class Flow:
      * :py:class:`~oemof.solph.blocks.Flow`
      * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
        Investment object is present)
-     * :py:class:`~oemof.solph.blocks.BinaryFlow` (If
-        binary  object is present, CAUTION: replaces
-        :py:class:`~oemof.solph.blocks.Flow` class)
+     * :py:class:`~oemof.solph.blocks.NonConvexFlow` (If
+        nonconvex  object is present, CAUTION: replaces
+        :py:class:`~oemof.solph.blocks.Flow` class and a MILP will be build)
 
     Examples
     --------
@@ -136,7 +136,7 @@ class Flow:
         # information afterwards when creating objects.
 
         scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
-                   'investment', 'binary', 'integer', 'fixed']
+                   'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
         defaults = {'fixed': False, 'min': 0, 'max': 1}
@@ -163,9 +163,9 @@ class Flow:
                 "Using the investment object the nominal_value" +
                 " is set to None.",
                 SyntaxWarning)
-        if self.investment and self.binary:
+        if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
-                             "binary flows!")
+                             "nonconvex flows!")
 
 
 class Bus(on.Bus):

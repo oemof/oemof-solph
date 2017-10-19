@@ -21,7 +21,7 @@ class Investment:
         self.ep_costs = ep_costs
 
 
-class BinaryFlow:
+class NonConvex:
     """
     Parameters
     ----------

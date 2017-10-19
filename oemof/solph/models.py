@@ -52,7 +52,7 @@ class OperationalModel(po.ConcreteModel):
     CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
                          blocks.LinearN1Transformer,
                          blocks.InvestmentFlow, blocks.Flow,
-                         blocks.BinaryFlow]
+                         blocks.NonConvexFlow]
 
     def __init__(self, es, **kwargs):
         super().__init__()
@@ -115,14 +115,16 @@ class OperationalModel(po.ConcreteModel):
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
 
-                if self.flows[o, i].nominal_value is not None and (
-                        self.flows[o, i].binary is None):
+                if self.flows[o, i].nominal_value is not None:
                     # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
-                    # lower bound of flow variable
-                    self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
-                                             self.flows[o, i].nominal_value)
+
+                    if self.flows[o, i].nonconvex is None:
+                        # lower bound of flow variable
+                        self.flow[o, i, t].setlb(
+                            self.flows[o, i].min[t] *
+                            self.flows[o, i].nominal_value)
 
         # ########################### CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
