@@ -45,14 +45,6 @@ class OperationalModel(po.ConcreteModel):
     FLOWS :
         A 2 dimensional set with all flows. Index: `(source, target)`
 
-    NEGATIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `negative_gradient` is set.
-
-    POSITIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `positive_gradient` is set.
-
     **The following variables are created**:
 
     flow
