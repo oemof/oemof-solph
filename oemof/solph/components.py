@@ -846,6 +846,9 @@ class VariableFractionTransformerBlock(SimpleBlock):
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
             \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
     """
+
+    CONSTRAINT_GROUP = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
