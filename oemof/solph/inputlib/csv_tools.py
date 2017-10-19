@@ -7,7 +7,7 @@ from oemof import network
 from ..options import BinaryFlow, Investment
 from ..plumbing import sequence
 from ..network import (Bus, Source, Sink, Flow, LinearTransformer)
-from ..custom import GenericStorage as Storage
+from ..components import GenericStorage as Storage
 
 
 def nodes_from_csv(file_nodes_flows, file_nodes_flows_sequences,

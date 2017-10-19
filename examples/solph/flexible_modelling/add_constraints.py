@@ -18,7 +18,7 @@ from oemof.solph import (Sink, LinearTransformer, Bus, Flow,
 def run_add_constraints_example(solver='cbc', nologg=False):
     if not nologg:
         logging.basicConfig(level=logging.INFO)
-    # ##### creating an oemof solph optimization model, nothing special here ###
+    # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
     # add some nodes
@@ -76,8 +76,8 @@ def run_add_constraints_example(solver='cbc', nologg=False):
 
     def _inflow_share_rule(m, s, e, t):
         """pyomo rule definition: Here we can use all objects from the block or
-        the om object, in this case we don't need anything from the block except
-         the newly defined set MYFLOWS.
+        the om object, in this case we don't need anything from the block
+        except the newly defined set MYFLOWS.
         """
         expr = (om.flow[s, e, t] >= om.flows[s, e].outflow_share[t] *
                 sum(om.flow[i, o, t] for (i, o) in om.FLOWS if o == e))

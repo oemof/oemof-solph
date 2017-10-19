@@ -43,7 +43,7 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 
 # generic chp
 # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-ccet = solph.custom.GenericCHP(
+ccet = solph.components.GenericCHP(
     label='combined_cycle_extraction_turbine',
     fuel_input={bgas: solph.Flow(
         H_L_FG_share=data['H_L_FG_share'])},
