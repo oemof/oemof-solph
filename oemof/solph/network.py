@@ -139,12 +139,18 @@ class Flow:
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
-        defaults = {'fixed': False, 'min': 0, 'max': 1}
+        defaults = {'fixed': False, 'min': 0, 'max': 1,
+                    'positive_gradient': {'ub': None, 'costs': 0},
+                    'negative_gradient': {'ub': None, 'costs': 0}
+                    }
 
         for attribute in set(scalars + sequences + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
-            setattr(self, attribute,
-                    sequence(value) if attribute in sequences else value)
+            if 'gradient' in attribute:
+                setattr(self, attribute, {'ub': sequence(value['ub']), 'costs': value['costs']})
+            else:
+                setattr(self, attribute,
+                        sequence(value) if attribute in sequences else value)
 
         if self.fixed and self.actual_value is None:
             raise ValueError("Can not fix flow value to None. "

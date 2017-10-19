@@ -108,11 +108,11 @@ class Flow(SimpleBlock):
 
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
-                        if g[2].negative_gradient[0] is not None])
+                        if g[2].negative_gradient['ub'][0] is not None])
 
         self.POSITIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
-                        if g[2].positive_gradient[0] is not None])
+                        if g[2].positive_gradient['ub'][0] is not None])
 
         self.INTEGER_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
@@ -129,14 +129,14 @@ class Flow(SimpleBlock):
                                 m.TIMESTEPS, within=NonNegativeIntegers)
         # set upper bound of gradient variable
         for i, o, f in group:
-            if m.flows[i, o].positive_gradient[0] is not None:
+            if m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient[t] * f.nominal_value)
-            if m.flows[i, o].negative_gradient[0] is not None:
+                        f.positive_gradient['ub'][t] * f.nominal_value)
+            if m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient[t] * f.nominal_value)
+                        f.negative_gradient['ub'][t] * f.nominal_value)
 
         # ######################### CONSTRAINTS ###############################
 
@@ -214,6 +214,7 @@ class Flow(SimpleBlock):
 
         variable_costs = 0
         fixed_costs = 0
+        gradient_costs = 0
 
         for i, o in m.FLOWS:
             for t in m.TIMESTEPS:
@@ -221,15 +222,26 @@ class Flow(SimpleBlock):
                 if m.flows[i, o].variable_costs[0] is not None:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
+
+                if m.flows[i, o].positive_gradient['ub'][0] is not None:
+                    gradient_costs += (self.positive_gradient[i, o, t] *
+                                       m.flows[i, o].positive_gradient['costs'])
+
+                if m.flows[i, o].negative_gradient['ub'][0] is not None:
+                    gradient_costs += (self.negative_gradient[i, o, t] *
+                                       m.flows[i, o].negative_gradient['costs'])
+
             # add fixed costs if nominal_value is not None
             if (m.flows[i, o].fixed_costs and
                     m.flows[i, o].nominal_value is not None):
                 fixed_costs += (m.flows[i, o].nominal_value *
                                 m.flows[i, o].fixed_costs)
 
-        # add the costs expression to the block
+
+
         self.fixed_costs = Expression(expr=fixed_costs)
         self.variable_costs = Expression(expr=variable_costs)
+        self.gradient_costs = Expression(expr=gradient_costs)
 
         return fixed_costs + variable_costs
 
