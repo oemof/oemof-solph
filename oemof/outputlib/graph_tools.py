@@ -77,22 +77,23 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     >>> import pandas as pd
     >>> from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
     ...                          OperationalModel, EnergySystem)
+    >>> from oemof.outputlib import graph_tools as gt
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
     >>> b_el = Bus(label='b_el')
-    >>> demand = Sink(label='demand_el',
-    ...               inputs = {b_el: Flow(nominal_value=85,
-    ...                         actual_value=[0.5, 0.25, 0.75],
-    ...                         fixed=True)})
+    >>> demand_el = Sink(label='demand_el',
+    ...                  inputs = {b_el: Flow(nominal_value=85,
+    ...                            actual_value=[0.5, 0.25, 0.75],
+    ...                            fixed=True)})
     >>> pp_gas = LinearTransformer(label='pp_gas',
     ...                            inputs={b_gas: Flow()},
     ...                            outputs={b_el: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
     ...                            conversion_factors={b_el: 0.5})
     >>> om = OperationalModel(es=es)
-    >>> my_graph = graph(energy_system=es, optimization_model=om,
-                         node_color={demand: 'r'}, plot=False)
+    >>> my_graph = gt.graph(energy_system=es, optimization_model=om,
+    ...                     node_color={demand_el: 'r'}, plot=False)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # import networkx as nx
