@@ -208,9 +208,9 @@ class GenericStorageBlock(SimpleBlock):
         # set the initial capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, m.timesteps[-1]] = (n.initial_capacity *
+                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
                                                      n.nominal_capacity)
-                self.capacity[n, m.timesteps[-1]].fix()
+                self.capacity[n, m.TIMESTEPS[-1]].fix()
 
         # storage balance constraint
         def _storage_balance_rule(block, n, t):
