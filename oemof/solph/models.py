@@ -60,13 +60,12 @@ class OperationalModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get('name', 'OperationalModel')
+
         self.es = es
-        self.timeindex = es.timeindex
-        self.timesteps = range(len(self.timeindex))
-        self.timeincrement = sequence(self.timeindex.freq.nanos / 3.6e12)
+
+        self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
 
         self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
-
                                    kwargs.get('constraint_groups', []))
 
         self._constraint_groups += [i for i in self.es.groups
@@ -81,16 +80,14 @@ class OperationalModel(po.ConcreteModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
+        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
+                                ordered=True)
 
         # previous timesteps
-        previous_timesteps = [x - 1 for x in self.timesteps]
-        previous_timesteps[0] = self.timesteps[-1]
+        previous_timesteps = [x - 1 for x in self.TIMESTEPS]
+        previous_timesteps[0] = self.TIMESTEPS.last()
 
         self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
-        # self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
-        #                            initialize=dict(zip(self.TIMESTEPS,
-        #                                                previous_timesteps)))
 
         # pyomo set for all flows in the energy system graph
         self.FLOWS = po.Set(initialize=self.flows.keys(),
