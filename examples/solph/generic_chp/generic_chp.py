@@ -47,7 +47,7 @@ demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
 ccet = solph.components.GenericCHP(
     label='combined_cycle_extraction_turbine',
     fuel_input={bgas: solph.Flow(
-        H_L_FG_share=data['H_L_FG_share'])},
+        H_L_FG_share_max=data['H_L_FG_share_max'])},
     electrical_output={bel: solph.Flow(
         P_max_woDH=data['P_max_woDH'],
         P_min_woDH=data['P_min_woDH'],
@@ -73,7 +73,7 @@ results = processing.results(om)
 # store as csv
 data = results[(ccet,)]['sequences'].to_csv('results_' + file_name)
 
-# plot CCET (scatter)
+# plot CCET
 data = results[(ccet,)]['sequences']
 ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
 ax.set_xlabel('Q (MW)')

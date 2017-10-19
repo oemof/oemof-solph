@@ -625,8 +625,8 @@ class GenericCHPBlock(SimpleBlock):
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.H_L_FG = Var(self.GENERICCHPS, m.TIMESTEPS,
-                          within=NonNegativeReals)
+        self.H_L_FG_max = Var(self.GENERICCHPS, m.TIMESTEPS,
+                              within=NonNegativeReals)
         self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS,
                           within=NonNegativeReals)
         self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
@@ -705,9 +705,9 @@ class GenericCHPBlock(SimpleBlock):
         def _H_L_FG_share_rule(block, n, t):
             """Set flue gas losses as share of fuel flow (not in paper)."""
             expr = 0
-            expr += - self.H_L_FG[n, t]
+            expr += - self.H_L_FG_max[n, t]
             expr += self.H_F[n, t] * \
-                list(n.fuel_input.values())[0].H_L_FG_share[t]
+                list(n.fuel_input.values())[0].H_L_FG_share_max[t]
             return expr == 0
         self.H_L_FG_share = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                        rule=_H_L_FG_share_rule)
@@ -715,7 +715,7 @@ class GenericCHPBlock(SimpleBlock):
         def _P_restriction_rule(block, n, t):
             """Restrict P depending on fuel and heat flow."""
             expr = 0
-            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
+            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_max[n, t]
             expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
             expr += - self.H_F[n, t]
             if n.back_pressure is True:
