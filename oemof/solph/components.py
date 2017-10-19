@@ -718,10 +718,10 @@ class GenericCHPBlock(SimpleBlock):
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
             expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
             expr += - self.H_F[n, t]
-            if n.back_pressure is False:
-                return expr <= 0
-            else:
+            if n.back_pressure is True:
                 return expr == 0
+            else:
+                return expr <= 0
         self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                         rule=_P_restriction_rule)
 

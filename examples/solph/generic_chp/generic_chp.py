@@ -55,7 +55,7 @@ ccet = solph.components.GenericCHP(
         Eta_el_min_woDH=data['Eta_el_min_woDH'])},
     heat_output={bth: solph.Flow(
         Q_CW_min=data['Q_CW_min'])},
-    Beta=data['Beta'], back_pressure=False,
+    Beta=data['Beta'],
     fixed_costs=0)
 
 # create an optimization problem and solve it
@@ -78,29 +78,16 @@ data = results[(ccet,)]['sequences']
 ax = data.plot(kind='scatter', x='Q', y='P', grid=True)
 ax.set_xlabel('Q (MW)')
 ax.set_ylabel('P (MW)')
-plt.savefig('plot_' + file_name + '.pdf', format='pdf', dpi=600)
+plt.savefig('plot_' + file_name + '_PQ.pdf', format='pdf', dpi=600)
 plt.close()
 #plt.show()
 
-# # plot CCET (line)
-# data = results[(ccet,)]['sequences']
-# ax = data.plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_xlabel('Time')
-# ax.set_ylabel('(MW)')
-# plt.show()
-#
-# # plot bus
-# data = views.node(results, 'bel')
-# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_title('Dispatch')
-# ax.set_xlabel('')
-# ax.set_ylabel('Power (MW)')
-# plt.show()
-#
-# # plot bus
-# data = views.node(results, 'bth')
-# ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
-# ax.set_title('Dispatch')
-# ax.set_xlabel('')
-# ax.set_ylabel('Heat flow (MW)')
-# plt.show()
+# plot bus
+data = views.node(results, 'bth')
+ax = data['sequences'].plot(kind='line', drawstyle='steps-post', grid=True)
+ax.set_title('Dispatch')
+ax.set_xlabel('')
+ax.set_ylabel('Heat flow (MW)')
+plt.savefig('plot_' + file_name + '_dispatch.pdf', format='pdf', dpi=600)
+plt.close()
+#plt.show()
