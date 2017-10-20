@@ -35,11 +35,17 @@ class OperationalModel(po.ConcreteModel):
     NODES :
         A set with all nodes of the given energy system.
 
+    FLOWS :
+        A 2 dimensional set with all flows. Index: `(source, target)`
+
     TIMESTEPS :
         A set with all timesteps of the given time horizon.
 
-    FLOWS :
-        A 2 dimensional set with all flows. Index: `(source, target)`
+    TIMEINDEX :
+        A 2-dim set with all periods, timesteps.
+
+    PERIODS :
+        A set with all periods
 
     **The following variables are created**:
 
