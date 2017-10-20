@@ -6,6 +6,7 @@ API changes
 ###########
 
 * Rename `NodesFromCSV` function to `nodes_from_csv`
+* Replace LinearTransformer and LinearN1Transformer classes with one Transformer class. The new class has n inputs and n outputs. Please note that the definition of the conversion factors has changed. See the new docstring to avoid errors (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
 
 
 New features
