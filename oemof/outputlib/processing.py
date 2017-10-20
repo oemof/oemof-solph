@@ -119,8 +119,8 @@ def results(om):
         except IndexError:
             error_message = ('Cannot access index on result data. ' +
                              'Did the optimization terminate' +
-                             ' without errors?' +
-                             'Are decision variables properly used in ' +
+                             ' without errors? ' +
+                             'Are decision variables used correctly in ' +
                              '(newly added) components?')
             raise IndexError(error_message)
 
