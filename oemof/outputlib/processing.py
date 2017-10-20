@@ -85,6 +85,9 @@ def create_dataframe(om):
     # order the data by oemof tuple and timestep
     df = df.sort_values(['oemof_tuple', 'timestep'], ascending=[True, True])
 
+    # drop empty decision variables
+    df = df.dropna(subset=['value'])
+
     return df
 
 
@@ -99,6 +102,8 @@ def results(om):
     and flows e.g. `results[(n,n)]['sequences']`.
     """
     df = create_dataframe(om)
+
+    df.to_csv('df.csv')
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {k: v[['timestep', 'variable_name', 'value']]
