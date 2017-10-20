@@ -764,6 +764,8 @@ class GenericCHPBlock(SimpleBlock):
                                          rule=_H_L_FG_max_rule)
 
         # additional constraints based on component/flow parametrisation
+        # move back to rules or find a way not to overwrite self
+        #
         for n in group:
             # back-pressure characteristics or one-segment model
             if n.back_pressure is True:
@@ -773,7 +775,8 @@ class GenericCHPBlock(SimpleBlock):
                 self.Q_max_res = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                             rule=_Q_max_res_rule)
                 # minimum restriction for heat flows e.g. for motoric CHPs
-                if hasattr(list(n.fuel_input.values())[0], 'H_L_FG_share_min'):
+                if getattr(list(n.fuel_input.values())[0],
+                           'H_L_FG_share_min', False):
                     self.H_L_FG_min = Var(self.GENERICCHPS, m.TIMESTEPS,
                                           within=NonNegativeReals)
                     self.H_L_FG_min_def = Constraint(self.GENERICCHPS,
