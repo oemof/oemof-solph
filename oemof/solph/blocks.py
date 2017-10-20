@@ -498,18 +498,19 @@ class Bus(SimpleBlock):
 
 class Transformer(SimpleBlock):
     """Block for the linear relation of nodes with type
-    class:`.LinearTransformer`
+    class:`.Transformer`
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
-    LINEAR_TRANSFORMERS
-        A set with all :class:`~oemof.solph.network.LinearTransformer` objects.
+    TRANSFORMERS
+        A set with all :class:`~oemof.solph.network.Transformer` objects.
     **The following constraints are created:**
-    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
+    Linear relation :attr:`om.Transformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion\_factor(n, o, t) = \
-            flow(n, o, t), \\\\
+            flow(i, n, t) / conversion\_factor(n, i, t) = \
+            flow(n, o, t) / conversion\_factor(n, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
+            \\forall n \\in \\textrm{TRANSFORMERS}, \\\\
+            \\forall i \\in \\textrm{INPUTS(n)}, \\\\
             \\forall o \\in \\textrm{OUTPUTS(n)}.
     """
     def __init__(self, *args, **kwargs):
@@ -521,13 +522,13 @@ class Transformer(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.LinearTransformers (trsf) objects for which
+            List of oemof.solph.Transformers objects for which
             the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
-            is created for all existing relations of the inputs and all outputs
+            is created for all existing relations of all inputs and all outputs
             of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
+            an attribute `conversion_factors` of type dict containing the
+            conversion factors for all inputs to outputs.
         """
         if group is None:
             return None
