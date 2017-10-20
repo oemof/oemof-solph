@@ -104,7 +104,7 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
                                             b_heat_source: Flow()},
                             outputs={bth: Flow(nominal_value=10)},
                             conversion_factors={
-                                        bel: 3, b_heat_source: cop/(cop-1)})
+                                        bel: 1/3, b_heat_source: (cop-1)/cop})
 
     # ################################ optimization ###########################
 
