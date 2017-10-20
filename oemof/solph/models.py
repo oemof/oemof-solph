@@ -100,8 +100,6 @@ class OperationalModel(po.ConcreteModel):
 
         self.PERIODS = po.Set(initialize=range(len(periods)))
 
-        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
-
         # TODO: Make this robust
         self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS) /
                                               len(self.PERIODS)))

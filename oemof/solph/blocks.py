@@ -167,7 +167,7 @@ class Flow(SimpleBlock):
                     rhs = (m.flows[inp, out].summed_min[p] *
                            m.flows[inp, out].nominal_value)
                 self.summed_min.add((inp, out, p), lhs >= rhs)
-        self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, m.PERDIOS,
+        self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, m.PERIODS,
                                      noruleinit=True)
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
@@ -223,7 +223,7 @@ class Flow(SimpleBlock):
         fixed_costs = 0
 
         for i, o in m.FLOWS:
-            for a, t in m.TIMEINDEX:
+            for p, t in m.TIMEINDEX:
                 # add variable costs
                 if m.flows[i, o].variable_costs[0] is not None:
                     variable_costs += (m.flow[i, o, p, t] * m.timeincrement[t] *
