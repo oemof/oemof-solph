@@ -103,8 +103,6 @@ def results(om):
     """
     df = create_dataframe(om)
 
-    df.to_csv('df.csv')
-
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {k: v[['timestep', 'variable_name', 'value']]
                for k, v in df.groupby('oemof_tuple')}
