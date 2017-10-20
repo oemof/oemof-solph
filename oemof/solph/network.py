@@ -201,22 +201,36 @@ class Transformer(on.Transformer):
     Parameters
     ----------
     conversion_factors : dict
-        Dictionary containing conversion factors for conversion of inflow
-        to specified outflow. Keys are output bus objects.
+        Dictionary containing conversion factors for conversion of each flow.
+        Keys are the connected bus objects.
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
     Examples
     --------
     Defining an linear transformer:
-    >>> bel = Bus()
-    >>> bth = Bus()
-    >>> bng = Bus()
-    >>> trsf = Transformer(conversion_factors={bel: 0.4,
-    ...                                        bth: [1, 2, 3]},
-    ...                          inputs={bng: Flow()})
-    >>> trsf.conversion_factors[bel][3]
-    0.4
+    >>> from oemof import solph
+    >>> bgas = solph.Bus(label="natural_gas")
+    >>> bcoal = solph.Bus(label="hard_coal")
+    >>> bel = solph.Bus(label="electricity")
+    >>> bheat = solph.Bus(label="heat")
+
+    >>> trsf = solph.Transformer(
+    ...    label="pp_gas",
+    ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5,
+    ...                        bgas: 0.8, bcoal: 0.2})
+    >>> print(sorted([x[1][5] for x in trsf.conversion_factors.items()]))
+    [0.2, 0.3, 0.5, 0.8]
+
+    >>> trsf = solph.Transformer(
+    ...    label="pp_gas",
+    ...    inputs={bgas: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5})
+    >>> trsf.conversion_factors[bgas][3]
+    1
 
     Notes
     -----
