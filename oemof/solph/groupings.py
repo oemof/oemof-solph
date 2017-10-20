@@ -17,8 +17,7 @@ groupings specified like this:
 
 """
 
-from .network import (Bus, Transformer, LinearN1Transformer)
-from .options import Investment
+from .network import Bus, Transformer
 from . import blocks
 import oemof.groupings as groupings
 
@@ -43,8 +42,6 @@ def constraint_grouping(node):
         return blocks.Bus
     if type(node) == Transformer:
         return blocks.Transformer
-    if isinstance(node, LinearN1Transformer):
-        return blocks.LinearN1Transformer
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(

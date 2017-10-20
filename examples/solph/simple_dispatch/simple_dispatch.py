@@ -8,8 +8,8 @@ Data: example_data.csv
 
 import os
 import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, LinearN1Transformer,
-                         Bus, Flow, OperationalModel, EnergySystem)
+from oemof.solph import (Sink, Source, Transformer, Bus, Flow, OperationalModel,
+                         EnergySystem)
 from oemof.outputlib import processing, views
 try:
     import matplotlib.pyplot as plt
