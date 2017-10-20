@@ -46,33 +46,33 @@ c_e_Bus_balance(heatBus_2)_:
 = 0
 
 c_e_Transformer_relation(chp_powerplant_gas_gasBus_electricityBus_0)_:
--1 flow(chp_powerplant_gas_electricityBus_0)
-+0.40000000000000002 flow(gasBus_chp_powerplant_gas_0)
+-2.5 flow(chp_powerplant_gas_electricityBus_0)
++1 flow(gasBus_chp_powerplant_gas_0)
 = 0
 
 c_e_Transformer_relation(chp_powerplant_gas_gasBus_electricityBus_1)_:
--1 flow(chp_powerplant_gas_electricityBus_1)
-+0.40000000000000002 flow(gasBus_chp_powerplant_gas_1)
+-2.5 flow(chp_powerplant_gas_electricityBus_1)
++1 flow(gasBus_chp_powerplant_gas_1)
 = 0
 
 c_e_Transformer_relation(chp_powerplant_gas_gasBus_electricityBus_2)_:
--1 flow(chp_powerplant_gas_electricityBus_2)
-+0.40000000000000002 flow(gasBus_chp_powerplant_gas_2)
+-2.5 flow(chp_powerplant_gas_electricityBus_2)
++1 flow(gasBus_chp_powerplant_gas_2)
 = 0
 
 c_e_Transformer_relation(chp_powerplant_gas_gasBus_heatBus_0)_:
--1 flow(chp_powerplant_gas_heatBus_0)
-+0.5 flow(gasBus_chp_powerplant_gas_0)
+-2 flow(chp_powerplant_gas_heatBus_0)
++1 flow(gasBus_chp_powerplant_gas_0)
 = 0
 
 c_e_Transformer_relation(chp_powerplant_gas_gasBus_heatBus_1)_:
--1 flow(chp_powerplant_gas_heatBus_1)
-+0.5 flow(gasBus_chp_powerplant_gas_1)
+-2 flow(chp_powerplant_gas_heatBus_1)
++1 flow(gasBus_chp_powerplant_gas_1)
 = 0
 
 c_e_Transformer_relation(chp_powerplant_gas_gasBus_heatBus_2)_:
--1 flow(chp_powerplant_gas_heatBus_2)
-+0.5 flow(gasBus_chp_powerplant_gas_2)
+-2 flow(chp_powerplant_gas_heatBus_2)
++1 flow(gasBus_chp_powerplant_gas_2)
 = 0
 
 c_u_InvestmentFlow_max(gasBus_chp_powerplant_gas_0)_:
