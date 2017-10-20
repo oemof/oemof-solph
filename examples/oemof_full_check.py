@@ -121,16 +121,16 @@ def run_example_checks():
         results = None
 
     test_results = {
-        (('wind', 'bel'), 'flow'): 19504.415509800005,
-        (('pv', 'bel'), 'flow'): 4205.0081990299996,
-        (('bel', 'demand_el'), 'flow'): 95893.690674837926,
-        (('bel', 'excess_el'), 'flow'): 353.30769076999997,
-        (('pp_chp', 'bel'), 'flow'): 7043.259944773984,
-        (('pp_lig', 'bel'), 'flow'): 16320.727254279591,
-        (('pp_gas', 'bel'), 'flow'): 23848.364613840022,
-        (('pp_coal', 'bel'), 'flow'): 25958.774628000549,
-        (('pp_oil', 'bel'), 'flow'): 2.2872602799999999,
-        (('bel', 'heat_pump'), 'flow'): 635.8390440710001
+        (('wind', 'bel', '0'), 'flow'): 19504.415509800005,
+        (('pv', 'bel', '0'), 'flow'): 4205.0081990299996,
+        (('bel', 'demand_el', '0'), 'flow'): 95893.690674837926,
+        (('bel', 'excess_el', '0'), 'flow'): 353.30769076999997,
+        (('pp_chp', 'bel', '0'), 'flow'): 7043.259944773984,
+        (('pp_lig', 'bel', '0'), 'flow'): 16320.727254279591,
+        (('pp_gas', 'bel', '0'), 'flow'): 23848.364613840022,
+        (('pp_coal', 'bel', '0'), 'flow'): 25958.774628000549,
+        (('pp_oil', 'bel', '0'), 'flow'): 2.2872602799999999,
+        (('bel', 'heat_pump', '0'), 'flow'): 635.8390440710001
     }
 
     check(test_results, testdict[key]['run'], testdict[key], results)
@@ -258,10 +258,10 @@ def run_example_checks():
 
     variable_chp_dict = {
         'objective': 14267160965.0,
-        (('natural_gas', 'fixed_chp_gas'), 'flow'): 0.0,
-        (('natural_gas', 'fixed_chp_gas_2'), 'flow'): 157717049.49999994,
-        (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
-        (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
+        (('natural_gas', 'fixed_chp_gas', '0'), 'flow'): 0.0,
+        (('natural_gas', 'fixed_chp_gas_2', '0'), 'flow'): 157717049.49999994,
+        (('natural_gas', 'variable_chp_gas', '0'), 'flow'): 127626169.47000004,
+        (('rgas', 'natural_gas', '0'), 'flow'): 285343219.29999995}
 
     check(variable_chp_dict, testdict[key]['run'], testdict[key], results)
     # ********* end of variable chp example ***********************************
