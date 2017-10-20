@@ -546,9 +546,9 @@ class Transformer(SimpleBlock):
                         for i in in_flows[n]:
                             try:
                                 lhs = (m.flow[i, n, t] *
-                                       n.conversion_factors[o][t] *
+                                       n.conversion_factors[o][t])
+                                rhs = (m.flow[n, o, t] *
                                        n.conversion_factors[i][t])
-                                rhs = m.flow[n, o, t]
                             except ValueError:
                                 raise ValueError(
                                     "Error in constraint creation",
