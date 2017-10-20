@@ -160,8 +160,8 @@ class GenericStorageBlock(SimpleBlock):
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: capacity(n, t) = capacity(n, previous(t)) \\cdot  \
             (1 - capacity\\_loss_n(t))) \
-            - \\frac{flow(n, o, t)}{\\eta(n, o, t)} \\cdot \\tau \
-            + flow(i, n, t) \\cdot \\eta(i, n, t) \\cdot \\tau
+            - \\frac{flow(n, o, p, t)}{\\eta(n, o, t)} \\cdot \\tau \
+            + flow(i, n, p, t) \\cdot \\eta(i, n, t) \\cdot \\tau
 
     **The following parts of the objective function are created:**
 
@@ -208,12 +208,13 @@ class GenericStorageBlock(SimpleBlock):
         # set the initial capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
-                                                     n.nominal_capacity)
-                self.capacity[n, m.TIMESTEPS[-1]].fix()
+                for p in m.PERIODS:
+                    self.capacity[n, m.PERIOD_TIMESTEPS[p][-1]] = \
+                        (n.initial_capacity * n.nominal_capacity)
+                self.capacity[n, m.PERIODD_TIMESTEPS[p][-1]].fix()
 
         # storage balance constraint
-        def _storage_balance_rule(block, n, t):
+        def _storage_balance_rule(block, n, p, t):
             """Rule definition for the storage balance of every storage n and
             timestep t
             """
@@ -221,12 +222,12 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[I[n], n, t] *
+            expr += (- m.flow[I[n], n, p, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
-            expr += (m.flow[n, O[n], t] /
+            expr += (m.flow[n, O[n], p, t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
+        self.balance = Constraint(self.STORAGES, m.TIMEINDEX,
                                   rule=_storage_balance_rule)
 
     def _objective_expression(self):
@@ -275,7 +276,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     capacity :attr:`om.InvestmentStorage.capacity[n, t]`
         Level of the storage (indexed by STORAGES and TIMESTEPS)
 
-    invest :attr:`om.InvestmentStorage.invest[n, t]`
+    invest :attr:`om.InvestmentStorage.invest[n, p]`
         Nominal capacity of the storage (indexed by STORAGES)
 
 
@@ -294,43 +295,45 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     Initial capacity of :class:`.network.Storage`
         .. math::
-          capacity(n, t_{last}) = invest(n) \\cdot
+          capacity(n, t_{last,p}) = invest(n, p) \\cdot
           initial\_capacity(n), \\\\
           \\forall n \\in \\textrm{INITIAL\_CAPACITY,} \\\\
-          \\forall t \\in \\textrm{TIMESTEPS}.
+          \\forall p \\in \\textrm{PERIODS}.
 
     Connect the invest variables of the storage and the input flow.
-        .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * nominal\_input\_capacity\_ratio(n) \\\\
-          \\forall n \\in \\textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(source(n), n, p) =
+          invest(n, p) * nominal\_input\_capacity\_ratio(n) \\\\
+          \\forall n \\in \\textrm{INVESTSTORAGES} \\\\
+          \\forall p \\in \\textrm{PERIODS}
 
     Connect the invest variables of the storage and the output flow.
-        .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * nominal_output_capacity_ratio(n) \\\\
-          \\forall n \\in \\textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(n, target(n), p) ==
+          invest(n, p) * nominal_output_capacity_ratio(n) \\\\
+          \\forall n \\in \\textrm{INVESTSTORAGES} \\\\
+          \\forall p \\in \\textrm{PERIODS}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t),
+        .. math:: capacity(n, t) \leq invest(n, p) \\cdot capacity\_min(n, t),
             \\\\
             \\forall n \\in \\textrm{MAX\_INVESTSTORAGES,} \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+            \\forall (p, t) \\in \\textrm{TIMEINDEX}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t),
+        .. math:: capacity(n, t) \geq invest(n,p) \\cdot capacity\_min(n, t),
             \\\\
             \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+            \\forall (p, t) \\in \\textrm{TIMEINDEX}.
 
 
     **The following parts of the objective function are created:**
 
     Equivalent periodical costs (investment costs):
         .. math::
-            \\sum_n invest(n) \\cdot ep\_costs(n)
+            \\sum_n \\sum_p invest(n, p) \\cdot ep\_costs(n)
 
     Additionally, if fixed costs are set by the user:
         .. math::
-            \\sum_n invest(n) \\cdot fixed\_costs(n)
+            \\sum_n \\sum_p invest(n, p) \\cdot fixed\_costs(n)
 
     The expression can be accessed by :attr:`om.InvestStorages.fixed_costs` and
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
@@ -367,82 +370,85 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
                             within=NonNegativeReals)
 
-        def _storage_investvar_bound_rule(block, n):
+        def _storage_investvar_bound_rule(block, n, p):
             """Rule definition to bound the invested storage capacity `invest`.
             """
             return 0, n.investment.maximum
-        self.invest = Var(self.INVESTSTORAGES, within=NonNegativeReals,
+        self.invest = Var(self.INVESTSTORAGES, self.PERIODS,
+                          within=NonNegativeReals,
                           bounds=_storage_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        def _storage_balance_rule(block, n, t):
+        def _storage_balance_rule(block, n, p, t):
             """Rule definition for the storage energy balance.
             """
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[i[n], n, t] *
+            expr += (- m.flow[i[n], n, p, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
-            expr += (m.flow[n, o[n], t] /
+            expr += (m.flow[n, o[n], p, t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
+        self.balance = Constraint(self.INVESTSTORAGES, m.TIMEINDEX,
                                   rule=_storage_balance_rule)
 
-        def _initial_capacity_invest_rule(block, n):
+        def _initial_capacity_invest_rule(block, n, p):
             """Rule definition for constraint to connect initial storage
             capacity with capacity of last timesteps.
             """
-            expr = (self.capacity[n, m.TIMESTEPS[-1]] == (n.initial_capacity *
-                                                          self.invest[n]))
+            expr = (self.capacity[n, m.PERIOD_TIMESTEPS[p][-1]] ==
+                    n.initial_capacity * self.invest[n, p])
             return expr
-        self.initial_capacity = Constraint(
-            self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+        self.initial_capacity = Constraint(self.INITIAL_CAPACITY, m.PERIODS,
+                                           rule=_initial_capacity_invest_rule)
 
-        def _storage_capacity_inflow_invest_rule(block, n):
+        def _storage_capacity_inflow_invest_rule(block, n, p):
             """Rule definition of constraint connecting the inflow
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[i[n], n] ==
-                    self.invest[n] * n.nominal_input_capacity_ratio)
+            expr = (m.InvestmentFlow.invest[i[n], n, p] ==
+                    self.invest[n, p] * n.nominal_input_capacity_ratio)
             return expr
         self.storage_capacity_inflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_inflow_invest_rule)
+            self.INVESTSTORAGES, m.PERIODS,
+            rule=_storage_capacity_inflow_invest_rule)
 
-        def _storage_capacity_outflow_invest_rule(block, n):
+        def _storage_capacity_outflow_invest_rule(block, n, p):
             """Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] ==
-                    self.invest[n] * n.nominal_output_capacity_ratio)
+            expr = (m.InvestmentFlow.invest[n, o[n], p] ==
+                    self.invest[n, p] * n.nominal_output_capacity_ratio)
             return expr
         self.storage_capacity_outflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_outflow_invest_rule)
+            self.INVESTSTORAGES, m.PERIODS,
+            rule=_storage_capacity_outflow_invest_rule)
 
-        def _max_capacity_invest_rule(block, n, t):
+        def _max_capacity_invest_rule(block, n, p, t):
             """Rule definition for upper bound constraint for the storage cap.
             """
             expr = (self.capacity[n, t] <= (n.capacity_max[t] *
-                                            self.invest[n]))
+                                            self.invest[n, p]))
             return expr
         self.max_capacity = Constraint(
-            self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
+            self.INVESTSTORAGES, m.TIMEINDEX, rule=_max_capacity_invest_rule)
 
-        def _min_capacity_invest_rule(block, n, t):
+        def _min_capacity_invest_rule(block, n, p, t):
             """Rule definition of lower bound constraint for the storage cap.
             """
             expr = (self.capacity[n, t] >= (n.capacity_min[t] *
-                                            self.invest[n]))
+                                            self.invest[n, p]))
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
         self.min_capacity = Constraint(
-            self.MIN_INVESTSTORAGES, m.TIMESTEPS,
+            self.MIN_INVESTSTORAGES, m.TIMEINDEX,
             rule=_min_capacity_invest_rule)
 
     def _objective_expression(self):
@@ -450,17 +456,20 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         if not hasattr(self, 'INVESTSTORAGES'):
             return 0
 
+        m = self.parent_block()
+
         investment_costs = 0
         fixed_costs = 0
 
         for n in self.INVESTSTORAGES:
-            if n.investment.ep_costs is not None:
-                investment_costs += self.invest[n] * n.investment.ep_costs
-            else:
-                raise ValueError("Missing value for investment costs!")
+            for p in m.PERIODS:
+                if n.investment.ep_costs is not None:
+                    investment_costs += self.invest[n, p] * n.investment.ep_costs
+                else:
+                    raise ValueError("Missing value for investment costs!")
 
-            if n.fixed_costs is not None:
-                fixed_costs += self.invest[n] * n.fixed_costs
+                if n.fixed_costs is not None:
+                    fixed_costs += self.invest[n, p] * n.fixed_costs
         self.investment_costs = Expression(expr=investment_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
 
@@ -831,19 +840,19 @@ class VariableFractionTransformerBlock(SimpleBlock):
 
     Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(input, n, t) = \\\\
-            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
+            flow(input, n, p, t) = \\\\
+            (flow(n, main\_output, t) + flow(n, tapped\_output, p, t) \\cdot \
             main\_flow\_loss\_index(n, t)) /\\\\
             efficiency\_condensing(n, t)\\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (p, t) \\in \\textrm{TIMEINDEX}, \\\\
             \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
     Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(n, main\_output, t) = flow(n, tapped\_output, t) \\cdot \\\\
+            flow(n, main\_output, p, t) = flow(n, tapped\_output, p, t) \\cdot \\\\
             conversion\_factor(n, main\_output, t) / \
             conversion\_factor(n, tapped\_output, t\\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall (p, t) \\in \\textrm{TIMEINDEX}, \\\\
             \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
     """
 
@@ -902,16 +911,16 @@ class VariableFractionTransformerBlock(SimpleBlock):
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output.
             """
-            for t in m.TIMESTEPS:
+            for (p, t) in m.TIMEINDEX:
                 for g in group:
-                    lhs = m.flow[g.inflow, g, t]
+                    lhs = m.flow[g.inflow, g, p, t]
                     rhs = (
-                        (m.flow[g, g.main_output, t] +
-                         m.flow[g, g.tapped_output, t] *
+                        (m.flow[g, g.main_output, p, t] +
+                         m.flow[g, g.tapped_output, p, t] *
                          g.main_flow_loss_index[t]) /
                         g.conversion_factor_single_flow_sq[t]
                         )
-                    block.input_output_relation.add((n, t), (lhs == rhs))
+                    block.input_output_relation.add((n, p, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, noruleinit=True)
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule)
@@ -919,12 +928,12 @@ class VariableFractionTransformerBlock(SimpleBlock):
         def _out_flow_relation_rule(block):
             """Relation between main and tapped output in full chp mode.
             """
-            for t in m.TIMESTEPS:
+            for (p, t) in m.TIMEINDEX:
                 for g in group:
-                    lhs = m.flow[g, g.main_output, t]
-                    rhs = (m.flow[g, g.tapped_output, t] *
+                    lhs = m.flow[g, g.main_output, p, t]
+                    rhs = (m.flow[g, g.tapped_output, p, t] *
                            g.flow_relation_index[t])
-                    block.out_flow_relation.add((g, t), (lhs >= rhs))
+                    block.out_flow_relation.add((g, p, t), (lhs >= rhs))
         self.out_flow_relation = Constraint(group, noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
