@@ -147,7 +147,7 @@ class Flow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint.
             """
             for inp, out in self.SUMMED_MAX_FLOWS:
-                for a in m.PERIODS:
+                for p in m.PERIODS:
                     lhs = sum(m.flow[inp, out, p, ts] * m.timeincrement[ts]
                               for ts in m.TIMESTEPS)
                     rhs = (m.flows[inp, out].summed_max[p] *
@@ -357,13 +357,13 @@ class InvestmentFlow(SimpleBlock):
                 [g[2].min[t] for t in m.TIMESTEPS]) > 0])
 
         # ######################### VARIABLES #################################
-        def _investvar_bound_rule(block, i, o):
+        def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of invest variable.
             """
             return (m.flows[i, o].investment.minimum,
                     m.flows[i, o].investment.maximum)
         # create variable bounded for flows with investement attribute
-        self.invest = Var(self.FLOWS, self.PERIODS, within=NonNegativeReals,
+        self.invest = Var(self.FLOWS, m.PERIODS, within=NonNegativeReals,
                           bounds=_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################

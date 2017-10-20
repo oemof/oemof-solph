@@ -374,7 +374,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """Rule definition to bound the invested storage capacity `invest`.
             """
             return 0, n.investment.maximum
-        self.invest = Var(self.INVESTSTORAGES, self.PERIODS,
+        self.invest = Var(self.INVESTSTORAGES, m.PERIODS,
                           within=NonNegativeReals,
                           bounds=_storage_investvar_bound_rule)
 
