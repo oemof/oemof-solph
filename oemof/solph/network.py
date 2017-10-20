@@ -135,10 +135,11 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer', 'fixed']
+        scalars = ['nominal_value', 'fixed_costs', 'investment', 'nonconvex',
+                   'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
-                     'variable_costs', 'min', 'max']
+                     'variable_costs', 'min', 'max', 'summed_max',
+                     'summed_min']
         defaults = {'fixed': False, 'min': 0, 'max': 1}
 
         for attribute in set(scalars + sequences + list(kwargs)):
