@@ -11,8 +11,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'solph'))
 from storage_investment import storage_investment
 from simple_dispatch import simple_dispatch
 from flexible_modelling import add_constraints
-from csv_reader.dispatch import dispatch
-from csv_reader.investment import investment
 from variable_chp import variable_chp
 
 tolerance = 0.001  # percent
@@ -153,94 +151,6 @@ def run_example_checks():
 
     check(test_results, testdict[key]['run'], testdict[key])
     # *********** end of flexible modelling example ***************************
-
-    # *********** csv reader dispatch example *********************************
-    key = 'csv_reader_dispatch'
-    testdict[key] = {
-        'name': "Dispatch model with csv reader",
-        'solver': 'cbc',
-        'verbose': False,
-        'scenario_path': os.path.join(basic_path, 'solph', 'csv_reader',
-                                      'dispatch', 'scenarios'),
-        'date_from': '2030-01-01 00:00:00',
-        'date_to': '2030-01-14 23:00:00',
-        'nodes_flows': 'example_energy_system.csv',
-        'nodes_flows_sequences': 'example_energy_system_seq.csv',
-        'results_path': os.path.join(os.path.expanduser("~"), 'csv_dispatch')
-    }
-
-    if not os.path.isdir(testdict[key]['results_path']):
-        os.mkdir(testdict[key]['results_path'])
-
-    try:
-        results = dispatch.run_csv_reader_dispatch_example(config=testdict[key])
-        testdict[key]['run'] = True
-    except Exception as e:
-        testdict[key]['messages'] = {'error': e}
-        testdict[key]['run'] = False
-        results = None
-
-    test_results = {
-        (('R1_pp_gas', 'R1_bus_el'), 'flow'): 0.0,
-        (('R1_pp_hard_coal', 'R1_bus_el'), 'flow'): 1031265.0381399998,
-        (('R1_pp_oil', 'R1_bus_el'), 'flow'): 0.0,
-        (('R1_pp_uranium', 'R1_bus_el'), 'flow'): 1428000.0,
-        (('R1_pp_lignite', 'R1_bus_el'), 'flow'): 1410321.1378500001,
-        (('R1_bus_el', 'R1_excess'), 'flow'): 0.0,
-        (('R1_bus_el', 'R1_load'), 'flow'): 8326012.1175384959,
-        (('R1_bus_el', 'R1_R2_powerline'), 'flow'): 0.0,
-        (('R1_solar', 'R1_bus_el'), 'flow'): 109133.28500000003,
-        (('R1_run_of_river', 'R1_bus_el'), 'flow'): 1092000.0,
-        (('R1_wind', 'R1_bus_el'), 'flow'): 472390.93500000017,
-        (('R1_bus_el',), 'duals'): 13325.791131000004,
-        (('R2_R1_powerline', 'R1_bus_el'), 'flow'): 2209649.7471529995,
-        (('R1_shortage', 'R1_bus_el'), 'flow'): 0.0,
-        (('R1_pp_biomass', 'R1_bus_el'), 'flow'): 180136.44901700001,
-        (('R1_pp_mixed_fuels', 'R1_bus_el'), 'flow'): 393115.52601000009}
-
-    check(test_results, testdict[key]['run'], testdict[key], results)
-    # *********** end of csv reader dispatch example **************************
-
-    # *********** csv reader investment example *******************************
-    key = 'csv_reader_investment'
-    testdict[key] = {'name': "Investment model with csv reader",
-                     'solver': 'cbc',
-                     'scenario_path': os.path.join(basic_path, 'solph',
-                                                   'csv_reader', 'investment',
-                                                   'data'),
-                     'date_from': '2030-01-01 00:00:00',
-                     'date_to': '2030-01-14 23:00:00',
-                     'nodes_flows': 'nodes_flows.csv',
-                     'nodes_flows_sequences': 'nodes_flows_seq.csv',
-                     'results_path': os.path.join(os.path.expanduser("~"),
-                                                  'csv_dispatch'),
-                     'verbose': False}
-
-    try:
-        investment.run_csv_reader_investment_example(testdict[key])
-        testdict[key]['run'] = True
-    except Exception as e:
-        testdict[key]['messages'] = {'error': e}
-        testdict[key]['run'] = False
-
-    test_results = {
-        (('REGION1_pp_oil', 'REGION1_bus_el'), 'flow'): 849251.37833000079,
-        (('REGION1_pp_gas', 'REGION1_bus_el'), 'flow'): 0.0,
-        (('REGION1_bus_el', 'REGION1_excess'), 'flow'): 271668.42666399997,
-        (('REGION1_pp_hard_coal', 'REGION1_bus_el'), 'flow'): 0.0,
-        (('REGION1_bus_el',), 'duals'): 29927.322138395313,
-        (('REGION1_storage_phs', 'REGION1_bus_el'), 'flow'): 98097.2121920000,
-        (('REGION1_bus_el', 'REGION1_storage_phs'), 'flow'): 121107.668965000,
-        (('REGION1_wind', 'REGION1_bus_el'), 'flow'): 2935897.092189997,
-        (('REGION1_pp_biomass', 'REGION1_bus_el'), 'flow'): 0.0,
-        (('REGION1_pp_lignite', 'REGION1_bus_el'), 'flow'): 0.0,
-        (('REGION1_pp_uranium', 'REGION1_bus_el'), 'flow'): 0.0,
-        (('REGION1_bus_el', 'REGION1_load'), 'flow'): 3490469.5819933019,
-        (('REGION1_shortage', 'REGION1_bus_el'), 'flow'): 0.0,
-        (('REGION1_solar', 'REGION1_bus_el'), 'flow'): 0.0}
-
-    check(test_results, testdict[key]['run'], testdict[key])
-    # *********** end of csv reader investment example ************************
 
     # ********* variable chp example ******************************************
     key = 'variable_chp'
