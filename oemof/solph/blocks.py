@@ -497,7 +497,7 @@ class Bus(SimpleBlock):
 
 class Transformer(SimpleBlock):
     """Block for the linear relation of nodes with type
-     class:`~oemof.solph.network.Transformer`
+     class:`Transformer`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
@@ -520,7 +520,7 @@ class Transformer(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearTransformer`
+        """ Creates the linear constraint for the class:`Transformer`
         block.
         Parameters
         ----------

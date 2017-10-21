@@ -155,8 +155,6 @@ An instance of the Transformer class can represent a node with multiple input an
 The efficiency has to be constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the thermal powerplant efficiency according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
-.. code-block:: python
-
 A condensing power plant can be defined by a transformer with one input (fuel) and one output (electricity).
 
 .. code-block:: python
