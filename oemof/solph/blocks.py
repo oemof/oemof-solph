@@ -496,7 +496,8 @@ class Bus(SimpleBlock):
 
 
 class Transformer(SimpleBlock):
-    """Block for the linear relation of nodes with type class:`.Transformer`
+    """Block for the linear relation of nodes with type
+     class:`~oemof.solph.network.Transformer`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )

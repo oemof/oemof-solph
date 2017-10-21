@@ -185,7 +185,7 @@ A CHP power plant would be defined in the same manner but with two outputs:
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-A CHP power plant with 70% coal and 30% natural gas can be defines with two inputs and two outputs:
+A CHP power plant with 70% coal and 30% natural gas can be defined with two inputs and two outputs:
 
 .. code-block:: python
 
