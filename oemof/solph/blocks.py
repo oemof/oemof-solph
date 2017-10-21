@@ -448,7 +448,6 @@ class InvestmentFlow(SimpleBlock):
 class Bus(SimpleBlock):
     """Block for all balanced buses.
 
-
     **The following constraints are build:**
 
     Bus balance  :attr:`om.Bus.balance[i, o, t]`
@@ -497,13 +496,16 @@ class Bus(SimpleBlock):
 
 
 class Transformer(SimpleBlock):
-    """Block for the linear relation of nodes with type
-    class:`.Transformer`
+    """Block for the linear relation of nodes with type class:`.Transformer`
+
     **The following sets are created:** (-> see basic sets at
     :class:`.OperationalModel` )
+
     TRANSFORMERS
         A set with all :class:`~oemof.solph.network.Transformer` objects.
+
     **The following constraints are created:**
+
     Linear relation :attr:`om.Transformer.relation[i,o,t]`
         .. math::
             flow(i, n, t) / conversion\_factor(n, i, t) = \
