@@ -93,7 +93,7 @@ class GenericCAESBlock(SimpleBlock):
         self.GENERICCAES = Set(initialize=[n for n in group])
 
         # variables
-        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.H_F = Var(self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals)
 
         def _h_flow_connection_rule(block, n, t):
             """Link fuel consumption to component inflow."""
@@ -101,7 +101,7 @@ class GenericCAESBlock(SimpleBlock):
             expr += self.H_F[n, t]
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
-        self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.h_flow_connection = Constraint(self.GENERICCAES, m.TIMESTEPS,
                                             rule=_h_flow_connection_rule)
 
 # ------------------------------------------------------------------------------
