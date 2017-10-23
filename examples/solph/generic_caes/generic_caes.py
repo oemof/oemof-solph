@@ -7,7 +7,7 @@ Example that illustrates how to use custom component `GenericCAES` can be used.
 import matplotlib.pyplot as plt
 import pandas as pd
 import oemof.solph as solph
-from oemof.outputlib import processing, views
+from oemof.outputlib import processing
 
 
 # read sequence data
@@ -24,14 +24,8 @@ es = solph.EnergySystem(timeindex=idx)
 # resources
 bgas = solph.Bus(label='bgas')
 
-rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow(variable_costs=20)})
-
-# heat
-bth = solph.Bus(label='bth')
-
-source_th = solph.Source(label='source_th', outputs={bth: solph.Flow()})
-
-demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow()})
+rgas = solph.Source(label='rgas',
+                    outputs={bgas: solph.Flow(variable_costs=20)})
 
 # power
 bel = solph.Bus(label='bel')
@@ -78,7 +72,6 @@ caes = solph.custom.GenericCAES(
     electrical_input={bel: solph.Flow()},
     fuel_input={bgas: solph.Flow()},
     electrical_output={bel: solph.Flow()},
-    heat_output={bth: solph.Flow()},
     params=concept, fixed_costs=0)
 
 # create an optimization problem and solve it
@@ -92,8 +85,6 @@ om.solve(solver='gurobi', solve_kwargs={'tee': True})
 
 # create result object
 results = processing.results(om)
-
-# store as csv
 
 # create dataframe with CAES results
 data = results[(caes,)]['sequences']
