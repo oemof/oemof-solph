@@ -11,7 +11,7 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
 import numpy as np
 import warnings
 from oemof.network import Bus, Transformer
-from oemof.solph import Flow, Transformer
+from oemof.solph import Flow
 from .options import Investment
 from .plumbing import sequence
 
