@@ -86,11 +86,11 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     ...                  inputs = {b_el: Flow(nominal_value=85,
     ...                            actual_value=[0.5, 0.25, 0.75],
     ...                            fixed=True)})
-    >>> pp_gas = LinearTransformer(label='pp_gas',
-    ...                            inputs={b_gas: Flow()},
-    ...                            outputs={b_el: Flow(nominal_value=41,
-    ...                                                variable_costs=40)},
-    ...                            conversion_factors={b_el: 0.5})
+    >>> pp_gas = Transformer(label='pp_gas',
+    ...                      inputs={b_gas: Flow()},
+    ...                      outputs={b_el: Flow(nominal_value=41,
+    ...                                          variable_costs=40)},
+    ...                      conversion_factors={b_el: 0.5})
     >>> om = OperationalModel(es=es)
     >>> my_graph = gt.graph(energy_system=es, optimization_model=om,
     ...                     node_color={demand_el: 'r'}, plot=False)
