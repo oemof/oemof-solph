@@ -34,8 +34,10 @@ class EnergySystem(es.EnergySystem):
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from . import GROUPINGS
         from .components import component_grouping
+        from .custom import custom_grouping
         kwargs['groupings'] = (GROUPINGS +
                                [component_grouping] +
+                               [custom_grouping] +
                                kwargs.get('groupings', []))
         super().__init__(**kwargs)
 
@@ -209,7 +211,7 @@ class Transformer(on.Transformer):
     Examples
     --------
     Defining an linear transformer:
-    
+
     >>> from oemof import solph
     >>> bgas = solph.Bus(label="natural_gas")
     >>> bcoal = solph.Bus(label="hard_coal")
