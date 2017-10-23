@@ -162,7 +162,7 @@ A condensing power plant can be defined by a transformer with one input (fuel) a
     b_gas = solph.Bus(label='natural_gas')
     b_el = solph.Bus(label='electricity')
 
-    solph.LinearTransformer(
+    solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={b_el: solph.Flow(nominal_value=10e10)},
@@ -176,7 +176,7 @@ A CHP power plant would be defined in the same manner but with two outputs:
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    solph.LinearTransformer(
+    solph.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30),
@@ -192,7 +192,7 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    solph.LinearTransformer(
+    solph.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30),
@@ -212,7 +212,7 @@ A heat pump would be defined in the same manner. New buses are defined to make t
     # a scalar or a sequence.
     cop = 3
 
-    solph.LinearN1Transformer(
+    solph.Transformer(
         label='heat_pump',
         inputs={b_el: Flow(), b_th_low: Flow()},
         outputs={b_th_high: Flow()},

@@ -209,6 +209,7 @@ class Transformer(on.Transformer):
     Examples
     --------
     Defining an linear transformer:
+    
     >>> from oemof import solph
     >>> bgas = solph.Bus(label="natural_gas")
     >>> bcoal = solph.Bus(label="hard_coal")
@@ -223,6 +224,12 @@ class Transformer(on.Transformer):
     ...                        bgas: 0.8, bcoal: 0.2})
     >>> print(sorted([x[1][5] for x in trsf.conversion_factors.items()]))
     [0.2, 0.3, 0.5, 0.8]
+
+    >>> type(trsf)
+    <class 'oemof.solph.network.Transformer'>
+
+    >>> sorted([str(i) for i in trsf.inputs])
+    ['hard_coal', 'natural_gas']
 
     >>> trsf = solph.Transformer(
     ...    label="pp_gas",
