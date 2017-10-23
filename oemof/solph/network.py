@@ -209,7 +209,7 @@ class Transformer(on.Transformer):
     Examples
     --------
     Defining an linear transformer:
-    
+
     >>> from oemof import solph
     >>> bgas = solph.Bus(label="natural_gas")
     >>> bcoal = solph.Bus(label="hard_coal")
