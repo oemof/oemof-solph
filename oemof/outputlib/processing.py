@@ -85,6 +85,9 @@ def create_dataframe(om):
     # order the data by oemof tuple and timestep
     df = df.sort_values(['oemof_tuple', 'timestep'], ascending=[True, True])
 
+    # drop empty decision variables
+    df = df.dropna(subset=['value'])
+
     return df
 
 
@@ -118,7 +121,8 @@ def results(om):
             results[k] = {'scalars': scalars, 'sequences': sequences}
         except IndexError:
             error_message = ('Cannot access index on result data. ' +
-                             'Did the optimization terminate without errors?')
+                             'Did the optimization terminate' +
+                             ' without errors?')
             raise IndexError(error_message)
 
     # add dual variables for bus constraints
