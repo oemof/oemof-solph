@@ -58,6 +58,11 @@ class GenericCAES(Transformer):
         self.heat_output = kwargs.get('electrical_output')
         self.params = kwargs.get('params')
 
+        # map specific flows to standard API
+        self.inputs.update(kwargs.get('fuel_input'))
+        self.outputs.update(kwargs.get('electrical_output'))
+        self.outputs.update(kwargs.get('heat_output'))
+
 # ------------------------------------------------------------------------------
 # End of generic CAES component
 # ------------------------------------------------------------------------------
@@ -92,6 +97,8 @@ class GenericCAESBlock(SimpleBlock):
 
         self.GENERICCAES = Set(initialize=[n for n in group])
 
+        print('foo', [i for i in self.GENERICCAES])
+
         # variables
         self.H_F = Var(self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals)
 
@@ -99,6 +106,7 @@ class GenericCAESBlock(SimpleBlock):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
+            expr += -5
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
         self.h_flow_connection = Constraint(self.GENERICCAES, m.TIMESTEPS,
@@ -110,5 +118,6 @@ class GenericCAESBlock(SimpleBlock):
 
 
 def custom_grouping(node):
+    """Add groupings for all components which is added in `models.py`."""
     if isinstance(node, GenericCAES):
         return GenericCAESBlock
