@@ -97,8 +97,6 @@ class GenericCAESBlock(SimpleBlock):
 
         self.GENERICCAES = Set(initialize=[n for n in group])
 
-        print('foo', [i for i in self.GENERICCAES])
-
         # variables
         self.H_F = Var(self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals)
 
