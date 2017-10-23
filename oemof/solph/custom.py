@@ -8,8 +8,6 @@ module holds the class definition and the block directly located by each other.
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
-import numpy as np
-import warnings
 from oemof.network import Bus, Transformer
 from oemof.solph import Flow
 from .options import Investment
@@ -43,9 +41,6 @@ class GenericCAES(Transformer):
     electrical_output : dict
         Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical output.
-    heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
 
     Notes
     -----
@@ -54,6 +49,7 @@ class GenericCAES(Transformer):
     """
 
     def __init__(self, *args, **kwargs):
+
         super().__init__(*args, **kwargs)
 
         self.electrical_input = kwargs.get('electrical_input')
@@ -66,7 +62,6 @@ class GenericCAES(Transformer):
         self.inputs.update(kwargs.get('electrical_input'))
         self.inputs.update(kwargs.get('fuel_input'))
         self.outputs.update(kwargs.get('electrical_output'))
-        self.outputs.update(kwargs.get('heat_output'))
 
 # ------------------------------------------------------------------------------
 # End of generic CAES component
@@ -178,7 +173,10 @@ class GenericCAESBlock(SimpleBlock):
 
         # Compression: Capacity on markets
         def cmp_p_constr_rule(block, n, t):
-            return (self.cmp_p[n, t] == m.flow[list(n.electrical_input.keys())[0], n, t])
+            expr = 0
+            expr += -self.cmp_p[n, t]
+            expr += m.flow[list(n.electrical_input.keys())[0], n, t]
+            return expr == 0
         self.cmp_p_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_constr_rule)
 
@@ -200,7 +198,8 @@ class GenericCAESBlock(SimpleBlock):
 
         # Compression: Status of operation (on/off)
         def cmp_st_p_min_constr_rule(block, n, t):
-            return (self.cmp_p[n, t] >= n.params['cmp_p_min'] * self.cmp_st[n, t])
+            return (
+                self.cmp_p[n, t] >= n.params['cmp_p_min'] * self.cmp_st[n, t])
         self.cmp_st_p_min_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_min_constr_rule)
 
@@ -235,8 +234,10 @@ class GenericCAESBlock(SimpleBlock):
 
         # Expansion: Capacity on markets
         def exp_p_constr_rule(block, n, t):
-            return (self.exp_p[n, t] ==
-                    m.flow[n, list(n.electrical_output.keys())[0], t])
+            expr = 0
+            expr += -self.exp_p[n, t]
+            expr += m.flow[n, list(n.electrical_output.keys())[0], t]
+            return expr == 0
         self.exp_p_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule)
 
@@ -258,7 +259,8 @@ class GenericCAESBlock(SimpleBlock):
 
         # Expansion: Status of operation (on/off)
         def exp_st_p_min_constr_rule(block, n, t):
-            return (self.exp_p[n, t] >= n.params['exp_p_min'] * self.exp_st[n, t])
+            return (
+                self.exp_p[n, t] >= n.params['exp_p_min'] * self.exp_st[n, t])
         self.exp_st_p_min_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_min_constr_rule)
 
@@ -279,8 +281,10 @@ class GenericCAESBlock(SimpleBlock):
 
         # Expansion: Fuel allocation
         def exp_q_fuel_constr_rule(block, n, t):
-            return (self.exp_q_fuel_in[n, t] ==
-                    m.flow[list(n.fuel_input.keys())[0], n, t])
+            expr = 0
+            expr += -self.exp_q_fuel_in[n, t]
+            expr += m.flow[list(n.fuel_input.keys())[0], n, t]
+            return expr == 0
         self.exp_q_fuel_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
 
@@ -323,7 +327,8 @@ class GenericCAESBlock(SimpleBlock):
                         (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
             else:
                 return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
-                        n.params['tau'] * (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
+                        n.params['tau'] *
+                        (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
         self.cav_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule)
 
@@ -341,7 +346,8 @@ class GenericCAESBlock(SimpleBlock):
                         (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
             else:
                 return (self.tes_level[n, t] ==
-                        n.params['tau'] * (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
+                        n.params['tau'] *
+                        (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
         self.tes_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_eta_constr_rule)
 
