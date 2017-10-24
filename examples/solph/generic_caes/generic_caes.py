@@ -5,6 +5,7 @@ Example that illustrates how to use custom component `GenericCAES` can be used.
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import oemof.solph as solph
 from oemof.outputlib import processing
@@ -15,7 +16,7 @@ file_name = 'generic_caes.csv'
 input_data = pd.read_csv(file_name, sep=",")
 
 # select periods
-periods = len(input_data[0:24*7*2])-1
+periods = len(input_data[0:2000])-1
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
@@ -97,8 +98,30 @@ other.index = data.index
 data = pd.concat([data, other], axis=1)
 print(data.columns)
 
-# plot dispatch
-columns = ['cav_level', 'cmp_p', 'exp_p', 'eex']
-ax = data[columns].plot(kind='line', drawstyle='steps-post',
-                        grid=True, subplots=True)
+# # plot dispatch
+# columns = ['cav_level', 'cmp_p', 'exp_p', 'eex']
+# ax = data[columns].plot(kind='line', drawstyle='steps-post',
+#                         grid=True, subplots=True)
+# plt.show()
+
+#
+t = data.index
+s = data['cav_level']
+dt = t[1]-t[0]
+dt = dt.total_seconds()
+fa = 1.0/dt  # scan frequency
+
+print('dt=%.5fs (Sample Time)' % dt)
+print('fa=%.2fHz (Frequency)' % fa)
+
+Y = np.fft.fft(s)
+N = len(Y)/2+1
+X = np.linspace(0, fa/2, N, endpoint=True)
+
+hann = np.hanning(len(s))
+Yhann = np.fft.fft(hann*s)
+
+plt.plot(X, 2.0*np.abs(Yhann[:N])/N)
+plt.xlabel('Frequency ($Hz$)')
+plt.ylabel('Amplitude ($MWh$)')
 plt.show()
