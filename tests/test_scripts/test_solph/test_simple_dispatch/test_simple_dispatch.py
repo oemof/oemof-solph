@@ -11,16 +11,10 @@ import pandas as pd
 from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
                          Bus, Flow, OperationalModel, EnergySystem)
 from oemof.outputlib import processing, views
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    plt = None
 
 
-def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
-                                silent=False):
+def test_dispatch_example(solver='cbc', periods=24*5):
     """Create an energy system and optimize the dispatch at least costs."""
-    # ####################### initialize and provide data #####################
 
     datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
     energysystem = EnergySystem(timeindex=datetimeindex)
@@ -112,8 +106,7 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
     optimization_model = OperationalModel(es=energysystem)
 
     # solve problem
-    optimization_model.solve(solver=solver,
-                             solve_kwargs={'tee': tee_var, 'keepfiles': False})
+    optimization_model.solve(solver=solver)
 
     # write back results from optimization object to energysystem
     optimization_model.results()
@@ -130,25 +123,23 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
     # variables are used
     data = views.node(results, 'bel')
 
-    if not silent:
-        print('Optimization successful. Printing some results:',
-              data['sequences'].info())
-
-    # plot data if matplotlib is installed
-    # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    if plt is not None and not silent:
-        ax = data['sequences'].sum(axis=0).plot(kind='barh')
-        ax.set_title('Sums for optimization period')
-        ax.set_xlabel('Energy (MWh)')
-        ax.set_ylabel('Flow')
-        plt.tight_layout()
-        plt.show()
-
     # generate results to be evaluated in tests
-    rdict = data['sequences'].sum(axis=0).to_dict()
+    results= data['sequences'].sum(axis=0).to_dict()
 
-    return rdict
+    test_results = {
+        (('wind', 'bel'), 'flow'): 1773,
+        (('pv', 'bel'), 'flow'): 605,
+        (('bel', 'demand_el'), 'flow'): 7440,
+        (('bel', 'excess_el'), 'flow'): 139,
+        (('pp_chp', 'bel'), 'flow'): 666,
+        (('pp_lig', 'bel'), 'flow'): 1210,
+        (('pp_gas', 'bel'), 'flow'): 1519,
+        (('pp_coal', 'bel'), 'flow'): 1925,
+        (('pp_oil', 'bel'), 'flow'): 0,
+        (('bel', 'heat_pump'), 'flow'): 118,
+    }
 
-
-if __name__ == "__main__":
-    run_simple_dispatch_example()
+    for key in test_results.keys():
+        a = int(round(results[key]))
+        b = int(round(test_results[key]))
+        assert a == b, "{0}: {1} not equal to {2}".format(key, a, b)
