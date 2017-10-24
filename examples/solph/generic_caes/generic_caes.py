@@ -104,7 +104,7 @@ print(data.columns)
 #                         grid=True, subplots=True)
 # plt.show()
 
-#
+# add FFT analysis
 t = data.index
 s = data['cav_level']
 dt = t[1]-t[0]
@@ -117,11 +117,16 @@ print('fa=%.2fHz (Frequency)' % fa)
 Y = np.fft.fft(s)
 N = len(Y)/2+1
 X = np.linspace(0, fa/2, N, endpoint=True)
+X = X * 60 * 60 * 24
 
 hann = np.hanning(len(s))
 Yhann = np.fft.fft(hann*s)
+Yscaled = 2.0*np.abs(Yhann[:N])/N
 
-plt.plot(X, 2.0*np.abs(Yhann[:N])/N)
-plt.xlabel('Frequency ($Hz$)')
-plt.ylabel('Amplitude ($MWh$)')
+fft = pd.DataFrame(index=X, data=Yscaled)
+
+ax = fft.plot(kind='line', drawstyle='steps-post', grid=True, legend=None)
+ax.set_xlim([min(fft.index)-1, max(fft.index)+1])
+ax.set_xlabel('Frequency ($1/d$)')
+ax.set_ylabel('Amplitude ($MWh$)')
 plt.show()
