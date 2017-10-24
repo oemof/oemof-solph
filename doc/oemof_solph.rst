@@ -194,7 +194,7 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
 
     solph.Transformer(
         label='pp_chp',
-        inputs={b_gas: Flow()},
+        inputs={b_gas: Flow(), b_coal: Flow()},
         outputs={b_el: Flow(nominal_value=30),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4,
