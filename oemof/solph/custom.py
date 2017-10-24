@@ -55,7 +55,6 @@ class GenericCAES(Transformer):
         self.electrical_input = kwargs.get('electrical_input')
         self.fuel_input = kwargs.get('fuel_input')
         self.electrical_output = kwargs.get('electrical_output')
-        self.heat_output = kwargs.get('electrical_output')
         self.params = kwargs.get('params')
 
         # map specific flows to standard API
