@@ -17,11 +17,21 @@ New features
   See examples for usage!
 * A new component `GenericCHP` allows an accurate modelling of different CHP
   types including combined-cycle plant.
+* Add an outputlib module to draw and plot energy system graphs using networkx.
+* Sort columns of result dataframe lexicographically.
+* It's now possible to modify a :class:`node <oemof.network.Node>`'s
+  :attr:`inputs <oemof.network.Node.inputs>` and `outputs
+  <oemof.network.Node.outputs>` by inserting and removing :class:`node
+  <oemof.network.Node>`s to and from the correspoding dictionaries.
+  :attr:`Outputs <oemof.network.Node.outputs>` where already working
+  previously, but due to an implementation quirk, :attr:`inputs
+  <oemof.network.Node.inputs>` did not behave as expected. This is now fixed.
 
 
 Documentation
 #############
 
+* Proofread (`issue #320 <https://github.com/oemof/oemof_base/issues/320>`_)
 
 Bug fixes
 #########
@@ -43,3 +53,4 @@ Contributors
 * Stephan Günther
 * Simon Hilpert
 * Uwe Krien
+* Jens-Olaf Delfs
