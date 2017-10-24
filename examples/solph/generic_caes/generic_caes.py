@@ -16,7 +16,7 @@ file_name = 'generic_caes.csv'
 input_data = pd.read_csv(file_name, sep=",")
 
 # select periods
-periods = len(input_data[0:2000])-1
+periods = len(input_data[0:8760])-1
 
 # create an energy system
 idx = pd.date_range('1/1/2017', periods=periods, freq='H')
@@ -111,22 +111,20 @@ dt = t[1]-t[0]
 dt = dt.total_seconds()
 fa = 1.0/dt  # scan frequency
 
-print('dt=%.5fs (Sample Time)' % dt)
-print('fa=%.2fHz (Frequency)' % fa)
 
 Y = np.fft.fft(s)
 N = len(Y)/2+1
 X = np.linspace(0, fa/2, N, endpoint=True)
-X = X * 60 * 60 * 24
+X = X * 60 * 60 * 24 * 7 * 1
 
 hann = np.hanning(len(s))
 Yhann = np.fft.fft(hann*s)
-Yscaled = 2.0*np.abs(Yhann[:N])/N
+Yscaled = 2.0 * np.abs(Yhann[:N])/N
 
 fft = pd.DataFrame(index=X, data=Yscaled)
 
 ax = fft.plot(kind='line', drawstyle='steps-post', grid=True, legend=None)
 ax.set_xlim([min(fft.index)-1, max(fft.index)+1])
-ax.set_xlabel('Frequency ($1/d$)')
+ax.set_xlabel('Frequency ($1/w$)')
 ax.set_ylabel('Amplitude ($MWh$)')
 plt.show()
