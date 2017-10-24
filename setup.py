@@ -36,5 +36,4 @@ setup(name='oemof',
       entry_points={
           'console_scripts': [
               'oemof_installation_test = '
-              'tests.test_installation:check_oemof_installation']}
-     )
+              'tests.test_installation:check_oemof_installation']})
