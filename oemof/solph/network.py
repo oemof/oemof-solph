@@ -217,7 +217,7 @@ class Transformer(on.Transformer):
     >>> bheat = solph.Bus(label="heat")
 
     >>> trsf = solph.Transformer(
-    ...    label="pp_gas",
+    ...    label="pp_gas_1",
     ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5,
@@ -231,12 +231,12 @@ class Transformer(on.Transformer):
     >>> sorted([str(i) for i in trsf.inputs])
     ['hard_coal', 'natural_gas']
 
-    >>> trsf = solph.Transformer(
-    ...    label="pp_gas",
+    >>> trsf_new = solph.Transformer(
+    ...    label="pp_gas_2",
     ...    inputs={bgas: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5})
-    >>> trsf.conversion_factors[bgas][3]
+    >>> trsf_new.conversion_factors[bgas][3]
     1
 
     Notes

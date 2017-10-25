@@ -77,7 +77,7 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
-    solph.LinearTransformer(
+    solph.Transformer(
         label='fixed_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel2: solph.Flow(), bth2: solph.Flow()},

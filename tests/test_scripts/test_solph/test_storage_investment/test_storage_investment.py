@@ -71,7 +71,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         fixed_costs=15)})
 
     # Transformer
-    solph.LinearTransformer(
+    solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},

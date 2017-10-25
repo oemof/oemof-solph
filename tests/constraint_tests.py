@@ -72,7 +72,7 @@ class Constraint_Tests:
 
         bel = solph.Bus(label='electricity')
 
-        Transformer(
+        solph.Transformer(
             label='powerplantGas',
             inputs={bgas: solph.Flow()},
             outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
@@ -88,7 +88,7 @@ class Constraint_Tests:
 
         bel = solph.Bus(label='electricity')
 
-        Transformer(
+        solph.Transformer(
             label='powerplant_gas',
             inputs={bgas: solph.Flow()},
             outputs={bel: solph.Flow(variable_costs=50,
@@ -206,7 +206,7 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
         bth = solph.Bus(label='thermalBus')
 
-        Transformer(
+        solph.Transformer(
             label='powerplantGasCoal',
             inputs={bbms: solph.Flow(), bgas: solph.Flow()},
             outputs={bel: solph.Flow(variable_costs=50),
@@ -225,13 +225,13 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
         bth = solph.Bus(label='thermalBus')
 
-        Transformer(
+        solph.Transformer(
             label='powerplant_gas_coal',
             inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
             outputs={bel: solph.Flow(variable_costs=50,
-                               investment=solph.Investment(maximum=1000,
-                                                           ep_costs=20)),
-                     bth: Flow(variable_costs=20)
+                                     investment=solph.Investment(maximum=1000,
+                                                                 ep_costs=20)),
+                     bth: solph.Flow(variable_costs=20)
                      },
             conversion_factors={bgas: 0.58, bcoal: 0.2,
                                 bel: 0.3, bth: 0.5})
@@ -245,7 +245,7 @@ class Constraint_Tests:
         bheat = solph.Bus(label='heatBus')
         bel = solph.Bus(label='electricityBus')
 
-        Transformer(
+        solph.Transformer(
             label='CHPpowerplantGas',
             inputs={bgas: solph.Flow(nominal_value=10e10, variable_costs=50)},
             outputs={bel: solph.Flow(), bheat: solph.Flow()},
@@ -261,7 +261,7 @@ class Constraint_Tests:
         bheat = solph.Bus(label='heatBus')
         bel = solph.Bus(label='electricityBus')
 
-        Transformer(
+        solph.Transformer(
             label='chp_powerplant_gas',
             inputs={bgas: solph.Flow(variable_costs=50,
                                      investment=solph.Investment(maximum=1000,
