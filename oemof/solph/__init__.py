@@ -1,5 +1,5 @@
-from oemof.solph.network import (Sink, Source, LinearTransformer, Bus,
-                                 Flow, EnergySystem, LinearN1Transformer)
+from oemof.solph.network import (Sink, Source, Transformer, Bus,
+                                 Flow, EnergySystem)
 from oemof.solph.models import OperationalModel
 from oemof.solph.groupings import GROUPINGS
 from oemof.solph.options import (Investment, NonConvex)

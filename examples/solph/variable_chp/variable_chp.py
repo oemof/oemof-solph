@@ -86,14 +86,14 @@ def run_variable_chp_example(number_timesteps=192,
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
 
     # This is just a dummy transformer with a nominal input of zero
-    solph.LinearTransformer(
+    solph.Transformer(
         label='fixed_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=0)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5})
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
-    solph.LinearTransformer(
+    solph.Transformer(
         label='fixed_chp_gas_2',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel2: solph.Flow(), bth2: solph.Flow()},

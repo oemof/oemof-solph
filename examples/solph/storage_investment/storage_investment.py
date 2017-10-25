@@ -97,7 +97,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple transformer object representing a gas power plant
-    solph.LinearTransformer(
+    solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
