@@ -72,7 +72,7 @@ class Constraint_Tests:
 
         bel = solph.Bus(label='electricity')
 
-        solph.LinearTransformer(
+        Transformer(
             label='powerplantGas',
             inputs={bgas: solph.Flow()},
             outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
@@ -88,7 +88,7 @@ class Constraint_Tests:
 
         bel = solph.Bus(label='electricity')
 
-        solph.LinearTransformer(
+        Transformer(
             label='powerplant_gas',
             inputs={bgas: solph.Flow()},
             outputs={bel: solph.Flow(variable_costs=50,
@@ -198,39 +198,45 @@ class Constraint_Tests:
 
         self.compare_lp_files('storage_invest.lp')
 
-    def test_linear_n1transformer(self):
+    def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
         """
         bgas = solph.Bus(label='gasBus')
         bbms = solph.Bus(label='biomassBus')
         bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='thermalBus')
 
-        solph.LinearN1Transformer(
+        Transformer(
             label='powerplantGasCoal',
             inputs={bbms: solph.Flow(), bgas: solph.Flow()},
-            outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
-            conversion_factors={bgas: 0.4, bbms: 0.1})
+            outputs={bel: solph.Flow(variable_costs=50),
+                     bth: solph.Flow(nominal_value=5e10, variable_costs=20)},
+            conversion_factors={bgas: 0.4, bbms: 0.1,
+                                bel: 0.3, bth: 0.5})
 
-        self.compare_lp_files('linear_n1_transformer.lp')
+        self.compare_lp_files('transformer.lp')
 
-    def test_linear_n1transformer_invest(self):
+    def test_transformer_invest(self):
         """Constraint test of a LinearN1Transformer with Investment.
         """
 
         bgas = solph.Bus(label='gasBus')
         bcoal = solph.Bus(label='coalBus')
         bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='thermalBus')
 
-        solph.LinearN1Transformer(
+        Transformer(
             label='powerplant_gas_coal',
             inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
             outputs={bel: solph.Flow(variable_costs=50,
-                                     investment=solph.Investment(maximum=1000,
-                                                                 ep_costs=20))
+                               investment=solph.Investment(maximum=1000,
+                                                           ep_costs=20)),
+                     bth: Flow(variable_costs=20)
                      },
-            conversion_factors={bgas: 0.58, bcoal: 0.2})
+            conversion_factors={bgas: 0.58, bcoal: 0.2,
+                                bel: 0.3, bth: 0.5})
 
-        self.compare_lp_files('linear_n1_transformer_invest.lp')
+        self.compare_lp_files('transformer_invest.lp')
 
     def test_linear_transformer_chp(self):
         """Constraint test of a LinearTransformer without Investment (two outputs).
@@ -239,7 +245,7 @@ class Constraint_Tests:
         bheat = solph.Bus(label='heatBus')
         bel = solph.Bus(label='electricityBus')
 
-        solph.LinearTransformer(
+        Transformer(
             label='CHPpowerplantGas',
             inputs={bgas: solph.Flow(nominal_value=10e10, variable_costs=50)},
             outputs={bel: solph.Flow(), bheat: solph.Flow()},
@@ -255,7 +261,7 @@ class Constraint_Tests:
         bheat = solph.Bus(label='heatBus')
         bel = solph.Bus(label='electricityBus')
 
-        solph.LinearTransformer(
+        Transformer(
             label='chp_powerplant_gas',
             inputs={bgas: solph.Flow(variable_costs=50,
                                      investment=solph.Investment(maximum=1000,

@@ -49,8 +49,7 @@ class OperationalModel(po.ConcreteModel):
         the corresponding flow object.
 
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
-                         blocks.LinearN1Transformer,
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.Transformer,
                          blocks.InvestmentFlow, blocks.Flow,
                          blocks.NonConvexFlow]
 

@@ -8,8 +8,8 @@ Data: example_data.csv
 
 import os
 import pandas as pd
-from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
-                         Bus, Flow, OperationalModel, EnergySystem)
+from oemof.solph import (Sink, Source, Transformer, Bus, Flow, OperationalModel,
+                         EnergySystem)
 from oemof.outputlib import processing, views
 
 
@@ -55,37 +55,37 @@ def test_dispatch_example(solver='cbc', periods=24*5):
                                        fixed=True)})
 
     # power plants
-    pp_coal = LinearTransformer(label='pp_coal',
-                                inputs={bcoal: Flow()},
-                                outputs={bel: Flow(nominal_value=20.2,
+    pp_coal = Transformer(label='pp_coal',
+                          inputs={bcoal: Flow()},
+                          outputs={bel: Flow(nominal_value=20.2,
                                                    variable_costs=25)},
-                                conversion_factors={bel: 0.39})
+                          conversion_factors={bel: 0.39})
 
-    pp_lig = LinearTransformer(label='pp_lig',
-                               inputs={blig: Flow()},
-                               outputs={bel: Flow(nominal_value=11.8,
+    pp_lig = Transformer(label='pp_lig',
+                         inputs={blig: Flow()},
+                         outputs={bel: Flow(nominal_value=11.8,
                                                   variable_costs=19)},
-                               conversion_factors={bel: 0.41})
+                         conversion_factors={bel: 0.41})
 
-    pp_gas = LinearTransformer(label='pp_gas',
-                               inputs={bgas: Flow()},
-                               outputs={bel: Flow(nominal_value=41,
+    pp_gas = Transformer(label='pp_gas',
+                         inputs={bgas: Flow()},
+                         outputs={bel: Flow(nominal_value=41,
                                                   variable_costs=40)},
-                               conversion_factors={bel: 0.50})
+                         conversion_factors={bel: 0.50})
 
-    pp_oil = LinearTransformer(label='pp_oil',
-                               inputs={boil: Flow()},
-                               outputs={bel: Flow(nominal_value=5,
+    pp_oil = Transformer(label='pp_oil',
+                         inputs={boil: Flow()},
+                         outputs={bel: Flow(nominal_value=5,
                                                   variable_costs=50)},
-                               conversion_factors={bel: 0.28})
+                         conversion_factors={bel: 0.28})
 
     # combined heat and power plant (chp)
-    pp_chp = LinearTransformer(label='pp_chp',
-                               inputs={bgas: Flow()},
-                               outputs={bel: Flow(nominal_value=30,
+    pp_chp = Transformer(label='pp_chp',
+                         inputs={bgas: Flow()},
+                         outputs={bel: Flow(nominal_value=30,
                                                   variable_costs=42),
                                         bth: Flow(nominal_value=40)},
-                               conversion_factors={bel: 0.3, bth: 0.4})
+                         conversion_factors={bel: 0.3, bth: 0.4})
 
     # heatpump with a coefficient of performance (COP) of 3
     b_heat_source = Bus(label='b_heat_source')
@@ -93,12 +93,12 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     heat_source = Source(label='heat_source', outputs={b_heat_source: Flow()})
 
     cop = 3
-    heat_pump = LinearN1Transformer(label='heat_pump',
-                                    inputs={bel: Flow(),
+    heat_pump = Transformer(label='heat_pump',
+                            inputs={bel: Flow(),
                                             b_heat_source: Flow()},
-                                    outputs={bth: Flow(nominal_value=10)},
-                                    conversion_factors={
-                                        bel: 3, b_heat_source: cop/(cop-1)})
+                            outputs={bth: Flow(nominal_value=10)},
+                            conversion_factors={
+                                        bel: 1/3, b_heat_source: (cop-1)/cop})
 
     # ################################ optimization ###########################
 
