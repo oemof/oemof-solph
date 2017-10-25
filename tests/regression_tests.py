@@ -1,6 +1,8 @@
 import logging
 
-from nose.tools import eq_, nottest, ok_
+from nose.tools import eq_, ok_
+import unittest
+
 import pandas as pd
 
 from oemof.energy_system import EnergySystem as ES
@@ -25,7 +27,7 @@ class TestSolphAndItsResults:
 
     # TODO: Fix this test so that it works with the new solph and can be
     #       re-enabled.
-    @nottest
+    @unittest.skip("'test_issue_74' will soon be fixed by @gnn.")
     def test_issue_74(self):
         Storage.optimization_options.update({'investment': True})
         bus = Bus(uid="bus")
@@ -49,7 +51,7 @@ class TestSolphAndItsResults:
 
     # TODO: Fix this test so that it works with the new solph and can be
     #       re-enabled.
-    @nottest
+    @unittest.skip("Result tests will soon be fixed by @gnn.")
     def test_bus_to_sink_outputs_in_results_dataframe(self):
         bus = Bus(uid="bus")
         source = FS(label="source", outputs={bus: Flow(
