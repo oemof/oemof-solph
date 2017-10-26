@@ -79,4 +79,4 @@ def test_gen_chp():
     for key in test_dict.keys():
         a = int(round(data[key]))
         b = int(round(test_dict[key]))
-        assert a == b, "{0}: {1} not equal to {2}".format(key, a, b)
+        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)

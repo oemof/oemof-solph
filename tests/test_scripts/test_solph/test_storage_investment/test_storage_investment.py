@@ -120,4 +120,4 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     for key in stor_invest_dict.keys():
         a = int(round(my_results[key]))
         b = int(round(stor_invest_dict[key]))
-        assert a == b, "{0}: {1} not equal to {2}".format(key, a, b)
+        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)

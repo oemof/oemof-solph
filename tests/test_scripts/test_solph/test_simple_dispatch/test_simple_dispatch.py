@@ -142,4 +142,4 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     for key in test_results.keys():
         a = int(round(results[key]))
         b = int(round(test_results[key]))
-        assert a == b, "{0}: {1} not equal to {2}".format(key, a, b)
+        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)

@@ -118,4 +118,4 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     for key in variable_chp_dict.keys():
         a = int(round(myresults[key]))
         b = int(round(variable_chp_dict[key]))
-        assert a == b, "{0}: {1} not equal to {2}".format(key, a, b)
+        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
