@@ -15,7 +15,7 @@ from oemof.solph import (Sink, Transformer, Bus, Flow,
                          OperationalModel, EnergySystem)
 
 
-def run_add_constraints_example(solver='cbc', nologg=False):
+def test_add_constraints_example(solver='cbc', nologg=False):
     if not nologg:
         logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ##
@@ -95,6 +95,3 @@ def run_add_constraints_example(solver='cbc', nologg=False):
     # you may print the model with om.pprint()
     om.solve(solver=solver)
     logging.info("Successfully finished.")
-
-if __name__ == "__main__":
-    run_add_constraints_example()

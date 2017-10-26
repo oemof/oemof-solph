@@ -6,8 +6,8 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
-from .plumbing import sequence
-from ..outputlib import processing
+from oemof.solph.plumbing import sequence
+from oemof.outputlib import processing
 import logging
 
 # #############################################################################
