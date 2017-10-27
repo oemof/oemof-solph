@@ -85,6 +85,9 @@ def create_dataframe(om):
     # order the data by oemof tuple and timestep
     df = df.sort_values(['oemof_tuple', 'timestep'], ascending=[True, True])
 
+    # drop empty decision variables
+    df = df.dropna(subset=['value'])
+
     return df
 
 
