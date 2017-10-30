@@ -61,7 +61,7 @@ def test_gen_chp():
         fixed_costs=0)
 
     # create an optimization problem and solve it
-    om = solph.OperationalModel(es)
+    om = solph.Model(es)
 
     # solve model
     om.solve(solver='cbc')

@@ -92,7 +92,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     )
 
     # Solve model
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
     om.solve(solver=solver)
 
     # Check dump and restore

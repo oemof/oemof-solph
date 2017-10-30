@@ -98,7 +98,7 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
 
     logging.info('Optimise the energy system')
 
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
 
     logging.info('Solve the optimization problem')
     om.solve(solver=solver)
