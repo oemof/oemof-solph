@@ -30,7 +30,7 @@ class Constraint_Tests:
                                                timeindex=self.date_time_index)
 
     def compare_lp_files(self, filename, ignored=None):
-        om = solph.OperationalModel(self.energysystem,
+        om = solph.Model(self.energysystem,
                                     timeindex=self.energysystem.timeindex)
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
         new_filename = ospath.join(self.tmppath, tmp_filename)
