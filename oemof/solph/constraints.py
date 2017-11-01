@@ -45,3 +45,15 @@ def emission_limit(om, flows=None, limit=None):
     om.emission_limit = po.Constraint(rule=emission_rule)
 
     return om
+
+
+def connect_investment_variables(om, invest):
+
+    iset = set(n for n in range(len(invest) - 1))
+
+    def connect_invest_rule(m, n):
+        return invest[n][0] * invest[n][1] == invest[n+1][0] * invest[n+1][1]
+
+    om.invest_connect_cnstr = po.Constraint(iset, rule=connect_invest_rule)
+
+    return om
