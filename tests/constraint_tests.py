@@ -30,7 +30,7 @@ class Constraint_Tests:
                                                timeindex=self.date_time_index)
 
     def get_om(self):
-        return solph.OperationalModel(self.energysystem,
+        return solph.Model(self.energysystem,
                                       timeindex=self.energysystem.timeindex)
 
     def compare_lp_files(self, filename, ignored=None, my_om=None):
