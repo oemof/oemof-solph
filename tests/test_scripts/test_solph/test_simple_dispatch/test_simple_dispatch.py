@@ -8,7 +8,7 @@ Data: example_data.csv
 
 import os
 import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, Bus, Flow, OperationalModel,
+from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
 from oemof.outputlib import processing, views
 
@@ -103,7 +103,7 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
-    optimization_model = OperationalModel(es=energysystem)
+    optimization_model = Model(es=energysystem)
 
     # solve problem
     optimization_model.solve(solver=solver)

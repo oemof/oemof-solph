@@ -145,7 +145,7 @@ def meta_results(om, undefined=False):
     Valid keys of the resulting dictionary are: 'objective', 'problem',
     'solver'.
 
-    om : oemof.solph.OperationalModel
+    om : oemof.solph.Model
         A solved Model.
     undefined : bool
         By default (False) only defined keys can be found in the dictionary.

@@ -22,7 +22,7 @@ class Flow(SimpleBlock):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     SUMMED_MAX_FLOWS
         A set of flows with the attribute :attr:`summed_max` being not None.
@@ -238,7 +238,7 @@ class InvestmentFlow(SimpleBlock):
     """Block for all flows with :attr:`investment` being not None.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     FLOWS
         A set of flows with the attribute :attr:`invest` of type
@@ -500,7 +500,7 @@ class Transformer(SimpleBlock):
     :class:`~oemof.solph.network.Transformer`
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     TRANSFORMERS
         A set with all :class:`~oemof.solph.network.Transformer` objects.
@@ -566,7 +566,7 @@ class NonConvexFlow(SimpleBlock):
     """
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
 
         A set of flows with the attribute :attr:`nonconvex` of type
