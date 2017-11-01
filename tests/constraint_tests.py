@@ -304,9 +304,13 @@ class Constraint_Tests:
         solph.Source(label='source2', outputs={bel: solph.Flow(
             nominal_value=100, emission=0.8)})
 
+        # Should be ignored because the emission attribute is not defined.
+        solph.Source(label='source3', outputs={bel: solph.Flow(
+            nominal_value=100)})
+
         om = self.get_om()
 
-        solph.constraints.emission_limit(om, om.flows, limit=777)
+        solph.constraints.emission_limit(om, limit=777)
 
         self.compare_lp_files('emission_limit.lp', my_om=om)
 
@@ -315,9 +319,21 @@ class Constraint_Tests:
         """
         def define_emission_limit():
             bel = solph.Bus(label='electricityBus')
+            solph.Source(label='source1', outputs={bel: solph.Flow(
+                nominal_value=100, emission=0.8)})
             solph.Source(label='source2', outputs={bel: solph.Flow(
                 nominal_value=100)})
             om = self.get_om()
             solph.constraints.emission_limit(om, om.flows, limit=777)
         assert_raises(ValueError, define_emission_limit)
 
+    def test_flow_without_emission_for_emission_constraint_no_error(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.8)})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nominal_value=100)})
+        om = self.get_om()
+        solph.constraints.emission_limit(om, limit=777)
