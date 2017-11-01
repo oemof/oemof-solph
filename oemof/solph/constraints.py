@@ -48,6 +48,23 @@ def emission_limit(om, flows=None, limit=None):
 
 
 def connect_investment_variables(om, invest):
+    """
+
+    Parameters
+    ----------
+    om : oemof.solph.Model
+        Model to which constraints are added.
+    invest : list of tuple (po.Var, float)
+        A list of tuples with the investment variable and a factor. This will
+        equalise the investment variables multiplied with the factor
+        invest_var1 * factor1 == investvar2 * factor2,
+        invest_var2 * factor2 == investvar3 * factor3, and so on
+
+    Returns
+    -------
+    om.solph.Model
+
+    """
 
     iset = set(n for n in range(len(invest) - 1))
 
