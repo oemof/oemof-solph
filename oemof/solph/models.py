@@ -6,8 +6,8 @@ import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
-from .plumbing import sequence
-from ..outputlib import processing
+from oemof.solph.plumbing import sequence
+from oemof.outputlib import processing
 import logging
 
 # #############################################################################
@@ -49,8 +49,7 @@ class OperationalModel(po.ConcreteModel):
         the corresponding flow object.
 
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
-                         blocks.LinearN1Transformer,
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.Transformer,
                          blocks.InvestmentFlow, blocks.Flow,
                          blocks.NonConvexFlow]
 

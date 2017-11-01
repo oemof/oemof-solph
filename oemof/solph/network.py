@@ -10,7 +10,7 @@ connected.
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
-from .plumbing import sequence
+from oemof.solph.plumbing import sequence
 
 
 class EnergySystem(es.EnergySystem):
@@ -195,14 +195,14 @@ class Source(on.Source):
     pass
 
 
-class LinearTransformer(on.Transformer):
-    """A Linear Transformer object.
+class Transformer(on.Transformer):
+    """A Linear Transformer object with n inputs and n outputs.
 
     Parameters
     ----------
     conversion_factors : dict
-        Dictionary containing conversion factors for conversion of inflow
-        to specified outflow. Keys are output bus objects.
+        Dictionary containing conversion factors for conversion of each flow.
+        Keys are the connected bus objects.
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
@@ -210,57 +210,50 @@ class LinearTransformer(on.Transformer):
     --------
     Defining an linear transformer:
 
-    >>> bel = Bus()
-    >>> bth = Bus()
-    >>> bng = Bus()
-    >>> trsf = LinearTransformer(conversion_factors={bel: 0.4,
-    ...                                              bth: [1, 2, 3]},
-    ...                          inputs={bng: Flow()})
-    >>> trsf.conversion_factors[bel][3]
-    0.4
+    >>> from oemof import solph
+    >>> bgas = solph.Bus(label="natural_gas")
+    >>> bcoal = solph.Bus(label="hard_coal")
+    >>> bel = solph.Bus(label="electricity")
+    >>> bheat = solph.Bus(label="heat")
+
+    >>> trsf = solph.Transformer(
+    ...    label="pp_gas_1",
+    ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5,
+    ...                        bgas: 0.8, bcoal: 0.2})
+    >>> print(sorted([x[1][5] for x in trsf.conversion_factors.items()]))
+    [0.2, 0.3, 0.5, 0.8]
+
+    >>> type(trsf)
+    <class 'oemof.solph.network.Transformer'>
+
+    >>> sorted([str(i) for i in trsf.inputs])
+    ['hard_coal', 'natural_gas']
+
+    >>> trsf_new = solph.Transformer(
+    ...    label="pp_gas_2",
+    ...    inputs={bgas: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5})
+    >>> trsf_new.conversion_factors[bgas][3]
+    1
 
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.LinearTransformer`
+     * :py:class:`~oemof.solph.blocks.Transformer`
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
+        missing_conversion_factor_keys = (
+            (set(self.outputs) | set(self.inputs)) -
+            set(self.conversion_factors))
 
-class LinearN1Transformer(on.Transformer):
-    """A Linear N:1 Transformer object.
-
-    Parameters
-    ----------
-
-    conversion_factors : dict
-        Dictionary containing conversion factors for conversion of inflow(s)
-        to specified outflow. Keys are output bus objects.
-        The dictionary values can either be a scalar or a sequence with length
-        of time horizon for simulation.
-
-    Examples
-    --------
-    Defining an linear transformer:
-
-    >>> gas = Bus()
-    >>> biomass = Bus()
-    >>> trsf = LinearN1Transformer(conversion_factors={gas: 0.4,
-    ...                                                biomass: [1, 2, 3]})
-    >>> trsf.conversion_factors[gas][3]
-    0.4
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.LinearN1Transformer`
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.conversion_factors = {
-            k: sequence(v)
-            for k, v in kwargs.get('conversion_factors', {}).items()}
+        for cf in missing_conversion_factor_keys:
+            self.conversion_factors[cf] = sequence(1)

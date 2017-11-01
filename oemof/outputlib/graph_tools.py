@@ -75,7 +75,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     Examples
     --------
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
     ...                          OperationalModel, EnergySystem)
     >>> from oemof.outputlib import graph_tools as gt
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
@@ -86,7 +86,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     ...                  inputs = {b_el: Flow(nominal_value=85,
     ...                            actual_value=[0.5, 0.25, 0.75],
     ...                            fixed=True)})
-    >>> pp_gas = LinearTransformer(label='pp_gas',
+    >>> pp_gas = Transformer(label='pp_gas',
     ...                            inputs={b_gas: Flow()},
     ...                            outputs={b_el: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
