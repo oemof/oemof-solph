@@ -23,7 +23,7 @@ def check_oemof_installation(silent=False):
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
 
     # check solvers
     solver = dict()

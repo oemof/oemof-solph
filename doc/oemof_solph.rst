@@ -285,7 +285,7 @@ Furthermore, it is possible to optimise the capacity of different components (se
 
     import os
     # set up a simple least cost optimisation
-    om = solph.OperationalModel(my_energysystem)
+    om = solph.Model(my_energysystem)
 
     # write the lp file for debugging or other reasons
     om.write(os.path.join(path, 'my_model.lp'), io_options={'symbolic_solver_labels': True})
@@ -408,7 +408,7 @@ information see the API of the BinaryFlow() class and its corresponding block cl
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.OperationalModel`.
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`.
 For now, you have to check out the examples in the :ref:`solph_examples_flex_label` example.
 
 
@@ -453,7 +453,7 @@ Alternatively to a manual creation of energy system component objects as describ
 Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by iterating line by line through texts files of a specific format.
 The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
+Both, investment and dispatch models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
 
 
 .. _solph_examples_label:
