@@ -337,3 +337,22 @@ class Constraint_Tests:
             nominal_value=100)})
         om = self.get_om()
         solph.constraints.emission_limit(om, limit=777)
+
+    def test_connect_investment_variables_constraint(self):
+        bus1 = solph.Bus(label='Bus1')
+        storage = solph.components.GenericStorage(
+            label='storage',
+            inputs={bus1: solph.Flow()},
+            outputs={bus1: solph.Flow()},
+            investment=solph.Investment(ep_costs=145))
+        sink = solph.Sink(label='Sink', inputs={bus1: solph.Flow(
+            investment=solph.Investment(ep_costs=500))})
+        source = solph.Source(label='Source', outputs={bus1: solph.Flow(
+            investment=solph.Investment(ep_costs=123))})
+        om = self.get_om()
+        investvar = [(om.InvestmentFlow.invest[source, bus1], 1),
+                     (om.InvestmentFlow.invest[bus1, sink], 0.5),
+                     (om.GenericInvestmentStorageBlock.invest[storage], 1)]
+        solph.constraints.connect_investment_variables(om, investvar)
+
+        self.compare_lp_files('connect_investment.lp', my_om=om)
