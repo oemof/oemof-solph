@@ -3,7 +3,7 @@ import logging
 import os.path as ospath
 import re
 
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 import pandas as pd
 
 import oemof.solph as solph
@@ -29,9 +29,15 @@ class Constraint_Tests:
         self.energysystem = solph.EnergySystem(groupings=solph.GROUPINGS,
                                                timeindex=self.date_time_index)
 
-    def compare_lp_files(self, filename, ignored=None):
-        om = solph.Model(self.energysystem,
-                                    timeindex=self.energysystem.timeindex)
+    def get_om(self):
+        return solph.Model(self.energysystem,
+                                      timeindex=self.energysystem.timeindex)
+
+    def compare_lp_files(self, filename, ignored=None, my_om=None):
+        if my_om is None:
+            om = self.get_om()
+        else:
+            om = my_om
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
         new_filename = ospath.join(self.tmppath, tmp_filename)
         om.write(new_filename, io_options={'symbolic_solver_labels': True})
@@ -287,3 +293,47 @@ class Constraint_Tests:
             conversion_factor_single_flow={bel: 0.5})
 
         self.compare_lp_files('variable_chp.lp')
+
+    def test_emission_constraints(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.5)})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.8)})
+
+        # Should be ignored because the emission attribute is not defined.
+        solph.Source(label='source3', outputs={bel: solph.Flow(
+            nominal_value=100)})
+
+        om = self.get_om()
+
+        solph.constraints.emission_limit(om, limit=777)
+
+        self.compare_lp_files('emission_limit.lp', my_om=om)
+
+    def test_flow_without_emission_for_emission_constraint(self):
+        """
+        """
+        def define_emission_limit():
+            bel = solph.Bus(label='electricityBus')
+            solph.Source(label='source1', outputs={bel: solph.Flow(
+                nominal_value=100, emission=0.8)})
+            solph.Source(label='source2', outputs={bel: solph.Flow(
+                nominal_value=100)})
+            om = self.get_om()
+            solph.constraints.emission_limit(om, om.flows, limit=777)
+        assert_raises(ValueError, define_emission_limit)
+
+    def test_flow_without_emission_for_emission_constraint_no_error(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.8)})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nominal_value=100)})
+        om = self.get_om()
+        solph.constraints.emission_limit(om, limit=777)
