@@ -50,7 +50,7 @@ concept = {
     'cav_e_out_b': 0,
     'cav_e_out_m': 0.3739636077,
     'cav_eta_temp': 1.0,
-    'cav_level_max': 211.11,  # 211.11
+    'cav_level_max': 10000000000000000000000,  # 211.11
     'cmp_p_max_b': 86.0918959849,
     'cmp_p_max_m': 0.0679999932,
     'cmp_p_min': 1,
@@ -63,7 +63,6 @@ concept = {
     'exp_q_in_b': -2.2073411014,
     'exp_q_in_m': 1.129249765,
     'exp_q_tes_share': 0,
-    'tau': 0.25,
     'tes_eta_temp': 1.0,
     'tes_level_max': 0.0
 }

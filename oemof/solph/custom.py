@@ -322,11 +322,11 @@ class GenericCAESBlock(SimpleBlock):
         def cav_eta_constr_rule(block, n, t):
             if t != 0:
                 return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
-                        self.cav_level[n, t-1] + n.params['tau'] *
+                        self.cav_level[n, t-1] + m.timeincrement[t] *
                         (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
             else:
                 return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
-                        n.params['tau'] *
+                        m.timeincrement[t] *
                         (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
         self.cav_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule)
@@ -341,11 +341,11 @@ class GenericCAESBlock(SimpleBlock):
         def tes_eta_constr_rule(block, n, t):
             if t != 0:
                 return (self.tes_level[n, t] ==
-                        self.tes_level[n, t-1] + n.params['tau'] *
+                        self.tes_level[n, t-1] + m.timeincrement[t] *
                         (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
             else:
                 return (self.tes_level[n, t] ==
-                        n.params['tau'] *
+                        m.timeincrement[t] *
                         (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
         self.tes_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_eta_constr_rule)
