@@ -76,3 +76,6 @@ class _Sequence(UserList):
         except IndexError:
             self.data.extend([self.default] * (key - len(self.data) + 1))
             self.data[key] = value
+
+    def __hash__(self):
+        return hash(str(self))

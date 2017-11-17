@@ -6,11 +6,13 @@ optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
 """
-
+import os
+import json
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
+from oemof.tools import helpers
 
 
 class EnergySystem(es.EnergySystem):
@@ -38,6 +40,32 @@ class EnergySystem(es.EnergySystem):
                                [component_grouping] +
                                kwargs.get('groupings', []))
         super().__init__(**kwargs)
+
+    def to_json(self, filename=None):
+        """
+        """
+
+        serialized = {
+            'nodes': {'buses': [], 'components': []},
+            'flows': {},
+            'timeindex': [str(i) for i in self.timeindex]
+        }
+
+        if filename is None:
+            filename = os.path.join(
+                helpers.extend_basic_path('json-files'), 'es.json')
+
+        for n in self.nodes:
+            if isinstance(n, on.Bus):
+                serialized['nodes']['buses'].append(n.label)
+            if isinstance(n, on.Component):
+                serialized['nodes']['components'].append(n.label)
+
+        for k, v in self.flows().items():
+            serialized['flows'][k[0].label] = {k[1].label:  v.__dict__}
+
+        with open(filename, 'w') as out:
+            json.dump(serialized, out)
 
 
 class Flow:
