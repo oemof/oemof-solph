@@ -11,7 +11,7 @@ import json
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
-from oemof.solph.plumbing import sequence
+from oemof.solph.plumbing import sequence, _Sequence
 from oemof.tools import helpers
 
 
@@ -61,11 +61,27 @@ class EnergySystem(es.EnergySystem):
             if isinstance(n, on.Component):
                 serialized['nodes']['components'].append(n.label)
 
+        flows = {}
         for k, v in self.flows().items():
-            serialized['flows'][k[0].label] = {k[1].label:  v.__dict__}
+            flows[k[0].label] = {}
+            flows[k[0].label][k[1].label] = {}
+
+            for kk, vv in v.__dict__.items():
+                if (isinstance(vv, _Sequence) or isinstance(vv, list)):
+                    # don't write None values
+                    if vv[0] is not None:
+                        flows[k[0].label][k[1].label][kk] = [
+                            float(vv[t]) for t in range(len(self.timeindex))]
+
+
+                else:
+                    if vv is not None:
+                        flows[k[0].label][k[1].label][kk] = vv
+
+        serialized['flows'] = flows
 
         with open(filename, 'w') as out:
-            json.dump(serialized, out)
+            json.dump(serialized, out, indent=4)
 
 
 class Flow:
