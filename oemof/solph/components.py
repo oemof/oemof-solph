@@ -11,7 +11,7 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
 import numpy as np
 import warnings
 from oemof.network import Bus, Transformer
-from oemof.solph import Flow, LinearTransformer
+from oemof.solph import Flow, Transformer
 from .options import Investment
 from .plumbing import sequence
 
@@ -140,7 +140,7 @@ class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     STORAGES
         A set with all :class:`.Storage` objects
@@ -208,9 +208,9 @@ class GenericStorageBlock(SimpleBlock):
         # set the initial capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, m.timesteps[-1]] = (n.initial_capacity *
+                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
                                                      n.nominal_capacity)
-                self.capacity[n, m.timesteps[-1]].fix()
+                self.capacity[n, m.TIMESTEPS[-1]].fix()
 
         # storage balance constraint
         def _storage_balance_rule(block, n, t):
@@ -259,7 +259,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     r"""Storage with an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     INVESTSTORAGES
         A set with all storages containing an Investment object.
@@ -807,7 +807,7 @@ class GenericCHPBlock(SimpleBlock):
 # Start of VariableFractionTransformer component
 # ------------------------------------------------------------------------------
 
-class VariableFractionTransformer(LinearTransformer):
+class VariableFractionTransformer(Transformer):
     """
     Component `GenericCHP` to model combined heat and power plants.
 
@@ -871,7 +871,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
     :class:`~oemof.solph.network.VariableFractionTransformer`
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     VARIABLE_FRACTION_TRANSFORMERS
         A set with all

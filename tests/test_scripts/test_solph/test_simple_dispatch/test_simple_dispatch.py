@@ -8,19 +8,13 @@ Data: example_data.csv
 
 import os
 import pandas as pd
-from oemof.solph import (Sink, Source, LinearTransformer, LinearN1Transformer,
-                         Bus, Flow, OperationalModel, EnergySystem)
+from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
+                         EnergySystem)
 from oemof.outputlib import processing, views
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    plt = None
 
 
-def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
-                                silent=False):
+def test_dispatch_example(solver='cbc', periods=24*5):
     """Create an energy system and optimize the dispatch at least costs."""
-    # ####################### initialize and provide data #####################
 
     datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
     energysystem = EnergySystem(timeindex=datetimeindex)
@@ -61,37 +55,37 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
                                        fixed=True)})
 
     # power plants
-    pp_coal = LinearTransformer(label='pp_coal',
-                                inputs={bcoal: Flow()},
-                                outputs={bel: Flow(nominal_value=20.2,
+    pp_coal = Transformer(label='pp_coal',
+                          inputs={bcoal: Flow()},
+                          outputs={bel: Flow(nominal_value=20.2,
                                                    variable_costs=25)},
-                                conversion_factors={bel: 0.39})
+                          conversion_factors={bel: 0.39})
 
-    pp_lig = LinearTransformer(label='pp_lig',
-                               inputs={blig: Flow()},
-                               outputs={bel: Flow(nominal_value=11.8,
+    pp_lig = Transformer(label='pp_lig',
+                         inputs={blig: Flow()},
+                         outputs={bel: Flow(nominal_value=11.8,
                                                   variable_costs=19)},
-                               conversion_factors={bel: 0.41})
+                         conversion_factors={bel: 0.41})
 
-    pp_gas = LinearTransformer(label='pp_gas',
-                               inputs={bgas: Flow()},
-                               outputs={bel: Flow(nominal_value=41,
+    pp_gas = Transformer(label='pp_gas',
+                         inputs={bgas: Flow()},
+                         outputs={bel: Flow(nominal_value=41,
                                                   variable_costs=40)},
-                               conversion_factors={bel: 0.50})
+                         conversion_factors={bel: 0.50})
 
-    pp_oil = LinearTransformer(label='pp_oil',
-                               inputs={boil: Flow()},
-                               outputs={bel: Flow(nominal_value=5,
+    pp_oil = Transformer(label='pp_oil',
+                         inputs={boil: Flow()},
+                         outputs={bel: Flow(nominal_value=5,
                                                   variable_costs=50)},
-                               conversion_factors={bel: 0.28})
+                         conversion_factors={bel: 0.28})
 
     # combined heat and power plant (chp)
-    pp_chp = LinearTransformer(label='pp_chp',
-                               inputs={bgas: Flow()},
-                               outputs={bel: Flow(nominal_value=30,
+    pp_chp = Transformer(label='pp_chp',
+                         inputs={bgas: Flow()},
+                         outputs={bel: Flow(nominal_value=30,
                                                   variable_costs=42),
                                         bth: Flow(nominal_value=40)},
-                               conversion_factors={bel: 0.3, bth: 0.4})
+                         conversion_factors={bel: 0.3, bth: 0.4})
 
     # heatpump with a coefficient of performance (COP) of 3
     b_heat_source = Bus(label='b_heat_source')
@@ -99,21 +93,20 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
     heat_source = Source(label='heat_source', outputs={b_heat_source: Flow()})
 
     cop = 3
-    heat_pump = LinearN1Transformer(label='heat_pump',
-                                    inputs={bel: Flow(),
+    heat_pump = Transformer(label='heat_pump',
+                            inputs={bel: Flow(),
                                             b_heat_source: Flow()},
-                                    outputs={bth: Flow(nominal_value=10)},
-                                    conversion_factors={
-                                        bel: 3, b_heat_source: cop/(cop-1)})
+                            outputs={bth: Flow(nominal_value=10)},
+                            conversion_factors={
+                                        bel: 1/3, b_heat_source: (cop-1)/cop})
 
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
-    optimization_model = OperationalModel(es=energysystem)
+    optimization_model = Model(es=energysystem)
 
     # solve problem
-    optimization_model.solve(solver=solver,
-                             solve_kwargs={'tee': tee_var, 'keepfiles': False})
+    optimization_model.solve(solver=solver)
 
     # write back results from optimization object to energysystem
     optimization_model.results()
@@ -130,25 +123,23 @@ def run_simple_dispatch_example(solver='cbc', periods=24*60, tee_var=True,
     # variables are used
     data = views.node(results, 'bel')
 
-    if not silent:
-        print('Optimization successful. Printing some results:',
-              data['sequences'].info())
-
-    # plot data if matplotlib is installed
-    # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    if plt is not None and not silent:
-        ax = data['sequences'].sum(axis=0).plot(kind='barh')
-        ax.set_title('Sums for optimization period')
-        ax.set_xlabel('Energy (MWh)')
-        ax.set_ylabel('Flow')
-        plt.tight_layout()
-        plt.show()
-
     # generate results to be evaluated in tests
-    rdict = data['sequences'].sum(axis=0).to_dict()
+    results= data['sequences'].sum(axis=0).to_dict()
 
-    return rdict
+    test_results = {
+        (('wind', 'bel'), 'flow'): 1773,
+        (('pv', 'bel'), 'flow'): 605,
+        (('bel', 'demand_el'), 'flow'): 7440,
+        (('bel', 'excess_el'), 'flow'): 139,
+        (('pp_chp', 'bel'), 'flow'): 666,
+        (('pp_lig', 'bel'), 'flow'): 1210,
+        (('pp_gas', 'bel'), 'flow'): 1519,
+        (('pp_coal', 'bel'), 'flow'): 1925,
+        (('pp_oil', 'bel'), 'flow'): 0,
+        (('bel', 'heat_pump'), 'flow'): 118,
+    }
 
-
-if __name__ == "__main__":
-    run_simple_dispatch_example()
+    for key in test_results.keys():
+        a = int(round(results[key]))
+        b = int(round(test_results[key]))
+        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)

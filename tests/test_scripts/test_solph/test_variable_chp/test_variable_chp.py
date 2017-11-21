@@ -21,7 +21,6 @@ from oemof import outputlib
 
 # Default logger of oemof
 from oemof.tools import logger
-from oemof.tools import helpers
 import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
@@ -29,20 +28,12 @@ import logging
 import os
 import pandas as pd
 
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    plt = None
 
-
-def run_variable_chp_example(number_timesteps=192,
-                             filename="variable_chp.csv", solver='cbc',
-                             debug=True, tee_switch=True):
+def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     logging.info('Initialize the energy system')
 
     # create time index for 192 hours in May.
-    date_time_index = pd.date_range('5/5/2012', periods=number_timesteps,
-                                    freq='H')
+    date_time_index = pd.date_range('5/5/2012', periods=192, freq='H')
     energysystem = solph.EnergySystem(timeindex=date_time_index)
 
     # Read data file with heat and electrical demand (192 hours)
@@ -85,16 +76,9 @@ def run_variable_chp_example(number_timesteps=192,
     solph.Sink(label='demand_th_2', inputs={bth2: solph.Flow(
         actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
 
-    # This is just a dummy transformer with a nominal input of zero
-    solph.LinearTransformer(
-        label='fixed_chp_gas',
-        inputs={bgas: solph.Flow(nominal_value=0)},
-        outputs={bel: solph.Flow(), bth: solph.Flow()},
-        conversion_factors={bel: 0.3, bth: 0.5})
-
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
-    solph.LinearTransformer(
-        label='fixed_chp_gas_2',
+    solph.Transformer(
+        label='fixed_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel2: solph.Flow(), bth2: solph.Flow()},
         conversion_factors={bel2: 0.3, bth2: 0.5})
@@ -114,16 +98,10 @@ def run_variable_chp_example(number_timesteps=192,
 
     logging.info('Optimise the energy system')
 
-    om = solph.OperationalModel(energysystem)
-
-    if debug:
-        filename = os.path.join(
-            helpers.extend_basic_path('lp_files'), 'variable_chp.lp')
-        logging.info('Store lp-file in {0}.'.format(filename))
-        om.write(filename, io_options={'symbolic_solver_labels': True})
+    om = solph.Model(energysystem)
 
     logging.info('Solve the optimization problem')
-    om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
+    om.solve(solver=solver)
 
     optimisation_results = outputlib.processing.results(om)
 
@@ -131,11 +109,13 @@ def run_variable_chp_example(number_timesteps=192,
     myresults = myresults['sequences'].sum(axis=0).to_dict()
     myresults['objective'] = outputlib.processing.meta_results(om)['objective']
 
-    return myresults
+    variable_chp_dict = {
+        'objective': 14267160965.0,
+        (('natural_gas', 'fixed_chp_gas'), 'flow'): 157717049.49999994,
+        (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
+        (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
 
-
-if __name__ == "__main__":
-    logger.define_logging()
-    results = run_variable_chp_example()
-    import pprint as pp
-    pp.pprint(results)
+    for key in variable_chp_dict.keys():
+        a = int(round(myresults[key]))
+        b = int(round(variable_chp_dict[key]))
+        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)

@@ -22,7 +22,7 @@ class Flow(SimpleBlock):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     SUMMED_MAX_FLOWS
         A set of flows with the attribute :attr:`summed_max` being not None.
@@ -216,9 +216,9 @@ class Flow(SimpleBlock):
         fixed_costs = 0
 
         for i, o in m.FLOWS:
-            for t in m.TIMESTEPS:
+            if m.flows[i, o].variable_costs[0] is not None:
+                for t in m.TIMESTEPS:
                 # add variable costs
-                if m.flows[i, o].variable_costs[0] is not None:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
             # add fixed costs if nominal_value is not None
@@ -238,7 +238,7 @@ class InvestmentFlow(SimpleBlock):
     """Block for all flows with :attr:`investment` being not None.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     FLOWS
         A set of flows with the attribute :attr:`invest` of type
@@ -448,7 +448,6 @@ class InvestmentFlow(SimpleBlock):
 class Bus(SimpleBlock):
     """Block for all balanced buses.
 
-
     **The following constraints are build:**
 
     Bus balance  :attr:`om.Bus.balance[i, o, t]`
@@ -496,125 +495,70 @@ class Bus(SimpleBlock):
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
-class LinearTransformer(SimpleBlock):
+class Transformer(SimpleBlock):
     """Block for the linear relation of nodes with type
-    class:`.LinearTransformer`
+    :class:`~oemof.solph.network.Transformer`
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
-    LINEAR_TRANSFORMERS
-        A set with all :class:`~oemof.solph.network.LinearTransformer` objects.
+    TRANSFORMERS
+        A set with all :class:`~oemof.solph.network.Transformer` objects.
 
     **The following constraints are created:**
 
-    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
+    Linear relation :attr:`om.Transformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion\_factor(n, o, t) = \
-            flow(n, o, t), \\\\
+            flow(i, n, t) / conversion\_factor(n, i, t) = \
+            flow(n, o, t) / conversion\_factor(n, o, t), \\\\
             \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
+            \\forall n \\in \\textrm{TRANSFORMERS}, \\\\
+            \\forall i \\in \\textrm{INPUTS(n)}, \\\\
             \\forall o \\in \\textrm{OUTPUTS(n)}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearTransformer`
+        """ Creates the linear constraint for the class:`Transformer`
         block.
-
         Parameters
         ----------
         group : list
-            List of oemof.solph.LinearTransformers (trsf) objects for which
+            List of oemof.solph.Transformers objects for which
             the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
-            is created for all existing relations of the inputs and all outputs
+            is created for all existing relations of all inputs and all outputs
             of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
+            an attribute `conversion_factors` of type dict containing the
+            conversion factors for all inputs to outputs.
         """
         if group is None:
             return None
 
         m = self.parent_block()
 
-        I = {n: [i for i in n.inputs][0] for n in group}
-        O = {n: [o for o in n.outputs.keys()] for n in group}
+        in_flows = {n: [i for i in n.inputs.keys()] for n in group}
+        out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    for o in O[n]:
-                        try:
-                            lhs = m.flow[I[n], n, t] * \
-                                  n.conversion_factors[o][t]
-                            rhs = m.flow[n, o, t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 n.label, o.label))
-                        block.relation.add((n, o, t), (lhs == rhs))
-        self.relation_build = BuildAction(rule=_input_output_relation)
-
-
-class LinearN1Transformer(SimpleBlock):
-    """Block for the linear relation of nodes with type
-    class:`.LinearN1Transformer`
-
-
-    **The following constraints are created:**
-
-    Linear relation :attr:`om.LinearN1Transformer.relation[i,o,t]`
-        .. math::
-            flow(i, n, t) \\cdot conversion_factor(i, n, t) = \
-            flow(n, o, t), \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_N1\_TRANSFORMERS}, \\\\
-            \\forall i \\in \\textrm{INPUTS(n)}.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearN1Transformer`
-        block.
-
-        Parameters
-        ----------
-        group : list
-            List of oemof.solph.LinearN1Transformers (trsf) objects for which
-            the linear relation of inputs and outputs is created
-            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
-            is created for all existing relations of the inputs and all outputs
-            of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
-        """
-        if group is None:
-            return None
-
-        m = self.parent_block()
-
-        I = {n: [i for i in n.inputs.keys()] for n in group}
-        O = {n: [o for o in n.outputs][0] for n in group}
-
-        self.relation = Constraint(group, noruleinit=True)
-
-        def _input_output_relation(block):
-            for t in m.TIMESTEPS:
-                for n in group:
-                    for i in I[n]:
-                        try:
-                            lhs = m.flow[n, O[n], t]
-                            rhs = m.flow[i, n, t] * n.conversion_factors[i][t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 i.label, n.label))
-                        block.relation.add((n, i, t), (lhs == rhs))
+                    for o in out_flows[n]:
+                        for i in in_flows[n]:
+                            try:
+                                lhs = (m.flow[i, n, t] /
+                                       n.conversion_factors[i][t])
+                                rhs = (m.flow[n, o, t] /
+                                       n.conversion_factors[o][t])
+                            except ValueError:
+                                raise ValueError(
+                                    "Error in constraint creation",
+                                    "source: {0}, target: {1}".format(
+                                        n.label, o.label))
+                            block.relation.add((n, i, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
@@ -622,7 +566,7 @@ class NonConvexFlow(SimpleBlock):
     """
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
 
         A set of flows with the attribute :attr:`nonconvex` of type
