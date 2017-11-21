@@ -22,7 +22,7 @@ class Flow(SimpleBlock):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     SUMMED_MAX_FLOWS
         A set of flows with the attribute :attr:`summed_max` being not None.
@@ -216,9 +216,9 @@ class Flow(SimpleBlock):
         fixed_costs = 0
 
         for i, o in m.FLOWS:
-            for t in m.TIMESTEPS:
+            if m.flows[i, o].variable_costs[0] is not None:
+                for t in m.TIMESTEPS:
                 # add variable costs
-                if m.flows[i, o].variable_costs[0] is not None:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
             # add fixed costs if nominal_value is not None
@@ -238,7 +238,7 @@ class InvestmentFlow(SimpleBlock):
     """Block for all flows with :attr:`investment` being not None.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     FLOWS
         A set of flows with the attribute :attr:`invest` of type
@@ -496,10 +496,11 @@ class Bus(SimpleBlock):
 
 
 class Transformer(SimpleBlock):
-    """Block for the linear relation of nodes with type class:`Transformer`
+    """Block for the linear relation of nodes with type
+    :class:`~oemof.solph.network.Transformer`
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     TRANSFORMERS
         A set with all :class:`~oemof.solph.network.Transformer` objects.
@@ -565,7 +566,7 @@ class NonConvexFlow(SimpleBlock):
     """
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
 
         A set of flows with the attribute :attr:`nonconvex` of type

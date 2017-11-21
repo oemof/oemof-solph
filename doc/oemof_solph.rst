@@ -146,7 +146,7 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
-.. _linear_transformer_class_label:
+.. _transformer_class_label:
 
 Transformer
 +++++++++++
@@ -194,7 +194,7 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
 
     solph.Transformer(
         label='pp_chp',
-        inputs={b_gas: Flow()},
+        inputs={b_gas: Flow(), b_coal: Flow()},
         outputs={b_el: Flow(nominal_value=30),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4,
@@ -226,7 +226,7 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 VariableFractionTransformer
 +++++++++++++++++++++++++++
 
-The VariableFractionTransformer inherits from the :ref:`linear_transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The VariableFractionTransformer inherits from the :ref:`transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -245,14 +245,14 @@ The key of the parameter *'conversion_factor_single_flow'* will indicate the mai
    :alt: variable_chp_plot.svg
    :align: center
 
-.. note:: See the :py:class:`~oemof.solph.network.VariableFractionTransformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.VariableFractionTransformer` class for all parameters and the mathematical background.
 
 Storage
 +++++++
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows, you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.network.Storage` class.
+Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.Storage` class.
 
 .. code-block:: python
 
@@ -265,7 +265,7 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-.. note:: See the :py:class:`~oemof.solph.network.Storage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.Storage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_optimise_es_label:
@@ -285,7 +285,7 @@ Furthermore, it is possible to optimise the capacity of different components (se
 
     import os
     # set up a simple least cost optimisation
-    om = solph.OperationalModel(my_energysystem)
+    om = solph.Model(my_energysystem)
 
     # write the lp file for debugging or other reasons
     om.write(os.path.join(path, 'my_model.lp'), io_options={'symbolic_solver_labels': True})
@@ -408,7 +408,7 @@ information see the API of the BinaryFlow() class and its corresponding block cl
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.OperationalModel`.
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`.
 For now, you have to check out the examples in the :ref:`solph_examples_flex_label` example.
 
 
@@ -453,7 +453,7 @@ Alternatively to a manual creation of energy system component objects as describ
 Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by iterating line by line through texts files of a specific format.
 The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
+Both, investment and dispatch models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
 
 
 .. _solph_examples_label:

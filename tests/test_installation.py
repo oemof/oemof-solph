@@ -7,7 +7,7 @@ import oemof.solph as solph
 import pandas as pd
 
 
-def run_test_example():
+def check_oemof_installation(silent=False):
     date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
@@ -23,7 +23,7 @@ def run_test_example():
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
 
     # check solvers
     solver = dict()
@@ -33,12 +33,19 @@ def run_test_example():
             solver[s] = "working"
         except Exception:
             solver[s] = "not working"
-    print("*********")
-    print('Solver installed with oemof:')
-    for s, t in solver.items():
-        print("{0}: {1}".format(s, t))
-    print("*********")
-    print("oemof successfully installed.")
+
+    if not silent:
+        print("*********")
+        print('Solver installed with oemof:')
+        for s, t in solver.items():
+            print("{0}: {1}".format(s, t))
+        print("*********")
+        print("oemof successfully installed.")
+
+
+def test_oemof_installation():
+    check_oemof_installation(silent=True)
+
 
 if __name__ == "__main__":
-    run_test_example()
+    check_oemof_installation()

@@ -140,7 +140,7 @@ class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     STORAGES
         A set with all :class:`.Storage` objects
@@ -259,7 +259,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     r"""Storage with an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     INVESTSTORAGES
         A set with all storages containing an Investment object.
@@ -819,7 +819,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
     :class:`~oemof.solph.network.VariableFractionTransformer`
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     VARIABLE_FRACTION_TRANSFORMERS
         A set with all

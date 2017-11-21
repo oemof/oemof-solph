@@ -3,16 +3,11 @@ import logging
 import os.path as ospath
 import re
 
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 import pandas as pd
-
-from oemof.solph.options import Investment
-from oemof.solph import OperationalModel
 
 import oemof.solph as solph
 
-from oemof.solph import (Bus, Source, Sink, Flow, Transformer)
-from oemof.solph.components import VariableFractionTransformer
 from oemof.tools import helpers
 
 logging.disable(logging.INFO)
@@ -32,11 +27,17 @@ class Constraint_Tests:
 
     def setup(self):
         self.energysystem = solph.EnergySystem(groupings=solph.GROUPINGS,
-                                                 timeindex=self.date_time_index)
+                                               timeindex=self.date_time_index)
 
-    def compare_lp_files(self, filename, ignored=None):
-        om = OperationalModel(self.energysystem,
-                              timeindex=self.energysystem.timeindex)
+    def get_om(self):
+        return solph.Model(self.energysystem,
+                                      timeindex=self.energysystem.timeindex)
+
+    def compare_lp_files(self, filename, ignored=None, my_om=None):
+        if my_om is None:
+            om = self.get_om()
+        else:
+            om = my_om
         tmp_filename = filename.replace('.lp', '') + '_tmp.lp'
         new_filename = ospath.join(self.tmppath, tmp_filename)
         om.write(new_filename, io_options={'symbolic_solver_labels': True})
@@ -73,14 +74,14 @@ class Constraint_Tests:
     def test_linear_transformer(self):
         """Constraint test of a LinearTransformer without Investment.
         """
-        bgas = Bus(label='gas')
+        bgas = solph.Bus(label='gas')
 
-        bel = Bus(label='electricity')
+        bel = solph.Bus(label='electricity')
 
-        Transformer(
+        solph.Transformer(
             label='powerplantGas',
-            inputs={bgas: Flow()},
-            outputs={bel: Flow(nominal_value=10e10, variable_costs=50)},
+            inputs={bgas: solph.Flow()},
+            outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
             conversion_factors={bel: 0.58})
 
         self.compare_lp_files('linear_transformer.lp')
@@ -89,16 +90,16 @@ class Constraint_Tests:
         """Constraint test of a LinearTransformer with Investment.
         """
 
-        bgas = Bus(label='gas')
+        bgas = solph.Bus(label='gas')
 
-        bel = Bus(label='electricity')
+        bel = solph.Bus(label='electricity')
 
-        Transformer(
+        solph.Transformer(
             label='powerplant_gas',
-            inputs={bgas: Flow()},
-            outputs={bel: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000,
-                                                     ep_costs=20))
+            inputs={bgas: solph.Flow()},
+            outputs={bel: solph.Flow(variable_costs=50,
+                                     investment=solph.Investment(maximum=1000,
+                                                                 ep_costs=20))
                      },
             conversion_factors={bel: 0.58})
 
@@ -107,12 +108,12 @@ class Constraint_Tests:
     def test_max_source_min_sink(self):
         """
         """
-        bel = Bus(label='electricityBus')
+        bel = solph.Bus(label='electricityBus')
 
-        Source(label='wind', outputs={bel: Flow(nominal_value=54,
-                                                max=(.85, .95, .61))})
+        solph.Source(label='wind', outputs={
+            bel: solph.Flow(nominal_value=54, max=(.85, .95, .61))})
 
-        Sink(label='minDemand', inputs={bel: Flow(
+        solph.Sink(label='minDemand', inputs={bel: solph.Flow(
             nominal_value=54, min=(.84, .94, .59), variable_costs=14)})
 
         self.compare_lp_files('max_source_min_sink.lp')
@@ -121,13 +122,13 @@ class Constraint_Tests:
         """Constraint test with a fixed source and a variable sink.
         """
 
-        bel = Bus(label='electricityBus')
+        bel = solph.Bus(label='electricityBus')
 
-        Source(label='wind', outputs={bel: Flow(actual_value=[.43, .72, .29],
-                                                nominal_value=10e5,
-                                                fixed=True, fixed_costs=20)})
+        solph.Source(label='wind', outputs={bel: solph.Flow(
+            actual_value=[.43, .72, .29], nominal_value=10e5, fixed=True,
+            fixed_costs=20)})
 
-        Sink(label='excess', inputs={bel: Flow(variable_costs=40)})
+        solph.Sink(label='excess', inputs={bel: solph.Flow(variable_costs=40)})
 
         self.compare_lp_files('fixed_source_variable_sink.lp')
 
@@ -135,15 +136,15 @@ class Constraint_Tests:
         """ Wrong constraints for fixed source + invest sink w. `summed_max`.
         """
 
-        bel = Bus(label='electricityBus')
+        bel = solph.Bus(label='electricityBus')
 
-        Source(label='wind', outputs={bel: Flow(actual_value=[12, 16, 14],
-                                                nominal_value=1000000,
-                                                fixed=True, fixed_costs=20)})
+        solph.Source(label='wind', outputs={bel: solph.Flow(
+            actual_value=[12, 16, 14], nominal_value=1000000, fixed=True,
+            fixed_costs=20)})
 
-        Sink(label='excess', inputs={bel: Flow(
+        solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
-            investment=Investment(ep_costs=500, maximum=10e5))})
+            investment=solph.Investment(ep_costs=500, maximum=10e5))})
 
         self.compare_lp_files('fixed_source_invest_sink.lp')
 
@@ -151,13 +152,13 @@ class Constraint_Tests:
         """Constraint test with a fixed sink and a dispatch invest source.
         """
 
-        bel = Bus(label='electricityBus')
+        bel = solph.Bus(label='electricityBus')
 
-        Source(label='pv', outputs={bel: Flow(
+        solph.Source(label='pv', outputs={bel: solph.Flow(
             max=[45, 83, 65], fixed_costs=20, variable_costs=13,
-            investment=Investment(ep_costs=123))})
+            investment=solph.Investment(ep_costs=123))})
 
-        Sink(label='excess', inputs={bel: Flow(
+        solph.Sink(label='excess', inputs={bel: solph.Flow(
             actual_value=[.5, .8, .3], nominal_value=10e4, fixed=True)})
 
         self.compare_lp_files('invest_source_fixed_sink.lp')
@@ -165,12 +166,12 @@ class Constraint_Tests:
     def test_storage(self):
         """
         """
-        bel = Bus(label='electricityBus')
+        bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
             label='storage',
-            inputs={bel: Flow(variable_costs=56)},
-            outputs={bel: Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
             nominal_capacity=10e4,
             capacity_loss=0.13,
             nominal_input_capacity_ratio=1/6,
@@ -184,12 +185,12 @@ class Constraint_Tests:
     def test_storage_invest(self):
         """
         """
-        bel = Bus(label='electricityBus')
+        bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
             label='storage',
-            inputs={bel: Flow(variable_costs=56)},
-            outputs={bel: Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
             capacity_max=0.9,
@@ -199,23 +200,23 @@ class Constraint_Tests:
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             fixed_costs=35,
-            investment=Investment(ep_costs=145, maximum=234))
+            investment=solph.Investment(ep_costs=145, maximum=234))
 
         self.compare_lp_files('storage_invest.lp')
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
         """
-        bgas = Bus(label='gasBus')
-        bbms = Bus(label='biomassBus')
-        bel = Bus(label='electricityBus')
-        bth = Bus(label='thermalBus')
+        bgas = solph.Bus(label='gasBus')
+        bbms = solph.Bus(label='biomassBus')
+        bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='thermalBus')
 
-        Transformer(
+        solph.Transformer(
             label='powerplantGasCoal',
-            inputs={bbms: Flow(), bgas: Flow()},
-            outputs={bel: Flow(variable_costs=50),
-                     bth: Flow(nominal_value=5e10, variable_costs=20)},
+            inputs={bbms: solph.Flow(), bgas: solph.Flow()},
+            outputs={bel: solph.Flow(variable_costs=50),
+                     bth: solph.Flow(nominal_value=5e10, variable_costs=20)},
             conversion_factors={bgas: 0.4, bbms: 0.1,
                                 bel: 0.3, bth: 0.5})
 
@@ -225,18 +226,18 @@ class Constraint_Tests:
         """Constraint test of a LinearN1Transformer with Investment.
         """
 
-        bgas = Bus(label='gasBus')
-        bcoal = Bus(label='coalBus')
-        bel = Bus(label='electricityBus')
-        bth = Bus(label='thermalBus')
+        bgas = solph.Bus(label='gasBus')
+        bcoal = solph.Bus(label='coalBus')
+        bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='thermalBus')
 
-        Transformer(
+        solph.Transformer(
             label='powerplant_gas_coal',
-            inputs={bgas: Flow(), bcoal: Flow()},
-            outputs={bel: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000,
-                                                     ep_costs=20)),
-                     bth: Flow(variable_costs=20)
+            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+            outputs={bel: solph.Flow(variable_costs=50,
+                                     investment=solph.Investment(maximum=1000,
+                                                                 ep_costs=20)),
+                     bth: solph.Flow(variable_costs=20)
                      },
             conversion_factors={bgas: 0.58, bcoal: 0.2,
                                 bel: 0.3, bth: 0.5})
@@ -246,14 +247,14 @@ class Constraint_Tests:
     def test_linear_transformer_chp(self):
         """Constraint test of a LinearTransformer without Investment (two outputs).
         """
-        bgas = Bus(label='gasBus')
-        bheat = Bus(label='heatBus')
-        bel = Bus(label='electricityBus')
+        bgas = solph.Bus(label='gasBus')
+        bheat = solph.Bus(label='heatBus')
+        bel = solph.Bus(label='electricityBus')
 
-        Transformer(
+        solph.Transformer(
             label='CHPpowerplantGas',
-            inputs={bgas: Flow(nominal_value=10e10, variable_costs=50)},
-            outputs={bel: Flow(), bheat: Flow()},
+            inputs={bgas: solph.Flow(nominal_value=10e10, variable_costs=50)},
+            outputs={bel: solph.Flow(), bheat: solph.Flow()},
             conversion_factors={bel: 0.4, bheat: 0.5})
 
         self.compare_lp_files('linear_transformer_chp.lp')
@@ -262,17 +263,17 @@ class Constraint_Tests:
         """Constraint test of a LinearTransformer with Investment (two outputs).
         """
 
-        bgas = Bus(label='gasBus')
-        bheat = Bus(label='heatBus')
-        bel = Bus(label='electricityBus')
+        bgas = solph.Bus(label='gasBus')
+        bheat = solph.Bus(label='heatBus')
+        bel = solph.Bus(label='electricityBus')
 
-        Transformer(
+        solph.Transformer(
             label='chp_powerplant_gas',
-            inputs={bgas: Flow(variable_costs=50,
-                               investment=Investment(maximum=1000,
-                                                     ep_costs=20))
+            inputs={bgas: solph.Flow(variable_costs=50,
+                                     investment=solph.Investment(maximum=1000,
+                                                                 ep_costs=20))
                     },
-            outputs={bel: Flow(), bheat: Flow()},
+            outputs={bel: solph.Flow(), bheat: solph.Flow()},
             conversion_factors={bel: 0.4, bheat: 0.5})
 
         self.compare_lp_files('linear_transformer_chp_invest.lp')
@@ -280,11 +281,11 @@ class Constraint_Tests:
     def test_variable_chp(self):
         """
         """
-        bel = Bus(label='electricityBus')
-        bth = Bus(label='heatBus')
-        bgas = Bus(label='commodityBus')
+        bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='heatBus')
+        bgas = solph.Bus(label='commodityBus')
 
-        VariableFractionTransformer(
+        solph.components.VariableFractionTransformer(
             label='variable_chp_gas',
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
@@ -292,3 +293,47 @@ class Constraint_Tests:
             conversion_factor_single_flow={bel: 0.5})
 
         self.compare_lp_files('variable_chp.lp')
+
+    def test_emission_constraints(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.5)})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.8)})
+
+        # Should be ignored because the emission attribute is not defined.
+        solph.Source(label='source3', outputs={bel: solph.Flow(
+            nominal_value=100)})
+
+        om = self.get_om()
+
+        solph.constraints.emission_limit(om, limit=777)
+
+        self.compare_lp_files('emission_limit.lp', my_om=om)
+
+    def test_flow_without_emission_for_emission_constraint(self):
+        """
+        """
+        def define_emission_limit():
+            bel = solph.Bus(label='electricityBus')
+            solph.Source(label='source1', outputs={bel: solph.Flow(
+                nominal_value=100, emission=0.8)})
+            solph.Source(label='source2', outputs={bel: solph.Flow(
+                nominal_value=100)})
+            om = self.get_om()
+            solph.constraints.emission_limit(om, om.flows, limit=777)
+        assert_raises(ValueError, define_emission_limit)
+
+    def test_flow_without_emission_for_emission_constraint_no_error(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nominal_value=100, emission=0.8)})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nominal_value=100)})
+        om = self.get_om()
+        solph.constraints.emission_limit(om, limit=777)
