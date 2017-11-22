@@ -20,9 +20,6 @@ def test_connect_invest():
 
     logging.info('Create oemof objects')
 
-    # create natural gas bus
-    bgas = solph.Bus(label="natural_gas")
-
     # create electricity bus
     bel1 = solph.Bus(label="electricity1")
     bel2 = solph.Bus(label="electricity2")
@@ -37,24 +34,9 @@ def test_connect_invest():
         actual_value=data['wind'], nominal_value=1000000, fixed=True,
         fixed_costs=20)})
 
-    # create fixed source object representing pv power plants
-    solph.Source(label='pv', outputs={bel1: solph.Flow(
-        actual_value=data['pv'], nominal_value=582000, fixed=True,
-        fixed_costs=15)})
-
-    # create source object representing the natural gas commodity (annual limit)
-    solph.Source(label='rgas', outputs={bgas: solph.Flow()})
-
     # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel1: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
-
-    # create simple transformer object representing a gas power plant
-    solph.Transformer(
-        label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel2: solph.Flow()},
-        conversion_factors={bel2: 0.39})
 
     storage = solph.components.GenericStorage(
         label='storage',
@@ -78,19 +60,11 @@ def test_connect_invest():
         inputs={bel2: solph.Flow()},
         outputs={bel1: solph.Flow(investment=solph.Investment(ep_costs=20))})
 
-    lineg1 = solph.Transformer(
-        label="lineg1",
-        inputs={bgas: solph.Flow()},
-        outputs={bel1: solph.Flow(investment=solph.Investment(ep_costs=20))})
-
     om = solph.Model(energysystem)
 
     solph.constraints.equate_variables(
         om, om.InvestmentFlow.invest[line12, bel2],
         om.InvestmentFlow.invest[line21, bel1], 2)
-    solph.constraints.equate_variables(
-        om, om.InvestmentFlow.invest[line12, bel2],
-        om.InvestmentFlow.invest[lineg1, bel1])
     solph.constraints.equate_variables(
         om, om.InvestmentFlow.invest[line12, bel2],
         om.GenericInvestmentStorageBlock.invest[storage])
@@ -105,19 +79,17 @@ def test_connect_invest():
     my_results = dict()
     my_results['line12'] = float(views.node(results, 'line12')['scalars'])
     my_results['line21'] = float(views.node(results, 'line21')['scalars'])
-    my_results['lineg1'] = float(views.node(results, 'lineg1')['scalars'])
     stor_res = views.node(results, 'storage')['scalars']
     my_results['storage_in'] = stor_res.iloc[0]
     my_results['storage'] = stor_res.iloc[1]
     my_results['storage_out'] = stor_res.iloc[2]
 
     connect_invest_dict = {
-        'line12': 840245,
-        'line21': 1680490,
-        'lineg1': 840245,
-        'storage': 840245,
-        'storage_in': 140041,
-        'storage_out': 140041}
+        'line12': 814705,
+        'line21': 1629410,
+        'storage': 814705,
+        'storage_in': 135784,
+        'storage_out': 135784}
 
     for key in connect_invest_dict.keys():
         a = int(round(my_results[key]))
