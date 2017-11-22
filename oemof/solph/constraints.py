@@ -75,8 +75,8 @@ def equate_variables(om, var1, var2, factor1=1, name=None):
     if name is None:
         name = '_'.join(["equate", str(var1), str(var2)])
 
-    def connect_invest_rule(m):
+    def equate_variables_rule(m):
         return var1 * factor1 == var2
-    setattr(om, name, po.Constraint(rule=connect_invest_rule))
+    setattr(om, name, po.Constraint(rule=equate_variables_rule))
 
     return om
