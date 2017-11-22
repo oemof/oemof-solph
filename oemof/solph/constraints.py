@@ -47,30 +47,36 @@ def emission_limit(om, flows=None, limit=None):
     return om
 
 
-def connect_investment_variables(om, invest):
+def equate_variables(om, var1, var2, factor1=1, name=None):
     """
 
     Parameters
     ----------
+    name
+    factor1
+    var1 : po.Var
+        First variable, to be set to equal with Var2 and multiplied with
+        factor1.
+    var2 : po.Var
+        Second variable, to be set equal to (Var1 * factor1).
+    factor1 : float
+        Factor to define the proportion between the variables.
+    name : str
+        Optional name for the equation e.g. in the LP file. By default the
+        name is: equate + string representation of var1 and var2.
     om : oemof.solph.Model
         Model to which constraints are added.
-    invest : list of tuple (po.Var, float)
-        A list of tuples with the investment variable and a factor. This will
-        equalise the investment variables multiplied with the factor
-        invest_var1 * factor1 == investvar2 * factor2,
-        invest_var2 * factor2 == investvar3 * factor3, and so on
 
     Returns
     -------
     om.solph.Model
 
     """
+    if name is None:
+        name = '_'.join(["equate", str(var1), str(var2)])
 
-    iset = set(n for n in range(len(invest) - 1))
-
-    def connect_invest_rule(m, n):
-        return invest[n][0] * invest[n][1] == invest[n+1][0] * invest[n+1][1]
-
-    om.invest_connect_cnstr = po.Constraint(iset, rule=connect_invest_rule)
+    def connect_invest_rule(m):
+        return var1 * factor1 == var2
+    setattr(om, name, po.Constraint(rule=connect_invest_rule))
 
     return om
