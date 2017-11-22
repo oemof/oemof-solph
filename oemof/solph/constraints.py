@@ -49,6 +49,12 @@ def emission_limit(om, flows=None, limit=None):
 
 def equate_variables(om, var1, var2, factor1=1, name=None):
     """
+    Set two variables to equal adaptable by a factor.
+
+    **The following constraints are build:**
+
+      .. math::
+        var1 \\cdot factor1 \\eq var2
 
     Parameters
     ----------
