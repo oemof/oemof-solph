@@ -8,14 +8,14 @@ objective:
 
 s.t.
 
-c_e_invest_connect_cnstr(0)_:
--0.5 InvestmentFlow_invest(Bus1_Sink)
-+1 InvestmentFlow_invest(Source_Bus1)
+c_e_equate_InvestmentFlow_invest(Source_Bus1)_InvestmentFlow_invest(Bus1_Sink)_:
+-1 InvestmentFlow_invest(Bus1_Sink)
++2 InvestmentFlow_invest(Source_Bus1)
 = 0
 
-c_e_invest_connect_cnstr(1)_:
+c_e_equate_InvestmentFlow_invest(Source_Bus1)_GenericInvestmentStorageBlock_invest(storage)_:
 -1 GenericInvestmentStorageBlock_invest(storage)
-+0.5 InvestmentFlow_invest(Bus1_Sink)
++1 InvestmentFlow_invest(Source_Bus1)
 = 0
 
 c_e_Bus_balance(Bus1_0)_:

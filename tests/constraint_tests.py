@@ -350,9 +350,11 @@ class Constraint_Tests:
         source = solph.Source(label='Source', outputs={bus1: solph.Flow(
             investment=solph.Investment(ep_costs=123))})
         om = self.get_om()
-        investvar = [(om.InvestmentFlow.invest[source, bus1], 1),
-                     (om.InvestmentFlow.invest[bus1, sink], 0.5),
-                     (om.GenericInvestmentStorageBlock.invest[storage], 1)]
-        solph.constraints.connect_investment_variables(om, investvar)
+        solph.constraints.equate_variables(
+            om, om.InvestmentFlow.invest[source, bus1],
+            om.InvestmentFlow.invest[bus1, sink], 2)
+        solph.constraints.equate_variables(
+            om, om.InvestmentFlow.invest[source, bus1],
+            om.GenericInvestmentStorageBlock.invest[storage])
 
         self.compare_lp_files('connect_investment.lp', my_om=om)

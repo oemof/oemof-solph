@@ -85,12 +85,15 @@ def test_connect_invest():
 
     om = solph.Model(energysystem)
 
-    invest = [(om.InvestmentFlow.invest[line12, bel2], 1),
-              (om.InvestmentFlow.invest[line21, bel1], 0.5),
-              (om.InvestmentFlow.invest[lineg1, bel1], 1),
-              (om.GenericInvestmentStorageBlock.invest[storage], 1)]
-
-    solph.constraints.connect_investment_variables(om, invest)
+    solph.constraints.equate_variables(
+        om, om.InvestmentFlow.invest[line12, bel2],
+        om.InvestmentFlow.invest[line21, bel1], 2)
+    solph.constraints.equate_variables(
+        om, om.InvestmentFlow.invest[line12, bel2],
+        om.InvestmentFlow.invest[lineg1, bel1])
+    solph.constraints.equate_variables(
+        om, om.InvestmentFlow.invest[line12, bel2],
+        om.GenericInvestmentStorageBlock.invest[storage])
 
     # if tee_switch is true solver messages will be displayed
     logging.info('Solve the optimization problem')
