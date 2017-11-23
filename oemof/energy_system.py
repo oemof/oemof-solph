@@ -118,12 +118,16 @@ class EnergySystem:
             g(entity, groups)
         return groups
 
-    def add(self, entity):
-        """ Add an `entity` to this energy system.
-        """
+    def _add(self, entity):
         self.entities.append(entity)
         self._groups = partial(self._regroup, entity, self.groups,
                                self._groupings)
+
+    def add(self, *nodes):
+        """ Add :class:`nodes <oemof.network.Node>` to this energy system.
+        """
+        for n in nodes:
+            self._add(n)
 
     @property
     def groups(self):
