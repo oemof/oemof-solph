@@ -49,7 +49,7 @@ def test_gen_chp():
     ccet = solph.components.GenericCHP(
         label='combined_cycle_extraction_turbine',
         fuel_input={bgas: solph.Flow(
-            H_L_FG_share=data['H_L_FG_share'])},
+            H_L_FG_share_max=data['H_L_FG_share_max'])},
         electrical_output={bel: solph.Flow(
             P_max_woDH=data['P_max_woDH'],
             P_min_woDH=data['P_min_woDH'],
