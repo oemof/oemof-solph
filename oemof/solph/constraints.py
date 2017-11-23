@@ -48,22 +48,21 @@ def emission_limit(om, flows=None, limit=None):
 
 
 def equate_variables(om, var1, var2, factor1=1, name=None):
-    """
-    Set two variables to equal adaptable by a factor.
+    r"""
+    Adds a constraint to the given model that set two variables to equal
+    adaptable by a factor.
 
     **The following constraints are build:**
 
       .. math::
-        var1 \\cdot factor1 \\eq var2
+        var\textit{1} \cdot factor\textit{1} = var\textit{2}
 
     Parameters
     ----------
-    name
-    factor1
-    var1 : po.Var
+    var1 : pyomo.environ.Var
         First variable, to be set to equal with Var2 and multiplied with
         factor1.
-    var2 : po.Var
+    var2 : pyomo.environ.Var
         Second variable, to be set equal to (Var1 * factor1).
     factor1 : float
         Factor to define the proportion between the variables.
@@ -71,11 +70,7 @@ def equate_variables(om, var1, var2, factor1=1, name=None):
         Optional name for the equation e.g. in the LP file. By default the
         name is: equate + string representation of var1 and var2.
     om : oemof.solph.Model
-        Model to which constraints are added.
-
-    Returns
-    -------
-    om.solph.Model
+        Model to which the constraint is added.
 
     Examples
     --------
