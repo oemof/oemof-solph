@@ -47,7 +47,7 @@ oemof.solph.components module
 oemof.solph.constraints module
 ------------------------------
 
-.. automodule:: oemof.solph.components
+.. automodule:: oemof.solph.constraints
     :members:
     :undoc-members:
     :show-inheritance:
