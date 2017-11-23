@@ -31,7 +31,7 @@ class Constraint_Tests:
 
     def get_om(self):
         return solph.Model(self.energysystem,
-                                      timeindex=self.energysystem.timeindex)
+                           timeindex=self.energysystem.timeindex)
 
     def compare_lp_files(self, filename, ignored=None, my_om=None):
         if my_om is None:
@@ -338,7 +338,9 @@ class Constraint_Tests:
         om = self.get_om()
         solph.constraints.emission_limit(om, limit=777)
 
-    def test_connect_investment_variables_constraint(self):
+    def test_equate_variables_constraint(self):
+        """Testing the equate_variables function in the constraint module.
+        """
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
