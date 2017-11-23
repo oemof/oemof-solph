@@ -284,13 +284,14 @@ class Entity:
     Attributes
     ----------
     registry: :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
-        The central registry keeping track of all :class:`Entities <Entity>`
-        created. If this is `None`, :class:`Entity` instances are not
-        kept track of. When you instantiate an :class:`EnergySystem
-        <oemof.core.energy_system.EnergySystem>` it automatically becomes the
-        entity registry, i.e. all entities created are added to its
-        :attr:`entities <oemof.core.energy_system.EnergySystem.entities>`
-        attribute on construction.
+        The central registry keeping track of all :class:`Node's <Node>`
+        created. If this is `None`, :class:`Node` instances are not
+        kept track of. Assign an :class:`EnergySystem
+        <oemof.core.energy_system.EnergySystem>` to this attribute to have it
+        become the a :class:`node <Node>` registry, i.e. all :class:`nodes
+        <Node>` created are added to its :attr:`nodes
+        <oemof.core.energy_system.EnergySystem.nodes>`
+        property on construction.
     """
     optimization_options = {}
 

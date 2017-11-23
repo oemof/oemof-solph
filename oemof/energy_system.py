@@ -100,8 +100,6 @@ class EnergySystem:
         for attribute in ['entities']:
             setattr(self, attribute, kwargs.get(attribute, []))
 
-        Entity.registry = self
-        Node.registry = self
         self._groups = {}
         self._groupings = ([BY_UID] +
                            [g if isinstance(g, Grouping) else Nodes(g)
