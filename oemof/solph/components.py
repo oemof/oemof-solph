@@ -158,15 +158,15 @@ class GenericStorageBlock(SimpleBlock):
     **The following constraints are created:**
 
     Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: capacity(n, t) = capacity(n, previous(t)) \\cdot  \
-            (1 - capacity\\_loss_n(t))) \
-            - \\frac{flow(n, o, t)}{\\eta(n, o, t)} \\cdot \\tau \
-            + flow(i, n, t) \\cdot \\eta(i, n, t) \\cdot \\tau
+        .. math:: capacity(n, t) = &capacity(n, previous(t)) \cdot
+            (1 - capacity\_loss_n(t))) \\
+            &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
+            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
 
     **The following parts of the objective function are created:**
 
     If :attr:`fixed_costs` is set by the user:
-        .. math:: \\sum_n nominal\\_capacity(n, t) \cdot fixed\\_costs(n)
+        .. math:: \sum_n nominal\_capacity(n, t) \cdot fixed\_costs(n)
 
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
     and their value after optimization by: `om.Storage.fixed_costs()`.
@@ -230,7 +230,7 @@ class GenericStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
     def _objective_expression(self):
-        """Objective expression for storages with no investment.
+        r"""Objective expression for storages with no investment.
         Note: This adds only fixed costs as variable costs are already
         added in the Block :class:`Flow`.
         """
@@ -283,54 +283,53 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     Storage balance
       .. math::
-        capacity(n, t) =  &capacity(n, t\_previous(t)) \\cdot \
-        (1 - capacity\_loss(n)) \\\\
-        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \\cdot \
-           \\tau) \\\\
-        &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n) \\cdot \
-           \\tau, \\\\
-        &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
-        &\\forall t \\in \\textrm{TIMESTEPS}.
+        capacity(n, t) =  &capacity(n, t\_previous(t)) \cdot
+        (1 - capacity\_loss(n)) \\
+        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \cdot
+        \tau) \\
+        &+ flow(source(n), n, t) \cdot inflow\_conversion\_factor(n) \cdot \
+        \tau \textrm{,} \\
+        &\forall n \in \textrm{INVESTSTORAGES} \textrm{,} \\
+        &\forall t \in \textrm{TIMESTEPS}.
 
     Initial capacity of :class:`.network.Storage`
         .. math::
-          capacity(n, t_{last}) = invest(n) \\cdot
-          initial\_capacity(n), \\\\
-          \\forall n \\in \\textrm{INITIAL\_CAPACITY,} \\\\
-          \\forall t \\in \\textrm{TIMESTEPS}.
+          capacity(n, t_{last}) = invest(n) \cdot
+          initial\_capacity(n), \\
+          \forall n \in \textrm{INITIAL\_CAPACITY,} \\
+          \forall t \in \textrm{TIMESTEPS}.
 
     Connect the invest variables of the storage and the input flow.
         .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * nominal\_input\_capacity\_ratio(n) \\\\
-          \\forall n \\in \\textrm{INVESTSTORAGES}
+          invest(n) * nominal\_input\_capacity\_ratio(n) \\
+          \forall n \in \textrm{INVESTSTORAGES}
 
     Connect the invest variables of the storage and the output flow.
         .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * nominal_output_capacity_ratio(n) \\\\
-          \\forall n \\in \\textrm{INVESTSTORAGES}
+          invest(n) * nominal_output_capacity_ratio(n) \\
+          \forall n \in \textrm{INVESTSTORAGES}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t),
-            \\\\
-            \\forall n \\in \\textrm{MAX\_INVESTSTORAGES,} \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+        .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
+            \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
+            \forall t \in \textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t),
-            \\\\
-            \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+        .. math:: capacity(n, t) \geq invest(n) \cdot capacity\_min(n, t),
+            \\
+            \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
+            \forall t \in \textrm{TIMESTEPS}.
 
 
     **The following parts of the objective function are created:**
 
     Equivalent periodical costs (investment costs):
         .. math::
-            \\sum_n invest(n) \\cdot ep\_costs(n)
+            \\sum_n invest(n) \cdot ep\_costs(n)
 
     Additionally, if fixed costs are set by the user:
         .. math::
-            \\sum_n invest(n) \\cdot fixed\_costs(n)
+            \\sum_n invest(n) \cdot fixed\_costs(n)
 
     The expression can be accessed by :attr:`om.InvestStorages.fixed_costs` and
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
@@ -476,7 +475,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 class GenericCHP(Transformer):
-    """
+    r"""
     Component `GenericCHP` to model combined heat and power plants.
 
     Can be used to model (combined cycle) extraction or back-pressure turbines
@@ -599,7 +598,7 @@ class GenericCHP(Transformer):
 # ------------------------------------------------------------------------------
 
 class GenericCHPBlock(SimpleBlock):
-    """Block for the linear relation of nodes with type class:`.GenericCHP`."""
+    r"""Block for the linear relation of nodes with type class:`.GenericCHP`."""
 
     CONSTRAINT_GROUP = True
 
@@ -726,7 +725,7 @@ class GenericCHPBlock(SimpleBlock):
                                         rule=_P_restriction_rule)
 
     def _objective_expression(self):
-        """Objective expression for generic CHPs with no investment.
+        r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds only fixed costs as variable costs are already
         added in the Block :class:`Flow`.
@@ -758,7 +757,7 @@ class GenericCHPBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 class VariableFractionTransformer(Transformer):
-    """
+    r"""
     Component `GenericCHP` to model combined heat and power plants.
 
     A linear transformer with more than one output, where the fraction of
@@ -817,7 +816,7 @@ class VariableFractionTransformer(Transformer):
 # ------------------------------------------------------------------------------
 
 class VariableFractionTransformerBlock(SimpleBlock):
-    """Block for the linear relation of nodes with type
+    r"""Block for the linear relation of nodes with type
     :class:`~oemof.solph.network.VariableFractionTransformer`
 
     **The following sets are created:** (-> see basic sets at
@@ -831,20 +830,20 @@ class VariableFractionTransformerBlock(SimpleBlock):
 
     Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(input, n, t) = \\\\
-            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
-            main\_flow\_loss\_index(n, t)) /\\\\
-            efficiency\_condensing(n, t)\\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+            flow(input, n, t) = \\
+            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \cdot \
+            main\_flow\_loss\_index(n, t)) /\\
+            efficiency\_condensing(n, t)\\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
     Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(n, main\_output, t) = flow(n, tapped\_output, t) \\cdot \\\\
+            flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
             conversion\_factor(n, main\_output, t) / \
-            conversion\_factor(n, tapped\_output, t\\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+            conversion\_factor(n, tapped\_output, t\\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
     """
 
     CONSTRAINT_GROUP = True
@@ -939,7 +938,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 class GenericCAES(Transformer):
-    """
+    r"""
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
     The full set of equations is described in:
@@ -986,7 +985,7 @@ class GenericCAES(Transformer):
 # ------------------------------------------------------------------------------
 
 class GenericCAESBlock(SimpleBlock):
-    """Block for nodes of class:`.GenericCAES`."""
+    r"""Block for nodes of class:`.GenericCAES`."""
 
     CONSTRAINT_GROUP = True
 
