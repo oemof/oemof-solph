@@ -82,7 +82,7 @@ The following code shows the difference between a bus that is assigned to a vari
 
 .. code-block:: python
 
-    print(my_energsystem.groups['natural_gas']
+    print(my_energysystem.groups['natural_gas']
     print(electricity_bus)
 
 .. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
@@ -138,7 +138,7 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
     solph.Source(
         label='import_natural_gas',
-        outputs={my_energsystem.groups['natural_gas']: solph.Flow(
+        outputs={my_energysystem.groups['natural_gas']: solph.Flow(
             nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
     solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
@@ -238,7 +238,7 @@ The VariableFractionTransformer inherits from the :ref:`transformer_class_label`
         conversion_factor_single_flow={b_el: 0.5}
         )
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) shedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
+The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
@@ -368,13 +368,13 @@ Mixed Integer (Linear) Problems
 -------------------------------
 
 Solph also allows you to model components with respect to more technical details.
-For example you can model a mimimal power production (Pmin-Constraint) within
+For example you can model a minimal power production (Pmin-Constraint) within
 oemof. Therefore, the following two classes exist in the oemof.solph.options
 module: :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
 Note that the usage of these classes is not compatible with the
 :py:class:`~oemof.solph.options.Investment` class at the moment.
 
-If you want to use the functionalities of the options-module, the only thing
+If you want to use the functionality of the options-module, the only thing
 you have to do is to invoke a class instance inside your Flow() - declaration:
 
 .. code-block:: python
@@ -395,7 +395,7 @@ to be of the domain discrete, i.e. {min, ... 10, 11, 12, ..., max}. The BinaryFl
 object of the 'electrical' flow will create a 'status' variable for the flow.
 This will be used to model for example Pmin/Pmax constraints if the attribute `min`
 of the flow is set. It will also be used to include start up constraints and costs
-if correponding attributes of the class are provided. For more
+if corresponding attributes of the class are provided. For more
 information see the API of the BinaryFlow() class and its corresponding block class:
 :py:class:`~oemof.solph.blocks.BinaryFlow`.
 
@@ -421,8 +421,8 @@ and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Conseq
 certain constraints are created for all elements of a specific group. Thus,
 mathematically the groups depict sets of elements inside the model.
 
-The grouping is handeld by the solph grouping module :py:mod:`~oemof.solph.groupings`
-which is based on the oemof core :py:mod:`~oemof.groupings` functionalities. You
+The grouping is handled by the solph grouping module :py:mod:`~oemof.solph.groupings`
+which is based on the oemof core :py:mod:`~oemof.groupings` functionality. You
 do not need to understand how the underlying functionality works. Instead, checkout
 how the solph grouping module is used to create groups.
 

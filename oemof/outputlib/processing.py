@@ -121,7 +121,8 @@ def results(om):
             results[k] = {'scalars': scalars, 'sequences': sequences}
         except IndexError:
             error_message = ('Cannot access index on result data. ' +
-                             'Did the optimization terminate without errors?')
+                             'Did the optimization terminate' +
+                             ' without errors?')
             raise IndexError(error_message)
 
     # add dual variables for bus constraints

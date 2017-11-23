@@ -158,15 +158,15 @@ class GenericStorageBlock(SimpleBlock):
     **The following constraints are created:**
 
     Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: capacity(n, t) = capacity(n, previous(t)) \\cdot  \
-            (1 - capacity\\_loss_n(t))) \
-            - \\frac{flow(n, o, t)}{\\eta(n, o, t)} \\cdot \\tau \
-            + flow(i, n, t) \\cdot \\eta(i, n, t) \\cdot \\tau
+        .. math:: capacity(n, t) = &capacity(n, previous(t)) \cdot
+            (1 - capacity\_loss_n(t))) \\
+            &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
+            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
 
     **The following parts of the objective function are created:**
 
     If :attr:`fixed_costs` is set by the user:
-        .. math:: \\sum_n nominal\\_capacity(n, t) \cdot fixed\\_costs(n)
+        .. math:: \sum_n nominal\_capacity(n, t) \cdot fixed\_costs(n)
 
     The fixed costs expression can be accessed by `om.Storage.fixed_costs`
     and their value after optimization by: `om.Storage.fixed_costs()`.
@@ -230,7 +230,7 @@ class GenericStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
     def _objective_expression(self):
-        """Objective expression for storages with no investment.
+        r"""Objective expression for storages with no investment.
         Note: This adds only fixed costs as variable costs are already
         added in the Block :class:`Flow`.
         """
@@ -283,54 +283,53 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     Storage balance
       .. math::
-        capacity(n, t) =  &capacity(n, t\_previous(t)) \\cdot \
-        (1 - capacity\_loss(n)) \\\\
-        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \\cdot \
-           \\tau) \\\\
-        &+ flow(source(n), n, t) \\cdot inflow\_conversion\_factor(n) \\cdot \
-           \\tau, \\\\
-        &\\forall n \\in \\textrm{INVESTSTORAGES} \\textrm{,} \\\\
-        &\\forall t \\in \\textrm{TIMESTEPS}.
+        capacity(n, t) =  &capacity(n, t\_previous(t)) \cdot
+        (1 - capacity\_loss(n)) \\
+        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \cdot
+        \tau) \\
+        &+ flow(source(n), n, t) \cdot inflow\_conversion\_factor(n) \cdot \
+        \tau \textrm{,} \\
+        &\forall n \in \textrm{INVESTSTORAGES} \textrm{,} \\
+        &\forall t \in \textrm{TIMESTEPS}.
 
     Initial capacity of :class:`.network.Storage`
         .. math::
-          capacity(n, t_{last}) = invest(n) \\cdot
-          initial\_capacity(n), \\\\
-          \\forall n \\in \\textrm{INITIAL\_CAPACITY,} \\\\
-          \\forall t \\in \\textrm{TIMESTEPS}.
+          capacity(n, t_{last}) = invest(n) \cdot
+          initial\_capacity(n), \\
+          \forall n \in \textrm{INITIAL\_CAPACITY,} \\
+          \forall t \in \textrm{TIMESTEPS}.
 
     Connect the invest variables of the storage and the input flow.
         .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * nominal\_input\_capacity\_ratio(n) \\\\
-          \\forall n \\in \\textrm{INVESTSTORAGES}
+          invest(n) * nominal\_input\_capacity\_ratio(n) \\
+          \forall n \in \textrm{INVESTSTORAGES}
 
     Connect the invest variables of the storage and the output flow.
         .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * nominal_output_capacity_ratio(n) \\\\
-          \\forall n \\in \\textrm{INVESTSTORAGES}
+          invest(n) * nominal_output_capacity_ratio(n) \\
+          \forall n \in \textrm{INVESTSTORAGES}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: capacity(n, t) \leq invest(n) \\cdot capacity\_min(n, t),
-            \\\\
-            \\forall n \\in \\textrm{MAX\_INVESTSTORAGES,} \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+        .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
+            \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
+            \forall t \in \textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) \geq invest(n) \\cdot capacity\_min(n, t),
-            \\\\
-            \\forall n \\in \\textrm{MIN\_INVESTSTORAGES,} \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+        .. math:: capacity(n, t) \geq invest(n) \cdot capacity\_min(n, t),
+            \\
+            \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
+            \forall t \in \textrm{TIMESTEPS}.
 
 
     **The following parts of the objective function are created:**
 
     Equivalent periodical costs (investment costs):
         .. math::
-            \\sum_n invest(n) \\cdot ep\_costs(n)
+            \\sum_n invest(n) \cdot ep\_costs(n)
 
     Additionally, if fixed costs are set by the user:
         .. math::
-            \\sum_n invest(n) \\cdot fixed\_costs(n)
+            \\sum_n invest(n) \cdot fixed\_costs(n)
 
     The expression can be accessed by :attr:`om.InvestStorages.fixed_costs` and
     their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
@@ -476,7 +475,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 class GenericCHP(Transformer):
-    """
+    r"""
     Component `GenericCHP` to model combined heat and power plants.
 
     Can be used to model (combined cycle) extraction or back-pressure turbines
@@ -491,8 +490,23 @@ class GenericCHP(Transformer):
     Int J Energy Environ Eng (2016) 7: 167.
     https://doi.org/10.1007/s40095-016-0204-6
 
-    Only one adaption for the parameter `H_L_FG_share`has been made to
-    set the flue gas losses `H_L_FG` as share of the fuel flow `H_F`.
+    For a general understanding of (MI)LP CHP representation, see:
+    Fabricio I. Salgado, P.
+    Short - Term Operation Planning on Cogeneration Systems: A Survey
+    Electric Power Systems Research (2007)
+    Electric Power Systems Research
+    Volume 78, Issue 5, May 2008, Pages 835-848
+    https://doi.org/10.1016/j.epsr.2007.06.001
+
+    Notes:
+    An adaption for the flow parameter `H_L_FG_share_max` has been made to
+    set the flue gas losses at maximum fuel flow `H_L_FG_max` as share of
+    the fuel flow `H_F` e.g. for combined cycle extraction turbines.
+    The flow parameter `H_L_FG_share_min` can be used to set the flue gas
+    losses at minimum fuel flow `H_L_FG_min` as share of
+    the fuel flow `H_F` e.g. for motoric CHPs.
+    The boolean component parameter `back_pressure` can be set to model
+    back-pressure characteristics.
 
     Also have a look at the examples on how to use it.
 
@@ -599,7 +613,7 @@ class GenericCHP(Transformer):
 # ------------------------------------------------------------------------------
 
 class GenericCHPBlock(SimpleBlock):
-    """Block for the linear relation of nodes with type class:`.GenericCHP`."""
+    r"""Block for the linear relation of nodes with type class:`.GenericCHP`."""
 
     CONSTRAINT_GROUP = True
 
@@ -625,40 +639,43 @@ class GenericCHPBlock(SimpleBlock):
 
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.H_L_FG = Var(self.GENERICCHPS, m.TIMESTEPS,
-                          within=NonNegativeReals)
+        self.H_L_FG_max = Var(self.GENERICCHPS, m.TIMESTEPS,
+                              within=NonNegativeReals)
+        self.H_L_FG_min = Var(self.GENERICCHPS, m.TIMESTEPS,
+                              within=NonNegativeReals)
         self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS,
                           within=NonNegativeReals)
         self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.Q = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
         self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
 
-        def _h_flow_connection_rule(block, n, t):
+        # constraint rules
+        def _H_flow_rule(block, n, t):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
-        self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_h_flow_connection_rule)
+        self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                 rule=_H_flow_rule)
 
-        def _q_flow_connection_rule(block, n, t):
+        def _Q_flow_rule(block, n, t):
             """Link heat flow to component outflow."""
             expr = 0
             expr += self.Q[n, t]
             expr += - m.flow[n, list(n.heat_output.keys())[0], t]
             return expr == 0
-        self.q_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_q_flow_connection_rule)
+        self.Q_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                 rule=_Q_flow_rule)
 
-        def _p_flow_connection_rule(block, n, t):
+        def _P_flow_rule(block, n, t):
             """Link power flow to component outflow."""
             expr = 0
             expr += self.P[n, t]
             expr += - m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
-        self.p_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_p_flow_connection_rule)
+        self.P_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                 rule=_P_flow_rule)
 
         def _H_F_1_rule(block, n, t):
             """Set P_woDH depending on H_F."""
@@ -702,31 +719,63 @@ class GenericCHPBlock(SimpleBlock):
         self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
 
-        def _H_L_FG_share_rule(block, n, t):
-            """Set flue gas losses as share of fuel flow (not in paper)."""
+        def _H_L_FG_max_rule(block, n, t):
+            """Set max. flue gas loss as share fuel flow share."""
             expr = 0
-            expr += - self.H_L_FG[n, t]
+            expr += - self.H_L_FG_max[n, t]
             expr += self.H_F[n, t] * \
-                list(n.fuel_input.values())[0].H_L_FG_share[t]
+                list(n.fuel_input.values())[0].H_L_FG_share_max[t]
             return expr == 0
-        self.H_L_FG_share = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                       rule=_H_L_FG_share_rule)
+        self.H_L_FG_max_def = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                         rule=_H_L_FG_max_rule)
 
-        def _P_restriction_rule(block, n, t):
-            """Restrict P depending on fuel and heat flow."""
+        def _Q_max_res_rule(block, n, t):
+            """Set maximum Q depending on fuel and electrical flow."""
             expr = 0
-            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG[n, t]
+            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_max[n, t]
             expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
             expr += - self.H_F[n, t]
-            if n.back_pressure is False:
-                return expr <= 0
-            else:
+            # back-pressure characteristics or one-segment model
+            if n.back_pressure is True:
                 return expr == 0
-        self.P_restriction = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                        rule=_P_restriction_rule)
+            else:
+                return expr <= 0
+        self.Q_max_res = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                    rule=_Q_max_res_rule)
+
+        def _H_L_FG_min_rule(block, n, t):
+            """Set min. flue gas loss as fuel flow share."""
+            # minimum flue gas losses e.g. for motoric CHPs
+            if getattr(list(n.fuel_input.values())[0],
+                       'H_L_FG_share_min', None):
+                expr = 0
+                expr += - self.H_L_FG_min[n, t]
+                expr += self.H_F[n, t] * \
+                    list(n.fuel_input.values())[0].H_L_FG_share_min[t]
+                return expr == 0
+            else:
+                return Constraint.Skip
+        self.H_L_FG_min_def = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                         rule=_H_L_FG_min_rule)
+
+        def _Q_min_res_rule(block, n, t):
+            """Set minimum Q depending on fuel and eletrical flow."""
+            # minimum restriction for heat flows e.g. for motoric CHPs
+            if getattr(list(n.fuel_input.values())[0],
+                       'H_L_FG_share_min', None):
+                expr = 0
+                expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
+                expr += list(n.heat_output.values())[0].Q_CW_min[t] \
+                    * self.Y[n, t]
+                expr += - self.H_F[n, t]
+                return expr >= 0
+            else:
+                return Constraint.Skip
+        self.Q_min_res = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                    rule=_Q_min_res_rule)
 
     def _objective_expression(self):
-        """Objective expression for generic CHPs with no investment.
+        r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds only fixed costs as variable costs are already
         added in the Block :class:`Flow`.
@@ -758,7 +807,7 @@ class GenericCHPBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 class VariableFractionTransformer(Transformer):
-    """
+    r"""
     Component `GenericCHP` to model combined heat and power plants.
 
     A linear transformer with more than one output, where the fraction of
@@ -817,7 +866,7 @@ class VariableFractionTransformer(Transformer):
 # ------------------------------------------------------------------------------
 
 class VariableFractionTransformerBlock(SimpleBlock):
-    """Block for the linear relation of nodes with type
+    r"""Block for the linear relation of nodes with type
     :class:`~oemof.solph.network.VariableFractionTransformer`
 
     **The following sets are created:** (-> see basic sets at
@@ -831,20 +880,20 @@ class VariableFractionTransformerBlock(SimpleBlock):
 
     Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(input, n, t) = \\\\
-            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \\cdot \
-            main\_flow\_loss\_index(n, t)) /\\\\
-            efficiency\_condensing(n, t)\\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+            flow(input, n, t) = \\
+            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \cdot \
+            main\_flow\_loss\_index(n, t)) /\\
+            efficiency\_condensing(n, t)\\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
     Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
         .. math::
-            flow(n, main\_output, t) = flow(n, tapped\_output, t) \\cdot \\\\
+            flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
             conversion\_factor(n, main\_output, t) / \
-            conversion\_factor(n, tapped\_output, t\\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+            conversion\_factor(n, tapped\_output, t\\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
     """
 
     CONSTRAINT_GROUP = True
@@ -939,7 +988,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 class GenericCAES(Transformer):
-    """
+    r"""
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
     The full set of equations is described in:
@@ -986,7 +1035,7 @@ class GenericCAES(Transformer):
 # ------------------------------------------------------------------------------
 
 class GenericCAESBlock(SimpleBlock):
-    """Block for nodes of class:`.GenericCAES`."""
+    r"""Block for nodes of class:`.GenericCAES`."""
 
     CONSTRAINT_GROUP = True
 
@@ -1013,14 +1062,14 @@ class GenericCAESBlock(SimpleBlock):
         # variables
         self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
 
-        def _h_flow_connection_rule(block, n, t):
+        def _H_flow_rule(block, n, t):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
-        self.h_flow_connection = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_h_flow_connection_rule)
+        self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+                                            rule=_H_flow_rule)
 
 # ------------------------------------------------------------------------------
 # End of CAES block
