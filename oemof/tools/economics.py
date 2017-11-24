@@ -16,5 +16,9 @@ def annuity(capex, n, wacc):
     wacc : float
         Weighted average cost of capital
 
+    Returns
+    -------
+    float
+
     """
     return capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)

@@ -26,7 +26,8 @@ warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 def graph(energy_system, optimization_model=None, edge_labels=True,
           remove_nodes=None, remove_nodes_with_substrings=None,
           remove_edges=None, node_color='#AFAFAF', edge_color='#CFCFCF',
-          plot=True, node_size=2000, with_labels=True, arrows=True):
+          plot=True, node_size=2000, with_labels=True, arrows=True,
+          layout='neato'):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -35,7 +36,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     ----------
     energy_system : `oemof.solph.network.EnergySystem`
 
-    optimization_model : `oemof.solph.models.OperationalModel`
+    optimization_model : `oemof.solph.models.Model`
 
     edge_labels: boolean
         Use nominal values of flow as edge label
@@ -49,8 +50,9 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     remove_edges: list of string tuples
         Edges to be removed e.g. [('resource_gas', 'gas_balance')]
 
-    node_color : string
-        Hex color code oder matplotlib color for node color.
+    node_color : dict or string
+        Hex color code oder matplotlib color for each node. If string, all
+        colors are the same.
 
     edge_color : string
         Hex color code oder matplotlib color for edge color.
@@ -67,27 +69,31 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     arrows : boolean
         Draw arrows on directed edges. Works only if an optimization_model has
         been passed.
+    layout : string
+        networkx graph layout, one of: neato, dot, twopi, circo, fdp, sfdp.
 
     Examples
     --------
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, LinearTransformer, Flow,
-    ...                          OperationalModel, EnergySystem)
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
+    ...                          Model, EnergySystem)
+    >>> from oemof.outputlib import graph_tools as gt
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
     >>> b_el = Bus(label='b_el')
-    >>> demand = Sink(label='demand_el',
-    ...               inputs = {b_el: Flow(nominal_value=85,
-    ...                         actual_value=[0.5, 0.25, 0.75],
-    ...                         fixed=True)})
-    >>> pp_gas = LinearTransformer(label='pp_gas',
+    >>> demand_el = Sink(label='demand_el',
+    ...                  inputs = {b_el: Flow(nominal_value=85,
+    ...                            actual_value=[0.5, 0.25, 0.75],
+    ...                            fixed=True)})
+    >>> pp_gas = Transformer(label='pp_gas',
     ...                            inputs={b_gas: Flow()},
     ...                            outputs={b_el: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
     ...                            conversion_factors={b_el: 0.5})
-    >>> om = OperationalModel(es=es)
-    >>> my_graph = graph(energy_system=es, optimization_model=om, plot=False)
+    >>> om = Model(es=es)
+    >>> my_graph = gt.graph(energy_system=es, optimization_model=om,
+    ...                     node_color={demand_el: 'r'}, plot=False)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # import networkx as nx
@@ -137,6 +143,9 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
                                 if i in v.label]
                 G.remove_nodes_from(remove_nodes)
 
+        if type(node_color) is dict:
+            node_color = [node_color.get(g, '#AFAFAF') for g in G.nodes()]
+
         # set drawing options
         options = {
          'prog': 'dot',
@@ -148,7 +157,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         }
 
         # draw graph
-        pos = graphviz_layout(G)
+        pos = graphviz_layout(G, prog=layout)
         nx.draw(G, pos=pos, **options)
 
         # add edge labels for all edges
@@ -169,7 +178,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
 for o in [graph]:
     if (((nx is None) or (graphviz_layout is None) or (pygraphviz is None)) and
-        (getattr(o, "__doc__") is not None)):
+            (getattr(o, "__doc__") is not None)):
         o.__doc__ = re.sub(r"((^|\n)\s*)>>>", r"\1>>",
                            re.sub(r"((^|\n)\s*)\.\.\.", r"\1..", o.__doc__))
 

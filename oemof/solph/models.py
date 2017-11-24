@@ -2,17 +2,12 @@
 """
 
 """
-
-from collections import UserDict, UserList
-from itertools import groupby
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from .network import Storage
 from oemof.solph import blocks
-from .options import Investment
-from .plumbing import sequence
-from ..outputlib import result_dictionary
+from oemof.solph.plumbing import sequence
+from oemof.outputlib import processing
 import logging
 
 # #############################################################################
@@ -21,9 +16,10 @@ import logging
 #
 # #############################################################################
 
-class OperationalModel(po.ConcreteModel):
-    """ An energy system model for operational simulation with optimized
-    dispatch.
+
+class Model(po.ConcreteModel):
+    """ An  energy system model for operational and investment
+    optimization.
 
     Parameters
     ----------
@@ -32,7 +28,7 @@ class OperationalModel(po.ConcreteModel):
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`OperationalModel.CONSTRAINTS`
+        Defaults to :const:`Model.CONSTRAINTS`
 
     **The following sets are created**:
 
@@ -45,14 +41,6 @@ class OperationalModel(po.ConcreteModel):
     FLOWS :
         A 2 dimensional set with all flows. Index: `(source, target)`
 
-    NEGATIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `negative_gradient` is set.
-
-    POSITIVE_GRADIENT_FLOWS :
-        A subset of set FLOWS with all flows where attribute
-        `positive_gradient` is set.
-
     **The following variables are created**:
 
     flow
@@ -60,36 +48,28 @@ class OperationalModel(po.ConcreteModel):
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
-    negative_flow_gradient :
-        Difference of a flow in consecutive timesteps if flow is reduced
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
-
-    positive_flow_gradient :
-        Difference of a flow in consecutive timesteps if flow is increased
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
-
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.LinearTransformer,
-                         blocks.LinearN1Transformer,
-                         blocks.VariableFractionTransformer,
-                         blocks.Storage, blocks.InvestmentFlow,
-                         blocks.InvestmentStorage, blocks.Flow,
-                         blocks.BinaryFlow, blocks.DiscreteFlow]
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.Transformer,
+                         blocks.InvestmentFlow, blocks.Flow,
+                         blocks.NonConvexFlow]
 
     def __init__(self, es, **kwargs):
         super().__init__()
 
         # ########################  Arguments #################################
 
-        self.name = kwargs.get('name', 'OperationalModel')
-        self.es = es
-        self.timeindex = es.timeindex
-        self.timesteps = range(len(self.timeindex))
-        self.timeincrement = sequence(self.timeindex.freq.nanos / 3.6e12)
+        self.name = kwargs.get('name', 'Model')
 
-        self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
+        self.es = es
+
+        self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
+
+        self._constraint_groups = (Model.CONSTRAINT_GROUPS +
                                    kwargs.get('constraint_groups', []))
 
+        self._constraint_groups += [i for i in self.es.groups
+                                    if hasattr(i, 'CONSTRAINT_GROUP') and
+                                    i not in self._constraint_groups]
         # dictionary with all flows containing flow objects as values und
         # tuple of string representation of oemof nodes (source, target)
         self.flows = es.flows()
@@ -99,32 +79,18 @@ class OperationalModel(po.ConcreteModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(initialize=self.timesteps, ordered=True)
+        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
+                                ordered=True)
 
         # previous timesteps
-        previous_timesteps = [x - 1 for x in self.timesteps]
-        previous_timesteps[0] = self.timesteps[-1]
+        previous_timesteps = [x - 1 for x in self.TIMESTEPS]
+        previous_timesteps[0] = self.TIMESTEPS.last()
 
         self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
-        # self.PREVIOUS_TIMESTEPS = po.Set(self.TIMESTEPS,
-        #                            initialize=dict(zip(self.TIMESTEPS,
-        #                                                previous_timesteps)))
 
         # pyomo set for all flows in the energy system graph
         self.FLOWS = po.Set(initialize=self.flows.keys(),
                             ordered=True, dimen=2)
-
-        self.NEGATIVE_GRADIENT_FLOWS = po.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.negative_gradient[0] is not None],
-            ordered=True, dimen=2)
-
-        self.POSITIVE_GRADIENT_FLOWS = po.Set(
-            initialize=[(n, t) for n in self.es.nodes
-                        for (t, f) in n.outputs.items()
-                        if f.positive_gradient[0] is not None],
-            ordered=True, dimen=2)
 
         # ######################### FLOW VARIABLE #############################
 
@@ -145,22 +111,16 @@ class OperationalModel(po.ConcreteModel):
                     if self.flows[o, i].fixed:
                         self.flow[o, i, t].fix()
 
-                if self.flows[o, i].nominal_value is not None and (
-                        self.flows[o, i].binary is None):
+                if self.flows[o, i].nominal_value is not None:
                     # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
-                    # lower bound of flow variable
-                    self.flow[o, i, t].setlb(self.flows[o, i].min[t] *
-                                             self.flows[o, i].nominal_value)
 
-        self.positive_flow_gradient = po.Var(self.POSITIVE_GRADIENT_FLOWS,
-                                             self.TIMESTEPS,
-                                             within=po.NonNegativeReals)
-
-        self.negative_flow_gradient = po.Var(self.NEGATIVE_GRADIENT_FLOWS,
-                                             self.TIMESTEPS,
-                                             within=po.NonNegativeReals)
+                    if self.flows[o, i].nonconvex is None:
+                        # lower bound of flow variable
+                        self.flow[o, i, t].setlb(
+                            self.flows[o, i].min[t] *
+                            self.flows[o, i].nominal_value)
 
         # ########################### CONSTRAINTS #############################
         # loop over all constraint groups to add constraints to the model
@@ -206,11 +166,11 @@ class OperationalModel(po.ConcreteModel):
         """ Returns a nested dictionary of the results of this optimization
         """
 
-        result = result_dictionary.result_dict(self)
+        result = processing.results(self)
 
         return result
 
-    def solve(self, solver='glpk', solver_io='lp', **kwargs):
+    def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
 
         Parameters
@@ -254,30 +214,22 @@ class OperationalModel(po.ConcreteModel):
             logging.info("Optimization successful...")
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
-            self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
+            self.es.results = results
         elif status == "ok" and termination_condition == "unknown":
             logging.warning("Optimization with unknown termination condition."
                             + " Writing output anyway...")
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
-            self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
+            self.es.results = results
         elif status == "warning" and termination_condition == "other":
             logging.warning("Optimization might be sub-optimal."
                             + " Writing output anyway...")
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
-            self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
+            self.es.results = results
         else:
             # storage results in result dictionary of energy system
-            self.es.results = self.results()
-            self.es.results.objective = self.objective()
-            self.es.results.solver = results
+            self.es.results = results
             logging.error(
                 "Optimization failed with status %s and terminal condition %s"
                 % (status, termination_condition))
