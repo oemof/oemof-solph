@@ -76,6 +76,7 @@ class EnergySystem:
     >>> from oemof.network import Bus, Sink
     >>> es = EnergySystem()
     >>> bus = Bus(label='electricity')
+    >>> es.add(bus)
     >>> bus is es.groups['electricity']
     True
 
@@ -88,8 +89,10 @@ class EnergySystem:
 
     >>> es = EnergySystem(groupings=[type])
     >>> buses = set(Bus(label="Bus {}".format(i)) for i in range(9))
+    >>> es.add(*buses)
     >>> components = set(Sink(label="Component {}".format(i))
     ...                   for i in range(9))
+    >>> es.add(*components)
     >>> buses == es.groups[Bus]
     True
     >>> components == es.groups[Sink]

@@ -91,6 +91,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     ...                            outputs={b_el: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
     ...                            conversion_factors={b_el: 0.5})
+    >>> es.add(b_gas, b_el, demand_el, pp_gas)
     >>> om = Model(es=es)
     >>> my_graph = gt.graph(energy_system=es, optimization_model=om,
     ...                     node_color={demand_el: 'r'}, plot=False)
