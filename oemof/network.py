@@ -1,4 +1,5 @@
 from collections import MutableMapping as MM
+from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 """
@@ -327,3 +328,23 @@ class Entity:
     def __str__(self):
         # TODO: @Günni: Unused privat method. No Docstring.
         return "<{0} #{1}>".format(type(self).__name__, self.uid)
+
+
+@contextmanager
+def registry_changed_to(r):
+    """ Override registry during execution of a block and restore it afterwards.
+    """
+    backup = Node.registry
+    Node.registry = None
+    yield
+    Node.registry = backup
+
+
+def temporarily_modifies_registry(function):
+    """ Backup registry before and restore it after execution of `function`.
+    """
+    def result(*xs, **ks):
+        with registry_disabled():
+            return f(*xs, **ks)
+    return result
+
