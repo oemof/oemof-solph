@@ -205,13 +205,13 @@ class Grouping:
 
 class Nodes(Grouping):
     """
-    Specialises :class:`Grouping` to group :class:`entities
-    <oemof.core.network.Entity>` into :class:`sets <set>`.
+    Specialises :class:`Grouping` to group :class:`nodes <oemof.network.Node>`
+    into :class:`sets <set>`.
     """
     def value(self, e):
         """
         Returns a :class:`set` containing only :obj:`e`, so groups are
-        :class:`sets <set>` of :class:`entities <oemof.core.network.Entity>`.
+        :class:`sets <set>` of :class:`node <oemof.network.Node>`.
         """
         return {e}
 
