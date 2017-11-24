@@ -98,9 +98,11 @@ class EnergySystem_Tests:
         g2 = Nodes( key=lambda e: "A Subset",
                     filter=lambda e: "subset" in str(e))
         ES = es.EnergySystem(groupings=[g1, g2])
-        special = Entity(uid="special")
-        subset = set(Entity(uid="subset: {}".format(i)) for i in range(10))
-        others = set(Entity(uid="other: {}".format(i)) for i in range(10))
+        special = Node(label="special")
+        subset = set(Node(label="subset: {}".format(i)) for i in range(10))
+        others = set(Node(label="other: {}".format(i)) for i in range(10))
+        ES.add(special, *subset)
+        ES.add(*others)
         eq_(ES.groups["The Special One"], special)
         eq_(ES.groups["A Subset"], subset)
 
@@ -115,20 +117,22 @@ class EnergySystem_Tests:
         g = Nodes( key="group", value=lambda _: set((1, 2, 3, 4)),
                    filter=lambda x: x % 2 == 0)
         ES = es.EnergySystem(groupings=[g])
-        special = Entity(uid="object")
+        special = Node(label="object")
+        ES.add(special)
         eq_(ES.groups["group"], set((2, 4)))
 
     def test_non_callable_group_keys(self):
         collect_everything = Nodes(key="everything")
         g1 = Grouping( key="The Special One",
-                       filter=lambda e: "special" in e.uid)
-        g2 = Nodes(key="A Subset", filter=lambda e: "subset" in e.uid)
+                       filter=lambda e: "special" in e.label)
+        g2 = Nodes(key="A Subset", filter=lambda e: "subset" in e.label)
         ES = es.EnergySystem(groupings=[g1, g2, collect_everything])
-        special = Entity(uid="special")
-        subset = set(Entity(uid="subset: {}".format(i)) for i in range(2))
-        others = set(Entity(uid="other: {}".format(i)) for i in range(2))
+        special = Node(label="special")
+        subset = set(Node(label="subset: {}".format(i)) for i in range(2))
+        others = set(Node(label="other: {}".format(i)) for i in range(2))
         everything = subset.union(others)
         everything.add(special)
+        ES.add(*everything)
         eq_(ES.groups["The Special One"], special)
         eq_(ES.groups["A Subset"], subset)
         eq_(ES.groups["everything"], everything)
