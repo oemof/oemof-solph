@@ -20,7 +20,6 @@ chp plant produces heat and power excess and therefore needs more natural gas.
 from oemof import outputlib
 
 # Default logger of oemof
-from oemof.tools import logger
 import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
