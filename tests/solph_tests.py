@@ -1,6 +1,7 @@
 from nose.tools import ok_, eq_
 
 from oemof.energy_system import EnergySystem as ES
+from oemof.network import Node
 from oemof.solph.blocks import InvestmentFlow as IF
 from oemof.solph import Investment
 import oemof.solph as solph
@@ -10,6 +11,7 @@ class Grouping_Tests:
 
     def setup(self):
         self.es = ES(groupings=solph.GROUPINGS)
+        Node.registry = self.es
 
     def test_investment_flow_grouping(self):
         """ Flows of investment sink should be grouped.

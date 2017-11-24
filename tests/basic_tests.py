@@ -12,7 +12,7 @@ import logging
 from oemof import energy_system as es
 from oemof.network import Entity
 from oemof.network import Bus, Transformer
-from oemof.network import Bus as NewBus, Node
+from oemof.network import Bus as NewBus, Node, temporarily_modifies_registry
 from oemof.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
 
 
@@ -26,14 +26,14 @@ class EnergySystem_Tests:
 
     def setup(self):
         self.es = es.EnergySystem()
+        Node.registry = self.es
 
     def test_entity_registration(self):
-        eq_(Entity.registry, self.es)
         bus = Bus(label='bus-uid', type='bus-type')
-        eq_(self.es.entities[0], bus)
+        eq_(self.es.nodes[0], bus)
         bus2 = Bus(label='bus-uid2', type='bus-type')
         Transformer(label='pp_gas', inputs=[bus], outputs=[bus2])
-        ok_(isinstance(self.es.entities[2], Transformer))
+        ok_(isinstance(self.es.nodes[2], Transformer))
         self.es.timeindex = self.timeindex
         ok_(len(self.es.timeindex) == 5)
 
@@ -70,16 +70,18 @@ class EnergySystem_Tests:
                 if isinstance(g, Iterable) and not isinstance(g, str):
                     ok_(e in g)
 
+    @temporarily_modifies_registry
     def test_defining_multiple_groupings_with_one_function(self):
         def assign_to_multiple_groups_in_one_go(n):
-            g1 = n.uid[-1]
-            g2 = n.uid[0:3]
+            g1 = n.label[-1]
+            g2 = n.label[0:3]
             return [g1, g2]
 
         ES = es.EnergySystem(groupings=[assign_to_multiple_groups_in_one_go])
-        entities = [ Entity(uid=("Foo: " if i % 2 == 0 else "Bar: ") +
-                                 "{}".format(i) +
-                                ("A" if i < 5 else "B"))
+        Node.registry = ES
+        nodes = [ Node(label=("Foo: " if i % 2 == 0 else "Bar: ") +
+                              "{}".format(i) +
+                              ("A" if i < 5 else "B"))
                      for i in range(10)]
         for group in ["Foo", "Bar", "A", "B"]:
             eq_(len(ES.groups[group]), 5,
@@ -88,13 +90,13 @@ class EnergySystem_Tests:
                  "\n  Got     : {}" +
                  "\n  Group   : {}" ).format(
                      group, len(ES.groups[group]),
-                     sorted([e.uid for e in ES.groups[group]])))
+                     sorted([e.label for e in ES.groups[group]])))
 
     def test_grouping_filter_parameter(self):
         g1 = Grouping( key=lambda e: "The Special One",
-                       filter=lambda e: "special" in e.uid)
+                       filter=lambda e: "special" in str(e))
         g2 = Nodes( key=lambda e: "A Subset",
-                    filter=lambda e: "subset" in e.uid)
+                    filter=lambda e: "subset" in str(e))
         ES = es.EnergySystem(groupings=[g1, g2])
         special = Entity(uid="special")
         subset = set(Entity(uid="subset: {}".format(i)) for i in range(10))
@@ -131,6 +133,7 @@ class EnergySystem_Tests:
         eq_(ES.groups["A Subset"], subset)
         eq_(ES.groups["everything"], everything)
 
+    @temporarily_modifies_registry
     def test_constant_group_keys(self):
         """ Callable keys passed in as `constant_key` should not be called.
 
@@ -141,23 +144,28 @@ class EnergySystem_Tests:
         everything = lambda: "everything"
         collect_everything = Nodes(constant_key=everything)
         ES = es.EnergySystem(groupings=[collect_everything])
+        Node.registry = ES
         node = Node(label="A Node")
         ok_("everything" not in ES.groups)
         ok_(everything in ES.groups)
         eq_(ES.groups[everything], set([node]))
 
+    @temporarily_modifies_registry
     def test_Flows(self):
         key = object()
         ES = es.EnergySystem(groupings=[Flows(key)])
+        Node.registry = ES
         flows = (object(), object())
         bus = NewBus(label="A Bus")
         node = Node(label="A Node",
                     inputs={bus: flows[0]}, outputs={bus: flows[1]})
         eq_(ES.groups[key], set(flows))
 
+    @temporarily_modifies_registry
     def test_FlowsWithNodes(self):
         key = object()
         ES = es.EnergySystem(groupings=[FWNs(key)])
+        Node.registry = ES
         flows = (object(), object())
         bus = NewBus(label="A Bus")
         node = Node(label="A Node",

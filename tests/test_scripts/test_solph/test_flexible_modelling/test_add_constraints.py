@@ -11,6 +11,7 @@ simon.hilpert@uni-flensburg.de
 import logging
 import pyomo.environ as po
 import pandas as pd
+from oemof.network import Node
 from oemof.solph import (Sink, Transformer, Bus, Flow,
                          Model, EnergySystem)
 
@@ -21,6 +22,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
+    Node.registry = es
     # add some nodes
     boil = Bus(label="oil", balanced=False)
     blig = Bus(label="lignite", balanced=False)

@@ -6,9 +6,9 @@ import re
 from nose.tools import eq_, assert_raises
 import pandas as pd
 
-import oemof.solph as solph
-
+from oemof.network import Node
 from oemof.tools import helpers
+import oemof.solph as solph
 
 logging.disable(logging.INFO)
 
@@ -28,6 +28,7 @@ class Constraint_Tests:
     def setup(self):
         self.energysystem = solph.EnergySystem(groupings=solph.GROUPINGS,
                                                timeindex=self.date_time_index)
+        Node.registry = self.energysystem
 
     def get_om(self):
         return solph.Model(self.energysystem,

@@ -8,6 +8,7 @@ In this case it is used to model a combined cycle extraction turbine.
 import os
 import pandas as pd
 import oemof.solph as solph
+from oemof.network import Node
 from oemof.outputlib import processing, views
 
 
@@ -23,6 +24,7 @@ def test_gen_chp():
     # create an energy system
     idx = pd.date_range('1/1/2017', periods=periods, freq='H')
     es = solph.EnergySystem(timeindex=idx)
+    Node.registry = es
 
     # resources
     bgas = solph.Bus(label='bgas')
