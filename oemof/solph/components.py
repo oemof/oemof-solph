@@ -1027,14 +1027,141 @@ class GenericCAESBlock(SimpleBlock):
 # ------------------------------------------------------------------------------
 
 
+# ------------------------------------------------------------------------------
+# Start of Engine-Generator Component
+# ------------------------------------------------------------------------------
+class GenericEngineGenerator(Transformer):
+    """
+    Component `GenericEngineGenerator` to model stationary engine-generators.
+
+    Parameters
+    ----------
+    fuel_input : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the fuel input.
+    fuel_curve : dict
+        Dictionary with key-value-pair of operating points as fraction of
+        nominal_capacity of output.keys and the specific fuel consumption.
+        The fuel curve is linearized and fuel coefficients
+        GenericEngineGenerator.fuel_coeff_a and
+        GenericEngineGenerator.fuel_coeff_b are being calculated.
+    electrical_output : dict
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        for the electrical output.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.GenericEngineGenerator`
+    """
+
+
+
+    def __init__(self, fuel_curve, *args, **kwargs):
+        super().__init__( *args, **kwargs )
+
+        self.fuel_input = kwargs.get( 'fuel_input' )
+        self.electrical_output = kwargs.get( 'electrical_output' )
+        self.fuel_curve = {k: v for k, v in fuel_curve.items()}
+
+        # map specific flows to standard API
+        fuel_bus = list( self.fuel_input.keys() )[0]
+        fuel_flow = list( self.fuel_input.values() )[0]
+        fuel_bus.outputs.update( {self: fuel_flow} )
+
+        self.outputs.update( kwargs.get( 'electrical_output' ) )
+
+        x = sorted( map( int, self.fuel_curve.keys() ) )
+        y = sorted( map( int, self.fuel_curve.values() ) )
+
+        z = np.polyfit( x, y, 1 )
+
+        self.fuel_coeff_a = z[0]
+        self.fuel_coeff_b = z[1]
+
+
+# ------------------------------------------------------------------------------
+# End of Engine-Generator Component
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Start of Engine-Generator Block
+# ------------------------------------------------------------------------------
+class GenericEngineGeneratorBlock( SimpleBlock ):
+    """Block for nodes of class:`.GenericEngineGenerator`."""
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__( *args, **kwargs )
+
+    def _create(self, group=None):
+        """
+        Create constraints for GenericEngineGeneratorBlock.
+
+        Parameters
+        ----------
+        group : list
+            List containing `.GenericEngineGenerators` objects.
+            e.g. groups=[genericeg1, genericeg2,..]
+
+        The following linear relation beetween GenericEngineGenerator.fuel_input[t]
+        and GenericEngineGenerator.electrical_output[t] is built.
+
+        Out flow relation :attr:`om.GenericEngineGenerator.relation[i,o,t]`
+        .. math::
+            flow(n, n.electrical_output.keys(), t) = \frac{low(n, n.fuel_input.keys(), t)  \\\\
+            - n.fuel_coeff_b}{n.fuel_coeff_a}
+            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
+            \\forall n \\in \\textrm{GENERIC\_ENGINE\_GENERATORS}.
+
+
+        """
+        m = self.parent_block()
+
+        if group is None:
+            return None
+
+        in_flows = {n: [i for i in n.fuel_input.keys()] for n in group}
+        out_flows = {n: [o for o in n.electrical_output.keys()] for n in group}
+
+        self.relation = Constraint( group, noruleinit=True )
+
+        #m.es.groups[n].fuel_coeff_a
+
+        def _input_output_relation_rule(block):
+            for n in group:
+                for t in m.TIMESTEPS:
+                    for i in in_flows[n]:
+                        for o in out_flows[n]:
+                            try:
+                                lhs = (m.flow[i, n, t] - n.fuel_coeff_b *
+                                       m.flows[n, o].max[t] * m.NonConvexFlow.status[n,o,t])\
+                                      / n.fuel_coeff_a
+                                rhs = m.flow[n, o, t]
+                            except:
+                                raise ValueError( "Error in constraint creation",
+                                                  "source: {0}, target: {1}".format(
+                                                      n.label, o.label ) )
+                            block.relation.add((n, i, o, t), (lhs == rhs))
+
+        self.relation_build = BuildAction( rule=_input_output_relation_rule )
+
+
+        # ------------------------------------------------------------------------------
+        # End of Engine-Generator Block
+        # ------------------------------------------------------------------------------
+
 def component_grouping(node):
-    if isinstance(node, GenericStorage) and isinstance(node.investment,
-                                                       Investment):
+    if isinstance( node, GenericStorage ) and isinstance( node.investment,
+                                                          Investment ):
         return GenericInvestmentStorageBlock
-    if isinstance(node, GenericStorage) and not isinstance(node.investment,
-                                                           Investment):
+    if isinstance( node, GenericStorage ) and not isinstance( node.investment,
+                                                              Investment ):
         return GenericStorageBlock
-    if isinstance(node, GenericCHP):
+    if isinstance( node, GenericCHP ):
         return GenericCHPBlock
-    if isinstance(node, VariableFractionTransformer):
+    if isinstance(node, GenericEngineGenerator):
+        return GenericEngineGeneratorBlock
+    if isinstance( node, VariableFractionTransformer ):
         return VariableFractionTransformerBlock
