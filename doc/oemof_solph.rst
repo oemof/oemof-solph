@@ -223,14 +223,14 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 
 .. note:: See the :py:class:`~oemof.solph.network.Transformer` class for all parameters and the mathematical background.
 
-VariableFractionTransformer
+ExtractionTurbineCHP
 +++++++++++++++++++++++++++
 
-The VariableFractionTransformer inherits from the :ref:`transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The ExtractionTurbineCHP inherits from the :ref:`transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
-    solph.VariableFractionTransformer(
+    solph.ExtractionTurbineCHP(
         label='variable_chp_gas',
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
@@ -245,7 +245,7 @@ The key of the parameter *'conversion_factor_single_flow'* will indicate the mai
    :alt: variable_chp_plot.svg
    :align: center
 
-.. note:: See the :py:class:`~oemof.solph.components.VariableFractionTransformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
 Storage
 +++++++

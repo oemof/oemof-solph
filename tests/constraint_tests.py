@@ -285,12 +285,12 @@ class Constraint_Tests:
         bth = solph.Bus(label='heatBus')
         bgas = solph.Bus(label='commodityBus')
 
-        solph.components.VariableFractionTransformer(
+        solph.components.ExtractionTurbineCHP(
             label='variable_chp_gas',
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
-            conversion_factor_single_flow={bel: 0.5})
+            conversion_factor_full_condensation={bel: 0.5})
 
         self.compare_lp_files('variable_chp.lp')
 
