@@ -31,7 +31,7 @@ class Constraint_Tests:
 
     def get_om(self):
         return solph.Model(self.energysystem,
-                                      timeindex=self.energysystem.timeindex)
+                           timeindex=self.energysystem.timeindex)
 
     def compare_lp_files(self, filename, ignored=None, my_om=None):
         if my_om is None:
@@ -285,12 +285,12 @@ class Constraint_Tests:
         bth = solph.Bus(label='heatBus')
         bgas = solph.Bus(label='commodityBus')
 
-        solph.components.VariableFractionTransformer(
+        solph.components.ExtractionTurbineCHP(
             label='variable_chp_gas',
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
-            conversion_factor_single_flow={bel: 0.5})
+            conversion_factor_full_condensation={bel: 0.5})
 
         self.compare_lp_files('variable_chp.lp')
 
@@ -337,6 +337,29 @@ class Constraint_Tests:
             nominal_value=100)})
         om = self.get_om()
         solph.constraints.emission_limit(om, limit=777)
+
+    def test_equate_variables_constraint(self):
+        """Testing the equate_variables function in the constraint module.
+        """
+        bus1 = solph.Bus(label='Bus1')
+        storage = solph.components.GenericStorage(
+            label='storage',
+            inputs={bus1: solph.Flow()},
+            outputs={bus1: solph.Flow()},
+            investment=solph.Investment(ep_costs=145))
+        sink = solph.Sink(label='Sink', inputs={bus1: solph.Flow(
+            investment=solph.Investment(ep_costs=500))})
+        source = solph.Source(label='Source', outputs={bus1: solph.Flow(
+            investment=solph.Investment(ep_costs=123))})
+        om = self.get_om()
+        solph.constraints.equate_variables(
+            om, om.InvestmentFlow.invest[source, bus1],
+            om.InvestmentFlow.invest[bus1, sink], 2)
+        solph.constraints.equate_variables(
+            om, om.InvestmentFlow.invest[source, bus1],
+            om.GenericInvestmentStorageBlock.invest[storage])
+
+        self.compare_lp_files('connect_investment.lp', my_om=om)
 
     def test_gradient(self):
         """
