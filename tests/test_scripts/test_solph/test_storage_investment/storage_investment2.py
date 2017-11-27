@@ -72,53 +72,40 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     # create natural gas bus
     bgas = solph.Bus(label="natural_gas")
 
+    bcoal = solph.Bus(label="hard_coal")
+
     # create electricity bus
     bel = solph.Bus(label="electricity")
+    bheat = solph.Bus(label="heat")
 
     # create excess component for the electricity bus to allow overproduction
     solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
+    solph.Sink(label='excess_heat', inputs={bheat: solph.Flow()})
+    solph.Source(label='shortage', outputs={bel: solph.Flow(
+        variable_costs=500)})
+    # solph.Source(label='shortage_heat', outputs={bheat: solph.Flow(
+    #     variable_costs=500)})
 
     # create source object representing the natural gas commodity (annual limit)
-    solph.Source(label='rgas', outputs={bgas: solph.Flow(
-        nominal_value=194397000 * number_timesteps / 8760, summed_max=1)})
+    solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 
-    # create fixed source object representing wind power plants
-    solph.Source(label='wind', outputs={bel: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True,
-        fixed_costs=20)})
-
-    # create fixed source object representing pv power plants
-    solph.Source(label='pv', outputs={bel: solph.Flow(
-        actual_value=data['pv'], nominal_value=582000, fixed=True,
-        fixed_costs=15)})
+    solph.Source(label='rcoal', outputs={bcoal: solph.Flow()})
 
     # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel: solph.Flow(
         actual_value=data['demand_el'], fixed=True, nominal_value=1)})
 
+    # create simple sink object representing the electrical demand
+    solph.Sink(label='demand_heat', inputs={bheat: solph.Flow(
+        actual_value=data['demand_el'] * 0.5, fixed=True, nominal_value=1)})
+
     # create simple transformer object representing a gas power plant
-    solph.LinearTransformer(
+    solph.Transformer(
         label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
-        conversion_factors={bel: 0.58})
-
-    # If the period is one year the equivalent periodical costs (epc) of an
-    # investment are equal to the annuity. Use oemof's economic tools.
-    epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-
-    # create storage object representing a battery
-    storage = solph.components.GenericStorage(
-        label='storage',
-        inputs={bel: solph.Flow(variable_costs=10e10)},
-        outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
-        nominal_input_capacity_ratio=1/6,
-        nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
-        investment=solph.Investment(ep_costs=epc),
-    )
+        inputs={bgas: solph.Flow(),
+                bcoal: solph.Flow()},
+        outputs={bel: solph.Flow(), bheat: solph.Flow()},
+        conversion_factors={bel: 0.3, bheat: 0.5, bgas: 0.2, bcoal: 0.8})
 
     ##########################################################################
     # Optimise the energy system and plot the results
@@ -127,7 +114,7 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     logging.info('Optimise the energy system')
 
     # initialise the operational model
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
     # if debug is true an lp-file will be written
     if debug:
         filename = os.path.join(
@@ -139,33 +126,18 @@ def optimise_storage_size(filename="storage_investment.csv", solver='cbc',
     logging.info('Solve the optimization problem')
     om.solve(solver=solver, solve_kwargs={'tee': tee_switch})
 
-    # Check dump and restore
-    energysystem.dump()
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
-    energysystem.restore()
-
     # check if the new result object is working for custom components
     results = processing.results(om)
 
-    if not silent:
-        print(results[(storage,)]['sequences'].head())
-        print(results[(storage,)]['scalars'])
-    custom_storage = views.node(results, 'storage')
-    electricity_bus = views.node(results, 'electricity')
+    pp_chp = views.node(results, 'pp_gas')
 
-    if plt is not None and not silent:
-        custom_storage['sequences'].plot(kind='line', drawstyle='steps-post')
-        plt.show()
-        electricity_bus['sequences'].plot(kind='line', drawstyle='steps-post')
-        plt.show()
+    my_results = pp_chp['sequences'].sum(axis=0).to_dict()
 
-    my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
-    my_results['storage_invest'] = results[(storage,)]['scalars']['invest']
-
-    if not silent:
-        meta_results = processing.meta_results(om)
-        pp.pprint(meta_results)
-
+    in_sum = (my_results[(('hard_coal', 'pp_gas'), 'flow')] +
+              my_results[(('natural_gas', 'pp_gas'), 'flow')])
+    out_sum = (my_results[(('pp_gas', 'electricity'), 'flow')] +
+               my_results[(('pp_gas', 'heat'), 'flow')])
+    print(in_sum * 0.8, out_sum)
     return my_results
 
 

@@ -82,7 +82,7 @@ The following code shows the difference between a bus that is assigned to a vari
 
 .. code-block:: python
 
-    print(my_energsystem.groups['natural_gas']
+    print(my_energysystem.groups['natural_gas']
     print(electricity_bus)
 
 .. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
@@ -138,7 +138,7 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
     solph.Source(
         label='import_natural_gas',
-        outputs={my_energsystem.groups['natural_gas']: solph.Flow(
+        outputs={my_energysystem.groups['natural_gas']: solph.Flow(
             nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
     solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
@@ -146,24 +146,29 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
-.. _linear_transformer_class_label:
+.. _transformer_class_label:
 
-LinearTransformer (1xM)
-+++++++++++++++++++++++
+Transformer
++++++++++++
 
-An instance of the LinearTransformer class can represent a node with one input flow and M output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis or a cooling device.
-As the name indicates the efficiency has to be constant within one time step to get a linear transformation.
+An instance of the Transformer class can represent a node with multiple input and output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis, a cooling device or a heat pump.
+The efficiency has to be constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the thermal powerplant efficiency according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
+
+A condensing power plant can be defined by a transformer with one input (fuel) and one output (electricity).
 
 .. code-block:: python
 
-    solph.LinearTransformer(
+    b_gas = solph.Bus(label='natural_gas')
+    b_el = solph.Bus(label='electricity')
+
+    solph.Transformer(
         label="pp_gas",
-        inputs={my_energsystem.groups['natural_gas']: solph.Flow()},
-        outputs={electricity_bus: solph.Flow(nominal_value=10e10)},
+        inputs={bgas: solph.Flow()},
+        outputs={b_el: solph.Flow(nominal_value=10e10)},
         conversion_factors={electricity_bus: 0.58})
 
-A CHP power plant would be defined in the same manner. New buses are defined to make the code cleaner:
+A CHP power plant would be defined in the same manner but with two outputs:
 
 .. code-block:: python
 
@@ -171,19 +176,57 @@ A CHP power plant would be defined in the same manner. New buses are defined to 
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    solph.LinearTransformer(
+    solph.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-.. note:: See the :py:class:`~oemof.solph.network.LinearTransformer` class for all parameters and the mathematical background.
+A CHP power plant with 70% coal and 30% natural gas can be defined with two inputs and two outputs:
+
+.. code-block:: python
+
+    b_gas = solph.Bus(label='natural_gas')
+    b_coal = solph.Bus(label='hard_coal')
+    b_el = solph.Bus(label='electricity')
+    b_th = solph.Bus(label='heat')
+
+    solph.Transformer(
+        label='pp_chp',
+        inputs={b_gas: Flow(), b_coal: Flow()},
+        outputs={b_el: Flow(nominal_value=30),
+                 b_th: Flow(nominal_value=40)},
+        conversion_factors={b_el: 0.3, b_th: 0.4,
+                            b_coal: 0.7, b_gas: 0.3})
+
+A heat pump would be defined in the same manner. New buses are defined to make the code cleaner:
+
+.. code-block:: python
+
+    b_el = solph.Bus(label='electricity')
+    b_th_low = solph.Bus(label='low_temp_heat')
+    b_th_high = solph.Bus(label='high_temp_heat')
+
+    # The cop (coefficient of performance) of the heat pump can be defined as
+    # a scalar or a sequence.
+    cop = 3
+
+    solph.Transformer(
+        label='heat_pump',
+        inputs={b_el: Flow(), b_th_low: Flow()},
+        outputs={b_th_high: Flow()},
+        conversion_factors={b_el: 1/cop,
+                            b_th_low: (cop-1)/cop})
+
+If the low-temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and, therefore, a Transformer with one input is sufficient.
+
+.. note:: See the :py:class:`~oemof.solph.network.Transformer` class for all parameters and the mathematical background.
 
 VariableFractionTransformer
 +++++++++++++++++++++++++++
 
-The VariableFractionTransformer inherits from the :ref:`linear_transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The VariableFractionTransformer inherits from the :ref:`transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -195,58 +238,21 @@ The VariableFractionTransformer inherits from the :ref:`linear_transformer_class
         conversion_factor_single_flow={b_el: 0.5}
         )
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) shedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
+The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
    :alt: variable_chp_plot.svg
    :align: center
 
-.. note:: See the :py:class:`~oemof.solph.network.VariableFractionTransformer` class for all parameters and the mathematical background.
-
-LinearTransformer (Nx1)
-+++++++++++++++++++++++
-
-An instance of the LinearTransformer class can represent a node with N input flows an one output flows such as a heat pump, additional heat supply or any kind of a process where two input flows are reduced to one output flow.
-As the name indicates the efficiency has be to constant within one time step to get a linear transformation.
-You can define a different efficiency for every time step (e.g. the COP of an air heat pump according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
-
-.. code-block:: python
-
-    solph.LinearN1Transformer(
-        label="pp_gas",
-        inputs={my_energsystem.groups['natural_gas']: solph.Flow()},
-        outputs={electricity_bus: solph.Flow(nominal_value=10e10)},
-        conversion_factors={electricity_bus: 0.58})
-
-A heat pump would be defined in the same manner. New buses are defined to make the code cleaner:
-
-.. code-block:: python
-
-    b_el = solph.Bus(label='electricity')
-    b_th_low = solph.Bus(label='low_temp_heat')
-    b_th_high = solph.Bus(label='high_temp_heat')
-
-    cop = 3  # coefficient of performance of the heat pump
-
-    solph.LinearN1Transformer(
-        label='heat_pump',
-        inputs={b_el: Flow(), b_th_low: Flow()},
-        outputs={b_th_high: Flow()},
-        conversion_factors={b_el: cop,
-                            b_th_low: cop/(cop-1)})
-
-If the low-temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and, therefore, a 1x1-Transformer is sufficient.
-
-.. note:: See the :py:class:`~oemof.solph.network.LinearN1Transformer` class for all parameters and the mathematical background.
-
+.. note:: See the :py:class:`~oemof.solph.components.VariableFractionTransformer` class for all parameters and the mathematical background.
 
 Storage
 +++++++
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows, you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.network.Storage` class.
+Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.Storage` class.
 
 .. code-block:: python
 
@@ -259,7 +265,7 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-.. note:: See the :py:class:`~oemof.solph.network.Storage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.Storage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_optimise_es_label:
@@ -279,7 +285,7 @@ Furthermore, it is possible to optimise the capacity of different components (se
 
     import os
     # set up a simple least cost optimisation
-    om = solph.OperationalModel(my_energysystem)
+    om = solph.Model(my_energysystem)
 
     # write the lp file for debugging or other reasons
     om.write(os.path.join(path, 'my_model.lp'), io_options={'symbolic_solver_labels': True})
@@ -362,13 +368,13 @@ Mixed Integer (Linear) Problems
 -------------------------------
 
 Solph also allows you to model components with respect to more technical details.
-For example you can model a mimimal power production (Pmin-Constraint) within
+For example you can model a minimal power production (Pmin-Constraint) within
 oemof. Therefore, the following two classes exist in the oemof.solph.options
 module: :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
 Note that the usage of these classes is not compatible with the
 :py:class:`~oemof.solph.options.Investment` class at the moment.
 
-If you want to use the functionalities of the options-module, the only thing
+If you want to use the functionality of the options-module, the only thing
 you have to do is to invoke a class instance inside your Flow() - declaration:
 
 .. code-block:: python
@@ -389,7 +395,7 @@ to be of the domain discrete, i.e. {min, ... 10, 11, 12, ..., max}. The BinaryFl
 object of the 'electrical' flow will create a 'status' variable for the flow.
 This will be used to model for example Pmin/Pmax constraints if the attribute `min`
 of the flow is set. It will also be used to include start up constraints and costs
-if correponding attributes of the class are provided. For more
+if corresponding attributes of the class are provided. For more
 information see the API of the BinaryFlow() class and its corresponding block class:
 :py:class:`~oemof.solph.blocks.BinaryFlow`.
 
@@ -402,7 +408,7 @@ information see the API of the BinaryFlow() class and its corresponding block cl
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.OperationalModel`.
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`.
 For now, you have to check out the examples in the :ref:`solph_examples_flex_label` example.
 
 
@@ -415,8 +421,8 @@ and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Conseq
 certain constraints are created for all elements of a specific group. Thus,
 mathematically the groups depict sets of elements inside the model.
 
-The grouping is handeld by the solph grouping module :py:mod:`~oemof.solph.groupings`
-which is based on the oemof core :py:mod:`~oemof.groupings` functionalities. You
+The grouping is handled by the solph grouping module :py:mod:`~oemof.solph.groupings`
+which is based on the oemof core :py:mod:`~oemof.groupings` functionality. You
 do not need to understand how the underlying functionality works. Instead, checkout
 how the solph grouping module is used to create groups.
 
@@ -447,7 +453,7 @@ Alternatively to a manual creation of energy system component objects as describ
 Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by iterating line by line through texts files of a specific format.
 The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-Both, investment and dispatch (operational) models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
+Both, investment and dispatch models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
 
 
 .. _solph_examples_label:

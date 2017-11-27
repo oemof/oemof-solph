@@ -9,7 +9,7 @@ from pyomo.core.base.block import SimpleBlock
 
 
 class Flow(SimpleBlock):
-    """ Flow block with definitions for standard flows.
+    r""" Flow block with definitions for standard flows.
 
     **The following variables are created**:
 
@@ -22,7 +22,7 @@ class Flow(SimpleBlock):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     SUMMED_MAX_FLOWS
         A set of flows with the attribute :attr:`summed_max` being not None.
@@ -42,37 +42,35 @@ class Flow(SimpleBlock):
 
     Flow max sum :attr:`om.Flow.summed_max[i, o]`
       .. math::
-        \\sum_t flow(i, o, t) \\cdot \\tau \\leq summed\_max(i, o), \\\\
-        \\forall (i, o) \\in \\textrm{SUMMED\_MAX\_FLOWS}.
+        \sum_t flow(i, o, t) \cdot \tau \leq summed\_max(i, o), \\
+        \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
     Flow min sum :attr:`om.Flow.summed_min[i, o]`
       .. math::
-        \\sum_t flow(i, o, t) \\cdot \\tau \\geq summed\_min(i, o), \\\\
-        \\forall (i, o) \\in \\textrm{SUMMED\_MIN\_FLOWS}.
+        \sum_t flow(i, o, t) \cdot \tau \geq summed\_min(i, o), \\
+        \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
-    Negative gradient constraint \
-    :attr:`om.Flow.negative_gradient_constr[i, o]`:
-      .. math:: flow(i, o, t-1) - flow(i, o, t) \\geq \
-        negative\_gradient(i, o, t), \\\\
-        \\forall (i, o) \\in \\textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\\\
-        \\forall t \\in \\textrm{TIMESTEPS}.
+    Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
+      .. math:: flow(i, o, t-1) - flow(i, o, t) \geq \
+        negative\_gradient(i, o, t), \\
+        \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+        \forall t \in \textrm{TIMESTEPS}.
 
-    Positive gradient constraint \
-    :attr:`om.Flow.positive_gradient_constr[i, o]`:
-        .. math:: flow(i, o, t) - flow(i, o, t-1) \\geq \
-            positive\__gradient(i, o, t), \\\\
-            \\forall (i, o) \\in \\textrm{POSITIVE\_GRADIENT\_FLOWS}, \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}.
+    Positive gradient constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
+        .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
+            positive\__gradient(i, o, t), \\
+            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
 
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
         .. math::
-            \\sum_{(i,o)} \\sum_t flow(i, o, t) \\cdot variable\_costs(i, o, t)
+            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
     Additionally, if :attr:`fixed_costs` are set by the user:
         .. math::
-            \\sum_{(i, o)}  nominal\_value(i, o) \\cdot fixed\_costs(i, o)
+            \sum_{(i, o)}  nominal\_value(i, o) \cdot fixed\_costs(i, o)
 
     The expression can be accessed by :attr:`om.Flow.fixed_costs` and
     their value after optimization by :meth:`om.Flow.fixed_costs()` .
@@ -82,7 +80,7 @@ class Flow(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates sets, variables and constraints for all standard flows.
+        r""" Creates sets, variables and constraints for all standard flows.
 
         Parameters
         ----------
@@ -207,7 +205,7 @@ class Flow(SimpleBlock):
                                               rule=_integer_flow_rule)
 
     def _objective_expression(self):
-        """ Objective expression for all standard flows with fixed costs
+        r""" Objective expression for all standard flows with fixed costs
         and variable costs.
         """
         m = self.parent_block()
@@ -217,9 +215,9 @@ class Flow(SimpleBlock):
         gradient_costs = 0
 
         for i, o in m.FLOWS:
-            for t in m.TIMESTEPS:
+            if m.flows[i, o].variable_costs[0] is not None:
+                for t in m.TIMESTEPS:
                 # add variable costs
-                if m.flows[i, o].variable_costs[0] is not None:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
 
@@ -245,10 +243,10 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
-    """Block for all flows with :attr:`investment` being not None.
+    r"""Block for all flows with :attr:`investment` being not None.
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
     FLOWS
         A set of flows with the attribute :attr:`invest` of type
@@ -273,50 +271,51 @@ class InvestmentFlow(SimpleBlock):
 
     **The following constraints are build:**
 
-    Actual value constraint for fixed invest flows \
-    :attr:`om.InvestmentFlow.fixed[i, o, t]`
-         .. math::
-             flow(i, o, t) = actual\_value(i, o, t) \\cdot invest(i, o), \\\\
-             \\forall (i, o) \\in \\textrm{FIXED\_FLOWS}, \\\\
-             \\forall t \\in \\textrm{TIMESTEPS}.
-
-    Lower bound (min) constraint for invest flows \
-    :attr:`om.InvestmentFlow.min[i, o, t]`
+    Actual value constraint for fixed invest
+      flows :attr:`om.InvestmentFlow.fixed[i, o, t]`
         .. math::
-             flow(i, o, t) \\geq min(i, o, t) \\cdot invest(i, o), \\\\
-             \\forall (i, o) \\in \\textrm{MIN\_FLOWS}, \\\\
-             \\forall t \\in \\textrm{TIMESTEPS}.
+          flow(i, o, t) = actual\_value(i, o, t) \cdot invest(i, o), \\
+          \forall (i, o) \in \textrm{FIXED\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
-    Upper bound (max) constraint for invest flows \
-    :attr:`om.InvestmentFlow.max[i, o, t]`
+    Lower bound (min) constraint for invest flows
+      :attr:`om.InvestmentFlow.min[i, o, t]`
         .. math::
-             flow(i, o, t) \\leq max(i, o, t) \\cdot invest(i, o), \\\\
-             \\forall (i, o) \\in \\textrm{FLOWS}, \\\\
-             \\forall t \\in \\textrm{TIMESTEPS}.
+             flow(i, o, t) \geq min(i, o, t) \cdot invest(i, o), \\
+             \forall (i, o) \in \textrm{MIN\_FLOWS}, \\
+             \forall t \in \textrm{TIMESTEPS}.
 
-    Flow max sum for invest flow :attr:`om.InvestmentFlow.summed_max[i, o]`
+    Upper bound (max) constraint for invest flows
+      :attr:`om.InvestmentFlow.max[i, o, t]`
         .. math::
-            \\sum_t flow(i, o, t) \\cdot \\tau \\leq summed\_max(i, o) \
-            \\cdot invest(i, o) \\\\
-            \\forall (i, o) \\in \\textrm{SUMMED\_MAX\_FLOWS}.
+             flow(i, o, t) \leq max(i, o, t) \cdot invest(i, o), \\
+             \forall (i, o) \in \textrm{FLOWS}, \\
+             \forall t \in \textrm{TIMESTEPS}.
+
+    Flow max sum for invest flow
+      :attr:`om.InvestmentFlow.summed_max[i, o]`
+        .. math::
+            \sum_t flow(i, o, t) \cdot \tau \leq summed\_max(i, o) \
+            \cdot invest(i, o) \\
+            \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
     Flow min sum for invest flow :attr:`om.InvestmentFlow.summed_min[i, o]`
         .. math::
-            \\sum_t flow(i, o, t) \\cdot \\tau \\geq summed\_min(i, o) \
-            \\cdot invest(i, o) \\\\
-            \\forall (i, o) \\in \\textrm{SUMMED\_MIN\_FLOWS}.
+            \sum_t flow(i, o, t) \cdot \tau \geq summed\_min(i, o) \
+            \cdot invest(i, o) \\
+            \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
 
     **The following parts of the objective function are created:**
 
-    Equivalent periodical costs (epc) expression \
-    :attr:`om.InvestmentFlow.investment_costs`:
+    Equivalent periodical costs (epc) expression
+      :attr:`om.InvestmentFlow.investment_costs`:
         .. math::
-            \\sum_{i, o} invest(i, o) \\cdot ep\_costs(i, o)
+            \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
 
     Additionally, if :attr:`fixed_costs` are set by the user:
         .. math::
-            \\sum_{i, o} invest(i, o) \\cdot fixed\_costs(i,o)
+            \sum_{i, o} invest(i, o) \cdot fixed\_costs(i,o)
 
     The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
     their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
@@ -327,7 +326,7 @@ class InvestmentFlow(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates sets, variables and constraints for Flow with investment
+        r"""Creates sets, variables and constraints for Flow with investment
         attribute of type class:`.Investment`.
 
         Parameters
@@ -424,7 +423,7 @@ class InvestmentFlow(SimpleBlock):
                                      rule=_summed_min_investflow_rule)
 
     def _objective_expression(self):
-        """ Objective expression for flows with investment attribute of type
+        r""" Objective expression for flows with investment attribute of type
         class:`.Investment`. The returned costs are fixed, variable and
         investment costs.
         """
@@ -456,17 +455,18 @@ class InvestmentFlow(SimpleBlock):
 
 
 class Bus(SimpleBlock):
-    """Block for all balanced buses.
-
+    r"""Block for all balanced buses.
 
     **The following constraints are build:**
 
     Bus balance  :attr:`om.Bus.balance[i, o, t]`
       .. math::
-        \\sum_{i \\in INPUTS(n)} flow(i, n, t) \\cdot \\tau =  \
-        \\sum_{o \\in OUTPUTS(n)} flow(n, o, t) \\cdot \\tau, \\\\
-        \\forall n \\in \\textrm{BUSES},
-        \\forall t \\in \\textrm{TIMESTEPS}.
+        \sum_{i \in INPUTS(n)} flow(i, n, t) \cdot \tau =
+        \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau, \\
+        \forall n \in \textrm{BUSES},
+        \forall t \in \textrm{TIMESTEPS}.
+
+    Hallo
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -506,136 +506,79 @@ class Bus(SimpleBlock):
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
-class LinearTransformer(SimpleBlock):
-    """Block for the linear relation of nodes with type
-    class:`.LinearTransformer`
+class Transformer(SimpleBlock):
+    r"""Block for the linear relation of nodes with type
+    :class:`~oemof.solph.network.Transformer`
 
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+    :class:`.Model` )
 
-    LINEAR_TRANSFORMERS
-        A set with all :class:`~oemof.solph.network.LinearTransformer` objects.
+    TRANSFORMERS
+        A set with all :class:`~oemof.solph.network.Transformer` objects.
 
     **The following constraints are created:**
 
-    Linear relation :attr:`om.LinearTransformer.relation[i,o,t]`
+    Linear relation :attr:`om.Transformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) \\cdot conversion\_factor(n, o, t) = \
-            flow(n, o, t), \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_TRANSFORMERS}, \\\\
-            \\forall o \\in \\textrm{OUTPUTS(n)}.
+            flow(i, n, t) / conversion\_factor(n, i, t) = \
+            flow(n, o, t) / conversion\_factor(n, o, t), \\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall n \in \textrm{TRANSFORMERS}, \\
+            \forall i \in \textrm{INPUTS(n)}, \\
+            \forall o \in \textrm{OUTPUTS(n)}.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearTransformer`
+        """ Creates the linear constraint for the class:`Transformer`
         block.
-
         Parameters
         ----------
         group : list
-            List of oemof.solph.LinearTransformers (trsf) objects for which
+            List of oemof.solph.Transformers objects for which
             the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
-            is created for all existing relations of the inputs and all outputs
+            is created for all existing relations of all inputs and all outputs
             of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
+            an attribute `conversion_factors` of type dict containing the
+            conversion factors for all inputs to outputs.
         """
         if group is None:
             return None
 
         m = self.parent_block()
 
-        I = {n: [i for i in n.inputs][0] for n in group}
-        O = {n: [o for o in n.outputs.keys()] for n in group}
+        in_flows = {n: [i for i in n.inputs.keys()] for n in group}
+        out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(group, noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    for o in O[n]:
-                        try:
-                            lhs = m.flow[I[n], n, t] * \
-                                  n.conversion_factors[o][t]
-                            rhs = m.flow[n, o, t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 n.label, o.label))
-                        block.relation.add((n, o, t), (lhs == rhs))
-        self.relation_build = BuildAction(rule=_input_output_relation)
-
-
-class LinearN1Transformer(SimpleBlock):
-    """Block for the linear relation of nodes with type
-    class:`.LinearN1Transformer`
-
-
-    **The following constraints are created:**
-
-    Linear relation :attr:`om.LinearN1Transformer.relation[i,o,t]`
-        .. math::
-            flow(i, n, t) \\cdot conversion_factor(i, n, t) = \
-            flow(n, o, t), \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{LINEAR\_N1\_TRANSFORMERS}, \\\\
-            \\forall i \\in \\textrm{INPUTS(n)}.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearN1Transformer`
-        block.
-
-        Parameters
-        ----------
-        group : list
-            List of oemof.solph.LinearN1Transformers (trsf) objects for which
-            the linear relation of inputs and outputs is created
-            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
-            is created for all existing relations of the inputs and all outputs
-            of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
-        """
-        if group is None:
-            return None
-
-        m = self.parent_block()
-
-        I = {n: [i for i in n.inputs.keys()] for n in group}
-        O = {n: [o for o in n.outputs][0] for n in group}
-
-        self.relation = Constraint(group, noruleinit=True)
-
-        def _input_output_relation(block):
-            for t in m.TIMESTEPS:
-                for n in group:
-                    for i in I[n]:
-                        try:
-                            lhs = m.flow[n, O[n], t]
-                            rhs = m.flow[i, n, t] * n.conversion_factors[i][t]
-                        except:
-                            raise ValueError("Error in constraint creation",
-                                             "source: {0}, target: {1}".format(
-                                                 i.label, n.label))
-                        block.relation.add((n, i, t), (lhs == rhs))
+                    for o in out_flows[n]:
+                        for i in in_flows[n]:
+                            try:
+                                lhs = (m.flow[i, n, t] /
+                                       n.conversion_factors[i][t])
+                                rhs = (m.flow[n, o, t] /
+                                       n.conversion_factors[o][t])
+                            except ValueError:
+                                raise ValueError(
+                                    "Error in constraint creation",
+                                    "source: {0}, target: {1}".format(
+                                        n.label, o.label))
+                            block.relation.add((n, i, o, t), (lhs == rhs))
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
 class NonConvexFlow(SimpleBlock):
-    """
-
+    r"""
     **The following sets are created:** (-> see basic sets at
-    :class:`.OperationalModel` )
+        :class:`.Model` )
 
-
-        A set of flows with the attribute :attr:`nonconvex` of type
+    A set of flows with the attribute :attr:`nonconvex` of type
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
@@ -664,43 +607,43 @@ class NonConvexFlow(SimpleBlock):
 
     Minimum flow constraint :attr:`om.NonConvexFlow.min[i,o,t]`
         .. math::
-            flow(i, o, t) \\geq min(i, o, t) \\cdot nominal\_value \
-                \\cdot status(i, o, t), \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{NONCONVEX\_FLOWS}.
+            flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value \
+                \cdot status(i, o, t), \\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Maximum flow constraint :attr:`om.NonConvexFlow.max[i,o,t]`
         .. math::
-            flow(i, o, t) \\leq max(i, o, t) \\cdot nominal\_value \
-                \\cdot status(i, o, t), \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{NONCONVEX\_FLOWS}.
+            flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value \
+                \cdot status(i, o, t), \\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Startup constraint :attr:`om.NonConvexFlow.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
-                status(i,o,t) - status(i, o, t-1) \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i,o) \\in \\textrm{STARTUP\_FLOWS}.
+                status(i,o,t) - status(i, o, t-1) \\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall (i,o) \in \textrm{STARTUP\_FLOWS}.
 
     Shutdown constraint :attr:`om.NonConvexFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
-                status(i, o, t-1) - status(i, o, t) \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall (i, o) \\in \\textrm{SHUTDOWN\_FLOWS}.
+                status(i, o, t-1) - status(i, o, t) \\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall (i, o) \in \textrm{SHUTDOWN\_FLOWS}.
 
     **The following parts of the objective function are created:**
 
     If :attr:`nonconvex.startup_costs` is set by the user:
         .. math::
-            \\sum_{i, o \\in STARTUP\_FLOWS} \\sum_t  startup(i, o, t) \
-            \\cdot startup\_costs(i, o)
+            \sum_{i, o \in STARTUP\_FLOWS} \sum_t  startup(i, o, t) \
+            \cdot startup\_costs(i, o)
 
     If :attr:`nonconvex.shutdown_costs` is set by the user:
         .. math::
-            \\sum_{i, o \\in SHUTDOWN\_FLOWS} \\sum_t shutdown(i, o, t) \
-                \\cdot shutdown\_costs(i, o)
+            \sum_{i, o \in SHUTDOWN\_FLOWS} \sum_t shutdown(i, o, t) \
+                \cdot shutdown\_costs(i, o)
 
     """
     def __init__(self, *args, **kwargs):
@@ -794,7 +737,7 @@ class NonConvexFlow(SimpleBlock):
         # TODO: Add  min-up/min-downtime constraints
 
     def _objective_expression(self):
-        """Objective expression for nonconvex flows.
+        r"""Objective expression for nonconvex flows.
         """
         if not hasattr(self, 'NONCONVEX_FLOWS'):
             return 0
