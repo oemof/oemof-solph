@@ -19,9 +19,7 @@ chp plant produces heat and power excess and therefore needs more natural gas.
 # Outputlib
 from oemof import outputlib
 
-# Default logger of oemof
 from oemof.network import Node
-from oemof.tools import logger
 import oemof.solph as solph
 
 # import oemof base classes to create energy system objects
@@ -86,12 +84,12 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
         conversion_factors={bel2: 0.3, bth2: 0.5})
 
     # create a fixed transformer to distribute to the heat and elec buses
-    solph.components.VariableFractionTransformer(
+    solph.components.ExtractionTurbineCHP(
         label='variable_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5},
-        conversion_factor_single_flow={bel: 0.5}
+        conversion_factor_full_condensation={bel: 0.5}
         )
 
     ##########################################################################

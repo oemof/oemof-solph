@@ -480,7 +480,7 @@ class GenericCHP(Transformer):
 
     Can be used to model (combined cycle) extraction or back-pressure turbines
     and used a mixed-integer linear formulation. Thus, it induces more
-    computational effort than the `VariableFractionTransformer` for the
+    computational effort than the `ExtractionTurbineCHP` for the
     benefit of higher accuracy.
 
     The full set of equations is described in:
@@ -803,22 +803,19 @@ class GenericCHPBlock(SimpleBlock):
 
 
 # ------------------------------------------------------------------------------
-# Start of VariableFractionTransformer component
+# Start of ExtractionTurbineCHP component
 # ------------------------------------------------------------------------------
 
-class VariableFractionTransformer(Transformer):
+class ExtractionTurbineCHP(Transformer):
     r"""
-    Component `GenericCHP` to model combined heat and power plants.
-
-    A linear transformer with more than one output, where the fraction of
-    the output flows is variable. By now it is restricted to two output flows.
+    A CHP with an extraction turbine in a linear model. For more options see
+    the :class:`~oemof.solph.components.GenericCHP` class.
 
     One main output flow has to be defined and is tapped by the remaining flow.
-    Thus, the main output will be reduced if the tapped output increases.
-    Therefore a loss index has to be defined. Furthermore a maximum efficiency
-    has to be specified if the whole flow is led to the main output
-    (tapped_output = 0). The state with the maximum tapped_output is described
-    through conversion factors equivalent to the LinearTransformer.
+    The conversion factors have to be defined for the maximum tapped flow (
+    full CHP mode) and for no tapped flow (full condensing mode). Even though it
+    is possible to limit the variability of the tapped flow, so that the full
+    condensing mode will never be reached.
 
     Parameters
     ----------
@@ -827,7 +824,7 @@ class VariableFractionTransformer(Transformer):
         to specified outflow. Keys are output bus objects.
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
-    conversion_factor_single_flow : dict
+    conversion_factor_full_condensation : dict
         The efficiency of the main flow if there is no tapped flow. Only one
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
@@ -837,12 +834,12 @@ class VariableFractionTransformer(Transformer):
     >>> bel = Bus(label='electricityBus')
     >>> bth = Bus(label='heatBus')
     >>> bgas = Bus(label='commodityBus')
-    >>> vft = VariableFractionTransformer(
+    >>> et_chp = ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
     ...    inputs={bgas: Flow(nominal_value=10e10)},
     ...    outputs={bel: Flow(), bth: Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
-    ...    conversion_factor_single_flow={bel: 0.5})
+    ...    conversion_factor_full_condensation={bel: 0.5})
 
     Notes
     -----
@@ -850,35 +847,36 @@ class VariableFractionTransformer(Transformer):
      * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
     """
 
-    def __init__(self, conversion_factor_single_flow, *args, **kwargs):
+    def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conversion_factor_single_flow = {
-            k: sequence(v) for k, v in conversion_factor_single_flow.items()}
+        self.conversion_factor_full_condensation = {
+            k: sequence(v) for k, v in
+            conversion_factor_full_condensation.items()}
 
 
 # ------------------------------------------------------------------------------
-# End of VariableFractionTransformer component
+# End of ExtractionTurbineCHP component
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-# Start of VariableFractionTransformer block
+# Start of ExtractionTurbineCHP block
 # ------------------------------------------------------------------------------
 
-class VariableFractionTransformerBlock(SimpleBlock):
+class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.network.VariableFractionTransformer`
+    :class:`~oemof.solph.components.ExtractionTurbineCHP`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
     VARIABLE_FRACTION_TRANSFORMERS
         A set with all
-        :class:`~oemof.solph.network.VariableFractionTransformer` objects.
+        :class:`~oemof.solph.components.ExtractionTurbineCHP` objects.
 
     **The following constraints are created:**
 
-    Variable i/o relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+    Variable i/o relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
             flow(input, n, t) = \\
             (flow(n, main\_output, t) + flow(n, tapped\_output, t) \cdot \
@@ -887,7 +885,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
-    Out flow relation :attr:`om.VariableFractionTransformer.relation[i,o,t]`
+    Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
             flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
             conversion\_factor(n, main\_output, t) / \
@@ -930,20 +928,21 @@ class VariableFractionTransformerBlock(SimpleBlock):
         for n in group:
             n.inflow = list(n.inputs)[0]
             n.label_main_flow = str(
-                [k for k, v in n.conversion_factor_single_flow.items()][0])
+                [k for k, v in n.conversion_factor_full_condensation.items()]
+                [0])
             n.main_output = [o for o in n.outputs
                              if n.label_main_flow == o.label][0]
             n.tapped_output = [o for o in n.outputs
                                if n.label_main_flow != o.label][0]
-            n.conversion_factor_single_flow_sq = (
-                n.conversion_factor_single_flow[
+            n.conversion_factor_full_condensation_sq = (
+                n.conversion_factor_full_condensation[
                     m.es.groups[n.main_output.label]])
             n.flow_relation_index = [
                 n.conversion_factors[m.es.groups[n.main_output.label]][t] /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
                 for t in m.TIMESTEPS]
             n.main_flow_loss_index = [
-                (n.conversion_factor_single_flow_sq[t] -
+                (n.conversion_factor_full_condensation_sq[t] -
                  n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
                 n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
                 for t in m.TIMESTEPS]
@@ -958,7 +957,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
                         (m.flow[g, g.main_output, t] +
                          m.flow[g, g.tapped_output, t] *
                          g.main_flow_loss_index[t]) /
-                        g.conversion_factor_single_flow_sq[t]
+                        g.conversion_factor_full_condensation_sq[t]
                         )
                     block.input_output_relation.add((n, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, noruleinit=True)
@@ -979,7 +978,7 @@ class VariableFractionTransformerBlock(SimpleBlock):
                 rule=_out_flow_relation_rule)
 
 # ------------------------------------------------------------------------------
-# End of VariableFractionTransformer block
+# End of ExtractionTurbineCHP block
 # ------------------------------------------------------------------------------
 
 
@@ -1085,5 +1084,5 @@ def component_grouping(node):
         return GenericStorageBlock
     if isinstance(node, GenericCHP):
         return GenericCHPBlock
-    if isinstance(node, VariableFractionTransformer):
-        return VariableFractionTransformerBlock
+    if isinstance(node, ExtractionTurbineCHP):
+        return ExtractionTurbineCHPBlock
