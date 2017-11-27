@@ -83,20 +83,19 @@ def equate_variables(om, var1, var2, factor1=1, name=None):
     >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
     >>> bel1 = solph.Bus(label='electricity1')
     >>> bel2 = solph.Bus(label='electricity2')
-    >>> line12 = solph.Transformer(
+    >>> energysystem.add(bel1, bel2)
+    >>> energysystem.add(solph.Transformer(
     ...    label='powerline_1_2',
     ...    inputs={bel1: solph.Flow()},
-    ...    outputs={bel2: solph.Flow(investment=solph.Investment(ep_costs=20))})
-    >>> line21 = solph.Transformer(
+    ...    outputs={bel2: solph.Flow(
+    ...        investment=solph.Investment(ep_costs=20))}))
+    >>> energysystem.add(solph.Transformer(
     ...    label='powerline_2_1',
     ...    inputs={bel2: solph.Flow()},
-    ...   outputs={bel1: solph.Flow(investment=solph.Investment(ep_costs=20))})
+    ...   outputs={bel1: solph.Flow(investment=solph.Investment(ep_costs=20))}))
     >>> om = solph.Model(energysystem)
-    >>> ## Alternatively you can find the objects by their labels.
-    >>> # bel1 = energysystem.groups['electricity1']
-    >>> # bel2 = energysystem.groups['electricity2']
-    >>> # line12 = energysystem.groups['powerline_1_2']
-    >>> # line21 = energysystem.groups['powerline_2_1']
+    >>> line12 = energysystem.groups['powerline_1_2']
+    >>> line21 = energysystem.groups['powerline_2_1']
     >>> solph.constraints.equate_variables(
     ...    om,
     ...    om.InvestmentFlow.invest[line12, bel2],

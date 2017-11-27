@@ -6,13 +6,15 @@ from oemof.outputlib import processing, views
 import logging
 import os
 import pandas as pd
+from oemof.network import Node
 
 
 def test_connect_invest():
     date_time_index = pd.date_range('1/1/2012', periods=24 * 7, freq='H')
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-
+    Node.registry = energysystem
+    
     # Read data file
     full_filename = os.path.join(os.path.dirname(__file__),
                                  'connect_invest.csv')
