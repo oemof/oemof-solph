@@ -215,9 +215,8 @@ class Flow(SimpleBlock):
         gradient_costs = 0
 
         for i, o in m.FLOWS:
-            if m.flows[i, o].variable_costs[0] is not None:
-                for t in m.TIMESTEPS:
-                # add variable costs
+            for t in m.TIMESTEPS:
+                if m.flows[i, o].variable_costs[0] is not None:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
 
