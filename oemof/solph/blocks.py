@@ -237,13 +237,11 @@ class Flow(SimpleBlock):
                 fixed_costs += (m.flows[i, o].nominal_value *
                                 m.flows[i, o].fixed_costs)
 
-
-
         self.fixed_costs = Expression(expr=fixed_costs)
         self.variable_costs = Expression(expr=variable_costs)
         self.gradient_costs = Expression(expr=gradient_costs)
 
-        return fixed_costs + variable_costs
+        return fixed_costs + variable_costs + gradient_costs
 
 
 class InvestmentFlow(SimpleBlock):
