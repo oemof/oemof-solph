@@ -46,7 +46,7 @@ class EnergySystem(es.EnergySystem):
         """
 
         serialized = {
-            'nodes': {'buses': [], 'components': []},
+            'nodes': {'buses': {}, 'components': {}},
             'flows': {},
             'timeindex': [str(i) for i in self.timeindex]
         }
@@ -57,9 +57,9 @@ class EnergySystem(es.EnergySystem):
 
         for n in self.nodes:
             if isinstance(n, on.Bus):
-                serialized['nodes']['buses'].append(n.label)
+                serialized['nodes']['buses'][n.label] = n.__dict__
             if isinstance(n, on.Component):
-                serialized['nodes']['components'].append(n.label)
+                serialized['nodes']['components'][n.label] = n.__dict__
 
         flows = {}
         for k, v in self.flows().items():
@@ -69,10 +69,11 @@ class EnergySystem(es.EnergySystem):
             for kk, vv in v.__dict__.items():
                 if (isinstance(vv, _Sequence) or isinstance(vv, list)):
                     # don't write None values
-                    if vv[0] is not None:
+                    if kk in v.set_defaults:
+                        pass
+                    elif kk != 'set_defaults':
                         flows[k[0].label][k[1].label][kk] = [
-                            float(vv[t]) for t in range(len(self.timeindex))]
-
+                            vv[t] for t in range(len(self.timeindex))]
 
                 else:
                     if vv is not None:
