@@ -172,6 +172,9 @@ class Flow:
     0.99
 
     """
+    defaults = {'fixed': False, 'min': 0, 'max': 1,
+                'negative_gradient': None, 'positive_gradient': None,
+                'actual_value': None}
 
     def __init__(self, **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
@@ -179,15 +182,18 @@ class Flow:
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
-
+        self.set_defaults = []
         scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
-        defaults = {'fixed': False, 'min': 0, 'max': 1}
 
         for attribute in set(scalars + sequences + list(kwargs)):
-            value = kwargs.get(attribute, defaults.get(attribute))
+            value = kwargs.get(attribute)
+            if value is None:
+                value = Flow.defaults.get(attribute)
+                self.set_defaults.append(attribute)
+
             setattr(self, attribute,
                     sequence(value) if attribute in sequences else value)
 
