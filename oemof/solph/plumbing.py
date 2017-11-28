@@ -2,6 +2,8 @@
 """
 
 """
+import pandas as pd
+import numpy as np
 from collections import abc, UserList
 
 
@@ -31,7 +33,13 @@ def sequence(sequence_or_scalar):
     """
     if (isinstance(sequence_or_scalar, abc.Iterable) and not
             isinstance(sequence_or_scalar, str)):
-        return sequence_or_scalar
+        if isinstance(sequence_or_scalar, pd.Series):
+            return sequence_or_scalar.values.tolist()
+        elif isinstance(sequence_or_scalar, np.array):
+            return sequence_or_scalar.tolist()
+        else:
+            return sequence_or_scalar
+
     else:
         return _Sequence(default=sequence_or_scalar)
 
