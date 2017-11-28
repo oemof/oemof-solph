@@ -114,30 +114,3 @@ def check_git_branch():
     logging.info("Used oemof version: {0}@{1}".format(
         last_commit,
         name_branch))
-
-
-def time_logging(start, text, logging_level='debug'):
-    """
-    Logs the time between the given start time and the actual time. A text
-    and the debug level is variable.
-
-    Parameters
-    ----------
-    start : float
-        start time
-    text : string
-        text to describe the log
-    logging_level : string
-        logging_level [default='debug']
-    """
-    import time
-    end_time = time.time() - start
-    hours = int(end_time / 3600)
-    minutes = int(end_time / 60 - hours * 60)
-    seconds = int(end_time - hours * 3600 - minutes * 60)
-    time_string = ' %0d:%02d:%02d hours' % (hours, minutes, seconds)
-    log_str = text + time_string
-    if logging_level == 'debug':
-        logging.debug(log_str)
-    elif logging_level == 'info':
-        logging.info(log_str)
