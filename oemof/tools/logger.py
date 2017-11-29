@@ -18,8 +18,6 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     ----------
     logfile : str
         Name of the log file, default: oemof.log
-    text : str
-        Header text to separate the logging blocks within the output file.
     logpath : str
         The path for log files. By default a ".oemof' folder is created in your
         home directory with subfolder called 'log_files'.
@@ -68,7 +66,6 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
     ...
     >>> logging.debug("Hallo")
-
     """
 
     if logpath is None:
