@@ -11,7 +11,8 @@ from oemof.tools import helpers
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,
                    screen_format=None, file_datefmt=None, screen_datefmt=None,
                    screen_level=logging.INFO, file_level=logging.DEBUG,
-                   log_version=True):
+                   log_version=True, timed_rotating=None):
+
     r"""Initialise customisable logger.
 
     Parameters
@@ -40,6 +41,9 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     log_version : boolean
         If True the actual version or commit is logged while initialising the
         logger.
+    timed_rotating : dict
+        Option to pass parameters to the TimedRotatingFileHandler.
+
 
     Returns
     -------
@@ -67,8 +71,7 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     >>> logging.debug("Hallo")
 
     """
-    if text is None:
-        text = "Starting new script..."
+
     if logpath is None:
         helpers.get_basic_path()
         logpath = helpers.extend_basic_path('log_files')
@@ -96,8 +99,14 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     ch.setLevel(screen_level)
     log.addHandler(ch)
 
-    fh = handlers.RotatingFileHandler(file, maxBytes=(1048576 * 5),
-                                      backupCount=7)
+    timed_rotating_p = {
+        'interval': 'midnight',
+        'backupCount': 10}
+
+    if timed_rotating is not None:
+        timed_rotating_p.update(timed_rotating)
+
+    fh = handlers.TimedRotatingFileHandler(file, **timed_rotating_p)
     fh.setFormatter(tmp_formatter)
     fh.setLevel(file_level)
     log.addHandler(fh)
