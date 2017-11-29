@@ -8,10 +8,10 @@ import sys
 from oemof.tools import helpers
 
 
-def define_logging(logpath=None, text=None, logfile='oemof.log',
-                   file_format=None, screen_format=None, file_datefmt=None,
-                   screen_datefmt=None, screen_level=logging.INFO,
-                   file_level=logging.DEBUG, log_version=True):
+def define_logging(logpath=None, logfile='oemof.log', file_format=None,
+                   screen_format=None, file_datefmt=None, screen_datefmt=None,
+                   screen_level=logging.INFO, file_level=logging.DEBUG,
+                   log_version=True):
     r"""Initialise customisable logger.
 
     Parameters
@@ -102,7 +102,7 @@ def define_logging(logpath=None, text=None, logfile='oemof.log',
     fh.setLevel(file_level)
     log.addHandler(fh)
 
-    logging.debug("***** {0} ************************************".format(text))
+    logging.debug("******************************************************")
     fh.setFormatter(file_formatter)
     logging.info("Path for logging: {0}".format(file))
     if log_version:
