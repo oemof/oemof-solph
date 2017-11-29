@@ -2,7 +2,6 @@
 
 import os
 import logging
-import logging.config
 from logging import handlers
 import sys
 from oemof.tools import helpers
@@ -61,22 +60,18 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     --------
     To define the default logger you have to import the python logging
      library and this function. The first logging message should be the
-     path where the log file is saved to. To make the test valid the date and
-     time was removed. You should not do this in your examples.
+     path where the log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
-    >>> log_path = logger.define_logging(logpath='', log_version=False,
-    ...                                  screen_datefmt='no_date')
-    no_date-INFO-Path for logging: oemof.log
-
+    >>> logger.define_logging() # doctest: +SKIP
+    17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
+    ...
     >>> logging.debug("Hallo")
-    >>> logging.info("Hallo Info")
-    no_date-INFO-Hallo Info
+
     """
 
     if logpath is None:
-        helpers.get_basic_path()
         logpath = helpers.extend_basic_path('log_files')
 
     file = os.path.join(logpath, logfile)
