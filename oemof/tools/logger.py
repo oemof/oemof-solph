@@ -100,7 +100,7 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     log.addHandler(ch)
 
     timed_rotating_p = {
-        'interval': 'midnight',
+        'when': 'midnight',
         'backupCount': 10}
 
     if timed_rotating is not None:
