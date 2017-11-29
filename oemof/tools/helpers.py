@@ -25,9 +25,3 @@ def extend_basic_path(subfolder):
     if not os.path.isdir(extended_path):
         os.mkdir(extended_path)
     return extended_path
-
-
-def get_fullpath(path, filename):
-    """Combines path and filename to a full path.
-    """
-    return os.path.join(path, filename)
