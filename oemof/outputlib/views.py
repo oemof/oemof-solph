@@ -8,8 +8,23 @@ Information about the possible usage is provided within the examples.
 from enum import Enum
 from itertools import zip_longest
 import pandas as pd
+from collections import namedtuple
 
 from oemof.network import Bus
+
+
+# NodeFlow contains oemof.network.Flow or oemof.network.Node component and
+# related FlowType (see below):
+NodeFlow = namedtuple('NodeFlow', ['component', 'type'])
+
+
+class FlowType(str, Enum):
+    """
+    Gives information on flow type
+    """
+    Single = 'single'
+    Input = 'input'
+    Output = 'output'
 
 
 def convert_keys_to_strings(results):
@@ -24,7 +39,7 @@ def convert_keys_to_strings(results):
     return converted
 
 
-def node(results, node):
+def node(results, node, get_flows=False):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
@@ -67,6 +82,12 @@ def node(results, node):
         cols = [c for sublist in cols for c in sublist]
         filtered['sequences'].columns = cols
         filtered['sequences'].sort_index(axis=1, inplace=True)
+
+    if get_flows:
+        filtered['flows'] = {}
+        for nodes, flow_name in filtered['sequences']:
+            filtered['flows'][(nodes, flow_name)] = __get_flow_component(
+                nodes, node)
 
     return filtered
 
@@ -133,3 +154,17 @@ def get_node_by_name(results, *names):
         return next(filter(lambda x: str(x) == names[0], nodes), None)
     else:
         return [n if str(n) in names else None for n in nodes]
+
+
+def __get_flow_component(nodes, current_node):
+    """
+    Returns input or output flow of node-tuple if two-dimensional
+    tuple is given, otherwise node itself s returned. Additionally, flow type
+    of result is returned.
+    """
+    if len(nodes) == 1:
+        return NodeFlow(nodes[0], FlowType.Single)
+    if nodes[0] == current_node:
+        return NodeFlow(current_node.outputs[nodes[1]], FlowType.Output)
+    else:
+        return NodeFlow(current_node.inputs[nodes[0]], FlowType.Input)
