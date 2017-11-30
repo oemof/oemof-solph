@@ -79,7 +79,7 @@ class NodeOption(Enum):
     HasOnlyInputs = 4
 
 
-def get_nodes(results, option=NodeOption.All, exclude_busses=False):
+def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
     """
     Get set of nodes from results-dict for given node option
 
