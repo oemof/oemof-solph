@@ -6,11 +6,13 @@ optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
 """
-
+import os
+import json
 import warnings
 import oemof.network as on
 import oemof.energy_system as es
-from oemof.solph.plumbing import sequence
+from oemof.solph.plumbing import sequence, _Sequence
+from oemof.tools import helpers
 
 
 class EnergySystem(es.EnergySystem):
@@ -38,6 +40,49 @@ class EnergySystem(es.EnergySystem):
                                [component_grouping] +
                                kwargs.get('groupings', []))
         super().__init__(**kwargs)
+
+    def to_json(self, filename=None):
+        """
+        """
+
+        serialized = {
+            'nodes': {'buses': {}, 'components': {}},
+            'flows': {},
+            'timeindex': [str(i) for i in self.timeindex]
+        }
+
+        if filename is None:
+            filename = os.path.join(
+                helpers.extend_basic_path('json-files'), 'es.json')
+
+        for n in self.nodes:
+            if isinstance(n, on.Bus):
+                serialized['nodes']['buses'][n.label] = n.__dict__
+            if isinstance(n, on.Component):
+                serialized['nodes']['components'][n.label] = n.__dict__
+
+        flows = {}
+        for k, v in self.flows().items():
+            flows[k[0].label] = {}
+            flows[k[0].label][k[1].label] = {}
+
+            for kk, vv in v.__dict__.items():
+                if (isinstance(vv, _Sequence) or isinstance(vv, list)):
+                    # don't write None values
+                    if kk in v.set_defaults:
+                        pass
+                    elif kk != 'set_defaults':
+                        flows[k[0].label][k[1].label][kk] = [
+                            vv[t] for t in range(len(self.timeindex))]
+
+                else:
+                    if vv is not None:
+                        flows[k[0].label][k[1].label][kk] = vv
+
+        serialized['flows'] = flows
+
+        with open(filename, 'w') as out:
+            json.dump(serialized, out, indent=4)
 
 
 class Flow:
@@ -127,6 +172,9 @@ class Flow:
     0.99
 
     """
+    defaults = {'fixed': False, 'min': 0, 'max': 1,
+                'negative_gradient': None, 'positive_gradient': None,
+                'actual_value': None}
 
     def __init__(self, **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
@@ -134,15 +182,18 @@ class Flow:
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
-
+        self.set_defaults = []
         scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
-        defaults = {'fixed': False, 'min': 0, 'max': 1}
 
         for attribute in set(scalars + sequences + list(kwargs)):
-            value = kwargs.get(attribute, defaults.get(attribute))
+            value = kwargs.get(attribute)
+            if value is None:
+                value = Flow.defaults.get(attribute)
+                self.set_defaults.append(attribute)
+
             setattr(self, attribute,
                     sequence(value) if attribute in sequences else value)
 
