@@ -384,3 +384,15 @@ class Constraint_Tests:
             om.GenericInvestmentStorageBlock.invest[storage])
 
         self.compare_lp_files('connect_investment.lp', my_om=om)
+
+    def test_gradient(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='powerplant', outputs={bel: solph.Flow(
+            nominal_value=999, variable_costs=23,
+            positive_gradient={'ub': 0.03, 'costs': 7},
+            negative_gradient={'ub': 0.05, 'costs': 8})})
+
+        self.compare_lp_files('source_with_gradient.lp')
