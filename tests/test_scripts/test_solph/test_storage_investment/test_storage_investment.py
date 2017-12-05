@@ -107,7 +107,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
-    my_results['storage_invest'] = results[(storage,)]['scalars']['invest']
+    my_results['storage_invest'] = results[(storage, None)]['scalars']['invest']
 
     stor_invest_dict = {
         'storage_invest': 2046851,
