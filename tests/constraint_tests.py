@@ -368,6 +368,8 @@ class Constraint_Tests:
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
+            nominal_input_capacity_ratio=0.2,
+            nominal_output_capacity_ratio=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))
