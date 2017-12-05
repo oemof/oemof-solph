@@ -49,7 +49,7 @@ You are welcome to contribute your own examples via a `pull request <https://git
 
 Got further questions regarding oemof? 
 ======================================
-If you have any further questions regarding omeof you can visit the forum under: '<https://forum.openmod-initiative.org/tags/c/qa/oemof>'. 
+If you have any further questions regarding omeof you can visit the forum at: `<https://forum.openmod-initiative.org/tags/c/qa/oemof>`. 
 
 
 Keep in touch
