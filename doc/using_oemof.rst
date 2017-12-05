@@ -83,21 +83,10 @@ Beside this the outputlib provides some basic plot methods to create nice plots.
 
 feedinlib
 =========
-The `feedinlib <http://pythonhosted.org/feedinlib/getting_started.html>`_ library is not part of the oemof installation and has to be installed separately using pypi. At the current state the feedinlib can calculate the output from a wind and a pv power plant passing parameters describing the power plant and a weather data set.
+The `feedinlib <https://github.com/oemof/feedinlib>`_ library is not part of the oemof installation and has to be installed separately using pypi. It serves as an interface between Open Data weather data and libraries to calculate feedin timeseries for fluctuating renewable energy sources. 
 
-.. code-block:: python
-
-    my_weather = weather.FeedinWeather()
-    my_weather.read_feedinlib_csv(filename='weather.csv')
-    
-    E126_power_plant = plants.WindPowerPlant(**enerconE126)
-    E126_feedin = E126_power_plant.feedin(weather=my_weather,
-                                          installed_capacity=15000000)  # 15 MW
-    
-    yingli_module = plants.Photovoltaic(**yingli210)
-    pv_feedin = yingli_module.feedin(weather=my_weather, number=30000)  # 30000 modules
-    
-See the `documentation of the feedinlib <http://pythonhosted.org/feedinlib/>`_ for a full description of the library and the example above.
+It is currently under revision (see `here <https://github.com/oemof/feedinlib/issues/29>`_ for further information). To begin with it will provide an interface to the `pvlib <https://github.com/pvlib/pvlib-python>`_ and `windpowerlib <https://github.com/wind-python/windpowerlib>`_ and functions to download MERRA2 weather data and `open_FRED weather data <https://openfredproject.wordpress.com>`_.
+See `documentation of the feedinlib <http://feedinlib.readthedocs.io/en/stable/>`_ for a full description of the library.
 
 demandlib
 =========
