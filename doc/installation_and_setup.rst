@@ -234,16 +234,16 @@ To test the whether the installation was successful simply run
 in your virtual environment. 
 If the installation was indeed successful, you will get: 
 
-..code:: console
-`*********`
-`Solver installed with oemof:`
-`glpk: working`
-`cplex: not working`
-`cbc: working`
-`gurobi: working`
-`*********`
-`oemof successfully installed.`
+.. code:: console
+    `*********`
+    `Solver installed with oemof:`
+    `glpk: working`
+    `cplex: not working`
+    `cbc: working`
+    `gurobi: working`
+    `*********`
+    `oemof successfully installed.`
 
-as output.
+as an output.
 
  
