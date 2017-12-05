@@ -45,18 +45,7 @@ Oemof packages are organised in different levels. The basic oemof interfaces are
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an 
-application (app) and depicts for example a concrete energy system model.
-
-You can execute examples of solph applications (:ref:`solph_examples_label`) from command-line by
-
-.. code:: bash
-
-  oemof_examples
-
-Further reading in the ':ref:`check_installation_label`' section.
-
-An additional collection of oemof examples can be found in the `oemof example repository <https://github.com/oemof/examples>`_.
+A collection of oemof examples can be found in the `oemof example repository <https://github.com/oemof/examples>`_.
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
 Keep in touch
