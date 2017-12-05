@@ -236,14 +236,14 @@ If the installation was  successful, you will get:
 
 .. code:: console
 
-    `*********`
-    `Solver installed with oemof:`
-    `glpk: working`
-    `cplex: not working`
-    `cbc: working`
-    `gurobi: working`
-    `*********`
-    `oemof successfully installed.`
+    *********
+    Solver installed with oemof:
+    glpk: working
+    cplex: not working
+    cbc: working
+    gurobi: working
+    *********
+    oemof successfully installed.
 
 as an output.
 
