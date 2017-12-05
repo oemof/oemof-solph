@@ -232,9 +232,10 @@ To test the whether the installation was successful simply run
   oemof_installation_test
   
 in your virtual environment. 
-If the installation was indeed successful, you will get: 
+If the installation was  successful, you will get: 
 
 .. code:: console
+
     `*********`
     `Solver installed with oemof:`
     `glpk: working`
