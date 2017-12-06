@@ -7,7 +7,6 @@ with very specific constraints on which types of nodes are allowed to be
 connected.
 """
 
-import warnings
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
@@ -147,28 +146,19 @@ class Flow:
         for attribute in set(scalars + sequences + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
             if 'gradient' in attribute:
-                setattr(self, attribute, {'ub': sequence(value['ub']), 'costs': value['costs']})
+                setattr(self, attribute, {'ub': sequence(value['ub']),
+                                          'costs': value['costs']})
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
 
-        if self.fixed and self.actual_value is None:
-            raise ValueError("Can not fix flow value to None. "
-                             "Please set actual_value of the flow")
-
-        elif self.fixed:
-            # ToDo: Check if min/max are set by user than raise warning
-            # warnings.warn(
-            #     "Values for min/max will be ignored if fixed is True.",
-            #     SyntaxWarning)
-            self.min = sequence(0)
-            self.max = sequence(1)
+        # Checking for impossible attribute combinations
+        if self.fixed and self.actual_value[0] is None:
+            raise ValueError("Cannot fix flow value to None.\n Please "
+                             "set the actual_value attribute of the flow")
         if self.investment and self.nominal_value is not None:
-            self.nominal_value = None
-            warnings.warn(
-                "Using the investment object the nominal_value" +
-                " is set to None.",
-                SyntaxWarning)
+            raise ValueError("Using the investment object the nominal_value"
+                             " has to be set to None.")
         if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
