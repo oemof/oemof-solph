@@ -1,6 +1,32 @@
 # -*- coding: utf-8 -*-
+import logging
 
 import pyomo.environ as po
+
+
+def investment_limit(m, limit=None):
+    """ Set an absolut limit for the total investment costs of an investment
+    optimization problem
+    """
+    logging.info("CAUTION: This is experimental stuff!")
+
+    def investment_rule(m):
+        """
+        """
+        expr = 0
+
+        if hasattr(m, "InvestmentFlow"):
+            expr += (m.InvestmentFlow.fixed_costs +
+                     m.InvestmentFlow.investment_costs)
+
+        if hasattr(m, "GenericInvestmentStorageBlock"):
+            expr += (m.GenericInvestmentStorageBlock.fixed_costs +
+                     m.GenericInvestmentStorageBlock.investment_costs)
+        return (expr <= limit)
+
+    m.investment_limit = po.Constraint(rule=investment_rule)
+
+    return m
 
 
 def emission_limit(om, flows=None, limit=None):
