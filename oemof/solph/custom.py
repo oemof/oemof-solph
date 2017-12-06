@@ -132,7 +132,7 @@ class ElectricalLineBlock(SimpleBlock):
             for t in m.TIMESTEPS:
                 for n in group:
                     if O[n].slack is True:
-                        self.voltage_angle[O[n], t].setub(0)
+                        self.voltage_angle[O[n], t].value = 0
                         self.voltage_angle[O[n], t].fix()
                     try:
                         lhs = m.flow[n, O[n], t]
