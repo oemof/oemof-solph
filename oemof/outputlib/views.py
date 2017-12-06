@@ -47,7 +47,7 @@ def node(results, node):
         idx = [tuple((k, m) for m in v) for k, v in idx.items()]
         idx = [i for sublist in idx for i in sublist]
         filtered['scalars'].index = idx
-        # filtered['scalars'].sort_index(axis=0, inplace=True)
+        filtered['scalars'].sort_index(axis=0, inplace=True)
 
     # create a dataframe with tuples as column labels for sequences
     sequences = {k: v['sequences'] for k, v in results.items()
@@ -62,6 +62,6 @@ def node(results, node):
         cols = [tuple((k, m) for m in v) for k, v in cols.items()]
         cols = [c for sublist in cols for c in sublist]
         filtered['sequences'].columns = cols
-        # filtered['sequences'].sort_index(axis=1, inplace=True)
+        filtered['sequences'].sort_index(axis=1, inplace=True)
 
     return filtered
