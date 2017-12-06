@@ -155,14 +155,6 @@ class Flow:
         if self.fixed and self.actual_value is None:
             raise ValueError("Can not fix flow value to None. "
                              "Please set actual_value of the flow")
-
-        elif self.fixed:
-            # ToDo: Check if min/max are set by user than raise warning
-            # warnings.warn(
-            #     "Values for min/max will be ignored if fixed is True.",
-            #     SyntaxWarning)
-            self.min = sequence(0)
-            self.max = sequence(1)
         if self.investment and self.nominal_value is not None:
             self.nominal_value = None
             warnings.warn(
