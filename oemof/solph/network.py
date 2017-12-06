@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """ Classes used to model energy supply systems within solph.
 
 Classes are derived from oemof core network classes and adapted for specific
@@ -6,6 +7,8 @@ optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
 """
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 import oemof.network as on
 import oemof.energy_system as es

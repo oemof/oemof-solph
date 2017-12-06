@@ -13,3 +13,6 @@ To add a component you need to add:
 * A few lines to the grouping function in the module that makes sure that
   the block is actually added to the model.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"

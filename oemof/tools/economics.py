@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Module to collect useful functions for economic calculation.
 
+"""Module to collect useful functions for economic calculation.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 
 def annuity(capex, n, wacc):

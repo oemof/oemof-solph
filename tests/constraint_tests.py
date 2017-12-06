@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from difflib import unified_diff
 import logging
 import os.path as ospath

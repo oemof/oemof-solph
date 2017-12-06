@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -
-"""
-This module is designed to hold custom components with their classes and
+
+""" This module is designed to hold custom components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 """
 
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+import numpy as np
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
-import numpy as np
 
 from oemof.network import Bus
 from oemof.solph import Flow, Transformer
-from .options import Investment
-from .plumbing import sequence
+from oemof.solph.options import Investment
+from oemof.solph.plumbing import sequence
 
 
 # ------------------------------------------------------------------------------
@@ -194,8 +197,8 @@ class GenericStorageBlock(SimpleBlock):
         if group is None:
             return None
 
-        I = {n: [i for i in n.inputs][0] for n in group}
-        O = {n: [o for o in n.outputs][0] for n in group}
+        i = {n: [i for i in n.inputs][0] for n in group}
+        o = {n: [o for o in n.outputs][0] for n in group}
 
         self.STORAGES = Set(initialize=[n for n in group])
 
@@ -225,9 +228,9 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[I[n], n, t] *
+            expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
-            expr += (m.flow[n, O[n], t] /
+            expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
@@ -1072,7 +1075,7 @@ class GenericCAESBlock(SimpleBlock):
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
         self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_H_flow_rule)
+                                 rule=_H_flow_rule)
 
 # ------------------------------------------------------------------------------
 # End of CAES block
