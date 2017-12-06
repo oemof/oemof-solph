@@ -92,23 +92,40 @@ class GenericStorage(Transformer):
         self.investment = kwargs.get('investment')
 
         # Check investment
-        msg_no_nv = ("No nominal value allowed with investment object."
-                     "(DRAFT!) {0}")
+        e_no_nv = ("If an investment object is defined the invest variable "
+                   "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
+        e_duplicate = ("Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
+                       "will set the nominal_value for the flow.\nTherefore "
+                       "either the 'nominal_{0}_capacity_ratio' or the "
+                       "'nominal_value' has to be 'None'.")
+
         if self.investment and self.nominal_capacity is not None:
-            raise AttributeError(msg_no_nv.format('storage'))
+            raise AttributeError(e_no_nv.format('nominal_capacity'))
 
         # Check flows for nominal value
-        for flow in list(self.inputs.values()) + list(self.outputs.values()):
+        for flow in self.inputs.values():
             if self.investment and flow.nominal_value is not None:
-                raise AttributeError(msg_no_nv.format('flow'))
+                raise AttributeError(e_no_nv.format('nominal_value'))
+            if (flow.nominal_value is not None and
+                    self.nominal_input_capacity_ratio is not None):
+                raise AttributeError(e_duplicate)
+            if (not self.investment and
+                    self.nominal_input_capacity_ratio is not None):
+                flow.nominal_value = (self.nominal_input_capacity_ratio *
+                                      self.nominal_capacity)
+            if self.investment:
+                if not isinstance(flow.investment, Investment):
+                    flow.investment = Investment()
+
+        for flow in self.outputs.values():
+            if self.investment and flow.nominal_value is not None:
+                raise AttributeError(e_no_nv.format('nominal_value'))
             if (flow.nominal_value is not None and
                     self.nominal_output_capacity_ratio is not None):
-                msg = ("Duplicate definition! (DRAFT!)"
-                       "fdsfgds")
-                raise AttributeError(msg)
+                raise AttributeError(e_duplicate)
             if (not self.investment and
                     self.nominal_output_capacity_ratio is not None):
-                flow.nominal_value = (self.nominal_input_capacity_ratio *
+                flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
                 if not isinstance(flow.investment, Investment):
