@@ -6,8 +6,21 @@ API changes
 ###########
 
 * Rename `NodesFromCSV` function to `nodes_from_csv`
-* Replace LinearTransformer and LinearN1Transformer classes with one Transformer class. The new class has n inputs and n outputs. Please note that the definition of the conversion factors has changed. See the new docstring to avoid errors (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
-
+* Replace LinearTransformer and LinearN1Transformer classes with one
+  Transformer class. The new class has n inputs and n outputs. Please note that
+  the definition of the conversion factors has changed. See the new docstring
+  to avoid errors (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
+* Rename OperationalModel to Model
+* :class:`Nodes <oemof.network.Node>` are no longer automatically added to the
+  most recently created :class:`energy system
+  <oemof.energy_system.EnergySystem>`. You can still restore the old automatic
+  registration by manually assigning an :class:`energy system
+  <oemof.energy_system.EnergySystem>` to :attr:`Node.registry
+  <oemof.network.Node.registry>`. On the other hand you can still explicitly
+  :meth:`add <oemof.energy_system.EnergySystem.add>` :class:`nodes
+  <oemof.network.Node>` to an :class:`energy system
+  <oemof.energy_system.EnergySystem>`. This option has been made a bit more
+  feature rich by the way, but see below for more on this.
 
 New features
 ############
@@ -27,6 +40,11 @@ New features
   :attr:`Outputs <oemof.network.Node.outputs>` where already working
   previously, but due to an implementation quirk, :attr:`inputs
   <oemof.network.Node.inputs>` did not behave as expected. This is now fixed.
+* You can now explicitly :meth:`add <oemof.energy_system.EnergySystem.add>`
+  :class:`nodes <oemof.network.Node>` to an :class:`energy system
+  <oemof.energy_system.EnergySystem>` in bulk using `*` and `**` syntax. For
+  the latter case, the :meth:`values <dict.values>` of the dictionary passed in
+  will be added.
 
 
 Documentation
@@ -37,6 +55,9 @@ Documentation
 Bug fixes
 #########
 
+* LP-file tests are now invariant against sign changes in equations, because
+  the equations are now normalized to always have non-negative right hand
+  sides.
 
 Testing
 #######

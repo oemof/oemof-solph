@@ -10,6 +10,7 @@ class Node_Tests:
 
     def setup(self):
         self.energysystem = ES()
+        Node.registry = self.energysystem
 
     def test_that_attributes_cannot_be_added(self):
         node = Node()
@@ -199,10 +200,12 @@ class Node_Tests:
         eq_(n1.outputs[n2], n1n2)
         eq_(n1.outputs, {n2: n1n2})
 
+
 class EnergySystem_Nodes_Integration_Tests:
 
     def setup(self):
         self.es = ES()
+        Node.registry = self.es
 
     def test_node_registration(self):
         eq_(Node.registry, self.es)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 This script shows how to a an individual constraint to the oemof solph
-OperationalModel.
+Model.
 The constraint we add forces a flow to be greater or equal a certain share
 of all inflows of its target bus. Moreover we will set an emission constraint.
 
@@ -11,8 +11,9 @@ simon.hilpert@uni-flensburg.de
 import logging
 import pyomo.environ as po
 import pandas as pd
+from oemof.network import Node
 from oemof.solph import (Sink, Transformer, Bus, Flow,
-                         OperationalModel, EnergySystem)
+                         Model, EnergySystem)
 
 
 def test_add_constraints_example(solver='cbc', nologg=False):
@@ -21,6 +22,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(timeindex=pd.date_range('1/1/2012', periods=4, freq='H'))
+    Node.registry = es
     # add some nodes
     boil = Bus(label="oil", balanced=False)
     blig = Bus(label="lignite", balanced=False)
@@ -42,7 +44,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
                 conversion_factors={b_el: 0.41})
 
     # create the model
-    om = OperationalModel(es=es)
+    om = Model(es=es)
 
     # add specific emission values to flow objects if source is a commodity bus
     for s, t in om.flows.keys():
@@ -58,7 +60,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     # Now we are going to add a 'sub-model' and add a user specific constraint
     # first we add ad pyomo Block() instance that we can use to add our
     # constraints. Then, we add this Block to our previous defined
-    # OperationalModel instance and add the constraints.
+    # Model instance and add the constraints.
     myblock = po.Block()
 
     # create a pyomo set with the flows (i.e. list of tuples),
@@ -71,7 +73,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     myblock.COMMODITYFLOWS = [k for (k, v) in om.flows.items()
                               if hasattr(v, 'emission_factor')]
 
-    # add the sub-model to the oemof OperationalModel instance
+    # add the sub-model to the oemof Model instance
     om.add_component('MyBlock', myblock)
 
     def _inflow_share_rule(m, s, e, t):

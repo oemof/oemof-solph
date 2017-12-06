@@ -31,6 +31,7 @@ The example models the following energy system:
 from oemof.tools import economics
 
 import oemof.solph as solph
+from oemof.network import Node
 from oemof.outputlib import processing, views
 
 import logging
@@ -44,6 +45,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     date_time_index = pd.date_range('1/1/2012', periods=400, freq='H')
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
+    Node.registry = energysystem
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -92,7 +94,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     )
 
     # Solve model
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
     om.solve(solver=solver)
 
     # Check dump and restore
@@ -105,7 +107,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
-    my_results['storage_invest'] = results[(storage,)]['scalars']['invest']
+    my_results['storage_invest'] = results[(storage, None)]['scalars']['invest']
 
     stor_invest_dict = {
         'storage_invest': 2046851,

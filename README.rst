@@ -37,22 +37,20 @@ Structure of the oemof cosmos
 
 Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
 
+
 Examples
 ========
 
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
+You can find a repository with all currently available examples for oemof on github. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structre. There is some elaboration on the examples in the respective repository.
 
-You can execute `examples of solph applications <http://oemof.readthedocs.io/en/latest/oemof_solph.html#solph-examples>`_ from command-line by
-
-.. code:: bash
-
-  oemof_examples
-
-Further reading in the `'Run examples to check the installation' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html#run-examples-to-check-the-installation>`_ section.
-
-An additional collection of oemof examples can be found in the `oemof example repository <https://github.com/oemof/examples>`_.
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
+
+Got further questions regarding oemof? 
+======================================
+If you have any further questions regarding omeof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof`. 
+
 
 Keep in touch
 =============

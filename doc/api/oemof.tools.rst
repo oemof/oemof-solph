@@ -4,14 +4,6 @@ oemof.tools package
 Submodules
 ----------
 
-oemof.tools.config module
--------------------------
-
-.. automodule:: oemof.tools.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 oemof.tools.helpers module
 --------------------------
 

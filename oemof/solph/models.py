@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+
+"""Solph Optimization Models
 """
 
-"""
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -10,16 +11,13 @@ from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
 import logging
 
-# #############################################################################
-#
-# Solph Optimization Models
-#
-# #############################################################################
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 
-class OperationalModel(po.ConcreteModel):
-    """ An energy system model for operational simulation with optimized
-    dispatch.
+class Model(po.ConcreteModel):
+    """ An  energy system model for operational and investment
+    optimization.
 
     Parameters
     ----------
@@ -28,7 +26,7 @@ class OperationalModel(po.ConcreteModel):
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`OperationalModel.CONSTRAINTS`
+        Defaults to :const:`Model.CONSTRAINTS`
 
     **The following sets are created**:
 
@@ -58,13 +56,13 @@ class OperationalModel(po.ConcreteModel):
 
         # ########################  Arguments #################################
 
-        self.name = kwargs.get('name', 'OperationalModel')
+        self.name = kwargs.get('name', 'Model')
 
         self.es = es
 
         self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
 
-        self._constraint_groups = (OperationalModel.CONSTRAINT_GROUPS +
+        self._constraint_groups = (Model.CONSTRAINT_GROUPS +
                                    kwargs.get('constraint_groups', []))
 
         self._constraint_groups += [i for i in self.es.groups

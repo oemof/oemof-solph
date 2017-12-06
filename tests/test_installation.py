@@ -1,9 +1,13 @@
-"""
-This module can be used to check the installation.
+# -*- coding: utf-8 -*-
+
+"""This module can be used to check the installation.
 This is not an illustrated example.
 """
 
-import oemof.solph as solph
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from oemof import solph
 import pandas as pd
 
 
@@ -23,7 +27,7 @@ def check_oemof_installation(silent=False):
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
-    om = solph.OperationalModel(energysystem)
+    om = solph.Model(energysystem)
 
     # check solvers
     solver = dict()

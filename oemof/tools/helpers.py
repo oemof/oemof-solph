@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-This is a collection of helper functions which work on there own and can be
+This is a collection of helper functions which work on their own and can be
 used by various classes. If there are too many helper-functions, they will
 be sorted in different modules.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 import os
 
@@ -25,9 +28,3 @@ def extend_basic_path(subfolder):
     if not os.path.isdir(extended_path):
         os.mkdir(extended_path)
     return extended_path
-
-
-def get_fullpath(path, filename):
-    """Combines path and filename to a full path.
-    """
-    return os.path.join(path, filename)

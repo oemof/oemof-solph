@@ -8,7 +8,8 @@ Data: example_data.csv
 
 import os
 import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, Bus, Flow, OperationalModel,
+from oemof.network import Node
+from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
 from oemof.outputlib import processing, views
 
@@ -18,6 +19,7 @@ def test_dispatch_example(solver='cbc', periods=24*5):
 
     datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
     energysystem = EnergySystem(timeindex=datetimeindex)
+    Node.registry = energysystem
     filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
     data = pd.read_csv(filename, sep=",")
 
@@ -103,7 +105,7 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
-    optimization_model = OperationalModel(es=energysystem)
+    optimization_model = Model(es=energysystem)
 
     # solve problem
     optimization_model.solve(solver=solver)
