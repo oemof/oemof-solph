@@ -7,13 +7,10 @@ module holds the class definition and the block directly located by each other.
 
 from pyomo.core.base.block import SimpleBlock
 import pyomo.environ as po
-import numpy as np
 import logging
 
-import oemof.network as on
-from .network import Bus, Transformer
-from .options import Investment
-from .plumbing import sequence
+from oemof.solph.network import Bus, Transformer
+from oemof.solph.plumbing import sequence
 
 
 class ElectricalBus(Bus):
@@ -32,7 +29,7 @@ class ElectricalBus(Bus):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.slack = kwargs.get('slack', True)
+        self.slack = kwargs.get('slack', False)
         self.v_max = kwargs.get('v_max', 1000)
         self.v_min = kwargs.get('v_min', -1000)
 
@@ -59,6 +56,19 @@ class ElectricalLine(Transformer):
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError("Component ElectricLine must not have more than \
                              one input and one output!")
+
+        self.input = self._input()
+        self.output = self._output()
+
+    def _input(self):
+        r""" Returns the first (and only!) input of the line object
+        """
+        return [i for i in self.inputs][0]
+
+    def _output(self):
+        r""" Returns the first (and only!) output of the line object
+        """
+        return [o for o in self.outputs][0]
 
 
 class ElectricalLineBlock(SimpleBlock):
@@ -99,8 +109,8 @@ class ElectricalLineBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n: n._input() for n in group}
-        O = {n: n._output() for n in group}
+        I = {n: n.input for n in group}
+        O = {n: n.output for n in group}
 
         # create voltage angle variables
         self.ELECTRICAL_BUSES = po.Set(initialize=[n for n in m.es.nodes
@@ -114,16 +124,16 @@ class ElectricalLineBlock(SimpleBlock):
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
             # TODO: Make this robust to select the same slack bus for
             # the same problems
-            bus = self.ELECTRICAL_BUSES.first()
-            logging.info("No slack bus set, setting bus {} as slack  bus").format(bus.label)
+            bus = [b for b in self.ELECTRICAL_BUSES][0]
+            logging.info("No slack bus set, setting bus {0} as slack bus".format(bus.label))
             bus.slack = True
 
         def _voltage_angle_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
                     if O[n].slack is True:
-                        lhs = m.flow[n, O[n], t]
-                        rhs = 0
+                        self.voltage_angle[O[n], t].setub(0)
+                        self.voltage_angle[O[n], t].fix()
                     try:
                         lhs = m.flow[n, O[n], t]
                         rhs = 1 / n.reactance[t] * (
@@ -143,7 +153,6 @@ class ElectricalLineBlock(SimpleBlock):
 
         self.electrical_flow_build = po.BuildAction(
                                          rule=_voltage_angle_relation)
-
 
 
 def custom_component_grouping(node):
