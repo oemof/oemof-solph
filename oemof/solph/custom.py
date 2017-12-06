@@ -6,18 +6,16 @@ module holds the class definition and the block directly located by each other.
 """
 
 from pyomo.core.base.block import SimpleBlock
-from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           Expression, BuildAction)
+import pyomo.environ as po
 import numpy as np
-import warnings
+import logging
+
 import oemof.network as on
 from .network import Bus, Transformer
 from .options import Investment
 from .plumbing import sequence
 
-# ------------------------------------------------------------------------------
-# ElectricalBus
-# ------------------------------------------------------------------------------
+
 class ElectricalBus(Bus):
     r"""A electrical bus object. Every node has to be connected to Bus. This
     Bus is used in combination with ElectricalLine objects for linear optimal
@@ -38,11 +36,10 @@ class ElectricalBus(Bus):
         self.v_max = kwargs.get('v_max', 1000)
         self.v_min = kwargs.get('v_min', -1000)
 
-# ------------------------------------------------------------------------------
-#  Electrical Line
-# ------------------------------------------------------------------------------
+
 class ElectricalLine(Transformer):
-    r"""A Electrical Line to used in linear optimal power flow calculations.
+    r"""An ElectricalLine to be used in linear optimal power flow calculations.
+    based on angle formulation
 
     Parameters
     ----------
@@ -53,8 +50,6 @@ class ElectricalLine(Transformer):
     ------
     * To use this object the connected buses need to be of the type
    `py:class:`~oemof.solph.network.ElectricalBus`.
-    * This object uses the outflow as reference. Please ignore the inflow
-    of this component for parameter setting.
 
     """
     def __init__(self, *args, **kwargs):
@@ -64,23 +59,11 @@ class ElectricalLine(Transformer):
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError("Component ElectricLine must not have more than \
                              one input and one output!")
-        self.input = self._input()
-        self.output = self._output()
-
-    def _input(self):
-        """ Returns the first (and only!) input of the line object
-        """
-        return [i for i in self.inputs][0]
-
-    def _output(self):
-        """ Returns the first (and only!) output of the line object
-        """
-        return [o for o in self.outputs][0]
 
 
 class ElectricalLineBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
-    class:`.LinearTransformer`
+    class:`.ElectricalLine`
 
 
     **The following constraints are created:**
@@ -88,9 +71,9 @@ class ElectricalLineBlock(SimpleBlock):
     Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
         .. math::
             flow(n, o, t) =  1 / reactance(n, t) \\cdot ()
-            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\\\
-            \\forall t \\in \\textrm{TIMESTEPS}, \\\\
-            \\forall n \\in \\textrm{ELECTRICAL\_LINES}.
+            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\
+            \forall t \\in \\textrm{TIMESTEPS}, \\
+            \forall n \\in \\textrm{ELECTRICAL\_LINES}.
     """
 
     CONSTRAINT_GROUP = True
@@ -120,22 +103,27 @@ class ElectricalLineBlock(SimpleBlock):
         O = {n: n._output() for n in group}
 
         # create voltage angle variables
-        self.ELECTRICAL_BUSES = Set(initialize=[n for n in m.es.nodes
-                                    if isinstance(n, ElectricalBus)])
+        self.ELECTRICAL_BUSES = po.Set(initialize=[n for n in m.es.nodes
+                                       if isinstance(n, ElectricalBus)])
 
         def _voltage_angle_bounds(block, b, t):
             return (b.v_min, b.v_max)
-        self.voltage_angle = Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
-                                 bounds=_voltage_angle_bounds)
-        # TODO: Add bounds for variable
+        self.voltage_angle = po.Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
+                                    bounds=_voltage_angle_bounds)
 
-        # add voltage angle constraint
-        self.electrical_flow = Constraint(group, noruleinit=True)
+        if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
+            # TODO: Make this robust to select the same slack bus for
+            # the same problems
+            bus = self.ELECTRICAL_BUSES.first()
+            logging.info("No slack bus set, setting bus {} as slack  bus").format(bus.label)
+            bus.slack = True
 
-        self._equate_electrical_flows = Constraint(group, noruleinit=True)
         def _voltage_angle_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
+                    if O[n].slack is True:
+                        lhs = m.flow[n, O[n], t]
+                        rhs = 0
                     try:
                         lhs = m.flow[n, O[n], t]
                         rhs = 1 / n.reactance[t] * (
@@ -145,16 +133,17 @@ class ElectricalLineBlock(SimpleBlock):
                         raise ValueError("Error in constraint creation",
                                          "of node {}".format(n.label))
                     block.electrical_flow.add((n, t), (lhs == rhs))
+                    # add constraint to set in-outflow equal
+                    block._equate_electrical_flows.add((n, t), (
+                        m.flow[n, O[n], t] == m.flow[I[n], n, t]))
 
-                    block._equate_electrical_flows.add((n, t), (m.flow[n, O[n],t] == m.flow[I[n], n, t]))
+        self.electrical_flow = po.Constraint(group, noruleinit=True)
 
-        self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)
+        self._equate_electrical_flows = po.Constraint(group, noruleinit=True)
 
-        def _bound_in_out_flow(block):
-            return m
-# ------------------------------------------------------------------------------
-#  End of ElectricalLine block
-# ------------------------------------------------------------------------------
+        self.electrical_flow_build = po.BuildAction(
+                                         rule=_voltage_angle_relation)
+
 
 
 def custom_component_grouping(node):
