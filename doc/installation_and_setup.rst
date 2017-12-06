@@ -219,36 +219,32 @@ GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
 .. _check_installation_label:
 
-Run examples to check the installation
+Run the installation_test file 
 ======================================
 
-Run the examples to check the installation. From the command-line (or Anaconda Prompt / WinPython Command Prompt) execute:
-
-.. code:: console
-
-  oemof_examples <name-of-example> [-s <name-of-solver>]
-
-You can choose from the list of examples
-
- * test_installation
- * storage_investment (solph)
- * simple_dispatch (solph)
- * csv_reader_investment (solph)
- * csv_reader_dispatch (solph)
- * add_constraints (solph)
- * variable_chp (solph)
   
 Test the installation and the installed solver:
 
+To test the whether the installation was successful simply run
+
 .. code:: console
 
-  oemof_examples test_installation
+  oemof_installation_test
   
-Execute an example with different solver (default: 'cbc').
+in your virtual environment. 
+If the installation was  successful, you will get: 
 
 .. code:: console
 
-  oemof_examples simple_dispatch
-  oemof_examples simple_dispatch -s glpk
+    *********
+    Solver installed with oemof:
+    glpk: working
+    cplex: not working
+    cbc: working
+    gurobi: working
+    *********
+    oemof successfully installed.
 
-If you want to run solph examples you need to have a solver installed (recommended: cbc), see the ":ref:`linux_solver_label`" or ":ref:`windows_solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
+as an output.
+
+ 

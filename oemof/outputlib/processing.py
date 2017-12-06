@@ -98,19 +98,20 @@ def results(om):
     Results from Pyomo are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
-    The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
+    The dictionary is keyed by the nodes e.g. `results[(n, None)]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
     """
     df = create_dataframe(om)
 
     # create a dict of dataframes keyed by oemof tuples
-    df_dict = {k: v[['timestep', 'variable_name', 'value']]
+    df_dict = {k if len(k) > 1 else (k[0], None):
+               v[['timestep', 'variable_name', 'value']]
                for k, v in df.groupby('oemof_tuple')}
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     results = {}
-    for k, v in df_dict.items():
+    for k in df_dict:
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
         df_dict[k].index = om.es.timeindex
@@ -131,10 +132,11 @@ def results(om):
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
-            if (bus,) not in results.keys():
-                results[(bus,)] = {'sequences': df, 'scalars': pd.Series()}
+            if (bus, None) not in results.keys():
+                results[(bus, None)] = {
+                    'sequences': df, 'scalars': pd.Series()}
             else:
-                results[(bus,)]['sequences']['duals'] = duals
+                results[(bus, None)]['sequences']['duals'] = duals
 
     return results
 
