@@ -89,28 +89,6 @@ Check the solver installation by executing the test_installation example (see :r
 
 To learn how to install (other) solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
-.. _additional_packages_Linux:
-
-Additional Python packages
---------------------------
-
-To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included by default in the installation of Python 3.4 and later versions.
-To install pip for earlier Python versions on Debian/Ubuntu try executing the following code in your terminal or use the software management of you Linux distribution: 
-
-.. code:: console
-
-  sudo apt-get install python3-pip
-
-For further information refer to https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel.
-
-In order to install a package using pip execute the following and substitute package_name by the desired package (e.g. virtualenv):
-
-.. code:: console
-
-  pip3 install package_name
-
-For further information on how to install Python modules check out https://docs.python.org/3/installing/index.html.
-
 
 Windows
 =======
