@@ -7,7 +7,7 @@ def test_generic_storage_1():
     """Duplicate definition inflow."""
     bel = solph.Bus()
     solph.components.GenericStorage(
-        label='storage',
+        label='storage1',
         nominal_capacity=45,
         inputs={bel: solph.Flow(nominal_value=5, variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -23,7 +23,7 @@ def test_generic_storage_2():
     """Duplicate definition inflow."""
     bel = solph.Bus()
     solph.components.GenericStorage(
-        label='storage',
+        label='storage2',
         nominal_capacity=45,
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(nominal_value=5, variable_costs=10e10)},
@@ -39,7 +39,7 @@ def test_generic_storage_3():
     """Nominal value defined with investment model."""
     bel = solph.Bus()
     solph.components.GenericStorage(
-        label='storage',
+        label='storage3',
         nominal_capacity=45,
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -55,7 +55,7 @@ def test_generic_storage_4():
     """Nominal value defined with investment model."""
     bel = solph.Bus()
     solph.components.GenericStorage(
-        label='storage',
+        label='storage4',
         nominal_capacity=45,
         inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
