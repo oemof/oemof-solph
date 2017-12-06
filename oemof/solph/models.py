@@ -94,7 +94,6 @@ class Model(po.ConcreteModel):
 
         # ######################### FLOW VARIABLE #############################
 
-        # non-negative pyomo variable for all existing flows in energysystem
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 
@@ -102,6 +101,9 @@ class Model(po.ConcreteModel):
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
+                if not isinstance(i, components.ElectricalLine) and \
+                 not isinstance(o, components.ElectricalLine):
+                    self.flow[o, i, t].setlb(0)
                 if self.flows[o, i].actual_value[t] is not None and (
                         self.flows[o, i].nominal_value is not None):
                     # pre- optimized value of flow variable
