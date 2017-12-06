@@ -84,12 +84,25 @@ def node(results, node, get_flows=False):
         filtered['sequences'].sort_index(axis=1, inplace=True)
 
     if get_flows:
-        filtered['flows'] = {}
-        for nodes, flow_name in filtered['sequences']:
-            filtered['flows'][(nodes, flow_name)] = __get_flow_component(
-                nodes, node)
+        filtered['flows'] = flows(results, node)
 
     return filtered
+
+
+def flows(results, current_node, flow_type=None):
+    nodes_list = [
+        k
+        for k, v in results.items()
+        if current_node in k and not v['sequences'].empty
+    ]
+    flow_dict = {}
+    for nodes in nodes_list:
+        flow = __get_flow_component(nodes, current_node)
+        if flow_type is None:
+            flow_dict[nodes] = flow
+        elif flow.type == flow_type:
+            flow_dict[nodes] = flow.component
+    return flow_dict
 
 
 class NodeOption(Enum):
@@ -153,7 +166,8 @@ def get_node_by_name(results, *names):
     if len(names) == 1:
         return next(filter(lambda x: str(x) == names[0], nodes), None)
     else:
-        return [n if str(n) in names else None for n in nodes]
+        node_names = {str(n): n for n in nodes}
+        return [node_names.get(n, None) for n in names]
 
 
 def __get_flow_component(nodes, current_node):
@@ -162,9 +176,9 @@ def __get_flow_component(nodes, current_node):
     tuple is given, otherwise node itself s returned. Additionally, flow type
     of result is returned.
     """
-    if len(nodes) == 1:
-        return NodeFlow(nodes[0], FlowType.Single)
-    if nodes[0] == current_node:
+    if nodes[1] is None:
+        return NodeFlow(nodes, FlowType.Single)
+    elif nodes[0] == current_node:
         return NodeFlow(current_node.outputs[nodes[1]], FlowType.Output)
     else:
         return NodeFlow(current_node.inputs[nodes[0]], FlowType.Input)
