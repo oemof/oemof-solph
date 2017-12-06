@@ -106,7 +106,7 @@ def results(om):
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
-    and flows e.g. `results[n,n]['sequences']`.
+    and flows e.g. `results[n, n]['sequences']`.
     """
     df = create_dataframe(om)
 
