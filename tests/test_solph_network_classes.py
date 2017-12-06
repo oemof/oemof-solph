@@ -22,7 +22,7 @@ def test_transformer_class():
 def test_flow_classes():
     with assert_raises(ValueError):
         solph.Flow(fixed=True)
-    with assert_raises(AttributeError):
+    with assert_raises(ValueError):
         solph.Flow(investment=solph.Investment(), nominal_value=4)
     with assert_raises(ValueError):
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())

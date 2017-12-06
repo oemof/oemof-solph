@@ -157,8 +157,8 @@ class Flow:
             raise ValueError("Cannot fix flow value to None.\n Please "
                              "set the actual_value attribute of the flow")
         if self.investment and self.nominal_value is not None:
-            raise AttributeError("Using the investment object the nominal_value"
-                                 " has to be set to None.")
+            raise ValueError("Using the investment object the nominal_value"
+                             " has to be set to None.")
         if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
