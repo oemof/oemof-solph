@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
+"""Basic EnergySystem class
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from functools import partial
 import logging
 import os
 import pandas as pd
-
 import dill as pickle
 
-from oemof.network import Entity
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Node
 
 
 class EnergySystem:

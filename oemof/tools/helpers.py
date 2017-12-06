@@ -5,6 +5,9 @@ used by various classes. If there are too many helper-functions, they will
 be sorted in different modules.
 """
 
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 import os
 
 

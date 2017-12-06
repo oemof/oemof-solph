@@ -1,5 +1,8 @@
 # -*- coding: utf-8
 
+"""Helpers to log your modeling process with oemof.
+"""
+
 import os
 import logging
 from logging import handlers
