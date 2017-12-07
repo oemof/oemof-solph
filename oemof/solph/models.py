@@ -101,9 +101,7 @@ class Model(po.ConcreteModel):
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
-                if not isinstance(i, custom.ElectricalLine) and \
-                 not isinstance(o, custom.ElectricalLine):
-                    self.flow[o, i, t].setlb(0)
+                self.flow[o, i, t].setlb(0)
                 if self.flows[o, i].actual_value[t] is not None and (
                         self.flows[o, i].nominal_value is not None):
                     # pre- optimized value of flow variable
