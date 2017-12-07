@@ -873,6 +873,7 @@ class ExtractionTurbineCHP(solph_Transformer):
 
     Examples
     --------
+    >>> from oemof import solph
     >>> bel = solph.Bus(label='electricityBus')
     >>> bth = solph.Bus(label='heatBus')
     >>> bgas = solph.Bus(label='commodityBus')
