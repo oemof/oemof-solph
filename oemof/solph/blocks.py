@@ -353,8 +353,7 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
         self.MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if sum(
-                [g[2].min[t] for t in m.TIMESTEPS]) > 0])
+            (g[0], g[1]) for g in group if g[2].min[0] is not None])
 
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
