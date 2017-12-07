@@ -14,7 +14,8 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 
 from oemof.network import Bus
-from oemof.solph import Flow, Transformer
+from oemof import network
+from oemof import solph
 from oemof.solph.options import Investment
 from oemof.solph.plumbing import sequence
 
@@ -23,7 +24,7 @@ from oemof.solph.plumbing import sequence
 # Start of generic storage component
 # ------------------------------------------------------------------------------
 
-class GenericStorage(Transformer):
+class GenericStorage(network.Transformer):
     """
     Component `GenericStorage` to model with basic characteristics of storages.
 
@@ -517,7 +518,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 # Start of generic CHP component
 # ------------------------------------------------------------------------------
 
-class GenericCHP(Transformer):
+class GenericCHP(network.Transformer):
     r"""
     Component `GenericCHP` to model combined heat and power plants.
 
@@ -849,7 +850,7 @@ class GenericCHPBlock(SimpleBlock):
 # Start of ExtractionTurbineCHP component
 # ------------------------------------------------------------------------------
 
-class ExtractionTurbineCHP(Transformer):
+class ExtractionTurbineCHP(solph.Transformer):
     r"""
     A CHP with an extraction turbine in a linear model. For more options see
     the :class:`~oemof.solph.components.GenericCHP` class.
@@ -879,8 +880,8 @@ class ExtractionTurbineCHP(Transformer):
     >>> bgas = Bus(label='commodityBus')
     >>> et_chp = ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
-    ...    inputs={bgas: Flow(nominal_value=10e10)},
-    ...    outputs={bel: Flow(), bth: Flow()},
+    ...    inputs={bgas: solph.Flow(nominal_value=10e10)},
+    ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
 
@@ -1029,7 +1030,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 # Start of generic CAES component
 # ------------------------------------------------------------------------------
 
-class GenericCAES(Transformer):
+class GenericCAES(network.Transformer):
     r"""
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
