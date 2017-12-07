@@ -13,11 +13,8 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 
-from oemof.network import Bus
 from oemof import network
 from oemof import solph
-from oemof.solph.options import Investment
-from oemof.solph.plumbing import sequence
 
 
 # ------------------------------------------------------------------------------
@@ -118,15 +115,15 @@ class GenericStorage(network.Transformer):
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_output_capacity_ratio', None)
         self.initial_capacity = kwargs.get('initial_capacity')
-        self.capacity_loss = sequence(kwargs.get('capacity_loss', 0))
-        self.inflow_conversion_factor = sequence(
+        self.capacity_loss = solph.sequence(kwargs.get('capacity_loss', 0))
+        self.inflow_conversion_factor = solph.sequence(
             kwargs.get(
                 'inflow_conversion_factor', 1))
-        self.outflow_conversion_factor = sequence(
+        self.outflow_conversion_factor = solph.sequence(
             kwargs.get(
                 'outflow_conversion_factor', 1))
-        self.capacity_max = sequence(kwargs.get('capacity_max', 1))
-        self.capacity_min = sequence(kwargs.get('capacity_min', 0))
+        self.capacity_max = solph.sequence(kwargs.get('capacity_max', 1))
+        self.capacity_min = solph.sequence(kwargs.get('capacity_min', 0))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
 
@@ -153,8 +150,8 @@ class GenericStorage(network.Transformer):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
+                if not isinstance(flow.investment, solph.Investment):
+                    flow.investment = solph.Investment()
 
         # Check output flows
         for flow in self.outputs.values():
@@ -168,8 +165,8 @@ class GenericStorage(network.Transformer):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
+                if not isinstance(flow.investment, solph.Investment):
+                    flow.investment = solph.Investment()
 
 # ------------------------------------------------------------------------------
 # End of generic storage component
@@ -588,7 +585,7 @@ class GenericCHP(network.Transformer):
         self.fuel_input = kwargs.get('fuel_input')
         self.electrical_output = kwargs.get('electrical_output')
         self.heat_output = kwargs.get('heat_output')
-        self.Beta = sequence(kwargs.get('Beta'))
+        self.Beta = solph.sequence(kwargs.get('Beta'))
         self.back_pressure = kwargs.get('back_pressure')
         self.fixed_costs = kwargs.get('fixed_costs')
         self._alphas = None
@@ -875,10 +872,10 @@ class ExtractionTurbineCHP(solph.Transformer):
 
     Examples
     --------
-    >>> bel = Bus(label='electricityBus')
-    >>> bth = Bus(label='heatBus')
-    >>> bgas = Bus(label='commodityBus')
-    >>> et_chp = ExtractionTurbineCHP(
+    >>> bel = solph.Bus(label='electricityBus')
+    >>> bth = solph.Bus(label='heatBus')
+    >>> bgas = solph.Bus(label='commodityBus')
+    >>> et_chp = solph.components.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
     ...    inputs={bgas: solph.Flow(nominal_value=10e10)},
     ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
@@ -894,7 +891,7 @@ class ExtractionTurbineCHP(solph.Transformer):
     def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conversion_factor_full_condensation = {
-            k: sequence(v) for k, v in
+            k: solph.sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
 
@@ -1121,10 +1118,10 @@ class GenericCAESBlock(SimpleBlock):
 
 def component_grouping(node):
     if isinstance(node, GenericStorage) and isinstance(node.investment,
-                                                       Investment):
+                                                       solph.Investment):
         return GenericInvestmentStorageBlock
     if isinstance(node, GenericStorage) and not isinstance(node.investment,
-                                                           Investment):
+                                                           solph.Investment):
         return GenericStorageBlock
     if isinstance(node, GenericCHP):
         return GenericCHPBlock
