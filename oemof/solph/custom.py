@@ -64,9 +64,15 @@ class ElectricalLine(Transformer):
         for f in self.inputs.values():
             if f.min is None:
                 f.min = -1
+            # to be used in grouping for all bidi flows
+            f.bidirectional = True
         for f in self.outputs.values():
             if f.min is None:
                 f.min = -1
+            # to be used in grouping for all bidi flows
+            f.bidirectional = True
+
+
 
     def _input(self):
         r""" Returns the first (and only!) input of the line object

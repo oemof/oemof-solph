@@ -92,6 +92,14 @@ class Model(po.ConcreteModel):
         self.FLOWS = po.Set(initialize=self.flows.keys(),
                             ordered=True, dimen=2)
 
+        self.BIDIRECTIONAL_FLOWS = po.Set(initialize=[
+            k for (k, v) in self.flows.items() if hasattr(v, 'bidirectional')],
+                                          ordered=True, dimen=2,
+                                          within=self.FLOWS)
+
+        self.UNIDIRECTIONAL_FLOWS = po.Set(
+            self.FLOWS - self.BIDIRECTIONAL_FLOWS,
+            ordered=True, dimen=2)
         # ######################### FLOW VARIABLE #############################
 
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
@@ -100,6 +108,8 @@ class Model(po.ConcreteModel):
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
+                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                    self.flow[o, i, t].setub(0)
                 if self.flows[o, i].nominal_value:
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
