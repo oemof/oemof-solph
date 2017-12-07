@@ -96,8 +96,10 @@ class Model(po.ConcreteModel):
                                           within=self.FLOWS)
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
-            self.FLOWS - self.BIDIRECTIONAL_FLOWS,
-            ordered=True, dimen=2)
+            initialize=[k for (k, v) in self.flows.items() if not
+                        hasattr(v, 'bidirectional')],
+            ordered=True, dimen=2, within=self.FLOWS)
+
         # ######################### FLOW VARIABLE #############################
 
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
