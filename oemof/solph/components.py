@@ -72,6 +72,41 @@ class GenericStorage(Transformer):
        present)
      * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
        present)
+
+    Examples
+    --------
+    Basic usage examples of the GenericStorage with a random selection of
+    attributes. See the Flow class for all Flow attributes.
+
+    >>> from oemof import solph
+
+    >>> my_bus = solph.Bus('my_bus')
+
+    >>> my_storage = solph.components.GenericStorage(
+    ...     label='storage',
+    ...     nominal_capacity=1000,
+    ...     inputs={my_bus: solph.Flow(variable_costs=10)},
+    ...     outputs={my_bus: solph.Flow()},
+    ...     capacity_loss=0.01,
+    ...     initial_capacity=0,
+    ...     capacity_max = 0.9,
+    ...     nominal_input_capacity_ratio=1/6,
+    ...     nominal_output_capacity_ratio=1/6,
+    ...     inflow_conversion_factor=0.9,
+    ...     outflow_conversion_factor=0.93,
+    ...     fixed_costs=35)
+
+    >>> my_investment_storage = solph.components.GenericStorage(
+    ...     label='storage',
+    ...     investment=solph.Investment(ep_costs=50),
+    ...     inputs={my_bus: solph.Flow()},
+    ...     outputs={my_bus: solph.Flow()},
+    ...     capacity_loss=0.02,
+    ...     initial_capacity=None,
+    ...     nominal_input_capacity_ratio=1/6,
+    ...     nominal_output_capacity_ratio=1/6,
+    ...     inflow_conversion_factor=1,
+    ...     outflow_conversion_factor=0.8)
     """
 
     def __init__(self, *args, **kwargs):
