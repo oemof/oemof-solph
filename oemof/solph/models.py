@@ -97,26 +97,27 @@ class Model(po.ConcreteModel):
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 
-
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
-                self.flow[o, i, t].setlb(0)
-                if self.flows[o, i].actual_value[t] is not None and (
-                        self.flows[o, i].nominal_value is not None):
-                    # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = (
-                        self.flows[o, i].actual_value[t] *
-                        self.flows[o, i].nominal_value)
-                    # fix variable if flow is fixed
-                    if self.flows[o, i].fixed:
-                        self.flow[o, i, t].fix()
-
-                if self.flows[o, i].nominal_value is not None:
+                if any(isinstance(n, custom.ElectricalLine) for n in (o, i)):
+                    pass
+                else:
+                    self.flow[o, i, t].setlb(0)
+                if self.flows[o, i].nominal_value:
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
 
-                    if self.flows[o, i].nonconvex is None:
+                    if self.flows[o, i].actual_value[t] is not None:
+                        # pre- optimized value of flow variable
+                        self.flow[o, i, t].value = (
+                            self.flows[o, i].actual_value[t] *
+                            self.flows[o, i].nominal_value)
+                        # fix variable if flow is fixed
+                        if self.flows[o, i].fixed:
+                            self.flow[o, i, t].fix()
+
+                    if not self.flows[o, i].nonconvex:
                         # lower bound of flow variable
                         self.flow[o, i, t].setlb(
                             self.flows[o, i].min[t] *
