@@ -19,7 +19,7 @@ from oemof.solph.plumbing import sequence
 class ElectricalBus(Bus):
     r"""A electrical bus object. Every node has to be connected to Bus. This
     Bus is used in combination with ElectricalLine objects for linear optimal
-    power flow (lopf) simulations
+    power flow (lopf) simulations.
 
     Notes
     -----
@@ -74,8 +74,6 @@ class ElectricalLine(Transformer):
                 f.min = -1
             # to be used in grouping for all bidi flows
             f.bidirectional = True
-
-
 
     def _input(self):
         r""" Returns the first (and only!) input of the line object
@@ -134,7 +132,7 @@ class ElectricalLineBlock(SimpleBlock):
                                        if isinstance(n, ElectricalBus)])
 
         def _voltage_angle_bounds(block, b, t):
-            return (b.v_min, b.v_max)
+            return b.v_min, b.v_max
         self.voltage_angle = po.Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
                                     bounds=_voltage_angle_bounds)
 
