@@ -60,6 +60,14 @@ class ElectricalLine(Transformer):
         self.input = self._input()
         self.output = self._output()
 
+        # set input / output flow values to -1 by default if not set by user
+        for f in self.inputs.values():
+            if f.min is None:
+                f.min = -1
+        for f in self.outputs.values():
+            if f.min is None:
+                f.min = -1
+
     def _input(self):
         r""" Returns the first (and only!) input of the line object
         """

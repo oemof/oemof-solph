@@ -100,10 +100,6 @@ class Model(po.ConcreteModel):
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
-                if any(isinstance(n, custom.ElectricalLine) for n in (o, i)):
-                    pass
-                else:
-                    self.flow[o, i, t].setlb(0)
                 if self.flows[o, i].nominal_value:
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
