@@ -107,7 +107,7 @@ class Model(po.ConcreteModel):
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    self.flow[o, i, t].setub(0)
+                    self.flow[o, i, t].setlb(0)
                 if self.flows[o, i].nominal_value:
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
