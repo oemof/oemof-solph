@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)

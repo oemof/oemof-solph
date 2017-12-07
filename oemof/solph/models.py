@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+
+"""Solph Optimization Models
 """
 
-"""
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -10,11 +11,8 @@ from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
 import logging
 
-# #############################################################################
-#
-# Solph Optimization Models
-#
-# #############################################################################
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 
 class Model(po.ConcreteModel):

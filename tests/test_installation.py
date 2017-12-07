@@ -1,9 +1,13 @@
-"""
-This module can be used to check the installation.
+# -*- coding: utf-8 -*-
+
+"""This module can be used to check the installation.
 This is not an illustrated example.
 """
 
-import oemof.solph as solph
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from oemof import solph
 import pandas as pd
 
 

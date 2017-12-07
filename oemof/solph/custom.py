@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-This module is designed to hold custom components with their classes and
+
+"""This module is designed to hold custom components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 from pyomo.core.base.block import SimpleBlock
 import pyomo.environ as po

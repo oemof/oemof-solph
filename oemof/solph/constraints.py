@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""Additional constraints to be used in an oemof energy model."""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 import pyomo.environ as po
 
 
@@ -38,8 +43,8 @@ def emission_limit(om, flows=None, limit=None):
     def emission_rule(m):
         """
         """
-        return (sum(m.flow[i, o, t] * flows[i, o].emission
-                for (i, o) in flows
+        return (sum(m.flow[inflow, outflow, t] * flows[inflow, outflow].emission
+                for (inflow, outflow) in flows
                 for t in m.TIMESTEPS) <= limit)
 
     om.emission_limit = po.Constraint(rule=emission_rule)
