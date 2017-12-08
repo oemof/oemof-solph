@@ -177,7 +177,7 @@ def __get_flow_component(nodes, current_node):
     of result is returned.
     """
     if nodes[1] is None:
-        return NodeFlow(nodes, FlowType.Single)
+        return NodeFlow(nodes[0], FlowType.Single)
     elif nodes[0] == current_node:
         return NodeFlow(current_node.outputs[nodes[1]], FlowType.Output)
     else:
