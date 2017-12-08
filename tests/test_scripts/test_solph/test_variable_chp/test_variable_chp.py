@@ -108,7 +108,7 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     myresults['objective'] = outputlib.processing.meta_results(om)['objective']
 
     variable_chp_dict = {
-        'objective': 24267160965.0,
+        'objective': 14267160965.0,
         (('natural_gas', 'fixed_chp_gas'), 'flow'): 157717049.49999994,
         (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
         (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
