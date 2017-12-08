@@ -1,5 +1,12 @@
-from traceback import format_exception_only as feo
+# -*- coding: utf-8 -
 
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
 
 from oemof.energy_system import EnergySystem as ES

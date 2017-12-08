@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -
+
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 import os
 
 from nose.tools import ok_
+
 from oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics

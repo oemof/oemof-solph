@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from oemof import solph
 from nose.tools import assert_raises, eq_, ok_
 
