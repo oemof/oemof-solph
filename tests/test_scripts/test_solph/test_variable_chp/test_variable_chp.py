@@ -12,20 +12,18 @@ chp plant produces heat and power excess and therefore needs more natural gas.
 
 """
 
-###############################################################################
-# imports
-###############################################################################
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
-# Outputlib
+from nose.tools import eq_
+import logging
+import os
+import pandas as pd
+
 from oemof import outputlib
 
 from oemof.network import Node
 import oemof.solph as solph
-
-# import oemof base classes to create energy system objects
-import logging
-import os
-import pandas as pd
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
@@ -110,12 +108,10 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     myresults['objective'] = outputlib.processing.meta_results(om)['objective']
 
     variable_chp_dict = {
-        'objective': 14267160965.0,
+        'objective': 24267160965.0,
         (('natural_gas', 'fixed_chp_gas'), 'flow'): 157717049.49999994,
         (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
         (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
 
     for key in variable_chp_dict.keys():
-        a = int(round(myresults[key]))
-        b = int(round(variable_chp_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(myresults[key])), int(round(variable_chp_dict[key])))

@@ -6,9 +6,12 @@ solve it with the solph module. Results are plotted with outputlib.
 Data: example_data.csv
 """
 
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from nose.tools import eq_
 import os
 import pandas as pd
-from oemof.network import Node
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
 from oemof.outputlib import processing, views
@@ -19,7 +22,6 @@ def test_dispatch_example(solver='cbc', periods=24*5):
 
     datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
     energysystem = EnergySystem(timeindex=datetimeindex)
-    Node.registry = energysystem
     filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
     data = pd.read_csv(filename, sep=",")
 
@@ -102,6 +104,10 @@ def test_dispatch_example(solver='cbc', periods=24*5):
                             conversion_factors={
                                         bel: 1/3, b_heat_source: (cop-1)/cop})
 
+    energysystem.add(bcoal, bgas, boil, blig, excess_el, wind, pv, demand_el,
+                     demand_th, pp_coal, pp_lig, pp_oil, pp_gas, pp_chp,
+                     b_heat_source, heat_source, heat_pump, bel, bth)
+
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
@@ -142,6 +148,4 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     }
 
     for key in test_results.keys():
-        a = int(round(results[key]))
-        b = int(round(test_results[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(results[key])), int(round(test_results[key])))

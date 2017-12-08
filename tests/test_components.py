@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Tests of the component module.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from nose import tools
 from oemof import solph
 
