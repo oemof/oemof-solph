@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -
-"""
-This module is designed to hold custom components with their classes and
+
+""" This module is designed to hold custom components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 """
 
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+import numpy as np
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
-import numpy as np
-import warnings
-from oemof.network import Bus, Transformer
+
+from oemof.network import Bus
 from oemof.solph import Flow, Transformer
-from .options import Investment
-from .plumbing import sequence
+from oemof.solph.options import Investment
+from oemof.solph.plumbing import sequence
 
 
 # ------------------------------------------------------------------------------
@@ -28,13 +31,15 @@ class GenericStorage(Transformer):
     ----------
     nominal_capacity : numeric
         Absolute nominal capacity of the storage
-    nominal_input_capacity_ratio :  numeric
-        Ratio between the nominal inflow of the storage and its capacity.
     nominal_output_capacity_ratio : numeric
-        Ratio between the nominal outflow of the storage and its capacity.
+        Ratio between the nominal outflow of the storage and its capacity. For
+        batteries this is also know as c-rate.
         Note: This ratio is used to create the Flow object for the outflow
-        and set its nominal value of the storage in the constructor.
+        and set its nominal value of the storage in the constructor. If no
+        investment object is defined it is also possible to set the nominal
+        value of the flow directly in its constructor.
     nominal_input_capacity_ratio : numeric
+        Ratio between the nominal inflow of the storage and its capacity.
         see: nominal_output_capacity_ratio
     initial_capacity : numeric
         The capacity of the storage in the first (and last) time step of
@@ -73,9 +78,9 @@ class GenericStorage(Transformer):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio', 0.2)
+            'nominal_input_capacity_ratio', None)
         self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_output_capacity_ratio', 0.2)
+            'nominal_output_capacity_ratio', None)
         self.initial_capacity = kwargs.get('initial_capacity')
         self.capacity_loss = sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = sequence(
@@ -88,44 +93,46 @@ class GenericStorage(Transformer):
         self.capacity_min = sequence(kwargs.get('capacity_min', 0))
         self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
+
         # Check investment
+        e_no_nv = ("If an investment object is defined the invest variable "
+                   "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
+        e_duplicate = ("Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
+                       "will set the nominal_value for the flow.\nTherefore "
+                       "either the 'nominal_{0}_capacity_ratio' or the "
+                       "'nominal_value' has to be 'None'.")
+
         if self.investment and self.nominal_capacity is not None:
-            self.nominal_capacity = None
-            warnings.warn(
-                "Using the investment object the nominal_capacity is set to" +
-                "None.", SyntaxWarning)
-        # Check input flows for nominal value
+            raise AttributeError(e_no_nv.format('nominal_capacity'))
+
+        # Check flows for nominal value
         for flow in self.inputs.values():
-            if flow.nominal_value is not None:
-                storage_nominal_value_warning('output')
-            if self.nominal_capacity is None:
-                flow.nominal_value = None
-            else:
+            if self.investment and flow.nominal_value is not None:
+                raise AttributeError(e_no_nv.format('nominal_value'))
+            if (flow.nominal_value is not None and
+                    self.nominal_input_capacity_ratio is not None):
+                raise AttributeError(e_duplicate)
+            if (not self.investment and
+                    self.nominal_input_capacity_ratio is not None):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
-        # Check output flows for nominal value
         for flow in self.outputs.values():
-            if flow.nominal_value is not None:
-                storage_nominal_value_warning('input')
-            if self.nominal_capacity is None:
-                flow.nominal_value = None
-            else:
+            if self.investment and flow.nominal_value is not None:
+                raise AttributeError(e_no_nv.format('nominal_value'))
+            if (flow.nominal_value is not None and
+                    self.nominal_output_capacity_ratio is not None):
+                raise AttributeError(e_duplicate)
+            if (not self.investment and
+                    self.nominal_output_capacity_ratio is not None):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
-
-
-def storage_nominal_value_warning(flow):
-    msg = ("The nominal_value should not be set for {0} flows of storages." +
-           "The value will be overwritten by the product of the " +
-           "nominal_capacity and the nominal_{0}_capacity_ratio.")
-    warnings.warn(msg.format(flow), SyntaxWarning)
 
 # ------------------------------------------------------------------------------
 # End of generic storage component
@@ -190,8 +197,8 @@ class GenericStorageBlock(SimpleBlock):
         if group is None:
             return None
 
-        I = {n: [i for i in n.inputs][0] for n in group}
-        O = {n: [o for o in n.outputs][0] for n in group}
+        i = {n: [i for i in n.inputs][0] for n in group}
+        o = {n: [o for o in n.outputs][0] for n in group}
 
         self.STORAGES = Set(initialize=[n for n in group])
 
@@ -221,9 +228,9 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, m.previous_timesteps[t]] * (
                 1 - n.capacity_loss[t])
-            expr += (- m.flow[I[n], n, t] *
+            expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
-            expr += (m.flow[n, O[n], t] /
+            expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
@@ -1068,7 +1075,7 @@ class GenericCAESBlock(SimpleBlock):
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
         self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                            rule=_H_flow_rule)
+                                 rule=_H_flow_rule)
 
 # ------------------------------------------------------------------------------
 # End of CAES block

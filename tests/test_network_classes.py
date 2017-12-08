@@ -200,6 +200,7 @@ class Node_Tests:
         eq_(n1.outputs[n2], n1n2)
         eq_(n1.outputs, {n2: n1n2})
 
+
 class EnergySystem_Nodes_Integration_Tests:
 
     def setup(self):
