@@ -160,23 +160,6 @@ Check the solver installation by executing the test_installation example (see :r
 For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
-.. _additional_packages_Win:
-
-Additional Python packages
---------------------------
-
-To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included in the winpython download. 
-If you do not have pip installed see here: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel.
-
-In order to install a package using pip execute the following and substitute package_name by the desired package:
-
-.. code:: console
-
-  pip install package_name
-
-For further information on how to install Python modules check out https://docs.python.org/3/installing/. Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
-
-
 Mac OSX
 =======
 
