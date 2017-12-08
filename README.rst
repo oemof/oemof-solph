@@ -4,6 +4,8 @@ With oemof we provide base packages for energy system modelling and optimisation
 
 Everybody is welcome to use and/or develop oemof. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 
+Contribution is already possible on a low level by simply fixing typos in oemof's documentation or rephrasing sections which are unclear. If you want to support us that way please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+
 .. contents::
     :depth: 1
     :local:
