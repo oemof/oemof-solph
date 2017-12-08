@@ -30,7 +30,7 @@ The code of the example above:
 
     # create the energy system
     es = EnergySystem()
-
+    
     # create bus 1
     bus_1 = Bus(label="bus_1")
 
