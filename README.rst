@@ -51,7 +51,9 @@ You are welcome to contribute your own examples via a `pull request <https://git
 
 Got further questions regarding oemof? 
 ======================================
-If you have any further questions regarding oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof`. 
+If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
+
+If you have questions regarding collaboration like code development or documentation fixing please use the issues on github.
 
 
 Keep in touch
