@@ -39,7 +39,8 @@ class ElectricalBus(Bus):
 
 class ElectricalLine(Transformer):
     r"""An ElectricalLine to be used in linear optimal power flow calculations.
-    based on angle formulation
+    based on angle formulation. Check out the Notes below before using this
+    component!
 
     Parameters
     ----------
@@ -50,6 +51,12 @@ class ElectricalLine(Transformer):
     ------
     * To use this object the connected buses need to be of the type
    `py:class:`~oemof.solph.network.ElectricalBus`.
+    * It does not work together with flows that have set the attr.`nonconvex`,
+    i.e. unit commitment constraints are not possible
+    * Input and output of this component are set equal, therefore just use
+    either only the input or the output to parameterize.
+    * Default attribute `min` of in/outflows is overwritten by -1 if not set
+    differently by the user
 
     """
     def __init__(self, *args, **kwargs):
@@ -65,11 +72,20 @@ class ElectricalLine(Transformer):
 
         # set input / output flow values to -1 by default if not set by user
         for f in self.inputs.values():
+            if f.nonconvex is not None:
+                raise ValueError(
+                    "Attribute `nonconvex` must be None for" +
+                    " inflows of component `ElectricalLine`!")
             if f.min is None:
                 f.min = -1
             # to be used in grouping for all bidi flows
             f.bidirectional = True
+
         for f in self.outputs.values():
+            if f.nonconvex is not None:
+                raise ValueError(
+                    "Attribute `nonconvex` must be None for" +
+                    " outflows of component `ElectricalLine`!")
             if f.min is None:
                 f.min = -1
             # to be used in grouping for all bidi flows
