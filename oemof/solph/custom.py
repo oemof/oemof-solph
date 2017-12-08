@@ -209,7 +209,6 @@ class Link(Transformer):
 
     Examples
     --------
-    Defining an linear transformer:
 
     >>> from oemof import solph
     >>> bel0 = solph.Bus(label="el0")
@@ -234,7 +233,7 @@ class Link(Transformer):
 
     Notes
     -----
-    The following sets, variables, constraints and objective parts are created
+    The sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.custom.LinkBlock`
     """
     def __init__(self, *args, **kwargs):
@@ -299,7 +298,7 @@ class LinkBlock(SimpleBlock):
                                 "Error in constraint creation",
                                 "from: {0}, to: {1}, via: {3}".format(
                                     cidx[0], cidx[1], n))
-                    block.relation.add((n, cidx[0], cidx[1], t), (expr))
+                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
         self.relation = po.Constraint(group, noruleinit=True)
 
