@@ -8,7 +8,8 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
-                        NonNegativeReals, Binary, NonNegativeIntegers)
+                        NonNegativeReals, Binary, NonNegativeIntegers,
+                        SOSConstraint)
 from pyomo.core.base.block import SimpleBlock
 
 
@@ -425,6 +426,78 @@ class InvestmentFlow(SimpleBlock):
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
 
+        # --------------------------------------------------------------------
+        # SOS-Constraints / Var For non-linear approximation of costs
+        # --------------------------------------------------------------------
+        # set with flows that have
+        self.SOS2_COST_FLOWS = Set(
+            initialize=[f for f in self.FLOWS if
+                        isinstance(m.flows[f].investment.ep_costs, list)])
+
+        self.sos2_costs_var = Var(self.SOS2_COST_FLOWS)
+
+        y = {}
+        x = {}
+        for (i, o) in self.SOS2_COST_FLOWS:
+            x[i, o] = [i[0] for i in m.flows[i, o].investment.ep_costs]
+            y[i, o] = [i[1] for i in m.flows[i, o].investment.ep_costs]
+
+        def _sos2_indices_init(block, i, o):
+            """ Set for the y val for each node
+            """
+            return [(i, o, p) for p in range(len(y[i, o]))]
+        self._sos2_indices = Set(self.SOS2_COST_FLOWS, dimen=3,
+                                 ordered=True, initialize=_sos2_indices_init)
+
+        # indices for sos2 variable
+        def _ub_indices_init(block):
+            """ Indices for set of sos2-variable
+            """
+            return [(i, o, p)
+                    for (i, o) in block.SOS2_COST_FLOWS
+                    for p in range(len(x[i, o]))]
+        self._ub_indices = Set(ordered=True, dimen=3,
+                               initialize=_ub_indices_init)
+        self.sos2_var = Var(self._ub_indices, within=NonNegativeReals)
+
+        def _sos2_invest_rule(block, i, o):
+            """ Forces the variable `ìnvest` to a interpolated value between
+            the points of the approximated nonlinear size-cost (x,y)
+            relationship.
+            """
+            expr = (block.invest[i, o] == sum(block.sos2_var[i, o, p] *
+                    x[i, o][p] for p in range(len(x[i, o]))))
+            return expr
+        self.sos2_invest_constr = Constraint(self.SOS2_COST_FLOWS,
+                                             rule=_sos2_invest_rule)
+
+        def _sos2_costs_rule(block, i, o):
+            """ Calculates the nonlinear approximated investment cost
+            for each flow n
+            """
+            expr = (block.sos2_costs_var[i, o] ==
+                    sum(block.sos2_var[i, o, p] * x[i, o][p]
+                        for p in range(len(x[i, o]))))
+            return expr
+        self.sos2_costs_constr = Constraint(self.SOS2_COST_FLOWS,
+                                            rule=_sos2_costs_rule)
+
+        def _sos2_var_rule(block, i, o):
+            """ sos constraint that only one segment/point can be selected,
+            i.e. two adjacent weights of points must equal 0 if sos=2 or
+            """
+            return (sum(block.sos2_var[i, o, p]
+                    for p in range(len(y[i, o]))) == 1)
+
+        self.sos2_constr = Constraint(self.SOS2_COST_FLOWS,
+                                      rule=_sos2_var_rule)
+
+        self.sos2_const = SOSConstraint(self.SOS2_COST_FLOWS,
+                                        var=self.sos2_var,
+                                        index=self._sos2_indices, sos=2)
+
+        # END of SOS ---------------------------------------------------------
+
     def _objective_expression(self):
         r""" Objective expression for flows with investment attribute of type
         class:`.Investment`. The returned costs are fixed, variable and
@@ -445,8 +518,11 @@ class InvestmentFlow(SimpleBlock):
                                 m.flows[i, o].fixed_costs)
             # investment costs
             if m.flows[i, o].investment.ep_costs is not None:
-                investment_costs += (self.invest[i, o] *
-                                     m.flows[i, o].investment.ep_costs)
+                if isinstance(m.flows[i, o].investment.ep_costs, list):
+                    investment_costs += self.sos2_costs_var[i, o]
+                else:
+                    investment_costs += (self.invest[i, o] *
+                                         m.flows[i, o].investment.ep_costs)
             else:
                 raise ValueError("Missing value for investment costs!")
 
