@@ -13,7 +13,7 @@ from oemof.tools import helpers
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,
                    screen_format=None, file_datefmt=None, screen_datefmt=None,
                    screen_level=logging.INFO, file_level=logging.DEBUG,
-                   log_version=True, timed_rotating=None):
+                   log_version=True, log_path=True, timed_rotating=None):
 
     r"""Initialise customisable logger.
 
@@ -41,6 +41,8 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     log_version : boolean
         If True the actual version or commit is logged while initialising the
         logger.
+    log_path : boolean
+        If True the used file path is logged while initialising the logger.
     timed_rotating : dict
         Option to pass parameters to the TimedRotatingFileHandler.
 
@@ -65,9 +67,10 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
 
     >>> import logging
     >>> from oemof.tools import logger
-    >>> logger.define_logging() # doctest: +SKIP
-    17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
-    ...
+    >>> mypath = logger.define_logging(log_path=False, log_version=False,
+    ...                                screen_datefmt = "no_date")
+    >>> mypath[-9:]
+    'oemof.log'
     >>> logging.debug("Hallo")
     """
 
@@ -111,7 +114,9 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
 
     logging.debug("******************************************************")
     fh.setFormatter(file_formatter)
-    logging.info("Path for logging: {0}".format(file))
+    if log_path:
+        logging.info("Path for logging: {0}".format(file))
+
     if log_version:
         try:
             check_git_branch()
