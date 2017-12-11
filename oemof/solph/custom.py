@@ -217,16 +217,16 @@ class Link(Transformer):
     >>> link = solph.custom.Link(
     ...    label="transshipment_link",
     ...    inputs={bel0: solph.Flow(), bel1: solph.Flow()},
-    ...    outputs={be0: solph.Flow(), bel1: solph.Flow()},
+    ...    outputs={bel0: solph.Flow(), bel1: solph.Flow()},
     ...    conversion_factors={(bel0, bel1): 0.92, (bel1, bel0): 0.99})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
     [0.92, 0.99]
 
     >>> type(link)
-    <class 'oemof.solph.network.Transformer'>
+    <class 'oemof.solph.custom.Link'>
 
     >>> sorted([str(i) for i in link.inputs])
-    ['el1', 'el0']
+    ['el0', 'el1']
 
     >>> link.conversion_factors[(bel0, bel1)][3]
     0.92
