@@ -80,6 +80,9 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     file = os.path.join(logpath, logfile)
 
     log = logging.getLogger('')
+
+    # Remove existing handlers to avoid interference.
+    log.handlers = []
     log.setLevel(logging.DEBUG)
 
     if file_format is None:
