@@ -306,7 +306,7 @@ class LinkBlock(SimpleBlock):
 
 
 class OffsetTransformer(Transformer):
-    """An object with 1...n inputs and 1...n outputs.
+    """An object with one input and one output.
 
     Parameters
     ----------
@@ -337,6 +337,9 @@ class OffsetTransformer(Transformer):
             if not v.nonconvex:
                 raise TypeError('Input flows must be of type NonConvexFlow!')
 
+        if len(self.inputs) > 1 or len(self.outputs) > 1:
+            raise ValueError("Component `OffsetTransformer` must not have" +
+                             "more than 1 input and 1 output!")
 
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
