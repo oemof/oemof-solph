@@ -21,8 +21,6 @@ API changes
   <oemof.network.Node>` to an :class:`energy system
   <oemof.energy_system.EnergySystem>`. This option has been made a bit more
   feature rich by the way, but see below for more on this.
-* The `fixed_costs` attribute of the  :class:`nodes <oemof.solph.network.Flow>`
-  has been removed.
 
 New features
 ############
