@@ -342,6 +342,64 @@ class OffsetTransformer(Transformer):
             for k, v in kwargs.get('offsets', {}).items()}
 
 
+class OffsetTransformerBlock(SimpleBlock):
+    r"""Block for the relation of nodes with type
+    :class:`~oemof.solph.custom.OffsetTransformer`
+
+    **The following constraints are created:**
+
+    TODO: Add description for constrainst
+
+    TODO: Add tests
+
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the relation for the class:`OffsetTransformer`.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.custom.OffsetTransformer objects for which
+            the relation of inputs and outputs is created
+            e.g. group = [ostf1, ostf2, ostf3, ...]. The components inside
+            the list need to hold an attribute `conversion_factors` and
+            `offsets` of type dict containing the conversion factors for all
+            inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        all_conversions = {}
+        for n in group:
+            all_conversions[n] = {
+                            k: v for k, v in n.conversion_factors.items()}
+
+        def _input_output_relation(block):
+            for t in m.TIMESTEPS:
+                for n, conversion in all_conversions.items():
+                    for cidx, c in conversion.items():
+                        try:
+                            expr = (m.flow[n, cidx[1], t] ==
+                                    c[t] * m.flow[cidx[0], n, t])
+                        except ValueError:
+                            raise ValueError(
+                                "Error in constraint creation",
+                                "from: {0}, to: {1}, via: {3}".format(
+                                    cidx[0], cidx[1], n))
+                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+
+        self.relation = po.Constraint(group, noruleinit=True)
+
+        self.relation_build = po.BuildAction(rule=_input_output_relation)
+
+
 def custom_component_grouping(node):
     if isinstance(node, ElectricalLine):
         return ElectricalLineBlock
