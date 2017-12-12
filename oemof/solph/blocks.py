@@ -76,6 +76,13 @@ class Flow(SimpleBlock):
         .. math::
             \sum_{(i, o)}  nominal\_value(i, o) \cdot fixed\_costs(i, o)
 
+    Additionally, if :attr:`positive}\_gradient['costs']` is set by the user:
+        .. math::
+            \sum_t \sum_{i, o} positive_gradient(i, o, t) * \
+            positive\_gradient\_costs
+
+    The same works for `negative_gradient` costs.
+
     The expression can be accessed by :attr:`om.Flow.fixed_costs` and
     their value after optimization by :meth:`om.Flow.fixed_costs()` .
     This works similar for variable costs with :attr:`*.variable_costs`.
@@ -324,6 +331,29 @@ class InvestmentFlow(SimpleBlock):
             \cdot invest(i, o) \\
             \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
+    Set maximum positive gradient based on investment
+    :attr:`om.InvestmentFlow.ub_positive_gradient_constr [i, o, t]`
+        .. math::
+            positive\_gradient(i, o, t) \leq positive\_gradient\_ub(i, o, t) \
+            \cdot invest(i, o) \\
+            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS} \
+            \forall t \in \textrm{TIMESTEPS}.
+
+    The same works for the upper bound of the variable `negative_gradient`.
+
+    Negative gradient constraint
+    :attr:`om.InvestmentFlow.negative_gradient_constr[i, o]`:
+      .. math:: flow(i, o, t-1) - flow(i, o, t) \geq \
+        negative\_gradient(i, o, t), \\
+        \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+        \forall t \in \textrm{TIMESTEPS}.
+
+    Positive gradient constraint
+    :attr:`om.InvestmentFlow.positive_gradient_constr[i, o]`:
+        .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
+            positive\_gradient(i, o, t), \\
+            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
 
     **The following parts of the objective function are created:**
 
@@ -335,6 +365,13 @@ class InvestmentFlow(SimpleBlock):
     Additionally, if :attr:`fixed_costs` are set by the user:
         .. math::
             \sum_{i, o} invest(i, o) \cdot fixed\_costs(i,o)
+
+    Additionally, if :attr:`positive_gradient['costs']` is set by the user:
+        .. math::
+            \sum_t \sum_{i, o} positive\_gradient(i, o, t) * \
+            positive\_gradient\_costs
+
+    The same works for `negative_gradient` costs.
 
     The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
     their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
@@ -531,13 +568,15 @@ class InvestmentFlow(SimpleBlock):
             else:
                 raise ValueError("Missing value for investment costs!")
 
-            if m.flows[i, o].positive_gradient['ub'][0] is not None:
+            if (i, o) in self.POSITIVE_GRADIENT_FLOWS and \
+                    m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
                                        m.flows[i, o].positive_gradient[
                                            'costs'])
 
-            if m.flows[i, o].negative_gradient['ub'][0] is not None:
+            if (i, o) in self.NEGATIVE_GRADIENT_FLOWS and \
+                    m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
                                        m.flows[i, o].negative_gradient[
