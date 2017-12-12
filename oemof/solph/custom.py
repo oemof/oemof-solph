@@ -320,7 +320,22 @@ class OffsetTransformer(Transformer):
 
     Examples
     --------
-    # @TODO: To be added!
+
+    >>> from oemof import solph
+
+    >>> bel = solph.Bus(label='bel0')
+    >>> bth = solph.Bus(label='bth')
+
+    >>> ostf = solph.custom.OffsetTransformer(
+    ...    inputs={bel: solph.Flow(
+    ...        nominal_value=60, min=0.5, max=1.0,
+    ...        nonconvex=solph.NonConvex())},
+    ...    label='ostf',
+    ...    outputs={bth: solph.Flow()},
+    ...    coefficients={(bel, bth): [20, 0.5]})
+
+    >>> type(ostf)
+    <class 'oemof.solph.custom.OffsetTransformer'>
 
     Notes
     -----
@@ -340,6 +355,7 @@ class OffsetTransformer(Transformer):
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError("Component `OffsetTransformer` must not have" +
                              "more than 1 input and 1 output!")
+
 
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
