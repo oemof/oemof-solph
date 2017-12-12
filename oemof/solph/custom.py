@@ -323,14 +323,14 @@ class OffsetTransformer(Transformer):
 
     >>> from oemof import solph
 
-    >>> bel = solph.Bus(label='bel0')
+    >>> bel = solph.Bus(label='bel')
     >>> bth = solph.Bus(label='bth')
 
     >>> ostf = solph.custom.OffsetTransformer(
+    ...    label='ostf',
     ...    inputs={bel: solph.Flow(
     ...        nominal_value=60, min=0.5, max=1.0,
     ...        nonconvex=solph.NonConvex())},
-    ...    label='ostf',
     ...    outputs={bth: solph.Flow()},
     ...    coefficients={(bel, bth): [20, 0.5]})
 
