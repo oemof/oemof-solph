@@ -331,8 +331,11 @@ class OffsetTransformer(Transformer):
         super().__init__(*args, **kwargs)
 
         self.coefficients = {
-            k: sequence(v)
-            for k, v in kwargs.get('coefficients', {}).items()}
+            k: sequence(v) for k, v in kwargs.get('coefficients', {}).items()}
+
+        for k, v in self.inputs.items():
+            if not v.nonconvex:
+                raise TypeError('Input flows must be of type NonConvexFlow!')
 
 
 class OffsetTransformerBlock(SimpleBlock):
