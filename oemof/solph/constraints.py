@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import logging
 
 """Additional constraints to be used in an oemof energy model."""
 
@@ -7,10 +6,11 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import pyomo.environ as po
+import logging
 
 
 def investment_limit(m, limit=None):
-    """ Set an absolut limit for the total investment costs of an investment
+    """ Set an absolute limit for the total investment costs of an investment
     optimization problem
     """
     logging.info("CAUTION: This is experimental stuff!")
@@ -27,7 +27,7 @@ def investment_limit(m, limit=None):
         if hasattr(m, "GenericInvestmentStorageBlock"):
             expr += (m.GenericInvestmentStorageBlock.fixed_costs +
                      m.GenericInvestmentStorageBlock.investment_costs)
-        return (expr <= limit)
+        return expr <= limit
 
     m.investment_limit = po.Constraint(rule=investment_rule)
 
