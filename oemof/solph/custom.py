@@ -305,8 +305,47 @@ class LinkBlock(SimpleBlock):
         self.relation_build = po.BuildAction(rule=_input_output_relation)
 
 
+class OffsetTransformer(Transformer):
+    """An object with 1...n inputs and 1...n outputs.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of each flow.
+        Keys are the connected tuples (input, output) bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+
+    offsets : dict
+        Dictionary containing offsets for conversion of each flow.
+        Keys are the connected tuples (input, output) bus objects.
+        The dictionary values can either be a scalar or a sequence with length
+        of time horizon for simulation.
+
+    Examples
+    --------
+    # @TODO: To be added!
+
+    Notes
+    -----
+    The sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.custom.OffsetTransformer`
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.conversion_factors = {
+            k: sequence(v)
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+        self.offsets = {
+            k: sequence(v)
+            for k, v in kwargs.get('offsets', {}).items()}
+
+
 def custom_component_grouping(node):
     if isinstance(node, ElectricalLine):
         return ElectricalLineBlock
     if type(node) is Link:
         return LinkBlock
+    if type(node) is OffsetTransformer:
+        return OffsetTransformerBlock
