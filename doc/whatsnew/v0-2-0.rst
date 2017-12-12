@@ -21,11 +21,13 @@ API changes
   <oemof.network.Node>` to an :class:`energy system
   <oemof.energy_system.EnergySystem>`. This option has been made a bit more
   feature rich by the way, but see below for more on this.
-
+* :class:`DataFramePlot <outputlib.DataFramePlot>`
+  :class:`ResultsDataFrame <outputlib.ResultsDataFrame>` have been removed
+  
 New features
 ############
 
-* Add new outputlib module to analyse and and plot optimization results.
+* Add new outputlib module to analyse optimization results.
   All decision variables of a Node are now collected automatically which
   enables an easier development of custom components within the oemof logic.
   See examples for usage!
@@ -73,6 +75,12 @@ Testing
 Other changes
 #############
 
+* The plot functionalities have been removed from the outputlib. Basic plotting is 
+  now found in a distinct repository as they are less a necessary part but more an 
+  optional tool for quickly creating plots from optimization results. You find them
+  at the oemof_visio repository `oemof_visio <https://github.com/oemof/oemof_visio>`. 
+  For plotting examples check the 
+  `'oemof_example' repository <https://github.com/oemof/oemof_examples>`.
 
 
 Contributors
