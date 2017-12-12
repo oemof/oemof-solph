@@ -6,7 +6,7 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import pyomo.environ as po
-
+import logging
 
 def emission_limit(om, flows=None, limit=None):
     """
