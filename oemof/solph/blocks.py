@@ -224,13 +224,15 @@ class Flow(SimpleBlock):
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
 
-            if m.flows[i, o].positive_gradient['ub'][0] is not None:
+            if (i, o) in self.POSITIVE_GRADIENT_FLOWS and \
+                    m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
                                        m.flows[i, o].positive_gradient[
                                            'costs'])
 
-            if m.flows[i, o].negative_gradient['ub'][0] is not None:
+            if (i, o) in self.NEGATIVE_GRADIENT_FLOWS and \
+                    m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
                                        m.flows[i, o].negative_gradient[
@@ -262,6 +264,12 @@ class InvestmentFlow(SimpleBlock):
     SUMMED_MIN_FLOWS
         A subset of set FLOWS with flows with the attribute
         :attr:`summed_min` being not None.
+    POSITIVE_GRADIENT_FLOWS
+        A subset of set FLOWS with flows with the attribute
+        :attr:`positive_gradient` being not None.
+    NEGATIVE_GRADIENT_FLOWS
+        A subset of set FLOWS with flows with the attribute
+        :attr:`negative_gradient` being not None.
     MIN_FLOWS
         A subset of FLOWS with flows having set a value of not None in the
         first timestep.
@@ -271,6 +279,14 @@ class InvestmentFlow(SimpleBlock):
     invest :attr:`om.InvestmentFlow.invest[i, o]`
         Value of the investment variable (i.e. equivalent to the nominal
         value of the flows after optimization (indexed by FLOWS)
+
+    positive_gradient :attr:`om.InvestmentFlow.positive_gradient[i, o, t]`
+        Value of the positive gradient variable
+        (indexed by POSITIVE_GRADIENT_FLOWS, TIMESTEPS)
+
+    negative_gradient :attr:`om.InvestmentFlow.negative_gradient[i, o, t]`
+        Value of the negative gradient variable
+        (indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS)
 
     **The following constraints are build:**
 
@@ -356,6 +372,14 @@ class InvestmentFlow(SimpleBlock):
         self.SUMMED_MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
+        self.NEGATIVE_GRADIENT_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group
+                        if g[2].negative_gradient['ub'][0] is not None])
+
+        self.POSITIVE_GRADIENT_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group
+                        if g[2].positive_gradient['ub'][0] is not None])
+
         self.MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if (
                 g[2].min[0] != 0 or len(g[2].min) > 1)])
@@ -370,9 +394,13 @@ class InvestmentFlow(SimpleBlock):
         self.invest = Var(self.FLOWS, within=NonNegativeReals,
                           bounds=_investvar_bound_rule)
 
-        # ######################### CONSTRAINTS ###############################
+        self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
+                                     m.TIMESTEPS)
 
-        # TODO: Add gradient constraints
+        self.negative_gradient = Var(self.NEGATIVE_GRADIENT_FLOWS,
+                                     m.TIMESTEPS)
+
+        # ######################### CONSTRAINTS ##############################
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
@@ -425,6 +453,58 @@ class InvestmentFlow(SimpleBlock):
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
 
+        # set upper bound of gradient variables via constraints
+        def _ub_positive_gradient(block, i, o, t):
+            """
+            """
+            return (block.positive_gradient[i, o, t] <=
+                    m.flows[i, o].positive_gradient['ub'][t] *
+                    block.invest[i, o])
+        self.ub_positive_gradient_constr = Constraint(
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS,
+            rule=_ub_positive_gradient)
+
+        def _ub_negative_gradient(block, i, o, t):
+            """
+            """
+            return (block.negative_gradient[i, o, t] <=
+                    m.flows[i, o].negative_gradient['ub'][t] *
+                    block.invest[i, o])
+        self.ub_negative_gradient_constr = Constraint(
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS,
+            rule=_ub_negative_gradient)
+
+        def _positive_gradient_flow_rule(model):
+            """Rule definition for positive gradient constraint.
+            """
+            for i, o in self.POSITIVE_GRADIENT_FLOWS:
+                for t in m.TIMESTEPS:
+                    if t > 0:
+                        lhs = m.flow[i, o, t] - m.flow[i, o, t-1]
+                        rhs = self.positive_gradient[i, o, t]
+                        self.positive_gradient_constr.add((i, o, t),
+                                                          lhs <= rhs)
+        self.positive_gradient_constr = Constraint(
+            self.POSITIVE_GRADIENT_FLOWS, noruleinit=True)
+        self.positive_gradient_build = BuildAction(
+            rule=_positive_gradient_flow_rule)
+
+        def _negative_gradient_flow_rule(model):
+            """Rule definition for negative gradient constraint.
+            """
+            for i, o in self.NEGATIVE_GRADIENT_FLOWS:
+                for t in m.TIMESTEPS:
+                    if t > 0:
+                        lhs = m.flow[i, o, t-1] - m.flow[i, o, t]
+                        rhs = self.negative_gradient[i, o, t]
+                        self.negative_gradient_constr.add((i, o, t),
+                                                          lhs <= rhs)
+
+        self.negative_gradient_constr = Constraint(
+            self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
+        self.negative_gradient_build = BuildAction(
+            rule=_negative_gradient_flow_rule)
+
     def _objective_expression(self):
         r""" Objective expression for flows with investment attribute of type
         class:`.Investment`. The returned costs are fixed, variable and
@@ -437,6 +517,7 @@ class InvestmentFlow(SimpleBlock):
         fixed_costs = 0
         variable_costs = 0
         investment_costs = 0
+        gradient_costs = 0
 
         for i, o in self.FLOWS:
             # fixed costs
@@ -450,9 +531,22 @@ class InvestmentFlow(SimpleBlock):
             else:
                 raise ValueError("Missing value for investment costs!")
 
+            if m.flows[i, o].positive_gradient['ub'][0] is not None:
+                for t in m.TIMESTEPS:
+                    gradient_costs += (self.positive_gradient[i, o, t] *
+                                       m.flows[i, o].positive_gradient[
+                                           'costs'])
+
+            if m.flows[i, o].negative_gradient['ub'][0] is not None:
+                for t in m.TIMESTEPS:
+                    gradient_costs += (self.negative_gradient[i, o, t] *
+                                       m.flows[i, o].negative_gradient[
+                                           'costs'])
+
         self.investment_costs = Expression(expr=investment_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.variable_costs = Expression(expr=variable_costs)
+        self.gradient_costs = Expression(expr=gradient_costs)
 
         return fixed_costs + variable_costs + investment_costs
 
