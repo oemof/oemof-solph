@@ -377,23 +377,26 @@ class OffsetTransformerBlock(SimpleBlock):
         m = self.parent_block()
 
         all_conversions = {}
+        all_offsets = {}
         for n in group:
             all_conversions[n] = {
                             k: v for k, v in n.conversion_factors.items()}
+            all_offsets[n] = {
+                            k: v for k, v in n.offsets.items()}
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
-                for n, conversion in all_conversions.items():
-                    for cidx, c in conversion.items():
-                        try:
-                            expr = (m.flow[n, cidx[1], t] ==
-                                    c[t] * m.flow[cidx[0], n, t])
-                        except ValueError:
-                            raise ValueError(
-                                "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {3}".format(
-                                    cidx[0], cidx[1], n))
-                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+                for n, cfs in all_conversions.items():
+                    for cidx, c in cfs.items():
+                            try:
+                                expr = (m.flow[n, cidx[1], t] ==
+                                        c[t] * m.flow[cidx[0], n, t])
+                            except ValueError:
+                                raise ValueError(
+                                    "Error in constraint creation",
+                                    "from: {0}, to: {1}, via: {3}".format(
+                                        cidx[0], cidx[1], n))
+                            block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
         self.relation = po.Constraint(group, noruleinit=True)
 
@@ -405,5 +408,5 @@ def custom_component_grouping(node):
         return ElectricalLineBlock
     if type(node) is Link:
         return LinkBlock
-    if type(node) is OffsetTransformer:
+    if isinstance(node, OffsetTransformer):
         return OffsetTransformerBlock
