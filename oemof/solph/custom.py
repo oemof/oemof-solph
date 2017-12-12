@@ -310,14 +310,10 @@ class OffsetTransformer(Transformer):
 
     Parameters
     ----------
-    conversion_factors : dict
-        Dictionary containing conversion factors for conversion of each flow.
-        Keys are the connected tuples (input, output) bus objects.
-        The dictionary values can either be a scalar or a sequence with length
-        of time horizon for simulation.
 
-    offsets : dict
-        Dictionary containing offsets for conversion of each flow.
+    coefficients : dict
+        Dictionary containing the first two polynomial coefficients
+        i.e. the y-intersect and slope of a linear equation.
         Keys are the connected tuples (input, output) bus objects.
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
@@ -334,12 +330,9 @@ class OffsetTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.conversion_factors = {
+        self.coefficients = {
             k: sequence(v)
-            for k, v in kwargs.get('conversion_factors', {}).items()}
-        self.offsets = {
-            k: sequence(v)
-            for k, v in kwargs.get('offsets', {}).items()}
+            for k, v in kwargs.get('coefficients', {}).items()}
 
 
 class OffsetTransformerBlock(SimpleBlock):
@@ -367,40 +360,32 @@ class OffsetTransformerBlock(SimpleBlock):
             List of oemof.solph.custom.OffsetTransformer objects for which
             the relation of inputs and outputs is created
             e.g. group = [ostf1, ostf2, ostf3, ...]. The components inside
-            the list need to hold an attribute `conversion_factors` and
-            `offsets` of type dict containing the conversion factors for all
-            inputs to outputs.
+            the list need to hold an attribute `coefficients` of type dict
+            containing the conversion factors for all inputs to outputs.
         """
         if group is None:
             return None
 
         m = self.parent_block()
 
-        all_conversions = {}
-        all_offsets = {}
+        self.OFFSETTRANSFORMERS = po.Set(initialize=[n for n in group])
+
+        all_coefficients = {}
         for n in group:
-            all_conversions[n] = {
-                            k: v for k, v in n.conversion_factors.items()}
-            all_offsets[n] = {
-                            k: v for k, v in n.offsets.items()}
+            all_coefficients[n] = {k: v for k, v in n.coefficients.items()}
 
-        def _input_output_relation(block):
-            for t in m.TIMESTEPS:
-                for n, cfs in all_conversions.items():
-                    for cidx, c in cfs.items():
-                            try:
-                                expr = (m.flow[n, cidx[1], t] ==
-                                        c[t] * m.flow[cidx[0], n, t])
-                            except ValueError:
-                                raise ValueError(
-                                    "Error in constraint creation",
-                                    "from: {0}, to: {1}, via: {3}".format(
-                                        cidx[0], cidx[1], n))
-                            block.relation.add((n, cidx[0], cidx[1], t), (expr))
-
-        self.relation = po.Constraint(group, noruleinit=True)
-
-        self.relation_build = po.BuildAction(rule=_input_output_relation)
+        def _relation_rule(block, n, t):
+            """Link binary input and output flow to component outflow."""
+            expr = 0
+            expr += - m.flow[n, list(all_coefficients[n].keys())[0][1], t]
+            expr += m.flow[list(all_coefficients[n].keys())[0][0], n, t] * \
+                list(all_coefficients[n].values())[0][1]
+            expr += m.NonConvexFlow.status[
+                list(all_coefficients[n].keys())[0][0], n, t] * \
+                list(all_coefficients[n].values())[0][0]
+            return expr == 0
+        self.relation = po.Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
+                                      rule=_relation_rule)
 
 
 def custom_component_grouping(node):
