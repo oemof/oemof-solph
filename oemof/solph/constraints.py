@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Additional constraints to be used in an oemof energy model."""
-
 import logging
-import pyomo.environ as po
+
+"""Additional constraints to be used in an oemof energy model."""
 
 __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
+
+import pyomo.environ as po
 
 
 def investment_limit(m, limit=None):
@@ -20,10 +21,12 @@ def investment_limit(m, limit=None):
         expr = 0
 
         if hasattr(m, "InvestmentFlow"):
-            expr += (m.InvestmentFlow.investment_costs)
+            expr += (m.InvestmentFlow.fixed_costs +
+                     m.InvestmentFlow.investment_costs)
 
         if hasattr(m, "GenericInvestmentStorageBlock"):
-            expr += (m.GenericInvestmentStorageBlock.investment_costs)
+            expr += (m.GenericInvestmentStorageBlock.fixed_costs +
+                     m.GenericInvestmentStorageBlock.investment_costs)
         return (expr <= limit)
 
     m.investment_limit = po.Constraint(rule=investment_rule)
@@ -39,8 +42,8 @@ def emission_limit(om, flows=None, limit=None):
         Model to which constraints are added.
     flows : dict
         Dictionary holding the flows that should be considered in constraint.
-        Keys are (source, target) objects of the Flow. If no dictionary is
-        given all flows containing the 'emission' attribute will be used.
+        Keys are (source, target) objects of the Flow. If no dictionary is given
+        all flows containing the 'emission' attribute will be used.
     limit : numeric
         Absolute emission limit.
 
@@ -66,8 +69,7 @@ def emission_limit(om, flows=None, limit=None):
     def emission_rule(m):
         """
         """
-        return (sum(m.flow[inflow, outflow, t] *
-                    flows[inflow, outflow].emission
+        return (sum(m.flow[inflow, outflow, t] * flows[inflow, outflow].emission
                 for (inflow, outflow) in flows
                 for t in m.TIMESTEPS) <= limit)
 

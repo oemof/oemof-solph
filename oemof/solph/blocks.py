@@ -72,9 +72,13 @@ class Flow(SimpleBlock):
         .. math::
             \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
-    The expression can be accessed by :attr:`om.Flow.variable_costs` and
-    their value after optimization by :meth:`om.Flow.variable_costs()` .
+    Additionally, if :attr:`fixed_costs` are set by the user:
+        .. math::
+            \sum_{(i, o)}  nominal\_value(i, o) \cdot fixed\_costs(i, o)
 
+    The expression can be accessed by :attr:`om.Flow.fixed_costs` and
+    their value after optimization by :meth:`om.Flow.fixed_costs()` .
+    This works similar for variable costs with :attr:`*.variable_costs`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -211,6 +215,7 @@ class Flow(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
+        fixed_costs = 0
         gradient_costs = 0
 
         for i, o in m.FLOWS:
@@ -231,7 +236,13 @@ class Flow(SimpleBlock):
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
-        return variable_costs + gradient_costs
+            # add fixed costs if nominal_value is not None
+            if (m.flows[i, o].fixed_costs and
+                    m.flows[i, o].nominal_value is not None):
+                fixed_costs += (m.flows[i, o].nominal_value *
+                                m.flows[i, o].fixed_costs)
+
+        return fixed_costs + variable_costs + gradient_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -305,10 +316,13 @@ class InvestmentFlow(SimpleBlock):
         .. math::
             \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
 
-    The expression can be accessed by :attr:`om.InvestmentFlow.variable_costs`
-    and their value after optimization by
-    :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
-    investment costs with :attr:`*.investment_costs` etc.
+    Additionally, if :attr:`fixed_costs` are set by the user:
+        .. math::
+            \sum_{i, o} invest(i, o) \cdot fixed\_costs(i,o)
+
+    The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
+    their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
+    This works similar for variable costs with :attr:`*.variable_costs` etc.
     """
 
     def __init__(self, *args, **kwargs):
@@ -420,14 +434,16 @@ class InvestmentFlow(SimpleBlock):
             return 0
 
         m = self.parent_block()
+        fixed_costs = 0
         variable_costs = 0
         investment_costs = 0
 
         for i, o in self.FLOWS:
-            variable_costs += sum(m.flow[i, o, t] *
-                                  m.timeincrement[t] *
-                                  m.flows[i, o].variable_costs[t]
-                                  for t in m.TIMESTEPS)
+            # fixed costs
+            if m.flows[i, o].fixed_costs is not None:
+                fixed_costs += (self.invest[i, o] *
+                                m.flows[i, o].fixed_costs)
+            # investment costs
             if m.flows[i, o].investment.ep_costs is not None:
                 investment_costs += (self.invest[i, o] *
                                      m.flows[i, o].investment.ep_costs)
@@ -435,9 +451,10 @@ class InvestmentFlow(SimpleBlock):
                 raise ValueError("Missing value for investment costs!")
 
         self.investment_costs = Expression(expr=investment_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
         self.variable_costs = Expression(expr=variable_costs)
 
-        return variable_costs + investment_costs
+        return fixed_costs + variable_costs + investment_costs
 
 
 class Bus(SimpleBlock):
