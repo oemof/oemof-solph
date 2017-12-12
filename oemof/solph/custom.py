@@ -345,8 +345,7 @@ class OffsetTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.coefficients = {
-            k: sequence(v) for k, v in kwargs.get('coefficients', {}).items()}
+        self.coefficients = kwargs.get('coefficients')
 
         for k, v in self.inputs.items():
             if not v.nonconvex:
@@ -392,19 +391,13 @@ class OffsetTransformerBlock(SimpleBlock):
 
         self.OFFSETTRANSFORMERS = po.Set(initialize=[n for n in group])
 
-        all_coefficients = {}
-        for n in group:
-            all_coefficients[n] = {k: v for k, v in n.coefficients.items()}
-
         def _relation_rule(block, n, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += - m.flow[n, list(all_coefficients[n].keys())[0][1], t]
-            expr += m.flow[list(all_coefficients[n].keys())[0][0], n, t] * \
-                list(all_coefficients[n].values())[0][1]
-            expr += m.NonConvexFlow.status[
-                list(all_coefficients[n].keys())[0][0], n, t] * \
-                list(all_coefficients[n].values())[0][0]
+            expr += - m.flow[n, list(n.outputs.keys())[0], t]
+            expr += m.flow[list(n.inputs.keys())[0], n, t] * n.coefficients[1]
+            expr += m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t] * \
+                n.coefficients[0]
             return expr == 0
         self.relation = po.Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
                                       rule=_relation_rule)
