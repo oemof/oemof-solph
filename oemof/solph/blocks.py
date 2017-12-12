@@ -269,7 +269,7 @@ class InvestmentFlow(SimpleBlock):
     **The following variables are created:**
 
     invest :attr:`om.InvestmentFlow.invest[i, o]`
-        Value of the investment variable (i.e. equivalent to the nominal
+        Value of the investment variable i.e. equivalent to the nominal
         value of the flows after optimization (indexed by FLOWS)
 
     **The following constraints are build:**
