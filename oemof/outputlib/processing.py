@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Modules for providing a convenient data structure for solph results.
+
+"""Modules for providing a convenient data structure for solph results.
 
 Information about the possible usage is provided within the examples.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 import pandas as pd
 from itertools import groupby

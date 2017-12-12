@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Regression tests.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 import logging
 
 from nose.tools import eq_, ok_

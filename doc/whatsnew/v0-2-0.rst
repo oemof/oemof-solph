@@ -45,7 +45,14 @@ New features
   <oemof.energy_system.EnergySystem>` in bulk using `*` and `**` syntax. For
   the latter case, the :meth:`values <dict.values>` of the dictionary passed in
   will be added.
-
+* A component :class:`nodes <oemof.solph.custom.ElectricalLine>`
+  and :class:`nodes <oemof.solph.custom.ElectricalBus>` to be used for
+  Linear Optimal Powerflow calculation based in angle formulations. This component
+  has been added to the `solph.custom.py` module. Though it should work correctly,
+  it is in a preliminary stage, please check your results. Feedback is welcome.
+* A component :class:`nodes <oemof.solph.custom.Link>` that can be used to model
+  a bidirectional connection within one component (Check out the example in the
+  oemof_example repository).
 
 Documentation
 #############

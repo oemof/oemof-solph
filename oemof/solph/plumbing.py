@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""Plumbing stuff.
 """
 
-"""
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from collections import abc, UserList
 
 

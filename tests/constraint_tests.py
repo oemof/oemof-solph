@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from difflib import unified_diff
 import logging
 import os.path as ospath
@@ -368,6 +376,8 @@ class Constraint_Tests:
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
+            nominal_input_capacity_ratio=0.2,
+            nominal_output_capacity_ratio=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))

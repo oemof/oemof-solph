@@ -1,14 +1,18 @@
+# -*- coding: utf-8 -*-
+
+"""This package (along with its subpackages) contains the classes used to model
+energy systems. An energy system is modelled as a graph/network of entities
+with very specific constraints on which types of entities are allowed to be
+connected.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from collections import MutableMapping as MM
 from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
-"""
-This package (along with its subpackages) contains the classes used to model
-energy systems. An energy system is modelled as a graph/network of entities
-with very specific constraints on which types of entities are allowed to be
-connected.
-
-"""
 
 
 class Inputs(MM):

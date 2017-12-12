@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)
@@ -259,8 +263,8 @@ class InvestmentFlow(SimpleBlock):
         A subset of set FLOWS with flows with the attribute
         :attr:`summed_min` being not None.
     MIN_FLOWS
-        A subset of FLOWS with flows having set a least minimum value for
-        at least one timestep in the optimization model.
+        A subset of FLOWS with flows having set a value of not None in the
+        first timestep.
 
     **The following variables are created:**
 
@@ -353,8 +357,8 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
         self.MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if sum(
-                [g[2].min[t] for t in m.TIMESTEPS]) > 0])
+            (g[0], g[1]) for g in group if (
+                g[2].min[0] != 0 or len(g[2].min) > 1)])
 
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
@@ -581,7 +585,7 @@ class NonConvexFlow(SimpleBlock):
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
-        greater than zero for at least one timestep in the simulation horizon.
+        beeing not None in the first timestep
     STARTUP_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`startup_costs` being not None.
@@ -666,8 +670,7 @@ class NonConvexFlow(SimpleBlock):
         self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                         if sum(g[2].min[t]
-                                                for t in m.TIMESTEPS) > 0])
+                                         if g[2].min[0] is not None])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                 if g[2].nonconvex.startup_costs is not None])
