@@ -129,18 +129,18 @@ class GenericStorage(network.Transformer):
         self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
 
-        # Check investment
+        # General error messages
         e_no_nv = ("If an investment object is defined the invest variable "
                    "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
         e_duplicate = ("Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
                        "will set the nominal_value for the flow.\nTherefore "
                        "either the 'nominal_{0}_capacity_ratio' or the "
                        "'nominal_value' has to be 'None'.")
-
+        # Check investment
         if self.investment and self.nominal_capacity is not None:
             raise AttributeError(e_no_nv.format('nominal_capacity'))
 
-        # Check flows for nominal value
+        # Check input flows
         for flow in self.inputs.values():
             if self.investment and flow.nominal_value is not None:
                 raise AttributeError(e_no_nv.format('nominal_value'))
@@ -155,6 +155,7 @@ class GenericStorage(network.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
+        # Check output flows
         for flow in self.outputs.values():
             if self.investment and flow.nominal_value is not None:
                 raise AttributeError(e_no_nv.format('nominal_value'))
