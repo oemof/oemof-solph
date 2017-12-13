@@ -99,8 +99,8 @@ class GenericStorage(network.Transformer):
     >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     investment=solph.Investment(ep_costs=50),
-    ...     inputs={my_bus: solph.Flow()},
-    ...     outputs={my_bus: solph.Flow()},
+    ...     inputs={my_bus: solph.Flow(investment=solph.Investment())},
+    ...     outputs={my_bus: solph.Flow(investment=solph.Investment())},
     ...     capacity_loss=0.02,
     ...     initial_capacity=None,
     ...     nominal_input_capacity_ratio=1/6,
@@ -168,7 +168,10 @@ class GenericStorage(network.Transformer):
                                       self.nominal_capacity)
             if self.investment:
                 if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
+                    raise AttributeError(
+                        "If you use the investment option"
+                        " for storages, the investment attribute must also be"
+                        " set for the inputs / outputs of the storage!")
 
 # ------------------------------------------------------------------------------
 # End of generic storage component
