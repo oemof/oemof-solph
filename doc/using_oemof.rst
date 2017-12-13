@@ -14,7 +14,7 @@ Oemof is a framework and even though it is in an early stage it already provides
 
 oemof-network
 =============
-The :ref:`oemof_network_label`_ library is part of the oemof installation. By now it can be used to define energy systems as a network with components and buses. Every component should be connected to one or more buses. After definition, a component has to explicitely be added to its energy system. Allowed components are sources, sinks and transformer.
+The :ref:`oemof_network_label` library is part of the oemof installation. By now it can be used to define energy systems as a network with components and buses. Every component should be connected to one or more buses. After definition, a component has to explicitely be added to its energy system. Allowed components are sources, sinks and transformer.
 
 .. 	image:: _files/example_network.svg
    :scale: 30 %
@@ -56,7 +56,7 @@ The network class is aimed to be very generic and might have some network analys
 
 oemof-solph
 ===========
-The :ref:`oemof_solph_label`_ library is part of the oemof installation. Solph is designed to create and solve linear or mixed-integer 
+The :ref:`oemof_solph_label` library is part of the oemof installation. Solph is designed to create and solve linear or mixed-integer 
 linear optimization problems. It is based on optimization modelling language pyomo.
 
 To use solph at least one linear solver has to be installed on you system. See the `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_ to learn which solvers are supported. Solph is tested with the open source solver `cbc` and the `gurobi` solver (free for academic use). The open `glpk` solver recently showed some odd behaviour.
@@ -65,7 +65,7 @@ The formulation of the energy system is based on the oemof-network library but c
 
 oemof-outputlib
 ===============
-The :ref:`oemof_outputlib_label`_ library is part of the oemof installation. The outputlib collects the results of an optimisation in a `pandas MultiIndex DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_. This makes it easy to process or plot the results using the capabilities of the pandas library.
+The :ref:`oemof_outputlib_label` library is part of the oemof installation. The outputlib collects the results of an optimisation in a `pandas MultiIndex DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_. This makes it easy to process or plot the results using the capabilities of the pandas library.
 
 The following code collects the results in a pandas DataFrame and selects the data
 for a specific component, in this case 'heat'.
