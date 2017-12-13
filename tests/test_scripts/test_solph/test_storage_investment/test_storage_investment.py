@@ -84,7 +84,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    storage = solph.components.GenericStorage(
+    solph.components.GenericStorage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -99,17 +99,19 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # Solve model
     om = solph.Model(energysystem)
     om.solve(solver=solver)
+    energysystem.results = processing.results(om)
 
     # Check dump and restore
     energysystem.dump()
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem()
     energysystem.restore()
 
     # Results
-    results = processing.results(om)
+    results = energysystem.results
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
+    storage = energysystem.groups['storage']
     my_results['storage_invest'] = results[(storage, None)]['scalars']['invest']
 
     stor_invest_dict = {
