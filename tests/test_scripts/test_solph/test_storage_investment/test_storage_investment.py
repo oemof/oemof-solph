@@ -99,7 +99,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # Solve model
     om = solph.Model(energysystem)
     om.solve(solver=solver)
-    energysystem.results = processing.results(om)
+    energysystem.results['main'] = processing.results(om)
+    energysystem.results['meta'] = processing.meta_results(om)
 
     # Check dump and restore
     energysystem.dump()
@@ -107,7 +108,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     energysystem.restore()
 
     # Results
-    results = energysystem.results
+    results = energysystem.results['main']
+    meta = energysystem.results['meta']
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
@@ -126,3 +128,20 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+
+    # Solver results
+    eq_(str(meta['solver']['Termination condition']), 'optimal')
+    eq_(meta['solver']['Error rc'], 0)
+    eq_(str(meta['solver']['Status']), 'ok')
+
+    # Problem results
+    eq_(meta['problem']['Lower bound'], 4.2316758e+17)
+    eq_(meta['problem']['Upper bound'], 4.2316758e+17)
+    eq_(meta['problem']['Number of variables'], 2804)
+    eq_(meta['problem']['Number of constraints'], 2805)
+    eq_(meta['problem']['Number of nonzeros'], 7606)
+    eq_(meta['problem']['Number of objectives'], 1)
+    eq_(str(meta['problem']['Sense']), 'minimize')
+
+    # Objective function
+    eq_(round(meta['objective'] / 1e+15), 423)
