@@ -107,6 +107,9 @@ class Flow(SimpleBlock):
 
         # ########################## SETS #################################
         # set for all flows with an global limit on the flow over time
+
+        self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+
         self.SUMMED_MAX_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None and
             g[2].nominal_value is not None])
@@ -225,7 +228,7 @@ class Flow(SimpleBlock):
         fixed_costs = 0
         gradient_costs = 0
 
-        for i, o in m.FLOWS:
+        for i, o in self.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 for t in m.TIMESTEPS:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
