@@ -141,4 +141,4 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     eq_(str(meta['problem']['Sense']), 'minimize')
 
     # Objective function
-    eq_(round(meta['objective']), 423167578362035072)
+    eq_(round(meta['objective']), 423167578333305088)
