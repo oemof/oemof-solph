@@ -86,8 +86,10 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
     storage = solph.components.GenericStorage(
         label='storage',
-        inputs={bel: solph.Flow(variable_costs=10e10)},
-        outputs={bel: solph.Flow(variable_costs=10e10)},
+        inputs={bel: solph.Flow(variable_costs=10e10,
+				investment=solph.Investment())},
+        outputs={bel: solph.Flow(variable_costs=10e10,
+				 investment=solph.Investment())},
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,

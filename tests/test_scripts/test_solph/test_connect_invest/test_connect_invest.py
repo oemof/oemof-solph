@@ -21,7 +21,7 @@ def test_connect_invest():
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
     Node.registry = energysystem
-    
+
     # Read data file
     full_filename = os.path.join(os.path.dirname(__file__),
                                  'connect_invest.csv')
@@ -49,8 +49,10 @@ def test_connect_invest():
 
     storage = solph.components.GenericStorage(
         label='storage',
-        inputs={bel1: solph.Flow(variable_costs=10e10)},
-        outputs={bel1: solph.Flow(variable_costs=10e10)},
+        inputs={bel1: solph.Flow(variable_costs=10e10,
+				 investment=solph.Investment())},
+        outputs={bel1: solph.Flow(variable_costs=10e10,
+				  investment=solph.Investment())},
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,

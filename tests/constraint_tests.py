@@ -221,8 +221,10 @@ class Constraint_Tests:
 
         solph.components.GenericStorage(
             label='storage',
-            inputs={bel: solph.Flow(variable_costs=56)},
-            outputs={bel: solph.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56,
+                                    investment=solph.Investment())},
+            outputs={bel: solph.Flow(variable_costs=24,
+                                     investment=solph.Investment())},
             nominal_capacity=None,
             capacity_loss=0.13,
             capacity_max=0.9,
@@ -378,8 +380,8 @@ class Constraint_Tests:
             label='storage',
             nominal_input_capacity_ratio=0.2,
             nominal_output_capacity_ratio=0.2,
-            inputs={bus1: solph.Flow()},
-            outputs={bus1: solph.Flow()},
+            inputs={bus1: solph.Flow(investment=solph.Investment())},
+            outputs={bus1: solph.Flow(investment=solph.Investment())},
             investment=solph.Investment(ep_costs=145))
         sink = solph.Sink(label='Sink', inputs={bus1: solph.Flow(
             investment=solph.Investment(ep_costs=500))})

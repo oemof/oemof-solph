@@ -7,6 +7,7 @@ This is not an illustrated example.
 __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
+from oemof.network import Node
 from oemof import solph
 import pandas as pd
 
@@ -15,6 +16,7 @@ def check_oemof_installation(silent=False):
     date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
+    Node.registry = energysystem
 
     bgas = solph.Bus(label="natural_gas")
     bel = solph.Bus(label="electricity")
