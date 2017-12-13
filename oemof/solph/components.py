@@ -152,7 +152,8 @@ class GenericStorage(network.Transformer):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
             if self.investment:
-                raise AttributeError(
+                if not isinstance(flow.investment, Investment):
+                    raise AttributeError(
                         "If you use the investment option"
                         " for storages, the investment attribute must also be"
                         " set for the inputs / outputs of the storage!")
