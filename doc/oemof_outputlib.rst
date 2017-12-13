@@ -6,9 +6,11 @@ oemof-outputlib
 
 For version 0.2.0, the outputlib has been refactored. Tools for plotting optimization
 results that were part of the outputlib in earlier versions are no longer part of this module,
-as the requirements to plotting functions greatly depend on the situation and are thus
-not generic. Basic functions for plotting of optimisation results are now found in
-a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`. 
+as the requirements to plotting functions greatly depend on the situation and are
+therefore not part of the generic. 
+
+Basic functions for plotting of optimisation results are now found in
+a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`_. 
 
 .. contents::
     :depth: 1
@@ -17,14 +19,15 @@ a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`.
 
 The main purpose of the outputlib is to collect and organise results.
 The outputlib converts the results to a pandas MultiIndex DataFrame. 
-In this way we make the full power of the pandas package available to process the results. 
+This way we can make use of the full power of the pandas package available to process
+the results. 
 
 See the `pandas documentation <http://pandas.pydata.org/pandas-docs/stable/>`_  to learn how to `visualise <http://pandas.pydata.org/pandas-docs/version/0.18.1/visualization.html>`_, `read or write <http://pandas.pydata.org/pandas-docs/stable/io.html>`_ or how to `access parts of the DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_ to process them.
 
 Collecting results
 ------------------
 
-Collecting the results can be done with the help of the processing module:
+Collecting results can be done with the help of the processing module:
 
 .. code-block:: python
 
@@ -37,6 +40,7 @@ and the solver:
 .. code-block:: python
 
     meta_results = outputlib.processing.meta_results(om)
+    
 
 Collecting information on specific nodes
 ----------------------------------------
