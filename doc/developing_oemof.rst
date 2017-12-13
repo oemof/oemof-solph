@@ -7,7 +7,9 @@ Oemof is developed collaboratively and therefore driven by its community. While 
 as a user of oemof, you may find situations that demand solutions that are not readily
 available. In this case, your solution may be of help to other users as well. Contributing
 to the development of oemof is good for two reasons: Your code may help others and you
-increase the quality of your code through the review of other developers.
+increase the quality of your code through the review of other developers. Note also these
+arguments on
+`why you should contribute <http://oemof.readthedocs.io/en/latest/about_oemof.html?highlight=why%20should#why-should-i-contribute>`_
 
 A first step to get involved with development can be contributing a component that is
 not part of the current version that you defined for your energy system. We have a module
