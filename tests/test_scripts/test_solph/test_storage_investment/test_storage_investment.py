@@ -82,7 +82,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    storage = solph.components.GenericStorage(
+    solph.components.GenericStorage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -96,17 +96,21 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # Solve model
     om = solph.Model(energysystem)
     om.solve(solver=solver)
+    energysystem.results['main'] = processing.results(om)
+    energysystem.results['meta'] = processing.meta_results(om)
 
     # Check dump and restore
     energysystem.dump()
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem()
     energysystem.restore()
 
     # Results
-    results = processing.results(om)
+    results = energysystem.results['main']
+    meta = energysystem.results['meta']
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
+    storage = energysystem.groups['storage']
     my_results['storage_invest'] = results[(storage, None)]['scalars']['invest']
 
     stor_invest_dict = {
@@ -121,3 +125,20 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+
+    # Solver results
+    eq_(str(meta['solver']['Termination condition']), 'optimal')
+    eq_(meta['solver']['Error rc'], 0)
+    eq_(str(meta['solver']['Status']), 'ok')
+
+    # Problem results
+    eq_(meta['problem']['Lower bound'], 4.2316758e+17)
+    eq_(meta['problem']['Upper bound'], 4.2316758e+17)
+    eq_(meta['problem']['Number of variables'], 2804)
+    eq_(meta['problem']['Number of constraints'], 2805)
+    eq_(meta['problem']['Number of nonzeros'], 7606)
+    eq_(meta['problem']['Number of objectives'], 1)
+    eq_(str(meta['problem']['Sense']), 'minimize')
+
+    # Objective function
+    eq_(round(meta['objective']), 423167578362035072)
