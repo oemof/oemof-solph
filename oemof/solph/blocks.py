@@ -238,6 +238,7 @@ class Flow(SimpleBlock):
                     m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
+                                       m.timeincrement[t] *
                                        m.flows[i, o].positive_gradient[
                                            'costs'])
 
@@ -245,6 +246,7 @@ class Flow(SimpleBlock):
                     m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
+                                       m.timeincrement[t] *
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
@@ -561,6 +563,11 @@ class InvestmentFlow(SimpleBlock):
 
         for i, o in self.FLOWS:
             # fixed costs
+            if m.flows[i, o].variable_costs[0] is not None:
+                for t in m.TIMESTEPS:
+                    variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
+                                       m.flows[i, o].variable_costs[t])
+
             if m.flows[i, o].fixed_costs is not None:
                 fixed_costs += (self.invest[i, o] *
                                 m.flows[i, o].fixed_costs)
@@ -575,6 +582,7 @@ class InvestmentFlow(SimpleBlock):
                     m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
+                                       m.timeincrement[t] *
                                        m.flows[i, o].positive_gradient[
                                            'costs'])
 
@@ -582,6 +590,7 @@ class InvestmentFlow(SimpleBlock):
                     m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
+                                       m.timeincrement[t] *
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
