@@ -224,6 +224,9 @@ class Flow(SimpleBlock):
         """
         m = self.parent_block()
 
+        if not hasattr(self, 'FLOWS'):
+            return 0
+
         variable_costs = 0
         fixed_costs = 0
         gradient_costs = 0
