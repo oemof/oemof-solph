@@ -22,8 +22,7 @@ def test_generic_storage_1():
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35)
+        inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
 
 @tools.raises(AttributeError)
@@ -38,8 +37,7 @@ def test_generic_storage_2():
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35)
+        inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
 
 @tools.raises(AttributeError)
@@ -54,8 +52,7 @@ def test_generic_storage_3():
         capacity_loss=0.00, initial_capacity=0,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
+        inflow_conversion_factor=1, outflow_conversion_factor=0.8
         investment=solph.Investment(ep_costs=23))
 
 
@@ -69,5 +66,4 @@ def test_generic_storage_4():
         outputs={bel: solph.Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
         nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35)
+        inflow_conversion_factor=1, outflow_conversion_factor=0.8)
