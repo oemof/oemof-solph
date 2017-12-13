@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""Connecting different investment variables.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from nose.tools import eq_
 import oemof.solph as solph
 from oemof.outputlib import processing, views
 
@@ -94,6 +101,4 @@ def test_connect_invest():
         'storage_out': 135784}
 
     for key in connect_invest_dict.keys():
-        a = int(round(my_results[key]))
-        b = int(round(connect_invest_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(my_results[key])), int(round(connect_invest_dict[key])))

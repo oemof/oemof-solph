@@ -164,6 +164,14 @@ class Constraint_Tests:
 
         self.compare_lp_files('fixed_source_variable_sink.lp')
 
+    def test_nominal_value_to_zero(self):
+        """If the nominal value is set to zero nothing should happen.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='s1', outputs={bel: solph.Flow(nominal_value=0)})
+        self.compare_lp_files('nominal_value_to_zero.lp')
+
     def test_fixed_source_invest_sink(self):
         """ Wrong constraints for fixed source + invest sink w. `summed_max`.
         """

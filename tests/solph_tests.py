@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Grouping tests.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from nose.tools import ok_, eq_
 
 from oemof.energy_system import EnergySystem as ES

@@ -27,7 +27,10 @@ The example models the following energy system:
 
 """
 
-# Default logger of oemof
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from nose.tools import eq_
 from oemof.tools import economics
 
 import oemof.solph as solph
@@ -120,6 +123,4 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         (('wind', 'electricity'), 'flow'): 305471851}
 
     for key in stor_invest_dict.keys():
-        a = int(round(my_results[key]))
-        b = int(round(stor_invest_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))

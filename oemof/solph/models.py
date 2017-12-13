@@ -6,7 +6,7 @@
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks
+from oemof.solph import blocks, custom
 from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
 import logging
@@ -90,31 +90,40 @@ class Model(po.ConcreteModel):
         self.FLOWS = po.Set(initialize=self.flows.keys(),
                             ordered=True, dimen=2)
 
+        self.BIDIRECTIONAL_FLOWS = po.Set(initialize=[
+            k for (k, v) in self.flows.items() if hasattr(v, 'bidirectional')],
+                                          ordered=True, dimen=2,
+                                          within=self.FLOWS)
+
+        self.UNIDIRECTIONAL_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items() if not
+                        hasattr(v, 'bidirectional')],
+            ordered=True, dimen=2, within=self.FLOWS)
+
         # ######################### FLOW VARIABLE #############################
 
-        # non-negative pyomo variable for all existing flows in energysystem
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
-                           within=po.NonNegativeReals)
+                           within=po.Reals)
 
         # loop over all flows and timesteps to set flow bounds / values
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
-                if self.flows[o, i].actual_value[t] is not None and (
-                        self.flows[o, i].nominal_value is not None):
-                    # pre- optimized value of flow variable
-                    self.flow[o, i, t].value = (
-                        self.flows[o, i].actual_value[t] *
-                        self.flows[o, i].nominal_value)
-                    # fix variable if flow is fixed
-                    if self.flows[o, i].fixed:
-                        self.flow[o, i, t].fix()
-
+                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                    self.flow[o, i, t].setlb(0)
                 if self.flows[o, i].nominal_value is not None:
-                    # upper bound of flow variable
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
 
-                    if self.flows[o, i].nonconvex is None:
+                    if self.flows[o, i].actual_value[t] is not None:
+                        # pre- optimized value of flow variable
+                        self.flow[o, i, t].value = (
+                            self.flows[o, i].actual_value[t] *
+                            self.flows[o, i].nominal_value)
+                        # fix variable if flow is fixed
+                        if self.flows[o, i].fixed:
+                            self.flow[o, i, t].fix()
+
+                    if not self.flows[o, i].nonconvex:
                         # lower bound of flow variable
                         self.flow[o, i, t].setlb(
                             self.flows[o, i].min[t] *
