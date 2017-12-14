@@ -68,12 +68,10 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         nominal_value=194397000 * 400 / 8760, summed_max=1)})
 
     solph.Source(label='wind', outputs={bel: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True,
-        fixed_costs=20)})
+        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
 
     solph.Source(label='pv', outputs={bel: solph.Flow(
-        actual_value=data['pv'], nominal_value=582000, fixed=True,
-        fixed_costs=15)})
+        actual_value=data['pv'], nominal_value=582000, fixed=True)})
 
     # Transformer
     solph.Transformer(
@@ -92,7 +90,6 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
         investment=solph.Investment(ep_costs=epc),
     )
 
@@ -144,4 +141,4 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     eq_(str(meta['problem']['Sense']), 'minimize')
 
     # Objective function
-    eq_(round(meta['objective']), 423167578362035072)
+    eq_(round(meta['objective']), 423167578261665280)
