@@ -61,21 +61,31 @@ See the developer version of the documentation of the dev branch at
 Collaboration with pull requests
 --------------------------------
 
-To collaborate use the pull request functionality of github.
+To collaborate use the pull request functionality of github as described here: https://guides.github.com/activities/hello-world/
 
-How to create a pull request
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* Fork the oemof repository
-* Create a pull request and describe what you will do and why
-* Change, add or remove code
-* Read the :ref:`style_guidlines_label` and follow them
-* Add new tests according to what you have done
+How to create a pullrequest
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fork the oemof repository to your own github account.
+* Change, add or remove code.
+* Commit your changes.
+* Create a pull request and describe what you will do and why.
+* Choose reviewers and assignees.
+* Optionally assign a label and milestone.
+* Wait for approval.
+
+Generally the following steps are required when changing, adding or removing code
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* Read the :ref:`style_guidlines_label` and :ref:`naming_conventions_label` and follow them
+* Add new :ref:`tests_label` according to what you have done
 * Add/change the documentation (new feature, API changes ...)
 * Add a whatsnew entry and your name to Contributors
-* Check if all tests still work including the example tests
+* Check if all tests still work including the example files in `oemof_examples <https://github.com/oemof/oemof_examples/>`_.
+
+.. _tests_label:
 
 Tests
-^^^^^
+-----
 
 .. role:: bash(code)
    :language: bash
@@ -149,6 +159,8 @@ As there is no recommendation in the PEP rules we use double quotes for strings 
     my_dictionary.get('key_string')
     
     logging.warning('Use three " to quote docstrings!'  # exception to avoid escape characters
+
+.. _naming_conventions_label:
 
 Naming Conventions
 ------------------
