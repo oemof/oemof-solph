@@ -150,7 +150,7 @@ class Flow:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
             elif 'fixed_costs' in attribute:
-                raise AttributeError(
+                raise DeprecationWarning(
                          "The `fixed_costs` attribute has been removed"
                          " with v0.2!")
             else:
