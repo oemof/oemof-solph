@@ -107,4 +107,4 @@ You want to add a GUI or your application to be linked to. We think, that workin
 
 Interested? Together we can talk about how to transfer your ideas into oemof or even integrate your code. Maybe we just link to your project and try to adept the API for a better fit in the future.
 
-If you are interested, also consider joining our developer meetings which take place every 6 months (usually May and December). Just contact us!
+Also consider joining our developer meetings which take place every 6 months (usually May and December). Just contact us!
