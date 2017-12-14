@@ -51,12 +51,20 @@ Newly added required packages (via PyPi) are installed by performing a manual up
 
   pip3 install --upgrade -e /path/to/the/repository
   
-Documentation
--------------
+Contribute to the documentation
+-------------------------------
 
 See the developer version of the documentation of the dev branch at
 `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
 
+Contribute to new components
+----------------------------
+                                                                                                                                                       
+You can develop a new component according to your needs. Therefore you can use the module oemof.solph.customs which collects custom components created by users and lowers the entry barrier for contributing.                
+                                 
+Your code should fit to the :ref:`style_guidlines_label`, but not necessarily to the :ref:`naming_conventions_label`. Also compatiblity to the results-
+API must not be guaranteed. Further you do not need to test your components or adapt the documentation. These steps are all necessary once your custom
+component becomes a constant part of oemof (oemof.solph.components) and are described here: :ref:`_coding_requirements_label`. But in the first step have a look at existing custom components created by other users in oemof.solph.custom and easily create your own if you need.     
 
 Collaboration with pull requests
 --------------------------------
@@ -73,6 +81,8 @@ How to create a pullrequest
 * Choose reviewers and assignees.
 * Optionally assign a label and milestone.
 * Wait for approval.
+
+.. _coding_requirements_label:  
 
 Generally the following steps are required when changing, adding or removing code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
