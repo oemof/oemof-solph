@@ -92,13 +92,13 @@ Run the following test before pushing a successful merge.
 Issue-Management
 ----------------
 
-A good means for communication with the developer group are the issues. If you
+A good way for communication with the developer group are issues. If you
 find a bug, want to contribute an enhancement or have a question on a specific problem
 in development you want to discuss, please create an issue:
 
-* create an issue describing your point accurately
-* use the list of tags to choose from to categorize your issue
-* address other developers
+* describing your point accurately
+* using the list of category tags
+* addressing other developers
 
 If you want to address other developers you can use @name-of-developer, or
 use e.g. @oemof-solph to address a team. `Here <https://github.com/orgs/oemof/teams>`_
