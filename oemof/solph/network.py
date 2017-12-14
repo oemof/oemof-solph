@@ -149,6 +149,10 @@ class Flow:
             if 'gradient' in attribute:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
+            elif 'fixed_costs' in attribute:
+                raise AttributeError(
+                         "The `fixed_costs` attribute has been removed"
+                         " with v0.2!")
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
