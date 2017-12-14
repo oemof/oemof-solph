@@ -6,14 +6,21 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import pyomo.environ as po
-import logging
 
 
 def investment_limit(m, limit=None):
     """ Set an absolute limit for the total investment costs of an investment
-    optimization problem
+    optimization problem:
+
+    .. math:: \sum_{investment\_costs} \leq limit
+
+    Parameters
+    ----------
+    m : oemof.solph.Model
+        Model to which the constraint is added
+    limit : float
+        Absolute limit of the investment (i.e. RHS of constraint)
     """
-    logging.info("CAUTION: This is experimental stuff!")
 
     def investment_rule(m):
         """
@@ -21,12 +28,10 @@ def investment_limit(m, limit=None):
         expr = 0
 
         if hasattr(m, "InvestmentFlow"):
-            expr += (m.InvestmentFlow.fixed_costs +
-                     m.InvestmentFlow.investment_costs)
+            expr += (m.InvestmentFlow.investment_costs)
 
         if hasattr(m, "GenericInvestmentStorageBlock"):
-            expr += (m.GenericInvestmentStorageBlock.fixed_costs +
-                     m.GenericInvestmentStorageBlock.investment_costs)
+            expr += (m.GenericInvestmentStorageBlock.investment_costs)
         return expr <= limit
 
     m.investment_limit = po.Constraint(rule=investment_rule)
