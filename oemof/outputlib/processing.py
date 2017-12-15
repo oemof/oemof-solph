@@ -214,9 +214,9 @@ def param_results(om):
             attr_value = getattr(v, a)
             try:
                _ = (e for e in attr_value)
-               print(a, attr_value, 'is iterable *****')
+               print(a, type(attr_value), 'is iterable *****')
             except TypeError:
-               print(a, attr_value, 'is not iterable')
+               print(a, type(attr_value), 'is not iterable')
 
     # print('NODES: #####')
     # for n in om.es.nodes:
