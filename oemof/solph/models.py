@@ -67,15 +67,23 @@ class BaseModel(po.ConcreteModel):
         self._add_objective()
 
     def _add_parent_block_sets(self):
+        """" Method to create all sets located at the parent block, i.e. the
+        model itself as they are to be shared across all model components.
+        """
         pass
 
     def _add_parent_block_variables(self):
+        """" Method to create all variables located at the parent block,
+        i.e. the model itself as these variables  are to be shared across
+        all model components.
+        """
         pass
 
     def _add_child_blocks(self):
+        """ Method to add the defined child blocks for components that have
+        been grouped in the defined constraint groups.
         """
-        """
-        # loop over all constraint groups to add constraints to the model
+
         for group in self._constraint_groups:
             # create instance for block
             block = group()
@@ -86,7 +94,10 @@ class BaseModel(po.ConcreteModel):
             block._create(group=self.es.groups.get(group))
 
     def _add_objective(self, sense=po.minimize, update=False):
-        """
+        """ Method to sum up all objective expressions from the child blocks
+        that have been created. This method looks for `_objective_expression`
+        attribute in the block definition and will call this method to add
+        their return value to the objective function.
         """
         if update:
             self.del_component('objective')
@@ -113,7 +124,6 @@ class BaseModel(po.ConcreteModel):
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
         """
-
         result = processing.results(self)
 
         return result
