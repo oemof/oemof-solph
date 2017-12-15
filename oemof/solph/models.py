@@ -29,8 +29,8 @@ class BaseModel(po.ConcreteModel):
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
         building process set this value to False
-        and use methods `_add_basic_sets`, `_add_basic_variables`,
-        `_add_blocks`, `_add_objective`
+        and use methods `_add_parent_block_sets`,
+        `_add_parent_block_variables`, `_add_blocks`, `_add_objective`
 
     """
     CONSTRAINT_GROUPS = []
@@ -61,18 +61,18 @@ class BaseModel(po.ConcreteModel):
     def _construct(self):
         """
         """
-        self._add_basic_sets()
-        self._add_basic_variables()
-        self._add_blocks()
+        self._add_parent_block_sets()
+        self._add_parent_block_variables()
+        self._add_child_blocks()
         self._add_objective()
 
-    def _add_basic_sets(self):
+    def _add_parent_block_sets(self):
         pass
 
-    def _add_basic_variables(self):
+    def _add_parent_block_variables(self):
         pass
 
-    def _add_blocks(self):
+    def _add_child_blocks(self):
         """
         """
         # loop over all constraint groups to add constraints to the model
@@ -231,7 +231,7 @@ class Model(BaseModel):
     def __init__(self, energysystem, **kwargs):
         super().__init__(energysystem, **kwargs)
 
-    def _add_basic_sets(self):
+    def _add_parent_block_sets(self):
         """
         """
         # set with all nodes
@@ -261,7 +261,7 @@ class Model(BaseModel):
                         hasattr(v, 'bidirectional')],
             ordered=True, dimen=2, within=self.FLOWS)
 
-    def _add_basic_variables(self):
+    def _add_parent_block_variables(self):
         """
         """
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
