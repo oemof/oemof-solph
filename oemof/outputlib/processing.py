@@ -201,29 +201,32 @@ def param_results(om):
     print('FLOWS: #####')
 
     for k, v in flows.items():
-        print('##### FLOW', (k[0].label, k[1].label))
-        #'oemof.solph.plumbing._Sequence'
-        #'NoneType'
-        # 'dict'
-        #'pandas.core.series.Series'
-        exclusions = ('__', '_', 'regis')
+        exclusions = ('__', '_', 'registry')
         attrs = [i for i in dir(v)
                  if not (callable(i) or i.startswith(exclusions))]
 
+        scalars, sequences = {}, {}
         for a in attrs:
             attr_value = getattr(v, a)
             try:
-               check = (e for e in attr_value)
-               print(a, type(attr_value), 'is iterable *****')
+                # raise error if attribute is not iterable
+                # see: https://stackoverflow.com/questions/1952464/
+                # in-python-how-do-i-determine-if-an-object-is-iterable
+                check = (e for e in attr_value)
+                sequences[a] = attr_value
             except TypeError:
-               print(a, type(attr_value), 'is not iterable')
+                scalars[a] = attr_value
+
+        # flatten dicts in sequences dict ;-)
+        print('##### FLOW ', (k[0].label, k[1].label))
+        print('SCA ', scalars)
+        print('SEQ ', sequences)
 
     # print('NODES: #####')
     # for n in om.es.nodes:
     #     print(n.label)
     #     exclusions = ('__', '_', 'regis')
     #     print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
-
 
     # go through:
     # nodes -> (node, None)
