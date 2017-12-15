@@ -144,11 +144,17 @@ class Flow(SimpleBlock):
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient['ub'][t] * f.nominal_value)
+                        f.positive_gradient['ub'][t] *
+                        f.nominal_value *
+                        f.max[t] *
+                        m.timeincrement[t])
             if m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient['ub'][t] * f.nominal_value)
+                        f.negative_gradient['ub'][t] *
+                        f.nominal_value *
+                        f.max[t] *
+                        m.timeincrement[t])
 
         # ######################### CONSTRAINTS ###############################
 
@@ -507,7 +513,9 @@ class InvestmentFlow(SimpleBlock):
             """
             return (block.positive_gradient[i, o, t] <=
                     m.flows[i, o].positive_gradient['ub'][t] *
-                    block.invest[i, o])
+                    m.flows[i, o].max[t] *
+                    block.invest[i, o] *
+                    m.timeincrement[t])
         self.ub_positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS,
             rule=_ub_positive_gradient)
@@ -517,7 +525,9 @@ class InvestmentFlow(SimpleBlock):
             """
             return (block.negative_gradient[i, o, t] <=
                     m.flows[i, o].negative_gradient['ub'][t] *
-                    block.invest[i, o])
+                    m.flows[i, o].max[t] *
+                    block.invest[i, o] *
+                    m.timeincrement[t])
         self.ub_negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS,
             rule=_ub_negative_gradient)
