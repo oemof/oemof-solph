@@ -257,12 +257,7 @@ def param_results(om):
     The dictionary is keyed by the nodes e.g. `results[(n, None)]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
     """
-    data = separate_flow_attrs(om)
-
-    for k, v in data.items():
-        print(k, v.keys())
-        #print('SCA ', data[k]['scalars'])
-        #print('SEQ (flat)', data[k]['sequences'])
+    flow_data = separate_flow_attrs(om)
 
     # print('NODES: #####')
     # for n in om.es.nodes:
