@@ -195,12 +195,13 @@ def param_results(om):
     """
 
     # @TODO: get stuff from om.flows and find unique nodes in om as well!?
+    # @TODO: flatten dicts in sequences dict ;-)
+    # go through:
+    # nodes -> (node, None)
+    # flows -> (node1, node2)
+    # separate between scalars and sequences
 
-    flows = om.flows
-
-    print('FLOWS: #####')
-
-    for k, v in flows.items():
+    for k, v in om.flows.items():
         exclusions = ('__', '_', 'registry')
         attrs = [i for i in dir(v)
                  if not (callable(i) or i.startswith(exclusions))]
@@ -217,7 +218,7 @@ def param_results(om):
             except TypeError:
                 scalars[a] = attr_value
 
-        # flatten dicts in sequences dict ;-)
+
         print('##### FLOW ', (k[0].label, k[1].label))
         print('SCA ', scalars)
         print('SEQ ', sequences)
@@ -227,10 +228,5 @@ def param_results(om):
     #     print(n.label)
     #     exclusions = ('__', '_', 'regis')
     #     print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
-
-    # go through:
-    # nodes -> (node, None)
-    # flows -> (node1, node2)
-    # separate between scalars and sequences
 
     return results
