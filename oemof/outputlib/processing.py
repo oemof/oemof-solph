@@ -209,10 +209,10 @@ def param_results(om):
         scalars, sequences = {}, {}
         for a in attrs:
             attr_value = getattr(v, a)
+            # check if attribute is iterable
+            # see: https://stackoverflow.com/questions/1952464/
+            # in-python-how-do-i-determine-if-an-object-is-iterable
             try:
-                # raise error if attribute is not iterable
-                # see: https://stackoverflow.com/questions/1952464/
-                # in-python-how-do-i-determine-if-an-object-is-iterable
                 check = (e for e in attr_value)
                 sequences[a] = attr_value
             except TypeError:
