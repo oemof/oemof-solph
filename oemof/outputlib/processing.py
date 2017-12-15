@@ -247,6 +247,52 @@ def separate_flow_attrs(om):
     return data
 
 
+def separate_node_attrs(om):
+    """
+    Create a dictionary with node scalars and series.
+
+    The dictionary is structured with flows as tuples and nested dictionaries
+    holding the scalars and series e.g.
+    {(node1, None): {'scalars': {'attr1': scalar, 'attr2': 'text'},
+    'sequences': {'attr1': iterable, 'attr2': iterable}}}
+
+    om : A solved oemof.solph.Model.
+
+    Returns
+    -------
+    dict
+    """
+
+    print('NODES: #####')
+    for n in om.es.nodes:
+        print(n.label)
+        exclusions = ('__', '_', 'regis')
+        print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
+
+    # data = {}
+    # for k, v in om.flows.items():
+    #     data[k] = {'scalars': {}, 'sequences': {}}
+    #
+    #     exclusions = ('__', '_', 'registry')
+    #     attrs = [i for i in dir(v)
+    #              if not (callable(i) or i.startswith(exclusions))]
+    #
+    #     for a in attrs:
+    #         attr_value = getattr(v, a)
+    #         # check if attribute is iterable
+    #         # see: https://stackoverflow.com/questions/1952464/
+    #         # in-python-how-do-i-determine-if-an-object-is-iterable
+    #         try:
+    #             check = (e for e in attr_value)
+    #             data[k]['sequences'][a] = attr_value
+    #         except TypeError:
+    #             data[k]['scalars'][a] = attr_value
+    #
+    #     data[k]['sequences'] = flatten(data[k]['sequences'])
+
+    return True
+
+
 def param_results(om):
     """
     Create a result dictionary containing node parameters.
@@ -258,11 +304,8 @@ def param_results(om):
     and flows e.g. `results[(n,n)]['sequences']`.
     """
     flow_data = separate_flow_attrs(om)
+    node_data = separate_node_attrs(om)
 
-    # print('NODES: #####')
-    # for n in om.es.nodes:
-    #     print(n.label)
-    #     exclusions = ('__', '_', 'regis')
-    #     print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
+    print(node_data)
 
     return results
