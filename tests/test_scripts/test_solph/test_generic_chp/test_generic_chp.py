@@ -62,8 +62,7 @@ def test_gen_chp():
             Eta_el_min_woDH=data['Eta_el_min_woDH'])},
         heat_output={bth: solph.Flow(
             Q_CW_min=data['Q_CW_min'])},
-        Beta=data['Beta'], back_pressure=False,
-        fixed_costs=0)
+        Beta=data['Beta'], back_pressure=False)
 
     # create an optimization problem and solve it
     om = solph.Model(es)

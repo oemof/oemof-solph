@@ -72,9 +72,9 @@ class Flow(SimpleBlock):
         .. math::
             \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
-    Additionally, if :attr:`fixed_costs` are set by the user:
-        .. math::
-            \sum_{(i, o)}  nominal\_value(i, o) \cdot fixed\_costs(i, o)
+    The expression can be accessed by :attr:`om.Flow.variable_costs` and
+    their value after optimization by :meth:`om.Flow.variable_costs()` .
+
 
     Additionally, if :attr:`positive}\_gradient['costs']` is set by the user:
         .. math::
@@ -82,10 +82,6 @@ class Flow(SimpleBlock):
             positive\_gradient\_costs
 
     The same works for `negative_gradient` costs.
-
-    The expression can be accessed by :attr:`om.Flow.fixed_costs` and
-    their value after optimization by :meth:`om.Flow.fixed_costs()` .
-    This works similar for variable costs with :attr:`*.variable_costs`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -234,7 +230,6 @@ class Flow(SimpleBlock):
             return 0
 
         variable_costs = 0
-        fixed_costs = 0
         gradient_costs = 0
 
         for i, o in self.FLOWS:
@@ -259,16 +254,10 @@ class Flow(SimpleBlock):
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
-            # add fixed costs if nominal_value is not None
-            if (m.flows[i, o].fixed_costs and
-                    m.flows[i, o].nominal_value is not None):
-                fixed_costs += (m.flows[i, o].nominal_value *
-                                m.flows[i, o].fixed_costs)
-
         self.variable_costs = Expression(expr=variable_costs)
         self.gradient_costs = Expression(expr=gradient_costs)
 
-        return fixed_costs + variable_costs + gradient_costs
+        return variable_costs + gradient_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -379,9 +368,10 @@ class InvestmentFlow(SimpleBlock):
         .. math::
             \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
 
-    Additionally, if :attr:`fixed_costs` are set by the user:
-        .. math::
-            \sum_{i, o} invest(i, o) \cdot fixed\_costs(i,o)
+    The expression can be accessed by
+    :attr:`om.InvestmentFlow.investment_costs` and their value after
+    optimization by :meth:`om.InvestmentFlow.investment_costs()` . This
+    works similar for gradient costs with :attr:`*.gradient_costs` etc.
 
     Additionally, if :attr:`positive_gradient['costs']` is set by the user:
         .. math::
@@ -389,10 +379,6 @@ class InvestmentFlow(SimpleBlock):
             positive\_gradient\_costs
 
     The same works for `negative_gradient` costs.
-
-    The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
-    their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
-    This works similar for variable costs with :attr:`*.variable_costs` etc.
     """
 
     def __init__(self, *args, **kwargs):
@@ -572,22 +558,16 @@ class InvestmentFlow(SimpleBlock):
             return 0
 
         m = self.parent_block()
-        fixed_costs = 0
-        variable_costs = 0
         investment_costs = 0
         gradient_costs = 0
+        variable_costs = 0
 
         for i, o in self.FLOWS:
-            # fixed costs
             if m.flows[i, o].variable_costs[0] is not None:
                 for t in m.TIMESTEPS:
                     variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
                                        m.flows[i, o].variable_costs[t])
 
-            if m.flows[i, o].fixed_costs is not None:
-                fixed_costs += (self.invest[i, o] *
-                                m.flows[i, o].fixed_costs)
-            # investment costs
             if m.flows[i, o].investment.ep_costs is not None:
                 investment_costs += (self.invest[i, o] *
                                      m.flows[i, o].investment.ep_costs)
@@ -611,11 +591,10 @@ class InvestmentFlow(SimpleBlock):
                                            'costs'])
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.fixed_costs = Expression(expr=fixed_costs)
         self.variable_costs = Expression(expr=variable_costs)
         self.gradient_costs = Expression(expr=gradient_costs)
 
-        return fixed_costs + variable_costs + investment_costs
+        return gradient_costs + variable_costs + investment_costs
 
 
 class Bus(SimpleBlock):

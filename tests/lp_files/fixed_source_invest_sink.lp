@@ -6,7 +6,6 @@ objective:
 +25 flow(electricityBus_excess_0)
 +25 flow(electricityBus_excess_1)
 +25 flow(electricityBus_excess_2)
-+20000000 ONE_VAR_CONSTANT
 
 s.t.
 
