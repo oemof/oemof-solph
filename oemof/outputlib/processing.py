@@ -213,7 +213,7 @@ def param_results(om):
         for a in attrs:
             attr_value = getattr(v, a)
             try:
-               _ = (e for e in attr_value)
+               check = (e for e in attr_value)
                print(a, type(attr_value), 'is iterable *****')
             except TypeError:
                print(a, type(attr_value), 'is not iterable')
