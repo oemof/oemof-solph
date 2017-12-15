@@ -181,3 +181,39 @@ def meta_results(om, undefined=False):
                         type(om.es.results[k1][0][k2]))
 
     return meta_res
+
+
+def param_results(om):
+    """
+    Create a result dictionary containing node parameters.
+
+    Results are written into a dictionary of pandas objects where
+    a Series holds all scalar values and a dataframe all sequences for nodes
+    and flows.
+    The dictionary is keyed by the nodes e.g. `results[(n, None)]['scalars']`
+    and flows e.g. `results[(n,n)]['sequences']`.
+    """
+
+    # @TODO: get stuff from om.flows and find unique nodes in om as well!?
+
+    flows = om.flows
+
+    print('FLOWS: #####')
+    for k, v in flows.items():
+        #print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
+        exclusions = ('__', '_', 'regis')
+        print(k, [i for i in dir(v) if not (callable(i) or i.startswith(exclusions))])
+
+    # print('NODES: #####')
+    # for n in om.es.nodes:
+    #     print(n.label)
+    #     exclusions = ('__', '_', 'regis')
+    #     print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
+
+
+    # go through:
+    # nodes -> (node, None)
+    # flows -> (node1, node2)
+    # separate between scalars and sequences
+
+    return results
