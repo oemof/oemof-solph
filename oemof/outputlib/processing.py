@@ -199,10 +199,24 @@ def param_results(om):
     flows = om.flows
 
     print('FLOWS: #####')
+
     for k, v in flows.items():
-        #print([i for i in dir(n) if not (callable(i) or i.startswith(exclusions))])
+        print('##### FLOW', (k[0].label, k[1].label))
+        #'oemof.solph.plumbing._Sequence'
+        #'NoneType'
+        # 'dict'
+        #'pandas.core.series.Series'
         exclusions = ('__', '_', 'regis')
-        print(k, [i for i in dir(v) if not (callable(i) or i.startswith(exclusions))])
+        attrs = [i for i in dir(v)
+                 if not (callable(i) or i.startswith(exclusions))]
+
+        for a in attrs:
+            attr_value = getattr(v, a)
+            try:
+               _ = (e for e in attr_value)
+               print(a, attr_value, 'is iterable *****')
+            except TypeError:
+               print(a, attr_value, 'is not iterable')
 
     # print('NODES: #####')
     # for n in om.es.nodes:
