@@ -54,17 +54,16 @@ Newly added required packages (via PyPi) are installed by performing a manual up
 Contribute to the documentation
 -------------------------------
 
-See the developer version of the documentation of the dev branch at
+If you want to contribute by improving the documentation (typos, grammar, comprehensibility), please use the developer version of the dev branch at
 `readthedocs.org <http://oemof.readthedocs.org/en/latest/>`_.
+Every fixed typo helps.
 
 Contribute to new components
 ----------------------------
                                                                                                                                                        
-You can develop a new component according to your needs. Therefore you can use the module oemof.solph.customs which collects custom components created by users and lowers the entry barrier for contributing.                
+You can develop a new component according to your needs. Therefore you can use the module oemof.solph.custom which collects custom components created by users and lowers the entry barrier for contributing.                
                                  
-Your code should fit to the :ref:`style_guidlines_label`, but not necessarily to the :ref:`naming_conventions_label`. Also compatiblity to the results-
-API must not be guaranteed. Further you do not need to test your components or adapt the documentation. These steps are all necessary once your custom
-component becomes a constant part of oemof (oemof.solph.components) and are described here: :ref:`_coding_requirements_label`. But in the first step have a look at existing custom components created by other users in oemof.solph.custom and easily create your own if you need.     
+Your code should fit to the :ref:`style_guidlines_label` and the docstring should be complete and hold the equations used in the constraints. But there are several steps you do not necessarily need to fulfill when contributing to oemof.solph.custom: you do not need to meet the :ref:`naming_conventions_label`. Also compatiblity to the results-API must not be guaranteed. Further you do not need to test your components or adapt the documentation. These steps are all necessary once your custom component becomes a constant part of oemof (oemof.solph.components) and are described here: :ref:`_coding_requirements_label`. But in the first step have a look at existing custom components created by other users in oemof.solph.custom and easily create your own if you need.     
 
 Collaboration with pull requests
 --------------------------------
@@ -77,9 +76,8 @@ How to create a pullrequest
 * Fork the oemof repository to your own github account.
 * Change, add or remove code.
 * Commit your changes.
-* Create a pull request and describe what you will do and why.
-* Choose reviewers and assignees.
-* Optionally assign a label and milestone.
+* Create a pull request and describe what you will do and why. Please use the pull request template we offer.
+* Optionally choose a label for your pull request, e.g. documentation, enhancement or bug.
 * Wait for approval.
 
 .. _coding_requirements_label:  
@@ -87,10 +85,10 @@ How to create a pullrequest
 Generally the following steps are required when changing, adding or removing code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Read the :ref:`style_guidlines_label` and :ref:`naming_conventions_label` and follow them
-* Add new :ref:`tests_label` according to what you have done
+* Add new tests according to what you have done
 * Add/change the documentation (new feature, API changes ...)
 * Add a whatsnew entry and your name to Contributors
-* Check if all tests still work including the example files in `oemof_examples <https://github.com/oemof/oemof_examples/>`_.
+* Check if all :ref:`tests_label` still work.
 
 .. _tests_label:
 
@@ -105,7 +103,6 @@ Run the following test before pushing a successful merge.
 .. code:: bash
 
     nosetests -w "/path/to/oemof" --with-doctest
-    python3 path/to/oemof/examples/oemof_full_check.py
 
 .. _style_guidlines_label:
 
