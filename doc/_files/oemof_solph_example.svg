@@ -32,7 +32,7 @@
       <ellipse rx="60" ry="18" clip-path="url(#clipPath2)" cx="248.3185" cy="640" stroke="none"/>
     </g>
     <g stroke-linecap="butt" transform="matrix(1,0,0,1,185,-287)" fill="white" text-rendering="geometricPrecision" font-family="sans-serif" shape-rendering="geometricPrecision" stroke="white" stroke-miterlimit="1.45">
-      <text x="212.7902" xml:space="preserve" y="644.1543" clip-path="url(#clipPath2)" stroke="none">Electricity 1</text>
+      <text x="212.7902" xml:space="preserve" y="644.1543" clip-path="url(#clipPath2)" stroke="none">electricity 1</text>
       <ellipse rx="60" fill="none" ry="18" clip-path="url(#clipPath2)" cx="248.3185" cy="640"/>
     </g>
     <g fill="gray" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke="gray">
@@ -81,7 +81,7 @@
       <ellipse rx="60" ry="18" clip-path="url(#clipPath2)" cx="513.2088" cy="640" stroke="none"/>
     </g>
     <g stroke-linecap="butt" transform="matrix(1,0,0,1,185,-287)" fill="white" text-rendering="geometricPrecision" font-family="sans-serif" shape-rendering="geometricPrecision" stroke="white" stroke-miterlimit="1.45">
-      <text x="477.6804" xml:space="preserve" y="644.1543" clip-path="url(#clipPath2)" stroke="none">Electricity 2</text>
+      <text x="477.6804" xml:space="preserve" y="644.1543" clip-path="url(#clipPath2)" stroke="none">electricity 2</text>
       <ellipse rx="60" fill="none" ry="18" clip-path="url(#clipPath2)" cx="513.2088" cy="640"/>
     </g>
     <g fill="green" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke="green">
@@ -110,7 +110,7 @@
     </g>
     <g text-rendering="geometricPrecision" stroke-miterlimit="1.45" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke-linecap="butt">
       <rect x="613.1306" y="625" clip-path="url(#clipPath2)" fill="none" width="110.202" rx="4" ry="4" height="30"/>
-      <text x="645.4387" y="644.1543" clip-path="url(#clipPath2)" fill="white" font-family="sans-serif" stroke="none" xml:space="preserve">storage</text>
+      <text x="645.4387" y="644.1543" clip-path="url(#clipPath2)" fill="white" font-family="sans-serif" stroke="none" xml:space="preserve">battery</text>
     </g>
     <g fill="maroon" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke="maroon">
       <ellipse rx="60" ry="18" clip-path="url(#clipPath2)" cx="-88" cy="640" stroke="none"/>
@@ -144,7 +144,7 @@
       <rect x="437.7779" width="132" height="30" y="344.8009" clip-path="url(#clipPath2)" stroke="none"/>
     </g>
     <g text-rendering="geometricPrecision" stroke-miterlimit="1.45" shape-rendering="geometricPrecision" font-family="sans-serif" transform="matrix(1,0,0,1,185,-287)" stroke-linecap="butt">
-      <text x="448.1403" xml:space="preserve" y="363.9552" clip-path="url(#clipPath2)" stroke="none">LinearTransformer</text>
+      <text x="448.1403" xml:space="preserve" y="363.9552" clip-path="url(#clipPath2)" stroke="none">Transformer</text>
       <rect fill="none" x="437.7779" width="132" height="30" y="344.8009" clip-path="url(#clipPath2)"/>
     </g>
     <g fill="rgb(0,0,51)" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke="rgb(0,0,51)">
@@ -152,7 +152,7 @@
     </g>
     <g text-rendering="geometricPrecision" stroke-miterlimit="1.45" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke-linecap="butt">
       <rect x="615.73" y="344.8009" clip-path="url(#clipPath2)" fill="none" width="110.202" rx="4" ry="4" height="30"/>
-      <text x="648.038" y="363.9552" clip-path="url(#clipPath2)" fill="white" font-family="sans-serif" stroke="none" xml:space="preserve">storage</text>
+      <text x="648.038" y="363.9552" clip-path="url(#clipPath2)" fill="white" font-family="sans-serif" stroke="none" xml:space="preserve">GenericStorage</text>
     </g>
     <g fill="green" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,185,-287)" stroke="green">
       <path d="M17.8739 374.801 L58.8739 344.801 L140.8739 344.801 L181.8739 374.801 Z" fill-rule="evenodd" clip-path="url(#clipPath2)" stroke="none"/>
