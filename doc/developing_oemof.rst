@@ -77,7 +77,6 @@ How to create a pullrequest
 * Change, add or remove code.
 * Commit your changes.
 * Create a pull request and describe what you will do and why. Please use the pull request template we offer.
-* Optionally choose a label for your pull request, e.g. documentation, enhancement or bug.
 * Wait for approval.
 
 .. _coding_requirements_label:  
