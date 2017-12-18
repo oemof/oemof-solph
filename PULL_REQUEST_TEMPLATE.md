@@ -1,4 +1,8 @@
-* Describe your pull request:
+* Describe your pull request as transparent as possible
+  * What functionality does it implement?
+  * Where is it located?
+  * How does the API look?
+  ...
 
 * Related issues?
 
