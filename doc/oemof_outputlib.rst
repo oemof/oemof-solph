@@ -29,26 +29,37 @@ Collecting results
 Collecting results can be done with the help of the processing module:
 
 .. code-block:: python
-
-    results = outputlib.processing.results(om)
     
+    results = outputlib.processing.results(om)
 
-Collecting meta results, i.e. information on the objective function, the problem
-and the solver:
+The results are returned in form of a python dictionary holding pandas dataframes.
+The dataframes contain scalar data (e.g. investments) and sequences describing nodes
+(with keys like (node, None) and flows between nodes (with keys like (node_1, node_2)).
+
+
+You can directly access the dataframes in the dictionary by using the keys.
+However, it might be most convenient to use the views module to collect information
+on a specific node. You can request all data related to a specific node by using
+either the node's variable name or its label:
+ 
+.. code-block:: python
+
+    data_heat = outputlib.views.node(results, 'heat')
+    
+Another option is to access data belonging to a previously defined grouping
+of nodes by the name of the grouping. Go 
+`here <http://oemof.readthedocs.io/en/latest/oemof_solph.html#the-grouping-module-sets>`_
+to learn how to work with groupings.
+
+
+A function for collecting and printing meta results, i.e. information on the objective function,
+the problem and the solver, is provided as well:
 
 .. code-block:: python
 
     meta_results = outputlib.processing.meta_results(om)
+    pp.pprint(meta_results)
     
-
-Collecting information on specific nodes
-----------------------------------------
-
-Information on specific node can be collected using the views module: 
-
-.. code-block:: python
-
-    heat = outputlib.views.node(results, 'heat')
 
 
 Drawing a graph representation of the energy system
