@@ -34,7 +34,7 @@ Collecting results can be done with the help of the processing module:
 
 The results are returned in form of a python dictionary holding pandas dataframes.
 The dataframes contain scalar data (e.g. investments) and sequences describing nodes
-(with keys like (node, None) and flows between nodes (with keys like (node_1, node_2)).
+(with keys like (node, None)) and flows between nodes (with keys like (node_1, node_2)).
 
 
 You can directly access the dataframes in the dictionary by using the keys.
