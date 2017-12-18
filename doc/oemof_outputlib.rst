@@ -36,7 +36,7 @@ The results are returned in form of a python dictionary holding pandas dataframe
 The dataframes contain scalar data (e.g. investments) and sequences describing nodes
 (with keys like (node, None)) and flows between nodes (with keys like (node_1, node_2)).
 You can directly extract the dataframes in the dictionary by using these keys,
- where "node" is the name of the object you want to address. If you want to address objects
+where "node" is the name of the object you want to address. If you want to address objects
 by their label, you can convert the results dictionary such that the keys are changed to
 strings given by the labels:
 
