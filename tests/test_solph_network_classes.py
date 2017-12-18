@@ -34,3 +34,5 @@ def test_flow_classes():
         solph.Flow(investment=solph.Investment(), nominal_value=4)
     with assert_raises(ValueError):
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
+    with assert_raises(AttributeError):
+        solph.Flow(fixed_costs=34)

@@ -95,7 +95,7 @@ If you first want to try out the collaborative process of software development y
 
 For any kind of contribution, please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
 
-Just contact us, if you have any questions!
+Just contact us if you have any questions!
 
 
 Join oemof with your own approach or project
@@ -106,3 +106,5 @@ You may want to add tools to analyse the results or something we never heard of.
 You want to add a GUI or your application to be linked to. We think, that working together in one framework will increase the probability that somebody will use and test your code (see :ref:`why_contribute_label`).
 
 Interested? Together we can talk about how to transfer your ideas into oemof or even integrate your code. Maybe we just link to your project and try to adept the API for a better fit in the future.
+
+Also consider joining our developer meetings which take place every 6 months (usually May and December). Just contact us!

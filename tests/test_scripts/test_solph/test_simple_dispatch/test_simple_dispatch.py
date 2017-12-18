@@ -110,7 +110,7 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
-    optimization_model = Model(es=energysystem)
+    optimization_model = Model(energysystem=energysystem)
 
     # solve problem
     optimization_model.solve(solver=solver)

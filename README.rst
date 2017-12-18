@@ -49,11 +49,16 @@ You can find a repository with all currently available examples for oemof on git
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
-Got further questions regarding oemof? 
+Got further questions on using oemof? 
 ======================================
 If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
-If you have questions regarding collaboration like code development or documentation fixing please use the issues on github.
+Join the developers!
+===================
+
+A warm welcome to all who want to join the developers and contribute to oemof. Information
+on the details and how to approach us can be found 
+`in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch

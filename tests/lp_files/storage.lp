@@ -8,7 +8,6 @@ objective:
 +24 flow(storage_electricityBus_0)
 +24 flow(storage_electricityBus_1)
 +24 flow(storage_electricityBus_2)
-+3500000 ONE_VAR_CONSTANT
 
 s.t.
 
