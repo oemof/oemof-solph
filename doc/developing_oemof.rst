@@ -70,13 +70,13 @@ Collaboration with pull requests
 
 To collaborate use the pull request functionality of github as described here: https://guides.github.com/activities/hello-world/
 
-How to create a pullrequest
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+How to create a pull request
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Fork the oemof repository to your own github account.
 * Change, add or remove code.
 * Commit your changes.
-* Create a pull request and describe what you will do and why. Please use the pull request template we offer.
+* Create a pull request and describe what you will do and why. Please use the pull request template we offer. It will be shown to you when you click on "New pull request".
 * Wait for approval.
 
 .. _coding_requirements_label:  
