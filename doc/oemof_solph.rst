@@ -57,6 +57,9 @@ Basically, there are four types of Nodes and every node has to be connected with
 
 Using these types it is already possible to set up a simple energy system model. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: _ADDLINK_
 
+An example of a simple energy system shows the usage of the nodes for 
+real world representations:
+
 .. 	image:: _files/oemof_solph_example.svg
    :scale: 10 %
    :alt: alternate text
