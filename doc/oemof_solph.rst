@@ -55,7 +55,7 @@ Basically, there are four types of Nodes and every node has to be connected with
  * Transformer (n inputs, n outputs)
  * GenericStorage (one input, one output)
 
-Using these types it is already possible to set up a simple energy system model. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: _ADDLINK_
+Using these types it is already possible to set up a simple energy system model. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
 An example of a simple energy system shows the usage of the nodes for 
 real world representations:
