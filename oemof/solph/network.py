@@ -47,7 +47,7 @@ class EnergySystem(es.EnergySystem):
         self.active_model = None
 
     def add_model(self, model):
-        """ Add a model to the energysystem
+        """ Add a model to the energysystem.
 
         Parameters
         ----------
@@ -84,7 +84,7 @@ class EnergySystem(es.EnergySystem):
         self.models[self.active_model].solve(solver='cbc')
 
     def get_results(self, model=None):
-        """ Get the results from a model
+        """ Get the results from a specified model.
 
         Parameters
         ----------
@@ -98,6 +98,7 @@ class EnergySystem(es.EnergySystem):
             self.results[model] = processing.results(self.models[model])
 
         return self.results[model]
+
 
 class Flow:
     r""" Defines a flow between two nodes.

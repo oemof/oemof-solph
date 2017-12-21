@@ -121,12 +121,6 @@ class BaseModel(po.ConcreteModel):
         # reduced costs
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
-    def results(self):
-        """ Returns a nested dictionary of the results of this optimization
-        """
-        result = processing.results(self)
-
-        return result
 
     def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
