@@ -13,7 +13,7 @@ __license__ = "GPLv3"
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
-
+from oemof.outputlib import processing
 
 class EnergySystem(es.EnergySystem):
     """ A variant of :class:`EnergySystem
@@ -42,6 +42,62 @@ class EnergySystem(es.EnergySystem):
             kwargs.get('groupings', []))
         super().__init__(**kwargs)
 
+        self.models = {}
+        self.results = {}
+        self.active_model = None
+
+    def add_model(self, model):
+        """ Add a model to the energysystem
+
+        Parameters
+        ----------
+        model : oemof.solph.BaseModel
+            A instance to the oemof.solph.BaseModel class.
+        """
+        self.models[model.name] = model
+
+    def use(self, model):
+        """ Tell the energysystem which models should be used for computation.
+
+        Parameters
+        ----------
+        model : oemof.solph.BaseModel or string
+            A instance to the oemof.solph.BaseModel class or string with the
+            name of the model.
+        """
+        if isinstance(model, str):
+            m = model
+        else:
+            m = model.name
+
+        setattr(self, "active_model", m)
+
+    def compute(self, solver='cbc'):
+        """ Compute the results for the active model of the energysystem
+        object.      .
+
+        Parameters
+        ----------
+        solver : string
+            Name of the solver to compute the results
+        """
+        self.models[self.active_model].solve(solver='cbc')
+
+    def get_results(self, model=None):
+        """ Get the results from a model
+
+        Parameters
+        ----------
+        model : string (optional)
+            Name of the model, if not set, the active model is used
+        """
+        if model is None:
+            model = self.active_model
+
+        if self.results.get(model) is None:
+            self.results[model] = processing.results(self.models[model])
+
+        return self.results[model]
 
 class Flow:
     r""" Defines a flow between two nodes.
