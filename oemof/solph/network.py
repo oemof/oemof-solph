@@ -70,7 +70,11 @@ class EnergySystem(es.EnergySystem):
         else:
             m = model.name
 
-        setattr(self, "active_model", m)
+        if m in self.models:
+            setattr(self, 'active_model', m)
+        else:
+            raise ValueError("Can not use model with name: {}!".format(m) +
+                             " Did you add the model to your energysystem?")
 
     def compute(self, solver='cbc'):
         """ Compute the results for the active model of the energysystem
