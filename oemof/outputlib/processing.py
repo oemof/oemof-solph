@@ -117,7 +117,7 @@ def results(om):
     for k in df_dict:
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
-        df_dict[k].index = om.es.timeindex
+        df_dict[k].index = om.timeindex
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]

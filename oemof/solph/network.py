@@ -10,6 +10,8 @@ connected.
 __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
+import logging
+
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
@@ -54,6 +56,13 @@ class EnergySystem(es.EnergySystem):
         model : oemof.solph.BaseModel
             A instance to the oemof.solph.BaseModel class.
         """
+        model._prepare({
+            'flows': self.flows(),
+            'nodes': self.nodes,
+            'groups': self.groups,
+            'timeindex': self.timeindex})
+        model._construct()
+
         self.models[model.name] = model
 
     def use(self, model):
@@ -83,9 +92,17 @@ class EnergySystem(es.EnergySystem):
         Parameters
         ----------
         solver : string
-            Name of the solver to compute the results
+            Name of the solver to compute the results.
         """
+        if self.results.get(self.active_model):
+            logging.warn("Results already exist for the model {}.".format(
+                         self.active_model) + " Result will be overwritten!")
+
         self.models[self.active_model].solve(solver='cbc')
+
+        # write results to results attribute
+        self.results[self.active_model] = processing.results(
+            self.models[self.active_model])
 
     def get_results(self, model=None):
         """ Get the results from a specified model.
