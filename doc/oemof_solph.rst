@@ -74,22 +74,23 @@ Bus
 All flows into and out of a bus are balanced. Therefore an instance of the Bus class represents a grid or network without losses. To define an instance of a Bus only a unique name is necessary.
 To make it easier to connect the bus to a component you can optionally assign a variable for later use.
 
+The following code shows the difference between a bus that is assigned to a variable and one that is not.
 
 .. code-block:: python
 
     solph.Bus(label='natural_gas')
     electricity_bus = solph.Bus(label='electricity')
 
-The following code shows the difference between a bus that is assigned to a variable and one that is not.
+You can directly add your busses (or any other component) to your EnergySystem or assign them to a variable and add them afterwards.
+The following code shows both options.
 
 .. code-block:: python
-
-    print(my_energysystem.groups['natural_gas']
-    print(electricity_bus)
-
-After creating the busses you have to add them to your EnergySystem.
+    my_energysystem.add(solph.Bus(label='gas'))
+    my_energysystem.add(solph.Bus(label='el'))
 
 .. code-block:: python
+    bgas = solph.Bus(label='gas')
+    bel = solph.Bus(label='el')
     my_energysystem.add(bgas, bel)
 
 .. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
