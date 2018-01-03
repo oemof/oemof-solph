@@ -37,19 +37,21 @@ Install the developer version
 -----------------------------
 
 To avoid problems make sure you have fully uninstalled previous versions of oemof. It is highly recommended to use a virtual environment. See this `virtualenv tutorial
-<https://docs.python.org/3/tutorial/venv.html>`_ for more help. Afterwards two steps are necessary to install the developer version:
+<https://docs.python.org/3/tutorial/venv.html>`_ for more help. Afterwards you have
+to clone the repository. See the `github documentation <https://help.github.com/articles/cloning-a-repository/>`_ to learn how to clone a repository.
+Now you can install the cloned repository using pip:
 
 .. code:: bash
 
-  git clone git@github.com:oemof/oemof.git
-  pip3 install -e /path/to/the/repository
+  pip install -e /path/to/the/repository
    
   
-Newly added required packages (via PyPi) are installed by performing a manual upgrade of oemof. Therefore, run
+Newly added required packages (via PyPi) can be installed by performing a manual
+ upgrade of oemof. In that case run:
 
 .. code:: bash
 
-  pip3 install --upgrade -e /path/to/the/repository
+  pip install --upgrade -e /path/to/the/repository
   
 Contribute to the documentation
 -------------------------------
