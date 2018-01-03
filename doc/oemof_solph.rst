@@ -46,17 +46,19 @@ Now you can start to add the components of the network.
 Add your components to the energy system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you have defined an instance of the EnergySystem class all components you define will automatically be added to your EnergySystem.
+After defining an instance of the EnergySystem class you have to add all nodes you define in the following to your EnergySystem.
 
 Basically, there are four types of Nodes and every node has to be connected with one or more buses. The connection between a component and a bus is the flow.
 
  * Sink (one input, no output)
  * Source (one output, no input)
- * LinearTransformer (one input, n outputs)
- * Storage (one input, one output)
+ * Transformer (n inputs, n outputs)
+ * GenericStorage (one input, one output)
 
-Using these types it is already possible to set up an simple energy model. But more types (e.g. flexible CHP transformer) are currently being developed.
-You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest.
+Using these types it is already possible to set up a simple energy system model. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
+
+An example of a simple energy system shows the usage of the nodes for 
+real world representations:
 
 .. 	image:: _files/oemof_solph_example.svg
    :scale: 10 %
@@ -72,18 +74,24 @@ Bus
 All flows into and out of a bus are balanced. Therefore an instance of the Bus class represents a grid or network without losses. To define an instance of a Bus only a unique name is necessary.
 To make it easier to connect the bus to a component you can optionally assign a variable for later use.
 
+The following code shows the difference between a bus that is assigned to a variable and one that is not.
 
 .. code-block:: python
 
     solph.Bus(label='natural_gas')
     electricity_bus = solph.Bus(label='electricity')
 
-The following code shows the difference between a bus that is assigned to a variable and one that is not.
+You can directly add your busses (or any other component) to your EnergySystem or assign them to a variable and add them afterwards.
+The following code shows both options.
 
 .. code-block:: python
+    my_energysystem.add(solph.Bus(label='gas'))
+    my_energysystem.add(solph.Bus(label='el'))
 
-    print(my_energysystem.groups['natural_gas']
-    print(electricity_bus)
+.. code-block:: python
+    bgas = solph.Bus(label='gas')
+    bel = solph.Bus(label='el')
+    my_energysystem.add(bgas, bel)
 
 .. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
 
@@ -252,11 +260,11 @@ Storage
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows, you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.Storage` class.
+Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class.
 
 .. code-block:: python
 
-    solph.Storage(
+    solph.GenericStorage(
         label='storage',
         inputs={b_el: solph.Flow(variable_costs=10)},
         outputs={b_el: solph.Flow(variable_costs=10)},
@@ -265,7 +273,7 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-.. note:: See the :py:class:`~oemof.solph.components.Storage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_optimise_es_label:
@@ -354,7 +362,7 @@ The following code shows a storage with an investment object.
 
 .. code-block:: python
 
-    solph.Storage(
+    solph.GenericStorage(
         label='storage', capacity_loss=0.01,
         inputs={electricity: solph.Flow()}, outputs={electricity: solph.Flow()},
         nominal_input_capacity_ratio=1/6, nominal_output_capacity_ratio=1/6,
