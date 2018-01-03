@@ -121,14 +121,14 @@ The parameter *'fixed=True'* means that the actual_value can not be changed by t
 
 .. code-block:: python
 
-    my_energysystem.add(solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
-        actual_value=my_demand_series, fixed=True, nominal_value=nominal_demand)}))
+    solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
+        actual_value=my_demand_series, fixed=True, nominal_value=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
 .. code-block:: python
 
-    my_energysystem.add(solph.Sink(label='electricity_excess', inputs={electricity_bus: solph.Flow()}))
+    solph.Sink(label='electricity_excess', inputs={electricity_bus: solph.Flow()})
 
 .. note:: The Sink class is only a plug and provides no additional constraints or variables.
 
@@ -144,13 +144,13 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
 .. code-block:: python
 
-    my_energysystem.add(solph.Source(
+    solph.Source(
         label='import_natural_gas',
         outputs={my_energysystem.groups['natural_gas']: solph.Flow(
-            nominal_value=1000, summed_max=1000000, variable_costs=50)}))
+            nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
-    my_energysystem.add(solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
-        actual_value=wind_power_feedin_series, nominal_value=1000000, fixed=True)}))
+    solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
+        actual_value=wind_power_feedin_series, nominal_value=1000000, fixed=True)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -170,11 +170,11 @@ A condensing power plant can be defined by a transformer with one input (fuel) a
     b_gas = solph.Bus(label='natural_gas')
     b_el = solph.Bus(label='electricity')
 
-    my_energysystem.add(solph.Transformer(
+    solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={b_el: solph.Flow(nominal_value=10e10)},
-        conversion_factors={electricity_bus: 0.58}))
+        conversion_factors={electricity_bus: 0.58})
 
 A CHP power plant would be defined in the same manner but with two outputs:
 
@@ -184,12 +184,12 @@ A CHP power plant would be defined in the same manner but with two outputs:
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    my_energysystem.add(solph.Transformer(
+    solph.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30),
                  b_th: Flow(nominal_value=40)},
-        conversion_factors={b_el: 0.3, b_th: 0.4}))
+        conversion_factors={b_el: 0.3, b_th: 0.4})
 
 A CHP power plant with 70% coal and 30% natural gas can be defined with two inputs and two outputs:
 
@@ -200,13 +200,13 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    my_energysystem.add(solph.Transformer(
+    solph.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow(), b_coal: Flow()},
         outputs={b_el: Flow(nominal_value=30),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4,
-                            b_coal: 0.7, b_gas: 0.3}))
+                            b_coal: 0.7, b_gas: 0.3})
 
 A heat pump would be defined in the same manner. New buses are defined to make the code cleaner:
 
@@ -220,12 +220,12 @@ A heat pump would be defined in the same manner. New buses are defined to make t
     # a scalar or a sequence.
     cop = 3
 
-    my_energysystem.add(solph.Transformer(
+    solph.Transformer(
         label='heat_pump',
         inputs={b_el: Flow(), b_th_low: Flow()},
         outputs={b_th_high: Flow()},
         conversion_factors={b_el: 1/cop,
-                            b_th_low: (cop-1)/cop}))
+                            b_th_low: (cop-1)/cop})
 
 If the low-temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and, therefore, a Transformer with one input is sufficient.
 
@@ -238,13 +238,13 @@ The ExtractionTurbineCHP inherits from the :ref:`transformer_class_label` class.
 
 .. code-block:: python
 
-    my_energysystem.add(solph.ExtractionTurbineCHP(
+    solph.ExtractionTurbineCHP(
         label='variable_chp_gas',
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
         conversion_factor_single_flow={b_el: 0.5}
-        ))
+        )
 
 The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
 
@@ -264,14 +264,14 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
 
 .. code-block:: python
 
-    my_energysystem.add(solph.GenericStorage(
+    solph.GenericStorage(
         label='storage',
         inputs={b_el: solph.Flow(variable_costs=10)},
         outputs={b_el: solph.Flow(variable_costs=10)},
         capacity_loss=0.001, nominal_value=50,
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8))
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
