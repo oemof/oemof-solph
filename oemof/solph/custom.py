@@ -26,7 +26,7 @@ class ElectricalBus(Bus):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.Bus`
     The objects are also used inside:
-     * :py:class:`~oemof.solph.blocks.ElectricalLine`
+     * :py:class:`~oemof.solph.custom.ElectricalLine`
 
     """
 
@@ -48,15 +48,18 @@ class ElectricalLine(Transformer):
         Reactance of the line to be modelled
 
     Notes
-    ------
+    -----
     * To use this object the connected buses need to be of the type
-   `py:class:`~oemof.solph.network.ElectricalBus`.
+      :py:class:`~oemof.solph.custom.ElectricalBus`.
     * It does not work together with flows that have set the attr.`nonconvex`,
-    i.e. unit commitment constraints are not possible
+      i.e. unit commitment constraints are not possible
     * Input and output of this component are set equal, therefore just use
-    either only the input or the output to parameterize.
+      either only the input or the output to parameterize.
     * Default attribute `min` of in/outflows is overwritten by -1 if not set
-    differently by the user
+      differently by the user
+
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.custom.ElectricalLineBlock`
 
     """
     def __init__(self, *args, **kwargs):

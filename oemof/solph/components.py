@@ -68,10 +68,10 @@ class GenericStorage(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object
-       present)
-     * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
-       present)
+     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no Investment
+       object present)
+     * :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` (if
+       Investment object present)
 
     Examples
     --------
@@ -555,7 +555,7 @@ class GenericCHP(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCHP`
+     * :py:class:`~oemof.solph.components.GenericCHPBlock`
     """
 
     def __init__(self, *args, **kwargs):
@@ -852,7 +852,7 @@ class ExtractionTurbineCHP(solph_Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
+     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
     """
 
     def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
@@ -1021,7 +1021,7 @@ class GenericCAES(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCAES`
+     * :py:class:`~oemof.solph.components.GenericCAESBlock`
     """
 
     def __init__(self, *args, **kwargs):

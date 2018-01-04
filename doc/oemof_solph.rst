@@ -43,19 +43,14 @@ This index can be used to define the EnergySystem:
 Now you can start to add the components of the network.
 
 
-Add your components to the energy system
+Add components to the energy system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 After defining an instance of the EnergySystem class you have to add all nodes you define in the following to your EnergySystem.
 
-Basically, there are four types of Nodes and every node has to be connected with one or more buses. The connection between a component and a bus is the flow.
+Basically, there are two types of *nodes* - *components* and *buses*. Every Component has to be connected with one or more *buses*. The connection between a *component* and a *bus* is the *flow*.
 
- * Sink (one input, no output)
- * Source (one output, no input)
- * Transformer (n inputs, n outputs)
- * GenericStorage (one input, one output)
-
-Using these types it is already possible to set up a simple energy system model. You can add your own types in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
+All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
 An example of a simple energy system shows the usage of the nodes for 
 real world representations:
@@ -68,30 +63,42 @@ real world representations:
 The figure shows a simple energy system using the four basic network classes and the Bus class.
 If you remove the transmission line (transport 1 and transport 2) you get two systems but they are still one energy system in terms of solph and will be optimised at once.
 
+There are different ways to add components to an *energy system*. The following line adds a *bus* object to the *energy system* defined above.
+
+.. code-block:: python
+
+    my_energysystem.add(solph.Bus())
+
+It is also possible to assign the bus to a variable and add it afterwards. In that case it is easy to add as many objects as you like.
+
+.. code-block:: python
+
+    my_bus1 = solph.Bus()
+    my_bus2 = solph.Bus()
+    my_energysystem.add(bgas, bel)
+
+Therefore it is also possible to add lists or dictionaries with components but you have to dissolve them.
+
+.. code-block:: python
+
+    # add a list
+    my_energysystem.add(*my_list)
+
+    # add a dictionary
+    my_energysystem.add(*my_dictionary.values())
+
+
 Bus
 +++
 
-All flows into and out of a bus are balanced. Therefore an instance of the Bus class represents a grid or network without losses. To define an instance of a Bus only a unique name is necessary.
-To make it easier to connect the bus to a component you can optionally assign a variable for later use.
+All flows into and out of a *bus* are balanced. Therefore an instance of the Bus class represents a grid or network without losses. To define an instance of a Bus only a unique label is necessary. If you do not set a label a random label is used but this makes it difficult to get the results later on.
 
-The following code shows the difference between a bus that is assigned to a variable and one that is not.
+To make it easier to connect the bus to a component you can optionally assign a variable for later use.
 
 .. code-block:: python
 
     solph.Bus(label='natural_gas')
     electricity_bus = solph.Bus(label='electricity')
-
-You can directly add your busses (or any other component) to your EnergySystem or assign them to a variable and add them afterwards.
-The following code shows both options.
-
-.. code-block:: python
-    my_energysystem.add(solph.Bus(label='gas'))
-    my_energysystem.add(solph.Bus(label='el'))
-
-.. code-block:: python
-    bgas = solph.Bus(label='gas')
-    bel = solph.Bus(label='el')
-    my_energysystem.add(bgas, bel)
 
 .. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
 
@@ -107,11 +114,105 @@ For all parameters see the API documentation of the :py:class:`~oemof.solph.netw
 
     solph.Flow()
 
+Oemof has different types of *flows* but you should be aware that you cannot connect every *flow* type with every *component*.
+
 .. note:: See the :py:class:`~oemof.solph.network.Flow` class for all parameters and the mathematical background.
 
+Components
+++++++++++
 
-Sink
-++++
+Components are divided in three categories. Basic components (solph.network), additional components (solph.components) and custom components (solph.custom). The custom section was created to lower the entry barrier for new components. Be aware that these components are in an experimental state. Let us know if you have used and tested these components. This is the first step to move them to the components section.
+
+See :ref:`oemof_solph_components_label` for a list of all components.
+
+
+.. _oemof_solph_optimise_es_label:
+
+Optimise your energy system
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The typical optimisation of an energy system in solph is the dispatch optimisation, which means that the use of the sources is optimised to satisfy the demand at least costs.
+Therefore, variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material.
+You can deviate from this scheme but you should keep it consistent to make it understandable for others.
+
+Costs do not have to be monetary costs but could be emissions or other variable units.
+
+Furthermore, it is possible to optimise the capacity of different components (see :ref:`investment_mode_label`).
+
+.. code-block:: python
+
+    # set up a simple least cost optimisation
+    om = solph.Model(my_energysystem)
+
+    # solve the energy model using the CBC solver
+    om.solve(solver='cbc', solve_kwargs={'tee': True})
+
+If you want to analyse the lp-file to see all equations and bounds you can write the file to you disc. In that case you should reduce the timesteps to 3. This will increase the readability of the file.
+
+.. code-block:: python
+
+    # set up a simple least cost optimisation
+    om = solph.Model(my_energysystem)
+
+    # write the lp file for debugging or other reasons
+    om.write('path/my_model.lp', io_options={'symbolic_solver_labels': True})
+
+Analysing your results
+^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to analyse your results, you should first dump your EnergySystem instance, otherwise you have to run the simulation again.
+
+.. code-block:: python
+
+    my_energysystem.results = processing.results(om)
+    my_energysystem.dump('my_path', 'my_dump.oemof')
+
+If you need the meta results of the solver you can do the following:
+
+.. code-block:: python
+
+    my_energysystem.results['main'] = processing.results(om)
+    my_energysystem.results['meta'] = processing.meta_results(om)
+    my_energysystem.dump('my_path', 'my_dump.oemof')
+
+To restore the dump you can simply create an EnergySystem instance and restore your dump into it.
+
+.. code-block:: python
+
+    import oemof.solph as solph
+    my_energysystem = solph.EnergySystem()
+    my_energysystem.restore('my_path', 'my_dump.oemof')
+    results = my_energysystem.results
+
+    # If you use meta results do the following instead of the previous line.
+    results = my_energysystem.results['main']
+    meta = my_energysystem.results['meta']
+
+
+If you call dump/restore without any parameters, the dump will be stored as *'es_dump.oemof'* into the *'.oemof/dumps/'* folder created in your HOME directory.
+
+See :ref:`oemof_outputlib_label` to learn how to process, plot and analyse the results.
+
+
+.. _oemof_solph_components_label:
+
+Solph components
+----------------
+
+ * :ref:`oemof_solph_components_sink_label`
+ * :ref:`oemof_solph_components_source_label`
+ * :ref:`oemof_solph_components_transformer_label`
+ * :ref:`oemof_solph_components_extraction_turbine_chp_label`
+ * :ref:`oemof_solph_components_generic_caes_label`
+ * :ref:`oemof_solph_components_generic_chp_label`
+ * :ref:`oemof_solph_components_generic_storage_label`
+ * :ref:`oemof_solph_custom_electrical_line_label`
+ * :ref:`oemof_solph_custom_link_label`
+
+.. _oemof_solph_components_sink_label:
+
+Sink (basic)
+^^^^^^^^^^^^
 
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
@@ -133,8 +234,10 @@ In contrast to the demand sink the excess sink has normally less restrictions bu
 .. note:: The Sink class is only a plug and provides no additional constraints or variables.
 
 
-Source
-++++++
+.. _oemof_solph_components_source_label:
+
+Source (basic)
+^^^^^^^^^^^^^^
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
@@ -154,10 +257,10 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
-.. _transformer_class_label:
+.. _oemof_solph_components_transformer_label:
 
-Transformer
-+++++++++++
+Transformer (basic)
+^^^^^^^^^^^^^^^^^^^
 
 An instance of the Transformer class can represent a node with multiple input and output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis, a cooling device or a heat pump.
 The efficiency has to be constant within one time step to get a linear transformation.
@@ -231,10 +334,12 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 
 .. note:: See the :py:class:`~oemof.solph.network.Transformer` class for all parameters and the mathematical background.
 
-ExtractionTurbineCHP
-+++++++++++++++++++++++++++
+.. _oemof_solph_components_extraction_turbine_chp_label:
 
-The ExtractionTurbineCHP inherits from the :ref:`transformer_class_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+ExtractionTurbineCHP (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transformer_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -246,7 +351,7 @@ The ExtractionTurbineCHP inherits from the :ref:`transformer_class_label` class.
         conversion_factor_single_flow={b_el: 0.5}
         )
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of the :ref:`variable_chp_examples_label` below.
+The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of an example in the `oemof example repository <https://github.com/oemof/oemof_examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
@@ -255,8 +360,30 @@ The key of the parameter *'conversion_factor_single_flow'* will indicate the mai
 
 .. note:: See the :py:class:`~oemof.solph.components.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
-Storage
-+++++++
+
+.. _oemof_solph_components_generic_caes_label:
+
+GenericCAES (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Compressed Air Energy Storage (CAES).
+
+.. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
+
+.. _oemof_solph_components_generic_chp_label:
+
+
+GenericCHP (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+With the GenericCHP class combined heat and power plants can be modelled with more details.
+
+.. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
+
+.. _oemof_solph_components_generic_storage_label:
+
+GenericStorage (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows, you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*.
@@ -276,54 +403,24 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
 
-.. _oemof_solph_optimise_es_label:
+.. _oemof_solph_custom_electrical_line_label:
 
-Optimise your energy system
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ElectricalLine (custom)
+^^^^^^^^^^^^^^^^^^^^^^^
 
-The typical optimisation of an energy system in solph is the dispatch optimisation, which means that the use of the sources is optimised to satisfy the demand at least costs.
-Therefore, variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material.
-You can deviate from this scheme but you should keep it consistent to make it understandable for others.
+Electrical line.
 
-Costs do not have to be monetary costs but could be emissions or other variable units.
-
-Furthermore, it is possible to optimise the capacity of different components (see :ref:`investment_mode_label`).
-
-.. code-block:: python
-
-    import os
-    # set up a simple least cost optimisation
-    om = solph.Model(my_energysystem)
-
-    # write the lp file for debugging or other reasons
-    om.write(os.path.join(path, 'my_model.lp'), io_options={'symbolic_solver_labels': True})
-
-    # solve the energy model using the CBC solver
-    om.solve(solver='cbc', solve_kwargs={'tee': True})
+.. note:: See the :py:class:`~oemof.solph.custom.ElectricalLine` class for all parameters and the mathematical background.
 
 
-Analysing your results
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _oemof_solph_custom_link_label:
 
-If you want to analyse your results, you should first dump your EnergySystem instance, otherwise you have to run the simulation again.
+Link (custom)
+^^^^^^^^^^^^^
 
-.. code-block:: python
+Link.
 
-    my_energysystem.dump('my_path', 'my_dump.oemof')
-
-To restore the dump you can simply create an EnergySystem instance and restore your dump into it.
-
-.. code-block:: python
-
-    import pandas as pd
-    import oemof.solph as solph
-    my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
-    new_energysystem = solph.EnergySystem(timeindex=my_index)
-    new_energysystem.restore('my_path', 'my_dump.oemof')
-
-If you call dump/restore with any parameters, the dump will be stored as *'es_dump.oemof'* into the *'.oemof/dumps/'* folder created in your HOME directory.
-
-In the outputlib the results will be converted to a pandas MultiIndex DataFrame. This makes it easy to plot, save or process the results. See :ref:`oemof_outputlib_label` for more information.
+.. note:: See the :py:class:`~oemof.solph.custom.Link` class for all parameters and the mathematical background.
 
 
 .. _investment_mode_label:
@@ -369,7 +466,7 @@ The following code shows a storage with an investment object.
         inflow_conversion_factor=0.99, outflow_conversion_factor=0.8,
         investment=solph.Investment(ep_costs=epc))
 
-.. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
+.. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.
 
 
 Mixed Integer (Linear) Problems
@@ -416,9 +513,7 @@ information see the API of the BinaryFlow() class and its corresponding block cl
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.Model`.
-For now, you have to check out the examples in the :ref:`solph_examples_flex_label` example.
-
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See the `example repository <https://github.com/oemof/oemof_examples>`_ to learn how to do it.
 
 
 The Grouping module (Sets)
@@ -454,14 +549,16 @@ to group two connected nodes with their connecting flow and others
 (see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
 
 
-Using the CSV reader
------------------------------------------------------
+Using the Excel (csv) reader
+----------------------------
 
-Alternatively to a manual creation of energy system component objects as describe above, these can also be created from a pre-defined csv-structure via a csv-reader.
-Technically speaking, the csv-reader is a simple parser that creates oemof nodes and their respective flows by iterating line by line through texts files of a specific format.
-The original idea behind this approach was to lower the entry barrier for new users, to have some sort of GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
+Alternatively to a manual creation of energy system component objects as describe above, can also be created from a excel sheet (libreoffice, gnumeric...).
 
-Both, investment and dispatch models can be modelled. Two examples and more information about the functionality can be found in the :ref:`solph_examples_csv_label` section.
+The idea is to create different sheets within one spreadsheet file for different components. Afterwards you can loop over the rows with the attributes in the columns. The name of the columns may differ from the name of the attribute. You may even create two sheets for the GenericStorage class with attributes such as C-rate for batteries or capacity of turbine for a PHES.
+
+Once you have create your specific excel reader you can lower the entry barrier for other users. It is some sort of a GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
+
+See the `example repository <https://github.com/oemof/oemof_examples>`_ for an excel reader example.
 
 
 .. _solph_examples_label:
@@ -469,52 +566,4 @@ Both, investment and dispatch models can be modelled. Two examples and more info
 Solph Examples
 --------------
 
-The following examples are available for solph. See section ":ref:`check_installation_label`" to learn how to execute the examples directly. Be aware that the CBC solver has to be installed to run the examples (:ref:`solver_label`). If you want to use a different solver, you can download the examples below and change the solver name manually.
-
-.. _solph_examples_csv_label:
-
-Csv_reader
-^^^^^^^^^^
-
-The csv-reader provides an easy to use interface to the solph library. The objects are defined using csv-files and are automatically created. There are two examples available.
-
- * Dispatch example (:download:`source file <../examples/solph/csv_reader/dispatch/dispatch.py>`, :download:`data file 1 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system.csv>`, :download:`data file 2 <../examples/solph/csv_reader/dispatch/scenarios/example_energy_system_seq.csv>`)
- * Investment example (:download:`source file <../examples/solph/csv_reader/investment/investment.py>`, :download:`data file 1 <../examples/solph/csv_reader/investment/data/nodes_flows.csv>`, :download:`data file 2 <../examples/solph/csv_reader/investment/data/nodes_flows_seq.csv>`).
-
-.. _solph_examples_flex_label:
-
-Flexible modelling
-^^^^^^^^^^^^^^^^^^^^
-
-It is also possible to pass constraints to the model that are not provided by solph but defined in your application.
-Inside this example two different kind of constraints are added: (1) emission constraints, (2)
-shared constraints between flows. To understand the example it might be useful to know a little bit about
-the pyomo-package and how constraints are defined. Moreover, you should have understood the basic underlying oemof
-structure. This example shows how to do it (:download:`source file <../examples/solph/flexible_modelling/add_constraints.py>`).
-
-Dispatch modelling
-^^^^^^^^^^^^^^^^^^^
-
-Dispatch modelling is a typical thing to do with solph. However cost does not have to be monetary but can be emissions etc. In this example
-a least cost dispatch of different generators that meet an inelastic demand is undertaken. Some of the generators are renewable energies with
-marginal costs of zero. Additionally, it shows how combined heat and power units may be easily modelled as well.
-(:download:`source file <../examples/solph/simple_dispatch/simple_dispatch.py>`, :download:`data file <../examples/solph/simple_dispatch/input_data.csv>`).
-
-Storage investment
-^^^^^^^^^^^^^^^^^^
-
-The investment object can be used to optimise the capacity of a component. In this example all components are given but the electrical storage. The optimal size of the storage will be determined (:download:`source file <../examples/solph/storage_investment/storage_investment.py>`, :download:`data file <../examples/solph/storage_investment/storage_investment.csv>`).
-
-.. _variable_chp_examples_label:
-
-Variable chp
-^^^^^^^^^^^^
-
-This example is not a real use case of an energy system but an example to show how a variable combined heat and power plant (chp) works in contrast to a fixed chp (eg. block device).
-
-.. 	image:: _files/example_variable_chp.svg
-   :scale: 10 %
-   :alt: example_variable_chp.svg
-   :align: center
-
-Both chp plants distribute power and heat to separate heat and power buses, which have a heat and power demand. The plot shows that the fixed chp produces heat and power excess and therefore uses more natural gas than then variable chp. (:download:`source file <../examples/solph/variable_chp/variable_chp.py>`, :download:`data file <../examples/solph/variable_chp/variable_chp.csv>`)
+See the `example repository <https://github.com/oemof/oemof_examples>`_ for various solph examples. The repository has sections for each major release.
