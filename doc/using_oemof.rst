@@ -59,29 +59,26 @@ oemof-solph
 The :ref:`oemof_solph_label` library is part of the oemof installation. Solph is designed to create and solve linear or mixed-integer 
 linear optimization problems. It is based on optimization modelling language pyomo.
 
-To use solph at least one linear solver has to installed on you system. See the `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_ to learn which solvers are supported. Solph is tested with the open source solver `cbc` and the `gurobi` solver (free for academic use). The open `glpk` solver recently showed some odd behaviour.
+To use solph at least one linear solver has to be installed on you system. See the `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_ to learn which solvers are supported. Solph is tested with the open source solver `cbc` and the `gurobi` solver (free for academic use). The open `glpk` solver recently showed some odd behaviour.
 
 The formulation of the energy system is based on the oemof-network library but contains additional components such as storages. Furthermore the network class are enhanced with additional parameters such as efficiencies, bounds, cost and more. See the API documentation for more details. Try the `solph examples <https://github.com/oemof/oemof/tree/master/examples>`_ to learn how to build a linear energy system.
 
 oemof-outputlib
 ===============
-The :ref:`oemof_outputlib_label` library is part of the oemof installation. The outputlib presents the results of an optimisation as a `pandas MultiIndex DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_. This makes it easy to process or plot the results using the capabilities of the pandas library.
+The :ref:`oemof_outputlib_label` library is part of the oemof installation. The outputlib collects the results of an optimisation in a `pandas MultiIndex DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_. This makes it easy to process or plot the results using the capabilities of the pandas library.
 
-The following code returns the output (flow from power plant to electricity bus) of a power plant. The result is written to a csv file using the pandas `i/o methods <http://pandas.pydata.org/pandas-docs/stable/io.html>`_. To get the input of the power plant the type has to be changed to `from_bus`.
+The following code collects the results in a pandas DataFrame and selects the data
+for a specific component, in this case 'heat'.
 
 .. code-block:: python
-    
-    pp_gas = myresults.slice_by(obj_label='pp_gas', type='to_bus',
-                                date_from='2012-01-01 00:00:00',
-                                date_to='2012-12-31 23:00:00')
-    pp_gas.to_csv('pp_gas.csv')
-    
-Beside this the outputlib provides some basic plot methods to create nice plots. The oemof plot methods can be used additionally and can easily be combined with the plot capabilities of pandas and matplotlib.
 
-.. 	image:: _files/example_figures.png
-   :scale: 100 %
-   :alt: alternate text
-   :align: center
+    results = outputlib.processing.results(om)
+    heat = outputlib.views.node(results, 'heat')
+    
+To visualize results, either use `pandas own visualization functionality <http://pandas.pydata.org/pandas-docs/version/0.18.1/visualization.html>`_, matplotlib or the plot library of your
+choice. Some existing plot methods can be found in a separate repository 
+`oemof_visio <https://github.com/oemof/oemof_visio>`_
+which can be helpful when looking for a quick way to create a plot.
 
 
 feedinlib
