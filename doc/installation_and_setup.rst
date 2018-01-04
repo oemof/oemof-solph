@@ -24,7 +24,7 @@ As oemof is designed as a Python package it is mandatory to have Python 3 instal
 
   pip install oemof
 
-If you do not yet have pip installed in your python environment, see section :ref:`additional_packages_Linux` below for further help.
+To use pip you have to install the pypi package. Normally pypi is part of your virtual environment.
 
 Using Linux repositories to install Python
 ------------------------------------------
@@ -105,7 +105,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip install oemof
 
-If pip is not part of your python environment, see section :ref:`additional_packages_Win` below for further help or use WinPython/Anaconda (see below).
+If pip is not part of your python environment, you have to install the pypi package.
 
 
 Using WinPython (community driven)
