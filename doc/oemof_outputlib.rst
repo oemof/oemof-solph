@@ -17,9 +17,7 @@ a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`_.
     :backlinks: top
 
 The main purpose of the outputlib is to collect and organise results.
-It converts the results to a dictionary holding pandas DataFrames and Series for all nodes and flows.
-This way we can make use of the full power of the pandas package available to process
-the results. 
+It gives back the results as a python dictionary holding scalar values and pandas DataFrames for all nodes and flows between them. This way we can make use of the full power of the pandas package available to process the results. 
 
 See the `pandas documentation <http://pandas.pydata.org/pandas-docs/stable/>`_  to learn how to `visualise <http://pandas.pydata.org/pandas-docs/version/0.18.1/visualization.html>`_, `read or write <http://pandas.pydata.org/pandas-docs/stable/io.html>`_ or how to `access parts of the DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_ to process them.
 
@@ -32,10 +30,10 @@ Collecting results can be done with the help of the processing module:
     
     results = outputlib.processing.results(om)
 
-The results are returned in form of a python dictionary holding pandas dataframes.
-The dataframes contain scalar data (e.g. investments) and sequences describing nodes
-(with keys like (node, None)) and flows between nodes (with keys like (node_1, node_2)).
-You can directly extract the dataframes in the dictionary by using these keys,
+The results are returned in form of a python dictionary holding scalar values (e.g. investments)
+and sequences. The scalars and sequences describe nodes (with keys like (node, None))
+and flows between nodes (with keys like (node_1, node_2)). Scalars are just scalar values, whereas
+sequences are stored as pandas DataFrames. You can directly extract the data in the dictionary by using these keys,
 where "node" is the name of the object you want to address. If you want to address objects
 by their label, you can convert the results dictionary such that the keys are changed to
 strings given by the labels:
