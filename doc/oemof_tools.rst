@@ -10,16 +10,17 @@ The oemof tools package contains little helpers to create your own application. 
     :depth: 1
     :local:
     :backlinks: top
-    
-Helpers
--------
-
-Excess oemof's default path. See the API-doc of :py:mod:`~oemof.tools.helpers` for all details.
 
 Economics
 ---------
 
 Calculate the annuity. See the API-doc of :py:func:`~oemof.tools.economics.annuity` for all details.
+
+Helpers
+-------
+
+Excess oemof's default path. See the API-doc of :py:mod:`~oemof.tools.helpers` for all details.
+
 
 Logger
 -------

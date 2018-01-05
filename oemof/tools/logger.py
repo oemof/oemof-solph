@@ -62,8 +62,8 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     Examples
     --------
     To define the default logger you have to import the python logging
-     library and this function. The first logging message should be the
-     path where the log file is saved to.
+    library and this function. The first logging message should be the
+    path where the log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
