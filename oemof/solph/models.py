@@ -188,22 +188,18 @@ class BaseModel(po.ConcreteModel):
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
             self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
             self.results = results
         elif status == "ok" and termination_condition == "unknown":
             logging.warning("Optimization with unknown termination condition."
                             " Writing output anyway...")
             self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
             self.results = results
         elif status == "warning" and termination_condition == "other":
             logging.warning("Optimization might be sub-optimal."
                             " Writing output anyway...")
             self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
             self.results = results
         else:
-            # storage results in result dictionary of energy system
             self.results = results
             logging.error(
                 "Optimization failed with status %s and terminal condition %s"
