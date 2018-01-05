@@ -216,8 +216,7 @@ class BaseModel(po.ConcreteModel):
 
 
 class Model(BaseModel):
-    """ An  energy system model for operational and investment
-    optimization.
+    """ An energy system model for operational and investment optimization.
 
     Parameters
     ----------
