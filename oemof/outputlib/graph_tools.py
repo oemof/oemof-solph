@@ -172,7 +172,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
             plot = False
 
         # add edge labels for all edges
-        if edge_labels is True:
+        if edge_labels is True and plt:
             labels = nx.get_edge_attributes(grph, 'weight')
             nx.draw_networkx_edge_labels(grph, pos=pos, edge_labels=labels)
 
