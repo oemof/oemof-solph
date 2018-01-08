@@ -9,6 +9,7 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import os
+from collections import MutableMapping
 
 
 def get_basic_path():
@@ -28,3 +29,27 @@ def extend_basic_path(subfolder):
     if not os.path.isdir(extended_path):
         os.mkdir(extended_path)
     return extended_path
+
+
+def flatten(d, parent_key='', sep='_'):
+    """
+    Flatten dictionary by compressing keys.
+
+    See: https://stackoverflow.com/questions/6027558/
+         flatten-nested-python-dictionaries-compressing-keys
+
+    d : dictionary
+    sep : separator for flattening keys
+
+    Returns
+    -------
+    dict
+    """
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + str(k) if parent_key else str(k)
+        if isinstance(v, MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)

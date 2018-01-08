@@ -8,11 +8,12 @@ Information about the possible usage is provided within the examples.
 __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
-import collections
 import pandas as pd
-from oemof.network import Node, Outputs, Inputs
+from oemof.network import Node
+from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var
+import oemof.solph
 
 
 def get_tuple(x):
@@ -184,31 +185,77 @@ def meta_results(om, undefined=False):
     return meta_res
 
 
-def flatten(d, parent_key='', sep='_'):
-    """
-    Flatten dictionary by compressing keys.
+def __separate_attrs(om, get_flows=False, exclude_none=True):
+    def detect_scalars_and_sequences(com):
+        com_data = {'scalars': {}, 'sequences': {}}
 
-    See: https://stackoverflow.com/questions/6027558/
-         flatten-nested-python-dictionaries-compressing-keys
+        exclusions = ('__', '_', 'registry', 'inputs', 'outputs')
+        attrs = [i for i in dir(com)
+                 if not (callable(i) or i.startswith(exclusions))]
 
-    d : dictionary
-    sep : separator for flattening keys
+        for a in attrs:
+            attr_value = getattr(com, a)
 
-    Returns
-    -------
-    dict
-    """
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
+            # Iterate trough investment and add scalars and sequences with
+            # "investment" prefix to component data:
+            if isinstance(attr_value, oemof.solph.Investment):
+                invest_data = detect_scalars_and_sequences(attr_value)
+                com_data['scalars'].update(
+                    {
+                        'investment_' + str(k): v
+                        for k, v in invest_data['scalars'].items()
+                     }
+                )
+                com_data['sequences'].update(
+                    {
+                        'investment_' + str(k): v
+                        for k, v in invest_data['sequences'].items()
+                    }
+                )
+                continue
 
+            if isinstance(attr_value, str):
+                com_data['scalars'][a] = attr_value
+                continue
 
-def separate_flow_attrs(om):
+            # check if attribute is iterable
+            # see: https://stackoverflow.com/questions/1952464/
+            # in-python-how-do-i-determine-if-an-object-is-iterable
+            try:
+                _ = (e for e in attr_value)
+                com_data['sequences'][a] = attr_value
+            except TypeError:
+                com_data['scalars'][a] = attr_value
+
+        com_data['sequences'] = flatten(com_data['sequences'])
+        move_undetected_scalars(com_data)
+        if exclude_none:
+            remove_nones(com_data)
+
+        return com_data
+
+    def move_undetected_scalars(com):
+        for key, value in list(com['sequences'].items()):
+            if isinstance(value, str):
+                com['scalars'][key] = value
+                del com['sequences'][key]
+                continue
+            try:
+                _ = (e for e in value)
+            except TypeError:
+                com['scalars'][key] = value
+                del com['sequences'][key]
+
+    def remove_nones(com):
+        for key, value in list(com['scalars'].items()):
+            if value is None:
+                del com['scalars'][key]
+        for key, value in list(com['sequences'].items()):
+            if (
+                    len(value) == 0 or
+                    value[0] is None
+            ):
+                del com['sequences'][key]
     """
     Create a dictionary with flow scalars and series.
 
@@ -223,74 +270,18 @@ def separate_flow_attrs(om):
     -------
     dict
     """
+    components = om.flows if get_flows else om.es.nodes
+
     data = {}
-    for k, v in om.flows.items():
-        data[k] = {'scalars': {}, 'sequences': {}}
-
-        exclusions = ('__', '_', 'registry')
-        attrs = [i for i in dir(v)
-                 if not (callable(i) or i.startswith(exclusions))]
-
-        for a in attrs:
-            attr_value = getattr(v, a)
-            # check if attribute is iterable
-            # see: https://stackoverflow.com/questions/1952464/
-            # in-python-how-do-i-determine-if-an-object-is-iterable
-            try:
-                check = (e for e in attr_value)
-                data[k]['sequences'][a] = attr_value
-            except TypeError:
-                data[k]['scalars'][a] = attr_value
-
-        data[k]['sequences'] = flatten(data[k]['sequences'])
+    for com_key in components:
+        component = components[com_key] if get_flows else com_key
+        component_data = detect_scalars_and_sequences(component)
+        data[com_key] = component_data
 
     return data
 
 
-def separate_node_attrs(om):
-    """
-    Create a dictionary with node scalars and series.
-
-    The dictionary is structured with flows as tuples and nested dictionaries
-    holding the scalars and series e.g.
-    {(node1, None): {'scalars': {'attr1': scalar, 'attr2': 'text'},
-    'sequences': {'attr1': iterable, 'attr2': iterable}}}
-
-    om : A solved oemof.solph.Model.
-
-    Returns
-    -------
-    dict
-    """
-
-    data = {}
-    for n in om.es.nodes:
-        idx = (n, None)
-        data[idx] = {'scalars': {}, 'sequences': {}}
-
-        exclusions = ('__', '_', 'registry')
-        attrs = [i for i in dir(n)
-                 if not (callable(i) or i.startswith(exclusions))]
-
-        for a in attrs:
-            attr_value = getattr(n, a)
-            # check if attribute is iterable
-            # see: https://stackoverflow.com/questions/1952464/
-            # in-python-how-do-i-determine-if-an-object-is-iterable
-            try:
-                check = (e for e in attr_value)
-                # if not isinstance(attr_value, (Outputs, Inputs)):
-                #     data[idx]['sequences'][a] = attr_value
-                data[idx]['sequences'][a] = attr_value
-            except TypeError:
-                data[idx]['scalars'][a] = attr_value
-
-        #data[idx]['sequences'] = flatten(data[idx]['sequences'])
-
-    return data
-
-
-def param_results(om):
+def param_results(om, exclude_none=True):
     """
     Create a result dictionary containing node parameters.
 
@@ -300,9 +291,8 @@ def param_results(om):
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
     """
-    flow_data = separate_flow_attrs(om)
-    node_data = separate_node_attrs(om)
 
-    print(node_data)
+    flow_data = __separate_attrs(om, True, exclude_none)
+    node_data = __separate_attrs(om, False, exclude_none)
 
-    return results
+    return {'flows': flow_data, 'nodes': node_data}
