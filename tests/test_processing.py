@@ -31,7 +31,6 @@ class Parameter_Result_Tests:
             outputs={
                 b_el1: Flow(
                     variable_costs=1,
-                    fixed_costs=20,
                     investment=Investment(ep_costs=0.5)
                 )
             },
@@ -86,7 +85,8 @@ class Parameter_Result_Tests:
             {
                 'actual_value': self.demand_values,
                 'max': [1] * 24,
-                'min': [0] * 24
+                'min': [0] * 24,
+                'variable_costs': [0] * 24
             }
         )
 
@@ -101,7 +101,7 @@ class Parameter_Result_Tests:
             'positive_gradient_costs': 0
         }
         default_scalars = [
-            'nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
+            'nominal_value', 'summed_max', 'summed_min',
             'investment', 'nonconvex', 'integer', 'fixed'
         ]
         for attr in default_scalars:
@@ -114,7 +114,8 @@ class Parameter_Result_Tests:
         sequences_attributes = {
             'actual_value': self.demand_values,
             'max': [1] * 24,
-            'min': [0] * 24
+            'min': [0] * 24,
+            'variable_costs': [0] * 24
         }
         default_sequences = [
             'actual_value', 'positive_gradient_ub', 'negative_gradient_ub',
@@ -138,7 +139,6 @@ class Parameter_Result_Tests:
                 'initial_capacity': 0,
                 'nominal_input_capacity_ratio': 1 / 6,
                 'nominal_output_capacity_ratio': 1 / 6,
-                'fixed_costs': 35,
                 'investment_ep_costs': 0.4,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0
