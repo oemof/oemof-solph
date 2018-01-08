@@ -5,11 +5,15 @@ used by various classes. If there are too many helper-functions, they will
 be sorted in different modules.
 """
 
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 import os
 
 
 def get_basic_path():
     """Returns the basic oemof path and creates it if necessary.
+    The basic path is the '.oemof' folder in the $HOME directory.
     """
     basicpath = os.path.join(os.path.expanduser('~'), '.oemof')
     if not os.path.isdir(basicpath):

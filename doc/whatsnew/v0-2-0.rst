@@ -21,11 +21,16 @@ API changes
   <oemof.network.Node>` to an :class:`energy system
   <oemof.energy_system.EnergySystem>`. This option has been made a bit more
   feature rich by the way, but see below for more on this.
+* The `fixed_costs` attribute of the  :class:`nodes <oemof.solph.network.Flow>`
+  has been removed. For more information see
+  (`Issue #407 <https://github.com/oemof/oemof/issues/407>`_).
+* :class:`DataFramePlot <outputlib.DataFramePlot>` and
+  :class:`ResultsDataFrame <outputlib.ResultsDataFrame>` have been removed.
 
 New features
 ############
 
-* Add new outputlib module to analyse and and plot optimization results.
+* Add new outputlib module to analyse optimization results.
   All decision variables of a Node are now collected automatically which
   enables an easier development of custom components within the oemof logic.
   See examples for usage!
@@ -45,7 +50,14 @@ New features
   <oemof.energy_system.EnergySystem>` in bulk using `*` and `**` syntax. For
   the latter case, the :meth:`values <dict.values>` of the dictionary passed in
   will be added.
-
+* A component :class:`nodes <oemof.solph.custom.ElectricalLine>`
+  and :class:`nodes <oemof.solph.custom.ElectricalBus>` to be used for
+  Linear Optimal Powerflow calculation based in angle formulations. This component
+  has been added to the `solph.custom.py` module. Though it should work correctly,
+  it is in a preliminary stage, please check your results. Feedback is welcome.
+* A component :class:`nodes <oemof.solph.custom.Link>` that can be used to model
+  a bidirectional connection within one component (Check out the example in the
+  oemof_example repository).
 
 Documentation
 #############
@@ -66,6 +78,12 @@ Testing
 Other changes
 #############
 
+* The plot functionalities have been removed from the outputlib. Basic plotting is 
+  now found in a distinct repository as they are less a necessary part but more an 
+  optional tool for quickly creating plots from optimization results. You find them
+  at the oemof_visio repository `oemof_visio <https://github.com/oemof/oemof_visio>`. 
+  For plotting examples check the 
+  `'oemof_example' repository <https://github.com/oemof/oemof_examples>`.
 
 
 Contributors

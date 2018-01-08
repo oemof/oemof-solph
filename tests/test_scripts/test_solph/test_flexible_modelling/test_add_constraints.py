@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+
 """
 This script shows how to a an individual constraint to the oemof solph
 Model.
 The constraint we add forces a flow to be greater or equal a certain share
 of all inflows of its target bus. Moreover we will set an emission constraint.
-
-31.10.2016
-simon.hilpert@uni-flensburg.de
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from nose.tools import ok_
 import logging
 import pyomo.environ as po
 import pandas as pd
@@ -35,16 +38,16 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     pp_oil = Transformer(label='pp_oil',
                          inputs={boil: Flow()},
                          outputs={b_el: Flow(nominal_value=50,
-                                                   variable_costs=25)},
+                                             variable_costs=25)},
                          conversion_factors={b_el: 0.39})
     Transformer(label='pp_lig',
                 inputs={blig: Flow()},
                 outputs={b_el: Flow(nominal_value=50,
-                                          variable_costs=10)},
+                                    variable_costs=10)},
                 conversion_factors={b_el: 0.41})
 
     # create the model
-    om = Model(es=es)
+    om = Model(energysystem=es)
 
     # add specific emission values to flow objects if source is a commodity bus
     for s, t in om.flows.keys():
@@ -95,5 +98,5 @@ def test_add_constraints_example(solver='cbc', nologg=False):
 
     # solve and write results to dictionary
     # you may print the model with om.pprint()
-    om.solve(solver=solver)
+    ok_(om.solve(solver=solver))
     logging.info("Successfully finished.")

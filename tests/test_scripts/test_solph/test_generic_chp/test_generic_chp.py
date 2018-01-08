@@ -4,7 +4,10 @@ Example that illustrates how to use custom component `GenericCHP` can be used.
 
 In this case it is used to model a combined cycle extraction turbine.
 """
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
+from nose.tools import eq_
 import os
 import pandas as pd
 import oemof.solph as solph
@@ -29,26 +32,26 @@ def test_gen_chp():
     # resources
     bgas = solph.Bus(label='bgas')
 
-    rgas = solph.Source(label='rgas', outputs={bgas: solph.Flow()})
+    solph.Source(label='rgas', outputs={bgas: solph.Flow()})
 
     # heat
     bth = solph.Bus(label='bth')
 
-    source_th = solph.Source(label='source_th',
+    solph.Source(label='source_th',
                              outputs={bth: solph.Flow(variable_costs=1000)})
 
-    demand_th = solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
+    solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
                            actual_value=data['demand_th'], nominal_value=200)})
 
     # power
     bel = solph.Bus(label='bel')
 
-    demand_el = solph.Sink(label='demand_el', inputs={bel: solph.Flow(
+    solph.Sink(label='demand_el', inputs={bel: solph.Flow(
                            variable_costs=data['price_el'])})
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-    ccet = solph.components.GenericCHP(
+    solph.components.GenericCHP(
         label='combined_cycle_extraction_turbine',
         fuel_input={bgas: solph.Flow(
             H_L_FG_share_max=data['H_L_FG_share_max'])},
@@ -59,8 +62,7 @@ def test_gen_chp():
             Eta_el_min_woDH=data['Eta_el_min_woDH'])},
         heat_output={bth: solph.Flow(
             Q_CW_min=data['Q_CW_min'])},
-        Beta=data['Beta'], back_pressure=False,
-        fixed_costs=0)
+        Beta=data['Beta'], back_pressure=False)
 
     # create an optimization problem and solve it
     om = solph.Model(es)
@@ -79,6 +81,4 @@ def test_gen_chp():
         (('source_th', 'bth'), 'flow'): 5929.8478649200015}
 
     for key in test_dict.keys():
-        a = int(round(data[key]))
-        b = int(round(test_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(data[key])), int(round(test_dict[key])))

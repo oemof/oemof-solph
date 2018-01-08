@@ -27,7 +27,10 @@ The example models the following energy system:
 
 """
 
-# Default logger of oemof
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from nose.tools import eq_
 from oemof.tools import economics
 
 import oemof.solph as solph
@@ -65,12 +68,10 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         nominal_value=194397000 * 400 / 8760, summed_max=1)})
 
     solph.Source(label='wind', outputs={bel: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True,
-        fixed_costs=20)})
+        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
 
     solph.Source(label='pv', outputs={bel: solph.Flow(
-        actual_value=data['pv'], nominal_value=582000, fixed=True,
-        fixed_costs=15)})
+        actual_value=data['pv'], nominal_value=582000, fixed=True)})
 
     # Transformer
     solph.Transformer(
@@ -81,7 +82,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    storage = solph.components.GenericStorage(
+    solph.components.GenericStorage(
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -89,25 +90,28 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
         investment=solph.Investment(ep_costs=epc),
     )
 
     # Solve model
     om = solph.Model(energysystem)
     om.solve(solver=solver)
+    energysystem.results['main'] = processing.results(om)
+    energysystem.results['meta'] = processing.meta_results(om)
 
     # Check dump and restore
     energysystem.dump()
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem()
     energysystem.restore()
 
     # Results
-    results = processing.results(om)
+    results = energysystem.results['main']
+    meta = energysystem.results['meta']
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
-    my_results['storage_invest'] = results[(storage,)]['scalars']['invest']
+    storage = energysystem.groups['storage']
+    my_results['storage_invest'] = results[(storage, None)]['scalars']['invest']
 
     stor_invest_dict = {
         'storage_invest': 2046851,
@@ -120,6 +124,21 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         (('wind', 'electricity'), 'flow'): 305471851}
 
     for key in stor_invest_dict.keys():
-        a = int(round(my_results[key]))
-        b = int(round(stor_invest_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+
+    # Solver results
+    eq_(str(meta['solver']['Termination condition']), 'optimal')
+    eq_(meta['solver']['Error rc'], 0)
+    eq_(str(meta['solver']['Status']), 'ok')
+
+    # Problem results
+    eq_(meta['problem']['Lower bound'], 4.2316758e+17)
+    eq_(meta['problem']['Upper bound'], 4.2316758e+17)
+    eq_(meta['problem']['Number of variables'], 2804)
+    eq_(meta['problem']['Number of constraints'], 2805)
+    eq_(meta['problem']['Number of nonzeros'], 7606)
+    eq_(meta['problem']['Number of objectives'], 1)
+    eq_(str(meta['problem']['Sense']), 'minimize')
+
+    # Objective function
+    eq_(round(meta['objective']), 423167578261665280)

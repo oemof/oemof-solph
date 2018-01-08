@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+
 """Optional classes to be added to a network class."""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 
 class Investment:

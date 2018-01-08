@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)
@@ -68,13 +72,9 @@ class Flow(SimpleBlock):
         .. math::
             \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
-    Additionally, if :attr:`fixed_costs` are set by the user:
-        .. math::
-            \sum_{(i, o)}  nominal\_value(i, o) \cdot fixed\_costs(i, o)
+    The expression can be accessed by :attr:`om.Flow.variable_costs` and
+    their value after optimization by :meth:`om.Flow.variable_costs()` .
 
-    The expression can be accessed by :attr:`om.Flow.fixed_costs` and
-    their value after optimization by :meth:`om.Flow.fixed_costs()` .
-    This works similar for variable costs with :attr:`*.variable_costs`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -211,7 +211,6 @@ class Flow(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        fixed_costs = 0
         gradient_costs = 0
 
         for i, o in m.FLOWS:
@@ -232,13 +231,7 @@ class Flow(SimpleBlock):
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
-            # add fixed costs if nominal_value is not None
-            if (m.flows[i, o].fixed_costs and
-                    m.flows[i, o].nominal_value is not None):
-                fixed_costs += (m.flows[i, o].nominal_value *
-                                m.flows[i, o].fixed_costs)
-
-        return fixed_costs + variable_costs + gradient_costs
+        return variable_costs + gradient_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -259,8 +252,8 @@ class InvestmentFlow(SimpleBlock):
         A subset of set FLOWS with flows with the attribute
         :attr:`summed_min` being not None.
     MIN_FLOWS
-        A subset of FLOWS with flows having set a least minimum value for
-        at least one timestep in the optimization model.
+        A subset of FLOWS with flows having set a value of not None in the
+        first timestep.
 
     **The following variables are created:**
 
@@ -312,13 +305,10 @@ class InvestmentFlow(SimpleBlock):
         .. math::
             \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
 
-    Additionally, if :attr:`fixed_costs` are set by the user:
-        .. math::
-            \sum_{i, o} invest(i, o) \cdot fixed\_costs(i,o)
-
-    The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
-    their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
-    This works similar for variable costs with :attr:`*.variable_costs` etc.
+    The expression can be accessed by :attr:`om.InvestmentFlow.variable_costs`
+    and their value after optimization by
+    :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
+    investment costs with :attr:`*.investment_costs` etc.
     """
 
     def __init__(self, *args, **kwargs):
@@ -353,8 +343,8 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
         self.MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if sum(
-                [g[2].min[t] for t in m.TIMESTEPS]) > 0])
+            (g[0], g[1]) for g in group if (
+                g[2].min[0] != 0 or len(g[2].min) > 1)])
 
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
@@ -430,16 +420,9 @@ class InvestmentFlow(SimpleBlock):
             return 0
 
         m = self.parent_block()
-        fixed_costs = 0
-        variable_costs = 0
         investment_costs = 0
 
         for i, o in self.FLOWS:
-            # fixed costs
-            if m.flows[i, o].fixed_costs is not None:
-                fixed_costs += (self.invest[i, o] *
-                                m.flows[i, o].fixed_costs)
-            # investment costs
             if m.flows[i, o].investment.ep_costs is not None:
                 investment_costs += (self.invest[i, o] *
                                      m.flows[i, o].investment.ep_costs)
@@ -447,10 +430,7 @@ class InvestmentFlow(SimpleBlock):
                 raise ValueError("Missing value for investment costs!")
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.fixed_costs = Expression(expr=fixed_costs)
-        self.variable_costs = Expression(expr=variable_costs)
-
-        return fixed_costs + variable_costs + investment_costs
+        return investment_costs
 
 
 class Bus(SimpleBlock):
@@ -581,7 +561,7 @@ class NonConvexFlow(SimpleBlock):
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
-        greater than zero for at least one timestep in the simulation horizon.
+        beeing not None in the first timestep
     STARTUP_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`startup_costs` being not None.
@@ -666,8 +646,7 @@ class NonConvexFlow(SimpleBlock):
         self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                         if sum(g[2].min[t]
-                                                for t in m.TIMESTEPS) > 0])
+                                         if g[2].min[0] is not None])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                 if g[2].nonconvex.startup_costs is not None])

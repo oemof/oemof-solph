@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
+
 """ All you need to create groups of stuff in your energy system.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 try:
     from collections.abc import (Hashable, Iterable, Mapping,
                                  MutableMapping as MuMa)

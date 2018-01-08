@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+
 """Modules for creating and manipulating energy system graphs."""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 import logging
 import re
@@ -10,6 +14,7 @@ try:
 except ImportError:
     logging.warning('Matplotlib could not be imported.',
                     ' Plotting will not work.')
+    plt = None
 try:
     import networkx as nx
     from networkx.drawing.nx_agraph import graphviz_layout
@@ -92,7 +97,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     ...                                                variable_costs=40)},
     ...                            conversion_factors={b_el: 0.5})
     >>> es.add(b_gas, b_el, demand_el, pp_gas)
-    >>> om = Model(es=es)
+    >>> om = Model(energysystem=es)
     >>> my_graph = gt.graph(energy_system=es, optimization_model=om,
     ...                     node_color={demand_el: 'r'}, plot=False)
     >>> # export graph as .graphml for programs like Yed where it can be
@@ -110,42 +115,42 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     """
     # construct graph from nodes and flows
     if nx:
-        G = nx.DiGraph()
+        grph = nx.DiGraph()
 
         # add nodes
         for n in energy_system.nodes:
-            G.add_node(n.label)
+            grph.add_node(n.label)
 
         # add labeled flows on directed edge if an optimization_model has been
         # passed or undirected edge otherwise
         if optimization_model:
             for s, t in optimization_model.flows:
                 if optimization_model.flows[s, t].nominal_value is None:
-                    G.add_edge(s.label, t.label)
+                    grph.add_edge(s.label, t.label)
                 else:
                     weight = optimization_model.flows[s, t].nominal_value
-                    G.add_edge(s.label, t.label, weight=weight)
+                    grph.add_edge(s.label, t.label, weight=weight)
         else:
             arrows = False
             for n in energy_system.nodes:
                 for i in n.inputs.keys():
-                    G.add_edge(n.label, i.label)
+                    grph.add_edge(n.label, i.label)
 
         # remove nodes and edges based on precise labels
         if remove_nodes is not None:
-            G.remove_nodes_from(remove_nodes)
+            grph.remove_nodes_from(remove_nodes)
         if remove_edges is not None:
-            G.remove_edges_from(remove_edges)
+            grph.remove_edges_from(remove_edges)
 
         # remove nodes based on substrings
         if remove_nodes_with_substrings is not None:
             for i in remove_nodes_with_substrings:
                 remove_nodes = [v.label for v in energy_system.nodes
                                 if i in v.label]
-                G.remove_nodes_from(remove_nodes)
+                grph.remove_nodes_from(remove_nodes)
 
         if type(node_color) is dict:
-            node_color = [node_color.get(g, '#AFAFAF') for g in G.nodes()]
+            node_color = [node_color.get(g, '#AFAFAF') for g in grph.nodes()]
 
         # set drawing options
         options = {
@@ -158,13 +163,13 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         }
 
         # draw graph
-        pos = graphviz_layout(G, prog=layout)
-        nx.draw(G, pos=pos, **options)
+        pos = graphviz_layout(grph, prog=layout)
+        nx.draw(grph, pos=pos, **options)
 
         # add edge labels for all edges
         if edge_labels is True:
-            labels = nx.get_edge_attributes(G, 'weight')
-            nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
+            labels = nx.get_edge_attributes(grph, 'weight')
+            nx.draw_networkx_edge_labels(grph, pos=pos, edge_labels=labels)
 
         # show output
         if plot is True:
@@ -172,9 +177,9 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
     else:
         logging.warning("Graph cannot be drawn due to missing packages.")
-        G = None
+        grph = None
 
-    return G
+    return grph
 
 
 for o in [graph]:

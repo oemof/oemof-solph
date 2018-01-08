@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -
+
+"""Basic tests.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
 
 from nose.tools import ok_, eq_
-
 import pandas as pd
-import logging
 
-# from oemof.core.network.entities.components import transformers as transformer
 from oemof import energy_system as es
 from oemof.network import Entity
 from oemof.network import Bus, Transformer

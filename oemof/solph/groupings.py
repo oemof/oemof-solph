@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """ list:  Groupings needed on an energy system for it to work with solph.
 
-TODO: Maybe move this to the module docstring? It should be somewhere prominent
-      so solph user's immediately see that they need to use :const:`GROUPINGS`
-      when they want to create an energy system for use with solph.
-
 If you want to use solph on an energy system, you need to create it with these
 groupings specified like this:
 
@@ -17,8 +13,11 @@ groupings specified like this:
 
 """
 
-from .network import Bus, Transformer
-from . import blocks
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from oemof.solph.network import Bus, Transformer
+from oemof.solph import blocks
 import oemof.groupings as groupings
 
 

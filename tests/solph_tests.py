@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -
+
+"""Grouping tests.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from nose.tools import ok_, eq_
 
 from oemof.energy_system import EnergySystem as ES
@@ -30,7 +38,7 @@ class Grouping_Tests:
 
         solph.Source(label='Source', outputs={b: solph.Flow(
             actual_value=[12, 16, 14], nominal_value=1000000,
-            fixed=True, fixed_costs=20)})
+            fixed=True)})
 
         solph.Sink(label='Sink', inputs={b: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,

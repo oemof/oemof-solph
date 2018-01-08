@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""Connecting different investment variables.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from nose.tools import eq_
 import oemof.solph as solph
 from oemof.outputlib import processing, views
 
@@ -33,8 +40,7 @@ def test_connect_invest():
 
     # create fixed source object representing wind power plants
     solph.Source(label='wind', outputs={bel1: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True,
-        fixed_costs=20)})
+        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
 
     # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel1: solph.Flow(
@@ -48,7 +54,6 @@ def test_connect_invest():
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
         investment=solph.Investment(ep_costs=0.2),
     )
 
@@ -82,9 +87,9 @@ def test_connect_invest():
     my_results['line12'] = float(views.node(results, 'line12')['scalars'])
     my_results['line21'] = float(views.node(results, 'line21')['scalars'])
     stor_res = views.node(results, 'storage')['scalars']
-    my_results['storage_in'] = stor_res.iloc[0]
-    my_results['storage'] = stor_res.iloc[1]
-    my_results['storage_out'] = stor_res.iloc[2]
+    my_results['storage_in'] = stor_res.iloc[0]  # ('electricity1', 'storage')
+    my_results['storage'] = stor_res.iloc[1]     # ('storage', 'None')
+    my_results['storage_out'] = stor_res.iloc[2] # ('storage', 'electricity1')
 
     connect_invest_dict = {
         'line12': 814705,
@@ -94,6 +99,4 @@ def test_connect_invest():
         'storage_out': 135784}
 
     for key in connect_invest_dict.keys():
-        a = int(round(my_results[key]))
-        b = int(round(connect_invest_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(my_results[key])), int(round(connect_invest_dict[key])))

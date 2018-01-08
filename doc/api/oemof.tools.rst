@@ -4,14 +4,6 @@ oemof.tools package
 Submodules
 ----------
 
-oemof.tools.config module
--------------------------
-
-.. automodule:: oemof.tools.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 oemof.tools.helpers module
 --------------------------
 
@@ -24,6 +16,14 @@ oemof.tools.logger module
 -------------------------
 
 .. automodule:: oemof.tools.logger
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.tools.economics module
+----------------------------
+
+.. automodule:: oemof.tools.economics
     :members:
     :undoc-members:
     :show-inheritance:
