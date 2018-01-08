@@ -129,10 +129,10 @@ class Parameter_Result_Tests:
         )
     
     def test_nodes_with_none_exclusion(self):
-        batt = self.es.groups['storage']
-        param_results = processing.param_results(self.om, exclude_none=True)
+        param_results = processing.param_results(
+            self.om, exclude_none=True, keys_as_str=True)
         eq_(
-            param_results['nodes'][batt]['scalars'],
+            param_results['nodes']['storage']['scalars'],
             {
                 'label': 'storage',
                 'initial_capacity': 0,
@@ -145,7 +145,7 @@ class Parameter_Result_Tests:
             }
         )
         eq_(
-            param_results['nodes'][batt]['sequences'],
+            param_results['nodes']['storage']['sequences'],
             {
                 'capacity_loss': [0.0] * 24,
                 'capacity_min': [0.0] * 24,
@@ -156,16 +156,16 @@ class Parameter_Result_Tests:
         )
 
     def test_nodes_without_none_exclusion(self):
-        diesel = self.es.groups['diesel']
-        param_results = processing.param_results(self.om, exclude_none=False)
+        param_results = processing.param_results(
+            self.om, exclude_none=False, keys_as_str=True)
         eq_(
-            param_results['nodes'][diesel]['scalars'],
+            param_results['nodes']['diesel']['scalars'],
             {
                 'label': 'diesel',
             }
         )
         eq_(
-            param_results['nodes'][diesel]['sequences'],
+            param_results['nodes']['diesel']['sequences'],
             {
                 'conversion_factors_b_el1': [2] * 24,
                 'conversion_factors_b_diesel': [1] * 24,

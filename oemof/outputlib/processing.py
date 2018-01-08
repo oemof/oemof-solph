@@ -14,6 +14,7 @@ from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var
 import oemof.solph
+from oemof.outputlib.views import convert_keys_to_strings
 
 
 def get_tuple(x):
@@ -281,18 +282,24 @@ def __separate_attrs(om, get_flows=False, exclude_none=True):
     return data
 
 
-def param_results(om, exclude_none=True):
+def param_results(om, exclude_none=True, keys_as_str=False):
     """
     Create a result dictionary containing node parameters.
 
     Results are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
-    The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
-    and flows e.g. `results[(n,n)]['sequences']`.
+    The dictionary is keyed by the nodes e.g.
+    `results['nodes'][idx]['scalars']`
+    and flows e.g. `results['flows'][(n,n)]['sequences']`.
     """
 
     flow_data = __separate_attrs(om, True, exclude_none)
     node_data = __separate_attrs(om, False, exclude_none)
 
-    return {'flows': flow_data, 'nodes': node_data}
+    return {
+        'flows': (
+            convert_keys_to_strings(flow_data) if keys_as_str else flow_data),
+        'nodes': (
+            convert_keys_to_strings(node_data) if keys_as_str else node_data),
+    }
