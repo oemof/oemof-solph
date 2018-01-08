@@ -163,7 +163,13 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
         # draw graph
         pos = nx.drawing.nx_agraph.graphviz_layout(grph, prog=layout)
-        nx.draw(grph, pos=pos, **options)
+        if plt:
+            nx.draw(grph, pos=pos, **options)
+        else:
+            logging.error("Matplotlib could not be imported.\n",
+                          "Plotting will not work.\n"
+                          "Try 'pip install matplotlib'")
+            plot = False
 
         # add edge labels for all edges
         if edge_labels is True:
@@ -172,11 +178,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
         # show output
         if plot is True:
-            if plt:
-                plt.show()
-            else:
-                logging.error('Matplotlib could not be imported.',
-                              ' Plotting will not work.')
+            plt.show()
 
     else:
         if nx is None:
