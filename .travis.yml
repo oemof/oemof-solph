@@ -7,6 +7,6 @@ python:
 before_install:
   - sudo apt-get install coinor-cbc graphviz graphviz-dev pkg-config
 
-install: "pip install -r travis_requirements.txt."
+install: "pip install -r travis_requirements.txt"
 # command to run tests
 script: nosetests --with-doctest
