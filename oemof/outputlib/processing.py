@@ -14,7 +14,6 @@ from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var
 import oemof.solph
-from oemof.outputlib.views import convert_keys_to_strings
 
 
 def get_tuple(x):
@@ -145,6 +144,21 @@ def results(om):
                 result[(bus, None)]['sequences']['duals'] = duals
 
     return result
+
+
+def convert_keys_to_strings(results):
+    """
+    Convert the dictionary keys to strings.
+
+    All (tuple) keys of the result object e.g. results[(pp1, bus1)] are
+    converted into strings that represent the object labels
+    e.g. results[('pp1','bus1')].
+    """
+    converted = {
+        tuple([str(e) for e in k]) if isinstance(k, tuple) else str(k): v
+        for k, v in results.items()
+    }
+    return converted
 
 
 def meta_results(om, undefined=False):
