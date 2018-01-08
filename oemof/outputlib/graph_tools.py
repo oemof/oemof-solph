@@ -6,7 +6,6 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import logging
-import re
 import warnings
 
 try:
@@ -190,11 +189,6 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
     return grph
 
-
-for o in [graph]:
-    if nx is None and (getattr(o, "__doc__") is not None):
-        o.__doc__ = re.sub(r"((^|\n)\s*)>>>", r"\1>>",
-                           re.sub(r"((^|\n)\s*)\.\.\.", r"\1..", o.__doc__))
 
 if __name__ == '__main__':
     import doctest
