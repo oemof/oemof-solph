@@ -12,18 +12,17 @@ import warnings
 try:
     from matplotlib import pyplot as plt
 except ImportError:
-    logging.warning('Matplotlib could not be imported.',
-                    ' Plotting will not work.')
     plt = None
+
 try:
     import networkx as nx
-    from networkx.drawing.nx_agraph import graphviz_layout
-    import pygraphviz
 except ImportError:
     nx = None
-    graphviz_layout = None
-    pygraphviz = None
 
+try:
+    import pygraphviz
+except ImportError:
+    pygraphviz = None
 
 warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 
@@ -111,10 +110,10 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     Notes
     -----
     Needs graphviz and networkx (>= v.1.11) to work properly.
-    Tested on Ubuntu 16.04 x64.
+    Tested on Ubuntu 16.04 x64 and solydxk (debian 9).
     """
     # construct graph from nodes and flows
-    if nx:
+    if nx is not None and pygraphviz is not None:
         grph = nx.DiGraph()
 
         # add nodes
@@ -163,7 +162,7 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         }
 
         # draw graph
-        pos = graphviz_layout(grph, prog=layout)
+        pos = nx.drawing.nx_agraph.graphviz_layout(grph, prog=layout)
         nx.draw(grph, pos=pos, **options)
 
         # add edge labels for all edges
@@ -173,18 +172,26 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
         # show output
         if plot is True:
-            plt.show()
+            if plt:
+                plt.show()
+            else:
+                logging.error('Matplotlib could not be imported.',
+                              ' Plotting will not work.')
 
     else:
-        logging.warning("Graph cannot be drawn due to missing packages.")
+        if nx is None:
+            logging.error(
+                "Graph cannot be drawn due to the missing networkx package.")
+        if pygraphviz is None:
+            logging.error(
+                "Graph cannot be drawn due to the missing pygraphviz package.")
         grph = None
 
     return grph
 
 
 for o in [graph]:
-    if (((nx is None) or (graphviz_layout is None) or (pygraphviz is None)) and
-            (getattr(o, "__doc__") is not None)):
+    if nx is None and (getattr(o, "__doc__") is not None):
         o.__doc__ = re.sub(r"((^|\n)\s*)>>>", r"\1>>",
                            re.sub(r"((^|\n)\s*)\.\.\.", r"\1..", o.__doc__))
 
