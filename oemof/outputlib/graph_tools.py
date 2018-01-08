@@ -166,9 +166,9 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
         if plt:
             nx.draw(grph, pos=pos, **options)
         else:
-            logging.error("Matplotlib could not be imported.\n",
-                          "Plotting will not work.\n"
-                          "Try 'pip install matplotlib'")
+            logging.error("Matplotlib could not be imported. "
+                          "Plotting will not work. "
+                          "Try 'pip install matplotlib'.")
             plot = False
 
         # add edge labels for all edges
