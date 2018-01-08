@@ -8,8 +8,39 @@ __license__ = "GPLv3"
 import pyomo.environ as po
 
 
-def emission_limit(om, flows=None, limit=None):
+def investment_limit(model, limit=None):
+    """ Set an absolute limit for the total investment costs of an investment
+    optimization problem:
+
+    .. math:: \sum_{investment\_costs} \leq limit
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which the constraint is added
+    limit : float
+        Absolute limit of the investment (i.e. RHS of constraint)
     """
+
+    def investment_rule(m):
+        expr = 0
+
+        if hasattr(m, "InvestmentFlow"):
+            expr += m.InvestmentFlow.investment_costs
+
+        if hasattr(m, "GenericInvestmentStorageBlock"):
+            expr += m.GenericInvestmentStorageBlock.investment_costs
+        return expr <= limit
+
+    model.investment_limit = po.Constraint(rule=investment_rule)
+
+    return model
+
+
+def emission_limit(om, flows=None, limit=None):
+    """Set a global limit for emissions. The emission attribute has to be added
+    to every flow you want to take into account.
+
     Parameters
     ----------
     om : oemof.solph.Model
@@ -41,8 +72,6 @@ def emission_limit(om, flows=None, limit=None):
                                                                       o.label))
 
     def emission_rule(m):
-        """
-        """
         return (sum(m.flow[inflow, outflow, t] * flows[inflow, outflow].emission
                 for (inflow, outflow) in flows
                 for t in m.TIMESTEPS) <= limit)
@@ -52,7 +81,7 @@ def emission_limit(om, flows=None, limit=None):
     return om
 
 
-def equate_variables(om, var1, var2, factor1=1, name=None):
+def equate_variables(model, var1, var2, factor1=1, name=None):
     r"""
     Adds a constraint to the given model that set two variables to equal
     adaptable by a factor.
@@ -74,13 +103,15 @@ def equate_variables(om, var1, var2, factor1=1, name=None):
     name : str
         Optional name for the equation e.g. in the LP file. By default the
         name is: equate + string representation of var1 and var2.
-    om : oemof.solph.Model
+    model : oemof.solph.Model
         Model to which the constraint is added.
 
     Examples
     --------
     The following example shows how to define a transmission line in the
-    investment mode by connecting both investment variables.
+    investment mode by connecting both investment variables. Note that the
+    equivalent periodical costs (epc) of the line are 40. You could also add
+    them to one line and set them to 0 for the other line.
 
     >>> import pandas as pd
     >>> from oemof import solph
@@ -104,12 +135,11 @@ def equate_variables(om, var1, var2, factor1=1, name=None):
     >>> solph.constraints.equate_variables(
     ...    om,
     ...    om.InvestmentFlow.invest[line12, bel2],
-    ...    om.InvestmentFlow.invest[line21, bel1],
-    ...    2)
+    ...    om.InvestmentFlow.invest[line21, bel1])
     """
     if name is None:
         name = '_'.join(["equate", str(var1), str(var2)])
 
     def equate_variables_rule(m):
         return var1 * factor1 == var2
-    setattr(om, name, po.Constraint(rule=equate_variables_rule))
+    setattr(model, name, po.Constraint(rule=equate_variables_rule))

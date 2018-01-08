@@ -83,9 +83,6 @@ class Flow:
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
-    fixed_costs : numeric
-        The costs of the whole period associated with the absolute
-        nominal_value of the flow.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
@@ -138,13 +135,13 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
+        scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
-        defaults = {'fixed': False, 'min': 0, 'max': 1,
+        defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
-                    'negative_gradient': {'ub': None, 'costs': 0}
+                    'negative_gradient': {'ub': None, 'costs': 0},
                     }
 
         for attribute in set(scalars + sequences + list(kwargs)):
@@ -152,6 +149,10 @@ class Flow:
             if 'gradient' in attribute:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
+            elif 'fixed_costs' in attribute:
+                raise AttributeError(
+                         "The `fixed_costs` attribute has been removed"
+                         " with v0.2!")
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)

@@ -116,7 +116,7 @@ def results(om):
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
-    results = {}
+    result = {}
     for k in df_dict:
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
@@ -124,8 +124,8 @@ def results(om):
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-            sequences = df_dict[k].loc[:, ~(condition)]
-            results[k] = {'scalars': scalars, 'sequences': sequences}
+            sequences = df_dict[k].loc[:, ~condition]
+            result[k] = {'scalars': scalars, 'sequences': sequences}
         except IndexError:
             error_message = ('Cannot access index on result data. ' +
                              'Did the optimization terminate' +
@@ -138,13 +138,13 @@ def results(om):
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
-            if (bus, None) not in results.keys():
-                results[(bus, None)] = {
+            if (bus, None) not in result.keys():
+                result[(bus, None)] = {
                     'sequences': df, 'scalars': pd.Series()}
             else:
-                results[(bus, None)]['sequences']['duals'] = duals
+                result[(bus, None)]['sequences']['duals'] = duals
 
-    return results
+    return result
 
 
 def meta_results(om, undefined=False):

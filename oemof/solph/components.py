@@ -68,10 +68,10 @@ class GenericStorage(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Storage` (if no Investment object
-       present)
-     * :py:class:`~oemof.solph.blocks.InvestmentStorage` (if Investment object
-       present)
+     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no Investment
+       object present)
+     * :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` (if
+       Investment object present)
 
     Examples
     --------
@@ -93,8 +93,7 @@ class GenericStorage(network.Transformer):
     ...     nominal_input_capacity_ratio=1/6,
     ...     nominal_output_capacity_ratio=1/6,
     ...     inflow_conversion_factor=0.9,
-    ...     outflow_conversion_factor=0.93,
-    ...     fixed_costs=35)
+    ...     outflow_conversion_factor=0.93)
 
     >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
@@ -126,7 +125,6 @@ class GenericStorage(network.Transformer):
                 'outflow_conversion_factor', 1))
         self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
-        self.fixed_costs = kwargs.get('fixed_costs')
         self.investment = kwargs.get('investment')
 
         # General error messages
@@ -208,11 +206,6 @@ class GenericStorageBlock(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    If :attr:`fixed_costs` is set by the user:
-        .. math:: \sum_n nominal\_capacity(n, t) \cdot fixed\_costs(n)
-
-    The fixed costs expression can be accessed by `om.Storage.fixed_costs`
-    and their value after optimization by: `om.Storage.fixed_costs()`.
     """
 
     CONSTRAINT_GROUP = True
@@ -274,21 +267,13 @@ class GenericStorageBlock(SimpleBlock):
 
     def _objective_expression(self):
         r"""Objective expression for storages with no investment.
-        Note: This adds only fixed costs as variable costs are already
+        Note: This adds nothing as variable costs are already
         added in the Block :class:`Flow`.
         """
         if not hasattr(self, 'STORAGES'):
             return 0
 
-        fixed_costs = 0
-
-        for n in self.STORAGES:
-            if n.fixed_costs is not None:
-                fixed_costs += n.nominal_capacity * n.fixed_costs
-
-        self.fixed_costs = Expression(expr=fixed_costs)
-
-        return fixed_costs
+        return 0
 
 # ------------------------------------------------------------------------------
 # End of generic storage block
@@ -370,13 +355,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         .. math::
             \\sum_n invest(n) \cdot ep\_costs(n)
 
-    Additionally, if fixed costs are set by the user:
-        .. math::
-            \\sum_n invest(n) \cdot fixed\_costs(n)
+    The expression can be accessed by
+    :attr:`om.InvestStorages.investment_costs` and their value after
+    optimization by :meth:`om.InvestStorages.investment_costs()` .
 
-    The expression can be accessed by :attr:`om.InvestStorages.fixed_costs` and
-    their value after optimization by :meth:`om.InvestStorages.fixed_costs()` .
-    This works similar for investment costs with :attr:`*.investment_costs`.
     """
 
     CONSTRAINT_GROUP = True
@@ -493,7 +475,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             return 0
 
         investment_costs = 0
-        fixed_costs = 0
 
         for n in self.INVESTSTORAGES:
             if n.investment.ep_costs is not None:
@@ -501,12 +482,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             else:
                 raise ValueError("Missing value for investment costs!")
 
-            if n.fixed_costs is not None:
-                fixed_costs += self.invest[n] * n.fixed_costs
         self.investment_costs = Expression(expr=investment_costs)
-        self.fixed_costs = Expression(expr=fixed_costs)
 
-        return fixed_costs + investment_costs
+        return investment_costs
 
 # ------------------------------------------------------------------------------
 # End of generic storage invest block
@@ -572,13 +550,12 @@ class GenericCHP(network.Transformer):
     back_pressure : boolean
         Flag to use back-pressure characteristics. Works of set to `True` and
         `Q_CW_min` set to zero. See paper above for more information.
-    fixed_costs : numerical value
-        Fixed costs for length of optimization period.
+
 
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCHP`
+     * :py:class:`~oemof.solph.components.GenericCHPBlock`
     """
 
     def __init__(self, *args, **kwargs):
@@ -589,7 +566,6 @@ class GenericCHP(network.Transformer):
         self.heat_output = kwargs.get('heat_output')
         self.Beta = solph_sequence(kwargs.get('Beta'))
         self.back_pressure = kwargs.get('back_pressure')
-        self.fixed_costs = kwargs.get('fixed_costs')
         self._alphas = None
 
         # map specific flows to standard API
@@ -820,25 +796,13 @@ class GenericCHPBlock(SimpleBlock):
     def _objective_expression(self):
         r"""Objective expression for generic CHPs with no investment.
 
-        Note: This adds only fixed costs as variable costs are already
+        Note: This adds nothing as variable costs are already
         added in the Block :class:`Flow`.
         """
         if not hasattr(self, 'GENERICCHPS'):
             return 0
 
-        fixed_costs = 0
-
-        m = self.parent_block()
-
-        for n in self.GENERICCHPS:
-            if n.fixed_costs is not None:
-                P_max = [list(n.electrical_output.values())[0].P_max_woDH[t]
-                         for t in m.TIMESTEPS]
-                fixed_costs += max(P_max) * n.fixed_costs
-
-        self.fixed_costs = Expression(expr=fixed_costs)
-
-        return fixed_costs
+        return 0
 
 # ------------------------------------------------------------------------------
 # End of generic CHP block
@@ -888,7 +852,7 @@ class ExtractionTurbineCHP(solph_Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.VariableFractionTransformer`
+     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
     """
 
     def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
@@ -1057,7 +1021,7 @@ class GenericCAES(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCAES`
+     * :py:class:`~oemof.solph.components.GenericCAESBlock`
     """
 
     def __init__(self, *args, **kwargs):

@@ -47,7 +47,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
                 conversion_factors={b_el: 0.41})
 
     # create the model
-    om = Model(es=es)
+    om = Model(energysystem=es)
 
     # add specific emission values to flow objects if source is a commodity bus
     for s, t in om.flows.keys():

@@ -40,8 +40,7 @@ def test_connect_invest():
 
     # create fixed source object representing wind power plants
     solph.Source(label='wind', outputs={bel1: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True,
-        fixed_costs=20)})
+        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
 
     # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel1: solph.Flow(
@@ -55,7 +54,6 @@ def test_connect_invest():
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
         investment=solph.Investment(ep_costs=0.2),
     )
 

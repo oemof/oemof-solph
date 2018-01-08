@@ -14,6 +14,7 @@ from collections import MutableMapping
 
 def get_basic_path():
     """Returns the basic oemof path and creates it if necessary.
+    The basic path is the '.oemof' folder in the $HOME directory.
     """
     basicpath = os.path.join(os.path.expanduser('~'), '.oemof')
     if not os.path.isdir(basicpath):

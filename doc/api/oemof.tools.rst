@@ -20,6 +20,14 @@ oemof.tools.logger module
     :undoc-members:
     :show-inheritance:
 
+oemof.tools.economics module
+----------------------------
+
+.. automodule:: oemof.tools.economics
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
