@@ -127,7 +127,8 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
                 if optimization_model.flows[s, t].nominal_value is None:
                     grph.add_edge(s.label, t.label)
                 else:
-                    weight = optimization_model.flows[s, t].nominal_value
+                    weight = format(
+                        optimization_model.flows[s, t].nominal_value, '.2f')
                     grph.add_edge(s.label, t.label, weight=weight)
         else:
             arrows = False
