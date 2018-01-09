@@ -331,10 +331,55 @@ class GenericCAES(Transformer):
         Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical output.
 
+    Examples
+    --------
+
+    >>> from oemof import solph
+
+    >>> bel = solph.Bus(label='bel')
+    >>> bth = solph.Bus(label='bth')
+    >>> bgas = solph.Bus(label='bgas')
+
+    >>> # dictionary with parameters for a specific CAES plant
+    >>> concept = {
+    ...    'cav_e_in_b': 0,
+    ...    'cav_e_in_m': 0.6457267578,
+    ...    'cav_e_out_b': 0,
+    ...    'cav_e_out_m': 0.3739636077,
+    ...    'cav_eta_temp': 1.0,
+    ...    'cav_level_max': 211.11,
+    ...    'cmp_p_max_b': 86.0918959849,
+    ...    'cmp_p_max_m': 0.0679999932,
+    ...    'cmp_p_min': 1,
+    ...    'cmp_q_out_b': -19.3996965679,
+    ...    'cmp_q_out_m': 1.1066036114,
+    ...    'cmp_q_tes_share': 0,
+    ...    'exp_p_max_b': 46.1294016678,
+    ...    'exp_p_max_m': 0.2528340303,
+    ...    'exp_p_min': 1,
+    ...    'exp_q_in_b': -2.2073411014,
+    ...    'exp_q_in_m': 1.129249765,
+    ...    'exp_q_tes_share': 0,
+    ...    'tes_eta_temp': 1.0,
+    ...    'tes_level_max': 0.0}
+
+    >>> # generic compressed air energy storage (caes) plant
+    >>> caes = solph.custom.GenericCAES(
+    ...    label='caes',
+    ...    electrical_input={bel: solph.Flow()},
+    ...    fuel_input={bgas: solph.Flow()},
+    ...    electrical_output={bel_sink: solph.Flow()},
+    ...    params=concept, fixed_costs=0)
+
+    >>> type(caes)
+    <class 'oemof.solph.custom.GenericCAES'>
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.GenericCAES`
+
+    TODO: Add description for constraints. See referenced paper until then!
     """
 
     def __init__(self, *args, **kwargs):
