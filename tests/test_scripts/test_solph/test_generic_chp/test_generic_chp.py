@@ -38,16 +38,16 @@ def test_gen_chp():
     bth = solph.Bus(label='bth')
 
     solph.Source(label='source_th',
-                             outputs={bth: solph.Flow(variable_costs=1000)})
+                 outputs={bth: solph.Flow(variable_costs=1000)})
 
-    solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
-                           actual_value=data['demand_th'], nominal_value=200)})
+    solph.Sink(label='demand_th', inputs={bth: solph.Flow(
+               fixed=True, actual_value=data['demand_th'], nominal_value=200)})
 
     # power
     bel = solph.Bus(label='bel')
 
     solph.Sink(label='demand_el', inputs={bel: solph.Flow(
-                           variable_costs=data['price_el'])})
+               variable_costs=data['price_el'])})
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
@@ -77,7 +77,7 @@ def test_gen_chp():
 
     test_dict = {
         (('bth', 'demand_th'), 'flow'): 20000.0,
-        (('combined_cycle_extraction_turbine', 'bth'), 'flow'): 14070.15215799997,
+        (('combined_cycle_extraction_turbine', 'bth'), 'flow'): 14070.15215799,
         (('source_th', 'bth'), 'flow'): 5929.8478649200015}
 
     for key in test_dict.keys():
