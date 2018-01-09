@@ -803,7 +803,7 @@ class GenericCHPBlock(SimpleBlock):
         return 0
 
 
-class ExtractionTurbineCHP(solph.Transformer):
+class ExtractionTurbineCHP(solph_Transformer):
     r"""
     A CHP with an extraction turbine in a linear model. For more options see
     the :class:`~oemof.solph.components.GenericCHP` class.
