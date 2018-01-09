@@ -45,7 +45,7 @@ def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
     >>> import pandas as pd
     >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
     ...                          Model, EnergySystem)
-    >>> from oemof.outputlib import graph_tools as gt
+    >>> from oemof.tools import graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
@@ -66,7 +66,7 @@ def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
     ...                          inputs={bel2: Flow()}, outputs={bel1: Flow()})
     >>> es.add(b_gas, bel1, demand_el, pp_gas, bel2, line_to2, line_from2)
     >>> om = Model(energysystem=es)
-    >>> my_graph = gt.graph(optimization_model=om)
+    >>> my_graph = grph.create_graph(optimization_model=om)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # import networkx as nx
