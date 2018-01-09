@@ -1,8 +1,8 @@
 
 from nose.tools import eq_
-from . import optimization_model
+from . import optimization_model, energysystem
 from oemof.outputlib import processing
-from oemof.outputlib.views import filter_nodes, NodeOption
+from oemof.outputlib.views import filter_nodes, NodeOption, get_node_by_name
 
 
 class Filter_Test():
@@ -31,3 +31,32 @@ class Filter_Test():
             option=NodeOption.HasOutputs
         )
         eq_(len(nodes), 16)
+
+    def test_get_node_by_name(self):
+        node = get_node_by_name(self.results, 'heat_pump')
+        eq_(
+            energysystem.groups['heat_pump'],
+            node
+        )
+
+    def test_get_multiple_nodes_by_name(self):
+        node1, node2 = get_node_by_name(self.results, 'b_el', 'pp_oil')
+        eq_(
+            energysystem.groups['b_el'],
+            node1
+        )
+        eq_(
+            energysystem.groups['pp_oil'],
+            node2
+        )
+
+    def test_get_node_by_name_with_wrong_attribute(self):
+        node1, node2 = get_node_by_name(self.results, 'b_el', 'wrong')
+        eq_(
+            energysystem.groups['b_el'],
+            node1
+        )
+        eq_(
+            None,
+            node2
+        )
