@@ -17,7 +17,6 @@ from oemof.outputlib import processing, views
 
 def test_gen_caes():
     # read sequence data
-
     full_filename = os.path.join(os.path.dirname(__file__), 'generic_caes.csv')
     data = pd.read_csv(full_filename)
 
@@ -32,19 +31,17 @@ def test_gen_caes():
     # resources
     bgas = solph.Bus(label='bgas')
 
-    rgas = solph.Source(label='rgas',
-                        outputs={bgas: solph.Flow(variable_costs=20)})
+    rgas = solph.Source(label='rgas', outputs={
+        bgas: solph.Flow(variable_costs=20)})
 
     # power
     bel_source = solph.Bus(label='bel_source')
-    source_el = solph.Source(label='source_el',
-                             outputs={bel_source: solph.Flow(
-                                variable_costs=data['price_el_source'])})
+    source_el = solph.Source(label='source_el', outputs={
+        bel_source: solph.Flow(variable_costs=data['price_el_source'])})
 
     bel_sink = solph.Bus(label='bel_sink')
-    sink_el = solph.Sink(label='sink_el',
-                           inputs={bel_sink: solph.Flow(
-                                variable_costs=data['price_el_sink'])})
+    sink_el = solph.Sink(label='sink_el', inputs={
+        bel_sink: solph.Flow(variable_costs=data['price_el_sink'])})
 
     # dictionary with parameters for a specific CAES plant
     # based on thermal modelling and linearization techniques
