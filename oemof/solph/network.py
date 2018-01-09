@@ -83,6 +83,9 @@ class Flow:
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
+    fixed_costs : numeric
+        The costs associated with one unit of the absolute nominal_value of
+        the flow for the whole period e.g. fixed OPEX.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
