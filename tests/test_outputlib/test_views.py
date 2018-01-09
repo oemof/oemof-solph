@@ -28,7 +28,7 @@ class Filter_Test():
     def test_filter_has_outputs(self):
         nodes = filter_nodes(
             self.results,
-            option=NodeOption.HasOutputs
+            option='has_outputs'
         )
         eq_(len(nodes), 16)
 

@@ -60,12 +60,12 @@ def node(results, node):
     return filtered
 
 
-class NodeOption(Enum):
-    All = 0
-    HasOutputs = 1
-    HasInputs = 2
-    HasOnlyOutputs = 3
-    HasOnlyInputs = 4
+class NodeOption(str, Enum):
+    All = 'all'
+    HasOutputs = 'has_outputs'
+    HasInputs = 'has_inputs'
+    HasOnlyOutputs = 'has_only_outputs'
+    HasOnlyInputs = 'has_only_inputs'
 
 
 def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
