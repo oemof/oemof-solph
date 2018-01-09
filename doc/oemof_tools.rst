@@ -16,6 +16,10 @@ Economics
 
 Calculate the annuity. See the API-doc of :py:func:`~oemof.tools.economics.annuity` for all details.
 
+Graph
+-----
+Create a networkx graph from an energy system. The networkx package provides many features to analyse draw and export graphs. See the `networkx documentation <https://networkx.github.io/documentation/stable/>`_ for more details.
+
 Helpers
 -------
 
