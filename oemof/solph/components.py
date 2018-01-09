@@ -540,13 +540,13 @@ class GenericCHP(network.Transformer):
     ...    fuel_input={bgas: solph.Flow(
     ...        H_L_FG_share_max=[0.183])},
     ...    electrical_output={bel: solph.Flow(
-    ...        P_max_woDH=data[155.946],
-    ...        P_min_woDH=data[68.787],
-    ...        Eta_el_max_woDH=data[0.525],
-    ...        Eta_el_min_woDH=data[0.444])},
+    ...        P_max_woDH=[155.946],
+    ...        P_min_woDH=[68.787],
+    ...        Eta_el_max_woDH=[0.525],
+    ...        Eta_el_min_woDH=[0.444])},
     ...    heat_output={bth: solph.Flow(
-    ...        Q_CW_min=data[10.552])},
-    ...    Beta=data[0.122], back_pressure=False)
+    ...        Q_CW_min=[10.552])},
+    ...    Beta=[0.122], back_pressure=False)
     >>> type(ccet)
     <class 'oemof.solph.components.GenericCHP'>
     """
