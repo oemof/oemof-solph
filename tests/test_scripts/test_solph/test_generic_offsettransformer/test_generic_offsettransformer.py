@@ -37,14 +37,15 @@ def test_gen_ostf():
     solph.Source(label='source_th',
                  outputs={bth: solph.Flow(variable_costs=1000)})
 
-    solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
-               actual_value=data['demand_th'], nominal_value=200)})
+    solph.Sink(label='demand_th', inputs={
+        bth: solph.Flow(
+            fixed=True, actual_value=data['demand_th'], nominal_value=200)})
 
     # power
     bel = solph.Bus(label='bel')
 
-    solph.Source(label='source_el', outputs={bel: solph.Flow(
-                 variable_costs=data['price_el'])})
+    solph.Source(label='source_el', outputs={
+        bel: solph.Flow(variable_costs=data['price_el'])})
 
     # generic chp
     hp = solph.custom.OffsetTransformer(

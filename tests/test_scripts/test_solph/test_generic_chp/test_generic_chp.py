@@ -17,7 +17,6 @@ from oemof.outputlib import processing, views
 
 def test_gen_chp():
     # read sequence data
-
     full_filename = os.path.join(os.path.dirname(__file__), 'ccet.csv')
     data = pd.read_csv(full_filename)
 
