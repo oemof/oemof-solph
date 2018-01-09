@@ -18,7 +18,7 @@ Calculate the annuity. See the API-doc of :py:func:`~oemof.tools.economics.annui
 
 Graph
 -----
-Create a networkx graph from an energy system. The networkx package provides many features to analyse draw and export graphs. See the `networkx documentation <https://networkx.github.io/documentation/stable/>`_ for more details.
+Create a networkx graph from an energy system. The networkx package provides many features to analyse draw and export graphs. See the `networkx documentation <https://networkx.github.io/documentation/stable/>`_ for more details. See the API-doc of :py:mod:`~oemof.tools.graph` for all details and an example.
 
 Helpers
 -------
