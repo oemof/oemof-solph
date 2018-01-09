@@ -13,7 +13,6 @@ from oemof.network import Node
 from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var
-import oemof.solph
 
 
 def get_tuple(x):
@@ -213,7 +212,7 @@ def __separate_attrs(om, get_flows=False, exclude_none=True):
 
             # Iterate trough investment and add scalars and sequences with
             # "investment" prefix to component data:
-            if isinstance(attr_value, oemof.solph.Investment):
+            if attr_value.__class__.__name__ == 'Investment':
                 invest_data = detect_scalars_and_sequences(attr_value)
                 com_data['scalars'].update(
                     {
