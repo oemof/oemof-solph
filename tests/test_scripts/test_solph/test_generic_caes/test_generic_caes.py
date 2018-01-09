@@ -71,7 +71,7 @@ def test_gen_caes():
         'tes_level_max': 0.0
     }
 
-    # generic compressed_air_energy_storage plant
+    # generic compressed air energy storage (caes) plant
     caes = solph.custom.GenericCAES(
         label='caes',
         electrical_input={bel_source: solph.Flow()},
@@ -114,6 +114,3 @@ def test_gen_caes():
 
     for key in test_dict.keys():
         eq_(int(round(data[key])), int(round(test_dict[key])))
-
-
-test_gen_caes()
