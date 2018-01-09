@@ -49,17 +49,22 @@ def graph(energy_system=None, optimization_model=None, remove_nodes=None,
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
-    >>> b_el = Bus(label='b_el')
+    >>> bel1 = Bus(label='bel1')
+    >>> bel2 = Bus(label='bel2')
     >>> demand_el = Sink(label='demand_el',
-    ...                  inputs = {b_el: Flow(nominal_value=85,
+    ...                  inputs = {bel1: Flow(nominal_value=85,
     ...                            actual_value=[0.5, 0.25, 0.75],
     ...                            fixed=True)})
     >>> pp_gas = Transformer(label='pp_gas',
     ...                            inputs={b_gas: Flow()},
-    ...                            outputs={b_el: Flow(nominal_value=41,
+    ...                            outputs={bel1: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
-    ...                            conversion_factors={b_el: 0.5})
-    >>> es.add(b_gas, b_el, demand_el, pp_gas)
+    ...                            conversion_factors={bel1: 0.5})
+    >>> line_to2 = Transformer(label='line_to2',
+    ...                        inputs={bel1: Flow()}, outputs={bel2: Flow()})
+    >>> line_from2 = Transformer(label='line_from2',
+    ...                          inputs={bel2: Flow()}, outputs={bel1: Flow()})
+    >>> es.add(b_gas, bel1, demand_el, pp_gas, bel2, line_to2, line_from2)
     >>> om = Model(energysystem=es)
     >>> my_graph = gt.graph(optimization_model=om)
     >>> # export graph as .graphml for programs like Yed where it can be
@@ -67,8 +72,12 @@ def graph(energy_system=None, optimization_model=None, remove_nodes=None,
     >>> # import networkx as nx
     >>> # nx.write_graphml(my_graph, "my_graph.graphml")
     >>> [my_graph.has_node(n)
-    ...  for n in ['b_gas', 'b_el', 'pp_gas', 'demand_el', 'tester']]
+    ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
     [True, True, True, True, False]
+    >>> list(nx.attracting_components(my_graph))
+    [{'demand_el'}]
+    >>> sorted(list(nx.strongly_connected_components(my_graph))[1])
+    ['bel1', 'bel2', 'line_from2', 'line_to2']
 
     Notes
     -----
