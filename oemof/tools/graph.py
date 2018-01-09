@@ -19,8 +19,8 @@ except ImportError:
     pygraphviz = None
 
 
-def graph(energy_system=None, optimization_model=None, remove_nodes=None,
-          remove_nodes_with_substrings=None, remove_edges=None):
+def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
+                 remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
