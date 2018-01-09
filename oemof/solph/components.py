@@ -565,6 +565,7 @@ class GenericCHP(network.Transformer):
         fuel_bus = list(self.fuel_input.keys())[0]
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
+
         self.outputs.update(kwargs.get('electrical_output'))
         self.outputs.update(kwargs.get('heat_output'))
 
@@ -586,6 +587,7 @@ class GenericCHP(network.Transformer):
 
         length = [len(a) for a in attrs if not isinstance(a, (int, float))]
         max_length = max(length)
+
 
         if all(len(a) == max_length for a in attrs):
             if max_length == 0:
@@ -613,11 +615,13 @@ class GenericCHP(network.Transformer):
         if self._alphas is None:
             self._calculate_alphas()
 
+
         return self._alphas
 
 
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the relation of nodes with type class:`.GenericCHP`.
+
 
     **The following constraints are created:**
 
@@ -626,6 +630,7 @@ class GenericCHPBlock(SimpleBlock):
     TODO: Add test
 
     """
+
 
     CONSTRAINT_GROUP = True
 
@@ -675,18 +680,7 @@ class GenericCHPBlock(SimpleBlock):
             """Link heat flow to component outflow."""
             expr = 0
             expr += self.Q[n, t]
-            expr += - m.flow[n, lis    Examples
-    --------
-    >>> from oemof import solph
-    >>> bel = solph.Bus(label='electricityBus')
-    >>> bth = solph.Bus(label='heatBus')
-    >>> bgas = solph.Bus(label='commodityBus')
-    >>> et_chp = solph.components.ExtractionTurbineCHP(
-    ...    label='variable_chp_gas',
-    ...    inputs={bgas: solph.Flow(nominal_value=10e10)},
-    ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
-    ...    conversion_factors={bel: 0.3, bth: 0.5},
-    ...    conversion_factor_full_condensation={bel: 0.5})t(n.heat_output.keys())[0], t]
+            expr += - m.flow[n, list(n.heat_output.keys())[0], t]
             return expr == 0
         self.Q_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                  rule=_Q_flow_rule)
