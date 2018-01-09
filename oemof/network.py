@@ -1,13 +1,18 @@
-from collections import MutableMapping as MM
-from functools import total_ordering
-from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
-"""
-This package (along with its subpackages) contains the classes used to model
+# -*- coding: utf-8 -*-
+
+"""This package (along with its subpackages) contains the classes used to model
 energy systems. An energy system is modelled as a graph/network of entities
 with very specific constraints on which types of entities are allowed to be
 connected.
-
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from collections import MutableMapping as MM
+from contextlib import contextmanager
+from functools import total_ordering
+from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 
 class Inputs(MM):
@@ -216,6 +221,8 @@ class Node:
         return id(self) == id(other)
 
     def __lt__(self, other):
+        if other is None:
+            return False
         return self.label < other.label
 
     def __hash__(self):
@@ -284,13 +291,14 @@ class Entity:
     Attributes
     ----------
     registry: :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
-        The central registry keeping track of all :class:`Entities <Entity>`
-        created. If this is `None`, :class:`Entity` instances are not
-        kept track of. When you instantiate an :class:`EnergySystem
-        <oemof.core.energy_system.EnergySystem>` it automatically becomes the
-        entity registry, i.e. all entities created are added to its
-        :attr:`entities <oemof.core.energy_system.EnergySystem.entities>`
-        attribute on construction.
+        The central registry keeping track of all :class:`Node's <Node>`
+        created. If this is `None`, :class:`Node` instances are not
+        kept track of. Assign an :class:`EnergySystem
+        <oemof.core.energy_system.EnergySystem>` to this attribute to have it
+        become the a :class:`node <Node>` registry, i.e. all :class:`nodes
+        <Node>` created are added to its :attr:`nodes
+        <oemof.core.energy_system.EnergySystem.nodes>`
+        property on construction.
     """
     optimization_options = {}
 
@@ -326,3 +334,23 @@ class Entity:
     def __str__(self):
         # TODO: @Günni: Unused privat method. No Docstring.
         return "<{0} #{1}>".format(type(self).__name__, self.uid)
+
+
+@contextmanager
+def registry_changed_to(r):
+    """ Override registry during execution of a block and restore it afterwards.
+    """
+    backup = Node.registry
+    Node.registry = None
+    yield
+    Node.registry = backup
+
+
+def temporarily_modifies_registry(function):
+    """ Backup registry before and restore it after execution of `function`.
+    """
+    def result(*xs, **ks):
+        with registry_disabled():
+            return f(*xs, **ks)
+    return result
+

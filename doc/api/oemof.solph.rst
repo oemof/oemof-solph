@@ -37,9 +37,25 @@ oemof.solph.network module
     :show-inheritance:
 
 oemof.solph.components module
---------------------------
+-----------------------------
 
 .. automodule:: oemof.solph.components
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.custom module
+-----------------------------
+
+.. automodule:: oemof.solph.custom
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints module
+------------------------------
+
+.. automodule:: oemof.solph.constraints
     :members:
     :undoc-members:
     :show-inheritance:

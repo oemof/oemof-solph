@@ -91,7 +91,11 @@ Why should I contribute?
 We know, sometimes it is difficult to start on an existing concept. It will take some time to understand it and you will need extra time to document your own stuff.
 But once you understand the libraries you will get lots of interesting features, always with the option to fit them to your own needs.
 
-Just contact us, if you have any questions!
+If you first want to try out the collaborative process of software development you can start with a contribution on a low level. Fixing typos in the documentation or rephrasing sentences which are unclear would help us on the one hand and brings you nearer to the collaboration process on the other hand.
+
+For any kind of contribution, please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+
+Just contact us if you have any questions!
 
 
 Join oemof with your own approach or project
@@ -102,3 +106,5 @@ You may want to add tools to analyse the results or something we never heard of.
 You want to add a GUI or your application to be linked to. We think, that working together in one framework will increase the probability that somebody will use and test your code (see :ref:`why_contribute_label`).
 
 Interested? Together we can talk about how to transfer your ideas into oemof or even integrate your code. Maybe we just link to your project and try to adept the API for a better fit in the future.
+
+Also consider joining our developer meetings which take place every 6 months (usually May and December). Just contact us!

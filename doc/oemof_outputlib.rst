@@ -4,123 +4,84 @@
 oemof-outputlib
 #####################
 
-The outputlib converts the results to a pandas MultiIndex DataFrame. In this way we make the full power of the pandas package available to process the results. See the `pandas documentation <http://pandas.pydata.org/pandas-docs/stable/>`_  to learn how to `visualise <http://pandas.pydata.org/pandas-docs/version/0.18.1/visualization.html>`_, `read or write <http://pandas.pydata.org/pandas-docs/stable/io.html>`_ or how to `access parts of the DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_ to process them.
+For version 0.2.0, the outputlib has been refactored. Tools for plotting optimization
+results that were part of the outputlib in earlier versions are no longer part of this module
+as the requirements to plotting functions greatly depend on individial requirements.
 
-However, oemof provides some functionality that makes your life easier, especially at the beginning.
+Basic functions for plotting of optimisation results are now found in
+a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`_. 
 
 .. contents::
     :depth: 1
     :local:
     :backlinks: top
 
-Slicing the DataFrame
----------------------
+The main purpose of the outputlib is to collect and organise results.
+It gives back the results as a python dictionary holding pandas Series for scalar values and pandas DataFrames for all nodes and flows between them. This way we can make use of the full power of the pandas package available to process the results. 
 
-(-> :py:meth:`~oemof.outputlib.ResultsDataFrame.slice_by`)
+See the `pandas documentation <http://pandas.pydata.org/pandas-docs/stable/>`_  to learn how to `visualise <http://pandas.pydata.org/pandas-docs/version/0.18.1/visualization.html>`_, `read or write <http://pandas.pydata.org/pandas-docs/stable/io.html>`_ or how to `access parts of the DataFrame <http://pandas.pydata.org/pandas-docs/stable/advanced.html>`_ to process them.
 
-You first need to create an instance of your MultiIndex DataFrame. On this DataFrame you can apply all functions provided by pandas. The slice_by method is an oemof method to access easily a specific component or bus to process or save the results. The *type* parameter signifies the direction of the flow, into or out of a bus. The following examples writes the output of a gas power plant to a csv-file. As we do slice the whole year, the *date_from/date_to* parameter is not necessary. We can use these parameters to slice shorter periods.
+Collecting results
+------------------
 
-  .. code-block:: python
-  
-      myresults = outputlib.DataFramePlot(energy_system=my_energysystem)
-      pp_gas = myresults.slice_by(obj_label='pp_gas', type='to_bus',
-                                  date_from='2012-01-01 00:00:00',
-                                  date_to='2012-12-31 23:00:00')
-      pp_gas.to_csv('pp_gas.csv')solph.Flow()
-      
-      
-You can use this approach also to plot the results, but plotting a slice of a DataFrame is not as easy as plotting a normal DataFrame so you can use the plotting class described in the next section.
-
-
-Plotting parts of the DataFrame
--------------------------------
-(-> :py:class:`~oemof.outputlib.DataFramePlot`)
-
-This class will only add some methods to make things easier. It is still possible to access the full functionality of the `matplotlib <http://matplotlib.org/>`_ package.
-
-Some feature provided by the outputlib:
-
-* Configure the x-axis of you plot with date/time ticks depending on your requirements (:py:class:`~oemof.outputlib.DataFramePlot.set_datetime_ticks`)
-* Placing the legend outside the plot (:py:class:`~oemof.outputlib.DataFramePlot.outside_legend`)
-* Plotting a balance plot around a bus with all inputs/outputs (:py:class:`~oemof.outputlib.DataFramePlot.io_plot`)
-* Use one specific color for every component of your energy model (:py:class:`~oemof.outputlib.DataFramePlot.color_from_dict`)
-* Change the order of the flows in your subset for bar plots or stacked plots (:py:class:`~oemof.outputlib.DataFramePlot.rearrange_subset`)
-
-The following examples shows how to use the `pandas plot method <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.plot.html>`_ with the oemof's DataFramePlot class. The parameter *linewidth* and *title* belong to pandas.
+Collecting results can be done with the help of the processing module:
 
 .. code-block:: python
-
-    myplot = outputlib.DataFramePlot(energy_system=energysystem)
-    myplot.slice_unstacked(bus_label="electricity", type="to_bus",
-                           date_from="2012-01-01 00:00:00",
-                           date_to="2012-01-31 00:00:00")
-    myplot.plot(linewidth=2, title="January 2012")
-
-
-The following examples shows how to combine code of the matplotlib with the DataFramePlot class. Matplotlib code is used to define the figure and the font size. With the *ax* parameter this configuration is passed to the pandas plot function. Further matplolib and oemof functions are used to design the plot.
-
-.. code-block:: python
-
-    fig = plt.figure(figsize=(24, 14))  # matplotlib
-    plt.rc('legend', **{'fontsize': 19})  # matplotlib
-    plt.rcParams.update({'font.size': 19})  # matplotlib
-    plt.style.use('grayscale')  # matplotlib  # oemof
-    myplot.slice_unstacked(bus_label="electricity", type="from_bus")
-    myplot.plot(title="Year 2016", colormap='Spectral', linewidth=2, ax=fig.add_subplot(1, 1, 1))  # pandas
-    myplot.ax.set_ylabel('Power in MW')  # matplotlib
-    myplot.ax.set_xlabel('Date')  # matplotlib
-    myplot.ax.set_title("Electricity bus")  # matplotlib
-    myplot.set_datetime_ticks(number_autoticks=5, date_format='%d-%m-%Y')  # oemof
-    myplot.outside_legend()  # oemof
     
-    
-Creating a colour dictionary
------------------------------
+    results = outputlib.processing.results(om)
 
-A colour dictionary is useful to have the same colour for a specific component in every plot. Therefore you can define a colour for every component of your model using a dictionary. The key has to be the labell of the component while the value is the colour.
+The scalars and sequences describe nodes (with keys like (node, None)) and flows between nodes (with keys like (node_1, node_2)). You can directly extract the data in the dictionary by using these keys, where "node" is the name of the object you want to address. If you want to address objects by their label, you can convert the results dictionary such that the keys are changed to strings given by the labels:
 
 .. code-block:: python
 
-    cdict = {'wind': '#5b5bae',
-             'pv': 'blue',
-             'storage': 'r',
-             'demand': (0.34, 0.2, 0.89)}
-             
-As shown in the example there are different ways to defining a colour using matplolib. Have a look at the general description of `matplotlib colours <http://matplotlib.org/api/colors_api.html>`_ or use the `named colours <http://matplotlib.org/examples/color/named_colors.html>`_.
+    views.convert_keys_to_strings(results)
+    print(results[(wind, bus_electricity)]['sequences']
     
 
-Creating an input/output plot for buses
----------------------------------------
-
-An input/output plot (i/o-plot) can be used to see the balance around a bus. All input flows are plotted as a stacked line plot, all output flows as a stacked bar plot. See :py:class:`~oemof.outputlib.DataFramePlot.rearrange_subset` for all possible parameters. The following example shows the code of left plot below:
+Another option is to access data belonging to a grouping by the name of the grouping 
+(`note also this section on groupings <http://oemof.readthedocs.io/en/latest/oemof_solph.html#the-grouping-module-sets>`_.
+Given the label of an object, e.g. 'wind' you can access the grouping by its label 
+and use this to extract data from the results dictionary.
 
 .. code-block:: python
 
-    myplot = outputlib.DataFramePlot(energy_system=energysystem)
-    handles, labels = myplot.io_plot(
-        bus_label='electricity', cdict=cdict,
-        barorder=['pv', 'wind', 'pp_gas', 'storage'],
-        lineorder=['demand', 'storage', 'excess_bel'],
-        line_kwa={'linewidth': 4},
-        date_from="2012-06-01 00:00:00",
-        date_to="2012-06-8 00:00:00",
-        )
-    myplot.ax.set_ylabel('Power in MW')
-    myplot.ax.set_xlabel('Date')
-    myplot.ax.set_title("Electricity bus")
-    myplot.set_datetime_ticks(tick_distance=24, date_format='%d-%m-%Y')
-    myplot.outside_legend(handles=handles, labels=labels)
+    node_wind = energysystem.groups['wind']
+    print(results[(node_wind, bus_electricity)])
+    
 
-    plt.show()
-
-Due to the rearrangement of the order with in the i/o-plot (*barorder*, *lineorder*) the handles and labels are manipulated. Therefore you have to pass them in the new order to the *outside_legend* method to get the legend in the right order. Otherwise the legend will be outside but will be in the first order.
-
-
-Typical outputs of the outputlib
---------------------------------
-
-.. 	image:: _files/example_figures.png
-   :scale: 100 %
-   :alt: alternate text
-   :align: center
+However, in many situations it might be convenient to use the views module to 
+collect information on a specific node. You can request all data related to a
+specific node by using either the node's variable name or its label:
  
+.. code-block:: python
+
+    data_wind = outputlib.views.node(results, 'wind')
+    
+
+A function for collecting and printing meta results, i.e. information on the objective function,
+the problem and the solver, is provided as well:
+
+.. code-block:: python
+
+    meta_results = outputlib.processing.meta_results(om)
+    pp.pprint(meta_results)
+    
+
+
+Drawing a graph representation of the energy system
+---------------------------------------------------
+
+A new feature as of version 0.2.0 is a function to draw a graph representation of
+the energy system.
+
+
+.. code-block:: python
+
+    import graph_tools as gt
+    my_graph = gt.graph(energy_system=es, optimization_model=om, node_color={demand_el: 'r'}, plot=False)
+    
+    # export graph as .graphml for programs like Yed where it can be
+    # sorted and customized. this is especially helpful for large graphs
+    import networkx as nx
+    nx.write_graphml(my_graph, "my_graph.graphml")
+

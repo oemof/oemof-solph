@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """ Classes used to model energy supply systems within solph.
 
 Classes are derived from oemof core network classes and adapted for specific
@@ -6,8 +7,9 @@ optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
 """
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
-import warnings
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
@@ -32,13 +34,12 @@ class EnergySystem(es.EnergySystem):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
-        from . import GROUPINGS
-        from .components import component_grouping
-        from .custom import custom_grouping
-        kwargs['groupings'] = (GROUPINGS +
-                               [component_grouping] +
-                               [custom_grouping] +
-                               kwargs.get('groupings', []))
+        from oemof.solph.groupings import GROUPINGS
+        from oemof.solph.components import component_grouping
+        from oemof.solph.custom import custom_component_grouping
+        kwargs['groupings'] = (
+            GROUPINGS + [component_grouping] + [custom_component_grouping] +
+            kwargs.get('groupings', []))
         super().__init__(**kwargs)
 
 
@@ -82,9 +83,6 @@ class Flow:
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
-    fixed_costs : numeric
-        The costs of the whole period associated with the absolute
-        nominal_value of the flow.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
@@ -137,34 +135,35 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
+        scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
                      'variable_costs', 'min', 'max']
-        defaults = {'fixed': False, 'min': 0, 'max': 1}
+        defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
+                    'positive_gradient': {'ub': None, 'costs': 0},
+                    'negative_gradient': {'ub': None, 'costs': 0},
+                    }
 
         for attribute in set(scalars + sequences + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
-            setattr(self, attribute,
-                    sequence(value) if attribute in sequences else value)
+            if 'gradient' in attribute:
+                setattr(self, attribute, {'ub': sequence(value['ub']),
+                                          'costs': value['costs']})
+            elif 'fixed_costs' in attribute:
+                raise AttributeError(
+                         "The `fixed_costs` attribute has been removed"
+                         " with v0.2!")
+            else:
+                setattr(self, attribute,
+                        sequence(value) if attribute in sequences else value)
 
-        if self.fixed and self.actual_value is None:
-            raise ValueError("Can not fix flow value to None. "
-                             "Please set actual_value of the flow")
-
-        elif self.fixed:
-            # ToDo: Check if min/max are set by user than raise warning
-            # warnings.warn(
-            #     "Values for min/max will be ignored if fixed is True.",
-            #     SyntaxWarning)
-            self.min = sequence(0)
-            self.max = sequence(1)
+        # Checking for impossible attribute combinations
+        if self.fixed and self.actual_value[0] is None:
+            raise ValueError("Cannot fix flow value to None.\n Please "
+                             "set the actual_value attribute of the flow")
         if self.investment and self.nominal_value is not None:
-            self.nominal_value = None
-            warnings.warn(
-                "Using the investment object the nominal_value" +
-                " is set to None.",
-                SyntaxWarning)
+            raise ValueError("Using the investment object the nominal_value"
+                             " has to be set to None.")
         if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")

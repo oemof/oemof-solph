@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Modules for providing a convenient data structure for solph results.
+
+"""Modules for providing a convenient data structure for solph results.
 
 Information about the possible usage is provided within the examples.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 import pandas as pd
 from itertools import groupby
@@ -98,27 +101,28 @@ def results(om):
     Results from Pyomo are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
-    The dictionary is keyed by the nodes e.g. `results[(n,)]['scalars']`
+    The dictionary is keyed by the nodes e.g. `results[(n, None)]['scalars']`
     and flows e.g. `results[(n,n)]['sequences']`.
     """
     df = create_dataframe(om)
 
     # create a dict of dataframes keyed by oemof tuples
-    df_dict = {k: v[['timestep', 'variable_name', 'value']]
+    df_dict = {k if len(k) > 1 else (k[0], None):
+               v[['timestep', 'variable_name', 'value']]
                for k, v in df.groupby('oemof_tuple')}
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
-    results = {}
-    for k, v in df_dict.items():
+    result = {}
+    for k in df_dict:
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
         df_dict[k].index = om.es.timeindex
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-            sequences = df_dict[k].loc[:, ~(condition)]
-            results[k] = {'scalars': scalars, 'sequences': sequences}
+            sequences = df_dict[k].loc[:, ~condition]
+            result[k] = {'scalars': scalars, 'sequences': sequences}
         except IndexError:
             error_message = ('Cannot access index on result data. ' +
                              'Did the optimization terminate' +
@@ -131,12 +135,25 @@ def results(om):
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
-            if (bus,) not in results.keys():
-                results[(bus,)] = {'sequences': df, 'scalars': pd.Series()}
+            if (bus, None) not in result.keys():
+                result[(bus, None)] = {
+                    'sequences': df, 'scalars': pd.Series()}
             else:
-                results[(bus,)]['sequences']['duals'] = duals
+                result[(bus, None)]['sequences']['duals'] = duals
 
-    return results
+    return result
+
+
+def convert_keys_to_strings(result):
+    """
+    Convert the dictionary keys to strings.
+
+    All tuple keys of the result object e.g. results[(pp1, bus1)] are converted
+    into strings that represent the object labels e.g. results[('pp1','bus1')].
+    """
+    converted = {tuple([str(e) for e in k]): v for k, v in result.items()}
+
+    return converted
 
 
 def meta_results(om, undefined=False):

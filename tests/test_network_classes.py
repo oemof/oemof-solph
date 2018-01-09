@@ -1,5 +1,12 @@
-from traceback import format_exception_only as feo
+# -*- coding: utf-8 -
 
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
 
 from oemof.energy_system import EnergySystem as ES
@@ -10,6 +17,7 @@ class Node_Tests:
 
     def setup(self):
         self.energysystem = ES()
+        Node.registry = self.energysystem
 
     def test_that_attributes_cannot_be_added(self):
         node = Node()
@@ -199,10 +207,12 @@ class Node_Tests:
         eq_(n1.outputs[n2], n1n2)
         eq_(n1.outputs, {n2: n1n2})
 
+
 class EnergySystem_Nodes_Integration_Tests:
 
     def setup(self):
         self.es = ES()
+        Node.registry = self.es
 
     def test_node_registration(self):
         eq_(Node.registry, self.es)
