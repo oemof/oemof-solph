@@ -18,14 +18,9 @@ try:
 except ImportError:
     pygraphviz = None
 
-warnings.filterwarnings("ignore")  # deactivate matplotlib warnings in networkx
 
-
-def graph(energy_system, optimization_model=None, edge_labels=True,
-          remove_nodes=None, remove_nodes_with_substrings=None,
-          remove_edges=None, node_color='#AFAFAF', edge_color='#CFCFCF',
-          plot=True, node_size=2000, with_labels=True, arrows=True,
-          layout='neato'):
+def graph(energy_system=None, optimization_model=None, remove_nodes=None,
+          remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -36,9 +31,6 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
     optimization_model : `oemof.solph.models.Model`
 
-    edge_labels: boolean
-        Use nominal values of flow as edge label
-
     remove_nodes: list of strings
         Nodes to be removed e.g. ['node1', node2')]
 
@@ -47,28 +39,6 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
     remove_edges: list of string tuples
         Edges to be removed e.g. [('resource_gas', 'gas_balance')]
-
-    node_color : dict or string
-        Hex color code oder matplotlib color for each node. If string, all
-        colors are the same.
-
-    edge_color : string
-        Hex color code oder matplotlib color for edge color.
-
-    plot : boolean
-        Show matplotlib plot.
-
-    node_size : integer
-        Size of nodes.
-
-    with_labels : boolean
-        Draw node labels.
-
-    arrows : boolean
-        Draw arrows on directed edges. Works only if an optimization_model has
-        been passed.
-    layout : string
-        networkx graph layout, one of: neato, dot, twopi, circo, fdp, sfdp.
 
     Examples
     --------
@@ -91,15 +61,14 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     ...                            conversion_factors={b_el: 0.5})
     >>> es.add(b_gas, b_el, demand_el, pp_gas)
     >>> om = Model(energysystem=es)
-    >>> my_graph = gt.graph(energy_system=es, optimization_model=om,
-    ...                     node_color={demand_el: 'r'}, plot=False)
+    >>> my_graph = gt.graph(optimization_model=om)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # import networkx as nx
     >>> # nx.write_graphml(my_graph, "my_graph.graphml")
     >>> [my_graph.has_node(n)
-    ...  for n in ['b_gas', 'b_el', 'pp_gas', 'demand_el']]
-    [True, True, True, True]
+    ...  for n in ['b_gas', 'b_el', 'pp_gas', 'demand_el', 'tester']]
+    [True, True, True, True, False]
 
     Notes
     -----
@@ -107,41 +76,85 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
     Tested on Ubuntu 16.04 x64 and solydxk (debian 9).
     """
     # construct graph from nodes and flows
-    if nx is not None and pygraphviz is not None:
-        grph = nx.DiGraph()
+    grph = nx.DiGraph()
 
-        # add nodes
+    # Get energy_system from Model
+    if energy_system is None:
+        energy_system = optimization_model.es
+
+    # add nodes
+    for n in energy_system.nodes:
+        grph.add_node(n.label)
+
+    # add labeled flows on directed edge if an optimization_model has been
+    # passed or undirected edge otherwise
+    if optimization_model:
+        for s, t in optimization_model.flows:
+            if optimization_model.flows[s, t].nominal_value is None:
+                grph.add_edge(s.label, t.label)
+            else:
+                weight = format(
+                    optimization_model.flows[s, t].nominal_value, '.2f')
+                grph.add_edge(s.label, t.label, weight=weight)
+    else:
         for n in energy_system.nodes:
-            grph.add_node(n.label)
+            for i in n.inputs.keys():
+                grph.add_edge(n.label, i.label)
 
-        # add labeled flows on directed edge if an optimization_model has been
-        # passed or undirected edge otherwise
-        if optimization_model:
-            for s, t in optimization_model.flows:
-                if optimization_model.flows[s, t].nominal_value is None:
-                    grph.add_edge(s.label, t.label)
-                else:
-                    weight = format(
-                        optimization_model.flows[s, t].nominal_value, '.2f')
-                    grph.add_edge(s.label, t.label, weight=weight)
-        else:
-            arrows = False
-            for n in energy_system.nodes:
-                for i in n.inputs.keys():
-                    grph.add_edge(n.label, i.label)
+    # remove nodes and edges based on precise labels
+    if remove_nodes is not None:
+        grph.remove_nodes_from(remove_nodes)
+    if remove_edges is not None:
+        grph.remove_edges_from(remove_edges)
 
-        # remove nodes and edges based on precise labels
-        if remove_nodes is not None:
+    # remove nodes based on substrings
+    if remove_nodes_with_substrings is not None:
+        for i in remove_nodes_with_substrings:
+            remove_nodes = [v.label for v in energy_system.nodes
+                            if i in v.label]
             grph.remove_nodes_from(remove_nodes)
-        if remove_edges is not None:
-            grph.remove_edges_from(remove_edges)
+    return grph
 
-        # remove nodes based on substrings
-        if remove_nodes_with_substrings is not None:
-            for i in remove_nodes_with_substrings:
-                remove_nodes = [v.label for v in energy_system.nodes
-                                if i in v.label]
-                grph.remove_nodes_from(remove_nodes)
+
+def draw_graph(grph, edge_labels=True, node_color='#AFAFAF',
+               edge_color='#CFCFCF', plot=True, node_size=2000,
+               with_labels=True, arrows=True, layout='neato'):
+    """
+    Draw a graph. This function will be removed in future versions.
+
+    Parameters
+    ----------
+    grph : networkxGraph
+        A graph to draw.
+    edge_labels : boolean
+        Use nominal values of flow as edge label
+    node_color : dict or string
+        Hex color code oder matplotlib color for each node. If string, all
+        colors are the same.
+
+    edge_color : string
+        Hex color code oder matplotlib color for edge color.
+
+    plot : boolean
+        Show matplotlib plot.
+
+    node_size : integer
+        Size of nodes.
+
+    with_labels : boolean
+        Draw node labels.
+
+    arrows : boolean
+        Draw arrows on directed edges. Works only if an optimization_model has
+        been passed.
+    layout : string
+        networkx graph layout, one of: neato, dot, twopi, circo, fdp, sfdp.
+    """
+    warnings.warn(
+        "\nThe function to plot the graph is deprecated and will be removed "
+        "in oemof >= 0.3.0.")
+
+    if plt is not None or pygraphviz is not None:
 
         if type(node_color) is dict:
             node_color = [node_color.get(g, '#AFAFAF') for g in grph.nodes()]
@@ -158,13 +171,8 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
 
         # draw graph
         pos = nx.drawing.nx_agraph.graphviz_layout(grph, prog=layout)
-        if plt:
-            nx.draw(grph, pos=pos, **options)
-        else:
-            logging.error("Matplotlib could not be imported. "
-                          "Plotting will not work. "
-                          "Try 'pip install matplotlib'.")
-            plot = False
+
+        nx.draw(grph, pos=pos, **options)
 
         # add edge labels for all edges
         if edge_labels is True and plt:
@@ -176,15 +184,12 @@ def graph(energy_system, optimization_model=None, edge_labels=True,
             plt.show()
 
     else:
-        if nx is None:
-            logging.error(
-                "Graph cannot be drawn due to the missing networkx package.")
+        if plt is None:
+            warnings.warn(
+                "Graph cannot be drawn due to the missing matplotlib package.")
         if pygraphviz is None:
-            logging.error(
+            warnings.warn(
                 "Graph cannot be drawn due to the missing pygraphviz package.")
-        grph = None
-
-    return grph
 
 
 if __name__ == '__main__':
