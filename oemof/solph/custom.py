@@ -254,8 +254,7 @@ class LinkBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    TODO: Add description for constrainst
-
+    TODO: Add description for constraints
     TODO: Add tests
 
     """
@@ -362,9 +361,9 @@ class OffsetTransformerBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    TODO: Add description for constrainst
+    TODO: Add description for constraints
 
-    TODO: Add tests
+    TODO: Add test
 
     """
     CONSTRAINT_GROUP = True
