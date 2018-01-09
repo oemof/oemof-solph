@@ -528,6 +528,27 @@ class GenericCHP(network.Transformer):
     -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericCHPBlock`
+
+    Examples
+    --------
+    >>> from oemof import solph
+    >>> bel = solph.Bus(label='electricityBus')
+    >>> bth = solph.Bus(label='heatBus')
+    >>> bgas = solph.Bus(label='commodityBus')
+    >>> ccet = solph.components.GenericCHP(
+    ...    label='combined_cycle_extraction_turbine',
+    ...    fuel_input={bgas: solph.Flow(
+    ...        H_L_FG_share_max=[0.183])},
+    ...    electrical_output={bel: solph.Flow(
+    ...        P_max_woDH=data[155.946],
+    ...        P_min_woDH=data[68.787],
+    ...        Eta_el_max_woDH=data[0.525],
+    ...        Eta_el_min_woDH=data[0.444])},
+    ...    heat_output={bth: solph.Flow(
+    ...        Q_CW_min=data[10.552])},
+    ...    Beta=data[0.122], back_pressure=False)
+    >>> type(ccet)
+    <class 'oemof.solph.components.GenericCHP'>
     """
 
     def __init__(self, *args, **kwargs):
