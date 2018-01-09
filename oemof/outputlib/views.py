@@ -104,3 +104,19 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
         return {n for n in nodes if not n.__class__.__name__ == 'Bus'}
     else:
         return nodes
+
+
+def get_node_by_name(results, *names):
+    """
+    Searches results for nodes
+
+    Names are looked up in nodes from results and either returned single node
+    (in case only one name is given) or as list of nodes. If name is not found,
+    None is returned.
+    """
+    nodes = filter_nodes(results)
+    if len(names) == 1:
+        return next(filter(lambda x: str(x) == names[0], nodes), None)
+    else:
+        node_names = {str(n): n for n in nodes}
+        return [node_names.get(n, None) for n in names]
