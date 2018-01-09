@@ -211,6 +211,11 @@ class Link(Transformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
+    Notes
+    -----
+    The sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.custom.LinkBlock`
+
     Examples
     --------
 
@@ -234,11 +239,6 @@ class Link(Transformer):
 
     >>> link.conversion_factors[(bel0, bel1)][3]
     0.92
-
-    Notes
-    -----
-    The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.LinkBlock`
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -331,15 +331,20 @@ class GenericCAES(Transformer):
         Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical output.
 
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.GenericCAES`
+
+    TODO: Add description for constraints. See referenced paper until then!
+
     Examples
     --------
 
     >>> from oemof import solph
-
     >>> bel = solph.Bus(label='bel')
     >>> bth = solph.Bus(label='bth')
     >>> bgas = solph.Bus(label='bgas')
-
     >>> # dictionary with parameters for a specific CAES plant
     >>> concept = {
     ...    'cav_e_in_b': 0,
@@ -362,7 +367,6 @@ class GenericCAES(Transformer):
     ...    'exp_q_tes_share': 0,
     ...    'tes_eta_temp': 1.0,
     ...    'tes_level_max': 0.0}
-
     >>> # generic compressed air energy storage (caes) plant
     >>> caes = solph.custom.GenericCAES(
     ...    label='caes',
@@ -370,16 +374,8 @@ class GenericCAES(Transformer):
     ...    fuel_input={bgas: solph.Flow()},
     ...    electrical_output={bel: solph.Flow()},
     ...    params=concept, fixed_costs=0)
-
     >>> type(caes)
     <class 'oemof.solph.custom.GenericCAES'>
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCAES`
-
-    TODO: Add description for constraints. See referenced paper until then!
     """
 
     def __init__(self, *args, **kwargs):
@@ -696,6 +692,11 @@ class OffsetTransformer(Transformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
+    Notes
+    -----
+    The sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.custom.OffsetTransformer`
+
     Examples
     --------
 
@@ -714,11 +715,6 @@ class OffsetTransformer(Transformer):
 
     >>> type(ostf)
     <class 'oemof.solph.custom.OffsetTransformer'>
-
-    Notes
-    -----
-    The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.OffsetTransformer`
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

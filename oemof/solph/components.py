@@ -524,7 +524,6 @@ class GenericCHP(network.Transformer):
         Flag to use back-pressure characteristics. Works of set to `True` and
         `Q_CW_min` set to zero. See paper above for more information.
 
-
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -655,7 +654,18 @@ class GenericCHPBlock(SimpleBlock):
             """Link heat flow to component outflow."""
             expr = 0
             expr += self.Q[n, t]
-            expr += - m.flow[n, list(n.heat_output.keys())[0], t]
+            expr += - m.flow[n, lis    Examples
+    --------
+    >>> from oemof import solph
+    >>> bel = solph.Bus(label='electricityBus')
+    >>> bth = solph.Bus(label='heatBus')
+    >>> bgas = solph.Bus(label='commodityBus')
+    >>> et_chp = solph.components.ExtractionTurbineCHP(
+    ...    label='variable_chp_gas',
+    ...    inputs={bgas: solph.Flow(nominal_value=10e10)},
+    ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bth: 0.5},
+    ...    conversion_factor_full_condensation={bel: 0.5})t(n.heat_output.keys())[0], t]
             return expr == 0
         self.Q_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                  rule=_Q_flow_rule)
@@ -778,7 +788,7 @@ class GenericCHPBlock(SimpleBlock):
         return 0
 
 
-class ExtractionTurbineCHP(solph_Transformer):
+class ExtractionTurbineCHP(solph.Transformer):
     r"""
     A CHP with an extraction turbine in a linear model. For more options see
     the :class:`~oemof.solph.components.GenericCHP` class.
@@ -801,6 +811,11 @@ class ExtractionTurbineCHP(solph_Transformer):
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
+
     Examples
     --------
     >>> from oemof import solph
@@ -813,11 +828,6 @@ class ExtractionTurbineCHP(solph_Transformer):
     ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
     """
 
     def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
@@ -940,83 +950,6 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         self.out_flow_relation = Constraint(group, noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
-
-
-class GenericCAES(network.Transformer):
-    r"""
-    Component `GenericCAES` to model arbitrary compressed air energy storages.
-
-    The full set of equations is described in:
-    Kaldemeyer, C.; Boysen, C.; Tuschy, I.
-    A Generic Formulation of Compressed Air Energy Storage as
-    Mixed Integer Linear Program – Unit Commitment of Specific
-    Technical Concepts in Arbitrary Market Environments
-    Materials Today: Proceedings 00 (2018) 0000–0000
-    [currently in review]
-
-    Parameters
-    ----------
-    fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
-    electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
-    heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericCAESBlock`
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fuel_input = kwargs.get('fuel_input')
-        self.electrical_output = kwargs.get('electrical_output')
-        self.heat_output = kwargs.get('electrical_output')
-        self.params = kwargs.get('params')
-
-
-class GenericCAESBlock(SimpleBlock):
-    r"""Block for nodes of class:`.GenericCAES`."""
-
-    CONSTRAINT_GROUP = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """
-        Create constraints for GenericCAESBlock.
-
-        Parameters
-        ----------
-        group : list
-            List containing `.GenericCAES` objects.
-            e.g. groups=[gcaes1, gcaes2,..]
-        """
-        m = self.parent_block()
-
-        if group is None:
-            return None
-
-        self.GENERICCAES = Set(initialize=[n for n in group])
-
-        # variables
-        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-
-        def _H_flow_rule(block, n, t):
-            """Link fuel consumption to component inflow."""
-            expr = 0
-            expr += self.H_F[n, t]
-            expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
-            return expr == 0
-        self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                 rule=_H_flow_rule)
 
 
 def component_grouping(node):
