@@ -632,7 +632,15 @@ class GenericCHP(network.Transformer):
 # ------------------------------------------------------------------------------
 
 class GenericCHPBlock(SimpleBlock):
-    r"""Block for the linear relation of nodes with type class:`.GenericCHP`."""
+    r"""Block for the relation of nodes with type class:`.GenericCHP`.
+
+    **The following constraints are created:**
+
+    TODO: Add description for constraints
+
+    TODO: Add test
+
+    """
 
     CONSTRAINT_GROUP = True
 
