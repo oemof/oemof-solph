@@ -19,10 +19,6 @@ from oemof.solph import sequence as solph_sequence
 from oemof.solph import Investment
 
 
-# ------------------------------------------------------------------------------
-# Start of generic storage component
-# ------------------------------------------------------------------------------
-
 class GenericStorage(network.Transformer):
     """
     Component `GenericStorage` to model with basic characteristics of storages.
@@ -168,14 +164,6 @@ class GenericStorage(network.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
-# ------------------------------------------------------------------------------
-# End of generic storage component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic storage block
-# ------------------------------------------------------------------------------
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
@@ -275,14 +263,7 @@ class GenericStorageBlock(SimpleBlock):
 
         return 0
 
-# ------------------------------------------------------------------------------
-# End of generic storage block
-# ------------------------------------------------------------------------------
 
-
-# ------------------------------------------------------------------------------
-# Start of generic storage invest block
-# ------------------------------------------------------------------------------
 class GenericInvestmentStorageBlock(SimpleBlock):
     r"""Storage with an :class:`.Investment` object.
 
@@ -486,14 +467,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         return investment_costs
 
-# ------------------------------------------------------------------------------
-# End of generic storage invest block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CHP component
-# ------------------------------------------------------------------------------
 
 class GenericCHP(network.Transformer):
     r"""
@@ -622,14 +595,6 @@ class GenericCHP(network.Transformer):
 
         return self._alphas
 
-# ------------------------------------------------------------------------------
-# End of generic CHP component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CHP block
-# ------------------------------------------------------------------------------
 
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the relation of nodes with type class:`.GenericCHP`.
@@ -812,14 +777,6 @@ class GenericCHPBlock(SimpleBlock):
 
         return 0
 
-# ------------------------------------------------------------------------------
-# End of generic CHP block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of ExtractionTurbineCHP component
-# ------------------------------------------------------------------------------
 
 class ExtractionTurbineCHP(solph_Transformer):
     r"""
@@ -869,15 +826,6 @@ class ExtractionTurbineCHP(solph_Transformer):
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
-
-# ------------------------------------------------------------------------------
-# End of ExtractionTurbineCHP component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of ExtractionTurbineCHP block
-# ------------------------------------------------------------------------------
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -993,14 +941,6 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
 
-# ------------------------------------------------------------------------------
-# End of ExtractionTurbineCHP block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CAES component
-# ------------------------------------------------------------------------------
 
 class GenericCAES(network.Transformer):
     r"""
@@ -1040,14 +980,6 @@ class GenericCAES(network.Transformer):
         self.heat_output = kwargs.get('electrical_output')
         self.params = kwargs.get('params')
 
-# ------------------------------------------------------------------------------
-# End of generic CAES component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of CAES block
-# ------------------------------------------------------------------------------
 
 class GenericCAESBlock(SimpleBlock):
     r"""Block for nodes of class:`.GenericCAES`."""
@@ -1085,10 +1017,6 @@ class GenericCAESBlock(SimpleBlock):
             return expr == 0
         self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
                                  rule=_H_flow_rule)
-
-# ------------------------------------------------------------------------------
-# End of CAES block
-# ------------------------------------------------------------------------------
 
 
 def component_grouping(node):
