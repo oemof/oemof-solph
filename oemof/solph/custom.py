@@ -368,7 +368,7 @@ class GenericCAES(Transformer):
     ...    label='caes',
     ...    electrical_input={bel: solph.Flow()},
     ...    fuel_input={bgas: solph.Flow()},
-    ...    electrical_output={bel_sink: solph.Flow()},
+    ...    electrical_output={bel: solph.Flow()},
     ...    params=concept, fixed_costs=0)
 
     >>> type(caes)
