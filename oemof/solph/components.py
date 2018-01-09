@@ -12,25 +12,12 @@ import numpy as np
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
-<<<<<<< HEAD
-import numpy as np
-import warnings
-from oemof.network import Bus, Transformer
-from oemof.solph import Flow
-from .options import Investment
-from .plumbing import sequence
-=======
 
 from oemof import network
 from oemof.solph import Transformer as solph_Transformer
 from oemof.solph import sequence as solph_sequence
 from oemof.solph import Investment
->>>>>>> dev
 
-
-# ------------------------------------------------------------------------------
-# Start of generic storage component
-# ------------------------------------------------------------------------------
 
 class GenericStorage(network.Transformer):
     """
@@ -84,7 +71,10 @@ class GenericStorage(network.Transformer):
 
     Examples
     --------
-    Basic usage examples of the GenericStorage with a random selection of
+    Basic usage examples of the GenericStorage with a random selection of# ------------------------------------------------------------------------------
+# Start of generic storage component
+# ------------------------------------------------------------------------------
+
     attributes. See the Flow class for all Flow attributes.
 
     >>> from oemof import solph
@@ -177,14 +167,6 @@ class GenericStorage(network.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
-# ------------------------------------------------------------------------------
-# End of generic storage component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic storage block
-# ------------------------------------------------------------------------------
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
@@ -284,14 +266,7 @@ class GenericStorageBlock(SimpleBlock):
 
         return 0
 
-# ------------------------------------------------------------------------------
-# End of generic storage block
-# ------------------------------------------------------------------------------
 
-
-# ------------------------------------------------------------------------------
-# Start of generic storage invest block
-# ------------------------------------------------------------------------------
 class GenericInvestmentStorageBlock(SimpleBlock):
     r"""Storage with an :class:`.Investment` object.
 
@@ -495,14 +470,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         return investment_costs
 
-# ------------------------------------------------------------------------------
-# End of generic storage invest block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CHP component
-# ------------------------------------------------------------------------------
 
 class GenericCHP(network.Transformer):
     r"""
@@ -578,11 +545,21 @@ class GenericCHP(network.Transformer):
         self._alphas = None
 
         # map specific flows to standard API
-        self.inputs.update(kwargs.get('fuel_input'))
+        fuel_bus = list(self.fuel_input.keys())[0]
+        fuel_flow = list(self.fuel_input.values())[0]
+        fuel_bus.outputs.update({self: fuel_flow})
         self.outputs.update(kwargs.get('electrical_output'))
         self.outputs.update(kwargs.get('heat_output'))
 
-    def _calculate_alphas(self):
+    def _calculate_alphas(self):# ------------------------------------------------------------------------------
+# End of generic storage invest block
+# ------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
+# Start of generic CHP component
+# ------------------------------------------------------------------------------
+
         """
         Calculate alpha coefficients.
 
@@ -629,14 +606,6 @@ class GenericCHP(network.Transformer):
 
         return self._alphas
 
-# ------------------------------------------------------------------------------
-# End of generic CHP component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CHP block
-# ------------------------------------------------------------------------------
 
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type class:`.GenericCHP`."""
@@ -811,14 +780,6 @@ class GenericCHPBlock(SimpleBlock):
 
         return 0
 
-# ------------------------------------------------------------------------------
-# End of generic CHP block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of ExtractionTurbineCHP component
-# ------------------------------------------------------------------------------
 
 class ExtractionTurbineCHP(solph_Transformer):
     r"""
@@ -868,15 +829,6 @@ class ExtractionTurbineCHP(solph_Transformer):
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
-
-# ------------------------------------------------------------------------------
-# End of ExtractionTurbineCHP component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of ExtractionTurbineCHP block
-# ------------------------------------------------------------------------------
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -992,109 +944,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
 
-# ------------------------------------------------------------------------------
-# End of ExtractionTurbineCHP block
-# ------------------------------------------------------------------------------
 
-
-<<<<<<< HEAD
-=======
-# ------------------------------------------------------------------------------
-# Start of generic CAES component
-# ------------------------------------------------------------------------------
-
-class GenericCAES(network.Transformer):
-    r"""
-    Component `GenericCAES` to model arbitrary compressed air energy storages.
-
-    The full set of equations is described in:
-    Kaldemeyer, C.; Boysen, C.; Tuschy, I.
-    A Generic Formulation of Compressed Air Energy Storage as
-    Mixed Integer Linear Program – Unit Commitment of Specific
-    Technical Concepts in Arbitrary Market Environments
-    Materials Today: Proceedings 00 (2018) 0000–0000
-    [currently in review]
-
-    Parameters
-    ----------
-    fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
-    electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
-    heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericCAESBlock`
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fuel_input = kwargs.get('fuel_input')
-        self.electrical_output = kwargs.get('electrical_output')
-        self.heat_output = kwargs.get('electrical_output')
-        self.params = kwargs.get('params')
-
-# ------------------------------------------------------------------------------
-# End of generic CAES component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of CAES block
-# ------------------------------------------------------------------------------
-
-class GenericCAESBlock(SimpleBlock):
-    r"""Block for nodes of class:`.GenericCAES`."""
-
-    CONSTRAINT_GROUP = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """
-        Create constraints for GenericCAESBlock.
-
-        Parameters
-        ----------
-        group : list
-            List containing `.GenericCAES` objects.
-            e.g. groups=[gcaes1, gcaes2,..]
-        """
-        m = self.parent_block()
-
-        if group is None:
-            return None
-
-        self.GENERICCAES = Set(initialize=[n for n in group])
-
-        # variables
-        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-
-        def _H_flow_rule(block, n, t):
-            """Link fuel consumption to component inflow."""
-            expr = 0
-            expr += self.H_F[n, t]
-            expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
-            return expr == 0
-        self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                 rule=_H_flow_rule)
-
-# ------------------------------------------------------------------------------
-# End of CAES block
-# ------------------------------------------------------------------------------
-
-
->>>>>>> dev
 def component_grouping(node):
-    """Add groupings for all components which is added in `models.py`."""
     if isinstance(node, GenericStorage) and isinstance(node.investment,
                                                        Investment):
         return GenericInvestmentStorageBlock
