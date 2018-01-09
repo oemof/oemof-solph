@@ -9,18 +9,7 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import pandas as pd
-
-
-def convert_keys_to_strings(results):
-    """
-    Convert the dictionary keys to strings.
-
-    All tuple keys of the result object e.g. results[(pp1, bus1)] are converted
-    into strings that represent the object labels e.g. results[('pp1','bus1')].
-    """
-    converted = {tuple([str(e) for e in k]): v for k, v in results.items()}
-
-    return converted
+from oemof.outputlib.processing import convert_keys_to_strings
 
 
 def node(results, node):
