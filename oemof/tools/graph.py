@@ -1,21 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""Modules for creating and manipulating energy system graphs."""
+"""Modules for creating and analysing energy system graphs."""
 
 __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import networkx as nx
-
-try:
-    from matplotlib import pyplot as plt
-except ImportError:
-    plt = None
-
-try:
-    import pygraphviz
-except ImportError:
-    pygraphviz = None
 
 
 def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
