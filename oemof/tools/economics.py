@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-"""
-Module to collect useful functions for economic calculation.
 
+"""Module to collect useful functions for economic calculation.
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 
 def annuity(capex, n, wacc):
-    """
+    """Calculate the annuity.
+
+    annuity = capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)
+
     Parameters
     ----------
     capex : float
@@ -18,7 +23,7 @@ def annuity(capex, n, wacc):
 
     Returns
     -------
-    float
+    float : annuity
 
     """
     return capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)

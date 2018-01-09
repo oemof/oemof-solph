@@ -42,35 +42,35 @@ c_e_Bus_balance(heatBus_2)_:
 +1 flow(variable_chp_gas_heatBus_2)
 = 0
 
-c_e_VariableFractionTransformerBlock_input_output_relation(variable_chp_gas_0)_:
+c_e_ExtractionTurbineCHPBlock_input_output_relation(variable_chp_gas_0)_:
 +1 flow(commodityBus_variable_chp_gas_0)
 -2 flow(variable_chp_gas_electricityBus_0)
 -0.80000000000000004 flow(variable_chp_gas_heatBus_0)
 = 0
 
-c_e_VariableFractionTransformerBlock_input_output_relation(variable_chp_gas_1)_:
+c_e_ExtractionTurbineCHPBlock_input_output_relation(variable_chp_gas_1)_:
 +1 flow(commodityBus_variable_chp_gas_1)
 -2 flow(variable_chp_gas_electricityBus_1)
 -0.80000000000000004 flow(variable_chp_gas_heatBus_1)
 = 0
 
-c_e_VariableFractionTransformerBlock_input_output_relation(variable_chp_gas_2)_:
+c_e_ExtractionTurbineCHPBlock_input_output_relation(variable_chp_gas_2)_:
 +1 flow(commodityBus_variable_chp_gas_2)
 -2 flow(variable_chp_gas_electricityBus_2)
 -0.80000000000000004 flow(variable_chp_gas_heatBus_2)
 = 0
 
-c_u_VariableFractionTransformerBlock_out_flow_relation(variable_chp_gas_0)_:
+c_u_ExtractionTurbineCHPBlock_out_flow_relation(variable_chp_gas_0)_:
 -1 flow(variable_chp_gas_electricityBus_0)
 +0.59999999999999998 flow(variable_chp_gas_heatBus_0)
 <= 0
 
-c_u_VariableFractionTransformerBlock_out_flow_relation(variable_chp_gas_1)_:
+c_u_ExtractionTurbineCHPBlock_out_flow_relation(variable_chp_gas_1)_:
 -1 flow(variable_chp_gas_electricityBus_1)
 +0.59999999999999998 flow(variable_chp_gas_heatBus_1)
 <= 0
 
-c_u_VariableFractionTransformerBlock_out_flow_relation(variable_chp_gas_2)_:
+c_u_ExtractionTurbineCHPBlock_out_flow_relation(variable_chp_gas_2)_:
 -1 flow(variable_chp_gas_electricityBus_2)
 +0.59999999999999998 flow(variable_chp_gas_heatBus_2)
 <= 0

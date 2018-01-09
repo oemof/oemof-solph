@@ -24,7 +24,7 @@ As oemof is designed as a Python package it is mandatory to have Python 3 instal
 
   pip install oemof
 
-If you do not yet have pip installed in your python environment, see section :ref:`additional_packages_Linux` below for further help.
+To use pip you have to install the pypi package. Normally pypi is part of your virtual environment.
 
 Using Linux repositories to install Python
 ------------------------------------------
@@ -89,28 +89,6 @@ Check the solver installation by executing the test_installation example (see :r
 
 To learn how to install (other) solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
-.. _additional_packages_Linux:
-
-Additional Python packages
---------------------------
-
-To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included by default in the installation of Python 3.4 and later versions.
-To install pip for earlier Python versions on Debian/Ubuntu try executing the following code in your terminal or use the software management of you Linux distribution: 
-
-.. code:: console
-
-  sudo apt-get install python3-pip
-
-For further information refer to https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel.
-
-In order to install a package using pip execute the following and substitute package_name by the desired package (e.g. virtualenv):
-
-.. code:: console
-
-  pip3 install package_name
-
-For further information on how to install Python modules check out https://docs.python.org/3/installing/index.html.
-
 
 Windows
 =======
@@ -118,7 +96,7 @@ Windows
 If you are new to Python check out the `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows. It will guide you step by step through the installation process, starting
 with the installation of Python using WinPython, all the way to executing your first oemof example.
 
-If you have Python 3 installed
+Having Python 3 installed
 ------------------------------
 
 As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have a working Python 3 environment you can install oemof by using pip. Run the following code in the command window of your python environment:
@@ -127,7 +105,7 @@ As oemof is designed as a Phyton-module it is mandatory to have Python 3 install
 
   pip install oemof
 
-If pip is not part of your python environment, see section :ref:`additional_packages_Win` below for further help or use WinPython/Anaconda (see below).
+If pip is not part of your python environment, you have to install the pypi package.
 
 
 Using WinPython (community driven)
@@ -182,23 +160,6 @@ Check the solver installation by executing the test_installation example (see :r
 For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 
 
-.. _additional_packages_Win:
-
-Additional Python packages
---------------------------
-
-To be able to install additional Python packages an installer program is needed. The preferred installer is pip which is included in the winpython download. 
-If you do not have pip installed see here: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel.
-
-In order to install a package using pip execute the following and substitute package_name by the desired package:
-
-.. code:: console
-
-  pip install package_name
-
-For further information on how to install Python modules check out https://docs.python.org/3/installing/. Using pip all necessary packages are installed automatically. Have a look at the `setup.py <https://github.com/oemof/oemof/blob/master/setup.py>`_  to see all requirements.
-
-
 Mac OSX
 =======
 
@@ -219,36 +180,32 @@ GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
 .. _check_installation_label:
 
-Run examples to check the installation
+Run the installation_test file 
 ======================================
 
-Run the examples to check the installation. From the command-line (or Anaconda Prompt / WinPython Command Prompt) execute:
-
-.. code:: console
-
-  oemof_examples <name-of-example> [-s <name-of-solver>]
-
-You can choose from the list of examples
-
- * test_installation
- * storage_investment (solph)
- * simple_dispatch (solph)
- * csv_reader_investment (solph)
- * csv_reader_dispatch (solph)
- * add_constraints (solph)
- * variable_chp (solph)
   
 Test the installation and the installed solver:
 
+To test the whether the installation was successful simply run
+
 .. code:: console
 
-  oemof_examples test_installation
+  oemof_installation_test
   
-Execute an example with different solver (default: 'cbc').
+in your virtual environment. 
+If the installation was  successful, you will get: 
 
 .. code:: console
 
-  oemof_examples simple_dispatch
-  oemof_examples simple_dispatch -s glpk
+    *********
+    Solver installed with oemof:
+    glpk: working
+    cplex: not working
+    cbc: working
+    gurobi: working
+    *********
+    oemof successfully installed.
 
-If you want to run solph examples you need to have a solver installed (recommended: cbc), see the ":ref:`linux_solver_label`" or ":ref:`windows_solver_label`" section. To get more information about the solph examples see the ":ref:`solph_examples_label`" section.
+as an output.
+
+ 

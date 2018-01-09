@@ -1,40 +1,31 @@
 # -*- coding: utf-8 -*-
 
 """
-General description:
----------------------
-
-This example is not a real use case of an energy system but an example to show
-how a variable combined heat and power plant (chp) works in contrast to a fixed
-chp (eg. block device). Both chp plants distribute power and heat to a separate
-heat and power Bus with a heat and power demand. The plot shows that the fixed
-chp plant produces heat and power excess and therefore needs more natural gas.
+This test contains a ExtractionTurbineCHP class.
 
 """
 
-###############################################################################
-# imports
-###############################################################################
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
-# Outputlib
-from oemof import outputlib
-
-# Default logger of oemof
-from oemof.tools import logger
-import oemof.solph as solph
-
-# import oemof base classes to create energy system objects
+from nose.tools import eq_
 import logging
 import os
 import pandas as pd
+
+from oemof import outputlib
+
+from oemof.network import Node
+import oemof.solph as solph
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     logging.info('Initialize the energy system')
 
     # create time index for 192 hours in May.
-    date_time_index = pd.date_range('5/5/2012', periods=192, freq='H')
+    date_time_index = pd.date_range('5/5/2012', periods=5, freq='H')
     energysystem = solph.EnergySystem(timeindex=date_time_index)
+    Node.registry = energysystem
 
     # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)
@@ -84,12 +75,12 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
         conversion_factors={bel2: 0.3, bth2: 0.5})
 
     # create a fixed transformer to distribute to the heat and elec buses
-    solph.components.VariableFractionTransformer(
+    solph.components.ExtractionTurbineCHP(
         label='variable_chp_gas',
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5},
-        conversion_factor_single_flow={bel: 0.5}
+        conversion_factor_full_condensation={bel: 0.5}
         )
 
     ##########################################################################
@@ -106,16 +97,26 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     optimisation_results = outputlib.processing.results(om)
 
     myresults = outputlib.views.node(optimisation_results, 'natural_gas')
-    myresults = myresults['sequences'].sum(axis=0).to_dict()
-    myresults['objective'] = outputlib.processing.meta_results(om)['objective']
+    sumresults = myresults['sequences'].sum(axis=0)
+    maxresults = myresults['sequences'].max(axis=0)
 
-    variable_chp_dict = {
-        'objective': 14267160965.0,
-        (('natural_gas', 'fixed_chp_gas'), 'flow'): 157717049.49999994,
-        (('natural_gas', 'variable_chp_gas'), 'flow'): 127626169.47000004,
-        (('rgas', 'natural_gas'), 'flow'): 285343219.29999995}
+    variable_chp_dict_sum = {
+        (('natural_gas', 'fixed_chp_gas'), 'flow'): 3710208,
+        (('natural_gas', 'variable_chp_gas'), 'flow'): 2823024,
+        (('rgas', 'natural_gas'), 'flow'): 6533232}
 
-    for key in variable_chp_dict.keys():
-        a = int(round(myresults[key]))
-        b = int(round(variable_chp_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+    variable_chp_dict_max = {
+        (('natural_gas', 'fixed_chp_gas'), 'flow'): 785934,
+        (('natural_gas', 'variable_chp_gas'), 'flow'): 630332,
+        (('rgas', 'natural_gas'), 'flow'): 1416266}
+
+    for key in variable_chp_dict_max.keys():
+        logging.debug("Test the maximum value of {0}".format(key))
+        eq_(int(round(maxresults[key])), int(round(variable_chp_dict_max[key])))
+
+    for key in variable_chp_dict_sum.keys():
+        logging.debug("Test the summed up value of {0}".format(key))
+        eq_(int(round(sumresults[key])), int(round(variable_chp_dict_sum[key])))
+
+    # objective function
+    eq_(round(outputlib.processing.meta_results(om)['objective']), 326661590)

@@ -2,7 +2,7 @@
 
 min 
 objective:
-+180 GenericInvestmentStorageBlock_invest(storage)
++145 GenericInvestmentStorageBlock_invest(storage)
 +56 flow(electricityBus_storage_0)
 +56 flow(electricityBus_storage_1)
 +56 flow(electricityBus_storage_2)
