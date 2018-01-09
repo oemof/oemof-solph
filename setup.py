@@ -31,7 +31,8 @@ setup(name='oemof',
       install_requires=['dill',
                         'numpy >= 1.7.0',
                         'pandas >= 0.18.0',
-                        'pyomo >= 4.2.0, != 4.3.11377'],
+                        'pyomo >= 4.2.0, != 4.3.11377',
+                        'networkx'],
       entry_points={
           'console_scripts': [
               'oemof_installation_test = '

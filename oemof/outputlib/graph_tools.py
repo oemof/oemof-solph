@@ -5,18 +5,13 @@
 __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
-import logging
 import warnings
+import networkx as nx
 
 try:
     from matplotlib import pyplot as plt
 except ImportError:
     plt = None
-
-try:
-    import networkx as nx
-except ImportError:
-    nx = None
 
 try:
     import pygraphviz
