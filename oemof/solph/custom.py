@@ -158,12 +158,12 @@ class ElectricalLineBlock(SimpleBlock):
         O = {n: n.output for n in group}
 
         # create voltage angle variables
-        self.ELECTRICAL_BUSES = po.Set(initialize=[n for n in m.es.nodes
+        self.ELECTRICAL_BUSES = Set(initialize=[n for n in m.es.nodes
                                        if isinstance(n, ElectricalBus)])
 
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
-        self.voltage_angle = po.Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
+        self.voltage_angle = Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
                                     bounds=_voltage_angle_bounds)
 
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
@@ -250,7 +250,7 @@ class Link(Transformer):
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
-BuildAction
+
 
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
@@ -722,7 +722,7 @@ class OffsetTransformerBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        self.OFFSETTRANSFORMERS = po.Set(initialize=[n for n in group])
+        self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
 
         def _relation_rule(block, n, t):
             """Link binary input and output flow to component outflow."""
@@ -733,8 +733,8 @@ class OffsetTransformerBlock(SimpleBlock):
             expr += m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t] * \
                 n.coefficients[0][t]
             return expr == 0
-        self.relation = po.Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
-                                      rule=_relation_rule)
+        self.relation = Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
+                                   rule=_relation_rule)
 
 
 def custom_component_grouping(node):
