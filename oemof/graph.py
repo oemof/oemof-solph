@@ -8,8 +8,9 @@ __license__ = "GPLv3"
 import networkx as nx
 
 
-def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
-                 remove_nodes_with_substrings=None, remove_edges=None):
+def create_nx_graph(energy_system=None, optimization_model=None,
+                    remove_nodes=None, remove_nodes_with_substrings=None,
+                    remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -55,7 +56,7 @@ def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
     ...                          inputs={bel2: Flow()}, outputs={bel1: Flow()})
     >>> es.add(b_gas, bel1, demand_el, pp_gas, bel2, line_to2, line_from2)
     >>> om = Model(energysystem=es)
-    >>> my_graph = grph.create_graph(optimization_model=om)
+    >>> my_graph = grph.create_nx_graph(optimization_model=om)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # import networkx as nx
