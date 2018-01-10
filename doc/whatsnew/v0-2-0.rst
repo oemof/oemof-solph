@@ -5,14 +5,20 @@ v0.2.0 ()
 API changes
 ###########
 
-* The `NodesFromCSV` has been removed from the code base. An alternative way
-  is provided in the newly created
-  `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository.
+* The `NodesFromCSV` has been removed from the code base. An alternative excel
+  (spreadsheet) reader is provided in the newly created
+  `excel example in the oemof_examples <https://github.com/oemof/oemof_examples/tree/master/examples/oemof_0.2/excel_reader>`_
+  repository.
 * LinearTransformer and LinearN1Transformer classes are now combined within one
   Transformer class. The new class has n inputs and n outputs. Please note that
-  the definition of the conversion factors has changed. See the new docstring
-  to avoid errors (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
-* OperationalModel has been renamed to Model.
+  the definition of the conversion factors (for N1) has changed. See the new
+  docstring to avoid errors
+  (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
+* As the example section has been moved to a new repository the `oemof_example`
+  command was removed. Use `oemof_installation_test` to check your installation
+  and the installed solvers.
+* OperationalModel has been renamed to Model. The :attr:`es` parameter was
+  renamed to :attr:`energysystem` parameter.
 * :class:`Nodes <oemof.network.Node>` are no longer automatically added to the
   most recently created :class:`energy system
   <oemof.energy_system.EnergySystem>`. You can still restore the old automatic
@@ -37,15 +43,24 @@ API changes
 New features
 ############
 
+* A new `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository
+  with some new examples was created.
 * A new outputlib module has been created to provide a convenient data structure
   for optimization results and enable quick analyses.
   All decision variables of a Node are now collected automatically which
-  enables an easier development of custom components.
-  Have a look at the
-  `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository
-  for information on the usage.
-* A module to draw and plot energy system graphs using networkx has been created
-  within the tools module.
+  enables an easier development of custom components. See the revised
+  :ref:`oemof_outputlib_label` documentation for more details or have a look at
+  the `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository
+  for information on the usage. Keep your eyes open, some new functions will
+  come soon that make the processing of the results easier. See the actual pull
+  request or issues for detailed information.
+* A new module with useful additional constraints were created with these
+  constraints global emission or investment limits can be set. Furthermore
+  it is possible to connect investment variables. Please add your own additional
+  constraints or let us know what is needed in the future.
+* A module to create a networkx graph from your energy system or your
+  optimisation model was added. You can use networkx to plot and analyse graphs.
+  See :ref:`oemof_graph_label` in the documentation for more information.
 * It's now possible to modify a :class:`node's <oemof.network.Node>`
   :attr:`inputs <oemof.network.Node.inputs>` and
   :attr:`outputs <oemof.network.Node.outputs>` by inserting and removing
@@ -91,6 +106,17 @@ Documentation
 
 * Large parts of the documentation have been proofread and improved since
   the last developer meeting in Flensburg.
+* The solph documentation has got an extra section with all existing components
+  (:ref:`oemof_solph_components_label`).
+* The developer documentation has been developed to lower the barriers for new
+  developers. Furthermore, a template for pull request was created.
+
+Known issues
+############
+* It is not possible to model one time step with oemof.solph. You have to model
+  at least two timesteps
+  (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a
+  comment if this bug affects you.
 
 Bug fixes
 #########
@@ -105,6 +131,7 @@ Testing
 * All known and newly created components are now tested within an independent
   testing environment which can be found in `/tests/`.
 * Other testing routines have been streamlined and reviewed, too.
+* example tests were integrated in the nosetest environment.
 
 Other changes
 #############
@@ -117,12 +144,14 @@ Other changes
   You can still find the "old" standard plots within the oemof_visio repository
   `oemof_visio <https://github.com/oemof/oemof_visio>`_ as they are now
   maintained separately.
+* A `user forum <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ was
+  created to answer use questions
 
 Contributors
 ############
 
 * Cord Kaldemeyer
+* Jens-Olaf Delfs
 * Stephan Günther
 * Simon Hilpert
 * Uwe Krien
-* Jens-Olaf Delfs

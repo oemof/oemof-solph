@@ -18,6 +18,8 @@ Components and buses can be combined to an energy system. Components and buses a
 
 **oemof-network is part of oemofs core and contains the base classes that are used in oemof-solph. You do not need to define your energy system on the network level as all components can be found in oemof-solph, too. You may want to inherit from oemof-network components if you want to create new components.**
 
+.. _oemof_graph_label:
+
 Graph
 -----
-In the graph module you will find a function to create a networkx graph from an energy system. The networkx package provides many features to analyse draw and export graphs. See the `networkx documentation <https://networkx.github.io/documentation/stable/>`_ for more details. See the API-doc of :py:mod:`~oemof.graph` for all details and an example. The graph module can be used with energy systems of solph as well.
+In the graph module you will find a function to create a networkx graph from an energy system or solph model. The networkx package provides many features to analyse, draw and export graphs. See the `networkx documentation <https://networkx.github.io/documentation/stable/>`_ for more details. See the API-doc of :py:mod:`~oemof.graph` for all details and an example. The graph module can be used with energy systems of solph as well.
