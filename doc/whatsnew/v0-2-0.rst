@@ -12,7 +12,7 @@ API changes
 * LinearTransformer and LinearN1Transformer classes are now combined within one
   Transformer class. The new class has n inputs and n outputs. Please note that
   the definition of the conversion factors (for N1) has changed. See the new
-  docstring to avoid errors
+  docstring of :class:`~oemof.solph.network.Transformer` class to avoid errors
   (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
 * As the example section has been moved to a new repository the `oemof_example`
   command was removed. Use `oemof_installation_test` to check your installation
@@ -54,6 +54,8 @@ New features
   for information on the usage. Keep your eyes open, some new functions will
   come soon that make the processing of the results easier. See the actual pull
   request or issues for detailed information.
+* The transformer class can now be used with n inputs and n outputs (
+  :class:`~oemof.solph.network.Transformer`)
 * A new module with useful additional constraints were created with these
   constraints global emission or investment limits can be set. Furthermore
   it is possible to connect investment variables. Please add your own additional
