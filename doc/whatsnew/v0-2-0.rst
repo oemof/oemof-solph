@@ -52,7 +52,7 @@ New features
   will be added.
 
 New components
-############
+##############
 
 * :class:`nodes <oemof.solph.custom.ElectricalLine>`
   and :class:`nodes <oemof.solph.custom.ElectricalBus>` can be used for
