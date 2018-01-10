@@ -7,8 +7,7 @@ API changes
 
 * The `NodesFromCSV` has been removed from the code base. An alternative way
   is provided in the newly created
-  `'oemof_examples' repository <https://github.com/oemof/oemof_examples>`_
-  repository.
+  `oemof_examples repository <https://github.com/oemof/oemof_examples>`_.
 * LinearTransformer and LinearN1Transformer classes are now combined within one
   Transformer class. The new class has n inputs and n outputs. Please note that
   the definition of the conversion factors has changed. See the new docstring
@@ -25,8 +24,8 @@ API changes
   <oemof.energy_system.EnergySystem>`. This option has been made a bit more
   feature rich by the way, but see below for more on this.
   Also check the
-  `'oemof_examples' repository <https://github.com/oemof/oemof_examples>`_
-  repository for more information on the usage.
+  `oemof_examples repository <https://github.com/oemof/oemof_examples>`_
+  for more information on the usage.
 * The `fixed_costs` attribute of the  :class:`nodes <oemof.solph.network.Flow>`
   has been removed. See
   (`Issue #407 <https://github.com/oemof/oemof/issues/407>`_) for more
@@ -43,8 +42,8 @@ New features
   All decision variables of a Node are now collected automatically which
   enables an easier development of custom components.
   Have a look at the
-  `'oemof_examples' repository <https://github.com/oemof/oemof_examples>`_
-  repository for information on the usage.
+  `oemof_examples repository <https://github.com/oemof/oemof_examples>`_
+  for information on the usage.
 * A module to draw and plot energy system graphs using networkx has been created
   within the tools module.
 * It's now possible to modify a :class:`node <oemof.network.Node>`'s
@@ -61,7 +60,7 @@ New features
   will be added.
 
 New components
-############
+##############
 
 * The nodes :class:`ElectricalLine <oemof.solph.custom.ElectricalLine>`
   and :class:`ElectricalBus <oemof.solph.custom.ElectricalBus>` can be used
@@ -71,7 +70,7 @@ New components
   Please check your results. Feedback is welcome!
 * The component :class:`Link <oemof.solph.custom.Link>` can now be used to model
   a bidirectional connection within one component. Check out the example in the
-  oemof_examples repository.
+  `oemof_examples repository <https://github.com/oemof/oemof_examples>`_.
 * The component :class:`GenericCHP <oemof.solph.components.GenericCHP>` can be
   used to model different CHP types such as extraction or back-pressure turbines
   and motoric plants. The component uses a mixed-integer linear formulation and
@@ -111,8 +110,7 @@ Other changes
   they are less a necessary part but more an optional tool .
   Basic plotting examples that show how to quickly create plots from
   optimization results can now be found in the
-  `'oemof_examples' repository <https://github.com/oemof/oemof_examples>`_
-  repository.
+  `oemof_examples repository <https://github.com/oemof/oemof_examples>`_.
   You can still find the "old" standard plots within the oemof_visio repository
   `oemof_visio <https://github.com/oemof/oemof_visio>`_ as they are now
   maintained separately.
