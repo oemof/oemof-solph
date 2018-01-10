@@ -34,7 +34,7 @@ def create_graph(energy_system=None, optimization_model=None, remove_nodes=None,
     >>> import pandas as pd
     >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
     ...                          Model, EnergySystem)
-    >>> from oemof.tools import graph as grph
+    >>> import oemof.graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
     >>> b_gas = Bus(label='b_gas', balanced=False)
