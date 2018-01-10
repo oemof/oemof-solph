@@ -50,14 +50,30 @@ New features
   <oemof.energy_system.EnergySystem>` in bulk using `*` and `**` syntax. For
   the latter case, the :meth:`values <dict.values>` of the dictionary passed in
   will be added.
-* A component :class:`nodes <oemof.solph.custom.ElectricalLine>`
-  and :class:`nodes <oemof.solph.custom.ElectricalBus>` to be used for
-  Linear Optimal Powerflow calculation based in angle formulations. This component
-  has been added to the `solph.custom.py` module. Though it should work correctly,
-  it is in a preliminary stage, please check your results. Feedback is welcome.
-* A component :class:`nodes <oemof.solph.custom.Link>` that can be used to model
+
+New components
+############
+
+* :class:`nodes <oemof.solph.custom.ElectricalLine>`
+  and :class:`nodes <oemof.solph.custom.ElectricalBus>` can be used for
+  Linear Optimal Powerflow calculation based in angle formulations.
+  This component has been added to the `solph.custom.py` module.
+  Though it should work correctly, it is in a preliminary stage.
+  Please check your results. Feedback is welcome!
+* component :class:`nodes <oemof.solph.custom.Link>` can be used to model
   a bidirectional connection within one component (Check out the example in the
-  oemof_example repository).
+  oemof_examples repository).
+* :class:`nodes <oemof.solph.components.GenericCHP>` can be used to model
+  different CHP types such as extraction or back-pressure turbines and motoric
+  plants. The component uses a mixed-integer linear formulation and can be
+  adapted to different technical layouts.
+* :class:`nodes <oemof.solph.custom.GenericCAES>` can be used to model
+  different concepts of compressed air energy storage. Technical concepts such
+  as diabatic or adiabatic layouts can be modelled at a high level of detail.
+  The component uses a mixed-integer linear formulation.
+* :class:`nodes <oemof.solph.custom.GenericOffsetTransformer>` can be used to
+  model components with load ranges such as heat pumps.
+  The component uses a mixed-integer linear formulation.
 
 Documentation
 #############
@@ -78,11 +94,11 @@ Testing
 Other changes
 #############
 
-* The plot functionalities have been removed from the outputlib. Basic plotting is 
-  now found in a distinct repository as they are less a necessary part but more an 
+* The plot functionalities have been removed from the outputlib. Basic plotting is
+  now found in a distinct repository as they are less a necessary part but more an
   optional tool for quickly creating plots from optimization results. You find them
-  at the oemof_visio repository `oemof_visio <https://github.com/oemof/oemof_visio>`. 
-  For plotting examples check the 
+  at the oemof_visio repository `oemof_visio <https://github.com/oemof/oemof_visio>`.
+  For plotting examples check the
   `'oemof_example' repository <https://github.com/oemof/oemof_examples>`.
 
 
