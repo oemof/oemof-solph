@@ -46,10 +46,10 @@ New features
   for information on the usage.
 * A module to draw and plot energy system graphs using networkx has been created
   within the tools module.
-* It's now possible to modify a :class:`node <oemof.network.Node>`'s
-  :attr:`inputs <oemof.network.Node.inputs>` and `outputs
-  <oemof.network.Node.outputs>` by inserting and removing :class:`node
-  <oemof.network.Node>`s to and from the correspoding dictionaries.
+* It's now possible to modify a :class:`node's <oemof.network.Node>`
+  :attr:`inputs <oemof.network.Node.inputs>` and
+  :attr:`outputs <oemof.network.Node.outputs>` by inserting and removing
+  :class:`nodes <oemof.network.Node>` to and from the correspoding dictionaries.
   :attr:`Outputs <oemof.network.Node.outputs>` where already working
   previously, but due to an implementation quirk, :attr:`inputs
   <oemof.network.Node.inputs>` did not behave as expected. This is now fixed.
@@ -65,7 +65,7 @@ New components
 * The nodes :class:`ElectricalLine <oemof.solph.custom.ElectricalLine>`
   and :class:`ElectricalBus <oemof.solph.custom.ElectricalBus>` can be used
   for Linear Optimal Powerflow calculation based on angle formulations.
-  These components have been added to the `solph.custom.py` module.
+  These components have been added to the `solph.custom` module.
   Though it should work correctly, it is in a preliminary stage.
   Please check your results. Feedback is welcome!
 * The component :class:`Link <oemof.solph.custom.Link>` can now be used to model
@@ -75,6 +75,8 @@ New components
   used to model different CHP types such as extraction or back-pressure turbines
   and motoric plants. The component uses a mixed-integer linear formulation and
   can be adapted to different technical layouts with a high level of detail.
+  Check out the example in the
+  `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository.
 * The component :class:`GenericCAES <oemof.solph.custom.GenericCAES>` can be
   used to model different concepts of compressed air energy storage. Technical
   concepts such as diabatic or adiabatic layouts can be modelled at a high level
@@ -87,7 +89,8 @@ New components
 Documentation
 #############
 
-* Large parts of the documentation have been proofread and improved.
+* Large parts of the documentation have been proofread and improved since
+  the last developer meeting in Flensburg.
 
 Bug fixes
 #########
@@ -100,8 +103,8 @@ Testing
 #######
 
 * All known and newly created components are now tested within an independent
-  testing environment which can be found in `/tests/test_scripts/test_solph`.
-* Other testing routines have been streamlined and reviewed.
+  testing environment which can be found in `/tests/`.
+* Other testing routines have been streamlined and reviewed, too.
 
 Other changes
 #############
