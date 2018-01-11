@@ -895,19 +895,18 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         pass
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearTransformer`
-        block.
+        """ Creates the linear constraint for the
+        :class:`oemof.solph.Transformer` block.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.LinearTransformers (trsf) objects for which
-            the linear relation of inputs and outputs is created
+            List of :class:`oemof.solph.ExtractionTurbineCHP` (trsf) objects for
+            which the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
             is created for all existing relations of the inputs and all outputs
             of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
+            all needed attributes.
         """
         if group is None:
             return None
