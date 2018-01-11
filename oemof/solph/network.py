@@ -93,9 +93,9 @@ class Flow:
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
     nonconvex :  :class:`oemof.solph.options.NonConvex` object
-        If an nonconvex flow object is added here, the flow constraints will
+        If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
-        will be different, i.e. constraint etc from
+        will be different, i.e. constraint etc. from
         :class:`oemof.solph.blocks.NonConvexFlow` will be used instead of
         :class:`oemof.solph.blocks.Flow`. Note: this does not work in
         combination with the investment attribute set at the moment.
