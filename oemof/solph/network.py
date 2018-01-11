@@ -197,7 +197,7 @@ class Source(on.Source):
 
 
 class Transformer(on.Transformer):
-    """A Linear Transformer object with n inputs and n outputs.
+    """A linear Transformer object with n inputs and n outputs.
 
     Parameters
     ----------
