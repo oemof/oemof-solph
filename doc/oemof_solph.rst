@@ -538,13 +538,13 @@ returns a key for the group depending e.g. on node attributes:
     def constraint_grouping(node):
         if isinstance(node, Bus) and node.balanced:
             return blocks.Bus
-        if isinstance(node, LinearTransformer):
-            return blocks.LinearTransformer
+        if isinstance(node, Transformer):
+            return blocks.Transformer
    GROUPINGS = [constraint_grouping]
 
 This function can be passed in a list to :attr:`groupings` of
 :class:`oemof.solph.network.EnergySystem`. So that we end up with two groups,
-one with all LinearTransformers and one with all Buses that are balanced. These
+one with all Transformers and one with all Buses that are balanced. These
 groups are simply stored in a dictionary. There are some advanced functionalities
 to group two connected nodes with their connecting flow and others
 (see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
