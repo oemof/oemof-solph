@@ -472,12 +472,12 @@ The following code shows a storage with an investment object.
 Mixed Integer (Linear) Problems
 -------------------------------
 
-Solph also allows you to model components with respect to more technical details.
-For example you can model a minimal power production (Pmin-Constraint) within
-oemof. Therefore, the following two classes exist in the oemof.solph.options
-module: :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
-Note that the usage of these classes is not compatible with the
-:py:class:`~oemof.solph.options.Investment` class at the moment.
+Solph also allows you to model components with respect to more technical details
+such as a minimal power production. Therefore, the class 
+:py:class:`~oemof.solph.options.NonConvex` exists in the 
+:py:mod:`~oemof.solph.options` module.
+Note that the usage of this class is currently not compatible with the
+:py:class:`~oemof.solph.options.Investment` class.
 
 If you want to use the functionality of the options-module, the only thing
 you have to do is to invoke a class instance inside your Flow() - declaration:
@@ -488,23 +488,23 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    solph.LinearTransformer(
+    solph.Transformer(
         label='pp_chp',
-        inputs={b_gas: Flow(discrete=DiscreteFlow())},
-        outputs={b_el: Flow(nominal_value=30, binary=BinaryFlow()),
+        inputs={b_gas: Flow()},
+        outputs={b_el: Flow(nominal_value=30,
+                            nonconvex=NonConvex()),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The created LinearTransformer will now force the flow variable of its input (gas)
-to be of the domain discrete, i.e. {min, ... 10, 11, 12, ..., max}. The BinaryFlow()
-object of the 'electrical' flow will create a 'status' variable for the flow.
-This will be used to model for example Pmin/Pmax constraints if the attribute `min`
-of the flow is set. It will also be used to include start up constraints and costs
+The NonConvex() object of the electrical output of the created LinearTransformer will create 
+a 'status' variable for the flow.
+This will be used to model for example minimal/maximal power production constraints if the
+attributes `min`/`max` of the flow are set. It will also be used to include start up constraints and costs
 if corresponding attributes of the class are provided. For more
-information see the API of the BinaryFlow() class and its corresponding block class:
-:py:class:`~oemof.solph.blocks.BinaryFlow`.
+information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding 
+block class :py:class:`~oemof.solph.blocks.NonConvex`.
 
-.. note:: The usage of these classes can sometimes be tricky as there are many interdenpendencies. So
+.. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
 
