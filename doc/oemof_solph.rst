@@ -513,7 +513,8 @@ block class :py:class:`~oemof.solph.blocks.NonConvex`.
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See the `example repository <https://github.com/oemof/oemof_examples>`_ to learn how to do it.
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See the `example repository
+<https://github.com/oemof/oemof_examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
 
 
 The Grouping module (Sets)
