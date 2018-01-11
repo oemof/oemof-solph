@@ -132,8 +132,8 @@ Testing
 
 * All known and newly created components are now tested within an independent
   testing environment which can be found in `/tests/`.
-* Other testing routines have been streamlined and reviewed, too.
-* example tests were integrated in the nosetest environment.
+* Other testing routines have been streamlined and reviewed and
+  example tests have been integrated in the nosetest environment.
 
 Other changes
 #############
@@ -143,11 +143,11 @@ Other changes
   Basic plotting examples that show how to quickly create plots from
   optimization results can now be found in the
   `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository.
-  You can still find the "old" standard plots within the oemof_visio repository
-  `oemof_visio <https://github.com/oemof/oemof_visio>`_ as they are now
-  maintained separately.
-* A `user forum <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ was
-  created to answer use questions
+  You can still find the "old" standard plots within the
+  `oemof_visio <https://github.com/oemof/oemof_visio>`_ repository as they are
+  now maintained separately.
+* A `user forum <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ has
+  been created to answer use questions.
 
 Contributors
 ############
