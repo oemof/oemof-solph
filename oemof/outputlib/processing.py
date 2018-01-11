@@ -290,8 +290,8 @@ def __separate_attrs(om, get_flows=False, exclude_none=True):
     for com_key in components:
         component = components[com_key] if get_flows else com_key
         component_data = detect_scalars_and_sequences(component)
-        data[com_key] = component_data
-
+        key = com_key if get_flows else (com_key, None)
+        data[key] = component_data
     return data
 
 
@@ -310,9 +310,5 @@ def param_results(om, exclude_none=True, keys_as_str=False):
     flow_data = __separate_attrs(om, True, exclude_none)
     node_data = __separate_attrs(om, False, exclude_none)
 
-    return {
-        'flows': (
-            convert_keys_to_strings(flow_data) if keys_as_str else flow_data),
-        'nodes': (
-            convert_keys_to_strings(node_data) if keys_as_str else node_data),
-    }
+    flow_data.update(node_data)
+    return convert_keys_to_strings(flow_data) if keys_as_str else flow_data
