@@ -126,3 +126,18 @@ class Economic_Tests():
             custom_cost_results[(batt, None)]['real_invest_costs'],
             600 * 30
         )
+
+    def test_lcoe_per_node(self):
+        diesel_lcoe = economics.calculate_lcoe(
+            dg, results, cost_results)
+        output = 125
+        assert diesel_lcoe.invest == 62.5 * 0.5 / output
+        assert diesel_lcoe.output_costs == 125 / output
+        assert diesel_lcoe.input_costs == 62.5 * 2 / output
+
+        output = 100
+        storage_lcoe = economics.calculate_lcoe(
+            batt, results, cost_results)
+        assert storage_lcoe.invest == 600 * 0.4 / output
+        assert storage_lcoe.output_costs == (100 * 2.5) / output
+        assert storage_lcoe.input_costs == 125 * 3 / output
