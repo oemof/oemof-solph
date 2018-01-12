@@ -30,12 +30,12 @@ Collecting results can be done with the help of the processing module:
     
     results = outputlib.processing.results(om)
 
-The scalars and sequences describe nodes (with keys like (node, None)) and flows between nodes (with keys like (node_1, node_2)). You can directly extract the data in the dictionary by using these keys, where "node" is the name of the object you want to address. If you want to address objects by their label, you can convert the results dictionary such that the keys are changed to strings given by the labels:
+The scalars and sequences describe nodes (with keys like (node, None)) and flows between nodes (with keys like (node_1, node_2)). You can directly extract the data in the dictionary by using these keys, where "node" is the name of the object you want to address. If you want to address objects by their label, you can convert the results dictionary such that the keys are changed to strings given by the labels, e.g.:
 
 .. code-block:: python
 
     views.convert_keys_to_strings(results)
-    print(results[(wind, bus_electricity)]['sequences']
+    print(results[('wind', 'bus_electricity')]['sequences']
     
 
 Another option is to access data belonging to a grouping by the name of the grouping 
