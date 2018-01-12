@@ -14,6 +14,8 @@ API changes
   the definition of the conversion factors (for N1) has changed. See the new
   docstring of :class:`~oemof.solph.network.Transformer` class to avoid errors
   (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
+* The :class:`oemof.solph.network.Storage` class has been renamed and moved to 
+  :class:`oemof.solph.components.GenericStorage`.
 * As the example section has been moved to a new repository the `oemof_example`
   command was removed. Use `oemof_installation_test` to check your installation
   and the installed solvers.
@@ -75,6 +77,9 @@ New features
   <oemof.energy_system.EnergySystem>` in bulk using `*` and `**` syntax. For
   the latter case, the :meth:`values <dict.values>` of the dictionary passed in
   will be added.
+* New components can now be added to the custom.py module. Components in this module
+  are indicated as in a testing state. Use them with care. This lowers the entry
+  barriers to test new components within the solph structure and find other testers.
 
 New components
 ##############
@@ -85,7 +90,7 @@ New components
   These components have been added to the `solph.custom` module.
   Though it should work correctly, it is in a preliminary stage.
   Please check your results. Feedback is welcome!
-* The component :class:`Link <oemof.solph.custom.Link>` can now be used to model
+* The custom component :class:`Link <oemof.solph.custom.Link>` can now be used to model
   a bidirectional connection within one component. Check out the example in the
   `oemof_examples <https://github.com/oemof/oemof_examples>`_ repository.
 * The component :class:`GenericCHP <oemof.solph.components.GenericCHP>` can be
@@ -98,7 +103,7 @@ New components
   used to model different concepts of compressed air energy storage. Technical
   concepts such as diabatic or adiabatic layouts can be modelled at a high level
   of detail. The component uses a mixed-integer linear formulation.
-* The component
+* The custom component
   :class:`GenericOffsetTransformer <oemof.solph.custom.GenericOffsetTransformer>`
   can be used to model components with load ranges such as heat pumps and also
   uses a mixed-integer linear formulation.
