@@ -25,7 +25,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
         Nodes to be removed e.g. ['node1', node2')]
 
     remove_nodes_with_substrings: list of strings
-        Nodes that contain substrings to be removed e.g. ['elec_', 'heat_')]
+        Nodes that contain substrings to be removed e.g. ['elec', 'heat')]
 
     remove_edges: list of string tuples
         Edges to be removed e.g. [('resource_gas', 'gas_balance')]

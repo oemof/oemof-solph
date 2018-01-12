@@ -561,7 +561,7 @@ class NonConvexFlow(SimpleBlock):
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
-        beeing not None in the first timestep
+        being not None in the first timestep
     STARTUP_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`startup_costs` being not None.
@@ -569,7 +569,7 @@ class NonConvexFlow(SimpleBlock):
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
-    **The following variable are created:**
+    **The following variables are created:**
 
     Status variable (binary) :attr:`om.NonConvexFlow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
@@ -630,7 +630,7 @@ class NonConvexFlow(SimpleBlock):
 
     def _create(self, group=None):
         """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.NonConvexFlow`.
+        an attribute flow of type class:`.NonConvexFlow`.
 
         Parameters
         ----------

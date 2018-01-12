@@ -339,7 +339,7 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transformer_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the LinearTransformer, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transformer_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -472,12 +472,12 @@ The following code shows a storage with an investment object.
 Mixed Integer (Linear) Problems
 -------------------------------
 
-Solph also allows you to model components with respect to more technical details.
-For example you can model a minimal power production (Pmin-Constraint) within
-oemof. Therefore, the following two classes exist in the oemof.solph.options
-module: :py:class:`~oemof.solph.options.BinaryFlow` and :py:class:`~oemof.solph.options.DiscreteFlow`.
-Note that the usage of these classes is not compatible with the
-:py:class:`~oemof.solph.options.Investment` class at the moment.
+Solph also allows you to model components with respect to more technical details
+such as a minimal power production. Therefore, the class 
+:py:class:`~oemof.solph.options.NonConvex` exists in the 
+:py:mod:`~oemof.solph.options` module.
+Note that the usage of this class is currently not compatible with the
+:py:class:`~oemof.solph.options.Investment` class.
 
 If you want to use the functionality of the options-module, the only thing
 you have to do is to invoke a class instance inside your Flow() - declaration:
@@ -488,23 +488,23 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
     b_el = solph.Bus(label='electricity')
     b_th = solph.Bus(label='heat')
 
-    solph.LinearTransformer(
+    solph.Transformer(
         label='pp_chp',
-        inputs={b_gas: Flow(discrete=DiscreteFlow())},
-        outputs={b_el: Flow(nominal_value=30, binary=BinaryFlow()),
+        inputs={b_gas: Flow()},
+        outputs={b_el: Flow(nominal_value=30,
+                            nonconvex=NonConvex()),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The created LinearTransformer will now force the flow variable of its input (gas)
-to be of the domain discrete, i.e. {min, ... 10, 11, 12, ..., max}. The BinaryFlow()
-object of the 'electrical' flow will create a 'status' variable for the flow.
-This will be used to model for example Pmin/Pmax constraints if the attribute `min`
-of the flow is set. It will also be used to include start up constraints and costs
+The NonConvex() object of the electrical output of the created LinearTransformer will create 
+a 'status' variable for the flow.
+This will be used to model for example minimal/maximal power production constraints if the
+attributes `min`/`max` of the flow are set. It will also be used to include start up constraints and costs
 if corresponding attributes of the class are provided. For more
-information see the API of the BinaryFlow() class and its corresponding block class:
-:py:class:`~oemof.solph.blocks.BinaryFlow`.
+information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding 
+block class :py:class:`~oemof.solph.blocks.NonConvex`.
 
-.. note:: The usage of these classes can sometimes be tricky as there are many interdenpendencies. So
+.. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
 
@@ -513,7 +513,8 @@ information see the API of the BinaryFlow() class and its corresponding block cl
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See the `example repository <https://github.com/oemof/oemof_examples>`_ to learn how to do it.
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See `flexible_modelling in the example repository
+<https://github.com/oemof/oemof_examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
 
 
 The Grouping module (Sets)
@@ -537,13 +538,13 @@ returns a key for the group depending e.g. on node attributes:
     def constraint_grouping(node):
         if isinstance(node, Bus) and node.balanced:
             return blocks.Bus
-        if isinstance(node, LinearTransformer):
-            return blocks.LinearTransformer
+        if isinstance(node, Transformer):
+            return blocks.Transformer
    GROUPINGS = [constraint_grouping]
 
 This function can be passed in a list to :attr:`groupings` of
 :class:`oemof.solph.network.EnergySystem`. So that we end up with two groups,
-one with all LinearTransformers and one with all Buses that are balanced. These
+one with all Transformers and one with all Buses that are balanced. These
 groups are simply stored in a dictionary. There are some advanced functionalities
 to group two connected nodes with their connecting flow and others
 (see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
