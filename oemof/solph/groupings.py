@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """ list:  Groupings needed on an energy system for it to work with solph.
 
-TODO: Maybe move this to the module docstring? It should be somewhere prominent
-      so solph user's immediately see that they need to use :const:`GROUPINGS`
-      when they want to create an energy system for use with solph.
-
 If you want to use solph on an energy system, you need to create it with these
 groupings specified like this:
 
@@ -17,10 +13,11 @@ groupings specified like this:
 
 """
 
-from .network import (Bus, LinearTransformer, Storage, LinearN1Transformer,
-                      VariableFractionTransformer)
-from .options import Investment
-from . import blocks
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from oemof.solph.network import Bus, Transformer
+from oemof.solph import blocks
 import oemof.groupings as groupings
 
 
@@ -42,16 +39,8 @@ def constraint_grouping(node):
     # constraints are grouped by overriding the method in future subclasses.
     if isinstance(node, Bus) and node.balanced:
         return blocks.Bus
-    if isinstance(node, VariableFractionTransformer):
-        return blocks.VariableFractionTransformer
-    if isinstance(node, LinearTransformer):
-        return blocks.LinearTransformer
-    if isinstance(node, LinearN1Transformer):
-        return blocks.LinearN1Transformer
-    if isinstance(node, Storage) and isinstance(node.investment, Investment):
-        return blocks.InvestmentStorage
-    if isinstance(node, Storage):
-        return blocks.Storage
+    if type(node) == Transformer:
+        return blocks.Transformer
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(
@@ -62,15 +51,10 @@ investment_flow_grouping = groupings.FlowsWithNodes(
 standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow)
 
-binary_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.BinaryFlow,
-    filter=lambda stf: stf[2].binary is not None)
-
-discrete_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.DiscreteFlow,
-    filter=lambda stf: stf[2].discrete is not None)
+nonconvex_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.NonConvexFlow,
+    filter=lambda stf: stf[2].nonconvex is not None)
 
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
-             standard_flow_grouping, binary_flow_grouping,
-             discrete_flow_grouping]
+             standard_flow_grouping, nonconvex_flow_grouping]

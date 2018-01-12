@@ -1,8 +1,17 @@
+# -*- coding: utf-8 -
+
+"""Grouping tests.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
 from nose.tools import ok_, eq_
 
 from oemof.energy_system import EnergySystem as ES
+from oemof.network import Node
 from oemof.solph.blocks import InvestmentFlow as IF
-from oemof.solph.network import Investment
+from oemof.solph import Investment
 import oemof.solph as solph
 
 
@@ -10,6 +19,7 @@ class Grouping_Tests:
 
     def setup(self):
         self.es = ES(groupings=solph.GROUPINGS)
+        Node.registry = self.es
 
     def test_investment_flow_grouping(self):
         """ Flows of investment sink should be grouped.
@@ -28,7 +38,7 @@ class Grouping_Tests:
 
         solph.Source(label='Source', outputs={b: solph.Flow(
             actual_value=[12, 16, 14], nominal_value=1000000,
-            fixed=True, fixed_costs=20)})
+            fixed=True)})
 
         solph.Sink(label='Sink', inputs={b: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,

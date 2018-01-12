@@ -1,5 +1,12 @@
-from traceback import format_exception_only as feo
+# -*- coding: utf-8 -
 
+"""Test the created constraints against approved constraints.
+"""
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
+
+from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
 
 from oemof.energy_system import EnergySystem as ES
@@ -7,6 +14,11 @@ from oemof.network import Bus, Node, Transformer
 
 
 class Node_Tests:
+
+    def setup(self):
+        self.energysystem = ES()
+        Node.registry = self.energysystem
+
     def test_that_attributes_cannot_be_added(self):
         node = Node()
         with assert_raises(AttributeError):
@@ -104,11 +116,103 @@ class Node_Tests:
             ("\n  Expected an empty dictionary of outputs." +
              "\n  Got: {} instead").format(new.outputs))
 
+    def test_modifying_outputs_after_construction(self):
+        """ One should be able to add and delete outputs of a node.
+        """
+        node = Node("N1")
+        bus = Node("N2")
+        flow = "flow"
+        eq_(node.outputs, {},
+            ("\n  Expected an empty dictionary of outputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.outputs,
+                dict(node.outputs)))
+        node.outputs[bus] = flow
+        eq_(node.outputs[bus], flow,
+            ("\n  Expected {} as `node.outputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
+        eq_(node.outputs, {bus: flow},
+            ("\n  Expected {} as `node.outputs`." +
+             "\n  Got    : {} (== {}) instead").format(
+                {bus: flow}, node.outputs,dict(node.outputs)))
+        del node.outputs[bus]
+        eq_(node.outputs, {},
+            ("\n  Expected an empty dictionary of outputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.outputs,
+                dict(node.outputs)))
+
+    def test_modifying_inputs_after_construction(self):
+        """ One should be able to add and delete inputs of a node.
+        """
+        node = Node("N1")
+        bus = Bus("N2")
+        flow = "flow"
+
+        eq_(node.inputs, {},
+            ("\n  Expected an empty dictionary of inputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.inputs,
+                dict(node.inputs)))
+        node.inputs[bus] = flow
+        eq_(node.inputs[bus], flow,
+            ("\n  Expected {} as `node.inputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
+        eq_(node.inputs, {bus: flow},
+            ("\n  Expected {} as `node.inputs`." +
+             "\n  Got    : {} (== {}) instead").format(
+                {bus: flow}, node.inputs,dict(node.inputs)))
+        del node.inputs[bus]
+        eq_(node.inputs, {},
+            ("\n  Expected an empty dictionary of inputs." +
+             "\n  Got: {} (== {}) instead").format(
+                node.inputs,
+                dict(node.inputs)))
+
+    def test_output_input_symmetry_after_modification(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        flow = "flow"
+
+        n1.outputs[n2] = flow
+        eq_(n2.inputs, {n1: flow})
+
+    def test_input_output_symmetry_after_modification(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        flow = "flow"
+
+        n1.inputs[n2] = flow
+        eq_(n2.outputs, {n1: flow})
+
+    def test_updating_inputs(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        n1n2 = "n1n2"
+
+        n2.inputs.update({n1: n1n2})
+        eq_(n2.inputs[n1], n1n2)
+        eq_(n2.inputs, {n1: n1n2})
+        eq_(n1.outputs[n2], n1n2)
+        eq_(n1.outputs, {n2: n1n2})
+
+    def test_updating_outputs(self):
+        n1 = Node("N1")
+        n2 = Node("N2")
+        n1n2 = "n1n2"
+
+        n1.outputs.update({n2: n1n2})
+        eq_(n2.inputs[n1], n1n2)
+        eq_(n2.inputs, {n1: n1n2})
+        eq_(n1.outputs[n2], n1n2)
+        eq_(n1.outputs, {n2: n1n2})
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
     def setup(self):
         self.es = ES()
+        Node.registry = self.es
 
     def test_node_registration(self):
         eq_(Node.registry, self.es)

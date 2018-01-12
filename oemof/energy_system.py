@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 20 15:53:14 2015
 
-@author: uwe
+"""Basic EnergySystem class
 """
+
+__copyright__ = "oemof developer group"
+__license__ = "GPLv3"
 
 from functools import partial
 import logging
 import os
-
+import pandas as pd
 import dill as pickle
 
-from oemof.network import Entity
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Node
 
 
 class EnergySystem:
@@ -30,10 +29,8 @@ class EnergySystem:
         <oemof.core.network.Entity>` that should be part of the energy system.
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
-    timeindex : pandas.index, optional
-        Define the time range and increment for the energy system. This is an
-        optional parameter but might be import for other functions/methods that
-        use the EnergySystem class as an input parameter.
+    timeindex : pandas.datetimeindex
+        Define the time range and increment for the energy system.
     groupings : list
         The elements of this list are used to construct :class:`Groupings
         <oemof.core.energy_system.Grouping>` or they are used directly if they
@@ -82,6 +79,7 @@ class EnergySystem:
     >>> from oemof.network import Bus, Sink
     >>> es = EnergySystem()
     >>> bus = Bus(label='electricity')
+    >>> es.add(bus)
     >>> bus is es.groups['electricity']
     True
 
@@ -94,8 +92,10 @@ class EnergySystem:
 
     >>> es = EnergySystem(groupings=[type])
     >>> buses = set(Bus(label="Bus {}".format(i)) for i in range(9))
+    >>> es.add(*buses)
     >>> components = set(Sink(label="Component {}".format(i))
     ...                   for i in range(9))
+    >>> es.add(*components)
     >>> buses == es.groups[Bus]
     True
     >>> components == es.groups[Sink]
@@ -106,8 +106,6 @@ class EnergySystem:
         for attribute in ['entities']:
             setattr(self, attribute, kwargs.get(attribute, []))
 
-        Entity.registry = self
-        Node.registry = self
         self._groups = {}
         self._groupings = ([BY_UID] +
                            [g if isinstance(g, Grouping) else Nodes(g)
@@ -116,7 +114,9 @@ class EnergySystem:
             for g in self._groupings:
                 g(e, self.groups)
         self.results = kwargs.get('results')
-        self.timeindex = kwargs.get('timeindex')
+        self.timeindex = kwargs.get('timeindex',
+                                    pd.date_range(start=pd.to_datetime('today'),
+                                                  periods=1, freq='H'))
 
     @staticmethod
     def _regroup(entity, groups, groupings):
@@ -124,12 +124,16 @@ class EnergySystem:
             g(entity, groups)
         return groups
 
-    def add(self, entity):
-        """ Add an `entity` to this energy system.
-        """
+    def _add(self, entity):
         self.entities.append(entity)
         self._groups = partial(self._regroup, entity, self.groups,
                                self._groupings)
+
+    def add(self, *nodes):
+        """ Add :class:`nodes <oemof.network.Node>` to this energy system.
+        """
+        for n in nodes:
+            self._add(n)
 
     @property
     def groups(self):

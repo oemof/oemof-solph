@@ -1,34 +1,51 @@
 # -*- coding: utf-8
 
+"""Helpers to log your modeling process with oemof.
+"""
+
 import os
-import shutil
 import logging
-import logging.config
+from logging import handlers
+import sys
 from oemof.tools import helpers
 
 
-def define_logging(inifile='logging.ini', basicpath=None,
-                   subdir='log_files', log_version=True):
-    r"""Initialise the logger using the logging.conf file in the local path.
+def define_logging(logpath=None, logfile='oemof.log', file_format=None,
+                   screen_format=None, file_datefmt=None, screen_datefmt=None,
+                   screen_level=logging.INFO, file_level=logging.DEBUG,
+                   log_version=True, log_path=True, timed_rotating=None):
 
-    Several sentences providing an extended description. Refer to
-    variables using back-ticks, e.g. `var`.
+    r"""Initialise customisable logger.
 
     Parameters
     ----------
-    inifile : string, optional (default: logging.ini)
-        Name of the configuration file to define the logger. If no ini-file
-         exist a default ini-file will be copied from 'default_files' and
-         used.
-    basicpath : string, optional (default: '.oemof' in HOME)
-        The basicpath for different oemof related information. By default
-        a ".oemof' folder is created in your home directory.
-    subdir : string, optional (default: 'log_files')
-        The name of the subfolder of the basicpath where the log-files are
-        stored.
+    logfile : str
+        Name of the log file, default: oemof.log
+    logpath : str
+        The path for log files. By default a ".oemof' folder is created in your
+        home directory with subfolder called 'log_files'.
+    file_format : str
+        Format of the file output.
+        Default: "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
+    screen_format : str
+        Format of the screen output.
+        Default: "%(asctime)s-%(levelname)s-%(message)s"
+    file_datefmt : str
+        Format of the datetime in the file output. Default: None
+    screen_datefmt : str
+        Format of the datetime in the screen output. Default: "%H:%M:%S"
+    screen_level : int
+        Level of logging to stdout. Default: 20 (logging.INFO)
+    file_level : int
+        Level of logging to file. Default: 10 (logging.DEBUG)
     log_version : boolean
         If True the actual version or commit is logged while initialising the
         logger.
+    log_path : boolean
+        If True the used file path is logged while initialising the logger.
+    timed_rotating : dict
+        Option to pass parameters to the TimedRotatingFileHandler.
+
 
     Returns
     -------
@@ -36,8 +53,8 @@ def define_logging(inifile='logging.ini', basicpath=None,
 
     Notes
     -----
-    By default the INFO level is printed on the screen and the debug level
-    in a file, but you can easily configure the ini-file.
+    By default the INFO level is printed on the screen and the DEBUG level
+    in a file, but you can easily configure the logger.
     Every module that wants to create logging messages has to import the
     logging module. The oemof logger module has to be imported once to
     initialise it.
@@ -45,39 +62,70 @@ def define_logging(inifile='logging.ini', basicpath=None,
     Examples
     --------
     To define the default logger you have to import the python logging
-     library and this function. The first logging message should be the
-     path where the log file is saved to.
+    library and this function. The first logging message should be the
+    path where the log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
-    >>> logger.define_logging() # doctest: +SKIP
-    17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
-    ...
+    >>> mypath = logger.define_logging(log_path=False, log_version=False,
+    ...                                screen_datefmt = "no_date")
+    >>> mypath[-9:]
+    'oemof.log'
     >>> logging.debug("Hallo")
-
     """
-    if basicpath is None:
-        basicpath = helpers.get_basic_path()
-    logpath = helpers.extend_basic_path(subdir)
-    log_filename = os.path.join(basicpath, inifile)
-    default_file = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), 'default_files', 'logging_default.ini')
-    if not os.path.isfile(log_filename):
-        shutil.copyfile(default_file, log_filename)
-    logging.config.fileConfig(os.path.join(basicpath, inifile))
-    try:
-        returnpath = logging.getLoggerClass().root.handlers[1].baseFilename
-    except AttributeError:
-        returnpath = None
-    logger = logging.getLogger('simpleExample')
-    logger.debug('*********************************************************')
-    logging.info('Path for logging: %s' % logpath)
+
+    if logpath is None:
+        logpath = helpers.extend_basic_path('log_files')
+
+    file = os.path.join(logpath, logfile)
+
+    log = logging.getLogger('')
+
+    # Remove existing handlers to avoid interference.
+    log.handlers = []
+    log.setLevel(logging.DEBUG)
+
+    if file_format is None:
+        file_format = (
+            "%(asctime)s - %(levelname)s - %(module)s - %(message)s")
+    file_formatter = logging.Formatter(file_format, file_datefmt)
+
+    if screen_format is None:
+        screen_format = "%(asctime)s-%(levelname)s-%(message)s"
+    if screen_datefmt is None:
+        screen_datefmt = "%H:%M:%S"
+    screen_formatter = logging.Formatter(screen_format, screen_datefmt)
+
+    tmp_formatter = logging.Formatter("%(message)s")
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setFormatter(screen_formatter)
+    ch.setLevel(screen_level)
+    log.addHandler(ch)
+
+    timed_rotating_p = {
+        'when': 'midnight',
+        'backupCount': 10}
+
+    if timed_rotating is not None:
+        timed_rotating_p.update(timed_rotating)
+
+    fh = handlers.TimedRotatingFileHandler(file, **timed_rotating_p)
+    fh.setFormatter(tmp_formatter)
+    fh.setLevel(file_level)
+    log.addHandler(fh)
+
+    logging.debug("******************************************************")
+    fh.setFormatter(file_formatter)
+    if log_path:
+        logging.info("Path for logging: {0}".format(file))
+
     if log_version:
         try:
             check_git_branch()
         except FileNotFoundError:
             check_version()
-    return returnpath
+    return file
 
 
 def check_version():
@@ -114,30 +162,3 @@ def check_git_branch():
     logging.info("Used oemof version: {0}@{1}".format(
         last_commit,
         name_branch))
-
-
-def time_logging(start, text, logging_level='debug'):
-    """
-    Logs the time between the given start time and the actual time. A text
-    and the debug level is variable.
-
-    Parameters
-    ----------
-    start : float
-        start time
-    text : string
-        text to describe the log
-    logging_level : string
-        logging_level [default='debug']
-    """
-    import time
-    end_time = time.time() - start
-    hours = int(end_time / 3600)
-    minutes = int(end_time / 60 - hours * 60)
-    seconds = int(end_time - hours * 3600 - minutes * 60)
-    time_string = ' %0d:%02d:%02d hours' % (hours, minutes, seconds)
-    log_str = text + time_string
-    if logging_level == 'debug':
-        logging.debug(log_str)
-    elif logging_level == 'info':
-        logging.info(log_str)

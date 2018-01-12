@@ -1,11 +1,10 @@
-\* Source Pyomo model name=OperationalModel *\
+\* Source Pyomo model name=Model *\
 
 min 
 objective:
 +40 flow(electricityBus_excess_0)
 +40 flow(electricityBus_excess_1)
 +40 flow(electricityBus_excess_2)
-+20000000 ONE_VAR_CONSTANT
 
 s.t.
 

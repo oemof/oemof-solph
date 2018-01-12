@@ -4,6 +4,8 @@ With oemof we provide base packages for energy system modelling and optimisation
 
 Everybody is welcome to use and/or develop oemof. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 
+Contribution is already possible on a low level by simply fixing typos in oemof's documentation or rephrasing sections which are unclear. If you want to support us that way please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+
 .. contents::
     :depth: 1
     :local:
@@ -13,8 +15,9 @@ Everybody is welcome to use and/or develop oemof. Read our `'Why should I contri
 Documentation
 =============
 
-Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project site <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. To get the latest news visit and follow our `website <https://www.oemof.org>`_.
+Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project site <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. Go to the `download page <http://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
 
+To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 
 Installing oemof
 ================
@@ -25,7 +28,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
   pip install oemof
 
-For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section.
+For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
   
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
@@ -36,25 +39,38 @@ Structure of the oemof cosmos
 
 Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
 
+
 Examples
 ========
 
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
+You can find a repository with all currently available examples for oemof on github. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structre. There is some elaboration on the examples in the respective repository.
 
-You can execute `examples of solph applications <http://oemof.readthedocs.io/en/latest/oemof_solph.html#solph-examples>`_ from command-line by
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
-.. code:: bash
+Got further questions on using oemof? 
+======================================
+If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
-  oemof_examples
+Join the developers!
+===================
 
-Further reading in the `'Run examples to check the installation' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html#run-examples-to-check-the-installation>`_ section.
+A warm welcome to all who want to join the developers and contribute to oemof. Information
+on the details and how to approach us can be found 
+`in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch
 =============
 
 You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
+
+
+Citing oemof
+============
+
+We use the zenodo project to get a DOI for each version. `Search zenodo for the right citation of your oemof version <https://zenodo.org/search?page=1&size=20&q=oemof>`_.
 
 
 License

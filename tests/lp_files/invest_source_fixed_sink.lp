@@ -1,8 +1,8 @@
-\* Source Pyomo model name=OperationalModel *\
+\* Source Pyomo model name=Model *\
 
 min 
 objective:
-+143 InvestmentFlow_invest(pv_electricityBus)
++123 InvestmentFlow_invest(pv_electricityBus)
 +13 flow(pv_electricityBus_0)
 +13 flow(pv_electricityBus_1)
 +13 flow(pv_electricityBus_2)

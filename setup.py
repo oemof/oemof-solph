@@ -13,8 +13,10 @@ import os
 
 import oemof
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(name='oemof',
       version=oemof.__version__,
@@ -25,29 +27,13 @@ setup(name='oemof',
       namespace_package=['oemof'],
       long_description=read('README.rst'),
       packages=find_packages(),
-      package_data={
-          'examples': [
-              os.path.join('solph',
-                           'csv_reader',
-                           'investment',
-                           'data',
-                           '*.csv'),
-              os.path.join('solph',
-                           'csv_reader',
-                           'dispatch',
-                           'scenarios',
-                           '*.csv'),
-              os.path.join('solph', 'simple_dispatch','*.csv'),
-              os.path.join('solph', 'variable_chp','*.csv'),
-              os.path.join('solph', 'storage_investment','*.csv')
-          ],
-            'oemof': [os.path.join('tools', 'default_files', '*.ini')]},
+      package_data={'oemof': [os.path.join('tools', 'default_files', '*.ini')]},
       install_requires=['dill',
                         'numpy >= 1.7.0',
                         'pandas >= 0.18.0',
                         'pyomo >= 4.2.0, != 4.3.11377',
-                        'matplotlib'],
+                        'networkx'],
       entry_points={
           'console_scripts': [
-              'oemof_examples = examples.examples:examples']}
-     )
+              'oemof_installation_test = '
+              'tests.test_installation:check_oemof_installation']})
