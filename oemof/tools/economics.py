@@ -8,6 +8,7 @@ __license__ = "GPLv3"
 
 import pandas
 from collections import namedtuple
+from oemof.outputlib import views
 
 
 def annuity(capex, n, wacc):
@@ -84,3 +85,41 @@ def cost_results(results, param_results, costs=DEFAULT_COSTS):
             cost_data[nodes][cost.name] = cost_value
 
     return cost_data
+
+
+LCOE = namedtuple('LCOE', ['invest', 'input_costs', 'output_costs'])
+
+
+def calculate_lcoe(node, results, cost_results):
+    invest = 0.0
+    variable_input_costs = 0.0
+    variable_output_costs = 0.0
+    output = 0.0
+
+    flow_types = views.get_flow_type(node, results)
+
+    # Get total output of node:
+    for output_nodes in flow_types['output']:
+        invest += cost_results[output_nodes].get('invest', 0.0)
+        variable_output_costs += cost_results[output_nodes].get(
+            'variable_costs', 0.0)
+        output += results[output_nodes]['sequences']['flow'].sum()
+    if output == 0.0:
+        return LCOE(0.0, 0.0, 0.0)
+
+    # Get total input of node:
+    for input_nodes in flow_types['input']:
+        invest += cost_results[input_nodes].get('invest', 0.0)
+        variable_input_costs += cost_results[input_nodes].get(
+            'variable_costs', 0.0)
+
+    # Get total invest of node:
+    for single_nodes in flow_types['single']:
+        invest += cost_results[single_nodes].get('invest', 0.0)
+
+    return LCOE(
+        *map(
+            lambda x: x / output,
+            [invest, variable_input_costs, variable_output_costs]
+        )
+    )
