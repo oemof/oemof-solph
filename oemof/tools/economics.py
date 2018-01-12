@@ -35,6 +35,7 @@ def annuity(capex, n, wacc):
 
 Costs = namedtuple('Costs', ['name', 'flow_key', 'param_key'])
 AttributeKey = namedtuple('CostKey', ['dimension', 'name'])
+
 DEFAULT_COSTS = [
     Costs(
         'invest',
@@ -50,7 +51,49 @@ DEFAULT_COSTS = [
 
 
 def cost_results(results, param_results, costs=DEFAULT_COSTS):
+    """
+    Calculate costs for all node tuples in param_results
+
+    Different costs can be calculated, by default DEFAULT_COSTS are calculated.
+    Costs are calculated by multiplying node parameters from param_results
+    dictionary with flows from results dictionary.
+
+    Parameters
+    ----------
+    results: dict
+        from `oemof.processing.results`
+    param_results: dict
+        from `oemof.processing.param_results`
+    costs: list-of-Costs (optional)
+        Costs to be calculated; by default DEFAULT_COSTS are calculated
+
+    Returns
+    -------
+    dict:
+        For each node tuple from param_results, calculated costs are returned
+        as dict containing cost name as key and cost result as value.
+    """
     def get_value(component, key):
+        """
+        Searches component for key
+
+        Returns component[key.dimension][key.name] if given.
+        If dimension is "sequences" pandas.Series is returned.
+
+        Parameters
+        ----------
+        component: dict
+            Parameters from param_results[nodes]
+        key: AttributeKey
+            AttributeKey with dimension and key name to search
+
+        Returns
+        -------
+        value/pandas.Series:
+            Returns component[key.dimension][key.name]. If dimension
+            "sequences" is given, value is turned into pandas.Series first.
+            If key is not found, None is returned.
+        """
         dimension = component.get(key.dimension)
         if dimension is None:
             return None
@@ -91,6 +134,27 @@ LCOE = namedtuple('LCOE', ['invest', 'input_costs', 'output_costs'])
 
 
 def calculate_lcoe(node, results, cost_results):
+    """
+    Returns LCOE for given node
+
+    Calculates LCOE from results and cost_results for given node. LCOE are
+    split into "invest", "variable_input_costs" and "variable_output_costs".
+
+    Parameters
+    ----------
+    node: Node
+        Node to calculated LCOE for
+    results: dict
+        Results dict from `oemof.outputlib.processing.results`
+    cost_results: dict
+        Cost results dict from `oemof.tools.economics.cost_results`
+
+    Returns
+    -------
+    LCOE:
+        Namedtuple LCOE, containing "invest", "variable_input_costs" and
+        "variable_output_costs".
+    """
     invest = 0.0
     variable_input_costs = 0.0
     variable_output_costs = 0.0
