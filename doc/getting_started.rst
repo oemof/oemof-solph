@@ -8,6 +8,8 @@ With oemof we provide base packages for energy system modelling and optimisation
 
 Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_label` section.
 
+Contribution is already possible on a low level by simply fixing typos in oemof's documentation or rephrasing sections which are unclear. If you want to support us that way please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+
 .. contents::
     :depth: 1
     :local:
@@ -20,7 +22,6 @@ Documentation
 Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project site <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. Go to the `download page <http://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
 
 To get the latest news visit and follow our `website <https://www.oemof.org>`_.
-
 
 Installing oemof
 ================
@@ -42,6 +43,7 @@ Structure of the oemof cosmos
 
 Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
 
+
 Examples
 ========
 
@@ -51,9 +53,16 @@ You can find a repository with all currently available examples for oemof on git
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
-Got further questions regarding oemof? 
+Got further questions on using oemof? 
 ======================================
-If you have any further questions regarding omeof you can visit the forum at: '<https://forum.openmod-initiative.org/tags/c/qa/oemof>'. 
+If you have questions regarding the use of oemof you can visit the forum at: https://forum.openmod-initiative.org/tags/c/qa/oemof and open a new thread if your questions hasn't been already answered.
+
+Join the developers!
+====================
+
+A warm welcome to all who want to join the developers and contribute to oemof. Information
+on the details and how to approach us can be found 
+`in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch
@@ -85,5 +94,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
-
-
