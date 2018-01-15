@@ -5,7 +5,7 @@ from oemof.solph import (
     EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
 from oemof.solph.components import GenericStorage
 from oemof.outputlib import processing
-from oemof.tools import economics
+from oemof.solph import economics
 
 
 # initialize energy system
@@ -132,12 +132,12 @@ class Economic_Tests():
             dg, results, cost_results)
         output = 125
         assert diesel_lcoe.invest == 62.5 * 0.5 / output
-        assert diesel_lcoe.output_costs == 125 / output
-        assert diesel_lcoe.input_costs == 62.5 * 2 / output
+        assert diesel_lcoe.opex == 125 / output
+        assert diesel_lcoe.fuel_cost == 62.5 * 2 / output
 
         output = 100
         storage_lcoe = economics.calculate_lcoe(
             batt, results, cost_results)
         assert storage_lcoe.invest == 600 * 0.4 / output
-        assert storage_lcoe.output_costs == (100 * 2.5) / output
-        assert storage_lcoe.input_costs == 125 * 3 / output
+        assert storage_lcoe.opex == (100 * 2.5) / output
+        assert storage_lcoe.fuel_cost == 125 * 3 / output
