@@ -68,12 +68,18 @@ class Flow:
         nominal\_value to get the absolute value. If fixed attr is set to True
         the flow variable will be fixed to actual_value * :attr:`nominal_value`
         , I.e. this value is set exogenous.
-    positive_gradient : numeric (sequence or scalar)
-        The normed maximal positive difference (flow[t-1] < flow[t])
-        of two consecutive flow values.
-    negative_gradient : numeric (sequence or scalar)
-        The normed maximum negative difference (from[t-1] > flow[t]) of two
-        consecutive timesteps.
+    positive_gradient : dictionary
+        Two obligate keys:
+        'ub': numeric (sequence, scalar or None), the normed maximal positive
+         difference (flow[t-1] < flow[t]) of two consecutive flow values
+         (ub = upper bound).
+        'costs': numeric (scalar or None), the gradient cost per unit.
+    negative_gradient : dictionary
+        Two obligate keys:
+        'ub': numeric (sequence, scalar or None), the normed maximal negative
+         difference (flow[t-1] > flow[t]) of two consecutive flow values
+         (ub = upper bound).
+        'costs': numeric (scalar or None), the gradient cost per unit.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
