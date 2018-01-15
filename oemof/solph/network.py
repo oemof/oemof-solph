@@ -137,16 +137,16 @@ class Flow:
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
-                     'variable_costs', 'min', 'max']
+        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+        dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
                     }
 
-        for attribute in set(scalars + sequences + list(kwargs)):
+        for attribute in set(scalars + sequences + dictionaries + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
-            if 'gradient' in attribute:
+            if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
             elif 'fixed_costs' in attribute:
