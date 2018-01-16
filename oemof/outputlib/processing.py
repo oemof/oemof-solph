@@ -260,9 +260,12 @@ def __separate_attrs(om, get_flows=False, exclude_none=True):
                 com['scalars'][key] = value
                 del com['sequences'][key]
             else:
-                if len(value) == 0:
-                    com['scalars'][key] = value.default
-                    del com['sequences'][key]
+                try:
+                    if not value.default_changed:
+                        com['scalars'][key] = value.default
+                        del com['sequences'][key]
+                except AttributeError:
+                    pass
 
     def remove_nones(com):
         for key, value in list(com['scalars'].items()):
