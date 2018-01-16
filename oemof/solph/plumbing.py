@@ -65,9 +65,12 @@ class _Sequence(UserList):
     """
     def __init__(self, *args, **kwargs):
         self.default = kwargs["default"]
+        self.default_changed = False
         super().__init__(*args)
 
     def __getitem__(self, key):
+        if not self.default_changed:
+            return self.default
         try:
             return self.data[key]
         except IndexError:
@@ -75,6 +78,7 @@ class _Sequence(UserList):
             return self.data[key]
 
     def __setitem__(self, key, value):
+        self.default_changed = True
         try:
             self.data[key] = value
         except IndexError:
