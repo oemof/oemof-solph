@@ -29,7 +29,7 @@ class EnergySystem(es.EnergySystem):
     If you know what you are doing and want to use solph without
     :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
     :class:`core's EnergySystem <oemof.core.energy_system.EnergySystem>`
-    directly. Test.
+    directly.
     """
 
     def __init__(self, **kwargs):
