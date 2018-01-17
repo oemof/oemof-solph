@@ -83,10 +83,9 @@ def create_nx_graph(energy_system=None, remove_nodes=None,
         for i in n.inputs.keys():
             weight = energy_system.flows()[(i, n)].nominal_value
             if weight is None:
-                weight = ""
+                grph.add_edge(i.label, n.label)
             else:
-                weight = format(weight, '.2f')
-            grph.add_edge(i.label, n.label, weigth=weight)
+                grph.add_edge(i.label, n.label, weigth=format(weight, '.2f'))
 
     # remove nodes and edges based on precise labels
     if remove_nodes is not None:
