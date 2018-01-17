@@ -83,7 +83,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
 
     # add nodes
     for n in energy_system.nodes:
-        grph.add_node(n.label)
+        grph.add_node(n.label, label=n.label)
 
     # add labeled flows on directed edge if an optimization_model has been
     # passed or undirected edge otherwise
