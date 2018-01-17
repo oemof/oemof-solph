@@ -8,9 +8,8 @@ __license__ = "GPLv3"
 import networkx as nx
 
 
-def create_nx_graph(energy_system=None, optimization_model=None,
-                    remove_nodes=None, remove_nodes_with_substrings=None,
-                    remove_edges=None):
+def create_nx_graph(energy_system=None, remove_nodes=None,
+                    remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -18,8 +17,6 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     Parameters
     ----------
     energy_system : `oemof.solph.network.EnergySystem`
-
-    optimization_model : `oemof.solph.models.Model`
 
     remove_nodes: list of strings
         Nodes to be removed e.g. ['node1', node2')]
@@ -55,8 +52,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     >>> line_from2 = Transformer(label='line_from2',
     ...                          inputs={bel2: Flow()}, outputs={bel1: Flow()})
     >>> es.add(b_gas, bel1, demand_el, pp_gas, bel2, line_to2, line_from2)
-    >>> om = Model(energysystem=es)
-    >>> my_graph = grph.create_nx_graph(optimization_model=om)
+    >>> my_graph = grph.create_nx_graph(es)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # import networkx as nx
@@ -77,28 +73,20 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     # construct graph from nodes and flows
     grph = nx.DiGraph()
 
-    # Get energy_system from Model
-    if energy_system is None:
-        energy_system = optimization_model.es
-
     # add nodes
     for n in energy_system.nodes:
         grph.add_node(n.label, label=n.label)
 
     # add labeled flows on directed edge if an optimization_model has been
     # passed or undirected edge otherwise
-    if optimization_model:
-        for s, t in optimization_model.flows:
-            if optimization_model.flows[s, t].nominal_value is None:
-                grph.add_edge(s.label, t.label)
+    for n in energy_system.nodes:
+        for i in n.inputs.keys():
+            weight = energy_system.flows()[(i, n)].nominal_value
+            if weight is None:
+                weight = ""
             else:
-                weight = format(
-                    optimization_model.flows[s, t].nominal_value, '.2f')
-                grph.add_edge(s.label, t.label, weight=weight)
-    else:
-        for n in energy_system.nodes:
-            for i in n.inputs.keys():
-                grph.add_edge(n.label, i.label)
+                weight = format(weight, '.2f')
+            grph.add_edge(i.label, n.label, weigth=weight)
 
     # remove nodes and edges based on precise labels
     if remove_nodes is not None:
