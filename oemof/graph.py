@@ -8,7 +8,7 @@ __license__ = "GPLv3"
 import networkx as nx
 
 
-def create_nx_graph(energy_system=None, remove_nodes=None,
+def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
                     remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
@@ -16,7 +16,12 @@ def create_nx_graph(energy_system=None, remove_nodes=None,
 
     Parameters
     ----------
+    filename
     energy_system : `oemof.solph.network.EnergySystem`
+
+    filename : str
+        Absolute filename (with path) to write your graph in the graphml format.
+        If no filename is given no file will be written.
 
     remove_nodes: list of strings
         Nodes to be removed e.g. ['node1', node2')]
@@ -99,6 +104,12 @@ def create_nx_graph(energy_system=None, remove_nodes=None,
             remove_nodes = [v.label for v in energy_system.nodes
                             if i in v.label]
             grph.remove_nodes_from(remove_nodes)
+
+    if filename is not None:
+        if filename[:-8] != '.graphml':
+            filename = filename + '.graphml'
+        nx.write_graphml(grph, filename)
+
     return grph
 
 
