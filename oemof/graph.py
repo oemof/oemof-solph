@@ -6,9 +6,10 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import networkx as nx
+import warnings
 
 
-def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
+def create_nx_graph(energy_system=None, optimization_model=None, remove_nodes=None, filename=None,
                     remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
@@ -16,7 +17,6 @@ def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
 
     Parameters
     ----------
-    filename
     energy_system : `oemof.solph.network.EnergySystem`
 
     filename : str
@@ -36,7 +36,7 @@ def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
     --------
     >>> import pandas as pd
     >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
-    ...                          EnergySystem)
+    ...                          Model, EnergySystem)
     >>> import oemof.graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
@@ -60,8 +60,7 @@ def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
     >>> my_graph = grph.create_nx_graph(es)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
-    >>> # import networkx as nx
-    >>> # nx.write_graphml(my_graph, "my_graph.graphml")
+    >>> # grph.create_nx_graph(es, filename="my_graph.graphml")
     >>> [my_graph.has_node(n)
     ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
     [True, True, True, True, False]
@@ -77,6 +76,13 @@ def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
     """
     # construct graph from nodes and flows
     grph = nx.DiGraph()
+
+    # Get energy_system from Model
+    if energy_system is None:
+        msg = ("\nThe optimisation_model attribute will be removed, pass the "
+               "energy system instead.")
+        warnings.warn(msg, FutureWarning)
+        energy_system = optimization_model.es
 
     # add nodes
     for n in energy_system.nodes:
