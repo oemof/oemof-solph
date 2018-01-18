@@ -9,7 +9,8 @@ import networkx as nx
 import warnings
 
 
-def create_nx_graph(energy_system=None, optimization_model=None, remove_nodes=None, filename=None,
+def create_nx_graph(energy_system=None, optimization_model=None,
+                    remove_nodes=None, filename=None,
                     remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
@@ -35,8 +36,7 @@ def create_nx_graph(energy_system=None, optimization_model=None, remove_nodes=No
     Examples
     --------
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
-    ...                          Model, EnergySystem)
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow, EnergySystem)
     >>> import oemof.graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
