@@ -6,11 +6,12 @@ __copyright__ = "oemof developer group"
 __license__ = "GPLv3"
 
 import networkx as nx
+import warnings
 
 
 def create_nx_graph(energy_system=None, optimization_model=None,
-                    remove_nodes=None, remove_nodes_with_substrings=None,
-                    remove_edges=None):
+                    remove_nodes=None, filename=None,
+                    remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
     See http://networkx.readthedocs.io/en/latest/ for more information.
@@ -19,7 +20,9 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     ----------
     energy_system : `oemof.solph.network.EnergySystem`
 
-    optimization_model : `oemof.solph.models.Model`
+    filename : str
+        Absolute filename (with path) to write your graph in the graphml format.
+        If no filename is given no file will be written.
 
     remove_nodes: list of strings
         Nodes to be removed e.g. ['node1', node2')]
@@ -33,8 +36,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     Examples
     --------
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, Transformer, Flow,
-    ...                          Model, EnergySystem)
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow, EnergySystem)
     >>> import oemof.graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
@@ -55,12 +57,10 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     >>> line_from2 = Transformer(label='line_from2',
     ...                          inputs={bel2: Flow()}, outputs={bel1: Flow()})
     >>> es.add(b_gas, bel1, demand_el, pp_gas, bel2, line_to2, line_from2)
-    >>> om = Model(energysystem=es)
-    >>> my_graph = grph.create_nx_graph(optimization_model=om)
+    >>> my_graph = grph.create_nx_graph(es)
     >>> # export graph as .graphml for programs like Yed where it can be
     >>> # sorted and customized. this is especially helpful for large graphs
-    >>> # import networkx as nx
-    >>> # nx.write_graphml(my_graph, "my_graph.graphml")
+    >>> # grph.create_nx_graph(es, filename="my_graph.graphml")
     >>> [my_graph.has_node(n)
     ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
     [True, True, True, True, False]
@@ -79,26 +79,24 @@ def create_nx_graph(energy_system=None, optimization_model=None,
 
     # Get energy_system from Model
     if energy_system is None:
+        msg = ("\nThe optimisation_model attribute will be removed, pass the "
+               "energy system instead.")
+        warnings.warn(msg, FutureWarning)
         energy_system = optimization_model.es
 
     # add nodes
     for n in energy_system.nodes:
-        grph.add_node(n.label)
+        grph.add_node(n.label, label=n.label)
 
     # add labeled flows on directed edge if an optimization_model has been
     # passed or undirected edge otherwise
-    if optimization_model:
-        for s, t in optimization_model.flows:
-            if optimization_model.flows[s, t].nominal_value is None:
-                grph.add_edge(s.label, t.label)
+    for n in energy_system.nodes:
+        for i in n.inputs.keys():
+            weight = energy_system.flows()[(i, n)].nominal_value
+            if weight is None:
+                grph.add_edge(i.label, n.label)
             else:
-                weight = format(
-                    optimization_model.flows[s, t].nominal_value, '.2f')
-                grph.add_edge(s.label, t.label, weight=weight)
-    else:
-        for n in energy_system.nodes:
-            for i in n.inputs.keys():
-                grph.add_edge(n.label, i.label)
+                grph.add_edge(i.label, n.label, weigth=format(weight, '.2f'))
 
     # remove nodes and edges based on precise labels
     if remove_nodes is not None:
@@ -112,6 +110,12 @@ def create_nx_graph(energy_system=None, optimization_model=None,
             remove_nodes = [v.label for v in energy_system.nodes
                             if i in v.label]
             grph.remove_nodes_from(remove_nodes)
+
+    if filename is not None:
+        if filename[:-8] != '.graphml':
+            filename = filename + '.graphml'
+        nx.write_graphml(grph, filename)
+
     return grph
 
 
