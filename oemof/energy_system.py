@@ -63,7 +63,7 @@ class EnergySystem:
         structure of the results dictionary.
     timeindex : pandas.index, optional
         Define the time range and increment for the energy system. This is an
-        optional atribute but might be import for other functions/methods that
+        optional attribute but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
 
 
