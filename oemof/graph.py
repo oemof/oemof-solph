@@ -70,8 +70,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     [{'demand_el'}]
     >>> sorted(list(nx.strongly_connected_components(my_graph))[1])
     ['bel1', 'bel2', 'line_from2', 'line_to2']
-    >>> om = Model(energysystem=es)
-    >>> new_graph = grph.create_nx_graph(optimization_model=om,
+    >>> new_graph = grph.create_nx_graph(energy_system=es,
     ...                                  remove_nodes_with_substrings=['b_'],
     ...                                  remove_nodes=['pp_gas'],
     ...                                  remove_edges=[('bel2', 'line_from2')],
