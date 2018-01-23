@@ -35,8 +35,10 @@ def create_nx_graph(energy_system=None, optimization_model=None,
 
     Examples
     --------
+    >>> import os
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, Transformer, Flow, EnergySystem)
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow, EnergySystem,
+    ...                          Model)
     >>> import oemof.graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
@@ -68,6 +70,20 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     [{'demand_el'}]
     >>> sorted(list(nx.strongly_connected_components(my_graph))[1])
     ['bel1', 'bel2', 'line_from2', 'line_to2']
+    >>> om = Model(energysystem=es)
+    >>> new_graph = grph.create_nx_graph(optimization_model=om,
+    ...                                  remove_nodes_with_substrings=['b_'],
+    ...                                  remove_nodes=['pp_gas'],
+    ...                                  remove_edges=[('bel2', 'line_from2')],
+    ...                                  filename='test_graph')
+    >>> [new_graph.has_node(n)
+    ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
+    [False, True, False, True, False]
+    >>> my_graph.has_edge('pp_gas', 'bel1')
+    True
+    >>> new_graph.has_edge('bel2', 'line_from2')
+    False
+    >>> os.remove('test_graph.graphml')
 
     Notes
     -----
@@ -117,8 +133,3 @@ def create_nx_graph(energy_system=None, optimization_model=None,
         nx.write_graphml(grph, filename)
 
     return grph
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
