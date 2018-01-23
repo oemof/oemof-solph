@@ -2,10 +2,12 @@
 
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)

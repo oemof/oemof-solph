@@ -4,10 +4,12 @@
 energy systems. An energy system is modelled as a graph/network of entities
 with very specific constraints on which types of entities are allowed to be
 connected.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from collections import MutableMapping as MM
 from contextlib import contextmanager

@@ -3,9 +3,12 @@
 Example that illustrates how to use custom component `GenericCHP` can be used.
 
 In this case it is used to model a combined cycle extraction turbine.
+
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 from nose.tools import eq_
 import os

@@ -2,10 +2,12 @@
 
 """This module can be used to check the installation.
 This is not an illustrated example.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from oemof import solph
 import pandas as pd

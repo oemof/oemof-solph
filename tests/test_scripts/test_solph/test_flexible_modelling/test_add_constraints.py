@@ -5,10 +5,12 @@ This script shows how to a an individual constraint to the oemof solph
 Model.
 The constraint we add forces a flow to be greater or equal a certain share
 of all inflows of its target bus. Moreover we will set an emission constraint.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from nose.tools import ok_
 import logging

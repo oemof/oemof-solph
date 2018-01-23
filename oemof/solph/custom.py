@@ -3,10 +3,12 @@
 """This module is designed to hold custom components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,

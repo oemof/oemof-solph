@@ -1,6 +1,11 @@
 # -*- coding: utf-8
 
 """Helpers to log your modeling process with oemof.
+
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import os

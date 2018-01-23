@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Example that shows how to use custom component `GenericOffsetTransformer`.
+
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 from nose.tools import eq_
 import os

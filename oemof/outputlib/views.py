@@ -3,10 +3,12 @@
 """Modules for providing convenient views for solph results.
 
 Information about the possible usage is provided within the examples.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 import pandas as pd
 from oemof.outputlib.processing import convert_keys_to_strings

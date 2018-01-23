@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 """Solph Optimization Models
+
+Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
+                        Uwe Krien
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pyomo.environ as po
@@ -9,9 +14,6 @@ from oemof.solph import blocks, custom
 from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
 import logging
-
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 
 class BaseModel(po.ConcreteModel):
