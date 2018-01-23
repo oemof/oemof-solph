@@ -37,8 +37,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     --------
     >>> import os
     >>> import pandas as pd
-    >>> from oemof.solph import (Bus, Sink, Transformer, Flow, EnergySystem,
-    ...                          Model)
+    >>> from oemof.solph import (Bus, Sink, Transformer, Flow, EnergySystem)
     >>> import oemof.graph as grph
     >>> datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
     >>> es = EnergySystem(timeindex=datetimeindex)
