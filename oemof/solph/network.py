@@ -218,13 +218,13 @@ class Transformer(on.Transformer):
     Defining an linear transformer:
 
     >>> from oemof import solph
-    >>> bgas = solph.Bus(label="natural_gas")
-    >>> bcoal = solph.Bus(label="hard_coal")
-    >>> bel = solph.Bus(label="electricity")
-    >>> bheat = solph.Bus(label="heat")
+    >>> bgas = solph.Bus(label='natural_gas')
+    >>> bcoal = solph.Bus(label='hard_coal')
+    >>> bel = solph.Bus(label='electricity')
+    >>> bheat = solph.Bus(label='heat')
 
     >>> trsf = solph.Transformer(
-    ...    label="pp_gas_1",
+    ...    label='pp_gas_1',
     ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5,
@@ -239,7 +239,7 @@ class Transformer(on.Transformer):
     ['hard_coal', 'natural_gas']
 
     >>> trsf_new = solph.Transformer(
-    ...    label="pp_gas_2",
+    ...    label='pp_gas_2',
     ...    inputs={bgas: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5})
