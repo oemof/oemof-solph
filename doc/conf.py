@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'oemof'
-copyright = u'2014, oemof-Team'
+copyright = u'2014-2018, oemof-developer-team'
 author = u'oemof-Team'
 
 # The version info for the project you're documenting, acts as replacement for

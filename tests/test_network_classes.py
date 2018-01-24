@@ -2,8 +2,9 @@
 
 """Test the created constraints against approved constraints.
 
-Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
-                        Uwe Krien
+This file is part of project oemof. It's copyrighted by the contributors
+recorded in the version control history of the file, available from its original
+location https://github.com/oemof/tests/test_network_classes.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """

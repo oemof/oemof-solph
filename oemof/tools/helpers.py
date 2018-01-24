@@ -4,8 +4,9 @@ This is a collection of helper functions which work on their own and can be
 used by various classes. If there are too many helper-functions, they will
 be sorted in different modules.
 
-Copyright (c) 2014-2018 Cord Kaldemeyer, Simon Hilpert, Stefan Günther,
-                        Uwe Krien
+This file is part of project oemof. It's copyrighted by the contributors
+recorded in the version control history of the file, available from its original
+location https://github.com/oemof/oemof/tools/helpers.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
