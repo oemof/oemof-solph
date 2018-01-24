@@ -4,9 +4,9 @@
 energy specific interfaces (facades) for solph components to simplify its
 application.
 
-This file is part of project oemof. It's copyrighted by the contributors
-recorded in the version control history of the file, available from its original
-location https://github.com/oemof/oemof/solph/facades.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/oemof/solph/facades.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """

@@ -5,9 +5,9 @@ energy systems. An energy system is modelled as a graph/network of entities
 with very specific constraints on which types of entities are allowed to be
 connected.
 
-This file is part of project oemof. It's copyrighted by the contributors
-recorded in the version control history of the file, available from its original
-location https://github.com/oemof/oemof/network.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/oemof/network.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """

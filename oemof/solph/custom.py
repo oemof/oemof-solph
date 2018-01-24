@@ -4,9 +4,9 @@
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 
-This file is part of project oemof. It's copyrighted by the contributors
-recorded in the version control history of the file, available from its original
-location https://github.com/oemof/oemof/solph/custom.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/oemof/solph/custom.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
