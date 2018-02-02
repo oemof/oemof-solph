@@ -6,9 +6,13 @@ Classes are derived from oemof core network classes and adapted for specific
 optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/oemof/solph/network.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 import oemof.network as on
 import oemof.energy_system as es
@@ -93,9 +97,9 @@ class Flow:
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
     nonconvex :  :class:`oemof.solph.options.NonConvex` object
-        If an nonconvex flow object is added here, the flow constraints will
+        If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
-        will be different, i.e. constraint etc from
+        will be different, i.e. constraint etc. from
         :class:`oemof.solph.blocks.NonConvexFlow` will be used instead of
         :class:`oemof.solph.blocks.Flow`. Note: this does not work in
         combination with the investment attribute set at the moment.
@@ -197,7 +201,7 @@ class Source(on.Source):
 
 
 class Transformer(on.Transformer):
-    """A Linear Transformer object with n inputs and n outputs.
+    """A linear Transformer object with n inputs and n outputs.
 
     Parameters
     ----------

@@ -3,10 +3,14 @@
 """
 This test contains a ExtractionTurbineCHP class.
 
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location
+oemof/tests/test_scripts/test_solph/test_variable_chp/test_variable_chp.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from nose.tools import eq_
 import logging

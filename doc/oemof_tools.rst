@@ -16,6 +16,7 @@ Economics
 
 Calculate the annuity. See the API-doc of :py:func:`~oemof.tools.economics.annuity` for all details.
 
+
 Helpers
 -------
 

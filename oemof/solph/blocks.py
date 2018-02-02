@@ -2,10 +2,13 @@
 
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/oemof/solph/blocks.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
                         NonNegativeReals, Binary, NonNegativeIntegers)
@@ -258,7 +261,7 @@ class InvestmentFlow(SimpleBlock):
     **The following variables are created:**
 
     invest :attr:`om.InvestmentFlow.invest[i, o]`
-        Value of the investment variable (i.e. equivalent to the nominal
+        Value of the investment variable i.e. equivalent to the nominal
         value of the flows after optimization (indexed by FLOWS)
 
     **The following constraints are build:**
@@ -561,7 +564,7 @@ class NonConvexFlow(SimpleBlock):
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
-        beeing not None in the first timestep
+        being not None in the first timestep
     STARTUP_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`startup_costs` being not None.
@@ -569,7 +572,7 @@ class NonConvexFlow(SimpleBlock):
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
-    **The following variable are created:**
+    **The following variables are created:**
 
     Status variable (binary) :attr:`om.NonConvexFlow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
@@ -630,7 +633,7 @@ class NonConvexFlow(SimpleBlock):
 
     def _create(self, group=None):
         """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.NonConvexFlow`.
+        an attribute flow of type class:`.NonConvexFlow`.
 
         Parameters
         ----------

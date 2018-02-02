@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -
 
 """Test the created constraints against approved constraints.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/tests/constraint_tests.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from difflib import unified_diff
 import logging
@@ -104,7 +107,7 @@ class Constraint_Tests:
                                            lineterm="")))
 
     def test_linear_transformer(self):
-        """Constraint test of a LinearTransformer without Investment.
+        """Constraint test of a Transformer without Investment.
         """
         bgas = solph.Bus(label='gas')
 
@@ -119,7 +122,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_transformer.lp')
 
     def test_linear_transformer_invest(self):
-        """Constraint test of a LinearTransformer with Investment.
+        """Constraint test of a Transformer with Investment.
         """
 
         bgas = solph.Bus(label='gas')
@@ -281,7 +284,7 @@ class Constraint_Tests:
         self.compare_lp_files('transformer_invest.lp')
 
     def test_linear_transformer_chp(self):
-        """Constraint test of a LinearTransformer without Investment (two outputs).
+        """Constraint test of a Transformer without Investment (two outputs).
         """
         bgas = solph.Bus(label='gasBus')
         bheat = solph.Bus(label='heatBus')
@@ -296,7 +299,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_transformer_chp.lp')
 
     def test_linear_transformer_chp_invest(self):
-        """Constraint test of a LinearTransformer with Investment (two outputs).
+        """Constraint test of a Transformer with Investment (two outputs).
         """
 
         bgas = solph.Bus(label='gasBus')
