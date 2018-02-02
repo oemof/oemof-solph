@@ -85,16 +85,16 @@ class Parameter_Result_Tests:
                 'nominal_value': 1,
                 'fixed': True,
                 'negative_gradient_costs': 0,
-                'positive_gradient_costs': 0
+                'positive_gradient_costs': 0,
+                'max': 1,
+                'min': 0,
+                'variable_costs': 0
             }
         )
         eq_(
             param_results[(b_el2, demand)]['sequences'],
             {
-                'actual_value': self.demand_values,
-                'max': [1] * 24,
-                'min': [0] * 24,
-                'variable_costs': [0] * 24
+                'actual_value': self.demand_values
             }
         )
 
@@ -106,7 +106,12 @@ class Parameter_Result_Tests:
             'nominal_value': 1,
             'fixed': True,
             'negative_gradient_costs': 0,
-            'positive_gradient_costs': 0
+            'positive_gradient_costs': 0,
+            'max': 1,
+            'min': 0,
+            'variable_costs': 0,
+            'positive_gradient_ub': None,
+            'negative_gradient_ub': None
         }
         default_scalars = [
             'nominal_value', 'summed_max', 'summed_min',
@@ -121,13 +126,9 @@ class Parameter_Result_Tests:
         )
         sequences_attributes = {
             'actual_value': self.demand_values,
-            'max': [1] * 24,
-            'min': [0] * 24,
-            'variable_costs': [0] * 24
         }
         default_sequences = [
-            'actual_value', 'positive_gradient_ub', 'negative_gradient_ub',
-            'variable_costs', 'min', 'max'
+            'actual_value'
         ]
         for attr in default_sequences:
             if attr not in sequences_attributes:
@@ -149,18 +150,17 @@ class Parameter_Result_Tests:
                 'nominal_output_capacity_ratio': 1 / 6,
                 'investment_ep_costs': 0.4,
                 'investment_maximum': float('inf'),
-                'investment_minimum': 0
+                'investment_minimum': 0,
+                'capacity_loss': 0,
+                'capacity_min': 0,
+                'capacity_max': 1,
+                'inflow_conversion_factor': 1,
+                'outflow_conversion_factor': 0.8,
             }
         )
         eq_(
             param_results[('storage', 'None')]['sequences'],
-            {
-                'capacity_loss': [0.0] * 24,
-                'capacity_min': [0.0] * 24,
-                'capacity_max': [1.0] * 24,
-                'inflow_conversion_factor': [1] * 24,
-                'outflow_conversion_factor': [0.8] * 24,
-            }
+            {}
         )
 
     def test_nodes_without_none_exclusion(self):
@@ -171,12 +171,11 @@ class Parameter_Result_Tests:
             param_results[(diesel, None)]['scalars'],
             {
                 'label': 'diesel',
+                'conversion_factors_b_el1': 2,
+                'conversion_factors_b_diesel': 1,
             }
         )
         eq_(
             param_results[(diesel, None)]['sequences'],
-            {
-                'conversion_factors_b_el1': [2] * 24,
-                'conversion_factors_b_diesel': [1] * 24,
-            }
+            {}
         )
