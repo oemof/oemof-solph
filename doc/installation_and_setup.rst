@@ -68,7 +68,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit).
 
     .. code-block:: console
 
-       conda create -n yourenvname python=3.4
+       conda create -n yourenvname python=3.x
        source activate yourenvname
 
  4. In terminal type: :code:`pip install oemof`
@@ -131,11 +131,8 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
 
     .. code-block:: console
 
-       conda create -n yourenvname python=3.4
+       conda create -n yourenvname python=3.x
        activate yourenvname
-
-    *It is recommended to use python 3.4. Some users reported that oemof does not work with
-    Windows + Anaconda + Python 3.5*
 
  4. In 'Anaconda Prompt' type: :code:`pip install oemof`
  5. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
