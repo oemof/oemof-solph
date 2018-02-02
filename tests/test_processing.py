@@ -70,7 +70,7 @@ class Parameter_Result_Tests:
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.param_results(self.om, exclude_none=True)
+        param_results = processing.param_results(self.es, exclude_none=True)
         eq_(
             param_results[(b_el2, demand)]['scalars'],
             {

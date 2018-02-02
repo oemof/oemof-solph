@@ -199,7 +199,7 @@ def meta_results(om, undefined=False):
     return meta_res
 
 
-def __separate_attrs(om, get_flows=False, exclude_none=True):
+def __separate_attrs(system, get_flows=False, exclude_none=True):
     def detect_scalars_and_sequences(com):
         com_data = {'scalars': {}, 'sequences': {}}
 
@@ -284,7 +284,11 @@ def __separate_attrs(om, get_flows=False, exclude_none=True):
     -------
     dict
     """
-    components = om.flows if get_flows else om.es.nodes
+    # Check if system is es or om:
+    if system.__class__.__name__ == 'EnergySystem':
+        components = system.flows() if get_flows else system.nodes
+    else:
+        components = system.flows if get_flows else system.es.nodes
 
     data = {}
     for com_key in components:
@@ -295,7 +299,7 @@ def __separate_attrs(om, get_flows=False, exclude_none=True):
     return data
 
 
-def param_results(om, exclude_none=True, keys_as_str=False):
+def param_results(system, exclude_none=True, keys_as_str=False):
     """
     Create a result dictionary containing node parameters.
 
@@ -305,10 +309,22 @@ def param_results(om, exclude_none=True, keys_as_str=False):
     The dictionary is keyed by the nodes e.g.
     `results['nodes'][idx]['scalars']`
     and flows e.g. `results['flows'][(n,n)]['sequences']`.
+
+    Parameters
+    ----------
+    system: Model or energysystem
+    exclude_none: bool
+        If True, all scalars and sequences containing None values are excluded
+    keys_as_str: bool
+        If True, nodes are stored as strings
+
+    Returns
+    -------
+    dict: Parameters for all nodes and flows
     """
 
-    flow_data = __separate_attrs(om, True, exclude_none)
-    node_data = __separate_attrs(om, False, exclude_none)
+    flow_data = __separate_attrs(system, True, exclude_none)
+    node_data = __separate_attrs(system, False, exclude_none)
 
     flow_data.update(node_data)
     return convert_keys_to_strings(flow_data) if keys_as_str else flow_data
