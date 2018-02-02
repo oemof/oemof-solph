@@ -96,11 +96,16 @@ class _Sequence(UserList):
     def __init_list(self):
         self.data = [self.default] * (self.highest_index + 1)
 
+    def __repr__(self):
+        if self.default_changed:
+            return super(_Sequence, self).__repr__()
+        return str([i for i in self])
+
     def __len__(self):
         return max(len(self.data), self.highest_index + 1)
 
     def __iter__(self):
         if self.default_changed:
-            super(_Sequence, self).__iter__()
+            return super(_Sequence, self).__iter__()
         else:
             return repeat(self.default, self.highest_index + 1)
