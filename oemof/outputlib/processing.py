@@ -315,7 +315,7 @@ def param_results(system, exclude_none=True, keys_as_str=False):
 
     Parameters
     ----------
-    system: Model or energysystem
+    system: Model or EnergySystem
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
     keys_as_str: bool
