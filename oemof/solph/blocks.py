@@ -760,8 +760,8 @@ class NonConvexFlow(SimpleBlock):
                 expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
                          m.flows[i, o].nonconvex.minimum_downtime)
                 expr += - m.flows[i, o].nonconvex.minimum_downtime
-                expr += -sum(self.status[i, o, t+d] for d in range(0,
-                             m.flows[i, o].nonconvex.minimum_downtime))
+                expr += sum(self.status[i, o, t+d] for d in range(0,
+                            m.flows[i, o].nonconvex.minimum_downtime))
                 return expr <= 0
             else:
                 expr = 0
