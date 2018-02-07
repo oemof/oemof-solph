@@ -714,6 +714,24 @@ class NonConvexFlow(SimpleBlock):
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
+        def _min_uptime_rule(block, i, o, t):
+            """Rule definition for min-uptime constraints of nonconvex flows.
+            """
+            # set initial status = end status
+            if t > m.TIMESTEPS[1] and t <= m.TIMESTEPS[-1]-3:
+                # m.flows[i, o].nonconvex.minimum_uptime
+                expr = ((self.status[i, o, t]-self.status[i, o, t-1]) *
+                        3 <= self.status[i, o, t] + self.status[i, o, t+1]
+                        + self.status[i, o, t+2])
+            else:
+                expr = Constraint.Skip
+                # expr = ((self.status[i, o, t]-self.status[i, o, t-1]) *
+                #         3 <= self.status[i, o, t] + self.status[i, o, t+1]
+                #         + self.status[i, o, t+2])
+            return expr
+        self.min_uptime_constr = Constraint(self.NONCONVEX_FLOWS, m.TIMESTEPS,
+                                            rule=_min_uptime_rule)
+
         # TODO: Add gradient constraints for nonconvex block / flows
         # TODO: Add  min-up/min-downtime constraints
 
