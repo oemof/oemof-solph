@@ -657,6 +657,14 @@ class NonConvexFlow(SimpleBlock):
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                  if g[2].nonconvex.shutdown_costs is not None])
 
+        self.MINUPTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                  if g[2].nonconvex.minimum_uptime
+                                  is not None])
+
+        self.MINDOWNTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                    if g[2].nonconvex.minimum_downtime
+                                    is not None])
+
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
@@ -729,11 +737,10 @@ class NonConvexFlow(SimpleBlock):
                 #         3 <= self.status[i, o, t] + self.status[i, o, t+1]
                 #         + self.status[i, o, t+2])
             return expr
-        self.min_uptime_constr = Constraint(self.NONCONVEX_FLOWS, m.TIMESTEPS,
+        self.min_uptime_constr = Constraint(self.MINUPTIMEFLOWS, m.TIMESTEPS,
                                             rule=_min_uptime_rule)
 
         # TODO: Add gradient constraints for nonconvex block / flows
-        # TODO: Add  min-up/min-downtime constraints
 
     def _objective_expression(self):
         r"""Objective expression for nonconvex flows.
