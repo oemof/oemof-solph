@@ -721,13 +721,14 @@ class NonConvexFlow(SimpleBlock):
             return expr
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
-        # calc max of min down/uptime for border regions for if/else parts
+
         def _min_uptime_rule(block, i, o, t):
             """Rule definition for min-uptime constraints of nonconvex flows.
             """
-            if (t >= m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_uptime
-               and
-               t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.minimum_uptime):
+            max_up_down = (
+                max(m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_uptime,
+                    m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_downtime))
+            if (t >= max_up_down and t <= m.TIMESTEPS[-1]-max_up_down):
                 expr = 0
                 expr += ((self.status[i, o, t]-self.status[i, o, t-1]) *
                          m.flows[i, o].nonconvex.minimum_uptime)
@@ -745,9 +746,10 @@ class NonConvexFlow(SimpleBlock):
         def _min_downtime_rule(block, i, o, t):
             """Rule definition for min-downtime constraints of nonconvex flows.
             """
-            if (t >= m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_downtime
-               and
-               t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.minimum_downtime):
+            max_up_down = (
+                max(m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_uptime,
+                    m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_downtime))
+            if (t >= max_up_down and t <= m.TIMESTEPS[-1]-max_up_down):
                 expr = 0
                 expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
                          m.flows[i, o].nonconvex.minimum_downtime)
