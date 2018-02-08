@@ -669,11 +669,9 @@ class NonConvexFlow(SimpleBlock):
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
         if self.STARTUPFLOWS:
-            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
-                               within=Binary)
+            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS, within=Binary)
         if self.SHUTDOWNFLOWS:
-            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS,
-                                within=Binary)
+            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS, within=Binary)
 
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints.
@@ -725,13 +723,7 @@ class NonConvexFlow(SimpleBlock):
         def _min_uptime_rule(block, i, o, t):
             """Rule definition for min-uptime constraints of nonconvex flows.
             """
-            if m.flows[i, o].nonconvex.minimum_downtime is not None:
-                max_up_down = (max(
-                    m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_uptime,
-                    m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_downtime))
-            else:
-                max_up_down = m.flows[i, o].nonconvex.minimum_uptime
-            if (t >= max_up_down and t <= m.TIMESTEPS[-1]-max_up_down):
+            if (t >= m.flows[i, o].nonconvex.max_up_down and t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
                 expr = 0
                 expr += ((self.status[i, o, t]-self.status[i, o, t-1]) *
                          m.flows[i, o].nonconvex.minimum_uptime)
@@ -749,13 +741,7 @@ class NonConvexFlow(SimpleBlock):
         def _min_downtime_rule(block, i, o, t):
             """Rule definition for min-downtime constraints of nonconvex flows.
             """
-            if m.flows[i, o].nonconvex.minimum_uptime is not None:
-                max_up_down = (max(
-                    m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_uptime,
-                    m.TIMESTEPS[1]+m.flows[i, o].nonconvex.minimum_downtime))
-            else:
-                max_up_down = m.flows[i, o].nonconvex.minimum_downtime
-            if (t >= max_up_down and t <= m.TIMESTEPS[-1]-max_up_down):
+            if (t >= m.flows[i, o].nonconvex.max_up_down and t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
                 expr = 0
                 expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
                          m.flows[i, o].nonconvex.minimum_downtime)

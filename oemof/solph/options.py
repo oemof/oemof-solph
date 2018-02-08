@@ -61,3 +61,29 @@ class NonConvex:
         self.minimum_uptime = kwargs.get('minimum_uptime')
         self.minimum_downtime = kwargs.get('minimum_downtime')
         self.initial_status = kwargs.get('initial_status', 0)
+        self._max_up_down = None
+
+    def _calculate_max_up_down(self):
+        """
+        Calculate maximum of up and downtime for direct usage in constraints.
+
+        The maximum of both is used to set the initial status for this
+        number of timesteps within the edge regions.
+        """
+        if (self.minimum_uptime is not None and self.minimum_downtime is None):
+            max_up_down = self.minimum_uptime
+        elif (self.minimum_uptime is None and
+              self.minimum_downtime is not None):
+            max_up_down = self.minimum_downtime
+        else:
+            max_up_down = max(self.minimum_uptime, self.minimum_downtime)
+
+        self._max_up_down = max_up_down
+
+    @property
+    def max_up_down(self):
+        """Compute or return the _max_up_down attribute."""
+        if self._max_up_down is None:
+            self._calculate_max_up_down()
+
+        return self._max_up_down
