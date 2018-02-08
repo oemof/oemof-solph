@@ -615,6 +615,13 @@ class NonConvexFlow(SimpleBlock):
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{SHUTDOWN\_FLOWS}.
 
+    Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
+        .. math::
+            (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \
+            \leq \sum_{n=0}^{minimum\_uptime} status(i,o,t+n) \\
+            \forall t \in \textrm{TIMESTEPS}, \\  # not element for inner!
+            \forall (i,o) \in \textrm{MINUPTIME\_FLOWS}.
+
     **The following parts of the objective function are created:**
 
     If :attr:`nonconvex.startup_costs` is set by the user:
