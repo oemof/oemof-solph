@@ -723,7 +723,8 @@ class NonConvexFlow(SimpleBlock):
         def _min_uptime_rule(block, i, o, t):
             """Rule definition for min-uptime constraints of nonconvex flows.
             """
-            if (t >= m.flows[i, o].nonconvex.max_up_down and t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
+            if (t >= m.flows[i, o].nonconvex.max_up_down and
+                    t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
                 expr = 0
                 expr += ((self.status[i, o, t]-self.status[i, o, t-1]) *
                          m.flows[i, o].nonconvex.minimum_uptime)
@@ -741,7 +742,8 @@ class NonConvexFlow(SimpleBlock):
         def _min_downtime_rule(block, i, o, t):
             """Rule definition for min-downtime constraints of nonconvex flows.
             """
-            if (t >= m.flows[i, o].nonconvex.max_up_down and t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
+            if (t >= m.flows[i, o].nonconvex.max_up_down and
+                    t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
                 expr = 0
                 expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
                          m.flows[i, o].nonconvex.minimum_downtime)
