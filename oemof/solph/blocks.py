@@ -781,14 +781,14 @@ class NonConvexFlow(SimpleBlock):
 
         if self.STARTUPFLOWS:
             startcosts += sum(self.startup[i, o, t] *
-                              m.flows[i, o].nonconvex.startup_costs
+                              m.flows[i, o].nonconvex.startup_costs[t]
                               for i, o in self.STARTUPFLOWS
                               for t in m.TIMESTEPS)
             self.startcosts = Expression(expr=startcosts)
 
         if self.SHUTDOWNFLOWS:
             shutdowncosts += sum(self.shutdown[i, o, t] *
-                                 m.flows[i, o].nonconvex.shutdown_costs
+                                 m.flows[i, o].nonconvex.shutdown_costs[t]
                                  for i, o in self.SHUTDOWNFLOWS
                                  for t in m.TIMESTEPS)
             self.shudowcosts = Expression(expr=shutdowncosts)

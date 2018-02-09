@@ -8,6 +8,8 @@ from its original location oemof/oemof/solph/options.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+from oemof.solph.plumbing import sequence
+
 
 class Investment:
     """
@@ -55,12 +57,15 @@ class NonConvex:
         six timesteps is defined in addition to a four timestep minimum uptime.
     """
     def __init__(self, **kwargs):
-        # super().__init__(self, **kwargs)
-        self.startup_costs = kwargs.get('startup_costs')
-        self.shutdown_costs = kwargs.get('shutdown_costs')
-        self.minimum_uptime = kwargs.get('minimum_uptime')
-        self.minimum_downtime = kwargs.get('minimum_downtime')
-        self.initial_status = kwargs.get('initial_status', 0)
+        scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status']
+        sequences = ['startup_costs', 'shutdown_costs']
+        defaults = {'initial_status': 0}
+
+        for attribute in set(scalars + sequences + list(kwargs)):
+            value = kwargs.get(attribute, defaults.get(attribute))
+            setattr(self, attribute,
+                    sequence(value) if attribute in sequences else value)
+
         self._max_up_down = None
 
     def _calculate_max_up_down(self):
