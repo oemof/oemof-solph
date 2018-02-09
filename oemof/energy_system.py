@@ -22,7 +22,7 @@ NOT_AVAILABLE = object()
 try:
     import datapackage
 
-    from itertools import repeat
+    from itertools import chain, cycle, repeat
     import json
     import re
     import types
@@ -169,6 +169,33 @@ class EnergySystem:
 
             components = {c['name']: {k: c[k] for k in c if k != 'name'}
                           for c in resource('components').read(keyed=True)}
+
+            elements = {e['name']:
+                {'name': e['name'],
+                 'inputs': {source: {k: v for n, k, v in triples
+                                          if n == source
+                                          if v is not None}
+                            for source in inputs},
+                 'outputs': {target: {k: v
+                                      for n, k, v in triples
+                                      if n == target
+                                      if v is not None}
+                             for target in outputs},
+                 'parameters': dict(chain(
+                        parse(e.get('node_parameter', "{}")).items(),
+                        components.get(e['name'], {}).items())),
+                 'type': e['type']}
+                for e in resource('elements').read(keyed=True)
+                for items in (list(parse(e.get('edge_parameter', "{}"))
+                                   .items()),)
+                for inputs, outputs in (
+                  ([p.strip() for p in e['predecessor'].split(',') if p],
+                   [s.strip() for s in e['successor'].split(',') if s]),)
+                for triples in [list(zip(list(chain(inputs, outputs)),
+                                         repeat(k),
+                                         listify(v)))
+                                for k, v in items]}
+            return elements
 
 
     def _add(self, entity):
