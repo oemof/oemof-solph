@@ -617,10 +617,35 @@ class NonConvexFlow(SimpleBlock):
 
     Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
         .. math::
-            (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \
-            \leq \sum_{n=0}^{minimum\_uptime} status(i,o,t+n) \\
-            \forall t \in \textrm{TIMESTEPS}, \\  # not element for inner!
+            (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
+            \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t \neq \{0..minimum\_uptime\} \cup \
+            \{t\_max-minimum\_uptime..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIME\_FLOWS}.
+            \\ \\
+            status(i, o, t) = initial\_status(i, o) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t = \{0..minimum\_uptime\} \cup \
+            \{t\_max-minimum\_uptime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINUPTIME\_FLOWS}.
+
+    Minimum downtime constraint :attr:`om.NonConvexFlow.downtime_constr[i,o,t]`
+        .. math::
+            (status(i, o, t-1)-status(i, o, t)) \
+            \cdot minimum\_downtime(i, o) \\
+            \leq minimum\_downtime(i, o) \
+            - \sum_{n=0}^{minimum\_downtime-1} status(i,o,t+n) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t \neq \{0..minimum\_downtime\} \cup \
+            \{t\_max-minimum\_downtime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINDOWNTIME\_FLOWS}.
+            \\ \\
+            status(i, o, t) = initial\_status(i, o) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t = \{0..minimum\_downtime\} \cup \
+            \{t\_max-minimum\_downtime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINDOWNTIME\_FLOWS}.
 
     **The following parts of the objective function are created:**
 
