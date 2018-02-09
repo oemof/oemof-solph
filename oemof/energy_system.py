@@ -20,6 +20,8 @@ from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 NOT_AVAILABLE = object()
 try:
     import datapackage
+
+    import types
 except ImportError as e:
     datapackage = NOT_AVAILABLE
 
@@ -140,6 +142,24 @@ class EnergySystem:
             # This is necessary because before reading a resource for the first
             # time its `headers` attribute ist `None`.
             for r in package.resources: r.read()
+            empty = types.SimpleNamespace()
+            empty.read = lambda *xs, **ks: ()
+            empty.headers = ()
+            resource = lambda r: package.get_resource(r) or empty
+
+            sequences = {name: [s[name]
+                         for s in resource('sequences').read(keyed=True)]
+                         for name in resource('sequences').headers}
+            sequences = {name: pd.Series(sequences[name],
+                                         index=sequences['timeindex'])
+                         for name in sequences
+                         if name != 'timeindex'}
+
+            hubs = {h['name']: {k: h[k] for k in h if k != 'name'}
+                    for h in resource('hubs').read(keyed=True)}
+
+            components = {c['name']: {k: c[k] for k in c if k != 'name'}
+                          for c in resource('components').read(keyed=True)}
 
 
     def _add(self, entity):
