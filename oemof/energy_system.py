@@ -133,6 +133,15 @@ class EnergySystem:
             g(entity, groups)
         return groups
 
+    if not datapackage is NOT_AVAILABLE:
+        @classmethod
+        def from_datapackage(cls, path):
+            package = datapackage.Package(path)
+            # This is necessary because before reading a resource for the first
+            # time its `headers` attribute ist `None`.
+            for r in package.resources: r.read()
+
+
     def _add(self, entity):
         self.entities.append(entity)
         self._groups = partial(self._regroup, entity, self.groups,
