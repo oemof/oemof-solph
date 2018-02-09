@@ -22,6 +22,9 @@ NOT_AVAILABLE = object()
 try:
     import datapackage
 
+    from itertools import repeat
+    import json
+    import re
     import types
 except ImportError as e:
     datapackage = NOT_AVAILABLE
@@ -146,6 +149,11 @@ class EnergySystem:
             empty = types.SimpleNamespace()
             empty.read = lambda *xs, **ks: ()
             empty.headers = ()
+            parse = lambda s: (json.loads(re.sub(
+                r'([{,] *)([^,:"{} ]*) *:',
+                r'\1"\2":',
+                s)) if s else {})
+            listify = lambda x: x if type(x) is list else repeat(x)
             resource = lambda r: package.get_resource(r) or empty
 
             sequences = {name: [s[name]
