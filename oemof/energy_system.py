@@ -17,6 +17,12 @@ import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 
+NOT_AVAILABLE = object()
+try:
+    import datapackage
+except ImportError as e:
+    datapackage = NOT_AVAILABLE
+
 
 class EnergySystem:
     r"""Defining an energy supply system to use oemof's solver libraries.
