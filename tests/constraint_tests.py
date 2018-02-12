@@ -431,3 +431,14 @@ class Constraint_Tests:
         solph.constraints.investment_limit(om, limit=900)
 
         self.compare_lp_files('investment_limit.lp', my_om=om)
+        
+    def test_min_max_runtime(self):
+        bus_t = solph.Bus(label='Bus_T')
+        solph.Source(
+            label='cheap_plant_min_down_constraints',
+            outputs={bus_t: solph.Flow(
+                nominal_value=10, min=0.5, max=1.0, variable_costs=10,
+                nonconvex=solph.NonConvex(
+                    minimum_downtime=4, minimum_uptime=2, initial_status=2,
+                    startup_costs=5, shutdown_costs=7))})   
+        self.compare_lp_files('min_max_runtime.lp')
