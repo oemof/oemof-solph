@@ -46,6 +46,14 @@ class Constraint_Tests:
                            timeindex=self.energysystem.timeindex)
 
     def compare_lp_files(self, filename, ignored=None, my_om=None):
+        r"""Compare lp-files to check constraints generated within solph.
+
+        An lp-file is being generated automatically when the tests are
+        executed. Make sure that you create an empty file first and
+        transfer the content from the one that has been created automatically
+        into this one afterwards. Make sure that the content is being checked
+        carefully. Otherwise, errors are included within the code base.
+        """
         if my_om is None:
             om = self.get_om()
         else:
