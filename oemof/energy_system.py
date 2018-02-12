@@ -22,7 +22,7 @@ NOT_AVAILABLE = object()
 try:
     import datapackage
 
-    from itertools import chain, cycle, repeat
+    from itertools import chain, cycle, groupby, repeat
     import json
     import re
     import types
@@ -172,15 +172,10 @@ class EnergySystem:
 
             elements = {e['name']:
                 {'name': e['name'],
-                 'inputs': {source: {k: v for n, k, v in triples
-                                          if n == source
-                                          if v is not None}
-                            for source in inputs},
-                 'outputs': {target: {k: v
-                                      for n, k, v in triples
-                                      if n == target
-                                      if v is not None}
-                             for target in outputs},
+                 'inputs': {source: edges[i, source]
+                            for i, source in enumerate(inputs)},
+                 'outputs': {target: edges[i, target]
+                             for i, target in enumerate(outputs, len(inputs))},
                  'parameters': dict(chain(
                         parse(e.get('node_parameter', "{}")).items(),
                         components.get(e['name'], {}).items())),
@@ -191,10 +186,20 @@ class EnergySystem:
                 for inputs, outputs in (
                   ([p.strip() for p in e['predecessor'].split(',') if p],
                    [s.strip() for s in e['successor'].split(',') if s]),)
-                for triples in [list(zip(list(chain(inputs, outputs)),
-                                         repeat(k),
-                                         listify(v)))
-                                for k, v in items]}
+                for triples in (chain(
+                    *(zip(enumerate(chain(inputs, outputs)),
+                          repeat(parameter),
+                          listify(value))
+                      for parameter, value in items)),)
+                for edges in (
+                    {group: {parameter: value
+                             for _, parameter, value in grouped_triples
+                             if value is not None}
+                     for group, grouped_triples in groupby(
+                        sorted(triples),
+                        key=lambda triple: triple[0])
+                    },)}
+
             return elements
 
 
