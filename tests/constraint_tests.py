@@ -51,8 +51,8 @@ class Constraint_Tests:
         An lp-file is being generated automatically when the tests are
         executed. Make sure that you create an empty file first and
         transfer the content from the one that has been created automatically
-        into this one afterwards. Make sure that the content is being checked
-        carefully. Otherwise, errors are included within the code base.
+        into this one afterwards. Please ensure that the content is being
+        checked carefully. Otherwise, errors are included within the code base.
         """
         if my_om is None:
             om = self.get_om()
