@@ -386,8 +386,7 @@ class Constraint_Tests:
         solph.constraints.emission_limit(om, limit=777)
 
     def test_equate_variables_constraint(self):
-        """Testing the equate_variables function in the constraint module.
-        """
+        """Testing the equate_variables function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
@@ -411,8 +410,7 @@ class Constraint_Tests:
         self.compare_lp_files('connect_investment.lp', my_om=om)
 
     def test_gradient(self):
-        """
-        """
+        """Testing min and max runtimes for nonconvex flows."""
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='powerplant', outputs={bel: solph.Flow(
@@ -423,8 +421,7 @@ class Constraint_Tests:
         self.compare_lp_files('source_with_gradient.lp')
 
     def test_investment_limit(self):
-        """Testing the investment_limit function in the constraint module.
-        """
+        """Testing the investment_limit function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         solph.components.GenericStorage(
             label='storage',
@@ -439,3 +436,15 @@ class Constraint_Tests:
         solph.constraints.investment_limit(om, limit=900)
 
         self.compare_lp_files('investment_limit.lp', my_om=om)
+
+    def test_min_max_runtime(self):
+        """Testing min and max runtimes for nonconvex flows."""
+        bus_t = solph.Bus(label='Bus_T')
+        solph.Source(
+            label='cheap_plant_min_down_constraints',
+            outputs={bus_t: solph.Flow(
+                nominal_value=10, min=0.5, max=1.0, variable_costs=10,
+                nonconvex=solph.NonConvex(
+                    minimum_downtime=4, minimum_uptime=2, initial_status=2,
+                    startup_costs=5, shutdown_costs=7))})
+        self.compare_lp_files('min_max_runtime.lp')
