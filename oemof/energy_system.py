@@ -167,11 +167,10 @@ class EnergySystem:
                     for name in data['sequences']
                     if name != 'timeindex'}
 
-            data['hubs'] = {h['name']: {k: h[k] for k in h}
-                    for h in resource('hubs').read(keyed=True)}
-
-            data['components'] = {c['name']: {k: c[k] for k in c}
-                    for c in resource('components').read(keyed=True)}
+            data.update(
+                    {name: {r['name']: {key: r[key] for key in r}
+                            for r in resource(name).read(keyed=True)}
+                     for name in ('hubs', 'components')})
 
             data['elements'] = {e['name']:
                 {'name': e['name'],
