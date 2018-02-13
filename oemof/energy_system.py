@@ -10,6 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from functools import partial
+import collections.abc as cabc
 import logging
 import os
 
@@ -201,6 +202,27 @@ class EnergySystem:
                         key=lambda triple: triple[0])
                     },)}
 
+            def nested_update_from(target, key, source):
+                """ Update `key`s in `target` with values from `source`.
+
+                The `target` is a (possibly nested) dictionary. Whenever
+                `key` is found in `target`, the value found at `key` is
+                taken to be a key at source. `target` is then updated so
+                that `key` is replaced by the value found at key, while
+                the value is replaced with the whatever the value points
+                to in source.
+                """
+                if key in target and target[key] in source:
+                    target_value = target[key]
+                    source_value = source[target_value]
+                    del target[key]
+                    target[target_value] = source_value
+                for k in target:
+                    if isinstance(target[k], cabc.MutableMapping):
+                        nested_update_from(target[k], key, source)
+                return target
+
+            nested_update_from(data['elements'], 'sequence', data['sequences'])
             return data
 
 
