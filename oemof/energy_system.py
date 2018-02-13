@@ -181,8 +181,6 @@ class EnergySystem:
                         components.get(e['name'], {}).items())),
                  'type': e['type']}
                 for e in resource('elements').read(keyed=True)
-                for items in (list(parse(e.get('edge_parameter', "{}"))
-                                   .items()),)
                 for inputs, outputs in (
                   ([p.strip() for p in e['predecessor'].split(',') if p],
                    [s.strip() for s in e['successor'].split(',') if s]),)
@@ -190,7 +188,8 @@ class EnergySystem:
                     *(zip(enumerate(chain(inputs, outputs)),
                           repeat(parameter),
                           listify(value))
-                      for parameter, value in items)),)
+                      for parameter, value in
+                          parse(e.get('edge_parameter', "{}")).items())),)
                 for edges in (
                     {group: {parameter: value
                              for _, parameter, value in grouped_triples
