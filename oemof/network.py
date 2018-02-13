@@ -249,23 +249,23 @@ class Node:
 
 
 class Bus(Node):
-    __slots__ = ()
+    pass
 
 
 class Component(Node):
-    __slots__ = ()
+    pass
 
 
 class Sink(Component):
-    __slots__ = ()
+    pass
 
 
 class Source(Component):
-    __slots__ = ()
+    pass
 
 
 class Transformer(Component):
-    __slots__ = ()
+    pass
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
