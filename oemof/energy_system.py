@@ -166,10 +166,10 @@ class EnergySystem:
                     for name in sequences
                     if name != 'timeindex'}
 
-            hubs = {h['name']: {k: h[k] for k in h if k != 'name'}
+            hubs = {h['name']: {k: h[k] for k in h}
                     for h in resource('hubs').read(keyed=True)}
 
-            components = {c['name']: {k: c[k] for k in c if k != 'name'}
+            components = {c['name']: {k: c[k] for k in c}
                     for c in resource('components').read(keyed=True)}
 
             elements = {e['name']:
