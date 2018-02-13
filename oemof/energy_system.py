@@ -153,26 +153,27 @@ class EnergySystem:
                 r'([{,] *)([^,:"{} ]*) *:',
                 r'\1"\2":',
                 s)) if s else {})
+            data = {}
             listify = lambda x: x if type(x) is list else repeat(x)
             resource = lambda r: package.get_resource(r) or empty
 
-            sequences = {
+            data['sequences'] = {
                     name: [s[name]
                            for s in resource('sequences').read(keyed=True)]
                     for name in resource('sequences').headers}
-            sequences = {
-                    name: pd.Series(sequences[name],
-                                    index=sequences['timeindex'])
-                    for name in sequences
+            data['sequences'] = {
+                    name: pd.Series(data['sequences'][name],
+                                    index=data['sequences']['timeindex'])
+                    for name in data['sequences']
                     if name != 'timeindex'}
 
-            hubs = {h['name']: {k: h[k] for k in h}
+            data['hubs'] = {h['name']: {k: h[k] for k in h}
                     for h in resource('hubs').read(keyed=True)}
 
-            components = {c['name']: {k: c[k] for k in c}
+            data['components'] = {c['name']: {k: c[k] for k in c}
                     for c in resource('components').read(keyed=True)}
 
-            elements = {e['name']:
+            data['elements'] = {e['name']:
                 {'name': e['name'],
                  'inputs': {source: edges[i, source]
                             for i, source in enumerate(inputs)},
@@ -180,7 +181,7 @@ class EnergySystem:
                              for i, target in enumerate(outputs, len(inputs))},
                  'parameters': dict(chain(
                         parse(e.get('node_parameter', "{}")).items(),
-                        components.get(e['name'], {}).items())),
+                        data['components'].get(e['name'], {}).items())),
                  'type': e['type']}
                 for e in resource('elements').read(keyed=True)
                 for inputs, outputs in (
@@ -201,7 +202,7 @@ class EnergySystem:
                         key=lambda triple: triple[0])
                     },)}
 
-            return elements
+            return data
 
 
     def _add(self, entity):
