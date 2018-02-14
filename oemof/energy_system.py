@@ -13,6 +13,7 @@ from functools import partial
 import collections.abc as cabc
 import logging
 import os
+import re
 
 import pandas as pd
 import dill as pickle
@@ -159,15 +160,25 @@ class EnergySystem:
             listify = lambda x: x if type(x) is list else repeat(x)
             resource = lambda r: package.get_resource(r) or empty
 
-            data['sequences'] = {
+            timeindex = None
+            def sequences(r):
+                """ Parses the resource `r` as a sequence.
+                """
+                result = {
                     name: [s[name]
-                           for s in resource('sequences').read(keyed=True)]
-                    for name in resource('sequences').headers}
-            timeindex=data['sequences']['timeindex']
-            data['sequences'] = {
-                    name: pd.Series(data['sequences'][name], index=timeindex)
-                    for name in data['sequences']
+                           for s in resource(r).read(keyed=True)]
+                    for name in resource(r).headers}
+                timeindex=result['timeindex']
+                result = {
+                    name: pd.Series(result[name], index=timeindex)
+                    for name in result
                     if name != 'timeindex'}
+                return result
+
+            for r in package.resources:
+                if all(re.match(r'^data/sequences/.*$', p)
+                       for p in listify(resource(r).descriptor['path'])):
+                    data.update({r: sequences(r)})
 
             data.update(
                     {name: {r['name']: {key: r[key] for key in r}
