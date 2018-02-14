@@ -175,7 +175,7 @@ class EnergySystem:
                     if name != 'timeindex'}
                 return result
 
-            for r in package.resources:
+            for r in (r.name for r in package.resources):
                 if all(re.match(r'^data/sequences/.*$', p)
                        for p in listify(resource(r).descriptor['path'])):
                     data.update({r: sequences(r)})
