@@ -18,6 +18,7 @@ import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
+from oemof.network import Bus
 
 NOT_AVAILABLE = object()
 try:
@@ -223,6 +224,26 @@ class EnergySystem:
                 return target
 
             nested_update_from(data['elements'], 'sequence', data['sequences'])
+            bus_names = set(chain(*(e[io].keys()
+                                    for e in data['elements'].values()
+                                    for io in ['inputs', 'outputs'])))
+            data['buses'] = {name: {'name': name,
+                                    'type': 'bus',
+                                    'parameters': data['hubs'].get(name, {})}
+                             for name in bus_names}
+
+            def create(cls, init, attributes):
+                """ Creates an instance of `cls` and sets `attributes`.
+                """
+                instance = cls(**init)
+                for k, v in attributes.items():
+                    setattr(instance, k, v)
+                return instance
+
+            data['buses'] = {name: create(Bus, {'label': name},
+                                          bus['parameters'])
+                             for name, bus in data['buses'].items()}
+
             return data
 
 
