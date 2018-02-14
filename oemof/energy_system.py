@@ -157,7 +157,11 @@ class EnergySystem:
                 r'\1"\2":',
                 s)) if s else {})
             data = {}
-            listify = lambda x: x if type(x) is list else repeat(x)
+            listify = lambda x, n=None: (x
+                                         if type(x) is list
+                                         else repeat(x)
+                                              if not n
+                                              else repeat(x, n))
             resource = lambda r: package.get_resource(r) or empty
 
             timeindex = None
@@ -177,7 +181,7 @@ class EnergySystem:
 
             for r in package.resources:
                 if all(re.match(r'^data/sequences/.*$', p)
-                       for p in listify(r.descriptor['path'])):
+                       for p in listify(r.descriptor['path'], 1)):
                     data.update({r.name: sequences(r)})
 
             data.update(
