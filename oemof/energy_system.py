@@ -166,8 +166,8 @@ class EnergySystem:
                 """
                 result = {
                     name: [s[name]
-                           for s in resource(r).read(keyed=True)]
-                    for name in resource(r).headers}
+                           for s in r.read(keyed=True)]
+                    for name in r.headers}
                 timeindex=result['timeindex']
                 result = {
                     name: pd.Series(result[name], index=timeindex)
@@ -175,10 +175,10 @@ class EnergySystem:
                     if name != 'timeindex'}
                 return result
 
-            for r in (r.name for r in package.resources):
+            for r in package.resources:
                 if all(re.match(r'^data/sequences/.*$', p)
-                       for p in listify(resource(r).descriptor['path'])):
-                    data.update({r: sequences(r)})
+                       for p in listify(r.descriptor['path'])):
+                    data.update({r.name: sequences(r)})
 
             data.update(
                     {name: {r['name']: {key: r[key] for key in r}
