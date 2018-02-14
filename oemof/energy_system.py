@@ -18,7 +18,7 @@ import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Bus
+from oemof.network import Bus, Component
 
 NOT_AVAILABLE = object()
 try:
@@ -243,6 +243,18 @@ class EnergySystem:
             data['buses'] = {name: create(Bus, {'label': name},
                                           bus['parameters'])
                              for name, bus in data['buses'].items()}
+
+            data['components'] = {
+                    name: create(Component,
+                        {'label': name,
+                         'inputs': {
+                            data['buses'][bus]: flow
+                            for bus, flow in element['inputs'].items()},
+                         'outputs': {
+                            data['buses'][bus]: flow
+                            for bus, flow in element['outputs'].items()}},
+                         element['parameters'])
+                    for name, element in data['elements'].items()}
 
             return data
 
