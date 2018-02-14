@@ -163,9 +163,9 @@ class EnergySystem:
                     name: [s[name]
                            for s in resource('sequences').read(keyed=True)]
                     for name in resource('sequences').headers}
+            timeindex=data['sequences']['timeindex']
             data['sequences'] = {
-                    name: pd.Series(data['sequences'][name],
-                                    index=data['sequences']['timeindex'])
+                    name: pd.Series(data['sequences'][name], index=timeindex)
                     for name in data['sequences']
                     if name != 'timeindex'}
 
@@ -256,7 +256,10 @@ class EnergySystem:
                          element['parameters'])
                     for name, element in data['elements'].items()}
 
-            return data
+            es = cls(timeindex=timeindex)
+            es.add(*chain(data['components'].values(), data['buses'].values()))
+
+            return es
 
 
     def _add(self, entity):
