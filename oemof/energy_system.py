@@ -181,7 +181,7 @@ class EnergySystem:
                  'outputs': {target: edges[i, target]
                              for i, target in enumerate(outputs, len(inputs))},
                  'parameters': dict(chain(
-                        parse(e.get('node_parameter', "{}")).items(),
+                        parse(e.get('node_parameters', "{}")).items(),
                         data['components'].get(e['name'], {}).items())),
                  'type': e['type']}
                 for e in resource('elements').read(keyed=True)
@@ -193,7 +193,7 @@ class EnergySystem:
                           repeat(parameter),
                           listify(value))
                       for parameter, value in
-                          parse(e.get('edge_parameter', "{}")).items())),)
+                          parse(e.get('edge_parameters', "{}")).items())),)
                 for edges in (
                     {group: {parameter: value
                              for _, parameter, value in grouped_triples
