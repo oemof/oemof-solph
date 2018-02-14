@@ -201,8 +201,8 @@ class EnergySystem:
                  'type': e['type']}
                 for e in resource('elements').read(keyed=True)
                 for inputs, outputs in (
-                  ([p.strip() for p in e['predecessor'].split(',') if p],
-                   [s.strip() for s in e['successor'].split(',') if s]),)
+                  ([p.strip() for p in e['predecessors'].split(',') if p],
+                   [s.strip() for s in e['successors'].split(',') if s]),)
                 for triples in (chain(
                     *(zip(enumerate(chain(inputs, outputs)),
                           repeat(parameter),
