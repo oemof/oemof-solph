@@ -218,27 +218,43 @@ class EnergySystem:
                         key=lambda triple: triple[0])
                     },)}
 
-            def nested_update_from(target, key, source):
-                """ Update `key`s in `target` with values from `source`.
+            def resolve_foreign_keys(source):
+                """ Check whether any key in `source` is a FK and follow it.
 
-                The `target` is a (possibly nested) dictionary. Whenever
-                `key` is found in `target`, the value found at `key` is
-                taken to be a key at source. `target` is then updated so
-                that `key` is replaced by the value found at key, while
-                the value is replaced with the whatever the value points
-                to in source.
+                The `source` dictionary is checked for whether any of
+                its keys is a foreign key. A key is considered a
+                foreign key if:
+
+                  - the value it points to is a string,
+                  - it is the name of a resource,
+                  - the value it points to is itself a top level key in
+                    the named resource.
+
+                If the above is the case, the foreign key itself is
+                deleted, the value it pointed to becomes the new key in
+                it's place and the value the key points to in the named
+                resource becomes the new value.
+                Foreign keys are resolved deeply, i.e. if `source`
+                contains nested dictionaries, foreign keys found on
+                arbitrary levels are resolved.
                 """
-                if key in target and target[key] in source:
-                    target_value = target[key]
-                    source_value = source[target_value]
-                    del target[key]
-                    target[target_value] = source_value
-                for k in target:
-                    if isinstance(target[k], cabc.MutableMapping):
-                        nested_update_from(target[k], key, source)
-                return target
+                for key in source:
+                    if (isinstance(source[key], str) and
+                        key in data and
+                        source[key] in data[key]):
 
-            nested_update_from(data['elements'], 'sequence', data['sequences'])
+                        source_value = source[key]
+                        target_value = data[key][source_value]
+                        del source[key]
+                        key = source_value
+                        source[source_value] = target_value
+
+                    if isinstance(source[key], cabc.MutableMapping):
+                        resolve_foreign_keys(source[key])
+
+                return source
+
+            resolve_foreign_keys(data['elements'])
             bus_names = set(chain(*(e[io].keys()
                                     for e in data['elements'].values()
                                     for io in ['inputs', 'outputs'])))
