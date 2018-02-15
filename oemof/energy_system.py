@@ -279,10 +279,10 @@ class EnergySystem:
                     name: create(Component,
                         {'label': name,
                          'inputs': {
-                            data['buses'][bus]: flow
+                            data['buses'][bus]: types.SimpleNamespace(**flow)
                             for bus, flow in element['inputs'].items()},
                          'outputs': {
-                            data['buses'][bus]: flow
+                            data['buses'][bus]: types.SimpleNamespace(**flow)
                             for bus, flow in element['outputs'].items()}},
                          element['parameters'])
                     for name, element in data['elements'].items()}
