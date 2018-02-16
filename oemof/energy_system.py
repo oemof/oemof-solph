@@ -255,6 +255,7 @@ class EnergySystem:
                 return source
 
             resolve_foreign_keys(data['elements'])
+
             bus_names = set(chain(*(e[io].keys()
                                     for e in data['elements'].values()
                                     for io in ['inputs', 'outputs'])))
