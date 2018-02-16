@@ -152,10 +152,7 @@ class EnergySystem:
             empty = types.SimpleNamespace()
             empty.read = lambda *xs, **ks: ()
             empty.headers = ()
-            parse = lambda s: (json.loads(re.sub(
-                r'([{,] *)([^,:"{} ]*) *:',
-                r'\1"\2":',
-                s)) if s else {})
+            parse = lambda s: (json.loads(s) if s else {})
             data = {}
             listify = lambda x, n=None: (x
                                          if type(x) is list
