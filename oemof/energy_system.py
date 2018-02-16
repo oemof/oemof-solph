@@ -147,7 +147,7 @@ class EnergySystem:
         def from_datapackage(cls, path):
             package = datapackage.Package(path)
             # This is necessary because before reading a resource for the first
-            # time its `headers` attribute ist `None`.
+            # time its `headers` attribute is `None`.
             for r in package.resources: r.read()
             empty = types.SimpleNamespace()
             empty.read = lambda *xs, **ks: ()
