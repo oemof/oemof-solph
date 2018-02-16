@@ -257,7 +257,8 @@ class EnergySystem:
                                     for e in data['elements'].values()
                                     for io in ['inputs', 'outputs'])))
             data['buses'] = {name: {'name': name,
-                                    'type': 'bus',
+                                    'type': (data['hubs'].get(name, {})
+                                                         .get('type', 'bus')),
                                     'parameters': data['hubs'].get(name, {})}
                              for name in bus_names}
 
