@@ -164,7 +164,7 @@ class EnergySystem:
                                               else repeat(x, n))
             resource = lambda r: package.get_resource(r) or empty
 
-            timeindex = None
+            timeindices = {}
             def sequences(r):
                 """ Parses the resource `r` as a sequence.
                 """
@@ -172,9 +172,9 @@ class EnergySystem:
                     name: [s[name]
                            for s in r.read(keyed=True)]
                     for name in r.headers}
-                timeindex=result['timeindex']
+                timeindices[r.name] = result['timeindex']
                 result = {
-                    name: pd.Series(result[name], index=timeindex)
+                    name: pd.Series(result[name], index=timeindices[r.name])
                     for name in result
                     if name != 'timeindex'}
                 return result
@@ -287,10 +287,16 @@ class EnergySystem:
                          element['parameters'])
                     for name, element in data['elements'].items()}
 
-            es = cls(timeindex=timeindex)
-            es.add(*chain(data['components'].values(), data['buses'].values()))
+            lst = ([idx for idx in timeindices.values()])
+            if lst[1:] == lst[:-1]:
+                # TODO Get frequence from meta data or calulate...
+                es = cls(timeindex=pd.DatetimeIndex(lst[0], freq='H'))
+                es.add(*chain(data['components'].values(),
+                              data['buses'].values()))
+                return es
 
-            return es
+            else:
+                raise ValueError("Timeindices in sequence resources differ!")
 
 
     def _add(self, entity):
