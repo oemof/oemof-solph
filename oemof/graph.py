@@ -110,7 +110,8 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     # passed or undirected edge otherwise
     for n in energy_system.nodes:
         for i in n.inputs.keys():
-            weight = energy_system.flows()[(i, n)].nominal_value
+            weight = getattr(energy_system.flows()[(i, n)],
+                             'nominal_value', None)
             if weight is None:
                 grph.add_edge(i.label, n.label)
             else:
