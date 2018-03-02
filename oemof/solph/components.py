@@ -4,9 +4,9 @@
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/oemof/solph/components.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/components.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -67,8 +67,8 @@ class GenericStorage(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no Investment
-       object present)
+     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
+       Investment object present)
      * :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` (if
        Investment object present)
 
@@ -129,10 +129,11 @@ class GenericStorage(network.Transformer):
         # General error messages
         e_no_nv = ("If an investment object is defined the invest variable "
                    "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
-        e_duplicate = ("Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
-                       "will set the nominal_value for the flow.\nTherefore "
-                       "either the 'nominal_{0}_capacity_ratio' or the "
-                       "'nominal_value' has to be 'None'.")
+        e_duplicate = (
+            "Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
+            "will set the nominal_value for the flow.\nTherefore "
+            "either the 'nominal_{0}_capacity_ratio' or the "
+            "'nominal_value' has to be 'None'.")
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             raise AttributeError(e_no_nv.format('nominal_capacity'))
@@ -813,9 +814,9 @@ class ExtractionTurbineCHP(solph_Transformer):
 
     One main output flow has to be defined and is tapped by the remaining flow.
     The conversion factors have to be defined for the maximum tapped flow (
-    full CHP mode) and for no tapped flow (full condensing mode). Even though it
-    is possible to limit the variability of the tapped flow, so that the full
-    condensing mode will never be reached.
+    full CHP mode) and for no tapped flow (full condensing mode). Even though
+    it is possible to limit the variability of the tapped flow, so that the
+    full condensing mode will never be reached.
 
     Parameters
     ----------
@@ -904,8 +905,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of :class:`oemof.solph.ExtractionTurbineCHP` (trsf) objects for
-            which the linear relation of inputs and outputs is created
+            List of :class:`oemof.solph.ExtractionTurbineCHP` (trsf) objects
+            for which the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
             is created for all existing relations of the inputs and all outputs
             of the transformer. The components inside the list need to hold

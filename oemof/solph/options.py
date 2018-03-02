@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """Optional classes to be added to a network class.
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/oemof/solph/options.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/options.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -16,7 +16,7 @@ class Investment:
     maximum : float
         Maximum of the additional invested capacity
     minimum : float
-        Minimum of the addtional invested capacity
+        Minimum of the additional invested capacity
     ep_costs : float
         Equivalent periodical costs for the investment, if period is one
         year these costs are equal to the equivalent annual costs.
