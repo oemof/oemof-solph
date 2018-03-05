@@ -10,7 +10,26 @@ import types
 import datapackage
 import pandas as pd
 
-def deserialize_energy_system(cls, path):
+from oemof.network import Bus, Component
+
+
+class HSN(types.SimpleNamespace):
+    """ A hashable variant of `types.Simplenamespace`.
+
+    By making it hashable, we can use the instances as dictionary keys, which
+    is necessary, as this is the default type for flows.
+    """
+    def __hash__(self):
+        return id(self)
+
+
+DEFAULT = object()
+FLOW_TYPE = object()
+
+def deserialize_energy_system(cls, path,
+                              typemap={'bus': Bus, 'hub': Bus,
+                                       DEFAULT: Component,
+                                       FLOW_TYPE: HSN}):
     package = datapackage.Package(path)
     # This is necessary because before reading a resource for the first
     # time its `headers` attribute is `None`.
@@ -136,18 +155,19 @@ def deserialize_energy_system(cls, path):
             setattr(instance, k, v)
         return instance
 
-    data['buses'] = {name: create(Bus, {'label': name},
+    data['buses'] = {name: create(typemap.get(bus.get('type', 'bus')),
+                                  {'label': name},
                                   bus['parameters'])
                      for name, bus in data['buses'].items()}
 
     data['components'] = {
-            name: create(Component,
+            name: create(typemap[element.get('type', DEFAULT)],
                 {'label': name,
                  'inputs': {
-                    data['buses'][bus]: types.SimpleNamespace(**flow)
+                    data['buses'][bus]: typemap.get(FLOW_TYPE, HSN)(**flow)
                     for bus, flow in element['inputs'].items()},
                  'outputs': {
-                    data['buses'][bus]: types.SimpleNamespace(**flow)
+                    data['buses'][bus]: typemap.get(FLOW_TYPE, HSN)(**flow)
                     for bus, flow in element['outputs'].items()}},
                  element['parameters'])
             for name, element in data['elements'].items()}
@@ -162,5 +182,4 @@ def deserialize_energy_system(cls, path):
 
     else:
         raise ValueError("Timeindices in sequence resources differ!")
-
 
