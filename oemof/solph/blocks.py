@@ -572,6 +572,14 @@ class NonConvexFlow(SimpleBlock):
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
+    MINUPTIMEFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`minimum_uptime` being not None.
+
+    MINDOWNTIMEFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`minimum_downtime` being not None.
+
     **The following variables are created:**
 
     Status variable (binary) :attr:`om.NonConvexFlow.status`:
