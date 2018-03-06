@@ -13,7 +13,7 @@ New features
 * It is now possible determine minimum up and downtimes for nonconvex flows.
   Check the `oemof_examples <https://github.com/oemof/oemof_examples>`_
   repository for an exemplary usage.
-
+* Startup and shutdown costs can now be defined time-dependent 
 
 New components
 ##############
