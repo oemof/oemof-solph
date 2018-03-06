@@ -178,7 +178,7 @@ class Flow(SimpleBlock):
                     else:
                         pass  # return(Constraint.Skip)
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, noruleinit=True)
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule)
 
@@ -195,7 +195,7 @@ class Flow(SimpleBlock):
                     else:
                         pass  # return(Constraint.Skip)
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
@@ -484,7 +484,7 @@ class Bus(SimpleBlock):
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
                         block.balance.add((n, t), expr)
-        self.balance = Constraint(group, noruleinit=True)
+        self.balance = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
@@ -534,7 +534,13 @@ class Transformer(SimpleBlock):
         in_flows = {n: [i for i in n.inputs.keys()] for n in group}
         out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
-        self.relation = Constraint(group, noruleinit=True)
+
+        self.relation = Constraint(
+            [(n, i, o, t)
+             for t in m.TIMESTEPS
+             for n in group
+             for o in out_flows[n]
+             for i in in_flows[n]], noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:

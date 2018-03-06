@@ -952,7 +952,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                         g.conversion_factor_full_condensation_sq[t]
                         )
                     block.input_output_relation.add((n, t), (lhs == rhs))
-        self.input_output_relation = Constraint(group, noruleinit=True)
+        self.input_output_relation = Constraint(group, m.TIMESTEPS,
+                                                noruleinit=True)
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule)
 
@@ -965,7 +966,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                     rhs = (m.flow[g, g.tapped_output, t] *
                            g.flow_relation_index[t])
                     block.out_flow_relation.add((g, t), (lhs >= rhs))
-        self.out_flow_relation = Constraint(group, noruleinit=True)
+        self.out_flow_relation = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
 
