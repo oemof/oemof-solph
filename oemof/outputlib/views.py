@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pandas as pd
+from enum import Enum
 from oemof.outputlib.processing import convert_keys_to_strings
 
 
@@ -60,3 +61,41 @@ def node(results, node):
         filtered['sequences'].sort_index(axis=1, inplace=True)
 
     return filtered
+
+
+class FlowType(str, Enum):
+    """
+    Gives information on flow type
+    """
+    Single = 'single'
+    Input = 'input'
+    Output = 'output'
+
+
+def get_flow_type(node, results):
+    """
+    Categorize results keys by flow type (Single, Input, Output)
+
+    Parameters
+    ----------
+    node: Node
+        Node of interest
+    results: dict
+        Results dict with tuple of nodes as key
+        (i.e. results, param_results, cost_results)
+    Returns
+    -------
+    dict: FlowType as key and tuple of nodes as value
+    """
+    flow_types = {ft: [] for ft in FlowType}
+    for nodes in results:
+        if (
+                nodes[0] == node and
+                (nodes[1] is None or nodes[1] == 'None')
+        ):
+            flow_types[FlowType.Single].append(nodes)
+        elif nodes[1] == node:
+            flow_types[FlowType.Input].append(nodes)
+        elif nodes[0] == node:
+            flow_types[FlowType.Output].append(nodes)
+    return flow_types
