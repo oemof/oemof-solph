@@ -26,10 +26,17 @@ class HSN(types.SimpleNamespace):
 DEFAULT = object()
 FLOW_TYPE = object()
 
+def rename(attributes, translations, target_class):
+    for c in target_class.mro():
+        if c in translations:
+            break
+    return {translations.get(c, {}).get(k, k): v for k, v in attributes.items()}
+
 def deserialize_energy_system(cls, path,
                               typemap={'bus': Bus, 'hub': Bus,
                                        DEFAULT: Component,
-                                       FLOW_TYPE: HSN}):
+                                       FLOW_TYPE: HSN},
+                              attributemap={}):
     package = datapackage.Package(path)
     # This is necessary because before reading a resource for the first
     # time its `headers` attribute is `None`.
@@ -151,8 +158,8 @@ def deserialize_energy_system(cls, path,
     def create(cls, init, attributes):
         """ Creates an instance of `cls` and sets `attributes`.
         """
-        instance = cls(**init)
-        for k, v in attributes.items():
+        instance = cls(**rename(init, attributemap, cls))
+        for k, v in rename(attributes, attributemap, cls).items():
             setattr(instance, k, v)
         return instance
 
@@ -166,13 +173,14 @@ def deserialize_energy_system(cls, path,
             typemap[element.get('type', DEFAULT)],
             {'label': name,
              'inputs': {
-                 data['buses'][bus]: typemap.get(FLOW_TYPE, HSN)(**flow)
+                 data['buses'][bus]: flow(**rename(kwargs, attributemap, flow))
                  for bus, flow in element['inputs'].items()},
              'outputs': {
-                 data['buses'][bus]: typemap.get(FLOW_TYPE, HSN)(**flow)
-                 for bus, flow in element['outputs'].items()}},
+                 data['buses'][bus]: flow(**rename(kwargs, attributemap, flow))
+                 for bus, kwargs in element['outputs'].items()}},
             element['parameters'])
-        for name, element in data['elements'].items()}
+        for name, element in data['elements'].items()
+        for flow in (typemap.get(FLOW_TYPE, HSN),)}
 
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
