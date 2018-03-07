@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """Additional constraints to be used in an oemof energy model.
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/oemof/solph/constraints.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/constraints.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -50,8 +50,8 @@ def emission_limit(om, flows=None, limit=None):
         Model to which constraints are added.
     flows : dict
         Dictionary holding the flows that should be considered in constraint.
-        Keys are (source, target) objects of the Flow. If no dictionary is given
-        all flows containing the 'emission' attribute will be used.
+        Keys are (source, target) objects of the Flow. If no dictionary is
+        given all flows containing the 'emission' attribute will be used.
     limit : numeric
         Absolute emission limit.
 
@@ -75,7 +75,8 @@ def emission_limit(om, flows=None, limit=None):
                                                                       o.label))
 
     def emission_rule(m):
-        return (sum(m.flow[inflow, outflow, t] * flows[inflow, outflow].emission
+        return (sum(m.flow[inflow, outflow, t] *
+                    flows[inflow, outflow].emission
                 for (inflow, outflow) in flows
                 for t in m.TIMESTEPS) <= limit)
 
@@ -131,7 +132,8 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     >>> energysystem.add(solph.Transformer(
     ...    label='powerline_2_1',
     ...    inputs={bel2: solph.Flow()},
-    ...   outputs={bel1: solph.Flow(investment=solph.Investment(ep_costs=20))}))
+    ...   outputs={bel1: solph.Flow(
+    ...       investment=solph.Investment(ep_costs=20))}))
     >>> om = solph.Model(energysystem)
     >>> line12 = energysystem.groups['powerline_1_2']
     >>> line21 = energysystem.groups['powerline_2_1']

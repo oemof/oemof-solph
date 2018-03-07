@@ -4,9 +4,9 @@
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/oemof/solph/custom.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/custom.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -173,7 +173,9 @@ class ElectricalLineBlock(SimpleBlock):
             # TODO: Make this robust to select the same slack bus for
             # the same problems
             bus = [b for b in self.ELECTRICAL_BUSES][0]
-            logging.info("No slack bus set,setting bus {0} as slack bus".format(bus.label))
+            logging.info(
+                "No slack bus set,setting bus {0} as slack bus".format(
+                    bus.label))
             bus.slack = True
 
         def _voltage_angle_relation(block):

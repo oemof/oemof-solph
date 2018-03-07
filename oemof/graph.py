@@ -2,9 +2,9 @@
 
 """Modules for creating and analysing energy system graphs.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/oemof/graph.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/graph.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -25,8 +25,8 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     energy_system : `oemof.solph.network.EnergySystem`
 
     filename : str
-        Absolute filename (with path) to write your graph in the graphml format.
-        If no filename is given no file will be written.
+        Absolute filename (with path) to write your graph in the graphml
+        format. If no filename is given no file will be written.
 
     remove_nodes: list of strings
         Nodes to be removed e.g. ['node1', node2')]
