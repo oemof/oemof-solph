@@ -174,7 +174,7 @@ def deserialize_energy_system(cls, path,
             {'label': name,
              'inputs': {
                  data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
-                 for bus, flow in element['inputs'].items()},
+                 for bus, kwargs in element['inputs'].items()},
              'outputs': {
                  data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
                  for bus, kwargs in element['outputs'].items()}},
