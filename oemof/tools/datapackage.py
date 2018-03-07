@@ -26,7 +26,7 @@ class HSN(types.SimpleNamespace):
 DEFAULT = object()
 FLOW_TYPE = object()
 
-def rename(attributes, translations, target_class):
+def remap(attributes, translations, target_class):
     for c in target_class.mro():
         if c in translations:
             break
@@ -158,8 +158,8 @@ def deserialize_energy_system(cls, path,
     def create(cls, init, attributes):
         """ Creates an instance of `cls` and sets `attributes`.
         """
-        instance = cls(**rename(init, attributemap, cls))
-        for k, v in rename(attributes, attributemap, cls).items():
+        instance = cls(**remap(init, attributemap, cls))
+        for k, v in remap(attributes, attributemap, cls).items():
             setattr(instance, k, v)
         return instance
 
@@ -173,10 +173,10 @@ def deserialize_energy_system(cls, path,
             typemap[element.get('type', DEFAULT)],
             {'label': name,
              'inputs': {
-                 data['buses'][bus]: flow(**rename(kwargs, attributemap, flow))
+                 data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
                  for bus, flow in element['inputs'].items()},
              'outputs': {
-                 data['buses'][bus]: flow(**rename(kwargs, attributemap, flow))
+                 data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
                  for bus, kwargs in element['outputs'].items()}},
             element['parameters'])
         for name, element in data['elements'].items()
