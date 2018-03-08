@@ -848,16 +848,8 @@ class ExtractionTurbineCHP(solph_Transformer):
     ...    conversion_factor_full_condensation={bel: 0.5})
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.conversion_factor_full_condensation = kwargs.get(
-            'conversion_factor_full_condensation')
-        if not self.conversion_factor_full_condensation:
-            raise TypeError(
-                'Missing Argument conversion_factor_full_condensation' +
-                ' for ExtractionTurbineCHP!')
-
         self.conversion_factor_full_condensation = {
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
