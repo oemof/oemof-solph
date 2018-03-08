@@ -194,7 +194,6 @@ def deserialize_energy_system(cls, path,
                 assert len(found) <= 1
 
                 if len(found) > 0:
-                    print("Found: {}".format(found))
                     source[key] = found[0]
 
             if isinstance(source[key], cabc.MutableMapping):
