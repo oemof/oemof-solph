@@ -158,9 +158,11 @@ def deserialize_energy_system(cls, path,
     def create(cls, init, attributes):
         """ Creates an instance of `cls` and sets `attributes`.
         """
+        init.update(attributes)
         instance = cls(**remap(init, attributemap, cls))
         for k, v in remap(attributes, attributemap, cls).items():
-            setattr(instance, k, v)
+            if not hasattr(instance, k):
+                setattr(instance, k, v)
         return instance
 
     data['buses'] = {name: create(typemap.get(bus.get('type', 'bus')),
