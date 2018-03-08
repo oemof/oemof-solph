@@ -132,11 +132,7 @@ def deserialize_energy_system(cls, path,
                     key in data and
                     source[key] in data[key]):
 
-                source_value = source[key]
-                target_value = data[key][source_value]
-                del source[key]
-                key = source_value
-                source[source_value] = target_value
+                source[key] = data[key][source[key]]
 
             if isinstance(source[key], cabc.MutableMapping):
                 resolve_foreign_keys(source[key])
