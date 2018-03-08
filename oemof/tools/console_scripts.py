@@ -52,3 +52,4 @@ def check_oemof_installation(silent=False):
 
 if __name__ == "__main__":
     check_oemof_installation(silent=True)
+    
