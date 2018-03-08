@@ -1,0 +1,57 @@
+v0.2.1 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+
+
+New features
+############
+
+* It is now possible determine minimum up and downtimes for nonconvex flows.
+  Check the `oemof_examples <https://github.com/oemof/oemof_examples>`_
+  repository for an exemplary usage.
+* Startup and shutdown costs can now be defined time-dependent 
+
+New components
+##############
+
+
+
+Documentation
+#############
+
+
+
+Known issues
+############
+* It is not possible to model one time step with oemof.solph. You have to model
+  at least two timesteps
+  (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a
+  comment if this bug affects you.
+
+Bug fixes
+#########
+
+* Shutdown costs for nonconvex flows are now accounted within the objective
+  which was not the case before due to a naming error
+
+Testing
+#######
+
+
+
+Other changes
+#############
+
+
+
+Contributors
+############
+
+* Cord Kaldemeyer
+* Stephan Günther
+* Simon Hilpert
+* Uwe Krien

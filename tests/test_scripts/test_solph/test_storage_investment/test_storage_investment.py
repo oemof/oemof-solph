@@ -25,10 +25,14 @@ The example models the following energy system:
                      |------------------>|       |
 
 
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
+the contributors recorded in the version control history of the file, available
+from its original location oemof/tests/test_scripts/test_solph/
+test_storage_investment/test_storage_investment.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from nose.tools import eq_
 from oemof.tools import economics
@@ -132,8 +136,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     eq_(str(meta['solver']['Status']), 'ok')
 
     # Problem results
-    eq_(meta['problem']['Lower bound'], 4.2316758e+17)
-    eq_(meta['problem']['Upper bound'], 4.2316758e+17)
+    eq_(meta['problem']['Lower bound'], 4.231675777e+17)
+    eq_(meta['problem']['Upper bound'], 4.231675777e+17)
     eq_(meta['problem']['Number of variables'], 2804)
     eq_(meta['problem']['Number of constraints'], 2805)
     eq_(meta['problem']['Number of nonzeros'], 7606)

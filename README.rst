@@ -54,7 +54,7 @@ Got further questions on using oemof?
 If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
 Join the developers!
-===================
+====================
 
 A warm welcome to all who want to join the developers and contribute to oemof. Information
 on the details and how to approach us can be found 

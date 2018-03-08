@@ -35,7 +35,7 @@ The scalars and sequences describe nodes (with keys like (node, None)) and flows
 .. code-block:: python
 
     views.convert_keys_to_strings(results)
-    print(results[(wind, bus_electricity)]['sequences']
+    print(results[('wind', 'bus_electricity')]['sequences']
     
 
 Another option is to access data belonging to a grouping by the name of the grouping 
@@ -65,23 +65,3 @@ the problem and the solver, is provided as well:
 
     meta_results = outputlib.processing.meta_results(om)
     pp.pprint(meta_results)
-    
-
-
-Drawing a graph representation of the energy system
----------------------------------------------------
-
-A new feature as of version 0.2.0 is a function to draw a graph representation of
-the energy system.
-
-
-.. code-block:: python
-
-    import graph_tools as gt
-    my_graph = gt.graph(energy_system=es, optimization_model=om, node_color={demand_el: 'r'}, plot=False)
-    
-    # export graph as .graphml for programs like Yed where it can be
-    # sorted and customized. this is especially helpful for large graphs
-    import networkx as nx
-    nx.write_graphml(my_graph, "my_graph.graphml")
-

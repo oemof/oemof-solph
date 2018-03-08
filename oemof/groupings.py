@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """ All you need to create groups of stuff in your energy system.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/groupings.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 try:
     from collections.abc import (Hashable, Iterable, Mapping,

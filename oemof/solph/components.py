@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -
 
-"""This module is designed to hold custom components with their classes and
+"""This module is designed to hold components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/components.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 import numpy as np
 from pyomo.core.base.block import SimpleBlock
@@ -18,10 +21,6 @@ from oemof.solph import Transformer as solph_Transformer
 from oemof.solph import sequence as solph_sequence
 from oemof.solph import Investment
 
-
-# ------------------------------------------------------------------------------
-# Start of generic storage component
-# ------------------------------------------------------------------------------
 
 class GenericStorage(network.Transformer):
     """
@@ -68,8 +67,8 @@ class GenericStorage(network.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no Investment
-       object present)
+     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
+       Investment object present)
      * :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` (if
        Investment object present)
 
@@ -130,10 +129,11 @@ class GenericStorage(network.Transformer):
         # General error messages
         e_no_nv = ("If an investment object is defined the invest variable "
                    "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
-        e_duplicate = ("Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
-                       "will set the nominal_value for the flow.\nTherefore "
-                       "either the 'nominal_{0}_capacity_ratio' or the "
-                       "'nominal_value' has to be 'None'.")
+        e_duplicate = (
+            "Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
+            "will set the nominal_value for the flow.\nTherefore "
+            "either the 'nominal_{0}_capacity_ratio' or the "
+            "'nominal_value' has to be 'None'.")
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             raise AttributeError(e_no_nv.format('nominal_capacity'))
@@ -168,14 +168,6 @@ class GenericStorage(network.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
-# ------------------------------------------------------------------------------
-# End of generic storage component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic storage block
-# ------------------------------------------------------------------------------
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
@@ -275,14 +267,7 @@ class GenericStorageBlock(SimpleBlock):
 
         return 0
 
-# ------------------------------------------------------------------------------
-# End of generic storage block
-# ------------------------------------------------------------------------------
 
-
-# ------------------------------------------------------------------------------
-# Start of generic storage invest block
-# ------------------------------------------------------------------------------
 class GenericInvestmentStorageBlock(SimpleBlock):
     r"""Storage with an :class:`.Investment` object.
 
@@ -486,14 +471,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         return investment_costs
 
-# ------------------------------------------------------------------------------
-# End of generic storage invest block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CHP component
-# ------------------------------------------------------------------------------
 
 class GenericCHP(network.Transformer):
     r"""
@@ -551,11 +528,31 @@ class GenericCHP(network.Transformer):
         Flag to use back-pressure characteristics. Works of set to `True` and
         `Q_CW_min` set to zero. See paper above for more information.
 
-
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericCHPBlock`
+
+    Examples
+    --------
+    >>> from oemof import solph
+    >>> bel = solph.Bus(label='electricityBus')
+    >>> bth = solph.Bus(label='heatBus')
+    >>> bgas = solph.Bus(label='commodityBus')
+    >>> ccet = solph.components.GenericCHP(
+    ...    label='combined_cycle_extraction_turbine',
+    ...    fuel_input={bgas: solph.Flow(
+    ...        H_L_FG_share_max=[0.183])},
+    ...    electrical_output={bel: solph.Flow(
+    ...        P_max_woDH=[155.946],
+    ...        P_min_woDH=[68.787],
+    ...        Eta_el_max_woDH=[0.525],
+    ...        Eta_el_min_woDH=[0.444])},
+    ...    heat_output={bth: solph.Flow(
+    ...        Q_CW_min=[10.552])},
+    ...    Beta=[0.122], back_pressure=False)
+    >>> type(ccet)
+    <class 'oemof.solph.components.GenericCHP'>
     """
 
     def __init__(self, *args, **kwargs):
@@ -572,6 +569,7 @@ class GenericCHP(network.Transformer):
         fuel_bus = list(self.fuel_input.keys())[0]
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
+
         self.outputs.update(kwargs.get('electrical_output'))
         self.outputs.update(kwargs.get('heat_output'))
 
@@ -620,19 +618,22 @@ class GenericCHP(network.Transformer):
         if self._alphas is None:
             self._calculate_alphas()
 
+
         return self._alphas
 
-# ------------------------------------------------------------------------------
-# End of generic CHP component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CHP block
-# ------------------------------------------------------------------------------
 
 class GenericCHPBlock(SimpleBlock):
-    r"""Block for the linear relation of nodes with type class:`.GenericCHP`."""
+    r"""Block for the relation of nodes with type class:`.GenericCHP`.
+
+
+    **The following constraints are created:**
+
+    TODO: Add description for constraints
+
+    TODO: Add test
+
+    """
+
 
     CONSTRAINT_GROUP = True
 
@@ -804,14 +805,6 @@ class GenericCHPBlock(SimpleBlock):
 
         return 0
 
-# ------------------------------------------------------------------------------
-# End of generic CHP block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of ExtractionTurbineCHP component
-# ------------------------------------------------------------------------------
 
 class ExtractionTurbineCHP(solph_Transformer):
     r"""
@@ -820,9 +813,9 @@ class ExtractionTurbineCHP(solph_Transformer):
 
     One main output flow has to be defined and is tapped by the remaining flow.
     The conversion factors have to be defined for the maximum tapped flow (
-    full CHP mode) and for no tapped flow (full condensing mode). Even though it
-    is possible to limit the variability of the tapped flow, so that the full
-    condensing mode will never be reached.
+    full CHP mode) and for no tapped flow (full condensing mode). Even though
+    it is possible to limit the variability of the tapped flow, so that the
+    full condensing mode will never be reached.
 
     Parameters
     ----------
@@ -836,6 +829,11 @@ class ExtractionTurbineCHP(solph_Transformer):
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
+
     Examples
     --------
     >>> from oemof import solph
@@ -848,11 +846,6 @@ class ExtractionTurbineCHP(solph_Transformer):
     ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
     """
 
     def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
@@ -861,15 +854,6 @@ class ExtractionTurbineCHP(solph_Transformer):
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
-
-# ------------------------------------------------------------------------------
-# End of ExtractionTurbineCHP component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of ExtractionTurbineCHP block
-# ------------------------------------------------------------------------------
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -914,19 +898,18 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         pass
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`LinearTransformer`
-        block.
+        """ Creates the linear constraint for the
+        :class:`oemof.solph.Transformer` block.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.LinearTransformers (trsf) objects for which
-            the linear relation of inputs and outputs is created
+            List of :class:`oemof.solph.ExtractionTurbineCHP` (trsf) objects
+            for which the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
             is created for all existing relations of the inputs and all outputs
             of the transformer. The components inside the list need to hold
-            a attribute `conversion_factors` of type dict containing the
-            conversion factors from inputs to outputs.
+            all needed attributes.
         """
         if group is None:
             return None
@@ -968,7 +951,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                         g.conversion_factor_full_condensation_sq[t]
                         )
                     block.input_output_relation.add((n, t), (lhs == rhs))
-        self.input_output_relation = Constraint(group, noruleinit=True)
+        self.input_output_relation = Constraint(group, m.TIMESTEPS,
+                                                noruleinit=True)
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule)
 
@@ -981,106 +965,10 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                     rhs = (m.flow[g, g.tapped_output, t] *
                            g.flow_relation_index[t])
                     block.out_flow_relation.add((g, t), (lhs >= rhs))
-        self.out_flow_relation = Constraint(group, noruleinit=True)
+        self.out_flow_relation = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
-
-# ------------------------------------------------------------------------------
-# End of ExtractionTurbineCHP block
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of generic CAES component
-# ------------------------------------------------------------------------------
-
-class GenericCAES(network.Transformer):
-    r"""
-    Component `GenericCAES` to model arbitrary compressed air energy storages.
-
-    The full set of equations is described in:
-    Kaldemeyer, C.; Boysen, C.; Tuschy, I.
-    A Generic Formulation of Compressed Air Energy Storage as
-    Mixed Integer Linear Program – Unit Commitment of Specific
-    Technical Concepts in Arbitrary Market Environments
-    Materials Today: Proceedings 00 (2018) 0000–0000
-    [currently in review]
-
-    Parameters
-    ----------
-    fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
-    electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
-    heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output.
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericCAESBlock`
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fuel_input = kwargs.get('fuel_input')
-        self.electrical_output = kwargs.get('electrical_output')
-        self.heat_output = kwargs.get('electrical_output')
-        self.params = kwargs.get('params')
-
-# ------------------------------------------------------------------------------
-# End of generic CAES component
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-# Start of CAES block
-# ------------------------------------------------------------------------------
-
-class GenericCAESBlock(SimpleBlock):
-    r"""Block for nodes of class:`.GenericCAES`."""
-
-    CONSTRAINT_GROUP = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """
-        Create constraints for GenericCAESBlock.
-
-        Parameters
-        ----------
-        group : list
-            List containing `.GenericCAES` objects.
-            e.g. groups=[gcaes1, gcaes2,..]
-        """
-        m = self.parent_block()
-
-        if group is None:
-            return None
-
-        self.GENERICCAES = Set(initialize=[n for n in group])
-
-        # variables
-        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-
-        def _H_flow_rule(block, n, t):
-            """Link fuel consumption to component inflow."""
-            expr = 0
-            expr += self.H_F[n, t]
-            expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
-            return expr == 0
-        self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
-                                 rule=_H_flow_rule)
-
-# ------------------------------------------------------------------------------
-# End of CAES block
-# ------------------------------------------------------------------------------
 
 
 def component_grouping(node):
