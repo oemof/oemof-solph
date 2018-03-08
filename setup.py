@@ -35,5 +35,5 @@ setup(name='oemof',
                         'networkx'],
       entry_points={
           'console_scripts': [
-              'oemof_installation_test = '
+              'oemof_installation_test' =
               'tests.test_installation:check_oemof_installation']})
