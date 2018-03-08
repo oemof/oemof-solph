@@ -77,15 +77,16 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
 
     This function filters nodes from results for special needs. At the moment,
     following options are available:
-        * NodeOption.All/'all': Returns all nodes
-        * NodeOption.HasOutputs/'has_outputs': Returns nodes with an output
-            flow (eg. Transformer, Source)
-        * NodeOption.HasInputs/'has_inputs': Returns nodes with an input flow
-            (eg. Transformer, Sink)
-        * NodeOption.HasOnlyOutputs/'has_only_outputs': Returns nodes having
-            only output flows (eg. Source)
-        * NodeOption.HasOnlyInputs/'has_only_inputs': Returns nodes having
-            only input flows (eg. Sink)
+        * NodeOption.All/'all':
+            Returns all nodes
+        * NodeOption.HasOutputs/'has_outputs':
+            Returns nodes with an output flow (eg. Transformer, Source)
+        * NodeOption.HasInputs/'has_inputs':
+            Returns nodes with an input flow (eg. Transformer, Sink)
+        * NodeOption.HasOnlyOutputs/'has_only_outputs':
+            Returns nodes having only output flows (eg. Source)
+        * NodeOption.HasOnlyInputs/'has_only_inputs':
+            Returns nodes having only input flows (eg. Sink)
     Additionally, busses can be excluded setting 'exclude_busses' to True.
 
     Parameters
