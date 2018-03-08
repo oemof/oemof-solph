@@ -8,8 +8,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import oemof.tools.console_scripts as console_scripts
 
-def test_console_scripts():
+def check_console_scripts():
     console_scripts.check_oemof_installation()
 
 if __name__ == "__main__":
-    test_console_scripts()
+    check_console_scripts()
