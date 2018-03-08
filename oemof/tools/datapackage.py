@@ -180,6 +180,30 @@ def deserialize_energy_system(cls, path,
         for name, element in data['elements'].items()
         for flow in (typemap.get(FLOW_TYPE, HSN),)}
 
+    def resolve_object_references(source):
+        """ Check whether any key in `source` is a reference to a `name`d object.
+        """
+        found = []
+        for key, name in source.items():
+            if isinstance(name, str):
+                for resource in data:
+                    if name in data[resource]:
+                        assert ("name" in data[resource][name] and
+                                data[resource][name]["name"] == name)
+                        found.append(data[resource][name])
+                assert len(found) <= 1
+
+                if len(found) > 0:
+                    print("Found: {}".format(found))
+                    source[key] = found[0]
+
+            if isinstance(source[key], cabc.MutableMapping):
+                resolve_foreign_keys(source[key])
+
+        return source
+
+    resolve_object_references(data)
+
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
         # TODO: Get frequency from meta data or calulate...
