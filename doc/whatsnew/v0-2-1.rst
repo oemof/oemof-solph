@@ -18,7 +18,8 @@ New features
   
   * Startup and shutdown costs can now be defined time-dependent.
 
-  * The graph module has been revised.  
+  * The graph module has been revised.
+  
     * You can now store a graph to disc as `.graphml` file.  
     * You can add weight to edges.  
     * Labels are attached to the nodes.
