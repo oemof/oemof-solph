@@ -76,9 +76,9 @@ Other changes
   * The negative/positive gradient attributes are dictionaries. In the constructor
     they moved from sequences to a new `dictionaries` argument.
     (`Issue #437 <https://github.com/oemof/oemof/issues/437>`_)
-  * License agreement were adapted according to the reuse project
+  * License agreement was adapted according to the reuse project
     (`Issue #442 <https://github.com/oemof/oemof/issues/442>`_)
-  * Code of conduct were added.
+  * Code of conduct was added.
     (`Issue #440 <https://github.com/oemof/oemof/issues/440>`_)
   
 
