@@ -3,20 +3,27 @@
 """This module can be used to check the installation.
 This is not an illustrated example.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/tests/test_installation.py
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/test_installation.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
+
+import os
+import sys
+import logging
+
+import nose
 
 from oemof import solph
 import pandas as pd
 
 
 def check_oemof_installation(silent=False):
-    date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
+    logging.disable(logging.CRITICAL)
 
+    date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
     energysystem = solph.EnergySystem(timeindex=date_time_index)
 
     bgas = solph.Bus(label="natural_gas")
@@ -31,6 +38,7 @@ def check_oemof_installation(silent=False):
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
     om = solph.Model(energysystem)
+    logging.warning('something')
 
     # check solvers
     solver = dict()
@@ -42,12 +50,17 @@ def check_oemof_installation(silent=False):
             solver[s] = "not working"
 
     if not silent:
-        print("*********")
+        print()
+        print("*****************************")
         print('Solver installed with oemof:')
+        print()
         for s, t in solver.items():
             print("{0}: {1}".format(s, t))
-        print("*********")
+        print()
+        print("*****************************")
         print("oemof successfully installed.")
+        print("*****************************")
+
 
 def test_oemof():
     testdir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
@@ -59,5 +72,5 @@ def test_oemof():
 
 
 if __name__ == "__main__":
-    check_oemof_installation(silent=True)
-    
+    check_oemof_installation(silent=False)
+    # check_nosetests()
