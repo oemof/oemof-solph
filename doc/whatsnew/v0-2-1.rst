@@ -5,26 +5,25 @@ v0.2.1 ()
 API changes
 ###########
 
-* The function create_nx_graph only takes an energysystem as argument, 
+  * The function create_nx_graph only takes an energysystem as argument, 
   not a solph model.
 
 
 New features
 ############
 
-* It is now possible determine minimum up and downtimes for nonconvex flows.
+  * It is now possible determine minimum up and downtimes for nonconvex flows.
   Check the `oemof_examples <https://github.com/oemof/oemof_examples>`_
   repository for an exemplary usage.
   
-* Startup and shutdown costs can now be defined time-dependent.
+  * Startup and shutdown costs can now be defined time-dependent.
 
-* The graph module has been revised.  
-
-  * You can now store a graph to disc as `.graphml` file.  
-  * You can add weight to edges.  
-  * Labels are attached to the nodes.
+    * The graph module has been revised.  
+    * You can now store a graph to disc as `.graphml` file.  
+    * You can add weight to edges.  
+    * Labels are attached to the nodes.
   
-* Two functions `get_node_by_name` and `filter_nodes` have been added that 
+  * Two functions `get_node_by_name` and `filter_nodes` have been added that 
   allow to get specified nodes or nodes of one kind from the results dictionary.
 
 New components
@@ -40,7 +39,7 @@ Documentation
 Known issues
 ############
 
-* It is not possible to model one time step with oemof.solph. You have to model
+  * It is not possible to model one time step with oemof.solph. You have to model
   at least two timesteps
   (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a
   comment if this bug affects you.
@@ -48,10 +47,10 @@ Known issues
 Bug fixes
 #########
 
-* Shutdown costs for nonconvex flows are now accounted within the objective
+  * Shutdown costs for nonconvex flows are now accounted within the objective
   which was not the case before due to a naming error.
-* Console `script oemof_test_installation` has been fixed.
-* New console script `test_oemof` has been added.
+  * Console `script oemof_test_installation` has been fixed.
+  * New console script `test_oemof` has been added.
 
 Testing
 #######
@@ -61,17 +60,17 @@ Testing
 Other changes
 #############
 
-* Internal change: Unnecessary list extensions while creating a model are avoided,
+  * Internal change: Unnecessary list extensions while creating a model are avoided,
   which leads to a decrease in runtime.
-* The negative/positive gradient attributes are dictionaries. In the constructor
+  * The negative/positive gradient attributes are dictionaries. In the constructor
   they moved from sequences to a new `dictionaries` argument.
   
 
 Contributors
 ############
 
-* Cord Kaldemeyer
-* Stephan Günther
-* Simon Hilpert
-* Uwe Krien
-* Jann Launer
+  * Cord Kaldemeyer
+  * Stephan Günther
+  * Simon Hilpert
+  * Uwe Krien
+  * Jann Launer
