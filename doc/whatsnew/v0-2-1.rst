@@ -16,10 +16,10 @@ New features
   Check the `oemof_examples <https://github.com/oemof/oemof_examples>`_
   repository for an exemplary usage.
 * Startup and shutdown costs can now be defined time-dependent.
-* The graph module has been revised.
-  * You can now store a graph to disc as `.graphml` file.
-  * You can add weight to edges
-  * Labels are attached to the nodes
+* The graph module has been revised.  
+  * You can now store a graph to disc as `.graphml` file.  
+  * You can add weight to edges.  
+  * Labels are attached to the nodes.
 * Two functions `get_node_by_name` and `filter_nodes` have been added that 
   allow to get specified nodes or nodes of one kind from the results dictionary.
 
