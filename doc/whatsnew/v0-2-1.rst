@@ -22,6 +22,7 @@ New features
 
   * The graph module has been revised.
     (`Issue #439 <https://github.com/oemof/oemof/issues/439>`_)
+    
     * You can now store a graph to disc as `.graphml` file to open it in yEd
       with labels. 
     * You can add weight to edges.  
