@@ -38,7 +38,6 @@ def check_oemof_installation(silent=False):
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
     om = solph.Model(energysystem)
-    logging.warning('something')
 
     # check solvers
     solver = dict()
