@@ -1,12 +1,15 @@
-"""
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location oemof/tests/test_processing.py
+# -*- coding: utf-8 -
+
+"""Tests the processing module of the outputlib.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/test_processing.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import ok_, eq_
+from nose.tools import eq_
 import pandas
 from oemof.solph import (
     EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
