@@ -197,9 +197,10 @@ class ElectricalLineBlock(SimpleBlock):
                     block._equate_electrical_flows.add((n, t), (
                         m.flow[n, O[n], t] == m.flow[I[n], n, t]))
 
-        self.electrical_flow = Constraint(group, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
 
-        self._equate_electrical_flows = Constraint(group, noruleinit=True)
+        self._equate_electrical_flows = Constraint(group, m.TIMESTEPS,
+                                                   noruleinit=True)
 
         self.electrical_flow_build = BuildAction(
                                          rule=_voltage_angle_relation)
