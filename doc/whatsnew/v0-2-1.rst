@@ -23,7 +23,7 @@ New features
     * You can add weight to edges.  
     * Labels are attached to the nodes.
   
-  * Two functions ``get_node_by_name`` and ``filter_nodes`` have been added that 
+  * Two functions `get_node_by_name` and `filter_nodes` have been added that 
   allow to get specified nodes or nodes of one kind from the results dictionary.
 
 New components
@@ -49,8 +49,8 @@ Bug fixes
 
   * Shutdown costs for nonconvex flows are now accounted within the objective
   which was not the case before due to a naming error.
-  * Console script ``oemof_test_installation`` has been fixed.
-  * New console script ``test_oemof`` has been added.
+  * Console script `oemof_test_installation` has been fixed.
+  * New console script `test_oemof` has been added.
 
 Testing
 #######
@@ -63,7 +63,7 @@ Other changes
   * Internal change: Unnecessary list extensions while creating a model are avoided,
   which leads to a decrease in runtime.
   * The negative/positive gradient attributes are dictionaries. In the constructor
-  they moved from sequences to a new ``dictionaries`` argument.
+  they moved from sequences to a new `dictionaries` argument.
   
 
 Contributors
