@@ -50,9 +50,6 @@ def check_oemof_installation(silent=False):
         print("oemof successfully installed.")
 
 
-def test_oemof_installation():
-    check_oemof_installation(silent=True)
-
-
 if __name__ == "__main__":
-    check_oemof_installation()
+    check_oemof_installation(silent=True)
+    
