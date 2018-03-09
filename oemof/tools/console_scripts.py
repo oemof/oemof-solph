@@ -63,6 +63,7 @@ def check_oemof_installation(silent=False):
 
 
 def test_oemof():
+    """Experimental function. No guarantee but nice if it works :-) """
     testdir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
     argv = sys.argv[:]
     argv.insert(1, "--with-doctest")
