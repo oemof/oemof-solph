@@ -32,8 +32,11 @@ setup(name='oemof',
                         'numpy >= 1.7.0',
                         'pandas >= 0.18.0',
                         'pyomo >= 4.2.0, != 4.3.11377',
-                        'networkx'],
+                        'networkx',
+                        'nose'],
       entry_points={
           'console_scripts': [
               'oemof_installation_test = '
-              'oemof.tools.console_scripts:check_oemof_installation']})
+              'oemof.tools.console_scripts:check_oemof_installation',
+              'test_oemof = '
+              'oemof.tools.console_scripts:test_oemof']})
