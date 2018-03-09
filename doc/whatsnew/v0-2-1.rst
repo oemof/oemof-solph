@@ -59,6 +59,7 @@ Bug fixes
   * Console script `oemof_test_installation` has been fixed.
     (`Issue #452 <https://github.com/oemof/oemof/issues/452>`_)
   * Adapt solph to API change in the Pyomo package.
+    (`Issue #449 <https://github.com/oemof/oemof/issues/449>`_)
 
 Testing
 #######
