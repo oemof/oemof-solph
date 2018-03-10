@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
+"""Basic EnergySystem class
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/energy_system.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 from functools import partial
 import logging
 import os
 import pandas as pd
-
 import dill as pickle
 
-from oemof.network import Entity
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Node
 
 
 class EnergySystem:
@@ -60,7 +66,7 @@ class EnergySystem:
         structure of the results dictionary.
     timeindex : pandas.index, optional
         Define the time range and increment for the energy system. This is an
-        optional atribute but might be import for other functions/methods that
+        optional attribute but might be import for other functions/methods that
         use the EnergySystem class as an input parameter.
 
 

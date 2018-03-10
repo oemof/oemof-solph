@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """ list:  Groupings needed on an energy system for it to work with solph.
 
-TODO: Maybe move this to the module docstring? It should be somewhere prominent
-      so solph user's immediately see that they need to use :const:`GROUPINGS`
-      when they want to create an energy system for use with solph.
-
 If you want to use solph on an energy system, you need to create it with these
 groupings specified like this:
 
@@ -15,10 +11,16 @@ groupings specified like this:
 
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/groupings.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from .network import Bus, Transformer
-from . import blocks
+from oemof.solph.network import Bus, Transformer
+from oemof.solph import blocks
 import oemof.groupings as groupings
 
 
@@ -33,7 +35,7 @@ def constraint_grouping(node):
     # `network` modules, resulting in having to do an import at runtime in the
     # init method of solph's `EnergySystem`. A better way would be to add a
     # method (maybe `constraints`, `constraint_group`, `constraint_type` or
-    # something like that) to solph's node hirarchy, which gets overriden in
+    # something like that) to solph's node hierarchy, which gets overridden in
     # each subclass to return the appropriate value. Then we can just call the
     # method here.
     # This even gives other users/us the ability to customize/extend how

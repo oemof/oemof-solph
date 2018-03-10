@@ -1,6 +1,18 @@
+# -*- coding: utf-8 -
+
+"""Test the created constraints against approved constraints.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/tool_tests.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 import os
 
 from nose.tools import ok_
+
 from oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics

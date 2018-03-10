@@ -1,5 +1,14 @@
 # -*- coding: utf-8
 
+"""Helpers to log your modeling process with oemof.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/tools/logger.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 import os
 import logging
 from logging import handlers
@@ -10,7 +19,7 @@ from oemof.tools import helpers
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,
                    screen_format=None, file_datefmt=None, screen_datefmt=None,
                    screen_level=logging.INFO, file_level=logging.DEBUG,
-                   log_version=True, timed_rotating=None):
+                   log_version=True, log_path=True, timed_rotating=None):
 
     r"""Initialise customisable logger.
 
@@ -38,6 +47,8 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     log_version : boolean
         If True the actual version or commit is logged while initialising the
         logger.
+    log_path : boolean
+        If True the used file path is logged while initialising the logger.
     timed_rotating : dict
         Option to pass parameters to the TimedRotatingFileHandler.
 
@@ -57,14 +68,15 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     Examples
     --------
     To define the default logger you have to import the python logging
-     library and this function. The first logging message should be the
-     path where the log file is saved to.
+    library and this function. The first logging message should be the
+    path where the log file is saved to.
 
     >>> import logging
     >>> from oemof.tools import logger
-    >>> logger.define_logging() # doctest: +SKIP
-    17:56:51-INFO-Path for logging: /HOME/.oemof/log_files
-    ...
+    >>> mypath = logger.define_logging(log_path=False, log_version=False,
+    ...                                screen_datefmt = "no_date")
+    >>> mypath[-9:]
+    'oemof.log'
     >>> logging.debug("Hallo")
     """
 
@@ -74,6 +86,9 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     file = os.path.join(logpath, logfile)
 
     log = logging.getLogger('')
+
+    # Remove existing handlers to avoid interference.
+    log.handlers = []
     log.setLevel(logging.DEBUG)
 
     if file_format is None:
@@ -108,7 +123,9 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
 
     logging.debug("******************************************************")
     fh.setFormatter(file_formatter)
-    logging.info("Path for logging: {0}".format(file))
+    if log_path:
+        logging.info("Path for logging: {0}".format(file))
+
     if log_version:
         try:
             check_git_branch()

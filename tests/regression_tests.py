@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -
+
+"""Regression tests.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/regression_tests.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 import logging
 
 from nose.tools import eq_, ok_

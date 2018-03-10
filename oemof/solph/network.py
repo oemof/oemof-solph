@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
+
 """ Classes used to model energy supply systems within solph.
 
 Classes are derived from oemof core network classes and adapted for specific
 optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/network.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-import warnings
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
@@ -32,11 +38,12 @@ class EnergySystem(es.EnergySystem):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
-        from . import GROUPINGS
-        from .components import component_grouping
-        kwargs['groupings'] = (GROUPINGS +
-                               [component_grouping] +
-                               kwargs.get('groupings', []))
+        from oemof.solph.groupings import GROUPINGS
+        from oemof.solph.components import component_grouping
+        from oemof.solph.custom import custom_component_grouping
+        kwargs['groupings'] = (
+            GROUPINGS + [component_grouping] + [custom_component_grouping] +
+            kwargs.get('groupings', []))
         super().__init__(**kwargs)
 
 
@@ -65,12 +72,18 @@ class Flow:
         nominal\_value to get the absolute value. If fixed attr is set to True
         the flow variable will be fixed to actual_value * :attr:`nominal_value`
         , I.e. this value is set exogenous.
-    positive_gradient : numeric (sequence or scalar)
-        The normed maximal positive difference (flow[t-1] < flow[t])
-        of two consecutive flow values.
-    negative_gradient : numeric (sequence or scalar)
-        The normed maximum negative difference (from[t-1] > flow[t]) of two
-        consecutive timesteps.
+    positive_gradient : dictionary
+        Two obligate keys:
+        'ub': numeric (sequence, scalar or None), the normed maximal positive
+         difference (flow[t-1] < flow[t]) of two consecutive flow values
+         (ub = upper bound).
+        'costs': numeric (scalar or None), the gradient cost per unit.
+    negative_gradient : dictionary
+        Two obligate keys:
+        'ub': numeric (sequence, scalar or None), the normed maximal negative
+         difference (flow[t-1] > flow[t]) of two consecutive flow values
+         (ub = upper bound).
+        'costs': numeric (scalar or None), the gradient cost per unit.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
@@ -80,9 +93,6 @@ class Flow:
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
-    fixed_costs : numeric
-        The costs of the whole period associated with the absolute
-        nominal_value of the flow.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
@@ -93,9 +103,9 @@ class Flow:
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
     nonconvex :  :class:`oemof.solph.options.NonConvex` object
-        If an nonconvex flow object is added here, the flow constraints will
+        If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
-        will be different, i.e. constraint etc from
+        will be different, i.e. constraint etc. from
         :class:`oemof.solph.blocks.NonConvexFlow` will be used instead of
         :class:`oemof.solph.blocks.Flow`. Note: this does not work in
         combination with the investment attribute set at the moment.
@@ -135,40 +145,35 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
-        scalars = ['nominal_value', 'fixed_costs', 'summed_max', 'summed_min',
+        scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
-                     'variable_costs', 'min', 'max']
-        defaults = {'fixed': False, 'min': 0, 'max': 1,
+        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+        dictionaries = ['positive_gradient', 'negative_gradient']
+        defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
-                    'negative_gradient': {'ub': None, 'costs': 0}
+                    'negative_gradient': {'ub': None, 'costs': 0},
                     }
 
-        for attribute in set(scalars + sequences + list(kwargs)):
+        for attribute in set(scalars + sequences + dictionaries + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
-            if 'gradient' in attribute:
-                setattr(self, attribute, {'ub': sequence(value['ub']), 'costs': value['costs']})
+            if attribute in dictionaries:
+                setattr(self, attribute, {'ub': sequence(value['ub']),
+                                          'costs': value['costs']})
+            elif 'fixed_costs' in attribute:
+                raise AttributeError(
+                         "The `fixed_costs` attribute has been removed"
+                         " with v0.2!")
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
 
-        if self.fixed and self.actual_value is None:
-            raise ValueError("Can not fix flow value to None. "
-                             "Please set actual_value of the flow")
-
-        elif self.fixed:
-            # ToDo: Check if min/max are set by user than raise warning
-            # warnings.warn(
-            #     "Values for min/max will be ignored if fixed is True.",
-            #     SyntaxWarning)
-            self.min = sequence(0)
-            self.max = sequence(1)
+        # Checking for impossible attribute combinations
+        if self.fixed and self.actual_value[0] is None:
+            raise ValueError("Cannot fix flow value to None.\n Please "
+                             "set the actual_value attribute of the flow")
         if self.investment and self.nominal_value is not None:
-            self.nominal_value = None
-            warnings.warn(
-                "Using the investment object the nominal_value" +
-                " is set to None.",
-                SyntaxWarning)
+            raise ValueError("Using the investment object the nominal_value"
+                             " has to be set to None.")
         if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
@@ -202,7 +207,7 @@ class Source(on.Source):
 
 
 class Transformer(on.Transformer):
-    """A Linear Transformer object with n inputs and n outputs.
+    """A linear Transformer object with n inputs and n outputs.
 
     Parameters
     ----------
@@ -217,13 +222,13 @@ class Transformer(on.Transformer):
     Defining an linear transformer:
 
     >>> from oemof import solph
-    >>> bgas = solph.Bus(label="natural_gas")
-    >>> bcoal = solph.Bus(label="hard_coal")
-    >>> bel = solph.Bus(label="electricity")
-    >>> bheat = solph.Bus(label="heat")
+    >>> bgas = solph.Bus(label='natural_gas')
+    >>> bcoal = solph.Bus(label='hard_coal')
+    >>> bel = solph.Bus(label='electricity')
+    >>> bheat = solph.Bus(label='heat')
 
     >>> trsf = solph.Transformer(
-    ...    label="pp_gas_1",
+    ...    label='pp_gas_1',
     ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5,
@@ -238,7 +243,7 @@ class Transformer(on.Transformer):
     ['hard_coal', 'natural_gas']
 
     >>> trsf_new = solph.Transformer(
-    ...    label="pp_gas_2",
+    ...    label='pp_gas_2',
     ...    inputs={bgas: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5})

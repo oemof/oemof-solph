@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
+
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/blocks.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
@@ -68,13 +75,9 @@ class Flow(SimpleBlock):
         .. math::
             \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
-    Additionally, if :attr:`fixed_costs` are set by the user:
-        .. math::
-            \sum_{(i, o)}  nominal\_value(i, o) \cdot fixed\_costs(i, o)
+    The expression can be accessed by :attr:`om.Flow.variable_costs` and
+    their value after optimization by :meth:`om.Flow.variable_costs()` .
 
-    The expression can be accessed by :attr:`om.Flow.fixed_costs` and
-    their value after optimization by :meth:`om.Flow.fixed_costs()` .
-    This works similar for variable costs with :attr:`*.variable_costs`.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -175,7 +178,7 @@ class Flow(SimpleBlock):
                     else:
                         pass  # return(Constraint.Skip)
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, noruleinit=True)
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule)
 
@@ -192,7 +195,7 @@ class Flow(SimpleBlock):
                     else:
                         pass  # return(Constraint.Skip)
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
@@ -211,7 +214,6 @@ class Flow(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        fixed_costs = 0
         gradient_costs = 0
 
         for i, o in m.FLOWS:
@@ -232,13 +234,7 @@ class Flow(SimpleBlock):
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
-            # add fixed costs if nominal_value is not None
-            if (m.flows[i, o].fixed_costs and
-                    m.flows[i, o].nominal_value is not None):
-                fixed_costs += (m.flows[i, o].nominal_value *
-                                m.flows[i, o].fixed_costs)
-
-        return fixed_costs + variable_costs + gradient_costs
+        return variable_costs + gradient_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -259,13 +255,13 @@ class InvestmentFlow(SimpleBlock):
         A subset of set FLOWS with flows with the attribute
         :attr:`summed_min` being not None.
     MIN_FLOWS
-        A subset of FLOWS with flows having set a least minimum value for
-        at least one timestep in the optimization model.
+        A subset of FLOWS with flows having set a value of not None in the
+        first timestep.
 
     **The following variables are created:**
 
     invest :attr:`om.InvestmentFlow.invest[i, o]`
-        Value of the investment variable (i.e. equivalent to the nominal
+        Value of the investment variable i.e. equivalent to the nominal
         value of the flows after optimization (indexed by FLOWS)
 
     **The following constraints are build:**
@@ -312,13 +308,10 @@ class InvestmentFlow(SimpleBlock):
         .. math::
             \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
 
-    Additionally, if :attr:`fixed_costs` are set by the user:
-        .. math::
-            \sum_{i, o} invest(i, o) \cdot fixed\_costs(i,o)
-
-    The expression can be accessed by :attr:`om.InvestmentFlow.fixed_costs` and
-    their value after optimization by :meth:`om.InvestmentFlow.fixed_costs()` .
-    This works similar for variable costs with :attr:`*.variable_costs` etc.
+    The expression can be accessed by :attr:`om.InvestmentFlow.variable_costs`
+    and their value after optimization by
+    :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
+    investment costs with :attr:`*.investment_costs` etc.
     """
 
     def __init__(self, *args, **kwargs):
@@ -353,8 +346,8 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
         self.MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if sum(
-                [g[2].min[t] for t in m.TIMESTEPS]) > 0])
+            (g[0], g[1]) for g in group if (
+                g[2].min[0] != 0 or len(g[2].min) > 1)])
 
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
@@ -430,16 +423,9 @@ class InvestmentFlow(SimpleBlock):
             return 0
 
         m = self.parent_block()
-        fixed_costs = 0
-        variable_costs = 0
         investment_costs = 0
 
         for i, o in self.FLOWS:
-            # fixed costs
-            if m.flows[i, o].fixed_costs is not None:
-                fixed_costs += (self.invest[i, o] *
-                                m.flows[i, o].fixed_costs)
-            # investment costs
             if m.flows[i, o].investment.ep_costs is not None:
                 investment_costs += (self.invest[i, o] *
                                      m.flows[i, o].investment.ep_costs)
@@ -447,10 +433,7 @@ class InvestmentFlow(SimpleBlock):
                 raise ValueError("Missing value for investment costs!")
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.fixed_costs = Expression(expr=fixed_costs)
-        self.variable_costs = Expression(expr=variable_costs)
-
-        return fixed_costs + variable_costs + investment_costs
+        return investment_costs
 
 
 class Bus(SimpleBlock):
@@ -501,7 +484,7 @@ class Bus(SimpleBlock):
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
                         block.balance.add((n, t), expr)
-        self.balance = Constraint(group, noruleinit=True)
+        self.balance = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
 
@@ -551,7 +534,13 @@ class Transformer(SimpleBlock):
         in_flows = {n: [i for i in n.inputs.keys()] for n in group}
         out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
-        self.relation = Constraint(group, noruleinit=True)
+
+        self.relation = Constraint(
+            [(n, i, o, t)
+             for t in m.TIMESTEPS
+             for n in group
+             for o in out_flows[n]
+             for i in in_flows[n]], noruleinit=True)
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
@@ -581,7 +570,7 @@ class NonConvexFlow(SimpleBlock):
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
-        greater than zero for at least one timestep in the simulation horizon.
+        being not None in the first timestep
     STARTUP_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`startup_costs` being not None.
@@ -589,7 +578,15 @@ class NonConvexFlow(SimpleBlock):
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
 
-    **The following variable are created:**
+    MINUPTIMEFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`minimum_uptime` being not None.
+
+    MINDOWNTIMEFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`minimum_downtime` being not None.
+
+    **The following variables are created:**
 
     Status variable (binary) :attr:`om.NonConvexFlow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
@@ -632,6 +629,38 @@ class NonConvexFlow(SimpleBlock):
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{SHUTDOWN\_FLOWS}.
 
+    Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
+        .. math::
+            (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
+            \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t \neq \{0..minimum\_uptime\} \cup \
+            \{t\_max-minimum\_uptime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINUPTIME\_FLOWS}.
+            \\ \\
+            status(i, o, t) = initial\_status(i, o) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t = \{0..minimum\_uptime\} \cup \
+            \{t\_max-minimum\_uptime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINUPTIME\_FLOWS}.
+
+    Minimum downtime constraint :attr:`om.NonConvexFlow.downtime_constr[i,o,t]`
+        .. math::
+            (status(i, o, t-1)-status(i, o, t)) \
+            \cdot minimum\_downtime(i, o) \\
+            \leq minimum\_downtime(i, o) \
+            - \sum_{n=0}^{minimum\_downtime-1} status(i,o,t+n) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t \neq \{0..minimum\_downtime\} \cup \
+            \{t\_max-minimum\_downtime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINDOWNTIME\_FLOWS}.
+            \\ \\
+            status(i, o, t) = initial\_status(i, o) \\
+            \forall t \in \textrm{TIMESTEPS} | \\
+            t = \{0..minimum\_downtime\} \cup \
+            \{t\_max-minimum\_downtime..t\_max\} , \\
+            \forall (i,o) \in \textrm{MINDOWNTIME\_FLOWS}.
+
     **The following parts of the objective function are created:**
 
     If :attr:`nonconvex.startup_costs` is set by the user:
@@ -650,7 +679,7 @@ class NonConvexFlow(SimpleBlock):
 
     def _create(self, group=None):
         """ Creates set, variables, constraints for all flow object with
-        a attribute flow of type class:`.NonConvexFlow`.
+        an attribute flow of type class:`.NonConvexFlow`.
 
         Parameters
         ----------
@@ -666,24 +695,31 @@ class NonConvexFlow(SimpleBlock):
         self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                         if sum(g[2].min[t]
-                                                for t in m.TIMESTEPS) > 0])
+                                         if g[2].min[0] is not None])
 
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                if g[2].nonconvex.startup_costs is not None])
+                                if g[2].nonconvex.startup_costs[0]
+                                is not None])
 
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                 if g[2].nonconvex.shutdown_costs is not None])
+                                 if g[2].nonconvex.shutdown_costs[0]
+                                 is not None])
+
+        self.MINUPTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                  if g[2].nonconvex.minimum_uptime
+                                  is not None])
+
+        self.MINDOWNTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                    if g[2].nonconvex.minimum_downtime
+                                    is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
         if self.STARTUPFLOWS:
-            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS,
-                               within=Binary)
+            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS, within=Binary)
         if self.SHUTDOWNFLOWS:
-            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS,
-                                within=Binary)
+            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS, within=Binary)
 
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints.
@@ -732,8 +768,46 @@ class NonConvexFlow(SimpleBlock):
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
+        def _min_uptime_rule(block, i, o, t):
+            """Rule definition for min-uptime constraints of nonconvex flows.
+            """
+            if (t >= m.flows[i, o].nonconvex.max_up_down and
+                    t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
+                expr = 0
+                expr += ((self.status[i, o, t]-self.status[i, o, t-1]) *
+                         m.flows[i, o].nonconvex.minimum_uptime)
+                expr += -sum(self.status[i, o, t+u] for u in range(0,
+                             m.flows[i, o].nonconvex.minimum_uptime))
+                return expr <= 0
+            else:
+                expr = 0
+                expr += self.status[i, o, t]
+                expr += -m.flows[i, o].nonconvex.initial_status
+                return expr == 0
+        self.min_uptime_constr = Constraint(
+            self.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule)
+
+        def _min_downtime_rule(block, i, o, t):
+            """Rule definition for min-downtime constraints of nonconvex flows.
+            """
+            if (t >= m.flows[i, o].nonconvex.max_up_down and
+                    t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
+                expr = 0
+                expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
+                         m.flows[i, o].nonconvex.minimum_downtime)
+                expr += - m.flows[i, o].nonconvex.minimum_downtime
+                expr += sum(self.status[i, o, t+d] for d in range(0,
+                            m.flows[i, o].nonconvex.minimum_downtime))
+                return expr <= 0
+            else:
+                expr = 0
+                expr += self.status[i, o, t]
+                expr += -m.flows[i, o].nonconvex.initial_status
+                return expr == 0
+        self.min_downtime_constr = Constraint(
+            self.MINDOWNTIMEFLOWS, m.TIMESTEPS, rule=_min_downtime_rule)
+
         # TODO: Add gradient constraints for nonconvex block / flows
-        # TODO: Add  min-up/min-downtime constraints
 
     def _objective_expression(self):
         r"""Objective expression for nonconvex flows.
@@ -747,17 +821,20 @@ class NonConvexFlow(SimpleBlock):
         shutdowncosts = 0
 
         if self.STARTUPFLOWS:
-            startcosts += sum(self.startup[i, o, t] *
-                              m.flows[i, o].nonconvex.startup_costs
-                              for i, o in self.STARTUPFLOWS
-                              for t in m.TIMESTEPS)
+            for i, o in self.STARTUPFLOWS:
+                if (m.flows[i, o].nonconvex.startup_costs[0] is not None):
+                    startcosts += sum(self.startup[i, o, t] *
+                                      m.flows[i, o].nonconvex.startup_costs[t]
+                                      for t in m.TIMESTEPS)
             self.startcosts = Expression(expr=startcosts)
 
         if self.SHUTDOWNFLOWS:
-            shutdowncosts += sum(self.shutdown[i, o, t] *
-                                 m.flows[i, o].nonconvex.shutdown_costs
-                                 for i, o in self.SHUTDOWNFLOWS
-                                 for t in m.TIMESTEPS)
-            self.shudowcosts = Expression(expr=shutdowncosts)
+            for i, o in self.SHUTDOWNFLOWS:
+                if (m.flows[i, o].nonconvex.shutdown_costs[0] is not None):
+                    shutdowncosts += sum(
+                        self.shutdown[i, o, t] *
+                        m.flows[i, o].nonconvex.shutdown_costs[t]
+                        for t in m.TIMESTEPS)
+            self.shutdowncosts = Expression(expr=shutdowncosts)
 
         return startcosts + shutdowncosts

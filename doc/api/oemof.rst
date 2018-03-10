@@ -37,6 +37,14 @@ oemof.network module
     :undoc-members:
     :show-inheritance:
 
+oemof.graph module
+--------------------
+
+.. automodule:: oemof.graph
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

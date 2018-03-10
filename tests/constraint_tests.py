@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -
+
+"""Test the created constraints against approved constraints.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/constraint_tests.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 from difflib import unified_diff
 import logging
 import os.path as ospath
@@ -35,6 +46,14 @@ class Constraint_Tests:
                            timeindex=self.energysystem.timeindex)
 
     def compare_lp_files(self, filename, ignored=None, my_om=None):
+        r"""Compare lp-files to check constraints generated within solph.
+
+        An lp-file is being generated automatically when the tests are
+        executed. Make sure that you create an empty file first and
+        transfer the content from the one that has been created automatically
+        into this one afterwards. Please ensure that the content is being
+        checked carefully. Otherwise, errors are included within the code base.
+        """
         if my_om is None:
             om = self.get_om()
         else:
@@ -96,7 +115,7 @@ class Constraint_Tests:
                                            lineterm="")))
 
     def test_linear_transformer(self):
-        """Constraint test of a LinearTransformer without Investment.
+        """Constraint test of a Transformer without Investment.
         """
         bgas = solph.Bus(label='gas')
 
@@ -111,7 +130,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_transformer.lp')
 
     def test_linear_transformer_invest(self):
-        """Constraint test of a LinearTransformer with Investment.
+        """Constraint test of a Transformer with Investment.
         """
 
         bgas = solph.Bus(label='gas')
@@ -149,12 +168,19 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            actual_value=[.43, .72, .29], nominal_value=10e5, fixed=True,
-            fixed_costs=20)})
+            actual_value=[.43, .72, .29], nominal_value=10e5, fixed=True)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(variable_costs=40)})
 
         self.compare_lp_files('fixed_source_variable_sink.lp')
+
+    def test_nominal_value_to_zero(self):
+        """If the nominal value is set to zero nothing should happen.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='s1', outputs={bel: solph.Flow(nominal_value=0)})
+        self.compare_lp_files('nominal_value_to_zero.lp')
 
     def test_fixed_source_invest_sink(self):
         """ Wrong constraints for fixed source + invest sink w. `summed_max`.
@@ -163,8 +189,7 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            actual_value=[12, 16, 14], nominal_value=1000000, fixed=True,
-            fixed_costs=20)})
+            actual_value=[12, 16, 14], nominal_value=1000000, fixed=True)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
@@ -179,7 +204,7 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='pv', outputs={bel: solph.Flow(
-            max=[45, 83, 65], fixed_costs=20, variable_costs=13,
+            max=[45, 83, 65], variable_costs=13,
             investment=solph.Investment(ep_costs=123))})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
@@ -201,8 +226,7 @@ class Constraint_Tests:
             nominal_input_capacity_ratio=1/6,
             nominal_output_capacity_ratio=1/6,
             inflow_conversion_factor=0.97,
-            outflow_conversion_factor=0.86,
-            fixed_costs=35)
+            outflow_conversion_factor=0.86)
 
         self.compare_lp_files('storage.lp')
 
@@ -223,7 +247,6 @@ class Constraint_Tests:
             nominal_output_capacity_ratio=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            fixed_costs=35,
             investment=solph.Investment(ep_costs=145, maximum=234))
 
         self.compare_lp_files('storage_invest.lp')
@@ -269,7 +292,7 @@ class Constraint_Tests:
         self.compare_lp_files('transformer_invest.lp')
 
     def test_linear_transformer_chp(self):
-        """Constraint test of a LinearTransformer without Investment (two outputs).
+        """Constraint test of a Transformer without Investment (two outputs).
         """
         bgas = solph.Bus(label='gasBus')
         bheat = solph.Bus(label='heatBus')
@@ -284,7 +307,7 @@ class Constraint_Tests:
         self.compare_lp_files('linear_transformer_chp.lp')
 
     def test_linear_transformer_chp_invest(self):
-        """Constraint test of a LinearTransformer with Investment (two outputs).
+        """Constraint test of a Transformer with Investment (two outputs).
         """
 
         bgas = solph.Bus(label='gasBus')
@@ -363,11 +386,12 @@ class Constraint_Tests:
         solph.constraints.emission_limit(om, limit=777)
 
     def test_equate_variables_constraint(self):
-        """Testing the equate_variables function in the constraint module.
-        """
+        """Testing the equate_variables function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
+            nominal_input_capacity_ratio=0.2,
+            nominal_output_capacity_ratio=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))
@@ -386,8 +410,7 @@ class Constraint_Tests:
         self.compare_lp_files('connect_investment.lp', my_om=om)
 
     def test_gradient(self):
-        """
-        """
+        """Testing min and max runtimes for nonconvex flows."""
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='powerplant', outputs={bel: solph.Flow(
@@ -396,3 +419,32 @@ class Constraint_Tests:
             negative_gradient={'ub': 0.05, 'costs': 8})})
 
         self.compare_lp_files('source_with_gradient.lp')
+
+    def test_investment_limit(self):
+        """Testing the investment_limit function in the constraint module."""
+        bus1 = solph.Bus(label='Bus1')
+        solph.components.GenericStorage(
+            label='storage',
+            nominal_input_capacity_ratio=0.2,
+            nominal_output_capacity_ratio=0.2,
+            inputs={bus1: solph.Flow()},
+            outputs={bus1: solph.Flow()},
+            investment=solph.Investment(ep_costs=145))
+        solph.Source(label='Source', outputs={bus1: solph.Flow(
+            investment=solph.Investment(ep_costs=123))})
+        om = self.get_om()
+        solph.constraints.investment_limit(om, limit=900)
+
+        self.compare_lp_files('investment_limit.lp', my_om=om)
+
+    def test_min_max_runtime(self):
+        """Testing min and max runtimes for nonconvex flows."""
+        bus_t = solph.Bus(label='Bus_T')
+        solph.Source(
+            label='cheap_plant_min_down_constraints',
+            outputs={bus_t: solph.Flow(
+                nominal_value=10, min=0.5, max=1.0, variable_costs=10,
+                nonconvex=solph.NonConvex(
+                    minimum_downtime=4, minimum_uptime=2, initial_status=2,
+                    startup_costs=5, shutdown_costs=7))})
+        self.compare_lp_files('min_max_runtime.lp')

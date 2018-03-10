@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""Connecting different investment variables.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
+oemof/tests/test_scripts/test_solph/test_connect_invest/test_connect_invest.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
+from nose.tools import eq_
 import oemof.solph as solph
 from oemof.outputlib import processing, views
 
@@ -33,8 +44,7 @@ def test_connect_invest():
 
     # create fixed source object representing wind power plants
     solph.Source(label='wind', outputs={bel1: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True,
-        fixed_costs=20)})
+        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
 
     # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel1: solph.Flow(
@@ -48,7 +58,6 @@ def test_connect_invest():
         nominal_input_capacity_ratio=1/6,
         nominal_output_capacity_ratio=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        fixed_costs=35,
         investment=solph.Investment(ep_costs=0.2),
     )
 
@@ -94,6 +103,4 @@ def test_connect_invest():
         'storage_out': 135784}
 
     for key in connect_invest_dict.keys():
-        a = int(round(my_results[key]))
-        b = int(round(connect_invest_dict[key]))
-        assert a == b, "\n{0}: \nGot: {1}\nExpected: {2}".format(key, a, b)
+        eq_(int(round(my_results[key])), int(round(connect_invest_dict[key])))

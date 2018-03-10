@@ -44,6 +44,14 @@ oemof.solph.components module
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.custom module
+-----------------------------
+
+.. automodule:: oemof.solph.custom
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 oemof.solph.constraints module
 ------------------------------
 

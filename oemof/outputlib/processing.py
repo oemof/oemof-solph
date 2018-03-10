@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Modules for providing a convenient data structure for solph results.
+
+"""Modules for providing a convenient data structure for solph results.
 
 Information about the possible usage is provided within the examples.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/outputlib/processing.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pandas as pd
-from itertools import groupby
 from oemof.network import Node
+from oemof.tools.helpers import flatten
+from itertools import groupby
 from pyomo.core.base.var import Var
 
 
@@ -98,8 +105,8 @@ def results(om):
     Results from Pyomo are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
-    The dictionary is keyed by the nodes e.g. `results[(n, None)]['scalars']`
-    and flows e.g. `results[(n,n)]['sequences']`.
+    The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
+    and flows e.g. `results[n, n]['sequences']`.
     """
     df = create_dataframe(om)
 
@@ -110,7 +117,7 @@ def results(om):
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
-    results = {}
+    result = {}
     for k in df_dict:
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
@@ -118,8 +125,8 @@ def results(om):
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-            sequences = df_dict[k].loc[:, ~(condition)]
-            results[k] = {'scalars': scalars, 'sequences': sequences}
+            sequences = df_dict[k].loc[:, ~condition]
+            result[k] = {'scalars': scalars, 'sequences': sequences}
         except IndexError:
             error_message = ('Cannot access index on result data. ' +
                              'Did the optimization terminate' +
@@ -132,13 +139,28 @@ def results(om):
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
-            if (bus, None) not in results.keys():
-                results[(bus, None)] = {
+            if (bus, None) not in result.keys():
+                result[(bus, None)] = {
                     'sequences': df, 'scalars': pd.Series()}
             else:
-                results[(bus, None)]['sequences']['duals'] = duals
+                result[(bus, None)]['sequences']['duals'] = duals
 
-    return results
+    return result
+
+
+def convert_keys_to_strings(results):
+    """
+    Convert the dictionary keys to strings.
+
+    All (tuple) keys of the result object e.g. results[(pp1, bus1)] are
+    converted into strings that represent the object labels
+    e.g. results[('pp1','bus1')].
+    """
+    converted = {
+        tuple([str(e) for e in k]) if isinstance(k, tuple) else str(k): v
+        for k, v in results.items()
+    }
+    return converted
 
 
 def meta_results(om, undefined=False):
@@ -178,3 +200,141 @@ def meta_results(om, undefined=False):
                         type(om.es.results[k1][0][k2]))
 
     return meta_res
+
+
+def __separate_attrs(system, get_flows=False, exclude_none=True):
+    def detect_scalars_and_sequences(com):
+        com_data = {'scalars': {}, 'sequences': {}}
+
+        exclusions = ('__', '_', 'registry', 'inputs', 'outputs')
+        attrs = [i for i in dir(com)
+                 if not (callable(i) or i.startswith(exclusions))]
+
+        for a in attrs:
+            attr_value = getattr(com, a)
+
+            # Iterate trough investment and add scalars and sequences with
+            # "investment" prefix to component data:
+            if attr_value.__class__.__name__ == 'Investment':
+                invest_data = detect_scalars_and_sequences(attr_value)
+                com_data['scalars'].update(
+                    {
+                        'investment_' + str(k): v
+                        for k, v in invest_data['scalars'].items()
+                     }
+                )
+                com_data['sequences'].update(
+                    {
+                        'investment_' + str(k): v
+                        for k, v in invest_data['sequences'].items()
+                    }
+                )
+                continue
+
+            if isinstance(attr_value, str):
+                com_data['scalars'][a] = attr_value
+                continue
+
+            # check if attribute is iterable
+            # see: https://stackoverflow.com/questions/1952464/
+            # in-python-how-do-i-determine-if-an-object-is-iterable
+            try:
+                _ = (e for e in attr_value)
+                com_data['sequences'][a] = attr_value
+            except TypeError:
+                com_data['scalars'][a] = attr_value
+
+        com_data['sequences'] = flatten(com_data['sequences'])
+        move_undetected_scalars(com_data)
+        if exclude_none:
+            remove_nones(com_data)
+
+        return com_data
+
+    def move_undetected_scalars(com):
+        for key, value in list(com['sequences'].items()):
+            if isinstance(value, str):
+                com['scalars'][key] = value
+                del com['sequences'][key]
+                continue
+            try:
+                _ = (e for e in value)
+            except TypeError:
+                com['scalars'][key] = value
+                del com['sequences'][key]
+            else:
+                try:
+                    if not value.default_changed:
+                        com['scalars'][key] = value.default
+                        del com['sequences'][key]
+                except AttributeError:
+                    pass
+
+    def remove_nones(com):
+        for key, value in list(com['scalars'].items()):
+            if value is None:
+                del com['scalars'][key]
+        for key, value in list(com['sequences'].items()):
+            if (
+                    len(value) == 0 or
+                    value[0] is None
+            ):
+                del com['sequences'][key]
+    """
+    Create a dictionary with flow scalars and series.
+
+    The dictionary is structured with flows as tuples and nested dictionaries
+    holding the scalars and series e.g.
+    {(node1, node2): {'scalars': {'attr1': scalar, 'attr2': 'text'},
+    'sequences': {'attr1': iterable, 'attr2': iterable}}}
+
+    om : A solved oemof.solph.Model.
+
+    Returns
+    -------
+    dict
+    """
+    # Check if system is es or om:
+    if system.__class__.__name__ == 'EnergySystem':
+        components = system.flows() if get_flows else system.nodes
+    else:
+        components = system.flows if get_flows else system.es.nodes
+
+    data = {}
+    for com_key in components:
+        component = components[com_key] if get_flows else com_key
+        component_data = detect_scalars_and_sequences(component)
+        key = com_key if get_flows else (com_key, None)
+        data[key] = component_data
+    return data
+
+
+def param_results(system, exclude_none=True, keys_as_str=False):
+    """
+    Create a result dictionary containing node parameters.
+
+    Results are written into a dictionary of pandas objects where
+    a Series holds all scalar values and a dataframe all sequences for nodes
+    and flows.
+    The dictionary is keyed by the nodes e.g.
+    `results['nodes'][idx]['scalars']`
+    and flows e.g. `results['flows'][(n,n)]['sequences']`.
+
+    Parameters
+    ----------
+    system: Model or EnergySystem
+    exclude_none: bool
+        If True, all scalars and sequences containing None values are excluded
+    keys_as_str: bool
+        If True, nodes are stored as strings
+
+    Returns
+    -------
+    dict: Parameters for all nodes and flows
+    """
+
+    flow_data = __separate_attrs(system, True, exclude_none)
+    node_data = __separate_attrs(system, False, exclude_none)
+
+    flow_data.update(node_data)
+    return convert_keys_to_strings(flow_data) if keys_as_str else flow_data

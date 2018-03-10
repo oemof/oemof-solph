@@ -1,14 +1,22 @@
+# -*- coding: utf-8 -
+
+"""Basic tests.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/basic_tests.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
 
 from nose.tools import ok_, eq_
-
 import pandas as pd
-import logging
 
-# from oemof.core.network.entities.components import transformers as transformer
 from oemof import energy_system as es
 from oemof.network import Entity
 from oemof.network import Bus, Transformer

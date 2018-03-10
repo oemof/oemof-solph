@@ -1,9 +1,22 @@
-from traceback import format_exception_only as feo
+# -*- coding: utf-8 -
 
+"""Test the created constraints against approved constraints.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/test_network_classes.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
+from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
+import warnings
 
 from oemof.energy_system import EnergySystem as ES
 from oemof.network import Bus, Node, Transformer
+from oemof import graph
+from oemof.solph import Model
 
 
 class Node_Tests:
@@ -200,6 +213,7 @@ class Node_Tests:
         eq_(n1.outputs[n2], n1n2)
         eq_(n1.outputs, {n2: n1n2})
 
+
 class EnergySystem_Nodes_Integration_Tests:
 
     def setup(self):
@@ -213,3 +227,10 @@ class EnergySystem_Nodes_Integration_Tests:
         b2 = Bus(label='<B2>')
         Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
         ok_(isinstance(self.es.entities[2], Transformer))
+
+
+def test_depreciated_graph_call():
+    es = ES()
+    om = Model(energysystem=es)
+    warnings.filterwarnings('ignore', category=FutureWarning)
+    graph.create_nx_graph(optimization_model=om)
