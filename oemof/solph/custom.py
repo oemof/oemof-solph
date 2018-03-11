@@ -309,7 +309,11 @@ class LinkBlock(SimpleBlock):
                                     cidx[0], cidx[1], n))
                         block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
-        self.relation = Constraint(group, noruleinit=True)
+        self.relation = Constraint(
+            [(n, cidx[0], cidx[1], t)
+             for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()
+             for cidx, c in conversion.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
