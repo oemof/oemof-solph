@@ -15,7 +15,28 @@ from oemof.solph.components import GenericStorage
 from oemof.solph.custom import Link
 from oemof.solph.plumbing import sequence
 
-class Generator(Source):
+
+class Facade:
+    """
+    """
+    def __init__():
+        pass
+
+    def _investment(self):
+        if self.capacity is None:
+            if self.capex is None:
+                msg = ("If you don't set `capacity`, you need to set attribute " +
+                       "`capex` of component {}!")
+                raise ValueError(msg.format(self.label))
+            else:
+                # TODO: calculate ep_costs from specific capex
+                investment = Investment(ep_costs=self.capex)
+        else:
+            investment = None
+
+        return investment
+
+class Generator(Source, Facade):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -31,9 +52,14 @@ class Generator(Source):
 
         self.opex = kwargs.get('opex', 0)
 
+        self.capex = kwargs.get('capex', None)
+
+        investment = self._investment()
+
         self.outputs.update({self.bus: Flow(nominal_value=self.capacity,
                                             variable_costs=self.opex,
                                             actual_value=self.profile,
+                                            investment=investment,
                                             fixed=not self.dispatchable)})
 
 
@@ -87,24 +113,37 @@ class Demand(Sink):
                                            fixed=True, **kwargs)})
 
 
-class Storage(GenericStorage):
+class Storage(GenericStorage, Facade):
     """
     """
     def __init__(self, *args, **kwargs):
+
         super().__init__(*args, **kwargs)
 
-        self.nominal_capacity = kwargs.get('capacity')
+        self.capacity = kwargs.get('capacity')
 
-        self.power = kwargs.get('power')
+        self.nominal_capacity = self.capacity
+
+        self.nominal_input_capacity_ratio = kwargs.get('c_rate', 1/6)
+
+        self.nominal_output_capacity_ratio = kwargs.get('c_rate', 1/6)
+
+        self.capex = kwargs.get('capex')
 
         self.bus = kwargs.get('bus')
 
-        self.inputs.update({self.bus: Flow(nominal_value=self.power)})
+        self.investment = self._investment()
 
-        self.outputs.update({self.bus: Flow(nominal_value=self.power)})
+        if self.investment:
+            investment = Investment()
+        else:
+            investment = None
+        self.inputs.update({self.bus: Flow(investment=investment)})
+
+        self.outputs.update({self.bus: Flow(investment=investment)})
 
 
-class Connector(Link):
+class Connector(Link, Facade):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -119,13 +158,19 @@ class Connector(Link):
 
         self.loss = kwargs.get('loss')
 
+        self.capex = kwargs.get('capex')
+
+        investment = self._investment()
+
         self.inputs.update({
             self.from_bus: Flow(),
             self.to_bus: Flow()})
 
         self.outputs.update({
-            self.from_bus: Flow(nominal_value=self.capacity),
-            self.to_bus: Flow(nominal_value=self.capacity)})
+            self.from_bus: Flow(nominal_value=self.capacity,
+                                investment=investment),
+            self.to_bus: Flow(nominal_value=self.capacity,
+                              investment=investment)})
 
         self.conversion_factors.update({
             (self.from_bus, self.to_bus): sequence((1 - self.loss)),
