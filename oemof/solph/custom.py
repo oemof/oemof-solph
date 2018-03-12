@@ -197,9 +197,10 @@ class ElectricalLineBlock(SimpleBlock):
                     block._equate_electrical_flows.add((n, t), (
                         m.flow[n, O[n], t] == m.flow[I[n], n, t]))
 
-        self.electrical_flow = Constraint(group, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
 
-        self._equate_electrical_flows = Constraint(group, noruleinit=True)
+        self._equate_electrical_flows = Constraint(group, m.TIMESTEPS,
+                                                   noruleinit=True)
 
         self.electrical_flow_build = BuildAction(
                                          rule=_voltage_angle_relation)
@@ -308,7 +309,11 @@ class LinkBlock(SimpleBlock):
                                     cidx[0], cidx[1], n))
                         block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
-        self.relation = Constraint(group, noruleinit=True)
+        self.relation = Constraint(
+            [(n, cidx[0], cidx[1], t)
+             for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()
+             for cidx, c in conversion.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
