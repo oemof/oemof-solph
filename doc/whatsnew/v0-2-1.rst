@@ -70,11 +70,11 @@ Testing
 Other changes
 #############
 
-  * Internal change: Unnecessary list extensions while creating a model are avoided,
-    which leads to a decrease in runtime.
+  * Internal change: Unnecessary list extensions while creating a model are
+    avoided, which leads to a decrease in runtime.
     (`Issue #438 <https://github.com/oemof/oemof/issues/438>`_)
-  * The negative/positive gradient attributes are dictionaries. In the constructor
-    they moved from sequences to a new `dictionaries` argument.
+  * The negative/positive gradient attributes are dictionaries. In the
+    constructor they moved from sequences to a new `dictionaries` argument.
     (`Issue #437 <https://github.com/oemof/oemof/issues/437>`_)
   * License agreement was adapted according to the reuse project
     (`Issue #442 <https://github.com/oemof/oemof/issues/442>`_)
