@@ -16,7 +16,7 @@ from enum import Enum
 from oemof.outputlib.processing import convert_keys_to_strings
 
 
-def node(results, node):
+def node(results, node, multiindex=False):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
@@ -45,6 +45,13 @@ def node(results, node):
         filtered['scalars'].index = idx
         filtered['scalars'].sort_index(axis=0, inplace=True)
 
+        if multiindex:
+            idx = pd.MultiIndex.from_tuples(
+                [tuple([row[0][0], row[0][1], row[1]])
+                 for row in filtered['scalars'].index])
+            idx.set_names(['from', 'to', 'type'], inplace=True)
+            filtered['scalars'].index = idx
+
     # create a dataframe with tuples as column labels for sequences
     sequences = {k: v['sequences'] for k, v in results.items()
                  if node in k and not v['sequences'].empty}
@@ -59,6 +66,13 @@ def node(results, node):
         cols = [c for sublist in cols for c in sublist]
         filtered['sequences'].columns = cols
         filtered['sequences'].sort_index(axis=1, inplace=True)
+
+        if multiindex:
+            idx = pd.MultiIndex.from_tuples(
+                [tuple([col[0][0], col[0][1], col[1]])
+                 for col in filtered['sequences'].columns])
+            idx.set_names(['from', 'to', 'type'], inplace=True)
+            filtered['sequences'].columns = idx
 
     return filtered
 
