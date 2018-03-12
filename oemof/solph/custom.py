@@ -788,7 +788,7 @@ def custom_component_grouping(node):
         return ElectricalLineBlock
     if isinstance(node, GenericCAES):
         return GenericCAESBlock
-    if type(node) is Link:
+    if isinstance(node, Link):
         return LinkBlock
     if isinstance(node, OffsetTransformer):
         return OffsetTransformerBlock

@@ -2,9 +2,9 @@
 
 """Connecting different investment variables.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location 
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
 oemof/tests/test_scripts/test_solph/test_connect_invest/test_connect_invest.py
 
 SPDX-License-Identifier: GPL-3.0-or-later

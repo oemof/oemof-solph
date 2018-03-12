@@ -4,9 +4,9 @@ Example that illustrates how to use custom component `GenericCHP` can be used.
 
 In this case it is used to model a combined cycle extraction turbine.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted by
-the contributors recorded in the version control history of the file, available
-from its original location
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
 oemof/tests/test_scripts/test_solph/test_generic_chp/test_generic_chp.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
