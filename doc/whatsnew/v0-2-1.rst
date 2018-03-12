@@ -37,6 +37,14 @@ New features
     (`Issue #445 <https://github.com/oemof/oemof/issues/445>`_)
 
 
+Fixes
+#####
+
+  * Deserializing a :class:`Node <oemof.network.Node>` lead to an object which
+    was no longer serializable. This is fixed now. :class:`Node
+    <oemof.network.Node>` instances should be able to be dumped and restored an
+    arbitraty amount of times.
+
 Documentation
 #############
 
