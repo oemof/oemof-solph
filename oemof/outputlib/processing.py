@@ -11,6 +11,7 @@ available from its original location oemof/oemof/outputlib/processing.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import numpy as np
 import pandas as pd
 from oemof.network import Node
 from oemof.tools.helpers import flatten
@@ -338,3 +339,47 @@ def param_results(system, exclude_none=True, keys_as_str=False):
 
     flow_data.update(node_data)
     return convert_keys_to_strings(flow_data) if keys_as_str else flow_data
+
+
+def get_derived_quantiy(m, quantity='emission', subset=None):
+    """ Calculate derived quantities (e.g. emissions) for each flow based on
+    the optimized results
+
+    Parameters
+    ----------
+    m : solph.Model
+        A solved oemof.solph.Model instance.
+    quantity: str
+        Quantity to derive, we look for an attribute at the flow the the name
+        of the passed string.
+    subset: dict
+        Subset of flows, with tuple as keys (input,output) and oemof.solph.Flow
+        instances as values of the dictionary.
+
+    Returns
+    -------
+    pandas.DataFrame
+    """
+    # get variable values of flow in model
+    optimized = pd.Series(m.flow.get_values())
+
+    # copy for filling
+    derived = optimized.copy()
+
+    # use subset of flows if passed
+    if subset:
+        raise NotImplementedError("Subset has not been implemented yet.")
+    else:
+        flows = m.flows.items()
+
+    # TODO: Check performance, maybe speed up calculation...
+    for k, f in flows:
+        if hasattr(f, quantity):
+            derived.loc[k[0], k[1], :] = (optimized.loc[k[0], k[1], :] *
+                                          getattr(f, quantity))
+        else:
+            derived.loc[k[0], k[1], :] = np.nan
+
+    df = derived.unstack(level=[0, 1])
+
+    return df
