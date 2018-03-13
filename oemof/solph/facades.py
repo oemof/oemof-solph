@@ -19,25 +19,44 @@ from oemof.solph.plumbing import sequence
 class Facade:
     """
     """
-    def __init__():
+    def __init__(**kwargs):
         pass
 
     def _investment(self):
         if self.capacity is None:
-            if self.capex is None:
+            if self.investment_cost is None:
                 msg = ("If you don't set `capacity`, you need to set attribute " +
-                       "`capex` of component {}!")
+                       "`investment_cost` of component {}!")
                 raise ValueError(msg.format(self.label))
             else:
                 # TODO: calculate ep_costs from specific capex
-                investment = Investment(ep_costs=self.capex)
+                investment = Investment(ep_costs=self.investment_cost)
         else:
             investment = None
 
         return investment
 
+
 class Generator(Source, Facade):
     """
+    Parameters
+    ----------
+    bus: oemof.solph.Bus
+        An oemof bus instance where the generator is connected to
+    capacity: numeric
+        The capacity of the generator (e.g. in MW).
+    dispatchable: boolean
+        If False the generator will be must run based on the specified
+        `profile` and (default is True).
+    marginal_cost: numeric
+        Marginal cost for one unit of produced output
+        E.g. for a powerplant:
+        marginal cost =fuel cost + operational cost + co2 cost (in Euro / MWh)
+        if timestep length is one hour.
+    investment_cost: numeric
+        Investment costs per unit of capacity (e.g. Euro / MW) .
+        If capacity is not set, this value will be used for optimizing the
+        generators capacity.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,17 +69,22 @@ class Generator(Source, Facade):
 
         self.profile = kwargs.get('profile', None)
 
-        self.opex = kwargs.get('opex', 0)
+        self.marginal_cost = kwargs.get('marginal_cost', 0)
 
-        self.capex = kwargs.get('capex', None)
+        self.investment_cost = kwargs.get('investment_cost', None)
+
+        self.edge_parameters = kwargs.get('edge_parameters', {})
 
         investment = self._investment()
 
-        self.outputs.update({self.bus: Flow(nominal_value=self.capacity,
-                                            variable_costs=self.opex,
-                                            actual_value=self.profile,
-                                            investment=investment,
-                                            fixed=not self.dispatchable)})
+        f = Flow(nominal_value=self.capacity,
+                 variable_costs=self.marginal_cost,
+                 actual_value=self.profile,
+                 investment=investment,
+                 fixed=not self.dispatchable,
+                 **self.edge_parameters)
+
+        self.outputs.update({self.bus: f})
 
 
 class CHP(Transformer):
@@ -81,7 +105,7 @@ class CHP(Transformer):
 
         self.eta_th = kwargs.get('eta_th', None)
 
-        self.opex = kwargs.get('opex', None)
+        self.maringal_cost = kwargs.get('maringal_cost', None)
 
         self.conversion_factors.update({
             self.bus_el: sequence(self.eta_el),
@@ -92,8 +116,44 @@ class CHP(Transformer):
 
         self.outputs.update({
             self.bus_el: Flow(nominal_value=self.capacity,
-                              variable_costs=self.opex),
+                              variable_costs=self.marginal_cost),
             self.bus_th: Flow()})
+
+
+class Conversion(Transformer, Facade):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.capacity = kwargs.get('capacity')
+
+        self.from_bus = kwargs.get('from_bus')
+
+        self.to_bus = kwargs.get('to_bus')
+
+        self.efficiency = kwargs.get('efficiency', 1)
+
+        self.marginal_cost = kwargs.get('marginal_cost', 0)
+
+        self.investment_cost = kwargs.get('investment_cost', None)
+
+        self.input_edge_parameters = kwargs.get('input_edge_parameters', {})
+
+        self.output_edge_parameters = kwargs.get('output_edge_parameters', {})
+
+        investment = self._investment()
+
+        self.conversion_factors.update({
+            self.to_bus: sequence(self.efficiency)})
+
+        self.inputs.update({
+            self.from_bus: Flow(**self.input_edge_parameters)})
+
+        self.outputs.update({
+            self.to_bus: Flow(nominal_value=self.capacity,
+                              variable_costs=self.marginal_cost,
+                              **self.output_edge_parameters)})
 
 
 class Demand(Sink):
@@ -108,9 +168,12 @@ class Demand(Sink):
 
         self.profile = kwargs.get('profile', None)
 
+        self.edge_parameters = kwargs.get('edge_parameters', {})
+
         self.inputs.update({self.bus: Flow(nominal_value=self.amount,
                                            actual_value=self.profile,
-                                           fixed=True, **kwargs)})
+                                           fixed=True,
+                                           **self.edge_parameters)})
 
 
 class Storage(GenericStorage, Facade):
@@ -128,22 +191,29 @@ class Storage(GenericStorage, Facade):
 
         self.nominal_output_capacity_ratio = kwargs.get('c_rate', 1/6)
 
-        self.capex = kwargs.get('capex')
+        self.investment_cost = kwargs.get('investment_cost')
 
         self.bus = kwargs.get('bus')
 
         self.investment = self._investment()
 
+        self.input_edge_parameters = kwargs.get('input_edge_parameters', {})
+
+        self.output_edge_parameters = kwargs.get('output_edge_parameters', {})
+
         if self.investment:
             investment = Investment()
         else:
             investment = None
-        self.inputs.update({self.bus: Flow(investment=investment)})
 
-        self.outputs.update({self.bus: Flow(investment=investment)})
+        self.inputs.update({self.bus: Flow(investment=investment,
+                                            **self.input_edge_parameters)})
+
+        self.outputs.update({self.bus: Flow(investment=investment,
+                                            **self.output_edge_parameters)})
 
 
-class Connector(Link, Facade):
+class Connection(Link, Facade):
     """
     """
     def __init__(self, *args, **kwargs):
@@ -158,7 +228,7 @@ class Connector(Link, Facade):
 
         self.loss = kwargs.get('loss')
 
-        self.capex = kwargs.get('capex')
+        self.investment_cost = kwargs.get('investment_cost')
 
         investment = self._investment()
 
