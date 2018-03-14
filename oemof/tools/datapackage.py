@@ -13,6 +13,14 @@ import pandas as pd
 from oemof.network import Bus, Component
 
 
+def raisestatement(exception, message=""):
+    if message:
+        raise exception(message)
+    else:
+        raise exception()
+    return "No one should ever see this."
+
+
 class HSN(types.SimpleNamespace):
     """ A hashable variant of `types.Simplenamespace`.
 
@@ -162,10 +170,15 @@ def deserialize_energy_system(cls, path,
                 setattr(instance, k, v)
         return instance
 
-    data['buses'] = {name: create(typemap.get(bus.get('type', 'bus')),
-                                  {'label': name},
-                                  bus['parameters'])
-                     for name, bus in data['buses'].items()}
+    data['buses'] = {
+        name: create(typemap.get(bus.get('type', 'bus'),
+                                 raisestatement(
+                                     ValueError,
+                                     "Typemap is missing a mapping for 'bus'.")),
+                     {'label': name},
+                     bus['parameters'])
+        for name, bus in sorted(data['buses'].items())}
+
 
     data['components'] = {
         name: create(
