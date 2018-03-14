@@ -27,7 +27,8 @@ DEFAULT = object()
 FLOW_TYPE = object()
 
 def remap(attributes, translations, target_class):
-    for c in target_class.mro():
+    mro = getattr(target_class, "mro", lambda: [target_class])
+    for c in mro():
         if c in translations:
             break
     return {translations.get(c, {}).get(k, k): v for k, v in attributes.items()}
