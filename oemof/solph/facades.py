@@ -38,7 +38,8 @@ class Facade:
 
 
 class Generator(Source, Facade):
-    """
+    """ Generator unit with one output, e.g. gas-turbine, wind-turbine, etc.
+
     Parameters
     ----------
     bus: oemof.solph.Bus
@@ -48,6 +49,9 @@ class Generator(Source, Facade):
     dispatchable: boolean
         If False the generator will be must run based on the specified
         `profile` and (default is True).
+    profile: array-like
+        Profile of the output such that profile[t] * capacity yields output for
+        timestep t
     marginal_cost: numeric
         Marginal cost for one unit of produced output
         E.g. for a powerplant:
@@ -88,7 +92,35 @@ class Generator(Source, Facade):
 
 
 class CHP(Transformer):
-    """
+    """ Combined Heat and Power (backpressure) unit with one input and
+    two outputs.
+
+    Parameters
+    ----------
+    bus_el: oemof.solph.Bus
+        An oemof bus instance where the chp unit is connected to with its
+        electrical output
+    bus_th: oemof.solph.Bus
+        An oemof bus instance where the chp unit is connected to with its
+        thermal output
+    bus_fuel: oemof.solph.Bus
+        An oemof bus instance where the chp unit is connected to with its
+        intput
+    capacity: numeric
+        The electrical capacity of the chp unit (e.g. in MW).
+    efficiency_el:
+        Electrical efficiency of the chp unit
+    efficiency_th
+        Thermal efficiency of the chp unit
+    marginal_cost: numeric
+        Marginal cost for one unit of produced electrical output
+        E.g. for a powerplant:
+        marginal cost =fuel cost + operational cost + co2 cost (in Euro / MWh)
+        if timestep length is one hour.
+    investment_cost: numeric
+        Investment costs per unit of electrical capacity (e.g. Euro / MW) .
+        If capacity is not set, this value will be used for optimizing the
+        chp capacity.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -101,9 +133,9 @@ class CHP(Transformer):
 
         self.capacity = kwargs.get('capacity', None)
 
-        self.eta_el = kwargs.get('eta_el', None)
+        self.efficiency_el = kwargs.get('efficiency_el', None)
 
-        self.eta_th = kwargs.get('eta_th', None)
+        self.efficiency_th = kwargs.get('efficiency_th', None)
 
         self.maringal_cost = kwargs.get('maringal_cost', None)
 
@@ -121,7 +153,26 @@ class CHP(Transformer):
 
 
 class Conversion(Transformer, Facade):
-    """
+    """ Conversion unit with one input and one output.
+
+    Parameters
+    ----------
+    from_bus: oemof.solph.Bus
+        An oemof bus instance where the conversion unit is connected to with
+        its input.
+    to_bus: oemof.solph.Bus
+        An oemof bus instance where the conversion unit is connected to with
+        its output.
+    capacity: numeric
+        The conversion capacity (output side) of the unit.
+    efficiency:
+        Efficiency of the conversion unit (0 <= efficiency <= 1).
+    marginal_cost: numeric
+        Marginal cost for one unit of produced output.
+    investment_cost: numeric
+        Investment costs per unit of output capacity.
+        If capacity is not set, this value will be used for optimizing the
+        chp capacity.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -157,7 +208,17 @@ class Conversion(Transformer, Facade):
 
 
 class Demand(Sink):
-    """
+    """ Demand object with one input
+
+     Parameters
+     ----------
+     bus: oemof.solph.Bus
+         An oemof bus instance where the demand is connected to.
+     amount: numeric
+         The total amount for the timehorzion (e.g. in MWh)
+     profile: array-like
+          Demand profile with normed values such that `profile[t] * amount`
+          yields the demand in timestep t
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -177,7 +238,18 @@ class Demand(Sink):
 
 
 class Storage(GenericStorage, Facade):
-    """
+    """ Storage unit
+
+    Parameters
+    ----------
+    bus: oemof.solph.Bus
+        An oemof bus instance where the storage unit is connected to.
+    capacity: numeric
+        The total capacity of the storage (e.g. in MWh)
+    c_rate: numeric
+        Ratio between energy and power output of the storage
+    investment_cost: numeric
+        Investment costs for the storage unit e.g in €/MW-capacity
     """
     def __init__(self, *args, **kwargs):
 
@@ -214,7 +286,24 @@ class Storage(GenericStorage, Facade):
 
 
 class Connection(Link, Facade):
-    """
+    """ Bi-direction connection for two buses (e.g. to model transshipment)
+
+    Parameters
+    ----------
+    from_bus: oemof.solph.Bus
+        An oemof bus instance where the connection unit is connected to with
+        its input.
+    to_bus: oemof.solph.Bus
+        An oemof bus instance where the connection unit is connected to with
+        its output.
+    capacity: numeric
+        The maximal capacity (output side each) of the unit.
+    loss:
+        Relative loss through the connection
+    investment_cost: numeric
+        Investment costs per unit of output capacity.
+        If capacity is not set, this value will be used for optimizing the
+        chp capacity.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
