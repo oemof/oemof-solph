@@ -181,21 +181,6 @@ def deserialize_energy_system(cls, path,
         for name, bus in sorted(data['buses'].items())
         for mapping in (typemap.get(bus.get('type', 'bus')),)}
 
-
-    data['components'] = {
-        name: create(
-            typemap[element.get('type', DEFAULT)],
-            {'label': name,
-             'inputs': {
-                 data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
-                 for bus, kwargs in element['inputs'].items()},
-             'outputs': {
-                 data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
-                 for bus, kwargs in element['outputs'].items()}},
-            element['parameters'])
-        for name, element in data['elements'].items()
-        for flow in (typemap.get(FLOW_TYPE, HSN),)}
-
     def resolve_object_references(source, f=None):
         """ Check whether any key in `source` is a reference to a `name`d object.
         """
@@ -226,7 +211,20 @@ def deserialize_energy_system(cls, path,
 
         return source
 
-    resolve_object_references(data)
+    data['components'] = {
+        name: create(
+            typemap[element.get('type', DEFAULT)],
+            {'label': name,
+             'inputs': {
+                 data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
+                 for bus, kwargs in sorted(element['inputs'].items())},
+             'outputs': {
+                 data['buses'][bus]: flow(**remap(kwargs, attributemap, flow))
+                 for bus, kwargs in sorted(element['outputs'].items())}},
+            resolve_object_references(element['parameters'],
+                                      f=lambda r: r == 'buses'))
+        for name, element in sorted(data['elements'].items())
+        for flow in (typemap.get(FLOW_TYPE, HSN),)}
 
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
