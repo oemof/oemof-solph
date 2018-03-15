@@ -20,7 +20,7 @@ def read(fname):
 
 setup(name='oemof',
       version=oemof.__version__,
-      author='oemof developing group',
+      author='oemof developer group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
       url='https://oemof.org/',
