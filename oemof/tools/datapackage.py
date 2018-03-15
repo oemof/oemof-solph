@@ -204,8 +204,8 @@ def deserialize_energy_system(cls, path,
             if isinstance(name, str):
                 for resource in data:
                     if name in data[resource]:
-                        assert ("name" in data[resource][name] and
-                                data[resource][name]["name"] == name)
+                        assert (getattr(data[resource][name], "label", name) ==
+                                name)
                         found.append(data[resource][name])
                 assert len(found) <= 1
 
@@ -213,7 +213,7 @@ def deserialize_energy_system(cls, path,
                     source[key] = found[0]
 
             if isinstance(source[key], cabc.MutableMapping):
-                resolve_foreign_keys(source[key])
+                resolve_object_references(source[key])
 
         return source
 
