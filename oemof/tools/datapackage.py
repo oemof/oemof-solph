@@ -73,7 +73,7 @@ def deserialize_energy_system(cls, path,
             for name in r.headers}
         timeindices[r.name] = result['timeindex']
         result = {
-            name: pd.Series(result[name], index=timeindices[r.name])
+            name: result[name]
             for name in result
             if name != 'timeindex'}
         return result
