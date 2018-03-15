@@ -139,6 +139,10 @@ class CHP(Transformer):
 
         self.marginal_cost = kwargs.get('marginal_cost', 0)
 
+        self.investment_cost = kwargs.get('investment_cost', None)
+
+        self.investment = self._investment()
+
         self.conversion_factors.update({
             self.bus_el: sequence(self.efficiency_el),
             self.bus_th: sequence(self.efficiency_th)})
@@ -149,6 +153,7 @@ class CHP(Transformer):
         self.outputs.update({
             self.bus_el: Flow(nominal_value=self.capacity,
                               variable_costs=self.marginal_cost),
+                              investment=investment
             self.bus_th: Flow()})
 
 
