@@ -196,24 +196,33 @@ def deserialize_energy_system(cls, path,
         for name, element in data['elements'].items()
         for flow in (typemap.get(FLOW_TYPE, HSN),)}
 
-    def resolve_object_references(source):
+    def resolve_object_references(source, f=None):
         """ Check whether any key in `source` is a reference to a `name`d object.
         """
-        found = []
-        for key, name in source.items():
-            if isinstance(name, str):
-                for resource in data:
-                    if name in data[resource]:
-                        assert (getattr(data[resource][name], "label", name) ==
-                                name)
-                        found.append(data[resource][name])
+        def find(n, d):
+            found = []
+            for resource in d:
+                if n in d[resource]:
+                    assert getattr(d[resource][n], "label", n) == n
+                    found.append(d[resource][n])
                 assert len(found) <= 1
+            return found
 
+        filtered = {r: data[r] for r in data if (not f) or f(r)}
+        for key, name in source.items():
+            found = find(key, filtered)
+            if len(found) > 0:
+                v = source[key]
+                del source[key]
+                key = found[0]
+                source[key] = v
+            if isinstance(name, str):
+                found = find(name, filtered)
                 if len(found) > 0:
                     source[key] = found[0]
 
             if isinstance(source[key], cabc.MutableMapping):
-                resolve_object_references(source[key])
+                resolve_object_references(source[key], f=f)
 
         return source
 
