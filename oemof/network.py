@@ -210,11 +210,17 @@ class Node:
             if optional in kwargs:
                 setattr(self, '_' + optional, kwargs[optional])
         for i in kwargs.get('inputs', {}):
+            assert isinstance(i, Node), \
+                   "Input {} of {} not a Node, but a {}."\
+                   .format(i, self, type(i))
             try:
                 flow[i, self] = kwargs['inputs'].get(i)
             except AttributeError:
                 flow[i, self] = None
         for o in kwargs.get('outputs', {}):
+            assert isinstance(o, Node), \
+                   "Output {} of {} not a Node, but a {}."\
+                   .format(o, self, type(o))
             try:
                 flow[self, o] = kwargs['outputs'].get(o)
             except AttributeError:
