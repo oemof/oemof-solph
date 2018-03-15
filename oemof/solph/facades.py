@@ -137,11 +137,11 @@ class CHP(Transformer):
 
         self.efficiency_th = kwargs.get('efficiency_th', None)
 
-        self.maringal_cost = kwargs.get('maringal_cost', None)
+        self.maringal_cost = kwargs.get('maringal_cost', 0)
 
         self.conversion_factors.update({
-            self.bus_el: sequence(self.eta_el),
-            self.bus_th: sequence(self.eta_th)})
+            self.bus_el: sequence(self.efficiency_el),
+            self.bus_th: sequence(self.efficiency_th)})
 
         self.inputs.update({
             self.bus_fuel: Flow()})
