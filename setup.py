@@ -32,7 +32,7 @@ setup(name='oemof',
       install_requires=['dill <= 0.2.7.1',
                         'numpy >= 1.7.0, <= 1.14.2',
                         'pandas >= 0.18.0, <= 0.22',
-                        'pyomo >= 4.2.0, <= 5.4.3',
+                        'pyomo >= 4.4.0, <= 5.4.3',
                         'networkx <= 2.1',
                         'nose <= 1.3.7'],
       entry_points={
