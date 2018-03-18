@@ -200,7 +200,9 @@ class Conversion(Transformer, Facade):
 
         investment = self._investment()
 
+
         self.conversion_factors.update({
+            self.from_bus: sequence(1),
             self.to_bus: sequence(self.efficiency)})
 
         self.inputs.update({
