@@ -168,6 +168,11 @@ class GenericStorage(network.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
+    def constraint_group(self):
+        if isinstance(self.investment, Investment):
+            return GenericInvestmentStorageBlock
+        else:
+            return GenericStorageBlock
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
@@ -621,6 +626,9 @@ class GenericCHP(network.Transformer):
 
         return self._alphas
 
+    def constraint_group(self):
+        return GenericCHPBlock
+
 
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the relation of nodes with type class:`.GenericCHP`.
@@ -854,6 +862,8 @@ class ExtractionTurbineCHP(solph_Transformer):
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
+    def constraint_group(self):
+        return ExtractionTurbineCHPBlock
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -969,16 +979,3 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                             noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
-
-
-def component_grouping(node):
-    if isinstance(node, GenericStorage) and isinstance(node.investment,
-                                                       Investment):
-        return GenericInvestmentStorageBlock
-    if isinstance(node, GenericStorage) and not isinstance(node.investment,
-                                                           Investment):
-        return GenericStorageBlock
-    if isinstance(node, GenericCHP):
-        return GenericCHPBlock
-    if isinstance(node, ExtractionTurbineCHP):
-        return ExtractionTurbineCHPBlock
