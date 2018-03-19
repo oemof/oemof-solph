@@ -60,6 +60,8 @@ Bug fixes
     (`Issue #452 <https://github.com/oemof/oemof/issues/452>`_)
   * Adapt solph to API change in the Pyomo package.
     (`Issue #449 <https://github.com/oemof/oemof/issues/449>`_)
+  * Deserialized nodes are now serializable again any number of times.
+
 
 Testing
 #######
