@@ -38,14 +38,6 @@ New features
 
   * In `outputlib.views.node()`, an option for multiindex dataframe has been added.
 
-Fixes
-#####
-
-  * Deserializing a :class:`Node <oemof.network.Node>` leads to an object which
-    was no longer serializable. This is fixed now. :class:`Node
-    <oemof.network.Node>` instances should be able to be dumped and restored an
-    arbitraty amount of times.
-
 
 Documentation
 #############
@@ -70,8 +62,10 @@ Bug fixes
   * Console script `oemof_test_installation` has been fixed.
     (`Issue #452 <https://github.com/oemof/oemof/issues/452>`_)
   * Adapt solph to API change in the Pyomo package.
-    (`Issue #449 <https://github.com/oemof/oemof/issues/449>`_)
-  * Deserialized nodes are now serializable again any number of times.
+  * Deserializing a :class:`Node <oemof.network.Node>` leads to an object which
+    was no longer serializable. This is fixed now. :class:`Node
+    <oemof.network.Node>` instances should be able to be dumped and restored an
+    arbitraty amount of times.
   * Adding timesteps to index of constraint for component el-line
     fixes an issue with pyomo.
 
