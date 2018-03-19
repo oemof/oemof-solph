@@ -36,6 +36,7 @@ New features
     in a dictionary similar to the `results` dictionary.
     (`Issue #445 <https://github.com/oemof/oemof/issues/445>`_)
 
+  * In `outputlib.views.node()`, an option for multiindex dataframe has been added.
 
 Fixes
 #####
@@ -70,6 +71,9 @@ Bug fixes
     (`Issue #452 <https://github.com/oemof/oemof/issues/452>`_)
   * Adapt solph to API change in the Pyomo package.
     (`Issue #449 <https://github.com/oemof/oemof/issues/449>`_)
+  * Deserialized nodes are now serializable again any number of times.
+  * Adding timesteps to index of constraint for component el-line
+    fixes an issue with pyomo.
 
 
 Testing
@@ -92,7 +96,9 @@ Other changes
     (`Issue #442 <https://github.com/oemof/oemof/issues/442>`_)
   * Code of conduct was added.
     (`Issue #440 <https://github.com/oemof/oemof/issues/440>`_)
-
+  * Version of required packages is now limited to the most actual version 
+    (`Issue #464 <https://github.com/oemof/oemof/issues/464>`_)
+    
 
 Contributors
 ############
