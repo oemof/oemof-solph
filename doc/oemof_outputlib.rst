@@ -35,7 +35,7 @@ The scalars and sequences describe nodes (with keys like (node, None)) and flows
 .. code-block:: python
 
     views.convert_keys_to_strings(results)
-    print(results[(wind, bus_electricity)]['sequences']
+    print(results[('wind', 'bus_electricity')]['sequences']
     
 
 Another option is to access data belonging to a grouping by the name of the grouping 

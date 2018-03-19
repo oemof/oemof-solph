@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 
-"""TODO: Maybe add a docstring containing a long description for oemof?
+"""
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/setup.py
 
-  This would double as something we could put int the `long_description`
-  parameter for `setup` and it would squelch some complaints pylint has on
-  `setup.py`.
-
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from setuptools import find_packages, setup
@@ -20,20 +20,24 @@ def read(fname):
 
 setup(name='oemof',
       version=oemof.__version__,
-      author='oemof developing group',
+      author='oemof developer group',
       author_email='oemof@rl-institut.de',
       description='The open energy modelling framework',
       url='https://oemof.org/',
       namespace_package=['oemof'],
       long_description=read('README.rst'),
       packages=find_packages(),
-      package_data={'oemof': [os.path.join('tools', 'default_files', '*.ini')]},
-      install_requires=['dill',
-                        'numpy >= 1.7.0',
-                        'pandas >= 0.18.0',
-                        'pyomo >= 4.2.0, != 4.3.11377',
-                        'networkx'],
+      package_data={'oemof': [
+          os.path.join('tools', 'default_files', '*.ini')]},
+      install_requires=['dill <= 0.2.7.1',
+                        'numpy >= 1.7.0, <= 1.14.2',
+                        'pandas >= 0.18.0, <= 0.22',
+                        'pyomo >= 4.4.0, <= 5.4.3',
+                        'networkx <= 2.1',
+                        'nose <= 1.3.7'],
       entry_points={
           'console_scripts': [
               'oemof_installation_test = '
-              'tests.test_installation:check_oemof_installation']})
+              'oemof.tools.console_scripts:check_oemof_installation',
+              'test_oemof = '
+              'oemof.tools.console_scripts:test_oemof']})

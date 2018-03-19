@@ -11,10 +11,13 @@ groupings specified like this:
 
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/groupings.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from oemof.solph.network import Bus, Transformer
 from oemof.solph import blocks
@@ -32,7 +35,7 @@ def constraint_grouping(node):
     # `network` modules, resulting in having to do an import at runtime in the
     # init method of solph's `EnergySystem`. A better way would be to add a
     # method (maybe `constraints`, `constraint_group`, `constraint_type` or
-    # something like that) to solph's node hirarchy, which gets overriden in
+    # something like that) to solph's node hierarchy, which gets overridden in
     # each subclass to return the appropriate value. Then we can just call the
     # method here.
     # This even gives other users/us the ability to customize/extend how

@@ -6,9 +6,13 @@ Classes are derived from oemof core network classes and adapted for specific
 optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/network.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 import oemof.network as on
 import oemof.energy_system as es
@@ -68,12 +72,18 @@ class Flow:
         nominal\_value to get the absolute value. If fixed attr is set to True
         the flow variable will be fixed to actual_value * :attr:`nominal_value`
         , I.e. this value is set exogenous.
-    positive_gradient : numeric (sequence or scalar)
-        The normed maximal positive difference (flow[t-1] < flow[t])
-        of two consecutive flow values.
-    negative_gradient : numeric (sequence or scalar)
-        The normed maximum negative difference (from[t-1] > flow[t]) of two
-        consecutive timesteps.
+    positive_gradient : dictionary
+        Two obligate keys:
+        'ub': numeric (sequence, scalar or None), the normed maximal positive
+         difference (flow[t-1] < flow[t]) of two consecutive flow values
+         (ub = upper bound).
+        'costs': numeric (scalar or None), the gradient cost per unit.
+    negative_gradient : dictionary
+        Two obligate keys:
+        'ub': numeric (sequence, scalar or None), the normed maximal negative
+         difference (flow[t-1] > flow[t]) of two consecutive flow values
+         (ub = upper bound).
+        'costs': numeric (scalar or None), the gradient cost per unit.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
@@ -137,16 +147,16 @@ class Flow:
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'positive_gradient', 'negative_gradient',
-                     'variable_costs', 'min', 'max']
+        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+        dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
                     }
 
-        for attribute in set(scalars + sequences + list(kwargs)):
+        for attribute in set(scalars + sequences + dictionaries + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
-            if 'gradient' in attribute:
+            if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
             elif 'fixed_costs' in attribute:
@@ -212,13 +222,13 @@ class Transformer(on.Transformer):
     Defining an linear transformer:
 
     >>> from oemof import solph
-    >>> bgas = solph.Bus(label="natural_gas")
-    >>> bcoal = solph.Bus(label="hard_coal")
-    >>> bel = solph.Bus(label="electricity")
-    >>> bheat = solph.Bus(label="heat")
+    >>> bgas = solph.Bus(label='natural_gas')
+    >>> bcoal = solph.Bus(label='hard_coal')
+    >>> bel = solph.Bus(label='electricity')
+    >>> bheat = solph.Bus(label='heat')
 
     >>> trsf = solph.Transformer(
-    ...    label="pp_gas_1",
+    ...    label='pp_gas_1',
     ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5,
@@ -233,7 +243,7 @@ class Transformer(on.Transformer):
     ['hard_coal', 'natural_gas']
 
     >>> trsf_new = solph.Transformer(
-    ...    label="pp_gas_2",
+    ...    label='pp_gas_2',
     ...    inputs={bgas: solph.Flow()},
     ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5})

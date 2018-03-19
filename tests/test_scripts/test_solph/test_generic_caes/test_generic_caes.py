@@ -3,9 +3,14 @@
 Example that illustrates how to use custom component `GenericCHP` can be used.
 
 In this case it is used to model a combined cycle extraction turbine.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
+oemof/tests/test_scripts/test_solph/test_generic_caes/test_generic_caes.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 from nose.tools import eq_
 import os

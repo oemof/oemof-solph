@@ -4,10 +4,14 @@
 solve it with the solph module. Results are plotted with outputlib.
 
 Data: example_data.csv
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
+oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from nose.tools import eq_
 import os
@@ -60,7 +64,7 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     pp_coal = Transformer(label='pp_coal',
                           inputs={bcoal: Flow()},
                           outputs={bel: Flow(nominal_value=20.2,
-                                                   variable_costs=25)},
+                                             variable_costs=25)},
                           conversion_factors={bel: 0.39})
 
     pp_lig = Transformer(label='pp_lig',

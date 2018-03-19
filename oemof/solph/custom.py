@@ -3,10 +3,13 @@
 """This module is designed to hold custom components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
-"""
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/custom.py
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
@@ -170,7 +173,9 @@ class ElectricalLineBlock(SimpleBlock):
             # TODO: Make this robust to select the same slack bus for
             # the same problems
             bus = [b for b in self.ELECTRICAL_BUSES][0]
-            logging.info("No slack bus set,setting bus {0} as slack bus".format(bus.label))
+            logging.info(
+                "No slack bus set,setting bus {0} as slack bus".format(
+                    bus.label))
             bus.slack = True
 
         def _voltage_angle_relation(block):
@@ -192,9 +197,10 @@ class ElectricalLineBlock(SimpleBlock):
                     block._equate_electrical_flows.add((n, t), (
                         m.flow[n, O[n], t] == m.flow[I[n], n, t]))
 
-        self.electrical_flow = Constraint(group, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
 
-        self._equate_electrical_flows = Constraint(group, noruleinit=True)
+        self._equate_electrical_flows = Constraint(group, m.TIMESTEPS,
+                                                   noruleinit=True)
 
         self.electrical_flow_build = BuildAction(
                                          rule=_voltage_angle_relation)
@@ -303,7 +309,11 @@ class LinkBlock(SimpleBlock):
                                     cidx[0], cidx[1], n))
                         block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
-        self.relation = Constraint(group, noruleinit=True)
+        self.relation = Constraint(
+            [(n, cidx[0], cidx[1], t)
+             for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()
+             for cidx, c in conversion.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
@@ -783,7 +793,7 @@ def custom_component_grouping(node):
         return ElectricalLineBlock
     if isinstance(node, GenericCAES):
         return GenericCAESBlock
-    if type(node) is Link:
+    if isinstance(node, Link):
         return LinkBlock
     if isinstance(node, OffsetTransformer):
         return OffsetTransformerBlock
