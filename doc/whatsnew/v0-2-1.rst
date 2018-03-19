@@ -36,6 +36,7 @@ New features
     in a dictionary similar to the `results` dictionary.
     (`Issue #445 <https://github.com/oemof/oemof/issues/445>`_)
 
+  * In `outputlib.views.node()`, an option for multiindex dataframe has been added.
 
 Documentation
 #############
