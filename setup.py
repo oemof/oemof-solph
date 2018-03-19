@@ -42,10 +42,10 @@ setup(name='oemof',
               os.path.join('solph', 'storage_investment','*.csv')
           ],
             'oemof': [os.path.join('tools', 'default_files', '*.ini')]},
-      install_requires=['dill',
-                        'numpy >= 1.7.0',
-                        'pandas >= 0.18.0',
-                        'pyomo >= 4.2.0, != 4.3.11377',
+      install_requires=['dill <= 0.2.7.1',
+                        'numpy >= 1.7.0, < 1.15',
+                        'pandas >= 0.18.0, <= 0.22',
+                        'pyomo >= 4.2.0, != 4.3.11377, <=5.3',
                         'matplotlib'],
       entry_points={
           'console_scripts': [
