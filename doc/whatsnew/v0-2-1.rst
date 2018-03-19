@@ -61,8 +61,8 @@ Bug fixes
   * Adapt solph to API change in the Pyomo package.
     (`Issue #449 <https://github.com/oemof/oemof/issues/449>`_)
   * Deserialized nodes are now serializable again any number of times.
-  * Adding Timesteps to index of constraint for component el-line
-    fixes an issue with pyomo 
+  * Adding timesteps to index of constraint for component el-line
+    fixes an issue with pyomo.
 
 Testing
 #######
