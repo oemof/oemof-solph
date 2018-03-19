@@ -81,7 +81,8 @@ Other changes
   * Code of conduct was added.
     (`Issue #440 <https://github.com/oemof/oemof/issues/440>`_)
   * Version of required packages is now limited to the most actual version 
-
+    (`Issue #464 <https://github.com/oemof/oemof/issues/464>`_)
+    
 Contributors
 ############
 
