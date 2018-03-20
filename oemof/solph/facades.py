@@ -10,7 +10,7 @@ available from its original location oemof/oemof/solph/facades.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
-from oemof.solph import Source, Flow, Investment, Sink, Transformer
+from oemof.solph import Source, Flow, Investment, Sink, Transformer, Bus
 from oemof.solph.components import GenericStorage
 from oemof.solph.custom import Link
 from oemof.solph.plumbing import sequence
@@ -37,6 +37,73 @@ class Facade:
         return investment
 
 
+class Reservoir(GenericStorage, Facade):
+    """ Reservoir storage unit
+
+    Parameters
+    ----------
+    bus: oemof.solph.Bus
+        An oemof bus instance where the storage unit is connected to.
+    capacity: numeric
+        The total capacity of the storage (e.g. in MWh)
+    inflow: array-like
+        Absolute profile of water inflow into the storage
+    investment_cost: numeric
+        Investment costs for the storage capacity! unit e.g in €/MW-capacity
+    spillage: boolean
+        If True, spillage of water will be possible, otherwise water is forced
+        to storage. Default: True
+    """
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.capacity = kwargs.get('capacity')
+
+        self.nominal_capacity = self.capacity
+
+        self.investment_cost = kwargs.get('investment_cost')
+
+        self.bus = kwargs.get('bus')
+
+        self.inflow = kwargs.get('inflow')
+
+        self.spillage = kwargs.get('spillage', True)
+
+        self.investment = self._investment()
+
+        self.input_edge_parameters = kwargs.get('input_edge_parameters', {})
+
+        self.output_edge_parameters = kwargs.get('output_edge_parameters', {})
+
+        if self.investment:
+            investment = Investment()
+        else:
+            investment = None
+
+        # TODO: Ensure automatic adding of
+        water = Bus(label="water-bus")
+        water_inflow = Source(
+            label='water_inflow',
+            outputs={
+                water: Flow(nominal_value=max(self.inflow),
+                            actual_value=[i/max(self.inflow) for i in self.inflow])})
+        if self.spillage:
+            water_spillage = Sink(label='water-spillage',
+                                  inputs={water: Flow()})
+        else:
+            water_spillage = None
+
+        self.inputs.update({water: Flow(investment=investment,
+                                        **self.input_edge_parameters)})
+
+        self.outputs.update({self.bus: Flow(investment=investment,
+                                            **self.output_edge_parameters)})
+
+        self.subnodes = (water, water_inflow, water_spillage)
+
+
+
 class Generator(Source, Facade):
     """ Generator unit with one output, e.g. gas-turbine, wind-turbine, etc.
 
@@ -61,6 +128,9 @@ class Generator(Source, Facade):
         Investment costs per unit of capacity (e.g. Euro / MW) .
         If capacity is not set, this value will be used for optimizing the
         generators capacity.
+    amount: numeric
+        Total amount of produced energy for the time horizon of the model e.G.
+        in MWh (optional). Note: Either set `amount` or `capacity`!
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,6 +138,17 @@ class Generator(Source, Facade):
         self.bus = kwargs.get('bus', None)
 
         self.capacity = kwargs.get('capacity', None)
+
+        self.amount = kwargs.get('amount', None)
+
+        if self.capacity and if not self.amount:
+            nominal_value = self.capacity
+        elif self.amount and if not self.capacity:
+            nominmal_value = self.amount
+        else:
+            msg = ("Either set the capacity OR the amount for the generator" +
+                  " with name {}!")
+            raise ValueError(msg.format(self.label))
 
         self.dispatchable = kwargs.get('dispatchable', True)
 
@@ -81,7 +162,7 @@ class Generator(Source, Facade):
 
         investment = self._investment()
 
-        f = Flow(nominal_value=self.capacity,
+        f = Flow(nominal_value=nominal_value,
                  variable_costs=self.marginal_cost,
                  actual_value=self.profile,
                  investment=investment,
