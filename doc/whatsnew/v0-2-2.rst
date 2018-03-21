@@ -1,0 +1,44 @@
+v0.2.2 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+
+
+New features
+############
+
+
+
+New components
+##############
+
+
+
+Documentation
+#############
+
+
+Known issues
+############
+
+
+Bug fixes
+#########
+
+* Fix file extension check to dump a graph correctly as .graphml-file
+
+Testing
+#######
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+* Uwe Krien
