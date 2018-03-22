@@ -141,9 +141,9 @@ class Generator(Source, Facade):
 
         self.amount = kwargs.get('amount', None)
 
-        if self.capacity and if not self.amount:
+        if self.capacity and not self.amount:
             nominal_value = self.capacity
-        elif self.amount and if not self.capacity:
+        elif self.amount and not self.capacity:
             nominmal_value = self.amount
         else:
             msg = ("Either set the capacity OR the amount for the generator" +
