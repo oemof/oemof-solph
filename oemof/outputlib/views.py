@@ -77,6 +77,34 @@ def node(results, node, multiindex=False):
     return filtered
 
 
+def by_type(results, node_type=None):
+    """
+    """
+    results_by_type = {}
+    for k, v in results.items():
+        # get component type of edge (node)
+        key = type([kk for kk in k if kk is not None][0])
+        # set dict if key not present
+        results_by_type[key] = results_by_type.get(key, {})
+        # update dict by result entry
+        results_by_type[key].update({k: v})
+
+    # TODO: Do not exclude None values of tuple indices (e.g. of storages)
+    seq = pd.concat({
+                k: v['sequences']
+                for k, v in results_by_type[node_type].items()
+                if not None in k},
+                axis=1)
+
+    sca = pd.concat({
+            k: v['scalars']
+            for k, v in results_by_type[node_type].items()
+            if not None in k},
+            axis=1)
+
+    return {'sequences': seq, 'scalars': sca}
+
+
 class NodeOption(str, Enum):
     All = 'all'
     HasOutputs = 'has_outputs'
