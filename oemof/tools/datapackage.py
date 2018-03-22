@@ -41,6 +41,23 @@ def remap(attributes, translations, target_class):
             break
     return {translations.get(c, {}).get(k, k): v for k, v in attributes.items()}
 
+
+def sequences(r, timeindices=None):
+    """ Parses the resource `r` as a sequence.
+    """
+    result = {
+        name: [s[name]
+                for s in r.read(keyed=True)]
+        for name in r.headers}
+    if timeindices:
+        timeindices[r.name] = result['timeindex']
+    result = {
+        name: result[name]
+        for name in result
+        if name != 'timeindex'}
+    return result
+
+
 def deserialize_energy_system(cls, path,
                               typemap={'bus': Bus, 'hub': Bus,
                                        DEFAULT: Component,
@@ -64,24 +81,11 @@ def deserialize_energy_system(cls, path,
     resource = lambda r: package.get_resource(r) or empty
 
     timeindices = {}
-    def sequences(r):
-        """ Parses the resource `r` as a sequence.
-        """
-        result = {
-            name: [s[name]
-                   for s in r.read(keyed=True)]
-            for name in r.headers}
-        timeindices[r.name] = result['timeindex']
-        result = {
-            name: result[name]
-            for name in result
-            if name != 'timeindex'}
-        return result
 
     for r in package.resources:
         if all(re.match(r'^data/sequences/.*$', p)
                for p in listify(r.descriptor['path'], 1)):
-            data.update({r.name: sequences(r)})
+            data.update({r.name: sequences(r, timeindices)})
 
     data.update(
         {name: {r['name']: {key: r[key] for key in r}
