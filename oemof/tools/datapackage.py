@@ -116,6 +116,7 @@ def deserialize_energy_system(cls, path,
         if all(re.match(r'^data/sequences/.*$', p)
                for p in listify(r.descriptor['path'], 1)):
             data.update({r.name: sequences(r, timeindices)})
+    sequence_names = set(data.keys())
 
     data.update(
         {name: {r['name']: {key: r[key] for key in r}
@@ -194,6 +195,7 @@ def deserialize_energy_system(cls, path,
                             'parameters': data['hubs'].get(name, {})}
                      for name in bus_names}
 
+    objects = {}
     def create(cls, init, attributes):
         """ Creates an instance of `cls` and sets `attributes`.
         """
@@ -202,6 +204,9 @@ def deserialize_energy_system(cls, path,
         for k, v in remap(attributes, attributemap, cls).items():
             if not hasattr(instance, k):
                 setattr(instance, k, v)
+            name = getattr(instance, "name", getattr(instance, "label", None))
+            if name is not None:
+                objects[name] = instance
         return instance
 
     data['buses'] = {
@@ -259,6 +264,21 @@ def deserialize_energy_system(cls, path,
                                       f=lambda r: r == 'buses'))
         for name, element in sorted(data['elements'].items())
         for flow in (typemap.get(FLOW_TYPE, HSN),)}
+
+    facades = {}
+    for r in package.resources:
+        if all(re.match(r'^data/elements/.*$', p)
+               for p in listify(r.descriptor['path'], 1)):
+            r.read(keyed=True)
+            foreign_keys = {fk["fields"]: fk["reference"]
+                for fk in r.descriptor['schema'].get("foreignKeys", ())}
+            for facade in r.read(keyed=True, relations=True):
+                read_facade(facade, facades, create, typemap, data, objects,
+                            sequence_names,
+                            foreign_keys,
+                            resource)
+
+    return facades
 
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
