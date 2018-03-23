@@ -278,8 +278,6 @@ def deserialize_energy_system(cls, path,
                             foreign_keys,
                             resource)
 
-    return facades
-
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
         # TODO: Get frequency from meta data or calulate...
