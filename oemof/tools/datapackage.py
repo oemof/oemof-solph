@@ -284,11 +284,13 @@ def deserialize_energy_system(cls, path,
         es = (cls(timeindex=pd.DatetimeIndex(lst[0], freq='H'))
               if lst
               else cls())
+
         es.add(*chain(data['components'].values(),
                       data['buses'].values(),
-                      facades.values()))
+                      facades.values(),
+                      chain(*[f.subnodes for f in facades.values()
+                              if hasattr(f, 'subnodes')])))
         return es
 
     else:
         raise ValueError("Timeindices in sequence resources differ!")
-
