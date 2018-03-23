@@ -57,6 +57,36 @@ def sequences(r, timeindices=None):
         if name != 'timeindex'}
     return result
 
+def read_facade(facade, facades, create, typemap, data, objects,
+                sequence_names,
+                fks,
+                resources):
+    """ Parse the resource `r` as a facade.
+    """
+    for field, reference in fks.items():
+        if reference["resource"] in sequence_names:
+            facade[field] = data[reference["resource"]][facade[field]]
+        elif reference["fields"] in objects:
+            facade[field] = objects[facade[field]]
+        elif reference["fields"] in facades:
+            facade[field] = facades[facade[field]]
+        else:
+            foreign_keys = {fk["fields"]: fk["reference"]
+                for fk in (resources(reference["resource"])
+                           .descriptor['schema']
+                           .get("foreignKeys", ()))}
+            facade[field] = read_facade(
+                facade[field], facades, create, typemap, data, objects,
+                sequence_names, foreign_keys, resources)
+
+    mapping = typemap.get(facade.get('type'))
+    if mapping is None:
+        raise(ValueError("Typemap is missing a mapping for '{}'."
+                         .format(facade.get('type', '<MISSING TYPE>'))))
+    instance = create(mapping, facade, facade)
+    facades[facade["name"]] = instance
+    return instance
+
 
 def deserialize_energy_system(cls, path,
                               typemap={'bus': Bus, 'hub': Bus,
