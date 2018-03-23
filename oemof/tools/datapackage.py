@@ -285,7 +285,8 @@ def deserialize_energy_system(cls, path,
               if lst
               else cls())
         es.add(*chain(data['components'].values(),
-                      data['buses'].values()))
+                      data['buses'].values(),
+                      facades.values()))
         return es
 
     else:
