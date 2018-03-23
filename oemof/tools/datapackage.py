@@ -281,7 +281,9 @@ def deserialize_energy_system(cls, path,
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
         # TODO: Get frequency from meta data or calulate...
-        es = cls(timeindex=pd.DatetimeIndex(lst[0], freq='H'))
+        es = (cls(timeindex=pd.DatetimeIndex(lst[0], freq='H'))
+              if lst
+              else cls())
         es.add(*chain(data['components'].values(),
                       data['buses'].values()))
         return es
