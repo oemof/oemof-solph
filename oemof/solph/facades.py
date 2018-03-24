@@ -22,9 +22,11 @@ class Facade:
     def __init__(**kwargs):
         pass
 
+        self.subnodes = []
+
     def __str__(self):
         return self.__name__
-        
+
     def _investment(self):
         if self.capacity is None:
             if self.investment_cost is None:
@@ -85,15 +87,15 @@ class Reservoir(GenericStorage, Facade):
             investment = None
 
         # TODO: Ensure automatic adding of
-        water = Bus(label="water-bus")
+        water = Bus(label="water-bus-" + self.label)
         water_inflow = Source(
-            label='water-inflow',
+            label="water-inflow" + self.label,
             outputs={
                 water: Flow(nominal_value=max(self.inflow),
                             #i/max(self.inflow) for i in self.inflow
                             actual_value=[1])})
         if self.spillage:
-            water_spillage = Sink(label='water-spillage',
+            water_spillage = Sink(label="water-spillage" + self.label,
                                   inputs={water: Flow()})
         else:
             water_spillage = None
