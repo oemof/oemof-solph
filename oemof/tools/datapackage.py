@@ -49,7 +49,7 @@ def sequences(r, timeindices=None):
         name: [s[name]
                 for s in r.read(keyed=True)]
         for name in r.headers}
-    if timeindices:
+    if timeindices is not None:
         timeindices[r.name] = result['timeindex']
     result = {
         name: result[name]
