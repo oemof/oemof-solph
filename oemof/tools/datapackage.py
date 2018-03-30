@@ -79,8 +79,8 @@ def read_facade(facade, facades, create, typemap, data, objects,
             facade[field] = read_facade(
                 facade[field], facades, create, typemap, data, objects,
                 sequence_names, foreign_keys, resources)
-
-    mapping = typemap.get(facade.get('type'))
+    # TODO: Do we really want to strip whitespace?  
+    mapping = typemap.get(facade.get('type').strip())
     if mapping is None:
         raise(ValueError("Typemap is missing a mapping for '{}'."
                          .format(facade.get('type', '<MISSING TYPE>'))))
