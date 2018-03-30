@@ -90,10 +90,26 @@ def read_facade(facade, facades, create, typemap, data, objects,
 
 
 def deserialize_energy_system(cls, path,
-                              typemap={'bus': Bus, 'hub': Bus,
-                                       DEFAULT: Component,
-                                       FLOW_TYPE: HSN},
-                              attributemap={object: {'name': 'label'}}):
+                              typemap={},
+                              attributemap={}):
+
+    default_typemap = {'bus': Bus,
+                       'hub': Bus,
+                       DEFAULT: Component,
+                       FLOW_TYPE: HSN}
+
+    for k, v in default_typemap.items():
+        typemap[k] = typemap.get(k, v)
+
+    if attributemap.get(object) is None:
+        attributemap[object] = {'name': 'label'}
+
+    for k, v in attributemap.items():
+        if v.get('name') is None:
+            attributemap[k]['name'] = 'label'
+
+
+
     package = datapackage.Package(path)
     # This is necessary because before reading a resource for the first
     # time its `headers` attribute is `None`.
