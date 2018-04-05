@@ -1,6 +1,7 @@
 """ Tools to work with deserialize energy systems from datapackages.
 """
 
+from decimal import Decimal
 from itertools import chain, groupby, repeat
 import collections.abc as cabc
 import json
@@ -46,7 +47,7 @@ def sequences(r, timeindices=None):
     """ Parses the resource `r` as a sequence.
     """
     result = {
-        name: [s[name]
+        name: [float(s[name]) if isinstance(s[name], Decimal) else s[name]
                 for s in r.read(keyed=True)]
         for name in r.headers}
     if timeindices is not None:
