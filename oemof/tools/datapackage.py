@@ -48,7 +48,7 @@ def sequences(r, timeindices=None):
     """
     result = {
         name: [float(s[name]) if isinstance(s[name], Decimal) else s[name]
-                for s in r.read(keyed=True)]
+               for s in r.read(keyed=True)]
         for name in r.headers}
     if timeindices is not None:
         timeindices[r.name] = result['timeindex']
