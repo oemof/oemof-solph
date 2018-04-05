@@ -63,6 +63,8 @@ def read_facade(facade, facades, create, typemap, data, objects,
                 resources):
     """ Parse the resource `r` as a facade.
     """
+    if 'name' in facade and facade['name'] in facades:
+        return facades[facade['name']]
     for field, reference in fks.items():
         if reference["resource"] in sequence_names:
             # if referenc not found -> set field value to None
