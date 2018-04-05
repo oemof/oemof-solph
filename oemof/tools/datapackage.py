@@ -67,10 +67,10 @@ def read_facade(facade, facades, create, typemap, data, objects,
         if reference["resource"] in sequence_names:
             # if referenc not found -> set field value to None
             facade[field] = data[reference["resource"]].get(facade[field])
-        elif reference["fields"] in objects:
-            facade[field] = objects[facade[field]]
-        elif reference["fields"] in facades:
-            facade[field] = facades[facade[field]]
+        elif facade[field][reference['fields']] in objects:
+            facade[field] = objects[facade[field][reference['fields']]]
+        elif facade[field][reference['fields']] in facades:
+            facade[field] = facades[facade[field][reference['fields']]]
         else:
             foreign_keys = {fk["fields"]: fk["reference"]
                 for fk in (resources(reference["resource"])
