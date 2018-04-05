@@ -307,9 +307,9 @@ class Demand(Sink):
      Parameters
      ----------
      bus: oemof.solph.Bus
-         An oemof bus instance where the demand is connected to.
+         The oemof bus instance the demand is connected to.
      amount: numeric
-         The total amount for the timehorzion (e.g. in MWh)
+         The total amount for the timehorizon (e.g. in MWh)
      profile: array-like
           Demand profile with normed values such that `profile[t] * amount`
           yields the demand in timestep t
@@ -337,7 +337,7 @@ class Storage(GenericStorage, Facade):
     Parameters
     ----------
     bus: oemof.solph.Bus
-        An oemof bus instance where the storage unit is connected to.
+        The oemof bus instance the storage unit is connected to.
     capacity: numeric
         The total capacity of the storage (e.g. in MWh)
     c_rate: numeric
