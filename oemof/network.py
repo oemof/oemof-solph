@@ -196,8 +196,7 @@ class Node:
     __slots__ = ["__weakref__", "_label", "_inputs", "_state"]
 
     def __init__(self, *args, **kwargs):
-        self._state = (args, kwargs)
-        self.__setstate__(self._state)
+        self.__setstate__((args, kwargs))
         if __class__.registry is not None:
             __class__.registry.add(self)
 
@@ -205,6 +204,7 @@ class Node:
         return self._state
 
     def __setstate__(self, state):
+        self._state = state
         args, kwargs = state
         for optional in ['label']:
             if optional in kwargs:
