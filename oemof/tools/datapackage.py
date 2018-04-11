@@ -64,6 +64,15 @@ def read_facade(facade, facades, create, typemap, data, objects,
                 resources):
     """ Parse the resource `r` as a facade.
     """
+    # TODO: Make sure the class var 'required' exists
+    if hasattr(typemap[facade['type']], 'required'):
+        for r in typemap[facade['type']].required:
+            if facade[r] is None:
+                raise AttributeError(
+                    ("Missing attribute `{}` for facade of type `{}` with" +
+                     " name/label `{}`.").\
+                        format(str(r), facade['type'], facade['name']))
+
     if 'name' in facade and facade['name'] in facades:
         return facades[facade['name']]
     for field, reference in fks.items():
