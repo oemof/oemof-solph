@@ -67,7 +67,7 @@ def read_facade(facade, facades, create, typemap, data, objects,
     # TODO: Make sure the class var 'required' exists
     if hasattr(typemap[facade['type']], 'required'):
         for r in typemap[facade['type']].required:
-            if facade[r] is None:
+            if facade.get(r) is None:
                 raise AttributeError(
                     ("Missing attribute `{}` for facade of type `{}` with" +
                      " name/label `{}`.").\
