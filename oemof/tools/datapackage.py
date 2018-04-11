@@ -302,6 +302,11 @@ def deserialize_energy_system(cls, path,
             foreign_keys = {fk["fields"]: fk["reference"]
                 for fk in r.descriptor['schema'].get("foreignKeys", ())}
             for facade in r.read(keyed=True, relations=True):
+                # convert decimal to float
+                for f, v in facade.items():
+                    if isinstance(v, Decimal):
+                        facade[f] = float(v)
+
                 read_facade(facade, facades, create, typemap, data, objects,
                             sequence_names,
                             foreign_keys,
