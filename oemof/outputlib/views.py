@@ -148,3 +148,24 @@ def get_node_by_name(results, *names):
     else:
         node_names = {str(n): n for n in nodes}
         return [node_names.get(n, None) for n in names]
+
+
+def node_weight_by_type(results, node_type=None):
+    """
+    """
+
+    group = {k: v['sequences'] for k,v in results.items()
+             if isinstance(k[0], node_type) and k[1] is None}
+    df = pd.concat(group.values(), axis=1)
+    cols = {k: [c for c in v.columns]
+            for k, v in group.items()}
+    cols = [tuple((k, m) for m in v) for k, v in cols.items()]
+    cols = [c for sublist in cols for c in sublist]
+    idx = pd.MultiIndex.from_tuples(
+                        [tuple([col[0][0], col[0][1], col[1]])
+                         for col in cols])
+    idx.set_names(['node_type', 'to', 'weight_type'], inplace=True)
+    df.columns = idx
+    df.columns = df.columns.droplevel([1])
+
+    return df
