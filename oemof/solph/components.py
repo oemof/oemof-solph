@@ -950,7 +950,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                          g.main_flow_loss_index[t]) /
                         g.conversion_factor_full_condensation_sq[t]
                         )
-                    block.input_output_relation.add((n, t), (lhs == rhs))
+                    block.input_output_relation.add((g, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, m.TIMESTEPS,
                                                 noruleinit=True)
         self.input_output_relation_build = BuildAction(
