@@ -9,8 +9,11 @@ available from its original location oemof/oemof/solph/plumbing.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import operator
 from collections import abc, UserList
 from itertools import repeat
+from numpy import array
+from copy import deepcopy
 
 
 def sequence(sequence_or_scalar):
@@ -67,6 +70,8 @@ class _Sequence(UserList):
     >>> s[0] = 23
     >>> s
     [23, 42, 42]
+    >>> [s[i] for i in range(5)]
+    [23, 42, 42, 42, 42]
     >>> sl = _Sequence([1, 2, 3])
     >>> sl[2]
     3
@@ -81,7 +86,7 @@ class _Sequence(UserList):
         else:
             self.default_changed = False
             self.highest_index = -1
-        super().__init__(*args)
+        super(_Sequence, self).__init__(*args)
 
     def __getitem__(self, key):
         if self.real_list:
@@ -125,3 +130,59 @@ class _Sequence(UserList):
             return super(_Sequence, self).__iter__()
         else:
             return repeat(self.default, self.highest_index + 1)
+
+    def __operate_sequences(self, other, op: operator):
+        if not (self.default_changed or other.default_changed):
+            return _Sequence(default=op(self.default, other.default))
+        if not (self.real_list or other.real_list):
+            length = max(len(self), len(other))
+            new = deepcopy(self)
+            new.data = list(op(
+                array([self[i] for i in range(length)]),
+                array([other[i] for i in range(length)])
+            ))
+            new.default = op(self.default, other.default)
+            return new
+        # At least one sequence contains a real list:
+        length = max(len(self), len(other))
+        new = deepcopy(self)
+        try:
+            new.data = list(op(
+                array([self[i] for i in range(length)]),
+                array([other[i] for i in range(length)])
+            ))
+        except IndexError:
+            raise IndexError(
+                'Sequences contain data with different lengths')
+        new.real_list = True
+        new.default = None
+        return new
+
+    def __add__(self, other):
+        if not isinstance(other, _Sequence):
+            return super(_Sequence, self).__add__(other)
+        # If other is Sequence:
+        op = operator.add
+        return self.__operate_sequences(other, op)
+
+    def __sub__(self, other):
+        if not isinstance(other, _Sequence):
+            return super(_Sequence, self).__add__(other)
+        # If other is Sequence:
+        op = operator.sub
+        return self.__operate_sequences(other, op)
+
+    def __mul__(self, other):
+        if not isinstance(other, _Sequence):
+            return super(_Sequence, self).__add__(other)
+        # If other is Sequence:
+        op = operator.mul
+        return self.__operate_sequences(other, op)
+
+    def __truediv__(self, other):
+        if not isinstance(other, _Sequence):
+            return super(_Sequence, self).__add__(other)
+        # If other is Sequence:
+        op = operator.truediv
+        return self.__operate_sequences(other, op)
+
