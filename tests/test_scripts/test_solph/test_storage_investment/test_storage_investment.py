@@ -136,8 +136,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     eq_(str(meta['solver']['Status']), 'ok')
 
     # Problem results
-    eq_(meta['problem']['Lower bound'], 4.231675777e+17)
-    eq_(meta['problem']['Upper bound'], 4.231675777e+17)
+    eq_(meta['problem']['Lower bound'], 4.2316758e+17)
+    eq_(meta['problem']['Upper bound'], 4.2316758e+17)
     eq_(meta['problem']['Number of variables'], 2804)
     eq_(meta['problem']['Number of constraints'], 2805)
     eq_(meta['problem']['Number of nonzeros'], 7606)
