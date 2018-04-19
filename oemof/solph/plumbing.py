@@ -39,7 +39,7 @@ def sequence(sequence_or_scalar):
     """
     if (isinstance(sequence_or_scalar, abc.Iterable) and not
             isinstance(sequence_or_scalar, str)):
-        return sequence_or_scalar
+        return _Sequence(sequence_or_scalar)
     else:
         return _Sequence(default=sequence_or_scalar)
 
@@ -65,15 +65,25 @@ class _Sequence(UserList):
     >>> s[0] = 23
     >>> s
     [23, 42, 42]
-
+    >>> sl = _Sequence([1, 2, 3])
+    >>> sl[2]
+    3
     """
     def __init__(self, *args, **kwargs):
-        self.default = kwargs["default"]
-        self.default_changed = False
-        self.highest_index = -1
+        self.default = kwargs.get('default')
+        self.real_list = False
+        if 'default' not in kwargs:
+            self.real_list = True
+            self.default_changed = True
+            self.highest_index = len(args) - 1
+        else:
+            self.default_changed = False
+            self.highest_index = -1
         super().__init__(*args)
 
     def __getitem__(self, key):
+        if self.real_list:
+            return super(_Sequence, self).__getitem__(key)
         self.highest_index = max(self.highest_index, key)
         if not self.default_changed:
             return self.default
@@ -84,6 +94,8 @@ class _Sequence(UserList):
             return self.data[key]
 
     def __setitem__(self, key, value):
+        if self.real_list:
+            return super(_Sequence, self).__setitem__(key, value)
         if not self.default_changed:
             self.default_changed = True
             self.__init_list()
