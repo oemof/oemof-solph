@@ -26,6 +26,8 @@ def sequence(sequence_or_scalar):
     --------
     >>> sequence([1,2])
     [1, 2]
+    >>> sequence(2)
+    2
 
     >>> x = sequence(10)
     >>> x[0]
@@ -111,6 +113,8 @@ class _Sequence(UserList):
     def __repr__(self):
         if self.default_changed:
             return super(_Sequence, self).__repr__()
+        if self.highest_index < 0:
+            return str(self.default)
         return str([i for i in self])
 
     def __len__(self):
