@@ -333,7 +333,14 @@ class Constraint_Tests:
         bgas = solph.Bus(label='commodityBus')
 
         solph.components.ExtractionTurbineCHP(
-            label='variable_chp_gas',
+            label='variable_chp_gas1',
+            inputs={bgas: solph.Flow(nominal_value=100)},
+            outputs={bel: solph.Flow(), bth: solph.Flow()},
+            conversion_factors={bel: 0.3, bth: 0.5},
+            conversion_factor_full_condensation={bel: 0.5})
+
+        solph.components.ExtractionTurbineCHP(
+            label='variable_chp_gas2',
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
