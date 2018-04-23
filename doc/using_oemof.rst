@@ -59,9 +59,9 @@ oemof-solph
 The :ref:`oemof_solph_label` library is part of the oemof installation. Solph is designed to create and solve linear or mixed-integer 
 linear optimization problems. It is based on optimization modelling language pyomo.
 
-To use solph at least one linear solver has to be installed on you system. See the `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_ to learn which solvers are supported. Solph is tested with the open source solver `cbc` and the `gurobi` solver (free for academic use). The open `glpk` solver recently showed some odd behaviour.
+To use solph at least one linear solver has to be installed on your system. See the `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_ to learn which solvers are supported. Solph is tested with the open source solver `cbc` and the `gurobi` solver (free for academic use). The open `glpk` solver recently showed some odd behaviour.
 
-The formulation of the energy system is based on the oemof-network library but contains additional components such as storages. Furthermore the network class are enhanced with additional parameters such as efficiencies, bounds, cost and more. See the API documentation for more details. Try the `solph examples <https://github.com/oemof/oemof/tree/master/examples>`_ to learn how to build a linear energy system.
+The formulation of the energy system is based on the oemof-network library but contains additional components such as storages. Furthermore the network class are enhanced with additional parameters such as efficiencies, bounds, cost and more. See the API documentation for more details. Try the `solph examples <https://github.com/oemof/oemof_examples>`_ to learn how to build a linear energy system.
 
 oemof-outputlib
 ===============
