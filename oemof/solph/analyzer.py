@@ -8,16 +8,18 @@ default function is called.
 """
 
 from warnings import warn
-from collections import OrderedDict
+from collections import OrderedDict, abc
 from oemof.network import Node
+from oemof.outputlib import views
 
 
 def init(results=None, param_results=None):
     Analysis(results, param_results)
 
 
-def analyze(*args):
-    Analysis().analyze(*args)
+def analyze():
+    for element in Analysis():
+        Analysis().analyze(*element)
 
 
 def clean():
@@ -37,13 +39,41 @@ class Analysis(object):
     Holds chain for all analyzers. Is implemented as singleton.
     """
     class __Analysis:
-        def __init__(self, results, param_results):
+        def __init__(self, results, param_results, iterator=None):
             self.results = results
             self.param_results = param_results
+            self.iterator = (
+                TupleIterator if iterator is None else iterator)
             self.chain = OrderedDict()
 
         def clean(self):
             self.chain = OrderedDict()
+
+        def check_requirements(self, component):
+            """
+            Checks if requirements are fullfilled
+
+            Function can be used by Analyzer and Iterator objects
+            """
+            if component.requires is not None:
+                for req in component.requires:
+                    if getattr(self, req) is None:
+                        raise RequirementError(
+                            'Component "' + component.__class__.__name__ +
+                            '" requires "' + req + '" to perform. Please '
+                            'initialize it with attribute "' + req + '".'
+                        )
+
+        def check_dependencies(self, analyzer):
+            if analyzer.depends_on is not None:
+                for dep in analyzer.depends_on:
+                    if dep.__name__ not in self.chain:
+                        raise DependencyError(
+                            'Analyzer "' + analyzer.__class__.__name__ +
+                            '" depends on analyzer "' + dep.__name__ + '". ' +
+                            'Please initialize analyzer "' + dep.__name__ +
+                            '" first.'
+                        )
 
         def add_to_chain(self, analyzer):
             if analyzer.__class__.__name__ in self.chain:
@@ -59,6 +89,9 @@ class Analysis(object):
             for analyzer in self.chain.values():
                 analyzer.analyze(*args)
 
+        def __iter__(self):
+            return self.iterator(self)
+
     singleton = None
 
     def __new__(cls, results=None, param_results=None):
@@ -73,10 +106,10 @@ class Analyzer(object):
 
     def __init__(self):
         self.analysis = Analysis()
+        self.analysis.check_requirements(self)
+        self.analysis.check_dependencies(self)
         self.analysis.add_to_chain(self)
         self.result = {}
-        self.__check_requirements()
-        self.__check_dependencies()
 
     def _get_dep(self, shortname):
         """
@@ -94,7 +127,7 @@ class Analyzer(object):
         dict: Result dictionary of dependent analyzer
         """
         if not isinstance(self.depends_on, dict):
-            raise TypeError(
+            raise DependencyError(
                 'Dependencies are not shortnamed. Consider converting '
                 'attribute "depends_on" into dict to support shortnaming '
                 'dependencies.'
@@ -103,7 +136,7 @@ class Analyzer(object):
             dep = list(self.depends_on.keys())[
                 list(self.depends_on.values()).index(shortname)]
         except ValueError:
-            raise ValueError(
+            raise DependencyError(
                 'Dependency shortname "' + shortname +
                 '" not found in analyzer "' + self.__class__.__name__ + '".')
         else:
@@ -125,79 +158,102 @@ class Analyzer(object):
                 args[1] is None
         )
 
-    def __check_requirements(self):
-        if self.requires is not None:
-            for req in self.requires:
-                if getattr(self.analysis, req) is None:
-                    raise RequirementError(
-                        'Analyzer requires "' + req + '" to perform. ' +
-                        'Please initialize analyser with attribute "' + req +
-                        '".'
-                    )
-
-    def __check_dependencies(self):
-        if self.depends_on is not None:
-            for dep in self.depends_on:
-                if dep.__name__ not in self.analysis.chain:
-                    raise DependencyError(
-                        'Analyzer "' + self.__class__.__name__ +
-                        '" depends on analyzer "' + dep + '". ' +
-                        'Please initialize analyzer "' + dep + '" first.'
-                    )
-
-    def analyze(self, args):
+    def analyze(self, *args):
         pass
-
-    def __str__(self):
-        return str(self.result)
 
 
 class SequenceFlowSumAnalyzer(Analyzer):
     requires = ('results',)
 
     def analyze(self, *args):
-        if self._arg_is_flow(args):
-            flow = tuple(args)
-            self.result[flow] = (
-                self.analysis.results[flow]['sequences']['flow'].sum())
+        try:
+            self.result[args] = (
+                self.analysis.results[args]['sequences']['flow'].sum())
+        except KeyError:
+            return
 
 
-class NodeAnalyzer(Analyzer):
-    requires = ('param_results',)
-    depends_on = (SequenceFlowSumAnalyzer,)
+class InvestAnalyzer(Analyzer):
+    requires = ('results', 'param_results',)
 
     def analyze(self, *args):
+        try:
+            invest = (
+                self.analysis.param_results[args]['scalars']
+                ['investment_ep_costs']
+            )
+        except KeyError:
+            return
+
+        try:
+            ep_costs = (
+                self.analysis.results[args]['scalars']['invest'])
+        except KeyError:
+            return
+        self.result[args] = invest * ep_costs
+
+
+class FlowTypeAnalyzer(Analyzer):
+    def analyze(self, *args):
         if self._arg_is_node(args):
-            node = args[0]
-            try:
-                self.result[node] = (
-                    self.analysis.param_results[(node, None)]['scalars']
-                    ['conversion_factors_b_el'])
-            except KeyError:
-                return
+            self.result[args] = views.get_flow_type(
+                args[0], self.analysis.results)
 
 
 class OpexAnalyzer(Analyzer):
     requires = ('param_results',)
-    depends_on = {SequenceFlowSumAnalyzer: 'seq'}
+    depends_on = {SequenceFlowSumAnalyzer: 'seq', FlowTypeAnalyzer: 'ft'}
 
     def analyze(self, *args):
-        if (
-                len(args) == 2 and
-                isinstance(args[0], Node) and
-                isinstance(args[1], Node)
-        ):
-            node = args[0]
-            try:
-                conv_factor = (
-                    self.analysis.param_results[(node, None)]['scalars']
-                    ['conversion_factors_b_el'])
-            except KeyError:
-                return
+        if not self._arg_is_node(args):
+            return
 
-            try:
-                flow = self._get_dep('seq')[args]
-            except KeyError:
-                return
+        ft = self._get_dep('ft')
+        try:
+            conv_factor = (
+                self.analysis.param_results[args]['scalars']
+                ['conversion_factors_b_el1'])
+        except KeyError:
+            return
 
-            self.result[node] = flow * conv_factor
+        try:
+            flow = self._get_dep('seq')[args]
+        except KeyError:
+            return
+
+        self.result[args] = flow * conv_factor
+
+
+class Iterator(abc.Iterator):
+    requires = None
+
+    def __init__(self, analysis):
+        analysis.check_requirements(self)
+        self.index = 0
+
+    def __next__(self):
+        try:
+            result = self.items[self.index]
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return result
+
+
+class TupleIterator(Iterator):
+    def __init__(self, analysis):
+        super(TupleIterator, self).__init__(analysis)
+        self.items = [
+            node
+            for node in analysis.param_results
+        ]
+
+
+class NodeIterator(Iterator):
+    def __init__(self, analysis):
+        super(NodeIterator, self).__init__(analysis)
+        self.items = [
+            node1
+            for (node1, node2) in analysis.param_results
+            if node2 is None
+        ]
