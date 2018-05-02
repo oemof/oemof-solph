@@ -45,18 +45,31 @@ def constraint_grouping(node):
     if type(node) == Transformer:
         return blocks.Transformer
 
+standard_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.Flow)
+
+def _investment_grouping(stf):
+    if hasattr(stf[2], 'investment'):
+        if stf[2].investment is not None:
+            return True
+    else:
+        return False
 
 investment_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.InvestmentFlow,
     # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
-    filter=lambda stf: stf[2].investment is not None)
+    filter=_investment_grouping)
 
-standard_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.Flow)
+def _nonconvex_grouping(stf):
+    if hasattr(stf[2], 'nonconvex'):
+        if stf[2].nonconvex is not None:
+            return True
+    else:
+        return False
 
 nonconvex_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.NonConvexFlow,
-    filter=lambda stf: stf[2].nonconvex is not None)
+    filter=_nonconvex_grouping)
 
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
