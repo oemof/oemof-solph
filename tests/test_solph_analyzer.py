@@ -11,7 +11,11 @@ class Analyzer_Tests:
             es_with_invest.optimization_model)
         self.param_results = processing.param_results(
             es_with_invest.optimization_model)
-        analyzer.init(self.results, self.param_results)
+        analyzer.init(
+            self.results,
+            self.param_results,
+            iterator=analyzer.TupleIterator
+        )
 
     def test_simple_analyzer(self):
         analyzer.clean()

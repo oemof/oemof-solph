@@ -13,8 +13,8 @@ from oemof.network import Node
 from oemof.outputlib import views
 
 
-def init(results=None, param_results=None):
-    Analysis(results, param_results)
+def init(results=None, param_results=None, iterator=None):
+    Analysis(results, param_results, iterator)
 
 
 def analyze():
@@ -39,7 +39,7 @@ class Analysis(object):
     Holds chain for all analyzers. Is implemented as singleton.
     """
     class __Analysis:
-        def __init__(self, results, param_results, iterator=None):
+        def __init__(self, results, param_results, iterator):
             self.results = results
             self.param_results = param_results
             self.iterator = (
@@ -48,6 +48,19 @@ class Analysis(object):
 
         def clean(self):
             self.chain = OrderedDict()
+
+        def check_iterator(self, analyzer):
+            if analyzer.required_iterator is None:
+                return
+            if self.iterator != analyzer.required_iterator:
+                raise RequirementError(
+                    'Analyzer "' + analyzer.__class__.__name__ +
+                    '" requires iterator "' +
+                    analyzer.required_iterator.__name__ +
+                    '" to work correctly. Please initialize analysis object '
+                    'with iterator "' + analyzer.required_iterator.__name__ +
+                    '".'
+                )
 
         def check_requirements(self, component):
             """
@@ -94,19 +107,61 @@ class Analysis(object):
 
     singleton = None
 
-    def __new__(cls, results=None, param_results=None):
+    def __new__(cls, results=None, param_results=None, iterator=None):
         if not Analysis.singleton:
-            Analysis.singleton = Analysis.__Analysis(results, param_results)
+            Analysis.singleton = Analysis.__Analysis(
+                results, param_results, iterator)
         return Analysis.singleton
+
+
+class Iterator(abc.Iterator):
+    """
+    Iterator for Analysis (uses Iterator Pattern)
+    """
+    requires = None
+
+    def __init__(self, analysis):
+        analysis.check_requirements(self)
+        self.items = None
+        self.index = 0
+
+    def __next__(self):
+        try:
+            result = self.items[self.index]
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return result
+
+
+class TupleIterator(Iterator):
+    def __init__(self, analysis):
+        super(TupleIterator, self).__init__(analysis)
+        self.items = [
+            node
+            for node in analysis.param_results
+        ]
+
+
+class NodeIterator(Iterator):
+    def __init__(self, analysis):
+        super(NodeIterator, self).__init__(analysis)
+        self.items = [
+            node
+            for node in analysis.param_results
+            if node[1] is None
+        ]
 
 
 class Analyzer(object):
     requires = None
+    required_iterator = None
     depends_on = None
 
     def __init__(self):
         self.analysis = Analysis()
         self.analysis.check_requirements(self)
+        self.analysis.check_iterator(self)
         self.analysis.check_dependencies(self)
         self.analysis.add_to_chain(self)
         self.result = {}
@@ -202,6 +257,7 @@ class FlowTypeAnalyzer(Analyzer):
 
 class OpexAnalyzer(Analyzer):
     requires = ('param_results',)
+    required_iterator = TupleIterator
     depends_on = {SequenceFlowSumAnalyzer: 'seq', FlowTypeAnalyzer: 'ft'}
 
     def analyze(self, *args):
@@ -222,38 +278,3 @@ class OpexAnalyzer(Analyzer):
             return
 
         self.result[args] = flow * conv_factor
-
-
-class Iterator(abc.Iterator):
-    requires = None
-
-    def __init__(self, analysis):
-        analysis.check_requirements(self)
-        self.index = 0
-
-    def __next__(self):
-        try:
-            result = self.items[self.index]
-        except IndexError:
-            raise StopIteration
-        self.index += 1
-        return result
-
-
-class TupleIterator(Iterator):
-    def __init__(self, analysis):
-        super(TupleIterator, self).__init__(analysis)
-        self.items = [
-            node
-            for node in analysis.param_results
-        ]
-
-
-class NodeIterator(Iterator):
-    def __init__(self, analysis):
-        super(NodeIterator, self).__init__(analysis)
-        self.items = [
-            node1
-            for (node1, node2) in analysis.param_results
-            if node2 is None
-        ]
