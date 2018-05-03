@@ -134,6 +134,20 @@ class Iterator(abc.Iterator):
         return result
 
 
+class FlowNodeIterator(Iterator):
+    def __init__(self, analysis):
+        super(FlowNodeIterator, self).__init__(analysis)
+        self.items = [
+            node
+            for node in analysis.param_results
+            if node[1] is not None
+        ] + [
+            node
+            for node in analysis.param_results
+            if node[1] is None
+        ]
+
+
 class TupleIterator(Iterator):
     def __init__(self, analysis):
         super(TupleIterator, self).__init__(analysis)
