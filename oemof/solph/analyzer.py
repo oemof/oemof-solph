@@ -9,7 +9,7 @@ default function is called.
 
 from warnings import warn
 from collections import OrderedDict, abc
-from oemof.network import Node
+from oemof.network import Node, Bus
 from oemof.outputlib import views
 
 
@@ -248,8 +248,8 @@ class SequenceFlowSumAnalyzer(Analyzer):
 
     def analyze(self, *args):
         try:
-            self.result[args] = (
-                self.analysis.results[args]['sequences']['flow'].sum())
+            rsq = self.rsq(args)
+            self.result[args] = rsq['flow'].sum()
         except KeyError:
             return
 
@@ -259,16 +259,10 @@ class InvestAnalyzer(Analyzer):
 
     def analyze(self, *args):
         try:
-            invest = (
-                self.analysis.param_results[args]['scalars']
-                ['investment_ep_costs']
-            )
-        except KeyError:
-            return
-
-        try:
-            ep_costs = (
-                self.analysis.results[args]['scalars']['invest'])
+            psc = self.psc(args)
+            rsc = self.rsc(args)
+            invest = psc['investment_ep_costs']
+            ep_costs = rsc['invest']
         except KeyError:
             return
         self.result[args] = invest * ep_costs
@@ -281,26 +275,27 @@ class FlowTypeAnalyzer(Analyzer):
                 args[0], self.analysis.results)
 
 
-class OpexAnalyzer(Analyzer):
-    requires = ('param_results',)
-    required_iterator = TupleIterator
+class BusBalanceAnalyzer(Analyzer):
+    requires = ('results', 'param_results')
+    required_iterator = FlowNodeIterator
     depends_on = {SequenceFlowSumAnalyzer: 'seq', FlowTypeAnalyzer: 'ft'}
 
     def analyze(self, *args):
-        if not self._arg_is_node(args):
+        if not (isinstance(args[0], Bus) and args[1] is None):
             return
 
-        ft = self._get_dep('ft')
+        ft_result = self._get_dep_result('ft')
+        seq_result = self._get_dep_result('seq')
         try:
-            conv_factor = (
-                self.analysis.param_results[args]['scalars']
-                ['conversion_factors_b_el1'])
+            current_flow_types = ft_result[args]
         except KeyError:
             return
-
-        try:
-            flow = self._get_dep('seq')[args]
-        except KeyError:
-            return
-
-        self.result[args] = flow * conv_factor
+        self.result[args] = {}
+        f_types = (views.FlowType.Input, views.FlowType.Output)
+        for i, ft in enumerate(f_types):
+            self.result[args][ft] = {}
+            for flow in current_flow_types[ft]:
+                try:
+                    self.result[args][ft][flow[i]] = seq_result[flow]
+                except KeyError:
+                    pass

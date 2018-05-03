@@ -14,7 +14,7 @@ class Analyzer_Tests:
         analyzer.init(
             self.results,
             self.param_results,
-            iterator=analyzer.TupleIterator
+            iterator=analyzer.FlowNodeIterator
         )
 
     def test_simple_analyzer(self):
@@ -23,18 +23,21 @@ class Analyzer_Tests:
         analyzer.analyze()
         eq_(len(a.result), 5)
 
-    def test_dependent_analyzer(self):
+    def test_requirements(self):
+        pass
+
+    def test_bus_balance_analyzer(self):
         analyzer.clean()
         a = analyzer.SequenceFlowSumAnalyzer()
-        b = analyzer.FlowTypeAnalyzer()
-        c = analyzer.OpexAnalyzer()
+        _ = analyzer.FlowTypeAnalyzer()
+        c = analyzer.BusBalanceAnalyzer()
         analyzer.analyze()
 
         eq_(len(a.result), 5)
-        eq_(len(c.result), 1)
+        eq_(len(c.result), 3)
 
     def test_invest_analyzer(self):
         analyzer.clean()
         invest = analyzer.InvestAnalyzer()
         analyzer.analyze()
-        print(invest)
+        # print(invest.result)
