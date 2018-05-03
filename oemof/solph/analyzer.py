@@ -180,7 +180,7 @@ class Analyzer(object):
         self.analysis.add_to_chain(self)
         self.result = {}
 
-    def _get_dep(self, shortname):
+    def _get_dep_result(self, shortname):
         """
         Returns results of dependent analyzer given its shortname.
 
@@ -210,6 +210,18 @@ class Analyzer(object):
                 '" not found in analyzer "' + self.__class__.__name__ + '".')
         else:
             return self.analysis.chain[dep.__name__].result
+
+    def rsc(self, args):
+        return self.analysis.results[args]['scalars']
+
+    def rsq(self, args):
+        return self.analysis.results[args]['sequences']
+
+    def psc(self, args):
+        return self.analysis.param_results[args]['scalars']
+
+    def psq(self, args):
+        return self.analysis.param_results[args]['sequences']
 
     @staticmethod
     def _arg_is_flow(args):
