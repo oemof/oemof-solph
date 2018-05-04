@@ -255,7 +255,7 @@ class SequenceFlowSumAnalyzer(Analyzer):
 
 
 class InvestAnalyzer(Analyzer):
-    requires = ('results', 'param_results',)
+    requires = ('results', 'param_results')
 
     def analyze(self, *args):
         try:
@@ -290,12 +290,12 @@ class BusBalanceAnalyzer(Analyzer):
             current_flow_types = ft_result[args]
         except KeyError:
             return
-        self.result[args] = {}
+        self.result[args[0]] = {}
         f_types = (views.FlowType.Input, views.FlowType.Output)
         for i, ft in enumerate(f_types):
-            self.result[args][ft] = {}
+            self.result[args[0]][ft] = {}
             for flow in current_flow_types[ft]:
                 try:
-                    self.result[args][ft][flow[i]] = seq_result[flow]
+                    self.result[args[0]][ft][flow[i]] = seq_result[flow]
                 except KeyError:
                     pass
