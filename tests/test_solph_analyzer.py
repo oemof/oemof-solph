@@ -135,13 +135,13 @@ class Analyzer_Tests:
             0
         )
 
-    @staticmethod
-    def test_lcoe_analyzer():
-        analyzer.clean()
-        _ = analyzer.SequenceFlowSumAnalyzer()
-        _ = analyzer.FlowTypeAnalyzer()
-        _ = analyzer.NodeBalanceAnalyzer()
-        analyzer.analyze()
-        analyzer.store_results()
-        lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
-        analyzer.analyze()
+    # @staticmethod
+    # def test_lcoe_analyzer():
+    #     analyzer.clean()
+    #     _ = analyzer.SequenceFlowSumAnalyzer()
+    #     _ = analyzer.FlowTypeAnalyzer()
+    #     _ = analyzer.NodeBalanceAnalyzer()
+    #     analyzer.analyze()
+    #     analyzer.store_results()
+    #     lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
+    #     analyzer.analyze()

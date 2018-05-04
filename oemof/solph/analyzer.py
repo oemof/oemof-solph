@@ -342,3 +342,29 @@ class BusBalanceAnalyzer(NodeBalanceAnalyzer):
 
     # TODO: Check if NodeBalanceAnalyzer already exists
     # If so, BusBalanceAnalyzer could simply filter results to
+
+
+# class LCOEAnalyzer(Analyzer):
+#     depends_on = (
+#         SequenceFlowSumAnalyzer, VariableCostAnalyzer, InvestAnalyzer)
+#     depends_on_former = (NodeBalanceAnalyzer,)
+#
+#     def __init__(self, load_sinks):
+#         """
+#         Initializes total load by iterating flows to all _load_sinks_
+#
+#         Parameters
+#         ----------
+#         load_sinks: list-of-Node
+#             List of all loads which are relevant for calculating total load
+#         """
+#         super(LCOEAnalyzer, self).__init__()
+#         seq_result = self._get_dep_result(SequenceFlowSumAnalyzer)
+#         nb_result = self._get_dep_result(NodeBalanceAnalyzer)
+#         self.total_load = 0.0
+#         for to_node in load_sinks:
+#             for from_node in nb_result[to_node]['input']:
+#                 self.total_load += seq_result[(from_node, to_node)]
+#
+#     def analyze(self, *args):
+#         re
