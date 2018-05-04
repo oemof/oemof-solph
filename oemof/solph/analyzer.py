@@ -268,6 +268,21 @@ class InvestAnalyzer(Analyzer):
         self.result[args] = invest * ep_costs
 
 
+class VariableCostAnalyzer(Analyzer):
+    requires = ('results', 'param_results')
+    depends_on = {SequenceFlowSumAnalyzer: 'seq'}
+
+    def analyze(self, *args):
+        seq_result = self._get_dep_result('seq')
+        try:
+            psc = self.psc(args)
+            variable_cost = psc['variable_costs']
+            flow_sum = seq_result[args]
+        except KeyError:
+            return
+        self.result[args] = variable_cost * flow_sum
+
+
 class FlowTypeAnalyzer(Analyzer):
     def analyze(self, *args):
         if self._arg_is_node(args):

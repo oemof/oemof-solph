@@ -1,7 +1,7 @@
 
 from nose.tools import eq_
 from energysystems_for_testing import es_with_invest
-from oemof.outputlib import processing
+from oemof.outputlib import processing, views
 from oemof.solph import analyzer
 
 
@@ -19,6 +19,31 @@ class Analyzer_Tests:
 
     def test_requirements(self):
         pass
+
+    def test_sequence_flow_sum_analyzer(self):
+        analyzer.clean()
+        seq = analyzer.SequenceFlowSumAnalyzer()
+        analyzer.analyze()
+
+        eq_(len(seq.result), 5)
+        eq_(seq.result[(es_with_invest.b_diesel, es_with_invest.dg)], 62.5)
+        eq_(seq.result[(es_with_invest.dg, es_with_invest.b_el1)], 125)
+        eq_(seq.result[(es_with_invest.b_el1, es_with_invest.batt)], 125)
+        eq_(seq.result[(es_with_invest.batt, es_with_invest.b_el2)], 100)
+        eq_(seq.result[(es_with_invest.b_el2, es_with_invest.demand)], 100)
+
+    def test_variable_cost_analyzer(self):
+        analyzer.clean()
+        _ = analyzer.SequenceFlowSumAnalyzer()
+        vc = analyzer.VariableCostAnalyzer()
+        analyzer.analyze()
+
+        eq_(len(vc.result), 5)
+        eq_(vc.result[(es_with_invest.b_diesel, es_with_invest.dg)], 125)
+        eq_(vc.result[(es_with_invest.dg, es_with_invest.b_el1)], 125)
+        eq_(vc.result[(es_with_invest.b_el1, es_with_invest.batt)], 375)
+        eq_(vc.result[(es_with_invest.batt, es_with_invest.b_el2)], 250)
+        eq_(vc.result[(es_with_invest.b_el2, es_with_invest.demand)], 0)
 
     def test_bus_balance_analyzer(self):
         analyzer.clean()
