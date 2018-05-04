@@ -1,7 +1,7 @@
 
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 from energysystems_for_testing import es_with_invest
-from oemof.outputlib import processing, views
+from oemof.outputlib import processing
 from oemof.solph import analyzer
 
 
@@ -18,9 +18,28 @@ class Analyzer_Tests:
         )
 
     def test_requirements(self):
-        pass
+        analyzer.clean()
 
-    def test_sequence_flow_sum_analyzer(self):
+        # depending analyzer missing:
+        with assert_raises(analyzer.DependencyError):
+            _ = analyzer.BusBalanceAnalyzer()
+
+        # wrong iterator:
+        analyzer.Analysis().iterator = analyzer.TupleIterator
+        _ = analyzer.SequenceFlowSumAnalyzer()
+        _ = analyzer.FlowTypeAnalyzer()
+        with assert_raises(analyzer.RequirementError):
+            _ = analyzer.BusBalanceAnalyzer()
+        analyzer.Analysis().iterator = analyzer.FlowNodeIterator
+
+        # param_results missing:
+        analyzer.Analysis().param_results = None
+        with assert_raises(analyzer.RequirementError):
+            _ = analyzer.InvestAnalyzer()
+        analyzer.Analysis().param_results = self.param_results
+
+    @staticmethod
+    def test_sequence_flow_sum_analyzer():
         analyzer.clean()
         seq = analyzer.SequenceFlowSumAnalyzer()
         analyzer.analyze()
@@ -32,7 +51,8 @@ class Analyzer_Tests:
         eq_(seq.result[(es_with_invest.batt, es_with_invest.b_el2)], 100)
         eq_(seq.result[(es_with_invest.b_el2, es_with_invest.demand)], 100)
 
-    def test_variable_cost_analyzer(self):
+    @staticmethod
+    def test_variable_cost_analyzer():
         analyzer.clean()
         _ = analyzer.SequenceFlowSumAnalyzer()
         vc = analyzer.VariableCostAnalyzer()
@@ -45,7 +65,8 @@ class Analyzer_Tests:
         eq_(vc.result[(es_with_invest.batt, es_with_invest.b_el2)], 250)
         eq_(vc.result[(es_with_invest.b_el2, es_with_invest.demand)], 0)
 
-    def test_bus_balance_analyzer(self):
+    @staticmethod
+    def test_bus_balance_analyzer():
         analyzer.clean()
         _ = analyzer.SequenceFlowSumAnalyzer()
         _ = analyzer.FlowTypeAnalyzer()
@@ -86,7 +107,8 @@ class Analyzer_Tests:
             100
         )
 
-    def test_invest_analyzer(self):
+    @staticmethod
+    def test_invest_analyzer():
         analyzer.clean()
         invest = analyzer.InvestAnalyzer()
         analyzer.analyze()

@@ -284,6 +284,8 @@ class VariableCostAnalyzer(Analyzer):
 
 
 class FlowTypeAnalyzer(Analyzer):
+    requires = ('results',)
+
     def analyze(self, *args):
         if self._arg_is_node(args):
             self.result[args] = views.get_flow_type(
