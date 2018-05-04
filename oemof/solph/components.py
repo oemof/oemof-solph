@@ -375,6 +375,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
+        self.INVESTSTORAGESINPUT = Set(initialize=[n for n in group if n.nominal_input_capacity_ratio is not None])
+        self.INVESTSTORAGESOUTPUT = Set(initialize=[n for n in group if n.nominal_output_capacity_ratio is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
             n for n in group if n.initial_capacity is not None])
@@ -431,26 +433,22 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            if n.nominal_input_capacity_ratio is not None:
-              expr = (m.InvestmentFlow.invest[i[n], n] ==
-                     self.invest[n] * n.nominal_input_capacity_ratio)
-              return expr
-            return Constraint.Skip
+            expr = (m.InvestmentFlow.invest[i[n], n] ==
+                    self.invest[n] * n.nominal_input_capacity_ratio)
+            return expr          
         self.storage_capacity_inflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_inflow_invest_rule)
+            self.INVESTSTORAGESINPUT, rule=_storage_capacity_inflow_invest_rule)
 
         def _storage_capacity_outflow_invest_rule(block, n):
             """Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            if n.nominal_output_capacity_ratio is not None:
-             expr = (m.InvestmentFlow.invest[n, o[n]] ==
-                     self.invest[n] * n.nominal_output_capacity_ratio)
-              return expr
-            return Constraint.Skip
+            expr = (m.InvestmentFlow.invest[n, o[n]] ==
+                    self.invest[n] * n.nominal_output_capacity_ratio)
+            return expr
         self.storage_capacity_outflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_outflow_invest_rule)
+            self.INVESTSTORAGESOUTPUT, rule=_storage_capacity_outflow_invest_rule)
 
         def _max_capacity_invest_rule(block, n, t):
             """Rule definition for upper bound constraint for the storage cap.
