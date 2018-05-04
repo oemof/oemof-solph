@@ -22,6 +22,10 @@ def analyze():
         Analysis().analyze(*element)
 
 
+def store_results():
+    Analysis().store_results()
+
+
 def clean():
     Analysis().clean()
 
@@ -45,9 +49,11 @@ class Analysis(object):
             self.iterator = (
                 TupleIterator if iterator is None else iterator)
             self.chain = OrderedDict()
+            self.former_chain = OrderedDict()
 
         def clean(self):
             self.chain = OrderedDict()
+            self.former_chain = OrderedDict()
 
         def check_iterator(self, analyzer):
             if analyzer.required_iterator is None:
@@ -78,15 +84,37 @@ class Analysis(object):
                         )
 
         def check_dependencies(self, analyzer):
-            if analyzer.depends_on is not None:
-                for dep in analyzer.depends_on:
-                    if dep.__name__ not in self.chain:
+            dep_str = (
+                'Analyzer "{an}" depends on analyzer "{dep}". '
+                'Please initialize analyzer "{dep}" first.'
+            )
+            dep_former_str = (
+                'Analyzer "{an}" depends on former analyzer "{dep}". '
+                'You have to run analysis with analyzer "{dep}" first. '
+                'Afterwards, you have to store results via '
+                '"analyzer.store_results()". Then you are able to add '
+                'analyzer "{an}" to analysis.'
+            )
+
+            def check_deps(former=False):
+                error_str = dep_former_str if former else dep_str
+                for dep in dependencies:
+                    if dep.__name__ not in chain_keys:
                         raise DependencyError(
-                            'Analyzer "' + analyzer.__class__.__name__ +
-                            '" depends on analyzer "' + dep.__name__ + '". ' +
-                            'Please initialize analyzer "' + dep.__name__ +
-                            '" first.'
+                            error_str.format(
+                                an=analyzer.__class__.__name__,
+                                dep=dep.__name__,
+                            )
                         )
+
+            chain_keys = list(self.former_chain)
+            if analyzer.depends_on_former is not None:
+                dependencies = analyzer.depends_on_former
+                check_deps(former=True)
+            if analyzer.depends_on is not None:
+                dependencies = analyzer.depends_on
+                chain_keys += list(self.chain)
+                check_deps()
 
         def add_to_chain(self, analyzer):
             if analyzer.__class__.__name__ in self.chain:
@@ -101,6 +129,10 @@ class Analysis(object):
         def analyze(self, *args):
             for analyzer in self.chain.values():
                 analyzer.analyze(*args)
+
+        def store_results(self):
+            self.former_chain.update(self.chain)
+            self.chain = OrderedDict()
 
         def __iter__(self):
             return self.iterator(self)
@@ -171,6 +203,7 @@ class Analyzer(object):
     requires = None
     required_iterator = None
     depends_on = None
+    depends_on_former = None
 
     def __init__(self):
         self.analysis = Analysis()
@@ -180,36 +213,20 @@ class Analyzer(object):
         self.analysis.add_to_chain(self)
         self.result = {}
 
-    def _get_dep_result(self, shortname):
+    def _get_dep_result(self, analyzer):
         """
-        Returns results of dependent analyzer given its shortname.
-
-        To work properly "depends_on" attribute of analyzer has to be a dict.
-
-        Parameters
-        ----------
-        shortname: str
-            Shortname of dependent analyzer
-
-        Returns
-        -------
-        dict: Result dictionary of dependent analyzer
+        Returns results of dependent analyzer.
         """
-        if not isinstance(self.depends_on, dict):
-            raise DependencyError(
-                'Dependencies are not shortnamed. Consider converting '
-                'attribute "depends_on" into dict to support shortnaming '
-                'dependencies.'
-            )
         try:
-            dep = list(self.depends_on.keys())[
-                list(self.depends_on.values()).index(shortname)]
-        except ValueError:
-            raise DependencyError(
-                'Dependency shortname "' + shortname +
-                '" not found in analyzer "' + self.__class__.__name__ + '".')
-        else:
-            return self.analysis.chain[dep.__name__].result
+            return self.analysis.former_chain[analyzer.__name__].result
+        except KeyError:
+            try:
+                return self.analysis.chain[analyzer.__name__].result
+            except KeyError:
+                raise DependencyError(
+                    'Analyzer "' + analyzer.__name__ +
+                    '" not found in analysis chain.'
+                )
 
     def rsc(self, args):
         return self.analysis.results[args]['scalars']
@@ -270,10 +287,10 @@ class InvestAnalyzer(Analyzer):
 
 class VariableCostAnalyzer(Analyzer):
     requires = ('results', 'param_results')
-    depends_on = {SequenceFlowSumAnalyzer: 'seq'}
+    depends_on = (SequenceFlowSumAnalyzer,)
 
     def analyze(self, *args):
-        seq_result = self._get_dep_result('seq')
+        seq_result = self._get_dep_result(SequenceFlowSumAnalyzer)
         try:
             psc = self.psc(args)
             variable_cost = psc['variable_costs']
@@ -292,17 +309,19 @@ class FlowTypeAnalyzer(Analyzer):
                 args[0], self.analysis.results)
 
 
-class BusBalanceAnalyzer(Analyzer):
+class NodeBalanceAnalyzer(Analyzer):
     requires = ('results', 'param_results')
     required_iterator = FlowNodeIterator
-    depends_on = {SequenceFlowSumAnalyzer: 'seq', FlowTypeAnalyzer: 'ft'}
+    depends_on = (SequenceFlowSumAnalyzer, FlowTypeAnalyzer)
+
+    node_type = Node
 
     def analyze(self, *args):
-        if not (isinstance(args[0], Bus) and args[1] is None):
+        if not (isinstance(args[0], self.node_type) and args[1] is None):
             return
 
-        ft_result = self._get_dep_result('ft')
-        seq_result = self._get_dep_result('seq')
+        seq_result = self._get_dep_result(SequenceFlowSumAnalyzer)
+        ft_result = self._get_dep_result(FlowTypeAnalyzer)
         try:
             current_flow_types = ft_result[args]
         except KeyError:
@@ -316,3 +335,10 @@ class BusBalanceAnalyzer(Analyzer):
                     self.result[args[0]][ft][flow[i]] = seq_result[flow]
                 except KeyError:
                     pass
+
+
+class BusBalanceAnalyzer(NodeBalanceAnalyzer):
+    node_type = Bus
+
+    # TODO: Check if NodeBalanceAnalyzer already exists
+    # If so, BusBalanceAnalyzer could simply filter results to

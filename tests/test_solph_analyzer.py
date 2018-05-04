@@ -134,3 +134,14 @@ class Analyzer_Tests:
             invest.result[(es_with_invest.batt, es_with_invest.b_el2)],
             0
         )
+
+    @staticmethod
+    def test_lcoe_analyzer():
+        analyzer.clean()
+        _ = analyzer.SequenceFlowSumAnalyzer()
+        _ = analyzer.FlowTypeAnalyzer()
+        _ = analyzer.NodeBalanceAnalyzer()
+        analyzer.analyze()
+        analyzer.store_results()
+        lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
+        analyzer.analyze()
