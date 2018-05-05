@@ -60,7 +60,7 @@ def remove_timestep(x):
         return x[:-1]
 
 
-def create_dataframe(om):
+def create_dataframe(om, blockvars=None):
     """
     Create a result dataframe with all optimization data.
 
@@ -68,10 +68,15 @@ def create_dataframe(om):
     are created for the variable index e.g. for tuples of the flows and
     components or the timesteps.
     """
-    # get all pyomo variables including their block
-    block_vars = []
-    for bv in om.component_data_objects(Var):
-        block_vars.append(bv.parent_component())
+    # select block vars depending on passed argument
+    if blockvars is not None:
+        block_vars = [bv.parent_component()
+                      for bv in om.component_data_objects(Var)
+                      if bv.parent_component().name in blockvars]
+    else:
+        block_vars = [bv.parent_component()
+                      for bv in om.component_data_objects(Var)]
+
     block_vars = list(set(block_vars))
 
     # write them into a dict with tuples as keys
@@ -98,7 +103,7 @@ def create_dataframe(om):
     return df
 
 
-def results(om):
+def results(om, blockvars=None):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -108,7 +113,7 @@ def results(om):
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
     and flows e.g. `results[n, n]['sequences']`.
     """
-    df = create_dataframe(om)
+    df = create_dataframe(om, blockvars)
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {k if len(k) > 1 else (k[0], None):
