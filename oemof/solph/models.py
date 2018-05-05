@@ -165,6 +165,10 @@ class BaseModel(po.ConcreteModel):
         for k in solver_cmdline_options:
             options[k] = solver_cmdline_options[k]
 
+        # set instance for persistent solver interfaces
+        if solver == 'gurobi_persistent' or solver == 'cplex_persistent':
+            opt.set_instance(self)
+
         results = opt.solve(self, **solve_kwargs)
 
         status = results["Solver"][0]["Status"].key
