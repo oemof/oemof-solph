@@ -127,24 +127,33 @@ class GenericStorage(network.Transformer):
         self.investment = kwargs.get('investment')
 
         # General error messages
-        e_no_nv = ("If an investment object is defined the invest variable "
-                   "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
-        e_duplicate = (
+        self._e_no_nv = (
+            "If an investment object is defined the invest variable "
+            "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
+        self._e_duplicate = (
             "Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
             "will set the nominal_value for the flow.\nTherefore "
             "either the 'nominal_{0}_capacity_ratio' or the "
             "'nominal_value' has to be 'None'.")
         # Check investment
         if self.investment and self.nominal_capacity is not None:
-            raise AttributeError(e_no_nv.format('nominal_capacity'))
+            raise AttributeError(self._e_no_nv.format('nominal_capacity'))
 
+        self._set_flows()
+
+    def _set_flows(self):
+        """ Sets correct attributes of input / output flows based on the
+        storage object attributes. This method is called in the constructor by
+        default. It may be called in sub-classed components at the
+        end of the constructor to ensure correct setting of attributes.
+        """
         # Check input flows
         for flow in self.inputs.values():
             if self.investment and flow.nominal_value is not None:
-                raise AttributeError(e_no_nv.format('nominal_value'))
+                raise AttributeError(self._e_no_nv.format('nominal_value'))
             if (flow.nominal_value is not None and
                     self.nominal_input_capacity_ratio is not None):
-                raise AttributeError(e_duplicate)
+                raise AttributeError(self._e_duplicate)
             if (not self.investment and
                     self.nominal_input_capacity_ratio is not None):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
@@ -156,10 +165,10 @@ class GenericStorage(network.Transformer):
         # Check output flows
         for flow in self.outputs.values():
             if self.investment and flow.nominal_value is not None:
-                raise AttributeError(e_no_nv.format('nominal_value'))
+                raise AttributeError(self._e_no_nv.format('nominal_value'))
             if (flow.nominal_value is not None and
                     self.nominal_output_capacity_ratio is not None):
-                raise AttributeError(e_duplicate)
+                raise AttributeError(self._e_duplicate)
             if (not self.investment and
                     self.nominal_output_capacity_ratio is not None):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
@@ -168,6 +177,11 @@ class GenericStorage(network.Transformer):
                 if not isinstance(flow.investment, Investment):
                     flow.investment = Investment()
 
+    def constraint_group(self):
+        if isinstance(self.investment, Investment):
+            return GenericInvestmentStorageBlock
+        else:
+            return GenericStorageBlock
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
@@ -621,6 +635,9 @@ class GenericCHP(network.Transformer):
 
         return self._alphas
 
+    def constraint_group(self):
+        return GenericCHPBlock
+
 
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the relation of nodes with type class:`.GenericCHP`.
@@ -854,6 +871,8 @@ class ExtractionTurbineCHP(solph_Transformer):
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
+    def constraint_group(self):
+        return ExtractionTurbineCHPBlock
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -950,7 +969,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                          g.main_flow_loss_index[t]) /
                         g.conversion_factor_full_condensation_sq[t]
                         )
-                    block.input_output_relation.add((n, t), (lhs == rhs))
+                    block.input_output_relation.add((g, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, m.TIMESTEPS,
                                                 noruleinit=True)
         self.input_output_relation_build = BuildAction(
@@ -969,16 +988,3 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                             noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
-
-
-def component_grouping(node):
-    if isinstance(node, GenericStorage) and isinstance(node.investment,
-                                                       Investment):
-        return GenericInvestmentStorageBlock
-    if isinstance(node, GenericStorage) and not isinstance(node.investment,
-                                                           Investment):
-        return GenericStorageBlock
-    if isinstance(node, GenericCHP):
-        return GenericCHPBlock
-    if isinstance(node, ExtractionTurbineCHP):
-        return ExtractionTurbineCHPBlock

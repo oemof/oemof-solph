@@ -211,7 +211,8 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     def detect_scalars_and_sequences(com):
         com_data = {'scalars': {}, 'sequences': {}}
 
-        exclusions = ('__', '_', 'registry', 'inputs', 'outputs')
+        exclusions = ('__', '_', 'registry', 'inputs', 'outputs',
+                      'constraint_group')
         attrs = [i for i in dir(com)
                  if not (callable(i) or i.startswith(exclusions))]
 

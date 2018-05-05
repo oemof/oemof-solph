@@ -1,0 +1,47 @@
+v0.2.2 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+
+
+New features
+############
+
+
+
+New components
+##############
+
+
+
+Documentation
+#############
+
+
+Known issues
+############
+
+
+Bug fixes
+#########
+
+* Fix file extension check to dump a graph correctly as .graphml-file
+* The full constraint set of the ExtractionTurbineCHP class was only build for
+ one object. If more than one object was present the input/output constraint
+ was missing. This leads to wrong results.
+
+Testing
+#######
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+* Uwe Krien
