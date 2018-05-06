@@ -28,6 +28,10 @@ class BaseModel(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to :const:`Model.CONSTRAINTS`
+    objective_weighting : array like (optional)
+        Weights used for temporal objective function
+        expressions. If nothing is passed `timeincrement` will be used which 
+        is calculated from the freq length of the energy system timeindex .
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
