@@ -121,9 +121,12 @@ class EnergySystem:
             for g in self._groupings:
                 g(e, self.groups)
         self.results = kwargs.get('results')
+
         self.timeindex = kwargs.get('timeindex',
                                     pd.date_range(start=pd.to_datetime('today'),
                                                   periods=1, freq='H'))
+
+        self.temporal = kwargs.get('temporal')
 
     @staticmethod
     def _regroup(entity, groups, groupings):
