@@ -314,8 +314,27 @@ def deserialize_energy_system(cls, path,
 
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
-        # TODO: Get frequency from meta data or calulate...
-        es = (cls(timeindex=pd.DatetimeIndex(lst[0], freq='H'))
+        # look for temporal resource and if present, take as timeindex from it
+        if package.get_resource('temporal'):
+            temporal = pd.DataFrame.from_dict(
+                package.get_resource('temporal').\
+                    read(keyed=True)).set_index('timeindex').astype(float)
+            # for correct freq setting of timeindex
+            temporal.index = pd.DatetimeIndex(
+                temporal.index.values, freq=temporal.index.inferred_freq,
+                name='timeindex')
+            timeindex = temporal.index
+
+        else:
+            # if no temporal provided as resource, take the first timeindex
+            # from dict
+            idx = pd.DatetimeIndex(lst[0])
+            timeindex = pd.DatetimeIndex(idx.values,
+                                         freq=idx.inferred_freq,
+                                         name='timeindex')
+            temporal = None
+
+        es = (cls(timeindex=timeindex, temporal=temporal)
               if lst
               else cls())
 
@@ -324,7 +343,8 @@ def deserialize_energy_system(cls, path,
                       facades.values(),
                       chain(*[f.subnodes for f in facades.values()
                               if hasattr(f, 'subnodes')])))
+        
         return es
 
     else:
-        raise ValueError("Timeindices in sequence resources differ!")
+        raise ValueError("Timeindices in resources differ!")
