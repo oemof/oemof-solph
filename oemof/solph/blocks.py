@@ -219,7 +219,7 @@ class Flow(SimpleBlock):
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 for t in m.TIMESTEPS:
-                    variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
+                    variable_costs += (m.flow[i, o, t] * m.objective_weighting[t] *
                                        m.flows[i, o].variable_costs[t])
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:

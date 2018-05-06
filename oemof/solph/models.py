@@ -49,6 +49,9 @@ class BaseModel(po.ConcreteModel):
 
         self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
 
+        self.objective_weighting = kwargs.get('objective_weighting',
+                                              self.timeincrement)
+
         self._constraint_groups = (type(self).CONSTRAINT_GROUPS +
                                    kwargs.get('constraint_groups', []))
 
