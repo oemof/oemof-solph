@@ -339,7 +339,17 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transformer_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
+:ref:`oemof_solph_components_transformer_label` class. An instance of this
+class can represent a component with one input and two output flows and a
+flexible ratio between these flows. By now this class is restricted to one
+input and two output flows. One application example would be a flexible
+combined heat and power (chp) plant. The class allows to define a different
+efficiency for every time step but this series has to be predefined as a
+parameter for the optimisation. In contrast to the
+:class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
+defined. For the main flow you can define a conversion factor if the second
+flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
