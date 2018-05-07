@@ -145,7 +145,7 @@ class Parameter_Result_Tests:
         param_results = processing.param_results(
             self.om, exclude_none=True, keys_as_str=True)
         eq_(
-            param_results[('storage', 'None')]['scalars'],
+            param_results[('storage', None)]['scalars'],
             {
                 'label': 'storage',
                 'initial_capacity': 0,
@@ -162,7 +162,7 @@ class Parameter_Result_Tests:
             }
         )
         eq_(
-            param_results[('storage', 'None')]['sequences'],
+            param_results[('storage', None)]['sequences'],
             {}
         )
 

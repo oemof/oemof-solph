@@ -157,7 +157,9 @@ def convert_keys_to_strings(results):
     e.g. results[('pp1','bus1')].
     """
     converted = {
-        tuple([str(e) for e in k]) if isinstance(k, tuple) else str(k): v
+        tuple([str(e) if e is not None else None for e in k])
+        if isinstance(k, tuple)
+        else str(k) if k is not None else None: v
         for k, v in results.items()
     }
     return converted
@@ -317,9 +319,8 @@ def param_results(system, exclude_none=True, keys_as_str=False):
     Results are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
-    The dictionary is keyed by the nodes e.g.
-    `results['nodes'][idx]['scalars']`
-    and flows e.g. `results['flows'][(n,n)]['sequences']`.
+    The dictionary is keyed by flows (n, n) and nodes (n, None), e.g.
+    `results[(n,n)]['sequences']`.
 
     Parameters
     ----------
