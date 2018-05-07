@@ -74,14 +74,14 @@ class Flow:
     positive_gradient : dictionary
         Two obligate keys:
         'ub': numeric (sequence, scalar or None), the normed maximal positive
-         difference (flow[t-1] < flow[t]) of two consecutive flow values
-         (ub = upper bound).
+        difference (flow[t-1] < flow[t]) of two consecutive flow values
+        (ub = upper bound).
         'costs': numeric (scalar or None), the gradient cost per unit.
     negative_gradient : dictionary
         Two obligate keys:
         'ub': numeric (sequence, scalar or None), the normed maximal negative
-         difference (flow[t-1] > flow[t]) of two consecutive flow values
-         (ub = upper bound).
+        difference (flow[t-1] > flow[t]) of two consecutive flow values
+        (ub = upper bound).
         'costs': numeric (scalar or None), the gradient cost per unit.
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
@@ -112,6 +112,7 @@ class Flow:
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
+
      * :py:class:`~oemof.solph.blocks.Flow`
      * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
        Investment object is present)
