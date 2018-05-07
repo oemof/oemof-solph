@@ -887,6 +887,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     **The following constraints are created:**
 
+    .. _ETCHP-equations:
+
     Variable i/o relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
             flow(input, n, t) = \\
