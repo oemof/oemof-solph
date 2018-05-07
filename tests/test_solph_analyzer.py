@@ -87,9 +87,7 @@ class Analyzer_Tests:
         eq_(len(bb.result[es_with_invest.b_el1]['input']), 1)
         eq_(len(bb.result[es_with_invest.b_el1]['output']), 1)
         eq_(
-            bb.result[es_with_invest.b_el1]['input'][es_with_invest.dg],
-            125
-        )
+            bb.result[es_with_invest.b_el1]['input'][es_with_invest.dg], 125)
         eq_(
             bb.result[es_with_invest.b_el1]['output'][es_with_invest.batt],
             125
@@ -98,10 +96,7 @@ class Analyzer_Tests:
         # b_el2:
         eq_(len(bb.result[es_with_invest.b_el2]['input']), 1)
         eq_(len(bb.result[es_with_invest.b_el2]['output']), 1)
-        eq_(
-            bb.result[es_with_invest.b_el2]['input'][es_with_invest.batt],
-            100
-        )
+        eq_(bb.result[es_with_invest.b_el2]['input'][es_with_invest.batt], 100)
         eq_(
             bb.result[es_with_invest.b_el2]['output'][es_with_invest.demand],
             100
@@ -122,26 +117,47 @@ class Analyzer_Tests:
         )
 
         # batt
+        eq_(invest.result[(es_with_invest.batt, None)], 600 * 0.4)
+        eq_(invest.result[(es_with_invest.b_el1, es_with_invest.batt)], 0)
+        eq_(invest.result[(es_with_invest.batt, es_with_invest.b_el2)], 0)
+
+    @staticmethod
+    def test_lcoe_analyzer():
+        analyzer.clean()
+        _ = analyzer.SequenceFlowSumAnalyzer()
+        _ = analyzer.FlowTypeAnalyzer()
+        _ = analyzer.NodeBalanceAnalyzer()
+        _ = analyzer.VariableCostAnalyzer()
+        _ = analyzer.InvestAnalyzer()
+        analyzer.analyze()
+        analyzer.store_results()
+        lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
+        analyzer.analyze()
+
+        output = 100
+        eq_(len(lcoe.result), 6)
+
+        # dg
         eq_(
-            invest.result[(es_with_invest.batt, None)],
-            600 * 0.4
+            lcoe.result[(es_with_invest.dg, es_with_invest.b_el1)],
+            (125 + 62.5 * 0.5) / output
         )
         eq_(
-            invest.result[(es_with_invest.b_el1, es_with_invest.batt)],
-            0
-        )
-        eq_(
-            invest.result[(es_with_invest.batt, es_with_invest.b_el2)],
-            0
+            lcoe.result[(es_with_invest.b_diesel, es_with_invest.dg)],
+            125 / output
         )
 
-    # @staticmethod
-    # def test_lcoe_analyzer():
-    #     analyzer.clean()
-    #     _ = analyzer.SequenceFlowSumAnalyzer()
-    #     _ = analyzer.FlowTypeAnalyzer()
-    #     _ = analyzer.NodeBalanceAnalyzer()
-    #     analyzer.analyze()
-    #     analyzer.store_results()
-    #     lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
-    #     analyzer.analyze()
+        # batt
+        eq_(lcoe.result[(es_with_invest.batt, None)], 600 * 0.4 / output)
+        eq_(
+            lcoe.result[(es_with_invest.b_el1, es_with_invest.batt)],
+            375 / output
+        )
+        eq_(
+            lcoe.result[(es_with_invest.batt, es_with_invest.b_el2)],
+            250 / output
+        )
+        eq_(
+            lcoe.result[(es_with_invest.b_el2, es_with_invest.demand)],
+            0 / output
+        )
