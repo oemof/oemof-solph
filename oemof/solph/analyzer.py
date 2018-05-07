@@ -38,6 +38,10 @@ class DependencyError(Exception):
     pass
 
 
+class FormerDependencyError(DependencyError):
+    pass
+
+
 class Analysis(object):
     """
     Holds chain for all analyzers. Is implemented as singleton.
@@ -98,9 +102,11 @@ class Analysis(object):
 
             def check_deps(former=False):
                 error_str = dep_former_str if former else dep_str
+                error_type = (
+                    FormerDependencyError if former else DependencyError)
                 for dep in dependencies:
                     if dep.__name__ not in chain_keys:
-                        raise DependencyError(
+                        raise error_type(
                             error_str.format(
                                 an=analyzer.__class__.__name__,
                                 dep=dep.__name__,
