@@ -8,7 +8,7 @@ This overview has been developed to make oemof easy to use and develop. It descr
     :depth: 1
     :local:
     :backlinks: top
-    
+
 
 The idea of an open framework
 ==============================
