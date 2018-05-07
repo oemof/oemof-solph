@@ -22,6 +22,10 @@ def analyze():
         Analysis().analyze(*element)
 
 
+def get_analyzer(analyzer):
+    return Analysis().get_analyzer(analyzer)
+
+
 def store_results():
     Analysis().store_results()
 
@@ -135,6 +139,16 @@ class Analysis(object):
         def analyze(self, *args):
             for analyzer in self.chain.values():
                 analyzer.analyze(*args)
+
+        def get_analyzer(self, analyzer):
+            try:
+                return self.chain[analyzer]
+            except KeyError:
+                try:
+                    return self.former_chain[analyzer]
+                except KeyError:
+                    raise KeyError('Analyzer "' + analyzer.__class__.__name__ +
+                                   '" not found.')
 
         def store_results(self):
             self.former_chain.update(self.chain)
