@@ -218,6 +218,7 @@ class Analyzer(object):
         self.analysis.check_dependencies(self)
         self.analysis.add_to_chain(self)
         self.result = {}
+        self.total = 0.0
 
     def _get_dep_result(self, analyzer):
         """
@@ -272,9 +273,11 @@ class SequenceFlowSumAnalyzer(Analyzer):
     def analyze(self, *args):
         try:
             rsq = self.rsq(args)
-            self.result[args] = rsq['flow'].sum()
+            result = rsq['flow'].sum()
         except KeyError:
             return
+        self.result[args] = result
+        self.total += result
 
 
 class InvestAnalyzer(Analyzer):
@@ -288,7 +291,9 @@ class InvestAnalyzer(Analyzer):
             ep_costs = rsc['invest']
         except KeyError:
             return
-        self.result[args] = invest * ep_costs
+        result = invest * ep_costs
+        self.result[args] = result
+        self.total += result
 
 
 class VariableCostAnalyzer(Analyzer):
@@ -303,7 +308,9 @@ class VariableCostAnalyzer(Analyzer):
             flow_sum = seq_result[args]
         except KeyError:
             return
-        self.result[args] = variable_cost * flow_sum
+        result = variable_cost * flow_sum
+        self.result[args] = result
+        self.total += result
 
 
 class FlowTypeAnalyzer(Analyzer):
@@ -389,4 +396,6 @@ class LCOEAnalyzer(Analyzer):
                 return
             inv = 0.0
 
-        self.result[args] = (inv + vc) / self.total_load
+        result = (inv + vc) / self.total_load
+        self.result[args] = result
+        self.total += result
