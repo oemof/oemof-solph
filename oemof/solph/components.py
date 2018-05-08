@@ -902,7 +902,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         .. math::
             flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
             conversion\_factor(n, main\_output, t) / \
-            conversion\_factor(n, tapped\_output, t\\
+            conversion\_factor(n, tapped\_output, t)\\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
     """
