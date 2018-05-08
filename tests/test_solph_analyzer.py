@@ -11,38 +11,39 @@ class Analyzer_Tests:
             es_with_invest.optimization_model)
         self.param_results = processing.param_results(
             es_with_invest.optimization_model)
-        analyzer.init(
+        self.analysis = analyzer.Analysis(
             self.results,
             self.param_results,
             iterator=analyzer.FlowNodeIterator
         )
 
     def test_requirements(self):
-        analyzer.clean()
+        self.analysis.clean()
 
         # depending analyzer missing:
+        nb = analyzer.NodeBalanceAnalyzer()
         with assert_raises(analyzer.DependencyError):
-            _ = analyzer.BusBalanceAnalyzer()
+            self.analysis.add_analyzer(nb)
 
         # wrong iterator:
-        analyzer.Analysis().iterator = analyzer.TupleIterator
-        _ = analyzer.SequenceFlowSumAnalyzer()
-        _ = analyzer.FlowTypeAnalyzer()
+        self.analysis.set_iterator(analyzer.TupleIterator)
+        self.analysis.add_analyzer(analyzer.SequenceFlowSumAnalyzer())
+        self.analysis.add_analyzer(analyzer.FlowTypeAnalyzer())
         with assert_raises(analyzer.RequirementError):
-            _ = analyzer.BusBalanceAnalyzer()
-        analyzer.Analysis().iterator = analyzer.FlowNodeIterator
+            self.analysis.add_analyzer(analyzer.NodeBalanceAnalyzer())
+        self.analysis.set_iterator(analyzer.FlowNodeIterator)
 
         # param_results missing:
-        analyzer.Analysis().param_results = None
+        self.analysis.param_results = None
         with assert_raises(analyzer.RequirementError):
-            _ = analyzer.InvestAnalyzer()
-        analyzer.Analysis().param_results = self.param_results
+            self.analysis.add_analyzer(analyzer.InvestAnalyzer())
+        self.analysis.param_results = self.param_results
 
-    @staticmethod
-    def test_sequence_flow_sum_analyzer():
-        analyzer.clean()
+    def test_sequence_flow_sum_analyzer(self):
+        self.analysis.clean()
         seq = analyzer.SequenceFlowSumAnalyzer()
-        analyzer.analyze()
+        self.analysis.add_analyzer(seq)
+        self.analysis.analyze()
 
         eq_(len(seq.result), 5)
         eq_(seq.result[(es_with_invest.b_diesel, es_with_invest.dg)], 62.5)
@@ -51,12 +52,13 @@ class Analyzer_Tests:
         eq_(seq.result[(es_with_invest.batt, es_with_invest.b_el2)], 100)
         eq_(seq.result[(es_with_invest.b_el2, es_with_invest.demand)], 100)
 
-    @staticmethod
-    def test_variable_cost_analyzer():
-        analyzer.clean()
-        _ = analyzer.SequenceFlowSumAnalyzer()
+    def test_variable_cost_analyzer(self):
+        self.analysis.clean()
+        seq = analyzer.SequenceFlowSumAnalyzer()
         vc = analyzer.VariableCostAnalyzer()
-        analyzer.analyze()
+        self.analysis.add_analyzer(seq)
+        self.analysis.add_analyzer(vc)
+        self.analysis.analyze()
 
         eq_(len(vc.result), 5)
         eq_(vc.result[(es_with_invest.b_diesel, es_with_invest.dg)], 125)
@@ -65,48 +67,48 @@ class Analyzer_Tests:
         eq_(vc.result[(es_with_invest.batt, es_with_invest.b_el2)], 250)
         eq_(vc.result[(es_with_invest.b_el2, es_with_invest.demand)], 0)
 
-    @staticmethod
-    def test_bus_balance_analyzer():
-        analyzer.clean()
-        _ = analyzer.SequenceFlowSumAnalyzer()
-        _ = analyzer.FlowTypeAnalyzer()
-        bb = analyzer.BusBalanceAnalyzer()
-        analyzer.analyze()
+    def test_bus_balance_analyzer(self):
+        self.analysis.clean()
+        self.analysis.add_analyzer(analyzer.SequenceFlowSumAnalyzer())
+        self.analysis.add_analyzer(analyzer.FlowTypeAnalyzer())
+        nb = analyzer.BusBalanceAnalyzer()
+        self.analysis.add_analyzer(nb)
+        self.analysis.analyze()
 
-        eq_(len(bb.result), 3)
+        eq_(len(nb.result), 3)
 
         # b_diesel:
-        eq_(len(bb.result[es_with_invest.b_diesel]['input']), 0)
-        eq_(len(bb.result[es_with_invest.b_diesel]['output']), 1)
+        eq_(len(nb.result[es_with_invest.b_diesel]['input']), 0)
+        eq_(len(nb.result[es_with_invest.b_diesel]['output']), 1)
         eq_(
-            bb.result[es_with_invest.b_diesel]['output'][es_with_invest.dg],
+            nb.result[es_with_invest.b_diesel]['output'][es_with_invest.dg],
             62.5
         )
 
         # b_el1:
-        eq_(len(bb.result[es_with_invest.b_el1]['input']), 1)
-        eq_(len(bb.result[es_with_invest.b_el1]['output']), 1)
+        eq_(len(nb.result[es_with_invest.b_el1]['input']), 1)
+        eq_(len(nb.result[es_with_invest.b_el1]['output']), 1)
         eq_(
-            bb.result[es_with_invest.b_el1]['input'][es_with_invest.dg], 125)
+            nb.result[es_with_invest.b_el1]['input'][es_with_invest.dg], 125)
         eq_(
-            bb.result[es_with_invest.b_el1]['output'][es_with_invest.batt],
+            nb.result[es_with_invest.b_el1]['output'][es_with_invest.batt],
             125
         )
 
         # b_el2:
-        eq_(len(bb.result[es_with_invest.b_el2]['input']), 1)
-        eq_(len(bb.result[es_with_invest.b_el2]['output']), 1)
-        eq_(bb.result[es_with_invest.b_el2]['input'][es_with_invest.batt], 100)
+        eq_(len(nb.result[es_with_invest.b_el2]['input']), 1)
+        eq_(len(nb.result[es_with_invest.b_el2]['output']), 1)
+        eq_(nb.result[es_with_invest.b_el2]['input'][es_with_invest.batt], 100)
         eq_(
-            bb.result[es_with_invest.b_el2]['output'][es_with_invest.demand],
+            nb.result[es_with_invest.b_el2]['output'][es_with_invest.demand],
             100
         )
 
-    @staticmethod
-    def test_invest_analyzer():
-        analyzer.clean()
+    def test_invest_analyzer(self):
+        self.analysis.clean()
         invest = analyzer.InvestAnalyzer()
-        analyzer.analyze()
+        self.analysis.add_analyzer(invest)
+        self.analysis.analyze()
 
         eq_(len(invest.result), 4)
 
@@ -121,18 +123,18 @@ class Analyzer_Tests:
         eq_(invest.result[(es_with_invest.b_el1, es_with_invest.batt)], 0)
         eq_(invest.result[(es_with_invest.batt, es_with_invest.b_el2)], 0)
 
-    @staticmethod
-    def test_lcoe_analyzer():
-        analyzer.clean()
-        _ = analyzer.SequenceFlowSumAnalyzer()
-        _ = analyzer.FlowTypeAnalyzer()
-        _ = analyzer.NodeBalanceAnalyzer()
-        _ = analyzer.VariableCostAnalyzer()
-        _ = analyzer.InvestAnalyzer()
-        analyzer.analyze()
-        analyzer.store_results()
+    def test_lcoe_analyzer(self):
+        self.analysis.clean()
+        self.analysis.add_analyzer(analyzer.SequenceFlowSumAnalyzer())
+        self.analysis.add_analyzer(analyzer.FlowTypeAnalyzer())
+        self.analysis.add_analyzer(analyzer.NodeBalanceAnalyzer())
+        self.analysis.add_analyzer(analyzer.VariableCostAnalyzer())
+        self.analysis.add_analyzer(analyzer.InvestAnalyzer())
+        self.analysis.analyze()
+        self.analysis.store_results()
         lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
-        analyzer.analyze()
+        self.analysis.add_analyzer(lcoe)
+        self.analysis.analyze()
 
         output = 100
         eq_(len(lcoe.result), 6)

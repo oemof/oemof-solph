@@ -13,27 +13,6 @@ from oemof.network import Node, Bus
 from oemof.outputlib import views
 
 
-def init(results=None, param_results=None, iterator=None):
-    Analysis(results, param_results, iterator)
-
-
-def analyze():
-    for element in Analysis():
-        Analysis().analyze(*element)
-
-
-def get_analyzer(analyzer):
-    return Analysis().get_analyzer(analyzer)
-
-
-def store_results():
-    Analysis().store_results()
-
-
-def clean():
-    Analysis().clean()
-
-
 class RequirementError(Exception):
     pass
 
@@ -47,123 +26,126 @@ class FormerDependencyError(DependencyError):
 
 
 class Analysis(object):
-    """
-    Holds chain for all analyzers. Is implemented as singleton.
-    """
-    class __Analysis:
-        def __init__(self, results, param_results, iterator):
-            self.results = results
-            self.param_results = param_results
-            self.iterator = (
-                TupleIterator if iterator is None else iterator)
-            self.chain = OrderedDict()
-            self.former_chain = OrderedDict()
+    def __init__(self, results, param_results, iterator):
+        self.results = results
+        self.param_results = param_results
+        self.__iterator = (
+            TupleIterator if iterator is None else iterator)
+        self.__chain = OrderedDict()
+        self.__former_chain = OrderedDict()
 
-        def clean(self):
-            self.chain = OrderedDict()
-            self.former_chain = OrderedDict()
+    def clean(self):
+        self.__chain = OrderedDict()
+        self.__former_chain = OrderedDict()
 
-        def check_iterator(self, analyzer):
-            if analyzer.required_iterator is None:
-                return
-            if self.iterator != analyzer.required_iterator:
-                raise RequirementError(
-                    'Analyzer "' + analyzer.__class__.__name__ +
-                    '" requires iterator "' +
-                    analyzer.required_iterator.__name__ +
-                    '" to work correctly. Please initialize analysis object '
-                    'with iterator "' + analyzer.required_iterator.__name__ +
-                    '".'
-                )
-
-        def check_requirements(self, component):
-            """
-            Checks if requirements are fullfilled
-
-            Function can be used by Analyzer and Iterator objects
-            """
-            if component.requires is not None:
-                for req in component.requires:
-                    if getattr(self, req) is None:
-                        raise RequirementError(
-                            'Component "' + component.__class__.__name__ +
-                            '" requires "' + req + '" to perform. Please '
-                            'initialize it with attribute "' + req + '".'
-                        )
-
-        def check_dependencies(self, analyzer):
-            dep_str = (
-                'Analyzer "{an}" depends on analyzer "{dep}". '
-                'Please initialize analyzer "{dep}" first.'
-            )
-            dep_former_str = (
-                'Analyzer "{an}" depends on former analyzer "{dep}". '
-                'You have to run analysis with analyzer "{dep}" first. '
-                'Afterwards, you have to store results via '
-                '"analyzer.store_results()". Then you are able to add '
-                'analyzer "{an}" to analysis.'
+    def check_iterator(self, analyzer):
+        if analyzer.required_iterator is None:
+            return
+        if not issubclass(self.__iterator, analyzer.required_iterator):
+            raise RequirementError(
+                'Analyzer "' + analyzer.__class__.__name__ +
+                '" requires iterator "' +
+                analyzer.required_iterator.__name__ +
+                '" to work correctly. Please initialize analysis object '
+                'with iterator "' + analyzer.required_iterator.__name__ +
+                '".'
             )
 
-            def check_deps(former=False):
-                error_str = dep_former_str if former else dep_str
-                error_type = (
-                    FormerDependencyError if former else DependencyError)
-                for dep in dependencies:
-                    if dep.__name__ not in chain_keys:
-                        raise error_type(
-                            error_str.format(
-                                an=analyzer.__class__.__name__,
-                                dep=dep.__name__,
-                            )
+    def check_requirements(self, component):
+        """
+        Checks if requirements are fullfilled
+
+        Function can be used by Analyzer and Iterator objects
+        """
+        if component.requires is not None:
+            for req in component.requires:
+                if getattr(self, req) is None:
+                    raise RequirementError(
+                        'Component "' + component.__class__.__name__ +
+                        '" requires "' + req + '" to perform. Please '
+                        'initialize it with attribute "' + req + '".'
+                    )
+
+    def check_dependencies(self, analyzer):
+        dep_str = (
+            'Analyzer "{an}" depends on analyzer "{dep}". '
+            'Please initialize analyzer "{dep}" first.'
+        )
+        dep_former_str = (
+            'Analyzer "{an}" depends on former analyzer "{dep}". '
+            'You have to run analysis with analyzer "{dep}" first. '
+            'Afterwards, you have to store results via '
+            '"analyzer.store_results()". Then you are able to add '
+            'analyzer "{an}" to analysis.'
+        )
+
+        def check_deps(former=False):
+            error_str = dep_former_str if former else dep_str
+            error_type = (
+                FormerDependencyError if former else DependencyError)
+            for dep in dependencies:
+                if dep.__name__ not in chain_keys:
+                    raise error_type(
+                        error_str.format(
+                            an=analyzer.__class__.__name__,
+                            dep=dep.__name__,
                         )
+                    )
 
-            chain_keys = list(self.former_chain)
-            if analyzer.depends_on_former is not None:
-                dependencies = analyzer.depends_on_former
-                check_deps(former=True)
-            if analyzer.depends_on is not None:
-                dependencies = analyzer.depends_on
-                chain_keys += list(self.chain)
-                check_deps()
+        chain_keys = list(self.__former_chain)
+        if analyzer.depends_on_former is not None:
+            dependencies = analyzer.depends_on_former
+            check_deps(former=True)
+        if analyzer.depends_on is not None:
+            dependencies = analyzer.depends_on
+            chain_keys += list(self.__chain)
+            check_deps()
 
-        def add_to_chain(self, analyzer):
-            if analyzer.__class__.__name__ in self.chain:
-                warn(
-                    'Analyzer "' + analyzer.__class__.__name__ +
-                    '" already added to analysis. '
-                    'Clear analysis if you want to create new analysis.'
-                )
-            else:
-                self.chain[analyzer.__class__.__name__] = analyzer
+    def add_analyzer(self, analyzer):
+        if not isinstance(analyzer, Analyzer):
+            raise TypeError('Analyzer has to be an instance of '
+                            '"analyzer.Analyzer" or its subclass')
+        self.check_requirements(analyzer)
+        self.check_iterator(analyzer)
+        self.check_dependencies(analyzer)
+        if analyzer.__class__.__name__ in self.__chain:
+            warn(
+                'Analyzer "' + analyzer.__class__.__name__ +
+                '" already added to analysis. '
+                'Clear analysis if you want to create new analysis.'
+            )
+        else:
+            self.__chain[analyzer.__class__.__name__] = analyzer
+        analyzer.analysis = self
+        analyzer.init_analyzer()
 
-        def analyze(self, *args):
-            for analyzer in self.chain.values():
-                analyzer.analyze(*args)
+    def analyze(self):
+        for element in self:
+            for analyzer in self.__chain.values():
+                analyzer.analyze(*element)
 
-        def get_analyzer(self, analyzer):
+    def get_analyzer(self, analyzer):
+        try:
+            return self.__chain[analyzer.__name__]
+        except KeyError:
             try:
-                return self.chain[analyzer]
+                return self.__former_chain[analyzer.__name__]
             except KeyError:
-                try:
-                    return self.former_chain[analyzer]
-                except KeyError:
-                    raise KeyError('Analyzer "' + analyzer.__class__.__name__ +
-                                   '" not found.')
+                raise KeyError('Analyzer "' + analyzer.__name__ +
+                               '" not found.')
 
-        def store_results(self):
-            self.former_chain.update(self.chain)
-            self.chain = OrderedDict()
+    def store_results(self):
+        self.__former_chain.update(self.__chain)
+        self.__chain = OrderedDict()
 
-        def __iter__(self):
-            return self.iterator(self)
+    def set_iterator(self, iterator):
+        if not issubclass(iterator, Iterator):
+            raise TypeError('Invalid iterator type')
+        else:
+            self.__iterator = iterator
 
-    singleton = None
-
-    def __new__(cls, results=None, param_results=None, iterator=None):
-        if not Analysis.singleton:
-            Analysis.singleton = Analysis.__Analysis(
-                results, param_results, iterator)
-        return Analysis.singleton
+    def __iter__(self):
+        return self.__iterator(self)
 
 
 class Iterator(abc.Iterator):
@@ -226,28 +208,19 @@ class Analyzer(object):
     depends_on_former = None
 
     def __init__(self):
-        self.analysis = Analysis()
-        self.analysis.check_requirements(self)
-        self.analysis.check_iterator(self)
-        self.analysis.check_dependencies(self)
-        self.analysis.add_to_chain(self)
+        self.analysis = None
         self.result = {}
         self.total = 0.0
+
+    def init_analyzer(self):
+        """This function is called after adding analyzer to analysis"""
+        pass
 
     def _get_dep_result(self, analyzer):
         """
         Returns results of dependent analyzer.
         """
-        try:
-            return self.analysis.former_chain[analyzer.__name__].result
-        except KeyError:
-            try:
-                return self.analysis.chain[analyzer.__name__].result
-            except KeyError:
-                raise DependencyError(
-                    'Analyzer "' + analyzer.__name__ +
-                    '" not found in analysis chain.'
-                )
+        return self.analysis.get_analyzer(analyzer).result
 
     def rsc(self, args):
         return self.analysis.results[args]['scalars']
@@ -278,13 +251,18 @@ class Analyzer(object):
         )
 
     def analyze(self, *args):
-        pass
+        if self.analysis is None:
+            raise AttributeError(
+                'Analyzer is not connected to analysis object.'
+                'Maybe you forgot to add analyzer to analysis?'
+            )
 
 
 class SequenceFlowSumAnalyzer(Analyzer):
     requires = ('results',)
 
     def analyze(self, *args):
+        super(SequenceFlowSumAnalyzer, self).analyze(*args)
         try:
             rsq = self.rsq(args)
             result = rsq['flow'].sum()
@@ -298,6 +276,7 @@ class InvestAnalyzer(Analyzer):
     requires = ('results', 'param_results')
 
     def analyze(self, *args):
+        super(InvestAnalyzer, self).analyze(*args)
         try:
             psc = self.psc(args)
             rsc = self.rsc(args)
@@ -315,6 +294,7 @@ class VariableCostAnalyzer(Analyzer):
     depends_on = (SequenceFlowSumAnalyzer,)
 
     def analyze(self, *args):
+        super(VariableCostAnalyzer, self).analyze(*args)
         seq_result = self._get_dep_result(SequenceFlowSumAnalyzer)
         try:
             psc = self.psc(args)
@@ -331,6 +311,7 @@ class FlowTypeAnalyzer(Analyzer):
     requires = ('results',)
 
     def analyze(self, *args):
+        super(FlowTypeAnalyzer, self).analyze(*args)
         if self._arg_is_node(args):
             self.result[args] = views.get_flow_type(
                 args[0], self.analysis.results)
@@ -344,6 +325,7 @@ class NodeBalanceAnalyzer(Analyzer):
     node_type = Node
 
     def analyze(self, *args):
+        super(NodeBalanceAnalyzer, self).analyze(*args)
         if not (isinstance(args[0], self.node_type) and args[1] is None):
             return
 
@@ -377,6 +359,11 @@ class LCOEAnalyzer(Analyzer):
     depends_on_former = (NodeBalanceAnalyzer,)
 
     def __init__(self, load_sinks):
+        super(LCOEAnalyzer, self).__init__()
+        self.load_sinks = load_sinks
+        self.total_load = 0.0
+
+    def init_analyzer(self):
         """
         Initializes total load by iterating flows to all _load_sinks_
 
@@ -385,15 +372,14 @@ class LCOEAnalyzer(Analyzer):
         load_sinks: list-of-Node
             List of all loads which are relevant for calculating total load
         """
-        super(LCOEAnalyzer, self).__init__()
         seq_result = self._get_dep_result(SequenceFlowSumAnalyzer)
         nb_result = self._get_dep_result(NodeBalanceAnalyzer)
-        self.total_load = 0.0
-        for to_node in load_sinks:
+        for to_node in self.load_sinks:
             for from_node in nb_result[to_node]['input']:
                 self.total_load += seq_result[(from_node, to_node)]
 
     def analyze(self, *args):
+        super(LCOEAnalyzer, self).analyze(*args)
         vc_result = self._get_dep_result(VariableCostAnalyzer)
         inv_result = self._get_dep_result(InvestAnalyzer)
 
