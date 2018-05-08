@@ -894,7 +894,14 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             &
             f(i, n, t) =
             \frac{(f(n, o_m, t) + f(n, o_t, t) \cdot I_{mfl}(n, t))}
-                 {E_c(n, t)} \\
+                 {E_c(n, t)}.
+
+    Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
+        .. math::
+            &
+            f(n, o_m, t) = f(n, o_t, t) \cdot
+            \frac{\eta(n, o_m, t)}
+                 {\eta(n, o_t, t)}\\
             &
             \forall t \in \textrm{TIMESTEPS}, \\
             &
@@ -906,19 +913,16 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
           node :math:`o` at timestep :math:`t`,
         * :math:`o_m` is the :py:obj:`main_output`,
         * :math:`o_t` is the :py:obj:`tapped_output`,
+        * :math:`\eta(n, o, t)` is the efficiency (:py:obj:`conversion_factor`)
+          applied to the output from node :math:`n` to node :math:`o` at
+          timestep :math:`t`,
         * :math:`I_{mfl}(n, t)` is the :py:obj:`main_flow_loss_index` at
           node :math:`n`, at timestep :math:`t` and
         * :math:`E_c(n, t)` is the condensing efficiency
           (:py:obj:`efficiency_condensing`) at node :math:`n` at timestep
           :math:`t`.
 
-    Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
-        .. math::
-            flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
-            conversion\_factor(n, main\_output, t) / \
-            conversion\_factor(n, tapped\_output, t)\\
-            \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
     """
 
     CONSTRAINT_GROUP = True
