@@ -891,12 +891,26 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     Variable i/o relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
-            flow(input, n, t) = \\
-            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \cdot \
-            main\_flow\_loss\_index(n, t)) /\\
-            efficiency\_condensing(n, t)\\
+            &
+            f(i, n, t) =
+            \frac{(f(n, o_m, t) + f(n, o_t, t) \cdot I_{mfl}(n, t))}
+                 {E_c(n, t)} \\
+            &
             \forall t \in \textrm{TIMESTEPS}, \\
+            &
             \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
+    where:
+
+        * :math:`f(i, o, t)` is the *flow* from input node :math:`i` to output
+          node :math:`o` at timestep :math:`t`,
+        * :math:`o_m` is the :py:obj:`main_output`,
+        * :math:`o_t` is the :py:obj:`tapped_output`,
+        * :math:`I_{mfl}(n, t)` is the :py:obj:`main_flow_loss_index` at
+          node :math:`n`, at timestep :math:`t` and
+        * :math:`E_c(n, t)` is the condensing efficiency
+          (:py:obj:`efficiency_condensing`) at node :math:`n` at timestep
+          :math:`t`.
 
     Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
