@@ -130,8 +130,6 @@ class Analyzer_Tests:
         self.analysis.add_analyzer(analyzer.NodeBalanceAnalyzer())
         self.analysis.add_analyzer(analyzer.VariableCostAnalyzer())
         self.analysis.add_analyzer(analyzer.InvestAnalyzer())
-        self.analysis.analyze()
-        self.analysis.store_results()
         lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
         self.analysis.add_analyzer(lcoe)
         self.analysis.analyze()

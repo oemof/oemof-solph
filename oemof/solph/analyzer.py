@@ -31,6 +31,7 @@ class Analysis(object):
         self.param_results = param_results
         self.__iterator = (
             TupleIterator if iterator is None else iterator)
+        self.__later = []
         self.__chain = OrderedDict()
         self.__former_chain = OrderedDict()
 
@@ -67,62 +68,90 @@ class Analysis(object):
                     )
 
     def check_dependencies(self, analyzer):
-        dep_str = (
+        error_str = (
             'Analyzer "{an}" depends on analyzer "{dep}". '
             'Please initialize analyzer "{dep}" first.'
         )
-        dep_former_str = (
-            'Analyzer "{an}" depends on former analyzer "{dep}". '
-            'You have to run analysis with analyzer "{dep}" first. '
-            'Afterwards, you have to store results via '
-            '"analyzer.store_results()". Then you are able to add '
-            'analyzer "{an}" to analysis.'
-        )
 
-        def check_deps(former=False):
-            error_str = dep_former_str if former else dep_str
-            error_type = (
-                FormerDependencyError if former else DependencyError)
+        def check_deps():
             for dep in dependencies:
                 if dep.__name__ not in chain_keys:
-                    raise error_type(
+                    raise DependencyError(
                         error_str.format(
                             an=analyzer.__class__.__name__,
-                            dep=dep.__name__,
+                            dep=dep
                         )
                     )
+
+        if analyzer.depends_on is not None:
+            dependencies = analyzer.depends_on
+            chain_keys = list(self.__former_chain) + list(self.__chain)
+            check_deps()
 
         chain_keys = list(self.__former_chain)
         if analyzer.depends_on_former is not None:
             dependencies = analyzer.depends_on_former
-            check_deps(former=True)
-        if analyzer.depends_on is not None:
-            dependencies = analyzer.depends_on
-            chain_keys += list(self.__chain)
-            check_deps()
+            try:
+                check_deps()
+            except DependencyError:
+                return False
+        return True
 
     def add_analyzer(self, analyzer):
+        added_to_chain = True
         if not isinstance(analyzer, Analyzer):
             raise TypeError('Analyzer has to be an instance of '
                             '"analyzer.Analyzer" or its subclass')
-        self.check_requirements(analyzer)
-        self.check_iterator(analyzer)
-        self.check_dependencies(analyzer)
         if analyzer.__class__.__name__ in self.__chain:
             warn(
                 'Analyzer "' + analyzer.__class__.__name__ +
                 '" already added to analysis. '
                 'Clear analysis if you want to create new analysis.'
             )
-        else:
+        self.check_requirements(analyzer)
+        self.check_iterator(analyzer)
+        no_dependecies = self.check_dependencies(analyzer)
+        if no_dependecies:
             self.__chain[analyzer.__class__.__name__] = analyzer
-        analyzer.analysis = self
-        analyzer.init_analyzer()
+            analyzer.analysis = self
+        else:
+            self.__later.append(analyzer)
+            added_to_chain = False
+        return added_to_chain
 
-    def analyze(self):
+    def __analyze_chain(self):
+        for analyzer in self.__chain.values():
+            analyzer.init_analyzer()
         for element in self:
             for analyzer in self.__chain.values():
                 analyzer.analyze(*element)
+
+    def __prepare_next_chain(self):
+        done = False
+        if not self.__later:
+            return True
+        added_analyzer = False
+        later = self.__later
+        self.__later = []
+        for i, analyzer in enumerate(later):
+            result = self.add_analyzer(analyzer)
+            if result:
+                added_analyzer = True
+        if not added_analyzer:
+            raise FormerDependencyError(
+                'Could not iterate over all Analyzers. '
+                'Maybe some analyzers are missing for former dependencies? '
+                'Analyzers that could not be performed are: ' +
+                ','.join(map(lambda x: x.__class__.__name__, self.__later))
+            )
+        return done
+
+    def analyze(self):
+        while True:
+            self.__analyze_chain()
+            self.__store_results()
+            if self.__prepare_next_chain():
+                break
 
     def get_analyzer(self, analyzer):
         try:
@@ -134,7 +163,7 @@ class Analysis(object):
                 raise KeyError('Analyzer "' + analyzer.__name__ +
                                '" not found.')
 
-    def store_results(self):
+    def __store_results(self):
         self.__former_chain.update(self.__chain)
         self.__chain = OrderedDict()
 
