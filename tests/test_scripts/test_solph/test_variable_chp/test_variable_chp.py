@@ -12,7 +12,7 @@ oemof/tests/test_scripts/test_solph/test_variable_chp/test_variable_chp.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 import logging
 import os
 import pandas as pd
@@ -116,11 +116,21 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
 
     for key in variable_chp_dict_max.keys():
         logging.debug("Test the maximum value of {0}".format(key))
-        eq_(int(round(maxresults[key])), int(round(variable_chp_dict_max[key])))
+        eq_(int(round(maxresults[key])), int(round(variable_chp_dict_max[key]))
+            )
 
     for key in variable_chp_dict_sum.keys():
         logging.debug("Test the summed up value of {0}".format(key))
-        eq_(int(round(sumresults[key])), int(round(variable_chp_dict_sum[key])))
+        eq_(int(round(sumresults[key])), int(round(variable_chp_dict_sum[key]))
+            )
 
     # objective function
     eq_(round(outputlib.processing.meta_results(om)['objective']), 326661590)
+
+    # The parameters 'flow_relation_index' and 'main_flow_loss_index' from the
+    # ExtractionTurbineCHP should be scalars as they are calculated values from
+    # the conversion factors. If the conversion factor are real series the
+    # values above have to be real series as well.
+    parameter = outputlib.processing.param_results(om, keys_as_str=True)
+    for p in ['flow_relation_index', 'main_flow_loss_index']:
+        ok_(p in parameter[('variable_chp_gas', 'None')]['scalars'])
