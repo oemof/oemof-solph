@@ -342,7 +342,7 @@ ExtractionTurbineCHP (component)
 The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
 :ref:`oemof_solph_components_transformer_label` class. An instance of this
 class can represent a component with one input and two output flows and a
-flexible ratio between these flows. By now this class is restricted to one
+flexible ratio between these flows. For now this class is restricted to one
 input and two output flows. One application example would be a flexible
 combined heat and power (chp) plant. The class allows to define a different
 efficiency for every time step but this series has to be predefined as a
