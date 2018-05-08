@@ -358,8 +358,7 @@ flow is zero (conversion_factor_single_flow).
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
-        conversion_factor_single_flow={b_el: 0.5}
-        )
+        conversion_factor_single_flow={b_el: 0.5})
 
 For :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances, the
 following constraints are created:
