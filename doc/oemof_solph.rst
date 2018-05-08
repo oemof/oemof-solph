@@ -368,7 +368,13 @@ flow is zero (conversion_factor_single_flow).
         conversion_factors={b_el: 0.3, b_th: 0.5},
         conversion_factor_single_flow={b_el: 0.5})
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of an example in the `oemof example repository <https://github.com/oemof/oemof_examples>`_.
+The key of the parameter *'conversion_factor_single_flow'* will indicate the
+main flow. In the example above, the flow to the Bus *'b_el'* is the main flow
+and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows
+how the variable chp (right) schedules it's electrical and thermal power
+production in contrast to a fixed chp (left). The plot is the output of an
+example in the `oemof example repository
+<https://github.com/oemof/oemof_examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
