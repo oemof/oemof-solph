@@ -885,19 +885,15 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         A set with all
         :class:`~oemof.solph.components.ExtractionTurbineCHP` objects.
 
-    **The following constraints are created:**
+    **The following two constraints are created:**
 
     .. _ETCHP-equations:
 
-    Variable i/o relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
             &
             f(i, n, t) =
             \frac{(f(n, o_m, t) + f(n, o_t, t) \cdot I_{mfl}(n, t))}
-                 {E_c(n, t)}.
-
-    Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
-        .. math::
+                 {E_c(n, t)} \\
             &
             f(n, o_m, t) = f(n, o_t, t) \cdot
             \frac{\eta(n, o_m, t)}
@@ -907,7 +903,10 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             &
             \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
-    where:
+    where the first equation is the result of the relation between the input
+    flow and the two output flows, the second equation stems from how the two
+    output flows relate to each other, and the symbols used are defined as
+    follows:
 
         * :math:`f(i, o, t)` is the *flow* from input node :math:`i` to output
           node :math:`o` at timestep :math:`t`,
