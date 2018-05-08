@@ -928,15 +928,13 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             n.conversion_factor_full_condensation_sq = (
                 n.conversion_factor_full_condensation[
                     m.es.groups[n.main_output.label]])
-            n.flow_relation_index = [
-                n.conversion_factors[m.es.groups[n.main_output.label]][t] /
-                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
-                for t in m.TIMESTEPS]
-            n.main_flow_loss_index = [
-                (n.conversion_factor_full_condensation_sq[t] -
-                 n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
-                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
-                for t in m.TIMESTEPS]
+            n.flow_relation_index = (
+                n.conversion_factors[m.es.groups[n.main_output.label]] /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]])
+            n.main_flow_loss_index = (
+                (n.conversion_factor_full_condensation_sq -
+                 n.conversion_factors[m.es.groups[n.main_output.label]]) /
+                n.conversion_factors[m.es.groups[n.tapped_output.label]])
 
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output.
