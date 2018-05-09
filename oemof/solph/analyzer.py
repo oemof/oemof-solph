@@ -26,11 +26,11 @@ class FormerDependencyError(DependencyError):
 
 
 class Analysis(object):
-    def __init__(self, results, param_results, iterator):
+    def __init__(self, results, param_results, iterator=None):
         self.results = results
         self.param_results = param_results
         self.__iterator = (
-            TupleIterator if iterator is None else iterator)
+            FlowNodeIterator if iterator is None else iterator)
         self.__later = []
         self.__chain = OrderedDict()
         self.__former_chain = OrderedDict()
