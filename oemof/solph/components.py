@@ -892,8 +892,9 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         .. math::
             &
             f(i, n, t) =
-            \frac{(f(n, o_m, t) + f(n, o_t, t) \cdot I_{mfl}(n, t))}
-                 {E_c(n, t)} \\
+            \frac{(f(n, o_m, t) + f(n, o_t, t) \cdot
+                  \frac{\eta_c(n, o_m, t) - \eta(n, o_m, t)}{\eta(n, o_t, t)})}
+                 {\eta_c(n, o_m, t)} \\
             &
             f(n, o_m, t) = f(n, o_t, t) \cdot
             \frac{\eta(n, o_m, t)}
@@ -915,12 +916,11 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         * :math:`\eta(n, o, t)` is the efficiency (:py:obj:`conversion_factor`)
           applied to the output from node :math:`n` to node :math:`o` at
           timestep :math:`t`,
-        * :math:`I_{mfl}(n, t)` is the :py:obj:`main_flow_loss_index` at
-          node :math:`n`, at timestep :math:`t` and
-        * :math:`E_c(n, t)` is the condensing efficiency
-          (:py:obj:`efficiency_condensing`) at node :math:`n` at timestep
-          :math:`t`.
-
+        * :math:`\eta_c(n, o_m, t)` is the efficiency at node :math:`n`, at
+          timestep :math:`t`, when operating with full condensation
+          (:py:obj:`conversion_factor_full_condesation`), i.e. the efficiency
+          applied to the main flow :math:`o_m` when the tapped flow :math:`o_t`
+          is zero.
 
     """
 
