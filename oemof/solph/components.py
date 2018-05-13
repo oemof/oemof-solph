@@ -130,7 +130,7 @@ class GenericStorage(network.Transformer):
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
         self.couple_investment = kwargs.get('couple_investment', None)
-        self.cyclic = kwargs.get('cyclic',None)
+        self.cyclic = kwargs.get('cyclic', None)
 
         # General error messages
         self._e_no_nv = (
