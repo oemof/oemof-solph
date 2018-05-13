@@ -63,6 +63,10 @@ class GenericStorage(network.Transformer):
         investment variable instead of to the nominal_capacity. The
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
+    couple_investment : String that indicated the coupling of power and
+        capacity. Values to choose: power_capacity ; power ; None 
+    cyclic: Defines the storage behaviour of the last timestep and whether
+        it is constrained to the initial capacity. Either 'None' or a scalar
 
     Notes
     -----
@@ -125,6 +129,8 @@ class GenericStorage(network.Transformer):
         self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
+        self.couple_investment = kwargs.get('couple_investment', None)
+        self.cyclic = kwargs.get('cyclic',None)
 
         # General error messages
         self._e_no_nv = (
@@ -135,6 +141,14 @@ class GenericStorage(network.Transformer):
             "will set the nominal_value for the flow.\nTherefore "
             "either the 'nominal_{0}_capacity_ratio' or the "
             "'nominal_value' has to be 'None'.")
+        self._e_couple_investment_capacity = (
+                "Either set an input or output capacity ratio or switch the couple_investment value accordingly")
+        self._e_couple_investment_power = (
+                "Either delete the input and output capacity ratio or switch the power_capacity value accordingly")
+        if self.couple_investment is 'power_capacity' and self.nominal_input_capacity_ratio is None and self.nominal_output_capacity_ratio is None:
+            raise AttributeError(self._e_couple_investment_capacity)
+        if self.couple_investment is 'power' and self.nominal_input_capacity_ratio is not None and self.nominal_output_capacity_ratio is not None:
+            raise AttributeError(self._e_couple_investment_power)        
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             raise AttributeError(self._e_no_nv.format('nominal_capacity'))
@@ -290,6 +304,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     INVESTSTORAGES
         A set with all storages containing an Investment object.
+    INVESTSTORAGESINPUT
+        A set with all storages containing an Investment object with coupled 
+        investment of input power and storage capacity
+    INVESTSTORAGESOUTPUT
+        A set with all storages containing an Investment object with coupled 
+        investment of output power and storage capacity
+    INVESTSTORAGESPOWERCOUPLED
+        A set with all storages containing an Investment object with coupled
+        investment of input and output power
     INITIAL_CAPACITY
         A subset of the set INVESTSTORAGES where elements of the set have an
         initial_capacity attribute.
@@ -375,11 +398,26 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
-        self.INVESTSTORAGESINPUT = Set(initialize=[n for n in group if n.nominal_input_capacity_ratio is not None])
-        self.INVESTSTORAGESOUTPUT = Set(initialize=[n for n in group if n.nominal_output_capacity_ratio is not None])
+        self.INVESTSTORAGESINPUT = Set(initialize=[n for n in group if 
+                                                   n.nominal_input_capacity_ratio 
+                                                   is not None and 
+                                                   n.couple_investment is 
+                                                   'power_capacity'])
+    
+        self.INVESTSTORAGESOUTPUT = Set(initialize=[n for n in group if 
+                                                    n.nominal_output_capacity_ratio 
+                                                    is not None and
+                                                    n.couple_investment is
+                                                    'power_capacity'])
+    
+        self.INVESTSTORAGESPOWERCOUPLED = Set(initialize=[n for n in group if 
+                                                          n.nominal_output_capacity_ratio 
+                                                          is None and 
+                                                          n.couple_investment 
+                                                          is 'power'])
 
         self.INITIAL_CAPACITY = Set(initialize=[
-            n for n in group if n.initial_capacity is not None])
+            n for n in group if n.initial_capacity is not None and n.cyclic is None])
 
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
@@ -427,6 +465,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             return expr
         self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+        
+        def _power_coupled(block,n):
+            """Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = (m.InvestmentFlow.invest[n, o[n]] == 
+                    m.InvestmentFlow.invest[o[n],n])
+            return expr
+        self.power_coupled = Constraint(
+                self.INVESTSTORAGESPOWERCOUPLED, rule=_power_coupled)
+        
 
         def _storage_capacity_inflow_invest_rule(block, n):
             """Rule definition of constraint connecting the inflow
