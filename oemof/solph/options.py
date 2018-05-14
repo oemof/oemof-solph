@@ -24,10 +24,12 @@ class Investment:
         year these costs are equal to the equivalent annual costs.
 
     """
-    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0):
+    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
+                 existing=0):
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
+        self.existing = existing
 
 
 class NonConvex:
