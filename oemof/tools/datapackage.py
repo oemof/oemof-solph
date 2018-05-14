@@ -65,6 +65,19 @@ def read_facade(facade, facades, create, typemap, data, objects,
     """ Parse the resource `r` as a facade.
     """
     # TODO: Make sure the class var 'required' exists
+    # TODO: Actually, required attributes are best enforced in the constructor
+    #       (i.e. `__init__`) either by making them arguments without default
+    #       values or by checking for the required values in the function body.
+    #       Benefits:
+    #
+    #           * The constructor sees the attributes after they are already
+    #             remapped, so `attributemap` gets taken into account
+    #             transparently and elegantly. The code below probably contains
+    #             a bug if `attributemap` maps for a required attribute.
+    #           * The `required` attribute becomes obsolete.
+    #           * Consistent error messages.
+    #           * Code checking for `required` attributes presence isn't all
+    #             over the place.
     if hasattr(typemap[facade['type']], 'required'):
         for r in typemap[facade['type']].required:
             if facade.get(r) is None:
