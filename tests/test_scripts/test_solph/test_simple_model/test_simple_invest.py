@@ -20,10 +20,12 @@ from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem, Investment)
 from oemof.tools import economics
 from oemof.outputlib import processing, views
+from oemof.network import Node
 
 
 def test_dispatch_example(solver='cbc', periods=24*5):
     """Create an energy system and optimize the dispatch at least costs."""
+    Node.registry = None
 
     filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
     data = pd.read_csv(filename, sep=",")
