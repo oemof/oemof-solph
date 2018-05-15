@@ -51,12 +51,12 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     ep_wind = economics.annuity(capex=1000, n=20, wacc=0.05)
     wind = Source(label='wind', outputs={bel: Flow(
                     actual_value=data['wind'], fixed=True,
-                    investment=Investment(ep_costs=ep_wind, existing=0))})
+                    investment=Investment(ep_costs=ep_wind, existing=100))})
 
     ep_pv = economics.annuity(capex=1500, n=20, wacc=0.05)
     pv = Source(label='pv', outputs={bel: Flow(
                     actual_value=data['pv'], fixed=True,
-                    investment=Investment(ep_costs=ep_pv, existing=0))})
+                    investment=Investment(ep_costs=ep_pv, existing=80))})
 
     # demands (electricity/heat)
     demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
@@ -157,8 +157,8 @@ def test_dispatch_example(solver='cbc', periods=24*5):
         (('pp_coal', 'b_el'), 'flow'): 1256,
         (('pp_oil', 'b_el'), 'flow'): 0,
         (('b_el', 'el_heat_pump'), 'flow'): 202,
-        'pv_capacity': 124,
-        'wind_capacity': 346,
+        'pv_capacity': 44,
+        'wind_capacity': 246,
     }
 
     for key in test_results.keys():
