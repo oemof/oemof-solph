@@ -154,6 +154,7 @@ class Parameter_Result_Tests:
                 'investment_ep_costs': 0.4,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_existing': 0,
                 'capacity_loss': 0,
                 'capacity_min': 0,
                 'capacity_max': 1,
