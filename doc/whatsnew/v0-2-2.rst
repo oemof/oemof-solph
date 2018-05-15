@@ -9,7 +9,9 @@ API changes
 
 New features
 ############
-
+* We added a new attribute `existing` to the `solph.options.Investement` class.
+It will now be possible to run investment optimization based on already
+installed capacity of a component.
 
 
 New components
