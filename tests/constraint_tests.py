@@ -194,7 +194,8 @@ class Constraint_Tests:
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
-            investment=solph.Investment(ep_costs=500, maximum=10e5))})
+            investment=solph.Investment(ep_costs=500, maximum=10e5,
+                                        existing=50))})
 
         self.compare_lp_files('fixed_source_invest_sink.lp')
 
