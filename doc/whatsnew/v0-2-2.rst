@@ -11,7 +11,7 @@ New features
 ############
 * We added a new attribute `existing` to the `solph.options.Investement` class.
 It will now be possible to run investment optimization based on already
-installed capacity of a component.
+installed capacity of a component.(`Issue #489 <https://github.com/oemof/oemof/issues/489>`_)
 
 
 New components
