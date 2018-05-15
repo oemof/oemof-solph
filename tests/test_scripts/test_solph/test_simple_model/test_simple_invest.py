@@ -145,16 +145,16 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     comp_results['wind_capacity'] = results[(wind, bel)]['scalars'].invest
 
     test_results = {
-        # (('wind', 'b_el'), 'flow'): 9239,
-        # (('pv', 'b_el'), 'flow'): 1147,
-        # (('b_el', 'demand_elec'), 'flow'): 7440,
-        # (('b_el', 'excess_el'), 'flow'): 6261,
-        # (('pp_chp', 'b_el'), 'flow'): 477,
-        # (('pp_lig', 'b_el'), 'flow'): 850,
-        # (('pp_gas', 'b_el'), 'flow'): 934,
-        # (('pp_coal', 'b_el'), 'flow'): 1256,
-        # (('pp_oil', 'b_el'), 'flow'): 0,
-        # (('b_el', 'el_heat_pump'), 'flow'): 202,
+        (('wind', 'b_el'), 'flow'): 9239,
+        (('pv', 'b_el'), 'flow'): 1147,
+        (('b_el', 'demand_elec'), 'flow'): 7440,
+        (('b_el', 'excess_el'), 'flow'): 6261,
+        (('pp_chp', 'b_el'), 'flow'): 477,
+        (('pp_lig', 'b_el'), 'flow'): 850,
+        (('pp_gas', 'b_el'), 'flow'): 934,
+        (('pp_coal', 'b_el'), 'flow'): 1256,
+        (('pp_oil', 'b_el'), 'flow'): 0,
+        (('b_el', 'el_heat_pump'), 'flow'): 202,
         'pv_capacity': 124,
         'wind_capacity': 346,
     }
