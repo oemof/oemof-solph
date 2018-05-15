@@ -84,18 +84,19 @@ class Constraint_Tests:
                                        generated_file.readlines()))
 
                 def normalize_to_positive_results(lines):
-                    negative_result_indices = [n
-                        for n, line in enumerate(lines)
+                    negative_result_indices = [
+                        n for n, line in enumerate(lines)
                         if re.match("^= -", line)]
                     equation_start_indices = [
                         [n for n in reversed(range(0, nri))
-                           if re.match('.*:$', lines[n])][0]+1
+                         if re.match('.*:$', lines[n])][0]+1
                         for nri in negative_result_indices]
                     for (start, end) in zip(
                             equation_start_indices,
                             negative_result_indices):
                         for n in range(start, end):
-                            lines[n] = ('-'
+                            lines[n] = (
+                                '-'
                                 if lines[n] and lines[n][0] == '+'
                                 else '+' if lines[n]
                                          else lines[n]) + lines[n][1:]
@@ -290,6 +291,29 @@ class Constraint_Tests:
                                 bel: 0.3, bth: 0.5})
 
         self.compare_lp_files('transformer_invest.lp')
+
+    def test_transformer_invest_with_existing(self):
+        """Constraint test of a LinearN1Transformer with Investment.
+        """
+
+        bgas = solph.Bus(label='gasBus')
+        bcoal = solph.Bus(label='coalBus')
+        bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='thermalBus')
+
+        solph.Transformer(
+            label='powerplant_gas_coal',
+            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+            outputs={bel: solph.Flow(variable_costs=50,
+                                     investment=solph.Investment(
+                                         maximum=1000, ep_costs=20,
+                                         existing=200)),
+                     bth: solph.Flow(variable_costs=20)
+                     },
+            conversion_factors={bgas: 0.58, bcoal: 0.2,
+                                bel: 0.3, bth: 0.5})
+
+        self.compare_lp_files('transformer_invest_with_existing.lp')
 
     def test_linear_transformer_chp(self):
         """Constraint test of a Transformer without Investment (two outputs).
