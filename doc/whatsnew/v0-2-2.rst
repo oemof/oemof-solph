@@ -10,8 +10,9 @@ API changes
 New features
 ############
 * We added a new attribute `existing` to the `solph.options.Investement` class.
-It will now be possible to run investment optimization based on already
-installed capacity of a component.(`Issue #489 <https://github.com/oemof/oemof/issues/489>`_)
+  It will now be possible to run investment optimization based on already
+  installed capacity of a component. (`Issue #489 <https://github.com/oemof/oemof/issues/489>`_).
+  Take a look on :ref:`investment_mode_label` for usage of this option.
 
 
 New components
@@ -32,8 +33,8 @@ Bug fixes
 
 * Fix file extension check to dump a graph correctly as .graphml-file
 * The full constraint set of the ExtractionTurbineCHP class was only build for
- one object. If more than one object was present the input/output constraint
- was missing. This leads to wrong results.
+  one object. If more than one object was present the input/output constraint
+  was missing. This leads to wrong results.
 * In the solph constraints module the emission constraint did not include
   the timeincrement form the model which has now be fixed.
 
