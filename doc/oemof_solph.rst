@@ -544,6 +544,14 @@ Adding additional constraints
 You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See `flexible_modelling in the example repository
 <https://github.com/oemof/oemof_examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
 
+Some predefined additional constraints can be found in the
+(:py:mod:`~oemof.solph.constraints`) module.
+
+ * Emission limit for the model (:func:`~.oemof.solph.constraints.emission_limit`)
+ * Coupling of two variables (e.g. investment variables) with a factor
+   (:func:`~.oemof.solph.constraints.equate_variables`)
+ * Overall investment limit (:func:`~.oemof.solph.constraints.investment_limit`)
+
 
 The Grouping module (Sets)
 -----------------------------------------------------
