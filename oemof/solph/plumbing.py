@@ -40,7 +40,18 @@ def sequence(sequence_or_scalar):
     10
     >>> print(x)
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-
+    >>> a = sequence(3)
+    >>> a + sequence(5)
+    8
+    >>> a[2] = 4
+    >>> a + sequence(5)
+    [8, 8, 9]
+    >>> a * sequence(2)
+    [6, 6, 8]
+    >>> b = sequence([1, 2, 3])
+    >>> c = sequence([4, 5, 6])
+    >>> b + c
+    [5, 7, 9]
     """
     if (isinstance(sequence_or_scalar, abc.Iterable) and not
             isinstance(sequence_or_scalar, str)):

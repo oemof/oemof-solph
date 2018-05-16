@@ -17,6 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
+from oemof.solph import blocks
 
 
 class EnergySystem(es.EnergySystem):
@@ -39,11 +40,9 @@ class EnergySystem(es.EnergySystem):
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from oemof.solph.groupings import GROUPINGS
-        from oemof.solph.components import component_grouping
-        from oemof.solph.custom import custom_component_grouping
-        kwargs['groupings'] = (
-            GROUPINGS + [component_grouping] + [custom_component_grouping] +
-            kwargs.get('groupings', []))
+
+        kwargs['groupings'] = (GROUPINGS + kwargs.get('groupings', []))
+
         super().__init__(**kwargs)
 
 
@@ -188,22 +187,28 @@ class Bus(on.Bus):
      * :py:class:`~oemof.solph.blocks.Bus`
 
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
 
 
+    def constraint_group(self):
+        if self.balanced:
+            return blocks.Bus
+        else:
+            return None
+
 class Sink(on.Sink):
     """An object with one input flow.
     """
-    pass
-
+    def constraint_group(self):
+        pass
 
 class Source(on.Source):
     """An object with one output flow.
     """
-    pass
+    def constraint_group(self):
+        pass
 
 
 class Transformer(on.Transformer):
@@ -268,3 +273,7 @@ class Transformer(on.Transformer):
 
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
+
+
+    def constraint_group(self):
+        return blocks.Transformer
