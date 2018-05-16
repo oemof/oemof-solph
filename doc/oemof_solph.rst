@@ -439,7 +439,7 @@ Storage. All parameters that usually refer to the *nominal_value/capacity* will
 now refer to the investment variables and existing capacity. It is also
 possible to set a maximum limit for the capacity that can be build.
 If existing capacity is considered for a component with investment mode enabled,
-the *ep_costs* apply to both, the newly built capacity and existing capacity.
+the *ep_costs* still apply only to the newly built capacity.
 
 For example if you want to find out what would be the optimal capacity of a wind
 power plant to decrease the costs of an existing energy system, you can define
