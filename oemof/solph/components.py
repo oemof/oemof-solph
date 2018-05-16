@@ -40,6 +40,11 @@ class GenericStorage(network.Transformer):
     nominal_input_capacity_ratio : numeric
         Ratio between the nominal inflow of the storage and its capacity.
         see: nominal_output_capacity_ratio
+    invest_relation_input_output_power : numeric
+        Ratio between the input power to the output power.
+        This ratio used to fix the flow investments to each other. Values <1
+        set the input flow lower than the output and >1 will increase the input
+        to the output flow.
     initial_capacity : numeric
         The capacity of the storage in the first (and last) time step of
         optimization.
@@ -63,6 +68,9 @@ class GenericStorage(network.Transformer):
         investment variable instead of to the nominal_capacity. The
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
+    cyclic: Defines the storage behaviour of the last timestep and whether
+        it is constrained to the initial capacity. Either 'False'= does not have
+        to equal las time step or 'True'= does have to equal last time step
 
     Notes
     -----
@@ -125,6 +133,8 @@ class GenericStorage(network.Transformer):
         self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
+        self.invest_relation_input_output_power = kwargs.get('invest_relation_input_output_power',None)
+        self.cyclic = kwargs.get('cyclic', True)
 
         # General error messages
         self._e_no_nv = (
@@ -135,6 +145,10 @@ class GenericStorage(network.Transformer):
             "will set the nominal_value for the flow.\nTherefore "
             "either the 'nominal_{0}_capacity_ratio' or the "
             "'nominal_value' has to be 'None'.")
+        self._e_couple_investment_power_capacity = (
+                "You can't couple input and output power to each other as well as the capacity")
+        if (self.invest_relation_input_output_power is not None and self.nominal_input_capacity_ratio is not None and self.nominal_output_capacity_ratio is not None):
+            raise AttributeError(self._e_couple_investment_power_capacity)      
         # Check investment
         if self.investment and self.nominal_capacity is not None:
             raise AttributeError(self._e_no_nv.format('nominal_capacity'))
@@ -290,6 +304,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     INVESTSTORAGES
         A set with all storages containing an Investment object.
+    INVESTSTORAGESINPUT
+        A set with all storages containing an Investment object with coupled 
+        investment of input power and storage capacity
+    INVESTSTORAGESOUTPUT
+        A set with all storages containing an Investment object with coupled 
+        investment of output power and storage capacity
+    INVESTSTORAGESPOWERCOUPLED
+        A set with all storages containing an Investment object with coupled
+        investment of input and output power
     INITIAL_CAPACITY
         A subset of the set INVESTSTORAGES where elements of the set have an
         initial_capacity attribute.
@@ -375,9 +398,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
+        self.INVESTSTORAGESINPUT = Set(initialize=[
+                n for n in group if n.nominal_input_capacity_ratio is not None])
+    
+        self.INVESTSTORAGESOUTPUT = Set(initialize=[
+                n for n in group if n.nominal_output_capacity_ratio is not None])
+    
+        self.INVESTSTORAGESPOWERCOUPLED = Set(initialize=[
+                n for n in group if n.invest_relation_input_output_power is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
-            n for n in group if n.initial_capacity is not None])
+                n for n in group if n.initial_capacity is not None and n.cyclic is True])
 
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
@@ -425,6 +456,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             return expr
         self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+        
+        def _power_coupled(block,n):
+            """Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = (m.InvestmentFlow.invest[n, o[n]] * n.invest_relation_input_output_power == 
+                    m.InvestmentFlow.invest[o[n],n] )
+            return expr
+        self.power_coupled = Constraint(
+                self.INVESTSTORAGESPOWERCOUPLED, rule=_power_coupled)
+        
 
         def _storage_capacity_inflow_invest_rule(block, n):
             """Rule definition of constraint connecting the inflow
@@ -433,9 +475,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             expr = (m.InvestmentFlow.invest[i[n], n] ==
                     self.invest[n] * n.nominal_input_capacity_ratio)
-            return expr
+            return expr          
         self.storage_capacity_inflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_inflow_invest_rule)
+            self.INVESTSTORAGESINPUT, rule=_storage_capacity_inflow_invest_rule)
 
         def _storage_capacity_outflow_invest_rule(block, n):
             """Rule definition of constraint connecting outflow
@@ -446,7 +488,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                     self.invest[n] * n.nominal_output_capacity_ratio)
             return expr
         self.storage_capacity_outflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_outflow_invest_rule)
+            self.INVESTSTORAGESOUTPUT, rule=_storage_capacity_outflow_invest_rule)
 
         def _max_capacity_invest_rule(block, n, t):
             """Rule definition for upper bound constraint for the storage cap.
