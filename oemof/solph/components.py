@@ -894,6 +894,10 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             \dot H_Fuel =
             \frac{P_el + \dot Q_th \cdot \beta}
                  {\eta_el,_woExtr)} \\
+                 
+    where :math:`\beta` is defined as:
+    
+         .. math::
             &
             \beta = \frac{\eta_el,_woExtr - \eta_el,_maxExtr}{\eta_th,_maxExtr)} \\
             &
