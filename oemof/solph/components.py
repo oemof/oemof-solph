@@ -134,7 +134,7 @@ class GenericStorage(network.Transformer):
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
         self.invest_relation_input_output_power = kwargs.get('invest_relation_input_output_power',None)
-        self.cyclic = kwargs.get('cyclic', None)
+        self.cyclic = kwargs.get('cyclic', True)
 
         # General error messages
         self._e_no_nv = (
@@ -408,7 +408,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 n for n in group if n.invest_relation_input_output_power is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
-                n for n in group if n.initial_capacity is not None and n.cyclic is None])
+                n for n in group if n.initial_capacity is not None and n.cyclic is True])
 
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
