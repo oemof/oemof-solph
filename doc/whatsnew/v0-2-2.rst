@@ -10,7 +10,11 @@ API changes
 New features
 ############
 
-
+* Investement variables for the capacity and the flows are now decoupled to
+enable more flexibility. It is possible to couple the flows to the capacity,
+the flows to itself or to not couple anything. Added attribute: 
+'invest_relation_input_output_power'. Scalar that indicates the input power ratio 
+compared to the output power ratio. 
 
 New components
 ##############
@@ -45,3 +49,4 @@ Contributors
 ############
 
 * Uwe Krien
+* Fabian Büllesbach
