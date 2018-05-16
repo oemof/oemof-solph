@@ -434,11 +434,19 @@ The annual savings by building up new capacity must therefore compensate the ann
 
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
 
-Basically an instance of the investment class can be added to a Flow or a Storage. Adding an investment object, the *nominal_value* or *nominal_capacity* should not be set.
-All parameters that usually refer to the *nominal_value/capacity* will now refer to the investment variables. It is also possible to set a maximum limit for the capacity that can be build.
+Basically an instance of the investment class can be added to a Flow or a
+Storage. All parameters that usually refer to the *nominal_value/capacity* will
+now refer to the investment variables and existing capacity. It is also
+possible to set a maximum limit for the capacity that can be build.
+If existing capacity is considered for a component with investment mode enabled,
+the *ep_costs* still apply only to the newly built capacity.
 
-For example if you want to find out what would be the optimal capacity of a wind power plant to decrease the costs of an existing energy system, you can define this model and add an investment source.
-The *wind_power_time_series* has to be a normalised feed-in time series of you wind power plant. The maximum value might be caused by limited space for wind turbines.
+For example if you want to find out what would be the optimal capacity of a wind
+power plant to decrease the costs of an existing energy system, you can define
+this model and add an investment source.
+The *wind_power_time_series* has to be a normalised feed-in time series of you
+wind power plant. The maximum value might be caused by limited space for wind
+turbines.
 
 .. code-block:: python
 
@@ -446,7 +454,19 @@ The *wind_power_time_series* has to be a normalised feed-in time series of you w
         actual_value=wind_power_time_series, fixed=True,
 	investment=solph.Investment(ep_costs=epc, maximum=50000))})
 
-The periodical costs are typically calculated as follows:
+Let's slightly alter the case and consider for already existing wind power
+capacity of 20,000 kW. We're still expecting the total wind power capacity, thus we
+allow for 30,000 kW of new installations and formulate as follows.
+
+.. code-block:: python
+
+    solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
+        actual_value=wind_power_time_series, fixed=True,
+	    investment=solph.Investment(ep_costs=epc,
+	                                maximum=30000,
+	                                existing=20000))})
+
+The periodical costs (*ep_costs*) are typically calculated as follows:
 
 .. code-block:: python
 
@@ -455,7 +475,16 @@ The periodical costs are typically calculated as follows:
     wacc = 0.05  # weighted average of capital cost
     epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
 
-The following code shows a storage with an investment object.
+This also implemented in :func:`~.oemof.tools.economics.annuity`. The code above
+would look like this:
+
+.. code-block:: python
+
+    from oemof.tools import economics
+    epc = economics.annuity(1000, 20, 0.05)
+
+The following code shows a storage with an investment object (without previously
+existing capacity)  .
 
 .. code-block:: python
 
@@ -515,6 +544,14 @@ Adding additional constraints
 
 You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See `flexible_modelling in the example repository
 <https://github.com/oemof/oemof_examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
+
+Some predefined additional constraints can be found in the
+:py:mod:`~oemof.solph.constraints` module.
+
+ * Emission limit for the model -> :func:`~.oemof.solph.constraints.emission_limit`
+ * Coupling of two variables e.g. investment variables) with a factor ->
+   :func:`~.oemof.solph.constraints.equate_variables`
+ * Overall investment limit -> :func:`~.oemof.solph.constraints.investment_limit`
 
 
 The Grouping module (Sets)
