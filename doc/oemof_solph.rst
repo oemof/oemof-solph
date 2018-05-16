@@ -475,7 +475,12 @@ The periodical costs (*ep_costs*) are typically calculated as follows:
     wacc = 0.05  # weighted average of capital cost
     epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
 
-This also implemented in :func:`~.oemof.tools.economics.annuity`.
+This also implemented in :func:`~.oemof.tools.economics.annuity`. The code above
+would look like this:
+
+.. code-block:: python
+
+    epc = annuity(1000, 20, 0.05)
 
 The following code shows a storage with an investment object (without previously
 existing capacity)  .
