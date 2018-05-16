@@ -50,5 +50,6 @@ Other changes
 Contributors
 ############
 
-* Uwe Krien
+* Guido Plessmann
 * Simon Hilpert
+* Uwe Krien
