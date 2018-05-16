@@ -894,37 +894,37 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             \dot H_Fuel =
             \frac{P_el + \dot Q_th \cdot \beta}
                  {\eta_el,_woExtr)} \\
-                 
-    where :math:`\beta` is defined as:
-    
-         .. math::
-            &
-            \beta = \frac{\eta_el,_woExtr - \eta_el,_maxExtr}{\eta_th,_maxExtr)} \\
             &
             P_el = \dot Q_th \cdot
             \frac{\eta_el}
                  {\eta_th}
 
+    where :math:`\beta` is defined as:
+    
+         .. math::
+            &
+            \beta = \frac{\eta_el,_woExtr - \eta_el,_maxExtr}{\eta_th,_maxExtr)} \\
+
     where the first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
     output flows relate to each other, and the symbols used are defined as
-    follows:
-    symbol...explanation...attribute
+    follows:\\
+    symbol - explanation - attribute
 
-        * :math:`\dot H_Fuel` ... fuel input flow ... :math:`f(i, n, t)`is the *flow* from input node :math:`i` to the
+        * :math:`\dot H_{Fuel}` - fuel input flow - :math:`f(i, n, t)` is the *flow* from input node :math:`i` to the
           node :math:`n` at timestep :math:`t`,
-        * :math:`P_el` ... electric power ... :math:`f(n, o_m, t)` is the *flow* from the
+        * :math:`P_{el}` - electric power - :math:`f(n, o_m, t)` is the *flow* from the
           node :math:`n` to the :py:obj:`main_output` node :math:`o_m` at timestep :math:`t`,
-        * :math:`\dot Q_th` ... thermal output ... :math:`f(n, o_t, t)` is the *flow* from the
+        * :math:`\dot Q_{th}` - thermal output - :math:`f(n, o_t, t)` is the *flow* from the
           node :math:`n` to the py:obj:`tapped_output` node :math:`o_t` at timestep :math:`t`,
-        * :math:`\beta` ... power loss index ... :math:`main_flow_loss_index(n, t)` as defined above,
-        * :math:`\eta_el_woExtr ... electric efficiency without heat extraction
-           ... :math:`conversion_factor_full_condensation(n,o_m,t),
-        * :math:`\eta_el_maxExtr ... electric efficiency with maximal heat extraction ... :math:`conversion_factors(n,o_m,t)`,
-        * :math:`\eta_th_maxExtr ... thermal efficiency with maximal heat extraction ... :math:`conversion_factors(n,o_t,t),
-        * :math:`\eta_el` ... electric efficiency ... :math:`\eta(n, o_m, t)` is the efficiency (:py:obj:`conversion_factor`)
+        * :math:`\beta` - power loss index - :math:`main_flow_loss_index(n, t)` as defined above,
+        * :math:`\eta_{el,woExtr}` - electric efficiency without heat extraction
+           - :math:`conversion_factor_full_condensation(n,o_m,t)`,
+        * :math:`\eta_{el,maxExtr}` - electric efficiency with maximal heat extraction - :math:`conversion_factors(n,o_m,t)`,
+        * :math:`\eta_{th,maxExtr}` - thermal efficiency with maximal heat extraction - :math:`conversion_factors(n,o_t,t)`,
+        * :math:`\eta_{el}` - electric efficiency - :math:`\eta(n, o_m, t)` is the efficiency (:py:obj:`conversion_factor`)
           applied to the output from node :math:`n` to node :math:`o_m` at timestep :math:`t`,
-        * :math:`\eta_th` ... thermal efficiency ... :math:`\eta(n, o_t, t)` is the efficiency (:py:obj:`conversion_factor`)
+        * :math:`\eta_{th}` - thermal efficiency - :math:`\eta(n, o_t, t)` is the efficiency (:py:obj:`conversion_factor`)
           applied to the output from node :math:`n` to node :math:`o_t` at timestep :math:`t`,
 
     """
