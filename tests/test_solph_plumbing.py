@@ -74,3 +74,14 @@ class Sequence_Mathematical_Tests:
         eq_(mul_sdc_sdc, [12, 8, 3])
         eq_(mul_sdc_sdc[4], 12)
         eq_(mul_sdc_sdc, [12, 8, 3, 12, 12])
+
+    def test_zipping(self):
+        eq_(list(zip(self.sd, [1])), [(2, 1)])
+        eq_(list(zip(self.sd, [1, 1])), [(2, 1), (2, 1)])
+        eq_(list(zip(self.sdc, [1])), [(3, 1)])
+        eq_(list(zip(self.sdc, [1, 1])), [(3, 1), (2, 1)])
+        eq_(
+            list(zip(self.sdc, [1, 1, 1, 1, 1, 1, 1])),
+            [(3, 1), (2, 1)] + [(3, 1)] * 5
+        )
+        eq_(list(zip(self.sr, [1, 1, 1])), [(1, 1), (2, 1), (3, 1)])

@@ -129,7 +129,7 @@ class _Sequence(UserList):
         if self.default_changed:
             return super(_Sequence, self).__iter__()
         else:
-            return repeat(self.default, self.highest_index + 1)
+            return repeat(self.default)
 
     def __operate_sequences(self, other, op: operator):
         if not (self.default_changed or other.default_changed):
