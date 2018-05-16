@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import numpy as np
+import warnings
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
@@ -31,20 +32,40 @@ class GenericStorage(network.Transformer):
     nominal_capacity : numeric
         Absolute nominal capacity of the storage
     nominal_output_capacity_ratio : numeric
-        Ratio between the nominal outflow of the storage and its capacity. For
-        batteries this is also know as c-rate.
+        DEPRECATED - Define the output capacity as nominal_value in the Flow
+        class. In case of an investment object in the storage and the flow use
+        :attr:`invest_relation_input_capacity` instead.
+        OLD TEXT: Ratio between the nominal outflow of the storage and
+        its capacity. For batteries this is also know as c-rate.
         Note: This ratio is used to create the Flow object for the outflow
         and set its nominal value of the storage in the constructor. If no
         investment object is defined it is also possible to set the nominal
         value of the flow directly in its constructor.
     nominal_input_capacity_ratio : numeric
-        Ratio between the nominal inflow of the storage and its capacity.
-        see: nominal_output_capacity_ratio
-    invest_relation_input_output_power : numeric
-        Ratio between the input power to the output power.
-        This ratio used to fix the flow investments to each other. Values <1
-        set the input flow lower than the output and >1 will increase the input
-        to the output flow.
+        DEPRECATED - Define the input capacity as nominal_value in the Flow
+        class. In case of an investment object in the storage and the flow use
+        :attr:`invest_relation_output_capacity` instead.
+        OLD TEXT: Ratio between the nominal inflow of the storage and
+        its capacity. see: nominal_output_capacity_ratio
+    invest_relation_input_capacity : numeric or None
+        Ratio between the investment variable of the input Flow and the
+        investment variable of the storage.
+        .. math:: input_invest = capacity_invest \cdot
+                  invest_relation_input_capacity
+    invest_relation_output_capacity : numeric or None
+        Ratio between the investment variable of the output Flow and the
+        investment variable of the storage.
+        .. math:: input_invest = capacity_invest \cdot
+                  invest_relation_input_capacity
+    invest_relation_input_output : numeric or None
+        Ratio between the investment variable of the output Flow and the
+        investment variable of the input flow. This ratio used to fix the
+        flow investments to each other.
+        Values < 1 set the input flow lower than the output and > 1 will
+        set the input flow higher than the output flow. If None no relation
+        will be set.
+        .. math:: input_invest = output_invest \cdot
+                  invest_relation_input_output
     initial_capacity : numeric
         The capacity of the storage in the first (and last) time step of
         optimization.
@@ -68,9 +89,9 @@ class GenericStorage(network.Transformer):
         investment variable instead of to the nominal_capacity. The
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
-    cyclic: Defines the storage behaviour of the last timestep and whether
-        it is constrained to the initial capacity. Either 'False'= does not have
-        to equal las time step or 'True'= does have to equal last time step
+    cyclic: bool
+        If 'True' a constraint is build to equate the storage load of the first
+        and the last time step.
 
     Notes
     -----
@@ -119,83 +140,105 @@ class GenericStorage(network.Transformer):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio', None)
+            'nominal_input_capacity_ratio')
         self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_output_capacity_ratio', None)
+            'nominal_output_capacity_ratio')
         self.initial_capacity = kwargs.get('initial_capacity')
         self.capacity_loss = solph_sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = solph_sequence(
-            kwargs.get(
-                'inflow_conversion_factor', 1))
+            kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
-            kwargs.get(
-                'outflow_conversion_factor', 1))
+            kwargs.get('outflow_conversion_factor', 1))
         self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
-        self.invest_relation_input_output_power = kwargs.get('invest_relation_input_output_power',None)
+        self.invest_relation_input_output = kwargs.get(
+            'invest_relation_input_output')
+        self.invest_relation_input_capacity = kwargs.get(
+            'invest_relation_input_capacity')
+        self.invest_relation_output_capacity = kwargs.get(
+            'invest_relation_output_capacity')
         self.cyclic = kwargs.get('cyclic', True)
+        self._invest_group = False
 
-        # General error messages
-        self._e_no_nv = (
-            "If an investment object is defined the invest variable "
-            "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
-        self._e_duplicate = (
-            "Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
-            "will set the nominal_value for the flow.\nTherefore "
-            "either the 'nominal_{0}_capacity_ratio' or the "
-            "'nominal_value' has to be 'None'.")
-        self._e_couple_investment_power_capacity = (
-                "You can't couple input and output power to each other as well as the capacity")
-        if (self.invest_relation_input_output_power is not None and self.nominal_input_capacity_ratio is not None and self.nominal_output_capacity_ratio is not None):
-            raise AttributeError(self._e_couple_investment_power_capacity)      
-        # Check investment
+        # Check if any Flow or the storage itself contains an Investment object
+        self._check_investment()
+
+        warnings.simplefilter('always', DeprecationWarning)
+        dpr_msg = "Deprecated..."
+
+        # DEPRECATED. Set nominal_value of in/out Flows using
+        # nominal_input_capacity_ratio / nominal_input_capacity_ratio
+        if self._invest_group is False and (
+                self.nominal_input_capacity_ratio is not None or
+                self.nominal_output_capacity_ratio is not None):
+            self._set_flows(dpr_msg)
+
+        # Check attributes for the investment mode.
+        if self._invest_group is True:
+            self._check_invest_attributes(dpr_msg)
+
+    def _check_investment(self):
+        for flow in self.inputs.values():
+            if isinstance(flow.investment, Investment):
+                self._invest_group = True
+        for flow in self.outputs.values():
+            if isinstance(flow.investment, Investment):
+                self._invest_group = True
+        if isinstance(self.investment, Investment):
+            self._invest_group = True
+
+    def _check_invest_attributes(self, dpr_msg):
+        if self.nominal_input_capacity_ratio is not None:
+            warnings.warn(dpr_msg, DeprecationWarning)
+            self.invest_relation_input_capacity = (
+                self.nominal_input_capacity_ratio)
+        if self.nominal_output_capacity_ratio is not None:
+            warnings.warn(dpr_msg, DeprecationWarning)
+            self.invest_relation_output_capacity = (
+                self.nominal_output_capacity_ratio)
         if self.investment and self.nominal_capacity is not None:
-            raise AttributeError(self._e_no_nv.format('nominal_capacity'))
+            e1 = ("If an investment object is defined the invest variable "
+                  "replaces the nominal_capacity.\n Therefore the "
+                  "nominal_capacity should be 'None'.\n")
+            raise AttributeError(e1)
+        if (self.invest_relation_input_output is not None and
+                self.invest_relation_output_capacity is not None and
+                self.invest_relation_input_capacity is not None):
+            e2 = ("Overdetermined. Three investment object will be coupled"
+                  "with three constraints. Set one invest relation to 'None'.")
+            raise AttributeError(e2)
+        for flow in self.inputs.values():
+            if (self.invest_relation_input_capacity is not None and
+                    not isinstance(flow.investment, Investment)):
+                flow.investment = Investment()
+        for flow in self.outputs.values():
+            if (self.invest_relation_output_capacity is not None and
+                    not isinstance(flow.investment, Investment)):
+                flow.investment = Investment()
 
-        self._set_flows()
-
-    def _set_flows(self):
+    def _set_flows(self, dpr_msg):
         """ Sets correct attributes of input / output flows based on the
         storage object attributes. This method is called in the constructor by
         default. It may be called in sub-classed components at the
         end of the constructor to ensure correct setting of attributes.
         """
-        # Check input flows
+        warnings.warn(dpr_msg, DeprecationWarning)
         for flow in self.inputs.values():
-            if self.investment and flow.nominal_value is not None:
-                raise AttributeError(self._e_no_nv.format('nominal_value'))
-            if (flow.nominal_value is not None and
-                    self.nominal_input_capacity_ratio is not None):
-                raise AttributeError(self._e_duplicate)
-            if (not self.investment and
-                    self.nominal_input_capacity_ratio is not None):
+            if self.nominal_input_capacity_ratio is not None:
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
-            if self.investment:
-                if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
-
-        # Check output flows
         for flow in self.outputs.values():
-            if self.investment and flow.nominal_value is not None:
-                raise AttributeError(self._e_no_nv.format('nominal_value'))
-            if (flow.nominal_value is not None and
-                    self.nominal_output_capacity_ratio is not None):
-                raise AttributeError(self._e_duplicate)
-            if (not self.investment and
-                    self.nominal_output_capacity_ratio is not None):
+            if self.nominal_output_capacity_ratio is not None:
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
-            if self.investment:
-                if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
 
     def constraint_group(self):
-        if isinstance(self.investment, Investment):
+        if self._invest_group is True:
             return GenericInvestmentStorageBlock
         else:
             return GenericStorageBlock
+
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
