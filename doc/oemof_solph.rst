@@ -480,7 +480,8 @@ would look like this:
 
 .. code-block:: python
 
-    epc = annuity(1000, 20, 0.05)
+    from oemof.tools import economics
+    epc = economics.annuity(1000, 20, 0.05)
 
 The following code shows a storage with an investment object (without previously
 existing capacity)  .
@@ -545,12 +546,12 @@ You can add additional constraints to your :py:class:`~oemof.solph.models.Model`
 <https://github.com/oemof/oemof_examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
 
 Some predefined additional constraints can be found in the
-(:py:mod:`~oemof.solph.constraints`) module.
+:py:mod:`~oemof.solph.constraints` module.
 
- * Emission limit for the model (:func:`~.oemof.solph.constraints.emission_limit`)
- * Coupling of two variables (e.g. investment variables) with a factor
-   (:func:`~.oemof.solph.constraints.equate_variables`)
- * Overall investment limit (:func:`~.oemof.solph.constraints.investment_limit`)
+ * Emission limit for the model -> :func:`~.oemof.solph.constraints.emission_limit`
+ * Coupling of two variables e.g. investment variables) with a factor ->
+   :func:`~.oemof.solph.constraints.equate_variables`
+ * Overall investment limit -> :func:`~.oemof.solph.constraints.investment_limit`
 
 
 The Grouping module (Sets)
