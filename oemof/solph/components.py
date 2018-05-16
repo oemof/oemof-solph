@@ -347,13 +347,13 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     INVESTSTORAGES
         A set with all storages containing an Investment object.
-    INVESTSTORAGESINPUT
+    INVEST_REL_CAP_IN
         A set with all storages containing an Investment object with coupled 
         investment of input power and storage capacity
-    INVESTSTORAGESOUTPUT
+    INVEST_REL_CAP_OUT
         A set with all storages containing an Investment object with coupled 
         investment of output power and storage capacity
-    INVESTSTORAGESPOWERCOUPLED
+    INVEST_REL_IN_OUT
         A set with all storages containing an Investment object with coupled
         investment of input and output power
     INITIAL_CAPACITY
@@ -441,17 +441,21 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
-        self.INVESTSTORAGESINPUT = Set(initialize=[
-                n for n in group if n.nominal_input_capacity_ratio is not None])
+        self.INVEST_REL_CAP_IN = Set(initialize=[
+            n for n in group if n.invest_relation_input_capacity is not None])
     
-        self.INVESTSTORAGESOUTPUT = Set(initialize=[
-                n for n in group if n.nominal_output_capacity_ratio is not None])
+        self.INVEST_REL_CAP_OUT = Set(initialize=[
+            n for n in group if n.invest_relation_output_capacity is not None])
     
-        self.INVESTSTORAGESPOWERCOUPLED = Set(initialize=[
-                n for n in group if n.invest_relation_input_output_power is not None])
+        self.INVEST_REL_IN_OUT = Set(initialize=[
+            n for n in group
+            if n.invest_relation_input_output is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
             n for n in group if n.initial_capacity is not None])
+
+        self.CYCLIC = Set(initialize=[
+            n for n in group if n.cyclic is True])
 
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
@@ -495,22 +499,22 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             capacity with capacity of last timesteps.
             """
             expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
-                   (n.investment.existing + self.invest[n]) *
+                    (n.investment.existing + self.invest[n]) *
                     n.initial_capacity)
             return expr
         self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
         
-        def _power_coupled(block,n):
+        def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
             and output power
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] * n.invest_relation_input_output_power == 
-                    m.InvestmentFlow.invest[o[n],n] )
+            expr = (m.InvestmentFlow.invest[n, o[n]] *
+                    n.invest_relation_input_output ==
+                    m.InvestmentFlow.invest[o[n], n])
             return expr
         self.power_coupled = Constraint(
-                self.INVESTSTORAGESPOWERCOUPLED, rule=_power_coupled)
-        
+                self.INVEST_REL_IN_OUT, rule=_power_coupled)
 
         def _storage_capacity_inflow_invest_rule(block, n):
             """Rule definition of constraint connecting the inflow
@@ -518,11 +522,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_capacity__inflow_ratio
             """
             expr = (m.InvestmentFlow.invest[i[n], n] ==
-                   (n.investment.existing + self.invest[n]) *
-                    n.nominal_input_capacity_ratio)
+                    (n.investment.existing + self.invest[n]) *
+                    n.invest_relation_input_capacity)
             return expr
         self.storage_capacity_inflow = Constraint(
-            self.INVESTSTORAGESINPUT, rule=_storage_capacity_inflow_invest_rule)
+            self.INVEST_REL_CAP_IN, rule=_storage_capacity_inflow_invest_rule)
 
         def _storage_capacity_outflow_invest_rule(block, n):
             """Rule definition of constraint connecting outflow
@@ -530,17 +534,18 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_capacity__outflow_ratio
             """
             expr = (m.InvestmentFlow.invest[n, o[n]] ==
-                   (n.investment.existing + self.invest[n]) *
-                    n.nominal_output_capacity_ratio)
+                    (n.investment.existing + self.invest[n]) *
+                    n.invest_relation_output_capacity)
             return expr
         self.storage_capacity_outflow = Constraint(
-            self.INVESTSTORAGESOUTPUT, rule=_storage_capacity_outflow_invest_rule)
+            self.INVEST_REL_CAP_OUT,
+            rule=_storage_capacity_outflow_invest_rule)
 
         def _max_capacity_invest_rule(block, n, t):
             """Rule definition for upper bound constraint for the storage cap.
             """
             expr = (self.capacity[n, t] <=
-                   (n.investment.existing + self.invest[n]) *
+                    (n.investment.existing + self.invest[n]) *
                     n.capacity_max[t])
             return expr
         self.max_capacity = Constraint(
@@ -550,7 +555,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """Rule definition of lower bound constraint for the storage cap.
             """
             expr = (self.capacity[n, t] >=
-                   (n.investment.existing + self.invest[n]) *
+                    (n.investment.existing + self.invest[n]) *
                     n.capacity_min[t])
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
