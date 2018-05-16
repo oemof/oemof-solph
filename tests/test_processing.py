@@ -114,7 +114,7 @@ class Parameter_Result_Tests:
             'min': 0,
             'variable_costs': 0,
             'positive_gradient_ub': None,
-            'negative_gradient_ub': None
+            'negative_gradient_ub': None,
         }
         default_scalars = [
             'nominal_value', 'summed_max', 'summed_min',
@@ -151,6 +151,8 @@ class Parameter_Result_Tests:
                 'initial_capacity': 0,
                 'nominal_input_capacity_ratio': 1 / 6,
                 'nominal_output_capacity_ratio': 1 / 6,
+                'invest_relation_output_capacity': 1 / 6,
+                'invest_relation_input_capacity': 1 / 6,
                 'investment_ep_costs': 0.4,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
@@ -160,6 +162,7 @@ class Parameter_Result_Tests:
                 'capacity_max': 1,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
+                'cyclic': True,
             }
         )
         eq_(
