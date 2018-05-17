@@ -159,7 +159,13 @@ class GenericStorage(network.Transformer):
         self._check_investment()
 
         warnings.simplefilter('always', DeprecationWarning)
-        dpr_msg = "Deprecated..."
+        dpr_msg = ("\nDeprecated. The attributes "
+                   "'nominal_input_capacity_ratio' and "
+                   "'nominal_input_capacity_ratio' will be removed in "
+                   "oemof >= v0.3.0.\n Please use the 'invest_relation_...' "
+                   "attribute in case of the investment mode.\n Please use "
+                   "the 'nominal_value' within in the Flows for the dispatch "
+                   "mode.\n These measures will avoid this warning.")
 
         # DEPRECATED. Set nominal_value of in/out Flows using
         # nominal_input_capacity_ratio / nominal_input_capacity_ratio
