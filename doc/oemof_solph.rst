@@ -386,18 +386,17 @@ GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
-The *nominal_value* of the storage signifies the nominal capacity. To limit the input and output flows, you can define the ratio between these flows and the capacity using *nominal_input_capacity_ratio* and *nominal_output_capacity_ratio*.
+The *nominal_capacity* of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
+To limit the input and output flows, you can define the *nominal_value* in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class.
 
 .. code-block:: python
 
     solph.GenericStorage(
         label='storage',
-        inputs={b_el: solph.Flow(variable_costs=10)},
-        outputs={b_el: solph.Flow(variable_costs=10)},
-        capacity_loss=0.001, nominal_value=50,
-        nominal_input_capacity_ratio=1/6,
-        nominal_output_capacity_ratio=1/6,
+        inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
+        outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
+        capacity_loss=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
@@ -441,6 +440,10 @@ possible to set a maximum limit for the capacity that can be build.
 If existing capacity is considered for a component with investment mode enabled,
 the *ep_costs* still apply only to the newly built capacity.
 
+The investment object can be used in Flows and some components. See the
+:ref:`oemof_solph_components_label` section for detailed information of each
+component.
+
 For example if you want to find out what would be the optimal capacity of a wind
 power plant to decrease the costs of an existing energy system, you can define
 this model and add an investment source.
@@ -482,18 +485,6 @@ would look like this:
 
     from oemof.tools import economics
     epc = economics.annuity(1000, 20, 0.05)
-
-The following code shows a storage with an investment object (without previously
-existing capacity)  .
-
-.. code-block:: python
-
-    solph.GenericStorage(
-        label='storage', capacity_loss=0.01,
-        inputs={electricity: solph.Flow()}, outputs={electricity: solph.Flow()},
-        nominal_input_capacity_ratio=1/6, nominal_output_capacity_ratio=1/6,
-        inflow_conversion_factor=0.99, outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc))
 
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.
 
