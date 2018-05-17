@@ -162,7 +162,6 @@ class Parameter_Result_Tests:
                 'capacity_max': 1,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
-                'cyclic': True,
             }
         )
         eq_(

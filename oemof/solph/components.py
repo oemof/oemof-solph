@@ -89,9 +89,6 @@ class GenericStorage(network.Transformer):
         investment variable instead of to the nominal_capacity. The
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
-    cyclic: bool
-        If 'True' a constraint is build to equate the storage load of the first
-        and the last time step.
 
     Notes
     -----
@@ -158,7 +155,6 @@ class GenericStorage(network.Transformer):
             'invest_relation_input_capacity')
         self.invest_relation_output_capacity = kwargs.get(
             'invest_relation_output_capacity')
-        self.cyclic = kwargs.get('cyclic', True)
         self._invest_group = False
 
         # Check if any Flow or the storage itself contains an Investment object
@@ -454,9 +450,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.INITIAL_CAPACITY = Set(initialize=[
             n for n in group if n.initial_capacity is not None])
 
-        self.CYCLIC = Set(initialize=[
-            n for n in group if n.cyclic is True])
-
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
         # for all time steps.
@@ -726,8 +719,6 @@ class GenericCHP(network.Transformer):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-
-
         return self._alphas
 
     def constraint_group(self):
@@ -745,8 +736,6 @@ class GenericCHPBlock(SimpleBlock):
     TODO: Add test
 
     """
-
-
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -968,6 +957,7 @@ class ExtractionTurbineCHP(solph_Transformer):
 
     def constraint_group(self):
         return ExtractionTurbineCHPBlock
+
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
