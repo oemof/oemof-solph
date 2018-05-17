@@ -17,9 +17,15 @@ New features
 
 * Investement variables for the capacity and the flows are now decoupled to
   enable more flexibility. It is possible to couple the flows to the capacity,
-  the flows to itself or to not couple anything. Added attribute: 
-  'invest_relation_input_output_power'. Scalar that indicates the input power ratio 
-  compared to the output power ratio. 
+  the flows to itself or to not couple anything. The newly added attributes
+  `invest_relation_input_output`, `invest_relation_input_capacity` and
+  `invest_relation_output_capacity` replace the existing attributes
+  `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` for the
+  investment mode. In case of the dispatch mode one should use the
+  `nominal_value` of the Flow classes. The attributes
+  `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` will be
+  removed in v0.3.0. Please adapt your application to avoid problems in the
+  future (`Issue #480 <https://github.com/oemof/oemof/issues/480>`_).
 
 New components
 ##############
