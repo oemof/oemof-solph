@@ -221,12 +221,10 @@ class Constraint_Tests:
 
         solph.components.GenericStorage(
             label='storage',
-            inputs={bel: solph.Flow(variable_costs=56)},
-            outputs={bel: solph.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
+            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
             nominal_capacity=10e4,
             capacity_loss=0.13,
-            nominal_input_capacity_ratio=1/6,
-            nominal_output_capacity_ratio=1/6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86)
 
@@ -245,8 +243,8 @@ class Constraint_Tests:
             capacity_loss=0.13,
             capacity_max=0.9,
             capacity_min=0.1,
-            nominal_input_capacity_ratio=1 / 6,
-            nominal_output_capacity_ratio=1 / 6,
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             investment=solph.Investment(ep_costs=145, maximum=234))
@@ -422,8 +420,8 @@ class Constraint_Tests:
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
-            nominal_input_capacity_ratio=0.2,
-            nominal_output_capacity_ratio=0.2,
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))
@@ -457,8 +455,8 @@ class Constraint_Tests:
         bus1 = solph.Bus(label='Bus1')
         solph.components.GenericStorage(
             label='storage',
-            nominal_input_capacity_ratio=0.2,
-            nominal_output_capacity_ratio=0.2,
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))

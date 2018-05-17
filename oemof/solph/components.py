@@ -110,13 +110,11 @@ class GenericStorage(network.Transformer):
     >>> my_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     nominal_capacity=1000,
-    ...     inputs={my_bus: solph.Flow(variable_costs=10)},
-    ...     outputs={my_bus: solph.Flow()},
+    ...     inputs={my_bus: solph.Flow(nominal_value=200, variable_costs=10)},
+    ...     outputs={my_bus: solph.Flow(nominal_value=200)},
     ...     capacity_loss=0.01,
     ...     initial_capacity=0,
     ...     capacity_max = 0.9,
-    ...     nominal_input_capacity_ratio=1/6,
-    ...     nominal_output_capacity_ratio=1/6,
     ...     inflow_conversion_factor=0.9,
     ...     outflow_conversion_factor=0.93)
 
@@ -127,8 +125,8 @@ class GenericStorage(network.Transformer):
     ...     outputs={my_bus: solph.Flow()},
     ...     capacity_loss=0.02,
     ...     initial_capacity=None,
-    ...     nominal_input_capacity_ratio=1/6,
-    ...     nominal_output_capacity_ratio=1/6,
+    ...     invest_relation_input_capacity=1/6,
+    ...     invest_relation_output_capacity=1/6,
     ...     inflow_conversion_factor=1,
     ...     outflow_conversion_factor=0.8)
     """
@@ -390,12 +388,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     Connect the invest variables of the storage and the input flow.
         .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * nominal\_input\_capacity\_ratio(n) \\
+          invest(n) * invest\_relation\_input\_capacity(n) \\
           \forall n \in \textrm{INVESTSTORAGES}
 
     Connect the invest variables of the storage and the output flow.
         .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * nominal_output_capacity_ratio(n) \\
+          invest(n) * invest\_relation\_output_capacity(n) \\
           \forall n \in \textrm{INVESTSTORAGES}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
