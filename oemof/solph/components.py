@@ -924,8 +924,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n` 
                               without heat extraction  at timestep :math:`t`
     :math:`\eta_{el,maxExtr}` electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
-                              with max heat extraction  node :math:`n` at timestep :math:`t`
-
+                              with max heat extraction node :math:`n` at timestep :math:`t`
     :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output` 
                               maximal heat extraction  at node :math:`n` at timestep :math:`t`
     ========================= ======================== =========		
