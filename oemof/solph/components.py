@@ -902,7 +902,6 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     where :math:`\beta` is defined as:
     
          .. math::
-            &
             \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr})}
 
     where the first equation is the result of the relation between the input
@@ -910,26 +909,28 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     output flows relate to each other, and the symbols used are defined as
     follows:
     
-    symbol - explanation - 
-    
-    attribute
 
-        * :math:`\dot H_{Fuel}` - fuel input flow - 
-        :py:obj:`flow(inflow, n, t)` is the *flow* from py:obj:`inflow` node to the node :math:`n` at timestep :math:`t`,
-        * :math:`P_{el}` - electric power - 
-        :py:obj:`flow(n, main_output, t)` is the *flow* from the node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`,
-        * :math:`\dot Q_{th}` - thermal output - 
-        :py:obj:`flow(n, tapped_output, t)` is the *flow* from the node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`,
-        * :math:`\beta` - power loss index - 
-        :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t` as defined above,
-        * :math:`\eta_{el,woExtr}` - electric efficiency without heat extraction - 
-        :py:obj:`conversion_factor_full_condensation` at node :math:`n` at timestep :math:`t`,
-        * :math:`\eta_{el,maxExtr}` - electric efficiency with maximal heat extraction - 
-        :py:obj:`conversion_factors`for the :py:obj:`main_output` at node :math:`n` at timestep :math:`t`,
-        * :math:`\eta_{th,maxExtr}` - thermal efficiency with maximal heat extraction - 
-        :py:obj:`conversion_factors` for the :py:obj:`tapped_output` at node :math:`n` at timestep :math:`t`
-       
-       
+    ========================= ======================== =========
+    symbol                    explanation              attribute
+    ========================= ======================== =========
+    :math:`\dot H_{Fuel}`     fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                                                       node to the node :math:`n` at timestep :math:`t`
+    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the  
+                                                       node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the 
+                                                       node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                                       as defined above
+    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n` 
+                              without heat extraction  at timestep :math:`t`
+    :math:`\eta_{el,maxExtr}` electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
+                              with max heat extraction  node :math:`n` at timestep :math:`t`
+
+    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output` 
+                              maximal heat extraction  at node :math:`n` at timestep :math:`t`
+    ========================= ======================== =========		
+
+
     """
 
     CONSTRAINT_GROUP = True
