@@ -340,19 +340,29 @@ ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
-:ref:`oemof_solph_components_transformer_label` class. An instance of this
-class can represent a component with one input and two output flows and a
-flexible ratio between these flows, leading to the following constraints:
+:ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+the application example for the component is a flexible combined heat and power
+(chp) plant. Of course, an instance of this class can represent also another
+component with one input and two output flows and a flexible ratio between
+these flows, leading to the following constraints:
 
 .. include:: ../oemof/solph/components.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
 These constraints are applied in addition those of a standard
-:class:`~oemof.solph.network.Transformer`. For now
-:py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances are
-restricted to one input and two output flows. One application example would be
-a flexible combined heat and power (chp) plant. The class allows the definition
+:class:`~oemof.solph.network.Transformer`. The constrains limits the amount of
+the possible operation points, like the following picture shows. For a certain
+flow of fuel, there is a line of operation points, whose slope is defined by
+:math:`\beta`. The second constrain limits the decrease of electrical power.
+
+.. 	image:: _files/ExtractionTurbine_range_of_operation.svg
+   :width: 70 %
+   :alt: variable_chp_plot.svg
+   :align: center
+   
+For now :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances are
+restricted to one input and two output flows. The class allows the definition
 of a different efficiency for every time step but the corresponding series has
 to be predefined as a parameter for the optimisation. In contrast to the
 :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
