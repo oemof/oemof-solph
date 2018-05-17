@@ -249,9 +249,6 @@ class GenericStorageBlock(SimpleBlock):
     STORAGES
         A set with all :class:`.Storage` objects
         (and no attr:`investement` of type :class:`.Investment`)
-    CYCLIC
-        A subset of STORAGES where the attr:`cylcic` of the objects
-        is set to True.
 
     **The following variables are created:**
 
@@ -297,9 +294,6 @@ class GenericStorageBlock(SimpleBlock):
 
         self.STORAGES = Set(initialize=[n for n in group])
 
-        self.CYCLIC = Set(initialize=[
-            n for n in group if n.cyclic is True])
-
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
             in timestep t
@@ -313,19 +307,9 @@ class GenericStorageBlock(SimpleBlock):
         # set the initial capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, m.TIMESTEPS[0]] = (n.initial_capacity *
+                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
                                                      n.nominal_capacity)
-                self.capacity[n, m.TIMESTEPS[0]].fix()
-
-        def _cyclic_rule(block, n):
-            """Rule definition for constraint to connect initial storage
-            capacity with capacity of last timesteps.
-            """
-            expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
-                    self.capacity[n, m.TIMESTEPS[0]])
-            return expr
-        self.initial_capacity = Constraint(
-            self.CYCLIC, rule=_cyclic_rule)
+                self.capacity[n, m.TIMESTEPS[-1]].fix()
 
         # storage balance constraint
         def _storage_balance_rule(block, n, t):
@@ -364,10 +348,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     INVESTSTORAGES
         A set with all storages containing an Investment object.
     INVEST_REL_CAP_IN
-        A set with all storages containing an Investment object with coupled
+        A set with all storages containing an Investment object with coupled 
         investment of input power and storage capacity
     INVEST_REL_CAP_OUT
-        A set with all storages containing an Investment object with coupled
+        A set with all storages containing an Investment object with coupled 
         investment of output power and storage capacity
     INVEST_REL_IN_OUT
         A set with all storages containing an Investment object with coupled
@@ -378,10 +362,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     MIN_INVESTSTORAGES
         A subset of INVESTSTORAGES where elements of the set have an
         capacity_min attribute greater than zero for at least one time step.
-    CYCLIC
-        A subset of INVESTSTORAGES where the attr:`cylcic` of the objects is
-        set to True
-
 
     **The following variables are created:**
 
@@ -461,13 +441,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
-        
         self.INVEST_REL_CAP_IN = Set(initialize=[
             n for n in group if n.invest_relation_input_capacity is not None])
-
+    
         self.INVEST_REL_CAP_OUT = Set(initialize=[
             n for n in group if n.invest_relation_output_capacity is not None])
-
+    
         self.INVEST_REL_IN_OUT = Set(initialize=[
             n for n in group
             if n.invest_relation_input_output is not None])
@@ -516,26 +495,16 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
         def _initial_capacity_invest_rule(block, n):
-            """Rule definition for constraint to set the initial capacity
-            of the storage at the first timestep.
+            """Rule definition for constraint to connect initial storage
+            capacity with capacity of last timesteps.
             """
-            expr = (self.capacity[n, m.TIMESTEPS[0]] ==
+            expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
                     (n.investment.existing + self.invest[n]) *
                     n.initial_capacity)
             return expr
         self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
-
-        def _cyclic_invest_rule(block, n):
-            """Rule definition for constraint to connect initial storage
-            capacity with capacity of last timesteps.
-            """
-            expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
-                    self.capacity[n, m.TIMESTEPS[0]])
-            return expr
-        self.initial_capacity = Constraint(
-            self.CYCLIC, rule=_cyclic_invest_rule)
-
+        
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
             and output power
