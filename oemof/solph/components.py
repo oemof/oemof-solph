@@ -153,10 +153,7 @@ class GenericStorage(network.Transformer):
             'invest_relation_input_capacity')
         self.invest_relation_output_capacity = kwargs.get(
             'invest_relation_output_capacity')
-        self._invest_group = False
-
-        # Check if any Flow or the storage itself contains an Investment object
-        self._check_investment()
+        self._invest_group = isinstance(self.investment, Investment)
 
         warnings.simplefilter('always', DeprecationWarning)
         dpr_msg = ("\nDeprecated. The attributes "
@@ -177,16 +174,6 @@ class GenericStorage(network.Transformer):
         # Check attributes for the investment mode.
         if self._invest_group is True:
             self._check_invest_attributes(dpr_msg)
-
-    def _check_investment(self):
-        for flow in self.inputs.values():
-            if isinstance(flow.investment, Investment):
-                self._invest_group = True
-        for flow in self.outputs.values():
-            if isinstance(flow.investment, Investment):
-                self._invest_group = True
-        if isinstance(self.investment, Investment):
-            self._invest_group = True
 
     def _check_invest_attributes(self, dpr_msg):
         if self.nominal_input_capacity_ratio is not None:
@@ -225,11 +212,13 @@ class GenericStorage(network.Transformer):
         """
         warnings.warn(dpr_msg, DeprecationWarning)
         for flow in self.inputs.values():
-            if self.nominal_input_capacity_ratio is not None:
+            if (self.nominal_input_capacity_ratio is not None and
+                    not isinstance(flow.investment, Investment)):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
         for flow in self.outputs.values():
-            if self.nominal_output_capacity_ratio is not None:
+            if (self.nominal_output_capacity_ratio is not None and
+                    not isinstance(flow.investment, Investment)):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
 
