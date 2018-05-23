@@ -64,28 +64,9 @@ def read_facade(facade, facades, create, typemap, data, objects,
                 resources):
     """ Parse the resource `r` as a facade.
     """
-    # TODO: Make sure the class var 'required' exists
-    # TODO: Actually, required attributes are best enforced in the constructor
-    #       (i.e. `__init__`) either by making them arguments without default
-    #       values or by checking for the required values in the function body.
-    #       Benefits:
-    #
-    #           * The constructor sees the attributes after they are already
-    #             remapped, so `attributemap` gets taken into account
-    #             transparently and elegantly. The code below probably contains
-    #             a bug if `attributemap` maps for a required attribute.
-    #           * The `required` attribute becomes obsolete.
-    #           * Consistent error messages.
-    #           * Code checking for `required` attributes presence isn't all
-    #             over the place.
-    if hasattr(typemap[facade['type']], 'required'):
-        for r in typemap[facade['type']].required:
-            if facade.get(r) is None:
-                raise AttributeError(
-                    ("Missing attribute `{}` for facade of type `{}` with" +
-                     " name/label `{}`.").\
-                        format(str(r), facade['type'], facade['name']))
-
+    # TODO: Generate better error messages, if keys which are assumed to be
+    # present, e.g. because they are used as foreign keys or because our
+    # way of reading data packages needs them, are missing.
     if 'name' in facade and facade['name'] in facades:
         return facades[facade['name']]
     for field, reference in fks.items():
