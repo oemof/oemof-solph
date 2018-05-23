@@ -306,6 +306,8 @@ def deserialize_energy_system(cls, path,
                             foreign_keys,
                             resource)
 
+    # TODO: Find concept how to deal with timeindices and clean up based on
+    # concept
     lst = ([idx for idx in timeindices.values()])
     if lst[1:] == lst[:-1]:
         # look for temporal resource and if present, take as timeindex from it
@@ -319,14 +321,23 @@ def deserialize_energy_system(cls, path,
                 name='timeindex')
             timeindex = temporal.index
 
+        # if no temporal provided as resource, take the first timeindex
+        # from dict
         else:
-            # if no temporal provided as resource, take the first timeindex
-            # from dict
-            idx = pd.DatetimeIndex(lst[0])
-            timeindex = pd.DatetimeIndex(idx.values,
-                                         freq=idx.inferred_freq,
-                                         name='timeindex')
-            temporal = None
+            # if lst is not empty
+            if lst:
+                idx = pd.DatetimeIndex(lst[0])
+                timeindex = pd.DatetimeIndex(idx.values,
+                                             freq=idx.inferred_freq,
+                                             name='timeindex')
+                temporal = None
+            # if for any reason lst of datetimeindices is empty
+            # (i.e. no sequences) have been provided, set datetime to one time
+            # step of today (same as in the EnergySystem __init__ if no
+            # timeindex is passed)
+            else:
+                timeindex = pd.date_range(start=pd.to_datetime('today'),
+                                          periods=1, freq='H')
 
         es = (cls(timeindex=timeindex, temporal=temporal)
               if lst
@@ -337,7 +348,7 @@ def deserialize_energy_system(cls, path,
                       facades.values(),
                       chain(*[f.subnodes for f in facades.values()
                               if hasattr(f, 'subnodes')])))
-        
+
         return es
 
     else:
