@@ -29,6 +29,15 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
 
     This function can be passed in a list to :attr:`groupings` of
     :class:`oemof.solph.network.EnergySystem`.
+
+    Parameters
+    ----------
+    node : :class:`Node <oemof.network.Node`
+        The node for which the figure out a constraint group.
+    fallback : callable, optional
+        A function of one argument. If `node` doesn't have a `constraint_group`
+        attribute, this is used to group the node instead. Defaults to not
+        group the node at all.
     """
     # TODO: Refactor this for looser coupling between modules.
     # This code causes an unwanted tight coupling between the `groupings` and
