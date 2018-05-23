@@ -255,13 +255,11 @@ class Node:
 
 
 class Bus(Node):
-    def constraint_group(self):
-        pass
+    pass
 
 
 class Component(Node):
-    def constraint_group(self):
-        pass
+    pass
 
 
 class Sink(Component):

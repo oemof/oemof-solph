@@ -24,7 +24,7 @@ from oemof.solph import blocks
 import oemof.groupings as groupings
 
 
-def constraint_grouping(node):
+def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     """Grouping function for constraints.
 
     This function can be passed in a list to :attr:`groupings` of
@@ -41,7 +41,8 @@ def constraint_grouping(node):
     # This even gives other users/us the ability to customize/extend how
     # constraints are grouped by overriding the method in future subclasses.
 
-    return node.constraint_group()
+    cg = getattr(node, "constraint_group", fallback)
+    return cg()
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(
