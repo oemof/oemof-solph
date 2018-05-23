@@ -33,7 +33,7 @@ Bug fixes
   one object. If more than one object was present the input/output constraint
   was missing. This leads to wrong results.
 * In the solph constraints module the emission constraint did not include
-  the timeincrement form the model which has now be fixed.
+  the timeincrement from the model which has now be fixed.
 
 Testing
 #######
