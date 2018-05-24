@@ -86,33 +86,36 @@ class NodeOption(str, Enum):
 
 
 def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
-    """
-    Get set of nodes from results-dict for given node option
+    """ Get set of nodes from results-dict for given node option.
 
     This function filters nodes from results for special needs. At the moment,
-    following options are available:
-        * NodeOption.All/'all':
+    the following options are available:
+
+        * :attr:`NodeOption.All`/:py:`'all'`:
             Returns all nodes
-        * NodeOption.HasOutputs/'has_outputs':
+        * :attr:`NodeOption.HasOutputs`/:py:`'has_outputs'`:
             Returns nodes with an output flow (eg. Transformer, Source)
-        * NodeOption.HasInputs/'has_inputs':
+        * :attr:`NodeOption.HasInputs`/:py:`'has_inputs'`:
             Returns nodes with an input flow (eg. Transformer, Sink)
-        * NodeOption.HasOnlyOutputs/'has_only_outputs':
+        * :attr:`NodeOption.HasOnlyOutputs`/:py:`'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
-        * NodeOption.HasOnlyInputs/'has_only_inputs':
+        * :attr:`NodeOption.HasOnlyInputs`/:py:`'has_only_inputs'`:
             Returns nodes having only input flows (eg. Sink)
-    Additionally, busses can be excluded setting 'exclude_busses' to True.
+
+    Additionally, busses can be excluded by setting `exclude_busses` to
+    :const:`True`.
 
     Parameters
     ----------
     results: dict
     option: NodeOption
     exclude_busses: bool
-        If set all bus nodes are excluded from resulting node set
+        If set, all bus nodes are excluded from the resulting node set.
 
     Returns
     -------
-    :obj:'set' of Node
+    :obj:`set`
+        A set of Nodes.
     """
     node_from, node_to = map(lambda x: set(x) - {None}, zip(*results))
     if option == NodeOption.All:
