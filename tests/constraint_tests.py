@@ -221,37 +221,74 @@ class Constraint_Tests:
 
         solph.components.GenericStorage(
             label='storage',
-            inputs={bel: solph.Flow(variable_costs=56)},
-            outputs={bel: solph.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
+            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
             nominal_capacity=10e4,
             capacity_loss=0.13,
-            nominal_input_capacity_ratio=1/6,
-            nominal_output_capacity_ratio=1/6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86)
 
         self.compare_lp_files('storage.lp')
 
-    def test_storage_invest(self):
-        """
+    def test_storage_invest_1(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
         """
         bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
-            label='storage',
+            label='storage1',
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
             capacity_max=0.9,
             capacity_min=0.1,
-            nominal_input_capacity_ratio=1 / 6,
-            nominal_output_capacity_ratio=1 / 6,
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             investment=solph.Investment(ep_costs=145, maximum=234))
 
-        self.compare_lp_files('storage_invest.lp')
+        self.compare_lp_files('storage_invest_1.lp')
+
+    def test_storage_invest_2(self):
+        """All can be free extended to their own cost.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage2',
+            inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
+            outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
+            investment=solph.Investment(ep_costs=145))
+        self.compare_lp_files('storage_invest_2.lp')
+
+    def test_storage_invest_3(self):
+        """The storage capacity is fixed, but the Flows can be extended.
+        e.g. PHES with a fixed basin but the pump and the turbine can be
+        adapted
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage3',
+            inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
+            outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
+            nominal_capacity=5000)
+        self.compare_lp_files('storage_invest_3.lp')
+
+    def test_storage_invest_4(self):
+        """All can be free extended to their own cost.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage2',
+            inputs={bel: solph.Flow(nominal_value=80)},
+            outputs={bel: solph.Flow(nominal_value=100)},
+            investment=solph.Investment(ep_costs=145, maximum=500))
+        self.compare_lp_files('storage_invest_4.lp')
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
@@ -422,8 +459,8 @@ class Constraint_Tests:
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
             label='storage',
-            nominal_input_capacity_ratio=0.2,
-            nominal_output_capacity_ratio=0.2,
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))
@@ -457,8 +494,8 @@ class Constraint_Tests:
         bus1 = solph.Bus(label='Bus1')
         solph.components.GenericStorage(
             label='storage',
-            nominal_input_capacity_ratio=0.2,
-            nominal_output_capacity_ratio=0.2,
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))
