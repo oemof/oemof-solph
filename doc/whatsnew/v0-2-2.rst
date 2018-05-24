@@ -27,6 +27,9 @@ New features
   removed in v0.3.0. Please adapt your application to avoid problems in the
   future (`Issue #480 <https://github.com/oemof/oemof/issues/480>`_).
 
+* An option was added to decouple the last and the first time step of the storage
+  capacity. At the moment the last time step has always the same value as the first.
+
 New components
 ##############
 
