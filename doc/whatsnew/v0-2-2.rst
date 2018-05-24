@@ -37,9 +37,9 @@ Bug fixes
 * Fix file extension check to dump a graph correctly as .graphml-file
 * The full constraint set of the ExtractionTurbineCHP class was only build for
   one object. If more than one object was present the input/output constraint
-  was missing. This leads to wrong results.
-* In the solph constraints module the emission constraint did not include
-  the timeincrement from the model which has now be fixed.
+  was missing. This lead to wrong results.
+* In the solph constraints module the emission constraint did not include the
+  timeincrement from the model which has now be fixed.
 
 Testing
 #######
