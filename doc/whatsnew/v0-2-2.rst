@@ -27,6 +27,14 @@ New features
   removed in v0.3.0. Please adapt your application to avoid problems in the
   future (`Issue #480 <https://github.com/oemof/oemof/issues/480>`_).
 
+* We now have experimental support for deserializing an energy system from a
+  tabular `data package <https://frictionlessdata.io/data-packages/>`_. Since
+  we have to extend the datapackage format a bit, the specification is not yet
+  finalized and documentation as well as tests range from sparse to
+  nonexistent. But anyone who wishes to help with the code is welcome to check
+  it out in the :mod:`datapackage <oemof.tools.datapackage>` module.
+
+
 New components
 ##############
 
@@ -46,9 +54,9 @@ Bug fixes
 * Fix file extension check to dump a graph correctly as .graphml-file
 * The full constraint set of the ExtractionTurbineCHP class was only build for
   one object. If more than one object was present the input/output constraint
-  was missing. This leads to wrong results.
-* In the solph constraints module the emission constraint did not include
-  the timeincrement form the model which has now be fixed.
+  was missing. This lead to wrong results.
+* In the solph constraints module the emission constraint did not include the
+  timeincrement from the model which has now be fixed.
 
 Testing
 #######
@@ -64,5 +72,6 @@ Contributors
 * Fabian Büllesbach
 * Guido Plessmann
 * Simon Hilpert
+* Stephan Günther
 * Uwe Krien
 

@@ -36,14 +36,6 @@ oemof.solph.custom module
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.facades module
---------------------------
-
-.. automodule:: oemof.solph.facades
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 oemof.solph.groupings module
 ----------------------------
 

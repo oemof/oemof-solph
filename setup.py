@@ -35,6 +35,7 @@ setup(name='oemof',
                         'pyomo >= 4.4.0, <= 5.4.3',
                         'networkx <= 2.1',
                         'nose <= 1.3.7'],
+      extras_require={'datapackage': ['datapackage']},
       entry_points={
           'console_scripts': [
               'oemof_installation_test = '
