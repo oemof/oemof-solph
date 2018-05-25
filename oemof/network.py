@@ -169,6 +169,10 @@ class Node:
 
     Attributes
     ----------
+    __slots__: str or iterable of str
+        See the Python documentation on `__slots__
+        <https://docs.python.org/3/reference/datamodel.html#slots>`_ for more
+        information.
     label: object
         If this node was given a `label` on construction, this attribute holds
         the actual object passed as a parameter. Otherwise py:``node.label`` is

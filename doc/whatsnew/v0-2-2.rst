@@ -65,6 +65,12 @@ Testing
 Other changes
 #############
 
+* Subclasses of :class:`Node <oemof.network.Node>` are no longer optimized
+  using `__slots__
+  <https://docs.python.org/3/reference/datamodel.html#slots>`_.
+  The abstract parent class still defines :attr:`__slots__
+  <oemof.network.Node.__slots__>` so that custom subclasses still have the
+  option of using it.
 
 Contributors
 ############
