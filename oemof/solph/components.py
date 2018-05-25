@@ -50,13 +50,17 @@ class GenericStorage(network.Transformer):
     invest_relation_input_capacity : numeric or None
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage.
-        .. math:: input_invest = capacity_invest \cdot
-                  invest_relation_input_capacity
+
+        .. math:: input\_invest =
+                  capacity\_invest \cdot invest\_relation\_input\_capacity
+
     invest_relation_output_capacity : numeric or None
         Ratio between the investment variable of the output Flow and the
         investment variable of the storage.
-        .. math:: input_invest = capacity_invest \cdot
-                  invest_relation_input_capacity
+
+        .. math:: input\_invest =
+                  capacity\_invest \cdot invest\_relation\_input\_capacity
+
     invest_relation_input_output : numeric or None
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
@@ -64,8 +68,10 @@ class GenericStorage(network.Transformer):
         Values < 1 set the input flow lower than the output and > 1 will
         set the input flow higher than the output flow. If None no relation
         will be set.
-        .. math:: input_invest = output_invest \cdot
-                  invest_relation_input_output
+
+        .. math:: input\_invest =
+                  output\_invest \cdot invest\_relation\_input\_output
+
     initial_capacity : numeric
         The capacity of the storage in the first (and last) time step of
         optimization.
