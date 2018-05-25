@@ -173,17 +173,6 @@ class Node:
         See the Python documentation on `__slots__
         <https://docs.python.org/3/reference/datamodel.html#slots>`_ for more
         information.
-    label: object
-        If this node was given a `label` on construction, this attribute holds
-        the actual object passed as a parameter. Otherwise py:``node.label`` is
-        a synonym for ``str(node)``.
-    inputs: dict
-        Dictionary mapping input :class:`Node`s `n` to flows from `n` into
-        `self`.
-    outputs: dict
-        Dictionary mapping output :class:`Node`s `n` to flows from `self` into
-        `n`.
-
     """
 
     # TODO: Doing this _state/__getstate__/__setstate__ dance is
@@ -246,15 +235,28 @@ class Node:
 
     @property
     def label(self):
+        """ object :
+        If this node was given a `label` on construction, this
+        attribute holds the actual object passed as a parameter. Otherwise
+        :py:`node.label` is a synonym for :py:`str(node)`.
+        """
         return (self._label if hasattr(self, "_label")
                 else "<{} #0x{:x}>".format(type(self).__name__, id(self)))
 
     @property
     def inputs(self):
+        """ dict :
+        Dictionary mapping input :class:`Nodes <Node>` :obj:`n` to flows from
+        :obj:`n` into :obj:`self`.
+        """
         return Inputs(flow, self)
 
     @property
     def outputs(self):
+        """ dict :
+        Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to flows from
+        :obj:`self` into :obj:`n`.
+        """
         return Outputs(flow, self)
 
 
