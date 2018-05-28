@@ -645,9 +645,80 @@ class GenericCHPBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    TODO: Add description for constraints
-
     TODO: Add test
+
+    .. _GenericCHP-equations:
+
+    .. math::
+        &
+        H_F(t) = in\\
+        &
+        \dot{Q}(t) = heat out\\
+        &
+        P_{el} = power out\\
+        &
+        H_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{woDH}(t)\\
+        &
+        H_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
+        &
+        H_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
+        &
+        H_F(t) \geq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,min,woDH}}\\
+        &
+        H_{L,FG,max}(t) = H_F(t) \cdot H_{L,FG,sharemax}(t)\\
+        &
+        H_{L,FG,min}(t) = H_F(t) \cdot H_{L,FG,sharemin}(t)\\
+        &
+        P + Q + H_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq H_F(t)\\
+        &
+        P + Q + H_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq H_F(t)\\[10pt]
+        &
+        \forall t \in \textrm{TIMESTEPS}, \\
+        &
+        \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
+    Where :math:`= / \leq` depends on the CHP being backpressure or not. The efficiencies are calcaluted as:
+
+    .. math::
+        &
+        \eta_{el,max,woDH} = \frac{P_{el, max, woDH}}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{max,woDH}(t)}\\
+        &
+        \eta_{el,min,woDH} = \frac{P_{el, max, woDH}}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{min,woDH}(t)}\\
+
+    ========================= ======================== =========
+    symbol                    explanation              attribute
+    ========================= ======================== =========
+    :math:`\dot H_{F}`        fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                                                       node to the node :math:`n` at timestep :math:`t`
+    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                                       node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`P_{el,woDH}`       electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`P_{el,max,woDH}`   max. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot Q`            thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
+                                                       node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\dot{Q}_{CW, min}` minimal therm. condenser
+                              load to cooling water
+    :math:`H_{L,FG,max}`      electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`H_{L,FG,sharemax}` electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`Y`                 status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
+                              on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\alpha_0`          coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                              describing efficiency    as defined above
+    :math:`\alpha_1`          coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                              describing efficiency    as defined above
+    :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                                       as defined above
+    :math:`\eta_{el,woDH}`    electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n`
+                              without heat extraction  at timestep :math:`t`
+    :math:`\eta_{el,maxDH}`   electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
+                              with max heat extraction node :math:`n` at timestep :math:`t`
+
+    ========================= ======================== =========
+
 
     """
 

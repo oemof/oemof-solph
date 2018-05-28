@@ -401,6 +401,10 @@ GenericCHP (component)
 
 With the GenericCHP class combined heat and power plants can be modelled with more details.
 
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations:
+  :end-before: """
+
 .. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_generic_storage_label:
