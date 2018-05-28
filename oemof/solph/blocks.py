@@ -367,8 +367,9 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint to fix flow variable
             of investment flow to (normed) actual value
             """
-            return (m.flow[i, o, t] == (self.invest[i, o] *
-                                        m.flows[i, o].actual_value[t]))
+            return (m.flow[i, o, t] == (
+                (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                 m.flows[i, o].actual_value[t]))
         self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
                                 rule=_investflow_fixed_rule)
 
@@ -376,8 +377,9 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting an upper bound of flow
             variable in investment case.
             """
-            expr = (m.flow[i, o, t] <= (m.flows[i, o].max[t] *
-                                        self.invest[i, o]))
+            expr = (m.flow[i, o, t] <= (
+                (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                 m.flows[i, o].max[t]))
             return expr
         self.max = Constraint(self.FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
@@ -386,8 +388,9 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting a lower bound on flow
             variable in investment case.
             """
-            expr = (m.flow[i, o, t] >= (m.flows[i, o].min[t] *
-                                        self.invest[i, o]))
+            expr = (m.flow[i, o, t] >= (
+                (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                 m.flows[i, o].min[t]))
             return expr
         self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                               rule=_min_investflow_rule)
@@ -398,7 +401,8 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                         for t in m.TIMESTEPS) <=
-                    m.flows[i, o].summed_max * self.invest[i, o])
+                    m.flows[i, o].summed_max * (
+                        self.invest[i, o] + m.flows[i, o].investment.existing))
             return expr
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS,
                                      rule=_summed_max_investflow_rule)
@@ -409,7 +413,8 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                         for t in m.TIMESTEPS) >=
-                    m.flows[i, o].summed_min * self.invest[i, o])
+                    ((m.flows[i, o].investment.existing + self.invest[i, o]) *
+                     m.flows[i, o].summed_min))
             return expr
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
