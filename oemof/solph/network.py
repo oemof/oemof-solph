@@ -121,7 +121,6 @@ class Flow:
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-
      * :py:class:`~oemof.solph.blocks.Flow`
      * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
        Investment object is present)
