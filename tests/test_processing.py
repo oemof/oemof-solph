@@ -143,7 +143,7 @@ class Parameter_Result_Tests:
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(sequences_attributes)
         )
-    
+
     def test_nodes_with_none_exclusion(self):
         param_results = processing.param_results(
             self.om, exclude_none=True, keys_as_str=True)
