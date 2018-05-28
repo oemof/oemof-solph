@@ -51,7 +51,16 @@ class BaseModel(po.ConcreteModel):
 
         self.es = energysystem
 
-        self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
+        try:
+            self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
+        except AttributeError:
+            logging.warning(
+                'Could not get timeincrement from pd.DateTimeIndex! ' +
+                'To avoid this warning, make sure the `freq` attribute of ' +
+                'your timeindex is not None. Setting timeincrement to 1...')
+            self.timeincrement = sequence(1)
+
+
 
         self.objective_weighting = kwargs.get('objective_weighting',
                                               self.timeincrement)

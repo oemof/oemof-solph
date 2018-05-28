@@ -9,7 +9,30 @@ API changes
 
 New features
 ############
+* We added a new attribute `existing` to the `solph.options.Investement` class.
+  It will now be possible to run investment optimization based on already
+  installed capacity of a component.
+  Take a look on :ref:`investment_mode_label` for usage of this option.
+  (`Issue #489 <https://github.com/oemof/oemof/issues/489>`_).
 
+* Investement variables for the capacity and the flows are now decoupled to
+  enable more flexibility. It is possible to couple the flows to the capacity,
+  the flows to itself or to not couple anything. The newly added attributes
+  `invest_relation_input_output`, `invest_relation_input_capacity` and
+  `invest_relation_output_capacity` replace the existing attributes
+  `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` for the
+  investment mode. In case of the dispatch mode one should use the
+  `nominal_value` of the Flow classes. The attributes
+  `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` will be
+  removed in v0.3.0. Please adapt your application to avoid problems in the
+  future (`Issue #480 <https://github.com/oemof/oemof/issues/480>`_).
+
+* We now have experimental support for deserializing an energy system from a
+  tabular `data package <https://frictionlessdata.io/data-packages/>`_. Since
+  we have to extend the datapackage format a bit, the specification is not yet
+  finalized and documentation as well as tests range from sparse to
+  nonexistent. But anyone who wishes to help with the code is welcome to check
+  it out in the :mod:`datapackage <oemof.tools.datapackage>` module.
 
 
 New components
@@ -31,9 +54,10 @@ Bug fixes
 * Fix file extension check to dump a graph correctly as .graphml-file
 * The full constraint set of the ExtractionTurbineCHP class was only build for
   one object. If more than one object was present the input/output constraint
-  was missing. This leads to wrong results.
-* In the solph constraints module the emission constraint did not include
-  the timeincrement form the model which has now be fixed.
+  was missing. This lead to wrong results.
+* In the solph constraints module the emission constraint did not include the
+  timeincrement from the model which has now be fixed.
+
 
 Testing
 #######
@@ -42,9 +66,19 @@ Testing
 Other changes
 #############
 
+* Subclasses of :class:`Node <oemof.network.Node>` are no longer optimized
+  using `__slots__
+  <https://docs.python.org/3/reference/datamodel.html#slots>`_.
+  The abstract parent class still defines :attr:`__slots__
+  <oemof.network.Node.__slots__>` so that custom subclasses still have the
+  option of using it.
 
 Contributors
 ############
 
-* Uwe Krien
+* Fabian Büllesbach
+* Guido Plessmann
 * Simon Hilpert
+* Stephan Günther
+* Uwe Krien
+

@@ -169,17 +169,10 @@ class Node:
 
     Attributes
     ----------
-    label: object
-        If this node was given a `label` on construction, this attribute holds
-        the actual object passed as a parameter. Otherwise py:``node.label`` is
-        a synonym for ``str(node)``.
-    inputs: dict
-        Dictionary mapping input :class:`Node`s `n` to flows from `n` into
-        `self`.
-    outputs: dict
-        Dictionary mapping output :class:`Node`s `n` to flows from `self` into
-        `n`.
-
+    __slots__: str or iterable of str
+        See the Python documentation on `__slots__
+        <https://docs.python.org/3/reference/datamodel.html#slots>`_ for more
+        information.
     """
 
     # TODO: Doing this _state/__getstate__/__setstate__ dance is
@@ -210,11 +203,17 @@ class Node:
             if optional in kwargs:
                 setattr(self, '_' + optional, kwargs[optional])
         for i in kwargs.get('inputs', {}):
+            assert isinstance(i, Node), \
+                   "Input {} of {} not a Node, but a {}."\
+                   .format(i, self, type(i))
             try:
                 flow[i, self] = kwargs['inputs'].get(i)
             except AttributeError:
                 flow[i, self] = None
         for o in kwargs.get('outputs', {}):
+            assert isinstance(o, Node), \
+                   "Output {} of {} not a Node, but a {}."\
+                   .format(o, self, type(o))
             try:
                 flow[self, o] = kwargs['outputs'].get(o)
             except AttributeError:
@@ -236,36 +235,49 @@ class Node:
 
     @property
     def label(self):
+        """ object :
+        If this node was given a `label` on construction, this
+        attribute holds the actual object passed as a parameter. Otherwise
+        :py:`node.label` is a synonym for :py:`str(node)`.
+        """
         return (self._label if hasattr(self, "_label")
                 else "<{} #0x{:x}>".format(type(self).__name__, id(self)))
 
     @property
     def inputs(self):
+        """ dict :
+        Dictionary mapping input :class:`Nodes <Node>` :obj:`n` to flows from
+        :obj:`n` into :obj:`self`.
+        """
         return Inputs(flow, self)
 
     @property
     def outputs(self):
+        """ dict :
+        Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to flows from
+        :obj:`self` into :obj:`n`.
+        """
         return Outputs(flow, self)
 
 
 class Bus(Node):
-    __slots__ = ()
+    pass
 
 
 class Component(Node):
-    __slots__ = ()
+    pass
 
 
 class Sink(Component):
-    __slots__ = ()
+    pass
 
 
 class Source(Component):
-    __slots__ = ()
+    pass
 
 
 class Transformer(Component):
-    __slots__ = ()
+    pass
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short

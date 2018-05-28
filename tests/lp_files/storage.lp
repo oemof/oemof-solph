@@ -51,12 +51,12 @@ c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds
-   0 <= flow(electricityBus_storage_0) <= 16666.666666666664
-   0 <= flow(electricityBus_storage_1) <= 16666.666666666664
-   0 <= flow(electricityBus_storage_2) <= 16666.666666666664
-   0 <= flow(storage_electricityBus_0) <= 16666.666666666664
-   0 <= flow(storage_electricityBus_1) <= 16666.666666666664
-   0 <= flow(storage_electricityBus_2) <= 16666.666666666664
+   0 <= flow(electricityBus_storage_0) <= 16667
+   0 <= flow(electricityBus_storage_1) <= 16667
+   0 <= flow(electricityBus_storage_2) <= 16667
+   0 <= flow(storage_electricityBus_0) <= 16667
+   0 <= flow(storage_electricityBus_1) <= 16667
+   0 <= flow(storage_electricityBus_2) <= 16667
    0 <= GenericStorageBlock_capacity(storage_0) <= 100000
    0 <= GenericStorageBlock_capacity(storage_1) <= 100000
    0 <= GenericStorageBlock_capacity(storage_2) <= 100000
