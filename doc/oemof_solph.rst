@@ -351,7 +351,7 @@ these flows, leading to the following constraints:
   :end-before: """
 
 These constraints are applied in addition those of a standard
-:class:`~oemof.solph.network.Transformer`. The constrains limits the amount of
+:class:`~oemof.solph.network.Transformer`. The constraints limit the range of
 the possible operation points, like the following picture shows. For a certain
 flow of fuel, there is a line of operation points, whose slope is defined by
 :math:`\beta`. The second constrain limits the decrease of electrical power.
