@@ -87,12 +87,12 @@ class Parameter_Result_Tests:
             param_results[(b_el2, demand)]['scalars'],
             pandas.Series(
                 {
-                    'nominal_value': 1,
                     'fixed': True,
-                    'negative_gradient_costs': 0,
-                    'positive_gradient_costs': 0,
+                    'nominal_value': 1,
                     'max': 1,
                     'min': 0,
+                    'negative_gradient_costs': 0,
+                    'positive_gradient_costs': 0,
                     'variable_costs': 0
                 }
             )
@@ -109,23 +109,21 @@ class Parameter_Result_Tests:
         demand = self.es.groups['demand_el']
         param_results = processing.param_results(self.om, exclude_none=False)
         scalar_attributes = {
-            'nominal_value': 1,
             'fixed': True,
-            'negative_gradient_costs': 0,
-            'positive_gradient_costs': 0,
+            'integer': None,
+            'investment': None,
+            'nominal_value': 1,
+            'nonconvex': None,
+            'summed_max': None,
+            'summed_min': None,
             'max': 1,
             'min': 0,
-            'variable_costs': 0,
+            'negative_gradient_ub': None,
+            'negative_gradient_costs': 0,
             'positive_gradient_ub': None,
-            'negative_gradient_ub': None
+            'positive_gradient_costs': 0,
+            'variable_costs': 0
         }
-        default_scalars = [
-            'nominal_value', 'summed_max', 'summed_min',
-            'investment', 'nonconvex', 'integer', 'fixed'
-        ]
-        for attr in default_scalars:
-            if attr not in scalar_attributes:
-                scalar_attributes[attr] = None
         assert_series_equal(
             param_results[(b_el2, demand)]['scalars'],
             pandas.Series(scalar_attributes)
@@ -150,16 +148,16 @@ class Parameter_Result_Tests:
         assert_series_equal(
             param_results[('storage', 'None')]['scalars'],
             pandas.Series({
-                'label': 'storage',
                 'initial_capacity': 0,
-                'nominal_input_capacity_ratio': 1 / 6,
-                'nominal_output_capacity_ratio': 1 / 6,
                 'investment_ep_costs': 0.4,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'label': 'storage',
+                'nominal_input_capacity_ratio': 1 / 6,
+                'nominal_output_capacity_ratio': 1 / 6,
                 'capacity_loss': 0,
-                'capacity_min': 0,
                 'capacity_max': 1,
+                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
             })
