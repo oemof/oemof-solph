@@ -977,7 +977,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             &
             \dot H_{Fuel} =
             \frac{P_{el} + \dot Q_{th} \cdot \beta}
-                 {\eta_{el,woExtr})} \\
+                 {\eta_{el,woExtr}} \\
             &
             P_{el} \leq \dot Q_{th} \cdot
             \frac{\eta_{el,maxExtr}}
@@ -986,7 +986,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     where :math:`\beta` is defined as:
     
          .. math::
-            \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr})}
+            \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr}}
 
     where the first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
