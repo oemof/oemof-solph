@@ -28,7 +28,7 @@ class Constraint_Tests:
 
     @classmethod
     def setup_class(self):
-        self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
+        self.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',
                                             re.DOTALL | re.MULTILINE)
 
         self.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
@@ -68,7 +68,7 @@ class Constraint_Tests:
                                   filename)) as expected_file:
 
                 def chop_trailing_whitespace(lines):
-                    return [re.sub("\s*$", '', l) for l in lines]
+                    return [re.sub(r'\s*$', '', l) for l in lines]
 
                 def remove(pattern, lines):
                     if not pattern:
