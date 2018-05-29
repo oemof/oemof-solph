@@ -13,7 +13,7 @@ install:
 
 # command to run tests
 script:
-  - nosetests --with-doctest --with coverage -c nose.cfg
+  - nosetests --with-doctest --with-coverage -c nose.cfg
 
 after_success:
   - coveralls
