@@ -8,5 +8,11 @@ before_install:
   - sudo apt-get install coinor-cbc
 
 install: "pip install .[datapackage]"
+
 # command to run tests
-script: nosetests --with-doctest
+script: nosetests --with-doctest --with-coverage
+
+after_success:
+  - coveralls
+
+
