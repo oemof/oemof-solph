@@ -7,6 +7,13 @@ python:
 before_install:
   - sudo apt-get install coinor-cbc
 
-install: "pip install .[datapackage]"
+install:
+  - pip install .[datapackage]
+  - pip install coveralls
+
 # command to run tests
-script: nosetests --with-doctest
+script:
+  - nosetests --with-doctest --with coverage -c nose.cfg
+
+after_success:
+  - coveralls
