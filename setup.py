@@ -27,8 +27,6 @@ setup(name='oemof',
       namespace_package=['oemof'],
       long_description=read('README.rst'),
       packages=find_packages(),
-      package_data={'oemof': [
-          os.path.join('tools', 'default_files', '*.ini')]},
       install_requires=['dill <= 0.2.7.1',
                         'numpy >= 1.7.0, <= 1.14.2',
                         'pandas >= 0.18.0, <= 0.23',
