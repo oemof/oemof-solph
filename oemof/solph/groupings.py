@@ -24,11 +24,20 @@ from oemof.solph import blocks
 import oemof.groupings as groupings
 
 
-def constraint_grouping(node):
+def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     """Grouping function for constraints.
 
     This function can be passed in a list to :attr:`groupings` of
     :class:`oemof.solph.network.EnergySystem`.
+
+    Parameters
+    ----------
+    node : :class:`Node <oemof.network.Node`
+        The node for which the figure out a constraint group.
+    fallback : callable, optional
+        A function of one argument. If `node` doesn't have a `constraint_group`
+        attribute, this is used to group the node instead. Defaults to not
+        group the node at all.
     """
     # TODO: Refactor this for looser coupling between modules.
     # This code causes an unwanted tight coupling between the `groupings` and
@@ -41,7 +50,8 @@ def constraint_grouping(node):
     # This even gives other users/us the ability to customize/extend how
     # constraints are grouped by overriding the method in future subclasses.
 
-    return node.constraint_group()
+    cg = getattr(node, "constraint_group", fallback)
+    return cg()
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(
