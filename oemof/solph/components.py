@@ -736,27 +736,27 @@ class GenericCHPBlock(SimpleBlock):
 
     .. math::
         &
-        H_F(t) = in\\
+        \dot{H}_F(t) = f(i,n,t)\\
         &
         \dot{Q}(t) = heat out\\
         &
         P_{el} = power out\\
         &
-        H_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{woDH}(t)\\
+        \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{woDH}(t)\\
         &
-        H_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
+        \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
         &
-        H_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
+        \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
         &
-        H_F(t) \geq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,min,woDH}}\\
+        \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}}{\eta_{el,min,woDH}}\\
         &
-        H_{L,FG,max}(t) = H_F(t) \cdot H_{L,FG,sharemax}(t)\\
+        \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemax}(t)\\
         &
-        H_{L,FG,min}(t) = H_F(t) \cdot H_{L,FG,sharemin}(t)\\
+        \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
         &
-        P + Q + H_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq H_F(t)\\
+        P + \dot{Q} + \dot{H}_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq H_F(t)\\
         &
-        P + Q + H_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq H_F(t)\\[10pt]
+        P + \dot{Q} + \dot{H}_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq H_F(t)\\[10pt]
         &
         \forall t \in \textrm{TIMESTEPS}, \\
         &
@@ -773,15 +773,15 @@ class GenericCHPBlock(SimpleBlock):
     ========================= ======================== =========
     symbol                    explanation              attribute
     ========================= ======================== =========
-    :math:`\dot H_{F}`        fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
-                                                       node to the node :math:`n` at timestep :math:`t`
-    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                                       node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot H_{F}`        inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                              trough fuel input        node to the node :math:`n` at timestep :math:`t`
+    :math:`P_{el}`            provided                 :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              electric power           node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`P_{el,woDH}`       electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
                               district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`P_{el,max,woDH}`   max. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
                               without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot Q`            thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
+    :math:`\dot{Q}`           provided heat            :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
                                                        node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\dot{Q}_{CW, min}` minimal therm. condenser
                               load to cooling water
