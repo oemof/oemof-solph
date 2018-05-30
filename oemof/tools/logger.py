@@ -14,6 +14,7 @@ import logging
 from logging import handlers
 import sys
 from oemof.tools import helpers
+import oemof
 
 
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,
@@ -158,7 +159,6 @@ def check_version():
     >>> int(v.split('.')[0])
     0
     """
-    import oemof
     try:
         version = oemof.__version__
     except AttributeError:
@@ -170,7 +170,10 @@ def check_git_branch():
     """Passes the used branch and commit to the logger
 
     >>> from oemof.tools import logger
-    >>> v = logger.check_git_branch()
+    >>> try:
+    ...    v = logger.check_git_branch()
+    ... except FileNotFoundError:
+    ...    v = ('abcdefgh', 'branch')
     >>> type(v)
     <class 'tuple'>
     >>> type(v[0])
