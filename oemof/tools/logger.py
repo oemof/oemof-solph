@@ -75,8 +75,7 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     >>> from oemof.tools import logger
     >>> mypath = logger.define_logging(
     ...     log_path=True, log_version=True, timed_rotating={'backupCount': 4},
-    ...     screen_level=logging.ERROR, screen_datefmt = "no_date"
-    ...     )  # doctest: +ELLIPSIS
+    ...     screen_level=logging.ERROR, screen_datefmt = "no_date")
     >>> mypath[-9:]
     'oemof.log'
     >>> logging.debug("Hallo")
