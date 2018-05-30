@@ -73,8 +73,11 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
 
     >>> import logging
     >>> from oemof.tools import logger
-    >>> mypath = logger.define_logging(log_path=False, log_version=False,
-    ...                                screen_datefmt = "no_date")
+    >>> mypath = logger.define_logging(
+    ...     log_path=True, log_version=True, timed_rotating={'backupCount': 4},
+    ...     screen_datefmt = "no_date")  # doctest: +ELLIPSIS
+    no_date-INFO-Path for logging: ...
+    no_date-INFO-Used oemof version: ...
     >>> mypath[-9:]
     'oemof.log'
     >>> logging.debug("Hallo")
@@ -127,26 +130,57 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
         logging.info("Path for logging: {0}".format(file))
 
     if log_version:
-        try:
-            check_git_branch()
-        except FileNotFoundError:
-            check_version()
+        logging.info("Used oemof version: {0}".format(get_version()))
     return file
 
 
+def get_version():
+    """Returns a string part of the used version. If the commit and the branch
+    is available the commit and the branch will be returned otherwise the
+    version number.
+
+    >>> from oemof.tools import logger
+    >>> v = logger.get_version()
+    >>> type(v)
+    <class 'str'>
+    """
+    try:
+        v = check_git_branch()
+        msg_part = "{0}@{1}".format(v[0], v[1])
+    except FileNotFoundError:
+        msg_part = "{0}".format(check_version())
+    return msg_part
+
+
 def check_version():
-    """Returns the actual version number of the used oemof version."""
+    """Returns the actual version number of the used oemof version.
+
+    >>> from oemof.tools import logger
+    >>> v = logger.check_version()
+    >>> int(v.split('.')[0])
+    0
+    """
     import oemof
     try:
         version = oemof.__version__
     except AttributeError:
         version = 'No version found due to internal error.'
-    logging.info("Used oemof version: {0}".format(version))
+    return version
 
 
 def check_git_branch():
     """Passes the used branch and commit to the logger
+
+    >>> from oemof.tools import logger
+    >>> v = logger.check_git_branch()
+    >>> type(v)
+    <class 'tuple'>
+    >>> type(v[0])
+    <class 'str'>
+    >>> len(v[0])
+    8
     """
+
     path = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), os.pardir,
         os.pardir, '.git')
@@ -165,6 +199,4 @@ def check_git_branch():
     last_commit = f.read(8)
     f.close()
 
-    logging.info("Used oemof version: {0}@{1}".format(
-        last_commit,
-        name_branch))
+    return last_commit, name_branch
