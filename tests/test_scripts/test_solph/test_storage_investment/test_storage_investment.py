@@ -149,7 +149,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     eq_(round(meta['objective']), 423167578261115584)
 
     # **************************************************
-    # Test again with a stored dump created with v0.2.0
+    # Test again with a stored dump created with v0.2.1dev (896a6d50)
 
     energysystem = solph.EnergySystem()
     energysystem.restore(dpath=os.path.dirname(os.path.realpath(__file__)),
