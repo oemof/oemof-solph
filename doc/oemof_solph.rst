@@ -411,6 +411,11 @@ GenericCHP (component)
 
 With the GenericCHP class combined heat and power plants can be modelled with more details.
 
+.. 	image:: _files/GenericCHP.svg
+   :scale: 10 %
+   :alt: scheme of GenericCHP operation range
+   :align: center
+
 .. include:: ../oemof/solph/components.py
   :start-after: _GenericCHP-equations:
   :end-before: """

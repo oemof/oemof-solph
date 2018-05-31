@@ -727,10 +727,9 @@ class GenericCHP(network.Transformer):
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the relation of nodes with type class:`.GenericCHP`.
 
+    TODO: Add test
 
     **The following constraints are created:**
-
-    TODO: Add test
 
     .. _GenericCHP-equations:
 
@@ -773,8 +772,8 @@ class GenericCHPBlock(SimpleBlock):
     ========================= ======================== =========
     symbol                    explanation              attribute
     ========================= ======================== =========
-    :math:`\dot H_{F}`        inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
-                              trough fuel input        node to the node :math:`n` at timestep :math:`t`
+    :math:`\dot{H}_{F}`       inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                              through fuel input       node to the node :math:`n` at timestep :math:`t`
     :math:`P_{el}`            provided                 :py:obj:`flow(n, main_output, t)` is the *flow* from the
                               electric power           node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`P_{el,woDH}`       electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
