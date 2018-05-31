@@ -735,39 +735,41 @@ class GenericCHPBlock(SimpleBlock):
 
     .. math::
         &
-        \dot{H}_F(t) = f(i,n,t)\\
+        (1)\qquad \dot{H}_F(t) = f(i,n,t) \\
         &
-        \dot{Q}(t) = heat out\\
+        (2)\qquad \dot{Q}(t) = heat out \\
         &
-        P_{el} = power out\\
+        (3)\qquad P_{el} = power out\\
         &
-        \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{woDH}(t)\\
+        (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{woDH}(t)\\
         &
-        \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
+        (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
         &
-        \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
+        (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
         &
-        \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}}{\eta_{el,min,woDH}}\\
+        (7)\qquad \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}}{\eta_{el,min,woDH}}\\
         &
-        \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemax}(t)\\
+        (8)\qquad \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemax}(t)\\
         &
-        \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
+        (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
         &
-        P + \dot{Q} + \dot{H}_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq H_F(t)\\
+        (10)\qquad P + \dot{Q} + \dot{H}_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq H_F(t)\\
         &
-        P + \dot{Q} + \dot{H}_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq H_F(t)\\[10pt]
+        (11)\qquad P + \dot{Q} + \dot{H}_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq H_F(t)\\[10pt]
         &
         \forall t \in \textrm{TIMESTEPS}, \\
         &
         \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
-    Where :math:`= / \leq` depends on the CHP being backpressure or not. The efficiencies are calcaluted as:
+
+    Where :math:`= / \leq` depends on the CHP being backpressure or not. The coefficients :math:`\alpha_0` and
+    :math:`\alpha_1` can be determined given the efficiencies maximal/minimal load:
 
     .. math::
         &
-        \eta_{el,max,woDH} = \frac{P_{el, max, woDH}}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{max,woDH}(t)}\\
+        \eta_{el,max,woDH} = \frac{P_{el, max, woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{max,woDH}(t)}\\
         &
-        \eta_{el,min,woDH} = \frac{P_{el, max, woDH}}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{min,woDH}(t)}\\
+        \eta_{el,min,woDH} = \frac{P_{el, max, woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{min,woDH}(t)}\\
 
     ========================= ======================== =========
     symbol                    explanation              attribute
