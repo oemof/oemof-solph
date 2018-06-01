@@ -2,7 +2,7 @@
 from nose.tools import eq_, assert_raises
 from energysystems_for_testing import es_with_invest
 from oemof.outputlib import processing
-from outputlib import analyzer
+from oemof.outputlib import analyzer
 
 
 class Analyzer_Tests:
