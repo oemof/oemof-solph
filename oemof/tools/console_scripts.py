@@ -59,18 +59,3 @@ def check_oemof_installation(silent=False):
         print("*****************************")
         print("oemof successfully installed.")
         print("*****************************")
-
-
-def test_oemof():
-    """Experimental function. No guarantee but nice if it works :-) """
-    testdir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
-    argv = sys.argv[:]
-    argv.insert(1, "--with-doctest")
-    argv.insert(1, "--logging-clear-handlers")
-    argv.insert(1, "-w{0}".format(testdir))
-    nose.run(argv=argv)
-
-
-if __name__ == "__main__":
-    check_oemof_installation(silent=False)
-    # check_nosetests()
