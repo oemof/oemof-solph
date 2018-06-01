@@ -148,7 +148,7 @@ def results(om):
     return result
 
 
-def convert_keys_to_strings(results):
+def convert_keys_to_strings(result):
     """
     Convert the dictionary keys to strings.
 
@@ -160,7 +160,7 @@ def convert_keys_to_strings(results):
         tuple([str(e) if e is not None else None for e in k])
         if isinstance(k, tuple)
         else str(k) if k is not None else None: v
-        for k, v in results.items()
+        for k, v in result.items()
     }
     return converted
 
@@ -205,6 +205,20 @@ def meta_results(om, undefined=False):
 
 
 def __separate_attrs(system, get_flows=False, exclude_none=True):
+    """
+    Create a dictionary with flow scalars and series.
+
+    The dictionary is structured with flows as tuples and nested dictionaries
+    holding the scalars and series e.g.
+    {(node1, node2): {'scalars': {'attr1': scalar, 'attr2': 'text'},
+    'sequences': {'attr1': iterable, 'attr2': iterable}}}
+
+    om : A solved oemof.solph.Model.
+
+    Returns
+    -------
+    dict
+    """
     def detect_scalars_and_sequences(com):
         com_data = {'scalars': {}, 'sequences': {}}
 
@@ -283,20 +297,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
                     value[0] is None
             ):
                 del com['sequences'][key]
-    """
-    Create a dictionary with flow scalars and series.
 
-    The dictionary is structured with flows as tuples and nested dictionaries
-    holding the scalars and series e.g.
-    {(node1, node2): {'scalars': {'attr1': scalar, 'attr2': 'text'},
-    'sequences': {'attr1': iterable, 'attr2': iterable}}}
-
-    om : A solved oemof.solph.Model.
-
-    Returns
-    -------
-    dict
-    """
     # Check if system is es or om:
     if system.__class__.__name__ == 'EnergySystem':
         components = system.flows() if get_flows else system.nodes
@@ -307,8 +308,8 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     for com_key in components:
         component = components[com_key] if get_flows else com_key
         component_data = detect_scalars_and_sequences(component)
-        key = com_key if get_flows else (com_key, None)
-        data[key] = component_data
+        c_key = com_key if get_flows else (com_key, None)
+        data[c_key] = component_data
     return data
 
 
