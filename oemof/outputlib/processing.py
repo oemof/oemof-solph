@@ -313,7 +313,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     return data
 
 
-def param_results(system, exclude_none=True, keys_as_str=False):
+def parameter_as_dict(system, exclude_none=True):
     """
     Create a result dictionary containing node parameters.
 
@@ -328,8 +328,6 @@ def param_results(system, exclude_none=True, keys_as_str=False):
     system: Model or EnergySystem
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
-    keys_as_str: bool
-        If True, nodes are stored as strings
 
     Returns
     -------
@@ -340,4 +338,4 @@ def param_results(system, exclude_none=True, keys_as_str=False):
     node_data = __separate_attrs(system, False, exclude_none)
 
     flow_data.update(node_data)
-    return convert_keys_to_strings(flow_data) if keys_as_str else flow_data
+    return flow_data
