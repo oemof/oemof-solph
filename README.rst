@@ -2,6 +2,8 @@
     :target: https://coveralls.io/github/oemof/oemof?branch=dev
 .. image:: https://travis-ci.org/oemof/oemof.svg?branch=dev
     :target: https://travis-ci.org/oemof/oemof
+.. image:: https://readthedocs.org/projects/oemof/badge/?version=stable
+    :target: https://oemof.readthedocs.io/en/stable/
 .. image:: https://img.shields.io/pypi/v/oemof.svg
     :target: https://pypi.org/project/oemof/
 .. image:: https://img.shields.io/github/license/oemof/oemof.svg
