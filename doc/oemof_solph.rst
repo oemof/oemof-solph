@@ -437,6 +437,8 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
 
 .. _oemof_solph_custom_electrical_line_label:
 
+GenericStorageInvestmentBlock Test test test
+
 ElectricalLine (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
