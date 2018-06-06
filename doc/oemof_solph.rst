@@ -434,10 +434,50 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
+Using the investment object with the GenericStorage component:
+
+The `GenericInvestmentStorageBlock` enables the investment mode for storages to optimise dispatch and investment. It is 
+based on the `GenericStorage` component and there are two main investment possibilities.
+
+    *	Invest into the flow parameters enables to invest into the power side e.g. a turbine or a pump
+    *	Invest into capacity of the storage enables to invest into the amount of storage capacity e.g. a basin 
+    
+As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows 
+with the capacity of the storage. 
+Three parameters are responsible for connecting the flows and the capacity of the storage:
+
+    *	`invest_relation_input_capacity’ fixes the inflow to the capacity. A ratio of ‘1’ means that the storage can be emptied
+     within one time-period. 
+    *	`invest_relation_output_capacity’ fixes the outflow to the capacity. A ratio of ‘1’ means that the storage can be
+     emptied within one period.
+    *	`invest_relation_input_output` fixes the input flow to the output flow. For values <1, the input will be smaller
+     and for values >1 the input flow will be larger. 
+    
+Not all 3 parameters can be set at the same time. 
+The optimization problem will then determine the optimal capacity as well as the optimal flows.
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='storage',
+        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100, existing = 20000, maximum = 30000))},
+        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100, existing = 20000, maximum = 30000), 
+                variable_costs=10)},
+        capacity_loss=0.001, 
+        nominal_capacity=50,
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
+        invest_relation_input_output = 1, invest_relation_input_capacity = 1/6,
+        investment = solph.Investment(ep_costs=50) 
+
+
+
+
+.. note:: See the :py:class:`~oemof.solph.components.GenericStorageInvestment` class for all parameters and the mathematical background.
+
+
 
 .. _oemof_solph_custom_electrical_line_label:
 
-GenericStorageInvestmentBlock Test test test
 
 ElectricalLine (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^
