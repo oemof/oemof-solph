@@ -323,7 +323,8 @@ def param_results(system, exclude_none=True, keys_as_str=False):
 
     Parameters
     ----------
-    system: Model or EnergySystem
+    system: energy_system.EnergySystem
+        A populated energy system.
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
     keys_as_str: bool
