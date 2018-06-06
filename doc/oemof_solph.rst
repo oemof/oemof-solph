@@ -433,7 +433,8 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 
-Using the investment object with the GenericStorage component:
+Using the investment object with the GenericStorage component
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The `GenericInvestmentStorageBlock` enables the investment mode for storages to optimise dispatch and investment. It is 
 based on the `GenericStorage` component and there are two main investment possibilities.
@@ -457,13 +458,15 @@ The optimization problem will then determine the optimal capacity as well as the
     solph.GenericStorage(
         label='storage',
         inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100, existing = 20000, 
-                                    maximum = 30000))},
+                                                              maximum = 30000))},
         outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100, existing = 20000, 
-                                    maximum = 30000), variable_costs=10)},
+                                                               maximum = 30000),
+                                  variable_costs=10)},
         capacity_loss=0.001, 
         nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
-        invest_relation_input_output = 1, invest_relation_input_capacity = 1/6,
+        invest_relation_input_output = 1,
+        invest_relation_input_capacity = 1/6,
         investment = solph.Investment(ep_costs=50) 
 
 The example presents a storage that has the input flow coupled to the capacity as well as the input flow to the output flow.
