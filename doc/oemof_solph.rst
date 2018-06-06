@@ -445,12 +445,9 @@ As an addition to other flow-investments, the storage class implements the possi
 with the capacity of the storage. 
 Three parameters are responsible for connecting the flows and the capacity of the storage:
 
-    *	`invest_relation_input_capacity` fixes the inflow to the capacity. A ratio of ‘1’ means that the storage can be emptied
-     within one time-period. 
-    *	`invest_relation_output_capacity` fixes the outflow to the capacity. A ratio of ‘1’ means that the storage can be
-     emptied within one period.
-    *	`invest_relation_input_output` fixes the input flow to the output flow. For values <1, the input will be smaller
-     and for values >1 the input flow will be larger. 
+    *	`invest_relation_input_capacity` fixes the inflow to the capacity. A ratio of ‘1’ means that the storage can be emptied within one time-period. 
+    *	`invest_relation_output_capacity` fixes the outflow to the capacity. A ratio of ‘1’ means that the storage can be emptied within one period.
+    *	`invest_relation_input_output` fixes the input flow to the output flow. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
     
 Not all 3 parameters can be set at the same time. 
 The optimization problem will then determine the optimal capacity as well as the optimal flows.
@@ -469,7 +466,7 @@ The optimization problem will then determine the optimal capacity as well as the
         invest_relation_input_output = 1, invest_relation_input_capacity = 1/6,
         investment = solph.Investment(ep_costs=50) 
 
-
+The example presents a storage that has the input flow coupled to the capacity as well as the input flow to the output flow.
 
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
