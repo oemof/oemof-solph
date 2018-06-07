@@ -436,8 +436,7 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
 Using the investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The `GenericInvestmentStorageBlock` enables the investment mode for storages to optimise dispatch and investment. It is 
-based on the `GenericStorage` component and there are two main investment possibilities.
+Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds two main investment possibilities.
 
     *	Invest into the flow parameters e.g. a turbine or a pump
     *	Invest into capacity of the storage  e.g. a basin or a battery cell
@@ -446,14 +445,28 @@ As an addition to other flow-investments, the storage class implements the possi
 with the capacity of the storage. 
 Three parameters are responsible for connecting the flows and the capacity of the storage:
 
-    *	' `invest_relation_input_capacity` ' fixes the inflow to the capacity. A ratio of ‘1’ means that the storage can be emptied within one time-period. 
-    *	' `invest_relation_output_capacity` ' fixes the outflow to the capacity. A ratio of ‘1’ means that the storage can be emptied within one period.
-    *	' `invest_relation_input_output` ' fixes the input flow to the output flow. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
+    *	' `invest_relation_input_capacity` ' fixes the input flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one time-period. 
+    *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
+    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
     
-Not all 3 parameters can be set at the same time. 
-The optimization problem will then determine the optimal capacity as well as the optimal flows.
+You should not set all 3 parameters at the same time, since it will lead to overditermination
+This following example-storage is not usable. The input flow has to be 1/6 of the capacity whereas the output has to be equal to the capacity and additionally both flows shall be equal.
 
 .. code-block:: python
+
+    solph.GenericStorage(
+        label='storage',
+        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100))},
+        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100)},
+        capacity_loss=0.001, 
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
+        invest_relation_input_output = 1
+        invest_relation_input_output = 1, invest_relation_input_capacity = 1/6,
+        investment = solph.Investment(ep_costs=50) 
+
+.. code-block:: python
+
+Instead you should use the storage as follows (one example).
 
     solph.GenericStorage(
         label='storage',
@@ -473,6 +486,7 @@ The example presents a storage that has the input flow coupled to the capacity a
 
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` class for all parameters and the mathematical background.
 
 
 
