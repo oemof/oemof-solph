@@ -441,6 +441,8 @@ Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds tw
     *	Invest into the flow parameters e.g. a turbine or a pump
     *	Invest into capacity of the storage  e.g. a basin or a battery cell
     
+Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode. 
+    
 As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows 
 with the capacity of the storage. 
 Three parameters are responsible for connecting the flows and the capacity of the storage:
@@ -461,7 +463,7 @@ This following example-storage is not usable. The input flow has to be 1/6 of th
         capacity_loss=0.001, 
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         invest_relation_input_output = 1
-        invest_relation_input_output = 1, invest_relation_input_capacity = 1/6,
+        invest_relation_input_capacity = 1, invest_relation_output_capacity = 1/6,
         investment = solph.Investment(ep_costs=50) 
 
 .. code-block:: python
