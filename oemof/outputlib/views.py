@@ -16,6 +16,9 @@ from enum import Enum
 from oemof.outputlib.processing import convert_keys_to_strings
 
 
+NONE_REPLACEMENT_STR = '_NONE_'
+
+
 def node(results, node, multiindex=False):
     """
     Obtain results for a single node e.g. a Bus or Component.
@@ -24,6 +27,23 @@ def node(results, node, multiindex=False):
     Results are written into a dictionary which is keyed by 'scalars' and
     'sequences' holding respective data in a pandas Series and DataFrame.
     """
+    def replace_none(col_list, reverse=False):
+        replacement = (
+            (None, NONE_REPLACEMENT_STR) if reverse else
+            (NONE_REPLACEMENT_STR, None)
+        )
+        changed_col_list = [
+            (
+                (
+                    replacement[0] if n1 is replacement[1] else n1,
+                    replacement[0] if n2 is replacement[1] else n2
+                ),
+                f
+            )
+            for (n1, n2), f in col_list
+        ]
+        return changed_col_list
+
     # convert to keys if only a string is passed
     if type(node) is str:
         results = convert_keys_to_strings(results)
@@ -43,7 +63,11 @@ def node(results, node, multiindex=False):
         idx = [tuple((k, m) for m in v) for k, v in idx.items()]
         idx = [i for sublist in idx for i in sublist]
         filtered['scalars'].index = idx
+        filtered['scalars'].index = replace_none(
+            filtered['scalars'].index.tolist())
         filtered['scalars'].sort_index(axis=0, inplace=True)
+        filtered['scalars'].index = replace_none(
+            filtered['scalars'].index.tolist(), True)
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
@@ -64,8 +88,10 @@ def node(results, node, multiindex=False):
                 if node in k and not v['sequences'].empty}
         cols = [tuple((k, m) for m in v) for k, v in cols.items()]
         cols = [c for sublist in cols for c in sublist]
-        filtered['sequences'].columns = cols
+        filtered['sequences'].columns = replace_none(cols)
         filtered['sequences'].sort_index(axis=1, inplace=True)
+        filtered['sequences'].columns = replace_none(
+            filtered['sequences'].columns, True)
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
