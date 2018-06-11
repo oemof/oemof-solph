@@ -173,15 +173,16 @@ class Parameter_Result_Tests:
             self.om, exclude_none=True)
         param_results_str = processing.convert_keys_to_strings(param_results)
         eq_(
-            param_results_str[('storage', None)]['scalars'],
+            param_results_str[('storage', 'None')]['scalars'],
             {
                 'label': 'storage',
                 'initial_capacity': 0,
-                'nominal_input_capacity_ratio': 1 / 6,
-                'nominal_output_capacity_ratio': 1 / 6,
+                'invest_relation_output_capacity': 1/6,
+                'invest_relation_input_capacity': 1/6,
                 'investment_ep_costs': 0.4,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_existing': 0,
                 'capacity_loss': 0,
                 'capacity_min': 0,
                 'capacity_max': 1,
@@ -190,7 +191,7 @@ class Parameter_Result_Tests:
             }
         )
         eq_(
-            param_results_str[('storage', None)]['sequences'],
+            param_results_str[('storage', 'None')]['sequences'],
             {}
         )
 
