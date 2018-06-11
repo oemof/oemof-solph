@@ -433,7 +433,7 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 
-Using the investment object with the GenericStorage component
+Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds two main investment possibilities.
