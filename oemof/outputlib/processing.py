@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pandas as pd
+import warnings
 from oemof.network import Node
 from oemof.tools.helpers import flatten
 from itertools import groupby
@@ -308,6 +309,15 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
         key = com_key if get_flows else (com_key, None)
         data[key] = component_data
     return data
+
+
+def param_results(system, exclude_none=True):
+    warnings.simplefilter('always', DeprecationWarning)
+    msg = ("The function 'param_results' has been renamed to"
+           "'parameter_as_dict'.\nPleas use the new function name to avoid"
+           "problems in the future.")
+    warnings.warn(msg, DeprecationWarning)
+    return parameter_as_dict(system, exclude_none=exclude_none)
 
 
 def parameter_as_dict(system, exclude_none=True):
