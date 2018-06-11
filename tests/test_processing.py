@@ -168,6 +168,32 @@ class Parameter_Result_Tests:
             {}
         )
 
+    def test_nodes_with_none_exclusion_old_name(self):
+        param_results = processing.param_results(
+            self.om, exclude_none=True)
+        param_results_str = processing.convert_keys_to_strings(param_results)
+        eq_(
+            param_results_str[('storage', None)]['scalars'],
+            {
+                'label': 'storage',
+                'initial_capacity': 0,
+                'nominal_input_capacity_ratio': 1 / 6,
+                'nominal_output_capacity_ratio': 1 / 6,
+                'investment_ep_costs': 0.4,
+                'investment_maximum': float('inf'),
+                'investment_minimum': 0,
+                'capacity_loss': 0,
+                'capacity_min': 0,
+                'capacity_max': 1,
+                'inflow_conversion_factor': 1,
+                'outflow_conversion_factor': 0.8,
+            }
+        )
+        eq_(
+            param_results_str[('storage', None)]['sequences'],
+            {}
+        )
+
     def test_nodes_without_none_exclusion(self):
         diesel = self.es.groups['diesel']
         param_results = processing.parameter_as_dict(
