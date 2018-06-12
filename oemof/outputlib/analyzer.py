@@ -7,10 +7,12 @@ functions for every specified element. If function does not exist, again a
 default function is called.
 """
 
+import pandas as pd
 from warnings import warn
 from collections import OrderedDict, abc
 from oemof.network import Node, Bus
 from oemof.outputlib import views
+from oemof import solph
 
 
 class RequirementError(Exception):
@@ -380,6 +382,86 @@ class BusBalanceAnalyzer(NodeBalanceAnalyzer):
 
     # TODO: Check if NodeBalanceAnalyzer already exists
     # If so, BusBalanceAnalyzer could simply filter results to
+
+
+class FlowFilterSubstring(Analyzer):
+    """Get the inflow of a transformer with the key of the transformer.
+    """
+    def __init__(self, substring, position=None):
+        super(FlowFilterSubstring, self).__init__()
+        self.substring = substring
+        self.position = position
+
+    def analyze(self, *args):
+        super(FlowFilterSubstring, self).analyze(*args)
+        if self.position is None or self.position == 1:
+            if args[1] is not None and self.substring in args[1].label:
+                self.result[args] = self.rsq(args)
+        if self.position is None or self.position == 0:
+            if args[0] is not None and self.substring in args[0].label:
+                if args not in self.result:
+                    self.result[args] = self.rsq(args)
+
+
+class LCOEAnalyzerCHP(Analyzer):
+    """
+
+    """
+    depends_on_former = (FlowFilterSubstring,)
+
+    def __init__(self):
+        super(LCOEAnalyzerCHP, self).__init__()
+        self.costs = {}
+
+    def analyze(self, *args):
+        super(LCOEAnalyzerCHP, self).analyze(*args)
+
+        demand = self._get_dep_result(FlowFilterSubstring)
+        df = pd.concat(demand, axis=1)
+        df.columns = df.columns.droplevel(-1)
+        elec_demand = df.sum(axis=1)
+
+        if isinstance(args[1], solph.Transformer):
+            eta = {}
+            if len(args[1].outputs) == 2:
+                for o in args[1].outputs:
+                    key = 'conversion_factors_{0}'.format(o)
+                    eta_key = o.label.split('_')[-2]
+                    eta_val = self.psc((args[1], None))[key]
+                    eta[eta_key] = eta_val
+                eta['heat_ref'] = 0.9
+                eta['elec_ref'] = 0.55
+
+                pee = (1 / (eta['heat'] / eta['heat_ref'] + eta['elec'] /
+                            eta['elec_ref'])) * (eta['elec'] / eta['elec_ref'])
+
+                cost_flow = self.rsq(args) * pee
+
+            elif len(args[1].outputs) == 1:
+                t_out = [o for o in args[1].outputs][0].label.split('_')[-2]
+                t_in = [i for i in args[1].inputs][0].label.split('_')[-2]
+                if t_out == 'elec' and t_in != 'elec':
+                    cost_flow = self.rsq(args)
+                else:
+                    cost_flow = None
+
+            else:
+                print(args[1].label, len(args[1].outputs))
+                cost_flow = None
+
+            if args[0] not in self.costs:
+                var_costs = 0
+                flow_seq = 0
+                for i in args[0].inputs:
+                    var_costs += (self.psc((i, args[0]))['variable_costs'] *
+                                  self.rsq((i, args[0])).sum())
+                    flow_seq += self.rsq((i, args[0])).sum()
+                self.costs[args[0]] = var_costs / flow_seq
+
+            if cost_flow is not None:
+                self.result[args[1].label] = cost_flow * self.costs[args[0]]
+                self.result[args[1].label] = (
+                    self.result[args[1].label]['flow'].div(elec_demand))
 
 
 class LCOEAnalyzer(Analyzer):
