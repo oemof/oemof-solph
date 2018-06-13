@@ -466,9 +466,9 @@ This following example-storage is not usable. The input flow has to be 1/6 of th
         invest_relation_input_capacity = 1, invest_relation_output_capacity = 1/6,
         investment = solph.Investment(ep_costs=50) 
 
-.. code-block:: python
-
 Instead you should use the storage as follows (one example).
+
+.. code-block:: python
 
     solph.GenericStorage(
         label='storage',
@@ -486,10 +486,7 @@ Instead you should use the storage as follows (one example).
 
 The example presents a storage that has the input flow coupled to the capacity as well as the input flow to the output flow.
 
-
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
-.. note:: See the :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` class for all parameters and the mathematical background.
-
 
 
 .. _oemof_solph_custom_electrical_line_label:
