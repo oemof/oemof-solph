@@ -96,8 +96,8 @@ class GenericStorage(network.Transformer):
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
        Investment object present)
@@ -597,7 +597,8 @@ class GenericCHP(network.Transformer):
     Volume 78, Issue 5, May 2008, Pages 835-848
     https://doi.org/10.1016/j.epsr.2007.06.001
 
-    Notes:
+    Note
+    ----
     An adaption for the flow parameter `H_L_FG_share_max` has been made to
     set the flue gas losses at maximum fuel flow `H_L_FG_max` as share of
     the fuel flow `H_F` e.g. for combined cycle extraction turbines.
@@ -629,8 +630,8 @@ class GenericCHP(network.Transformer):
         Flag to use back-pressure characteristics. Works of set to `True` and
         `Q_CW_min` set to zero. See paper above for more information.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericCHPBlock`
 
@@ -929,8 +930,8 @@ class ExtractionTurbineCHP(solph_Transformer):
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
 
