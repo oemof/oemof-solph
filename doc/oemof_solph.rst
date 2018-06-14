@@ -451,40 +451,34 @@ Three parameters are responsible for connecting the flows and the capacity of th
     *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
     *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
     
-You should not set all 3 parameters at the same time, since it will lead to overditermination
-This following example-storage is not usable. The input flow has to be 1/6 of the capacity whereas the output has to be equal to the capacity and additionally both flows shall be equal.
+You should not set all 3 parameters at the same time, since it will lead to overditermination.
+
+This following example-storage pictures a PHES. Both flows and the storage itself (representing: pump, turbine, basin) are free in their investment. You can set the parameters to `None` or delete them as `None` is the default value.   
 
 .. code-block:: python
 
     solph.GenericStorage(
-        label='storage',
-        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100))},
-        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100)},
+        label='PHES',
+        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
         capacity_loss=0.001, 
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
-        invest_relation_input_output = 1
-        invest_relation_input_capacity = 1, invest_relation_output_capacity = 1/6,
-        investment = solph.Investment(ep_costs=50) 
+        investment = solph.Investment(ep_costs=40) 
 
-Instead you should use the storage as follows (one example).
+The following example describes a battery where we have coupled the flows (representing power) to the capacity of the storage.
 
 .. code-block:: python
 
     solph.GenericStorage(
-        label='storage',
-        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100, existing = 20000, 
-                                                              maximum = 30000))},
-        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=100, existing = 20000, 
-                                                               maximum = 30000),
-                                  variable_costs=10)},
+        label='battery',
+        inputs={b_el: solph.Flow()},
+        outputs={b_el: solph.Flow()},
         capacity_loss=0.001, 
-        nominal_capacity=50,
+        nominal_capacity=50,)
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
-        invest_relation_input_output = 1,
-        invest_relation_input_capacity = 1/6,
-        investment = solph.Investment(ep_costs=50) 
+        invest_relation_input_capacity = 1/6, invest_relation_output_capacity = 1/6
+        investment = solph.Investment(ep_costs=400) 
 
-The example presents a storage that has the input flow coupled to the capacity as well as the input flow to the output flow.
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
