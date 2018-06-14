@@ -501,9 +501,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """Rule definition for constraint to connect the input power
             and output power
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] *
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) *
                     n.invest_relation_input_output ==
-                    m.InvestmentFlow.invest[o[n], n])
+                    (m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing))
             return expr
         self.power_coupled = Constraint(
                 self.INVEST_REL_IN_OUT, rule=_power_coupled)
