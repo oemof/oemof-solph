@@ -245,6 +245,10 @@ class GenericStorageBlock(SimpleBlock):
         A set with all :class:`.Storage` objects
         (and no attr:`investement` of type :class:`.Investment`)
 
+    STORAGES_WITH_INVEST_FLOW_REL
+        A set with all :class:`.Storage` objects with two investment flows
+        coupled with the 'invest_relation_input_output' attribute.
+
     **The following variables are created:**
 
     capacity
@@ -262,7 +266,15 @@ class GenericStorageBlock(SimpleBlock):
             &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
             + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
 
+    Connect the invest variables of the input and the output flow.
+        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
+          (InvestmentFlow.invest(n, target(n)) + existing) *
+           invest\_relation\_input_output(n) \\
+          \forall n \in \textrm{INVEST_REL_IN_OUT}
+
     **The following parts of the objective function are created:**
+
+    Nothing added to the objective function.
 
     """
 
@@ -288,6 +300,9 @@ class GenericStorageBlock(SimpleBlock):
         o = {n: [o for o in n.outputs][0] for n in group}
 
         self.STORAGES = Set(initialize=[n for n in group])
+
+        self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
+            n for n in group if n.invest_relation_input_output is not None])
 
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
@@ -322,6 +337,19 @@ class GenericStorageBlock(SimpleBlock):
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
+
+        def _power_coupled(block, n):
+            """Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) *
+                    n.invest_relation_input_output ==
+                    (m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing))
+            return expr
+        self.power_coupled = Constraint(
+                self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled)
 
     def _objective_expression(self):
         r"""Objective expression for storages with no investment.
