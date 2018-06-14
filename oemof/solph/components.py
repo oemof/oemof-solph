@@ -513,7 +513,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[i[n], n] ==
+            expr = ((m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing) ==
                     (n.investment.existing + self.invest[n]) *
                     n.invest_relation_input_capacity)
             return expr
@@ -525,7 +526,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] ==
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) ==
                     (n.investment.existing + self.invest[n]) *
                     n.invest_relation_output_capacity)
             return expr
