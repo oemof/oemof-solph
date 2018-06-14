@@ -1058,12 +1058,6 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def set_value(self, value):
-        pass
-
-    def clear(self):
-        pass
-
     def _create(self, group=None):
         """ Creates the linear constraint for the
         :class:`oemof.solph.Transformer` block.
