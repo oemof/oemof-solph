@@ -453,7 +453,7 @@ Three parameters are responsible for connecting the flows and the capacity of th
     
 You should not set all 3 parameters at the same time, since it will lead to overditermination.
 
-This following example-storage pictures a PHES. Both flows and the storage itself (representing: pump, turbine, basin) are free in their investment. You can set the parameters to `None` or delete them as `None` is the default value.   
+The following example pictures a PHES. Both flows and the storage itself (representing: pump, turbine, basin) are free in their investment. You can set the parameters to `None` or delete them as `None` is the default value.   
 
 .. code-block:: python
 
@@ -465,7 +465,7 @@ This following example-storage pictures a PHES. Both flows and the storage itsel
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40) 
 
-The following example describes a battery where we have coupled the flows (representing power) to the capacity of the storage.
+The following example describes a battery with flows coupled to the capacity of the storage.
 
 .. code-block:: python
 
