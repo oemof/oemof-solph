@@ -226,7 +226,8 @@ class Constraint_Tests:
             nominal_capacity=10e4,
             capacity_loss=0.13,
             inflow_conversion_factor=0.97,
-            outflow_conversion_factor=0.86)
+            outflow_conversion_factor=0.86,
+            initial_capacity=0.4)
 
         self.compare_lp_files('storage.lp')
 
@@ -261,7 +262,8 @@ class Constraint_Tests:
             label='storage2',
             inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
             outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
-            investment=solph.Investment(ep_costs=145))
+            investment=solph.Investment(ep_costs=145),
+            initial_capacity=0.5)
         self.compare_lp_files('storage_invest_2.lp')
 
     def test_storage_invest_3(self):

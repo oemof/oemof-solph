@@ -28,10 +28,9 @@ c_e_Bus_balance(electricityBus_2)_:
 
 c_e_GenericStorageBlock_balance(storage_no_invest_0)_:
 +1 GenericStorageBlock_capacity(storage_no_invest_0)
--0.87 GenericStorageBlock_capacity(storage_no_invest_2)
 -0.96999999999999997 flow(electricityBus_storage_no_invest_0)
 +1.1627906976744187 flow(storage_no_invest_electricityBus_0)
-= 0
+= 34800
 
 c_e_GenericStorageBlock_balance(storage_no_invest_1)_:
 -0.87 GenericStorageBlock_capacity(storage_no_invest_0)
@@ -42,10 +41,9 @@ c_e_GenericStorageBlock_balance(storage_no_invest_1)_:
 
 c_e_GenericStorageBlock_balance(storage_no_invest_2)_:
 -0.87 GenericStorageBlock_capacity(storage_no_invest_1)
-+1 GenericStorageBlock_capacity(storage_no_invest_2)
 -0.96999999999999997 flow(electricityBus_storage_no_invest_2)
 +1.1627906976744187 flow(storage_no_invest_electricityBus_2)
-= 0
+= -40000
 
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
@@ -59,5 +57,4 @@ bounds
    0 <= flow(storage_no_invest_electricityBus_2) <= 16667
    0 <= GenericStorageBlock_capacity(storage_no_invest_0) <= 100000
    0 <= GenericStorageBlock_capacity(storage_no_invest_1) <= 100000
-   0 <= GenericStorageBlock_capacity(storage_no_invest_2) <= 100000
 end
