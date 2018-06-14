@@ -290,6 +290,40 @@ class Constraint_Tests:
             investment=solph.Investment(ep_costs=145, maximum=500))
         self.compare_lp_files('storage_invest_4.lp')
 
+    def test_storage_invest_5(self):
+        """The storage capacity is fixed, but the Flows can be extended.
+        e.g. PHES with a fixed basin but the pump and the turbine can be
+        adapted. The installed capacity of the pump is 10 % bigger than the
+        the capacity of the turbine due to 'invest_relation_input_output=1.1'.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage5',
+            inputs={bel: solph.Flow(investment=solph.Investment(
+                ep_costs=99, existing=110))},
+            outputs={bel: solph.Flow(investment=solph.Investment(
+                existing=100))},
+            invest_relation_input_output=1.1,
+            nominal_capacity=10000)
+        self.compare_lp_files('storage_invest_5.lp')
+
+    def test_storage_invest_6(self):
+        """Like test_storage_invest_5 but there can also be an investment in
+        the basin.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage6',
+            inputs={bel: solph.Flow(investment=solph.Investment(
+                ep_costs=99, existing=110))},
+            outputs={bel: solph.Flow(investment=solph.Investment(
+                existing=100))},
+            invest_relation_input_output=1.1,
+            investment=solph.Investment(ep_costs=145, existing=10000))
+        self.compare_lp_files('storage_invest_6.lp')
+
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
         """
