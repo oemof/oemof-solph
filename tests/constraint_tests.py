@@ -220,7 +220,7 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
-            label='storage',
+            label='storage_no_invest',
             inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
             outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
             nominal_capacity=10e4,
@@ -279,12 +279,12 @@ class Constraint_Tests:
         self.compare_lp_files('storage_invest_3.lp')
 
     def test_storage_invest_4(self):
-        """All can be free extended to their own cost.
+        """Only the storage capacity can be extended.
         """
         bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
-            label='storage2',
+            label='storage4',
             inputs={bel: solph.Flow(nominal_value=80)},
             outputs={bel: solph.Flow(nominal_value=100)},
             investment=solph.Investment(ep_costs=145, maximum=500))
@@ -458,7 +458,7 @@ class Constraint_Tests:
         """Testing the equate_variables function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
-            label='storage',
+            label='storage_constraint',
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
@@ -493,7 +493,7 @@ class Constraint_Tests:
         """Testing the investment_limit function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         solph.components.GenericStorage(
-            label='storage',
+            label='storage_invest_limit',
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
