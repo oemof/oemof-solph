@@ -388,14 +388,20 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Connect the invest variables of the storage and the input flow.
-        .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * invest\_relation\_input\_capacity(n) \\
-          \forall n \in \textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
+          (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
+          \forall n \in \textrm{INVEST_REL_CAP_IN}
 
     Connect the invest variables of the storage and the output flow.
-        .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * invest\_relation\_output_capacity(n) \\
-          \forall n \in \textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(n, target(n)) + existing ==
+          (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
+          \forall n \in \textrm{INVEST_REL_CAP_OUT}
+
+    Connect the invest variables of the input and the output flow.
+        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
+          (InvestmentFlow.invest(n, target(n)) + existing) *
+           invest\_relation\_input_output(n) \\
+          \forall n \in \textrm{INVEST_REL_IN_OUT}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
@@ -443,8 +449,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             n for n in group if n.invest_relation_output_capacity is not None])
     
         self.INVEST_REL_IN_OUT = Set(initialize=[
-            n for n in group
-            if n.invest_relation_input_output is not None])
+            n for n in group if n.invest_relation_input_output is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
             n for n in group if n.initial_capacity is not None])
