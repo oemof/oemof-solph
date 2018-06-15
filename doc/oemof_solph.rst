@@ -52,7 +52,7 @@ Basically, there are two types of *nodes* - *components* and *buses*. Every Comp
 
 All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
-An example of a simple energy system shows the usage of the nodes for 
+An example of a simple energy system shows the usage of the nodes for
 real world representations:
 
 .. 	image:: _files/oemof_solph_example.svg
@@ -493,8 +493,8 @@ Mixed Integer (Linear) Problems
 -------------------------------
 
 Solph also allows you to model components with respect to more technical details
-such as a minimal power production. Therefore, the class 
-:py:class:`~oemof.solph.options.NonConvex` exists in the 
+such as a minimal power production. Therefore, the class
+:py:class:`~oemof.solph.options.NonConvex` exists in the
 :py:mod:`~oemof.solph.options` module.
 Note that the usage of this class is currently not compatible with the
 :py:class:`~oemof.solph.options.Investment` class.
@@ -516,12 +516,12 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The NonConvex() object of the electrical output of the created LinearTransformer will create 
+The NonConvex() object of the electrical output of the created LinearTransformer will create
 a 'status' variable for the flow.
 This will be used to model for example minimal/maximal power production constraints if the
 attributes `min`/`max` of the flow are set. It will also be used to include start up constraints and costs
 if corresponding attributes of the class are provided. For more
-information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding 
+information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding
 block class :py:class:`~oemof.solph.blocks.NonConvex`.
 
 .. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So
