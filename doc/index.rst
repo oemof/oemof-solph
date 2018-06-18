@@ -21,6 +21,7 @@ Contents:
    oemof_solph
    oemof_outputlib
    oemof_tools
+   oemof_solph_dev
    api
 
 
