@@ -420,6 +420,22 @@ With the GenericCHP class combined heat and power plants can be modelled with mo
   :start-after: _GenericCHP-equations:
   :end-before: """
 
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='combined_cycle_extraction_turbine',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.183])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[155.946],
+            P_min_woDH=[68.787],
+            Eta_el_max_woDH=[0.525],
+            Eta_el_min_woDH=[0.444])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[10.552])},
+        Beta=[0.122], back_pressure=False)
+
 .. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_generic_storage_label:
