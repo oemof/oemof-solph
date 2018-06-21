@@ -787,10 +787,10 @@ class GenericCHPBlock(SimpleBlock):
                                                        node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\dot{Q}_{CW, min}` minimal therm. condenser
                               load to cooling water
-    :math:`H_{L,FG,max}`      electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                              district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`H_{L,FG,sharemax}` electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                              district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`H_{L,FG,max}`      max. fuel gas            :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`H_{L,FG,sharemax}` max. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                              enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`Y`                 status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
                               on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\alpha_0`          coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
