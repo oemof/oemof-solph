@@ -779,34 +779,34 @@ class GenericCHPBlock(SimpleBlock):
                                     through fuel input
     :math:`P_{el}`                  provided                 :py:obj:`P[n,t]`
                                     electric power
-    :math:`P_{el,woDH}`             electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{Q}`                 provided heat            :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
-                                                             node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
-    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser
+    :math:`P_{el,woDH}`             electric power without   :py:obj:`P_woDH[n,t]`
+                                    district heating
+    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`P_min_woDH[t]`
+                                    without district heating
+    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`P_max_woDH[t]`
+                                    without district heating
+    :math:`\dot{Q}`                 provided heat            :py:obj:`Q[n,t]`
+
+    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[t]`
                                     load to cooling water
-    :math:`\dot{H}_{L,FG,max}`      flue gas losses at       :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    maximal fuel flow        node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{H}_{L,FG,sharemin}` min. share of flue gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`Y`                       status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
-                                    on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
-    :math:`\alpha_0`                coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
-                                    describing efficiency    as defined above
-    :math:`\alpha_1`                coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
-                                    describing efficiency    as defined above
-    :math:`\beta`                   power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
-                                                             as defined above
-    :math:`\eta_{el,min,woDH}`      min. electric efficiency :py:obj:`conversion_factor_full_condensation` at node :math:`n`
-                                    without district heating at timestep :math:`t`
-    :math:`\eta_{el,max,woDH}`      max. electric efficiency :py:obj:`conversion_factors` for the :py:obj:`main_output` at
-                                    without district heating node :math:`n` at timestep :math:`t`
+    :math:`\dot{H}_{L,FG,max}`      flue gas losses at       :py:obj:`H_L_FG_max[n, t]`
+                                    maximal fuel flow
+    :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`H_L_FG_share_max[t]`
+                                    enthalpy loss
+    :math:`\dot{H}_{L,FG,sharemin}` min. share of flue gas   :py:obj:`H_L_FG_share_min[t]`
+                                    enthalpy loss
+    :math:`Y`                       status variable          :py:obj:`Y[n,t]`
+                                    on/off
+    :math:`\alpha_0`                coefficient              :py:obj:`n.alphas[0][t]`
+                                    describing efficiency
+    :math:`\alpha_1`                coefficient              :py:obj:`n.alphas[1][t]`
+                                    describing efficiency
+    :math:`\beta`                   power loss index         :py:obj:`Beta[t]`
+
+    :math:`\eta_{el,min,woDH}`      min. electric efficiency :py:obj:`Eta_el_min_woDH[t]`
+                                    without district heating
+    :math:`\eta_{el,max,woDH}`      max. electric efficiency :py:obj:`Eta_el_max_woDH[t]`
+                                    without district heating
 
     =============================== ======================== =========
 
