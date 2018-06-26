@@ -793,6 +793,8 @@ class GenericCHPBlock(SimpleBlock):
                                     enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`\dot{H}_{L,FG,sharemax}` max. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
                                     enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot{H}_{L,FG,sharemin}` min. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`Y`                       status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
                                     on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\alpha_0`                coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
@@ -802,9 +804,9 @@ class GenericCHPBlock(SimpleBlock):
     :math:`\beta`                   power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
                                                              as defined above
     :math:`\eta_{el,min,woDH}`      min. electric efficiency :py:obj:`conversion_factor_full_condensation` at node :math:`n`
-                                    without heat extraction  at timestep :math:`t`
+                                    without district heating at timestep :math:`t`
     :math:`\eta_{el,max,woDH}`      max. electric efficiency :py:obj:`conversion_factors` for the :py:obj:`main_output` at
-                                    without heat extraction  node :math:`n` at timestep :math:`t`
+                                    without district heating node :math:`n` at timestep :math:`t`
 
     =============================== ======================== =========
 
