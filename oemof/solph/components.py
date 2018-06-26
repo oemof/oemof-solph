@@ -773,7 +773,7 @@ class GenericCHPBlock(SimpleBlock):
         \eta_{el,min,woDH} = \frac{P_{el, max, woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{min,woDH}(t)}\\
 
     =============================== ======================== =========
-    symbol                          explanation              attribute
+    math. symbol                    explanation              attribute
     =============================== ======================== =========
     :math:`\dot{H}_{F}`             inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
                                     through fuel input       node to the node :math:`n` at timestep :math:`t`
