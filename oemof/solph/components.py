@@ -741,7 +741,7 @@ class GenericCHPBlock(SimpleBlock):
         &
         (3)\qquad P_{el} = power out\\
         &
-        (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{woDH}(t)\\
+        (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,woDH}(t)\\
         &
         (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
         &
@@ -753,9 +753,9 @@ class GenericCHPBlock(SimpleBlock):
         &
         (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
         &
-        (10)\qquad P(t) + \dot{Q}(t) + \dot{H}_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq \dot{H}_F(t)\\
+        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq \dot{H}_F(t)\\
         &
-        (11)\qquad P(t) + \dot{Q}(t) + \dot{H}_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
+        (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
         &
         \forall t \in \textrm{TIMESTEPS}, \\
         &
@@ -772,39 +772,41 @@ class GenericCHPBlock(SimpleBlock):
         &
         \eta_{el,min,woDH} = \frac{P_{el, max, woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{min,woDH}(t)}\\
 
-    ========================= ======================== =========
-    symbol                    explanation              attribute
-    ========================= ======================== =========
-    :math:`\dot{H}_{F}`       inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
-                              through fuel input       node to the node :math:`n` at timestep :math:`t`
-    :math:`P_{el}`            provided                 :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                              electric power           node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`P_{el,woDH}`       electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                              district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`P_{el,max,woDH}`   max. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                              without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{Q}`           provided heat            :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
-                                                       node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
-    :math:`\dot{Q}_{CW, min}` minimal therm. condenser
-                              load to cooling water
-    :math:`\dot{H}_{L,FG,max}`max. fuel gas            :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                              enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{H}            max. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-    _{L,FG,sharemax}`         enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`Y`                 status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
-                              on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
-    :math:`\alpha_0`          coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
-                              describing efficiency    as defined above
-    :math:`\alpha_1`          coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
-                              describing efficiency    as defined above
-    :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
-                                                       as defined above
-    :math:`\eta_{el,woDH}`    electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n`
-                              without heat extraction  at timestep :math:`t`
-    :math:`\eta_{el,maxDH}`   electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
-                              with max heat extraction node :math:`n` at timestep :math:`t`
+    =============================== ======================== =========
+    symbol                          explanation              attribute
+    =============================== ======================== =========
+    :math:`\dot{H}_{F}`             inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                                    through fuel input       node to the node :math:`n` at timestep :math:`t`
+    :math:`P_{el}`                  provided                 :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    electric power           node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`P_{el,woDH}`             electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    without district heating node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot{Q}`                 provided heat            :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
+                                                             node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser
+                                    load to cooling water
+    :math:`\dot{H}_{L,FG,max}`      max. fuel gas            :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot{H}_{L,FG,sharemax}` max. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`Y`                       status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
+                                    on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\alpha_0`                coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                    describing efficiency    as defined above
+    :math:`\alpha_1`                coefficient              :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                    describing efficiency    as defined above
+    :math:`\beta`                   power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                                             as defined above
+    :math:`\eta_{el,min,woDH}`      min. electric efficiency :py:obj:`conversion_factor_full_condensation` at node :math:`n`
+                                    without heat extraction  at timestep :math:`t`
+    :math:`\eta_{el,max,woDH}`      max. electric efficiency :py:obj:`conversion_factors` for the :py:obj:`main_output` at
+                                    without heat extraction  node :math:`n` at timestep :math:`t`
 
-    ========================= ======================== =========
+    =============================== ======================== =========
 
 
     """
