@@ -775,10 +775,10 @@ class GenericCHPBlock(SimpleBlock):
     =============================== ======================== =========
     math. symbol                    explanation              attribute
     =============================== ======================== =========
-    :math:`\dot{H}_{F}`             inflow of enthalpy       :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
-                                    through fuel input       node to the node :math:`n` at timestep :math:`t`
-    :math:`P_{el}`                  provided                 :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    electric power           node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot{H}_{F}`             inflow of enthalpy       :py:obj:`H_F[n,t]`
+                                    through fuel input
+    :math:`P_{el}`                  provided                 :py:obj:`P[n,t]`
+                                    electric power
     :math:`P_{el,woDH}`             electric power without   :py:obj:`flow(n, main_output, t)` is the *flow* from the
                                     district heating         node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`flow(n, main_output, t)` is the *flow* from the
