@@ -768,9 +768,9 @@ class GenericCHPBlock(SimpleBlock):
 
     .. math::
         &
-        \eta_{el,max,woDH} = \frac{P_{el, max, woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{max,woDH}(t)}\\
+        \eta_{el,max,woDH} = \frac{P_{el,max,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,max,woDH}(t)}\\
         &
-        \eta_{el,min,woDH} = \frac{P_{el, max, woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{min,woDH}(t)}\\
+        \eta_{el,min,woDH} = \frac{P_{el,min,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,min,woDH}(t)}\\
 
     =============================== ======================== =========
     math. symbol                    explanation              attribute
