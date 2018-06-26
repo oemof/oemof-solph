@@ -789,11 +789,11 @@ class GenericCHPBlock(SimpleBlock):
                                                              node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\dot{Q}_{CW, min}`       minimal therm. condenser
                                     load to cooling water
-    :math:`\dot{H}_{L,FG,max}`      max. fuel gas            :py:obj:`flow(n, main_output, t)` is the *flow* from the
+    :math:`\dot{H}_{L,FG,max}`      flue gas losses at       :py:obj:`flow(n, main_output, t)` is the *flow* from the
+                                    maximal fuel flow        node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
                                     enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{H}_{L,FG,sharemax}` max. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
-                                    enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot{H}_{L,FG,sharemin}` min. share of fuel gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
+    :math:`\dot{H}_{L,FG,sharemin}` min. share of flue gas   :py:obj:`flow(n, main_output, t)` is the *flow* from the
                                     enthalpy loss            node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
     :math:`Y`                       status variable          :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
                                     on/off                   node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
