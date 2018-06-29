@@ -432,10 +432,61 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         capacity_loss=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+
+Using an investment object with the GenericStorage component
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds two main investment possibilities.
+
+    *	Invest into the flow parameters e.g. a turbine or a pump
+    *	Invest into capacity of the storage  e.g. a basin or a battery cell
+    
+Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode. 
+    
+As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows 
+with the capacity of the storage. 
+Three parameters are responsible for connecting the flows and the capacity of the storage:
+
+    *	' `invest_relation_input_capacity` ' fixes the input flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be filled within one time-period.
+    *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
+    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
+    
+You should not set all 3 parameters at the same time, since it will lead to overdetermination.
+
+The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Both flows and the storage itself (representing: pump, turbine, basin) are free in their investment. You can set the parameters to `None` or delete them as `None` is the default value.
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='PHES',
+        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
+        capacity_loss=0.001, 
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
+        investment = solph.Investment(ep_costs=40))
+
+The following example describes a battery with flows coupled to the capacity of the storage.
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='battery',
+        inputs={b_el: solph.Flow()},
+        outputs={b_el: solph.Flow()},
+        capacity_loss=0.001, 
+        nominal_capacity=50,
+        inflow_conversion_factor=0.98,
+         outflow_conversion_factor=0.8,
+        invest_relation_input_capacity = 1/6,
+        invest_relation_output_capacity = 1/6,
+        investment = solph.Investment(ep_costs=400))
+
+
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_electrical_line_label:
+
 
 ElectricalLine (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^

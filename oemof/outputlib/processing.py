@@ -337,7 +337,8 @@ def parameter_as_dict(system, exclude_none=True):
 
     Parameters
     ----------
-    system: Model or EnergySystem
+    system: energy_system.EnergySystem
+        A populated energy system.
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
 
