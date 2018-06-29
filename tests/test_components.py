@@ -19,8 +19,7 @@ def test_generic_storage_1():
     bel = solph.Bus()
     solph.components.GenericStorage(
         label='storage1',
-        nominal_capacity=45,
-        inputs={bel: solph.Flow(nominal_value=5, variable_costs=10e10)},
+        inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
         invest_relation_input_output=1,

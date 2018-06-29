@@ -267,6 +267,10 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
         if exclude_none:
             remove_nones(com_data)
 
+        com_data = {
+            'scalars': pd.Series(com_data['scalars']),
+            'sequences': pd.DataFrame(com_data['sequences'])
+        }
         return com_data
 
     def move_undetected_scalars(com):
@@ -335,7 +339,8 @@ def parameter_as_dict(system, exclude_none=True):
 
     Parameters
     ----------
-    system: Model or EnergySystem
+    system: energy_system.EnergySystem
+        A populated energy system.
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
 

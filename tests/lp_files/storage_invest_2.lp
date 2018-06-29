@@ -74,6 +74,11 @@ c_e_GenericInvestmentStorageBlock_balance(storage2_2)_:
 +1 flow(storage2_electricityBus_2)
 = 0
 
+c_e_GenericInvestmentStorageBlock_initial_capacity(storage2)_:
++1 GenericInvestmentStorageBlock_capacity(storage2_2)
+-0.5 GenericInvestmentStorageBlock_invest(storage2)
+= 0
+
 c_u_GenericInvestmentStorageBlock_max_capacity(storage2_0)_:
 +1 GenericInvestmentStorageBlock_capacity(storage2_0)
 -1 GenericInvestmentStorageBlock_invest(storage2)
