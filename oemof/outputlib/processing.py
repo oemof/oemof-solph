@@ -327,9 +327,8 @@ def parameter_as_dict(system, exclude_none=True):
     Results are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
-    The dictionary is keyed by the nodes e.g.
-    `results['nodes'][idx]['scalars']`
-    and flows e.g. `results['flows'][(n,n)]['sequences']`.
+    The dictionary is keyed by flows (n, n) and nodes (n, None), e.g.
+    `parameter[(n, n)]['sequences']` or `parameter[(n, n)]['scalars']`.
 
     Parameters
     ----------
