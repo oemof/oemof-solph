@@ -12,5 +12,5 @@ import oemof.tools.console_scripts as console_scripts
 
 
 def test_console_scripts():
-    console_scripts.check_oemof_installation(silent=True)
+    console_scripts.check_oemof_installation(silent=False)
     pass

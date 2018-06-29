@@ -969,24 +969,51 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         A set with all
         :class:`~oemof.solph.components.ExtractionTurbineCHP` objects.
 
-    **The following constraints are created:**
+    **The following two constraints are created:**
 
-    Variable i/o relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
-        .. math::
-            flow(input, n, t) = \\
-            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \cdot \
-            main\_flow\_loss\_index(n, t)) /\\
-            efficiency\_condensing(n, t)\\
-            \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+    .. _ETCHP-equations:
 
-    Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
-            flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
-            conversion\_factor(n, main\_output, t) / \
-            conversion\_factor(n, tapped\_output, t\\
-            \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+            &
+            \dot H_{Fuel} =
+            \frac{P_{el} + \dot Q_{th} \cdot \beta}
+                 {\eta_{el,woExtr}} \\
+            &
+            P_{el} \leq \dot Q_{th} \cdot
+            \frac{\eta_{el,maxExtr}}
+                 {\eta_{th,maxExtr}}
+
+    where :math:`\beta` is defined as:
+    
+         .. math::
+            \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr}}
+
+    where the first equation is the result of the relation between the input
+    flow and the two output flows, the second equation stems from how the two
+    output flows relate to each other, and the symbols used are defined as
+    follows:
+    
+
+    ========================= ======================== =========
+    symbol                    explanation              attribute
+    ========================= ======================== =========
+    :math:`\dot H_{Fuel}`     fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                                                       node to the node :math:`n` at timestep :math:`t`
+    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the  
+                                                       node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the 
+                                                       node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                                       as defined above
+    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n` 
+                              without heat extraction  at timestep :math:`t`
+    :math:`\eta_{el,maxExtr}` electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
+                              with max heat extraction node :math:`n` at timestep :math:`t`
+    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output` 
+                              maximal heat extraction  at node :math:`n` at timestep :math:`t`
+    ========================= ======================== =========		
+
+
     """
 
     CONSTRAINT_GROUP = True

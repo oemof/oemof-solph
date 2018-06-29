@@ -339,7 +339,35 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transformer_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
+:ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+the application example for the component is a flexible combined heat and power
+(chp) plant. Of course, an instance of this class can represent also another
+component with one input and two output flows and a flexible ratio between
+these flows, leading to the following constraints:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _ETCHP-equations:
+  :end-before: """
+
+These constraints are applied in addition those of a standard
+:class:`~oemof.solph.network.Transformer`. The constraints limit the range of
+the possible operation points, like the following picture shows. For a certain
+flow of fuel, there is a line of operation points, whose slope is defined by
+:math:`\beta`. The second constrain limits the decrease of electrical power.
+
+.. 	image:: _files/ExtractionTurbine_range_of_operation.svg
+   :width: 70 %
+   :alt: variable_chp_plot.svg
+   :align: center
+   
+For now :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances are
+restricted to one input and two output flows. The class allows the definition
+of a different efficiency for every time step but the corresponding series has
+to be predefined as a parameter for the optimisation. In contrast to the
+:class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
+defined. For the main flow you can define a conversion factor if the second
+flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -348,10 +376,15 @@ The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transfor
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
-        conversion_factor_single_flow={b_el: 0.5}
-        )
+        conversion_factor_single_flow={b_el: 0.5})
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of an example in the `oemof example repository <https://github.com/oemof/oemof_examples>`_.
+The key of the parameter *'conversion_factor_single_flow'* will indicate the
+main flow. In the example above, the flow to the Bus *'b_el'* is the main flow
+and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows
+how the variable chp (right) schedules it's electrical and thermal power
+production in contrast to a fixed chp (left). The plot is the output of an
+example in the `oemof example repository
+<https://github.com/oemof/oemof_examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
