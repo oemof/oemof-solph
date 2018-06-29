@@ -144,7 +144,8 @@ class Parameter_Result_Tests:
 
     def test_nodes_with_none_exclusion(self):
         param_results = processing.param_results(
-            self.om, exclude_none=True, keys_as_str=True)
+            self.om, exclude_none=True)
+        param_results = processing.convert_keys_to_strings(param_results)
         assert_series_equal(
             param_results[('storage', 'None')]['scalars'],
             pandas.Series({
