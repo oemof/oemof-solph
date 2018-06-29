@@ -63,7 +63,7 @@ def test_optimise_storage_size(filename="storage_investment.csv",
                                solver='cbc'):
 
     logging.info('Initialize the energy system')
-    date_time_index = pd.date_range('1/1/2012', periods=400, freq='H')
+    date_time_index = pd.date_range('1/1/2012', periods=40, freq='H')
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
     Node.registry = energysystem
@@ -109,7 +109,7 @@ def test_optimise_storage_size(filename="storage_investment.csv",
     # Investment storage
     solph.components.GenericStorage(
         label=Label('storage', 'electricity', 'battery'),
-        nominal_capacity=2046852,
+        nominal_capacity=204685,
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
@@ -147,17 +147,17 @@ def test_optimise_storage_size(filename="storage_investment.csv",
     my_results['gas_usage'] = gas_usage.sum()
 
     stor_invest_dict = {
-        'gas_usage': 8876575,
-        'max_load': 2046851,
-        (('bus_electricity_', 'sink_electricity_demand'), 'flow'): 105867395,
-        (('bus_electricity_', 'sink_electricity_excess'), 'flow'): 211771291,
-        (('bus_electricity_', 'storage_electricity_battery'), 'flow'): 2350931,
-        (('pp_electricity_natural_gas', 'bus_electricity_'), 'flow'): 5148414,
-        (('renewable_electricity_pv', 'bus_electricity_'), 'flow'): 7488607,
+        'gas_usage': 1304112,
+        'max_load': 0,
+        (('bus_electricity_', 'sink_electricity_demand'), 'flow'): 8239764,
+        (('bus_electricity_', 'sink_electricity_excess'), 'flow'): 22036732,
+        (('bus_electricity_', 'storage_electricity_battery'), 'flow'): 0,
+        (('pp_electricity_natural_gas', 'bus_electricity_'), 'flow'): 756385,
+        (('renewable_electricity_pv', 'bus_electricity_'), 'flow'): 744132,
         (('renewable_electricity_wind', 'bus_electricity_'),
-            'flow'): 305471851,
+            'flow'): 28775978,
         (('storage_electricity_battery', 'bus_electricity_',),
-            'flow'): 1880745}
+            'flow'): 0}
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
@@ -168,13 +168,13 @@ def test_optimise_storage_size(filename="storage_investment.csv",
     eq_(str(meta['solver']['Status']), 'ok')
 
     # Problem results
-    eq_(meta['problem']['Lower bound'], 4.231675775e+17)
-    eq_(meta['problem']['Upper bound'], 4.231675775e+17)
-    eq_(meta['problem']['Number of variables'], 2800)
-    eq_(meta['problem']['Number of constraints'], 1602)
-    eq_(meta['problem']['Number of nonzeros'], 5199)
+    eq_(int(meta['problem']['Lower bound']), 37819254)
+    eq_(int(meta['problem']['Upper bound']), 37819254)
+    eq_(meta['problem']['Number of variables'], 280)
+    eq_(meta['problem']['Number of constraints'], 162)
+    eq_(meta['problem']['Number of nonzeros'], 519)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 
     # Objective function
-    eq_(round(meta['objective']), 423167578097420672)
+    eq_(round(meta['objective']), 37819254)
