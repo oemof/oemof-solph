@@ -267,10 +267,11 @@ class GenericStorageBlock(SimpleBlock):
             + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
 
     Connect the invest variables of the input and the output flow.
-        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
-          (InvestmentFlow.invest(n, target(n)) + existing) *
-           invest\_relation\_input_output(n) \\
-          \forall n \in \textrm{INVEST_REL_IN_OUT}
+        .. math::
+          InvestmentFlow.invest(source(n), n) + existing = \\
+          (InvestmentFlow.invest(n, target(n)) + existing) * \\
+          invest\_relation\_input\_output(n) \\
+          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
     **The following parts of the objective function are created:**
 
@@ -416,20 +417,20 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Connect the invest variables of the storage and the input flow.
-        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
+        .. math:: InvestmentFlow.invest(source(n), n) + existing =
           (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
-          \forall n \in \textrm{INVEST_REL_CAP_IN}
+          \forall n \in \textrm{INVEST\_REL\_CAP\_IN}
 
     Connect the invest variables of the storage and the output flow.
-        .. math:: InvestmentFlow.invest(n, target(n)) + existing ==
+        .. math:: InvestmentFlow.invest(n, target(n)) + existing =
           (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
-          \forall n \in \textrm{INVEST_REL_CAP_OUT}
+          \forall n \in \textrm{INVEST\_REL\_CAP\_OUT}
 
     Connect the invest variables of the input and the output flow.
         .. math:: InvestmentFlow.invest(source(n), n) + existing ==
           (InvestmentFlow.invest(n, target(n)) + existing) *
-           invest\_relation\_input_output(n) \\
-          \forall n \in \textrm{INVEST_REL_IN_OUT}
+          invest\_relation\_input_output(n) \\
+          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
