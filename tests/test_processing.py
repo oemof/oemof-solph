@@ -81,7 +81,7 @@ class Parameter_Result_Tests:
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.param_results(self.es, exclude_none=True)
+        param_results = processing.parameter_as_dict(self.es, exclude_none=True)
         eq_(
             param_results[(b_el2, demand)]['scalars'],
             {
@@ -104,7 +104,7 @@ class Parameter_Result_Tests:
     def test_flows_without_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.param_results(self.om, exclude_none=False)
+        param_results = processing.parameter_as_dict(self.om, exclude_none=False)
         scalar_attributes = {
             'nominal_value': 1,
             'fixed': True,
@@ -142,10 +142,11 @@ class Parameter_Result_Tests:
         )
     
     def test_nodes_with_none_exclusion(self):
-        param_results = processing.param_results(
-            self.om, exclude_none=True, keys_as_str=True)
+        param_results = processing.parameter_as_dict(
+            self.om, exclude_none=True)
+        param_results_str = processing.convert_keys_to_strings(param_results)
         eq_(
-            param_results[('storage', 'None')]['scalars'],
+            param_results_str[('storage', 'None')]['scalars'],
             {
                 'label': 'storage',
                 'initial_capacity': 0,
@@ -163,13 +164,40 @@ class Parameter_Result_Tests:
             }
         )
         eq_(
-            param_results[('storage', 'None')]['sequences'],
+            param_results_str[('storage', 'None')]['sequences'],
+            {}
+        )
+
+    def test_nodes_with_none_exclusion_old_name(self):
+        param_results = processing.param_results(
+            self.om, exclude_none=True)
+        param_results_str = processing.convert_keys_to_strings(param_results)
+        eq_(
+            param_results_str[('storage', 'None')]['scalars'],
+            {
+                'label': 'storage',
+                'initial_capacity': 0,
+                'invest_relation_output_capacity': 1/6,
+                'invest_relation_input_capacity': 1/6,
+                'investment_ep_costs': 0.4,
+                'investment_maximum': float('inf'),
+                'investment_minimum': 0,
+                'investment_existing': 0,
+                'capacity_loss': 0,
+                'capacity_min': 0,
+                'capacity_max': 1,
+                'inflow_conversion_factor': 1,
+                'outflow_conversion_factor': 0.8,
+            }
+        )
+        eq_(
+            param_results_str[('storage', 'None')]['sequences'],
             {}
         )
 
     def test_nodes_without_none_exclusion(self):
         diesel = self.es.groups['diesel']
-        param_results = processing.param_results(
+        param_results = processing.parameter_as_dict(
             self.om, exclude_none=False)
         eq_(
             param_results[(diesel, None)]['scalars'],
