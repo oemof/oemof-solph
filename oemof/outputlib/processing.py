@@ -270,34 +270,34 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
         return com_data
 
     def move_undetected_scalars(com):
-        for key, value in list(com['sequences'].items()):
+        for ckey, value in list(com['sequences'].items()):
             if isinstance(value, str):
-                com['scalars'][key] = value
-                del com['sequences'][key]
+                com['scalars'][ckey] = value
+                del com['sequences'][ckey]
                 continue
             try:
                 _ = (e for e in value)
             except TypeError:
-                com['scalars'][key] = value
-                del com['sequences'][key]
+                com['scalars'][ckey] = value
+                del com['sequences'][ckey]
             else:
                 try:
                     if not value.default_changed:
-                        com['scalars'][key] = value.default
-                        del com['sequences'][key]
+                        com['scalars'][ckey] = value.default
+                        del com['sequences'][ckey]
                 except AttributeError:
                     pass
 
     def remove_nones(com):
-        for key, value in list(com['scalars'].items()):
+        for ckey, value in list(com['scalars'].items()):
             if value is None:
-                del com['scalars'][key]
-        for key, value in list(com['sequences'].items()):
+                del com['scalars'][ckey]
+        for ckey, value in list(com['sequences'].items()):
             if (
                     len(value) == 0 or
                     value[0] is None
             ):
-                del com['sequences'][key]
+                del com['sequences'][ckey]
 
     # Check if system is es or om:
     if system.__class__.__name__ == 'EnergySystem':
@@ -309,8 +309,8 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     for com_key in components:
         component = components[com_key] if get_flows else com_key
         component_data = detect_scalars_and_sequences(component)
-        c_key = com_key if get_flows else (com_key, None)
-        data[c_key] = component_data
+        ckey = com_key if get_flows else (com_key, None)
+        data[ckey] = component_data
     return data
 
 
@@ -331,7 +331,7 @@ def parameter_as_dict(system, exclude_none=True):
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
     The dictionary is keyed by flows (n, n) and nodes (n, None), e.g.
-    `results[(n,n)]['sequences']`.
+    `parameter[(n, n)]['sequences']` or `parameter[(n, n)]['scalars']`.
 
     Parameters
     ----------
