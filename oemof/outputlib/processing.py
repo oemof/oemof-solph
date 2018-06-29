@@ -265,6 +265,10 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
         if exclude_none:
             remove_nones(com_data)
 
+        com_data = {
+            'scalars': pd.Series(com_data['scalars']),
+            'sequences': pd.DataFrame(com_data['sequences'])
+        }
         return com_data
 
     def move_undetected_scalars(com):
