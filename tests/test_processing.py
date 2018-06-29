@@ -16,6 +16,7 @@ from oemof.solph import (
     EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
 from oemof.solph.components import GenericStorage
 from oemof.outputlib import processing
+from oemof.outputlib import views
 
 
 class Parameter_Result_Tests:
@@ -187,3 +188,17 @@ class Parameter_Result_Tests:
             param_results[(diesel, None)]['sequences'],
             pandas.DataFrame()
         )
+
+    def test_parameter_with_node_view(self):
+        param_results = processing.parameter_as_dict(
+            self.om, exclude_none=True)
+        bel1 = views.node(param_results, 'b_el1')
+        eq_(bel1['scalars'][(('b_el1', 'storage'), 'variable_costs')], 3)
+
+        bel1_m = views.node(param_results, 'b_el1', multiindex=True)
+        eq_(bel1_m['scalars'].loc[('b_el1', 'storage', 'variable_costs')], 3)
+
+    def test_multiindex_sequences(self):
+        results = processing.results(self.om)
+        bel1 = views.node(results, 'b_el1', multiindex=True)
+        eq_(int(bel1['sequences'][('diesel', 'b_el1', 'flow')].sum()), 2875)
