@@ -82,7 +82,8 @@ class Parameter_Result_Tests:
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.param_results(self.es, exclude_none=True)
+        param_results = processing.parameter_as_dict(self.es,
+                                                     exclude_none=True)
         assert_series_equal(
             param_results[(b_el2, demand)]['scalars'],
             pandas.Series(
@@ -107,7 +108,8 @@ class Parameter_Result_Tests:
     def test_flows_without_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.param_results(self.om, exclude_none=False)
+        param_results = processing.parameter_as_dict(self.om,
+                                                     exclude_none=False)
         scalar_attributes = {
             'fixed': True,
             'integer': None,
@@ -143,7 +145,7 @@ class Parameter_Result_Tests:
         )
 
     def test_nodes_with_none_exclusion(self):
-        param_results = processing.param_results(
+        param_results = processing.parameter_as_dict(
             self.om, exclude_none=True)
         param_results = processing.convert_keys_to_strings(param_results)
         assert_series_equal(
@@ -171,7 +173,7 @@ class Parameter_Result_Tests:
 
     def test_nodes_without_none_exclusion(self):
         diesel = self.es.groups['diesel']
-        param_results = processing.param_results(
+        param_results = processing.parameter_as_dict(
             self.om, exclude_none=False)
         assert_series_equal(
             param_results[(diesel, None)]['scalars'],

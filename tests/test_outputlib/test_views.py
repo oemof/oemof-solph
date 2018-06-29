@@ -7,7 +7,7 @@ from oemof.outputlib import processing, views
 class Filter_Test():
     def setup(self):
         self.results = processing.results(optimization_model)
-        self.param_results = processing.param_results(optimization_model)
+        self.param_results = processing.parameter_as_dict(optimization_model)
 
     def test_filter_all(self):
         nodes = views.filter_nodes(self.results)
