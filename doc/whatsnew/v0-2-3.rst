@@ -1,0 +1,45 @@
+v0.2.3 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+
+
+New features
+############
+
+
+New components
+##############
+
+
+
+Documentation
+#############
+
+
+Known issues
+############
+
+
+Bug fixes
+#########
+
+
+Testing
+#######
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+* Simon Hilpert
+* Stephan Günther
+* Uwe Krien
+
