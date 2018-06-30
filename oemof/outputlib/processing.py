@@ -13,6 +13,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import pandas as pd
 import warnings
+import sys
 from oemof.network import Node
 from oemof.tools.helpers import flatten
 from itertools import groupby
@@ -122,7 +123,13 @@ def results(om):
     for k in df_dict:
         df_dict[k].set_index('timestep', inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
-        df_dict[k].index = om.es.timeindex
+        try:
+            df_dict[k].index = om.es.timeindex
+        except ValueError as e:
+            msg = ("\nFlow: {0}-{1}. This could be caused by NaN-values in"
+                   " your input data.")
+            raise type(e)(str(e) + msg.format(k[0].label, k[1].label)
+                          ).with_traceback(sys.exc_info()[2])
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
