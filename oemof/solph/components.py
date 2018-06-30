@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import numpy as np
+import warnings
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
@@ -31,15 +32,46 @@ class GenericStorage(network.Transformer):
     nominal_capacity : numeric
         Absolute nominal capacity of the storage
     nominal_output_capacity_ratio : numeric
-        Ratio between the nominal outflow of the storage and its capacity. For
-        batteries this is also know as c-rate.
+        DEPRECATED - Define the output capacity as nominal_value in the Flow
+        class. In case of an investment object in the storage and the flow use
+        :attr:`invest_relation_input_capacity` instead.
+        OLD TEXT: Ratio between the nominal outflow of the storage and
+        its capacity. For batteries this is also know as c-rate.
         Note: This ratio is used to create the Flow object for the outflow
         and set its nominal value of the storage in the constructor. If no
         investment object is defined it is also possible to set the nominal
         value of the flow directly in its constructor.
     nominal_input_capacity_ratio : numeric
-        Ratio between the nominal inflow of the storage and its capacity.
-        see: nominal_output_capacity_ratio
+        DEPRECATED - Define the input capacity as nominal_value in the Flow
+        class. In case of an investment object in the storage and the flow use
+        :attr:`invest_relation_output_capacity` instead.
+        OLD TEXT: Ratio between the nominal inflow of the storage and
+        its capacity. see: nominal_output_capacity_ratio
+    invest_relation_input_capacity : numeric or None
+        Ratio between the investment variable of the input Flow and the
+        investment variable of the storage.
+
+        .. math:: input\_invest =
+                  capacity\_invest \cdot invest\_relation\_input\_capacity
+
+    invest_relation_output_capacity : numeric or None
+        Ratio between the investment variable of the output Flow and the
+        investment variable of the storage.
+
+        .. math:: output\_invest =
+                  capacity\_invest \cdot invest\_relation\_output\_capacity
+
+    invest_relation_input_output : numeric or None
+        Ratio between the investment variable of the output Flow and the
+        investment variable of the input flow. This ratio used to fix the
+        flow investments to each other.
+        Values < 1 set the input flow lower than the output and > 1 will
+        set the input flow higher than the output flow. If None no relation
+        will be set.
+
+        .. math:: input\_invest =
+                  output\_invest \cdot invest\_relation\_input\_output
+
     initial_capacity : numeric
         The capacity of the storage in the first (and last) time step of
         optimization.
@@ -64,8 +96,8 @@ class GenericStorage(network.Transformer):
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
        Investment object present)
@@ -84,13 +116,11 @@ class GenericStorage(network.Transformer):
     >>> my_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     nominal_capacity=1000,
-    ...     inputs={my_bus: solph.Flow(variable_costs=10)},
-    ...     outputs={my_bus: solph.Flow()},
+    ...     inputs={my_bus: solph.Flow(nominal_value=200, variable_costs=10)},
+    ...     outputs={my_bus: solph.Flow(nominal_value=200)},
     ...     capacity_loss=0.01,
     ...     initial_capacity=0,
     ...     capacity_max = 0.9,
-    ...     nominal_input_capacity_ratio=1/6,
-    ...     nominal_output_capacity_ratio=1/6,
     ...     inflow_conversion_factor=0.9,
     ...     outflow_conversion_factor=0.93)
 
@@ -101,8 +131,8 @@ class GenericStorage(network.Transformer):
     ...     outputs={my_bus: solph.Flow()},
     ...     capacity_loss=0.02,
     ...     initial_capacity=None,
-    ...     nominal_input_capacity_ratio=1/6,
-    ...     nominal_output_capacity_ratio=1/6,
+    ...     invest_relation_input_capacity=1/6,
+    ...     invest_relation_output_capacity=1/6,
     ...     inflow_conversion_factor=1,
     ...     outflow_conversion_factor=0.8)
     """
@@ -111,62 +141,98 @@ class GenericStorage(network.Transformer):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.nominal_input_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio', None)
+            'nominal_input_capacity_ratio')
         self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_output_capacity_ratio', None)
+            'nominal_output_capacity_ratio')
         self.initial_capacity = kwargs.get('initial_capacity')
         self.capacity_loss = solph_sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = solph_sequence(
-            kwargs.get(
-                'inflow_conversion_factor', 1))
+            kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
-            kwargs.get(
-                'outflow_conversion_factor', 1))
+            kwargs.get('outflow_conversion_factor', 1))
         self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
         self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
         self.investment = kwargs.get('investment')
+        self.invest_relation_input_output = kwargs.get(
+            'invest_relation_input_output')
+        self.invest_relation_input_capacity = kwargs.get(
+            'invest_relation_input_capacity')
+        self.invest_relation_output_capacity = kwargs.get(
+            'invest_relation_output_capacity')
+        self._invest_group = isinstance(self.investment, Investment)
 
-        # General error messages
-        e_no_nv = ("If an investment object is defined the invest variable "
-                   "replaces the {0}.\n Therefore the {0} should be 'None'.\n")
-        e_duplicate = (
-            "Duplicate definition.\nThe 'nominal_{0}_capacity_ratio'"
-            "will set the nominal_value for the flow.\nTherefore "
-            "either the 'nominal_{0}_capacity_ratio' or the "
-            "'nominal_value' has to be 'None'.")
-        # Check investment
+        warnings.simplefilter('always', DeprecationWarning)
+        dpr_msg = ("\nDeprecated. The attributes "
+                   "'nominal_input_capacity_ratio' and "
+                   "'nominal_input_capacity_ratio' will be removed in "
+                   "oemof >= v0.3.0.\n Please use the 'invest_relation_...' "
+                   "attribute in case of the investment mode.\n Please use "
+                   "the 'nominal_value' within in the Flows for the dispatch "
+                   "mode.\n These measures will avoid this warning.")
+
+        # DEPRECATED. Set nominal_value of in/out Flows using
+        # nominal_input_capacity_ratio / nominal_input_capacity_ratio
+        if self._invest_group is False and (
+                self.nominal_input_capacity_ratio is not None or
+                self.nominal_output_capacity_ratio is not None):
+            self._set_flows(dpr_msg)
+
+        # Check attributes for the investment mode.
+        if self._invest_group is True:
+            self._check_invest_attributes(dpr_msg)
+
+    def _check_invest_attributes(self, dpr_msg):
+        if self.nominal_input_capacity_ratio is not None:
+            warnings.warn(dpr_msg, DeprecationWarning)
+            self.invest_relation_input_capacity = (
+                self.nominal_input_capacity_ratio)
+        if self.nominal_output_capacity_ratio is not None:
+            warnings.warn(dpr_msg, DeprecationWarning)
+            self.invest_relation_output_capacity = (
+                self.nominal_output_capacity_ratio)
         if self.investment and self.nominal_capacity is not None:
-            raise AttributeError(e_no_nv.format('nominal_capacity'))
-
-        # Check input flows
+            e1 = ("If an investment object is defined the invest variable "
+                  "replaces the nominal_capacity.\n Therefore the "
+                  "nominal_capacity should be 'None'.\n")
+            raise AttributeError(e1)
+        if (self.invest_relation_input_output is not None and
+                self.invest_relation_output_capacity is not None and
+                self.invest_relation_input_capacity is not None):
+            e2 = ("Overdetermined. Three investment object will be coupled"
+                  "with three constraints. Set one invest relation to 'None'.")
+            raise AttributeError(e2)
         for flow in self.inputs.values():
-            if self.investment and flow.nominal_value is not None:
-                raise AttributeError(e_no_nv.format('nominal_value'))
-            if (flow.nominal_value is not None and
-                    self.nominal_input_capacity_ratio is not None):
-                raise AttributeError(e_duplicate)
-            if (not self.investment and
-                    self.nominal_input_capacity_ratio is not None):
+            if (self.invest_relation_input_capacity is not None and
+                    not isinstance(flow.investment, Investment)):
+                flow.investment = Investment()
+        for flow in self.outputs.values():
+            if (self.invest_relation_output_capacity is not None and
+                    not isinstance(flow.investment, Investment)):
+                flow.investment = Investment()
+
+    def _set_flows(self, dpr_msg):
+        """ Sets correct attributes of input / output flows based on the
+        storage object attributes. This method is called in the constructor by
+        default. It may be called in sub-classed components at the
+        end of the constructor to ensure correct setting of attributes.
+        """
+        warnings.warn(dpr_msg, DeprecationWarning)
+        for flow in self.inputs.values():
+            if (self.nominal_input_capacity_ratio is not None and
+                    not isinstance(flow.investment, Investment)):
                 flow.nominal_value = (self.nominal_input_capacity_ratio *
                                       self.nominal_capacity)
-            if self.investment:
-                if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
-
-        # Check output flows
         for flow in self.outputs.values():
-            if self.investment and flow.nominal_value is not None:
-                raise AttributeError(e_no_nv.format('nominal_value'))
-            if (flow.nominal_value is not None and
-                    self.nominal_output_capacity_ratio is not None):
-                raise AttributeError(e_duplicate)
-            if (not self.investment and
-                    self.nominal_output_capacity_ratio is not None):
+            if (self.nominal_output_capacity_ratio is not None and
+                    not isinstance(flow.investment, Investment)):
                 flow.nominal_value = (self.nominal_output_capacity_ratio *
                                       self.nominal_capacity)
-            if self.investment:
-                if not isinstance(flow.investment, Investment):
-                    flow.investment = Investment()
+
+    def constraint_group(self):
+        if self._invest_group is True:
+            return GenericInvestmentStorageBlock
+        else:
+            return GenericStorageBlock
 
 
 class GenericStorageBlock(SimpleBlock):
@@ -178,6 +244,10 @@ class GenericStorageBlock(SimpleBlock):
     STORAGES
         A set with all :class:`.Storage` objects
         (and no attr:`investement` of type :class:`.Investment`)
+
+    STORAGES_WITH_INVEST_FLOW_REL
+        A set with all :class:`.Storage` objects with two investment flows
+        coupled with the 'invest_relation_input_output' attribute.
 
     **The following variables are created:**
 
@@ -196,7 +266,16 @@ class GenericStorageBlock(SimpleBlock):
             &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
             + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
 
+    Connect the invest variables of the input and the output flow.
+        .. math::
+          InvestmentFlow.invest(source(n), n) + existing = \\
+          (InvestmentFlow.invest(n, target(n)) + existing) * \\
+          invest\_relation\_input\_output(n) \\
+          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+
     **The following parts of the objective function are created:**
+
+    Nothing added to the objective function.
 
     """
 
@@ -222,6 +301,9 @@ class GenericStorageBlock(SimpleBlock):
         o = {n: [o for o in n.outputs][0] for n in group}
 
         self.STORAGES = Set(initialize=[n for n in group])
+
+        self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
+            n for n in group if n.invest_relation_input_output is not None])
 
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
@@ -257,6 +339,19 @@ class GenericStorageBlock(SimpleBlock):
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
 
+        def _power_coupled(block, n):
+            """Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) *
+                    n.invest_relation_input_output ==
+                    (m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing))
+            return expr
+        self.power_coupled = Constraint(
+                self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled)
+
     def _objective_expression(self):
         r"""Objective expression for storages with no investment.
         Note: This adds nothing as variable costs are already
@@ -276,6 +371,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     INVESTSTORAGES
         A set with all storages containing an Investment object.
+    INVEST_REL_CAP_IN
+        A set with all storages containing an Investment object with coupled 
+        investment of input power and storage capacity
+    INVEST_REL_CAP_OUT
+        A set with all storages containing an Investment object with coupled 
+        investment of output power and storage capacity
+    INVEST_REL_IN_OUT
+        A set with all storages containing an Investment object with coupled
+        investment of input and output power
     INITIAL_CAPACITY
         A subset of the set INVESTSTORAGES where elements of the set have an
         initial_capacity attribute.
@@ -313,14 +417,20 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Connect the invest variables of the storage and the input flow.
-        .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * nominal\_input\_capacity\_ratio(n) \\
-          \forall n \in \textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(source(n), n) + existing =
+          (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
+          \forall n \in \textrm{INVEST\_REL\_CAP\_IN}
 
     Connect the invest variables of the storage and the output flow.
-        .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * nominal_output_capacity_ratio(n) \\
-          \forall n \in \textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(n, target(n)) + existing =
+          (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
+          \forall n \in \textrm{INVEST\_REL\_CAP\_OUT}
+
+    Connect the invest variables of the input and the output flow.
+        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
+          (InvestmentFlow.invest(n, target(n)) + existing) *
+          invest\_relation\_input_output(n) \\
+          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
@@ -361,6 +471,14 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
+        self.INVEST_REL_CAP_IN = Set(initialize=[
+            n for n in group if n.invest_relation_input_capacity is not None])
+    
+        self.INVEST_REL_CAP_OUT = Set(initialize=[
+            n for n in group if n.invest_relation_output_capacity is not None])
+    
+        self.INVEST_REL_IN_OUT = Set(initialize=[
+            n for n in group if n.invest_relation_input_output is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
             n for n in group if n.initial_capacity is not None])
@@ -406,39 +524,59 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """Rule definition for constraint to connect initial storage
             capacity with capacity of last timesteps.
             """
-            expr = (self.capacity[n, m.TIMESTEPS[-1]] == (n.initial_capacity *
-                                                          self.invest[n]))
+            expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
+                    (n.investment.existing + self.invest[n]) *
+                    n.initial_capacity)
             return expr
         self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+        
+        def _power_coupled(block, n):
+            """Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) *
+                    n.invest_relation_input_output ==
+                    (m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing))
+            return expr
+        self.power_coupled = Constraint(
+                self.INVEST_REL_IN_OUT, rule=_power_coupled)
 
         def _storage_capacity_inflow_invest_rule(block, n):
             """Rule definition of constraint connecting the inflow
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[i[n], n] ==
-                    self.invest[n] * n.nominal_input_capacity_ratio)
+            expr = ((m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing) ==
+                    (n.investment.existing + self.invest[n]) *
+                    n.invest_relation_input_capacity)
             return expr
         self.storage_capacity_inflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_inflow_invest_rule)
+            self.INVEST_REL_CAP_IN, rule=_storage_capacity_inflow_invest_rule)
 
         def _storage_capacity_outflow_invest_rule(block, n):
             """Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] ==
-                    self.invest[n] * n.nominal_output_capacity_ratio)
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) ==
+                    (n.investment.existing + self.invest[n]) *
+                    n.invest_relation_output_capacity)
             return expr
         self.storage_capacity_outflow = Constraint(
-            self.INVESTSTORAGES, rule=_storage_capacity_outflow_invest_rule)
+            self.INVEST_REL_CAP_OUT,
+            rule=_storage_capacity_outflow_invest_rule)
 
         def _max_capacity_invest_rule(block, n, t):
             """Rule definition for upper bound constraint for the storage cap.
             """
-            expr = (self.capacity[n, t] <= (n.capacity_max[t] *
-                                            self.invest[n]))
+            expr = (self.capacity[n, t] <=
+                    (n.investment.existing + self.invest[n]) *
+                    n.capacity_max[t])
             return expr
         self.max_capacity = Constraint(
             self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
@@ -446,8 +584,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _min_capacity_invest_rule(block, n, t):
             """Rule definition of lower bound constraint for the storage cap.
             """
-            expr = (self.capacity[n, t] >= (n.capacity_min[t] *
-                                            self.invest[n]))
+            expr = (self.capacity[n, t] >=
+                    (n.investment.existing + self.invest[n]) *
+                    n.capacity_min[t])
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
         self.min_capacity = Constraint(
@@ -496,7 +635,8 @@ class GenericCHP(network.Transformer):
     Volume 78, Issue 5, May 2008, Pages 835-848
     https://doi.org/10.1016/j.epsr.2007.06.001
 
-    Notes:
+    Note
+    ----
     An adaption for the flow parameter `H_L_FG_share_max` has been made to
     set the flue gas losses at maximum fuel flow `H_L_FG_max` as share of
     the fuel flow `H_F` e.g. for combined cycle extraction turbines.
@@ -528,8 +668,8 @@ class GenericCHP(network.Transformer):
         Flag to use back-pressure characteristics. Works of set to `True` and
         `Q_CW_min` set to zero. See paper above for more information.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericCHPBlock`
 
@@ -617,9 +757,10 @@ class GenericCHP(network.Transformer):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-
-
         return self._alphas
+
+    def constraint_group(self):
+        return GenericCHPBlock
 
 
 class GenericCHPBlock(SimpleBlock):
@@ -633,8 +774,6 @@ class GenericCHPBlock(SimpleBlock):
     TODO: Add test
 
     """
-
-
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -829,8 +968,8 @@ class ExtractionTurbineCHP(solph_Transformer):
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
 
@@ -854,6 +993,9 @@ class ExtractionTurbineCHP(solph_Transformer):
             k: solph_sequence(v) for k, v in
             conversion_factor_full_condensation.items()}
 
+    def constraint_group(self):
+        return ExtractionTurbineCHPBlock
+
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -866,36 +1008,57 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         A set with all
         :class:`~oemof.solph.components.ExtractionTurbineCHP` objects.
 
-    **The following constraints are created:**
+    **The following two constraints are created:**
 
-    Variable i/o relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
-        .. math::
-            flow(input, n, t) = \\
-            (flow(n, main\_output, t) + flow(n, tapped\_output, t) \cdot \
-            main\_flow\_loss\_index(n, t)) /\\
-            efficiency\_condensing(n, t)\\
-            \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+    .. _ETCHP-equations:
 
-    Out flow relation :attr:`om.ExtractionTurbineCHP.relation[i,o,t]`
         .. math::
-            flow(n, main\_output, t) = flow(n, tapped\_output, t) \cdot \\
-            conversion\_factor(n, main\_output, t) / \
-            conversion\_factor(n, tapped\_output, t\\
-            \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+            &
+            \dot H_{Fuel} =
+            \frac{P_{el} + \dot Q_{th} \cdot \beta}
+                 {\eta_{el,woExtr}} \\
+            &
+            P_{el} \leq \dot Q_{th} \cdot
+            \frac{\eta_{el,maxExtr}}
+                 {\eta_{th,maxExtr}}
+
+    where :math:`\beta` is defined as:
+    
+         .. math::
+            \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr}}
+
+    where the first equation is the result of the relation between the input
+    flow and the two output flows, the second equation stems from how the two
+    output flows relate to each other, and the symbols used are defined as
+    follows:
+    
+
+    ========================= ======================== =========
+    symbol                    explanation              attribute
+    ========================= ======================== =========
+    :math:`\dot H_{Fuel}`     fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
+                                                       node to the node :math:`n` at timestep :math:`t`
+    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the  
+                                                       node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
+    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the 
+                                                       node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
+    :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
+                                                       as defined above
+    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n` 
+                              without heat extraction  at timestep :math:`t`
+    :math:`\eta_{el,maxExtr}` electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
+                              with max heat extraction node :math:`n` at timestep :math:`t`
+    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output` 
+                              maximal heat extraction  at node :math:`n` at timestep :math:`t`
+    ========================= ======================== =========		
+
+
     """
 
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def set_value(self, value):
-        pass
-
-    def clear(self):
-        pass
 
     def _create(self, group=None):
         """ Creates the linear constraint for the
@@ -950,7 +1113,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                          g.main_flow_loss_index[t]) /
                         g.conversion_factor_full_condensation_sq[t]
                         )
-                    block.input_output_relation.add((n, t), (lhs == rhs))
+                    block.input_output_relation.add((g, t), (lhs == rhs))
         self.input_output_relation = Constraint(group, m.TIMESTEPS,
                                                 noruleinit=True)
         self.input_output_relation_build = BuildAction(
@@ -969,16 +1132,3 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                             noruleinit=True)
         self.out_flow_relation_build = BuildAction(
                 rule=_out_flow_relation_rule)
-
-
-def component_grouping(node):
-    if isinstance(node, GenericStorage) and isinstance(node.investment,
-                                                       Investment):
-        return GenericInvestmentStorageBlock
-    if isinstance(node, GenericStorage) and not isinstance(node.investment,
-                                                           Investment):
-        return GenericStorageBlock
-    if isinstance(node, GenericCHP):
-        return GenericCHPBlock
-    if isinstance(node, ExtractionTurbineCHP):
-        return ExtractionTurbineCHPBlock

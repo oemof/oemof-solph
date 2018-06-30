@@ -28,7 +28,7 @@ class Constraint_Tests:
 
     @classmethod
     def setup_class(self):
-        self.objective_pattern = re.compile("^objective.*(?=s\.t\.)",
+        self.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',
                                             re.DOTALL | re.MULTILINE)
 
         self.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
@@ -68,7 +68,7 @@ class Constraint_Tests:
                                   filename)) as expected_file:
 
                 def chop_trailing_whitespace(lines):
-                    return [re.sub("\s*$", '', l) for l in lines]
+                    return [re.sub(r'\s*$', '', l) for l in lines]
 
                 def remove(pattern, lines):
                     if not pattern:
@@ -84,18 +84,19 @@ class Constraint_Tests:
                                        generated_file.readlines()))
 
                 def normalize_to_positive_results(lines):
-                    negative_result_indices = [n
-                        for n, line in enumerate(lines)
+                    negative_result_indices = [
+                        n for n, line in enumerate(lines)
                         if re.match("^= -", line)]
                     equation_start_indices = [
                         [n for n in reversed(range(0, nri))
-                           if re.match('.*:$', lines[n])][0]+1
+                         if re.match('.*:$', lines[n])][0]+1
                         for nri in negative_result_indices]
                     for (start, end) in zip(
                             equation_start_indices,
                             negative_result_indices):
                         for n in range(start, end):
-                            lines[n] = ('-'
+                            lines[n] = (
+                                '-'
                                 if lines[n] and lines[n][0] == '+'
                                 else '+' if lines[n]
                                          else lines[n]) + lines[n][1:]
@@ -193,7 +194,8 @@ class Constraint_Tests:
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
-            investment=solph.Investment(ep_costs=500, maximum=10e5))})
+            investment=solph.Investment(ep_costs=500, maximum=10e5,
+                                        existing=50))})
 
         self.compare_lp_files('fixed_source_invest_sink.lp')
 
@@ -218,38 +220,111 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
-            label='storage',
-            inputs={bel: solph.Flow(variable_costs=56)},
-            outputs={bel: solph.Flow(variable_costs=24)},
+            label='storage_no_invest',
+            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
+            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
             nominal_capacity=10e4,
             capacity_loss=0.13,
-            nominal_input_capacity_ratio=1/6,
-            nominal_output_capacity_ratio=1/6,
             inflow_conversion_factor=0.97,
-            outflow_conversion_factor=0.86)
+            outflow_conversion_factor=0.86,
+            initial_capacity=0.4)
 
         self.compare_lp_files('storage.lp')
 
-    def test_storage_invest(self):
-        """
+    def test_storage_invest_1(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
         """
         bel = solph.Bus(label='electricityBus')
 
         solph.components.GenericStorage(
-            label='storage',
+            label='storage1',
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
             nominal_capacity=None,
             capacity_loss=0.13,
             capacity_max=0.9,
             capacity_min=0.1,
-            nominal_input_capacity_ratio=1 / 6,
-            nominal_output_capacity_ratio=1 / 6,
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             investment=solph.Investment(ep_costs=145, maximum=234))
 
-        self.compare_lp_files('storage_invest.lp')
+        self.compare_lp_files('storage_invest_1.lp')
+
+    def test_storage_invest_2(self):
+        """All can be free extended to their own cost.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage2',
+            inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
+            outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
+            investment=solph.Investment(ep_costs=145),
+            initial_capacity=0.5)
+        self.compare_lp_files('storage_invest_2.lp')
+
+    def test_storage_invest_3(self):
+        """The storage capacity is fixed, but the Flows can be extended.
+        e.g. PHES with a fixed basin but the pump and the turbine can be
+        adapted
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage3',
+            inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
+            outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
+            nominal_capacity=5000)
+        self.compare_lp_files('storage_invest_3.lp')
+
+    def test_storage_invest_4(self):
+        """Only the storage capacity can be extended.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage4',
+            inputs={bel: solph.Flow(nominal_value=80)},
+            outputs={bel: solph.Flow(nominal_value=100)},
+            investment=solph.Investment(ep_costs=145, maximum=500))
+        self.compare_lp_files('storage_invest_4.lp')
+
+    def test_storage_invest_5(self):
+        """The storage capacity is fixed, but the Flows can be extended.
+        e.g. PHES with a fixed basin but the pump and the turbine can be
+        adapted. The installed capacity of the pump is 10 % bigger than the
+        the capacity of the turbine due to 'invest_relation_input_output=1.1'.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage5',
+            inputs={bel: solph.Flow(investment=solph.Investment(
+                ep_costs=99, existing=110))},
+            outputs={bel: solph.Flow(investment=solph.Investment(
+                existing=100))},
+            invest_relation_input_output=1.1,
+            nominal_capacity=10000)
+        self.compare_lp_files('storage_invest_5.lp')
+
+    def test_storage_invest_6(self):
+        """Like test_storage_invest_5 but there can also be an investment in
+        the basin.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage6',
+            inputs={bel: solph.Flow(investment=solph.Investment(
+                ep_costs=99, existing=110))},
+            outputs={bel: solph.Flow(investment=solph.Investment(
+                existing=100))},
+            invest_relation_input_output=1.1,
+            investment=solph.Investment(ep_costs=145, existing=10000))
+        self.compare_lp_files('storage_invest_6.lp')
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
@@ -290,6 +365,29 @@ class Constraint_Tests:
                                 bel: 0.3, bth: 0.5})
 
         self.compare_lp_files('transformer_invest.lp')
+
+    def test_transformer_invest_with_existing(self):
+        """Constraint test of a LinearN1Transformer with Investment.
+        """
+
+        bgas = solph.Bus(label='gasBus')
+        bcoal = solph.Bus(label='coalBus')
+        bel = solph.Bus(label='electricityBus')
+        bth = solph.Bus(label='thermalBus')
+
+        solph.Transformer(
+            label='powerplant_gas_coal',
+            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+            outputs={bel: solph.Flow(variable_costs=50,
+                                     investment=solph.Investment(
+                                         maximum=1000, ep_costs=20,
+                                         existing=200)),
+                     bth: solph.Flow(variable_costs=20)
+                     },
+            conversion_factors={bgas: 0.58, bcoal: 0.2,
+                                bel: 0.3, bth: 0.5})
+
+        self.compare_lp_files('transformer_invest_with_existing.lp')
 
     def test_linear_transformer_chp(self):
         """Constraint test of a Transformer without Investment (two outputs).
@@ -333,7 +431,14 @@ class Constraint_Tests:
         bgas = solph.Bus(label='commodityBus')
 
         solph.components.ExtractionTurbineCHP(
-            label='variable_chp_gas',
+            label='variable_chp_gas1',
+            inputs={bgas: solph.Flow(nominal_value=100)},
+            outputs={bel: solph.Flow(), bth: solph.Flow()},
+            conversion_factors={bel: 0.3, bth: 0.5},
+            conversion_factor_full_condensation={bel: 0.5})
+
+        solph.components.ExtractionTurbineCHP(
+            label='variable_chp_gas2',
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
@@ -389,9 +494,9 @@ class Constraint_Tests:
         """Testing the equate_variables function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         storage = solph.components.GenericStorage(
-            label='storage',
-            nominal_input_capacity_ratio=0.2,
-            nominal_output_capacity_ratio=0.2,
+            label='storage_constraint',
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))
@@ -424,9 +529,9 @@ class Constraint_Tests:
         """Testing the investment_limit function in the constraint module."""
         bus1 = solph.Bus(label='Bus1')
         solph.components.GenericStorage(
-            label='storage',
-            nominal_input_capacity_ratio=0.2,
-            nominal_output_capacity_ratio=0.2,
+            label='storage_invest_limit',
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
             inputs={bus1: solph.Flow()},
             outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145))

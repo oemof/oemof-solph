@@ -131,7 +131,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
             grph.remove_nodes_from(remove_nodes)
 
     if filename is not None:
-        if filename[:-8] != '.graphml':
+        if filename[-8:] != '.graphml':
             filename = filename + '.graphml'
         nx.write_graphml(grph, filename)
 

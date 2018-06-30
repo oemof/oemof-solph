@@ -91,14 +91,15 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
         capacity_loss=0.00, initial_capacity=0,
-        nominal_input_capacity_ratio=1/6,
-        nominal_output_capacity_ratio=1/6,
+        invest_relation_input_capacity=1/6,
+        invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc),
+        investment=solph.Investment(ep_costs=epc, existing=6851),
     )
 
     # Solve model
     om = solph.Model(energysystem)
+    om.receive_duals()
     om.solve(solver=solver)
     energysystem.results['main'] = processing.results(om)
     energysystem.results['meta'] = processing.meta_results(om)
@@ -115,10 +116,12 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
     storage = energysystem.groups['storage']
-    my_results['storage_invest'] = results[(storage, None)]['scalars']['invest']
+    my_results['storage_invest'] = results[(storage, None)]['scalars'][
+        'invest']
 
     stor_invest_dict = {
-        'storage_invest': 2046851,
+        'storage_invest': 2040000,
+        (('electricity', 'None'), 'duals'): 10800000000321,
         (('electricity', 'demand'), 'flow'): 105867395,
         (('electricity', 'excess_bel'), 'flow'): 211771291,
         (('electricity', 'storage'), 'flow'): 2350931,
@@ -145,4 +148,32 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     eq_(str(meta['problem']['Sense']), 'minimize')
 
     # Objective function
-    eq_(round(meta['objective']), 423167578261665280)
+    eq_(round(meta['objective']), 423167578261115584)
+
+    # **************************************************
+    # Test again with a stored dump created with v0.2.1dev (896a6d50)
+
+    energysystem = solph.EnergySystem()
+    energysystem.restore(dpath=os.path.dirname(os.path.realpath(__file__)),
+                         filename='es_dump_test.oemof')
+
+    results = energysystem.results['main']
+
+    electricity_bus = views.node(results, 'electricity')
+    my_results = electricity_bus['sequences'].sum(axis=0).to_dict()
+    storage = energysystem.groups['storage']
+    my_results['storage_invest'] = results[(storage, None)]['scalars'][
+        'invest']
+
+    stor_invest_dict = {
+        'storage_invest': 2040000,
+        (('electricity', 'demand'), 'flow'): 105867395,
+        (('electricity', 'excess_bel'), 'flow'): 211771291,
+        (('electricity', 'storage'), 'flow'): 2350931,
+        (('pp_gas', 'electricity'), 'flow'): 5148414,
+        (('pv', 'electricity'), 'flow'): 7488607,
+        (('storage', 'electricity'), 'flow'): 1880745,
+        (('wind', 'electricity'), 'flow'): 305471851}
+
+    for key in stor_invest_dict.keys():
+        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))

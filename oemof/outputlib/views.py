@@ -86,33 +86,36 @@ class NodeOption(str, Enum):
 
 
 def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
-    """
-    Get set of nodes from results-dict for given node option
+    """ Get set of nodes from results-dict for given node option.
 
     This function filters nodes from results for special needs. At the moment,
-    following options are available:
-        * NodeOption.All/'all':
+    the following options are available:
+
+        * :attr:`NodeOption.All`/:py:`'all'`:
             Returns all nodes
-        * NodeOption.HasOutputs/'has_outputs':
+        * :attr:`NodeOption.HasOutputs`/:py:`'has_outputs'`:
             Returns nodes with an output flow (eg. Transformer, Source)
-        * NodeOption.HasInputs/'has_inputs':
+        * :attr:`NodeOption.HasInputs`/:py:`'has_inputs'`:
             Returns nodes with an input flow (eg. Transformer, Sink)
-        * NodeOption.HasOnlyOutputs/'has_only_outputs':
+        * :attr:`NodeOption.HasOnlyOutputs`/:py:`'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
-        * NodeOption.HasOnlyInputs/'has_only_inputs':
+        * :attr:`NodeOption.HasOnlyInputs`/:py:`'has_only_inputs'`:
             Returns nodes having only input flows (eg. Sink)
-    Additionally, busses can be excluded setting 'exclude_busses' to True.
+
+    Additionally, busses can be excluded by setting `exclude_busses` to
+    :const:`True`.
 
     Parameters
     ----------
     results: dict
     option: NodeOption
     exclude_busses: bool
-        If set all bus nodes are excluded from resulting node set
+        If set, all bus nodes are excluded from the resulting node set.
 
     Returns
     -------
-    :obj:'set' of Node
+    :obj:`set`
+        A set of Nodes.
     """
     node_from, node_to = map(lambda x: set(x) - {None}, zip(*results))
     if option == NodeOption.All:
@@ -148,3 +151,24 @@ def get_node_by_name(results, *names):
     else:
         node_names = {str(n): n for n in nodes}
         return [node_names.get(n, None) for n in names]
+
+
+def node_weight_by_type(results, node_type=None):
+    """
+    """
+
+    group = {k: v['sequences'] for k,v in results.items()
+             if isinstance(k[0], node_type) and k[1] is None}
+    df = pd.concat(group.values(), axis=1)
+    cols = {k: [c for c in v.columns]
+            for k, v in group.items()}
+    cols = [tuple((k, m) for m in v) for k, v in cols.items()]
+    cols = [c for sublist in cols for c in sublist]
+    idx = pd.MultiIndex.from_tuples(
+                        [tuple([col[0][0], col[0][1], col[1]])
+                         for col in cols])
+    idx.set_names(['node_type', 'to', 'weight_type'], inplace=True)
+    df.columns = idx
+    df.columns = df.columns.droplevel([1])
+
+    return df

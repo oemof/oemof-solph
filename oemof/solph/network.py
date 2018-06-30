@@ -17,6 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
+from oemof.solph import blocks
 
 
 class EnergySystem(es.EnergySystem):
@@ -39,11 +40,9 @@ class EnergySystem(es.EnergySystem):
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from oemof.solph.groupings import GROUPINGS
-        from oemof.solph.components import component_grouping
-        from oemof.solph.custom import custom_component_grouping
-        kwargs['groupings'] = (
-            GROUPINGS + [component_grouping] + [custom_component_grouping] +
-            kwargs.get('groupings', []))
+
+        kwargs['groupings'] = (GROUPINGS + kwargs.get('groupings', []))
+
         super().__init__(**kwargs)
 
 
@@ -66,24 +65,31 @@ class Flow:
         Normed minimum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`min`
     max : numeric (sequence or scalar)
-        Nominal maximum value of the flow. (see. :attr:`min`)
-    actual_value: numeric (sequence or scalar)
+        Nominal maximum value of the flow (see :attr:`min`).
+    actual_value : numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
-        nominal\_value to get the absolute value. If fixed attr is set to True
-        the flow variable will be fixed to actual_value * :attr:`nominal_value`
-        , I.e. this value is set exogenous.
-    positive_gradient : dictionary
-        Two obligate keys:
-        'ub': numeric (sequence, scalar or None), the normed maximal positive
-         difference (flow[t-1] < flow[t]) of two consecutive flow values
-         (ub = upper bound).
-        'costs': numeric (scalar or None), the gradient cost per unit.
-    negative_gradient : dictionary
-        Two obligate keys:
-        'ub': numeric (sequence, scalar or None), the normed maximal negative
-         difference (flow[t-1] > flow[t]) of two consecutive flow values
-         (ub = upper bound).
-        'costs': numeric (scalar or None), the gradient cost per unit.
+        :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
+        set to :obj:`True` the flow variable will be fixed to :py:`actual_value
+        * nominal_value`, i.e. this value is set exogenous.
+    positive_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+         * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
+           bound* on the positive difference (:py:`flow[t-1] < flow[t]`) of
+           two consecutive flow values.
+         * :py:`'costs``: numeric (scalar or None), the gradient cost per
+           unit.
+
+    negative_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+
+        A dictionary containing the following two keys:
+
+          * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
+            bound* on the negative difference (:py:`flow[t-1] > flow[t]`) of
+            two consecutive flow values.
+          * :py:`'costs``: numeric (scalar or None), the gradient cost per
+            unit.
+
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
@@ -97,18 +103,20 @@ class Flow:
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
         :attr:`actual_value`.
-    investment : :class:`oemof.solph.options.Investment` object
+    investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
-    nonconvex :  :class:`oemof.solph.options.NonConvex` object
+    nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
         will be different, i.e. constraint etc. from
-        :class:`oemof.solph.blocks.NonConvexFlow` will be used instead of
-        :class:`oemof.solph.blocks.Flow`. Note: this does not work in
-        combination with the investment attribute set at the moment.
+        :class:`NonConvexFlow <oemof.solph.blocks.NonConvexFlow>`
+        will be used instead of
+        :class:`Flow <oemof.solph.blocks.Flow>`.
+        Note: at the moment this does not work if the investment attribute is
+        set .
 
     Notes
     -----
@@ -188,22 +196,28 @@ class Bus(on.Bus):
      * :py:class:`~oemof.solph.blocks.Bus`
 
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
 
 
+    def constraint_group(self):
+        if self.balanced:
+            return blocks.Bus
+        else:
+            return None
+
 class Sink(on.Sink):
     """An object with one input flow.
     """
-    pass
-
+    def constraint_group(self):
+        pass
 
 class Source(on.Source):
     """An object with one output flow.
     """
-    pass
+    def constraint_group(self):
+        pass
 
 
 class Transformer(on.Transformer):
@@ -268,3 +282,7 @@ class Transformer(on.Transformer):
 
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
+
+
+    def constraint_group(self):
+        return blocks.Transformer

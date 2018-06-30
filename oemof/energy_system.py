@@ -10,12 +10,16 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from functools import partial
+import collections.abc as cabc
 import logging
 import os
+import re
+
 import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
+from oemof.network import Bus, Component
 
 
 class EnergySystem:
@@ -117,15 +121,28 @@ class EnergySystem:
             for g in self._groupings:
                 g(e, self.groups)
         self.results = kwargs.get('results')
+
         self.timeindex = kwargs.get('timeindex',
                                     pd.date_range(start=pd.to_datetime('today'),
                                                   periods=1, freq='H'))
+
+        self.temporal = kwargs.get('temporal')
 
     @staticmethod
     def _regroup(entity, groups, groupings):
         for g in groupings:
             g(entity, groups)
         return groups
+
+
+    try:
+        from .tools.datapackage import deserialize_energy_system
+        from_datapackage = classmethod(deserialize_energy_system)
+    except ImportError as e:
+        @classmethod
+        def from_datapackage(cls, *args, **kwargs):
+            raise e
+
 
     def _add(self, entity):
         self.entities.append(entity)
