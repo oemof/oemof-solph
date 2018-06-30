@@ -99,6 +99,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Solve model
     om = solph.Model(energysystem)
+    om.receive_duals()
     om.solve(solver=solver)
     energysystem.results['main'] = processing.results(om)
     energysystem.results['meta'] = processing.meta_results(om)
@@ -120,6 +121,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     stor_invest_dict = {
         'storage_invest': 2040000,
+        (('electricity', 'None'), 'duals'): 10800000000321,
         (('electricity', 'demand'), 'flow'): 105867395,
         (('electricity', 'excess_bel'), 'flow'): 211771291,
         (('electricity', 'storage'), 'flow'): 2350931,
