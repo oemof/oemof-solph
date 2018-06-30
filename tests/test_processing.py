@@ -78,6 +78,7 @@ class Parameter_Result_Tests:
         )
         cls.es.add(dg, batt, demand)
         cls.om = Model(cls.es)
+        cls.om.receive_duals()
         cls.om.solve()
 
     def test_flows_with_none_exclusion(self):
@@ -229,3 +230,8 @@ class Parameter_Result_Tests:
         results = processing.results(self.om)
         bel1 = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel1['sequences'][('diesel', 'b_el1', 'flow')].sum()), 2875)
+
+    def test_duals(self):
+        results = processing.results(self.om)
+        bel = views.node(results, 'b_el1', multiindex=True)
+        eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)
