@@ -9,7 +9,7 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -80,6 +80,8 @@ class Parameter_Result_Tests:
         cls.om = Model(cls.es)
         cls.om.receive_duals()
         cls.om.solve()
+        cls.mod = Model(cls.es)
+        cls.mod.solve()
 
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
@@ -230,6 +232,13 @@ class Parameter_Result_Tests:
         results = processing.results(self.om)
         bel1 = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel1['sequences'][('diesel', 'b_el1', 'flow')].sum()), 2875)
+
+    def test_error_from_nan_values(self):
+        trsf = self.es.groups['diesel']
+        bus = self.es.groups['b_el1']
+        self.mod.flow[trsf, bus, 5] = float('nan')
+        with assert_raises(ValueError):
+            processing.results(self.mod)
 
     def test_duals(self):
         results = processing.results(self.om)
