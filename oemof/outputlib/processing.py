@@ -32,8 +32,6 @@ def get_tuple(x):
             return i
         elif issubclass(type(i), Node):
             return i,
-        else:
-            pass
 
 
 def get_timestep(x):
