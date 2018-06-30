@@ -58,9 +58,7 @@ Known issues
 ############
 
 * It is not possible to model one time step with oemof.solph. You have to
-    model at least two timesteps
-    (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a
-    comment if this bug affects you.
+  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a comment if this bug affects you.
 
 Bug fixes
 #########
