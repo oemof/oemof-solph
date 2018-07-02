@@ -81,7 +81,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 Citing oemof
 ============
 
-We use the zenodo project to get a DOI for each version. `Search zenodo for the right citation of your oemof version <https://zenodo.org/search?page=1&size=20&q=oemof>`_.
+We use the zenodo project to get a DOI for each version.  `Select the version you want to cite <h10.5281/zenodo.596235>`_.
 
 
 License
