@@ -104,7 +104,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
 
     # add nodes
     for n in energy_system.nodes:
-        grph.add_node(n.label, label=n.label)
+        grph.add_node(str(n.label), label=str(n.label))
 
     # add labeled flows on directed edge if an optimization_model has been
     # passed or undirected edge otherwise
@@ -113,9 +113,10 @@ def create_nx_graph(energy_system=None, optimization_model=None,
             weight = getattr(energy_system.flows()[(i, n)],
                              'nominal_value', None)
             if weight is None:
-                grph.add_edge(i.label, n.label)
+                grph.add_edge(str(i.label), str(n.label))
             else:
-                grph.add_edge(i.label, n.label, weigth=format(weight, '.2f'))
+                grph.add_edge(str(i.label), str(n.label),
+                              weigth=format(weight, '.2f'))
 
     # remove nodes and edges based on precise labels
     if remove_nodes is not None:
@@ -126,8 +127,8 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     # remove nodes based on substrings
     if remove_nodes_with_substrings is not None:
         for i in remove_nodes_with_substrings:
-            remove_nodes = [v.label for v in energy_system.nodes
-                            if i in v.label]
+            remove_nodes = [str(v.label) for v in energy_system.nodes
+                            if i in str(v.label)]
             grph.remove_nodes_from(remove_nodes)
 
     if filename is not None:
