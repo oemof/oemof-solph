@@ -17,6 +17,14 @@ from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
+# TODO:
+#
+#   * Update input/output in_edges and out_edges if an edge gets constructed
+#     directly.
+#   * Make inputs and outputs updatetable again to fix tests.
+#   * Document `in_edges` and `out_edges` attributes.
+#
+
 
 class Inputs(MM):
     """ A special helper to map `n1.inputs[n2]` to `n2.outputs[n1]`.
