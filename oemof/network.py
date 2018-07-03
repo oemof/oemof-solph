@@ -222,6 +222,23 @@ class Node:
             self.out_edges.add(
                     globals()['Edge'](input=self, output=o, flow=flow))
 
+        """
+        This could be slightly more efficient than the loops above, but doesn't
+        play well with the assertions:
+
+        inputs = kwargs.get('inputs', {})
+        self.in_edges = {
+                Edge(input=i, output=self,
+                    flow=None if not isinstance(inputs, MM) else inputs[i])
+                for i in inputs}
+
+        outputs = kwargs.get('outputs', {})
+        self.out_edges = {
+                Edge(input=self, output=o,
+                    flow=None if not isinstance(outputs, MM) else outputs[o])
+                for o in outputs}
+        self.edges = self.in_edges.union(self.out_edges)
+        """
 
     def __eq__(self, other):
         return id(self) == id(other)
