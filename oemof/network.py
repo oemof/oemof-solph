@@ -162,10 +162,6 @@ class Node:
     outputs: list or dict, optional
         Either a list of this nodes' output nodes or a dictionary mapping
         output nodes to corresponding outflows (i.e. output values).
-    flow: function, optional
-        A function taking this node and a target node as a parameter (i.e.
-        something of the form :python:`def f(self, target)`), returning the
-        flow originating from this node into :python:`target`.
 
     Attributes
     ----------
