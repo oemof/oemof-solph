@@ -75,11 +75,11 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     ['bel1', 'bel2', 'line_from2', 'line_to2']
     >>> new_graph = grph.create_nx_graph(energy_system=es,
     ...                                  remove_nodes_with_substrings=['b_'],
-    ...                                  remove_nodes=['pp_gas'],
+    ...                                  remove_nodes=["('pp', 'gas')"],
     ...                                  remove_edges=[('bel2', 'line_from2')],
     ...                                  filename='test_graph')
     >>> [new_graph.has_node(n)
-    ...  for n in ['b_gas', 'bel1', '(pp, gas)', 'demand_el', 'tester']]
+    ...  for n in ['b_gas', 'bel1', "('pp', 'gas')", 'demand_el', 'tester']]
     [False, True, False, True, False]
     >>> my_graph.has_edge("('pp', 'gas')", 'bel1')
     True
