@@ -141,7 +141,8 @@ class Node:
     Abstract superclass of the two general types of nodes of an energy system
     graph, collecting attributes and operations common to all types of nodes.
     Users should neither instantiate nor subclass this, but use
-    :class:`Component`, :class:`Bus` or one of their subclasses instead.
+    :class:`Component`, :class:`Bus`, :class:`Edge` or one of their subclasses
+    instead.
 
     .. role:: python(code)
       :language: python
@@ -182,7 +183,7 @@ class Node:
     #       needed to confirm that.
 
     registry = None
-    __slots__ = ["__weakref__", "_label", "_inputs", "_state"]
+    __slots__ = ["__weakref__", "_label", "_state", "in_edges", "out_edges"]
 
     def __init__(self, *args, **kwargs):
         self.__setstate__((args, kwargs))
@@ -198,22 +199,29 @@ class Node:
         for optional in ['label']:
             if optional in kwargs:
                 setattr(self, '_' + optional, kwargs[optional])
+        self.in_edges = set()
         for i in kwargs.get('inputs', {}):
             assert isinstance(i, Node), \
                    "Input {} of {} not a Node, but a {}."\
                    .format(i, self, type(i))
             try:
-                flow[i, self] = kwargs['inputs'].get(i)
+                flow = kwargs['inputs'].get(i)
             except AttributeError:
-                flow[i, self] = None
+                flow = None
+            self.in_edges.add(
+                    globals()['Edge'](input=i, output=self, flow=flow))
+        self.out_edges = set()
         for o in kwargs.get('outputs', {}):
             assert isinstance(o, Node), \
                    "Output {} of {} not a Node, but a {}."\
                    .format(o, self, type(o))
             try:
-                flow[self, o] = kwargs['outputs'].get(o)
+                flow = kwargs['outputs'].get(o)
             except AttributeError:
-                flow[self, o] = None
+                flow = None
+            self.out_edges.add(
+                    globals()['Edge'](input=self, output=o, flow=flow))
+
 
     def __eq__(self, other):
         return id(self) == id(other)
@@ -241,19 +249,28 @@ class Node:
 
     @property
     def inputs(self):
-        """ dict :
-        Dictionary mapping input :class:`Nodes <Node>` :obj:`n` to flows from
-        :obj:`n` into :obj:`self`.
+        """ dict:
+        Dictionary mapping input :class:`Nodes <Node>` :obj:`n` to
+        :class:`Edge`s from :obj:`n` into :obj:`self`.
+        If :obj:`self` is an :class:`Edge`, returns a dict containing the
+        :class:`Edge`'s single input node as the key and the flow as the value.
         """
-        return Inputs(flow, self)
+        return ({edge.input: edge for edge in self.in_edges}
+                if not hasattr(self, "input")
+                else {self.input: self.flow})
+
 
     @property
     def outputs(self):
-        """ dict :
-        Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to flows from
-        :obj:`self` into :obj:`n`.
+        """ dict:
+        Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to
+        :class:`Edges` from :obj:`self` into :obj:`n`.
+        If :obj:`self` is an :class:`Edge`, returns a dict containing the
+        :class:`Edge`'s single output node as the key and the flow as the value.
         """
-        return Outputs(flow, self)
+        return ({edge.output: edge for edge in self.out_edges}
+                if not hasattr(self, "output")
+                else {self.output: self.flow})
 
 
 class Edge(Node):
