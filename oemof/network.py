@@ -12,7 +12,7 @@ available from its original location oemof/oemof/network.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from collections import MutableMapping as MM
+from collections import namedtuple as NT, MutableMapping as MM
 from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
@@ -254,6 +254,31 @@ class Node:
         :obj:`self` into :obj:`n`.
         """
         return Outputs(flow, self)
+
+
+class Edge(Node):
+    """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
+
+    :class:`Edge`s connect a single non-:class:`Edge` Node with another. They
+    are directed and have a (sequence of) value(s) attached to them so they can
+    be used to represent a flow from a source/an input to a target/an output.
+
+    Parameters
+    ----------
+    input, output: :class:`Bus` or :class:`Component`
+    flow: object, optional
+        The (list of) objec(s) representing the flow from this objects input
+        into it's output.
+
+    Note that all of these paramters are also set as attributes with the same
+    name.
+    """
+    Label = NT("Edge", ['input', 'output', 'value'])
+    def __init__(self, input, output, flow=None):
+        super().__init__(label=Edge.Label(input, output, flow))
+        self.flow = flow
+        self.input = input
+        self.output = output
 
 
 class Bus(Node):
