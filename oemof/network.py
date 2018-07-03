@@ -19,8 +19,6 @@ from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 # TODO:
 #
-#   * Update input/output in_edges and out_edges if an edge gets constructed
-#     directly.
 #   * Make inputs and outputs updatetable again to fix tests.
 #   * Document `in_edges` and `out_edges` attributes.
 #   * Remove `_Edges` and `flow`.
@@ -334,6 +332,9 @@ class Edge(Node):
         self.flow = flow
         self.input = input
         self.output = output
+        # TODO: Test this part. Als: add Edge tests in general.
+        input.in_edges.add(self)
+        output.in_edges.add(self)
 
 
 class Bus(Node):
