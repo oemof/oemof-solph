@@ -23,6 +23,8 @@ from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 #     directly.
 #   * Make inputs and outputs updatetable again to fix tests.
 #   * Document `in_edges` and `out_edges` attributes.
+#   * Remove `_Edges` and `flow`.
+#   * Finally get rid of `Entity`.
 #
 
 
