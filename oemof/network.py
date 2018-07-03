@@ -314,7 +314,7 @@ class Edge(Node):
         The (list of) objec(s) representing the flow from this objects input
         into it's output.
 
-    Note that all of these paramters are also set as attributes with the same
+    Note that all of these parameters are also set as attributes with the same
     name.
     """
     Label = NT("Edge", ['input', 'output'])
