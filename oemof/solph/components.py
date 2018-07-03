@@ -1081,28 +1081,21 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
         for n in group:
             n.inflow = list(n.inputs)[0]
-            n.label_main_flow = str(
+            n.main_flow = (
                 [k for k, v in n.conversion_factor_full_condensation.items()]
                 [0])
-            n.main_output = [o for o in n.outputs
-                             if n.label_main_flow == str(o.label)][0]
-            n.tapped_output = [o for o in n.outputs
-                               if n.label_main_flow != str(o.label)][0]
+            n.main_output = [o for o in n.outputs if n.main_flow == o][0]
+            n.tapped_output = [o for o in n.outputs if n.main_flow != o][0]
             n.conversion_factor_full_condensation_sq = (
-                n.conversion_factor_full_condensation[
-                    m.es.groups[str(n.main_output.label)]])
+                n.conversion_factor_full_condensation[n.main_output])
             n.flow_relation_index = [
-                n.conversion_factors[
-                    m.es.groups[str(n.main_output.label)]][t] /
-                n.conversion_factors[
-                    m.es.groups[str(n.tapped_output.label)]][t]
+                n.conversion_factors[n.main_output][t] /
+                n.conversion_factors[n.tapped_output][t]
                 for t in m.TIMESTEPS]
             n.main_flow_loss_index = [
                 (n.conversion_factor_full_condensation_sq[t] -
-                 n.conversion_factors[m.es.groups[
-                     str(n.main_output.label)]][t]) /
-                n.conversion_factors[m.es.groups[
-                    str(n.tapped_output.label)]][t]
+                 n.conversion_factors[n.main_output][t]) /
+                n.conversion_factors[n.tapped_output][t]
                 for t in m.TIMESTEPS]
 
         def _input_output_relation_rule(block):
