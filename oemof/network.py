@@ -317,9 +317,9 @@ class Edge(Node):
     Note that all of these paramters are also set as attributes with the same
     name.
     """
-    Label = NT("Edge", ['input', 'output', 'value'])
+    Label = NT("Edge", ['input', 'output'])
     def __init__(self, input, output, flow=None):
-        super().__init__(label=Edge.Label(input, output, flow))
+        super().__init__(label=Edge.Label(input, output))
         self.flow = flow
         self.input = input
         self.output = output
