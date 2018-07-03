@@ -52,7 +52,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     ...                  inputs = {bel1: Flow(nominal_value=85,
     ...                            actual_value=[0.5, 0.25, 0.75],
     ...                            fixed=True)})
-    >>> pp_gas = Transformer(label='pp_gas',
+    >>> pp_gas = Transformer(label=('pp', 'gas'),
     ...                            inputs={b_gas: Flow()},
     ...                            outputs={bel1: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
@@ -67,7 +67,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # grph.create_nx_graph(es, filename="my_graph.graphml")
     >>> [my_graph.has_node(n)
-    ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
+    ...  for n in ['b_gas', 'bel1', "('pp', 'gas')", 'demand_el', 'tester']]
     [True, True, True, True, False]
     >>> list(nx.attracting_components(my_graph))
     [{'demand_el'}]
@@ -79,9 +79,9 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     ...                                  remove_edges=[('bel2', 'line_from2')],
     ...                                  filename='test_graph')
     >>> [new_graph.has_node(n)
-    ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
+    ...  for n in ['b_gas', 'bel1', '(pp, gas)', 'demand_el', 'tester']]
     [False, True, False, True, False]
-    >>> my_graph.has_edge('pp_gas', 'bel1')
+    >>> my_graph.has_edge("('pp', 'gas')", 'bel1')
     True
     >>> new_graph.has_edge('bel2', 'line_from2')
     False
