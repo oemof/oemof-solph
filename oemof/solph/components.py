@@ -735,7 +735,7 @@ class GenericCHPBlock(SimpleBlock):
 
     .. math::
         &
-        (1)\qquad \dot{H}_F(t) = fuel\ inflow \\
+        (1)\qquad \dot{H}_F(t) = fuel\ input \\
         &
         (2)\qquad \dot{Q}(t) = heat\ output \\
         &
@@ -793,10 +793,10 @@ class GenericCHPBlock(SimpleBlock):
                                     at min heat extraction
     :math:`\dot{H}_{L,FG,max}`      flue gas enthalpy loss   :py:obj:`H_L_FG_max[n, t]`
                                     at max heat extraction
-    :math:`\dot{H}_{L,FG,sharemin}` min. share of flue gas   :py:obj:`H_L_FG_share_min[t]`
-                                    enthalpy loss
-    :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`H_L_FG_share_max[t]`
-                                    enthalpy loss
+    :math:`\dot{H}_{L,FG,sharemin}` share of flue gas loss   :py:obj:`H_L_FG_share_min[t]`
+                                    at min heat extraction
+    :math:`\dot{H}_{L,FG,sharemax}` share of flue gas loss   :py:obj:`H_L_FG_share_max[t]`
+                                    at min heat extraction
     :math:`Y`                       status variable          :py:obj:`Y[n,t]`
                                     on/off
     :math:`\alpha_0`                coefficient              :py:obj:`n.alphas[0][t]`
@@ -808,7 +808,7 @@ class GenericCHPBlock(SimpleBlock):
     :math:`\eta_{el,min,woDH}`      el. eff. at min. fuel    :py:obj:`Eta_el_min_woDH[t]`
                                     flow w/o district heat
     :math:`\eta_{el,max,woDH}`      el. eff. at max. fuel    :py:obj:`Eta_el_max_woDH[t]`
-                                    flow wo district heat
+                                    flow w/o district heat
 
     =============================== ======================== =========
 
