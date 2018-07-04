@@ -743,7 +743,7 @@ class GenericCHPBlock(SimpleBlock):
         &
         (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,woDH}(t)\\
         &
-        (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P(t) + \beta \cdot \dot{Q}(t) )\\
+        (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P_{el}(t) + \beta \cdot \dot{Q}(t) )\\
         &
         (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
         &
@@ -789,11 +789,13 @@ class GenericCHPBlock(SimpleBlock):
 
     :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[t]`
                                     load to cooling water
+    :math:`\dot{H}_{L,FG,min}`      flue gas losses at       :py:obj:`H_L_FG_min[n, t]`
+                                    minimal fuel flow
     :math:`\dot{H}_{L,FG,max}`      flue gas losses at       :py:obj:`H_L_FG_max[n, t]`
                                     maximal fuel flow
-    :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`H_L_FG_share_max[t]`
-                                    enthalpy loss
     :math:`\dot{H}_{L,FG,sharemin}` min. share of flue gas   :py:obj:`H_L_FG_share_min[t]`
+                                    enthalpy loss
+    :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`H_L_FG_share_max[t]`
                                     enthalpy loss
     :math:`Y`                       status variable          :py:obj:`Y[n,t]`
                                     on/off
