@@ -599,10 +599,10 @@ class GenericCHP(network.Transformer):
 
     Notes:
     An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum fuel flow `H_L_FG_max` as share of
+    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
     the fuel flow `H_F` e.g. for combined cycle extraction turbines.
     The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum fuel flow `H_L_FG_min` as share of
+    losses at minimum heat extraction `H_L_FG_min` as share of
     the fuel flow `H_F` e.g. for motoric CHPs.
     The boolean component parameter `back_pressure` can be set to model
     back-pressure characteristics.
@@ -735,11 +735,11 @@ class GenericCHPBlock(SimpleBlock):
 
     .. math::
         &
-        (1)\qquad \dot{H}_F(t) = f(i,n,t) \\
+        (1)\qquad \dot{H}_F(t) = fuel\ inflow \\
         &
-        (2)\qquad \dot{Q}(t) = heat out \\
+        (2)\qquad \dot{Q}(t) = heat\ output \\
         &
-        (3)\qquad P_{el} = power out\\
+        (3)\qquad P_{el} = power\ output\\
         &
         (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,woDH}(t)\\
         &
@@ -775,7 +775,7 @@ class GenericCHPBlock(SimpleBlock):
     =============================== ======================== =========
     math. symbol                    explanation              attribute
     =============================== ======================== =========
-    :math:`\dot{H}_{F}`             inflow of enthalpy       :py:obj:`H_F[n,t]`
+    :math:`\dot{H}_{F}`             input of enthalpy        :py:obj:`H_F[n,t]`
                                     through fuel input
     :math:`P_{el}`                  provided                 :py:obj:`P[n,t]`
                                     electric power
@@ -789,10 +789,10 @@ class GenericCHPBlock(SimpleBlock):
 
     :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[t]`
                                     load to cooling water
-    :math:`\dot{H}_{L,FG,min}`      flue gas losses at       :py:obj:`H_L_FG_min[n, t]`
-                                    minimal fuel flow
-    :math:`\dot{H}_{L,FG,max}`      flue gas losses at       :py:obj:`H_L_FG_max[n, t]`
-                                    maximal fuel flow
+    :math:`\dot{H}_{L,FG,min}`      flue gas enthalpy loss   :py:obj:`H_L_FG_min[n, t]`
+                                    at min heat extraction
+    :math:`\dot{H}_{L,FG,max}`      flue gas enthalpy loss   :py:obj:`H_L_FG_max[n, t]`
+                                    at max heat extraction
     :math:`\dot{H}_{L,FG,sharemin}` min. share of flue gas   :py:obj:`H_L_FG_share_min[t]`
                                     enthalpy loss
     :math:`\dot{H}_{L,FG,sharemax}` max. share of flue gas   :py:obj:`H_L_FG_share_max[t]`
@@ -805,10 +805,10 @@ class GenericCHPBlock(SimpleBlock):
                                     describing efficiency
     :math:`\beta`                   power loss index         :py:obj:`Beta[t]`
 
-    :math:`\eta_{el,min,woDH}`      min. electric efficiency :py:obj:`Eta_el_min_woDH[t]`
-                                    without district heating
-    :math:`\eta_{el,max,woDH}`      max. electric efficiency :py:obj:`Eta_el_max_woDH[t]`
-                                    without district heating
+    :math:`\eta_{el,min,woDH}`      el. eff. at min. fuel    :py:obj:`Eta_el_min_woDH[t]`
+                                    flow w/o district heat
+    :math:`\eta_{el,max,woDH}`      el. eff. at max. fuel    :py:obj:`Eta_el_max_woDH[t]`
+                                    flow wo district heat
 
     =============================== ======================== =========
 
