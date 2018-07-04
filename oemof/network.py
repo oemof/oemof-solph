@@ -332,7 +332,7 @@ class Edge(Node):
         self.flow = flow
         self.input = input
         self.output = output
-        input.in_edges.add(self)
+        input.out_edges.add(self)
         output.in_edges.add(self)
 
 
