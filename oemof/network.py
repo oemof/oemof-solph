@@ -332,7 +332,6 @@ class Edge(Node):
         self.flow = flow
         self.input = input
         self.output = output
-        # TODO: Test this part. Als: add Edge tests in general.
         input.in_edges.add(self)
         output.in_edges.add(self)
 

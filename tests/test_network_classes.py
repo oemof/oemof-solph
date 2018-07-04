@@ -14,7 +14,7 @@ from nose.tools import assert_raises, eq_, ok_
 import warnings
 
 from oemof.energy_system import EnergySystem as ES
-from oemof.network import Bus, Node, Transformer
+from oemof.network import Bus, Edge, Node, Transformer
 from oemof import graph
 from oemof.solph import Model
 
@@ -212,6 +212,24 @@ class Node_Tests:
         eq_(n2.inputs, {n1: n1n2})
         eq_(n1.outputs[n2], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+
+
+class Edge_Tests:
+    def test_edge_construction_side_effects(self):
+        """ Constructing an `Edge` should affect it's input/output `Node`s.
+
+        When constructing an `Edge`, the `inputs` and `outputs` of its output
+        and input `Node`s should be set appropriately.
+        """
+        source = Node(label='source')
+        target = Node(label='target')
+        edge = Edge(input=source, output=target)
+        ok_(target in source.outputs,
+            "{} not in {} after constructing {}."
+            .format(target, source.outputs, edge))
+        ok_(source in target.inputs,
+            "{} not in {} after constructing {}."
+            .format(source, target.outputs, edge))
 
 
 class EnergySystem_Nodes_Integration_Tests:
