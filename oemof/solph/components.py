@@ -739,23 +739,23 @@ class GenericCHPBlock(SimpleBlock):
         &
         (2)\qquad \dot{Q}(t) = heat\ output \\
         &
-        (3)\qquad P_{el} = power\ output\\
+        (3)\qquad P_{el}(t) = power\ output\\
         &
         (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,woDH}(t)\\
         &
         (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P_{el}(t) + \beta \cdot \dot{Q}(t) )\\
         &
-        (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}}{\eta_{el,max,woDH}}\\
+        (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}(t)}{\eta_{el,max,woDH}(t)}\\
         &
-        (7)\qquad \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}}{\eta_{el,min,woDH}}\\
+        (7)\qquad \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}(t)}{\eta_{el,min,woDH}(t)}\\
         &
         (8)\qquad \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemax}(t)\\
         &
         (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
         &
-        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max} + \dot{Q}_{CW, min} \cdot Y(t) = / \leq \dot{H}_F(t)\\
+        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) = / \leq \dot{H}_F(t)\\
         &
-        (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min} + \dot{Q}_{CW, min} \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
+        (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
         &
         \forall t \in \textrm{TIMESTEPS}, \\
         &
