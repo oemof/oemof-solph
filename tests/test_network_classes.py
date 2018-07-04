@@ -111,12 +111,12 @@ class Node_Tests:
         flow = object()
         old = Node(label="A reused label")
         bus = Bus(label="bus", inputs={old: flow})
-        eq_(bus.inputs[old], flow,
+        eq_(bus.inputs[old].flow, flow,
             ("\n  Expected: {}" +
-             "\n  Got     : {} instead").format(flow, bus.inputs[old]))
-        eq_(old.outputs[bus], flow,
+             "\n  Got     : {} instead").format(flow, bus.inputs[old].flow))
+        eq_(old.outputs[bus].flow, flow,
             ("\n  Expected: {}" +
-             "\n  Got     : {} instead").format(flow, old.outputs[bus]))
+             "\n  Got     : {} instead").format(flow, old.outputs[bus].flow))
         new = Node(label="A reused label")
         eq_(new.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
