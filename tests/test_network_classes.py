@@ -134,13 +134,13 @@ class Node_Tests:
                 node.outputs,
                 dict(node.outputs)))
         node.outputs[bus] = flow
-        eq_(node.outputs[bus], flow,
-            ("\n  Expected {} as `node.outputs[bus]`." +
-             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
         eq_(node.outputs, {bus: flow},
             ("\n  Expected {} as `node.outputs`." +
              "\n  Got    : {} (== {}) instead").format(
                 {bus: flow}, node.outputs,dict(node.outputs)))
+        eq_(node.outputs[bus], flow,
+            ("\n  Expected {} as `node.outputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
         del node.outputs[bus]
         eq_(node.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
@@ -161,13 +161,13 @@ class Node_Tests:
                 node.inputs,
                 dict(node.inputs)))
         node.inputs[bus] = flow
-        eq_(node.inputs[bus], flow,
-            ("\n  Expected {} as `node.inputs[bus]`." +
-             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
         eq_(node.inputs, {bus: flow},
             ("\n  Expected {} as `node.inputs`." +
              "\n  Got    : {} (== {}) instead").format(
                 {bus: flow}, node.inputs,dict(node.inputs)))
+        eq_(node.inputs[bus], flow,
+            ("\n  Expected {} as `node.inputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
         del node.inputs[bus]
         eq_(node.inputs, {},
             ("\n  Expected an empty dictionary of inputs." +
@@ -197,10 +197,10 @@ class Node_Tests:
         n1n2 = "n1n2"
 
         n2.inputs.update({n1: n1n2})
-        eq_(n2.inputs[n1], n1n2)
         eq_(n2.inputs, {n1: n1n2})
-        eq_(n1.outputs[n2], n1n2)
+        eq_(n2.inputs[n1], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+        eq_(n1.outputs[n2], n1n2)
 
     def test_updating_outputs(self):
         n1 = Node("N1")
@@ -208,10 +208,10 @@ class Node_Tests:
         n1n2 = "n1n2"
 
         n1.outputs.update({n2: n1n2})
-        eq_(n2.inputs[n1], n1n2)
         eq_(n2.inputs, {n1: n1n2})
-        eq_(n1.outputs[n2], n1n2)
+        eq_(n2.inputs[n1], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+        eq_(n1.outputs[n2], n1n2)
 
 
 class Edge_Tests:
