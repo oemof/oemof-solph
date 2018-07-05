@@ -213,7 +213,6 @@ class Node:
         """
         return self._inputs
 
-
     @property
     def outputs(self):
         """ dict:
