@@ -20,6 +20,13 @@ from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 # TODO:
 #
+#   * Document the `register` method. Maybe also document the
+#     `_delay_registration_` attribute and make it official. This could also be
+#     a good chance to finally use `blinker` to put an event on
+#     `_delay_registration_` for deletion/assignment to trigger registration.
+#     I always had the hunch that using blinker could help to straighten out
+#     that delayed auto registration hack via partial functions. Maybe this
+#     could be a good starting point for this.
 #   * Finally get rid of `Entity`.
 #
 
@@ -121,7 +128,11 @@ class Node:
 
     def __init__(self, *args, **kwargs):
         self.__setstate__((args, kwargs))
-        if __class__.registry is not None:
+        self.register()
+
+    def register(self):
+        if (    __class__.registry is not None and
+                not getattr(self, "_delay_registration_", False)):
             __class__.registry.add(self)
 
     def __getstate__(self):
