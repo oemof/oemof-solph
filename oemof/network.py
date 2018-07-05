@@ -233,10 +233,11 @@ class Edge(Node):
 
     Parameters
     ----------
-    input, output: :class:`Bus` or :class:`Component`
-    flow: object, optional
-        The (list of) objec(s) representing the flow from this objects input
-        into it's output.
+    input, output: :class:`Bus` or :class:`Component`, optional
+    flow, values: object, optional
+        The (list of) object(s) representing the values flowing from this
+        edge's input into its output. Note that these two names are aliases of
+        each other, so `flow` and `values` are mutually exclusive.
 
     Note that all of these parameters are also set as attributes with the same
     name.
@@ -253,12 +254,21 @@ class Edge(Node):
     #           more `Bus`es/`Component`s.
     #
     Label = NT("Edge", ['input', 'output'])
-    def __init__(self, input, output, flow=None):
+    def __init__(self, input, output, flow=None, values=None):
+        if flow is not None and values is not None:
+            raise ValueError(
+                    "`Edge`'s `flow` and `values` keyword arguments are " +
+                    "aliases of each other, so they're mutually exclusive.\n" +
+                    "You supplied:\n"+
+                    "    `flow`  : {}".format(flow) +
+                    "    `values`: {}".format(values) +
+                    "\nChoose one.")
         super().__init__(label=Edge.Label(input, output))
         self.flow = flow
         self.input = input
         self.output = output
         input.outputs[output] = self
+        self.values = values
 
     @classmethod
     def from_object(klass, o):
@@ -279,6 +289,14 @@ class Edge(Node):
             return klass(**o)
         else:
             return Edge(values=o)
+
+    @property
+    def flow(self):
+        return self.values
+
+    @flow.setter
+    def flow(self, values):
+        self.values = values
 
 
 class Bus(Node):
