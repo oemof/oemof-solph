@@ -42,8 +42,7 @@ class Inputs(MM):
         return key.outputs.__setitem__(self.target, value)
 
     def __iter__(self):
-        return ({i: i.outputs[self.target] for i in self.target._in_edges}
-                .__iter__())
+        return iter(self.target._in_edges)
 
     def __len__(self):
         return self.target._in_edges.__len__()
