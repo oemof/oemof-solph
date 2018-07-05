@@ -187,7 +187,9 @@ class Node:
     #       needed to confirm that.
 
     registry = None
-    __slots__ = ["__weakref__", "_label", "_state", "in_edges", "out_edges"]
+    __slots__ = [
+            "__weakref__", "_label", "_state", "_in_edges", "_inputs",
+            "_outputs"]
 
     def __init__(self, *args, **kwargs):
         self.__setstate__((args, kwargs))
@@ -200,21 +202,22 @@ class Node:
     def __setstate__(self, state):
         self._state = state
         args, kwargs = state
+        self._inputs = Inputs(self)
+        self._outputs = Outputs(self)
         for optional in ['label']:
             if optional in kwargs:
                 setattr(self, '_' + optional, kwargs[optional])
-        self.in_edges = set()
+        self._in_edges = set()
         for i in kwargs.get('inputs', {}):
             assert isinstance(i, Node), \
                    "Input {} of {} not a Node, but a {}."\
                    .format(i, self, type(i))
+            self._in_edges.add(i)
             try:
                 flow = kwargs['inputs'].get(i)
             except AttributeError:
                 flow = None
-            self.in_edges.add(
-                    globals()['Edge'](input=i, output=self, flow=flow))
-        self.out_edges = set()
+            self.inputs[i] = globals()['Edge'](input=i, output=self, flow=flow)
         for o in kwargs.get('outputs', {}):
             assert isinstance(o, Node), \
                    "Output {} of {} not a Node, but a {}."\
@@ -223,7 +226,7 @@ class Node:
                 flow = kwargs['outputs'].get(o)
             except AttributeError:
                 flow = None
-            self.out_edges.add(
+            self.outputs[o] = (
                     globals()['Edge'](input=self, output=o, flow=flow))
 
         """
@@ -280,9 +283,7 @@ class Node:
         If :obj:`self` is an :class:`Edge`, returns a dict containing the
         :class:`Edge`'s single input node as the key and the flow as the value.
         """
-        return ({edge.input: edge for edge in self.in_edges}
-                if not hasattr(self, "input")
-                else {self.input: self.flow})
+        return self._inputs
 
 
     @property
@@ -293,9 +294,7 @@ class Node:
         If :obj:`self` is an :class:`Edge`, returns a dict containing the
         :class:`Edge`'s single output node as the key and the flow as the value.
         """
-        return ({edge.output: edge for edge in self.out_edges}
-                if not hasattr(self, "output")
-                else {self.output: self.flow})
+        return self._outputs
 
 
 class Edge(Node):
@@ -332,8 +331,7 @@ class Edge(Node):
         self.flow = flow
         self.input = input
         self.output = output
-        input.out_edges.add(self)
-        output.in_edges.add(self)
+        input.outputs[output] = self
 
 
 class Bus(Node):
