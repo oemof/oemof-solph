@@ -10,18 +10,30 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="148mm"
+   width="430mm"
    height="105mm"
-   viewBox="0 0 148 105"
+   viewBox="0 0 430 105"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.1 r15371"
-   sodipodi:docname="GenericCHP.svg"
+   sodipodi:docname="GenericCHP_ccet.svg"
    inkscape:export-filename="/home/local/RL-INSTITUT/jann.launer/Schreibtisch/Janns_Ordner/GenericCHP_Doku/GenericCHP.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
-     id="defs2" />
+     id="defs2">
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 83.906552,254.52025 C 116.24625,218.43886 116.24625,218.43886 116.24625,218.43886"
+       id="path4523-6"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.41;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 69.21079,254.52025 89.782429,218.43886"
+       id="path4668-0"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -29,9 +41,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994948"
-     inkscape:cx="540.18744"
-     inkscape:cy="167.69002"
+     inkscape:zoom="0.49497474"
+     inkscape:cx="938.60799"
+     inkscape:cy="13.138765"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -48,7 +60,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -63,60 +75,60 @@
        width="112.2532"
        height="71.360962"
        x="22.701813"
-       y="202.67" />
+       y="209.01991" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="48.89423"
-       y="284.45444"
+       y="290.80453"
        id="text4504"><tspan
          sodipodi:role="line"
          id="tspan4502"
          x="48.89423"
-         y="284.45444"
+         y="290.80453"
          style="font-size:7.76111126px;stroke-width:0.26458332">Heat extraction</tspan></text>
     <path
        style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 22.701805,246.2349 61.204747,8.28535"
+       d="m 22.701805,252.58494 61.204747,8.28535"
        id="path4506"
        inkscape:connector-curvature="0" />
     <path
        style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 22.701805,205.8772 93.544445,12.56166"
+       d="M 22.701805,212.22724 116.24625,224.7889"
        id="path4506-5"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 83.906552,254.52025 C 116.24625,218.43886 116.24625,218.43886 116.24625,218.43886"
+       d="M 83.906552,260.87029 C 116.24625,224.7889 116.24625,224.7889 116.24625,224.7889"
        id="path4523"
        inkscape:connector-curvature="0" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.27537841px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 91.125379,202.94171 c 43.837821,26.71048 43.556811,26.98585 43.556811,26.98585"
+       d="M 91.125379,209.29175 C 134.9632,236.00223 134.68219,236.2776 134.68219,236.2776"
        id="path4548"
        inkscape:connector-curvature="0" />
     <path
        inkscape:connector-curvature="0"
        id="path4571"
-       d="m 80.559485,202.97043 c 54.546405,33.23527 54.196755,33.57791 54.196755,33.57791"
+       d="m 80.559485,209.32047 c 54.546405,33.23527 54.196755,33.57791 54.196755,33.57791"
        style="fill:none;stroke:#000000;stroke-width:0.34264734px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.41;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 69.993639,202.99915 c 65.254951,39.76008 64.836651,40.16998 64.836651,40.16998"
+       d="m 69.993639,209.34919 c 65.254951,39.76008 64.836651,40.16998 64.836651,40.16998"
        id="path4573"
        inkscape:connector-curvature="0" />
     <circle
        id="path4579"
        style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.13333334;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        cx="22.934536"
-       cy="246.26944"
+       cy="252.61935"
        r="2" />
     <circle
        id="path4581"
        style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1.33333325;stroke-opacity:1"
        cx="23.201813"
-       cy="205.37724"
+       cy="211.72716"
        r="2" />
     <text
        xml:space="preserve"
@@ -163,30 +175,30 @@
    id="tspan4681">L,FG</tspan>=20%</tspan></textPath></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.41;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 68.408981,252.64709 89.515159,214.69937"
+       d="M 68.408981,258.99713 89.515159,221.04941"
        id="path4668"
        inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="25.641777"
-       y="214.96269"
+       y="221.31261"
        id="text4693"><tspan
          sodipodi:role="line"
          id="tspan4691"
          x="25.641777"
-         y="214.96269"
+         y="221.31261"
          style="font-size:5.64444447px;stroke-width:0.26458332">P<tspan
    style="font-size:4.23333311px"
    id="tspan4699">max,woDH</tspan></tspan></text>
     <text
        id="text4697"
-       y="254.78586"
+       y="261.13593"
        x="24.038158"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
        xml:space="preserve"><tspan
          style="font-size:5.64444447px;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
-         y="254.78586"
+         y="261.13593"
          x="24.038158"
          id="tspan4695"
          sodipodi:role="line">P<tspan
@@ -195,14 +207,258 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="-268.91757"
+       x="-275.26767"
        y="15.989568"
        id="text4504-6"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan4502-4"
-         x="-268.91757"
+         x="-275.26767"
          y="15.989568"
          style="font-size:7.76111126px;stroke-width:0.26458332">Electrical power</tspan></text>
+    <rect
+       style="opacity:1;fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:0.60000002;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4496-3"
+       width="112.2532"
+       height="71.360962"
+       x="159.82567"
+       y="209.01991" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="186.01808"
+       y="290.80472"
+       id="text4504-67"><tspan
+         sodipodi:role="line"
+         id="tspan4502-5"
+         x="186.01808"
+         y="290.80472"
+         style="font-size:7.76111126px;stroke-width:0.26458332">Heat extraction</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="162.76562"
+       y="221.31261"
+       id="text4693-3"><tspan
+         sodipodi:role="line"
+         id="tspan4691-5"
+         x="162.76562"
+         y="221.31261"
+         style="font-size:5.64444447px;stroke-width:0.26458332">P<tspan
+   style="font-size:4.23333311px;stroke-width:0.26458332"
+   id="tspan4699-6">max,woDH</tspan></tspan></text>
+    <text
+       id="text4697-2"
+       y="257.43176"
+       x="162.74951"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-size:5.64444447px;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+         y="257.43176"
+         x="162.74951"
+         id="tspan4695-9"
+         sodipodi:role="line">P<tspan
+   style="font-size:4.23333311px;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+   id="tspan4701-1">min,woDH</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="-275.26785"
+       y="153.1134"
+       id="text4504-6-2"
+       transform="rotate(-90)"><tspan
+         sodipodi:role="line"
+         id="tspan4502-4-7"
+         x="-275.26785"
+         y="153.1134"
+         style="font-size:7.76111126px;stroke-width:0.26458332">Electrical power</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.56500006;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.13000001, 0.56500001;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 221.03063,260.87034 H 159.82589"
+       id="path4512"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.56500006;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.13000001, 0.56500001;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 253.37033,224.78895 H 159.82589"
+       id="path4516"
+       inkscape:connector-curvature="0" />
+    <circle
+       id="path4579-0"
+       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.13333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       cx="159.68042"
+       cy="260.74606"
+       r="2" />
+    <circle
+       id="path4581-9"
+       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1.33333337;stroke-opacity:1"
+       cx="159.7587"
+       cy="224.76733"
+       r="2" />
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 221.03063,260.87034 c 32.3397,-36.08139 32.3397,-36.08139 32.3397,-36.08139"
+       id="path4523-3"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="opacity:1;fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:0.60000002;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4496-6"
+       width="112.2532"
+       height="71.360962"
+       x="296.94952"
+       y="209.01991" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="323.14191"
+       y="290.80463"
+       id="text4504-2"><tspan
+         sodipodi:role="line"
+         id="tspan4502-6"
+         x="323.14191"
+         y="290.80463"
+         style="font-size:7.76111126px;stroke-width:0.26458332">Heat extraction</tspan></text>
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 358.15439,260.87023 c 32.3397,-36.08139 32.3397,-36.08139 32.3397,-36.08139"
+       id="path4535"
+       inkscape:connector-curvature="0" />
+    <text
+       transform="translate(274.24784,6.3500033)"
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       id="text4659-3"><textPath
+         xlink:href="#path4668-0"
+         id="textPath4670-7"><tspan
+   style="font-size:5.64444447px;stroke-width:0.26458332"
+   id="tspan4657-5">  H<tspan
+   style="font-size:4.23333311px"
+   id="tspan4681-9">L,FG</tspan>=20%</tspan></textPath></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.41;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 343.45863,260.87023 20.57163,-36.08139"
+       id="path4548-2"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="299.8895"
+       y="221.84181"
+       id="text4693-2"><tspan
+         sodipodi:role="line"
+         id="tspan4691-8"
+         x="299.8895"
+         y="221.84181"
+         style="font-size:5.64444447px;stroke-width:0.26458332">P<tspan
+   style="font-size:4.23333311px;stroke-width:0.26458332"
+   id="tspan4699-9">max,woDH</tspan></tspan></text>
+    <text
+       id="text4697-7"
+       y="267.44919"
+       x="299.06619"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-size:5.64444447px;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+         y="267.44919"
+         x="299.06619"
+         id="tspan4695-3"
+         sodipodi:role="line">P<tspan
+   style="font-size:4.23333311px;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+   id="tspan4701-6">min,woDH</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="-275.26776"
+       y="290.2373"
+       id="text4504-6-1"
+       transform="rotate(-90)"><tspan
+         sodipodi:role="line"
+         id="tspan4502-4-2"
+         x="-275.26776"
+         y="290.2373"
+         style="font-size:7.76111126px;stroke-width:0.26458332">Electrical power</tspan></text>
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 358.15439,260.87023 H 312.73465"
+       id="path4510"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 322.62362,224.78884 -9.88897,36.08139"
+       id="path4514"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.93000001, 0.465;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 312.73465,260.87023 h -15.785"
+       id="path4516-9"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 390.49409,224.78884 H 322.62362"
+       id="path4518"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.93000001, 0.465;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 322.62362,224.78884 H 296.94965"
+       id="path4520"
+       inkscape:connector-curvature="0" />
+    <circle
+       id="path4579-3"
+       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.13333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       cx="297.04861"
+       cy="260.6377"
+       r="2" />
+    <circle
+       id="path4581-1"
+       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1.33333337;stroke-opacity:1"
+       cx="297.04865"
+       cy="224.55615"
+       r="2" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4626"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,0,192)"><flowRegion
+         id="flowRegion4628"><rect
+           id="rect4630"
+           width="420.22345"
+           height="123.23861"
+           x="1402.0918"
+           y="-764.82501" /></flowRegion><flowPara
+         id="flowPara4632"></flowPara></flowRoot>    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="68.346367"
+       y="202.47661"
+       id="text4636"><tspan
+         sodipodi:role="line"
+         id="tspan4634"
+         x="68.346367"
+         y="202.47661"
+         style="font-size:7.76111126px;stroke-width:0.26458332">CCET</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="208.18736"
+       y="202.47661"
+       id="text4636-9"><tspan
+         sodipodi:role="line"
+         id="tspan4634-4"
+         x="208.18736"
+         y="202.47661"
+         style="font-size:7.76111126px;stroke-width:0.26458332">BPT</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="341.10287"
+       y="202.50008"
+       id="text4636-9-7"><tspan
+         sodipodi:role="line"
+         id="tspan4634-4-8"
+         x="341.10287"
+         y="202.50008"
+         style="font-size:7.76111126px;stroke-width:0.26458332">mCHP</tspan></text>
   </g>
 </svg>
