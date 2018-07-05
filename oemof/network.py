@@ -12,7 +12,8 @@ available from its original location oemof/oemof/network.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from collections import namedtuple as NT, MutableMapping as MM, UserDict as UD
+from collections import (namedtuple as NT, Mapping, MutableMapping as MM,
+                         UserDict as UD)
 from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
@@ -259,6 +260,26 @@ class Edge(Node):
         self.input = input
         self.output = output
         input.outputs[output] = self
+
+    @classmethod
+    def from_object(klass, o):
+        """ Creates an `Edge` instance from a single object.
+
+        This method inspects its argument and does something different
+        depending on various cases:
+
+          * If `o` is an instance of `Edge`, `o` is returned unchanged.
+          * If `o` is a `Mapping`, the instance is created by calling
+            `klass(**o)`,
+          * In all other cases, `o` will be used as the `values` keyword
+            argument to `Edge`s constructor.
+        """
+        if isinstance(o, Edge):
+            return o
+        elif isinstance(o, Mapping):
+            return klass(**o)
+        else:
+            return Edge(values=o)
 
 
 class Bus(Node):
