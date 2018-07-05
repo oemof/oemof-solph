@@ -20,6 +20,9 @@ from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 # TODO:
 #
+#   * Only allow setting a Node's label if `_delay_registration_` is active
+#     and/or the node is not yet registered.
+#   * Only allow setting an Edge's input/output if it is None
 #   * Document the `register` method. Maybe also document the
 #     `_delay_registration_` attribute and make it official. This could also be
 #     a good chance to finally use `blinker` to put an event on
@@ -214,6 +217,10 @@ class Node:
         return (self._label if hasattr(self, "_label")
                 else "<{} #0x{:x}>".format(type(self).__name__, id(self)))
 
+    @label.setter
+    def label(self, label):
+        self._label = label
+
     @property
     def inputs(self):
         """ dict:
@@ -265,7 +272,7 @@ class Edge(Node):
     #           more `Bus`es/`Component`s.
     #
     Label = NT("Edge", ['input', 'output'])
-    def __init__(self, input, output, flow=None, values=None):
+    def __init__(self, input=None, output=None, flow=None, values=None):
         if flow is not None and values is not None:
             raise ValueError(
                     "`Edge`'s `flow` and `values` keyword arguments are " +
@@ -274,10 +281,13 @@ class Edge(Node):
                     "    `flow`  : {}".format(flow) +
                     "    `values`: {}".format(values) +
                     "\nChoose one.")
+        if input is None or output is None:
+            self._delay_registration_ = True
         super().__init__(label=Edge.Label(input, output))
         self.flow = flow
-        input.outputs[output] = self
         self.values = values
+        if input is not None and output is not None:
+            input.outputs[output] = self
 
     @classmethod
     def from_object(klass, o):
@@ -311,9 +321,28 @@ class Edge(Node):
     def input(self):
         return self.label.input
 
+    @input.setter
+    def input(self, i):
+        old_input = self.input
+        self.label = Edge.Label(i, self.label.output)
+        if old_input is None and i is not None and self.output is not None:
+            del self._delay_registration_
+            self.register()
+            i.outputs[self.output] = self
+
     @property
     def output(self):
         return self.label.output
+
+    @output.setter
+    def output(self, o):
+        old_output = self.output
+        self.label = Edge.Label(self.label.input, o)
+        if old_output is None and o is not None and self.input is not None:
+            del self._delay_registration_
+            if __class__.registry is not None:
+                __class__.registry.add(self)
+            o.inputs[self.input] = self
 
 
 class Bus(Node):
