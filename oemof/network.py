@@ -49,27 +49,20 @@ class Inputs(MM):
         return self.target._in_edges.__len__()
 
 
-class Outputs(MM):
+class Outputs(UD):
     """ Helper that intercepts modifications to update `Inputs` symmetrically.
     """
-    def __init__(self, flows, source):
-        self.flows = flows
+    def __init__(self, source):
         self.source = source
-
-    def __getitem__(self, key):
-        return self.flows.__getitem__((self.source, key))
+        super().__init__()
 
     def __delitem__(self, key):
-        return self.flows.__delitem__((self.source, key))
+        key._in_edges.remove(self.source)
+        return super().__delitem__(key)
 
     def __setitem__(self, key, value):
-        return self.flows.__setitem__((self.source, key), value)
-
-    def __iter__(self):
-        return self.flows._out_edges.get(self.source, ()).__iter__()
-
-    def __len__(self):
-        return self.flows._out_edges.get(self.source, ()).__len__()
+        key._in_edges.add(self.source)
+        return super().__setitem__(key, value)
 
 
 class _Edges(MM):
