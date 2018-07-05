@@ -265,8 +265,6 @@ class Edge(Node):
                     "\nChoose one.")
         super().__init__(label=Edge.Label(input, output))
         self.flow = flow
-        self.input = input
-        self.output = output
         input.outputs[output] = self
         self.values = values
 
@@ -297,6 +295,14 @@ class Edge(Node):
     @flow.setter
     def flow(self, values):
         self.values = values
+
+    @property
+    def input(self):
+        return self.label.input
+
+    @property
+    def output(self):
+        return self.label.output
 
 
 class Bus(Node):
