@@ -12,7 +12,7 @@ available from its original location oemof/oemof/network.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from collections import namedtuple as NT, MutableMapping as MM
+from collections import namedtuple as NT, MutableMapping as MM, UserDict as UD
 from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
@@ -29,24 +29,24 @@ from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 class Inputs(MM):
     """ A special helper to map `n1.inputs[n2]` to `n2.outputs[n1]`.
     """
-    def __init__(self, flows, target):
-        self.flows = flows
+    def __init__(self, target):
         self.target = target
 
     def __getitem__(self, key):
-        return self.flows.__getitem__((key, self.target))
+        return key.outputs.__getitem__(self.target)
 
     def __delitem__(self, key):
-        return self.flows.__delitem__((key, self.target))
+        return key.outputs.__delitem__(self.target)
 
     def __setitem__(self, key, value):
-        return self.flows.__setitem__((key, self.target), value)
+        return key.outputs.__setitem__(self.target, value)
 
     def __iter__(self):
-        return self.flows._in_edges.get(self.target, ()).__iter__()
+        return ({i: i.outputs[self.target] for i in self.target._in_edges}
+                .__iter__())
 
     def __len__(self):
-        return self.flows._in_edges.get(self.target, ()).__len__()
+        return self.target._in_edges.__len__()
 
 
 class Outputs(MM):
