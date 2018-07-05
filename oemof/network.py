@@ -263,17 +263,6 @@ class Edge(Node):
     Note that all of these parameters are also set as attributes with the same
     name.
     """
-    # TODO: Figure out how to distinguish different kinds of flows between the
-    #       same nodes. We have at least the following two options:
-    #
-    #         * Allow multiple `Edge`s with the same input and output. For this
-    #           to work with groupings, we would have to put another attribute
-    #           on `Edge` `label`s distinguishing these parallel edges from
-    #           each other.
-    #         * Don't allow parallel edges, forcing the user to either have
-    #           complex objects like xarray `Dataet`s as flow values, or to add
-    #           more `Bus`es/`Component`s.
-    #
     Label = NT("Edge", ['input', 'output'])
     def __init__(self, input=None, output=None, flow=None, values=None):
         if flow is not None and values is not None:
