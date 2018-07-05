@@ -33,6 +33,11 @@
        id="path4668-0"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#5f7ce9;stroke-width:0.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 83.906552,247.11187 C 116.24625,211.03048 116.24625,211.03048 116.24625,211.03048"
+       id="path4523-36"
+       inkscape:connector-curvature="0" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -42,8 +47,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.69999999"
-     inkscape:cx="767.02041"
-     inkscape:cy="75.767732"
+     inkscape:cx="547.73469"
+     inkscape:cy="70.053446"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -60,7 +65,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -157,7 +162,8 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       id="text4627-2"><textPath
+       id="text4627-2"
+       transform="translate(-1.1339286,-1.889881)"><textPath
          xlink:href="#path4523"
          id="textPath4654"
          style="font-size:5.64444447px">  H<tspan
@@ -166,7 +172,8 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       id="text4659"><textPath
+       id="text4659"
+       transform="translate(-1.889881,-1.5119048)"><textPath
          xlink:href="#path4668"
          id="textPath4670"><tspan
    style="font-size:5.64444447px;stroke-width:0.26458332"
@@ -324,7 +331,7 @@
        id="path4535"
        inkscape:connector-curvature="0" />
     <text
-       transform="translate(274.24784,-7.4083308)"
+       transform="translate(273.11391,-9.2982118)"
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        id="text4659-3"><textPath
@@ -460,5 +467,19 @@
          x="341.10287"
          y="188.74193"
          style="font-size:7.76111126px;stroke-width:0.26458332">mCHP</tspan></text>
+    <text
+       y="-43.161724"
+       x="-83.61087"
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       id="text4627-2-7"
+       transform="translate(273.15773,-2.0266812)"
+       inkscape:transform-center-x="166.30953"
+       inkscape:transform-center-y="43.467263"><textPath
+         xlink:href="#path4523-36"
+         id="textPath4654-5"
+         style="font-size:5.64444447px;stroke-width:0.26458332">  H<tspan
+   style="font-size:4.23333311px;stroke-width:0.26458332"
+   id="tspan4685-3">L,FG</tspan>= 5%</textPath></text>
   </g>
 </svg>
