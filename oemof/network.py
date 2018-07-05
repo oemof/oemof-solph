@@ -47,6 +47,10 @@ class Inputs(MM):
     def __len__(self):
         return self.target._in_edges.__len__()
 
+    def __repr__(self):
+        return repr("<{0.__module__}.{0.__name__}: {1!r}>"
+                    .format(type(self), dict(self)))
+
 
 class Outputs(UD):
     """ Helper that intercepts modifications to update `Inputs` symmetrically.
@@ -253,6 +257,10 @@ class Node:
 
     def __str__(self):
         return str(self.label)
+
+    def __repr__(self):
+        return repr("<{0.__module__}.{0.__name__}: {1!r}>"
+                    .format(type(self), self.label))
 
     @property
     def label(self):
