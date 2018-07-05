@@ -46,7 +46,7 @@ class EnergySystem(es.EnergySystem):
         super().__init__(**kwargs)
 
 
-class Flow:
+class Flow(on.Edge):
     r""" Defines a flow between two nodes.
 
     Keyword arguments are used to set the attributes of this flow. Parameters
@@ -152,6 +152,8 @@ class Flow:
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
+
+        super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']

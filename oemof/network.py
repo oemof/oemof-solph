@@ -159,7 +159,9 @@ class Node:
                 flow = kwargs['inputs'].get(i)
             except AttributeError:
                 flow = None
-            self.inputs[i] = globals()['Edge'](input=i, output=self, flow=flow)
+            edge = globals()['Edge'].from_object(flow)
+            edge.input=i
+            edge.output=self
         for o in kwargs.get('outputs', {}):
             assert isinstance(o, Node), \
                    "Output {} of {} not a Node, but a {}."\
@@ -168,8 +170,9 @@ class Node:
                 flow = kwargs['outputs'].get(o)
             except AttributeError:
                 flow = None
-            self.outputs[o] = (
-                    globals()['Edge'](input=self, output=o, flow=flow))
+            edge = globals()['Edge'].from_object(flow)
+            edge.input = self
+            edge.output = o
 
         """
         This could be slightly more efficient than the loops above, but doesn't
