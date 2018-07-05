@@ -276,8 +276,7 @@ class Edge(Node):
         if input is None or output is None:
             self._delay_registration_ = True
         super().__init__(label=Edge.Label(input, output))
-        self.flow = flow
-        self.values = values
+        self.values = values if values is not None else flow
         if input is not None and output is not None:
             input.outputs[output] = self
 
