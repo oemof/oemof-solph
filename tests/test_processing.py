@@ -114,6 +114,8 @@ class Parameter_Result_Tests:
             'variable_costs': 0,
             'positive_gradient_ub': None,
             'negative_gradient_ub': None,
+            'flow': None,
+            'values': None,
         }
         default_scalars = [
             'nominal_value', 'summed_max', 'summed_min',
