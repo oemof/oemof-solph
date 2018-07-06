@@ -243,8 +243,9 @@ class EnergySystem_Nodes_Integration_Tests:
         b1 = Bus(label='<B1>')
         eq_(self.es.entities[0], b1)
         b2 = Bus(label='<B2>')
-        Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
-        ok_(isinstance(self.es.entities[2], Transformer))
+        eq_(self.es.entities[1], b2)
+        t1 = Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
+        ok_(t1 in self.es.entities)
 
 
 def test_depreciated_graph_call():
