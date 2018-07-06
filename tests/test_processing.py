@@ -20,7 +20,7 @@ from oemof.outputlib import processing
 class Parameter_Result_Tests:
     @classmethod
     def setUpClass(cls):
-        cls.period = 24
+        cls.period = 2
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
                 '2016-01-01',
@@ -62,8 +62,7 @@ class Parameter_Result_Tests:
             investment=Investment(ep_costs=0.4),
         )
 
-        cls.demand_values = [100] * 8760
-        cls.demand_values[0] = 0.0
+        cls.demand_values = [0.0, 100]
         demand = Sink(
             label="demand_el",
             inputs={
