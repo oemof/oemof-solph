@@ -582,6 +582,9 @@ class NonConvexFlow(SimpleBlock):
     SHUTDOWN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
+    OPR_FLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`opr_costs` being not None.
 
     MINUPTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
@@ -678,6 +681,11 @@ class NonConvexFlow(SimpleBlock):
             \sum_{i, o \in SHUTDOWN\_FLOWS} \sum_t shutdown(i, o, t) \
                 \cdot shutdown\_costs(i, o)
 
+    If :attr:`nonconvex.opr_costs` is set by the user:
+        .. math::
+            \sum_{i, o \in OPR\_FLOWS} \sum_t status(i, o, t) \
+                \cdot opr\_costs(i, o)
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -717,6 +725,10 @@ class NonConvexFlow(SimpleBlock):
         self.MINDOWNTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                     if g[2].nonconvex.minimum_downtime
                                     is not None])
+
+        self.OPR_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                 if g[2].nonconvex.opr_costs[0]
+                                 is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
@@ -824,6 +836,7 @@ class NonConvexFlow(SimpleBlock):
 
         startcosts = 0
         shutdowncosts = 0
+        operationcosts = 0
 
         if self.STARTUPFLOWS:
             for i, o in self.STARTUPFLOWS:
@@ -842,4 +855,14 @@ class NonConvexFlow(SimpleBlock):
                         for t in m.TIMESTEPS)
             self.shutdowncosts = Expression(expr=shutdowncosts)
 
-        return startcosts + shutdowncosts
+        if self.OPR_FLOWS:
+            for i,o in self.OPR_FLOWS:
+                if m.flows[i, o].nonconvex.opr_costs[0] is not None :
+                    operationcosts += sum(
+                        self.status[i, o, t] *
+                        m.flows[i, o].nonconvex.opr_costs[t]
+                        for t in m.TIMESTEPS)
+
+            self.operationcosts = Expression(expr=operationcosts)
+
+        return startcosts + shutdowncosts + operationcosts

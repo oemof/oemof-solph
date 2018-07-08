@@ -43,6 +43,9 @@ class NonConvex:
         Costs associated with a start of the flow (representing a unit).
     shutdown_costs : numeric
         Costs associated with the shutdown of the flow (representing a unit).
+    opr_costs : numeric
+        Costs associated with the operation of the flow independently from the
+        actual output (representing a unit).
     minimum_uptime : numeric (1 or positive integer)
         Minimum time that a flow must be greater then its minimum flow after
         startup. Be aware that minimum up and downtimes can contradict each
@@ -63,7 +66,7 @@ class NonConvex:
     """
     def __init__(self, **kwargs):
         scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status']
-        sequences = ['startup_costs', 'shutdown_costs']
+        sequences = ['startup_costs', 'shutdown_costs','opr_costs']
         defaults = {'initial_status': 0}
 
         for attribute in set(scalars + sequences + list(kwargs)):
