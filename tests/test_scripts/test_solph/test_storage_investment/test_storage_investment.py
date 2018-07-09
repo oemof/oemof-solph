@@ -45,8 +45,12 @@ import logging
 import os
 import pandas as pd
 
+PP_GAS = None
 
-def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
+
+def test_optimise_storage_size(filename="storage_investment.csv",
+                               solver='cbc'):
+    global PP_GAS
 
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=400, freq='H')
@@ -78,8 +82,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         actual_value=data['pv'], nominal_value=582000, fixed=True)})
 
     # Transformer
-    solph.Transformer(
-        label="pp_gas",
+    PP_GAS = solph.Transformer(
+        label='pp_gas',
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
@@ -106,6 +110,9 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Check dump and restore
     energysystem.dump()
+
+
+def test_results_with_actual_dump():
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -150,9 +157,11 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # Objective function
     eq_(round(meta['objective']), 423167578261115584)
 
-    # **************************************************
-    # Test again with a stored dump created with v0.2.1dev (896a6d50)
 
+def test_results_with_old_dump():
+    """
+    Test again with a stored dump created with v0.2.1dev (896a6d50)
+    """
     energysystem = solph.EnergySystem()
     energysystem.restore(dpath=os.path.dirname(os.path.realpath(__file__)),
                          filename='es_dump_test.oemof')
