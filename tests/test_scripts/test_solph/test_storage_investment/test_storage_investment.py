@@ -35,6 +35,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from nose.tools import eq_
+import unittest
+
 from oemof.tools import economics
 
 import oemof.solph as solph
@@ -186,3 +188,18 @@ def test_results_with_old_dump():
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+
+
+@unittest.skip("Failing test for bug #474. Will be fixed in PR #510")
+def test_attributes():
+    energysystem = solph.EnergySystem()
+    energysystem.restore()
+
+    trsf_attr_before_dump = sorted(
+        [x for x in dir(PP_GAS) if '__' not in x])
+
+    trsf_attr_after_restore = sorted(
+        [x for x in dir(energysystem.groups['pp_gas']) if '__' not in x])
+
+    # Compare parameter before the dump and after the restore
+    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
