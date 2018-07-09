@@ -100,8 +100,10 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     om.solve(solver=solver)
 
     optimisation_results = outputlib.processing.results(om)
+    parameter = outputlib.processing.parameter_as_dict(energysystem)
 
-    myresults = outputlib.views.node(optimisation_results, "('natural', 'gas')")
+    myresults = outputlib.views.node(optimisation_results,
+                                     "('natural', 'gas')")
     sumresults = myresults['sequences'].sum(axis=0)
     maxresults = myresults['sequences'].max(axis=0)
 
@@ -124,6 +126,11 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
         logging.debug("Test the summed up value of {0}".format(key))
         eq_(int(round(sumresults[key])),
             int(round(variable_chp_dict_sum[key])))
+
+    eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
+        ['scalars']['label'], "('fixed_chp', 'gas')")
+    eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
+          ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
 
     # objective function
     eq_(round(outputlib.processing.meta_results(om)['objective']), 326661590)
