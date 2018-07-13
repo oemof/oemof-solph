@@ -660,14 +660,12 @@ class GenericCAESBlock(SimpleBlock):
 
         # Cavern: Storage balance
         def cav_eta_constr_rule(block, n, t):
-            if t != 0:
+            if t > 0:
                 return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
                         self.cav_level[n, t-1] + m.timeincrement[t] *
                         (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
             else:
-                return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
-                        m.timeincrement[t] *
-                        (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
+                return Constraint.Skip
         self.cav_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule)
 
@@ -676,6 +674,20 @@ class GenericCAESBlock(SimpleBlock):
             return (self.cav_level[n, t] <= n.params['cav_level_max'])
         self.cav_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule)
+
+        # Cavern: State of charge in the first timestep (first=last=0.5*max)
+        def cav_soc_t0_constr_rule(block, n, t):
+            return (self.cav_level[n, m.TIMESTEPS[1]] ==
+                    n.params['cav_level_max']*0.5)
+        self.cav_soc_t0_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_soc_t0_constr_rule)
+
+        # Cavern: State of charge in the last timestep (first=last=0.5*max)
+        def cav_soc_tmax_constr_rule(block, n, t):
+            return (self.cav_level[n, m.TIMESTEPS[-1]] ==
+                    n.params['cav_level_max']*0.5)
+        self.cav_soc_tmax_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_soc_tmax_constr_rule)
 
         # TES: Storage balance
         def tes_eta_constr_rule(block, n, t):
