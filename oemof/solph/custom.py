@@ -678,14 +678,14 @@ class GenericCAESBlock(SimpleBlock):
         # Cavern: State of charge in the first timestep (first=last=0.5*max)
         def cav_soc_t0_constr_rule(block, n, t):
             return (self.cav_level[n, m.TIMESTEPS[1]] ==
-                    n.params['cav_level_max']*0.5)
+                    n.params['cav_level_start_end'])
         self.cav_soc_t0_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_soc_t0_constr_rule)
 
         # Cavern: State of charge in the last timestep (first=last=0.5*max)
         def cav_soc_tmax_constr_rule(block, n, t):
             return (self.cav_level[n, m.TIMESTEPS[-1]] ==
-                    n.params['cav_level_max']*0.5)
+                    n.params['cav_level_start_end'])
         self.cav_soc_tmax_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_soc_tmax_constr_rule)
 
