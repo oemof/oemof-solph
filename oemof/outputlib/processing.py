@@ -256,6 +256,11 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
                 com_data['scalars'][a] = attr_value
                 continue
 
+            # If the label is a tuple it is iterable, therefore it should be
+            # converted to a string. Otherwise it will be a sequence.
+            if a == 'label':
+                attr_value = str(attr_value)
+
             # check if attribute is iterable
             # see: https://stackoverflow.com/questions/1952464/
             # in-python-how-do-i-determine-if-an-object-is-iterable
