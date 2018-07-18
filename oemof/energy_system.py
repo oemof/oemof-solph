@@ -20,6 +20,7 @@ import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 from oemof.network import Bus, Component
+import oemof.xarray as xarray
 
 
 class EnergySystem:
@@ -127,6 +128,7 @@ class EnergySystem:
                                                   periods=1, freq='H'))
 
         self.temporal = kwargs.get('temporal')
+        self.graph = xarray.graph(self.entities)
 
     @staticmethod
     def _regroup(entity, groups, groupings):
