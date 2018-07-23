@@ -863,6 +863,6 @@ class NonConvexFlow(SimpleBlock):
                         m.flows[i, o].nonconvex.activity_costs[t]
                         for t in m.TIMESTEPS)
 
-            self.operationcosts = Expression(expr=activitycosts)
+            self.activitycosts = Expression(expr=activitycosts)
 
         return startcosts + shutdowncosts + activitycosts
