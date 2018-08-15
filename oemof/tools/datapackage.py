@@ -18,6 +18,7 @@ import re
 import types
 
 import datapackage
+from datapackage import exceptions
 import pandas as pd
 
 from oemof.network import Bus, Component
@@ -129,7 +130,12 @@ def deserialize_energy_system(cls, path,
     # This is necessary because before reading a resource for the first
     # time its `headers` attribute is `None`.
     for r in package.resources:
-        r.read()
+        try:
+            r.read()
+        except exceptions.CastError as e:
+            raise exceptions.CastError(
+                "Cast error occured in resource with name `{}`".format(r.name))
+
     empty = types.SimpleNamespace()
     empty.read = lambda *xs, **ks: ()
     empty.headers = ()
