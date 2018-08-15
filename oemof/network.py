@@ -264,7 +264,7 @@ class Edge(Node):
     name.
     """
     Label = NT("Edge", ['input', 'output'])
-    def __init__(self, input=None, output=None, flow=None, values=None):
+    def __init__(self, input=None, output=None, flow=None, values=None, **kwargs):
         if flow is not None and values is not None:
             raise ValueError(
                     "`Edge`'s `flow` and `values` keyword arguments are " +
@@ -444,4 +444,3 @@ def temporarily_modifies_registry(function):
         with registry_disabled():
             return f(*xs, **ks)
     return result
-
