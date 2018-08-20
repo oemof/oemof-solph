@@ -711,6 +711,110 @@ class GenericCAESBlock(SimpleBlock):
             self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
 
 
+class GenericCAES2(Transformer):
+    """
+    Component `GenericCAES2` to model arbitrary compressed air energy storages.
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.electrical_input = kwargs.get('electrical_input')
+        self.fuel_input = kwargs.get('fuel_input')
+        self.electrical_output = kwargs.get('electrical_output')
+        self.params = kwargs.get('params')
+
+        # map specific flows to standard API
+        self.inputs.update(kwargs.get('electrical_input'))
+        self.inputs.update(kwargs.get('fuel_input'))
+        self.outputs.update(kwargs.get('electrical_output'))
+
+    def constraint_group(self):
+        return GenericCAESBlock
+
+
+class GenericCAES2Block(SimpleBlock):
+    """Block for nodes of class:`.GenericCAES2`."""
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+        Create constraints for GenericCAESBlock.
+
+        Parameters
+        ----------
+        group : list
+            List containing `.GenericCAES` objects.
+            e.g. groups=[gcaes1, gcaes2,..]
+        """
+        m = self.parent_block()
+
+        if group is None:
+            return None
+
+        self.GENERICCAES = Set(initialize=[n for n in group])
+
+        # Compression: Binary variable for operation status
+        self.cmp_st = Var(self.GENERICCAES, m.TIMESTEPS, within=Binary)
+        m.cmp_P = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+        m.cmp_y = Var(self.GENERICCAES, m.T, domain=Binary)
+        m.cmp_m = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+        m.cmp_z = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+        m.exp_P = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+        m.exp_y = Var(self.GENERICCAES, m.T, domain=Binary)
+        m.exp_m = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+        m.exp_Q = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+        m.cav_Pi_o = Var(self.GENERICCAES, m.T, domain=NonNegativeReals)
+
+        # Compression: Capacity on markets
+        def cmp_p_constr_rule(block, n, t):
+            expr = 0
+            expr += -self.cmp_p[n, t]
+            expr += m.flow[list(n.electrical_input.keys())[0], n, t]
+            return expr == 0
+        self.cmp_p_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_constr_rule)
+
+        # Expansion: Capacity on markets
+        def exp_p_constr_rule(block, n, t):
+            expr = 0
+            expr += -self.exp_p[n, t]
+            expr += m.flow[n, list(n.electrical_output.keys())[0], t]
+            return expr == 0
+        self.exp_p_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule)
+
+        # Expansion: Fuel allocation
+        def exp_q_fuel_constr_rule(block, n, t):
+            expr = 0
+            expr += -self.exp_q_fuel_in[n, t]
+            expr += m.flow[list(n.fuel_input.keys())[0], n, t]
+            return expr == 0
+        self.exp_q_fuel_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
+
+        # bounds=(0, n.params['cmp_P_max'])
+
+        # Cavern: Lower bound
+        def cav_lb_constr_rule(block, n, t):
+            return (self.cav_level[n, t] >= n.params['cav_Pi_o_min'])
+        self.cav_lb_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_lb_constr_rule)
+
+        # Cavern: Upper bound
+        def cav_ub_constr_rule(block, n, t):
+            return (self.cav_level[n, t] <= n.params['cav_Pi_o_max'])
+        self.cav_ub_constr = Constraint(
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule)
+
+
+
+
 class OffsetTransformer(Transformer):
     """An object with one input and one output.
 
