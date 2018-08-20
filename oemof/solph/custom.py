@@ -761,15 +761,22 @@ class GenericCAESBlock2(SimpleBlock):
 
         # Compression: Binary variable for operation status
         self.cmp_st = Var(self.GENERICCAES, m.TIMESTEPS, within=Binary)
-        self.cmp_P = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
+        self.cmp_P = Var(self.GENERICCAES, m.TIMESTEPS,
+                         domain=NonNegativeReals)
         self.cmp_y = Var(self.GENERICCAES, m.TIMESTEPS, domain=Binary)
-        self.cmp_m = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
-        self.cmp_z = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
-        self.exp_P = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
+        self.cmp_m = Var(self.GENERICCAES, m.TIMESTEPS,
+                         domain=NonNegativeReals)
+        self.cmp_z = Var(self.GENERICCAES, m.TIMESTEPS,
+                         domain=NonNegativeReals)
+        self.exp_P = Var(self.GENERICCAES, m.TIMESTEPS,
+                         domain=NonNegativeReals)
         self.exp_y = Var(self.GENERICCAES, m.TIMESTEPS, domain=Binary)
-        self.exp_m = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
-        self.exp_Q = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
-        self.cav_Pi_o = Var(self.GENERICCAES, m.TIMESTEPS, domain=NonNegativeReals)
+        self.exp_m = Var(self.GENERICCAES, m.TIMESTEPS,
+                         domain=NonNegativeReals)
+        self.exp_Q = Var(self.GENERICCAES, m.TIMESTEPS,
+                         domain=NonNegativeReals)
+        self.cav_Pi_o = Var(self.GENERICCAES, m.TIMESTEPS,
+                            domain=NonNegativeReals)
 
         # Mapping of flows to "internal" decision variables
         def cmp_p_constr_rule(block, n, t):
@@ -820,12 +827,14 @@ class GenericCAESBlock2(SimpleBlock):
             self.GENERICCAES, m.TIMESTEPS, rule=cav_pi_rule)
 
         def cav_pi_t0_rule(block, n, t):
-            return(self.cav_Pi_o[n, min(m.TIMESTEPS)] == n.params['cav_Pi_o_0'])
+            return(
+                self.cav_Pi_o[n, min(m.TIMESTEPS)] == n.params['cav_Pi_o_0'])
         self.cav_pi_t0_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_pi_t0_rule)
 
         def cav_pi_tmax_rule(block, n, t):
-            return(self.cav_Pi_o[n, max(m.TIMESTEPS)] == n.params['cav_Pi_o_0'])
+            return(
+                self.cav_Pi_o[n, max(m.TIMESTEPS)] == n.params['cav_Pi_o_0'])
         self.cav_pi_tmax_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_pi_tmax_rule)
 
@@ -836,12 +845,14 @@ class GenericCAESBlock2(SimpleBlock):
             self.GENERICCAES, m.TIMESTEPS, rule=exp_ub_constr_rule)
 
         def exp_p_range_min_rule(block, n, t):
-            return(self.exp_P[n, t] >= self.exp_y[n, t] * n.params['exp_P_min'])
+            return(
+                self.exp_P[n, t] >= self.exp_y[n, t] * n.params['exp_P_min'])
         self.exp_p_range_min_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_range_min_rule)
 
         def exp_p_range_max_rule(block, n, t):
-            return(self.exp_P[n, t] <= self.exp_y[n, t] * n.params['exp_P_max'])
+            return(
+                self.exp_P[n, t] <= self.exp_y[n, t] * n.params['exp_P_max'])
         self.exp_p_range_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_range_max_rule)
 
@@ -862,12 +873,14 @@ class GenericCAESBlock2(SimpleBlock):
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_ub_constr_rule)
 
         def cmp_p_range_min_rule(block, n, t):
-            return(self.cmp_P[n, t] >= self.cmp_y[n, t] * n.params['cmp_P_min'])
+            return(
+                self.cmp_P[n, t] >= self.cmp_y[n, t] * n.params['cmp_P_min'])
         self.cmp_p_range_min_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_range_min_rule)
 
         def cmp_p_range_max_rule(block, n, t):
-            return(self.cmp_P[n, t] <= self.cmp_y[n, t] * n.params['cmp_P_max'])
+            return(
+                self.cmp_P[n, t] <= self.cmp_y[n, t] * n.params['cmp_P_max'])
         self.cmp_p_range_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_range_max_rule)
 
