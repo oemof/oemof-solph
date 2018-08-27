@@ -8,8 +8,10 @@ matrix:
     - python: 3.7
       dist: xenial
       sudo: true
+  allow_failures:
+    - python: 3.7
 
-# command to install dependencies
+  # command to install dependencies
 before_install:
   - sudo apt-get install coinor-cbc
 
