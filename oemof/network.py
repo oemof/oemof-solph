@@ -225,7 +225,7 @@ class Node:
     def __lt__(self, other):
         if other is None:
             return False
-        return self.label < other.label
+        return str(self.label) < str(other.label)
 
     def __hash__(self):
         return hash(self.label)
