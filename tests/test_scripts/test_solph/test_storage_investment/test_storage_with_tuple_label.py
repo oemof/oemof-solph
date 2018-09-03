@@ -59,8 +59,8 @@ def test_label():
     eq_(repr(my_label), "Label(tag1='arg', tag2=5, tag3=None)")
 
 
-def test_optimise_storage_size(filename="storage_investment.csv",
-                               solver='cbc'):
+def test_tuples_as_labels_example(filename="storage_investment.csv",
+                                  solver='cbc'):
 
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=40, freq='H')

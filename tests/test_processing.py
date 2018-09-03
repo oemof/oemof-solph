@@ -9,7 +9,7 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -78,7 +78,10 @@ class Parameter_Result_Tests:
         )
         cls.es.add(dg, batt, demand)
         cls.om = Model(cls.es)
+        cls.om.receive_duals()
         cls.om.solve()
+        cls.mod = Model(cls.es)
+        cls.mod.solve()
 
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
@@ -109,7 +112,7 @@ class Parameter_Result_Tests:
     def test_flows_without_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.parameter_as_dict(self.om,
+        param_results = processing.parameter_as_dict(self.es,
                                                      exclude_none=False)
         scalar_attributes = {
             'fixed': True,
@@ -147,7 +150,34 @@ class Parameter_Result_Tests:
 
     def test_nodes_with_none_exclusion(self):
         param_results = processing.parameter_as_dict(
-            self.om, exclude_none=True)
+            self.es, exclude_none=True)
+        param_results = processing.convert_keys_to_strings(param_results)
+        assert_series_equal(
+            param_results[('storage', 'None')]['scalars'],
+            pandas.Series({
+                'initial_capacity': 0,
+                'invest_relation_input_capacity': 1/6,
+                'invest_relation_output_capacity': 1/6,
+                'investment_ep_costs': 0.4,
+                'investment_existing': 0,
+                'investment_maximum': float('inf'),
+                'investment_minimum': 0,
+                'label': 'storage',
+                'capacity_loss': 0,
+                'capacity_max': 1,
+                'capacity_min': 0,
+                'inflow_conversion_factor': 1,
+                'outflow_conversion_factor': 0.8,
+            })
+        )
+        assert_frame_equal(
+            param_results[('storage', 'None')]['sequences'],
+            pandas.DataFrame()
+        )
+
+    def test_nodes_with_none_exclusion_old_name(self):
+        param_results = processing.param_results(
+            self.es, exclude_none=True)
         param_results = processing.convert_keys_to_strings(param_results)
         assert_series_equal(
             param_results[('storage', None)]['scalars'],
@@ -175,7 +205,7 @@ class Parameter_Result_Tests:
     def test_nodes_without_none_exclusion(self):
         diesel = self.es.groups['diesel']
         param_results = processing.parameter_as_dict(
-            self.om, exclude_none=False)
+            self.es, exclude_none=False)
         assert_series_equal(
             param_results[(diesel, None)]['scalars'],
             pandas.Series({
@@ -191,7 +221,7 @@ class Parameter_Result_Tests:
 
     def test_parameter_with_node_view(self):
         param_results = processing.parameter_as_dict(
-            self.om, exclude_none=True)
+            self.es, exclude_none=True)
         bel1 = views.node(param_results, 'b_el1')
         eq_(bel1['scalars'][(('b_el1', 'storage'), 'variable_costs')], 3)
 
@@ -202,3 +232,15 @@ class Parameter_Result_Tests:
         results = processing.results(self.om)
         bel1 = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel1['sequences'][('diesel', 'b_el1', 'flow')].sum()), 2875)
+
+    def test_error_from_nan_values(self):
+        trsf = self.es.groups['diesel']
+        bus = self.es.groups['b_el1']
+        self.mod.flow[trsf, bus, 5] = float('nan')
+        with assert_raises(ValueError):
+            processing.results(self.mod)
+
+    def test_duals(self):
+        results = processing.results(self.om)
+        bel = views.node(results, 'b_el1', multiindex=True)
+        eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)

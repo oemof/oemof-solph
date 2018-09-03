@@ -1,9 +1,15 @@
-v0.2.2 ()
+v0.2.2 (July 1, 2018)
 ++++++++++++++++++++++++++
 
 
 API changes
 ###########
+
+* The storage API has been revised, even though it is still possible to use the
+  old API. In that case a warning is raised
+  (`Issue #491 <https://github.com/oemof/oemof/issues/491>`_).
+* The newly introduced parm_results are not results and therefore renamed to
+  parameter_as_dict. The old name is still valid but raises a warning.
 
 
 
@@ -43,10 +49,16 @@ New components
 Documentation
 #############
 
+* The documentation of the storage
+  `storage component <http://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
+* The documentation of the
+  `Extraction Turbine <https://oemof.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
 
 Known issues
 ############
 
+* It is not possible to model one time step with oemof.solph. You have to
+  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a comment if this bug affects you.
 
 Bug fixes
 #########
@@ -57,9 +69,15 @@ Bug fixes
   was missing. This lead to wrong results.
 * In the solph constraints module the emission constraint did not include the
   timeincrement from the model which has now be fixed.
+* The parameter_as_dict (former: param_results) do work with the views
+  functions now (`Issue #494 <https://github.com/oemof/oemof/issues/494>`_).
 
 Testing
 #######
+
+* The test coverage has been increased (>80%). oemof has experimental areas to
+  test new functions. These functions are marked as experimental and will not
+  be tested. Therefore the real coverage is even higher.
 
 
 Other changes
