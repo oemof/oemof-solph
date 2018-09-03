@@ -154,7 +154,7 @@ def results(om):
     return result
 
 
-def convert_keys_to_strings(result):
+def convert_keys_to_strings(result, keep_none_type=False):
     """
     Convert the dictionary keys to strings.
 
@@ -162,12 +162,20 @@ def convert_keys_to_strings(result):
     converted into strings that represent the object labels
     e.g. results[('pp1','bus1')].
     """
-    converted = {
-        tuple([str(e) if e is not None else None for e in k])
-        if isinstance(k, tuple)
-        else str(k) if k is not None else None: v
-        for k, v in result.items()
-    }
+    if keep_none_type:
+        converted = {
+            tuple([str(e) if e is not None else None for e in k])
+            if isinstance(k, tuple)
+            else str(k) if k is not None else None: v
+            for k, v in result.items()
+        }
+    else:
+        converted = {
+            tuple(map(str, k))
+            if isinstance(k, tuple)
+            else str(k): v
+            for k, v in result.items()
+        }
     return converted
 
 

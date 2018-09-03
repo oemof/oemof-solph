@@ -19,7 +19,7 @@ from oemof.outputlib.processing import convert_keys_to_strings
 NONE_REPLACEMENT_STR = '_NONE_'
 
 
-def node(results, node, multiindex=False):
+def node(results, node, multiindex=False, keep_none_type=False):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
@@ -46,7 +46,7 @@ def node(results, node, multiindex=False):
 
     # convert to keys if only a string is passed
     if type(node) is str:
-        results = convert_keys_to_strings(results)
+        results = convert_keys_to_strings(results, keep_none_type)
 
     filtered = {}
 
@@ -63,11 +63,16 @@ def node(results, node, multiindex=False):
         idx = [tuple((k, m) for m in v) for k, v in idx.items()]
         idx = [i for sublist in idx for i in sublist]
         filtered['scalars'].index = idx
-        filtered['scalars'].index = replace_none(
-            filtered['scalars'].index.tolist())
+
+        # Sort index
+        # (if Nones are present, they have to be replaced while sorting)
+        if keep_none_type:
+            filtered['scalars'].index = replace_none(
+                filtered['scalars'].index.tolist())
         filtered['scalars'].sort_index(axis=0, inplace=True)
-        filtered['scalars'].index = replace_none(
-            filtered['scalars'].index.tolist(), True)
+        if keep_none_type:
+            filtered['scalars'].index = replace_none(
+                filtered['scalars'].index.tolist(), True)
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
