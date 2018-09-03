@@ -90,7 +90,9 @@ def test_gen_caes():
     # create result object
     results = processing.results(om)
 
-    data = views.node(results, 'caes')['sequences'].sum(axis=0).to_dict()
+    data = views.node(
+        results, 'caes', keep_none_type=True
+    )['sequences'].sum(axis=0).to_dict()
 
     test_dict = {
         (('caes', None), 'cav_level'): 25658.82964382,
