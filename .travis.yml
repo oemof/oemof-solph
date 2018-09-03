@@ -14,7 +14,7 @@ before_install:
   - sudo apt-get install coinor-cbc
 
 install:
-  - pip install .[datapackage]
+  - pip install .
   - pip install coveralls
 
 # command to run tests
