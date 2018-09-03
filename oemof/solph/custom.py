@@ -867,7 +867,7 @@ class GenericCAESBlock2(SimpleBlock):
 
         def cas_pi_rule(block, n, t):
             """Cavern balance for all timesteps but the first."""
-            if t > 1:
+            if t > min(m.TIMESTEPS):
                 return(self.cas_Pi_o[n, t] ==
                        (1-n.params['cmp_eta'])*self.cas_Pi_o[n, t-1] +
                        3600/n.params['cas_m_0'] *
