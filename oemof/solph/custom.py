@@ -165,12 +165,12 @@ class ElectricalLineBlock(SimpleBlock):
 
         # create voltage angle variables
         self.ELECTRICAL_BUSES = Set(initialize=[n for n in m.es.nodes
-                                       if isinstance(n, ElectricalBus)])
+                                    if isinstance(n, ElectricalBus)])
 
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
         self.voltage_angle = Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
-                                    bounds=_voltage_angle_bounds)
+                                 bounds=_voltage_angle_bounds)
 
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
             # TODO: Make this robust to select the same slack bus for
@@ -262,6 +262,7 @@ class Link(Transformer):
 
     def constraint_group(self):
         return LinkBlock
+
 
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
