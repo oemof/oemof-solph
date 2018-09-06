@@ -58,8 +58,8 @@ class GenericStorage(network.Transformer):
         Ratio between the investment variable of the output Flow and the
         investment variable of the storage.
 
-        .. math:: input\_invest =
-                  capacity\_invest \cdot invest\_relation\_input\_capacity
+        .. math:: output\_invest =
+                  capacity\_invest \cdot invest\_relation\_output\_capacity
 
     invest_relation_input_output : numeric or None
         Ratio between the investment variable of the output Flow and the
@@ -96,8 +96,8 @@ class GenericStorage(network.Transformer):
         nominal_capacity should not be set (or set to None) if an investment
         object is used.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
        Investment object present)
@@ -245,6 +245,10 @@ class GenericStorageBlock(SimpleBlock):
         A set with all :class:`.Storage` objects
         (and no attr:`investement` of type :class:`.Investment`)
 
+    STORAGES_WITH_INVEST_FLOW_REL
+        A set with all :class:`.Storage` objects with two investment flows
+        coupled with the 'invest_relation_input_output' attribute.
+
     **The following variables are created:**
 
     capacity
@@ -262,7 +266,16 @@ class GenericStorageBlock(SimpleBlock):
             &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
             + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
 
+    Connect the invest variables of the input and the output flow.
+        .. math::
+          InvestmentFlow.invest(source(n), n) + existing = \\
+          (InvestmentFlow.invest(n, target(n)) + existing) * \\
+          invest\_relation\_input\_output(n) \\
+          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+
     **The following parts of the objective function are created:**
+
+    Nothing added to the objective function.
 
     """
 
@@ -288,6 +301,9 @@ class GenericStorageBlock(SimpleBlock):
         o = {n: [o for o in n.outputs][0] for n in group}
 
         self.STORAGES = Set(initialize=[n for n in group])
+
+        self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
+            n for n in group if n.invest_relation_input_output is not None])
 
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
@@ -322,6 +338,19 @@ class GenericStorageBlock(SimpleBlock):
             return expr == 0
         self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
+
+        def _power_coupled(block, n):
+            """Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) *
+                    n.invest_relation_input_output ==
+                    (m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing))
+            return expr
+        self.power_coupled = Constraint(
+                self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled)
 
     def _objective_expression(self):
         r"""Objective expression for storages with no investment.
@@ -388,14 +417,20 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Connect the invest variables of the storage and the input flow.
-        .. math:: InvestmentFlow.invest(source(n), n) =
-          invest(n) * invest\_relation\_input\_capacity(n) \\
-          \forall n \in \textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(source(n), n) + existing =
+          (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
+          \forall n \in \textrm{INVEST\_REL\_CAP\_IN}
 
     Connect the invest variables of the storage and the output flow.
-        .. math:: InvestmentFlow.invest(n, target(n)) ==
-          invest(n) * invest\_relation\_output_capacity(n) \\
-          \forall n \in \textrm{INVESTSTORAGES}
+        .. math:: InvestmentFlow.invest(n, target(n)) + existing =
+          (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
+          \forall n \in \textrm{INVEST\_REL\_CAP\_OUT}
+
+    Connect the invest variables of the input and the output flow.
+        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
+          (InvestmentFlow.invest(n, target(n)) + existing) *
+          invest\_relation\_input_output(n) \\
+          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
@@ -443,8 +478,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             n for n in group if n.invest_relation_output_capacity is not None])
     
         self.INVEST_REL_IN_OUT = Set(initialize=[
-            n for n in group
-            if n.invest_relation_input_output is not None])
+            n for n in group if n.invest_relation_input_output is not None])
 
         self.INITIAL_CAPACITY = Set(initialize=[
             n for n in group if n.initial_capacity is not None])
@@ -501,9 +535,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """Rule definition for constraint to connect the input power
             and output power
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] *
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) *
                     n.invest_relation_input_output ==
-                    m.InvestmentFlow.invest[o[n], n])
+                    (m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing))
             return expr
         self.power_coupled = Constraint(
                 self.INVEST_REL_IN_OUT, rule=_power_coupled)
@@ -513,7 +549,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_capacity__inflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[i[n], n] ==
+            expr = ((m.InvestmentFlow.invest[i[n], n] +
+                     m.flows[i[n], n].investment.existing) ==
                     (n.investment.existing + self.invest[n]) *
                     n.invest_relation_input_capacity)
             return expr
@@ -525,7 +562,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_capacity__outflow_ratio
             """
-            expr = (m.InvestmentFlow.invest[n, o[n]] ==
+            expr = ((m.InvestmentFlow.invest[n, o[n]] +
+                     m.flows[n, o[n]].investment.existing) ==
                     (n.investment.existing + self.invest[n]) *
                     n.invest_relation_output_capacity)
             return expr
@@ -597,7 +635,8 @@ class GenericCHP(network.Transformer):
     Volume 78, Issue 5, May 2008, Pages 835-848
     https://doi.org/10.1016/j.epsr.2007.06.001
 
-    Notes:
+    Note
+    ----
     An adaption for the flow parameter `H_L_FG_share_max` has been made to
     set the flue gas losses at maximum fuel flow `H_L_FG_max` as share of
     the fuel flow `H_F` e.g. for combined cycle extraction turbines.
@@ -629,8 +668,8 @@ class GenericCHP(network.Transformer):
         Flag to use back-pressure characteristics. Works of set to `True` and
         `Q_CW_min` set to zero. See paper above for more information.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.GenericCHPBlock`
 
@@ -929,8 +968,8 @@ class ExtractionTurbineCHP(solph_Transformer):
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
-    Notes
-    -----
+    Note
+    ----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
 
@@ -1021,12 +1060,6 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def set_value(self, value):
-        pass
-
-    def clear(self):
-        pass
-
     def _create(self, group=None):
         """ Creates the linear constraint for the
         :class:`oemof.solph.Transformer` block.
@@ -1048,24 +1081,21 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
         for n in group:
             n.inflow = list(n.inputs)[0]
-            n.label_main_flow = str(
+            n.main_flow = (
                 [k for k, v in n.conversion_factor_full_condensation.items()]
                 [0])
-            n.main_output = [o for o in n.outputs
-                             if n.label_main_flow == o.label][0]
-            n.tapped_output = [o for o in n.outputs
-                               if n.label_main_flow != o.label][0]
+            n.main_output = [o for o in n.outputs if n.main_flow == o][0]
+            n.tapped_output = [o for o in n.outputs if n.main_flow != o][0]
             n.conversion_factor_full_condensation_sq = (
-                n.conversion_factor_full_condensation[
-                    m.es.groups[n.main_output.label]])
+                n.conversion_factor_full_condensation[n.main_output])
             n.flow_relation_index = [
-                n.conversion_factors[m.es.groups[n.main_output.label]][t] /
-                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                n.conversion_factors[n.main_output][t] /
+                n.conversion_factors[n.tapped_output][t]
                 for t in m.TIMESTEPS]
             n.main_flow_loss_index = [
                 (n.conversion_factor_full_condensation_sq[t] -
-                 n.conversion_factors[m.es.groups[n.main_output.label]][t]) /
-                n.conversion_factors[m.es.groups[n.tapped_output.label]][t]
+                 n.conversion_factors[n.main_output][t]) /
+                n.conversion_factors[n.tapped_output][t]
                 for t in m.TIMESTEPS]
 
         def _input_output_relation_rule(block):
