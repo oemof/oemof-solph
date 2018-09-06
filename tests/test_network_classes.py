@@ -213,6 +213,15 @@ class Node_Tests:
         eq_(n1.outputs[n2], n1n2)
         eq_(n1.outputs, {n2: n1n2})
 
+    def test_label_as_positional_argument(self):
+        o = object()
+        n = Node(o)
+        ok_(n.label is o, (
+                "Setting `label` as positional parameter argument failed."
+                "\n  Expected: {!r}"
+                "\n  Got     : {!r}")
+                .format(o, n.label))
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
