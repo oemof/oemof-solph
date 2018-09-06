@@ -301,19 +301,34 @@ class SequenceFlowSumAnalyzer(Analyzer):
         self.total += result
 
 
+class SizeAnalyzer(Analyzer):
+    requires = ('results',)
+
+    def analyze(self, *args):
+        super(SizeAnalyzer, self).analyze(*args)
+        try:
+            rsc = self.rsc(args)
+            result = rsc['invest']
+        except KeyError:
+            return
+        self.result[args] = result
+        self.total += result
+
+
 class InvestAnalyzer(Analyzer):
     requires = ('results', 'param_results')
+    depends_on = (SizeAnalyzer,)
 
     def analyze(self, *args):
         super(InvestAnalyzer, self).analyze(*args)
+        seq_result = self._get_dep_result(SizeAnalyzer)
         try:
             psc = self.psc(args)
-            rsc = self.rsc(args)
+            size = seq_result[args]
             invest = psc['investment_ep_costs']
-            ep_costs = rsc['invest']
         except KeyError:
             return
-        result = invest * ep_costs
+        result = invest * size
         self.result[args] = result
         self.total += result
 
