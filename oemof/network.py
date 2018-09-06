@@ -199,9 +199,20 @@ class Node:
     def __setstate__(self, state):
         self._state = state
         args, kwargs = state
+        args = list(args)
+        args.reverse
         for optional in ['label']:
             if optional in kwargs:
+                if args:
+                    raise(TypeError((
+                        "{}.__setstate__()\n"
+                        "  (which usally means __init__())\n"
+                        "  got multiple values for argument '{}'")
+                        .format(type(self), optional)))
                 setattr(self, '_' + optional, kwargs[optional])
+            else:
+                if args:
+                    setattr(self, '_' + optional, args.pop())
         for i in kwargs.get('inputs', {}):
             assert isinstance(i, Node), \
                    "Input {} of {} not a Node, but a {}."\
