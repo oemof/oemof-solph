@@ -144,11 +144,22 @@ class Node:
     def __setstate__(self, state):
         self._state = state
         args, kwargs = state
+        args = list(args)
+        args.reverse
         self._inputs = Inputs(self)
         self._outputs = Outputs(self)
         for optional in ['label']:
             if optional in kwargs:
+                if args:
+                    raise(TypeError((
+                        "{}.__setstate__()\n"
+                        "  (which usally means __init__())\n"
+                        "  got multiple values for argument '{}'")
+                        .format(type(self), optional)))
                 setattr(self, '_' + optional, kwargs[optional])
+            else:
+                if args:
+                    setattr(self, '_' + optional, args.pop())
         self._in_edges = set()
         for i in kwargs.get('inputs', {}):
             assert isinstance(i, Node), \

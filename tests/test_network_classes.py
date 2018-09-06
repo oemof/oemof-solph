@@ -231,6 +231,15 @@ class Edge_Tests:
             "{} not in {} after constructing {}."
             .format(source, target.outputs, edge))
 
+    def test_label_as_positional_argument(self):
+        o = object()
+        n = Node(o)
+        ok_(n.label is o, (
+                "Setting `label` as positional parameter argument failed."
+                "\n  Expected: {!r}"
+                "\n  Got     : {!r}")
+                .format(o, n.label))
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
