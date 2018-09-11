@@ -626,8 +626,9 @@ class GenericCHP(network.Transformer):
         Beta values in same dimension as all other parameters (length of
         optimization period).
     back_pressure : boolean
-        Flag to use back-pressure characteristics. Works of set to `True` and
-        `Q_CW_min` set to zero. See paper above for more information.
+        Flag to use back-pressure characteristics. Set to `True` and
+        `Q_CW_min` for back-pressure turbines. See paper above for more
+        information.
 
     Notes
     -----
