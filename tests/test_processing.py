@@ -127,7 +127,7 @@ class Parameter_Result_Tests:
             'negative_gradient_costs': 0,
             'positive_gradient_ub': None,
             'positive_gradient_costs': 0,
-            'variable_costs': 0
+            'variable_costs': 0,
             'flow': None,
             'values': None,
         }
