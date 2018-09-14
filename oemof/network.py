@@ -133,11 +133,6 @@ class Node:
         self.__setstate__((args, kwargs))
         self.register()
 
-    def register(self):
-        if (    __class__.registry is not None and
-                not getattr(self, "_delay_registration_", False)):
-            __class__.registry.add(self)
-
     def __getstate__(self):
         return self._state
 
@@ -202,6 +197,11 @@ class Node:
                 for o in outputs}
         self.edges = self.in_edges.union(self.out_edges)
         """
+
+    def register(self):
+        if (    __class__.registry is not None and
+                not getattr(self, "_delay_registration_", False)):
+            __class__.registry.add(self)
 
     def __eq__(self, other):
         return id(self) == id(other)
