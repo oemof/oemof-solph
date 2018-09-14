@@ -114,31 +114,10 @@ class Node:
         information.
     """
 
-    # TODO: Doing this _state/__getstate__/__setstate__ dance is
-    #       necessary to fix issues #186 and #203. But there must be
-    #       some more elegant solution. So in the long run, either this,
-    #       or dump/restore should be refactored so that storing the
-    #       initialization arguments is not necessary.
-    #       The culprit seems to be that inputs/outputs are actually
-    #       stored in the `_Edge` class and pickle can't make that jump.
-    #       But more sophisticated research and minimal test cases are
-    #       needed to confirm that.
-
     registry = None
-    __slots__ = [
-            "__weakref__", "_label", "_state", "_in_edges", "_inputs",
-            "_outputs"]
+    __slots__ = ["_label", "_in_edges", "_inputs", "_outputs"]
 
     def __init__(self, *args, **kwargs):
-        self.__setstate__((args, kwargs))
-        self.register()
-
-    def __getstate__(self):
-        return self._state
-
-    def __setstate__(self, state):
-        self._state = state
-        args, kwargs = state
         args = list(args)
         args.reverse
         self._inputs = Inputs(self)
@@ -180,6 +159,7 @@ class Node:
             edge.input = self
             edge.output = o
 
+        self.register()
         """
         This could be slightly more efficient than the loops above, but doesn't
         play well with the assertions:
