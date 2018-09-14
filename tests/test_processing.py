@@ -97,7 +97,8 @@ class Parameter_Result_Tests:
                     'min': 0,
                     'negative_gradient_costs': 0,
                     'positive_gradient_costs': 0,
-                    'variable_costs': 0
+                    'variable_costs': 0,
+                    'label': str(b_el2.outputs[demand].label),
                 }
             )
         )
@@ -130,6 +131,7 @@ class Parameter_Result_Tests:
             'variable_costs': 0,
             'flow': None,
             'values': None,
+            'label': str(b_el2.outputs[demand].label),
         }
         assert_series_equal(
             param_results[(b_el2, demand)]['scalars'],
