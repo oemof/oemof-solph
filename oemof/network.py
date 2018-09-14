@@ -126,8 +126,7 @@ class Node:
             if optional in kwargs:
                 if args:
                     raise(TypeError((
-                        "{}.__setstate__()\n"
-                        "  (which usally means __init__())\n"
+                        "{}.__init__()\n"
                         "  got multiple values for argument '{}'")
                         .format(type(self), optional)))
                 setattr(self, '_' + optional, kwargs[optional])
