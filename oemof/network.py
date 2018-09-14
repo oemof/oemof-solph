@@ -256,6 +256,7 @@ class Node:
         return self._outputs
 
 
+EdgeLabel = NT("EdgeLabel", ['input', 'output'])
 class Edge(Node):
     """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
 
@@ -274,7 +275,7 @@ class Edge(Node):
     Note that all of these parameters are also set as attributes with the same
     name.
     """
-    Label = NT("Edge", ['input', 'output'])
+    Label = EdgeLabel
     def __init__(self, input=None, output=None, flow=None, values=None,
             **kwargs):
         if flow is not None and values is not None:
