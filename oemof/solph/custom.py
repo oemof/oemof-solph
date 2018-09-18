@@ -736,7 +736,7 @@ class OffsetTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.coefficients = kwargs.get('coefficients')
+        self.coefficients = [sequence(i) for i in kwargs.get('coefficients')]
 
         for k, v in self.inputs.items():
             if not v.nonconvex:
