@@ -703,11 +703,10 @@ class OffsetTransformer(Transformer):
     Parameters
     ----------
 
-    coefficients : dict
-        Dictionary containing the first two polynomial coefficients
+    coefficients : tuple
+        Tuple containing the first two polynomial coefficients
         i.e. the y-intersect and slope of a linear equation.
-        Keys are the connected tuples (input, output) bus objects.
-        The dictionary values can either be a scalar or a sequence with length
+        The tuple values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
     Notes
@@ -729,7 +728,7 @@ class OffsetTransformer(Transformer):
     ...        nominal_value=60, min=0.5, max=1.0,
     ...        nonconvex=solph.NonConvex())},
     ...    outputs={bth: solph.Flow()},
-    ...    coefficients={(bel, bth): [20, 0.5]})
+    ...    coefficients=(20, 0.5))
 
     >>> type(ostf)
     <class 'oemof.solph.custom.OffsetTransformer'>
