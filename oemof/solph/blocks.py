@@ -237,23 +237,23 @@ class Flow(SimpleBlock):
 
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
-                m.report['objective']['variable cost'] = {
-                    '\sum_{i,o \in F} \sum_{t \in T} flow_{i,o,t} \dcot \tau^{obj} \cdot edge^{cvar}_{i,o,t}'}
+                m.report['objective']['variable cost'] = \
+                    '\sum_{i,o \in F} \sum_{t \in T} flow_{i,o,t} \dcot \tau^{obj} \cdot edge^{cvar}_{i,o,t}'
                 for t in m.TIMESTEPS:
                     variable_costs += (m.flow[i, o, t] * m.objective_weighting[t] *
                                        m.flows[i, o].variable_costs[t])
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
-                m.report['objective']['positive gradient cost'] = {
-                    '\sum_{i,o \in F} \sum_{t \in T} pg_{i,o,t} \dcot edge^{pg,cost}_{i,o}'}
+                m.report['objective']['positive gradient cost'] = \
+                    '\sum_{i,o \in F} \sum_{t \in T} pg_{i,o,t} \dcot edge^{pg,cost}_{i,o}'
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
                                        m.flows[i, o].positive_gradient[
                                            'costs'])
 
             if m.flows[i, o].negative_gradient['ub'][0] is not None:
-                m.report['objective']['negative gradient cost'] = {
-                    '\sum_{i,o \in F} \sum_{t \in T} ng_{i,o,t} \dcot edge^{ng,cost}_{i,o}'}
+                m.report['objective']['negative gradient cost'] = \
+                    '\sum_{i,o \in F} \sum_{t \in T} ng_{i,o,t} \dcot edge^{ng,cost}_{i,o}'
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
                                        m.flows[i, o].negative_gradient[
@@ -381,8 +381,12 @@ class InvestmentFlow(SimpleBlock):
             return (m.flows[i, o].investment.minimum,
                     m.flows[i, o].investment.maximum)
         # create variable bounded for flows with investement attribute
-        self.invest = Var(self.FLOWS, within=NonNegativeReals,
-                          bounds=_investvar_bound_rule)
+        if self.FLOWS:
+            m.report['variables']['investment'] = {
+                'ub': 'investment_{i,o} \leq edge^{inv,max}_{i,o}',
+                'lb': 'investment_{i,o} \geq edge^{inv,min}_{i,o}'}
+            self.invest = Var(self.FLOWS, within=NonNegativeReals,
+                              bounds=_investvar_bound_rule)
 
         # ######################### CONSTRAINTS ###############################
 
@@ -395,8 +399,11 @@ class InvestmentFlow(SimpleBlock):
             return (m.flow[i, o, t] == (
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
                  m.flows[i, o].actual_value[t]))
-        self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
-                                rule=_investflow_fixed_rule)
+        if self.FIXED_FLOWS:
+            m.report['variables']['flow'].update({
+                'value': 'flow_{i,o,t} = edge^{inv,exist} + investment_{i,o} \cdot edge^{av}_{i,o,t} \forall (i,o) \in F_{I,fix}'})
+            self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
+                                    rule=_investflow_fixed_rule)
 
         def _max_investflow_rule(block, i, o, t):
             """Rule definition of constraint setting an upper bound of flow
@@ -406,8 +413,11 @@ class InvestmentFlow(SimpleBlock):
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
                  m.flows[i, o].max[t]))
             return expr
-        self.max = Constraint(self.FLOWS, m.TIMESTEPS,
-                              rule=_max_investflow_rule)
+        if self.FLOWS:
+            m.report['variables']['flow'].update({
+                'upper bound contr': 'flow_{i,o,t} \leq edge^{inv,exist} + investment_{i,o} \cdot edge^{max}_{i,o,t} \forall (i,o) \in F_I'})
+            self.max = Constraint(self.FLOWS, m.TIMESTEPS,
+                                  rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
             """Rule definition of constraint setting a lower bound on flow
