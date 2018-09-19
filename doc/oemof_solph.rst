@@ -420,18 +420,18 @@ as shown in the figure below.
 To model the different types it is necessary to modify the used constraints, which are defined by input attributes.
 Constraint 1 to 9 are always used, constraint 10 is used with different operators for the different types.
 If the attribute back_pressure is true, it is an equal sign, if not it is a less-than-or-equal sign.  Constraint 11
-is only used for the type motoric CHP by setting the attribute H_L_FG_share_min.
+is only used for the type motoric CHP by setting the attribute `H_L_FG_share_min`.
 
 The first type is a combined cycle extraction turbine, which is shown in figure one. Constrains 1 to 10 are used.
-Beta defines the slope of the range of operation, H_L_FG_share_max defines its right boundary.
+Beta defines the slope of the range of operation, `H_L_FG_share_max` defines its right boundary.
 
-To model a back-pressure turbine, the attribute back_pressure has to be set 'True'. The operator in constraint 10 is
+To model a back-pressure turbine, the attribute back_pressure has to be set `True`. The operator in constraint 10 is
 set to “=”, instead of “=<”, so the range of operation is limited to one line (figure 2), which defines a fixed amount
-of heat load for every amount of electrical power. Q_CW_min and beta have to be 0.
+of heat load for every amount of electrical power. `Q_CW_min` and beta have to be 0.
 
 In contrast to the first type, the operation range of the motoric chp (figure 3) also has a left boundary, which shows
 the minimal heat extraction for a certain electrical load (figure 3). It is set with the attribute H_L_FG_share_min.
-If this attribute is given, constrain 11 will be used. Q_CW_min and beta have to be 0.
+If this attribute is given, constrain 11 will be used. `Q_CW_min` and `Beta` have to be 0.
 
 .. include:: ../oemof/solph/components.py
   :start-after: _GenericCHP-equations:
