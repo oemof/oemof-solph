@@ -417,10 +417,6 @@ as shown in the figure below.
    :alt: scheme of GenericCHP operation range
    :align: center
 
-.. include:: ../oemof/solph/components.py
-  :start-after: _GenericCHP-equations:
-  :end-before: """
-
 To model the different types it is necessary to modify the used constraints, which are defined by input attributes.
 Constraint 1 to 9 are always used, constraint 10 is used with different operators for the different types.
 If the attribute back_pressure is true, it is an equal sign, if not it is a less-than-or-equal sign.  Constraint 11
@@ -436,6 +432,10 @@ of heat load for every amount of electrical power. Q_CW_min and beta have to be 
 In contrast to the first type, the operation range of the motoric chp (figure 3) also has a left boundary, which shows
 the minimal heat extraction for a certain electrical load (figure 3). It is set with the attribute H_L_FG_share_min.
 If this attribute is given, constrain 11 will be used. Q_CW_min and beta have to be 0.
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations:
+  :end-before: """
 
 .. code-block:: python
 
