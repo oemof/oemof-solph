@@ -627,7 +627,7 @@ class GenericCHP(network.Transformer):
         optimization period).
     back_pressure : boolean
         Flag to use back-pressure characteristics. Set to `True` and
-        `Q_CW_min=[0.]` for back-pressure turbines. See paper above for more
+        `Q_CW_min` to zero for back-pressure turbines. See paper above for more
         information.
 
     Notes
