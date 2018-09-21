@@ -189,7 +189,7 @@ def test_results_with_old_dump():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
 
 
-def test_attributes():
+def test_solph_transformer_attributes_before_dump_and_after_restore():
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -201,3 +201,4 @@ def test_attributes():
 
     # Compare parameter before the dump and after the restore
     eq_(trsf_attr_before_dump, trsf_attr_after_restore)
+
