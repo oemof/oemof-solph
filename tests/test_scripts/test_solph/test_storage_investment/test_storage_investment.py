@@ -37,6 +37,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 from pickle import UnpicklingError
 
 from nose.tools import eq_, ok_
+
 from oemof.tools import economics
 
 import oemof.solph as solph
@@ -47,8 +48,12 @@ import logging
 import os
 import pandas as pd
 
+PP_GAS = None
 
-def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
+
+def test_optimise_storage_size(filename="storage_investment.csv",
+                               solver='cbc'):
+    global PP_GAS
 
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=400, freq='H')
@@ -80,8 +85,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         actual_value=data['pv'], nominal_value=582000, fixed=True)})
 
     # Transformer
-    solph.Transformer(
-        label="pp_gas",
+    PP_GAS = solph.Transformer(
+        label='pp_gas',
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
@@ -108,6 +113,9 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Check dump and restore
     energysystem.dump()
+
+
+def test_results_with_actual_dump():
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -152,9 +160,11 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # Objective function
     eq_(round(meta['objective']), 423167578261115584)
 
-    # **************************************************
-    # Test again with a stored dump created with v0.2.1dev (896a6d50)
 
+def test_results_with_old_dump():
+    """
+    Test again with a stored dump created with v0.2.1dev (896a6d50)
+    """
     energysystem = solph.EnergySystem()
     error = None
     try:
@@ -194,3 +204,23 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+
+
+def test_solph_transformer_attributes_before_dump_and_after_restore():
+    """ dump/restore should preserve all attributes of `solph.Transformer`
+    """
+    energysystem = solph.EnergySystem()
+    energysystem.restore()
+
+    trsf_attr_before_dump = sorted(
+        [x for x in dir(PP_GAS) if '__' not in x])
+
+    trsf_attr_after_restore = sorted(
+        [x for x in dir(energysystem.groups['pp_gas']) if '__' not in x])
+
+    # Compare parameter before the dump and after the restore
+    # Once #474 is fixed, this test will start to fail, which will make you
+    # realize, that #474 is fixed. Just change the `!=` to `==` (or rewrite
+    # test using `eq_`) and boom, you have a nice regression test.
+    ok_(trsf_attr_before_dump != trsf_attr_after_restore)
+
