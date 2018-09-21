@@ -307,10 +307,15 @@ def deserialize_energy_system(cls, path,
     for r in package.resources:
         if all(re.match(r'^data/elements/.*$', p)
                for p in listify(r.descriptor['path'], 1)):
-            r.read(keyed=True)
+            try:
+                facade_data = r.read(keyed=True, relations=True)
+            except:
+                raise exceptions.LoadError(
+                    ("Could not read data for resource with name `{}`. " +
+                     " Maybe wrong foreign keys?").format(r.name))
             foreign_keys = {fk["fields"]: fk["reference"]
                 for fk in r.descriptor['schema'].get("foreignKeys", ())}
-            for facade in r.read(keyed=True, relations=True):
+            for facade in facade_data:
                 # convert decimal to float
                 for f, v in facade.items():
                     if isinstance(v, Decimal):
