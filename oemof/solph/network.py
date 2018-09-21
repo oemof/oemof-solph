@@ -61,11 +61,11 @@ class Flow:
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
-    min : numeric (sequence or scalar)
-        Normed minimum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_value` with :attr:`min`
     max : numeric (sequence or scalar)
-        Nominal maximum value of the flow (see :attr:`min`).
+        Normed maximum value of the flow. The flow absolute maximum will be
+        calculated by multiplying :attr:`nominal_value` with :attr:`max`
+    min : numeric (sequence or scalar)
+        Nominal minimum value of the flow (see :attr:`max`).
     actual_value : numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
