@@ -88,7 +88,7 @@ class Parameter_Result_Tests:
         param_results = processing.parameter_as_dict(self.es,
                                                      exclude_none=True)
         assert_series_equal(
-            param_results[(b_el2, demand)]['scalars'],
+            param_results[(b_el2, demand)]['scalars'].sort_index(),
             pandas.Series(
                 {
                     'fixed': True,
@@ -100,7 +100,7 @@ class Parameter_Result_Tests:
                     'variable_costs': 0,
                     'label': str(b_el2.outputs[demand].label),
                 }
-            )
+            ).sort_index()
         )
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
