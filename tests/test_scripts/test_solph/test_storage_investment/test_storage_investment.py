@@ -35,7 +35,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from nose.tools import eq_
-import unittest
 
 from oemof.tools import economics
 
@@ -190,7 +189,6 @@ def test_results_with_old_dump():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
 
 
-@unittest.skip("Failing test for bug #474. Will be fixed in PR #510")
 def test_attributes():
     energysystem = solph.EnergySystem()
     energysystem.restore()
