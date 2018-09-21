@@ -218,9 +218,6 @@ def test_solph_transformer_attributes_before_dump_and_after_restore():
     trsf_attr_after_restore = sorted(
         [x for x in dir(energysystem.groups['pp_gas']) if '__' not in x])
 
-    # Compare parameter before the dump and after the restore
-    # Once #474 is fixed, this test will start to fail, which will make you
-    # realize, that #474 is fixed. Just change the `!=` to `==` (or rewrite
-    # test using `eq_`) and boom, you have a nice regression test.
-    ok_(trsf_attr_before_dump != trsf_attr_after_restore)
+    # Compare attributes before dump and after restore
+    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
 
