@@ -160,7 +160,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     try:
         energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
-                filename='es_dump_test.oemof')
+                filename='es_dump_test_2_1dev.oemof')
     except UnpicklingError as e:
         error = e
 
@@ -168,7 +168,12 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # changes, the test has to be changed accordingly.
     eq_(len(str(error)), 431)
 
-    """
+    # **************************************************
+    # Test again with a stored dump created with v0.2.3dev (896a6d50)
+    energysystem = solph.EnergySystem()
+    energysystem.restore(
+                dpath=os.path.dirname(os.path.realpath(__file__)),
+                filename='es_dump_test_2_3dev.oemof')
     results = energysystem.results['main']
 
     electricity_bus = views.node(results, 'electricity')
@@ -189,4 +194,3 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
-    """
