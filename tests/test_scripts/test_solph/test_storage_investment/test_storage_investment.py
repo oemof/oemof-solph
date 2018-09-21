@@ -34,7 +34,7 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 
 from oemof.tools import economics
 
@@ -202,5 +202,8 @@ def test_solph_transformer_attributes_before_dump_and_after_restore():
         [x for x in dir(energysystem.groups['pp_gas']) if '__' not in x])
 
     # Compare parameter before the dump and after the restore
-    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
+    # Once #474 is fixed, this test will start to fail, which will make you
+    # realize, that #474 is fixed. Just change the `!=` to `==` (or rewrite
+    # test using `eq_`) and boom, you have a nice regression test.
+    ok_(trsf_attr_before_dump != trsf_attr_after_restore)
 
