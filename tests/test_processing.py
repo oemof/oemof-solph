@@ -106,7 +106,7 @@ class Parameter_Result_Tests:
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
                 {'actual_value': self.demand_values}
-            )
+            ), check_like=True
         )
 
     def test_flows_without_none_exclusion(self):
@@ -134,8 +134,8 @@ class Parameter_Result_Tests:
             'label': str(b_el2.outputs[demand].label),
         }
         assert_series_equal(
-            param_results[(b_el2, demand)]['scalars'],
-            pandas.Series(scalar_attributes)
+            param_results[(b_el2, demand)]['scalars'].sort_index(),
+            pandas.Series(scalar_attributes).sort_index()
         )
         sequences_attributes = {
             'actual_value': self.demand_values,
@@ -148,7 +148,7 @@ class Parameter_Result_Tests:
                 sequences_attributes[attr] = [None]
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
-            pandas.DataFrame(sequences_attributes)
+            pandas.DataFrame(sequences_attributes), check_like=True
         )
 
     def test_nodes_with_none_exclusion(self):
