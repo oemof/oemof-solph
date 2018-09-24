@@ -223,10 +223,7 @@ class Node:
         return id(self) == id(other)
 
     def __lt__(self, other):
-        try:
-            return str(self.label) < str(other.label)
-        except AttributeError:
-            return False
+        return str(self) < str(other)
 
     def __hash__(self):
         return hash(self.label)
