@@ -10,7 +10,7 @@ available from its original location oemof/oemof/outputlib/views.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
-
+import logging
 import pandas as pd
 from enum import Enum
 from oemof.outputlib.processing import convert_keys_to_strings
@@ -186,20 +186,48 @@ def get_node_by_name(results, *names):
 
 def node_weight_by_type(results, node_type=None):
     """
+    Extracts node weights (if exist) of all components of the specified
+    `node_type`.
+
+    Node weight are endogenous optimzation variables associated with the node
+    and not the edge between two node, foxample the variable representing the
+    storage level.
+
+    Parameters
+    ----------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object 
+    node_type: oemof.solph class
+        Specifies the type for which node weights should be collected
+
+    Usage
+    --------
+    from oemof.outputlib import views
+
+    # solve oemof model 'm'
+    # Then collect node weights
+    views.node_weight_by_type(m.results(), node_type=solph.GenericStorage)
     """
+
+    if node_type is None:
+        raise ValueError('Argument `node_type` must not be of type None!')
 
     group = {k: v['sequences'] for k,v in results.items()
              if isinstance(k[0], node_type) and k[1] is None}
-    df = pd.concat(group.values(), axis=1)
-    cols = {k: [c for c in v.columns]
-            for k, v in group.items()}
-    cols = [tuple((k, m) for m in v) for k, v in cols.items()]
-    cols = [c for sublist in cols for c in sublist]
-    idx = pd.MultiIndex.from_tuples(
-                        [tuple([col[0][0], col[0][1], col[1]])
-                         for col in cols])
-    idx.set_names(['node_type', 'to', 'weight_type'], inplace=True)
-    df.columns = idx
-    df.columns = df.columns.droplevel([1])
+    if not group:
+        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        return False
+    else:
+        df = pd.concat(group.values(), axis=1)
+        cols = {k: [c for c in v.columns]
+                for k, v in group.items()}
+        cols = [tuple((k, m) for m in v) for k, v in cols.items()]
+        cols = [c for sublist in cols for c in sublist]
+        idx = pd.MultiIndex.from_tuples(
+                            [tuple([col[0][0], col[0][1], col[1]])
+                             for col in cols])
+        idx.set_names(['node', 'to', 'weight_type'], inplace=True)
+        df.columns = idx
+        df.columns = df.columns.droplevel([1])
 
-    return df
+        return df
