@@ -186,9 +186,7 @@ class Node:
         return id(self) == id(other)
 
     def __lt__(self, other):
-        if other is None:
-            return False
-        return self.label < other.label
+        return str(self) < str(other)
 
     def __hash__(self):
         return hash(self.label)
