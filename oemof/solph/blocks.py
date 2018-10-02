@@ -138,7 +138,7 @@ class Flow(SimpleBlock):
                     self.positive_gradient[i, o, t].setub(
                         f.positive_gradient['ub'][t] * f.nominal_value)
             if m.flows[i, o].negative_gradient['ub'][0] is not None:
-                m.report['variables']['positive_gradient'] = {
+                m.report['variables']['negative_gradient'] = {
                     'upper bound': 'ng_{i,o,t} \ļeq edge^{ng}_{i,o,t} \cdot edge^{nv}'}
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
