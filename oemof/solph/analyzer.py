@@ -8,7 +8,7 @@ default function is called.
 """
 
 from warnings import warn
-from collections import OrderedDict, abc
+from collections import OrderedDict, abc, namedtuple
 from oemof.network import Node, Bus
 from oemof.outputlib import views
 
@@ -382,6 +382,9 @@ class BusBalanceAnalyzer(NodeBalanceAnalyzer):
     # If so, BusBalanceAnalyzer could simply filter results to
 
 
+LCOEResult = namedtuple('LCOEResult', ['investment', 'variable_costs'])
+
+
 class LCOEAnalyzer(Analyzer):
     depends_on = (
         SequenceFlowSumAnalyzer, VariableCostAnalyzer, InvestAnalyzer)
@@ -425,6 +428,6 @@ class LCOEAnalyzer(Analyzer):
                 return
             inv = 0.0
 
-        result = (inv + vc) / self.total_load
+        result = LCOEResult(inv / self.total_load, vc / self.total_load)
         self.result[args] = result
-        self.total += result
+        self.total += result.investment + result.variable_costs
