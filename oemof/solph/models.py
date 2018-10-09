@@ -83,6 +83,21 @@ class BaseModel(po.ConcreteModel):
         if kwargs.get("auto_construct", True):
             self._construct()
 
+    def generate_report(self):
+        result = (
+                r'\begin{{align*}}'
+                '\n'
+                r'\operatorname{{minimize}} & {objective}'
+                '\n'
+                r'\orperatorname{{s.t.}} & {constraints}'
+                '\end{{align*}}')
+        report = self.report
+        components = {'constraints': ''}
+        components['objective'] = (r' \\' + '\n + & ').join(
+                r'\underbrace{{{}}}_{{\textrm{{{}}}}}'.format(objective, name)
+                for name, objective in m.report['objective'].items())
+        return result.format(**components)
+
     def _construct(self):
         """
         """
