@@ -95,7 +95,7 @@ class BaseModel(po.ConcreteModel):
         components = {'constraints': ''}
         components['objective'] = (r' \\' + '\n + & ').join(
                 r'\underbrace{{{}}}_{{\textrm{{{}}}}}'.format(objective, name)
-                for name, objective in m.report['objective'].items())
+                for name, objective in self.report['objective'].items())
         return result.format(**components)
 
     def _construct(self):
