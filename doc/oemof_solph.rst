@@ -371,14 +371,14 @@ flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
-    solph.ExtractionTurbineCHP(
+    solph.component.ExtractionTurbineCHP(
         label='variable_chp_gas',
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
-        conversion_factor_single_flow={b_el: 0.5})
+        conversion_factor_full_condensation={b_el: 0.5})
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the
+The key of the parameter *'conversion_factor_full_condensation'* will indicate the
 main flow. In the example above, the flow to the Bus *'b_el'* is the main flow
 and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows
 how the variable chp (right) schedules it's electrical and thermal power
