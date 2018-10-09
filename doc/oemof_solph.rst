@@ -371,7 +371,7 @@ flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
-    solph.component.ExtractionTurbineCHP(
+    solph.ExtractionTurbineCHP(
         label='variable_chp_gas',
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
