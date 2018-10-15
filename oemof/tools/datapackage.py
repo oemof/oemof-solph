@@ -136,7 +136,7 @@ def deserialize_energy_system(cls, path,
         try:
             r.read()
         except exceptions.CastError:
-            exceptions.CastError(
+            raise exceptions.CastError(
                 (cast_error_msg).format(r.name))
     empty = types.SimpleNamespace()
     empty.read = lambda *xs, **ks: ()
@@ -326,7 +326,6 @@ def deserialize_energy_system(cls, path,
                 for f, v in facade.items():
                     if isinstance(v, Decimal):
                         facade[f] = float(v)
-
                 read_facade(facade, facades, create, typemap, data, objects,
                             sequence_names,
                             foreign_keys,
