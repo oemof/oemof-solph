@@ -88,8 +88,8 @@ class BaseModel(po.ConcreteModel):
                 r'\begin{{align*}}'
                 '\n'
                 r'\operatorname{{minimize}} & {objective}'
+                r'\operatorname{{s.t.:}} & {constraints}'
                 '\n'
-                r'\orperatorname{{s.t.}} & {constraints}'
                 '\end{{align*}}')
         report = self.report
         components = {'constraints': ''}

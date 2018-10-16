@@ -242,7 +242,7 @@ class Flow(SimpleBlock):
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 m.report['objective']['variable cost'] = (
-                    '\sum_{i,o \in F} \sum_{t \in T} flow_{i,o,t} \dcot '
+                    '\sum_{i,o \in F} \sum_{t \in T} flow_{i,o,t} \cdot '
                     r'\tau^{obj} \cdot edge^{cvar}_{i,o,t}')
                 for t in m.TIMESTEPS:
                     variable_costs += (m.flow[i, o, t] * m.objective_weighting[t] *
@@ -250,7 +250,7 @@ class Flow(SimpleBlock):
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
                 m.report['objective']['positive gradient cost'] = (
-                    '\sum_{i,o \in F} \sum_{t \in T} pg_{i,o,t} \dcot '
+                    '\sum_{i,o \in F} \sum_{t \in T} pg_{i,o,t} \cdot '
                     'edge^{pg,cost}_{i,o}')
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
@@ -259,7 +259,7 @@ class Flow(SimpleBlock):
 
             if m.flows[i, o].negative_gradient['ub'][0] is not None:
                 m.report['objective']['negative gradient cost'] = (
-                    '\sum_{i,o \in F} \sum_{t \in T} ng_{i,o,t} \dcot '
+                    '\sum_{i,o \in F} \sum_{t \in T} ng_{i,o,t} \cdot '
                     'edge^{ng,cost}_{i,o}')
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
