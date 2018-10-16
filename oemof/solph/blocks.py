@@ -159,9 +159,9 @@ class Flow(SimpleBlock):
                 self.summed_max.add((inp, out), lhs <= rhs)
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
         if self.SUMMED_MAX_FLOWS:
-            m.report['constraints']['summed max'] = {
+            m.report['constraints']['summed max'] = (
                     r'flow_{i,o,t} \cdot \tau \leq edge^{smax}_{i,o} \cdot '
-                    'edge_^{nv}_{i,o}'}
+                    'edge_^{nv}_{i,o}')
         self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
 
         def _flow_summed_min_rule(model):
@@ -175,9 +175,9 @@ class Flow(SimpleBlock):
                 self.summed_min.add((inp, out), lhs >= rhs)
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
         if self.SUMMED_MIN_FLOWS:
-            m.report['constraints']['summed min'] = {
+            m.report['constraints']['summed min'] = (
                     r'flow_{i,o,t} \cdot \tau \geq edge^{smin}_{i,o} \cdot '
-                    'edge_^{nv}_{i,o}'}
+                    'edge_^{nv}_{i,o}')
             self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
         def _positive_gradient_flow_rule(model):
@@ -195,8 +195,8 @@ class Flow(SimpleBlock):
         if self.POSITIVE_GRADIENT_FLOWS:
             self.positive_gradient_constr = Constraint(
                 self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
-            m.report['constraints']['positive gradient'] = {
-                'flow_{i,o,t} - flow_{i,o,t-1} \leq pg_{i,o,t}'}
+            m.report['constraints']['positive gradient'] = (
+                    'pg_{i,o,t} \geq flow_{i,o,t} - flow_{i,o,t-1}')
             self.positive_gradient_build = BuildAction(
                 rule=_positive_gradient_flow_rule)
 
@@ -215,8 +215,8 @@ class Flow(SimpleBlock):
         if self.NEGATIVE_GRADIENT_FLOWS:
             self.negative_gradient_constr = Constraint(
                 self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
-            m.report['constraints']['negative gradient'] = {
-                'flow_{i,o,t-1} - flow_{i,o,t} \leq ng_{i,o,t}'}
+            m.report['constraints']['negative gradient'] = (
+                'ng_{i,o,t} \geq flow_{i,o,t-1} - flow_{i,o,t}')
             self.negative_gradient_build = BuildAction(
                 rule=_negative_gradient_flow_rule)
 
@@ -225,8 +225,8 @@ class Flow(SimpleBlock):
             """
             return self.integer_flow[i, o, t] == m.flow[i, o, t]
         if self.INTEGER_FLOWS:
-            m.report['constraints']['integer flow'] = {
-                'flow_{i,o,t} = integer_flow_{i,o,t}'}
+            m.report['constraints']['integer flow'] = (
+                'flow_{i,o,t} = integer_flow_{i,o,t}')
             self.integer_flow_constr = Constraint(self.INTEGER_FLOWS, m.TIMESTEPS,
                                                   rule=_integer_flow_rule)
 
