@@ -8,15 +8,16 @@ available from its original location oemof/oemof/solph/models.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import logging
 import re
 
-import pyomo.environ as po
-from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
+from pyomo.opt import SolverFactory
+import pyomo.environ as po
+
+from oemof.outputlib import processing
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
-from oemof.outputlib import processing
-import logging
 
 
 class BaseModel(po.ConcreteModel):
