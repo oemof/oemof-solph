@@ -196,3 +196,43 @@ class Analyzer_Tests:
             lcoe.result[(es_with_invest.b_el2, es_with_invest.demand)],
             (0, 0)
         )
+
+    def test_prodcution_analyzer(self):
+        self.analysis.clean()
+        production = analyzer.ProductionAnalyzer()
+        self.analysis.add_analyzer(production)
+        self.analysis.analyze()
+
+        eq_(
+            production.result[(es_with_invest.b_el2, es_with_invest.demand)],
+            (100, 100, 100, 100)
+        )
+        eq_(
+            production.result[
+                (es_with_invest.b_el1, es_with_invest.batt)
+            ],
+            (125, 62.5, 62.5, 62.5)
+        )
+
+    def test_operating_hours_analyzer(self):
+        self.analysis.clean()
+        op = analyzer.OperatingHoursAnalyzer()
+        self.analysis.add_analyzer(op)
+        self.analysis.analyze()
+
+        eq_(
+            op.result[(es_with_invest.b_el2, es_with_invest.demand)],
+            1
+        )
+        eq_(
+            op.result[
+                (es_with_invest.b_el1, es_with_invest.batt)
+            ],
+            2
+        )
+        eq_(
+            op.result[
+                (es_with_invest.batt, es_with_invest.b_el2)
+            ],
+            1
+        )

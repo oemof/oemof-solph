@@ -446,3 +446,47 @@ class LCOEAnalyzer(Analyzer):
         result = LCOEResult(inv / self.total_load, vc / self.total_load)
         self.result[args] = result
         self.total += result.investment + result.variable_costs
+
+
+class OperatingHoursAnalyzer(Analyzer):
+    """
+    Returns amount of operating hours
+    """
+    requires = ('results',)
+
+    def analyze(self, *args):
+        super(OperatingHoursAnalyzer, self).analyze(*args)
+        try:
+            rsq = self.rsq(args)
+            result = (rsq['flow'] > 0).sum()
+        except KeyError:
+            return
+        self.result[args] = result
+        self.total += result
+
+
+ProductionResult = namedtuple(
+    'ProductionResult', ['sum', 'mean', 'max', 'min'])
+
+
+class ProductionAnalyzer(Analyzer):
+    """
+    Returns power during operating hours
+    """
+    requires = ('results',)
+
+    def analyze(self, *args):
+        super(ProductionAnalyzer, self).analyze(*args)
+        try:
+            rsq = self.rsq(args)
+            production = rsq['flow'][rsq['flow'] > 0]
+        except KeyError:
+            return
+        result = ProductionResult(
+            production.sum(),
+            production.mean(),
+            production.min(),
+            production.max()
+        )
+        self.result[args] = result
+        self.total += result.sum
