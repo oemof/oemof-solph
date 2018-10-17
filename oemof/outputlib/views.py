@@ -10,13 +10,16 @@ available from its original location oemof/oemof/outputlib/views.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
-
+import logging
 import pandas as pd
 from enum import Enum
 from oemof.outputlib.processing import convert_keys_to_strings
 
 
-def node(results, node, multiindex=False):
+NONE_REPLACEMENT_STR = '_NONE_'
+
+
+def node(results, node, multiindex=False, keep_none_type=False):
     """
     Obtain results for a single node e.g. a Bus or Component.
 
@@ -24,9 +27,26 @@ def node(results, node, multiindex=False):
     Results are written into a dictionary which is keyed by 'scalars' and
     'sequences' holding respective data in a pandas Series and DataFrame.
     """
+    def replace_none(col_list, reverse=False):
+        replacement = (
+            (None, NONE_REPLACEMENT_STR) if reverse else
+            (NONE_REPLACEMENT_STR, None)
+        )
+        changed_col_list = [
+            (
+                (
+                    replacement[0] if n1 is replacement[1] else n1,
+                    replacement[0] if n2 is replacement[1] else n2
+                ),
+                f
+            )
+            for (n1, n2), f in col_list
+        ]
+        return changed_col_list
+
     # convert to keys if only a string is passed
     if type(node) is str:
-        results = convert_keys_to_strings(results)
+        results = convert_keys_to_strings(results, keep_none_type)
 
     filtered = {}
 
@@ -43,7 +63,16 @@ def node(results, node, multiindex=False):
         idx = [tuple((k, m) for m in v) for k, v in idx.items()]
         idx = [i for sublist in idx for i in sublist]
         filtered['scalars'].index = idx
+
+        # Sort index
+        # (if Nones are present, they have to be replaced while sorting)
+        if keep_none_type:
+            filtered['scalars'].index = replace_none(
+                filtered['scalars'].index.tolist())
         filtered['scalars'].sort_index(axis=0, inplace=True)
+        if keep_none_type:
+            filtered['scalars'].index = replace_none(
+                filtered['scalars'].index.tolist(), True)
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
@@ -64,8 +93,10 @@ def node(results, node, multiindex=False):
                 if node in k and not v['sequences'].empty}
         cols = [tuple((k, m) for m in v) for k, v in cols.items()]
         cols = [c for sublist in cols for c in sublist]
-        filtered['sequences'].columns = cols
+        filtered['sequences'].columns = replace_none(cols)
         filtered['sequences'].sort_index(axis=1, inplace=True)
+        filtered['sequences'].columns = replace_none(
+            filtered['sequences'].columns, True)
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
@@ -124,33 +155,36 @@ class NodeOption(str, Enum):
 
 
 def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
-    """
-    Get set of nodes from results-dict for given node option
+    """ Get set of nodes from results-dict for given node option.
 
     This function filters nodes from results for special needs. At the moment,
-    following options are available:
-        * NodeOption.All/'all':
+    the following options are available:
+
+        * :attr:`NodeOption.All`/:py:`'all'`:
             Returns all nodes
-        * NodeOption.HasOutputs/'has_outputs':
+        * :attr:`NodeOption.HasOutputs`/:py:`'has_outputs'`:
             Returns nodes with an output flow (eg. Transformer, Source)
-        * NodeOption.HasInputs/'has_inputs':
+        * :attr:`NodeOption.HasInputs`/:py:`'has_inputs'`:
             Returns nodes with an input flow (eg. Transformer, Sink)
-        * NodeOption.HasOnlyOutputs/'has_only_outputs':
+        * :attr:`NodeOption.HasOnlyOutputs`/:py:`'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
-        * NodeOption.HasOnlyInputs/'has_only_inputs':
+        * :attr:`NodeOption.HasOnlyInputs`/:py:`'has_only_inputs'`:
             Returns nodes having only input flows (eg. Sink)
-    Additionally, busses can be excluded setting 'exclude_busses' to True.
+
+    Additionally, busses can be excluded by setting `exclude_busses` to
+    :const:`True`.
 
     Parameters
     ----------
     results: dict
     option: NodeOption
     exclude_busses: bool
-        If set all bus nodes are excluded from resulting node set
+        If set, all bus nodes are excluded from the resulting node set.
 
     Returns
     -------
-    :obj:'set' of Node
+    :obj:`set`
+        A set of Nodes.
     """
     node_from, node_to = map(lambda x: set(x) - {None}, zip(*results))
     if option == NodeOption.All:
@@ -186,3 +220,52 @@ def get_node_by_name(results, *names):
     else:
         node_names = {str(n): n for n in nodes}
         return [node_names.get(n, None) for n in names]
+
+
+def node_weight_by_type(results, node_type=None):
+    """
+    Extracts node weights (if exist) of all components of the specified
+    `node_type`.
+
+    Node weight are endogenous optimzation variables associated with the node
+    and not the edge between two node, foxample the variable representing the
+    storage level.
+
+    Parameters
+    ----------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object 
+    node_type: oemof.solph class
+        Specifies the type for which node weights should be collected
+
+    Usage
+    --------
+    from oemof.outputlib import views
+
+    # solve oemof model 'm'
+    # Then collect node weights
+    views.node_weight_by_type(m.results(), node_type=solph.GenericStorage)
+    """
+
+    if node_type is None:
+        raise ValueError('Argument `node_type` must not be of type None!')
+
+    group = {k: v['sequences'] for k,v in results.items()
+             if isinstance(k[0], node_type) and k[1] is None}
+    if not group:
+        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        return False
+    else:
+        df = pd.concat(group.values(), axis=1)
+        cols = {k: [c for c in v.columns]
+                for k, v in group.items()}
+        cols = [tuple((k, m) for m in v) for k, v in cols.items()]
+        cols = [c for sublist in cols for c in sublist]
+        idx = pd.MultiIndex.from_tuples(
+                            [tuple([col[0][0], col[0][1], col[1]])
+                             for col in cols])
+        idx.set_names(['node', 'to', 'weight_type'], inplace=True)
+        df.columns = idx
+        df.columns = df.columns.droplevel([1])
+
+        return df

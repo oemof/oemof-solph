@@ -24,11 +24,20 @@ from oemof.solph import blocks
 import oemof.groupings as groupings
 
 
-def constraint_grouping(node):
+def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     """Grouping function for constraints.
 
     This function can be passed in a list to :attr:`groupings` of
     :class:`oemof.solph.network.EnergySystem`.
+
+    Parameters
+    ----------
+    node : :class:`Node <oemof.network.Node`
+        The node for which the figure out a constraint group.
+    fallback : callable, optional
+        A function of one argument. If `node` doesn't have a `constraint_group`
+        attribute, this is used to group the node instead. Defaults to not
+        group the node at all.
     """
     # TODO: Refactor this for looser coupling between modules.
     # This code causes an unwanted tight coupling between the `groupings` and
@@ -40,23 +49,35 @@ def constraint_grouping(node):
     # method here.
     # This even gives other users/us the ability to customize/extend how
     # constraints are grouped by overriding the method in future subclasses.
-    if isinstance(node, Bus) and node.balanced:
-        return blocks.Bus
-    if type(node) == Transformer:
-        return blocks.Transformer
 
-
-investment_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.InvestmentFlow,
-    # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
-    filter=lambda stf: stf[2].investment is not None)
+    cg = getattr(node, "constraint_group", fallback)
+    return cg()
 
 standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow)
 
+def _investment_grouping(stf):
+    if hasattr(stf[2], 'investment'):
+        if stf[2].investment is not None:
+            return True
+    else:
+        return False
+
+investment_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.InvestmentFlow,
+    # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
+    filter=_investment_grouping)
+
+def _nonconvex_grouping(stf):
+    if hasattr(stf[2], 'nonconvex'):
+        if stf[2].nonconvex is not None:
+            return True
+    else:
+        return False
+
 nonconvex_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.NonConvexFlow,
-    filter=lambda stf: stf[2].nonconvex is not None)
+    filter=_nonconvex_grouping)
 
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,

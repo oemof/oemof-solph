@@ -108,6 +108,9 @@ class ElectricalLine(Transformer):
         """
         return [o for o in self.outputs][0]
 
+    def constraint_group(self):
+        return ElectricalLineBlock
+
 
 class ElectricalLineBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
@@ -257,6 +260,8 @@ class Link(Transformer):
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
+    def constraint_group(self):
+        return LinkBlock
 
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
@@ -401,6 +406,9 @@ class GenericCAES(Transformer):
         self.inputs.update(kwargs.get('electrical_input'))
         self.inputs.update(kwargs.get('fuel_input'))
         self.outputs.update(kwargs.get('electrical_output'))
+
+    def constraint_group(self):
+        return GenericCAESBlock
 
 
 class GenericCAESBlock(SimpleBlock):
@@ -739,6 +747,9 @@ class OffsetTransformer(Transformer):
             raise ValueError("Component `OffsetTransformer` must not have" +
                              "more than 1 input and 1 output!")
 
+    def constraint_group(self):
+        return OffsetTransformerBlock
+
 
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
@@ -786,14 +797,3 @@ class OffsetTransformerBlock(SimpleBlock):
             return expr == 0
         self.relation = Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
                                    rule=_relation_rule)
-
-
-def custom_component_grouping(node):
-    if isinstance(node, ElectricalLine):
-        return ElectricalLineBlock
-    if isinstance(node, GenericCAES):
-        return GenericCAESBlock
-    if isinstance(node, Link):
-        return LinkBlock
-    if isinstance(node, OffsetTransformer):
-        return OffsetTransformerBlock

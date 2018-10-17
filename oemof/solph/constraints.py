@@ -75,7 +75,7 @@ def emission_limit(om, flows=None, limit=None):
                                                                       o.label))
 
     def emission_rule(m):
-        return (sum(m.flow[inflow, outflow, t] *
+        return (sum(m.flow[inflow, outflow, t] * m.timeincrement[t] *
                     flows[inflow, outflow].emission
                 for (inflow, outflow) in flows
                 for t in m.TIMESTEPS) <= limit)
