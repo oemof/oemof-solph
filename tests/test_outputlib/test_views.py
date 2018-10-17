@@ -1,6 +1,6 @@
 
 from nose.tools import eq_
-from . import optimization_model, energysystem
+from energysystems_for_testing.multiple_sources_and_transformers import optimization_model, energysystem
 from oemof.outputlib import processing, views
 
 
