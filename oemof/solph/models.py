@@ -87,8 +87,11 @@ class BaseModel(po.ConcreteModel):
         result = (
                 r'\begin{{aligned}}'
                 '\n'
-                r'\operatorname{{minimize}} & {objective}'
-                r'\operatorname{{s.t.:}} & {constraints}'
+                r'\operatorname{{minimize}} & {objective} \\'
+                '\n'
+                r'\operatorname{{s.t.:}} \\'
+                '\n'
+                '{constraints}'
                 '\n'
                 '\end{{aligned}}')
         report = self.report
