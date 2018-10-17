@@ -8,6 +8,8 @@ available from its original location oemof/oemof/solph/models.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import re
+
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -95,10 +97,13 @@ class BaseModel(po.ConcreteModel):
                 '\n'
                 '\end{{aligned}}')
         report = self.report
-        components = {'constraints': ''}
+        components = {}
         components['objective'] = (r' \\' + '\n + & ').join(
                 r'\underbrace{{{}}}_{{\textrm{{{}}}}}'.format(objective, name)
                 for name, objective in self.report['objective'].items())
+        components['constraints'] = (r' \\' + '\n + & ').join(
+                re.sub(r'(\\leq|\\geq|=|<|>)', r'\1{} &', c)
+                for c in self.report['constraints'].values())
         return result.format(**components)
 
     def _construct(self):
