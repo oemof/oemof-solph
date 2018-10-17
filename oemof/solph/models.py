@@ -85,12 +85,12 @@ class BaseModel(po.ConcreteModel):
 
     def generate_report(self):
         result = (
-                r'\begin{{align*}}'
+                r'\begin{{aligned}}'
                 '\n'
                 r'\operatorname{{minimize}} & {objective}'
                 r'\operatorname{{s.t.:}} & {constraints}'
                 '\n'
-                '\end{{align*}}')
+                '\end{{aligned}}')
         report = self.report
         components = {'constraints': ''}
         components['objective'] = (r' \\' + '\n + & ').join(
