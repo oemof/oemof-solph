@@ -107,6 +107,7 @@ class Analyzer_Tests:
     def test_invest_analyzer(self):
         self.analysis.clean()
         invest = analyzer.InvestAnalyzer()
+        self.analysis.add_analyzer(analyzer.SizeAnalyzer())
         self.analysis.add_analyzer(invest)
         self.analysis.analyze()
 
@@ -129,6 +130,7 @@ class Analyzer_Tests:
         self.analysis.add_analyzer(analyzer.FlowTypeAnalyzer())
         self.analysis.add_analyzer(analyzer.NodeBalanceAnalyzer())
         self.analysis.add_analyzer(analyzer.VariableCostAnalyzer())
+        self.analysis.add_analyzer(analyzer.SizeAnalyzer())
         self.analysis.add_analyzer(analyzer.InvestAnalyzer())
         lcoe = analyzer.LCOEAnalyzer([es_with_invest.demand])
         self.analysis.add_analyzer(lcoe)
@@ -139,25 +141,58 @@ class Analyzer_Tests:
 
         # dg
         eq_(
-            lcoe.result[(es_with_invest.dg, es_with_invest.b_el1)],
-            (125 + 62.5 * 0.5) / output
+            lcoe.result[(es_with_invest.dg, es_with_invest.b_el1)].variable_costs,
+            125 / output
         )
         eq_(
-            lcoe.result[(es_with_invest.b_diesel, es_with_invest.dg)],
+            lcoe.result[
+                (es_with_invest.dg, es_with_invest.b_el1)
+            ].investment,
+            62.5 * 0.5 / output
+        )
+        eq_(
+            lcoe.result[
+                (es_with_invest.b_diesel, es_with_invest.dg)
+            ].investment,
+            0.0
+        )
+        eq_(
+            lcoe.result[
+                (es_with_invest.b_diesel, es_with_invest.dg)
+            ].variable_costs,
             125 / output
         )
 
         # batt
-        eq_(lcoe.result[(es_with_invest.batt, None)], 600 * 0.4 / output)
         eq_(
-            lcoe.result[(es_with_invest.b_el1, es_with_invest.batt)],
+            lcoe.result[(es_with_invest.batt, None)].investment,
+            600 * 0.4 / output
+        )
+        eq_(
+            lcoe.result[
+                (es_with_invest.b_el1, es_with_invest.batt)
+            ].investment,
+            0.0
+        )
+        eq_(
+            lcoe.result[
+                (es_with_invest.b_el1, es_with_invest.batt)
+            ].variable_costs,
             375 / output
         )
         eq_(
-            lcoe.result[(es_with_invest.batt, es_with_invest.b_el2)],
+            lcoe.result[
+                (es_with_invest.batt, es_with_invest.b_el2)
+            ].investment,
+            0.0
+        )
+        eq_(
+            lcoe.result[
+                (es_with_invest.batt, es_with_invest.b_el2)
+            ].variable_costs,
             250 / output
         )
         eq_(
             lcoe.result[(es_with_invest.b_el2, es_with_invest.demand)],
-            0 / output
+            (0, 0)
         )
