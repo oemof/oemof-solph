@@ -31,7 +31,7 @@ setup(name='oemof',
                         'numpy >= 1.7.0, < 1.16',
                         'pandas >= 0.18.0, < 0.24',
                         'pyomo >= 4.4.0, <= 5.5.0',
-                        'networkx <= 2.1'],
+                        'networkx < 2.3'],
       extras_require={'datapackage': ['datapackage']},
       entry_points={
           'console_scripts': [
