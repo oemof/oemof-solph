@@ -97,7 +97,6 @@ class BaseModel(po.ConcreteModel):
                 '{constraints}'
                 '\n'
                 '\end{{aligned}}')
-        report = self.report
         components = {}
         components['objective'] = (r' \\' + '\n + & ').join(
                 r'\underbrace{{{}}}_{{\textrm{{{}}}}}'.format(objective, name)
