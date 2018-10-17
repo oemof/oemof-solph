@@ -369,6 +369,8 @@ def deserialize_energy_system(cls, path,
               if lst
               else cls())
 
+        es.datapackage = package
+
         es.add(*chain(data['components'].values(),
                       data['buses'].values(),
                       facades.values(),
