@@ -101,7 +101,7 @@ class BaseModel(po.ConcreteModel):
         components['objective'] = (r' \\' + '\n + & ').join(
                 r'\underbrace{{{}}}_{{\textrm{{{}}}}}'.format(objective, name)
                 for name, objective in self.report['objective'].items())
-        components['constraints'] = (r' \\' + '\n + & ').join(
+        components['constraints'] = (r' \\' + '\n').join(
                 re.sub(r'(\\leq|\\geq|=|<|>)', r'\1{} &', c)
                 for c in self.report['constraints'].values())
         return result.format(**components)
