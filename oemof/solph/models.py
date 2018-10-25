@@ -94,7 +94,9 @@ class BaseModel(po.ConcreteModel):
                 '\n'
                 r'\operatorname{{s.t.:}} \\'
                 '\n'
-                '{constraints}'
+                r'{constraints} \\'
+                '\n'
+                r'{variables}'
                 '\n'
                 '\end{{aligned}}')
         components = {}
@@ -104,6 +106,13 @@ class BaseModel(po.ConcreteModel):
         components['constraints'] = (r' \\' + '\n').join(
                 re.sub(r'(\\leq|\\geq|=|<|>)', r'\1{} &', c)
                 for c in self.report['constraints'].values())
+        components['variables'] = (r' \\' + '\n').join(
+                re.sub(
+                    r'(\\forall.*)',
+                    r' \\\\' + '\n' + r' & \1',
+                    re.sub(r'(\\leq|\\geq|=|<|>)', r'\1{} &', constraint))
+                for variable in self.report['variables']
+                for constraint in self.report['variables'][variable].values())
         return result.format(**components)
 
     def _construct(self):
