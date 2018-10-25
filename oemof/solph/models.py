@@ -363,7 +363,7 @@ class Model(BaseModel):
                     if not self.flows[o, i].nonconvex:
                         self.report['variables']['flow'].update({
                             'lower bound': (
-                                'flow_{i,o,t} = edge^{min}_{i,o,t} \cdot '
+                                'flow_{i,o,t} \geq edge^{min}_{i,o,t} \cdot '
                                 'edge^{nv}_{i,o}')})
                         # lower bound of flow variable
                         self.flow[o, i, t].setlb(
