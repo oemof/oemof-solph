@@ -333,7 +333,7 @@ class Model(BaseModel):
                 if self.flows[o, i].nominal_value is not None:
                     self.report['variables']['flow'].update({
                         'upper bound': (
-                            'flow_{i,o,t} \leq edge_{max}_{i,o,t} \cdot '
+                            'flow_{i,o,t} \leq edge^{max}_{i,o,t} \cdot '
                             'edge^{nv}_{i,o}')})
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
@@ -341,7 +341,7 @@ class Model(BaseModel):
                     if self.flows[o, i].actual_value[t] is not None:
                         self.report['variables']['flow'].update({
                             'value': (
-                                'flow_{i,o,t} = edge_{av}_{i,o,t} \cdot '
+                                'flow_{i,o,t} = edge^{av}_{i,o,t} \cdot '
                                 'edge^{nv}_{i,o}')})
                         # pre- optimized value of flow variable
                         self.flow[o, i, t].value = (
@@ -354,7 +354,7 @@ class Model(BaseModel):
                     if not self.flows[o, i].nonconvex:
                         self.report['variables']['flow'].update({
                             'lower bound': (
-                                'flow_{i,o,t} = edge_{min}_{i,o,t} \cdot '
+                                'flow_{i,o,t} = edge^{min}_{i,o,t} \cdot '
                                 'edge^{nv}_{i,o}')})
                         # lower bound of flow variable
                         self.flow[o, i, t].setlb(
