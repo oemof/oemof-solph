@@ -1,9 +1,15 @@
-v0.2.2 ()
+v0.2.2 (July 1, 2018)
 ++++++++++++++++++++++++++
 
 
 API changes
 ###########
+
+* The storage API has been revised, even though it is still possible to use the
+  old API. In that case a warning is raised
+  (`Issue #491 <https://github.com/oemof/oemof/issues/491>`_).
+* The newly introduced parm_results are not results and therefore renamed to
+  parameter_as_dict. The old name is still valid but raises a warning.
 
 
 
@@ -27,8 +33,13 @@ New features
   removed in v0.3.0. Please adapt your application to avoid problems in the
   future (`Issue #480 <https://github.com/oemof/oemof/issues/480>`_).
 
-* An option was added to decouple the last and the first time step of the storage
-  capacity. At the moment the last time step has always the same value as the first.
+* We now have experimental support for deserializing an energy system from a
+  tabular `data package <https://frictionlessdata.io/data-packages/>`_. Since
+  we have to extend the datapackage format a bit, the specification is not yet
+  finalized and documentation as well as tests range from sparse to
+  nonexistent. But anyone who wishes to help with the code is welcome to check
+  it out in the :mod:`datapackage <oemof.tools.datapackage>` module.
+
 
 New components
 ##############
@@ -38,10 +49,16 @@ New components
 Documentation
 #############
 
+* The documentation of the storage
+  `storage component <http://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
+* The documentation of the
+  `Extraction Turbine <https://oemof.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
 
 Known issues
 ############
 
+* It is not possible to model one time step with oemof.solph. You have to
+  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a comment if this bug affects you.
 
 Bug fixes
 #########
@@ -49,17 +66,29 @@ Bug fixes
 * Fix file extension check to dump a graph correctly as .graphml-file
 * The full constraint set of the ExtractionTurbineCHP class was only build for
   one object. If more than one object was present the input/output constraint
-  was missing. This leads to wrong results.
-* In the solph constraints module the emission constraint did not include
-  the timeincrement form the model which has now be fixed.
+  was missing. This lead to wrong results.
+* In the solph constraints module the emission constraint did not include the
+  timeincrement from the model which has now be fixed.
+* The parameter_as_dict (former: param_results) do work with the views
+  functions now (`Issue #494 <https://github.com/oemof/oemof/issues/494>`_).
 
 Testing
 #######
+
+* The test coverage has been increased (>80%). oemof has experimental areas to
+  test new functions. These functions are marked as experimental and will not
+  be tested. Therefore the real coverage is even higher.
 
 
 Other changes
 #############
 
+* Subclasses of :class:`Node <oemof.network.Node>` are no longer optimized
+  using `__slots__
+  <https://docs.python.org/3/reference/datamodel.html#slots>`_.
+  The abstract parent class still defines :attr:`__slots__
+  <oemof.network.Node.__slots__>` so that custom subclasses still have the
+  option of using it.
 
 Contributors
 ############
@@ -67,5 +96,6 @@ Contributors
 * Fabian Büllesbach
 * Guido Plessmann
 * Simon Hilpert
+* Stephan Günther
 * Uwe Krien
 

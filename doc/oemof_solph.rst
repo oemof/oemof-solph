@@ -339,7 +339,35 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transformer_label` class. An instance of this class can represent a component with one input and two output flows and a flexible ratio between these flows. By now this class is restricted to one input and two output flows. One application example would be a flexible combined heat and power (chp) plant. The class allows to define a different efficiency for every time step but this series has to be predefined as a parameter for the optimisation. In contrast to the :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is defined. For the main flow you can define a conversion factor if the second flow is zero (conversion_factor_single_flow).
+The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
+:ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+the application example for the component is a flexible combined heat and power
+(chp) plant. Of course, an instance of this class can represent also another
+component with one input and two output flows and a flexible ratio between
+these flows, leading to the following constraints:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _ETCHP-equations:
+  :end-before: """
+
+These constraints are applied in addition those of a standard
+:class:`~oemof.solph.network.Transformer`. The constraints limit the range of
+the possible operation points, like the following picture shows. For a certain
+flow of fuel, there is a line of operation points, whose slope is defined by
+:math:`\beta`. The second constrain limits the decrease of electrical power.
+
+.. 	image:: _files/ExtractionTurbine_range_of_operation.svg
+   :width: 70 %
+   :alt: variable_chp_plot.svg
+   :align: center
+   
+For now :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances are
+restricted to one input and two output flows. The class allows the definition
+of a different efficiency for every time step but the corresponding series has
+to be predefined as a parameter for the optimisation. In contrast to the
+:class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
+defined. For the main flow you can define a conversion factor if the second
+flow is zero (conversion_factor_single_flow).
 
 .. code-block:: python
 
@@ -348,10 +376,15 @@ The ExtractionTurbineCHP inherits from the :ref:`oemof_solph_components_transfor
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
-        conversion_factor_single_flow={b_el: 0.5}
-        )
+        conversion_factor_full_condensation={b_el: 0.5})
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the main flow. In the example above, the flow to the Bus *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows how the variable chp (right) schedules it's electrical and thermal power production in contrast to a fixed chp (left). The plot is the output of an example in the `oemof example repository <https://github.com/oemof/oemof_examples>`_.
+The key of the parameter *'conversion_factor_full_condensation'* will indicate the
+main flow. In the example above, the flow to the Bus *'b_el'* is the main flow
+and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows
+how the variable chp (right) schedules it's electrical and thermal power
+production in contrast to a fixed chp (left). The plot is the output of an
+example in the `oemof example repository
+<https://github.com/oemof/oemof_examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
@@ -399,10 +432,61 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         capacity_loss=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+
+Using an investment object with the GenericStorage component
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds two main investment possibilities.
+
+    *	Invest into the flow parameters e.g. a turbine or a pump
+    *	Invest into capacity of the storage  e.g. a basin or a battery cell
+    
+Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode. 
+    
+As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows 
+with the capacity of the storage. 
+Three parameters are responsible for connecting the flows and the capacity of the storage:
+
+    *	' `invest_relation_input_capacity` ' fixes the input flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be filled within one time-period.
+    *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
+    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
+    
+You should not set all 3 parameters at the same time, since it will lead to overdetermination.
+
+The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Both flows and the storage itself (representing: pump, turbine, basin) are free in their investment. You can set the parameters to `None` or delete them as `None` is the default value.
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='PHES',
+        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
+        capacity_loss=0.001, 
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
+        investment = solph.Investment(ep_costs=40))
+
+The following example describes a battery with flows coupled to the capacity of the storage.
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='battery',
+        inputs={b_el: solph.Flow()},
+        outputs={b_el: solph.Flow()},
+        capacity_loss=0.001, 
+        nominal_capacity=50,
+        inflow_conversion_factor=0.98,
+         outflow_conversion_factor=0.8,
+        invest_relation_input_capacity = 1/6,
+        invest_relation_output_capacity = 1/6,
+        investment = solph.Investment(ep_costs=400))
+
+
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_electrical_line_label:
+
 
 ElectricalLine (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^

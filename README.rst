@@ -1,3 +1,12 @@
+.. image:: https://coveralls.io/repos/github/oemof/oemof/badge.svg?branch=dev
+    :target: https://coveralls.io/github/oemof/oemof?branch=dev
+.. image:: https://travis-ci.org/oemof/oemof.svg?branch=dev
+    :target: https://travis-ci.org/oemof/oemof
+.. image:: https://readthedocs.org/projects/oemof/badge/?version=stable
+    :target: https://oemof.readthedocs.io/en/stable/
+.. image:: https://badge.fury.io/py/oemof.svg
+    :target: https://badge.fury.io/py/oemof
+
 Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented toolbox to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
 
 With oemof we provide base packages for energy system modelling and optimisation.
@@ -45,7 +54,7 @@ Examples
 
 The linkage of specific modules of the various packages is called an 
 application (app) and depicts for example a concrete energy system model.
-You can find a repository with all currently available examples for oemof on github. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structre. There is some elaboration on the examples in the respective repository.
+You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
@@ -70,7 +79,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 Citing oemof
 ============
 
-We use the zenodo project to get a DOI for each version. `Search zenodo for the right citation of your oemof version <https://zenodo.org/search?page=1&size=20&q=oemof>`_.
+We use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
 
 
 License

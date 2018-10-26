@@ -12,6 +12,14 @@ oemof.tools.console\_scripts module
     :undoc-members:
     :show-inheritance:
 
+oemof.tools.datapackage module
+------------------------------
+
+.. automodule:: oemof.tools.datapackage
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 oemof.tools.economics module
 ----------------------------
 
