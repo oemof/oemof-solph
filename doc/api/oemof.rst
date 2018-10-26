@@ -13,10 +13,18 @@ Subpackages
 Submodules
 ----------
 
-oemof.energy_system module
---------------------------
+oemof.energy\_system module
+---------------------------
 
 .. automodule:: oemof.energy_system
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.graph module
+------------------
+
+.. automodule:: oemof.graph
     :members:
     :undoc-members:
     :show-inheritance:
@@ -33,14 +41,6 @@ oemof.network module
 --------------------
 
 .. automodule:: oemof.network
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.graph module
---------------------
-
-.. automodule:: oemof.graph
     :members:
     :undoc-members:
     :show-inheritance:

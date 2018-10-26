@@ -5,7 +5,7 @@ Submodules
 ----------
 
 oemof.outputlib.processing module
--------------------------
+---------------------------------
 
 .. automodule:: oemof.outputlib.processing
     :members:
@@ -13,7 +13,7 @@ oemof.outputlib.processing module
     :show-inheritance:
 
 oemof.outputlib.views module
--------------------------
+----------------------------
 
 .. automodule:: oemof.outputlib.views
     :members:

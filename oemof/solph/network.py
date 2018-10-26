@@ -46,7 +46,7 @@ class EnergySystem(es.EnergySystem):
         super().__init__(**kwargs)
 
 
-class Flow:
+class Flow(on.Edge):
     r""" Defines a flow between two nodes.
 
     Keyword arguments are used to set the attributes of this flow. Parameters
@@ -61,28 +61,35 @@ class Flow:
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
-    min : numeric (sequence or scalar)
-        Normed minimum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_value` with :attr:`min`
     max : numeric (sequence or scalar)
-        Nominal maximum value of the flow. (see. :attr:`min`)
-    actual_value: numeric (sequence or scalar)
+        Normed maximum value of the flow. The flow absolute maximum will be
+        calculated by multiplying :attr:`nominal_value` with :attr:`max`
+    min : numeric (sequence or scalar)
+        Nominal minimum value of the flow (see :attr:`max`).
+    actual_value : numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
-        nominal\_value to get the absolute value. If fixed attr is set to True
-        the flow variable will be fixed to actual_value * :attr:`nominal_value`
-        , I.e. this value is set exogenous.
-    positive_gradient : dictionary
-        Two obligate keys:
-        'ub': numeric (sequence, scalar or None), the normed maximal positive
-         difference (flow[t-1] < flow[t]) of two consecutive flow values
-         (ub = upper bound).
-        'costs': numeric (scalar or None), the gradient cost per unit.
-    negative_gradient : dictionary
-        Two obligate keys:
-        'ub': numeric (sequence, scalar or None), the normed maximal negative
-         difference (flow[t-1] > flow[t]) of two consecutive flow values
-         (ub = upper bound).
-        'costs': numeric (scalar or None), the gradient cost per unit.
+        :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
+        set to :obj:`True` the flow variable will be fixed to :py:`actual_value
+        * nominal_value`, i.e. this value is set exogenous.
+    positive_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+         * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
+           bound* on the positive difference (:py:`flow[t-1] < flow[t]`) of
+           two consecutive flow values.
+         * :py:`'costs``: numeric (scalar or None), the gradient cost per
+           unit.
+
+    negative_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+
+        A dictionary containing the following two keys:
+
+          * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
+            bound* on the negative difference (:py:`flow[t-1] > flow[t]`) of
+            two consecutive flow values.
+          * :py:`'costs``: numeric (scalar or None), the gradient cost per
+            unit.
+
     summed_max : numeric
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
@@ -96,18 +103,20 @@ class Flow:
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
         :attr:`actual_value`.
-    investment : :class:`oemof.solph.options.Investment` object
+    investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
-    nonconvex :  :class:`oemof.solph.options.NonConvex` object
+    nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
         will be different, i.e. constraint etc. from
-        :class:`oemof.solph.blocks.NonConvexFlow` will be used instead of
-        :class:`oemof.solph.blocks.Flow`. Note: this does not work in
-        combination with the investment attribute set at the moment.
+        :class:`NonConvexFlow <oemof.solph.blocks.NonConvexFlow>`
+        will be used instead of
+        :class:`Flow <oemof.solph.blocks.Flow>`.
+        Note: at the moment this does not work if the investment attribute is
+        set .
 
     Notes
     -----
@@ -143,6 +152,8 @@ class Flow:
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
+
+        super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']

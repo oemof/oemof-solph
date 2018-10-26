@@ -1,0 +1,46 @@
+v0.2.3 ()
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+
+
+New features
+############
+
+
+New components
+##############
+
+
+
+Documentation
+#############
+
+
+Known issues
+############
+
+
+Bug fixes
+#########
+* Some functions did not work with tuples as labels. It has been fixed for the ExtractionTurbineCHP, the graph module and the parameter_as_dict function. (`Issue #507 <https://github.com/oemof/oemof/issues/507>`_)
+
+
+Testing
+#######
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+* Simon Hilpert
+* Stephan Günther
+* Uwe Krien
+
