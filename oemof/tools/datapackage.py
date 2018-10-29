@@ -374,6 +374,8 @@ def deserialize_energy_system(cls, path,
                       chain(*[f.subnodes for f in facades.values()
                               if hasattr(f, 'subnodes')])))
 
+        es.typemap = typemap
+
         return es
 
     else:
