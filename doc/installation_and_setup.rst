@@ -18,7 +18,7 @@ Linux
 Having Python 3 installed
 ------------------------------
 
-As oemof is designed as a Python package it is mandatory to have Python 3 installed. It is highly recommended to use a virtual environment. See this `tutorial <https://docs.python.org/3/tutorial/venv.html>`_ for more help or see the sections below. If you already have a Python 3 environment you can install oemof using pip:
+As oemof is designed as a Python package it is mandatory to have Python 3 installed. Python >= 3.5 is recommended. Lower versions may work but are not tested. It is highly recommended to use a virtual environment. See this `tutorial <https://docs.python.org/3/tutorial/venv.html>`_ for more help or see the sections below. If you already have a Python 3 environment you can install oemof using pip:
 
 .. code:: console
 
@@ -99,7 +99,7 @@ with the installation of Python using WinPython, all the way to executing your f
 Having Python 3 installed
 ------------------------------
 
-As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have a working Python 3 environment you can install oemof by using pip. Run the following code in the command window of your python environment:
+As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. Python >= 3.5 is recommended. Lower versions may work but are not tested. If you already have a working Python 3 environment you can install oemof by using pip. Run the following code in the command window of your python environment:
 
 .. code:: console
 
