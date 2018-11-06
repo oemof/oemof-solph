@@ -145,6 +145,7 @@ class GenericStorage(network.Transformer):
         self.nominal_output_capacity_ratio = kwargs.get(
             'nominal_output_capacity_ratio')
         self.initial_capacity = kwargs.get('initial_capacity')
+        self.cycled = kwargs.get('cycled', True)
         self.capacity_loss = solph_sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = solph_sequence(
             kwargs.get('inflow_conversion_factor', 1))
@@ -302,6 +303,9 @@ class GenericStorageBlock(SimpleBlock):
 
         self.STORAGES = Set(initialize=[n for n in group])
 
+        self.STORAGES_CYCLED = Set(initialize=[
+            n for n in group if n.cycled is True])
+
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
 
@@ -315,29 +319,59 @@ class GenericStorageBlock(SimpleBlock):
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
+        def _storage_init_capacity_bound_rule(block, n):
+            return 0, n.nominal_capacity
+
+        self.init_cap = Var(self.STORAGES, within=NonNegativeReals,
+                            bounds=_storage_init_capacity_bound_rule)
+
         # set the initial capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
-                                                     n.nominal_capacity)
-                self.capacity[n, m.TIMESTEPS[-1]].fix()
+                self.init_cap[n] = (n.initial_capacity * n.nominal_capacity)
+                self.init_cap[n].fix()
 
-        # storage balance constraint
+        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+
+        # storage balance constraint (first time step)
+        def _storage_balance_first_rule(block, n):
+            """Rule definition for the storage balance of every storage n and
+            timestep t
+            """
+            expr = 0
+            expr += block.capacity[n, 0]
+            expr += - block.init_cap[n] * (
+                1 - n.capacity_loss[0])
+            expr += (- m.flow[i[n], n, 0] *
+                     n.inflow_conversion_factor[0]) * m.timeincrement[0]
+            expr += (m.flow[n, o[n], 0] /
+                     n.outflow_conversion_factor[0]) * m.timeincrement[0]
+            return expr == 0
+        self.balance_first = Constraint(self.STORAGES,
+                                        rule=_storage_balance_first_rule)
+
+        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage balance of every storage n and
             timestep t
             """
             expr = 0
             expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timesteps[t]] * (
+            expr += - block.capacity[n, t-1] * (
                 1 - n.capacity_loss[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
+        self.balance = Constraint(self.STORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
+
+        # capacity of last time step == initial capacity if cycled
+        def _cycled_storage_rule(block, n):
+            return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+        self.cycled_cstr = Constraint(self.STORAGES_CYCLED,
+                                      rule=_cycled_storage_rule)
 
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
