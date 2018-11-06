@@ -116,9 +116,7 @@ class Parameter_Result_Tests:
         """
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.parameter_as_dict(
-                self.es,
-                exclude_none=False)
+        param_results = processing.param_results(self.es, exclude_none=False)
 
         scalar_attributes = {
             'fixed': True,
