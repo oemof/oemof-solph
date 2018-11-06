@@ -505,6 +505,16 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
+
+        self.INVESTSTORAGES_CYCLED = Set(initialize=[
+            n for n in group if n.cycled is True])
+
+        self.INVESTSTORAGES_NO_INIT_CAP = Set(initialize=[
+            n for n in group if n.initial_capacity is None])
+
+        self.INVESTSTORAGES_INIT_CAP = Set(initialize=[
+            n for n in group if n.initial_capacity is not None])
+
         self.INVEST_REL_CAP_IN = Set(initialize=[
             n for n in group if n.invest_relation_input_capacity is not None])
     
@@ -513,9 +523,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     
         self.INVEST_REL_IN_OUT = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
-
-        self.INITIAL_CAPACITY = Set(initialize=[
-            n for n in group if n.initial_capacity is not None])
 
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
@@ -535,35 +542,65 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.invest = Var(self.INVESTSTORAGES, within=NonNegativeReals,
                           bounds=_storage_investvar_bound_rule)
 
+        self.init_cap = Var(self.INVESTSTORAGES, within=NonNegativeReals)
+
+        def _inv_storage_init_cap_max_rule(block, n):
+            return block.init_cap[n] <= n.investment.existing + block.invest[n]
+        self.init_cap_limit = Constraint(self.INVESTSTORAGES_NO_INIT_CAP,
+                                         rule=_inv_storage_init_cap_max_rule)
+
+        def _inv_storage_init_cap_fix_rule(block, n):
+            return block.init_cap[n] == n.initial_capacity * (
+                    n.investment.existing + block.invest[n])
+        self.init_cap_fix = Constraint(self.INVESTSTORAGES_INIT_CAP,
+                                       rule=_inv_storage_init_cap_fix_rule)
+
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
+        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+
+        # storage balance constraint (first time step)
+        def _storage_balance_first_rule(block, n):
+            """Rule definition for the storage balance of every storage n and
+            timestep t
+            """
+            expr = 0
+            expr += block.capacity[n, 0]
+            expr += - block.init_cap[n] * (
+                    1 - n.capacity_loss[0])
+            expr += (- m.flow[i[n], n, 0] *
+                     n.inflow_conversion_factor[0]) * m.timeincrement[0]
+            expr += (m.flow[n, o[n], 0] /
+                     n.outflow_conversion_factor[0]) * m.timeincrement[0]
+            return expr == 0
+
+        self.balance_first = Constraint(self.INVESTSTORAGES,
+                                        rule=_storage_balance_first_rule)
+
+        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
-            """Rule definition for the storage energy balance.
+            """Rule definition for the storage balance of every storage n and
+            timestep t
             """
             expr = 0
             expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timesteps[t]] * (
-                1 - n.capacity_loss[t])
+            expr += - block.capacity[n, t - 1] * (
+                    1 - n.capacity_loss[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
+
+        self.balance = Constraint(self.INVESTSTORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
 
-        def _initial_capacity_invest_rule(block, n):
-            """Rule definition for constraint to connect initial storage
-            capacity with capacity of last timesteps.
-            """
-            expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
-                    (n.investment.existing + self.invest[n]) *
-                    n.initial_capacity)
-            return expr
-        self.initial_capacity = Constraint(
-            self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+        def _cycled_storage_rule(block, n):
+            return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+        self.cycled_cstr = Constraint(self.INVESTSTORAGES_CYCLED,
+                                      rule=_cycled_storage_rule)
         
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
