@@ -121,13 +121,18 @@ class Parameter_Result_Tests:
             param_results = processing.param_results(
                     self.es,
                     exclude_none=False)
-            eq_(len(warnings), 1)
-            eq_(str(warnings[0].message),
-                str(DeprecationWarning(
+            eq_(len(warnings), 1,
+                    "\n  Expected a single warning to be issued."
+                    "\n  Got: {}".format(len(warnings)))
+            expectation = DeprecationWarning(
                     "The function 'param_results' has been "
                     "renamed to'parameter_as_dict'.\n"
                     "Pleas use the new function name to avoidproblems in the "
-                    "future.")))
+                    "future.")
+            eq_(str(warnings[0].message),
+                str(expectation),
+                "\n  Expected: \n---\n{}\n---".format(expectation) +
+                "\n  Got: \n---\n{}\n---".format(warnings[0].message))
 
 
         scalar_attributes = {
