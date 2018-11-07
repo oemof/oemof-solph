@@ -213,6 +213,11 @@ class Node_Tests:
         eq_(n1.outputs, {n2: n1n2})
         eq_(n1.outputs[n2], n1n2)
 
+    def test_error_for_duplicate_label_argument(self):
+        """ `Node.__init__` should fail if positional and keyword args collide.
+        """
+        with assert_raises(TypeError):
+            Node("Positional Label", label="Keyword Label")
 
 class Edge_Tests:
     def test_edge_construction_side_effects(self):
