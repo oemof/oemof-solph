@@ -10,6 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from nose.tools import eq_, assert_raises
+from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -116,7 +117,18 @@ class Parameter_Result_Tests:
         """
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.param_results(self.es, exclude_none=False)
+        with catch_warnings(record=True) as warnings:
+            param_results = processing.param_results(
+                    self.es,
+                    exclude_none=False)
+            eq_(len(warnings), 1)
+            eq_(str(warnings[0].message),
+                str(DeprecationWarning(
+                    "The function 'param_results' has been "
+                    "renamed to'parameter_as_dict'.\n"
+                    "Pleas use the new function name to avoidproblems in the "
+                    "future.")))
+
 
         scalar_attributes = {
             'fixed': True,
