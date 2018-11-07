@@ -31,22 +31,7 @@ class GenericStorage(network.Transformer):
     ----------
     nominal_capacity : numeric
         Absolute nominal capacity of the storage
-    nominal_output_capacity_ratio : numeric
-        DEPRECATED - Define the output capacity as nominal_value in the Flow
-        class. In case of an investment object in the storage and the flow use
-        :attr:`invest_relation_input_capacity` instead.
-        OLD TEXT: Ratio between the nominal outflow of the storage and
-        its capacity. For batteries this is also know as c-rate.
-        Note: This ratio is used to create the Flow object for the outflow
-        and set its nominal value of the storage in the constructor. If no
-        investment object is defined it is also possible to set the nominal
-        value of the flow directly in its constructor.
-    nominal_input_capacity_ratio : numeric
-        DEPRECATED - Define the input capacity as nominal_value in the Flow
-        class. In case of an investment object in the storage and the flow use
-        :attr:`invest_relation_output_capacity` instead.
-        OLD TEXT: Ratio between the nominal inflow of the storage and
-        its capacity. see: nominal_output_capacity_ratio
+
     invest_relation_input_capacity : numeric or None
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage.
@@ -140,10 +125,6 @@ class GenericStorage(network.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
-        self.nominal_input_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio')
-        self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_output_capacity_ratio')
         self.initial_capacity = kwargs.get('initial_capacity')
         self.cycled = kwargs.get('cycled', True)
         self.capacity_loss = solph_sequence(kwargs.get('capacity_loss', 0))
@@ -162,35 +143,11 @@ class GenericStorage(network.Transformer):
             'invest_relation_output_capacity')
         self._invest_group = isinstance(self.investment, Investment)
 
-        warnings.simplefilter('always', DeprecationWarning)
-        dpr_msg = ("\nDeprecated. The attributes "
-                   "'nominal_input_capacity_ratio' and "
-                   "'nominal_input_capacity_ratio' will be removed in "
-                   "oemof >= v0.3.0.\n Please use the 'invest_relation_...' "
-                   "attribute in case of the investment mode.\n Please use "
-                   "the 'nominal_value' within in the Flows for the dispatch "
-                   "mode.\n These measures will avoid this warning.")
-
-        # DEPRECATED. Set nominal_value of in/out Flows using
-        # nominal_input_capacity_ratio / nominal_input_capacity_ratio
-        if self._invest_group is False and (
-                self.nominal_input_capacity_ratio is not None or
-                self.nominal_output_capacity_ratio is not None):
-            self._set_flows(dpr_msg)
-
         # Check attributes for the investment mode.
         if self._invest_group is True:
-            self._check_invest_attributes(dpr_msg)
+            self._check_invest_attributes()
 
-    def _check_invest_attributes(self, dpr_msg):
-        if self.nominal_input_capacity_ratio is not None:
-            warnings.warn(dpr_msg, DeprecationWarning)
-            self.invest_relation_input_capacity = (
-                self.nominal_input_capacity_ratio)
-        if self.nominal_output_capacity_ratio is not None:
-            warnings.warn(dpr_msg, DeprecationWarning)
-            self.invest_relation_output_capacity = (
-                self.nominal_output_capacity_ratio)
+    def _check_invest_attributes(self):
         if self.investment and self.nominal_capacity is not None:
             e1 = ("If an investment object is defined the invest variable "
                   "replaces the nominal_capacity.\n Therefore the "
@@ -210,24 +167,6 @@ class GenericStorage(network.Transformer):
             if (self.invest_relation_output_capacity is not None and
                     not isinstance(flow.investment, Investment)):
                 flow.investment = Investment()
-
-    def _set_flows(self, dpr_msg):
-        """ Sets correct attributes of input / output flows based on the
-        storage object attributes. This method is called in the constructor by
-        default. It may be called in sub-classed components at the
-        end of the constructor to ensure correct setting of attributes.
-        """
-        warnings.warn(dpr_msg, DeprecationWarning)
-        for flow in self.inputs.values():
-            if (self.nominal_input_capacity_ratio is not None and
-                    not isinstance(flow.investment, Investment)):
-                flow.nominal_value = (self.nominal_input_capacity_ratio *
-                                      self.nominal_capacity)
-        for flow in self.outputs.values():
-            if (self.nominal_output_capacity_ratio is not None and
-                    not isinstance(flow.investment, Investment)):
-                flow.nominal_value = (self.nominal_output_capacity_ratio *
-                                      self.nominal_capacity)
 
     def constraint_group(self):
         if self._invest_group is True:
