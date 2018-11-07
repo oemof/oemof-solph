@@ -252,6 +252,19 @@ class Edge_Tests:
                 "\n  Got     : {!r}")
                 .format(o, n.label))
 
+    def test_node_label_without_private_attribute(self):
+        """ A `Node` with no explicit `label` doesn't have a `_label` attribute.
+        """
+        n = Node()
+        with assert_raises(AttributeError):
+            n._label
+
+    def test_node_label_if_its_not_explicitly_specified(self):
+        """ If not explicitly given, a `Node`'s label is based on its `id`.
+        """
+        n = Node()
+        ok_("0x{:x}>".format(id(n)) in n.label)
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
