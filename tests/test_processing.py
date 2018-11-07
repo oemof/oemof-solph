@@ -133,8 +133,8 @@ class Parameter_Result_Tests:
                     "future.")
             eq_(repr(warnings[0].message),
                 repr(expectation),
-                "\n  Expected: \n---\n{!r}\n---".format(expectation) +
-                "\n  Got: \n---\n{!r}\n---".format(warnings[0].message))
+                "\n\nExpected: \n\n{!r}".format(expectation) +
+                "\n\nGot: \n\n{!r}".format(warnings[0].message))
 
 
         scalar_attributes = {
