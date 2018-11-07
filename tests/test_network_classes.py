@@ -219,6 +219,13 @@ class Node_Tests:
         with assert_raises(TypeError):
             Node("Positional Label", label="Keyword Label")
 
+    def test_node_input_output_type_assertions(self):
+        """ `Node`s should only accept `Node` instances as input/output targets.
+        """
+        with assert_raises(AssertionError):
+            Node('A node with an output', outputs={'Not a Node': 'A Flow'})
+            Node('A node with an input', inputs={'Not a Node': 'A Flow'})
+
 class Edge_Tests:
     def test_edge_construction_side_effects(self):
         """ Constructing an `Edge` should affect it's input/output `Node`s.
