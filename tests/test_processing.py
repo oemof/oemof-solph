@@ -111,7 +111,9 @@ class Parameter_Result_Tests:
         )
 
     def compatibility_test(self):
-        """This check is implemented to check whether the old name still works.
+        """ `param_results` still works but raises a `DeprecationWarning`.
+
+        This check is implemented to check whether the old name still works.
         `param_results` has been renamed to `parameter_as_dict`.
         Test and function can be removed with the next major release!
         """
