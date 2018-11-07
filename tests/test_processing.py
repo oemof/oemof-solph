@@ -131,10 +131,10 @@ class Parameter_Result_Tests:
                     "renamed to'parameter_as_dict'.\n"
                     "Pleas use the new function name to avoidproblems in the "
                     "future.")
-            eq_(str(warnings[0].message),
-                str(expectation),
-                "\n  Expected: \n---\n{}\n---".format(expectation) +
-                "\n  Got: \n---\n{}\n---".format(warnings[0].message))
+            eq_(repr(warnings[0].message),
+                repr(expectation),
+                "\n  Expected: \n---\n{!r}\n---".format(expectation) +
+                "\n  Got: \n---\n{!r}\n---".format(warnings[0].message))
 
 
         scalar_attributes = {
