@@ -174,6 +174,8 @@ class GenericStorage(network.Transformer):
         else:
             return GenericStorageBlock
 
+# Todo: accessed by
+
 
 class GenericStorageBlock(SimpleBlock):
     r"""Storage without an :class:`.Investment` object.
@@ -182,8 +184,12 @@ class GenericStorageBlock(SimpleBlock):
     :class:`.Model` )
 
     STORAGES
-        A set with all :class:`.Storage` objects
-        (and no attr:`investement` of type :class:`.Investment`)
+        A set with all :class:`.Storage` objects, which do not have an
+         attr:`investment` of type :class:`.Investment`.
+
+    STORAGES_CYCLED
+        A set of  all :class:`.Storage` objects, with 'cycled' attribute set
+        to True.
 
     STORAGES_WITH_INVEST_FLOW_REL
         A set with all :class:`.Storage` objects with two investment flows
@@ -192,19 +198,46 @@ class GenericStorageBlock(SimpleBlock):
     **The following variables are created:**
 
     capacity
-        Capacity (level) for every storage and timestep. The value for the
-        capacity at the beginning is set by the parameter `initial_capacity` or
-        not set if `initial_capacity` is None.
-        The variable of storage s and timestep t can be accessed by:
-        `om.Storage.capacity[s, t]`
+        Capacity (level) of the storage and time step. The capacity is bound to
+
+        .. math::
+            nominal\_capacity \cdot capacity\_min(t) < capacity(t) <
+            nominal\_capacity \cdot capacity\_min(t)
+
+        The variable of storage s and time step t can be accessed by:
+        `model.Storage.capacity[s, t]`
+
+    init_cap
+        The capacity of the storage before the first time step. The
+        init_cap is bound to
+
+        .. math:: 0 < init\_cap <  nominal\_capacity
+
+        If the initial_capacity attribute is not None the init_cap variable is
+        set to
+
+        .. math:: init\_cap =  nominal\_capacity \cdot initial\_capacity
 
     **The following constraints are created:**
 
-    Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: capacity(n, t) = &capacity(n, previous(t)) \cdot
-            (1 - capacity\_loss_n(t))) \\
+    Set last time step to the initial capacity if cycled is True
+        .. math::
+            capacity(n, t_{last} = &init\_cap(n)\\
+            &\forall n \in \textrm{STORAGES\_CYCLED}
+
+    Storage balance for t = 0 :attr:`om.Storage.balance[n, t]`
+        .. math:: capacity(n, 0) = &initial\_capacity(n) \cdot
+            (1 - capacity\_loss(n, 0))) \\
             &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
-            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
+            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau\\
+            &\forall n \in \textrm{STORAGES}
+
+    Storage balance for t > 0 :attr:`om.Storage.balance[n, t]`
+        .. math:: capacity(n, t) = &capacity(n, t-1) \cdot
+            (1 - capacity\_loss(n, t))) \\
+            &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
+            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau\\
+            &\forall n \in \textrm{STORAGES}
 
     Connect the invest variables of the input and the output flow.
         .. math::
@@ -240,6 +273,8 @@ class GenericStorageBlock(SimpleBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
+        #  ************* SETS *********************************
+
         self.STORAGES = Set(initialize=[n for n in group])
 
         self.STORAGES_CYCLED = Set(initialize=[
@@ -247,6 +282,8 @@ class GenericStorageBlock(SimpleBlock):
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
+
+        #  ************* VARIABLES *****************************
 
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
@@ -270,12 +307,14 @@ class GenericStorageBlock(SimpleBlock):
                 self.init_cap[n] = (n.initial_capacity * n.nominal_capacity)
                 self.init_cap[n].fix()
 
+        #  ************* Constraints ***************************
+
         reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
 
         # storage balance constraint (first time step)
         def _storage_balance_first_rule(block, n):
-            """Rule definition for the storage balance of every storage n and
-            timestep t
+            """Rule definition for the storage balance of every storage n for
+            the first timestep.
             """
             expr = 0
             expr += block.capacity[n, 0]
@@ -292,7 +331,7 @@ class GenericStorageBlock(SimpleBlock):
         # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage balance of every storage n and
-            timestep t
+            every timestep but the first (t > 0)
             """
             expr = 0
             expr += block.capacity[n, t]
@@ -306,8 +345,8 @@ class GenericStorageBlock(SimpleBlock):
         self.balance = Constraint(self.STORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
 
-        # capacity of last time step == initial capacity if cycled
         def _cycled_storage_rule(block, n):
+            """capacity of last time step == initial capacity if cycled"""
             return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
         self.cycled_cstr = Constraint(self.STORAGES_CYCLED,
                                       rule=_cycled_storage_rule)
