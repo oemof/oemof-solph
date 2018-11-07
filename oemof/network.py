@@ -135,9 +135,10 @@ class Node:
                     setattr(self, '_' + optional, args.pop())
         self._in_edges = set()
         for i in kwargs.get('inputs', {}):
-            assert isinstance(i, Node), \
-                   "Input {} of {} not a Node, but a {}."\
-                   .format(i, self, type(i))
+            assert isinstance(i, Node), (
+                    "\n\nInput\n\n  {!r}\n\nof\n\n  {!r}\n\n"
+                    "not an instance of Node, but of {}."
+                    ).format(i, self, type(i))
             self._in_edges.add(i)
             try:
                 flow = kwargs['inputs'].get(i)
@@ -147,9 +148,10 @@ class Node:
             edge.input=i
             edge.output=self
         for o in kwargs.get('outputs', {}):
-            assert isinstance(o, Node), \
-                   "Output {} of {} not a Node, but a {}."\
-                   .format(o, self, type(o))
+            assert isinstance(o, Node), (
+                    "\n\nOutput\n\n  {!r}\n\nof\n\n  {!r}\n\n"
+                    "not an instance of Node, but of {}."
+                    ).format(o, self, type(o))
             try:
                 flow = kwargs['outputs'].get(o)
             except AttributeError:
