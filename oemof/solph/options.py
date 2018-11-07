@@ -80,7 +80,7 @@ class NonConvex:
         The maximum of both is used to set the initial status for this
         number of timesteps within the edge regions.
         """
-        if (self.minimum_uptime is not None and self.minimum_downtime is None):
+        if self.minimum_uptime is not None and self.minimum_downtime is None:
             max_up_down = self.minimum_uptime
         elif (self.minimum_uptime is None and
               self.minimum_downtime is not None):

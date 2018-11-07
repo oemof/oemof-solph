@@ -93,7 +93,7 @@ def test_connect_invest():
     stor_res = views.node(results, 'storage')['scalars']
     my_results['storage_in'] = stor_res.iloc[0]  # ('electricity1', 'storage')
     my_results['storage'] = stor_res.iloc[1]     # ('storage', 'None')
-    my_results['storage_out'] = stor_res.iloc[2] # ('storage', 'electricity1')
+    my_results['storage_out'] = stor_res.iloc[2]  # ('storage', 'electricity1')
 
     connect_invest_dict = {
         'line12': 814705,

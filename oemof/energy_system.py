@@ -135,7 +135,6 @@ class EnergySystem:
             g(entity, groups)
         return groups
 
-
     try:
         from .tools.datapackage import deserialize_energy_system
         from_datapackage = classmethod(deserialize_energy_system)
@@ -143,7 +142,6 @@ class EnergySystem:
         @classmethod
         def from_datapackage(cls, *args, **kwargs):
             raise e
-
 
     def _add(self, entity):
         self.entities.append(entity)
