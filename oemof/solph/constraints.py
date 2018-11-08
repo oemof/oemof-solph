@@ -47,12 +47,11 @@ def emission_limit(om, flows=None, limit=None):
     .. math:: \sum_{F_E} \sum_{T} flow(i,o,t) \cdot emission_factor(i,o,t)
                \cdot \tau \leq limit
 
-    With F_E being the set of flows considered for the emission limit and
-    T being the set of timestepsself.
+    With `F_E` being the set of flows considered for the emission limit and
+    `T` being the set of timestepsself.
 
-    Total emissions after optimization can be retrieved using the `emissions`
-    attribute for an `oemof.solph.Model` instance `om`,
-    for example `om.emissions`.
+    Total total emissions after optimization can be retrieved using the
+    attribute  :attr:`om.oemof.solph.Model.total_emissions`.
 
     Parameters
     ----------
