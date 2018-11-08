@@ -14,7 +14,7 @@ from nose.tools import assert_raises, eq_, ok_
 import warnings
 
 from oemof.energy_system import EnergySystem as ES
-from oemof.network import Bus, Edge, Node, Transformer
+from oemof.network import Bus, Edge, Node, Transformer, registry_changed_to
 from oemof import graph
 from oemof.solph import Model
 
@@ -297,16 +297,15 @@ class Edge_Tests:
         eq_(e.flow, "new values set via `e.flow`")
         eq_(e.values, "new values set via `e.flow`")
 
-
     def test_delayed_registration_when_setting_input(self):
         """`Edge` registration gets delayed until input and output are set.
         """
         i, o = (Node("input"), Node("output"))
-        Node.registry = ES()
-        e = Edge(output=o)
-        ok_(not e in Node.registry.groups.values())
-        e.input = i
-        ok_(e in Node.registry.groups.values())
+        with registry_changed_to(ES()):
+            e = Edge(output=o)
+            ok_(not e in Node.registry.groups.values())
+            e.input = i
+            ok_(e in Node.registry.groups.values())
 
 
 class EnergySystem_Nodes_Integration_Tests:
