@@ -265,6 +265,12 @@ class Edge_Tests:
         n = Node()
         ok_("0x{:x}>".format(id(n)) in n.label)
 
+    def test_edge_failure_for_colliding_arguments(self):
+        """ `Edge` initialisation fails when colliding arguments are supplied.
+        """
+        with assert_raises(ValueError):
+            Edge(flow=object(), values=object())
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
