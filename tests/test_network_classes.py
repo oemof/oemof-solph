@@ -226,6 +226,19 @@ class Node_Tests:
             Node('A node with an output', outputs={'Not a Node': 'A Flow'})
             Node('A node with an input', inputs={'Not a Node': 'A Flow'})
 
+    def test_node_label_without_private_attribute(self):
+        """ A `Node` with no explicit `label` doesn't have a `_label` attribute.
+        """
+        n = Node()
+        with assert_raises(AttributeError):
+            n._label
+
+    def test_node_label_if_its_not_explicitly_specified(self):
+        """ If not explicitly given, a `Node`'s label is based on its `id`.
+        """
+        n = Node()
+        ok_("0x{:x}>".format(id(n)) in n.label)
+
 class Edge_Tests:
     def test_edge_construction_side_effects(self):
         """ Constructing an `Edge` should affect it's input/output `Node`s.
@@ -251,19 +264,6 @@ class Edge_Tests:
                 "\n  Expected: {!r}"
                 "\n  Got     : {!r}")
                 .format(o, n.label))
-
-    def test_node_label_without_private_attribute(self):
-        """ A `Node` with no explicit `label` doesn't have a `_label` attribute.
-        """
-        n = Node()
-        with assert_raises(AttributeError):
-            n._label
-
-    def test_node_label_if_its_not_explicitly_specified(self):
-        """ If not explicitly given, a `Node`'s label is based on its `id`.
-        """
-        n = Node()
-        ok_("0x{:x}>".format(id(n)) in n.label)
 
     def test_edge_failure_for_colliding_arguments(self):
         """ `Edge` initialisation fails when colliding arguments are supplied.
