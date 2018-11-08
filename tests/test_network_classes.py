@@ -283,6 +283,17 @@ class Edge_Tests:
         eq_(edge.values, f)
         eq_(edge.flow, f)
 
+    def test_flow_setter(self):
+        """ `Edge.flow`'s setter relays to `values`.
+        """
+        e = Edge(values="initial values")
+        eq_(e.flow, "initial values")
+        eq_(e.values, "initial values")
+        e.flow = "new values set via `e.flow`"
+        eq_(e.flow, "new values set via `e.flow`")
+        eq_(e.values, "new values set via `e.flow`")
+
+
 
 
 class EnergySystem_Nodes_Integration_Tests:
