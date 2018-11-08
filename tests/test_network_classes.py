@@ -271,6 +271,19 @@ class Edge_Tests:
         with assert_raises(ValueError):
             Edge(flow=object(), values=object())
 
+    def test_alternative_edge_construction_from_mapping(self):
+        """ `Edge.from_object` treats mappings as keyword arguments.
+        """
+        i, o, f = (Node("input"), Node("output"), "flow")
+        with assert_raises(ValueError):
+            Edge.from_object({"flow": i, "values": o})
+        edge = Edge.from_object({"input": i, "output": o, "flow": f})
+        eq_(edge.input, i)
+        eq_(edge.output, o)
+        eq_(edge.values, f)
+        eq_(edge.flow, f)
+
+
 
 class EnergySystem_Nodes_Integration_Tests:
 
