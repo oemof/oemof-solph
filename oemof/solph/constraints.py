@@ -50,8 +50,8 @@ def emission_limit(om, flows=None, limit=None):
     With `F_E` being the set of flows considered for the emission limit and
     `T` being the set of timestepsself.
 
-    Total total emissions after optimization can be retrieved using the
-    attribute  :attr:`om.oemof.solph.Model.total_emissions`.
+    Total total emissions after optimization can be retrieved calling the
+    :attr:`om.oemof.solph.Model.total_emissions()`.
 
     Parameters
     ----------
@@ -86,10 +86,10 @@ def emission_limit(om, flows=None, limit=None):
                                                                  o.label))
 
     om.total_emissions =  po.Expression(
-        expr=sum(m.flow[inflow, outflow, t] * m.timeincrement[t] *
-                flows[inflow, outflow].emission
-                for (inflow, outflow) in flows
-                for t in m.TIMESTEPS))
+        expr=sum(om.flow[inflow, outflow, t] * om.timeincrement[t] *
+                 flows[inflow, outflow].emission_factor
+                 for (inflow, outflow) in flows
+                 for t in om.TIMESTEPS))
 
     om.emission_limit = po.Constraint(expr=om.total_emissions <= limit)
 
