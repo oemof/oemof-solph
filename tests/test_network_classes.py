@@ -240,6 +240,10 @@ class Node_Tests:
         ok_("0x{:x}>".format(id(n)) in n.label)
 
 class Edge_Tests:
+
+    def setup(self):
+        Node.registry = None
+
     def test_edge_construction_side_effects(self):
         """ Constructing an `Edge` should affect it's input/output `Node`s.
 
