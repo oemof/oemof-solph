@@ -259,12 +259,12 @@ class Edge(Node):
             **kwargs):
         if flow is not None and values is not None:
             raise ValueError(
-                    "`Edge`'s `flow` and `values` keyword arguments are " +
-                    "aliases of each other, so they're mutually exclusive.\n" +
-                    "You supplied:\n"+
-                    "    `flow`  : {}".format(flow) +
-                    "    `values`: {}".format(values) +
-                    "\nChoose one.")
+                    "\n\n`Edge`'s `flow` and `values` keyword arguments are "
+                    "aliases of each other,\nso they're mutually exclusive.\n"
+                    "You supplied:\n" +
+                    "    `flow`  : {}\n".format(flow) +
+                    "    `values`: {}\n".format(values) +
+                    "Choose one.")
         if input is None or output is None:
             self._delay_registration_ = True
         super().__init__(label=Edge.Label(input, output))
