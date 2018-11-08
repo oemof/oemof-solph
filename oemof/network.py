@@ -429,7 +429,7 @@ def registry_changed_to(r):
     Node.registry = backup
 
 
-def temporarily_modifies_registry(function):
+def temporarily_modifies_registry(f):
     """ Backup registry before and restore it after execution of `function`.
     """
     def result(*xs, **ks):
