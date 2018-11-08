@@ -196,7 +196,7 @@ def node_weight_by_type(results, node_type=None):
     Parameters
     ----------
     results: dict
-        A result dictionary from a solved oemof.solph.Model object 
+        A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type for which node weights should be collected
 
@@ -218,16 +218,106 @@ def node_weight_by_type(results, node_type=None):
         logging.error('No node weights for nodes of type `{}`'.format(node_type))
         return False
     else:
-        df = pd.concat(group.values(), axis=1)
-        cols = {k: [c for c in v.columns]
-                for k, v in group.items()}
-        cols = [tuple((k, m) for m in v) for k, v in cols.items()]
-        cols = [c for sublist in cols for c in sublist]
-        idx = pd.MultiIndex.from_tuples(
-                            [tuple([col[0][0], col[0][1], col[1]])
-                             for col in cols])
-        idx.set_names(['node', 'to', 'weight_type'], inplace=True)
-        df.columns = idx
-        df.columns = df.columns.droplevel([1])
-
+        df = convert_to_multiindex(group,
+                                   index_names=['node', 'to', 'weight_type'],
+                                   droplevel=[1])
         return df
+
+
+def node_input_by_type(results, node_type, droplevel=[]):
+    """
+    """
+    if node_type is None:
+        raise ValueError('Argument `node_type` must not be of type None!')
+
+    group = {k: v['sequences'] for k, v in results.items()
+             if isinstance(k[1], node_type) and k[0] is not None}
+    if not group:
+        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        return False
+
+    else:
+        df = convert_to_multiindex(group, droplevel=droplevel)
+
+    return df
+
+def node_output_by_type(results, node_type, droplevel=[]):
+    """
+    """
+    if node_type is None:
+        raise ValueError('Argument `node_type` must not be of type None!')
+
+    group = {k: v['sequences'] for k, v in results.items()
+             if isinstance(k[0], node_type) and k[1] is not None}
+    if not group:
+        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        return False
+
+    else:
+        df = convert_to_multiindex(group, droplevel=droplevel)
+
+    return df
+
+def net_storage_flow(results, node_type):
+    """
+    """
+
+    group = {k: v['sequences'] for k, v in results.items()
+             if isinstance(k[0], node_type) or isinstance(k[1], node_type)}
+
+    if not group:
+        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        return False
+
+
+    df = convert_to_multiindex(group)
+
+    x = df.xs('capacity', axis=1, level=2).columns.values
+    labels = [s for s, t in x]
+
+    dataframes = []
+
+    for l in labels:
+        grouper = lambda x: (lambda fr, to, ty:
+                            'output' if (fr == l and ty == 'flow') else
+                            'input' if (to == l and ty == 'flow') else
+                            'level' if (fr == l and ty != 'flow') else
+                            None) (*x)
+
+        subset = df.groupby(grouper, axis=1).sum()
+
+        subset['net_flow'] =  subset['output'] - subset['input']
+
+        subset.columns = pd.MultiIndex.from_product([[l], subset.columns])
+
+        dataframes.append(subset.xs('net_flow', axis=1, level=1))
+
+    return pd.concat(dataframes, axis=1)
+
+
+def convert_to_multiindex(group, index_names=['from', 'to', 'type'],
+                          droplevel=[]):
+    """ Convert dict to pandas DataFrame with multiindex
+
+    Parameters
+    ----------
+    group: dict
+        Sequences of the oemof.solph.Model.results dictionary
+    index_names: arraylike
+        Array with names of the MultiIndex
+    droplevel: arraylike
+        List containing levels to be dropped from the dataframe
+    """
+    df = pd.concat(group.values(), axis=1)
+    cols = {k: [c for c in v.columns]
+            for k, v in group.items()}
+    cols = [tuple((k, m) for m in v) for k, v in cols.items()]
+    cols = [c for sublist in cols for c in sublist]
+    idx = pd.MultiIndex.from_tuples(
+                        [tuple([col[0][0], col[0][1], col[1]])
+                         for col in cols])
+    idx.set_names(index_names, inplace=True)
+    df.columns = idx
+    df.columns = df.columns.droplevel(droplevel)
+
+    return df
