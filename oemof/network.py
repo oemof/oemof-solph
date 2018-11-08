@@ -430,7 +430,11 @@ def registry_changed_to(r):
 
 
 def temporarily_modifies_registry(f):
-    """ Backup registry before and restore it after execution of `function`.
+    """ Decorator that disables `Node` registration during `f`'s execution.
+
+    It does so by setting `Node.registry` to `None` while `f` is executing, so
+    `f` can freely set `Node.registry` to something else. The registration's
+    original value is restored afterwards.
     """
     def result(*xs, **ks):
         with registry_changed_to(None):
