@@ -298,6 +298,15 @@ class Edge_Tests:
         eq_(e.values, "new values set via `e.flow`")
 
 
+    def test_delayed_registration_when_setting_input(self):
+        """`Edge` registration gets delayed until input and output are set.
+        """
+        i, o = (Node("input"), Node("output"))
+        Node.registry = ES()
+        e = Edge(output=o)
+        ok_(not e in Node.registry.groups.values())
+        e.input = i
+        ok_(e in Node.registry.groups.values())
 
 
 class EnergySystem_Nodes_Integration_Tests:
