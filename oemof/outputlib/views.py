@@ -269,7 +269,6 @@ def net_storage_flow(results, node_type):
         logging.error('No node weights for nodes of type `{}`'.format(node_type))
         return False
 
-
     df = convert_to_multiindex(group)
 
     x = df.xs('capacity', axis=1, level=2).columns.values
@@ -288,9 +287,12 @@ def net_storage_flow(results, node_type):
 
         subset['net_flow'] =  subset['output'] - subset['input']
 
-        subset.columns = pd.MultiIndex.from_product([[l], subset.columns])
+        subset.columns = pd.MultiIndex.from_product(
+                                [[l],
+                                 [o for o in labels[0].outputs],
+                                 subset.columns])
 
-        dataframes.append(subset.xs('net_flow', axis=1, level=1))
+        dataframes.append(subset.loc[:,(slice(None), slice(None), 'net_flow')])
 
     return pd.concat(dataframes, axis=1)
 
