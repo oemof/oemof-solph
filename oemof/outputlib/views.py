@@ -289,7 +289,7 @@ def net_storage_flow(results, node_type):
 
         subset.columns = pd.MultiIndex.from_product(
                                 [[l],
-                                 [o for o in labels[0].outputs],
+                                 [o for o in l.outputs],
                                  subset.columns])
 
         dataframes.append(subset.loc[:,(slice(None), slice(None), 'net_flow')])
