@@ -225,48 +225,104 @@ def node_weight_by_type(results, node_type=None):
 
 
 def node_input_by_type(results, node_type, droplevel=[]):
-    """
+    """ Gets all inputs for all nodes of the type `node_type` and returns
+    a dataframe.
+
+    Parameter
+    ---------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object
+    node_type: oemof.solph class
+        Specifies the type of the node for that inputs are selected
+
+    Usage
+    --------
+    import oemof.solph as solph
+    from oemof.outputlib import views
+
+    # solve oemof solph model 'm'
+    # Then collect node weights
+    views.node_input_by_type(m.results(), node_type=solph.Sink)
     """
     if node_type is None:
         raise ValueError('Argument `node_type` must not be of type None!')
 
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[1], node_type) and k[0] is not None}
-    if not group:
-        logging.error('No node weights for nodes of type `{}`'.format(node_type))
-        return False
 
+    if not group:
+        logging.error('No nodes of type `{}`'.format(node_type))
+        return False
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
-
-    return df
+        return df
 
 def node_output_by_type(results, node_type, droplevel=[]):
-    """
+    """ Gets all outputs for all nodes of the type `node_type` and returns
+    a dataframe.
+
+    Parameter
+    ---------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object
+    node_type: oemof.solph class
+        Specifies the type of the node for that outputs are selected
+
+    Usage
+    --------
+    import oemof.solph as solph
+    from oemof.outputlib import views
+
+    # solve oemof solph model 'm'
+    # Then collect node weights
+    views.node_output_by_type(m.results(), node_type=solph.Transformer)
     """
     if node_type is None:
         raise ValueError('Argument `node_type` must not be of type None!')
 
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[0], node_type) and k[1] is not None}
-    if not group:
-        logging.error('No node weights for nodes of type `{}`'.format(node_type))
-        return False
 
+    if not group:
+        logging.error('No nodes of type `{}`'.format(node_type))
+        return False
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
-
-    return df
+        return df
 
 def net_storage_flow(results, node_type):
-    """
+    """ Calculates the net storage flow for storage models that have one
+    input edge and one output edge both with flows within the domain of
+    non-negative reals.
+
+    Parameter
+    ---------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object
+    node_type: oemof.solph class
+        Specifies the type for which (storage) type net flows are calculated
+
+    Returns
+    -------
+    pandas.DataFrame object with multiindex colums. Names of levels of columns
+    are: from, to, net_flow.
+
+    Usage
+    --------
+    import oemof.solph as solph
+    from oemof.outputlib import views
+
+    # solve oemof solph model 'm'
+    # Then collect node weights
+    views.net_storage_flow(m.results(), node_type=solph.GenericStorage)
     """
 
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[0], node_type) or isinstance(k[1], node_type)}
 
     if not group:
-        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        logging.error(
+            'No nodes of type `{}`'.format(node_type))
         return False
 
     df = convert_to_multiindex(group)
