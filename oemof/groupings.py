@@ -9,11 +9,7 @@ available from its original location oemof/oemof/groupings.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-try:
-    from collections.abc import (Hashable, Iterable, Mapping,
-                                 MutableMapping as MuMa)
-except ImportError:
-    from collections import (Hashable, Iterable, Mapping,
+from collections.abc import (Hashable, Iterable, Mapping,
                              MutableMapping as MuMa)
 from itertools import chain, filterfalse
 
