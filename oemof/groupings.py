@@ -201,7 +201,7 @@ class Grouping:
             for k in list(filterfalse(self.filter, v)):
                 v.pop(k)
         elif isinstance(v, Mapping):
-            v = type(v)((k, v[k]) for k in v if self.filter(k))
+            v = type(v)(dict((k, v[k]) for k in filter(self.filter, v)))
         elif isinstance(v, Iterable):
             v = type(v)(filter(self.filter, v))
         elif self.filter and not self.filter(v):
