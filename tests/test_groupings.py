@@ -21,3 +21,18 @@ def test_initialization_argument_checks():
     with assert_raises(TypeError, msg=message):
         g = Grouping(key=lambda x: x, constant_key='key')
 
+def test_notimplementederrors():
+    """ `Grouping` should raise an error when reaching unreachable code.
+    """
+
+    message = "\n`Grouping.key` not overriden, but no error raised."
+    with assert_raises(NotImplementedError, msg=message):
+        g = Grouping(key="key")
+        del g.key
+        g.key("dummy argument")
+
+    message = "\n`Grouping.filter` not overriden, but no error raised."
+    with assert_raises(NotImplementedError, msg=message):
+        g = Grouping(key="key")
+        del g.filter
+        g.filter("dummy argument")
