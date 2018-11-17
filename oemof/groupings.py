@@ -124,7 +124,7 @@ class Grouping:
 
         Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
-        raise NotImplementedError(
+        raise NotImplementedError("\n\n"
             "There is no default implementation for `Groupings.key`.\n" +
             "Congratulations, you managed to execute supposedly " +
             "unreachable code.\n" +
@@ -179,7 +179,7 @@ class Grouping:
         (:obj:`True`) or not (:obj:`False`).
 
         """
-        raise NotImplementedError(
+        raise NotImplementedError("\n\n"
             "`Groupings.filter` called without being overridden.\n" +
             "Congratulations, you managed to execute supposedly " +
             "unreachable code.\n" +
