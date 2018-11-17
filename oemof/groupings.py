@@ -109,18 +109,18 @@ class Grouping:
             if kw in kwargs:
                 setattr(self, kw, kwargs[kw])
 
-    def key(self, e):
+    def key(self, node):
         """ Obtain a key under which to store the group.
 
         You have to supply this method yourself using the :obj:`key` parameter
         when creating :class:`Grouping` instances.
 
-        Called for every :class:`entity <oemof.core.network.Entity>` :obj:`e`
-        of the energy system. Expected to return the key (i.e. a valid
-        :class:`hashable`) under which the group :meth:`value(e)
-        <Grouping.value>` will be stored. If it should be added to more than
-        one group, return a :class:`list` (or any other :class:`non-hashable
-        <Hashable>`, :class:`iterable`) containing the group keys.
+        Called for every :class:`node <oemof.core.network.Node>` of the energy
+        system. Expected to return the key (i.e. a valid :class:`hashable`)
+        under which the group :meth:`value(node) <Grouping.value>` will be
+        stored. If it should be added to more than one group, return a
+        :class:`list` (or any other non-:class:`hashable <Hashable>`,
+        :class:`iterable`) containing the group keys.
 
         Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
