@@ -14,6 +14,12 @@ from collections.abc import (Hashable, Iterable, Mapping,
 from itertools import chain, filterfalse
 
 
+# TODO: Update docstrings.
+#
+#   * Make them easier to understand.
+#   * Update them to use nodes instead of entities.
+#
+
 class Grouping:
     """
     Used to aggregate :class:`entities <oemof.core.network.Entity>` in an
