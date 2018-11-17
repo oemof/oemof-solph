@@ -125,10 +125,10 @@ class Grouping:
         Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
         raise NotImplementedError("\n\n"
-            "There is no default implementation for `Groupings.key`.\n" +
-            "Congratulations, you managed to execute supposedly " +
-            "unreachable code.\n" +
-            "Please let us know by filing a bug at:\n\n    " +
+            "There is no default implementation for `Groupings.key`.\n"
+            "Congratulations, you managed to execute supposedly "
+            "unreachable code.\n"
+            "Please let us know by filing a bug at:\n\n    "
             "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
@@ -159,7 +159,7 @@ class Grouping:
         """
         if old is new:
             return old
-        raise ValueError("\nGrouping \n  " +
+        raise ValueError("\nGrouping \n  "
                          "{}:{}\nand\n  {}:{}\ncollides.\n".format(
                              id(old), old, id(new), new) +
                          "Possibly duplicate uids/labels?")
@@ -180,10 +180,10 @@ class Grouping:
 
         """
         raise NotImplementedError("\n\n"
-            "`Groupings.filter` called without being overridden.\n" +
-            "Congratulations, you managed to execute supposedly " +
-            "unreachable code.\n" +
-            "Please let us know by filing a bug at:\n\n    " +
+            "`Groupings.filter` called without being overridden.\n"
+            "Congratulations, you managed to execute supposedly "
+            "unreachable code.\n"
+            "Please let us know by filing a bug at:\n\n    "
             "https://github.com/oemof/oemof/issues\n")
 
     def __call__(self, e, d):
