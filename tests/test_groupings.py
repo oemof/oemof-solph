@@ -4,7 +4,7 @@ Most parts of the `groupings` module are tested via other tests, but certain
 code paths don't get covered by those, which is what this module is for.
 """
 
-from nose.tools import assert_raises
+from nose.tools import assert_raises, eq_
 
 from oemof.groupings import Grouping
 
@@ -36,3 +36,14 @@ def test_notimplementederrors():
         g = Grouping(key="key")
         del g.filter
         g.filter("dummy argument")
+
+def test_mutable_mapping_groups():
+    g = Grouping(
+            key=lambda x: len(x),
+            value=lambda x: {y: len([z for z in x if z == y]) for y in x})
+    groups = {}
+    expected = {3: {'o': 2, 'f': 1}}
+    g("foo", groups)
+    eq_(groups, expected,
+            "\n  Expected: {} \n  Got     : {}".format(expected, groups))
+
