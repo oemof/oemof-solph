@@ -73,7 +73,7 @@ c_e_GenericStorageBlock_balance(storage3_2)_:
 +1 flow(storage3_electricityBus_2)
 = 0
 
-c_e_GenericStorageBlock_cycled_cstr(storage3)_:
+c_e_GenericStorageBlock_balanced_cstr(storage3)_:
 +1 GenericStorageBlock_capacity(storage3_2)
 -1 GenericStorageBlock_init_cap(storage3)
 = 0

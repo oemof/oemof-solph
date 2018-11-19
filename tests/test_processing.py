@@ -216,7 +216,7 @@ class Parameter_Result_Tests:
                 'capacity_loss': 0,
                 'capacity_max': 1,
                 'capacity_min': 0,
-                'cycled': True,
+                'balanced': True,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
             })
@@ -245,7 +245,7 @@ class Parameter_Result_Tests:
                 'capacity_loss': 0,
                 'capacity_max': 1,
                 'capacity_min': 0,
-                'cycled': True,
+                'balanced': True,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
             })

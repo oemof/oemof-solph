@@ -78,7 +78,7 @@ c_e_GenericInvestmentStorageBlock_balance(storage6_2)_:
 +1 flow(storage6_electricityBus_2)
 = 0
 
-c_e_GenericInvestmentStorageBlock_cycled_cstr(storage6)_:
+c_e_GenericInvestmentStorageBlock_balanced_cstr(storage6)_:
 +1 GenericInvestmentStorageBlock_capacity(storage6_2)
 -1 GenericInvestmentStorageBlock_init_cap(storage6)
 = 0

@@ -125,7 +125,7 @@ c_e_GenericInvestmentStorageBlock_balance(storage_constraint_2)_:
 +1 flow(storage_constraint_Bus1_2)
 = 0
 
-c_e_GenericInvestmentStorageBlock_cycled_cstr(storage_constraint)_:
+c_e_GenericInvestmentStorageBlock_balanced_cstr(storage_constraint)_:
 +1 GenericInvestmentStorageBlock_capacity(storage_constraint_2)
 -1 GenericInvestmentStorageBlock_init_cap(storage_constraint)
 = 0
