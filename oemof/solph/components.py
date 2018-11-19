@@ -126,7 +126,7 @@ class GenericStorage(network.Transformer):
         super().__init__(*args, **kwargs)
         self.nominal_capacity = kwargs.get('nominal_capacity')
         self.initial_capacity = kwargs.get('initial_capacity')
-        self.cycled = kwargs.get('cycled', True)
+        self.balanced = kwargs.get('balanced', True)
         self.capacity_loss = solph_sequence(kwargs.get('capacity_loss', 0))
         self.inflow_conversion_factor = solph_sequence(
             kwargs.get('inflow_conversion_factor', 1))
@@ -187,8 +187,8 @@ class GenericStorageBlock(SimpleBlock):
         A set with all :class:`.Storage` objects, which do not have an
          attr:`investment` of type :class:`.Investment`.
 
-    STORAGES_CYCLED
-        A set of  all :class:`.Storage` objects, with 'cycled' attribute set
+    STORAGES_BALANCED
+        A set of  all :class:`.Storage` objects, with 'balanced' attribute set
         to True.
 
     STORAGES_WITH_INVEST_FLOW_REL
@@ -220,10 +220,10 @@ class GenericStorageBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    Set last time step to the initial capacity if cycled is True
+    Set last time step to the initial capacity if balanced is True
         .. math::
             capacity(n, t_{last} = &init\_cap(n)\\
-            &\forall n \in \textrm{STORAGES\_CYCLED}
+            &\forall n \in \textrm{STORAGES\_BALANCED}
 
     Storage balance for t = 0 :attr:`om.Storage.balance[n, t]`
         .. math:: capacity(n, 0) = &initial\_capacity(n) \cdot
@@ -277,8 +277,8 @@ class GenericStorageBlock(SimpleBlock):
 
         self.STORAGES = Set(initialize=[n for n in group])
 
-        self.STORAGES_CYCLED = Set(initialize=[
-            n for n in group if n.cycled is True])
+        self.STORAGES_BALANCED = Set(initialize=[
+            n for n in group if n.balanced is True])
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
@@ -345,11 +345,11 @@ class GenericStorageBlock(SimpleBlock):
         self.balance = Constraint(self.STORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
 
-        def _cycled_storage_rule(block, n):
-            """capacity of last time step == initial capacity if cycled"""
+        def _balanced_storage_rule(block, n):
+            """capacity of last time step == initial capacity if balanced"""
             return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
-        self.cycled_cstr = Constraint(self.STORAGES_CYCLED,
-                                      rule=_cycled_storage_rule)
+        self.balanced_cstr = Constraint(self.STORAGES_BALANCED,
+                                      rule=_balanced_storage_rule)
 
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
@@ -484,8 +484,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
 
-        self.INVESTSTORAGES_CYCLED = Set(initialize=[
-            n for n in group if n.cycled is True])
+        self.INVESTSTORAGES_BALANCED = Set(initialize=[
+            n for n in group if n.balanced is True])
 
         self.INVESTSTORAGES_NO_INIT_CAP = Set(initialize=[
             n for n in group if n.initial_capacity is None])
@@ -575,10 +575,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.balance = Constraint(self.INVESTSTORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
 
-        def _cycled_storage_rule(block, n):
+        def _balanced_storage_rule(block, n):
             return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
-        self.cycled_cstr = Constraint(self.INVESTSTORAGES_CYCLED,
-                                      rule=_cycled_storage_rule)
+        self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
+                                      rule=_balanced_storage_rule)
         
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
