@@ -409,9 +409,96 @@ Compressed Air Energy Storage (CAES).
 GenericCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-With the GenericCHP class combined heat and power plants can be modelled with more details.
+With the GenericCHP class it is possible to model different types of CHP plants (combined cycle extraction turbines,
+back pressure turbines and motoric CHP), which use different ranges of operation, as shown in the figure below.
+
+.. 	image:: _files/GenericCHP.svg
+   :scale: 10 %
+   :alt: scheme of GenericCHP operation range
+   :align: center
+
+Combined cycle extraction turbines: The minimal and maximal electric power without district heating
+(red dots in the figure) define maximum load and minimum load of the plant. Beta defines electrical power loss through
+heat extraction. The minimal thermal condenser load to cooling water and the share of flue gas losses
+at maximal heat extraction determine the right boundary of the operation range.
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='combined_cycle_extraction_turbine',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.19 for p in range(0, periods)])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[200 for p in range(0, periods)],
+            P_min_woDH=[80 for p in range(0, periods)],
+            Eta_el_max_woDH=[0.53 for p in range(0, periods)],
+            Eta_el_min_woDH=[0.43 for p in range(0, periods)])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[30 for p in range(0, periods)])},
+        Beta=[0.19 for p in range(0, periods)],
+        back_pressure=False)
+
+For modeling a back pressure CHP, the attribute `back_pressure` has to be set to True.
+The ratio of power and heat production in a back pressure plant is fixed, therefore the operation range
+is just a line (see figure). Again, the `P_min_woDH`  and `P_max_woDH`, the efficiencies at these points and the share of flue
+gas losses at maximal heat extraction have to be specified. In this case “without district heating” is not to be taken
+literally since an operation without heat production is not possible. It is advised to set `Beta` to zero, so the minimal and
+maximal electric power without district heating are the same as in the operation point (see figure). The minimal
+thermal condenser load to cooling water has to be zero, because there is no condenser besides the district heating unit.
+
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='back_pressure_turbine',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.19 for p in range(0, periods)])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[200 for p in range(0, periods)],
+            P_min_woDH=[80 for p in range(0, periods)],
+            Eta_el_max_woDH=[0.53 for p in range(0, periods)],
+            Eta_el_min_woDH=[0.43 for p in range(0, periods)])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[0 for p in range(0, periods)])},
+        Beta=[0 for p in range(0, periods)],
+        back_pressure=True)
+
+A motoric chp has no condenser, so `Q_CW_min` is zero. Electrical power does not depend on the amount of heat used
+so `Beta` is zero. The minimal and maximal electric power (without district heating) and the efficiencies at these
+points are needed, whereas the use of electrical power without using thermal energy is not possible.
+With `Beta=0` there is no difference between these points and the electrical output in the operation range.
+As a consequence of the functionality of a motoric CHP, share of flue gas losses at maximal heat extraction but also
+at minimal heat extraction have to be specified.
+
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='motoric_chp',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.18 for p in range(0, periods)],
+            H_L_FG_share_min=[0.41 for p in range(0, periods)])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[200 for p in range(0, periods)],
+            P_min_woDH=[100 for p in range(0, periods)],
+            Eta_el_max_woDH=[0.44 for p in range(0, periods)],
+            Eta_el_min_woDH=[0.40 for p in range(0, periods)])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[0 for p in range(0, periods)])},
+        Beta=[0 for p in range(0, periods)],
+        back_pressure=False)
+
+Modeling different types of plants means telling the component to use different constraints. Constraint 1 to 9
+are active in all three cases. Constraint 10 depends on the attribute back_pressure. If true, the constraint is
+an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
+setting the attribute `H_L_FG_share_min`.
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations:
+  :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
+
 
 .. _oemof_solph_components_generic_storage_label:
 
