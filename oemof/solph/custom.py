@@ -784,7 +784,7 @@ class GenericCAESBlock2(SimpleBlock):
         # Add constraint rules
         def cmp_ub_constr_rule(block, n, t):
             """Compression upper bound."""
-            return (self.exp_P[n, t] <= n.params['cmp_P_max'])
+            return (self.cmp_P[n, t] <= n.params['cmp_P_max'])
         self.cmp_ub_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cmp_ub_constr_rule)
 
@@ -813,8 +813,8 @@ class GenericCAESBlock2(SimpleBlock):
             self.GENERICCAES2, m.TIMESTEPS, rule=cmp_area1_rule)
 
         def cmp_area2_rule(block, n, t):
-            """Relationship between heat flow and mass flow."""
-            return(self.cmp_Q[n, t] == self.cmp_m[n, t] * n.params['cmp_d'])
+            """Relationship between heat flow and power."""
+            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * n.params['cmp_d'])
         self.cmp_area2_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cmp_area2_rule)
 
@@ -897,14 +897,14 @@ class GenericCAESBlock2(SimpleBlock):
             self.GENERICCAES2, m.TIMESTEPS, rule=exp_p_range_max_rule)
 
         def exp_area1_rule(block, n, t):
-            """Relationship between power and mass flow."""
+            """Relationship between power and power."""
             return(self.exp_m[n, t] == self.exp_P[n, t] / n.params['exp_a'])
         self.exp_area1_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=exp_area1_rule)
 
         def exp_area2_rule(block, n, t):
             """Relationship between heat flow and mass flow."""
-            return(self.exp_Q[n, t] == self.exp_m[n, t] * n.params['exp_b'])
+            return(self.exp_Q[n, t] == self.exp_P[n, t] * n.params['exp_b'])
         self.exp_area2_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=exp_area2_rule)
 
