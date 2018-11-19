@@ -755,6 +755,9 @@ class GenericCAESBlock2(SimpleBlock):
         self.exp_y = Var(self.GENERICCAES2, m.TIMESTEPS, domain=Binary)
         self.exp_m = Var(self.GENERICCAES2, m.TIMESTEPS)
         self.exp_Q = Var(self.GENERICCAES2, m.TIMESTEPS)
+        # the variable for the pressure in the first and last timestep
+        # is used only if 'cas_Pi_o_0' is set to 'balanced'
+        self.cas_Pi_t0_tmax = Var(self.GENERICCAES2)
 
         # Mapping of flows to "internal" decision variables
         def cmp_p_constr_rule(block, n, t):
@@ -864,15 +867,23 @@ class GenericCAESBlock2(SimpleBlock):
 
         def cas_pi_t0_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
-            return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                   n.params['cas_Pi_o_0'])
+            if n.params['cas_Pi_o_0'] == 'balanced':
+                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
+                       self.cas_Pi_t0_tmax[n])
+            else:
+                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
+                       n.params['cas_Pi_o_0'])
         self.cas_pi_t0_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_t0_rule)
 
         def cas_pi_tmax_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
-            return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                   n.params['cas_Pi_o_0'])
+            if n.params['cas_Pi_o_0'] == 'balanced':
+                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
+                       self.cas_Pi_t0_tmax[n])
+            else:
+                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
+                       n.params['cas_Pi_o_0'])
         self.cas_pi_tmax_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_tmax_rule)
 
