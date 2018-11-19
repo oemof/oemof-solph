@@ -155,7 +155,6 @@ class Parameter_Result_Tests:
             pandas.DataFrame(sequences_attributes), check_like=True
         )
 
-
     def test_flows_without_none_exclusion(self):
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
@@ -205,6 +204,7 @@ class Parameter_Result_Tests:
         assert_series_equal(
             param_results[('storage', 'None')]['scalars'],
             pandas.Series({
+                'balanced': True,
                 'initial_capacity': 0,
                 'invest_relation_input_capacity': 1/6,
                 'invest_relation_output_capacity': 1/6,
@@ -216,7 +216,6 @@ class Parameter_Result_Tests:
                 'capacity_loss': 0,
                 'capacity_max': 1,
                 'capacity_min': 0,
-                'balanced': True,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
             })
@@ -234,6 +233,7 @@ class Parameter_Result_Tests:
         assert_series_equal(
             param_results[('storage', None)]['scalars'],
             pandas.Series({
+                'balanced': True,
                 'initial_capacity': 0,
                 'invest_relation_input_capacity': 1/6,
                 'invest_relation_output_capacity': 1/6,
@@ -245,7 +245,6 @@ class Parameter_Result_Tests:
                 'capacity_loss': 0,
                 'capacity_max': 1,
                 'capacity_min': 0,
-                'balanced': True,
                 'inflow_conversion_factor': 1,
                 'outflow_conversion_factor': 0.8,
             })
