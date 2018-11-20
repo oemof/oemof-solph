@@ -763,7 +763,7 @@ class GenericCAESBlock2(SimpleBlock):
         # optimization loop
         def _cmp_P_bound_rule(block, n, t):
             """Rule definition for bounds of compression power."""
-            bounds = (0, n.params['cmp_P_max'])
+            bounds = (0, n.params['cmp_P_inst'])
             return bounds
         self.cmp_P = Var(self.GENERICCAES2, m.TIMESTEPS,
                          bounds=_cmp_P_bound_rule)
@@ -777,7 +777,7 @@ class GenericCAESBlock2(SimpleBlock):
 
         def _exp_P_bound_rule(block, n, t):
             """Rule definition for bounds of expansion power."""
-            bounds = (0, n.params['exp_P_max'])
+            bounds = (0, n.params['exp_P_inst'])
             return bounds
         self.exp_P = Var(self.GENERICCAES2, m.TIMESTEPS,
                          bounds=_exp_P_bound_rule)
@@ -813,14 +813,14 @@ class GenericCAESBlock2(SimpleBlock):
         def cmp_p_range_min_rule(block, n, t):
             """Minimum load range."""
             return(self.cmp_P[n, t] >= self.cmp_y[n, t] *
-                   n.params['cmp_P_min'])
+                   n.params['cmp_P_min'] * self.cmp_P[n, t].ub)
         self.cmp_p_range_min_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cmp_p_range_min_rule)
 
         def cmp_p_range_max_rule(block, n, t):
             """Maximum load range."""
             return(self.cmp_P[n, t] <= self.cmp_y[n, t] *
-                   self.cmp_P[n, t].ub)
+                   n.params['cmp_P_max'] * self.cmp_P[n, t].ub)
         self.cmp_p_range_max_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cmp_p_range_max_rule)
 
@@ -903,14 +903,14 @@ class GenericCAESBlock2(SimpleBlock):
         def exp_p_range_min_rule(block, n, t):
             """Minimum load range."""
             return(self.exp_P[n, t] >= self.exp_y[n, t] *
-                   n.params['exp_P_min'])
+                   n.params['exp_P_min'] * self.exp_P[n, t].ub)
         self.exp_p_range_min_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=exp_p_range_min_rule)
 
         def exp_p_range_max_rule(block, n, t):
             """Maximum load range."""
             return(self.exp_P[n, t] <= self.exp_y[n, t] *
-                   self.exp_P[n, t].ub)
+                   n.params['exp_P_max'] * self.exp_P[n, t].ub)
         self.exp_p_range_max_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=exp_p_range_max_rule)
 
