@@ -719,6 +719,7 @@ class GenericCAES2(Transformer):
     def constraint_group(self):
         return GenericCAESBlock2
 
+
 class GenericCAESBlock2(SimpleBlock):
     """Block for nodes of class:`.GenericCAES2`."""
 
@@ -757,10 +758,9 @@ class GenericCAESBlock2(SimpleBlock):
         # is used only if 'cas_Pi_o_0' is set to 'balanced'
         self.cas_Pi_t0_tmax = Var(self.GENERICCAES2)
 
-        # Set bounds for decision variables where the bounds are used
+        # Set bounds for decision variables whose bounds are used
         # within other constraints. This allows to change only one variable
-        # bound directly on the pyomo model e.g. in an external design
-        # optimization loop
+        # bound directly on the pyomo model e.g. in a design optimization
         def _cmp_P_bound_rule(block, n, t):
             """Rule definition for bounds of compression power."""
             bounds = (0, n.params['cmp_P_inst'])
