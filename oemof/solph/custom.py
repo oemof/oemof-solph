@@ -810,6 +810,7 @@ class GenericCAESBlock2(SimpleBlock):
         self.exp_q_fuel_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
 
+        # Define constraints for technical description
         def cmp_p_range_min_rule(block, n, t):
             """Minimum load range."""
             return(self.cmp_P[n, t] >= self.cmp_y[n, t] *
@@ -830,7 +831,7 @@ class GenericCAESBlock2(SimpleBlock):
                 n.params['cmp_a'] * self.cmp_y[n, t] +
                 n.params['cmp_b'] * self.cmp_P[n, t] + n.params['cmp_c'] *
                 (self.cmp_z[n, t] + n.params['cas_Pi_min'] *
-                 self.cmp_y[n, t])))
+                 self.cmp_P[n, t].ub * self.cmp_y[n, t])))
         self.cmp_area1_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cmp_area1_rule)
 
