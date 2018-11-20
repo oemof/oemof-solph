@@ -885,7 +885,7 @@ class GenericCAESBlock2(SimpleBlock):
                        self.cas_Pi_t0_tmax[n])
             else:
                 return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                       n.params['cas_Pi_o_0'])
+                       n.params['cas_Pi_o_0'] * self.cas_Pi_o[n, t].ub)
         self.cas_pi_t0_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_t0_rule)
 
@@ -896,7 +896,7 @@ class GenericCAESBlock2(SimpleBlock):
                        self.cas_Pi_t0_tmax[n])
             else:
                 return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                       n.params['cas_Pi_o_0'])
+                       n.params['cas_Pi_o_0'] * self.cas_Pi_o[n, t].ub)
         self.cas_pi_tmax_constr = Constraint(
             self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_tmax_rule)
 
