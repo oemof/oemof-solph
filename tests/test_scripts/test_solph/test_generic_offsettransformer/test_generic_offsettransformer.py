@@ -83,5 +83,3 @@ def test_gen_ostf():
 
     for key in test_dict.keys():
         eq_(int(round(data[key])), int(round(test_dict[key])))
-
-test_gen_ostf()
