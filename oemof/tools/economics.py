@@ -10,7 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 
-def annuity(capex, n, wacc):
+def annuity(capex, n, wacc, **kwargs):
     """Calculate the annuity.
 
     annuity = capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)
@@ -28,5 +28,10 @@ def annuity(capex, n, wacc):
     -------
     float : annuity
 
-    """
-    return capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)
+    """ 
+    u  = kwargs.get('u', n)
+    cost_decrease = kwargs.get('cost_decrease', 0)
+
+    return (capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)
+                    *((1-((1-cost_decrease)/(1+wacc))**n)/
+                    (1-((1-cost_decrease)/(1+wacc))**u)))
