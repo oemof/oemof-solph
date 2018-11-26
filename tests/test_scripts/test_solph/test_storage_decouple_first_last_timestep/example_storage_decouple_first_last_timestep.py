@@ -33,7 +33,7 @@ PARAMETER = {
 def storage_example():
     # read time series
     timeseries = pd.read_csv(
-        os.path.join(os.path.dirname(__file__), 'gsdtf.csv'))
+        os.path.join(os.path.dirname(__file__), 'storage_data.csv'))
     # create an energy system
     idx = pd.date_range('1/1/2017', periods=len(timeseries), freq='H')
     es = solph.EnergySystem(timeindex=idx)
