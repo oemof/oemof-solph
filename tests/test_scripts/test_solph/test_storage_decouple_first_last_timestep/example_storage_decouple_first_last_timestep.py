@@ -114,14 +114,18 @@ def storage_example():
         storage_cap.loc[prev, name] = results[s, None]['scalars']['init_cap']
         balance[name] = (storage_cap.loc[last][name] -
                          storage_cap.loc[prev][name])
-    storage_cap.plot(drawstyle="steps-mid", subplots=False, sharey=True)
-    storage_cap.plot(drawstyle="steps-mid", subplots=True, sharey=True)
-    costs.plot(kind='bar', ax=plt.subplots()[1])
-    balance.plot(kind='bar', linewidth=1, edgecolor='#000000',
-                 ax=plt.subplots()[1])
-    
+
     if plt is not None:
+        storage_cap.plot(drawstyle="steps-mid", subplots=False, sharey=True)
+        storage_cap.plot(drawstyle="steps-mid", subplots=True, sharey=True)
+        costs.plot(kind='bar', ax=plt.subplots()[1])
+        balance.plot(kind='bar', linewidth=1, edgecolor='#000000',
+                     ax=plt.subplots()[1])
         plt.show()
+
+    print(storage_cap)
+    print(costs)
+    print(balance)
 
 
 storage_example()
