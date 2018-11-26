@@ -14,7 +14,11 @@ import os
 import pandas as pd
 import oemof.solph as solph
 from oemof.outputlib import processing
-from matplotlib import pyplot as plt
+try:
+    from matplotlib import pyplot as plt
+except ImportError:
+    print("Install matplotlib to see the plots.")
+    plt = None
 
 
 DATA = [
@@ -115,7 +119,9 @@ def storage_example():
     costs.plot(kind='bar', ax=plt.subplots()[1])
     balance.plot(kind='bar', linewidth=1, edgecolor='#000000',
                  ax=plt.subplots()[1])
-    plt.show()
+    
+    if plt is not None:
+        plt.show()
 
 
 storage_example()
