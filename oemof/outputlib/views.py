@@ -216,7 +216,7 @@ def node_weight_by_type(results, node_type=None):
              if isinstance(k[0], node_type) and k[1] is None}
     if not group:
         logging.error('No node weights for nodes of type `{}`'.format(node_type))
-        return False
+        return None
     else:
         df = convert_to_multiindex(group,
                                    index_names=['node', 'to', 'weight_type'],
@@ -252,7 +252,7 @@ def node_input_by_type(results, node_type, droplevel=[]):
 
     if not group:
         logging.error('No nodes of type `{}`'.format(node_type))
-        return False
+        return None
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
         return df
@@ -285,7 +285,7 @@ def node_output_by_type(results, node_type, droplevel=[]):
 
     if not group:
         logging.error('No nodes of type `{}`'.format(node_type))
-        return False
+        return None
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
         return df
