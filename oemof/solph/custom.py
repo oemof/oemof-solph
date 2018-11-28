@@ -394,15 +394,13 @@ class GenericCAESBlock2(SimpleBlock):
         self.N = Set(initialize=[n for n in group], ordered=True)
         self.NT = Set(initialize=self.N*m.TIMESTEPS, ordered=True)
 
+        # Function to create double indexed dictionary for parameters
+        def param_dict(nodetimeset=None, param=None):
+            return {(n, t): getattr(n, param)[t] for (n, t) in nodetimeset}
+
         # Parameters
-        # function with param as input parameter!?
-        # how can one use a solph sequence as a proper sequence object without
-        # iterating over all timesteps?
-        # pass in: sequence, nodes, timesteps
-        # return: dict
-        cmp_P_inst = {(n, t): n.cmp_P_inst[t] for (n, t) in self.NT}
-        self.cmp_P_inst = Param(self.N, m.TIMESTEPS, initialize=cmp_P_inst,
-                                mutable=True)
+        self.cmp_P_inst = Param(self.N, m.TIMESTEPS, mutable=True,
+                                initialize=param_dict(self.NT, 'cmp_P_inst'))
         self.cmp_P_inst.pprint()
 
         # Variables
