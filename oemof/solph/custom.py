@@ -322,6 +322,278 @@ class LinkBlock(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
+class GenericCAES2(Transformer):
+    """
+    Component `GenericCAES2` to model arbitrary compressed air energy storages.
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.electrical_input = kwargs.get('electrical_input')
+        self.fuel_input = kwargs.get('fuel_input')
+        self.electrical_output = kwargs.get('electrical_output')
+
+        # map specific flows to standard API
+        self.inputs.update(kwargs.get('electrical_input'))
+        self.inputs.update(kwargs.get('fuel_input'))
+        self.outputs.update(kwargs.get('electrical_output'))
+
+        # set required model parameters
+        self.cas_C_st = sequence(kwargs.get('cas_C_st'))
+        self.cas_m_0 = sequence(kwargs.get('cas_m_0'))
+        self.cas_Pi_min = sequence(kwargs.get('cas_Pi_min'))
+        self.cas_Pi_o_max = sequence(kwargs.get('cas_Pi_o_max'))
+        self.cas_Pi_o_0 = sequence(kwargs.get('cas_Pi_o_0'))
+        self.cas_R = sequence(kwargs.get('cas_R'))
+        self.cas_T0 = sequence(kwargs.get('cas_T0'))
+        self.cas_T = sequence(kwargs.get('cas_T'))
+        self.cmp_a = sequence(kwargs.get('cmp_a'))
+        self.cmp_b = sequence(kwargs.get('cmp_b'))
+        self.cmp_c = sequence(kwargs.get('cmp_c'))
+        self.cmp_d = sequence(kwargs.get('cmp_d'))
+        self.cmp_eta = sequence(kwargs.get('cmp_eta'))
+        self.cmp_P_inst = sequence(kwargs.get('cmp_P_inst'))
+        self.cmp_P_max = sequence(kwargs.get('cmp_P_max'))
+        self.cmp_P_min = sequence(kwargs.get('cmp_P_min'))
+        self.exp_a = sequence(kwargs.get('exp_a'))
+        self.exp_b = sequence(kwargs.get('exp_b'))
+        self.exp_P_inst = sequence(kwargs.get('exp_P_inst'))
+        self.exp_P_max = sequence(kwargs.get('exp_P_max'))
+        self.exp_P_min = sequence(kwargs.get('exp_P_min'))
+
+    def constraint_group(self):
+        return GenericCAESBlock2
+
+
+class GenericCAESBlock2(SimpleBlock):
+    """Block for nodes of class:`.GenericCAES2`."""
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+        Create constraints for GenericCAESBlock.
+
+        Parameters
+        ----------
+        group : list
+            List containing `.GenericCAES` objects.
+            e.g. groups=[gcaes1, gcaes2,..]
+        """
+        m = self.parent_block()
+
+        if group is None:
+            return None
+
+        # Sets
+        self.N = Set(initialize=[n for n in group], ordered=True)
+        self.NT = Set(initialize=self.N*m.TIMESTEPS, ordered=True)
+
+        # Parameters
+        # function with param as input parameter!?
+        # how can one use a solph sequence as a proper sequence object without
+        # iterating over all timesteps?
+        # pass in: sequence, nodes, timesteps
+        # return: dict
+        cmp_P_inst = {(n, t): n.cmp_P_inst[t] for (n, t) in self.NT}
+        self.cmp_P_inst = Param(self.N, m.TIMESTEPS, initialize=cmp_P_inst,
+                                mutable=True)
+        self.cmp_P_inst.pprint()
+
+        # Variables
+        self.cmp_Q = Var(self.N, m.TIMESTEPS)
+        self.cmp_y = Var(self.N, m.TIMESTEPS, domain=Binary)
+        self.cmp_m = Var(self.N, m.TIMESTEPS)
+        self.cmp_z = Var(self.N, m.TIMESTEPS)
+        self.exp_y = Var(self.N, m.TIMESTEPS, domain=Binary)
+        self.exp_m = Var(self.N, m.TIMESTEPS)
+        self.exp_Q = Var(self.N, m.TIMESTEPS)
+
+        # The variable for the pressure in the first and last timestep
+        # is used only if 'cas_Pi_o_0' is set to 'balanced'
+        self.cas_Pi_t0_tmax = Var(self.N)
+
+        # Set bounds for decision variables whose bounds are used
+        # within other constraints. This allows to change only one variable
+        # bound directly on the pyomo model e.g. in a design optimization
+        def cmp_P_bound_rule(block, n, t):
+            """Rule definition for bounds of compression power."""
+            bounds = (0, n.cmp_P_inst)
+            return bounds
+        self.cmp_P = Var(self.N, m.TIMESTEPS,
+                         bounds=cmp_P_bound_rule)
+
+        def cas_Pi_o_bound_rule(block, n, t):
+            """Rule definition for bounds of cavern pressure."""
+            bounds = (0, n.cas_Pi_o_max)
+            return bounds
+        self.cas_Pi_o = Var(self.N, m.TIMESTEPS,
+                            bounds=cas_Pi_o_bound_rule)
+
+        def exp_P_bound_rule(block, n, t):
+            """Rule definition for bounds of expansion power."""
+            bounds = (0, n.exp_P_inst)
+            return bounds
+        self.exp_P = Var(self.N, m.TIMESTEPS,
+                         bounds=exp_P_bound_rule)
+
+        # Map flows to "internal" decision variables
+        def cmp_p_constr_rule(block, n, t):
+            """Map flow to internal decision variable for compression power."""
+            expr = 0
+            expr += -self.cmp_P[n, t]
+            expr += m.flow[list(n.electrical_input.keys())[0], n, t]
+            return expr == 0
+        self.cmp_p_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_p_constr_rule)
+
+        def exp_p_constr_rule(block, n, t):
+            """Map flow to internal decision variable for expansion power."""
+            expr = 0
+            expr += -self.exp_P[n, t]
+            expr += m.flow[n, list(n.electrical_output.keys())[0], t]
+            return expr == 0
+        self.exp_p_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=exp_p_constr_rule)
+
+        def exp_q_fuel_constr_rule(block, n, t):
+            """Map flow to internal decision variable for heat flow."""
+            expr = 0
+            expr += -self.exp_Q[n, t]
+            expr += m.flow[list(n.fuel_input.keys())[0], n, t]
+            return expr == 0
+        self.exp_q_fuel_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
+
+        # Define constraints for technical description
+        def cmp_p_range_min_rule(block, n, t):
+            """Minimum load range."""
+            return(self.cmp_P[n, t] >= self.cmp_y[n, t] *
+                   n.cmp_P_min * n.cmp_P_inst)  # to be replaced by param
+        self.cmp_p_range_min_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_p_range_min_rule)
+
+        def cmp_p_range_max_rule(block, n, t):
+            """Maximum load range."""
+            return(self.cmp_P[n, t] <= self.cmp_y[n, t] *
+                   n.cmp_P_max * n.cmp_P_inst)  # to be replaced by param
+        self.cmp_p_range_max_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_p_range_max_rule)
+
+        def cmp_area1_rule(block, n, t):
+            """Relationship between power, mass flow and cavern pressure."""
+            return(self.cmp_m[n, t] == (
+                n.cmp_a * self.cmp_y[n, t] +
+                n.cmp_b * self.cmp_P[n, t] + n.cmp_c *
+                (self.cmp_z[n, t] + n.cas_Pi_min *
+                 self.cmp_y[n, t])))
+        self.cmp_area1_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_area1_rule)
+
+        def cmp_area2_rule(block, n, t):
+            """Relationship between heat flow and power."""
+            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * n.cmp_d)
+        self.cmp_area2_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_area2_rule)
+
+        def cmp_z1_rule(block, n, t):
+            """Linearization of variable product (cas_Pi_o * cmp_y)."""
+            return(self.cmp_z[n, t] <= self.cas_Pi_o[n, t].ub *
+                   self.cmp_y[n, t])
+        self.cmp_z1_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_z1_rule)
+
+        def cmp_z2_rule(block, n, t):
+            """Linearization of variable product (cas_Pi_o * cmp_y)."""
+            return(self.cmp_z[n, t] <= self.cas_Pi_o[n, t])
+        self.cmp_z2_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_z2_rule)
+
+        def cmp_z3_rule(block, n, t):
+            """Linearization of variable product (cas_Pi_o * cmp_y)."""
+            return(self.cmp_z[n, t] >= self.cas_Pi_o[n, t] -
+                   (1 - self.cmp_y[n, t]) * self.cas_Pi_o[n, t].ub)
+        self.cmp_z3_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_z3_rule)
+
+        def cmp_z4_rule(block, n, t):
+            """Linearization of variable product (cas_Pi_o * cmp_y)."""
+            return(self.cmp_z[n, t] >= 0)
+        self.cmp_z4_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_z4_rule)
+
+        def cas_pi_rule(block, n, t):
+            """Cavern balance for all timesteps but the first."""
+            if t > min(m.TIMESTEPS):
+                return(self.cas_Pi_o[n, t] ==
+                       (1 - n.cmp_eta) * self.cas_Pi_o[n, t-1] +
+                       3600 / n.cas_m_0 *
+                       (self.cmp_m[n, t] - self.exp_m[n, t]))
+            else:
+                return Constraint.Skip
+        self.cas_pi_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cas_pi_rule)
+
+        def cas_pi_t0_rule(block, n, t):
+            """Cavern level in first and last timestep are set equal."""
+            if n.cas_Pi_o_0 == 'balanced':
+                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
+                       self.cas_Pi_t0_tmax[n])
+            else:
+                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
+                       n.cas_Pi_o_0 * self.cas_Pi_o[n, t].ub)
+        self.cas_pi_t0_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cas_pi_t0_rule)
+
+        def cas_pi_tmax_rule(block, n, t):
+            """Cavern level in first and last timestep are set equal."""
+            if n.cas_Pi_o_0 == 'balanced':
+                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
+                       self.cas_Pi_t0_tmax[n])
+            else:
+                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
+                       n.cas_Pi_o_0 * self.cas_Pi_o[n, t].ub)
+        self.cas_pi_tmax_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cas_pi_tmax_rule)
+
+        def exp_p_range_min_rule(block, n, t):
+            """Minimum load range."""
+            return(self.exp_P[n, t] >= self.exp_y[n, t] *
+                   n.exp_P_min * self.exp_P[n, t].ub)
+        self.exp_p_range_min_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=exp_p_range_min_rule)
+
+        def exp_p_range_max_rule(block, n, t):
+            """Maximum load range."""
+            return(self.exp_P[n, t] <= self.exp_y[n, t] *
+                   n.exp_P_max * self.exp_P[n, t].ub)
+        self.exp_p_range_max_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=exp_p_range_max_rule)
+
+        def exp_area1_rule(block, n, t):
+            """Relationship between power and power."""
+            return(self.exp_m[n, t] == self.exp_P[n, t] / n.exp_a)
+        self.exp_area1_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=exp_area1_rule)
+
+        def exp_area2_rule(block, n, t):
+            """Relationship between heat flow and mass flow."""
+            return(self.exp_Q[n, t] == self.exp_P[n, t] * n.exp_b)
+        self.exp_area2_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=exp_area2_rule)
+
+        def cmp_exp_excl_rule(block, n, t):
+            """Exclusion of parallel operation of compression and expansion."""
+            return(self.cmp_y[n, t] + self.exp_y[n, t] <= 1)
+        self.cmp_exp_excl_constr = Constraint(
+            self.N, m.TIMESTEPS, rule=cmp_exp_excl_rule)
+
+
 class GenericCAES(Transformer):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
@@ -695,270 +967,6 @@ class GenericCAESBlock(SimpleBlock):
             return (self.tes_level[n, t] <= n.params['tes_level_max'])
         self.tes_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
-
-
-class GenericCAES2(Transformer):
-    """
-    Component `GenericCAES2` to model arbitrary compressed air energy storages.
-    """
-
-    def __init__(self, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-
-        self.electrical_input = kwargs.get('electrical_input')
-        self.fuel_input = kwargs.get('fuel_input')
-        self.electrical_output = kwargs.get('electrical_output')
-
-        # map specific flows to standard API
-        self.inputs.update(kwargs.get('electrical_input'))
-        self.inputs.update(kwargs.get('fuel_input'))
-        self.outputs.update(kwargs.get('electrical_output'))
-
-        # set required model parameters
-        self.cas_C_st = kwargs.get('cas_C_st')
-        self.cas_m_0 = kwargs.get('cas_m_0')
-        self.cas_Pi_min = kwargs.get('cas_Pi_min')
-        self.cas_Pi_o_max = kwargs.get('cas_Pi_o_max')
-        self.cas_Pi_o_0 = kwargs.get('cas_Pi_o_0')
-        self.cas_R = kwargs.get('cas_R')
-        self.cas_T0 = kwargs.get('cas_T0')
-        self.cas_T = kwargs.get('cas_T')
-        self.cmp_a = kwargs.get('cmp_a')
-        self.cmp_b = kwargs.get('cmp_b')
-        self.cmp_c = kwargs.get('cmp_c')
-        self.cmp_d = kwargs.get('cmp_d')
-        self.cmp_eta = kwargs.get('cmp_eta')
-        self.cmp_P_inst = kwargs.get('cmp_P_inst')
-        self.cmp_P_max = kwargs.get('cmp_P_max')
-        self.cmp_P_min = kwargs.get('cmp_P_min')
-        self.exp_a = kwargs.get('exp_a')
-        self.exp_b = kwargs.get('exp_b')
-        self.exp_P_inst = kwargs.get('exp_P_inst')
-        self.exp_P_max = kwargs.get('exp_P_max')
-        self.exp_P_min = kwargs.get('exp_P_min')
-
-    def constraint_group(self):
-        return GenericCAESBlock2
-
-
-class GenericCAESBlock2(SimpleBlock):
-    """Block for nodes of class:`.GenericCAES2`."""
-
-    CONSTRAINT_GROUP = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """
-        Create constraints for GenericCAESBlock.
-
-        Parameters
-        ----------
-        group : list
-            List containing `.GenericCAES` objects.
-            e.g. groups=[gcaes1, gcaes2,..]
-        """
-        m = self.parent_block()
-
-        if group is None:
-            return None
-
-        self.GENERICCAES2 = Set(initialize=[n for n in group])
-
-        # Parameters as mutable parameter
-        print('FOOO:')
-        for n in self.GENERICCAES2:
-            print(n.__dict__)
-
-        # Variables
-        self.cmp_Q = Var(self.GENERICCAES2, m.TIMESTEPS)
-        self.cmp_y = Var(self.GENERICCAES2, m.TIMESTEPS, domain=Binary)
-        self.cmp_m = Var(self.GENERICCAES2, m.TIMESTEPS)
-        self.cmp_z = Var(self.GENERICCAES2, m.TIMESTEPS)
-        self.exp_y = Var(self.GENERICCAES2, m.TIMESTEPS, domain=Binary)
-        self.exp_m = Var(self.GENERICCAES2, m.TIMESTEPS)
-        self.exp_Q = Var(self.GENERICCAES2, m.TIMESTEPS)
-
-        # The variable for the pressure in the first and last timestep
-        # is used only if 'cas_Pi_o_0' is set to 'balanced'
-        self.cas_Pi_t0_tmax = Var(self.GENERICCAES2)
-
-        # Set bounds for decision variables whose bounds are used
-        # within other constraints. This allows to change only one variable
-        # bound directly on the pyomo model e.g. in a design optimization
-        def cmp_P_bound_rule(block, n, t):
-            """Rule definition for bounds of compression power."""
-            bounds = (0, n.cmp_P_inst)
-            return bounds
-        self.cmp_P = Var(self.GENERICCAES2, m.TIMESTEPS,
-                         bounds=cmp_P_bound_rule)
-
-        def cas_Pi_o_bound_rule(block, n, t):
-            """Rule definition for bounds of cavern pressure."""
-            bounds = (0, n.cas_Pi_o_max)
-            return bounds
-        self.cas_Pi_o = Var(self.GENERICCAES2, m.TIMESTEPS,
-                            bounds=cas_Pi_o_bound_rule)
-
-        def exp_P_bound_rule(block, n, t):
-            """Rule definition for bounds of expansion power."""
-            bounds = (0, n.exp_P_inst)
-            return bounds
-        self.exp_P = Var(self.GENERICCAES2, m.TIMESTEPS,
-                         bounds=exp_P_bound_rule)
-
-        # Map flows to "internal" decision variables
-        def cmp_p_constr_rule(block, n, t):
-            """Map flow to internal decision variable for compression power."""
-            expr = 0
-            expr += -self.cmp_P[n, t]
-            expr += m.flow[list(n.electrical_input.keys())[0], n, t]
-            return expr == 0
-        self.cmp_p_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_p_constr_rule)
-
-        def exp_p_constr_rule(block, n, t):
-            """Map flow to internal decision variable for expansion power."""
-            expr = 0
-            expr += -self.exp_P[n, t]
-            expr += m.flow[n, list(n.electrical_output.keys())[0], t]
-            return expr == 0
-        self.exp_p_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=exp_p_constr_rule)
-
-        def exp_q_fuel_constr_rule(block, n, t):
-            """Map flow to internal decision variable for heat flow."""
-            expr = 0
-            expr += -self.exp_Q[n, t]
-            expr += m.flow[list(n.fuel_input.keys())[0], n, t]
-            return expr == 0
-        self.exp_q_fuel_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
-
-        # Define constraints for technical description
-        def cmp_p_range_min_rule(block, n, t):
-            """Minimum load range."""
-            return(self.cmp_P[n, t] >= self.cmp_y[n, t] *
-                   n.cmp_P_min * n.cmp_P_inst)  # to be replaced by param
-        self.cmp_p_range_min_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_p_range_min_rule)
-
-        def cmp_p_range_max_rule(block, n, t):
-            """Maximum load range."""
-            return(self.cmp_P[n, t] <= self.cmp_y[n, t] *
-                   n.cmp_P_max * n.cmp_P_inst)  # to be replaced by param
-        self.cmp_p_range_max_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_p_range_max_rule)
-
-        def cmp_area1_rule(block, n, t):
-            """Relationship between power, mass flow and cavern pressure."""
-            return(self.cmp_m[n, t] == (
-                n.cmp_a * self.cmp_y[n, t] +
-                n.cmp_b * self.cmp_P[n, t] + n.cmp_c *
-                (self.cmp_z[n, t] + n.cas_Pi_min *
-                 self.cmp_y[n, t])))
-        self.cmp_area1_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_area1_rule)
-
-        def cmp_area2_rule(block, n, t):
-            """Relationship between heat flow and power."""
-            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * n.cmp_d)
-        self.cmp_area2_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_area2_rule)
-
-        def cmp_z1_rule(block, n, t):
-            """Linearization of variable product (cas_Pi_o * cmp_y)."""
-            return(self.cmp_z[n, t] <= self.cas_Pi_o[n, t].ub *
-                   self.cmp_y[n, t])
-        self.cmp_z1_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_z1_rule)
-
-        def cmp_z2_rule(block, n, t):
-            """Linearization of variable product (cas_Pi_o * cmp_y)."""
-            return(self.cmp_z[n, t] <= self.cas_Pi_o[n, t])
-        self.cmp_z2_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_z2_rule)
-
-        def cmp_z3_rule(block, n, t):
-            """Linearization of variable product (cas_Pi_o * cmp_y)."""
-            return(self.cmp_z[n, t] >= self.cas_Pi_o[n, t] -
-                   (1 - self.cmp_y[n, t]) * self.cas_Pi_o[n, t].ub)
-        self.cmp_z3_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_z3_rule)
-
-        def cmp_z4_rule(block, n, t):
-            """Linearization of variable product (cas_Pi_o * cmp_y)."""
-            return(self.cmp_z[n, t] >= 0)
-        self.cmp_z4_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_z4_rule)
-
-        def cas_pi_rule(block, n, t):
-            """Cavern balance for all timesteps but the first."""
-            if t > min(m.TIMESTEPS):
-                return(self.cas_Pi_o[n, t] ==
-                       (1 - n.cmp_eta) * self.cas_Pi_o[n, t-1] +
-                       3600 / n.cas_m_0 *
-                       (self.cmp_m[n, t] - self.exp_m[n, t]))
-            else:
-                return Constraint.Skip
-        self.cas_pi_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_rule)
-
-        def cas_pi_t0_rule(block, n, t):
-            """Cavern level in first and last timestep are set equal."""
-            if n.cas_Pi_o_0 == 'balanced':
-                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                       self.cas_Pi_t0_tmax[n])
-            else:
-                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                       n.cas_Pi_o_0 * self.cas_Pi_o[n, t].ub)
-        self.cas_pi_t0_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_t0_rule)
-
-        def cas_pi_tmax_rule(block, n, t):
-            """Cavern level in first and last timestep are set equal."""
-            if n.cas_Pi_o_0 == 'balanced':
-                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                       self.cas_Pi_t0_tmax[n])
-            else:
-                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                       n.cas_Pi_o_0 * self.cas_Pi_o[n, t].ub)
-        self.cas_pi_tmax_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cas_pi_tmax_rule)
-
-        def exp_p_range_min_rule(block, n, t):
-            """Minimum load range."""
-            return(self.exp_P[n, t] >= self.exp_y[n, t] *
-                   n.exp_P_min * self.exp_P[n, t].ub)
-        self.exp_p_range_min_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=exp_p_range_min_rule)
-
-        def exp_p_range_max_rule(block, n, t):
-            """Maximum load range."""
-            return(self.exp_P[n, t] <= self.exp_y[n, t] *
-                   n.exp_P_max * self.exp_P[n, t].ub)
-        self.exp_p_range_max_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=exp_p_range_max_rule)
-
-        def exp_area1_rule(block, n, t):
-            """Relationship between power and power."""
-            return(self.exp_m[n, t] == self.exp_P[n, t] / n.exp_a)
-        self.exp_area1_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=exp_area1_rule)
-
-        def exp_area2_rule(block, n, t):
-            """Relationship between heat flow and mass flow."""
-            return(self.exp_Q[n, t] == self.exp_P[n, t] * n.exp_b)
-        self.exp_area2_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=exp_area2_rule)
-
-        def cmp_exp_excl_rule(block, n, t):
-            """Exclusion of parallel operation of compression and expansion."""
-            return(self.cmp_y[n, t] + self.exp_y[n, t] <= 1)
-        self.cmp_exp_excl_constr = Constraint(
-            self.GENERICCAES2, m.TIMESTEPS, rule=cmp_exp_excl_rule)
 
 
 class OffsetTransformer(Transformer):
