@@ -391,13 +391,14 @@ class GenericCAESBlock2(SimpleBlock):
             return None
 
         # Sets
-        self.N = Set(initialize=[n for n in group], ordered=True)
+        self.N = Set(initialize=[node for node in group], ordered=True)
         self.NT = Set(initialize=self.N*m.TIMESTEPS, ordered=True)
 
         # Function to create double indexed dictionary for parameters
-        def param_dict(nodetimeset=None, param=None):
-            return {(n, t): getattr(n, param)[t] for (n, t) in nodetimeset}
-
+        def parameter_dict(node_timestep_set=None, param=None):
+            parameter_dict = {(node, timestep): getattr(node, param)[timestep]
+                              for (node, timestep) in node_timestep_set}
+            return parameter_dict
         # Parameters
         self.cmp_P_inst = Param(self.N, m.TIMESTEPS, mutable=True,
                                 initialize=param_dict(self.NT, 'cmp_P_inst'))
