@@ -393,117 +393,125 @@ class GenericCAESBlock2(SimpleBlock):
         # @TODO: Replace indices with text representation
         # e.g. "compression" for "cmp"
 
-        # Sets
-        self.N = Set(initialize=[node for node in group], ordered=True)
-        self.NT = Set(initialize=self.N*m.TIMESTEPS, ordered=True)
-
         # Function to create double indexed dictionary for parameters
         def attribute_dict(node_timestep_set=None, param=None):
             attribute_dict = {(node, timestep): getattr(node, param)[timestep]
                               for (node, timestep) in node_timestep_set}
             return attribute_dict
 
+        # Sets
+        self.NODES = Set(
+            initialize=[node for node in group], ordered=True)
+        self.NODESTIMESTEPS = Set(
+            initialize=self.NODES*m.TIMESTEPS, ordered=True)
+
         # Parameters
         self.cas_C_st = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_C_st'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_C_st'))
         self.cas_m_0 = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_m_0'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_m_0'))
         self.cas_Pi_min = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_Pi_min'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_min'))
         self.cas_Pi_o_max = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_Pi_o_max'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_o_max'))
         self.cas_Pi_o_0 = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_Pi_o_0'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_o_0'))
         self.cas_R = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_R'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_R'))
         self.cas_T0 = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_T0'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_T0'))
         self.cas_T = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cas_T'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_T'))
         self.cmp_a = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_a'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_a'))
         self.cmp_b = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_b'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_b'))
         self.cmp_c = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_c'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_c'))
         self.cmp_d = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_d'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_d'))
         self.cmp_eta = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_eta'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_eta'))
         self.cmp_P_inst = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_P_inst'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_P_inst'))
         self.cmp_P_max = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_P_max'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_P_max'))
         self.cmp_P_min = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'cmp_P_min'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_P_min'))
         self.exp_a = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'exp_a'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_a'))
         self.exp_b = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'exp_b'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_b'))
         self.exp_P_inst = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'exp_P_inst'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_inst'))
         self.exp_P_max = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'exp_P_max'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_max'))
         self.exp_P_min = Param(
-            self.N, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NT, 'exp_P_min'))
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_min'))
 
         # Variables
-        self.cmp_Q = Var(self.N, m.TIMESTEPS)
-        self.cmp_y = Var(self.N, m.TIMESTEPS, domain=Binary)
-        self.cmp_m = Var(self.N, m.TIMESTEPS)
-        self.cmp_z = Var(self.N, m.TIMESTEPS)
-        self.exp_y = Var(self.N, m.TIMESTEPS, domain=Binary)
-        self.exp_m = Var(self.N, m.TIMESTEPS)
-        self.exp_Q = Var(self.N, m.TIMESTEPS)
-
+        self.cmp_P = Var(self.NODES, m.TIMESTEPS)
+        self.cmp_Q = Var(self.NODES, m.TIMESTEPS)
+        self.cmp_y = Var(self.NODES, m.TIMESTEPS, domain=Binary)
+        self.cmp_m = Var(self.NODES, m.TIMESTEPS)
+        self.cmp_z = Var(self.NODES, m.TIMESTEPS)
+        self.cas_Pi_o = Var(self.NODES, m.TIMESTEPS)
+        self.exp_y = Var(self.NODES, m.TIMESTEPS, domain=Binary)
+        self.exp_m = Var(self.NODES, m.TIMESTEPS)
+        self.exp_Q = Var(self.NODES, m.TIMESTEPS)
+        self.exp_P = Var(self.NODES, m.TIMESTEPS)
         # The variable for the pressure in the first and last timestep
         # is used only if 'cas_Pi_o_0' is set to 'balanced'
-        self.cas_Pi_t0_tmax = Var(self.N)
+        self.cas_Pi_t0_tmax = Var(self.NODES)
 
-        # Set bounds for decision variables whose bounds are used
-        # within other constraints. This allows to change only one variable
-        # bound directly on the pyomo model e.g. in a design optimization
+        # Set bounds for decision variables
         def cmp_P_bound_rule(block, n, t):
             """Rule definition for bounds of compression power."""
-            bounds = (0, n.cmp_P_inst)
-            return bounds
-        self.cmp_P = Var(self.N, m.TIMESTEPS,
-                         bounds=cmp_P_bound_rule)
+            expr = 0
+            expr += -self.cmp_P[n, t]
+            expr += self.cmp_P_inst[n, t]
+            return expr == 0
+        self.cmp_P_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=cmp_P_bound_rule)
 
         def cas_Pi_o_bound_rule(block, n, t):
             """Rule definition for bounds of cavern pressure."""
-            bounds = (0, n.cas_Pi_o_max)
-            return bounds
-        self.cas_Pi_o = Var(self.N, m.TIMESTEPS,
-                            bounds=cas_Pi_o_bound_rule)
+            expr = 0
+            expr += -self.cas_Pi_o[n, t]
+            expr += self.cas_Pi_o_max[n, t]
+            return expr == 0
+        self.cas_Pi_o_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=cas_Pi_o_bound_rule)
 
         def exp_P_bound_rule(block, n, t):
             """Rule definition for bounds of expansion power."""
-            bounds = (0, n.exp_P_inst)
-            return bounds
-        self.exp_P = Var(self.N, m.TIMESTEPS,
-                         bounds=exp_P_bound_rule)
+            expr = 0
+            expr += -self.exp_P[n, t]
+            expr += self.exp_P_inst[n, t]
+            return expr == 0
+        self.exp_P_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=exp_P_bound_rule)
 
         # Map flows to "internal" decision variables
         def cmp_p_constr_rule(block, n, t):
@@ -513,7 +521,7 @@ class GenericCAESBlock2(SimpleBlock):
             expr += m.flow[list(n.electrical_input.keys())[0], n, t]
             return expr == 0
         self.cmp_p_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_p_constr_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_p_constr_rule)
 
         def exp_p_constr_rule(block, n, t):
             """Map flow to internal decision variable for expansion power."""
@@ -522,7 +530,7 @@ class GenericCAESBlock2(SimpleBlock):
             expr += m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
         self.exp_p_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=exp_p_constr_rule)
+            self.NODES, m.TIMESTEPS, rule=exp_p_constr_rule)
 
         def exp_q_fuel_constr_rule(block, n, t):
             """Map flow to internal decision variable for heat flow."""
@@ -531,130 +539,122 @@ class GenericCAESBlock2(SimpleBlock):
             expr += m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
         self.exp_q_fuel_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
+            self.NODES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
 
         # Define constraints for technical description
         def cmp_p_range_min_rule(block, n, t):
             """Minimum load range."""
             return(self.cmp_P[n, t] >= self.cmp_y[n, t] *
-                   n.cmp_P_min * n.cmp_P_inst)  # to be replaced by param
+                   self.cmp_P_min[n, t] * self.cmp_P_inst[n, t])
         self.cmp_p_range_min_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_p_range_min_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_p_range_min_rule)
 
         def cmp_p_range_max_rule(block, n, t):
             """Maximum load range."""
             return(self.cmp_P[n, t] <= self.cmp_y[n, t] *
-                   n.cmp_P_max * n.cmp_P_inst)  # to be replaced by param
+                   self.cmp_P_max[n, t] * self.cmp_P_inst[n, t])
         self.cmp_p_range_max_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_p_range_max_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_p_range_max_rule)
 
         def cmp_area1_rule(block, n, t):
             """Relationship between power, mass flow and cavern pressure."""
             return(self.cmp_m[n, t] == (
-                n.cmp_a * self.cmp_y[n, t] +
-                n.cmp_b * self.cmp_P[n, t] + n.cmp_c *
-                (self.cmp_z[n, t] + n.cas_Pi_min *
+                self.cmp_a[n, t] * self.cmp_y[n, t] +
+                self.cmp_b[n, t] * self.cmp_P[n, t] + self.cmp_c[n, t] *
+                (self.cmp_z[n, t] + self.cas_Pi_min[n, t] *
                  self.cmp_y[n, t])))
         self.cmp_area1_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_area1_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_area1_rule)
 
         def cmp_area2_rule(block, n, t):
             """Relationship between heat flow and power."""
-            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * n.cmp_d)
+            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * self.cmp_d[n, t])
         self.cmp_area2_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_area2_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_area2_rule)
 
         def cmp_z1_rule(block, n, t):
             """Linearization of variable product (cas_Pi_o * cmp_y)."""
-            return(self.cmp_z[n, t] <= self.cas_Pi_o[n, t].ub *
+            return(self.cmp_z[n, t] <= self.cas_Pi_o_max[n, t] *
                    self.cmp_y[n, t])
         self.cmp_z1_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_z1_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_z1_rule)
 
         def cmp_z2_rule(block, n, t):
             """Linearization of variable product (cas_Pi_o * cmp_y)."""
             return(self.cmp_z[n, t] <= self.cas_Pi_o[n, t])
         self.cmp_z2_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_z2_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_z2_rule)
 
         def cmp_z3_rule(block, n, t):
             """Linearization of variable product (cas_Pi_o * cmp_y)."""
             return(self.cmp_z[n, t] >= self.cas_Pi_o[n, t] -
-                   (1 - self.cmp_y[n, t]) * self.cas_Pi_o[n, t].ub)
+                   (1 - self.cmp_y[n, t]) * self.cas_Pi_o_max[n, t])
         self.cmp_z3_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_z3_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_z3_rule)
 
         def cmp_z4_rule(block, n, t):
             """Linearization of variable product (cas_Pi_o * cmp_y)."""
             return(self.cmp_z[n, t] >= 0)
         self.cmp_z4_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_z4_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_z4_rule)
 
         def cas_pi_rule(block, n, t):
             """Cavern balance for all timesteps but the first."""
             if t > min(m.TIMESTEPS):
                 return(self.cas_Pi_o[n, t] ==
-                       (1 - n.cmp_eta) * self.cas_Pi_o[n, t-1] +
-                       3600 / n.cas_m_0 *
+                       (1 - self.cmp_eta[n, t]) * self.cas_Pi_o[n, t-1] +
+                       3600 / self.cas_m_0[n, t] *
                        (self.cmp_m[n, t] - self.exp_m[n, t]))
             else:
                 return Constraint.Skip
         self.cas_pi_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cas_pi_rule)
+            self.NODES, m.TIMESTEPS, rule=cas_pi_rule)
 
         def cas_pi_t0_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
-            if n.cas_Pi_o_0 == 'balanced':
-                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                       self.cas_Pi_t0_tmax[n])
-            else:
-                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                       n.cas_Pi_o_0 * self.cas_Pi_o[n, t].ub)
+            return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
+                   self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
         self.cas_pi_t0_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cas_pi_t0_rule)
+            self.NODES, m.TIMESTEPS, rule=cas_pi_t0_rule)
 
         def cas_pi_tmax_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
-            if n.cas_Pi_o_0 == 'balanced':
-                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                       self.cas_Pi_t0_tmax[n])
-            else:
-                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                       n.cas_Pi_o_0 * self.cas_Pi_o[n, t].ub)
+            return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
+                   self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
         self.cas_pi_tmax_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cas_pi_tmax_rule)
+            self.NODES, m.TIMESTEPS, rule=cas_pi_tmax_rule)
 
         def exp_p_range_min_rule(block, n, t):
             """Minimum load range."""
             return(self.exp_P[n, t] >= self.exp_y[n, t] *
-                   n.exp_P_min * self.exp_P[n, t].ub)
+                   self.exp_P_min[n, t] * self.exp_P_inst[n, t])
         self.exp_p_range_min_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=exp_p_range_min_rule)
+            self.NODES, m.TIMESTEPS, rule=exp_p_range_min_rule)
 
         def exp_p_range_max_rule(block, n, t):
             """Maximum load range."""
             return(self.exp_P[n, t] <= self.exp_y[n, t] *
-                   n.exp_P_max * self.exp_P[n, t].ub)
+                   self.exp_P_max[n, t] * self.exp_P_inst[n, t])
         self.exp_p_range_max_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=exp_p_range_max_rule)
+            self.NODES, m.TIMESTEPS, rule=exp_p_range_max_rule)
 
         def exp_area1_rule(block, n, t):
             """Relationship between power and power."""
-            return(self.exp_m[n, t] == self.exp_P[n, t] / n.exp_a)
+            return(self.exp_m[n, t] == self.exp_P[n, t] / self.exp_a[n, t])
         self.exp_area1_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=exp_area1_rule)
+            self.NODES, m.TIMESTEPS, rule=exp_area1_rule)
 
         def exp_area2_rule(block, n, t):
             """Relationship between heat flow and mass flow."""
-            return(self.exp_Q[n, t] == self.exp_P[n, t] * n.exp_b)
+            return(self.exp_Q[n, t] == self.exp_P[n, t] * self.exp_b[n, t])
         self.exp_area2_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=exp_area2_rule)
+            self.NODES, m.TIMESTEPS, rule=exp_area2_rule)
 
         def cmp_exp_excl_rule(block, n, t):
             """Exclusion of parallel operation of compression and expansion."""
             return(self.cmp_y[n, t] + self.exp_y[n, t] <= 1)
         self.cmp_exp_excl_constr = Constraint(
-            self.N, m.TIMESTEPS, rule=cmp_exp_excl_rule)
+            self.NODES, m.TIMESTEPS, rule=cmp_exp_excl_rule)
 
 
 class GenericCAES(Transformer):
