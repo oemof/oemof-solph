@@ -17,7 +17,7 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Param,
 import logging
 
 from oemof.solph.network import Bus, Transformer
-from oemof.solph.plumbing import sequence
+from oemof.solph.plumbing import sequence, attribute_dict
 
 
 class ElectricalBus(Bus):
@@ -390,14 +390,16 @@ class GenericCAESBlock2(SimpleBlock):
         if group is None:
             return None
 
+        # @TODO:
+        # Move to parent class?:
+        #   - function to create attribute dict
+        #   - None group return
+        #   - set creation of NODES and NODESTIMESTEPS
+        # Move to contructor?:
+        #   - m = self.parent_block()
+
         # @TODO: Replace indices with text representation
         # e.g. "compression" for "cmp"
-
-        def attribute_dict(node_timestep_set=None, param=None):
-            """Create double indexed attribute dictionary."""
-            attribute_dict = {(node, timestep): getattr(node, param)[timestep]
-                              for (node, timestep) in node_timestep_set}
-            return attribute_dict
 
         # Declare sets
         self.NODES = Set(

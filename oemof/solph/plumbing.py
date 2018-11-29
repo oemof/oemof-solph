@@ -109,3 +109,21 @@ class _Sequence(UserList):
             return super(_Sequence, self).__iter__()
         else:
             return repeat(self.default, self.highest_index + 1)
+
+
+def attribute_dict(node_timestep_set=None, attribute=None):
+    """Create double indexed attribute dictionary.
+
+    Parameters
+    ----------
+    node_timestep_set: set with tuples of nodes and timesteps (n, t)
+    attribute: string with node attribute name
+
+    Examples
+    --------
+    >>> attribute_dict([(n, 1), (n, 2)], 'cmp_P_inst')
+    {(n, 1): 20, (n, 2): 20}
+    """
+    attribute_dict = {(node, timestep): getattr(node, attribute)[timestep]
+                      for (node, timestep) in node_timestep_set}
+    return attribute_dict
