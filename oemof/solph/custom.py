@@ -390,19 +390,83 @@ class GenericCAESBlock2(SimpleBlock):
         if group is None:
             return None
 
+        # @TODO: Replace indices with text representation
+        # e.g. "compression" for "cmp"
+
         # Sets
         self.N = Set(initialize=[node for node in group], ordered=True)
         self.NT = Set(initialize=self.N*m.TIMESTEPS, ordered=True)
 
         # Function to create double indexed dictionary for parameters
-        def parameter_dict(node_timestep_set=None, param=None):
-            parameter_dict = {(node, timestep): getattr(node, param)[timestep]
+        def attribute_dict(node_timestep_set=None, param=None):
+            attribute_dict = {(node, timestep): getattr(node, param)[timestep]
                               for (node, timestep) in node_timestep_set}
-            return parameter_dict
+            return attribute_dict
+
         # Parameters
-        self.cmp_P_inst = Param(self.N, m.TIMESTEPS, mutable=True,
-                                initialize=param_dict(self.NT, 'cmp_P_inst'))
-        self.cmp_P_inst.pprint()
+        self.cas_C_st = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_C_st'))
+        self.cas_m_0 = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_m_0'))
+        self.cas_Pi_min = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_Pi_min'))
+        self.cas_Pi_o_max = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_Pi_o_max'))
+        self.cas_Pi_o_0 = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_Pi_o_0'))
+        self.cas_R = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_R'))
+        self.cas_T0 = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_T0'))
+        self.cas_T = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cas_T'))
+        self.cmp_a = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_a'))
+        self.cmp_b = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_b'))
+        self.cmp_c = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_c'))
+        self.cmp_d = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_d'))
+        self.cmp_eta = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_eta'))
+        self.cmp_P_inst = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_P_inst'))
+        self.cmp_P_max = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_P_max'))
+        self.cmp_P_min = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'cmp_P_min'))
+        self.exp_a = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'exp_a'))
+        self.exp_b = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'exp_b'))
+        self.exp_P_inst = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'exp_P_inst'))
+        self.exp_P_max = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'exp_P_max'))
+        self.exp_P_min = Param(
+            self.N, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NT, 'exp_P_min'))
 
         # Variables
         self.cmp_Q = Var(self.N, m.TIMESTEPS)
