@@ -393,19 +393,19 @@ class GenericCAESBlock2(SimpleBlock):
         # @TODO: Replace indices with text representation
         # e.g. "compression" for "cmp"
 
-        # Function to create double indexed dictionary for parameters
         def attribute_dict(node_timestep_set=None, param=None):
+            """Create double indexed attribute dictionary."""
             attribute_dict = {(node, timestep): getattr(node, param)[timestep]
                               for (node, timestep) in node_timestep_set}
             return attribute_dict
 
-        # Sets
+        # Declare sets
         self.NODES = Set(
             initialize=[node for node in group], ordered=True)
         self.NODESTIMESTEPS = Set(
             initialize=self.NODES*m.TIMESTEPS, ordered=True)
 
-        # Parameters
+        # Declare parameters
         self.cas_C_st = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_C_st'))
@@ -470,7 +470,7 @@ class GenericCAESBlock2(SimpleBlock):
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_min'))
 
-        # Variables
+        # Declare variables
         self.cmp_P = Var(self.NODES, m.TIMESTEPS)
         self.cmp_Q = Var(self.NODES, m.TIMESTEPS)
         self.cmp_y = Var(self.NODES, m.TIMESTEPS, domain=Binary)
@@ -481,37 +481,34 @@ class GenericCAESBlock2(SimpleBlock):
         self.exp_m = Var(self.NODES, m.TIMESTEPS)
         self.exp_Q = Var(self.NODES, m.TIMESTEPS)
         self.exp_P = Var(self.NODES, m.TIMESTEPS)
-        # The variable for the pressure in the first and last timestep
-        # is used only if 'cas_Pi_o_0' is set to 'balanced'
-        self.cas_Pi_t0_tmax = Var(self.NODES)
 
         # Set bounds for decision variables
-        def cmp_P_bound_rule(block, n, t):
+        def cmp_P_upper_bound_rule(block, n, t):
             """Rule definition for bounds of compression power."""
             expr = 0
-            expr += -self.cmp_P[n, t]
-            expr += self.cmp_P_inst[n, t]
-            return expr == 0
-        self.cmp_P_bound = Constraint(
-            self.NODES, m.TIMESTEPS, rule=cmp_P_bound_rule)
+            expr += self.cmp_P[n, t]
+            expr += -self.cmp_P_inst[n, t]
+            return expr <= 0
+        self.cmp_P_upper_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=cmp_P_upper_bound_rule)
 
-        def cas_Pi_o_bound_rule(block, n, t):
+        def cas_Pi_o_upper_bound_rule(block, n, t):
             """Rule definition for bounds of cavern pressure."""
             expr = 0
-            expr += -self.cas_Pi_o[n, t]
-            expr += self.cas_Pi_o_max[n, t]
-            return expr == 0
-        self.cas_Pi_o_bound = Constraint(
-            self.NODES, m.TIMESTEPS, rule=cas_Pi_o_bound_rule)
+            expr += self.cas_Pi_o[n, t]
+            expr += -self.cas_Pi_o_max[n, t]
+            return expr <= 0
+        self.cas_Pi_o_upper_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=cas_Pi_o_upper_bound_rule)
 
-        def exp_P_bound_rule(block, n, t):
+        def exp_P_upper_bound_rule(block, n, t):
             """Rule definition for bounds of expansion power."""
             expr = 0
-            expr += -self.exp_P[n, t]
-            expr += self.exp_P_inst[n, t]
-            return expr == 0
-        self.exp_P_bound = Constraint(
-            self.NODES, m.TIMESTEPS, rule=exp_P_bound_rule)
+            expr += self.exp_P[n, t]
+            expr += -self.exp_P_inst[n, t]
+            return expr <= 0
+        self.exp_P_upper_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=exp_P_upper_bound_rule)
 
         # Map flows to "internal" decision variables
         def cmp_p_constr_rule(block, n, t):
@@ -610,12 +607,12 @@ class GenericCAESBlock2(SimpleBlock):
         self.cas_pi_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=cas_pi_rule)
 
-        def cas_pi_t0_rule(block, n, t):
+        def cas_pi_tmin_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
             return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
                    self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
-        self.cas_pi_t0_constr = Constraint(
-            self.NODES, m.TIMESTEPS, rule=cas_pi_t0_rule)
+        self.cas_pi_tmin_constr = Constraint(
+            self.NODES, m.TIMESTEPS, rule=cas_pi_tmin_rule)
 
         def cas_pi_tmax_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
