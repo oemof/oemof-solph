@@ -44,8 +44,8 @@ class NonConvex:
     shutdown_costs : numeric
         Costs associated with the shutdown of the flow (representing a unit).
     activity_costs : numeric
-        Costs associated with the active operation of the flow independently from the
-        actual output (representing a unit).
+        Costs associated with the active operation of the flow, independently
+        from the actual output.
     minimum_uptime : numeric (1 or positive integer)
         Minimum time that a flow must be greater then its minimum flow after
         startup. Be aware that minimum up and downtimes can contradict each
