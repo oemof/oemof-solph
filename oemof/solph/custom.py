@@ -342,10 +342,11 @@ class GenericCAES2(Transformer):
 
         # set required model parameters
         self.cas_C_st = sequence(kwargs.get('cas_C_st'))
-        self.cas_m_0 = sequence(kwargs.get('cas_m_0'))
         self.cas_Pi_min = sequence(kwargs.get('cas_Pi_min'))
         self.cas_Pi_o_max = sequence(kwargs.get('cas_Pi_o_max'))
         self.cas_Pi_o_0 = sequence(kwargs.get('cas_Pi_o_0'))
+        self.cas_v0 = sequence(kwargs.get('cas_v0'))
+        self.cas_p0 = sequence(kwargs.get('cas_p0'))
         self.cas_R = sequence(kwargs.get('cas_R'))
         self.cas_T0 = sequence(kwargs.get('cas_T0'))
         self.cas_T = sequence(kwargs.get('cas_T'))
@@ -411,9 +412,6 @@ class GenericCAESBlock2(SimpleBlock):
         self.cas_C_st = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_C_st'))
-        self.cas_m_0 = Param(
-            self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_m_0'))
         self.cas_Pi_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_min'))
@@ -423,6 +421,12 @@ class GenericCAESBlock2(SimpleBlock):
         self.cas_Pi_o_0 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_o_0'))
+        self.cas_v0 = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_v0'))
+        self.cas_p0 = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_p0'))
         self.cas_R = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_R'))
@@ -602,7 +606,8 @@ class GenericCAESBlock2(SimpleBlock):
             if t > min(m.TIMESTEPS):
                 return(self.cas_Pi_o[n, t] ==
                        (1 - self.cmp_eta[n, t]) * self.cas_Pi_o[n, t-1] +
-                       3600 / self.cas_m_0[n, t] *
+                       3600 / ((self.cas_p0[n, t]*self.cas_v0[n, t]) /
+                               (self.cas_R[n, t]*self.cas_T0[n, t])) *
                        (self.cmp_m[n, t] - self.exp_m[n, t]))
             else:
                 return Constraint.Skip
