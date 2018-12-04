@@ -856,8 +856,8 @@ class NonConvexFlow(SimpleBlock):
             self.shutdowncosts = Expression(expr=shutdowncosts)
 
         if self.ACTIVE_FLOWS:
-            for i,o in self.OPR_FLOWS:
-                if m.flows[i, o].nonconvex.opr_costs[0] is not None :
+            for i, o in self.ACTIVE_FLOWS:
+                if m.flows[i, o].nonconvex.activity_costs[0] is not None :
                     activitycosts += sum(
                         self.status[i, o, t] *
                         m.flows[i, o].nonconvex.activity_costs[t]
