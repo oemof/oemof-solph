@@ -554,8 +554,8 @@ class Constraint_Tests:
                     startup_costs=5, shutdown_costs=7))})
         self.compare_lp_files('min_max_runtime.lp')
 
-    def test_min_max_runtime(self):
-        """Testing activity costs for nonconvex flows."""
+    def test_activity_costs(self):
+        """Testing activity_costs attribute for nonconvex flows."""
         bus_t = solph.Bus(label='Bus_C')
         solph.Source(
             label='cheap_plant_activity_costs',
