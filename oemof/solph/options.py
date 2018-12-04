@@ -66,7 +66,7 @@ class NonConvex:
     """
     def __init__(self, **kwargs):
         scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status']
-        sequences = ['startup_costs', 'shutdown_costs','activity_costs']
+        sequences = ['startup_costs', 'shutdown_costs', 'activity_costs']
         defaults = {'initial_status': 0}
 
         for attribute in set(scalars + sequences + list(kwargs)):
@@ -83,10 +83,9 @@ class NonConvex:
         The maximum of both is used to set the initial status for this
         number of timesteps within the edge regions.
         """
-        if (self.minimum_uptime is not None and self.minimum_downtime is None):
+        if self.minimum_uptime is not None and self.minimum_downtime is None:
             max_up_down = self.minimum_uptime
-        elif (self.minimum_uptime is None and
-              self.minimum_downtime is not None):
+        elif self.minimum_uptime is None and self.minimum_downtime is not None:
             max_up_down = self.minimum_downtime
         else:
             max_up_down = max(self.minimum_uptime, self.minimum_downtime)
