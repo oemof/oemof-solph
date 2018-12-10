@@ -201,7 +201,7 @@ def node_weight_by_type(results, node_type):
     node_type: oemof.solph class
         Specifies the type for which node weights should be collected
 
-    Usage
+    Example
     --------
     from oemof.outputlib import views
 
@@ -210,10 +210,11 @@ def node_weight_by_type(results, node_type):
     views.node_weight_by_type(m.results(), node_type=solph.GenericStorage)
     """
 
-    group = {k: v['sequences'] for k,v in results.items()
+    group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[0], node_type) and k[1] is None}
     if not group:
-        logging.error('No node weights for nodes of type `{}`'.format(node_type))
+        logging.error('No node weights for nodes of type `{}`'.format(
+            node_type))
         return None
     else:
         df = convert_to_multiindex(group,
@@ -222,7 +223,7 @@ def node_weight_by_type(results, node_type):
         return df
 
 
-def node_input_by_type(results, node_type, droplevel=[]):
+def node_input_by_type(results, node_type, droplevel=None):
     """ Gets all inputs for all nodes of the type `node_type` and returns
     a dataframe.
 
@@ -242,6 +243,8 @@ def node_input_by_type(results, node_type, droplevel=[]):
     # Then collect node weights
     views.node_input_by_type(m.results(), node_type=solph.Sink)
     """
+    if droplevel is None:
+        droplevel = []
 
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[1], node_type) and k[0] is not None}
@@ -253,7 +256,8 @@ def node_input_by_type(results, node_type, droplevel=[]):
         df = convert_to_multiindex(group, droplevel=droplevel)
         return df
 
-def node_output_by_type(results, node_type, droplevel=[]):
+
+def node_output_by_type(results, node_type, droplevel=None):
     """ Gets all outputs for all nodes of the type `node_type` and returns
     a dataframe.
 
@@ -273,6 +277,8 @@ def node_output_by_type(results, node_type, droplevel=[]):
     # Then collect node weights
     views.node_output_by_type(m.results(), node_type=solph.Transformer)
     """
+    if droplevel is None:
+        droplevel = []
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[0], node_type) and k[1] is not None}
 
@@ -282,6 +288,7 @@ def node_output_by_type(results, node_type, droplevel=[]):
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
         return df
+
 
 def net_storage_flow(results, node_type):
     """ Calculates the net storage flow for storage models that have one
@@ -300,7 +307,7 @@ def net_storage_flow(results, node_type):
     pandas.DataFrame object with multiindex colums. Names of levels of columns
     are: from, to, net_flow.
 
-    Usage
+    Examples
     --------
     import oemof.solph as solph
     from oemof.outputlib import views
@@ -316,9 +323,12 @@ def net_storage_flow(results, node_type):
     if not group:
         logging.error(
             'No nodes of type `{}`'.format(node_type))
-        return False
+        return None
 
     df = convert_to_multiindex(group)
+
+    if 'capacity' not in df.columns.get_level_values(2).unique():
+        return None
 
     x = df.xs('capacity', axis=1, level=2).columns.values
     labels = [s for s, t in x]
@@ -326,28 +336,28 @@ def net_storage_flow(results, node_type):
     dataframes = []
 
     for l in labels:
-        grouper = lambda x: (lambda fr, to, ty:
-                            'output' if (fr == l and ty == 'flow') else
-                            'input' if (to == l and ty == 'flow') else
-                            'level' if (fr == l and ty != 'flow') else
-                            None) (*x)
+        grouper = lambda x1: (lambda fr, to, ty:
+                              'output' if (fr == l and ty == 'flow') else
+                              'input' if (to == l and ty == 'flow') else
+                              'level' if (fr == l and ty != 'flow') else
+                              None)(*x1)
 
         subset = df.groupby(grouper, axis=1).sum()
 
-        subset['net_flow'] =  subset['output'] - subset['input']
+        subset['net_flow'] = subset['output'] - subset['input']
 
         subset.columns = pd.MultiIndex.from_product(
                                 [[l],
                                  [o for o in l.outputs],
                                  subset.columns])
 
-        dataframes.append(subset.loc[:,(slice(None), slice(None), 'net_flow')])
+        dataframes.append(
+            subset.loc[:, (slice(None), slice(None), 'net_flow')])
 
     return pd.concat(dataframes, axis=1)
 
 
-def convert_to_multiindex(group, index_names=['from', 'to', 'type'],
-                          droplevel=[]):
+def convert_to_multiindex(group, index_names=None, droplevel=None):
     """ Convert dict to pandas DataFrame with multiindex
 
     Parameters
@@ -359,6 +369,11 @@ def convert_to_multiindex(group, index_names=['from', 'to', 'type'],
     droplevel: arraylike
         List containing levels to be dropped from the dataframe
     """
+    if index_names is None:
+        index_names = ['from', 'to', 'type']
+    if droplevel is None:
+        droplevel = []
+        
     sorted_group = OrderedDict(
         (k, group[k]) for k in sorted(group))
     df = pd.concat(sorted_group.values(), axis=1)
