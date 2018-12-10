@@ -315,6 +315,13 @@ class Parameter_Result_Tests:
         bel = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)
 
+    def test_node_weight_by_type(self):
+        results = processing.results(self.om)
+        capacity = views.node_weight_by_type(
+            results, node_type=GenericStorage)
+        eq_(int(float(capacity.sum()) * pow(10, 6)) / pow(10, 6),
+            1437.500003)
+
     def test_output_by_type_view(self):
         results = processing.results(self.om)
         transformer_output = views.node_output_by_type(results, node_type=Transformer)
