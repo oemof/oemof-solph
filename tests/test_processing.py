@@ -314,3 +314,28 @@ class Parameter_Result_Tests:
         results = processing.results(self.om)
         bel = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)
+
+    def test_output_by_type_view(self):
+        results = processing.results(self.om)
+        transformer_output = views.node_output_by_type(results, node_type=Transformer)
+        compare = views.node(
+            results, 'diesel', multiindex=True)['sequences'][('diesel', 'b_el1', 'flow')]
+        eq_(int(transformer_output.sum()), int(compare.sum()))
+
+    def test_input_by_type_view(self):
+        results = processing.results(self.om)
+        sink_input = views.node_input_by_type(results, node_type=Sink)
+        compare = views.node(results, 'demand_el', multiindex=True)
+        eq_(int(sink_input.sum()),
+            int(compare['sequences'][('b_el2', 'demand_el', 'flow')].sum()))
+
+    def test_net_storage_flow(self):
+        results = processing.results(self.om)
+        storage_flow = views.net_storage_flow(
+            results, node_type=GenericStorage)
+        compare = views.node(
+            results, 'storage', multiindex=True)['sequences']
+        eq_(
+            ((compare[('storage', 'b_el2', 'flow')] -
+              compare[('b_el1', 'storage', 'flow')]).to_frame() ==
+             storage_flow.values).all()[0], True)
