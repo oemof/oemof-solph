@@ -324,9 +324,11 @@ class Parameter_Result_Tests:
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
-        transformer_output = views.node_output_by_type(results, node_type=Transformer)
+        transformer_output = views.node_output_by_type(results,
+                                                       node_type=Transformer)
         compare = views.node(
-            results, 'diesel', multiindex=True)['sequences'][('diesel', 'b_el1', 'flow')]
+            results, 'diesel', multiindex=True)['sequences'][(
+                'diesel', 'b_el1', 'flow')]
         eq_(int(transformer_output.sum()), int(compare.sum()))
 
     def test_input_by_type_view(self):
