@@ -10,6 +10,7 @@ available from its original location oemof/oemof/outputlib/views.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
+from collections import OrderedDict
 import logging
 import pandas as pd
 from enum import Enum
@@ -358,9 +359,12 @@ def convert_to_multiindex(group, index_names=['from', 'to', 'type'],
     droplevel: arraylike
         List containing levels to be dropped from the dataframe
     """
-    df = pd.concat(group.values(), axis=1)
-    cols = {k: [c for c in v.columns]
-            for k, v in group.items()}
+    sorted_group = OrderedDict(
+        (k, group[k]) for k in sorted(group))
+    df = pd.concat(sorted_group.values(), axis=1)
+
+    cols = OrderedDict((k, v.columns)
+                        for k, v in sorted_group.items())
     cols = [tuple((k, m) for m in v) for k, v in cols.items()]
     cols = [c for sublist in cols for c in sublist]
     idx = pd.MultiIndex.from_tuples(
