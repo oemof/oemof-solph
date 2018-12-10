@@ -379,7 +379,7 @@ def convert_to_multiindex(group, index_names=None, droplevel=None):
     df = pd.concat(sorted_group.values(), axis=1)
 
     cols = OrderedDict((k, v.columns)
-                        for k, v in sorted_group.items())
+                       for k, v in sorted_group.items())
     cols = [tuple((k, m) for m in v) for k, v in cols.items()]
     cols = [c for sublist in cols for c in sublist]
     idx = pd.MultiIndex.from_tuples(
