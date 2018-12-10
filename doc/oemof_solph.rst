@@ -75,7 +75,7 @@ It is also possible to assign the bus to a variable and add it afterwards. In th
 
     my_bus1 = solph.Bus()
     my_bus2 = solph.Bus()
-    my_energysystem.add(bgas, bel)
+    my_energysystem.add(my_bus1, my_bus2)
 
 Therefore it is also possible to add lists or dictionaries with components but you have to dissolve them.
 
