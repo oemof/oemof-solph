@@ -184,7 +184,7 @@ def get_node_by_name(results, *names):
         return [node_names.get(n, None) for n in names]
 
 
-def node_weight_by_type(results, node_type=None):
+def node_weight_by_type(results, node_type):
     """
     Extracts node weights (if exist) of all components of the specified
     `node_type`.
@@ -208,9 +208,6 @@ def node_weight_by_type(results, node_type=None):
     # Then collect node weights
     views.node_weight_by_type(m.results(), node_type=solph.GenericStorage)
     """
-
-    if node_type is None:
-        raise ValueError('Argument `node_type` must not be of type None!')
 
     group = {k: v['sequences'] for k,v in results.items()
              if isinstance(k[0], node_type) and k[1] is None}
@@ -244,8 +241,6 @@ def node_input_by_type(results, node_type, droplevel=[]):
     # Then collect node weights
     views.node_input_by_type(m.results(), node_type=solph.Sink)
     """
-    if node_type is None:
-        raise ValueError('Argument `node_type` must not be of type None!')
 
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[1], node_type) and k[0] is not None}
@@ -277,9 +272,6 @@ def node_output_by_type(results, node_type, droplevel=[]):
     # Then collect node weights
     views.node_output_by_type(m.results(), node_type=solph.Transformer)
     """
-    if node_type is None:
-        raise ValueError('Argument `node_type` must not be of type None!')
-
     group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[0], node_type) and k[1] is not None}
 
