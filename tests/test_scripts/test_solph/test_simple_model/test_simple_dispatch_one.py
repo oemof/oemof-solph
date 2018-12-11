@@ -16,38 +16,40 @@ import pandas as pd
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
 from oemof.outputlib import processing, views
+from oemof.network import Node
 
 
 def test_dispatch_one_time_step(solver='cbc', periods=1):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################
+    Node.registry = None
 
     # resource buses
-    bgas = Bus(label='gas_1', balanced=False)
+    bgas = Bus(label='gas', balanced=False)
 
     # electricity and heat
-    bel = Bus(label='b_el_1')
-    bth = Bus(label='b_th_1')
+    bel = Bus(label='b_el')
+    bth = Bus(label='b_th')
 
     # an excess and a shortage variable can help to avoid infeasible problems
-    excess_el = Sink(label='excess_el_1', inputs={bel: Flow()})
+    excess_el = Sink(label='excess_el', inputs={bel: Flow()})
 
     # sources
-    wind = Source(label='wind_1', outputs={bel: Flow(
+    wind = Source(label='wind', outputs={bel: Flow(
         actual_value=0.5, nominal_value=66.3, fixed=True)})
 
     # demands (electricity/heat)
-    demand_el = Sink(label='demand_elec_1', inputs={bel: Flow(nominal_value=85,
+    demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
                      actual_value=0.3, fixed=True)})
 
-    demand_th = Sink(label='demand_therm_1',
+    demand_th = Sink(label='demand_therm',
                      inputs={bth: Flow(nominal_value=40,
                                        actual_value=0.2,
                                        fixed=True)})
 
     # combined heat and power plant (chp)
-    pp_chp = Transformer(label='pp_chp_1',
+    pp_chp = Transformer(label='pp_chp',
                          inputs={bgas: Flow()},
                          outputs={bel: Flow(nominal_value=30,
                                             variable_costs=42),
@@ -55,12 +57,12 @@ def test_dispatch_one_time_step(solver='cbc', periods=1):
                          conversion_factors={bel: 0.3, bth: 0.4})
 
     # heatpump with a coefficient of performance (COP) of 3
-    b_heat_source = Bus(label='b_heat_source_1')
+    b_heat_source = Bus(label='b_heat_source')
 
-    heat_source = Source(label='heat_source_1', outputs={b_heat_source: Flow()})
+    heat_source = Source(label='heat_source', outputs={b_heat_source: Flow()})
 
     cop = 3
-    heat_pump = Transformer(label='heat_pump_1',
+    heat_pump = Transformer(label='heat_pump',
                             inputs={bel: Flow(), b_heat_source: Flow()},
                             outputs={bth: Flow(nominal_value=10)},
                             conversion_factors={
@@ -83,16 +85,16 @@ def test_dispatch_one_time_step(solver='cbc', periods=1):
     optimization_model.results()
 
     # ################################ results ################################
-    data = views.node(processing.results(om=optimization_model), 'b_el_1')
+    data = views.node(processing.results(om=optimization_model), 'b_el')
 
     # generate results to be evaluated in tests
     results = data['sequences'].sum(axis=0).to_dict()
 
     test_results = {
-        (('wind_1', 'b_el_1'), 'flow'): 33,
-        (('b_el_1', 'demand_elec_1'), 'flow'): 26,
-        (('b_el_1', 'excess_el_1'), 'flow'): 5,
-        (('b_el_1', 'heat_pump_1'), 'flow'): 3,
+        (('wind', 'b_el'), 'flow'): 33,
+        (('b_el', 'demand_elec'), 'flow'): 26,
+        (('b_el', 'excess_el'), 'flow'): 5,
+        (('b_el', 'heat_pump'), 'flow'): 3,
     }
 
     for key in test_results.keys():
