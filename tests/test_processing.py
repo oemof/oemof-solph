@@ -9,7 +9,7 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_, assert_raises
+from nose.tools import eq_, assert_raises, ok_
 from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
@@ -314,3 +314,59 @@ class Parameter_Result_Tests:
         results = processing.results(self.om)
         bel = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)
+
+    def test_node_weight_by_type(self):
+        results = processing.results(self.om)
+        capacity = views.node_weight_by_type(
+            results, node_type=GenericStorage)
+        eq_(int(float(capacity.sum()) * pow(10, 6)) / pow(10, 6),
+            1437.500003)
+
+    def test_output_by_type_view(self):
+        results = processing.results(self.om)
+        transformer_output = views.node_output_by_type(results,
+                                                       node_type=Transformer)
+        compare = views.node(
+            results, 'diesel', multiindex=True)['sequences'][(
+                'diesel', 'b_el1', 'flow')]
+        eq_(int(transformer_output.sum()), int(compare.sum()))
+
+    def test_input_by_type_view(self):
+        results = processing.results(self.om)
+        sink_input = views.node_input_by_type(results, node_type=Sink)
+        compare = views.node(results, 'demand_el', multiindex=True)
+        eq_(int(sink_input.sum()),
+            int(compare['sequences'][('b_el2', 'demand_el', 'flow')].sum()))
+
+    def test_net_storage_flow(self):
+        results = processing.results(self.om)
+        storage_flow = views.net_storage_flow(
+            results, node_type=GenericStorage)
+        compare = views.node(
+            results, 'storage', multiindex=True)['sequences']
+        eq_(
+            ((compare[('storage', 'b_el2', 'flow')] -
+              compare[('b_el1', 'storage', 'flow')]).to_frame() ==
+             storage_flow.values).all()[0], True)
+
+    def test_output_by_type_view_empty(self):
+        results = processing.results(self.om)
+        view = views.node_output_by_type(results, node_type=Flow)
+        ok_(view is None)
+
+    def test_input_by_type_view_empty(self):
+        results = processing.results(self.om)
+        view = views.node_input_by_type(results, node_type=Flow)
+        ok_(view is None)
+
+    def test_net_storage_flow_empty(self):
+        results = processing.results(self.om)
+        view = views.net_storage_flow(results, node_type=Sink)
+        ok_(view is None)
+        view2 = views.net_storage_flow(results, node_type=Flow)
+        ok_(view2 is None)
+
+    def test_node_weight_by_type_empty(self):
+        results = processing.results(self.om)
+        view = views.node_weight_by_type(results, node_type=Flow)
+        ok_(view is None)
