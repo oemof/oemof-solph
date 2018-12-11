@@ -683,6 +683,7 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30,
+                            min=0.5,
                             nonconvex=NonConvex()),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
