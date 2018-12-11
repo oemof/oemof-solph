@@ -108,6 +108,9 @@ def read_facade(facade, facades, create, typemap, data, objects,
 def deserialize_energy_system(cls, path,
                               typemap={},
                               attributemap={}):
+    cast_error_msg = (
+        "Metadata structure of resource `{}` does not match data " +
+        "structure. Check the column names, types and their order.")
 
     default_typemap = {'bus': Bus,
                        'hub': Bus,
@@ -132,10 +135,9 @@ def deserialize_energy_system(cls, path,
     for r in package.resources:
         try:
             r.read()
-        except exceptions.CastError as e:
+        except exceptions.CastError:
             raise exceptions.CastError(
-                "Cast error occured in resource with name `{}`".format(r.name))
-
+                (cast_error_msg).format(r.name))
     empty = types.SimpleNamespace()
     empty.read = lambda *xs, **ks: ()
     empty.headers = ()
@@ -307,15 +309,23 @@ def deserialize_energy_system(cls, path,
     for r in package.resources:
         if all(re.match(r'^data/elements/.*$', p)
                for p in listify(r.descriptor['path'], 1)):
-            r.read(keyed=True)
+            try:
+                facade_data = r.read(keyed=True, relations=True)
+            except exceptions.CastError:
+                raise exceptions.LoadError(
+                        (cast_error_msg).format(r.name))
+            except:
+                raise exceptions.LoadError(
+                    ("Could not read data for resource with name `{}`. " +
+                     " Maybe wrong foreign keys?").format(r.name))
+
             foreign_keys = {fk["fields"]: fk["reference"]
                 for fk in r.descriptor['schema'].get("foreignKeys", ())}
-            for facade in r.read(keyed=True, relations=True):
+            for facade in facade_data:
                 # convert decimal to float
                 for f, v in facade.items():
                     if isinstance(v, Decimal):
                         facade[f] = float(v)
-
                 read_facade(facade, facades, create, typemap, data, objects,
                             sequence_names,
                             foreign_keys,
@@ -363,6 +373,8 @@ def deserialize_energy_system(cls, path,
                       facades.values(),
                       chain(*[f.subnodes for f in facades.values()
                               if hasattr(f, 'subnodes')])))
+
+        es.typemap = typemap
 
         return es
 
