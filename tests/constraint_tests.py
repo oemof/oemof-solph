@@ -452,9 +452,9 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='source1', outputs={bel: solph.Flow(
-            nominal_value=100, emission=0.5)})
+            nominal_value=100, emission_factor=0.5)})
         solph.Source(label='source2', outputs={bel: solph.Flow(
-            nominal_value=100, emission=0.8)})
+            nominal_value=100, emission_factor=0.8)})
 
         # Should be ignored because the emission attribute is not defined.
         solph.Source(label='source3', outputs={bel: solph.Flow(
@@ -472,19 +472,19 @@ class Constraint_Tests:
         def define_emission_limit():
             bel = solph.Bus(label='electricityBus')
             solph.Source(label='source1', outputs={bel: solph.Flow(
-                nominal_value=100, emission=0.8)})
+                nominal_value=100, emission_factor=0.8)})
             solph.Source(label='source2', outputs={bel: solph.Flow(
                 nominal_value=100)})
             om = self.get_om()
             solph.constraints.emission_limit(om, om.flows, limit=777)
-        assert_raises(ValueError, define_emission_limit)
+        assert_raises(AttributeError, define_emission_limit)
 
     def test_flow_without_emission_for_emission_constraint_no_error(self):
         """
         """
         bel = solph.Bus(label='electricityBus')
         solph.Source(label='source1', outputs={bel: solph.Flow(
-            nominal_value=100, emission=0.8)})
+            nominal_value=100, emission_factor=0.8)})
         solph.Source(label='source2', outputs={bel: solph.Flow(
             nominal_value=100)})
         om = self.get_om()
@@ -553,3 +553,13 @@ class Constraint_Tests:
                     minimum_downtime=4, minimum_uptime=2, initial_status=2,
                     startup_costs=5, shutdown_costs=7))})
         self.compare_lp_files('min_max_runtime.lp')
+
+    def test_activity_costs(self):
+        """Testing activity_costs attribute for nonconvex flows."""
+        bus_t = solph.Bus(label='Bus_C')
+        solph.Source(
+            label='cheap_plant_activity_costs',
+            outputs={bus_t: solph.Flow(
+                nominal_value=10, min=0.5, max=1.0, variable_costs=10,
+                nonconvex=solph.NonConvex(activity_costs=2))})
+        self.compare_lp_files('activity_costs.lp')
