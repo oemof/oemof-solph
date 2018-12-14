@@ -655,8 +655,16 @@ class GenericCAESBlock2(SimpleBlock):
             self.NODES, m.TIMESTEPS, rule=exp_area2_rule)
 
         def cmp_exp_excl_rule(block, n, t):
-            """Exclusion of parallel operation of compression and expansion."""
-            return(self.cmp_y[n, t] + self.exp_y[n, t] <= 1)
+            """Exclusion of parallel operation of compression and expansion.
+
+            Additionally, the compression and expansion is deactivated in the
+            first and last timestep because the initial and final storage
+            level have to be equal.
+            """
+            if t > min(m.TIMESTEPS) and t < max(m.TIMESTEPS):
+                return(self.cmp_y[n, t] + self.exp_y[n, t] <= 1)
+            else:
+                return(self.cmp_y[n, t] + self.exp_y[n, t] <= 0)
         self.cmp_exp_excl_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=cmp_exp_excl_rule)
 
