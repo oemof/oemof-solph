@@ -11,41 +11,49 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 
 def annuity(capex, n, wacc, u=None, cost_decrease=0):
-    """Calculate the annuity.
+    """Calculates the annuity of an initial investment 'capex', considering the 
+    cost of capital 'wacc' during a project horizon 'n'
 
-    In case of a single initial investment:
+    In case of a single initial investment, the employed formula reads:
 
-    annuity = capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)
+    .. math::
+    annuity = capex \cdot \frac{(wacc \cdot (1+wacc)^n)}
+              {((1 + wacc)^n - 1)}
     
-    or in case of repeated investments at fixed intervals 'u'
-        with decreasing costs 'cost_decrease':
+    In case of repeated investments (due to replacements) at fixed intervals 
+    'u', the formula yields:
 
-    annuity = capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)*
-              ((1-((1-cost_decrease)/(1+wacc))**n)/
-              (1-((1-cost_decrease)/(1+wacc))**u)))
+    .. math::
+    annuity = capex \cdot \frac{(wacc \cdot (1+wacc)^n)}
+              {((1 + wacc)^n - 1)} \cdot \left( 
+              \frac{1 - \left( \frac{(1-cost\_decrease)}
+              {(1+wacc)} \right)^n}
+              {1 - \left( \frac{(1-cost\_decrease)}{(1+wacc)}
+              \right)^u} \right)
 
     Parameters
     ----------
     capex : float
-        Capital expenditure for first investment (NPV of investment)
+        Capital expenditure for first investment. Net Present Value (NPV) or Net
+        Present Cost (NPC) of investment
     n : int
-        Number of years investigated; might be an integer multiple of technical
-        lifetime (u) in case of repeated investments; in case of a single
-        investment n must equal u (economic lifetime)
+        Horizon of the analysis, or number of years the annuity wants to be 
+        obtained for (n>=1)
     wacc : float
-        Weighted average cost of capital
+        Weighted average cost of capital (0<wacc<1)
     u : int
-        Number of years that a single investment is used, i.e. the technical
-        lifetime of a single investment
+        Lifetime of the investigated investment. Might be smaller than the 
+        analysis horizon, 'n', meaning it will have to be replaced. 
+        Takes value 'n' if not specified otherwise (u>=1)
     cost_decrease : float
-        Annual rate of cost_decrease for repeated investments; takes the value '0'
-        if not set otherwise, that is in case of a single investment or in case
-        of no cost decrease for repeated investments
-
+        Annual rate of cost decrease (due to, e.g., price experience curve). 
+        This only influences the result for investments corresponding to 
+        replacements, whenever u<n. 
+        Takes value 0, if not specified otherwise (0<cost_decrease<1)
     Returns
     -------
-    float : annuity
-
+    float 
+        annuity
     """ 
     if u is None:
         u = n
