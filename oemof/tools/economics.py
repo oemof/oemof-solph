@@ -10,7 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 
-def annuity(capex, n, wacc, **kwargs):
+def annuity(capex, n, wacc, u=None, cost_decrease=0):
     """Calculate the annuity.
 
     In case of a single initial investment:
@@ -47,9 +47,11 @@ def annuity(capex, n, wacc, **kwargs):
     float : annuity
 
     """ 
-    u  = kwargs.get('u', n)
-    cost_decrease = kwargs.get('cost_decrease', 0)
+    if u is None:
+        u = n
 
-    return (capex * (wacc * (1 + wacc) ** n) / ((1 + wacc) ** n - 1)*
-                    ((1-((1-cost_decrease)/(1+wacc))**n)/
-                    (1-((1-cost_decrease)/(1+wacc))**u)))
+    return (
+        capex * (wacc*(1+wacc)**n) / ((1 + wacc)**n - 1) *
+        (( 1 - ((1-cost_decrease)/(1+wacc))**n) /
+         ( 1 - ((1-cost_decrease)/(1+wacc))**u))
+        )
