@@ -11,6 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
 
+
 def annuity(capex, n, wacc, u=None, cost_decrease=0):
     """Calculates the annuity of an initial investment 'capex', considering the 
     cost of capital 'wacc' during a project horizon 'n'
@@ -35,8 +36,8 @@ def annuity(capex, n, wacc, u=None, cost_decrease=0):
     Parameters
     ----------
     capex : float
-        Capital expenditure for first investment. Net Present Value (NPV) or Net
-        Present Cost (NPC) of investment
+        Capital expenditure for first investment. Net Present Value (NPV) or
+        Net Present Cost (NPC) of investment
     n : int
         Horizon of the analysis, or number of years the annuity wants to be 
         obtained for (n>=1)
@@ -59,13 +60,12 @@ def annuity(capex, n, wacc, u=None, cost_decrease=0):
     if u is None:
         u = n
         
-    if ((n<1) or (wacc<0 or wacc>1) or (u<1) or 
-        (cost_decrease<0 or cost_decrease>1)):
+    if ((n < 1) or (wacc < 0 or wacc > 1) or (u < 1) or
+            (cost_decrease < 0 or cost_decrease > 1)):
         msg = 'Input arguments for annuity function out of bounds!'
         logging.warning(msg)
 
     return (
         capex * (wacc*(1+wacc)**n) / ((1 + wacc)**n - 1) *
-        (( 1 - ((1-cost_decrease)/(1+wacc))**n) /
-         ( 1 - ((1-cost_decrease)/(1+wacc))**u))
-        )
+        ((1 - ((1-cost_decrease)/(1+wacc))**n) /
+         (1 - ((1-cost_decrease)/(1+wacc))**u)))
