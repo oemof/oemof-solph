@@ -419,8 +419,8 @@ GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
-The *nominal_capacity* of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the *nominal_value* in the Flow objects.
+The ``nominal_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
+To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined.
 
 .. code-block:: python
@@ -432,16 +432,16 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         capacity_loss=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-For initialising the state of charge before the first time step (time step zero) the parameter *initial_capacity* (default value: None) can be set by a numeric value as fraction of the storage capacity.
-Additionally the parameter *balanced* (default: True) sets the relation of the state of charge of time step zero and the last time step.
-If *balanced* is True, the state of charge in the last time step is equal to initial value in time step zero.
-Use *balanced* =False with caution as energy might be added to or taken from the energy system due to different states of charge in time step zero and the last time step.
+For initialising the state of charge before the first time step (time step zero) the parameter ``initial_capacity`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
+Additionally the parameter ``balanced`` (default value: ``True``) sets the relation of the state of charge of time step zero and the last time step.
+If ``balanced=True``, the state of charge in the last time step is equal to initial value in time step zero.
+Use ``balanced=False`` with caution as energy might be added to or taken from the energy system due to different states of charge in time step zero and the last time step.
 Generally, with these two parameters four configurations are possible, which might result in different solutions of the same optimization model:
 
-    *	' `initial_capacity` '=None, ' `balanced` '=True (default setting): The state of charge in time step zero is a result of the optimization. The state of charge of the last time step is equal to time step zero. Thus, the storage is not violating the energy conservation by adding or taking energy from the system due to different states of charge at the beginning and at the end of the optimization period.
-    *	' `initial_capacity` '=0.5, ' `balanced` '=True: The state of charge in time step zero is fixed to 0.5 (50 % charged). The state of charge in the last time step is also constrained by 0.5 due to the coupling parameter *balanced* set to True.
-    *	' `initial_capacity` '=None, ' `balanced` '=False: Both, the state of charge in time step zero and the last time step are a result of the optimization and not coupled.
-    *	' `initial_capacity` '=0.5, ' `balanced` '=False: The state of charge in time step zero is constrained by a given value. The state of charge of the last time step is a result of the optimization.
+    *	``initial_capacity=None``, ``balanced=True`` (default setting): The state of charge in time step zero is a result of the optimization. The state of charge of the last time step is equal to time step zero. Thus, the storage is not violating the energy conservation by adding or taking energy from the system due to different states of charge at the beginning and at the end of the optimization period.
+    *	``initial_capacity=0.5``, ``balanced=True``: The state of charge in time step zero is fixed to 0.5 (50 % charged). The state of charge in the last time step is also constrained by 0.5 due to the coupling parameter ``balanced`` set to ``True``.
+    *	``initial_capacity=None``, ``balanced=False``: Both, the state of charge in time step zero and the last time step are a result of the optimization and not coupled.
+    *	``initial_capacity=0.5``, ``balanced=False``: The state of charge in time step zero is constrained by a given value. The state of charge of the last time step is a result of the optimization.
 
 The following code block shows an example of the storage parametrization for the second configuration:
 
