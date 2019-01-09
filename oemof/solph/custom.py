@@ -797,3 +797,65 @@ class OffsetTransformerBlock(SimpleBlock):
             return expr == 0
         self.relation = Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
                                    rule=_relation_rule)
+
+class PiecewiseLinearTransformer(Transformer):
+    """An object with one inputs and one output.
+
+    Parameters
+    ----------
+
+    Examples
+    --------
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.coefficients = kwargs.get('coefficients')
+
+        for k, v in self.inputs.items():
+            if not v.nonconvex:
+                raise TypeError('Input flows must be of type NonConvexFlow!')
+
+        if len(self.inputs) > 1 or len(self.outputs) > 1:
+            raise ValueError("Component `OffsetTransformer` must not have" +
+                             "more than 1 input and 1 output!")
+
+    def constraint_group(self):
+        return OffsetTransformerBlock
+
+
+class PiecewiseLinearTransformerBlock(SimpleBlock):
+    r"""Block for the relation of nodes with type
+    :class:`~oemof.solph.custom.PiecewiseLinearTransformer`
+
+    **The following constraints are created:**
+
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the relation for the class:`PiecewiseLinearTransformer`.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.custom.PiecewiseLinearTransformer objects
+            for which the relation of inputs and outputs is created
+            e.g. group = [pwltf1, pwltf2, pwltf3, ...].
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
+
+        def _relation_rule(block, n, t):
+            """Link binary input and output flow to component outflow."""
+
+        self.relation = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
+                                   rule=_relation_rule)
