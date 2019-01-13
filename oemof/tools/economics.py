@@ -9,9 +9,6 @@ available from its original location oemof/oemof/tools/economics.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-import logging
-
-
 def annuity(capex, n, wacc, u=None, cost_decrease=0):
     """Calculates the annuity of an initial investment 'capex', considering the 
     cost of capital 'wacc' during a project horizon 'n'
@@ -62,8 +59,7 @@ def annuity(capex, n, wacc, u=None, cost_decrease=0):
         
     if ((n < 1) or (wacc < 0 or wacc > 1) or (u < 1) or
             (cost_decrease < 0 or cost_decrease > 1)):
-        msg = 'Input arguments for annuity function out of bounds!'
-        logging.warning(msg)
+        raise ValueError('Input arguments for "annuity" out of bounds!')
 
     return (
         capex * (wacc*(1+wacc)**n) / ((1 + wacc)**n - 1) *
