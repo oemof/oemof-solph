@@ -184,8 +184,8 @@ class BaseModel(po.ConcreteModel):
         results = opt.solve(self, **solve_kwargs)
 
         status = results["Solver"][0]["Status"].key
-        termination_condition = \
-            results["Solver"][0]["Termination condition"].key
+        termination_condition = (
+            results["Solver"][0]["Termination condition"].key)
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
