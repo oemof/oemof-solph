@@ -452,8 +452,6 @@ class Bus(SimpleBlock):
         \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau, \\
         \forall n \in \textrm{BUSES},
         \forall t \in \textrm{TIMESTEPS}.
-
-    Hallo
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
