@@ -33,7 +33,8 @@ def test_logger():
     ok_(os.path.isfile(filepath))
 
 
-def test_economics():
+def test_annuity():
+    """Test annuity function of economics tool."""
     ok_(round(economics.annuity(1000, 10, 0.1)) == 163)
     ok_(round(economics.annuity(capex=1000, wacc=0.1, n=10, u=5)) == 264)
     ok_(round(economics.annuity(1000, 10, 0.1, u=5, cost_decrease=0.1)) == 222)
