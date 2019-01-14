@@ -5,12 +5,17 @@ v0.3.0 (January ??, 2019)
 API changes
 ###########
 
-* something
+* The ``param_results`` function does not exist anymore. It has been renamed to
+    ``parameter_as_dict`` a time ago but the old name still worked for a while
+    along with a ``FutureWarning``
+    (`Issue #537 <https://github.com/oemof/oemof/issues/537>`_).
 
 New features
 ############
 
-* something
+* Namedtuples and tuples as labels work now without problems. This makes it
+    much easier to find objects and results in large energy systems
+    (`Issue #507 <https://github.com/oemof/oemof/issues/507>`_).
 
 New components
 ##############
