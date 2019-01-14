@@ -10,7 +10,7 @@ API changes
 New features
 ############
 
-* something
+* Now it is possible to model just one time step. This is important for time step based models and all other models with an outer loop (`Issue #519 <https://github.com/oemof/oemof/issues/519>`_).
 
 New components
 ##############
