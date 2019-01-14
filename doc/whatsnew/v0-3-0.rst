@@ -30,7 +30,12 @@ Known issues
 Bug fixes
 #########
 
-* something
+* The timeincrement attribute of the model is not set to one anymore.
+    In earlier versions the timeincrement was set to one by default. This was a
+    problem if a wrong time index was passed. In that case the timeincrement
+    was set to one without a warning. Now an error is raised if no
+    timeincrement or valid time index is found
+    (`Issue #549 <https://github.com/oemof/oemof/issues/549>`_).
 
 Testing
 #######
