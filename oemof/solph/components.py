@@ -201,8 +201,8 @@ class GenericStorageBlock(SimpleBlock):
         Capacity (level) of the storage and time step. The capacity is bound to
 
         .. math::
-            nominal\_capacity \cdot capacity\_min(t) < capacity(t) <
-            nominal\_capacity \cdot capacity\_min(t)
+            E_{nom} \cdot capacity\_min(t) < E(t) <
+            E_{nom} \cdot capacity\_min(t)
 
         The variable of storage s and time step t can be accessed by:
         `model.Storage.capacity[s, t]`
@@ -211,26 +211,26 @@ class GenericStorageBlock(SimpleBlock):
         The capacity of the storage before the first time step. The
         init_cap is bound to
 
-        .. math:: 0 < init\_cap <  nominal\_capacity
+        .. math:: 0 < E(-1) <  E_{nom}
 
         If the initial_capacity attribute is not None the init_cap variable is
         set to
 
-        .. math:: init\_cap =  nominal\_capacity \cdot initial\_capacity
+        .. math:: init\_cap =  E_{nom} \cdot E(-1)
 
     **The following constraints are created:**
 
     Set last time step to the initial capacity if balanced is True
         .. math::
-            capacity(n, t_{last} = &init\_cap(n)\\
+            E(n, t_{last} = &init\_cap(n)\\
             &\forall n \in \textrm{STORAGES\_BALANCED}
 
     Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: E(n, t) = &E(n, t-\Delta t) \cdot
+        .. math:: E(n, t) = &E(n, t-1) \cdot
             (1 - \delta(n, t))) \\
-            &- \frac{\dot{E}_o(n, t)}{\eta_o(n, t)} \cdot \Delta t
-            + \dot{E}_i(n, t) \cdot \eta_i(n, t) \cdot \Delta t\\
-            &\forall n \in \textrm{STORAGES}, \forall 0 \le t \le t_{max}
+            &- \frac{\dot{E}_o(n, t)}{\eta_o(n, t)} \cdot \tau(t)
+            + \dot{E}_i(n, t) \cdot \eta_i(n, t) \cdot \tau(t)\\
+            &\forall n \in \textrm{STORAGES}
 
     Connect the invest variables of the input and the output flow.
         .. math::
@@ -243,12 +243,12 @@ class GenericStorageBlock(SimpleBlock):
     symbol                      explanation             attribute
     =========================== ======================= =========
     :math:`E(t)`                energy currently stored :py:obj:`capacity`
-    :math:`E(t=-\Delta t)`      stored energy before    :py:obj:`initial_capacity`
+    :math:`E(-1)`               stored energy before    :py:obj:`initial_capacity`
                                 initial time step
     :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_capacity`
                                 the energy storage
-    :math:`E_{min}(t)/E_{nom}`  minimum allowed storage :py:obj:`capacity_min[t]`
-    :math:`E_{max}(t)/E_{nom}`  maximum allowed storage :py:obj:`capacity_max[t]`
+    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`capacity_min[t]`
+    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`capacity_max[t]`
     :math:`\delta(t)`           fraction of lost energy :py:obj:`capacity_loss[t]`
                                 (e.g. leakage) per time
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
