@@ -40,7 +40,11 @@ Bug fixes
 Testing
 #######
 
-* something
+* Automatic test coverage control was implemented. Now a PR will not be
+    accepted if it decreases the test coverage.
+* Test coverage was increased to over 90%. A badge was added to the
+    `oemof github page <https://github.com/oemof/oemof>`_ that shows the
+    actual test coverage.
 
 Other changes
 #############
