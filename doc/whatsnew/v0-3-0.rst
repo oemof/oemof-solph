@@ -13,6 +13,8 @@ API changes
 New features
 ############
 
+* Now it is possible to model just one time step. This is important for time step based models and all other models with an outer loop (`Issue #519 <https://github.com/oemof/oemof/issues/519>`_).
+
 * Namedtuples and tuples as labels work now without problems. This makes it
     much easier to find objects and results in large energy systems
     (`Issue #507 <https://github.com/oemof/oemof/issues/507>`_).
