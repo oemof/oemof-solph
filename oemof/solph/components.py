@@ -247,19 +247,19 @@ class GenericStorageBlock(SimpleBlock):
                                 initial time step
     :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_capacity`
                                 the energy storage
-    :math:`E_{min}(t)/E_{nom}`  minimum allowed storage :py:obj:`capacity_min`[t]
-    :math:`E_{max}(t)/E_{nom}`  maximum allowed storage :py:obj:`capacity_max`[t]
+    :math:`E_{min}(t)/E_{nom}`  minimum allowed storage :py:obj:`capacity_min[t]`
+    :math:`E_{max}(t)/E_{nom}`  maximum allowed storage :py:obj:`capacity_max[t]`
     :math:`\delta(t)`           fraction of lost energy :py:obj:`capacity_loss[t]`
                                 (e.g. leakage) per time
-    step:math:`\dot{E}_i(t)`    energy flowing in       :py:obj:`inputs`
-    step:math:`\dot{E}_o(t)`    energy flowing out      :py:obj:`outputs`
+    :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
+    :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
     :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 when storing energy
     :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
-    =========================   ======================= =========
+    =========================== ======================= =========
 
     **The following parts of the objective function are created:**
 
