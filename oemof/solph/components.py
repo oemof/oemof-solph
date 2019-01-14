@@ -225,19 +225,12 @@ class GenericStorageBlock(SimpleBlock):
             capacity(n, t_{last} = &init\_cap(n)\\
             &\forall n \in \textrm{STORAGES\_BALANCED}
 
-    Storage balance for t = 0 :attr:`om.Storage.balance[n, t]`
-        .. math:: capacity(n, 0) = &initial\_capacity(n) \cdot
-            (1 - capacity\_loss(n, 0))) \\
-            &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
-            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau\\
-            &\forall n \in \textrm{STORAGES}
-
-    Storage balance for t > 0 :attr:`om.Storage.balance[n, t]`
-        .. math:: capacity(n, t) = &capacity(n, t-1) \cdot
-            (1 - capacity\_loss(n, t))) \\
-            &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
-            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau\\
-            &\forall n \in \textrm{STORAGES}
+    Storage balance :attr:`om.Storage.balance[n, t]`
+        .. math:: E(n, t) = &E(n, t-\Delta t) \cdot
+            (1 - \delta(n, t))) \\
+            &- \frac{\dot{E}_o(n, t)}{\eta_o(n, t)} \cdot \Delta t
+            + \dot{E}_i(n, t) \cdot \eta_i(n, t) \cdot \Delta t\\
+            &\forall n \in \textrm{STORAGES}, \forall 0 \le t \le t_{max}
 
     Connect the invest variables of the input and the output flow.
         .. math::
@@ -245,6 +238,28 @@ class GenericStorageBlock(SimpleBlock):
           (InvestmentFlow.invest(n, target(n)) + existing) * \\
           invest\_relation\_input\_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+
+    =========================== ======================= =========
+    symbol                      explanation             attribute
+    =========================== ======================= =========
+    :math:`E(t)`                energy currently stored :py:obj:`capacity`
+    :math:`E(t=-\Delta t)`      stored energy before    :py:obj:`initial_capacity`
+                                initial time step
+    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_capacity`
+                                the energy storage
+    :math:`E_{min}(t)/E_{nom}`  minimum allowed storage :py:obj:`capacity_min`[t]
+    :math:`E_{max}(t)/E_{nom}`  maximum allowed storage :py:obj:`capacity_max`[t]
+    :math:`\delta(t)`           fraction of lost energy :py:obj:`capacity_loss[t]`
+                                (e.g. leakage) per time
+    step:math:`\dot{E}_i(t)`    energy flowing in       :py:obj:`inputs`
+    step:math:`\dot{E}_o(t)`    energy flowing out      :py:obj:`outputs`
+    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
+                                (i.e. efficiency)
+                                when storing energy
+    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
+                                (i.e. efficiency)
+                                taking stored energy
+    =========================   ======================= =========
 
     **The following parts of the objective function are created:**
 
