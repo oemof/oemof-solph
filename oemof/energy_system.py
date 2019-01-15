@@ -121,9 +121,7 @@ class EnergySystem:
                 g(e, self.groups)
         self.results = kwargs.get('results')
 
-        self.timeindex = kwargs.get('timeindex',
-                                    pd.date_range(start=pd.to_datetime('today'),
-                                                  periods=1, freq='H'))
+        self.timeindex = kwargs.get('timeindex')
 
         self.temporal = kwargs.get('temporal')
 

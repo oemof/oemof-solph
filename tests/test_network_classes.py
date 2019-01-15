@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
 import warnings
+import pandas as pd
 
 from oemof.energy_system import EnergySystem as ES
 from oemof.network import Bus, Edge, Node, Transformer
@@ -258,7 +259,8 @@ class EnergySystem_Nodes_Integration_Tests:
 
 
 def test_depreciated_graph_call():
-    es = ES()
+    datetimeindex = pd.date_range('1/1/2012', periods=1, freq='H')
+    es = ES(timeindex=datetimeindex)
     om = Model(energysystem=es)
     warnings.filterwarnings('ignore', category=FutureWarning)
     graph.create_nx_graph(optimization_model=om)
