@@ -255,10 +255,3 @@ class EnergySystem_Nodes_Integration_Tests:
         eq_(self.es.entities[1], b2)
         t1 = Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
         ok_(t1 in self.es.entities)
-
-
-def test_depreciated_graph_call():
-    es = ES()
-    om = Model(energysystem=es)
-    warnings.filterwarnings('ignore', category=FutureWarning)
-    graph.create_nx_graph(optimization_model=om)
