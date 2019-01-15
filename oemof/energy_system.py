@@ -14,7 +14,6 @@ from pickle import UnpicklingError
 import logging
 import os
 
-import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
