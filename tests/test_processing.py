@@ -10,6 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from nose.tools import eq_, assert_raises
+from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -110,14 +111,30 @@ class Parameter_Result_Tests:
         )
 
     def compatibility_test(self):
-        """This check is implemented to check whether the old name still works.
+        """ `param_results` still works but raises a `DeprecationWarning`.
+
+        This check is implemented to check whether the old name still works.
         `param_results` has been renamed to `parameter_as_dict`.
         Test and function can be removed with the next major release!
         """
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
-        param_results = processing.parameter_as_dict(self.es,
-                                                     exclude_none=False)
+        with catch_warnings(record=True) as warnings:
+            param_results = processing.parameter_as_dict(
+                    self.es,
+                    exclude_none=False)
+            eq_(len(warnings), 1,
+                    "\n  Expected a single warning to be issued."
+                    "\n  Got: {}".format(len(warnings)))
+            expectation = DeprecationWarning(
+                    "The function 'param_results' has been "
+                    "renamed to'parameter_as_dict'.\n"
+                    "Pleas use the new function name to avoidproblems in the "
+                    "future.")
+            eq_(repr(warnings[0].message),
+                repr(expectation),
+                "\n\nExpected: \n\n{!r}".format(expectation) +
+                "\n\nGot: \n\n{!r}".format(warnings[0].message))
 
         scalar_attributes = {
             'fixed': True,

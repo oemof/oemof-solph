@@ -11,16 +11,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from functools import partial
 from pickle import UnpicklingError
-import collections.abc as cabc
 import logging
 import os
-import re
 
 import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Bus, Component
+from oemof.network import Bus
 
 
 class EnergySystem:
@@ -226,7 +224,6 @@ class EnergySystem:
                         "https://github.com/oemof/oemof/issues\n\n  "
                         "or comment on it if it already exists.")
             raise e
-
 
         msg = ('Attributes restored from: {0}'.format(os.path.join(
             dpath, filename)))

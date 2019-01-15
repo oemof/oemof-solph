@@ -701,10 +701,10 @@ class GenericCHP(network.Transformer):
     Note
     ----
     An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum fuel flow `H_L_FG_max` as share of
+    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
     the fuel flow `H_F` e.g. for combined cycle extraction turbines.
     The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum fuel flow `H_L_FG_min` as share of
+    losses at minimum heat extraction `H_L_FG_min` as share of
     the fuel flow `H_F` e.g. for motoric CHPs.
     The boolean component parameter `back_pressure` can be set to model
     back-pressure characteristics.
@@ -728,8 +728,9 @@ class GenericCHP(network.Transformer):
         Beta values in same dimension as all other parameters (length of
         optimization period).
     back_pressure : boolean
-        Flag to use back-pressure characteristics. Works of set to `True` and
-        `Q_CW_min` set to zero. See paper above for more information.
+        Flag to use back-pressure characteristics. Set to `True` and
+        `Q_CW_min` to zero for back-pressure turbines. See paper above for more
+        information.
 
     Note
     ----
@@ -829,12 +830,91 @@ class GenericCHP(network.Transformer):
 class GenericCHPBlock(SimpleBlock):
     r"""Block for the relation of nodes with type class:`.GenericCHP`.
 
+    TODO: Add test
 
     **The following constraints are created:**
 
-    TODO: Add description for constraints
+    .. _GenericCHP-equations:
 
-    TODO: Add test
+    .. math::
+        &
+        (1)\qquad \dot{H}_F(t) = fuel\ input \\
+        &
+        (2)\qquad \dot{Q}(t) = heat\ output \\
+        &
+        (3)\qquad P_{el}(t) = power\ output\\
+        &
+        (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,woDH}(t)\\
+        &
+        (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P_{el}(t) + \beta \cdot \dot{Q}(t) )\\
+        &
+        (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}(t)}{\eta_{el,max,woDH}(t)}\\
+        &
+        (7)\qquad \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}(t)}{\eta_{el,min,woDH}(t)}\\
+        &
+        (8)\qquad \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemax}(t)\\
+        &
+        (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
+        &
+        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) = / \leq \dot{H}_F(t)\\
+        &
+        (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
+        &
+        \forall t \in \textrm{TIMESTEPS}, \\
+        &
+        \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
+
+
+    Where :math:`= / \leq` depends on the CHP being backpressure or not. Constraint (11) is set only if
+    :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP. The coefficients :math:`\alpha_0` and :math:`\alpha_1`
+    can be determined given the efficiencies maximal/minimal load:
+
+    .. math::
+        &
+        \eta_{el,max,woDH} = \frac{P_{el,max,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,max,woDH}(t)}\\
+        &
+        \eta_{el,min,woDH} = \frac{P_{el,min,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,min,woDH}(t)}\\
+
+    =============================== ======================== =========
+    math. symbol                    explanation              attribute
+    =============================== ======================== =========
+    :math:`\dot{H}_{F}`             input of enthalpy        :py:obj:`H_F[n,t]`
+                                    through fuel input
+    :math:`P_{el}`                  provided                 :py:obj:`P[n,t]`
+                                    electric power
+    :math:`P_{el,woDH}`             electric power without   :py:obj:`P_woDH[n,t]`
+                                    district heating
+    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`P_min_woDH[t]`
+                                    without district heating
+    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`P_max_woDH[t]`
+                                    without district heating
+    :math:`\dot{Q}`                 provided heat            :py:obj:`Q[n,t]`
+
+    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[t]`
+                                    load to cooling water
+    :math:`\dot{H}_{L,FG,min}`      flue gas enthalpy loss   :py:obj:`H_L_FG_min[n, t]`
+                                    at min heat extraction
+    :math:`\dot{H}_{L,FG,max}`      flue gas enthalpy loss   :py:obj:`H_L_FG_max[n, t]`
+                                    at max heat extraction
+    :math:`\dot{H}_{L,FG,sharemin}` share of flue gas loss   :py:obj:`H_L_FG_share_min[t]`
+                                    at min heat extraction
+    :math:`\dot{H}_{L,FG,sharemax}` share of flue gas loss   :py:obj:`H_L_FG_share_max[t]`
+                                    at max heat extraction
+    :math:`Y`                       status variable          :py:obj:`Y[n,t]`
+                                    on/off
+    :math:`\alpha_0`                coefficient              :py:obj:`n.alphas[0][t]`
+                                    describing efficiency
+    :math:`\alpha_1`                coefficient              :py:obj:`n.alphas[1][t]`
+                                    describing efficiency
+    :math:`\beta`                   power loss index         :py:obj:`Beta[t]`
+
+    :math:`\eta_{el,min,woDH}`      el. eff. at min. fuel    :py:obj:`Eta_el_min_woDH[t]`
+                                    flow w/o distr. heating
+    :math:`\eta_{el,max,woDH}`      el. eff. at max. fuel    :py:obj:`Eta_el_max_woDH[t]`
+                                    flow w/o distr. heating
+
+    =============================== ======================== =========
+
 
     """
     CONSTRAINT_GROUP = True
