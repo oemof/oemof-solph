@@ -102,7 +102,7 @@ class GenericStorage(network.Transformer):
     ...     nominal_storage_capacity=1000,
     ...     inputs={my_bus: solph.Flow(nominal_value=200, variable_costs=10)},
     ...     outputs={my_bus: solph.Flow(nominal_value=200)},
-    ...     capacity_loss=0.01,
+    ...     loss_rate=0.01,
     ...     initial_storage_level=0,
     ...     capacity_max = 0.9,
     ...     inflow_conversion_factor=0.9,
@@ -610,7 +610,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_inflow_invest_rule(block, n):
             """Rule definition of constraint connecting the inflow
             `InvestmentFlow.invest of storage with invested capacity `invest`
-            by nominal_capacity__inflow_ratio
+            by nominal_storage_capacity__inflow_ratio
             """
             expr = ((m.InvestmentFlow.invest[i[n], n] +
                      m.flows[i[n], n].investment.existing) ==
@@ -623,7 +623,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_outflow_invest_rule(block, n):
             """Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
-            by nominal_capacity__outflow_ratio
+            by nominal_storage_capacity__outflow_ratio
             """
             expr = ((m.InvestmentFlow.invest[n, o[n]] +
                      m.flows[n, o[n]].investment.existing) ==
