@@ -10,6 +10,7 @@ available from its original location oemof/oemof/outputlib/views.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
+from collections import OrderedDict
 import logging
 import pandas as pd
 from enum import Enum
@@ -184,7 +185,7 @@ def get_node_by_name(results, *names):
         return [node_names.get(n, None) for n in names]
 
 
-def node_weight_by_type(results, node_type=None):
+def node_weight_by_type(results, node_type):
     """
     Extracts node weights (if exist) of all components of the specified
     `node_type`.
@@ -196,11 +197,11 @@ def node_weight_by_type(results, node_type=None):
     Parameters
     ----------
     results: dict
-        A result dictionary from a solved oemof.solph.Model object 
+        A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type for which node weights should be collected
 
-    Usage
+    Example
     --------
     from oemof.outputlib import views
 
@@ -209,25 +210,183 @@ def node_weight_by_type(results, node_type=None):
     views.node_weight_by_type(m.results(), node_type=solph.GenericStorage)
     """
 
-    if node_type is None:
-        raise ValueError('Argument `node_type` must not be of type None!')
-
-    group = {k: v['sequences'] for k,v in results.items()
+    group = {k: v['sequences'] for k, v in results.items()
              if isinstance(k[0], node_type) and k[1] is None}
     if not group:
-        logging.error('No node weights for nodes of type `{}`'.format(node_type))
-        return False
+        logging.error('No node weights for nodes of type `{}`'.format(
+            node_type))
+        return None
     else:
-        df = pd.concat(group.values(), axis=1)
-        cols = {k: [c for c in v.columns]
-                for k, v in group.items()}
-        cols = [tuple((k, m) for m in v) for k, v in cols.items()]
-        cols = [c for sublist in cols for c in sublist]
-        idx = pd.MultiIndex.from_tuples(
-                            [tuple([col[0][0], col[0][1], col[1]])
-                             for col in cols])
-        idx.set_names(['node', 'to', 'weight_type'], inplace=True)
-        df.columns = idx
-        df.columns = df.columns.droplevel([1])
-
+        df = convert_to_multiindex(group,
+                                   index_names=['node', 'to', 'weight_type'],
+                                   droplevel=[1])
         return df
+
+
+def node_input_by_type(results, node_type, droplevel=None):
+    """ Gets all inputs for all nodes of the type `node_type` and returns
+    a dataframe.
+
+    Parameter
+    ---------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object
+    node_type: oemof.solph class
+        Specifies the type of the node for that inputs are selected
+
+    Usage
+    --------
+    import oemof.solph as solph
+    from oemof.outputlib import views
+
+    # solve oemof solph model 'm'
+    # Then collect node weights
+    views.node_input_by_type(m.results(), node_type=solph.Sink)
+    """
+    if droplevel is None:
+        droplevel = []
+
+    group = {k: v['sequences'] for k, v in results.items()
+             if isinstance(k[1], node_type) and k[0] is not None}
+
+    if not group:
+        logging.error('No nodes of type `{}`'.format(node_type))
+        return None
+    else:
+        df = convert_to_multiindex(group, droplevel=droplevel)
+        return df
+
+
+def node_output_by_type(results, node_type, droplevel=None):
+    """ Gets all outputs for all nodes of the type `node_type` and returns
+    a dataframe.
+
+    Parameter
+    ---------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object
+    node_type: oemof.solph class
+        Specifies the type of the node for that outputs are selected
+
+    Usage
+    --------
+    import oemof.solph as solph
+    from oemof.outputlib import views
+
+    # solve oemof solph model 'm'
+    # Then collect node weights
+    views.node_output_by_type(m.results(), node_type=solph.Transformer)
+    """
+    if droplevel is None:
+        droplevel = []
+    group = {k: v['sequences'] for k, v in results.items()
+             if isinstance(k[0], node_type) and k[1] is not None}
+
+    if not group:
+        logging.error('No nodes of type `{}`'.format(node_type))
+        return None
+    else:
+        df = convert_to_multiindex(group, droplevel=droplevel)
+        return df
+
+
+def net_storage_flow(results, node_type):
+    """ Calculates the net storage flow for storage models that have one
+    input edge and one output edge both with flows within the domain of
+    non-negative reals.
+
+    Parameter
+    ---------
+    results: dict
+        A result dictionary from a solved oemof.solph.Model object
+    node_type: oemof.solph class
+        Specifies the type for which (storage) type net flows are calculated
+
+    Returns
+    -------
+    pandas.DataFrame object with multiindex colums. Names of levels of columns
+    are: from, to, net_flow.
+
+    Examples
+    --------
+    import oemof.solph as solph
+    from oemof.outputlib import views
+
+    # solve oemof solph model 'm'
+    # Then collect node weights
+    views.net_storage_flow(m.results(), node_type=solph.GenericStorage)
+    """
+
+    group = {k: v['sequences'] for k, v in results.items()
+             if isinstance(k[0], node_type) or isinstance(k[1], node_type)}
+
+    if not group:
+        logging.error(
+            'No nodes of type `{}`'.format(node_type))
+        return None
+
+    df = convert_to_multiindex(group)
+
+    if 'capacity' not in df.columns.get_level_values(2).unique():
+        return None
+
+    x = df.xs('capacity', axis=1, level=2).columns.values
+    labels = [s for s, t in x]
+
+    dataframes = []
+
+    for l in labels:
+        grouper = lambda x1: (lambda fr, to, ty:
+                              'output' if (fr == l and ty == 'flow') else
+                              'input' if (to == l and ty == 'flow') else
+                              'level' if (fr == l and ty != 'flow') else
+                              None)(*x1)
+
+        subset = df.groupby(grouper, axis=1).sum()
+
+        subset['net_flow'] = subset['output'] - subset['input']
+
+        subset.columns = pd.MultiIndex.from_product(
+                                [[l],
+                                 [o for o in l.outputs],
+                                 subset.columns])
+
+        dataframes.append(
+            subset.loc[:, (slice(None), slice(None), 'net_flow')])
+
+    return pd.concat(dataframes, axis=1)
+
+
+def convert_to_multiindex(group, index_names=None, droplevel=None):
+    """ Convert dict to pandas DataFrame with multiindex
+
+    Parameters
+    ----------
+    group: dict
+        Sequences of the oemof.solph.Model.results dictionary
+    index_names: arraylike
+        Array with names of the MultiIndex
+    droplevel: arraylike
+        List containing levels to be dropped from the dataframe
+    """
+    if index_names is None:
+        index_names = ['from', 'to', 'type']
+    if droplevel is None:
+        droplevel = []
+        
+    sorted_group = OrderedDict(
+        (k, group[k]) for k in sorted(group))
+    df = pd.concat(sorted_group.values(), axis=1)
+
+    cols = OrderedDict((k, v.columns)
+                       for k, v in sorted_group.items())
+    cols = [tuple((k, m) for m in v) for k, v in cols.items()]
+    cols = [c for sublist in cols for c in sublist]
+    idx = pd.MultiIndex.from_tuples(
+                        [tuple([col[0][0], col[0][1], col[1]])
+                         for col in cols])
+    idx.set_names(index_names, inplace=True)
+    df.columns = idx
+    df.columns = df.columns.droplevel(droplevel)
+
+    return df
