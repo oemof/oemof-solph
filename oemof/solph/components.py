@@ -59,6 +59,9 @@ class GenericStorage(network.Transformer):
 
     initial_storage_level : numeric
         The content of the storage in the first time step of optimization.
+    balanced : boolian
+        Couple storage level of first and last time step.
+        (Total inflow and total outflow are balanced.)
     loss_rate : numeric (sequence or scalar)
         The relative loss of the storage capacity from between two consecutive
         timesteps.
@@ -214,13 +217,13 @@ class GenericStorageBlock(SimpleBlock):
         If the initial_storage_level attribute is not None the init_cap
         variable is set to
 
-        .. math:: init\_cap =  E_{nom} \cdot c(-1)
+        .. math:: E(-1) =  E_{nom} \cdot c(-1)
 
     **The following constraints are created:**
 
-    Set last time step to the initial capacity if balanced is True
+    Set last time step to the initial capacity if `balanced == True`
         .. math::
-            E(n, t_{last} = &init\_cap(n)\\
+            E(n, t_{last}) = &E(n, -1)\\
             &\forall n \in \textrm{STORAGES\_BALANCED}
 
     Storage balance :attr:`om.Storage.balance[n, t]`
