@@ -120,7 +120,7 @@ class Parameter_Result_Tests:
         b_el2 = self.es.groups['b_el2']
         demand = self.es.groups['demand_el']
         with catch_warnings(record=True) as warnings:
-            param_results = processing.parameter_as_dict(
+            param_results = processing.param_results(
                     self.es,
                     exclude_none=False)
             eq_(len(warnings), 1,
