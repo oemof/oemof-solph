@@ -52,11 +52,11 @@ def test_storage_decouple():
     
     # Electric Storage
     storage_elec = solph.components.GenericStorage(label='storage_elec',
-                                                   nominal_capacity = 10,
+                                                   nominal_storage_capacity = 10,
                                                    inputs={bel: solph.Flow(nominal_value = 10)},
                                                    outputs={bel: solph.Flow(nominal_value = 10)},
-                                                   capacity_loss = 0.00,
-                                                   initial_capacity = 0.2,
+                                                   loss_rate = 0.00,
+                                                   initial_storage_level = 0.2,
                                                    balanced = False,
                                                    inflow_conversion_factor = 1,
                                                    outflow_conversion_factor = 1)
@@ -121,11 +121,11 @@ def test_storage_couple():
     
     # Electric Storage
     storage_elec = solph.components.GenericStorage(label='storage_elec',
-                                                   nominal_capacity = 10,
+                                                   nominal_storage_capacity = 10,
                                                    inputs={bel: solph.Flow(nominal_value = 10)},
                                                    outputs={bel: solph.Flow(nominal_value = 10)},
-                                                   capacity_loss = 0.00,
-                                                   initial_capacity = 0.2,
+                                                   loss_rate = 0.00,
+                                                   initial_storage_level = 0.2,
                                                    balanced = True,
                                                    inflow_conversion_factor = 1,
                                                    outflow_conversion_factor = 1)

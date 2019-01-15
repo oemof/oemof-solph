@@ -109,10 +109,10 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     # Investment storage
     solph.components.GenericStorage(
         label=Label('storage', 'electricity', 'battery'),
-        nominal_capacity=204685,
+        nominal_storage_capacity=204685,
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_capacity=1/6,
         invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,

@@ -30,7 +30,7 @@ DATA = [
 PARAMETER = {
     'el_price': 10,
     'sh_price': 5,
-    'nominal_capacity': 7
+    'nominal_storage_capacity': 7
 }
 
 
@@ -71,7 +71,7 @@ def storage_example():
         # Electric Storage
         es.add(solph.components.GenericStorage(
             label='storage_elec_{0}'.format(name),
-            nominal_capacity=PARAMETER['nominal_capacity'],
+            nominal_storage_capacity=PARAMETER['nominal_storage_capacity'],
             inputs={bel: solph.Flow()},
             outputs={bel: solph.Flow()},
             initial_capacity=data_set['initial_capacity'],

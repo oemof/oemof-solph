@@ -223,11 +223,11 @@ class Constraint_Tests:
             label='storage_no_invest',
             inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
             outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
-            nominal_capacity=10e4,
-            capacity_loss=0.13,
+            nominal_storage_capacity=10e4,
+            loss_rate=0.13,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            initial_capacity=0.4)
+            initial_storage_level=0.4)
 
         self.compare_lp_files('storage.lp')
 
@@ -241,8 +241,8 @@ class Constraint_Tests:
             label='storage1',
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
-            nominal_capacity=None,
-            capacity_loss=0.13,
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
             capacity_max=0.9,
             capacity_min=0.1,
             invest_relation_input_capacity=1/6,
@@ -263,7 +263,7 @@ class Constraint_Tests:
             inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
             outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
             investment=solph.Investment(ep_costs=145),
-            initial_capacity=0.5)
+            initial_storage_level=0.5)
         self.compare_lp_files('storage_invest_2.lp')
 
     def test_storage_invest_3(self):
@@ -277,7 +277,7 @@ class Constraint_Tests:
             label='storage3',
             inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
             outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
-            nominal_capacity=5000)
+            nominal_storage_capacity=5000)
         self.compare_lp_files('storage_invest_3.lp')
 
     def test_storage_invest_4(self):
@@ -307,7 +307,7 @@ class Constraint_Tests:
             outputs={bel: solph.Flow(investment=solph.Investment(
                 existing=100))},
             invest_relation_input_output=1.1,
-            nominal_capacity=10000)
+            nominal_storage_capacity=10000)
         self.compare_lp_files('storage_invest_5.lp')
 
     def test_storage_invest_6(self):

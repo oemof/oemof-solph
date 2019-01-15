@@ -21,7 +21,7 @@ def test_generic_storage_1():
         label='storage1',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_output=1,
         invest_relation_output_capacity=1,
         invest_relation_input_capacity=1,
@@ -35,10 +35,10 @@ def test_generic_storage_2():
     bel = solph.Bus()
     solph.components.GenericStorage(
         label='storage3',
-        nominal_capacity=45,
+        nominal_storage_capacity=45,
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_capacity=1/6,
         invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
@@ -50,8 +50,8 @@ def test_generic_storage_3():
     bel = solph.Bus()
     solph.components.GenericStorage(
         label='storage4',
-        nominal_capacity=45,
+        nominal_storage_capacity=45,
         inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
         outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8)
