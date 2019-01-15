@@ -22,10 +22,10 @@ except ImportError:
 
 
 DATA = [
-    {'name': 'unbalanced', 'initial_capacity': 0.2, 'balanced': False},
-    {'name': 'unbalanced_None', 'initial_capacity': None, 'balanced': False},
-    {'name': 'balanced', 'initial_capacity': 0.2, 'balanced': True},
-    {'name': 'balanced_None', 'initial_capacity': None, 'balanced': True}]
+    {'name': 'unbalanced', 'initial_storage_level': 0.2, 'balanced': False},
+    {'name': 'unbalanced_None', 'initial_storage_level': None, 'balanced': False},
+    {'name': 'balanced', 'initial_storage_level': 0.2, 'balanced': True},
+    {'name': 'balanced_None', 'initial_storage_level': None, 'balanced': True}]
 
 PARAMETER = {
     'el_price': 10,
@@ -74,7 +74,7 @@ def storage_example():
             nominal_storage_capacity=PARAMETER['nominal_storage_capacity'],
             inputs={bel: solph.Flow()},
             outputs={bel: solph.Flow()},
-            initial_capacity=data_set['initial_capacity'],
+            initial_storage_level=data_set['initial_storage_level'],
             balanced=data_set['balanced']))
     
     # create an optimization problem and solve it
