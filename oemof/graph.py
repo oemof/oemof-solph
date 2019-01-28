@@ -10,11 +10,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import networkx as nx
-import warnings
 
 
-def create_nx_graph(energy_system=None, optimization_model=None,
-                    remove_nodes=None, filename=None,
+def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
                     remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
@@ -94,13 +92,6 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     """
     # construct graph from nodes and flows
     grph = nx.DiGraph()
-
-    # Get energy_system from Model
-    if energy_system is None:
-        msg = ("\nThe optimisation_model attribute will be removed, pass the "
-               "energy system instead.")
-        warnings.warn(msg, FutureWarning)
-        energy_system = optimization_model.es
 
     # add nodes
     for n in energy_system.nodes:
