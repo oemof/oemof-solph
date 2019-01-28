@@ -87,7 +87,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
 
-To learn how to install (other) solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/latest/>`_ to learn about which solvers are supported.
 
 
 Windows
@@ -154,7 +154,7 @@ You do not have to install both solvers. Oemof recommends the CBC (Coin-or branc
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
  
-For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/latest/>`_ to learn about which solvers are supported.
 
 
 Mac OSX
