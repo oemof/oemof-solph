@@ -68,15 +68,14 @@ def test_dispatch_one_time_step(solver='cbc', periods=1):
                             conversion_factors={
                                         bel: 1/3, b_heat_source: (cop-1)/cop})
 
-    datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
-    energysystem = EnergySystem(timeindex=datetimeindex)
+    energysystem = EnergySystem(timeindex=[1])
     energysystem.add(bgas, bel, bth, excess_el, wind, demand_el, demand_th,
                      pp_chp, b_heat_source, heat_source, heat_pump)
 
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
-    optimization_model = Model(energysystem=energysystem)
+    optimization_model = Model(energysystem=energysystem, timeincrement=1)
 
     # solve problem
     optimization_model.solve(solver=solver)
