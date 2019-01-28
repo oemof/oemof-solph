@@ -1,2 +1,4 @@
 [run]
-omit = *datapackage*
+omit =
+    *datapackage*
+    *custom*
