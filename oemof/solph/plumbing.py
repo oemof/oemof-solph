@@ -58,13 +58,17 @@ class _Sequence(UserList):
     >>> s = _Sequence(default=42)
     >>> len(s)
     0
+    >>> s[1]
+    42
     >>> s[2]
     42
     >>> len(s)
     3
-    >>> s[0] = 23
     >>> s
-    [23, 42, 42]
+    [42, 42, 42]
+    >>> s[8]
+    42
+
 
     """
     def __init__(self, *args, **kwargs):
@@ -75,37 +79,16 @@ class _Sequence(UserList):
 
     def __getitem__(self, key):
         self.highest_index = max(self.highest_index, key)
-        if not self.default_changed:
-            return self.default
-        try:
-            return self.data[key]
-        except IndexError:
-            self.data.extend([self.default] * (key - len(self.data) + 1))
-            return self.data[key]
-
-    def __setitem__(self, key, value):
-        if not self.default_changed:
-            self.default_changed = True
-            self.__init_list()
-        try:
-            self.data[key] = value
-        except IndexError:
-            self.data.extend([self.default] * (key - len(self.data) + 1))
-            self.data[key] = value
+        return self.default
 
     def __init_list(self):
         self.data = [self.default] * (self.highest_index + 1)
 
     def __repr__(self):
-        if self.default_changed:
-            return super(_Sequence, self).__repr__()
         return str([i for i in self])
 
     def __len__(self):
         return max(len(self.data), self.highest_index + 1)
 
     def __iter__(self):
-        if self.default_changed:
-            return super(_Sequence, self).__iter__()
-        else:
-            return repeat(self.default, self.highest_index + 1)
+        return repeat(self.default, self.highest_index + 1)
