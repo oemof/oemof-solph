@@ -11,12 +11,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
-import warnings
 
 from oemof.energy_system import EnergySystem as ES
 from oemof.network import Bus, Edge, Node, Transformer
-from oemof import graph
-from oemof.solph import Model
 
 
 class Node_Tests:
