@@ -354,12 +354,15 @@ class GenericCAES2(Transformer):
         self.cmp_b = sequence(kwargs.get('cmp_b'))
         self.cmp_c = sequence(kwargs.get('cmp_c'))
         self.cmp_d = sequence(kwargs.get('cmp_d'))
+        self.cmp_e = sequence(kwargs.get('cmp_e'))
         self.cmp_eta = sequence(kwargs.get('cmp_eta'))
         self.cmp_P_inst = sequence(kwargs.get('cmp_P_inst'))
         self.cmp_P_max = sequence(kwargs.get('cmp_P_max'))
         self.cmp_P_min = sequence(kwargs.get('cmp_P_min'))
         self.exp_a = sequence(kwargs.get('exp_a'))
         self.exp_b = sequence(kwargs.get('exp_b'))
+        self.exp_c = sequence(kwargs.get('exp_c'))
+        self.exp_d = sequence(kwargs.get('exp_d'))
         self.exp_P_inst = sequence(kwargs.get('exp_P_inst'))
         self.exp_P_max = sequence(kwargs.get('exp_P_max'))
         self.exp_P_min = sequence(kwargs.get('exp_P_min'))
@@ -448,6 +451,9 @@ class GenericCAESBlock2(SimpleBlock):
         self.cmp_d = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_d'))
+        self.cmp_e = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_e'))
         self.cmp_eta = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_eta'))
@@ -466,6 +472,12 @@ class GenericCAESBlock2(SimpleBlock):
         self.exp_b = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_b'))
+        self.exp_c = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_c'))
+        self.exp_d = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_d'))
         self.exp_P_inst = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_inst'))
@@ -644,13 +656,15 @@ class GenericCAESBlock2(SimpleBlock):
 
         def exp_area1_rule(block, n, t):
             """Relationship between power and power."""
-            return(self.exp_m[n, t] == self.exp_P[n, t] / self.exp_a[n, t])
+            return(self.exp_m[n, t] == self.exp_a[n, t] * self.exp_P[n, t] +
+                   self.exp_b[n, t] * self.exp_y[n, t])
         self.exp_area1_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=exp_area1_rule)
 
         def exp_area2_rule(block, n, t):
             """Relationship between heat flow and mass flow."""
-            return(self.exp_Q[n, t] == self.exp_P[n, t] * self.exp_b[n, t])
+            return(self.exp_Q[n, t] == self.exp_c[n, t] * self.exp_P[n, t] +
+                   self.exp_d[n, t] * self.exp_y[n, t])
         self.exp_area2_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=exp_area2_rule)
 
