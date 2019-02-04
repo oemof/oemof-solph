@@ -583,7 +583,8 @@ class GenericCAESBlock2(SimpleBlock):
 
         def cmp_area2_rule(block, n, t):
             """Relationship between heat flow and power."""
-            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * self.cmp_d[n, t])
+            return(self.cmp_Q[n, t] == self.cmp_P[n, t] * self.cmp_d[n, t] -
+                   self.cmp_e[n, t] * self.cmp_m[n, t])
         self.cmp_area2_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=cmp_area2_rule)
 
