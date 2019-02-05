@@ -479,10 +479,8 @@ class Bus(SimpleBlock):
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    lhs = sum(m.flow[i, n, t] * m.timeincrement[t]
-                              for i in I[n])
-                    rhs = sum(m.flow[n, o, t] * m.timeincrement[t]
-                              for o in O[n])
+                    lhs = sum(m.flow[i, n, t] for i in I[n])
+                    rhs = sum(m.flow[n, o, t] for o in O[n])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
