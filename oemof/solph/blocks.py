@@ -448,8 +448,8 @@ class Bus(SimpleBlock):
 
     Bus balance  :attr:`om.Bus.balance[i, o, t]`
       .. math::
-        \sum_{i \in INPUTS(n)} flow(i, n, t) \cdot \tau =
-        \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau, \\
+        \sum_{i \in INPUTS(n)} flow(i, n, t) =
+        \sum_{o \in OUTPUTS(n)} flow(n, o, t), \\
         \forall n \in \textrm{BUSES},
         \forall t \in \textrm{TIMESTEPS}.
     """
