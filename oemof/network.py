@@ -335,11 +335,15 @@ class Component(Node):
 
 
 class Sink(Component):
-    pass
+    def __init__(self, *args, inputs, **kwargs):
+        kwargs['inputs'] = inputs
+        super().__init__(*args, **kwargs)
 
 
 class Source(Component):
-    pass
+    def __init__(self, *args, outputs, **kwargs):
+        kwargs['outputs'] = outputs
+        super().__init__(*args, **kwargs)
 
 
 class Transformer(Component):

@@ -82,7 +82,7 @@ class EnergySystem:
     <oemof.core.network.Entity.uid>`:
 
     >>> from oemof.network import Entity
-    >>> from oemof.network import Bus, Sink
+    >>> from oemof.network import Bus, Component
     >>> es = EnergySystem()
     >>> bus = Bus(label='electricity')
     >>> es.add(bus)
@@ -99,12 +99,12 @@ class EnergySystem:
     >>> es = EnergySystem(groupings=[type])
     >>> buses = set(Bus(label="Bus {}".format(i)) for i in range(9))
     >>> es.add(*buses)
-    >>> components = set(Sink(label="Component {}".format(i))
+    >>> components = set(Component(label="Component {}".format(i))
     ...                   for i in range(9))
     >>> es.add(*components)
     >>> buses == es.groups[Bus]
     True
-    >>> components == es.groups[Sink]
+    >>> components == es.groups[Component]
     True
 
     """
