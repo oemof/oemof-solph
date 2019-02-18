@@ -335,13 +335,13 @@ class Component(Node):
 
 
 class Sink(Component):
-    def __init__(self, *args, inputs, **kwargs):
+    def __init__(self, *args, inputs={}, **kwargs):
         kwargs['inputs'] = inputs
         Component.__init__(self, *args, **kwargs)
 
 
 class Source(Component):
-    def __init__(self, *args, outputs, **kwargs):
+    def __init__(self, *args, outputs={}, **kwargs):
         kwargs['outputs'] = outputs
         Component.__init__(self, *args, **kwargs)
 
