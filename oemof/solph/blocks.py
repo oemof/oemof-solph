@@ -48,6 +48,7 @@ class Flow(SimpleBlock):
     **The following constraints are build:**
 
     Flow max sum :attr:`om.Flow.summed_max[i, o]`
+      .. math::
         \sum_t flow(i, o, t) \cdot \tau
             \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
