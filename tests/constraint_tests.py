@@ -326,6 +326,21 @@ class Constraint_Tests:
             investment=solph.Investment(ep_costs=145, existing=10000))
         self.compare_lp_files('storage_invest_6.lp')
 
+    def test_storage_minimum_invest(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage1',
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
+            investment=solph.Investment(
+                ep_costs=145, minimum=100, maximum=200))
+
+        self.compare_lp_files('storage_invest_minimum.lp')
+
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
         """
