@@ -409,7 +409,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     INVEST_REL_IN_OUT
         A set with all storages containing an Investment object with coupled
         investment of input and output power
-    INITIAL_CAPACITY
+    INITIAL_STORAGE_LEVEL
         A subset of the set INVESTSTORAGES where elements of the set have an
         initial_storage_level attribute.
     MIN_INVESTSTORAGES
