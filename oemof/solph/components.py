@@ -221,7 +221,7 @@ class GenericStorageBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    Set last time step to the initial capacity if `balanced == True`
+    Set last time step to the initial capacity if :attr:`balanced == True`
         .. math::
             E(n, t_{last}) = &E(n, -1)\\
             &\forall n \in \textrm{STORAGES\_BALANCED}
@@ -239,6 +239,8 @@ class GenericStorageBlock(SimpleBlock):
           (InvestmentFlow.invest(n, target(n)) + existing) * \\
           invest\_relation\_input\_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+
+
 
     =========================== ======================= =========
     symbol                      explanation             attribute
@@ -428,22 +430,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     **The following constraints are build:**
 
     Storage balance
-      .. math::
-        capacity(n, t) =  &capacity(n, t\_previous(t)) \cdot
-        (1 - \delta(n, t)) \\
-        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \cdot
-        \tau) \\
-        &+ flow(source(n), n, t) \cdot inflow\_conversion\_factor(n) \cdot \
-        \tau \textrm{,} \\
-        &\forall n \in \textrm{INVESTSTORAGES} \textrm{,} \\
-        &\forall t \in \textrm{TIMESTEPS}.
+        Same as for :class:`.GenericStorageBlock`, except
+        .. math::
+            n \in \textrm{INVESTSTORAGES}
+
 
     Initial capacity of :class:`.network.Storage`
         .. math::
-          capacity(n, t_{last}) = invest(n) \cdot
-          initial\_storage\_level(n), \\
-          \forall n \in \textrm{INITIAL\_CAPACITY,} \\
-          \forall t \in \textrm{TIMESTEPS}.
+          E(n, -1) = invest(n) \cdot c(n, -1), \\
+          \forall n \in \textrm{INITIAL\_STORAGE\_LEVEL}.
 
     Connect the invest variables of the storage and the input flow.
         .. math:: InvestmentFlow.invest(source(n), n) + existing =
@@ -462,13 +457,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
+        .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) \geq invest(n) \cdot capacity\_min(n, t),
-            \\
+        .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
 
@@ -482,6 +476,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     The expression can be accessed by
     :attr:`om.InvestStorages.investment_costs` and their value after
     optimization by :meth:`om.InvestStorages.investment_costs()` .
+
+
+    The symbols are the same as in:class:`.GenericStorageBlock`.
+
 
     """
 
