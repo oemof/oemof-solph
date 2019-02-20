@@ -70,12 +70,12 @@ class GenericStorage(network.Transformer):
         inflow of the storage.
     outflow_conversion_factor : numeric (sequence or scalar)
         see: inflow_conversion_factor
-    capacity_min : numeric (sequence or scalar)
-        The nominal minimum capacity of the storage as fraction of the
-        nominal capacity (between 0 and 1, default: 0).
+    min_storage_level : numeric (sequence or scalar)
+        The minimum storaged energy of the storage as fraction of the
+        nominal storage capacity (between 0 and 1, default: 0).
         To set different values in every time step use a sequence.
-    capacity_max : numeric (sequence or scalar)
-        see: capacity_min
+    max_storage_level : numeric (sequence or scalar)
+        see: min_storage_level
     investment : :class:`oemof.solph.options.Investment` object
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
@@ -107,7 +107,7 @@ class GenericStorage(network.Transformer):
     ...     outputs={my_bus: solph.Flow(nominal_value=200)},
     ...     loss_rate=0.01,
     ...     initial_storage_level=0,
-    ...     capacity_max = 0.9,
+    ...     max_storage_level = 0.9,
     ...     inflow_conversion_factor=0.9,
     ...     outflow_conversion_factor=0.93)
 
@@ -124,7 +124,10 @@ class GenericStorage(network.Transformer):
     ...     outflow_conversion_factor=0.8)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args,
+                 max_storage_level=1,
+                 min_storage_level=0,
+                 **kwargs):
         super().__init__(*args, **kwargs)
         self.nominal_storage_capacity = kwargs.get('nominal_storage_capacity')
         self.initial_storage_level = kwargs.get('initial_storage_level')
@@ -134,8 +137,8 @@ class GenericStorage(network.Transformer):
             kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
             kwargs.get('outflow_conversion_factor', 1))
-        self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
-        self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
+        self.max_storage_level = solph_sequence(max_storage_level)
+        self.min_storage_level = solph_sequence(min_storage_level)
         self.investment = kwargs.get('investment')
         self.invest_relation_input_output = kwargs.get(
             'invest_relation_input_output')
@@ -250,8 +253,8 @@ class GenericStorageBlock(SimpleBlock):
                                 the energy storage
     :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
                                 initial time step
-    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`capacity_min[t]`
-    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`capacity_max[t]`
+    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
+    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
     :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
                                 (e.g. leakage) per time
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
@@ -307,8 +310,8 @@ class GenericStorageBlock(SimpleBlock):
             """Rule definition for bounds of capacity variable of storage n
             in timestep t
             """
-            bounds = (n.nominal_storage_capacity * n.capacity_min[t],
-                      n.nominal_storage_capacity * n.capacity_max[t])
+            bounds = (n.nominal_storage_capacity * n.min_storage_level[t],
+                      n.nominal_storage_capacity * n.max_storage_level[t])
             return bounds
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
@@ -416,7 +419,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         initial_storage_level attribute.
     MIN_INVESTSTORAGES
         A subset of INVESTSTORAGES where elements of the set have an
-        capacity_min attribute greater than zero for at least one time step.
+        min_storage_level attribute greater than zero for at least one
+        time step.
 
     **The following variables are created:**
 
@@ -522,7 +526,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # for all time steps.
         self.MIN_INVESTSTORAGES = Set(
             initialize=[n for n in group if sum(
-                [n.capacity_min[t] for t in m.TIMESTEPS]) > 0])
+                [n.min_storage_level[t] for t in m.TIMESTEPS]) > 0])
 
         # ######################### Variables  ################################
         self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
@@ -640,7 +644,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             expr = (self.capacity[n, t] <=
                     (n.investment.existing + self.invest[n]) *
-                    n.capacity_max[t])
+                    n.max_storage_level[t])
             return expr
         self.max_capacity = Constraint(
             self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
@@ -650,7 +654,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             expr = (self.capacity[n, t] >=
                     (n.investment.existing + self.invest[n]) *
-                    n.capacity_min[t])
+                    n.min_storage_level[t])
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
         self.min_capacity = Constraint(

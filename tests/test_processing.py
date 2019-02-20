@@ -168,10 +168,10 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
-                'capacity_max': 1,
-                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
+                'max_storage_level': 1,
+                'min_storage_level': 0,
                 'outflow_conversion_factor': 0.8,
             })
         )
@@ -197,10 +197,10 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
-                'capacity_max': 1,
-                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
+                'max_storage_level': 1,
+                'min_storage_level': 0,
                 'outflow_conversion_factor': 0.8,
             })
         )
