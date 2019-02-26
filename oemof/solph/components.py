@@ -226,15 +226,13 @@ class GenericStorageBlock(SimpleBlock):
 
     Set last time step to the initial capacity if :attr:`balanced == True`
         .. math::
-            E(n, t_{last}) = &E(n, -1)\\
-            &\forall n \in \textrm{STORAGES\_BALANCED}
+            E(t_{last}) = &E(-1)
 
     Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: E(n, t) = &E(n, t-1) \cdot
-            (1 - \delta(n, t))) \\
-            &- \frac{\dot{E}_o(n, t)}{\eta_o(n, t)} \cdot \tau(t)
-            + \dot{E}_i(n, t) \cdot \eta_i(n, t) \cdot \tau(t)\\
-            &\forall n \in \textrm{STORAGES}
+        .. math:: E(t) = &E(t-1) \cdot
+            (1 - \delta(t))) \\
+            &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
+            + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
     Connect the invest variables of the input and the output flow.
         .. math::
@@ -265,6 +263,7 @@ class GenericStorageBlock(SimpleBlock):
     :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
+    :math:`\tau(t)`             length of the time step 
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
@@ -434,9 +433,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     **The following constraints are build:**
 
     Storage balance
-        Same as for :class:`.GenericStorageBlock`, except
-        .. math::
-            n \in \textrm{INVESTSTORAGES}
+        Same as for :class:`.GenericStorageBlock`.
 
 
     Initial capacity of :class:`.network.Storage`
