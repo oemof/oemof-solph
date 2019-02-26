@@ -72,7 +72,7 @@ class GenericStorage(network.Transformer):
         see: inflow_conversion_factor
     min_storage_level : numeric (sequence or scalar)
         The minimum storaged energy of the storage as fraction of the
-        nominal storage capacity (between 0 and 1, default: 0).
+        nominal storage capacity (between 0 and 1).
         To set different values in every time step use a sequence.
     max_storage_level : numeric (sequence or scalar)
         see: min_storage_level
