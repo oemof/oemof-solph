@@ -1099,7 +1099,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             \frac{P_{el} + \dot Q_{th} \cdot \beta}
                  {\eta_{el,woExtr}} \\
             &
-            P_{el} \leq \dot Q_{th} \cdot
+            P_{el} \geq \dot Q_{th} \cdot
             \frac{\eta_{el,maxExtr}}
                  {\eta_{th,maxExtr}}
 

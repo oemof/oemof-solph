@@ -49,12 +49,14 @@ class Flow(SimpleBlock):
 
     Flow max sum :attr:`om.Flow.summed_max[i, o]`
       .. math::
-        \sum_t flow(i, o, t) \cdot \tau \leq summed\_max(i, o), \\
+        \sum_t flow(i, o, t) \cdot \tau
+            \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
     Flow min sum :attr:`om.Flow.summed_min[i, o]`
       .. math::
-        \sum_t flow(i, o, t) \cdot \tau \geq summed\_min(i, o), \\
+        \sum_t flow(i, o, t) \cdot \tau
+            \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
     Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
