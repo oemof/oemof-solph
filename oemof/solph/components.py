@@ -799,6 +799,7 @@ class GenericCHPBlock(SimpleBlock):
 
     where :math:`= / \leq` depends on the CHP being back pressure or not.
     If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
+
     .. math::
         &
         (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
