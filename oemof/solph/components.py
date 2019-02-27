@@ -765,7 +765,9 @@ class GenericCHP(network.Transformer):
 
 
 class GenericCHPBlock(SimpleBlock):
-    r"""Block for the relation of nodes with type class:`.GenericCHP`.
+    r"""
+    Block for the relation of the :math:`n` nodes with
+    type class:`.GenericCHP`.
 
     TODO: Add test
 
@@ -793,17 +795,17 @@ class GenericCHPBlock(SimpleBlock):
         &
         (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
         &
-        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) = / \leq \dot{H}_F(t)\\
+        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) = / \leq \dot{H}_F(t)
+
+    where :math:`= / \leq` depends on the CHP being back pressure or not.
+    If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
+
+    .. math::
         &
         (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
-        &
-        \forall t \in \textrm{TIMESTEPS}, \\
-        &
-        \forall n \in \textrm{VARIABLE\_FRACTION\_TRANSFORMERS}.
 
 
-    Where :math:`= / \leq` depends on the CHP being backpressure or not. Constraint (11) is set only if
-    :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP. The coefficients :math:`\alpha_0` and :math:`\alpha_1`
+    The coefficients :math:`\alpha_0` and :math:`\alpha_1`
     can be determined given the efficiencies maximal/minimal load:
 
     .. math::
@@ -821,33 +823,33 @@ class GenericCHPBlock(SimpleBlock):
                                     electric power
     :math:`P_{el,woDH}`             electric power without   :py:obj:`P_woDH[n,t]`
                                     district heating
-    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`P_min_woDH[t]`
+    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`P_min_woDH[n,t]`
                                     without district heating
-    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`P_max_woDH[t]`
+    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`P_max_woDH[n,t]`
                                     without district heating
     :math:`\dot{Q}`                 provided heat            :py:obj:`Q[n,t]`
 
-    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[t]`
+    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[n,t]`
                                     load to cooling water
-    :math:`\dot{H}_{L,FG,min}`      flue gas enthalpy loss   :py:obj:`H_L_FG_min[n, t]`
+    :math:`\dot{H}_{L,FG,min}`      flue gas enthalpy loss   :py:obj:`H_L_FG_min[n,t]`
                                     at min heat extraction
-    :math:`\dot{H}_{L,FG,max}`      flue gas enthalpy loss   :py:obj:`H_L_FG_max[n, t]`
+    :math:`\dot{H}_{L,FG,max}`      flue gas enthalpy loss   :py:obj:`H_L_FG_max[n,t]`
                                     at max heat extraction
-    :math:`\dot{H}_{L,FG,sharemin}` share of flue gas loss   :py:obj:`H_L_FG_share_min[t]`
+    :math:`\dot{H}_{L,FG,sharemin}` share of flue gas loss   :py:obj:`H_L_FG_share_min[n,t]`
                                     at min heat extraction
-    :math:`\dot{H}_{L,FG,sharemax}` share of flue gas loss   :py:obj:`H_L_FG_share_max[t]`
+    :math:`\dot{H}_{L,FG,sharemax}` share of flue gas loss   :py:obj:`H_L_FG_share_max[n,t]`
                                     at max heat extraction
     :math:`Y`                       status variable          :py:obj:`Y[n,t]`
                                     on/off
-    :math:`\alpha_0`                coefficient              :py:obj:`n.alphas[0][t]`
+    :math:`\alpha_0`                coefficient              :py:obj:`n.alphas[0][n,t]`
                                     describing efficiency
-    :math:`\alpha_1`                coefficient              :py:obj:`n.alphas[1][t]`
+    :math:`\alpha_1`                coefficient              :py:obj:`n.alphas[1][n,t]`
                                     describing efficiency
-    :math:`\beta`                   power loss index         :py:obj:`Beta[t]`
+    :math:`\beta`                   power loss index         :py:obj:`Beta[n,t]`
 
-    :math:`\eta_{el,min,woDH}`      el. eff. at min. fuel    :py:obj:`Eta_el_min_woDH[t]`
+    :math:`\eta_{el,min,woDH}`      el. eff. at min. fuel    :py:obj:`Eta_el_min_woDH[n,t]`
                                     flow w/o distr. heating
-    :math:`\eta_{el,max,woDH}`      el. eff. at max. fuel    :py:obj:`Eta_el_max_woDH[t]`
+    :math:`\eta_{el,max,woDH}`      el. eff. at max. fuel    :py:obj:`Eta_el_max_woDH[n,t]`
                                     flow w/o distr. heating
 
     =============================== ======================== =========
@@ -1098,7 +1100,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             \frac{P_{el} + \dot Q_{th} \cdot \beta}
                  {\eta_{el,woExtr}} \\
             &
-            P_{el} \leq \dot Q_{th} \cdot
+            P_{el} \geq \dot Q_{th} \cdot
             \frac{\eta_{el,maxExtr}}
                  {\eta_{th,maxExtr}}
 
