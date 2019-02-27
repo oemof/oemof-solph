@@ -152,6 +152,16 @@ class GenericStorage(network.Transformer):
         if self._invest_group is True:
             self._check_invest_attributes()
 
+    def _set_flows(self):
+        for flow in self.inputs.values():
+            if (self.invest_relation_input_capacity is not None and
+                    not isinstance(flow.investment, Investment)):
+                flow.investment = Investment()
+        for flow in self.outputs.values():
+            if (self.invest_relation_output_capacity is not None and
+                    not isinstance(flow.investment, Investment)):
+                flow.investment = Investment()
+
     def _check_invest_attributes(self):
         if self.investment and self.nominal_storage_capacity is not None:
             e1 = ("If an investment object is defined the invest variable "
@@ -164,14 +174,8 @@ class GenericStorage(network.Transformer):
             e2 = ("Overdetermined. Three investment object will be coupled"
                   "with three constraints. Set one invest relation to 'None'.")
             raise AttributeError(e2)
-        for flow in self.inputs.values():
-            if (self.invest_relation_input_capacity is not None and
-                    not isinstance(flow.investment, Investment)):
-                flow.investment = Investment()
-        for flow in self.outputs.values():
-            if (self.invest_relation_output_capacity is not None and
-                    not isinstance(flow.investment, Investment)):
-                flow.investment = Investment()
+
+        self._set_flows()
 
     def constraint_group(self):
         if self._invest_group is True:
@@ -263,7 +267,7 @@ class GenericStorageBlock(SimpleBlock):
     :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
-    :math:`\tau(t)`             length of the time step 
+    :math:`\tau(t)`             length of the time step
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
@@ -405,10 +409,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     INVESTSTORAGES
         A set with all storages containing an Investment object.
     INVEST_REL_CAP_IN
-        A set with all storages containing an Investment object with coupled 
+        A set with all storages containing an Investment object with coupled
         investment of input power and storage capacity
     INVEST_REL_CAP_OUT
-        A set with all storages containing an Investment object with coupled 
+        A set with all storages containing an Investment object with coupled
         investment of output power and storage capacity
     INVEST_REL_IN_OUT
         A set with all storages containing an Investment object with coupled
@@ -511,10 +515,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         self.INVEST_REL_CAP_IN = Set(initialize=[
             n for n in group if n.invest_relation_input_capacity is not None])
-    
+
         self.INVEST_REL_CAP_OUT = Set(initialize=[
             n for n in group if n.invest_relation_output_capacity is not None])
-    
+
         self.INVEST_REL_IN_OUT = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
 
@@ -595,7 +599,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
         self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
                                       rule=_balanced_storage_rule)
-        
+
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
             and output power
@@ -1168,7 +1172,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                  {\eta_{th,maxExtr}}
 
     where :math:`\beta` is defined as:
-    
+
          .. math::
             \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr}}
 
@@ -1176,26 +1180,26 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     flow and the two output flows, the second equation stems from how the two
     output flows relate to each other, and the symbols used are defined as
     follows:
-    
+
 
     ========================= ======================== =========
     symbol                    explanation              attribute
     ========================= ======================== =========
     :math:`\dot H_{Fuel}`     fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
                                                        node to the node :math:`n` at timestep :math:`t`
-    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the  
+    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the
                                                        node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the 
+    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
                                                        node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
                                                        as defined above
-    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n` 
+    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n`
                               without heat extraction  at timestep :math:`t`
     :math:`\eta_{el,maxExtr}` electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
                               with max heat extraction node :math:`n` at timestep :math:`t`
-    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output` 
+    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output`
                               maximal heat extraction  at node :math:`n` at timestep :math:`t`
-    ========================= ======================== =========		
+    ========================= ======================== =========
 
 
     """
