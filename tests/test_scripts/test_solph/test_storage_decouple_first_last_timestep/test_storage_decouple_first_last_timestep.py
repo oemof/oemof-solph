@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example that shows how to use custom component `GenericOffsetTransformer`.
+Unit test for parameter `balanced` of `GenericStorage`.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
