@@ -537,7 +537,6 @@ class Transformer(SimpleBlock):
         in_flows = {n: [i for i in n.inputs.keys()] for n in group}
         out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
-
         self.relation = Constraint(
             [(n, i, o, t)
              for t in m.TIMESTEPS
