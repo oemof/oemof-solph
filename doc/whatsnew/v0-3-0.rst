@@ -62,3 +62,5 @@ Contributors
 ############
 
 * Uwe Krien
+* Johannes Röder
+* Patrik Schönfeldt
