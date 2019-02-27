@@ -23,7 +23,8 @@ except ImportError:
 
 DATA = [
     {'name': 'unbalanced', 'initial_storage_level': 0.2, 'balanced': False},
-    {'name': 'unbalanced_None', 'initial_storage_level': None, 'balanced': False},
+    {'name': 'unbalanced_None', 'initial_storage_level': None,
+     'balanced': False},
     {'name': 'balanced', 'initial_storage_level': 0.2, 'balanced': True},
     {'name': 'balanced_None', 'initial_storage_level': None, 'balanced': True}]
 
