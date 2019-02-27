@@ -472,7 +472,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     Equivalent periodical costs (investment costs):
         .. math::
-            \\sum_n invest(n) \cdot ep\_costs(n)
+            \sum_n invest(n) \cdot ep\_costs(n)
 
     The expression can be accessed by
     :attr:`om.InvestStorages.investment_costs` and their value after
