@@ -340,6 +340,37 @@ class Constraint_Tests:
                 ep_costs=145, minimum=100, maximum=200))
 
         self.compare_lp_files('storage_invest_minimum.lp')
+        
+    def test_storage_unbalanced(self):
+        """Testing a unbalanced storage (e.g. battery)."""
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage1',
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
+            nominal_storage_capacity=1111,
+            initial_storage_level=None,
+            balanced=False,
+            invest_relation_input_capacity=1,
+            invest_relation_output_capacity=1)    
+        self.compare_lp_files('storage_unbalanced.lp')
+    
+    def test_storage_invest_unbalanced(self):
+        """Testing a unbalanced storage (e.g. battery)."""
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage1',
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
+            nominal_storage_capacity=None,
+            initial_storage_level=0.5,
+            balanced=False,
+            invest_relation_input_capacity=1,
+            invest_relation_output_capacity=1,
+            investment=solph.Investment(ep_costs=145))
+        self.compare_lp_files('storage_invest_unbalanced.lp')
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
