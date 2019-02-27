@@ -46,3 +46,4 @@ Contributors
 ############
 
 * Uwe Krien
+* Patrik Schönfeldt
