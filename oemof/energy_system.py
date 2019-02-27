@@ -11,16 +11,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from functools import partial
 from pickle import UnpicklingError
-import collections.abc as cabc
 import logging
 import os
-import re
 
-import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Bus, Component
+from oemof.network import Bus
 
 
 class EnergySystem:
@@ -123,9 +120,7 @@ class EnergySystem:
                 g(e, self.groups)
         self.results = kwargs.get('results')
 
-        self.timeindex = kwargs.get('timeindex',
-                                    pd.date_range(start=pd.to_datetime('today'),
-                                                  periods=1, freq='H'))
+        self.timeindex = kwargs.get('timeindex')
 
         self.temporal = kwargs.get('temporal')
 
@@ -134,16 +129,6 @@ class EnergySystem:
         for g in groupings:
             g(entity, groups)
         return groups
-
-
-    try:
-        from .tools.datapackage import deserialize_energy_system
-        from_datapackage = classmethod(deserialize_energy_system)
-    except ImportError as e:
-        @classmethod
-        def from_datapackage(cls, *args, **kwargs):
-            raise e
-
 
     def _add(self, entity):
         self.entities.append(entity)
@@ -228,7 +213,6 @@ class EnergySystem:
                         "https://github.com/oemof/oemof/issues\n\n  "
                         "or comment on it if it already exists.")
             raise e
-
 
         msg = ('Attributes restored from: {0}'.format(os.path.join(
             dpath, filename)))

@@ -452,8 +452,6 @@ class Bus(SimpleBlock):
         \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau, \\
         \forall n \in \textrm{BUSES},
         \forall t \in \textrm{TIMESTEPS}.
-
-    Hallo
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -538,7 +536,6 @@ class Transformer(SimpleBlock):
 
         in_flows = {n: [i for i in n.inputs.keys()] for n in group}
         out_flows = {n: [o for o in n.outputs.keys()] for n in group}
-
 
         self.relation = Constraint(
             [(n, i, o, t)

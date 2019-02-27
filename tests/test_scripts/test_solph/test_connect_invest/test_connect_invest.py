@@ -54,7 +54,7 @@ def test_connect_invest():
         label='storage',
         inputs={bel1: solph.Flow(variable_costs=10e10)},
         outputs={bel1: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_capacity=1/6,
         invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
@@ -91,9 +91,11 @@ def test_connect_invest():
     my_results['line12'] = float(views.node(results, 'line12')['scalars'])
     my_results['line21'] = float(views.node(results, 'line21')['scalars'])
     stor_res = views.node(results, 'storage')['scalars']
-    my_results['storage_in'] = stor_res.iloc[0]  # ('electricity1', 'storage')
-    my_results['storage'] = stor_res.iloc[1]     # ('storage', 'None')
-    my_results['storage_out'] = stor_res.iloc[2] # ('storage', 'electricity1')
+    my_results['storage_in'] = stor_res[
+        (('electricity1', 'storage'), 'invest')]
+    my_results['storage'] = stor_res[(('storage', 'None'), 'invest')]
+    my_results['storage_out'] = stor_res[
+        (('storage', 'electricity1'), 'invest')]
 
     connect_invest_dict = {
         'line12': 814705,

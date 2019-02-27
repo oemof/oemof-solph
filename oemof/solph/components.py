@@ -29,24 +29,9 @@ class GenericStorage(network.Transformer):
 
     Parameters
     ----------
-    nominal_capacity : numeric
+    nominal_storage_capacity : numeric
         Absolute nominal capacity of the storage
-    nominal_output_capacity_ratio : numeric
-        DEPRECATED - Define the output capacity as nominal_value in the Flow
-        class. In case of an investment object in the storage and the flow use
-        :attr:`invest_relation_input_capacity` instead.
-        OLD TEXT: Ratio between the nominal outflow of the storage and
-        its capacity. For batteries this is also know as c-rate.
-        Note: This ratio is used to create the Flow object for the outflow
-        and set its nominal value of the storage in the constructor. If no
-        investment object is defined it is also possible to set the nominal
-        value of the flow directly in its constructor.
-    nominal_input_capacity_ratio : numeric
-        DEPRECATED - Define the input capacity as nominal_value in the Flow
-        class. In case of an investment object in the storage and the flow use
-        :attr:`invest_relation_output_capacity` instead.
-        OLD TEXT: Ratio between the nominal inflow of the storage and
-        its capacity. see: nominal_output_capacity_ratio
+
     invest_relation_input_capacity : numeric or None
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage.
@@ -72,10 +57,12 @@ class GenericStorage(network.Transformer):
         .. math:: input\_invest =
                   output\_invest \cdot invest\_relation\_input\_output
 
-    initial_capacity : numeric
-        The capacity of the storage in the first (and last) time step of
-        optimization.
-    capacity_loss : numeric (sequence or scalar)
+    initial_storage_level : numeric
+        The content of the storage in the first time step of optimization.
+    balanced : boolian
+        Couple storage level of first and last time step.
+        (Total inflow and total outflow are balanced.)
+    loss_rate : numeric (sequence or scalar)
         The relative loss of the storage capacity from between two consecutive
         timesteps.
     inflow_conversion_factor : numeric (sequence or scalar)
@@ -83,18 +70,18 @@ class GenericStorage(network.Transformer):
         inflow of the storage.
     outflow_conversion_factor : numeric (sequence or scalar)
         see: inflow_conversion_factor
-    capacity_min : numeric (sequence or scalar)
-        The nominal minimum capacity of the storage as fraction of the
-        nominal capacity (between 0 and 1, default: 0).
+    min_storage_level : numeric (sequence or scalar)
+        The minimum storaged energy of the storage as fraction of the
+        nominal storage capacity (between 0 and 1).
         To set different values in every time step use a sequence.
-    capacity_max : numeric (sequence or scalar)
-        see: capacity_min
+    max_storage_level : numeric (sequence or scalar)
+        see: min_storage_level
     investment : :class:`oemof.solph.options.Investment` object
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
-        investment variable instead of to the nominal_capacity. The
-        nominal_capacity should not be set (or set to None) if an investment
-        object is used.
+        investment variable instead of to the nominal_storage_capacity. The
+        nominal_storage_capacity should not be set (or set to None) if an
+        investment object is used.
 
     Note
     ----
@@ -115,12 +102,12 @@ class GenericStorage(network.Transformer):
 
     >>> my_storage = solph.components.GenericStorage(
     ...     label='storage',
-    ...     nominal_capacity=1000,
+    ...     nominal_storage_capacity=1000,
     ...     inputs={my_bus: solph.Flow(nominal_value=200, variable_costs=10)},
     ...     outputs={my_bus: solph.Flow(nominal_value=200)},
-    ...     capacity_loss=0.01,
-    ...     initial_capacity=0,
-    ...     capacity_max = 0.9,
+    ...     loss_rate=0.01,
+    ...     initial_storage_level=0,
+    ...     max_storage_level = 0.9,
     ...     inflow_conversion_factor=0.9,
     ...     outflow_conversion_factor=0.93)
 
@@ -129,29 +116,29 @@ class GenericStorage(network.Transformer):
     ...     investment=solph.Investment(ep_costs=50),
     ...     inputs={my_bus: solph.Flow()},
     ...     outputs={my_bus: solph.Flow()},
-    ...     capacity_loss=0.02,
-    ...     initial_capacity=None,
+    ...     loss_rate=0.02,
+    ...     initial_storage_level=None,
     ...     invest_relation_input_capacity=1/6,
     ...     invest_relation_output_capacity=1/6,
     ...     inflow_conversion_factor=1,
     ...     outflow_conversion_factor=0.8)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args,
+                 max_storage_level=1,
+                 min_storage_level=0,
+                 **kwargs):
         super().__init__(*args, **kwargs)
-        self.nominal_capacity = kwargs.get('nominal_capacity')
-        self.nominal_input_capacity_ratio = kwargs.get(
-            'nominal_input_capacity_ratio')
-        self.nominal_output_capacity_ratio = kwargs.get(
-            'nominal_output_capacity_ratio')
-        self.initial_capacity = kwargs.get('initial_capacity')
-        self.capacity_loss = solph_sequence(kwargs.get('capacity_loss', 0))
+        self.nominal_storage_capacity = kwargs.get('nominal_storage_capacity')
+        self.initial_storage_level = kwargs.get('initial_storage_level')
+        self.balanced = kwargs.get('balanced', True)
+        self.loss_rate = solph_sequence(kwargs.get('loss_rate', 0))
         self.inflow_conversion_factor = solph_sequence(
             kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
             kwargs.get('outflow_conversion_factor', 1))
-        self.capacity_max = solph_sequence(kwargs.get('capacity_max', 1))
-        self.capacity_min = solph_sequence(kwargs.get('capacity_min', 0))
+        self.max_storage_level = solph_sequence(max_storage_level)
+        self.min_storage_level = solph_sequence(min_storage_level)
         self.investment = kwargs.get('investment')
         self.invest_relation_input_output = kwargs.get(
             'invest_relation_input_output')
@@ -161,39 +148,15 @@ class GenericStorage(network.Transformer):
             'invest_relation_output_capacity')
         self._invest_group = isinstance(self.investment, Investment)
 
-        warnings.simplefilter('always', DeprecationWarning)
-        dpr_msg = ("\nDeprecated. The attributes "
-                   "'nominal_input_capacity_ratio' and "
-                   "'nominal_input_capacity_ratio' will be removed in "
-                   "oemof >= v0.3.0.\n Please use the 'invest_relation_...' "
-                   "attribute in case of the investment mode.\n Please use "
-                   "the 'nominal_value' within in the Flows for the dispatch "
-                   "mode.\n These measures will avoid this warning.")
-
-        # DEPRECATED. Set nominal_value of in/out Flows using
-        # nominal_input_capacity_ratio / nominal_input_capacity_ratio
-        if self._invest_group is False and (
-                self.nominal_input_capacity_ratio is not None or
-                self.nominal_output_capacity_ratio is not None):
-            self._set_flows(dpr_msg)
-
         # Check attributes for the investment mode.
         if self._invest_group is True:
-            self._check_invest_attributes(dpr_msg)
+            self._check_invest_attributes()
 
-    def _check_invest_attributes(self, dpr_msg):
-        if self.nominal_input_capacity_ratio is not None:
-            warnings.warn(dpr_msg, DeprecationWarning)
-            self.invest_relation_input_capacity = (
-                self.nominal_input_capacity_ratio)
-        if self.nominal_output_capacity_ratio is not None:
-            warnings.warn(dpr_msg, DeprecationWarning)
-            self.invest_relation_output_capacity = (
-                self.nominal_output_capacity_ratio)
-        if self.investment and self.nominal_capacity is not None:
+    def _check_invest_attributes(self):
+        if self.investment and self.nominal_storage_capacity is not None:
             e1 = ("If an investment object is defined the invest variable "
-                  "replaces the nominal_capacity.\n Therefore the "
-                  "nominal_capacity should be 'None'.\n")
+                  "replaces the nominal_storage_capacity.\n Therefore the "
+                  "nominal_storage_capacity should be 'None'.\n")
             raise AttributeError(e1)
         if (self.invest_relation_input_output is not None and
                 self.invest_relation_output_capacity is not None and
@@ -210,29 +173,13 @@ class GenericStorage(network.Transformer):
                     not isinstance(flow.investment, Investment)):
                 flow.investment = Investment()
 
-    def _set_flows(self, dpr_msg):
-        """ Sets correct attributes of input / output flows based on the
-        storage object attributes. This method is called in the constructor by
-        default. It may be called in sub-classed components at the
-        end of the constructor to ensure correct setting of attributes.
-        """
-        warnings.warn(dpr_msg, DeprecationWarning)
-        for flow in self.inputs.values():
-            if (self.nominal_input_capacity_ratio is not None and
-                    not isinstance(flow.investment, Investment)):
-                flow.nominal_value = (self.nominal_input_capacity_ratio *
-                                      self.nominal_capacity)
-        for flow in self.outputs.values():
-            if (self.nominal_output_capacity_ratio is not None and
-                    not isinstance(flow.investment, Investment)):
-                flow.nominal_value = (self.nominal_output_capacity_ratio *
-                                      self.nominal_capacity)
-
     def constraint_group(self):
         if self._invest_group is True:
             return GenericInvestmentStorageBlock
         else:
             return GenericStorageBlock
+
+# Todo: accessed by
 
 
 class GenericStorageBlock(SimpleBlock):
@@ -242,8 +189,12 @@ class GenericStorageBlock(SimpleBlock):
     :class:`.Model` )
 
     STORAGES
-        A set with all :class:`.Storage` objects
-        (and no attr:`investement` of type :class:`.Investment`)
+        A set with all :class:`.Storage` objects, which do not have an
+         attr:`investment` of type :class:`.Investment`.
+
+    STORAGES_BALANCED
+        A set of  all :class:`.Storage` objects, with 'balanced' attribute set
+        to True.
 
     STORAGES_WITH_INVEST_FLOW_REL
         A set with all :class:`.Storage` objects with two investment flows
@@ -252,19 +203,36 @@ class GenericStorageBlock(SimpleBlock):
     **The following variables are created:**
 
     capacity
-        Capacity (level) for every storage and timestep. The value for the
-        capacity at the beginning is set by the parameter `initial_capacity` or
-        not set if `initial_capacity` is None.
-        The variable of storage s and timestep t can be accessed by:
-        `om.Storage.capacity[s, t]`
+        Capacity (level) of the storage and time step. The capacity is bound to
+
+        .. math::
+            E_{nom} \cdot c_{min}(t) < E(t) < E_{nom} \cdot c_{max}(t)
+
+        The variable of storage s and time step t can be accessed by:
+        `model.Storage.capacity[s, t]`
+
+    init_cap
+        The capacity of the storage before the first time step. The
+        init_cap is bound to
+
+        .. math:: 0 < E(-1) <  E_{nom}
+
+        If the initial_storage_level attribute is not None the init_cap
+        variable is set to
+
+        .. math:: E(-1) =  E_{nom} \cdot c(-1)
 
     **The following constraints are created:**
 
+    Set last time step to the initial capacity if :attr:`balanced == True`
+        .. math::
+            E(t_{last}) = &E(-1)
+
     Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: capacity(n, t) = &capacity(n, previous(t)) \cdot
-            (1 - capacity\_loss_n(t))) \\
-            &- \frac{flow(n, o, t)}{\eta(n, o, t)} \cdot \tau
-            + flow(i, n, t) \cdot \eta(i, n, t) \cdot \tau
+        .. math:: E(t) = &E(t-1) \cdot
+            (1 - \delta(t))) \\
+            &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
+            + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
     Connect the invest variables of the input and the output flow.
         .. math::
@@ -272,6 +240,31 @@ class GenericStorageBlock(SimpleBlock):
           (InvestmentFlow.invest(n, target(n)) + existing) * \\
           invest\_relation\_input\_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+
+
+
+    =========================== ======================= =========
+    symbol                      explanation             attribute
+    =========================== ======================= =========
+    :math:`E(t)`                energy currently stored :py:obj:`capacity`
+    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`
+                                the energy storage
+    :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
+                                initial time step
+    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
+    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
+    :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
+                                (e.g. leakage) per time
+    :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
+    :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
+    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
+                                (i.e. efficiency)
+                                when storing energy
+    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
+                                (i.e. efficiency)
+                                taking stored energy
+    :math:`\tau(t)`             length of the time step 
+    =========================== ======================= =========
 
     **The following parts of the objective function are created:**
 
@@ -300,44 +293,84 @@ class GenericStorageBlock(SimpleBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
+        #  ************* SETS *********************************
+
         self.STORAGES = Set(initialize=[n for n in group])
+
+        self.STORAGES_BALANCED = Set(initialize=[
+            n for n in group if n.balanced is True])
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
+
+        #  ************* VARIABLES *****************************
 
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
             in timestep t
             """
-            bounds = (n.nominal_capacity * n.capacity_min[t],
-                      n.nominal_capacity * n.capacity_max[t])
+            bounds = (n.nominal_storage_capacity * n.min_storage_level[t],
+                      n.nominal_storage_capacity * n.max_storage_level[t])
             return bounds
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
+        def _storage_init_capacity_bound_rule(block, n):
+            return 0, n.nominal_storage_capacity
+
+        self.init_cap = Var(self.STORAGES, within=NonNegativeReals,
+                            bounds=_storage_init_capacity_bound_rule)
+
         # set the initial capacity of the storage
         for n in group:
-            if n.initial_capacity is not None:
-                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
-                                                     n.nominal_capacity)
-                self.capacity[n, m.TIMESTEPS[-1]].fix()
+            if n.initial_storage_level is not None:
+                self.init_cap[n] = (n.initial_storage_level *
+                                    n.nominal_storage_capacity)
+                self.init_cap[n].fix()
 
-        # storage balance constraint
+        #  ************* Constraints ***************************
+
+        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+
+        # storage balance constraint (first time step)
+        def _storage_balance_first_rule(block, n):
+            """Rule definition for the storage balance of every storage n for
+            the first timestep.
+            """
+            expr = 0
+            expr += block.capacity[n, 0]
+            expr += - block.init_cap[n] * (
+                1 - n.loss_rate[0])
+            expr += (- m.flow[i[n], n, 0] *
+                     n.inflow_conversion_factor[0]) * m.timeincrement[0]
+            expr += (m.flow[n, o[n], 0] /
+                     n.outflow_conversion_factor[0]) * m.timeincrement[0]
+            return expr == 0
+        self.balance_first = Constraint(self.STORAGES,
+                                        rule=_storage_balance_first_rule)
+
+        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage balance of every storage n and
-            timestep t
+            every timestep but the first (t > 0)
             """
             expr = 0
             expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timesteps[t]] * (
-                1 - n.capacity_loss[t])
+            expr += - block.capacity[n, t-1] * (
+                1 - n.loss_rate[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
+        self.balance = Constraint(self.STORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
+
+        def _balanced_storage_rule(block, n):
+            """capacity of last time step == initial capacity if balanced"""
+            return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+        self.balanced_cstr = Constraint(self.STORAGES_BALANCED,
+                                      rule=_balanced_storage_rule)
 
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
@@ -380,12 +413,13 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     INVEST_REL_IN_OUT
         A set with all storages containing an Investment object with coupled
         investment of input and output power
-    INITIAL_CAPACITY
+    INITIAL_STORAGE_LEVEL
         A subset of the set INVESTSTORAGES where elements of the set have an
-        initial_capacity attribute.
+        initial_storage_level attribute.
     MIN_INVESTSTORAGES
         A subset of INVESTSTORAGES where elements of the set have an
-        capacity_min attribute greater than zero for at least one time step.
+        min_storage_level attribute greater than zero for at least one
+        time step.
 
     **The following variables are created:**
 
@@ -399,22 +433,13 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     **The following constraints are build:**
 
     Storage balance
-      .. math::
-        capacity(n, t) =  &capacity(n, t\_previous(t)) \cdot
-        (1 - capacity\_loss(n)) \\
-        &- (flow(n, target(n), t)) / (outflow\_conversion\_factor(n) \cdot
-        \tau) \\
-        &+ flow(source(n), n, t) \cdot inflow\_conversion\_factor(n) \cdot \
-        \tau \textrm{,} \\
-        &\forall n \in \textrm{INVESTSTORAGES} \textrm{,} \\
-        &\forall t \in \textrm{TIMESTEPS}.
+        Same as for :class:`.GenericStorageBlock`.
+
 
     Initial capacity of :class:`.network.Storage`
         .. math::
-          capacity(n, t_{last}) = invest(n) \cdot
-          initial\_capacity(n), \\
-          \forall n \in \textrm{INITIAL\_CAPACITY,} \\
-          \forall t \in \textrm{TIMESTEPS}.
+          E(n, -1) = invest(n) \cdot c(n, -1), \\
+          \forall n \in \textrm{INITIAL\_STORAGE\_LEVEL}.
 
     Connect the invest variables of the storage and the input flow.
         .. math:: InvestmentFlow.invest(source(n), n) + existing =
@@ -433,13 +458,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: capacity(n, t) \leq invest(n) \cdot capacity\_min(n, t), \\
+        .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
 
     Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: capacity(n, t) \geq invest(n) \cdot capacity\_min(n, t),
-            \\
+        .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
 
@@ -448,11 +472,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     Equivalent periodical costs (investment costs):
         .. math::
-            \\sum_n invest(n) \cdot ep\_costs(n)
+            \sum_n invest(n) \cdot ep\_costs(n)
 
     The expression can be accessed by
     :attr:`om.InvestStorages.investment_costs` and their value after
     optimization by :meth:`om.InvestStorages.investment_costs()` .
+
+
+    The symbols are the same as in:class:`.GenericStorageBlock`.
+
 
     """
 
@@ -471,6 +499,16 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
+
+        self.INVESTSTORAGES_BALANCED = Set(initialize=[
+            n for n in group if n.balanced is True])
+
+        self.INVESTSTORAGES_NO_INIT_CAP = Set(initialize=[
+            n for n in group if n.initial_storage_level is None])
+
+        self.INVESTSTORAGES_INIT_CAP = Set(initialize=[
+            n for n in group if n.initial_storage_level is not None])
+
         self.INVEST_REL_CAP_IN = Set(initialize=[
             n for n in group if n.invest_relation_input_capacity is not None])
     
@@ -480,15 +518,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.INVEST_REL_IN_OUT = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
 
-        self.INITIAL_CAPACITY = Set(initialize=[
-            n for n in group if n.initial_capacity is not None])
-
         # The capacity is set as a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
         # for all time steps.
         self.MIN_INVESTSTORAGES = Set(
             initialize=[n for n in group if sum(
-                [n.capacity_min[t] for t in m.TIMESTEPS]) > 0])
+                [n.min_storage_level[t] for t in m.TIMESTEPS]) > 0])
 
         # ######################### Variables  ################################
         self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
@@ -497,39 +532,69 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_investvar_bound_rule(block, n):
             """Rule definition to bound the invested storage capacity `invest`.
             """
-            return 0, n.investment.maximum
+            return n.investment.minimum, n.investment.maximum
         self.invest = Var(self.INVESTSTORAGES, within=NonNegativeReals,
                           bounds=_storage_investvar_bound_rule)
+
+        self.init_cap = Var(self.INVESTSTORAGES, within=NonNegativeReals)
+
+        def _inv_storage_init_cap_max_rule(block, n):
+            return block.init_cap[n] <= n.investment.existing + block.invest[n]
+        self.init_cap_limit = Constraint(self.INVESTSTORAGES_NO_INIT_CAP,
+                                         rule=_inv_storage_init_cap_max_rule)
+
+        def _inv_storage_init_cap_fix_rule(block, n):
+            return block.init_cap[n] == n.initial_storage_level * (
+                    n.investment.existing + block.invest[n])
+        self.init_cap_fix = Constraint(self.INVESTSTORAGES_INIT_CAP,
+                                       rule=_inv_storage_init_cap_fix_rule)
 
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
+        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+
+        # storage balance constraint (first time step)
+        def _storage_balance_first_rule(block, n):
+            """Rule definition for the storage balance of every storage n and
+            timestep t
+            """
+            expr = 0
+            expr += block.capacity[n, 0]
+            expr += - block.init_cap[n] * (
+                    1 - n.loss_rate[0])
+            expr += (- m.flow[i[n], n, 0] *
+                     n.inflow_conversion_factor[0]) * m.timeincrement[0]
+            expr += (m.flow[n, o[n], 0] /
+                     n.outflow_conversion_factor[0]) * m.timeincrement[0]
+            return expr == 0
+
+        self.balance_first = Constraint(self.INVESTSTORAGES,
+                                        rule=_storage_balance_first_rule)
+
+        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
-            """Rule definition for the storage energy balance.
+            """Rule definition for the storage balance of every storage n and
+            timestep t
             """
             expr = 0
             expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timesteps[t]] * (
-                1 - n.capacity_loss[t])
+            expr += - block.capacity[n, t - 1] * (
+                    1 - n.loss_rate[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.INVESTSTORAGES, m.TIMESTEPS,
+
+        self.balance = Constraint(self.INVESTSTORAGES, reduced_timesteps,
                                   rule=_storage_balance_rule)
 
-        def _initial_capacity_invest_rule(block, n):
-            """Rule definition for constraint to connect initial storage
-            capacity with capacity of last timesteps.
-            """
-            expr = (self.capacity[n, m.TIMESTEPS[-1]] ==
-                    (n.investment.existing + self.invest[n]) *
-                    n.initial_capacity)
-            return expr
-        self.initial_capacity = Constraint(
-            self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
+        def _balanced_storage_rule(block, n):
+            return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+        self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
+                                      rule=_balanced_storage_rule)
         
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
@@ -547,7 +612,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_inflow_invest_rule(block, n):
             """Rule definition of constraint connecting the inflow
             `InvestmentFlow.invest of storage with invested capacity `invest`
-            by nominal_capacity__inflow_ratio
+            by nominal_storage_capacity__inflow_ratio
             """
             expr = ((m.InvestmentFlow.invest[i[n], n] +
                      m.flows[i[n], n].investment.existing) ==
@@ -560,7 +625,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_outflow_invest_rule(block, n):
             """Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
-            by nominal_capacity__outflow_ratio
+            by nominal_storage_capacity__outflow_ratio
             """
             expr = ((m.InvestmentFlow.invest[n, o[n]] +
                      m.flows[n, o[n]].investment.existing) ==
@@ -576,7 +641,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             expr = (self.capacity[n, t] <=
                     (n.investment.existing + self.invest[n]) *
-                    n.capacity_max[t])
+                    n.max_storage_level[t])
             return expr
         self.max_capacity = Constraint(
             self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
@@ -586,7 +651,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             expr = (self.capacity[n, t] >=
                     (n.investment.existing + self.invest[n]) *
-                    n.capacity_min[t])
+                    n.min_storage_level[t])
             return expr
         # Set the lower bound of the storage capacity if the attribute exists
         self.min_capacity = Constraint(

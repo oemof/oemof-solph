@@ -144,11 +144,9 @@ def get_version():
     <class 'str'>
     """
     try:
-        v = check_git_branch()
-        msg_part = "{0}@{1}".format(v[0], v[1])
+        return check_git_branch()
     except FileNotFoundError:
-        msg_part = "{0}".format(check_version())
-    return msg_part
+        return "{0}".format(check_version())
 
 
 def check_version():
@@ -169,17 +167,16 @@ def check_version():
 def check_git_branch():
     """Passes the used branch and commit to the logger
 
+    The following test reacts on a local system different than on Travis-CI.
+    Therefore, a try/except test is created.
+
     >>> from oemof.tools import logger
     >>> try:
     ...    v = logger.check_git_branch()
     ... except FileNotFoundError:
-    ...    v = ('abcdefgh', 'branch')
+    ...    v = 'dsfafasdfsdf'
     >>> type(v)
-    <class 'tuple'>
-    >>> type(v[0])
     <class 'str'>
-    >>> len(v[0])
-    8
     """
 
     path = os.path.join(os.path.dirname(
@@ -200,4 +197,4 @@ def check_git_branch():
     last_commit = f.read(8)
     f.close()
 
-    return last_commit, name_branch
+    return "{0}@{1}".format(last_commit, name_branch)

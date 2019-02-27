@@ -55,8 +55,8 @@ class Parameter_Result_Tests:
             label='storage',
             inputs={b_el1: Flow(variable_costs=3)},
             outputs={b_el2: Flow(variable_costs=2.5)},
-            capacity_loss=0.00,
-            initial_capacity=0,
+            loss_rate=0.00,
+            initial_storage_level=0,
             invest_relation_input_capacity=1/6,
             invest_relation_output_capacity=1/6,
             inflow_conversion_factor=1,
@@ -159,7 +159,8 @@ class Parameter_Result_Tests:
         assert_series_equal(
             param_results[('storage', 'None')]['scalars'],
             pandas.Series({
-                'initial_capacity': 0,
+                'balanced': True,
+                'initial_storage_level': 0,
                 'invest_relation_input_capacity': 1/6,
                 'invest_relation_output_capacity': 1/6,
                 'investment_ep_costs': 0.4,
@@ -167,10 +168,10 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
-                'capacity_loss': 0,
-                'capacity_max': 1,
-                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
+                'loss_rate': 0,
+                'max_storage_level': 1,
+                'min_storage_level': 0,
                 'outflow_conversion_factor': 0.8,
             })
         )
@@ -187,7 +188,8 @@ class Parameter_Result_Tests:
         assert_series_equal(
             param_results[('storage', None)]['scalars'],
             pandas.Series({
-                'initial_capacity': 0,
+                'balanced': True,
+                'initial_storage_level': 0,
                 'invest_relation_input_capacity': 1/6,
                 'invest_relation_output_capacity': 1/6,
                 'investment_ep_costs': 0.4,
@@ -195,10 +197,10 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
-                'capacity_loss': 0,
-                'capacity_max': 1,
-                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
+                'loss_rate': 0,
+                'max_storage_level': 1,
+                'min_storage_level': 0,
                 'outflow_conversion_factor': 0.8,
             })
         )
@@ -247,9 +249,8 @@ class Parameter_Result_Tests:
 
     def test_duals(self):
         results = processing.results(self.om)
-        bel = views.node(results, 'b_el1', multiindex=True,
-                         keep_none_type=True)
-        eq_(int(bel['sequences']['b_el1', None, 'duals'].sum()), 48)
+        bel = views.node(results, 'b_el1', multiindex=True)
+        eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)
 
     def test_node_weight_by_type(self):
         results = processing.results(self.om)
