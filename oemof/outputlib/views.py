@@ -250,7 +250,7 @@ def node_input_by_type(results, node_type, droplevel=None):
              if isinstance(k[1], node_type) and k[0] is not None}
 
     if not group:
-        logging.error('No nodes of type `{}`'.format(node_type))
+        logging.info('No nodes of type `{}`'.format(node_type))
         return None
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
@@ -283,7 +283,7 @@ def node_output_by_type(results, node_type, droplevel=None):
              if isinstance(k[0], node_type) and k[1] is not None}
 
     if not group:
-        logging.error('No nodes of type `{}`'.format(node_type))
+        logging.info('No nodes of type `{}`'.format(node_type))
         return None
     else:
         df = convert_to_multiindex(group, droplevel=droplevel)
@@ -321,7 +321,7 @@ def net_storage_flow(results, node_type):
              if isinstance(k[0], node_type) or isinstance(k[1], node_type)}
 
     if not group:
-        logging.error(
+        logging.info(
             'No nodes of type `{}`'.format(node_type))
         return None
 
@@ -373,7 +373,7 @@ def convert_to_multiindex(group, index_names=None, droplevel=None):
         index_names = ['from', 'to', 'type']
     if droplevel is None:
         droplevel = []
-        
+
     sorted_group = OrderedDict(
         (k, group[k]) for k in sorted(group))
     df = pd.concat(sorted_group.values(), axis=1)
