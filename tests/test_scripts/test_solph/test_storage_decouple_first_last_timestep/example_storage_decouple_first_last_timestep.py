@@ -127,6 +127,3 @@ def storage_example():
     print(storage_cap)
     print(costs)
     print(balance)
-
-
-storage_example()
