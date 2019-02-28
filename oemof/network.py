@@ -232,8 +232,18 @@ class Node:
         """
         return self._outputs
 
+    @staticmethod
+    def _explicit_kwargs(kwargs):
+        del kwargs['self']
+        del kwargs['__class__']
+        del kwargs['args']
+        del kwargs['kwargs']
+        return kwargs
+
 
 EdgeLabel = NT("EdgeLabel", ['input', 'output'])
+
+
 class Edge(Node):
     """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
 
@@ -335,19 +345,29 @@ class Component(Node):
 
 
 class Sink(Component):
-    def __init__(self, *args, inputs={}, **kwargs):
+    def __init__(self, *args,
+                 inputs={},
+                 **kwargs):
         kwargs['inputs'] = inputs
         Component.__init__(self, *args, **kwargs)
 
 
 class Source(Component):
-    def __init__(self, *args, outputs={}, **kwargs):
+    def __init__(self, *args,
+                 outputs={},
+                 **kwargs):
         kwargs['outputs'] = outputs
         Component.__init__(self, *args, **kwargs)
 
 
 class Transformer(Component):
-    pass
+    def __init__(self, *args,
+                 inputs={},
+                 outputs={},
+                 conversion_factors={},
+                 **kwargs):
+        kwargs.update(Node._explicit_kwargs(locals()))
+        Component.__init__(self, *args, **kwargs)
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short

@@ -1132,7 +1132,11 @@ class ExtractionTurbineCHP(solph_Transformer):
     ...    conversion_factor_full_condensation={bel: 0.5})
     """
 
-    def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
+    def __init__(self, *args,
+                 conversion_factors={},
+                 conversion_factor_full_condensation={},
+                 **kwargs):
+        kwargs.update(network.Node._explicit_kwargs(locals()))
         super().__init__(*args, **kwargs)
         self.conversion_factor_full_condensation = {
             k: solph_sequence(v) for k, v in
