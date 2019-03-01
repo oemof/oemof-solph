@@ -234,8 +234,12 @@ class Node:
 
     @staticmethod
     def _explicit_kwargs(kwargs):
+        """
+        Helper function to get explicit kwargs to a function.
+        This function is designed to be called using locals()
+        as the parameter before other local variables are defined.
+        """
         del kwargs['self']
-        del kwargs['__class__']
         del kwargs['args']
         del kwargs['kwargs']
         return kwargs
