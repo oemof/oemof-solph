@@ -140,6 +140,8 @@ class EnergySystem:
         """
         for n in nodes:
             self._add(n)
+            if hasattr(n, 'subnodes'):
+                self.add(*n.subnodes)
 
     @property
     def groups(self):
