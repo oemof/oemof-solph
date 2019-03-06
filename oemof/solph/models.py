@@ -270,6 +270,11 @@ class Model(BaseModel):
         self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
                                 ordered=True)
 
+        if self.es.subperiods is None:
+            self.SUBPERIODS = {0: self.TIMESTEPS}
+        else:
+            self.SUBPERIODS = self.es.subperiods
+
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
         previous_timesteps[0] = self.TIMESTEPS.last()

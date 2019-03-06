@@ -147,12 +147,14 @@ class Flow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint.
             """
             for inp, out in self.SUMMED_MAX_FLOWS:
-                lhs = sum(m.flow[inp, out, ts] * m.timeincrement[ts]
-                          for ts in m.TIMESTEPS)
-                rhs = (m.flows[inp, out].summed_max *
-                       m.flows[inp, out].nominal_value)
-                self.summed_max.add((inp, out), lhs <= rhs)
-        self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
+                for p in m.SUBPERIODS:
+                    lhs = sum(m.flow[inp, out, ts] * m.timeincrement[ts]
+                              for ts in m.SUBPERIODS[p])
+                    rhs = (m.flows[inp, out].summed_max[p] *
+                           m.flows[inp, out].nominal_value)
+                    self.summed_max.add((inp, out, p), lhs <= rhs)
+        self.summed_max = Constraint(
+            self.SUMMED_MAX_FLOWS, m.SUBPERIODS.keys(), noruleinit=True)
         self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
 
         def _flow_summed_min_rule(model):

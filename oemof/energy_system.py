@@ -36,6 +36,8 @@ class EnergySystem:
         Defaults to `[]` if not supplied.
     timeindex : pandas.datetimeindex
         Define the time range and increment for the energy system.
+    subperiods : dict (optional)
+        Dictionary with defined sub periods for the timeindex
     groupings : list
         The elements of this list are used to construct :class:`Groupings
         <oemof.core.energy_system.Grouping>` or they are used directly if they
@@ -121,6 +123,8 @@ class EnergySystem:
         self.results = kwargs.get('results')
 
         self.timeindex = kwargs.get('timeindex')
+
+        self.subperiods = kwargs.get('subperiods')
 
         self.temporal = kwargs.get('temporal')
 
