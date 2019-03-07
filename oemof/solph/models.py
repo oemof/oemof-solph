@@ -270,10 +270,18 @@ class Model(BaseModel):
         self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
                                 ordered=True)
 
+        # kind of hackish way to convert timeindex to ranges for SUBPERIODS
         if self.es.subperiods is None:
             self.SUBPERIODS = {0: self.TIMESTEPS}
         else:
-            self.SUBPERIODS = self.es.subperiods
+            self.SUBPERIODS = {}
+            for k, v in self.es.subperiods.items():
+                if k > 0:
+                    self.SUBPERIODS[k] = range(
+                        self.SUBPERIODS[k-1][-1]+1,
+                        self.SUBPERIODS[k-1][-1]+1 + len(v))
+                else:
+                    self.SUBPERIODS[k] = range(0, len(v))
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
