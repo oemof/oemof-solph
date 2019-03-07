@@ -161,12 +161,14 @@ class Flow(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint.
             """
             for inp, out in self.SUMMED_MIN_FLOWS:
-                lhs = sum(m.flow[inp, out, ts] * m.timeincrement[ts]
-                          for ts in m.TIMESTEPS)
-                rhs = (m.flows[inp, out].summed_min *
-                       m.flows[inp, out].nominal_value)
-                self.summed_min.add((inp, out), lhs >= rhs)
-        self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
+                for p in m.SUBPERIODS:
+                    lhs = sum(m.flow[inp, out, ts] * m.timeincrement[ts]
+                              for ts in m.TIMESTEPS)
+                    rhs = (m.flows[inp, out].summed_min[p] *
+                           m.flows[inp, out].nominal_value)
+                    self.summed_min.add((inp, out, p), lhs >= rhs)
+        self.summed_min = Constraint(
+            self.SUMMED_MIN_FLOWS, m.SUBPERIODS.keys(), noruleinit=True)
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
         def _positive_gradient_flow_rule(model):
