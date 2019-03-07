@@ -10,7 +10,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from functools import partial
+import pandas as pd
 from pickle import UnpicklingError
+from itertools import chain
 import logging
 import os
 
@@ -124,7 +126,15 @@ class EnergySystem:
 
         self.timeindex = kwargs.get('timeindex')
 
-        self.subperiods = kwargs.get('subperiods')
+        self.subperiods = kwargs.get('subperiods', {0: self.timeindex})
+
+        check_subperiods_timeindex = pd.DatetimeIndex(
+            chain(*[i.values for i in self.subperiods.values()]),
+            tz=self.timeindex.tz, freq='H')
+
+        if not self.timeindex.equals(check_subperiods_timeindex):
+            raise ValueError(
+                "Timeindex and subperiods values do not match!")
 
         self.temporal = kwargs.get('temporal')
 
