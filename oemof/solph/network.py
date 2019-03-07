@@ -146,7 +146,10 @@ class Flow(on.Edge):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 summed_max=None,
+                 summed_min=None,
+                 **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
@@ -155,7 +158,7 @@ class Flow(on.Edge):
 
         super().__init__()
 
-        scalars = ['nominal_value', 'summed_max', 'summed_min',
+        scalars = ['nominal_value',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
@@ -177,6 +180,18 @@ class Flow(on.Edge):
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
+        if summed_max is None:
+            self.summed_max = None
+        elif type(summed_max) is dict:
+            self.summed_max = summed_max
+        else:
+            self.summed_max = {0: summed_max}
+        if summed_min is None:
+            self.summed_min = None
+        elif type(summed_min) is dict:
+            self.summed_min = summed_min
+        else:
+            self.summed_min = {0: summed_min}
 
         # Checking for impossible attribute combinations
         if self.fixed and self.actual_value[0] is None:
