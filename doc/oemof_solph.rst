@@ -506,9 +506,9 @@ GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
-The *nominal_capacity* of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the *nominal_value* in the Flow objects.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class.
+The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
+To limit the input and output flows, you can define the ``nominal_storage_capacity`` in the Flow objects.
+Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined.
 
 .. code-block:: python
 
@@ -516,9 +516,33 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         label='storage',
         inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
         outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
-        capacity_loss=0.001, nominal_capacity=50,
+        loss_rate=0.001, nominal_storage_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+For initialising the state of charge before the first time step (time step zero) the parameter ``initial_storage_level`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
+Additionally the parameter ``balanced`` (default value: ``True``) sets the relation of the state of charge of time step zero and the last time step.
+If ``balanced=True``, the state of charge in the last time step is equal to initial value in time step zero.
+Use ``balanced=False`` with caution as energy might be added to or taken from the energy system due to different states of charge in time step zero and the last time step.
+Generally, with these two parameters four configurations are possible, which might result in different solutions of the same optimization model:
+
+    *	``initial_storage_level=None``, ``balanced=True`` (default setting): The state of charge in time step zero is a result of the optimization. The state of charge of the last time step is equal to time step zero. Thus, the storage is not violating the energy conservation by adding or taking energy from the system due to different states of charge at the beginning and at the end of the optimization period.
+    *	``initial_storage_level=0.5``, ``balanced=True``: The state of charge in time step zero is fixed to 0.5 (50 % charged). The state of charge in the last time step is also constrained by 0.5 due to the coupling parameter ``balanced`` set to ``True``.
+    *	``initial_storage_level=None``, ``balanced=False``: Both, the state of charge in time step zero and the last time step are a result of the optimization and not coupled.
+    *	``initial_storage_level=0.5``, ``balanced=False``: The state of charge in time step zero is constrained by a given value. The state of charge of the last time step is a result of the optimization.
+
+The following code block shows an example of the storage parametrization for the second configuration:
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='storage',
+        inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
+        outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
+        loss_rate=0.001, nominal_storage_capacity=50,
+        initial_storage_level=0.5, balanced=True,
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
+
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
 
 Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -548,7 +572,7 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
         label='PHES',
         inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
         outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
-        capacity_loss=0.001, 
+        loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
 
@@ -560,8 +584,8 @@ The following example describes a battery with flows coupled to the capacity of 
         label='battery',
         inputs={b_el: solph.Flow()},
         outputs={b_el: solph.Flow()},
-        capacity_loss=0.001, 
-        nominal_capacity=50,
+        loss_rate=0.001,
+        nominal_storage_capacity=50,
         inflow_conversion_factor=0.98,
          outflow_conversion_factor=0.8,
         invest_relation_input_capacity = 1/6,
@@ -683,6 +707,7 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30,
+                            min=0.5,
                             nonconvex=NonConvex()),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
