@@ -40,7 +40,7 @@ class TestSolphAndItsResults:
         self.es = ES(timeindex=tix, groupings=[investment_flow_grouping])
 
     def test_issue_576(self):
-        buses = [Bus("B1"), Bus("B2")]
+        buses = [Bus("B1"), Bus("B2"), Bus("B3")]
         self.es.add(*buses)
         edge = Edge(input=buses[0], output=buses[1])
         self.es.add(edge)
@@ -54,6 +54,19 @@ class TestSolphAndItsResults:
             ),
         )
         triple = (buses[0], buses[1], edge)
+        ok_(
+            triple in self.es.groups[IF],
+            "\nExpected\n\n  `{}`\n\nin `es.groups[{}]`:\n\n  `{}`"
+            .format(
+                "\n   ".join(pformat(triple).split("\n")),
+                IF,
+                "\n   ".join(pformat(self.es.groups[IF]).split("\n"))
+            ),
+        )
+        edge = Edge(input=buses[1], output=buses[2])
+        edge.investment = Investment(2)
+        self.es.add(edge)
+        triple = (buses[1], buses[2], edge)
         ok_(
             triple in self.es.groups[IF],
             "\nExpected\n\n  `{}`\n\nin `es.groups[{}]`:\n\n  `{}`"
