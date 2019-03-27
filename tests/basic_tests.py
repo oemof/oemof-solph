@@ -13,6 +13,7 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
+from pprint import pformat
 
 from nose.tools import ok_, eq_
 import pandas as pd
@@ -145,6 +146,39 @@ class EnergySystem_Tests:
         eq_(ES.groups["The Special One"], special)
         eq_(ES.groups["A Subset"], subset)
         eq_(ES.groups["everything"], everything)
+
+    def test_grouping_laziness(self):
+        """ Energy system `groups` should be fully lazy.
+
+        `Node`s added to an energy system should only be tested for and put
+        into their respective groups right before the `groups` property of an
+        energy system is accessed.
+        """
+        group = "Group"
+        g = Nodes(key=group, filter=lambda n: getattr(n, "group", False))
+        self.es = es.EnergySystem(groupings=[g])
+        buses = [Bus("Grouped"), Bus("Ungrouped one"), Bus("Ungrouped two")]
+        self.es.add(buses[0])
+        buses[0].group = True
+        self.es.add(*buses[1:])
+        ok_(
+            group in self.es.groups,
+            "\nExpected to find\n\n  `{!r}`\n\nin `es.groups`.\nGot:\n\n  `{}`"
+            .format(
+                group,
+                "\n   ".join(pformat(set(self.es.groups.keys())).split("\n")),
+            ),
+        )
+        ok_(
+            buses[0] in self.es.groups[group],
+            "\nExpected\n\n  `{}`\n\nin `es.groups['{}']`:\n\n  `{}`"
+            .format(
+                "\n   ".join(pformat(buses[0]).split("\n")),
+                group,
+                "\n   ".join(pformat(self.es.groups[group]).split("\n"))
+            ),
+        )
+
 
     @temporarily_modifies_registry
     def test_constant_group_keys(self):
