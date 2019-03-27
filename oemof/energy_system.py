@@ -9,7 +9,7 @@ available from its original location oemof/oemof/energy_system.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from functools import partial
+from collections import deque
 from pickle import UnpicklingError
 import logging
 import os
@@ -108,45 +108,48 @@ class EnergySystem:
 
     """
     def __init__(self, **kwargs):
-        for attribute in ['entities']:
-            setattr(self, attribute, kwargs.get(attribute, []))
-
         self._groups = {}
         self._groupings = ([BY_UID] +
                            [g if isinstance(g, Grouping) else Nodes(g)
                             for g in kwargs.get('groupings', [])])
-        for e in self.entities:
-            for g in self._groupings:
-                g(e, self.groups)
+        self.entities = []
+
         self.results = kwargs.get('results')
 
         self.timeindex = kwargs.get('timeindex')
 
         self.temporal = kwargs.get('temporal')
 
-    @staticmethod
-    def _regroup(entity, groups, groupings):
-        for g in groupings:
-            g(entity, groups)
-        return groups
-
-    def _add(self, entity):
-        self.entities.append(entity)
-        self._groups = partial(self._regroup, entity, self.groups,
-                               self._groupings)
+        self.add(*kwargs.get('entities', ()))
 
     def add(self, *nodes):
         """ Add :class:`nodes <oemof.network.Node>` to this energy system.
+
+        Notes
+        -----
+
+        In the unlikely case that you want to use this function as a group key:
+        DON'T.
+        It's already used as a key in `groups` to keep track of ungrouped
+        nodes. This is done to avoid having to add another private attribute to
+        `EnergySystem`.
         """
+        self.nodes.extend(nodes)
+        self._groups[self.add] = self._groups.get(self.add, [])
+        self._groups[self.add].extend(nodes)
         for n in nodes:
-            self._add(n)
             if hasattr(n, 'subnodes'):
                 self.add(*n.subnodes)
 
     @property
     def groups(self):
-        while callable(self._groups):
-            self._groups = self._groups()
+        gs = self._groups
+        deque(
+            (g(n, gs) for g in self._groupings for n in gs.get(self.add, [])),
+            maxlen=0,
+        )
+        if self.add in gs:
+            del gs[self.add]
         return self._groups
 
     @property
