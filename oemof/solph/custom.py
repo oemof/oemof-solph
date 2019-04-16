@@ -16,6 +16,7 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 import logging
 
+import oemof.network as on
 from oemof.solph.network import Bus, Transformer
 from oemof.solph.plumbing import sequence
 
@@ -263,6 +264,7 @@ class Link(Transformer):
     def constraint_group(self):
         return LinkBlock
 
+
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.custom.Link`
@@ -319,6 +321,104 @@ class LinkBlock(SimpleBlock):
              for t in m.TIMESTEPS
              for n, conversion in all_conversions.items()
              for cidx, c in conversion.items()], noruleinit=True)
+        self.relation_build = BuildAction(rule=_input_output_relation)
+
+
+class Switch(Transformer):
+    """A Switch object with N inputs and M outputs.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for connection
+        between flows.
+        Keys are the connected tuples (input, output) bus objects.
+        The dictionary values can either be a scalar or a sequence
+        with length of time horizon for simulation.
+        Connections without  conversion factor will be restricted.
+
+    Notes
+    -----
+    The sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.custom.SwitchBlock`
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.conversion_factors = {
+            k: sequence(v)
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+
+    def constraint_group(self):
+        return SwitchBlock
+
+
+class SwitchBlock(SimpleBlock):
+    r"""Block for the linear relation of nodes with type
+    :class:`~oemof.solph.custom.Switch`
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.Model` )
+
+    SWITCHES
+        A set with all :class:`~oemof.solph.custom.Switch` objects.
+
+    **The following constraints are created:**
+
+    Linear relation :attr:`om.Transformer.relation[i,o,t]`
+        .. math::
+            P_{i}(t) = P_{o}(t) * \eta_{i, o}(t), \\
+            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall n \in \textrm{SWITCHES}, \\
+            \forall i \in \textrm{INPUTS(n)}, \\
+            \forall o \in \textrm{OUTPUTS(n)}.
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the linear constraint for the class:`Switch`
+        block.
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.custom.Switch objects for which
+            the linear relation of inputs and outputs is created.
+            The components inside the list need to hold
+            an attribute `conversion_factors` of type dict containing the
+            conversion factors for all inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        all_conversions = {}
+        for n in group:
+            all_conversions[n] = {
+                k: v for k, v in n.conversion_factors.items()}
+
+        def _input_output_relation(block):
+            for t in m.TIMESTEPS:
+                for n, conversion in all_conversions.items():
+                    for (i, o), c in conversion.items():
+                        try:
+                            expr = (m.flow[n, 0, t] == c[t] * m.flow[i, n, t])
+                        except ValueError:
+                            raise ValueError(
+                                "Error in constraint creation",
+                                "from: {0}, to: {1}, via: {3}".format(
+                                    i, o, n))
+                        block.relation.add((n, i, o, t), expr)
+
+        self.relation = Constraint(
+            [(n, i, o, t)
+             for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()
+             for (i, o), c in conversion.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
