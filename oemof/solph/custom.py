@@ -396,6 +396,14 @@ class SwitchBlock(SimpleBlock):
 
         m = self.parent_block()
 
+        self.SWITCHES = Set(initialize=[n for n in group])
+
+        self.SWITCH_CONNECTIONS = Set(
+            initialize=[f for s in group for f in s.conversion_factors])
+
+        self.status = Var(self.SWITCHES, self.SWITCH_CONNECTIONS, m.TIMESTEPS,
+                          within=Binary)
+
         all_conversions = {}
         for n in group:
             all_conversions[n] = {
