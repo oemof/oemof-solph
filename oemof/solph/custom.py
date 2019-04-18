@@ -414,7 +414,7 @@ class SwitchBlock(SimpleBlock):
                 for n, conversion in all_conversions.items():
                     for (i, o), c in conversion.items():
                         try:
-                            expr = (m.flow[n, 0, t] == c[t] * m.flow[i, n, t])
+                            expr = (m.flow[n, o, t] == c[t] * m.flow[i, n, t])
                         except ValueError:
                             raise ValueError(
                                 "Error in constraint creation",
