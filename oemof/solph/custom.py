@@ -324,23 +324,33 @@ class LinkBlock(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class Switch(Transformer):
-    """A Switch object with N inputs and M outputs.
+class SimpleSwitch(Transformer):
+    """A SimpleSwitch object with N inputs and N outputs.
 
     Parameters
     ----------
+    inputs : dict
+        Dictionary mapping output nodes to corresponding outflows.
+        The Flows have to have a defined 'nominal_value'.
+    outputs: dict
+        (see inputs, same number of entries as inputs)
     conversion_factors : dict
         Dictionary containing conversion factors for connection
         between flows.
         Keys are the connected tuples (input, output) bus objects.
         The dictionary values can either be a scalar or a sequence
         with length of time horizon for simulation.
-        Connections without  conversion factor will be restricted.
+        It is assumed every input is connected to exactly one output.
+        Connections without conversion factor will be restricted.
+    concurrent_connections : numeric
+        Number of bus-bus connections (named in conversion_factors)
+        that are simultaneously active.
+
 
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.SwitchBlock`
+     * :py:class:`~oemof.solph.custom.SimpleSwitchBlock`
 
     """
     def __init__(self, *args, **kwargs):
@@ -350,19 +360,21 @@ class Switch(Transformer):
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
+        self.concurrent_connections = kwargs.get('concurrent_connections', 1)
+
     def constraint_group(self):
-        return SwitchBlock
+        return SimpleSwitchBlock
 
 
-class SwitchBlock(SimpleBlock):
+class SimpleSwitchBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.custom.Switch`
+    :class:`~oemof.solph.custom.SimpleSwitch`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
-    SWITCHES
-        A set with all :class:`~oemof.solph.custom.Switch` objects.
+    SIMPLE_SWITCHES
+        A set with all :class:`~oemof.solph.custom.SimpleSwitch` objects.
 
     **The following constraints are created:**
 
@@ -370,7 +382,7 @@ class SwitchBlock(SimpleBlock):
         .. math::
             P_{i}(t) = P_{o}(t) * \eta_{i, o}(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{SWITCHES}, \\
+            \forall n \in \textrm{SIMPLE_SWITCHES}, \\
             \forall i \in \textrm{INPUTS(n)}, \\
             \forall o \in \textrm{OUTPUTS(n)}.
     """
@@ -380,12 +392,12 @@ class SwitchBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`Switch`
+        """ Creates the linear constraint for the class:`SimpleSwitch`
         block.
         Parameters
         ----------
         group : list
-            List of oemof.solph.custom.Switch objects for which
+            List of oemof.solph.custom.SimpleSwitch objects for which
             the linear relation of inputs and outputs is created.
             The components inside the list need to hold
             an attribute `conversion_factors` of type dict containing the
@@ -396,13 +408,13 @@ class SwitchBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        self.SWITCHES = Set(initialize=[n for n in group])
+        self.SIMPLE_SWITCHES = Set(initialize=[n for n in group])
 
-        self.SWITCH_CONNECTIONS = Set(
+        self.SIMPLE_SWITCH_CONNECTIONS = Set(
             initialize=[f for s in group for f in s.conversion_factors])
 
-        self.status = Var(self.SWITCHES, self.SWITCH_CONNECTIONS, m.TIMESTEPS,
-                          within=Binary)
+        self.status = Var(self.SIMPLE_SWITCHES, self.SIMPLE_SWITCH_CONNECTIONS,
+                          m.TIMESTEPS, within=Binary)
 
         all_conversions = {}
         for n in group:
@@ -414,13 +426,13 @@ class SwitchBlock(SimpleBlock):
                 for n, conversion in all_conversions.items():
                     for (i, o), c in conversion.items():
                         try:
-                            expr = (m.flow[n, o, t] == c[t] * m.flow[i, n, t])
+                            expr = (c[t] * m.flow[i, n, t] == m.flow[n, o, t])
+                            block.relation.add((n, i, o, t), expr)
                         except ValueError:
                             raise ValueError(
                                 "Error in constraint creation",
                                 "from: {0}, to: {1}, via: {3}".format(
                                     i, o, n))
-                        block.relation.add((n, i, o, t), expr)
 
         self.relation = Constraint(
             [(n, i, o, t)
@@ -428,6 +440,30 @@ class SwitchBlock(SimpleBlock):
              for n, conversion in all_conversions.items()
              for (i, o), c in conversion.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
+
+        def _allowed_flow_rule(block, n, i, o, t):
+            """Propagate switch status to (in-) flows
+            """
+            rhs = self.status[n, (i, o), t] * m.flows[(i, n)].nominal_value
+            expr = (m.flow[i, n, t] <= rhs)
+            return expr
+        self.allowed_flows_constr = Constraint(
+            self.SIMPLE_SWITCHES,
+            self.SIMPLE_SWITCH_CONNECTIONS,
+            m.TIMESTEPS,
+            rule=_allowed_flow_rule)
+
+        def _concurrent_connections_rule(block, n, t):
+            """Rule definition for concurrent connections of SimpleSwitch.
+            """
+            lhs = sum(self.status[n, (i, o), t]
+                      for i, o in n.conversion_factors)
+            return lhs == n.concurrent_connections
+        self.concurrent_connections_constr = Constraint(
+            self.SIMPLE_SWITCHES,
+            m.TIMESTEPS,
+            rule=_concurrent_connections_rule)
+
 
 
 class GenericCAES(Transformer):
