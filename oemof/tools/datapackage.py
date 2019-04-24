@@ -41,6 +41,9 @@ class HSN(types.SimpleNamespace):
     def __hash__(self):
         return id(self)
 
+    def __eq__(self, other):
+        return id(self) == id(other)
+
 
 DEFAULT = object()
 FLOW_TYPE = object()
