@@ -29,7 +29,6 @@ def raisestatement(exception, message=""):
         raise exception(message)
     else:
         raise exception()
-    return "No one should ever see this."
 
 
 class HSN(types.SimpleNamespace):
