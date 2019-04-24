@@ -35,7 +35,7 @@ setup(name='oemof',
       extras_require={'datapackage': ['datapackage']},
       entry_points={
           'console_scripts': [
-              'oemof_installation_test = '
+              'oemof_installation_test = ' +
               'oemof.tools.console_scripts:check_oemof_installation',
-              'test_oemof = '
+              'test_oemof = ' +
               'oemof.tools.console_scripts:test_oemof']})
