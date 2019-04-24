@@ -330,7 +330,7 @@ class SimpleSwitch(Transformer):
     Parameters
     ----------
     inputs : dict
-        Dictionary mapping output nodes to corresponding outflows.
+        Dictionary mapping input nodes to corresponding inflows.
         The Flows have to have a defined 'nominal_value'.
     outputs: dict
         (see inputs, same number of entries as inputs)
