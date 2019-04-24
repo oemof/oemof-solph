@@ -17,7 +17,6 @@ import json
 import re
 import types
 
-import datapackage
 from datapackage import exceptions, Package
 import pandas as pd
 
