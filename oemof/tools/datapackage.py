@@ -18,7 +18,7 @@ import re
 import types
 
 import datapackage
-from datapackage import exceptions
+from datapackage import exceptions, Package
 import pandas as pd
 
 from oemof.network import Bus, Component
@@ -32,7 +32,7 @@ def raisestatement(exception, message=""):
 
 
 class HSN(types.SimpleNamespace):
-    """ A hashable variant of `types.Simplenamespace`.
+    """ A hashable variant of `types.SimpleNamespace`.
 
     By making it hashable, we can use the instances as dictionary keys, which
     is necessary, as this is the default type for flows.
@@ -46,6 +46,7 @@ class HSN(types.SimpleNamespace):
 
 DEFAULT = object()
 FLOW_TYPE = object()
+
 
 def remap(attributes, translations, target_class):
     mro = getattr(target_class, "mro", lambda: [target_class])
@@ -69,6 +70,7 @@ def sequences(r, timeindices=None):
         for name in result
         if name != 'timeindex'}
     return result
+
 
 def read_facade(facade, facades, create, typemap, data, objects,
                 sequence_names,
@@ -129,9 +131,7 @@ def deserialize_energy_system(cls, path,
         if v.get('name') is None:
             attributemap[k]['name'] = 'label'
 
-
-
-    package = datapackage.Package(path)
+    package = Package(path)
     # This is necessary because before reading a resource for the first
     # time its `headers` attribute is `None`.
     for r in package.resources:
@@ -139,18 +139,21 @@ def deserialize_energy_system(cls, path,
             r.read()
         except exceptions.CastError:
             raise exceptions.CastError(
-                (cast_error_msg).format(r.name))
+                cast_error_msg.format(r.name))
     empty = types.SimpleNamespace()
     empty.read = lambda *xs, **ks: ()
     empty.headers = ()
-    parse = lambda s: (json.loads(s) if s else {})
+
+    def parse(s): (json.loads(s) if s else {})
     data = {}
-    listify = lambda x, n=None: (x
-                                 if isinstance(x, list)
-                                 else repeat(x)
-                                 if not n
-                                 else repeat(x, n))
-    resource = lambda r: package.get_resource(r) or empty
+
+    def listify(x, n=None): (x
+                             if isinstance(x, list)
+                             else repeat(x)
+                             if not n
+                             else repeat(x, n))
+
+    def resource(r): package.get_resource(r) or empty
 
     timeindices = {}
 
@@ -238,6 +241,7 @@ def deserialize_energy_system(cls, path,
                      for name in bus_names}
 
     objects = {}
+
     def create(cls, init, attributes):
         """ Creates an instance of `cls` and sets `attributes`.
         """
@@ -315,14 +319,15 @@ def deserialize_energy_system(cls, path,
                 facade_data = r.read(keyed=True, relations=True)
             except exceptions.CastError:
                 raise exceptions.LoadError(
-                        (cast_error_msg).format(r.name))
-            except:
+                        cast_error_msg.format(r.name))
+            except Exception:
                 raise exceptions.LoadError(
                     ("Could not read data for resource with name `{}`. " +
                      " Maybe wrong foreign keys?").format(r.name))
 
-            foreign_keys = {fk["fields"]: fk["reference"]
-                for fk in r.descriptor['schema'].get("foreignKeys", ())}
+            foreign_keys =\
+                {fk["fields"]: fk["reference"]
+                 for fk in r.descriptor['schema'].get("foreignKeys", ())}
             for facade in facade_data:
                 # convert decimal to float
                 for f, v in facade.items():
@@ -379,6 +384,5 @@ def deserialize_energy_system(cls, path,
         es.typemap = typemap
 
         return es
-
     else:
         raise ValueError("Timeindices in resources differ!")
