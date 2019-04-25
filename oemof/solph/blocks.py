@@ -700,7 +700,12 @@ class NonConvexFlow(SimpleBlock):
 
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                          if g[2].min[0] is not None])
-
+        self.MAXSTARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                   if g[2].nonconvex.maximum_startups
+                                   is not None])
+        self.MAXSHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                    if g[2].nonconvex.maximum_shutdowns
+                                    is not None])
         self.MINUPTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                   if g[2].nonconvex.minimum_uptime
                                   is not None])
@@ -752,6 +757,14 @@ class NonConvexFlow(SimpleBlock):
         self.startup_constr = Constraint(self.NONCONVEX_FLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
 
+        def _max_startup_rule(block, i, o):
+            """Rule definition for maximum number of start-ups.
+            """
+            lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
+            return lhs == m.flows[i, o].nonconvex.maximum_startups
+        self.max_startup_constr = Constraint(self.MAXSTARTUPFLOWS,
+                                             rule=_max_startup_rule)
+
         def _shutdown_rule(block, i, o, t):
             """Rule definition for shutdown constraints of nonconvex flows.
             """
@@ -765,6 +778,14 @@ class NonConvexFlow(SimpleBlock):
             return expr
         self.shutdown_constr = Constraint(self.NONCONVEX_FLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
+
+        def _max_shutdown_rule(block, i, o):
+            """Rule definition for maximum number of start-ups.
+            """
+            lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
+            return lhs == m.flows[i, o].nonconvex.maximum_shutdowns
+        self.max_shutdown_constr = Constraint(self.MAXSTARTUPFLOWS,
+                                              rule=_max_shutdown_rule)
 
         def _min_uptime_rule(block, i, o, t):
             """Rule definition for min-uptime constraints of nonconvex flows.
