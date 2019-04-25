@@ -39,11 +39,11 @@ class NonConvex:
     """
     Parameters
     ----------
-    startup_costs : numeric
+    startup_costs : numeric (sequence or scalar)
         Costs associated with a start of the flow (representing a unit).
-    shutdown_costs : numeric
+    shutdown_costs : numeric (sequence or scalar)
         Costs associated with the shutdown of the flow (representing a unit).
-    activity_costs : numeric
+    activity_costs : numeric (sequence or scalar)
         Costs associated with the active operation of the flow, independently
         from the actual output.
     minimum_uptime : numeric (1 or positive integer)
