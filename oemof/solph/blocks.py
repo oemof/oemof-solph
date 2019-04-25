@@ -574,21 +574,13 @@ class NonConvexFlow(SimpleBlock):
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
-        being not None in the first timestep
-    STARTUP_FLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`startup_costs` being not None.
-    SHUTDOWN_FLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`shutdown_costs` being not None.
-    ACTIVE_FLOWS
+        being not None in the first timestep.
+    ACTIVITYCOSTFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`activity_costs` being not None.
-
     MINUPTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`minimum_uptime` being not None.
-
     MINDOWNTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`minimum_downtime` being not None.
@@ -627,14 +619,14 @@ class NonConvexFlow(SimpleBlock):
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i,o) \in \textrm{STARTUP\_FLOWS}.
+            \forall (i,o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Shutdown constraint :attr:`om.NonConvexFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{SHUTDOWN\_FLOWS}.
+            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
         .. math::
@@ -709,14 +701,6 @@ class NonConvexFlow(SimpleBlock):
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                          if g[2].min[0] is not None])
 
-        self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                if g[2].nonconvex.startup_costs[0]
-                                is not None])
-
-        self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                 if g[2].nonconvex.shutdown_costs[0]
-                                 is not None])
-
         self.MINUPTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                   if g[2].nonconvex.minimum_uptime
                                   is not None])
@@ -725,17 +709,15 @@ class NonConvexFlow(SimpleBlock):
                                     if g[2].nonconvex.minimum_downtime
                                     is not None])
 
-        self.ACTIVE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                 if g[2].nonconvex.activity_costs[0]
-                                 is not None])
+        self.ACTIVITYCOSTFLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group
+                        if g[2].nonconvex.activity_costs[0] is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
-        if self.STARTUPFLOWS:
-            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS, within=Binary)
-        if self.SHUTDOWNFLOWS:
-            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS, within=Binary)
+        self.startup = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
+        self.shutdown = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints.
@@ -767,7 +749,7 @@ class NonConvexFlow(SimpleBlock):
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
                         m.flows[i, o].nonconvex.initial_status)
             return expr
-        self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
+        self.startup_constr = Constraint(self.NONCONVEX_FLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
 
         def _shutdown_rule(block, i, o, t):
@@ -781,14 +763,14 @@ class NonConvexFlow(SimpleBlock):
                         m.flows[i, o].nonconvex.initial_status -
                         self.status[i, o, t])
             return expr
-        self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
+        self.shutdown_constr = Constraint(self.NONCONVEX_FLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
         def _min_uptime_rule(block, i, o, t):
             """Rule definition for min-uptime constraints of nonconvex flows.
             """
-            if (t >= m.flows[i, o].nonconvex.max_up_down and
-                    t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
+            if m.flows[i, o].nonconvex.max_up_down <= t\
+                    <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down:
                 expr = 0
                 expr += ((self.status[i, o, t]-self.status[i, o, t-1]) *
                          m.flows[i, o].nonconvex.minimum_uptime)
@@ -806,8 +788,8 @@ class NonConvexFlow(SimpleBlock):
         def _min_downtime_rule(block, i, o, t):
             """Rule definition for min-downtime constraints of nonconvex flows.
             """
-            if (t >= m.flows[i, o].nonconvex.max_up_down and
-                    t <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down):
+            if m.flows[i, o].nonconvex.max_up_down <= t\
+                    <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down:
                 expr = 0
                 expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
                          m.flows[i, o].nonconvex.minimum_downtime)
@@ -833,35 +815,32 @@ class NonConvexFlow(SimpleBlock):
 
         m = self.parent_block()
 
-        startcosts = 0
-        shutdowncosts = 0
-        activitycosts = 0
+        startup_costs = 0
+        shutdown_costs = 0
+        activity_costs = 0
 
-        if self.STARTUPFLOWS:
-            for i, o in self.STARTUPFLOWS:
-                if (m.flows[i, o].nonconvex.startup_costs[0] is not None):
-                    startcosts += sum(self.startup[i, o, t] *
-                                      m.flows[i, o].nonconvex.startup_costs[t]
-                                      for t in m.TIMESTEPS)
-            self.startcosts = Expression(expr=startcosts)
+        for i, o in self.NONCONVEX_FLOWS:
+            if m.flows[i, o].nonconvex.startup_costs[0] is not None:
+                startup_costs += sum(self.startup[i, o, t] *
+                                  m.flows[i, o].nonconvex.startup_costs[t]
+                                  for t in m.TIMESTEPS)
+            if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
+                shutdown_costs += sum(
+                    self.shutdown[i, o, t] *
+                    m.flows[i, o].nonconvex.shutdown_costs[t]
+                    for t in m.TIMESTEPS)
 
-        if self.SHUTDOWNFLOWS:
-            for i, o in self.SHUTDOWNFLOWS:
-                if (m.flows[i, o].nonconvex.shutdown_costs[0] is not None):
-                    shutdowncosts += sum(
-                        self.shutdown[i, o, t] *
-                        m.flows[i, o].nonconvex.shutdown_costs[t]
-                        for t in m.TIMESTEPS)
-            self.shutdowncosts = Expression(expr=shutdowncosts)
+        self.startup_costs = Expression(expr=startup_costs)
+        self.shutdowncosts = Expression(expr=shutdown_costs)
 
-        if self.ACTIVE_FLOWS:
-            for i, o in self.ACTIVE_FLOWS:
-                if m.flows[i, o].nonconvex.activity_costs[0] is not None :
-                    activitycosts += sum(
+        if self.ACTIVITYCOSTFLOWS:
+            for i, o in self.ACTIVITYCOSTFLOWS:
+                if m.flows[i, o].nonconvex.activity_costs[0] is not None:
+                    activity_costs += sum(
                         self.status[i, o, t] *
                         m.flows[i, o].nonconvex.activity_costs[t]
                         for t in m.TIMESTEPS)
 
-            self.activitycosts = Expression(expr=activitycosts)
+            self.activitycosts = Expression(expr=activity_costs)
 
-        return startcosts + shutdowncosts + activitycosts
+        return startup_costs + shutdown_costs + activity_costs
