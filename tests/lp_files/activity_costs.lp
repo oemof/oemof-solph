@@ -53,6 +53,40 @@ c_u_NonConvexFlow_max(cheap_plant_activity_costs_Bus_C_2)_:
 +1 flow(cheap_plant_activity_costs_Bus_C_2)
 <= 0
 
+c_u_NonConvexFlow_startup_constr(cheap_plant_activity_costs_Bus_C_0)_:
+-1 NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_0)
++1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_0)
+<= 0
+
+c_u_NonConvexFlow_startup_constr(cheap_plant_activity_costs_Bus_C_1)_:
+-1 NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_1)
+-1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_0)
++1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_1)
+<= 0
+
+c_u_NonConvexFlow_startup_constr(cheap_plant_activity_costs_Bus_C_2)_:
+-1 NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_2)
+-1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_1)
++1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_2)
+<= 0
+
+c_u_NonConvexFlow_shutdown_constr(cheap_plant_activity_costs_Bus_C_0)_:
+-1 NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_0)
+-1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_0)
+<= 0
+
+c_u_NonConvexFlow_shutdown_constr(cheap_plant_activity_costs_Bus_C_1)_:
+-1 NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_1)
++1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_0)
+-1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_1)
+<= 0
+
+c_u_NonConvexFlow_shutdown_constr(cheap_plant_activity_costs_Bus_C_2)_:
+-1 NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_2)
++1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_1)
+-1 NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_2)
+<= 0
+
 c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
@@ -63,8 +97,20 @@ bounds
    0 <= NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_0) <= 1
    0 <= NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_1) <= 1
    0 <= NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_2) <= 1
+   0 <= NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_0) <= 1
+   0 <= NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_1) <= 1
+   0 <= NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_2) <= 1
+   0 <= NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_0) <= 1
+   0 <= NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_1) <= 1
+   0 <= NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_2) <= 1
 binary
   NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_0)
   NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_1)
   NonConvexFlow_status(cheap_plant_activity_costs_Bus_C_2)
+  NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_0)
+  NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_1)
+  NonConvexFlow_startup(cheap_plant_activity_costs_Bus_C_2)
+  NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_0)
+  NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_1)
+  NonConvexFlow_shutdown(cheap_plant_activity_costs_Bus_C_2)
 end
