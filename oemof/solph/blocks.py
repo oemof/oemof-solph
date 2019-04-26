@@ -578,6 +578,12 @@ class NonConvexFlow(SimpleBlock):
     ACTIVITYCOSTFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`activity_costs` being not None.
+    MAXSTARTUPFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`maximum_startups` being not None.
+    MAXSHUTDOWNFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`maximum_shutdowns` being not None.
     MINUPTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`minimum_uptime` being not None.
@@ -621,12 +627,26 @@ class NonConvexFlow(SimpleBlock):
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i,o) \in \textrm{NONCONVEX\_FLOWS}.
 
+    Maximum startups constraint
+    :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+        .. math::
+            \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
+                N_{start}(i,o)
+            \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
+
     Shutdown constraint :attr:`om.NonConvexFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
+
+    Maximum shutdowns constraint
+    :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+        .. math::
+            \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
+                N_{shutdown}(i,o)
+            \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
 
     Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
         .. math::
