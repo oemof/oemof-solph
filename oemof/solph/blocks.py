@@ -633,7 +633,7 @@ class NonConvexFlow(SimpleBlock):
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i,o) \in \textrm{NONCONVEX\_FLOWS}.
+            \forall (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
     :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
@@ -647,7 +647,7 @@ class NonConvexFlow(SimpleBlock):
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
+            \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
     :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
