@@ -782,7 +782,7 @@ class NonConvexFlow(SimpleBlock):
         def _max_shutdown_rule(block, i, o):
             """Rule definition for maximum number of start-ups.
             """
-            lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
+            lhs = sum(self.shutdown[i, o, t] for t in m.TIMESTEPS)
             return lhs <= m.flows[i, o].nonconvex.maximum_shutdowns
         self.max_shutdown_constr = Constraint(self.MAXSHUTDOWNFLOWS,
                                               rule=_max_shutdown_rule)
