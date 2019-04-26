@@ -633,28 +633,28 @@ class NonConvexFlow(SimpleBlock):
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i,o) \in \textrm{STARTUP_FLOWS}.
+            \forall (i,o) \in \textrm{STARTUP\_FLOWS}.
 
     Maximum startups constraint
     :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{start}(i,o)
-            \forall (i,o) \in \textrm{MAXSTARTUP_FLOWS}.
+            \forall (i,o) \in \textrm{MAXSTARTUP\_FLOWS}.
 
     Shutdown constraint :attr:`om.NonConvexFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{SHUTDOWN_FLOWS}.
+            \forall (i, o) \in \textrm{SHUTDOWN\_FLOWS}.
 
     Maximum shutdowns constraint
     :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{shutdown}(i,o)
-            \forall (i,o) \in \textrm{MAXSHUTDOWN_FLOWS}.
+            \forall (i,o) \in \textrm{MAXSHUTDOWN\_FLOWS}.
 
     Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
         .. math::
