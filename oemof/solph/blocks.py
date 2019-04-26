@@ -761,7 +761,7 @@ class NonConvexFlow(SimpleBlock):
             """Rule definition for maximum number of start-ups.
             """
             lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
-            return lhs == m.flows[i, o].nonconvex.maximum_startups
+            return lhs <= m.flows[i, o].nonconvex.maximum_startups
         self.max_startup_constr = Constraint(self.MAXSTARTUPFLOWS,
                                              rule=_max_startup_rule)
 
@@ -783,8 +783,8 @@ class NonConvexFlow(SimpleBlock):
             """Rule definition for maximum number of start-ups.
             """
             lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
-            return lhs == m.flows[i, o].nonconvex.maximum_shutdowns
-        self.max_shutdown_constr = Constraint(self.MAXSTARTUPFLOWS,
+            return lhs <= m.flows[i, o].nonconvex.maximum_shutdowns
+        self.max_shutdown_constr = Constraint(self.MAXSHUTDOWNFLOWS,
                                               rule=_max_shutdown_rule)
 
         def _min_uptime_rule(block, i, o, t):
