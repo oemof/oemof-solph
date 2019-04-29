@@ -54,9 +54,9 @@ class NonConvex:
         Minimum time a flow is forced to zero after shutting down.
         Be aware that minimum up and downtimes can contradict each
         other and may to infeasible problems.
-    maximum_startups : numeric (1 or positive integer)
+    maximum_startups : numeric (0 or positive integer)
         Maximum number of start-ups.
-    maximum_shutdowns : numeric (1 or positive integer)
+    maximum_shutdowns : numeric (0 or positive integer)
         Maximum number of shutdowns.
     initial_status : numeric (0 or 1)
         Integer value indicating the status of the flow in the first time step
