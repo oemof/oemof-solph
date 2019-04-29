@@ -737,10 +737,10 @@ class NonConvexFlow(SimpleBlock):
                                    if g[2].nonconvex.maximum_startups
                                    is not None])
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                if g[2].nonconvex.shutdown_costs[0]
-                                is not None
-                                or g[2].nonconvex.maximum_shutdowns
-                                is not None])
+                                 if g[2].nonconvex.shutdown_costs[0]
+                                 is not None
+                                 or g[2].nonconvex.maximum_shutdowns
+                                 is not None])
         self.MAXSHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                     if g[2].nonconvex.maximum_shutdowns
                                     is not None])
