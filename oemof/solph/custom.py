@@ -13,7 +13,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           Expression, BuildAction)
+                           Expression, BuildAction, Piecewise)
 import logging
 
 from oemof.solph.network import Bus, Transformer
@@ -803,6 +803,8 @@ class PiecewiseLinearTransformer(Transformer):
 
     Parameters
     ----------
+    x : list
+    y : list
 
     Examples
     --------
@@ -811,18 +813,15 @@ class PiecewiseLinearTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.coefficients = kwargs.get('coefficients')
-
-        for k, v in self.inputs.items():
-            if not v.nonconvex:
-                raise TypeError('Input flows must be of type NonConvexFlow!')
+        self.x = kwargs.get('x')
+        self.y = kwargs.get('y')
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
-            raise ValueError("Component `OffsetTransformer` must not have" +
+            raise ValueError("Component `PiecewiseLinearTransformer` cannot have" +
                              "more than 1 input and 1 output!")
 
     def constraint_group(self):
-        return OffsetTransformerBlock
+        return PiecewiseLinearTransformerBlock
 
 
 class PiecewiseLinearTransformerBlock(SimpleBlock):
@@ -856,6 +855,38 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
 
         def _relation_rule(block, n, t):
             """Link binary input and output flow to component outflow."""
+            expr = 0
+            efficiency = 1.
+            expr += - m.flow[n, list(n.outputs.keys())[0], t]
+            expr += m.flow[list(n.inputs.keys())[0], n, t] * efficiency
+            return expr == 0
 
         self.relation = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
                                    rule=_relation_rule)
+
+        # add piecewise linear constraint
+        def _pw(block, x, y, t):
+            expr = 0
+            expr = min(max(x, 0), 1)
+            return expr == 0
+
+        pw_repn = 'CC'
+        min_x, max_x = -10, 10
+        self.x = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=(min_x, max_x))
+        self.y = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, )
+
+        Piecewise(self.PWLINEARTRANSFORMERS,
+                            m.TIMESTEPS,
+                            self.y,
+                            self.x,
+                            pw_repn=pw_repn, # piecewise representation:
+                            pw_constr_type='EQ', # piecewise construction type: Upper bound, lower bound, equal
+                            pw_pts=[min_x, 0, 1, max_x],
+                            f_rule=_pw)
+
+        print('-------------aha------------')
+        # print(self.pw.type())
+        # for i in dir(self.pw):
+        #     print(i)
+        # print(self.pw.pprint())
+        print(self.relation.type())
