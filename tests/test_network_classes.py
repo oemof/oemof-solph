@@ -11,12 +11,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
-import warnings
 
 from oemof.energy_system import EnergySystem as ES
-from oemof.network import Bus, Node, Transformer
-from oemof import graph
-from oemof.solph import Model
+from oemof.network import Bus, Edge, Node, Transformer
 
 
 class Node_Tests:
@@ -111,12 +108,12 @@ class Node_Tests:
         flow = object()
         old = Node(label="A reused label")
         bus = Bus(label="bus", inputs={old: flow})
-        eq_(bus.inputs[old], flow,
+        eq_(bus.inputs[old].flow, flow,
             ("\n  Expected: {}" +
-             "\n  Got     : {} instead").format(flow, bus.inputs[old]))
-        eq_(old.outputs[bus], flow,
+             "\n  Got     : {} instead").format(flow, bus.inputs[old].flow))
+        eq_(old.outputs[bus].flow, flow,
             ("\n  Expected: {}" +
-             "\n  Got     : {} instead").format(flow, old.outputs[bus]))
+             "\n  Got     : {} instead").format(flow, old.outputs[bus].flow))
         new = Node(label="A reused label")
         eq_(new.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
@@ -134,13 +131,13 @@ class Node_Tests:
                 node.outputs,
                 dict(node.outputs)))
         node.outputs[bus] = flow
-        eq_(node.outputs[bus], flow,
-            ("\n  Expected {} as `node.outputs[bus]`." +
-             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
         eq_(node.outputs, {bus: flow},
             ("\n  Expected {} as `node.outputs`." +
              "\n  Got    : {} (== {}) instead").format(
                 {bus: flow}, node.outputs,dict(node.outputs)))
+        eq_(node.outputs[bus], flow,
+            ("\n  Expected {} as `node.outputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
         del node.outputs[bus]
         eq_(node.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
@@ -161,13 +158,13 @@ class Node_Tests:
                 node.inputs,
                 dict(node.inputs)))
         node.inputs[bus] = flow
-        eq_(node.inputs[bus], flow,
-            ("\n  Expected {} as `node.inputs[bus]`." +
-             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
         eq_(node.inputs, {bus: flow},
             ("\n  Expected {} as `node.inputs`." +
              "\n  Got    : {} (== {}) instead").format(
                 {bus: flow}, node.inputs,dict(node.inputs)))
+        eq_(node.inputs[bus], flow,
+            ("\n  Expected {} as `node.inputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
         del node.inputs[bus]
         eq_(node.inputs, {},
             ("\n  Expected an empty dictionary of inputs." +
@@ -197,10 +194,10 @@ class Node_Tests:
         n1n2 = "n1n2"
 
         n2.inputs.update({n1: n1n2})
-        eq_(n2.inputs[n1], n1n2)
         eq_(n2.inputs, {n1: n1n2})
-        eq_(n1.outputs[n2], n1n2)
+        eq_(n2.inputs[n1], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+        eq_(n1.outputs[n2], n1n2)
 
     def test_updating_outputs(self):
         n1 = Node("N1")
@@ -208,10 +205,37 @@ class Node_Tests:
         n1n2 = "n1n2"
 
         n1.outputs.update({n2: n1n2})
-        eq_(n2.inputs[n1], n1n2)
         eq_(n2.inputs, {n1: n1n2})
-        eq_(n1.outputs[n2], n1n2)
+        eq_(n2.inputs[n1], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+        eq_(n1.outputs[n2], n1n2)
+
+
+class Edge_Tests:
+    def test_edge_construction_side_effects(self):
+        """ Constructing an `Edge` should affect it's input/output `Node`s.
+
+        When constructing an `Edge`, the `inputs` and `outputs` of its output
+        and input `Node`s should be set appropriately.
+        """
+        source = Node(label='source')
+        target = Node(label='target')
+        edge = Edge(input=source, output=target)
+        ok_(target in source.outputs,
+            "{} not in {} after constructing {}."
+            .format(target, source.outputs, edge))
+        ok_(source in target.inputs,
+            "{} not in {} after constructing {}."
+            .format(source, target.outputs, edge))
+
+    def test_label_as_positional_argument(self):
+        o = object()
+        n = Node(o)
+        ok_(n.label is o, (
+                "Setting `label` as positional parameter argument failed."
+                "\n  Expected: {!r}"
+                "\n  Got     : {!r}")
+                .format(o, n.label))
 
 
 class EnergySystem_Nodes_Integration_Tests:
@@ -225,12 +249,6 @@ class EnergySystem_Nodes_Integration_Tests:
         b1 = Bus(label='<B1>')
         eq_(self.es.entities[0], b1)
         b2 = Bus(label='<B2>')
-        Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
-        ok_(isinstance(self.es.entities[2], Transformer))
-
-
-def test_depreciated_graph_call():
-    es = ES()
-    om = Model(energysystem=es)
-    warnings.filterwarnings('ignore', category=FutureWarning)
-    graph.create_nx_graph(optimization_model=om)
+        eq_(self.es.entities[1], b2)
+        t1 = Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
+        ok_(t1 in self.es.entities)

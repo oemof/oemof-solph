@@ -18,7 +18,7 @@ Linux
 Having Python 3 installed
 ------------------------------
 
-As oemof is designed as a Python package it is mandatory to have Python 3 installed. It is highly recommended to use a virtual environment. See this `tutorial <https://docs.python.org/3/tutorial/venv.html>`_ for more help or see the sections below. If you already have a Python 3 environment you can install oemof using pip:
+As oemof is designed as a Python package it is mandatory to have Python 3 installed. Python >= 3.5 is recommended. Lower versions may work but are not tested. It is highly recommended to use a virtual environment. See this `tutorial <https://docs.python.org/3/tutorial/venv.html>`_ for more help or see the sections below. If you already have a Python 3 environment you can install oemof using pip:
 
 .. code:: console
 
@@ -87,7 +87,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
 
-To learn how to install (other) solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/latest/>`_ to learn about which solvers are supported.
 
 
 Windows
@@ -99,7 +99,7 @@ with the installation of Python using WinPython, all the way to executing your f
 Having Python 3 installed
 ------------------------------
 
-As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. If you already have a working Python 3 environment you can install oemof by using pip. Run the following code in the command window of your python environment:
+As oemof is designed as a Phyton-module it is mandatory to have Python 3 installed. Python >= 3.5 is recommended. Lower versions may work but are not tested. If you already have a working Python 3 environment you can install oemof by using pip. Run the following code in the command window of your python environment:
 
 .. code:: console
 
@@ -154,7 +154,7 @@ You do not have to install both solvers. Oemof recommends the CBC (Coin-or branc
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
  
-For commercial solvers (Gurobi, Cplex...) have a look at the `pyomo solver notes <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/latest/>`_ to learn about which solvers are supported.
 
 
 Mac OSX

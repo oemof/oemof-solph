@@ -46,7 +46,7 @@ class EnergySystem(es.EnergySystem):
         super().__init__(**kwargs)
 
 
-class Flow:
+class Flow(on.Edge):
     r""" Defines a flow between two nodes.
 
     Keyword arguments are used to set the attributes of this flow. Parameters
@@ -61,11 +61,11 @@ class Flow:
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
-    min : numeric (sequence or scalar)
-        Normed minimum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_value` with :attr:`min`
     max : numeric (sequence or scalar)
-        Nominal maximum value of the flow (see :attr:`min`).
+        Normed maximum value of the flow. The flow absolute maximum will be
+        calculated by multiplying :attr:`nominal_value` with :attr:`max`
+    min : numeric (sequence or scalar)
+        Nominal minimum value of the flow (see :attr:`max`).
     actual_value : numeric (sequence or scalar)
         Specific value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
@@ -153,6 +153,8 @@ class Flow:
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
+        super().__init__()
+
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'variable_costs', 'min', 'max']
@@ -161,8 +163,9 @@ class Flow:
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
                     }
+        keys = [k for k in kwargs if k != 'label']
 
-        for attribute in set(scalars + sequences + dictionaries + list(kwargs)):
+        for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),

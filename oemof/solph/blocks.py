@@ -49,12 +49,14 @@ class Flow(SimpleBlock):
 
     Flow max sum :attr:`om.Flow.summed_max[i, o]`
       .. math::
-        \sum_t flow(i, o, t) \cdot \tau \leq summed\_max(i, o), \\
+        \sum_t flow(i, o, t) \cdot \tau
+            \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
     Flow min sum :attr:`om.Flow.summed_min[i, o]`
       .. math::
-        \sum_t flow(i, o, t) \cdot \tau \geq summed\_min(i, o), \\
+        \sum_t flow(i, o, t) \cdot \tau
+            \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
     Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
@@ -452,8 +454,6 @@ class Bus(SimpleBlock):
         \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau, \\
         \forall n \in \textrm{BUSES},
         \forall t \in \textrm{TIMESTEPS}.
-
-    Hallo
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -539,7 +539,6 @@ class Transformer(SimpleBlock):
         in_flows = {n: [i for i in n.inputs.keys()] for n in group}
         out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
-
         self.relation = Constraint(
             [(n, i, o, t)
              for t in m.TIMESTEPS
@@ -582,6 +581,9 @@ class NonConvexFlow(SimpleBlock):
     SHUTDOWN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`shutdown_costs` being not None.
+    ACTIVE_FLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        :attr:`activity_costs` being not None.
 
     MINUPTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
@@ -678,6 +680,11 @@ class NonConvexFlow(SimpleBlock):
             \sum_{i, o \in SHUTDOWN\_FLOWS} \sum_t shutdown(i, o, t) \
                 \cdot shutdown\_costs(i, o)
 
+    If :attr:`nonconvex.activity_costs` is set by the user:
+        .. math::
+            \sum_{i, o \in ACTIVE\_FLOWS} \sum_t status(i, o, t) \
+                \cdot activity\_costs(i, o)
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -717,6 +724,10 @@ class NonConvexFlow(SimpleBlock):
         self.MINDOWNTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                     if g[2].nonconvex.minimum_downtime
                                     is not None])
+
+        self.ACTIVE_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
+                                 if g[2].nonconvex.activity_costs[0]
+                                 is not None])
 
         # ################### VARIABLES AND CONSTRAINTS #######################
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
@@ -824,6 +835,7 @@ class NonConvexFlow(SimpleBlock):
 
         startcosts = 0
         shutdowncosts = 0
+        activitycosts = 0
 
         if self.STARTUPFLOWS:
             for i, o in self.STARTUPFLOWS:
@@ -842,4 +854,14 @@ class NonConvexFlow(SimpleBlock):
                         for t in m.TIMESTEPS)
             self.shutdowncosts = Expression(expr=shutdowncosts)
 
-        return startcosts + shutdowncosts
+        if self.ACTIVE_FLOWS:
+            for i, o in self.ACTIVE_FLOWS:
+                if m.flows[i, o].nonconvex.activity_costs[0] is not None :
+                    activitycosts += sum(
+                        self.status[i, o, t] *
+                        m.flows[i, o].nonconvex.activity_costs[t]
+                        for t in m.TIMESTEPS)
+
+            self.activitycosts = Expression(expr=activitycosts)
+
+        return startcosts + shutdowncosts + activitycosts

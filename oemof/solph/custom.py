@@ -25,6 +25,8 @@ class ElectricalBus(Bus):
     Bus is used in combination with ElectricalLine objects for linear optimal
     power flow (lopf) simulations.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -50,6 +52,8 @@ class ElectricalLine(Transformer):
     ----------
     reactance : float or array of floats
         Reactance of the line to be modelled
+
+    Note: This component is experimental. Use it with care.
 
     Notes
     -----
@@ -116,6 +120,7 @@ class ElectricalLineBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
     class:`.ElectricalLine`
 
+    Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
 
@@ -220,6 +225,8 @@ class Link(Transformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The sets, variables, constraints and objective parts are created
@@ -263,9 +270,12 @@ class Link(Transformer):
     def constraint_group(self):
         return LinkBlock
 
+
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.custom.Link`
+
+    Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
 
@@ -346,6 +356,8 @@ class GenericCAES(Transformer):
         Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical output.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -412,7 +424,11 @@ class GenericCAES(Transformer):
 
 
 class GenericCAESBlock(SimpleBlock):
-    """Block for nodes of class:`.GenericCAES`."""
+    """Block for nodes of class:`.GenericCAES`.
+
+    Note: This component is experimental. Use it with care.
+
+    """
 
     CONSTRAINT_GROUP = True
 
@@ -709,6 +725,8 @@ class OffsetTransformer(Transformer):
         The tuple values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The sets, variables, constraints and objective parts are created
@@ -753,6 +771,8 @@ class OffsetTransformer(Transformer):
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.custom.OffsetTransformer`
+    
+    Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
 

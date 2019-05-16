@@ -1,5 +1,5 @@
 
-from nose.tools import eq_
+from nose.tools import eq_, raises
 from . import optimization_model, energysystem
 from oemof.outputlib import processing, views
 
@@ -9,7 +9,7 @@ class Filter_Test():
         self.results = processing.results(optimization_model)
         self.param_results = processing.parameter_as_dict(optimization_model)
 
-    def test_filter_all(self):
+    def test_filter_all_(self):
         nodes = views.filter_nodes(self.results)
         eq_(len(nodes), 19)
 
@@ -25,12 +25,35 @@ class Filter_Test():
         )
         eq_(len(nodes), 3)
 
+    def test_filter_only_sinks(self):
+        nodes = views.filter_nodes(
+            self.results,
+            option=views.NodeOption.HasOnlyInputs,
+            exclude_busses=True
+        )
+        eq_(len(nodes), 3)
+
+    def test_filter_no_sources(self):
+        nodes = views.filter_nodes(
+            self.results,
+            option=views.NodeOption.HasInputs,
+            exclude_busses=True
+        )
+        eq_(len(nodes), 9)
+
     def test_filter_has_outputs(self):
         nodes = views.filter_nodes(
             self.results,
             option='has_outputs'
         )
         eq_(len(nodes), 16)
+
+    @raises(ValueError)
+    def test_filter_has_something(self):
+        views.filter_nodes(
+            self.results,
+            option='has_something'
+        )
 
     def test_get_node_by_name(self):
         node = views.get_node_by_name(self.results, 'heat_pump')

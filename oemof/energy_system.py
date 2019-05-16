@@ -10,16 +10,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from functools import partial
-import collections.abc as cabc
+from pickle import UnpicklingError
 import logging
 import os
-import re
 
-import pandas as pd
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Bus, Component
+from oemof.network import Bus
 
 
 class EnergySystem:
@@ -122,9 +120,7 @@ class EnergySystem:
                 g(e, self.groups)
         self.results = kwargs.get('results')
 
-        self.timeindex = kwargs.get('timeindex',
-                                    pd.date_range(start=pd.to_datetime('today'),
-                                                  periods=1, freq='H'))
+        self.timeindex = kwargs.get('timeindex')
 
         self.temporal = kwargs.get('temporal')
 
@@ -133,16 +129,6 @@ class EnergySystem:
         for g in groupings:
             g(entity, groups)
         return groups
-
-
-    try:
-        from .tools.datapackage import deserialize_energy_system
-        from_datapackage = classmethod(deserialize_energy_system)
-    except ImportError as e:
-        @classmethod
-        def from_datapackage(cls, *args, **kwargs):
-            raise e
-
 
     def _add(self, entity):
         self.entities.append(entity)
@@ -154,6 +140,8 @@ class EnergySystem:
         """
         for n in nodes:
             self._add(n)
+            if hasattr(n, 'subnodes'):
+                self.add(*n.subnodes)
 
     @property
     def groups(self):
@@ -206,7 +194,28 @@ class EnergySystem:
         if filename is None:
             filename = 'es_dump.oemof'
 
-        self.__dict__ = pickle.load(open(os.path.join(dpath, filename), "rb"))
+        try:
+            self.__dict__ = pickle.load(
+                    open(os.path.join(dpath, filename), "rb"))
+        except UnpicklingError as e:
+            if str(e) == "state is not a dictionary":
+                raise UnpicklingError(
+                        "\n  "
+                        "Seems like you're trying to load an energy system "
+                        "dumped with an older\n  "
+                        "oemof version. Unfortunetaly we made changes which "
+                        "broke this from\n  "
+                        "v0.2.2 (more specifically commit `bec669b`) to its "
+                        "successor.\n  "
+                        "If you really need this functionality, please file "
+                        "a bug entitled\n\n    "
+                        '"Pickle customization removal breaks '
+                        '`EnergySystem.restore`"\n\n  '
+                        "at\n\n    "
+                        "https://github.com/oemof/oemof/issues\n\n  "
+                        "or comment on it if it already exists.")
+            raise e
+
         msg = ('Attributes restored from: {0}'.format(os.path.join(
             dpath, filename)))
         logging.debug(msg)

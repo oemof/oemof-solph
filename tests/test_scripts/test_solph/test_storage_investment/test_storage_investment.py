@@ -34,7 +34,10 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_
+from pickle import UnpicklingError
+
+from nose.tools import eq_, ok_
+
 from oemof.tools import economics
 
 import oemof.solph as solph
@@ -45,8 +48,12 @@ import logging
 import os
 import pandas as pd
 
+PP_GAS = None
 
-def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
+
+def test_optimise_storage_size(filename="storage_investment.csv",
+                               solver='cbc'):
+    global PP_GAS
 
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2012', periods=400, freq='H')
@@ -78,8 +85,8 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         actual_value=data['pv'], nominal_value=582000, fixed=True)})
 
     # Transformer
-    solph.Transformer(
-        label="pp_gas",
+    PP_GAS = solph.Transformer(
+        label='pp_gas',
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58})
@@ -90,7 +97,7 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_capacity=1/6,
         invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
@@ -106,6 +113,9 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     # Check dump and restore
     energysystem.dump()
+
+
+def test_results_with_actual_dump():
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -141,22 +151,39 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
     # Problem results
     eq_(meta['problem']['Lower bound'], 4.231675777e+17)
     eq_(meta['problem']['Upper bound'], 4.231675777e+17)
-    eq_(meta['problem']['Number of variables'], 2804)
-    eq_(meta['problem']['Number of constraints'], 2805)
-    eq_(meta['problem']['Number of nonzeros'], 7606)
+    eq_(meta['problem']['Number of variables'], 2805)
+    eq_(meta['problem']['Number of constraints'], 2806)
+    eq_(meta['problem']['Number of nonzeros'], 7608)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 
     # Objective function
     eq_(round(meta['objective']), 423167578261115584)
 
-    # **************************************************
-    # Test again with a stored dump created with v0.2.1dev (896a6d50)
 
+def test_results_with_old_dump():
+    """
+    Test again with a stored dump created with v0.2.1dev (896a6d50)
+    """
     energysystem = solph.EnergySystem()
-    energysystem.restore(dpath=os.path.dirname(os.path.realpath(__file__)),
-                         filename='es_dump_test.oemof')
+    error = None
+    try:
+        energysystem.restore(
+                dpath=os.path.dirname(os.path.realpath(__file__)),
+                filename='es_dump_test_2_1dev.oemof')
+    except UnpicklingError as e:
+        error = e
 
+    # Just making sure, the right error is raised. If the error message
+    # changes, the test has to be changed accordingly.
+    eq_(len(str(error)), 431)
+
+    # **************************************************
+    # Test again with a stored dump created with v0.2.3dev (896a6d50)
+    energysystem = solph.EnergySystem()
+    energysystem.restore(
+                dpath=os.path.dirname(os.path.realpath(__file__)),
+                filename='es_dump_test_2_3dev.oemof')
     results = energysystem.results['main']
 
     electricity_bus = views.node(results, 'electricity')
@@ -177,3 +204,20 @@ def test_optimise_storage_size(filename="storage_investment.csv", solver='cbc'):
 
     for key in stor_invest_dict.keys():
         eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+
+
+def test_solph_transformer_attributes_before_dump_and_after_restore():
+    """ dump/restore should preserve all attributes of `solph.Transformer`
+    """
+    energysystem = solph.EnergySystem()
+    energysystem.restore()
+
+    trsf_attr_before_dump = sorted(
+        [x for x in dir(PP_GAS) if '__' not in x])
+
+    trsf_attr_after_restore = sorted(
+        [x for x in dir(energysystem.groups['pp_gas']) if '__' not in x])
+
+    # Compare attributes before dump and after restore
+    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
+

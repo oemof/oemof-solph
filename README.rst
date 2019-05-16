@@ -31,7 +31,7 @@ To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 Installing oemof
 ================
 
-If you have a working Python3 environment, use pypi to install the latest oemof version.
+If you have a working Python3 environment, use pypi to install the latest oemof version. Python >= 3.5 is recommended. Lower versions may work but are not tested.
 
 .. code:: bash
 
