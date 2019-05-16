@@ -754,63 +754,11 @@ class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.custom.OffsetTransformer`
 
-     **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
+    **The following constraints are created:**
 
-    OFFSETTRANSFORMERS
-        A set :py:obj:`n` with all :class:`~oemof.solph.custom.OffsetTransformer` objects.
+    TODO: Add description for constraints
 
-    **The following variables are created:**
-    No additional decision variables are created.
-
-    **The following constraints are created for all OffsetTransformer:**
-
-        Relation between In- and Outflow of OffsetTransformer:
-
-          .. math::
-            &
-            flow(n, o, t) = C_1(n, t) \cdot flow(i, n, t) + C_0(n, t) \cdot status(i, n, t) \\
-            \\
-                \forall t \in \textrm{TIMESTEPS}, \\
-                \forall n \in \textrm{OFFSETTRANSFORMERS}, \\
-          Detail description
-                Variables:
-                    .. math:: flow
-                    .. math:: status
-                Parameters:
-                    .. math:: C_{0}
-                    .. math:: C_{1}
-                Indices:
-                    .. math:: n
-                    .. math:: i
-                    .. math:: o
-                    .. math:: t
-
-        More readable representation:
-
-          .. math::
-            &
-            P_{out}(t) = C_1 \cdot P_{in}(t) + C_0 \cdot Y(t) \\
-
-        Note: The coefficients can be defined by series in order to set a different
-        efficiency for every timestep.
-
-        ========================= ======================== =========
-        symbol                    explanation              attribute
-        ========================= ======================== =========
-        :math:`P_{out}(t)`        outflow power            :py:obj:`flow(n, o, t)` is the *flow* from the node :math:`n`
-                                                           to the outflow node :math:`o` at timestep :math:`t`
-        :math:`P_{in}(t)`         inflow power             :py:obj:`flow(i, n, t)` is the *flow* from the inflow
-                                                           node :math:`i` to the node :math:`n` at timestep :math:`t`
-        :math:`Y(t)`              binary status variable   :py:obj:`status(i, n, t)` is the status of the *flow* from the
-                                                           inflow node :math:`i` to the node :math:`n` at timestep :math:`t`
-        :math:`C_1`               linear coefficient 1
-
-        :math:`C_0`               linear coefficient 0
-
-        ========================= ======================== =========
-
-        TODO: Add test
+    TODO: Add test
 
     """
     CONSTRAINT_GROUP = True
