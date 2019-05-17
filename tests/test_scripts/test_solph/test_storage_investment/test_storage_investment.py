@@ -153,7 +153,7 @@ def test_results_with_actual_dump():
     eq_(meta['problem']['Upper bound'], 4.231675777e+17)
     eq_(meta['problem']['Number of variables'], 2805)
     eq_(meta['problem']['Number of constraints'], 2806)
-    eq_(meta['problem']['Number of nonzeros'], 7608)
+    eq_(meta['problem']['Number of nonzeros'], 1197)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 
