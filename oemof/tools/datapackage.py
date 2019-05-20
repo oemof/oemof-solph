@@ -52,7 +52,8 @@ def remap(attributes, translations, target_class):
     for c in mro():
         if c in translations:
             break
-    return {translations.get(c, {}).get(k, k): v for k, v in attributes.items()}
+    return {
+        translations.get(c, {}).get(k, k): v for k, v in attributes.items()}
 
 
 def sequences(r, timeindices=None):
@@ -92,9 +93,9 @@ def read_facade(facade, facades, create, typemap, data, objects,
             facade[field] = facades[facade[field][reference['fields']]]
         else:
             foreign_keys = {fk["fields"]: fk["reference"]
-                for fk in (resources(reference["resource"])
-                           .descriptor['schema']
-                           .get("foreignKeys", ()))}
+                            for fk in (resources(reference["resource"])
+                            .descriptor['schema']
+                            .get("foreignKeys", ()))}
             facade[field] = read_facade(
                 facade[field], facades, create, typemap, data, objects,
                 sequence_names, foreign_keys, resources)
@@ -109,8 +110,14 @@ def read_facade(facade, facades, create, typemap, data, objects,
 
 
 def deserialize_energy_system(cls, path,
-                              typemap={},
-                              attributemap={}):
+                              typemap=None,
+                              attributemap=None):
+
+    if typemap is None:
+        typemap = {}
+    if attributemap is None:
+        attributemap = {}
+
     cast_error_msg = (
         "Metadata structure of resource `{}` does not match data " +
         "structure. Check the column names, types and their order.")
@@ -266,7 +273,8 @@ def deserialize_energy_system(cls, path,
         for mapping in (typemap.get(bus.get('type', 'bus')),)}
 
     def resolve_object_references(source, f=None):
-        """ Check whether any key in `source` is a reference to a `name`d object.
+        """
+        Check whether any key in `source` is a reference to a `name`d object.
         """
         def find(n, d):
             found = []
@@ -324,9 +332,9 @@ def deserialize_energy_system(cls, path,
                     ("Could not read data for resource with name `{}`. " +
                      " Maybe wrong foreign keys?").format(r.name))
 
-            foreign_keys =\
-                {fk["fields"]: fk["reference"]
-                 for fk in r.descriptor['schema'].get("foreignKeys", ())}
+            foreign_keys = {
+                fk["fields"]: fk["reference"]
+                for fk in r.descriptor['schema'].get("foreignKeys", ())}
             for facade in facade_data:
                 # convert decimal to float
                 for f, v in facade.items():
@@ -344,8 +352,8 @@ def deserialize_energy_system(cls, path,
         # look for temporal resource and if present, take as timeindex from it
         if package.get_resource('temporal'):
             temporal = pd.DataFrame.from_dict(
-                package.get_resource('temporal').\
-                    read(keyed=True)).set_index('timeindex').astype(float)
+                package.get_resource('temporal').
+                read(keyed=True)).set_index('timeindex').astype(float)
             # for correct freq setting of timeindex
             temporal.index = pd.DatetimeIndex(
                 temporal.index.values, freq=temporal.index.inferred_freq,
