@@ -1290,16 +1290,14 @@ class OffsetTransformer(network.Transformer):
 
     coefficients : solph.sequence or tuple
         Tuple containing the first two polynomial coefficients
-        i.e. the y-intersect and slope of a linear equation.
+        i.e. the y-intersection and slope of a linear equation.
         The tuple values can either be a scalar or a sequence with length
         of time horizon for simulation.
-
-    Note: This component is experimental. Use it with care.
 
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.OffsetTransformer`
+     * :py:class:`~oemof.solph.components.OffsetTransformerBlock`
 
     Examples
     --------
@@ -1341,17 +1339,31 @@ class OffsetTransformer(network.Transformer):
 
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.custom.OffsetTransformer`
-
-    Note: This component is experimental. Use it with care.
+    :class:`~oemof.solph.components.OffsetTransformer`
 
     **The following constraints are created:**
 
-    TODO: Add description for constraints
+    .. math::
+        &
+        P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
 
-    TODO: Add test
 
+    ========================= ======================== =========
+    symbol                    explanation              attribute
+    ========================= ======================== =========
+    :math:`P_{out}(t)`        output flow              :py:obj:`flow[n, o, t]`
+
+    :math:`P_{in}(t)`         input flow               :py:obj:`flow[i, n, t]`
+
+    :math:`Y(t)`              binary status variable   :py:obj:`status[i, n, t]`
+                              of nonconvex input flow
+    :math:`C_1(t)`            linear coefficient 1     :py:obj:`coefficients[1][n, t]`
+                              (slope)
+    :math:`C_0(t)`            linear coefficient 0     :py:obj:`coefficients[0][n, t]`
+                              (y-intersection)
+    ========================= ======================== =========
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
