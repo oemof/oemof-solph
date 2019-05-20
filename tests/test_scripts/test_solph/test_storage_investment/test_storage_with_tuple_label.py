@@ -172,7 +172,7 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     eq_(int(meta['problem']['Upper bound']), 37819254)
     eq_(meta['problem']['Number of variables'], 281)
     eq_(meta['problem']['Number of constraints'], 163)
-    eq_(meta['problem']['Number of nonzeros'], 521)
+    eq_(meta['problem']['Number of nonzeros'], 116)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 
