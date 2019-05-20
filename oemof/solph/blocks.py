@@ -450,8 +450,8 @@ class Bus(SimpleBlock):
 
     Bus balance  :attr:`om.Bus.balance[i, o, t]`
       .. math::
-        \sum_{i \in INPUTS(n)} flow(i, n, t) \cdot \tau =
-        \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau, \\
+        \sum_{i \in INPUTS(n)} flow(i, n, t) =
+        \sum_{o \in OUTPUTS(n)} flow(n, o, t), \\
         \forall n \in \textrm{BUSES},
         \forall t \in \textrm{TIMESTEPS}.
     """
@@ -481,10 +481,8 @@ class Bus(SimpleBlock):
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    lhs = sum(m.flow[i, n, t] * m.timeincrement[t]
-                              for i in I[n])
-                    rhs = sum(m.flow[n, o, t] * m.timeincrement[t]
-                              for o in O[n])
+                    lhs = sum(m.flow[i, n, t] for i in I[n])
+                    rhs = sum(m.flow[n, o, t] for o in O[n])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
