@@ -53,7 +53,7 @@ def test_gen_ostf():
         bel: solph.Flow(variable_costs=data['price_el'])})
 
     # generic chp
-    solph.custom.OffsetTransformer(
+    solph.components.OffsetTransformer(
         label='heat_pump',
         inputs={bel: solph.Flow(
             nominal_value=100,
@@ -62,7 +62,7 @@ def test_gen_ostf():
             nonconvex=solph.NonConvex()
             )},
         outputs={bth: solph.Flow()},
-        coefficients=[0, 2])
+        coefficients=(0, 2))
 
     # create an optimization problem and solve it
     om = solph.Model(es)
