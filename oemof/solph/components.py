@@ -1083,13 +1083,6 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
     :class:`~oemof.solph.components.ExtractionTurbineCHP`
 
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    VARIABLE_FRACTION_TRANSFORMERS
-        A set with all
-        :class:`~oemof.solph.components.ExtractionTurbineCHP` objects.
-
     **The following two constraints are created:**
 
     .. _ETCHP-equations:
