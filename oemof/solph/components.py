@@ -810,9 +810,9 @@ class GenericCHPBlock(SimpleBlock):
 
     .. math::
         &
-        \eta_{el,max,woDH} = \frac{P_{el,max,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,max,woDH}(t)}\\
+        \eta_{el,max,woDH}(t) = \frac{P_{el,max,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,max,woDH}(t)}\\
         &
-        \eta_{el,min,woDH} = \frac{P_{el,min,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,min,woDH}(t)}\\
+        \eta_{el,min,woDH}(t) = \frac{P_{el,min,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,min,woDH}(t)}\\
 
     =============================== ======================== =========
     math. symbol                    explanation              attribute
@@ -1096,18 +1096,18 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
         .. math::
             &
-            \dot H_{Fuel} =
-            \frac{P_{el} + \dot Q_{th} \cdot \beta}
-                 {\eta_{el,woExtr}} \\
+            (1)\dot H_{Fuel}(t) =
+               \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
+                 {\eta_{el,woExtr}(t)} \\
             &
-            P_{el} \geq \dot Q_{th} \cdot
-            \frac{\eta_{el,maxExtr}}
-                 {\eta_{th,maxExtr}}
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot
+               \frac{\eta_{el,maxExtr}(t)}
+                 {\eta_{th,maxExtr}(t)}
 
     where :math:`\beta` is defined as:
     
          .. math::
-            \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr}}
+            \beta(t) = \frac{\eta_{el,woExtr}(t) - \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 
     where the first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
