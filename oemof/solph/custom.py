@@ -412,7 +412,23 @@ class GenericCAES(Transformer):
 
 
 class GenericCAESBlock(SimpleBlock):
-    """Block for nodes of class:`.GenericCAES`."""
+    r"""Block for nodes of class:`.GenericCAES`.
+
+    .. _GenericCAES-equations:
+
+    .. math::
+    &
+    (2)\qquad P_{cmp\_max}(t) = b_{cmp\_max} \\
+
+    ============================= =========== ====================== =====
+    math. symbol                  attribute   explanation            type
+    ============================= =========== ====================== =====
+    :math:`\dot{P}_{cmp}`                     summed heat flow       var
+                                              in compression
+    ============================= =========== ====================== =====
+
+
+    """
 
     CONSTRAINT_GROUP = True
 
