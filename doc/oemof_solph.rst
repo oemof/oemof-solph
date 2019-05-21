@@ -397,6 +397,7 @@ example in the `oemof example repository
 .. _oemof_solph_components_generic_caes_label:
 
 GenericCAES (component)
+GenericCAES (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
