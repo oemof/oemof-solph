@@ -599,14 +599,16 @@ The following example describes a battery with flows coupled to the capacity of 
 OffsetTransformer (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `OffsetTransformer` object makes it possible to create a Transformer with different efficiencies in part load condition. For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load. The following example illustrates how to define an OffsetTransformer:
+The `OffsetTransformer` object makes it possible to create a Transformer with different efficiencies in part load condition.
+For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load.
+The following example illustrates how to define an OffsetTransformer for given information for the output:
 
 .. code-block:: python
 
     eta_min = 0.5       # efficiency at minimal operation point
     eta_max = 0.8       # efficiency at nominal operation point
-    P_out_min = 20      # absolute minimal Power
-    P_out_max = 100     # absolute nominal Power
+    P_out_min = 20      # absolute minimal output power
+    P_out_max = 100     # absolute nominal output power
 
     # calculate limits of input power flow
     P_in_min = P_out_min / eta_min
@@ -641,12 +643,12 @@ The following figures illustrate the relations:
 
 Now, it becomes clear, why this object has been named `OffsetTransformer`. The
 linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
-the Offset *'c0'* with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
+the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. math::
-
-    P_{out}(t) = C_1 \cdot P_{in}(t) + C_0 \cdot status(t)
+.. include:: ../oemof/solph/components.py
+  :start-after: _OffsetTransformer-equations:
+  :end-before: """
 
 The following figures shows the efficiency dependent on the output power,
 which results in a nonlinear relation:
@@ -659,6 +661,8 @@ which results in a nonlinear relation:
    :width: 70 %
    :alt: OffsetTransformer_efficiency.svg
    :align: center
+
+The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 
 .. note:: See the :py:class:`~oemof.solph.components.OffsetTransformer` class for all parameters and the mathematical background.
 

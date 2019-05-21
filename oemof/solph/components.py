@@ -1343,6 +1343,8 @@ class OffsetTransformerBlock(SimpleBlock):
 
     **The following constraints are created:**
 
+    .. _OffsetTransformer-equations:
+
     .. math::
         &
         P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
