@@ -1350,20 +1350,23 @@ class OffsetTransformerBlock(SimpleBlock):
         P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
 
 
-    ========================= ======================== =========
-    symbol                    explanation              attribute
-    ========================= ======================== =========
-    :math:`P_{out}(t)`        output flow              :py:obj:`flow[n, o, t]`
+    ========================= ====== ======================== =========
+    symbol                    type*  explanation              attribute
+    ========================= ====== ======================== =========
+    :math:`P_{out}(t)`        V      output flow              :py:obj:`flow[n, o, t]`
 
-    :math:`P_{in}(t)`         input flow               :py:obj:`flow[i, n, t]`
+    :math:`P_{in}(t)`         V      input flow               :py:obj:`flow[i, n, t]`
 
-    :math:`Y(t)`              binary status variable   :py:obj:`status[i, n, t]`
-                              of nonconvex input flow
-    :math:`C_1(t)`            linear coefficient 1     :py:obj:`coefficients[1][n, t]`
-                              (slope)
-    :math:`C_0(t)`            linear coefficient 0     :py:obj:`coefficients[0][n, t]`
-                              (y-intersection)
-    ========================= ======================== =========
+    :math:`Y(t)`              V      binary status variable   :py:obj:`status[i, n, t]`
+                                     of nonconvex input flow
+    :math:`C_1(t)`            P      linear coefficient 1     :py:obj:`coefficients[1][n, t]`
+                                     (slope)
+    :math:`C_0(t)`            P      linear coefficient 0     :py:obj:`coefficients[0][n, t]`
+                                     (y-intersection)
+    ========================= ====== ======================== =========
+
+    \*) V: Decision Variable; P: Parameter
+
     """
 
     CONSTRAINT_GROUP = True
