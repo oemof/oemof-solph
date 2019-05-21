@@ -1354,8 +1354,8 @@ class OffsetTransformerBlock(SimpleBlock):
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
 
-        ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "output flow"
-        ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","input flow"
+        ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "Power of output"
+        ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","Power of input"
         ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V", "binary status variable of nonconvex input flow "
         ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear coefficient 1 (slope)"
         ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear coefficient 0 (y-intersection)"
