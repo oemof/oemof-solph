@@ -769,11 +769,9 @@ class GenericCHPBlock(SimpleBlock):
     Block for the relation of the :math:`n` nodes with
     type class:`.GenericCHP`.
 
-    TODO: Add test
-
     **The following constraints are created:**
 
-    .. _GenericCHP-equations:
+    .. _GenericCHP-equations1-10:
 
     .. math::
         &
@@ -783,77 +781,95 @@ class GenericCHPBlock(SimpleBlock):
         &
         (3)\qquad P_{el}(t) = power\ output\\
         &
-        (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,woDH}(t)\\
+        (4)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot
+        P_{el,woDH}(t)\\
         &
-        (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot ( P_{el}(t) + \beta \cdot \dot{Q}(t) )\\
+        (5)\qquad \dot{H}_F(t) = \alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot
+        ( P_{el}(t) + \beta \cdot \dot{Q}(t) )\\
         &
-        (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot \frac{P_{el, max, woDH}(t)}{\eta_{el,max,woDH}(t)}\\
+        (6)\qquad \dot{H}_F(t) \leq Y(t) \cdot
+        \frac{P_{el, max, woDH}(t)}{\eta_{el,max,woDH}(t)}\\
         &
-        (7)\qquad \dot{H}_F(t) \geq Y(t) \cdot \frac{P_{el, min, woDH}(t)}{\eta_{el,min,woDH}(t)}\\
+        (7)\qquad \dot{H}_F(t) \geq Y(t) \cdot
+        \frac{P_{el, min, woDH}(t)}{\eta_{el,min,woDH}(t)}\\
         &
-        (8)\qquad \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemax}(t)\\
+        (8)\qquad \dot{H}_{L,FG,max}(t) = \dot{H}_F(t) \cdot
+        \dot{H}_{L,FG,sharemax}(t)\\
         &
-        (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot \dot{H}_{L,FG,sharemin}(t)\\
+        (9)\qquad \dot{H}_{L,FG,min}(t) = \dot{H}_F(t) \cdot
+        \dot{H}_{L,FG,sharemin}(t)\\
         &
-        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) = / \leq \dot{H}_F(t)
+        (10)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,max}(t) +
+        \dot{Q}_{CW, min}(t) \cdot Y(t) = / \leq \dot{H}_F(t)\\
 
     where :math:`= / \leq` depends on the CHP being back pressure or not.
-    If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
-
-    .. math::
-        &
-        (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) + \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
-
 
     The coefficients :math:`\alpha_0` and :math:`\alpha_1`
     can be determined given the efficiencies maximal/minimal load:
 
     .. math::
         &
-        \eta_{el,max,woDH}(t) = \frac{P_{el,max,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,max,woDH}(t)}\\
+        \eta_{el,max,woDH}(t) = \frac{P_{el,max,woDH}(t)}{\alpha_0(t)
+        \cdot Y(t) + \alpha_1(t) \cdot P_{el,max,woDH}(t)}\\
         &
-        \eta_{el,min,woDH}(t) = \frac{P_{el,min,woDH}(t)}{\alpha_0(t) \cdot Y(t) + \alpha_1(t) \cdot P_{el,min,woDH}(t)}\\
+        \eta_{el,min,woDH}(t) = \frac{P_{el,min,woDH}(t)}{\alpha_0(t)
+        \cdot Y(t) + \alpha_1(t) \cdot P_{el,min,woDH}(t)}\\
 
-    =============================== ======================== =========
-    math. symbol                    explanation              attribute
-    =============================== ======================== =========
-    :math:`\dot{H}_{F}`             input of enthalpy        :py:obj:`H_F[n,t]`
-                                    through fuel input
-    :math:`P_{el}`                  provided                 :py:obj:`P[n,t]`
-                                    electric power
-    :math:`P_{el,woDH}`             electric power without   :py:obj:`P_woDH[n,t]`
-                                    district heating
-    :math:`P_{el,min,woDH}`         min. electric power      :py:obj:`P_min_woDH[n,t]`
-                                    without district heating
-    :math:`P_{el,max,woDH}`         max. electric power      :py:obj:`P_max_woDH[n,t]`
-                                    without district heating
-    :math:`\dot{Q}`                 provided heat            :py:obj:`Q[n,t]`
 
-    :math:`\dot{Q}_{CW, min}`       minimal therm. condenser :py:obj:`Q_CW_min[n,t]`
-                                    load to cooling water
-    :math:`\dot{H}_{L,FG,min}`      flue gas enthalpy loss   :py:obj:`H_L_FG_min[n,t]`
-                                    at min heat extraction
-    :math:`\dot{H}_{L,FG,max}`      flue gas enthalpy loss   :py:obj:`H_L_FG_max[n,t]`
-                                    at max heat extraction
-    :math:`\dot{H}_{L,FG,sharemin}` share of flue gas loss   :py:obj:`H_L_FG_share_min[n,t]`
-                                    at min heat extraction
-    :math:`\dot{H}_{L,FG,sharemax}` share of flue gas loss   :py:obj:`H_L_FG_share_max[n,t]`
-                                    at max heat extraction
-    :math:`Y`                       status variable          :py:obj:`Y[n,t]`
-                                    on/off
-    :math:`\alpha_0`                coefficient              :py:obj:`n.alphas[0][n,t]`
-                                    describing efficiency
-    :math:`\alpha_1`                coefficient              :py:obj:`n.alphas[1][n,t]`
-                                    describing efficiency
-    :math:`\beta`                   power loss index         :py:obj:`Beta[n,t]`
+    **For the attribute** :math:`\dot{H}_{L,FG,min}` **being not None**,
+    e.g. for a motoric CHP, **the following is created:**
 
-    :math:`\eta_{el,min,woDH}`      el. eff. at min. fuel    :py:obj:`Eta_el_min_woDH[n,t]`
-                                    flow w/o distr. heating
-    :math:`\eta_{el,max,woDH}`      el. eff. at max. fuel    :py:obj:`Eta_el_max_woDH[n,t]`
-                                    flow w/o distr. heating
+        **Constraint:**
 
-    =============================== ======================== =========
+    .. _GenericCHP-equations11:
 
+    .. math::
+        &
+        (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) +
+        \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
+
+    .. table:: Variables (V) and Parameters (P)
+
+       =============================== =============================== ==== =======================
+       math. symbol                    attribute                       type explanation
+       =============================== =============================== ==== =======================
+       :math:`\dot{H}_{F}`             :py:obj:`H_F[n,t]`              V    input of enthalpy
+                                                                            through fuel input
+       :math:`P_{el}`                  :py:obj:`P[n,t]`                V    provided
+                                                                            electric power
+       :math:`P_{el,woDH}`             :py:obj:`P_woDH[n,t]`           V    electric power without
+                                                                            district heating
+       :math:`P_{el,min,woDH}`         :py:obj:`P_min_woDH[n,t]`       P    min. electric power
+                                                                            without district heating
+       :math:`P_{el,max,woDH}`         :py:obj:`P_max_woDH[n,t]`       P    max. electric power
+                                                                            without district heating
+       :math:`\dot{Q}`                 :py:obj:`Q[n,t]`                V    provided heat
+
+       :math:`\dot{Q}_{CW, min}`       :py:obj:`Q_CW_min[n,t]`         P    minimal therm. condenser
+                                                                            load to cooling water
+       :math:`\dot{H}_{L,FG,min}`      :py:obj:`H_L_FG_min[n,t]`       V    flue gas enthalpy loss
+                                                                            at min heat extraction
+       :math:`\dot{H}_{L,FG,max}`      :py:obj:`H_L_FG_max[n,t]`       V    flue gas enthalpy loss
+                                                                            at max heat extraction
+       :math:`\dot{H}_{L,FG,sharemin}` :py:obj:`H_L_FG_share_min[n,t]` P    share of flue gas loss
+                                                                            at min heat extraction
+       :math:`\dot{H}_{L,FG,sharemax}` :py:obj:`H_L_FG_share_max[n,t]` P    share of flue gas loss
+                                                                            at max heat extraction
+       :math:`Y`                       :py:obj:`Y[n,t]`                V    status variable
+                                                                            on/off
+       :math:`\alpha_0`                :py:obj:`n.alphas[0][n,t]`      P    coefficient
+                                                                            describing efficiency
+       :math:`\alpha_1`                :py:obj:`n.alphas[1][n,t]`      P    coefficient
+                                                                            describing efficiency
+       :math:`\beta`                   :py:obj:`Beta[n,t]`             P    power loss index
+
+       :math:`\eta_{el,min,woDH}`      :py:obj:`Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel
+                                                                            flow w/o distr. heating
+       :math:`\eta_{el,max,woDH}`      :py:obj:`Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
+                                                                            flow w/o distr. heating
+       =============================== =============================== ==== =======================
+
+    TODO: Add test
 
     """
     CONSTRAINT_GROUP = True
