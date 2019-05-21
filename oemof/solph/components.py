@@ -1350,22 +1350,15 @@ class OffsetTransformerBlock(SimpleBlock):
         P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
 
 
-    ========================= ====== ======================== =========
-    symbol                    type*  explanation              attribute
-    ========================= ====== ======================== =========
-    :math:`P_{out}(t)`        V      output flow              :py:obj:`flow[n, o, t]`
+    .. csv-table:: Variables (V) and Parameters (P)
+        :header: "symbol", "attribute", "type", "explanation"
+        :widths: 1, 1, 1, 1
 
-    :math:`P_{in}(t)`         V      input flow               :py:obj:`flow[i, n, t]`
-
-    :math:`Y(t)`              V      binary status variable   :py:obj:`status[i, n, t]`
-                                     of nonconvex input flow
-    :math:`C_1(t)`            P      linear coefficient 1     :py:obj:`coefficients[1][n, t]`
-                                     (slope)
-    :math:`C_0(t)`            P      linear coefficient 0     :py:obj:`coefficients[0][n, t]`
-                                     (y-intersection)
-    ========================= ====== ======================== =========
-
-    \*) V: Decision Variable; P: Parameter
+        ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "output flow"
+        ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","input flow"
+        ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V", "binary status variable of nonconvex input flow "
+        ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear coefficient 1 (slope)"
+        ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear coefficient 0 (y-intersection)"
 
     """
 
