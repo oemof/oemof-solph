@@ -828,8 +828,6 @@ class GenericCHPBlock(SimpleBlock):
         (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) +
         \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
     =============================== =============================== ==== =======================
@@ -870,9 +868,8 @@ class GenericCHPBlock(SimpleBlock):
     :math:`\eta_{el,max,woDH}`      :py:obj:`Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
                                                                          flow w/o distr. heating
     =============================== =============================== ==== =======================
-=======
-=======
->>>>>>> 8fe334f2d644ff9ca3a704700feaf776187c439e
+
+
     .. table:: Variables (V) and Parameters (P)
 
        =============================== =============================== ==== =======================
@@ -913,12 +910,6 @@ class GenericCHPBlock(SimpleBlock):
        :math:`\eta_{el,max,woDH}`      :py:obj:`Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
                                                                             flow w/o distr. heating
        =============================== =============================== ==== =======================
-<<<<<<< HEAD
->>>>>>> 8fe334f2d644ff9ca3a704700feaf776187c439e
-=======
->>>>>>> 8fe334f2d644ff9ca3a704700feaf776187c439e
-
-    TODO: Add test
 
     """
     CONSTRAINT_GROUP = True
