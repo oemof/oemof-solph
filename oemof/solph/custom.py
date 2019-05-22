@@ -416,6 +416,67 @@ class GenericCAESBlock(SimpleBlock):
 
     **The following variables are created:**
 
+    :math:`ST_{cmp}(t)`
+    -- Status of compression (binary)
+
+    :math:`P_{cmp}(t)`
+    -- Compression power
+
+    :math:`P_{cmp\_max}(t)`
+    -- Max compression power
+
+    :math:`\dot{Q}_{cmp}(t)`
+    -- Summed heat flow in compression
+
+    :math:`\dot{Q}_{cmp\_out}(t)`
+    --  Waste heat flow from compression
+
+    :math:`ST_{exp}(t)`
+    -- Status of expansion (binary)
+
+    :math:`P_{exp}(t)`
+    -- Expansion power
+
+    :math:`P_{exp\_max}(t)`
+    -- Max. expansion power
+
+    :math:`\dot{Q}_{exp}(t)`
+    -- Summed heat flow in expansion
+
+    :math:`\dot{Q}_{exp\_in}(t)`
+    -- (external) heat flow into expansion,
+    e.g. heat flow of natural gas co-firing
+
+    :math:`\dot{Q}_{exp\_add}(t)`
+    -- Additional heat flow into expansion
+
+    :math:`CAV_{fil}(t)`
+    -- Filling level if CAE
+
+    :math:`\dot{E}_{cas\_in}(t)`
+    -- Exergy flow into CAS
+
+    :math:`\dot{E}_{cas\_out}(t)`
+    -- Exergy flow from CAS
+
+    :math:`TES_{fil}(t)`
+    -- Filling level of Thermal Energy Storage (TES)
+
+    :math:`\dot{Q}_{tes\_in}(t)`
+    -- Heat flow into TES
+
+    :math:`\dot{Q}_{tes\_out}(t)`
+    -- Heat flow from TES
+
+    :math:`P_{cmp\_spot}(t)`
+    -- Compression power at spot market (*Not
+    used in the constraints*)
+
+    :math:`P_{exp\_spot}(t)`
+    -- Expansion power at spot market (*Not
+    used in the constraints*)
+
+
     **The following constraints are created:**
 
     .. _GenericCAES-equations:
