@@ -400,6 +400,7 @@ GenericCAES (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
+The following constraints describe the CAES:
 
 .. include:: ../oemof/solph/custom.py
   :start-after: _GenericCAES-equations:
