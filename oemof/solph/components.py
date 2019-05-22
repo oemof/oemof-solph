@@ -869,48 +869,6 @@ class GenericCHPBlock(SimpleBlock):
                                                                          flow w/o distr. heating
     =============================== =============================== ==== =======================
 
-
-    .. table:: Variables (V) and Parameters (P)
-
-       =============================== =============================== ==== =======================
-       math. symbol                    attribute                       type explanation
-       =============================== =============================== ==== =======================
-       :math:`\dot{H}_{F}`             :py:obj:`H_F[n,t]`              V    input of enthalpy
-                                                                            through fuel input
-       :math:`P_{el}`                  :py:obj:`P[n,t]`                V    provided
-                                                                            electric power
-       :math:`P_{el,woDH}`             :py:obj:`P_woDH[n,t]`           V    electric power without
-                                                                            district heating
-       :math:`P_{el,min,woDH}`         :py:obj:`P_min_woDH[n,t]`       P    min. electric power
-                                                                            without district heating
-       :math:`P_{el,max,woDH}`         :py:obj:`P_max_woDH[n,t]`       P    max. electric power
-                                                                            without district heating
-       :math:`\dot{Q}`                 :py:obj:`Q[n,t]`                V    provided heat
-
-       :math:`\dot{Q}_{CW, min}`       :py:obj:`Q_CW_min[n,t]`         P    minimal therm. condenser
-                                                                            load to cooling water
-       :math:`\dot{H}_{L,FG,min}`      :py:obj:`H_L_FG_min[n,t]`       V    flue gas enthalpy loss
-                                                                            at min heat extraction
-       :math:`\dot{H}_{L,FG,max}`      :py:obj:`H_L_FG_max[n,t]`       V    flue gas enthalpy loss
-                                                                            at max heat extraction
-       :math:`\dot{H}_{L,FG,sharemin}` :py:obj:`H_L_FG_share_min[n,t]` P    share of flue gas loss
-                                                                            at min heat extraction
-       :math:`\dot{H}_{L,FG,sharemax}` :py:obj:`H_L_FG_share_max[n,t]` P    share of flue gas loss
-                                                                            at max heat extraction
-       :math:`Y`                       :py:obj:`Y[n,t]`                V    status variable
-                                                                            on/off
-       :math:`\alpha_0`                :py:obj:`n.alphas[0][n,t]`      P    coefficient
-                                                                            describing efficiency
-       :math:`\alpha_1`                :py:obj:`n.alphas[1][n,t]`      P    coefficient
-                                                                            describing efficiency
-       :math:`\beta`                   :py:obj:`Beta[n,t]`             P    power loss index
-
-       :math:`\eta_{el,min,woDH}`      :py:obj:`Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel
-                                                                            flow w/o distr. heating
-       :math:`\eta_{el,max,woDH}`      :py:obj:`Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
-                                                                            flow w/o distr. heating
-       =============================== =============================== ==== =======================
-
     """
     CONSTRAINT_GROUP = True
 
