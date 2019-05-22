@@ -666,7 +666,7 @@ class GenericCAESBlock(SimpleBlock):
         self.cmp_st_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_max_constr_rule)
 
-        # Compression: Heat flow out
+        # (7) Compression: Heat flow out
         def cmp_q_out_constr_rule(block, n, t):
             return (self.cmp_q_out_sum[n, t] ==
                     n.params['cmp_q_out_m'] * self.cmp_p[n, t] +
@@ -674,21 +674,21 @@ class GenericCAESBlock(SimpleBlock):
         self.cmp_q_out_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_constr_rule)
 
-        # Compression: Definition of single heat flows
+        #  (8) Compression: Definition of single heat flows
         def cmp_q_out_sum_constr_rule(block, n, t):
             return (self.cmp_q_out_sum[n, t] == self.cmp_q_waste[n, t] +
                     self.tes_e_in[n, t])
         self.cmp_q_out_sum_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_sum_constr_rule)
 
-        # Compression: Heat flow out ratio
+        # (9) Compression: Heat flow out ratio
         def cmp_q_out_shr_constr_rule(block, n, t):
             return (self.cmp_q_waste[n, t] * n.params['cmp_q_tes_share'] ==
                     self.tes_e_in[n, t] * (1 - n.params['cmp_q_tes_share']))
         self.cmp_q_out_shr_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_shr_constr_rule)
 
-        # Expansion: Capacity on markets
+        # (10) Expansion: Capacity on markets
         def exp_p_constr_rule(block, n, t):
             expr = 0
             expr += -self.exp_p[n, t]
@@ -697,7 +697,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_p_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule)
 
-        # Expansion: Max. capacity depending on cavern filling level
+        # (11-12) Expansion: Max. capacity depending on cavern filling level
         def exp_p_max_constr_rule(block, n, t):
             if t != 0:
                 return (self.exp_p_max[n, t] ==
@@ -708,18 +708,20 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_constr_rule)
 
+        # (13)
         def exp_p_max_area_constr_rule(block, n, t):
             return (self.exp_p[n, t] <= self.exp_p_max[n, t])
         self.exp_p_max_area_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_area_constr_rule)
 
-        # Expansion: Status of operation (on/off)
+        # (14) Expansion: Status of operation (on/off)
         def exp_st_p_min_constr_rule(block, n, t):
             return (
                 self.exp_p[n, t] >= n.params['exp_p_min'] * self.exp_st[n, t])
         self.exp_st_p_min_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_min_constr_rule)
 
+        # (15)
         def exp_st_p_max_constr_rule(block, n, t):
             return (self.exp_p[n, t] <=
                     (n.params['exp_p_max_m'] * n.params['cav_level_max'] +
@@ -727,7 +729,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_st_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_max_constr_rule)
 
-        # Expansion: Heat flow in
+        # (16) Expansion: Heat flow in
         def exp_q_in_constr_rule(block, n, t):
             return (self.exp_q_in_sum[n, t] ==
                     n.params['exp_q_in_m'] * self.exp_p[n, t] +
@@ -735,7 +737,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_q_in_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_constr_rule)
 
-        # Expansion: Fuel allocation
+        # (17) Expansion: Fuel allocation
         def exp_q_fuel_constr_rule(block, n, t):
             expr = 0
             expr += -self.exp_q_fuel_in[n, t]
@@ -744,14 +746,14 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_q_fuel_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
 
-        # Expansion: Definition of single heat flows
+        # (18) Expansion: Definition of single heat flows
         def exp_q_in_sum_constr_rule(block, n, t):
             return (self.exp_q_in_sum[n, t] == self.exp_q_fuel_in[n, t] +
                     self.tes_e_out[n, t] + self.exp_q_add_in[n, t])
         self.exp_q_in_sum_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_sum_constr_rule)
 
-        # Expansion: Heat flow in ratio
+        # (19) Expansion: Heat flow in ratio
         def exp_q_in_shr_constr_rule(block, n, t):
             return (n.params['exp_q_tes_share'] * self.exp_q_fuel_in[n, t] ==
                     (1 - n.params['exp_q_tes_share']) *
@@ -759,7 +761,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_q_in_shr_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_shr_constr_rule)
 
-        # Cavern: Energy inflow
+        # (20) Cavern: Energy inflow
         def cav_e_in_constr_rule(block, n, t):
             return (self.cav_e_in[n, t] ==
                     n.params['cav_e_in_m'] * self.cmp_p[n, t] +
@@ -767,7 +769,7 @@ class GenericCAESBlock(SimpleBlock):
         self.cav_e_in_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_e_in_constr_rule)
 
-        # Cavern: Energy outflow
+        # (21) Cavern: Energy outflow
         def cav_e_out_constr_rule(block, n, t):
             return (self.cav_e_out[n, t] ==
                     n.params['cav_e_out_m'] * self.exp_p[n, t] +
@@ -775,7 +777,7 @@ class GenericCAESBlock(SimpleBlock):
         self.cav_e_out_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_e_out_constr_rule)
 
-        # Cavern: Storage balance
+        # (22-23) Cavern: Storage balance
         def cav_eta_constr_rule(block, n, t):
             if t != 0:
                 return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
@@ -788,13 +790,13 @@ class GenericCAESBlock(SimpleBlock):
         self.cav_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule)
 
-        # Cavern: Upper bound
+        # (24) Cavern: Upper bound
         def cav_ub_constr_rule(block, n, t):
             return (self.cav_level[n, t] <= n.params['cav_level_max'])
         self.cav_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule)
 
-        # TES: Storage balance
+        # (25-26) TES: Storage balance
         def tes_eta_constr_rule(block, n, t):
             if t != 0:
                 return (self.tes_level[n, t] ==
@@ -807,7 +809,7 @@ class GenericCAESBlock(SimpleBlock):
         self.tes_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_eta_constr_rule)
 
-        # TES: Upper bound
+        # (27) TES: Upper bound
         def tes_ub_constr_rule(block, n, t):
             return (self.tes_level[n, t] <= n.params['tes_level_max'])
         self.tes_ub_constr = Constraint(
