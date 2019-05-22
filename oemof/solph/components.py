@@ -274,6 +274,7 @@ class GenericStorageBlock(SimpleBlock):
 
     Nothing added to the objective function.
 
+
     """
 
     CONSTRAINT_GROUP = True
@@ -1359,6 +1360,7 @@ class OffsetTransformerBlock(SimpleBlock):
         ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V", "binary status variable of nonconvex input flow "
         ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear coefficient 1 (slope)"
         ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear coefficient 0 (y-intersection)"
+
 
     """
 
