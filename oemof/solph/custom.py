@@ -414,18 +414,119 @@ class GenericCAES(Transformer):
 class GenericCAESBlock(SimpleBlock):
     r"""Block for nodes of class:`.GenericCAES`.
 
+    **The following variables are created:**
+
+    **The following constraints are created:**
+
     .. _GenericCAES-equations:
 
     .. math::
-    &
-    (2)\qquad P_{cmp\_max}(t) = b_{cmp\_max} \\
+        &
+        (1) \qquad P_{cmp}(t) = electrical\_input (t)
+            \quad \forall t \in T \\
+        &
+        (2) \qquad P_{cmp\_max}(t) = m_{cmp\_max} \cdot CAS_{fil}(t-1)
+            + b_{\text cmp\_max}
+            \quad \forall t \in\left[1, t_{\max }\right] \\
+        &
+        (3) \qquad P_{c m p_{-} m a x}(t) = b_{c m p_{-} m a x}
+            \quad \forall t \notin\left[1, t_{\max }\right] \\
+        &
+        (4) \qquad P_{cmp}(t) \leq P_{cmp\_max}(t)
+            \quad \forall t \in T  \\
+        &
+        (5) \qquad P_{cmp}(t) \geq P_{cmp\_min} \cdot ST_{cmp}(t)
+            \quad \forall t \in T  \\
+        &
+        (6) \qquad P_{cmp}(t) = m_{cmp\_max} \cdot CAS_{fil\_max}
+            + b_{\text cmp\_max} \cdot ST_{cmp}(t)
+            \quad \forall t \in T \\
+        &
+        (7) \qquad \dot{Q}_{cmp}(t) =
+            m_{cmp\_q} \cdot P_{cmp}(t) + b_{cmp\_q} \cdot ST_{cmp}(t)
+            \quad \forall t \in T  \\
+        &
+        (8) \qquad \dot{Q}_{cmp}(t) = \dot{Q}_{cmp_out}(t)
+            + \dot{Q}_{tes\_in}(t)
+            \quad \forall t \in T \\
+        &
+        (9) \qquad r_{cmp\_tes} \cdot\dot{Q}_{cmp_out}(t) =
+            \left(1-r_{c m p_{-} t e s}\right) \dot{Q}_{tes\_in}(t)
+            \quad \forall t \in T \\
+        &
+        (10) \quad\; P_{exp}(t) = electrical\_output (t)
+             \quad \forall t \in T \\
+        &
+        (11) \quad\; P_{exp\_max}(t) = m_{exp\_max} CAS_{fil}(t-1)
+             + b_{exp\_max}
+             \quad \forall t \in\left[1, t_{\max }\right] \\
+        &
+        (12) \quad\; P_{exp\_max}(t) = b_{exp\_max}
+             \quad \forall t \notin\left[1, t_{\max }\right] \\
+        &
+        (13) \quad\; P_{exp}(t) \leq P_{exp\_max}(t)
+             \quad \forall t \in T \\
+        &
+        (14) \quad\; P_{exp}(t) \geq P_{exp\_min}(t) \cdot ST_{exp}(t)
+             \quad \forall t \in T \\
+        &
+        (15) \quad\; P_{exp}(t) \leq m_{exp\_max} \cdot CAS_{fil\_max}
+             + b_{exp\_max} \cdot ST_{exp}(t)
+             \quad \forall t \in T \\
+        &
+        (16) \quad\; \dot{Q}_{e x p}(t) = m_{e x p_{-} q} P_{e x p}(t)
+             + b_{c x p_{-} q} S T_{c x p}(t)
+             \quad \forall t \in T \\
+        &
+        (17) \quad\; \dot{Q}_{exp\_in}(t) = fuel\_input(t)
+             \quad \forall t \in T \\
+        &
+        (18) \quad\; \dot{Q}_{exp}(t) = \dot{Q}_{exp\_in}(t)
+             + \dot{Q}_{tes\_out}(t)+\dot{Q}_{cxp\_add}(t)
+             \quad \forall t \in T \\
+        &
+        (19) \quad\; r_{exp\_tes} \cdot \dot{Q}_{exp\_in}(t) =
+             (1 - r_{exp\_tes})(\dot{Q}_{tes\_out}(t) + \dot{Q}_{exp\_add}(t))
+             \quad \forall t \in T \\
+        &
+        (20) \quad\; \dot{E}_{cas\_in}(t) = m_{cas\_in}\cdot P_{cmp}(t)
+             + b_{cas\_in}\cdot ST_{cmp}(t)
+             \quad \forall t \in T \\
+        &
+        (21) \quad\; \dot{E}_{cas\_out}(t) = m_{cas\_out}\cdot P_{cmp}(t)
+             + b_{cas\_out}\cdot ST_{cmp}(t)
+             \quad \forall t \in T \\
+        &
+        (22) \quad\; \eta_{c a s\_tmp} \cdot CAS_{fil}(t) = CAS_{fil}(t-1)
+             + \tau\left(\dot{E}_{cas\_in}(t) - \dot{E}_{cas\_out}(t)\right)
+             \quad \forall t \in\left[1, t_{max}\right] \\
+         &
+        (23) \quad\; \eta_{c a s\_tmp} \cdot CAS_{fil}(t) =
+             \tau\left(\dot{E}_{cas\_in}(t) - \dot{E}_{cas\_out}(t)\right)
+             \quad \forall t \notin\left[1, t_{max}\right] \\
+        &
+        (24) \quad\; CAS_{fil}(t) \leq CAS_{fil\_max}
+             \quad \forall t \in T \\
+        &
+        (25) \quad\; \eta_{tes\_tmp}\cdot TES_{fil}(t) = TES_{fil}(t-1)
+             + \tau\left(\dot{Q}_{tes\_in}(t)
+             - \dot{Q}_{tes\_out}(t)\right)
+             \quad \forall t \in\left[1, t_{max}\right] \\
+         &
+        (26) \quad\; \eta_{tes\_tmp}\cdot TES_{fil}(t) =
+             \tau\left(\dot{Q}_{tes\_in}(t)
+             - \dot{Q}_{tes\_out}(t)\right)
+             \quad \forall t \notin\left[1, t_{max}\right] \\
+        &
+        (27) \quad\; TES_{fil}(t) \leq TES_{fil\_max}
+             \quad \forall t \in T \\
 
-    ============================= =========== ====================== =====
-    math. symbol                  attribute   explanation            type
-    ============================= =========== ====================== =====
-    :math:`\dot{P}_{cmp}`                     summed heat flow       var
-                                              in compression
-    ============================= =========== ====================== =====
+
+    ========================= =========== ====================== =====
+    symbol                    attribute   explanation            type
+    ========================= =========== ====================== =====
+    :math:`{P}_{cmp}`                     summed heat flow       var
+    ========================= =========== ====================== =====
 
 
     """
