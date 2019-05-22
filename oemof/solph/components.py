@@ -1170,7 +1170,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     where the first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
     output flows relate to each other, and the symbols used are defined as
-    follows:
+    follows (with Variables (V) and Parameters (P)):
 
     ========================= ==================================================== ==== =========
     symbol                    attribute                                            type explanation
