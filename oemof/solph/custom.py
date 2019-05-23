@@ -423,7 +423,7 @@ class GenericCAESBlock(SimpleBlock):
     -- Compression power
 
     :math:`P_{cmp\_max}(t)`
-    -- Max compression power
+    -- Max. compression power
 
     :math:`\dot{Q}_{cmp}(t)`
     -- Summed heat flow in compression
@@ -487,11 +487,11 @@ class GenericCAESBlock(SimpleBlock):
             \quad \forall t \in T \\
         &
         (2) \qquad P_{cmp\_max}(t) = m_{cmp\_max} \cdot CAS_{fil}(t-1)
-            + b_{\text cmp\_max}
-            \quad \forall t \in\left[1, t_{\max }\right] \\
+            + b_{cmp\_max}
+            \quad \forall t \in\left[1, t_{max}\right] \\
         &
-        (3) \qquad P_{c m p_{-} m a x}(t) = b_{c m p_{-} m a x}
-            \quad \forall t \notin\left[1, t_{\max }\right] \\
+        (3) \qquad P_{cmp\_max}(t) = b_{cmp\_max}
+            \quad \forall t \notin\left[1, t_{max}\right] \\
         &
         (4) \qquad P_{cmp}(t) \leq P_{cmp\_max}(t)
             \quad \forall t \in T  \\
@@ -500,7 +500,7 @@ class GenericCAESBlock(SimpleBlock):
             \quad \forall t \in T  \\
         &
         (6) \qquad P_{cmp}(t) = m_{cmp\_max} \cdot CAS_{fil\_max}
-            + b_{\text cmp\_max} \cdot ST_{cmp}(t)
+            + b_{cmp\_max} \cdot ST_{cmp}(t)
             \quad \forall t \in T \\
         &
         (7) \qquad \dot{Q}_{cmp}(t) =
@@ -511,8 +511,8 @@ class GenericCAESBlock(SimpleBlock):
             + \dot{Q}_{tes\_in}(t)
             \quad \forall t \in T \\
         &
-        (9) \qquad r_{cmp\_tes} \cdot\dot{Q}_{cmp_out}(t) =
-            \left(1-r_{c m p_{-} t e s}\right) \dot{Q}_{tes\_in}(t)
+        (9) \qquad r_{cmp\_tes} \cdot\dot{Q}_{cmp\_out}(t) =
+            \left(1-r_{cmp\_tes}\right) \dot{Q}_{tes\_in}(t)
             \quad \forall t \in T \\
         &
         (10) \quad\; P_{exp}(t) = electrical\_output (t)
@@ -535,8 +535,8 @@ class GenericCAESBlock(SimpleBlock):
              + b_{exp\_max} \cdot ST_{exp}(t)
              \quad \forall t \in T \\
         &
-        (16) \quad\; \dot{Q}_{e x p}(t) = m_{e x p_{-} q} P_{e x p}(t)
-             + b_{c x p_{-} q} S T_{c x p}(t)
+        (16) \quad\; \dot{Q}_{exp}(t) = m_{exp\_q} \cdot P_{exp}(t)
+             + b_{cxp\_q} \cdot ST_{cxp}(t)
              \quad \forall t \in T \\
         &
         (17) \quad\; \dot{Q}_{exp\_in}(t) = fuel\_input(t)
@@ -558,11 +558,11 @@ class GenericCAESBlock(SimpleBlock):
              + b_{cas\_out}\cdot ST_{cmp}(t)
              \quad \forall t \in T \\
         &
-        (22) \quad\; \eta_{c a s\_tmp} \cdot CAS_{fil}(t) = CAS_{fil}(t-1)
+        (22) \quad\; \eta_{cas\_tmp} \cdot CAS_{fil}(t) = CAS_{fil}(t-1)
              + \tau\left(\dot{E}_{cas\_in}(t) - \dot{E}_{cas\_out}(t)\right)
              \quad \forall t \in\left[1, t_{max}\right] \\
          &
-        (23) \quad\; \eta_{c a s\_tmp} \cdot CAS_{fil}(t) =
+        (23) \quad\; \eta_{cas\_tmp} \cdot CAS_{fil}(t) =
              \tau\left(\dot{E}_{cas\_in}(t) - \dot{E}_{cas\_out}(t)\right)
              \quad \forall t \notin\left[1, t_{max}\right] \\
         &
@@ -574,13 +574,14 @@ class GenericCAESBlock(SimpleBlock):
              - \dot{Q}_{tes\_out}(t)\right)
              \quad \forall t \in\left[1, t_{max}\right] \\
          &
-        (26) \quad\; \eta_{tes\_tmp}\cdot TES_{fil}(t) =
+        (26) \quad\; TES_{fil}(t) =
              \tau\left(\dot{Q}_{tes\_in}(t)
              - \dot{Q}_{tes\_out}(t)\right)
              \quad \forall t \notin\left[1, t_{max}\right] \\
         &
         (27) \quad\; TES_{fil}(t) \leq TES_{fil\_max}
              \quad \forall t \in T \\
+        &
 
 
     ========================= =========== ====================== =====
