@@ -569,7 +569,7 @@ class GenericCAESBlock(SimpleBlock):
         (24) \quad\; CAS_{fil}(t) \leq CAS_{fil\_max}
              \quad \forall t \in T \\
         &
-        (25) \quad\; \eta_{tes\_tmp}\cdot TES_{fil}(t) = TES_{fil}(t-1)
+        (25) \quad\; TES_{fil}(t) = TES_{fil}(t-1)
              + \tau\left(\dot{Q}_{tes\_in}(t)
              - \dot{Q}_{tes\_out}(t)\right)
              \quad \forall t \in\left[1, t_{max}\right] \\
