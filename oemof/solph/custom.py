@@ -866,7 +866,6 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         def build_breakpoints(block, n):
             for t in m.TIMESTEPS:
                 self.breakpoints[(n, t)] = n.in_breakpoints
-            print(self.breakpoints)
         self.breakpoint_build = BuildAction(self.PWLINEARTRANSFORMERS, rule=build_breakpoints)
 
         def _conversion_function(block, n, t, x):
