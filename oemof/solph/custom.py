@@ -815,6 +815,7 @@ class PiecewiseLinearTransformer(Transformer):
         super().__init__(*args, **kwargs)
 
         self.in_breakpoints = kwargs.get('in_breakpoints')
+        self.in_breakpoints = list(self.in_breakpoints)
         self.out_breakpoints = kwargs.get('out_breakpoints')
         self.conversion_function = kwargs.get('conversion_function')
         self.pw_repn = kwargs.get('pw_repn')
@@ -857,11 +858,16 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
 
         # TODO:
-        # get breakpoints -> BuildAction
         # pw_repn ?
 
         pw_repn = 'CC'
-        min_x, max_x = 0, 500
+
+        self.breakpoints = {}
+        def build_breakpoints(block, n):
+            for t in m.TIMESTEPS:
+                self.breakpoints[(n, t)] = n.in_breakpoints
+            print(self.breakpoints)
+        self.breakpoint_build = BuildAction(self.PWLINEARTRANSFORMERS, rule=build_breakpoints)
 
         def _conversion_function(block, n, t, x):
             expr = n.conversion_function(x)
@@ -907,6 +913,6 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
                                    self.outflow,
                                    self.inflow,
                                    pw_repn=pw_repn,
-                                   pw_constr_type='EQ',  # piecewise construction type: Upper bound, lower bound, equal
-                                   pw_pts=list(np.arange(min_x, max_x, 10)),
-                                   f_rule=_pw)
+                                   pw_constr_type='EQ',
+                                   pw_pts=self.breakpoints,
+                                   f_rule=_conversion_function)
