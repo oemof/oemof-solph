@@ -18,6 +18,7 @@ import logging
 
 from oemof.solph.network import Bus, Transformer
 from oemof.solph.plumbing import sequence
+import numpy as np
 
 
 class ElectricalBus(Bus):
@@ -853,40 +854,51 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
 
         self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
 
-        def _relation_rule(block, n, t):
-            """Link binary input and output flow to component outflow."""
-            expr = 0
-            efficiency = 1.
-            expr += - m.flow[n, list(n.outputs.keys())[0], t]
-            expr += m.flow[list(n.inputs.keys())[0], n, t] * efficiency
-            return expr == 0
-
-        self.relation = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
-                                   rule=_relation_rule)
+        # TODO:
+        # get function
+        # get bounds
+        # get breakpoints
+        # pw_repn
+        # pw_constr_type
 
         # add piecewise linear constraint
-        def _pw(block, x, y, t):
-            expr = 0
-            expr = min(max(x, 0), 1)
-            return expr == 0
+        def _pw(block, n, t, x):
+            expr = 0.01 * x**2
+            return expr
 
         pw_repn = 'CC'
-        min_x, max_x = -10, 10
-        self.x = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=(min_x, max_x))
-        self.y = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, )
+        min_x, max_x = 0, 500
+        min_y, max_y = 0, 0.01 * max_x**2
 
-        Piecewise(self.PWLINEARTRANSFORMERS,
-                            m.TIMESTEPS,
-                            self.y,
-                            self.x,
-                            pw_repn=pw_repn, # piecewise representation:
-                            pw_constr_type='EQ', # piecewise construction type: Upper bound, lower bound, equal
-                            pw_pts=[min_x, 0, 1, max_x],
-                            f_rule=_pw)
+        self.inflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=(min_x, max_x))
+        self.outflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=(min_y, max_y))
 
-        print('-------------aha------------')
-        # print(self.pw.type())
-        # for i in dir(self.pw):
-        #     print(i)
-        # print(self.pw.pprint())
-        print(self.relation.type())
+        def _in_equation(block, n, t):
+            """Link binary input and output flow to component outflow."""
+            expr = 0
+
+            expr += - m.flow[list(n.inputs.keys())[0], n, t]
+            expr += self.inflow[n, t]
+            return expr == 0
+
+        self.equate_in = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
+                                   rule=_in_equation)
+
+        def _out_equation(block, n, t):
+            """Link binary input and output flow to component outflow."""
+            expr = 0
+            expr += - m.flow[n, list(n.outputs.keys())[0], t]
+            expr += self.outflow[n, t]
+            return expr == 0
+
+        self.equate_out = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
+                                   rule=_out_equation)
+
+        self.piecewise = Piecewise(self.PWLINEARTRANSFORMERS,
+                                   m.TIMESTEPS,
+                                   self.outflow,
+                                   self.inflow,
+                                   pw_repn=pw_repn,
+                                   pw_constr_type='EQ',  # piecewise construction type: Upper bound, lower bound, equal
+                                   pw_pts=list(np.arange(min_x, max_x+10, 10)),
+                                   f_rule=_pw)
