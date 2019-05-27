@@ -814,8 +814,10 @@ class PiecewiseLinearTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.x = kwargs.get('x')
-        self.y = kwargs.get('y')
+        self.in_breakpoints = kwargs.get('in_breakpoints')
+        self.out_breakpoints = kwargs.get('out_breakpoints')
+        self.conversion_function = kwargs.get('conversion_function')
+        self.pw_repn = kwargs.get('pw_repn')
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError("Component `PiecewiseLinearTransformer` cannot have" +
@@ -855,28 +857,34 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
 
         # TODO:
-        # get function
-        # get bounds
-        # get breakpoints
-        # pw_repn
-        # pw_constr_type
-
-        # add piecewise linear constraint
-        def _pw(block, n, t, x):
-            expr = 0.01 * x**2
-            return expr
+        # get breakpoints -> BuildAction
+        # pw_repn ?
 
         pw_repn = 'CC'
         min_x, max_x = 0, 500
-        min_y, max_y = 0, 0.01 * max_x**2
 
-        self.inflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=(min_x, max_x))
-        self.outflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=(min_y, max_y))
+        def _conversion_function(block, n, t, x):
+            expr = n.conversion_function(x)
+            return expr
+
+        # bounds are min/max of breakpoints
+        lb_in = {n: min(n.in_breakpoints) for n in group}
+        ub_in = {n: max(n.in_breakpoints) for n in group}
+        lb_out = {n: min(n.out_breakpoints) for n in group}
+        ub_out = {n: max(n.out_breakpoints) for n in group}
+
+        def get_inflow_bounds(model, n, t):
+            return (lb_in[n], ub_in[n])
+
+        def get_outflow_bounds(model, n, t):
+            return (lb_out[n], ub_out[n])
+
+        self.inflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_inflow_bounds)
+        self.outflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_outflow_bounds)
 
         def _in_equation(block, n, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-
             expr += - m.flow[list(n.inputs.keys())[0], n, t]
             expr += self.inflow[n, t]
             return expr == 0
@@ -900,5 +908,5 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
                                    self.inflow,
                                    pw_repn=pw_repn,
                                    pw_constr_type='EQ',  # piecewise construction type: Upper bound, lower bound, equal
-                                   pw_pts=list(np.arange(min_x, max_x+10, 10)),
+                                   pw_pts=list(np.arange(min_x, max_x, 10)),
                                    f_rule=_pw)
