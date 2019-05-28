@@ -804,12 +804,42 @@ class PiecewiseLinearTransformer(Transformer):
 
     Parameters
     ----------
-    x : list
-    y : list
+    in_breakpoints : list
+        List containing the domain breakpoints, i.e. the breakpoints for the
+        incoming flow.
+
+    out_breakpoints : list
+        List containing the range breakpoints, i.e. the breakpoints for the
+        outgoing flow.
+
+    conversion_function : func
+        The function describing the relation between incoming flow and outgoing
+        flow which is to be approximated.
+
+    pw_repn : string
+        Choice of piecewise representation that is passed to pyomo.environ.Piecewise
 
     Examples
     --------
 
+    >>> import oemof.solph as solph
+
+    >>> b_gas = Bus(label='biogas')
+    >>> b_el = Bus(label='electricity')
+
+    >>> pwltf = solph.custom.PiecewiseLinearTransformer(
+    ...    label='pwltf',
+    ...    inputs={b_gas: solph.Flow(
+    ...    nominal_value=100,
+    ...    variable_costs=1)},
+    ...    outputs={b_el: solph.Flow()},
+    ...    in_breakpoints=[0.,0.25,0.75,1.],
+    ...    out_breakpoints=[0.,0.25,0.75,1.],
+    ...    conversion_function=lambda x: x**2,
+    ...    pw_repn='CC')
+
+    >>> type(pwltf)
+    <class 'oemof.solph.custom.PiecewiseLinearTransformer'>
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
