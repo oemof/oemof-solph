@@ -814,8 +814,7 @@ class PiecewiseLinearTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.in_breakpoints = kwargs.get('in_breakpoints')
-        self.in_breakpoints = list(self.in_breakpoints)
+        self.in_breakpoints = list(kwargs.get('in_breakpoints'))
         self.out_breakpoints = kwargs.get('out_breakpoints')
         self.conversion_function = kwargs.get('conversion_function')
         self.pw_repn = kwargs.get('pw_repn')
