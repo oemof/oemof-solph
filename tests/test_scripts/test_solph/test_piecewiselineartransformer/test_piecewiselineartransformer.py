@@ -27,7 +27,7 @@ def test_pwltf():
 
     # Set up EnergySystem, buses and sink
     energysystem = EnergySystem(timeindex=datetimeindex)
-    b_gas = Bus(label='gas', balanced=False)
+    b_gas = Bus(label='biogas', balanced=False)
     b_el = Bus(label='electricity')
     demand_el = Sink(label='demand',
                      inputs={b_el: Flow(nominal_value=1,
@@ -64,7 +64,7 @@ def test_pwltf():
     string_results = outputlib.processing.convert_keys_to_strings(results)
     sequences = {k:v['sequences'] for k, v in string_results.items()}
     df = pd.concat(sequences, axis=1)
-    df[('efficiency', None, None)] = df[('pwltf', 'electricity')].divide(df[('gas', 'pwltf')])
+    df[('efficiency', None, None)] = df[('pwltf', 'electricity')].divide(df[('biogas', 'pwltf')])
 
     # Test: Compare results with piecewise linearized function
     def linearized_func(func, x_break, x):
@@ -77,7 +77,7 @@ def test_pwltf():
             funclist.append(lambda x, b=b, a=a, i=i: b + a*(x-x_break[i]))
         return np.piecewise(x, condlist, funclist)
 
-    production_expected = linearized_func(conv_func, in_breakpoints, df[('gas', 'pwltf')]['flow'].values)
+    production_expected = linearized_func(conv_func, in_breakpoints, df[('biogas', 'pwltf')]['flow'].values)
     production_modeled = df[('pwltf', 'electricity')]['flow'].values
 
     assert np.allclose(production_modeled, production_expected)
