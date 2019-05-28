@@ -18,7 +18,6 @@ import logging
 
 from oemof.solph.network import Bus, Transformer
 from oemof.solph.plumbing import sequence
-import numpy as np
 
 
 class ElectricalBus(Bus):
