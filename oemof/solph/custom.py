@@ -799,7 +799,8 @@ class OffsetTransformerBlock(SimpleBlock):
                                    rule=_relation_rule)
 
 class PiecewiseLinearTransformer(Transformer):
-    """An object with one inputs and one output.
+    """ Component to model a transformer with one input and one output
+    and an arbitrary piecewise linear conversion function.
 
     Parameters
     ----------
