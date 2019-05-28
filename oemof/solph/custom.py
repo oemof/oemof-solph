@@ -903,16 +903,16 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             return expr
 
         # bounds are min/max of breakpoints
-        lb_in = {n: min(n.in_breakpoints) for n in group}
-        ub_in = {n: max(n.in_breakpoints) for n in group}
-        lb_out = {n: min(n.out_breakpoints) for n in group}
-        ub_out = {n: max(n.out_breakpoints) for n in group}
+        lower_bound_in = {n: min(n.in_breakpoints) for n in group}
+        upper_bound_in = {n: max(n.in_breakpoints) for n in group}
+        lower_bound_out = {n: min(n.out_breakpoints) for n in group}
+        upper_bound_out = {n: max(n.out_breakpoints) for n in group}
 
         def get_inflow_bounds(model, n, t):
-            return (lb_in[n], ub_in[n])
+            return (lower_bound_in[n], upper_bound_in[n])
 
         def get_outflow_bounds(model, n, t):
-            return (lb_out[n], ub_out[n])
+            return (lower_bound_out[n], upper_bound_out[n])
 
         self.inflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_inflow_bounds)
         self.outflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_outflow_bounds)
