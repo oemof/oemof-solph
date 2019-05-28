@@ -886,10 +886,11 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
 
         self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
 
-        # TODO:
-        # pw_repn ?
-
-        pw_repn = 'CC'
+        pw_repns = [n.pw_repn for n in group]
+        if all(x == pw_repns[0] for x in pw_repns):
+            self.pw_repn = pw_repns[0]
+        else:
+            print('Cannot different piecewise representations ', [n.pw_repn for n in group])
 
         self.breakpoints = {}
         def build_breakpoints(block, n):
@@ -940,7 +941,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
                                    m.TIMESTEPS,
                                    self.outflow,
                                    self.inflow,
-                                   pw_repn=pw_repn,
+                                   pw_repn=self.pw_repn,
                                    pw_constr_type='EQ',
                                    pw_pts=self.breakpoints,
                                    f_rule=_conversion_function)
