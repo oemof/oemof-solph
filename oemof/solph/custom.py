@@ -798,6 +798,7 @@ class OffsetTransformerBlock(SimpleBlock):
         self.relation = Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
                                    rule=_relation_rule)
 
+
 class PiecewiseLinearTransformer(Transformer):
     """ Component to model a transformer with one input and one output
     and an arbitrary piecewise linear conversion function.
