@@ -55,3 +55,19 @@ def test_generic_storage_3():
         outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)},
         loss_rate=0.00, initial_storage_level=0,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8)
+
+def test_offsettransformer_1():
+    """No NonConvexFlow for Inflow defined."""
+    with tools.assert_raises_regexp(
+            TypeError, 'Input flows must be of type NonConvexFlow!'):
+        bgas = solph.Bus(label='gasBus')
+        bth = solph.Bus(label='thermalBus')
+        solph.components.OffsetTransformer(
+            label='gasboiler',
+            inputs={bgas: solph.Flow(
+                nominal_value=100,
+                max=1,
+                min=0.32,
+            )},
+            outputs={bth: solph.Flow()},
+            coefficients=[-17, 0.9])
