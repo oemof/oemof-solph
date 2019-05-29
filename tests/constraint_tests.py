@@ -621,7 +621,6 @@ class Constraint_Tests:
             inputs={bgas: solph.Flow(
                 nonconvex=solph.NonConvex(),
                 nominal_value=100,
-                max=1,
                 min=0.32,
             )},
             outputs={bth: solph.Flow()},
