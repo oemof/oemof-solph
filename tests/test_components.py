@@ -56,7 +56,8 @@ def test_generic_storage_3():
         loss_rate=0.00, initial_storage_level=0,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
-def test_offsettransformer_1():
+
+def test_offsettransformer_wrong_flow_type():
     """No NonConvexFlow for Inflow defined."""
     with tools.assert_raises_regexp(
             TypeError, 'Input flows must be of type NonConvexFlow!'):
@@ -71,3 +72,43 @@ def test_offsettransformer_1():
             )},
             outputs={bth: solph.Flow()},
             coefficients=[-17, 0.9])
+
+
+def test_offsettransformer__too_many_input_flows():
+    """Too many Input Flows defined."""
+    with tools.assert_raises_regexp(
+            ValueError, 'OffsetTransformer` must not have more than 1'):
+        bgas = solph.Bus(label='GasBus')
+        bcoal = solph.Bus(label='CoalBus')
+        bel = solph.Bus(label='ElectricityBus')
+        solph.components.OffsetTransformer(
+            label='ostf',
+            inputs={
+                bgas: solph.Flow(
+                    nominal_value=60, min=0.5, max=1.0,
+                    nonconvex=solph.NonConvex()),
+                bcoal: solph.Flow(
+                    nominal_value=30, min=0.3, max=1.0,
+                    nonconvex=solph.NonConvex())
+            },
+            outputs={bel: solph.Flow()},
+            coefficients=(20, 0.5))
+
+
+def test_offsettransformer_too_many_output_flows():
+    """Too many Output Flows defined."""
+    with tools.assert_raises_regexp(
+            ValueError, 'OffsetTransformer` must not have more than 1'):
+        bgas = solph.Bus(label='GasBus')
+        bth = solph.Bus(label='CoalBus')
+        bel = solph.Bus(label='ElectricityBus')
+        solph.components.OffsetTransformer(
+            label='ostf',
+            inputs={
+                bgas: solph.Flow(
+                    nominal_value=60, min=0.5, max=1.0,
+                    nonconvex=solph.NonConvex())
+            },
+            outputs={bel: solph.Flow(),
+                     bth: solph.Flow()},
+            coefficients=(20, 0.5))
