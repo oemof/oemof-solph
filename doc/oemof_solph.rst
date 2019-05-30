@@ -396,10 +396,15 @@ example in the `oemof example repository
 
 .. _oemof_solph_components_generic_caes_label:
 
-GenericCAES (component)
+GenericCAES (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
+The following constraints describe the CAES:
+
+.. include:: ../oemof/solph/custom.py
+  :start-after: _GenericCAES-equations:
+  :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
 
@@ -494,7 +499,13 @@ an equality, if not it is a less or equal. Constraint 11 is only needed for mode
 setting the attribute `H_L_FG_share_min`.
 
 .. include:: ../oemof/solph/components.py
-  :start-after: _GenericCHP-equations:
+  :start-after: _GenericCHP-equations1-10:
+  :end-before: **For the attribute**
+
+If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations11:
   :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
