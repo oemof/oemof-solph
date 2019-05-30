@@ -82,7 +82,7 @@ def test_offsettransformer__too_many_input_flows():
         bcoal = solph.Bus(label='CoalBus')
         bel = solph.Bus(label='ElectricityBus')
         solph.components.OffsetTransformer(
-            label='ostf',
+            label='ostf_2_in',
             inputs={
                 bgas: solph.Flow(
                     nominal_value=60, min=0.5, max=1.0,
@@ -99,16 +99,16 @@ def test_offsettransformer_too_many_output_flows():
     """Too many Output Flows defined."""
     with tools.assert_raises_regexp(
             ValueError, 'OffsetTransformer` must not have more than 1'):
-        bgas = solph.Bus(label='GasBus')
-        bth = solph.Bus(label='CoalBus')
-        bel = solph.Bus(label='ElectricityBus')
+        bm1 = solph.Bus(label='my_offset_Bus1')
+        bm2 = solph.Bus(label='my_offset_Bus2')
+
         solph.components.OffsetTransformer(
-            label='ostf',
+            label='ostf_2_out',
             inputs={
-                bgas: solph.Flow(
+                bm1: solph.Flow(
                     nominal_value=60, min=0.5, max=1.0,
                     nonconvex=solph.NonConvex())
             },
-            outputs={bel: solph.Flow(),
-                     bth: solph.Flow()},
+            outputs={bm1: solph.Flow(),
+                     bm2: solph.Flow()},
             coefficients=(20, 0.5))
