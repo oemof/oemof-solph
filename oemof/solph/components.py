@@ -1331,7 +1331,7 @@ class OffsetTransformer(network.Transformer):
                 raise TypeError('Input flows must be of type NonConvexFlow!')
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
-            raise ValueError("Component `OffsetTransformer` must not have" +
+            raise ValueError("Component `OffsetTransformer` must not have " +
                              "more than 1 input and 1 output!")
 
     def constraint_group(self):
@@ -1357,9 +1357,12 @@ class OffsetTransformerBlock(SimpleBlock):
 
         ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "Power of output"
         ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","Power of input"
-        ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V", "binary status variable of nonconvex input flow "
-        ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear coefficient 1 (slope)"
-        ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear coefficient 0 (y-intersection)"
+        ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V","binary
+        status variable of nonconvex input flow "
+        ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear
+        coefficient 1 (slope)"
+        ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear
+        coefficient 0 (y-intersection)"
 
 
     """
