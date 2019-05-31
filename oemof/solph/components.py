@@ -1323,12 +1323,15 @@ class OffsetTransformer(network.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.coefficients = [
-            solph_sequence(i) for i in kwargs.get('coefficients')]
+        if kwargs.get('coefficients') is not None:
+            self.coefficients = tuple([
+                solph_sequence(i) for i in kwargs.get('coefficients')])
 
-        for k, v in self.inputs.items():
-            if not v.nonconvex:
-                raise TypeError('Input flows must be of type NonConvexFlow!')
+        if len(self.inputs) == 1:
+            for k, v in self.inputs.items():
+                if not v.nonconvex:
+                    raise TypeError(
+                        'Input flows must be of type NonConvexFlow!')
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError("Component `OffsetTransformer` must not have " +
