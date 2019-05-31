@@ -1289,7 +1289,7 @@ class OffsetTransformer(network.Transformer):
     Parameters
     ----------
 
-    coefficients : solph.sequence or tuple
+    coefficients : tuple
         Tuple containing the first two polynomial coefficients
         i.e. the y-intersection and slope of a linear equation.
         The tuple values can either be a scalar or a sequence with length
