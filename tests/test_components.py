@@ -62,16 +62,33 @@ def test_offsettransformer_wrong_flow_type():
     with tools.assert_raises_regexp(
             TypeError, 'Input flows must be of type NonConvexFlow!'):
         bgas = solph.Bus(label='gasBus')
-        bth = solph.Bus(label='thermalBus')
         solph.components.OffsetTransformer(
             label='gasboiler',
-            inputs={bgas: solph.Flow(
-                nominal_value=100,
-                max=1,
-                min=0.32,
-            )},
-            outputs={bth: solph.Flow()},
-            coefficients=[-17, 0.9])
+            inputs={bgas: solph.Flow()},
+            coefficients=(-17, 0.9))
+
+
+def test_offsettransformer_not_enough_coefficients():
+    with tools.assert_raises_regexp(
+            ValueError,
+            'Two coefficients or coefficient series have to be given.'):
+        solph.components.OffsetTransformer(
+            label='of1',
+            coefficients=([1, 4, 7]))
+
+
+def test_offsettransformer_too_many_coefficients():
+    with tools.assert_raises_regexp(
+            ValueError,
+            'Two coefficients or coefficient series have to be given.'):
+        solph.components.OffsetTransformer(
+            label='of2',
+            coefficients=(1, 4, 7))
+
+
+def test_offsettransformer_empty():
+    """No NonConvexFlow for Inflow defined."""
+    solph.components.OffsetTransformer()
 
 
 def test_offsettransformer__too_many_input_flows():
@@ -80,7 +97,6 @@ def test_offsettransformer__too_many_input_flows():
             ValueError, 'OffsetTransformer` must not have more than 1'):
         bgas = solph.Bus(label='GasBus')
         bcoal = solph.Bus(label='CoalBus')
-        bel = solph.Bus(label='ElectricityBus')
         solph.components.OffsetTransformer(
             label='ostf_2_in',
             inputs={
@@ -91,7 +107,6 @@ def test_offsettransformer__too_many_input_flows():
                     nominal_value=30, min=0.3, max=1.0,
                     nonconvex=solph.NonConvex())
             },
-            outputs={bel: solph.Flow()},
             coefficients=(20, 0.5))
 
 
