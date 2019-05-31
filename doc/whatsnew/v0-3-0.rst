@@ -10,6 +10,11 @@ API changes
     along with a ``FutureWarning``
     (`Issue #537 <https://github.com/oemof/oemof/issues/537>`_).
 
+* The OffsetTransformer is now a regular oemof.solph component. It has been
+  tested and the documentation has been improved. So it has been move from
+  *custom* to *components*. Use oemof.solph.components.OffsetTransformer (
+  `Issue #522 <https://github.com/oemof/oemof/issues/522>`_).
+
 New features
 ############
 
