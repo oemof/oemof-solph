@@ -13,6 +13,8 @@ from nose import tools
 from oemof import solph
 
 
+# ********* GenericStorage *********
+
 @tools.raises(AttributeError)
 def test_generic_storage_1():
     """Duplicate definition inflow."""
@@ -56,6 +58,8 @@ def test_generic_storage_3():
         loss_rate=0.00, initial_storage_level=0,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
+
+# ********* OffsetTransformer *********
 
 def test_offsettransformer_wrong_flow_type():
     """No NonConvexFlow for Inflow defined."""
