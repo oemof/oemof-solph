@@ -1326,6 +1326,9 @@ class OffsetTransformer(network.Transformer):
         if kwargs.get('coefficients') is not None:
             self.coefficients = tuple([
                 solph_sequence(i) for i in kwargs.get('coefficients')])
+            if len(self.coefficients) != 2:
+                raise ValueError(
+                    "Two coefficients or coefficient series have to be given.")
 
         if len(self.inputs) == 1:
             for k, v in self.inputs.items():
