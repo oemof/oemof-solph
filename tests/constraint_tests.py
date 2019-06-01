@@ -609,3 +609,21 @@ class Constraint_Tests:
                 nominal_value=10, min=0.5, max=1.0, variable_costs=10,
                 nonconvex=solph.NonConvex(activity_costs=2))})
         self.compare_lp_files('activity_costs.lp')
+
+    def test_offsettransformer(self):
+        """Constraint test of a OffsetTransformer.
+        """
+        bgas = solph.Bus(label='gasBus')
+        bth = solph.Bus(label='thermalBus')
+
+        solph.components.OffsetTransformer(
+            label='gasboiler',
+            inputs={bgas: solph.Flow(
+                nonconvex=solph.NonConvex(),
+                nominal_value=100,
+                min=0.32,
+            )},
+            outputs={bth: solph.Flow()},
+            coefficients=[-17, 0.9])
+
+        self.compare_lp_files('offsettransformer.lp')
