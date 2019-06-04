@@ -122,6 +122,7 @@ class EnergySystem:
     """
 
     def __init__(self, **kwargs):
+        self._first_ungrouped_node_index_ = 0
         self._groups = {}
         self._groupings = ([BY_UID] +
                            [g if isinstance(g, Grouping) else Nodes(g)
@@ -137,20 +138,8 @@ class EnergySystem:
         self.add(*kwargs.get('entities', ()))
 
     def add(self, *nodes):
-        """ Add :class:`nodes <oemof.network.Node>` to this energy system.
-
-        Notes
-        -----
-
-        In the unlikely case that you want to use this function as a group key:
-        DON'T.
-        It's already used as a key in `groups` to keep track of ungrouped
-        nodes. This is done to avoid having to add another private attribute to
-        `EnergySystem`.
-        """
+        """Add :class:`nodes <oemof.network.Node>` to this energy system."""
         self.nodes.extend(nodes)
-        self._groups[self.add] = self._groups.get(self.add, [])
-        self._groups[self.add].extend(nodes)
         for n in nodes:
             self.signals[type(self).add].send(n, EnergySystem=self)
     signals[add] = blinker.signal(add)
@@ -159,11 +148,14 @@ class EnergySystem:
     def groups(self):
         gs = self._groups
         deque(
-            (g(n, gs) for g in self._groupings for n in gs.get(self.add, [])),
+            (
+                g(n, gs)
+                for g in self._groupings
+                for n in self.nodes[self._first_ungrouped_node_index_ :]
+            ),
             maxlen=0,
         )
-        if self.add in gs:
-            del gs[self.add]
+        self._first_ungrouped_node_index_ = len(self.nodes)
         return self._groups
 
     @property
