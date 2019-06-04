@@ -11,7 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
 
-from nose.tools import ok_
+from nose.tools import ok_, assert_raises_regexp
 
 from oemof.tools import logger
 from oemof.tools import helpers
@@ -33,5 +33,19 @@ def test_logger():
     ok_(os.path.isfile(filepath))
 
 
-def test_economics():
+def test_annuity():
+    """Test annuity function of economics tool."""
     ok_(round(economics.annuity(1000, 10, 0.1)) == 163)
+    ok_(round(economics.annuity(capex=1000, wacc=0.1, n=10, u=5)) == 264)
+    ok_(round(economics.annuity(1000, 10, 0.1, u=5, cost_decrease=0.1)) == 222)
+
+
+def test_annuity_exceptions():
+    """Test out-of-bounds-error of the annuity tool."""
+    msg = "Input arguments for 'annuity' out of bounds!"
+    assert_raises_regexp(ValueError, msg, economics.annuity, 1000, 10, 2)
+    assert_raises_regexp(ValueError, msg, economics.annuity, 1000, 0.5, 1)
+    assert_raises_regexp(
+        ValueError, msg, economics.annuity, 1000, 10, 0.1, u=0.3)
+    assert_raises_regexp(
+        ValueError, msg, economics.annuity, 1000, 10, 0.1, cost_decrease=-1)

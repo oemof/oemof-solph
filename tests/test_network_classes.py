@@ -11,13 +11,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
-import warnings
 
 from oemof.energy_system import EnergySystem as ES
 from oemof.network import (Bus, Edge, Node, Transformer, registry_changed_to,
                            temporarily_modifies_registry)
-from oemof import graph
-from oemof.solph import Model
 
 
 class Node_Tests:
@@ -332,11 +329,4 @@ class EnergySystem_Nodes_Integration_Tests:
             n = Node("not registered")
         create_a_node()
         ok_("not registered" not in self.es.groups)
-
-
-def test_depreciated_graph_call():
-    es = ES()
-    om = Model(energysystem=es)
-    warnings.filterwarnings('ignore', category=FutureWarning)
-    graph.create_nx_graph(optimization_model=om)
 

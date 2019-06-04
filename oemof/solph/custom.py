@@ -25,6 +25,8 @@ class ElectricalBus(Bus):
     Bus is used in combination with ElectricalLine objects for linear optimal
     power flow (lopf) simulations.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -50,6 +52,8 @@ class ElectricalLine(Transformer):
     ----------
     reactance : float or array of floats
         Reactance of the line to be modelled
+
+    Note: This component is experimental. Use it with care.
 
     Notes
     -----
@@ -116,6 +120,7 @@ class ElectricalLineBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
     class:`.ElectricalLine`
 
+    Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
 
@@ -220,6 +225,8 @@ class Link(Transformer):
         The dictionary values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The sets, variables, constraints and objective parts are created
@@ -263,9 +270,12 @@ class Link(Transformer):
     def constraint_group(self):
         return LinkBlock
 
+
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.custom.Link`
+
+    Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
 
@@ -346,6 +356,8 @@ class GenericCAES(Transformer):
         Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical output.
 
+    Note: This component is experimental. Use it with care.
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -412,7 +424,164 @@ class GenericCAES(Transformer):
 
 
 class GenericCAESBlock(SimpleBlock):
-    """Block for nodes of class:`.GenericCAES`."""
+    r"""Block for nodes of class:`.GenericCAES`.
+
+    Note: This component is experimental. Use it with care.
+
+    **The following constraints are created:**
+
+    .. _GenericCAES-equations:
+
+    .. math::
+        &
+        (1) \qquad P_{cmp}(t) = electrical\_input (t)
+            \quad \forall t \in T \\
+        &
+        (2) \qquad P_{cmp\_max}(t) = m_{cmp\_max} \cdot CAS_{fil}(t-1)
+            + b_{cmp\_max}
+            \quad \forall t \in\left[1, t_{max}\right] \\
+        &
+        (3) \qquad P_{cmp\_max}(t) = b_{cmp\_max}
+            \quad \forall t \notin\left[1, t_{max}\right] \\
+        &
+        (4) \qquad P_{cmp}(t) \leq P_{cmp\_max}(t)
+            \quad \forall t \in T  \\
+        &
+        (5) \qquad P_{cmp}(t) \geq P_{cmp\_min} \cdot ST_{cmp}(t)
+            \quad \forall t \in T  \\
+        &
+        (6) \qquad P_{cmp}(t) = m_{cmp\_max} \cdot CAS_{fil\_max}
+            + b_{cmp\_max} \cdot ST_{cmp}(t)
+            \quad \forall t \in T \\
+        &
+        (7) \qquad \dot{Q}_{cmp}(t) =
+            m_{cmp\_q} \cdot P_{cmp}(t) + b_{cmp\_q} \cdot ST_{cmp}(t)
+            \quad \forall t \in T  \\
+        &
+        (8) \qquad \dot{Q}_{cmp}(t) = \dot{Q}_{cmp_out}(t)
+            + \dot{Q}_{tes\_in}(t)
+            \quad \forall t \in T \\
+        &
+        (9) \qquad r_{cmp\_tes} \cdot\dot{Q}_{cmp\_out}(t) =
+            \left(1-r_{cmp\_tes}\right) \dot{Q}_{tes\_in}(t)
+            \quad \forall t \in T \\
+        &
+        (10) \quad\; P_{exp}(t) = electrical\_output (t)
+             \quad \forall t \in T \\
+        &
+        (11) \quad\; P_{exp\_max}(t) = m_{exp\_max} CAS_{fil}(t-1)
+             + b_{exp\_max}
+             \quad \forall t \in\left[1, t_{\max }\right] \\
+        &
+        (12) \quad\; P_{exp\_max}(t) = b_{exp\_max}
+             \quad \forall t \notin\left[1, t_{\max }\right] \\
+        &
+        (13) \quad\; P_{exp}(t) \leq P_{exp\_max}(t)
+             \quad \forall t \in T \\
+        &
+        (14) \quad\; P_{exp}(t) \geq P_{exp\_min}(t) \cdot ST_{exp}(t)
+             \quad \forall t \in T \\
+        &
+        (15) \quad\; P_{exp}(t) \leq m_{exp\_max} \cdot CAS_{fil\_max}
+             + b_{exp\_max} \cdot ST_{exp}(t)
+             \quad \forall t \in T \\
+        &
+        (16) \quad\; \dot{Q}_{exp}(t) = m_{exp\_q} \cdot P_{exp}(t)
+             + b_{cxp\_q} \cdot ST_{cxp}(t)
+             \quad \forall t \in T \\
+        &
+        (17) \quad\; \dot{Q}_{exp\_in}(t) = fuel\_input(t)
+             \quad \forall t \in T \\
+        &
+        (18) \quad\; \dot{Q}_{exp}(t) = \dot{Q}_{exp\_in}(t)
+             + \dot{Q}_{tes\_out}(t)+\dot{Q}_{cxp\_add}(t)
+             \quad \forall t \in T \\
+        &
+        (19) \quad\; r_{exp\_tes} \cdot \dot{Q}_{exp\_in}(t) =
+             (1 - r_{exp\_tes})(\dot{Q}_{tes\_out}(t) + \dot{Q}_{exp\_add}(t))
+             \quad \forall t \in T \\
+        &
+        (20) \quad\; \dot{E}_{cas\_in}(t) = m_{cas\_in}\cdot P_{cmp}(t)
+             + b_{cas\_in}\cdot ST_{cmp}(t)
+             \quad \forall t \in T \\
+        &
+        (21) \quad\; \dot{E}_{cas\_out}(t) = m_{cas\_out}\cdot P_{cmp}(t)
+             + b_{cas\_out}\cdot ST_{cmp}(t)
+             \quad \forall t \in T \\
+        &
+        (22) \quad\; \eta_{cas\_tmp} \cdot CAS_{fil}(t) = CAS_{fil}(t-1)
+             + \tau\left(\dot{E}_{cas\_in}(t) - \dot{E}_{cas\_out}(t)\right)
+             \quad \forall t \in\left[1, t_{max}\right] \\
+         &
+        (23) \quad\; \eta_{cas\_tmp} \cdot CAS_{fil}(t) =
+             \tau\left(\dot{E}_{cas\_in}(t) - \dot{E}_{cas\_out}(t)\right)
+             \quad \forall t \notin\left[1, t_{max}\right] \\
+        &
+        (24) \quad\; CAS_{fil}(t) \leq CAS_{fil\_max}
+             \quad \forall t \in T \\
+        &
+        (25) \quad\; TES_{fil}(t) = TES_{fil}(t-1)
+             + \tau\left(\dot{Q}_{tes\_in}(t)
+             - \dot{Q}_{tes\_out}(t)\right)
+             \quad \forall t \in\left[1, t_{max}\right] \\
+         &
+        (26) \quad\; TES_{fil}(t) =
+             \tau\left(\dot{Q}_{tes\_in}(t)
+             - \dot{Q}_{tes\_out}(t)\right)
+             \quad \forall t \notin\left[1, t_{max}\right] \\
+        &
+        (27) \quad\; TES_{fil}(t) \leq TES_{fil\_max}
+             \quad \forall t \in T \\
+        &
+
+
+    **Table: Symbols and attribute names of variables and parameters**
+
+    .. csv-table:: Variables (V) and Parameters (P)
+        :header: "symbol", "attribute", "type", "explanation"
+        :widths: 1, 1, 1, 1
+
+        ":math:`ST_{cmp}` ", ":py:obj:`cmp_st[n,t]` ", "V", "Status of compression"
+        ":math:`{P}_{cmp}` ", ":py:obj:`cmp_p[n,t]`", "V", "Compression power"
+        ":math:`{P}_{cmp\_max}`", ":py:obj:`cmp_p_max[n,t]`", "V", "Max. compression power"
+        ":math:`\dot{Q}_{cmp}` ", ":py:obj:`cmp_q_out_sum[n,t]`", "V", "Summed heat flow in compression"
+        ":math:`\dot{Q}_{cmp\_out}` ", ":py:obj:`cmp_q_waste[n,t]`", "V", "Waste heat flow from compression"
+        ":math:`ST_{exp}(t)`", ":py:obj:`exp_st[n,t]`", "V", "Status of expansion (binary)"
+        ":math:`P_{exp}(t)`", ":py:obj:`exp_p[n,t]`", "V", "Expansion power"
+        ":math:`P_{exp\_max}(t)`", ":py:obj:`exp_p_max[n,t]`", "V", "Max. expansion power"
+        ":math:`\dot{Q}_{exp}(t)`", ":py:obj:`exp_q_in_sum[n,t]`", "V", "Summed heat flow in expansion"
+        ":math:`\dot{Q}_{exp\_in}(t)`", ":py:obj:`exp_q_fuel_in[n,t]`", "V", "Heat (external) flow into expansion"
+        ":math:`\dot{Q}_{exp\_add}(t)`", ":py:obj:`exp_q_add_in[n,t]`", "V", "Additional heat flow into expansion"
+        ":math:`CAV_{fil}(t)`", ":py:obj:`cav_level[n,t]`", "V", "Filling level if CAE"
+        ":math:`\dot{E}_{cas\_in}(t)`", ":py:obj:`cav_e_in[n,t]`", "V", "Exergy flow into CAS"
+        ":math:`\dot{E}_{cas\_out}(t)`", ":py:obj:`cav_e_out[n,t]`", "V", "Exergy flow from CAS"
+        ":math:`TES_{fil}(t)`", ":py:obj:`tes_level[n,t]`", "V", "Filling level of Thermal Energy Storage (TES)"
+        ":math:`\dot{Q}_{tes\_in}(t)`", ":py:obj:`tes_e_in[n,t]`", "V", "Heat flow into TES"
+        ":math:`\dot{Q}_{tes\_out}(t)`", ":py:obj:`tes_e_out[n,t]`", "V", "Heat flow from TES"
+        ":math:`b_{cmp\_max}`", ":py:obj:`cmp_p_max_b[n,t]`", "P", "Specific y-intersection"
+        ":math:`b_{cmp\_q}`", ":py:obj:`cmp_q_out_b[n,t]`", "P", "Specific y-intersection"
+        ":math:`b_{exp\_max}`", ":py:obj:`exp_p_max_b[n,t]`", "P", "Specific y-intersection"
+        ":math:`b_{exp\_q}`", ":py:obj:`exp_q_in_b[n,t]`", "P", "Specific y-intersection"
+        ":math:`b_{cas\_in}`", ":py:obj:`cav_e_in_b[n,t]`", "P", "Specific y-intersection"
+        ":math:`b_{cas\_out}`", ":py:obj:`cav_e_out_b[n,t]`", "P", "Specific y-intersection"
+        ":math:`m_{cmp\_max}`", ":py:obj:`cmp_p_max_m[n,t]`", "P", "Specific slope"
+        ":math:`m_{cmp\_q}`", ":py:obj:`cmp_q_out_m[n,t]`", "P", "Specific slope"
+        ":math:`m_{exp\_max}`", ":py:obj:`exp_p_max_m[n,t]`", "P", "Specific slope"
+        ":math:`m_{exp\_q}`", ":py:obj:`exp_q_in_m[n,t]`", "P", "Specific slope"
+        ":math:`m_{cas\_in}`", ":py:obj:`cav_e_in_m[n,t]`", "P", "Specific slope"
+        ":math:`m_{cas\_out}`", ":py:obj:`cav_e_out_m[n,t]`", "P", "Specific slope"
+        ":math:`P_{cmp\_min}`", ":py:obj:`cmp_p_min[n,t]`", "P", "Min. compression power"
+        ":math:`r_{cmp\_tes}`", ":py:obj:`cmp_q_tes_share[n,t]`", "P", "Ratio between waste heat flow and heat flow into TES"
+        ":math:`r_{exp\_tes}`", ":py:obj:`exp_q_tes_share[n,t]`", "P", "Ratio between external heat flow into expansion and heat flows from TES and additional source"
+        ":math:`\tau`", ":py:obj:`m.timeincrement[n,t]`", "P", "Time interval length"
+        ":math:`TES_{fil\_max}`", ":py:obj:`tes_level_max[n,t]`", "P", "Max. filling level of TES"
+        ":math:`CAS_{fil\_max}`", ":py:obj:`cav_level_max[n,t]`", "P", "Max. filling level of TES"
+        ":math:`\tau`", ":py:obj:`cav_eta_tmp[n,t]`", "P", "Temporal efficiency (loss factor to take intertemporal losses into account)"
+        ":math:`electrical\_input`", ":py:obj:`flow[list(n.electrical_input.keys())[0], n, t]`", "P", "Electr. power input into compression"
+        ":math:`electrical\_output`", ":py:obj:`flow[n, list(n.electrical_output.keys())[0], t]`", "P", "Electr. power output of expansion"
+        ":math:`fuel\_input`", ":py:obj:`flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input (external) into Expansion"
+
+    """
 
     CONSTRAINT_GROUP = True
 
@@ -549,7 +718,7 @@ class GenericCAESBlock(SimpleBlock):
         self.cmp_st_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_max_constr_rule)
 
-        # Compression: Heat flow out
+        # (7) Compression: Heat flow out
         def cmp_q_out_constr_rule(block, n, t):
             return (self.cmp_q_out_sum[n, t] ==
                     n.params['cmp_q_out_m'] * self.cmp_p[n, t] +
@@ -557,21 +726,21 @@ class GenericCAESBlock(SimpleBlock):
         self.cmp_q_out_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_constr_rule)
 
-        # Compression: Definition of single heat flows
+        #  (8) Compression: Definition of single heat flows
         def cmp_q_out_sum_constr_rule(block, n, t):
             return (self.cmp_q_out_sum[n, t] == self.cmp_q_waste[n, t] +
                     self.tes_e_in[n, t])
         self.cmp_q_out_sum_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_sum_constr_rule)
 
-        # Compression: Heat flow out ratio
+        # (9) Compression: Heat flow out ratio
         def cmp_q_out_shr_constr_rule(block, n, t):
             return (self.cmp_q_waste[n, t] * n.params['cmp_q_tes_share'] ==
                     self.tes_e_in[n, t] * (1 - n.params['cmp_q_tes_share']))
         self.cmp_q_out_shr_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_shr_constr_rule)
 
-        # Expansion: Capacity on markets
+        # (10) Expansion: Capacity on markets
         def exp_p_constr_rule(block, n, t):
             expr = 0
             expr += -self.exp_p[n, t]
@@ -580,7 +749,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_p_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule)
 
-        # Expansion: Max. capacity depending on cavern filling level
+        # (11-12) Expansion: Max. capacity depending on cavern filling level
         def exp_p_max_constr_rule(block, n, t):
             if t != 0:
                 return (self.exp_p_max[n, t] ==
@@ -591,18 +760,20 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_constr_rule)
 
+        # (13)
         def exp_p_max_area_constr_rule(block, n, t):
             return (self.exp_p[n, t] <= self.exp_p_max[n, t])
         self.exp_p_max_area_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_area_constr_rule)
 
-        # Expansion: Status of operation (on/off)
+        # (14) Expansion: Status of operation (on/off)
         def exp_st_p_min_constr_rule(block, n, t):
             return (
                 self.exp_p[n, t] >= n.params['exp_p_min'] * self.exp_st[n, t])
         self.exp_st_p_min_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_min_constr_rule)
 
+        # (15)
         def exp_st_p_max_constr_rule(block, n, t):
             return (self.exp_p[n, t] <=
                     (n.params['exp_p_max_m'] * n.params['cav_level_max'] +
@@ -610,7 +781,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_st_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_max_constr_rule)
 
-        # Expansion: Heat flow in
+        # (16) Expansion: Heat flow in
         def exp_q_in_constr_rule(block, n, t):
             return (self.exp_q_in_sum[n, t] ==
                     n.params['exp_q_in_m'] * self.exp_p[n, t] +
@@ -618,7 +789,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_q_in_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_constr_rule)
 
-        # Expansion: Fuel allocation
+        # (17) Expansion: Fuel allocation
         def exp_q_fuel_constr_rule(block, n, t):
             expr = 0
             expr += -self.exp_q_fuel_in[n, t]
@@ -627,14 +798,14 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_q_fuel_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
 
-        # Expansion: Definition of single heat flows
+        # (18) Expansion: Definition of single heat flows
         def exp_q_in_sum_constr_rule(block, n, t):
             return (self.exp_q_in_sum[n, t] == self.exp_q_fuel_in[n, t] +
                     self.tes_e_out[n, t] + self.exp_q_add_in[n, t])
         self.exp_q_in_sum_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_sum_constr_rule)
 
-        # Expansion: Heat flow in ratio
+        # (19) Expansion: Heat flow in ratio
         def exp_q_in_shr_constr_rule(block, n, t):
             return (n.params['exp_q_tes_share'] * self.exp_q_fuel_in[n, t] ==
                     (1 - n.params['exp_q_tes_share']) *
@@ -642,7 +813,7 @@ class GenericCAESBlock(SimpleBlock):
         self.exp_q_in_shr_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_shr_constr_rule)
 
-        # Cavern: Energy inflow
+        # (20) Cavern: Energy inflow
         def cav_e_in_constr_rule(block, n, t):
             return (self.cav_e_in[n, t] ==
                     n.params['cav_e_in_m'] * self.cmp_p[n, t] +
@@ -650,7 +821,7 @@ class GenericCAESBlock(SimpleBlock):
         self.cav_e_in_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_e_in_constr_rule)
 
-        # Cavern: Energy outflow
+        # (21) Cavern: Energy outflow
         def cav_e_out_constr_rule(block, n, t):
             return (self.cav_e_out[n, t] ==
                     n.params['cav_e_out_m'] * self.exp_p[n, t] +
@@ -658,7 +829,7 @@ class GenericCAESBlock(SimpleBlock):
         self.cav_e_out_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_e_out_constr_rule)
 
-        # Cavern: Storage balance
+        # (22-23) Cavern: Storage balance
         def cav_eta_constr_rule(block, n, t):
             if t != 0:
                 return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
@@ -671,13 +842,13 @@ class GenericCAESBlock(SimpleBlock):
         self.cav_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule)
 
-        # Cavern: Upper bound
+        # (24) Cavern: Upper bound
         def cav_ub_constr_rule(block, n, t):
             return (self.cav_level[n, t] <= n.params['cav_level_max'])
         self.cav_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule)
 
-        # TES: Storage balance
+        # (25-26) TES: Storage balance
         def tes_eta_constr_rule(block, n, t):
             if t != 0:
                 return (self.tes_level[n, t] ==
@@ -690,110 +861,8 @@ class GenericCAESBlock(SimpleBlock):
         self.tes_eta_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_eta_constr_rule)
 
-        # TES: Upper bound
+        # (27) TES: Upper bound
         def tes_ub_constr_rule(block, n, t):
             return (self.tes_level[n, t] <= n.params['tes_level_max'])
         self.tes_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
-
-
-class OffsetTransformer(Transformer):
-    """An object with one input and one output.
-
-    Parameters
-    ----------
-
-    coefficients : dict
-        Dictionary containing the first two polynomial coefficients
-        i.e. the y-intersect and slope of a linear equation.
-        Keys are the connected tuples (input, output) bus objects.
-        The dictionary values can either be a scalar or a sequence with length
-        of time horizon for simulation.
-
-    Notes
-    -----
-    The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.OffsetTransformer`
-
-    Examples
-    --------
-
-    >>> from oemof import solph
-
-    >>> bel = solph.Bus(label='bel')
-    >>> bth = solph.Bus(label='bth')
-
-    >>> ostf = solph.custom.OffsetTransformer(
-    ...    label='ostf',
-    ...    inputs={bel: solph.Flow(
-    ...        nominal_value=60, min=0.5, max=1.0,
-    ...        nonconvex=solph.NonConvex())},
-    ...    outputs={bth: solph.Flow()},
-    ...    coefficients={(bel, bth): [20, 0.5]})
-
-    >>> type(ostf)
-    <class 'oemof.solph.custom.OffsetTransformer'>
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.coefficients = kwargs.get('coefficients')
-
-        for k, v in self.inputs.items():
-            if not v.nonconvex:
-                raise TypeError('Input flows must be of type NonConvexFlow!')
-
-        if len(self.inputs) > 1 or len(self.outputs) > 1:
-            raise ValueError("Component `OffsetTransformer` must not have" +
-                             "more than 1 input and 1 output!")
-
-    def constraint_group(self):
-        return OffsetTransformerBlock
-
-
-class OffsetTransformerBlock(SimpleBlock):
-    r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.custom.OffsetTransformer`
-
-    **The following constraints are created:**
-
-    TODO: Add description for constraints
-
-    TODO: Add test
-
-    """
-    CONSTRAINT_GROUP = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """ Creates the relation for the class:`OffsetTransformer`.
-
-        Parameters
-        ----------
-        group : list
-            List of oemof.solph.custom.OffsetTransformer objects for which
-            the relation of inputs and outputs is created
-            e.g. group = [ostf1, ostf2, ostf3, ...]. The components inside
-            the list need to hold an attribute `coefficients` of type dict
-            containing the conversion factors for all inputs to outputs.
-        """
-        if group is None:
-            return None
-
-        m = self.parent_block()
-
-        self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
-
-        def _relation_rule(block, n, t):
-            """Link binary input and output flow to component outflow."""
-            expr = 0
-            expr += - m.flow[n, list(n.outputs.keys())[0], t]
-            expr += m.flow[list(n.inputs.keys())[0], n, t] * \
-                n.coefficients[1][t]
-            expr += m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t] * \
-                n.coefficients[0][t]
-            return expr == 0
-        self.relation = Constraint(self.OFFSETTRANSFORMERS, m.TIMESTEPS,
-                                   rule=_relation_rule)

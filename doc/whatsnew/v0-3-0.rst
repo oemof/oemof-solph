@@ -1,0 +1,82 @@
+v0.3.0 (January ??, 2019)
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+* The ``param_results`` function does not exist anymore. It has been renamed to
+  ``parameter_as_dict`` (`Issue #537 <https://github.com/oemof/oemof/
+  issues/537>`_).
+
+* The storage API has been revised. Please check the
+  `API documentation <https://oemof.readthedocs.io/en/stable/api/
+  oemof.solph.html#oemof.solph.components.GenericStorage>`_ for all details.
+
+* The OffsetTransformer is now a regular oemof.solph component. It has been
+  tested and the documentation has been improved. So it has been move from
+  *custom* to *components*. Use oemof.solph.components.OffsetTransformer (
+  `Issue #522 <https://github.com/oemof/oemof/issues/522>`_).
+
+New features
+############
+
+* Now it is possible to model just one time step. This is important for time
+  step based models and all other models with an outer loop
+  (`Issue #519 <https://github.com/oemof/oemof/issues/519>`_).
+
+* The storage can be used unbalanced now, which means that the level at the end
+  could be different to the level at the beginning of the modeled time period.
+  See the `storage documentation <https://oemof.readthedocs.io/en/stable/
+  oemof_solph.html#genericstorage-component>`_ for more details.
+
+* Namedtuples and tuples as labels work now without problems. This makes it
+  much easier to find objects and results in large energy systems
+  (`Issue #507 <https://github.com/oemof/oemof/issues/507>`_).
+
+New components
+##############
+
+* something
+
+Documentation
+#############
+
+* The template for docstrings with equations (docstring of block classes) has
+  been improved.
+
+Known issues
+############
+
+* something
+
+Bug fixes
+#########
+
+* The timeincrement attribute of the model is not set to one anymore.
+  In earlier versions the timeincrement was set to one by default. This was a
+  problem if a wrong time index was passed. In that case the timeincrement
+  was set to one without a warning. Now an error is raised if no
+  timeincrement or valid time index is found
+  (`Issue #549 <https://github.com/oemof/oemof/issues/549>`_).
+
+Testing
+#######
+
+* Automatic test coverage control was implemented. Now a PR will not be
+  accepted if it decreases the test coverage.
+* Test coverage was increased to over 90%. A badge was added to the
+  `oemof github page <https://github.com/oemof/oemof>`_ that shows the
+  actual test coverage.
+
+Other changes
+#############
+
+* something
+
+Contributors
+############
+
+* Uwe Krien
+* Johannes Röder
+* Patrik Schönfeldt

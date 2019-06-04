@@ -48,19 +48,19 @@ class BaseModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get('name', type(self).__name__)
-
         self.es = energysystem
+        self.timeincrement = sequence(kwargs.get('timeincrement', None))
 
-        try:
-            self.timeincrement = sequence(self.es.timeindex.freq.nanos / 3.6e12)
-        except AttributeError:
-            logging.warning(
-                'Could not get timeincrement from pd.DateTimeIndex! ' +
-                'To avoid this warning, make sure the `freq` attribute of ' +
-                'your timeindex is not None. Setting timeincrement to 1...')
-            self.timeincrement = sequence(1)
-
-
+        if self.timeincrement[0] is None:
+            try:
+                self.timeincrement = sequence(
+                    self.es.timeindex.freq.nanos / 3.6e12)
+            except AttributeError:
+                msg = ("No valid time increment found. Please pass a valid "
+                       "timeincremet parameter or pass an EnergySystem with "
+                       "a valid time index. Please note that a valid time"
+                       "index need to have a 'freq' attribute.")
+                raise AttributeError(msg)
 
         self.objective_weighting = kwargs.get('objective_weighting',
                                               self.timeincrement)
