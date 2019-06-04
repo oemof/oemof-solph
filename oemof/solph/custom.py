@@ -16,14 +16,23 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 import logging
 
-from oemof.solph.network import Bus, Transformer
+from oemof.solph.network import Bus, Transformer, Flow
 from oemof.solph.plumbing import sequence
 
 
 class ElectricalBus(Bus):
     r"""A electrical bus object. Every node has to be connected to Bus. This
     Bus is used in combination with ElectricalLine objects for linear optimal
-    power flow (lopf) simulations.
+    power flow (lopf) calculations.
+
+    Parameters
+    ----------
+    slack: boolean
+        If True Bus is slack bus for network
+    v_max: numeric
+        Maximum value of voltage angle at electrical bus
+    v_min: numeric
+        Mininum value of voltag angle at electrical bus
 
     Note: This component is experimental. Use it with care.
 
@@ -43,7 +52,7 @@ class ElectricalBus(Bus):
         self.v_min = kwargs.get('v_min', -1000)
 
 
-class ElectricalLine(Transformer):
+class ElectricalLine(Flow):
     r"""An ElectricalLine to be used in linear optimal power flow calculations.
     based on angle formulation. Check out the Notes below before using this
     component!
@@ -74,43 +83,16 @@ class ElectricalLine(Transformer):
         super().__init__(*args, **kwargs)
         self.reactance = sequence(kwargs.get('reactance', 0.00001))
 
-        if len(self.inputs) > 1 or len(self.outputs) > 1:
-            raise ValueError("Component ElectricLine must not have more than \
-                             one input and one output!")
-
-        self.input = self._input()
-        self.output = self._output()
-
         # set input / output flow values to -1 by default if not set by user
-        for f in self.inputs.values():
-            if f.nonconvex is not None:
-                raise ValueError(
-                    "Attribute `nonconvex` must be None for" +
-                    " inflows of component `ElectricalLine`!")
-            if f.min is None:
-                f.min = -1
-            # to be used in grouping for all bidi flows
-            f.bidirectional = True
-
-        for f in self.outputs.values():
-            if f.nonconvex is not None:
-                raise ValueError(
-                    "Attribute `nonconvex` must be None for" +
-                    " outflows of component `ElectricalLine`!")
-            if f.min is None:
-                f.min = -1
-            # to be used in grouping for all bidi flows
-            f.bidirectional = True
-
-    def _input(self):
-        r""" Returns the first (and only!) input of the line object
-        """
-        return [i for i in self.inputs][0]
-
-    def _output(self):
-        r""" Returns the first (and only!) output of the line object
-        """
-        return [o for o in self.outputs][0]
+        if self.nonconvex is not None:
+            raise ValueError(
+                ("Attribute `nonconvex` must be None for " +
+                 "component `ElectricalLine` from {} to {}!").format(
+                    self.input, self.output))
+        if self.min is None:
+            self.min = -1
+        # to be used in grouping for all bidi flows
+        self.bidirectional = True
 
     def constraint_group(self):
         return ElectricalLineBlock
@@ -165,12 +147,9 @@ class ElectricalLineBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {n: n.input for n in group}
-        O = {n: n.output for n in group}
-
         # create voltage angle variables
         self.ELECTRICAL_BUSES = Set(initialize=[n for n in m.es.nodes
-                                       if isinstance(n, ElectricalBus)])
+                                    if isinstance(n, ElectricalBus)])
 
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
@@ -189,26 +168,20 @@ class ElectricalLineBlock(SimpleBlock):
         def _voltage_angle_relation(block):
             for t in m.TIMESTEPS:
                 for n in group:
-                    if O[n].slack is True:
-                        self.voltage_angle[O[n], t].value = 0
-                        self.voltage_angle[O[n], t].fix()
+                    if n.input.slack is True:
+                        self.voltage_angle[n.output, t].value = 0
+                        self.voltage_angle[n.output, t].fix()
                     try:
-                        lhs = m.flow[n, O[n], t]
+                        lhs = m.flow[n.input, n.output, t]
                         rhs = 1 / n.reactance[t] * (
-                            self.voltage_angle[I[n], t] -
-                            self.voltage_angle[O[n], t])
+                            self.voltage_angle[n.input, t] -
+                            self.voltage_angle[n.output, t])
                     except:
                         raise ValueError("Error in constraint creation",
                                          "of node {}".format(n.label))
                     block.electrical_flow.add((n, t), (lhs == rhs))
-                    # add constraint to set in-outflow equal
-                    block._equate_electrical_flows.add((n, t), (
-                        m.flow[n, O[n], t] == m.flow[I[n], n, t]))
 
         self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
-
-        self._equate_electrical_flows = Constraint(group, m.TIMESTEPS,
-                                                   noruleinit=True)
 
         self.electrical_flow_build = BuildAction(
                                          rule=_voltage_angle_relation)

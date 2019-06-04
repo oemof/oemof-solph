@@ -184,6 +184,10 @@ def test_results_with_old_dump():
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
                 filename='es_dump_test_2_3dev.oemof')
+    # Note: This internal attribute is new in v.0.3.0, so the dump doesn't
+    #       contain it for obvious reasons. Setting it manually to the correct
+    #       value prevents the test from erroring.
+    energysystem._first_ungrouped_node_index_ = len(energysystem.nodes)
     results = energysystem.results['main']
 
     electricity_bus = views.node(results, 'electricity')

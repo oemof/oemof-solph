@@ -9,11 +9,12 @@ available from its original location oemof/oemof/energy_system.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from functools import partial
+from collections import deque
 from pickle import UnpicklingError
 import logging
 import os
 
+import blinker
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
@@ -107,46 +108,54 @@ class EnergySystem:
     True
 
     """
-    def __init__(self, **kwargs):
-        for attribute in ['entities']:
-            setattr(self, attribute, kwargs.get(attribute, []))
 
+    signals = {}
+    """A dictionary of blinker_ signals emitted by energy systems.
+
+    Currently only one signal is supported. This signal is emitted whenever a
+    `Node <oemof.network.Node>` is `add`ed to an energy system. The signal's
+    `sender` is set to the `node <oemof.network.Node>` that got added to the
+    energy system so that `nodes <oemof.network.Node>` have an easy way to only
+    receive signals for when they themselves get added to an energy system.
+
+    .. _blinker: https://pythonhosted.org/blinker/
+    """
+
+    def __init__(self, **kwargs):
+        self._first_ungrouped_node_index_ = 0
         self._groups = {}
         self._groupings = ([BY_UID] +
                            [g if isinstance(g, Grouping) else Nodes(g)
                             for g in kwargs.get('groupings', [])])
-        for e in self.entities:
-            for g in self._groupings:
-                g(e, self.groups)
+        self.entities = []
+
         self.results = kwargs.get('results')
 
         self.timeindex = kwargs.get('timeindex')
 
         self.temporal = kwargs.get('temporal')
 
-    @staticmethod
-    def _regroup(entity, groups, groupings):
-        for g in groupings:
-            g(entity, groups)
-        return groups
-
-    def _add(self, entity):
-        self.entities.append(entity)
-        self._groups = partial(self._regroup, entity, self.groups,
-                               self._groupings)
+        self.add(*kwargs.get('entities', ()))
 
     def add(self, *nodes):
-        """ Add :class:`nodes <oemof.network.Node>` to this energy system.
-        """
+        """Add :class:`nodes <oemof.network.Node>` to this energy system."""
+        self.nodes.extend(nodes)
         for n in nodes:
-            self._add(n)
-            if hasattr(n, 'subnodes'):
-                self.add(*n.subnodes)
+            self.signals[type(self).add].send(n, EnergySystem=self)
+    signals[add] = blinker.signal(add)
 
     @property
     def groups(self):
-        while callable(self._groups):
-            self._groups = self._groups()
+        gs = self._groups
+        deque(
+            (
+                g(n, gs)
+                for g in self._groupings
+                for n in self.nodes[self._first_ungrouped_node_index_ :]
+            ),
+            maxlen=0,
+        )
+        self._first_ungrouped_node_index_ = len(self.nodes)
         return self._groups
 
     @property
