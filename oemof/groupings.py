@@ -9,16 +9,18 @@ available from its original location oemof/oemof/groupings.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-try:
-    from collections.abc import (Hashable, Iterable, Mapping,
-                                 MutableMapping as MuMa)
-except ImportError:
-    from collections import (Hashable, Iterable, Mapping,
+from collections.abc import (Hashable, Iterable, Mapping,
                              MutableMapping as MuMa)
 from itertools import chain, filterfalse
 
 from oemof.network import Edge
 
+
+# TODO: Update docstrings.
+#
+#   * Make them easier to understand.
+#   * Update them to use nodes instead of entities.
+#
 
 class Grouping:
     """
@@ -115,26 +117,26 @@ class Grouping:
             if kw in kwargs:
                 setattr(self, kw, kwargs[kw])
 
-    def key(self, e):
+    def key(self, node):
         """ Obtain a key under which to store the group.
 
         You have to supply this method yourself using the :obj:`key` parameter
         when creating :class:`Grouping` instances.
 
-        Called for every :class:`entity <oemof.core.network.Entity>` :obj:`e`
-        of the energy system. Expected to return the key (i.e. a valid
-        :class:`hashable`) under which the group :meth:`value(e)
-        <Grouping.value>` will be stored. If it should be added to more than
-        one group, return a :class:`list` (or any other :class:`non-hashable
-        <Hashable>`, :class:`iterable`) containing the group keys.
+        Called for every :class:`node <oemof.core.network.Node>` of the energy
+        system. Expected to return the key (i.e. a valid :class:`hashable`)
+        under which the group :meth:`value(node) <Grouping.value>` will be
+        stored. If it should be added to more than one group, return a
+        :class:`list` (or any other non-:class:`hashable <Hashable>`,
+        :class:`iterable`) containing the group keys.
 
         Return :obj:`None` if you don't want to store :obj:`e` in a group.
         """
-        raise NotImplementedError(
-            "There is no default implementation for `Groupings.key`.\n" +
-            "Congratulations, you managed to execute supposedly " +
-            "unreachable code.\n" +
-            "Please let us know by filing a bug at:\n\n    " +
+        raise NotImplementedError("\n\n"
+            "There is no default implementation for `Groupings.key`.\n"
+            "Congratulations, you managed to execute supposedly "
+            "unreachable code.\n"
+            "Please let us know by filing a bug at:\n\n    "
             "https://github.com/oemof/oemof/issues\n")
 
     def value(self, e):
@@ -165,7 +167,7 @@ class Grouping:
         """
         if old is new:
             return old
-        raise ValueError("\nGrouping \n  " +
+        raise ValueError("\nGrouping \n  "
                          "{}:{}\nand\n  {}:{}\ncollides.\n".format(
                              id(old), old, id(new), new) +
                          "Possibly duplicate uids/labels?")
@@ -185,11 +187,11 @@ class Grouping:
         (:obj:`True`) or not (:obj:`False`).
 
         """
-        raise NotImplementedError(
-            "`Groupings.filter` called without being overridden.\n" +
-            "Congratulations, you managed to execute supposedly " +
-            "unreachable code.\n" +
-            "Please let us know by filing a bug at:\n\n    " +
+        raise NotImplementedError("\n\n"
+            "`Groupings.filter` called without being overridden.\n"
+            "Congratulations, you managed to execute supposedly "
+            "unreachable code.\n"
+            "Please let us know by filing a bug at:\n\n    "
             "https://github.com/oemof/oemof/issues\n")
 
     def __call__(self, e, d):
@@ -201,7 +203,7 @@ class Grouping:
             for k in list(filterfalse(self.filter, v)):
                 v.pop(k)
         elif isinstance(v, Mapping):
-            v = type(v)((k, v[k]) for k in v if self.filter(k))
+            v = type(v)(dict((k, v[k]) for k in filter(self.filter, v)))
         elif isinstance(v, Iterable):
             v = type(v)(filter(self.filter, v))
         elif self.filter and not self.filter(v):

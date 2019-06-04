@@ -135,9 +135,10 @@ class Node:
                     setattr(self, '_' + optional, args.pop())
         self._in_edges = set()
         for i in kwargs.get('inputs', {}):
-            assert isinstance(i, Node), \
-                   "Input {} of {} not a Node, but a {}."\
-                   .format(i, self, type(i))
+            assert isinstance(i, Node), (
+                    "\n\nInput\n\n  {!r}\n\nof\n\n  {!r}\n\n"
+                    "not an instance of Node, but of {}."
+                    ).format(i, self, type(i))
             self._in_edges.add(i)
             try:
                 flow = kwargs['inputs'].get(i)
@@ -147,9 +148,10 @@ class Node:
             edge.input=i
             edge.output=self
         for o in kwargs.get('outputs', {}):
-            assert isinstance(o, Node), \
-                   "Output {} of {} not a Node, but a {}."\
-                   .format(o, self, type(o))
+            assert isinstance(o, Node), (
+                    "\n\nOutput\n\n  {!r}\n\nof\n\n  {!r}\n\n"
+                    "not an instance of Node, but of {}."
+                    ).format(o, self, type(o))
             try:
                 flow = kwargs['outputs'].get(o)
             except AttributeError:
@@ -257,12 +259,12 @@ class Edge(Node):
             **kwargs):
         if flow is not None and values is not None:
             raise ValueError(
-                    "`Edge`'s `flow` and `values` keyword arguments are " +
-                    "aliases of each other, so they're mutually exclusive.\n" +
-                    "You supplied:\n"+
-                    "    `flow`  : {}".format(flow) +
-                    "    `values`: {}".format(values) +
-                    "\nChoose one.")
+                    "\n\n`Edge`'s `flow` and `values` keyword arguments are "
+                    "aliases of each other,\nso they're mutually exclusive.\n"
+                    "You supplied:\n" +
+                    "    `flow`  : {}\n".format(flow) +
+                    "    `values`: {}\n".format(values) +
+                    "Choose one.")
         if input is None or output is None:
             self._delay_registration_ = True
         super().__init__(label=Edge.Label(input, output))
@@ -422,15 +424,19 @@ def registry_changed_to(r):
     """ Override registry during execution of a block and restore it afterwards.
     """
     backup = Node.registry
-    Node.registry = None
+    Node.registry = r
     yield
     Node.registry = backup
 
 
-def temporarily_modifies_registry(function):
-    """ Backup registry before and restore it after execution of `function`.
+def temporarily_modifies_registry(f):
+    """ Decorator that disables `Node` registration during `f`'s execution.
+
+    It does so by setting `Node.registry` to `None` while `f` is executing, so
+    `f` can freely set `Node.registry` to something else. The registration's
+    original value is restored afterwards.
     """
     def result(*xs, **ks):
-        with registry_disabled():
+        with registry_changed_to(None):
             return f(*xs, **ks)
     return result
