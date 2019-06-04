@@ -220,3 +220,25 @@ class EnergySystem_Tests:
         eq_(ES.groups[key], set(((bus, node, flows[0]),
                                  (node, bus, flows[1]))))
 
+    def test_that_node_additions_are_signalled(self):
+        """When a node gets `add`ed, a corresponding signal should be emitted."""
+        node = Node(label="Node")
+
+        def subscriber(sender, **kwargs):
+            ok_(sender is node)
+            ok_(kwargs['EnergySystem'] is self.es)
+            subscriber.called = True
+        subscriber.called = False
+
+        es.EnergySystem.signals[es.EnergySystem.add].connect(
+            subscriber, sender=node
+        )
+        self.es.add(node)
+        ok_(
+            subscriber.called,
+            (
+                "\nExpected `subscriber.called` to be `True`.\n"
+                "Got {}.\n"
+                "Probable reason: `subscriber` didn't get called."
+            ).format(subscriber.called),
+        )

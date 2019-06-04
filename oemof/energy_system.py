@@ -14,6 +14,7 @@ from pickle import UnpicklingError
 import logging
 import os
 
+import blinker
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
@@ -107,6 +108,19 @@ class EnergySystem:
     True
 
     """
+
+    signals = {}
+    """A dictionary of blinker_ signals emitted by energy systems.
+
+    Currently only one signal is supported. This signal is emitted whenever a
+    `Node <oemof.network.Node>` is `add`ed to an energy system. The signal's
+    `sender` is set to the `node <oemof.network.Node>` that got added to the
+    energy system so that `nodes <oemof.network.Node>` have an easy way to only
+    receive signals for when they themselves get added to an energy system.
+
+    .. _blinker: https://pythonhosted.org/blinker/
+    """
+
     def __init__(self, **kwargs):
         self._groups = {}
         self._groupings = ([BY_UID] +
@@ -138,8 +152,8 @@ class EnergySystem:
         self._groups[self.add] = self._groups.get(self.add, [])
         self._groups[self.add].extend(nodes)
         for n in nodes:
-            if hasattr(n, 'subnodes'):
-                self.add(*n.subnodes)
+            self.signals[type(self).add].send(n, EnergySystem=self)
+    signals[add] = blinker.signal(add)
 
     @property
     def groups(self):
