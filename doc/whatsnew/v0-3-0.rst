@@ -94,6 +94,10 @@ Testing
 * Test coverage was increased to over 90%. A badge was added to the
   `oemof github page <https://github.com/oemof/oemof>`_ that shows the
   actual test coverage.
+* Test coverage on the :mod:`groupings <oemof.groupings>` and :mod:`network
+  <oemof.network>` modules has significantly increased. These modules where
+  historically very weakly tested and are now approaching 90% and 95%
+  respectively with more tests being planned.
 
 Other changes
 #############
