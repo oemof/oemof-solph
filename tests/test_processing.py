@@ -9,7 +9,8 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from nose.tools import eq_, assert_raises
+from nose.tools import eq_, assert_raises, ok_
+from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -54,8 +55,8 @@ class Parameter_Result_Tests:
             label='storage',
             inputs={b_el1: Flow(variable_costs=3)},
             outputs={b_el2: Flow(variable_costs=2.5)},
-            capacity_loss=0.00,
-            initial_capacity=0,
+            loss_rate=0.00,
+            initial_storage_level=0,
             invest_relation_input_capacity=1/6,
             invest_relation_output_capacity=1/6,
             inflow_conversion_factor=1,
@@ -64,8 +65,7 @@ class Parameter_Result_Tests:
             investment=Investment(ep_costs=0.4),
         )
 
-        cls.demand_values = [100] * 8760
-        cls.demand_values[0] = 0.0
+        cls.demand_values = [0.0] + [100] * 23
         demand = Sink(
             label="demand_el",
             inputs={
@@ -89,7 +89,7 @@ class Parameter_Result_Tests:
         param_results = processing.parameter_as_dict(self.es,
                                                      exclude_none=True)
         assert_series_equal(
-            param_results[(b_el2, demand)]['scalars'],
+            param_results[(b_el2, demand)]['scalars'].sort_index(),
             pandas.Series(
                 {
                     'fixed': True,
@@ -98,15 +98,16 @@ class Parameter_Result_Tests:
                     'min': 0,
                     'negative_gradient_costs': 0,
                     'positive_gradient_costs': 0,
-                    'variable_costs': 0
+                    'variable_costs': 0,
+                    'label': str(b_el2.outputs[demand].label),
                 }
-            )
+            ).sort_index()
         )
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
                 {'actual_value': self.demand_values}
-            )
+            ), check_like=True
         )
 
     def test_flows_without_none_exclusion(self):
@@ -128,11 +129,14 @@ class Parameter_Result_Tests:
             'negative_gradient_costs': 0,
             'positive_gradient_ub': None,
             'positive_gradient_costs': 0,
-            'variable_costs': 0
+            'variable_costs': 0,
+            'flow': None,
+            'values': None,
+            'label': str(b_el2.outputs[demand].label),
         }
         assert_series_equal(
-            param_results[(b_el2, demand)]['scalars'],
-            pandas.Series(scalar_attributes)
+            param_results[(b_el2, demand)]['scalars'].sort_index(),
+            pandas.Series(scalar_attributes).sort_index()
         )
         sequences_attributes = {
             'actual_value': self.demand_values,
@@ -145,7 +149,7 @@ class Parameter_Result_Tests:
                 sequences_attributes[attr] = [None]
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
-            pandas.DataFrame(sequences_attributes)
+            pandas.DataFrame(sequences_attributes), check_like=True
         )
 
     def test_nodes_with_none_exclusion(self):
@@ -155,7 +159,8 @@ class Parameter_Result_Tests:
         assert_series_equal(
             param_results[('storage', 'None')]['scalars'],
             pandas.Series({
-                'initial_capacity': 0,
+                'balanced': True,
+                'initial_storage_level': 0,
                 'invest_relation_input_capacity': 1/6,
                 'invest_relation_output_capacity': 1/6,
                 'investment_ep_costs': 0.4,
@@ -163,10 +168,10 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
-                'capacity_loss': 0,
-                'capacity_max': 1,
-                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
+                'loss_rate': 0,
+                'max_storage_level': 1,
+                'min_storage_level': 0,
                 'outflow_conversion_factor': 0.8,
             })
         )
@@ -176,13 +181,15 @@ class Parameter_Result_Tests:
         )
 
     def test_nodes_with_none_exclusion_old_name(self):
-        param_results = processing.param_results(
+        param_results = processing.parameter_as_dict(
             self.es, exclude_none=True)
-        param_results = processing.convert_keys_to_strings(param_results)
+        param_results = processing.convert_keys_to_strings(
+            param_results, keep_none_type=True)
         assert_series_equal(
-            param_results[('storage', 'None')]['scalars'],
+            param_results[('storage', None)]['scalars'],
             pandas.Series({
-                'initial_capacity': 0,
+                'balanced': True,
+                'initial_storage_level': 0,
                 'invest_relation_input_capacity': 1/6,
                 'invest_relation_output_capacity': 1/6,
                 'investment_ep_costs': 0.4,
@@ -190,15 +197,15 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
-                'capacity_loss': 0,
-                'capacity_max': 1,
-                'capacity_min': 0,
                 'inflow_conversion_factor': 1,
+                'loss_rate': 0,
+                'max_storage_level': 1,
+                'min_storage_level': 0,
                 'outflow_conversion_factor': 0.8,
             })
         )
         assert_frame_equal(
-            param_results[('storage', 'None')]['sequences'],
+            param_results[('storage', None)]['sequences'],
             pandas.DataFrame()
         )
 
@@ -244,3 +251,59 @@ class Parameter_Result_Tests:
         results = processing.results(self.om)
         bel = views.node(results, 'b_el1', multiindex=True)
         eq_(int(bel['sequences']['b_el1', 'None', 'duals'].sum()), 48)
+
+    def test_node_weight_by_type(self):
+        results = processing.results(self.om)
+        capacity = views.node_weight_by_type(
+            results, node_type=GenericStorage)
+        eq_(int(float(capacity.sum()) * pow(10, 6)) / pow(10, 6),
+            1437.500003)
+
+    def test_output_by_type_view(self):
+        results = processing.results(self.om)
+        transformer_output = views.node_output_by_type(results,
+                                                       node_type=Transformer)
+        compare = views.node(
+            results, 'diesel', multiindex=True)['sequences'][(
+                'diesel', 'b_el1', 'flow')]
+        eq_(int(transformer_output.sum()), int(compare.sum()))
+
+    def test_input_by_type_view(self):
+        results = processing.results(self.om)
+        sink_input = views.node_input_by_type(results, node_type=Sink)
+        compare = views.node(results, 'demand_el', multiindex=True)
+        eq_(int(sink_input.sum()),
+            int(compare['sequences'][('b_el2', 'demand_el', 'flow')].sum()))
+
+    def test_net_storage_flow(self):
+        results = processing.results(self.om)
+        storage_flow = views.net_storage_flow(
+            results, node_type=GenericStorage)
+        compare = views.node(
+            results, 'storage', multiindex=True)['sequences']
+        eq_(
+            ((compare[('storage', 'b_el2', 'flow')] -
+              compare[('b_el1', 'storage', 'flow')]).to_frame() ==
+             storage_flow.values).all()[0], True)
+
+    def test_output_by_type_view_empty(self):
+        results = processing.results(self.om)
+        view = views.node_output_by_type(results, node_type=Flow)
+        ok_(view is None)
+
+    def test_input_by_type_view_empty(self):
+        results = processing.results(self.om)
+        view = views.node_input_by_type(results, node_type=Flow)
+        ok_(view is None)
+
+    def test_net_storage_flow_empty(self):
+        results = processing.results(self.om)
+        view = views.net_storage_flow(results, node_type=Sink)
+        ok_(view is None)
+        view2 = views.net_storage_flow(results, node_type=Flow)
+        ok_(view2 is None)
+
+    def test_node_weight_by_type_empty(self):
+        results = processing.results(self.om)
+        view = views.node_weight_by_type(results, node_type=Flow)
+        ok_(view is None)

@@ -9,17 +9,16 @@ available from its original location oemof/oemof/energy_system.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from functools import partial
-import collections.abc as cabc
+from collections import deque
+from pickle import UnpicklingError
 import logging
 import os
-import re
 
-import pandas as pd
+import blinker
 import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
-from oemof.network import Bus, Component
+from oemof.network import Bus
 
 
 class EnergySystem:
@@ -109,56 +108,54 @@ class EnergySystem:
     True
 
     """
-    def __init__(self, **kwargs):
-        for attribute in ['entities']:
-            setattr(self, attribute, kwargs.get(attribute, []))
 
+    signals = {}
+    """A dictionary of blinker_ signals emitted by energy systems.
+
+    Currently only one signal is supported. This signal is emitted whenever a
+    `Node <oemof.network.Node>` is `add`ed to an energy system. The signal's
+    `sender` is set to the `node <oemof.network.Node>` that got added to the
+    energy system so that `nodes <oemof.network.Node>` have an easy way to only
+    receive signals for when they themselves get added to an energy system.
+
+    .. _blinker: https://pythonhosted.org/blinker/
+    """
+
+    def __init__(self, **kwargs):
+        self._first_ungrouped_node_index_ = 0
         self._groups = {}
         self._groupings = ([BY_UID] +
                            [g if isinstance(g, Grouping) else Nodes(g)
                             for g in kwargs.get('groupings', [])])
-        for e in self.entities:
-            for g in self._groupings:
-                g(e, self.groups)
+        self.entities = []
+
         self.results = kwargs.get('results')
 
-        self.timeindex = kwargs.get('timeindex',
-                                    pd.date_range(start=pd.to_datetime('today'),
-                                                  periods=1, freq='H'))
+        self.timeindex = kwargs.get('timeindex')
 
         self.temporal = kwargs.get('temporal')
 
-    @staticmethod
-    def _regroup(entity, groups, groupings):
-        for g in groupings:
-            g(entity, groups)
-        return groups
-
-
-    try:
-        from .tools.datapackage import deserialize_energy_system
-        from_datapackage = classmethod(deserialize_energy_system)
-    except ImportError as e:
-        @classmethod
-        def from_datapackage(cls, *args, **kwargs):
-            raise e
-
-
-    def _add(self, entity):
-        self.entities.append(entity)
-        self._groups = partial(self._regroup, entity, self.groups,
-                               self._groupings)
+        self.add(*kwargs.get('entities', ()))
 
     def add(self, *nodes):
-        """ Add :class:`nodes <oemof.network.Node>` to this energy system.
-        """
+        """Add :class:`nodes <oemof.network.Node>` to this energy system."""
+        self.nodes.extend(nodes)
         for n in nodes:
-            self._add(n)
+            self.signals[type(self).add].send(n, EnergySystem=self)
+    signals[add] = blinker.signal(add)
 
     @property
     def groups(self):
-        while callable(self._groups):
-            self._groups = self._groups()
+        gs = self._groups
+        deque(
+            (
+                g(n, gs)
+                for g in self._groupings
+                for n in self.nodes[self._first_ungrouped_node_index_ :]
+            ),
+            maxlen=0,
+        )
+        self._first_ungrouped_node_index_ = len(self.nodes)
         return self._groups
 
     @property
@@ -206,7 +203,28 @@ class EnergySystem:
         if filename is None:
             filename = 'es_dump.oemof'
 
-        self.__dict__ = pickle.load(open(os.path.join(dpath, filename), "rb"))
+        try:
+            self.__dict__ = pickle.load(
+                    open(os.path.join(dpath, filename), "rb"))
+        except UnpicklingError as e:
+            if str(e) == "state is not a dictionary":
+                raise UnpicklingError(
+                        "\n  "
+                        "Seems like you're trying to load an energy system "
+                        "dumped with an older\n  "
+                        "oemof version. Unfortunetaly we made changes which "
+                        "broke this from\n  "
+                        "v0.2.2 (more specifically commit `bec669b`) to its "
+                        "successor.\n  "
+                        "If you really need this functionality, please file "
+                        "a bug entitled\n\n    "
+                        '"Pickle customization removal breaks '
+                        '`EnergySystem.restore`"\n\n  '
+                        "at\n\n    "
+                        "https://github.com/oemof/oemof/issues\n\n  "
+                        "or comment on it if it already exists.")
+            raise e
+
         msg = ('Attributes restored from: {0}'.format(os.path.join(
             dpath, filename)))
         logging.debug(msg)

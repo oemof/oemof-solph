@@ -52,9 +52,9 @@ c_u_InvestmentFlow_max(storage3_electricityBus_2)_:
 +1 flow(storage3_electricityBus_2)
 <= 0
 
-c_e_GenericStorageBlock_balance(storage3_0)_:
+c_e_GenericStorageBlock_balance_first(storage3)_:
 +1 GenericStorageBlock_capacity(storage3_0)
--1 GenericStorageBlock_capacity(storage3_2)
+-1 GenericStorageBlock_init_cap(storage3)
 -1 flow(electricityBus_storage3_0)
 +1 flow(storage3_electricityBus_0)
 = 0
@@ -73,6 +73,11 @@ c_e_GenericStorageBlock_balance(storage3_2)_:
 +1 flow(storage3_electricityBus_2)
 = 0
 
+c_e_GenericStorageBlock_balanced_cstr(storage3)_:
++1 GenericStorageBlock_capacity(storage3_2)
+-1 GenericStorageBlock_init_cap(storage3)
+= 0
+
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
@@ -88,4 +93,5 @@ bounds
    0 <= GenericStorageBlock_capacity(storage3_0) <= 5000
    0 <= GenericStorageBlock_capacity(storage3_1) <= 5000
    0 <= GenericStorageBlock_capacity(storage3_2) <= 5000
+   0 <= GenericStorageBlock_init_cap(storage3) <= 5000
 end

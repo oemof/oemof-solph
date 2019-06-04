@@ -10,11 +10,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import networkx as nx
-import warnings
 
 
-def create_nx_graph(energy_system=None, optimization_model=None,
-                    remove_nodes=None, filename=None,
+def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
                     remove_nodes_with_substrings=None, remove_edges=None):
     """
     Create a `networkx.DiGraph` for the passed energy system and plot it.
@@ -52,7 +50,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     ...                  inputs = {bel1: Flow(nominal_value=85,
     ...                            actual_value=[0.5, 0.25, 0.75],
     ...                            fixed=True)})
-    >>> pp_gas = Transformer(label='pp_gas',
+    >>> pp_gas = Transformer(label=('pp', 'gas'),
     ...                            inputs={b_gas: Flow()},
     ...                            outputs={bel1: Flow(nominal_value=41,
     ...                                                variable_costs=40)},
@@ -67,7 +65,7 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     >>> # sorted and customized. this is especially helpful for large graphs
     >>> # grph.create_nx_graph(es, filename="my_graph.graphml")
     >>> [my_graph.has_node(n)
-    ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
+    ...  for n in ['b_gas', 'bel1', "('pp', 'gas')", 'demand_el', 'tester']]
     [True, True, True, True, False]
     >>> list(nx.attracting_components(my_graph))
     [{'demand_el'}]
@@ -75,13 +73,13 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     ['bel1', 'bel2', 'line_from2', 'line_to2']
     >>> new_graph = grph.create_nx_graph(energy_system=es,
     ...                                  remove_nodes_with_substrings=['b_'],
-    ...                                  remove_nodes=['pp_gas'],
+    ...                                  remove_nodes=["('pp', 'gas')"],
     ...                                  remove_edges=[('bel2', 'line_from2')],
     ...                                  filename='test_graph')
     >>> [new_graph.has_node(n)
-    ...  for n in ['b_gas', 'bel1', 'pp_gas', 'demand_el', 'tester']]
+    ...  for n in ['b_gas', 'bel1', "('pp', 'gas')", 'demand_el', 'tester']]
     [False, True, False, True, False]
-    >>> my_graph.has_edge('pp_gas', 'bel1')
+    >>> my_graph.has_edge("('pp', 'gas')", 'bel1')
     True
     >>> new_graph.has_edge('bel2', 'line_from2')
     False
@@ -95,16 +93,9 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     # construct graph from nodes and flows
     grph = nx.DiGraph()
 
-    # Get energy_system from Model
-    if energy_system is None:
-        msg = ("\nThe optimisation_model attribute will be removed, pass the "
-               "energy system instead.")
-        warnings.warn(msg, FutureWarning)
-        energy_system = optimization_model.es
-
     # add nodes
     for n in energy_system.nodes:
-        grph.add_node(n.label, label=n.label)
+        grph.add_node(str(n.label), label=str(n.label))
 
     # add labeled flows on directed edge if an optimization_model has been
     # passed or undirected edge otherwise
@@ -113,9 +104,10 @@ def create_nx_graph(energy_system=None, optimization_model=None,
             weight = getattr(energy_system.flows()[(i, n)],
                              'nominal_value', None)
             if weight is None:
-                grph.add_edge(i.label, n.label)
+                grph.add_edge(str(i.label), str(n.label))
             else:
-                grph.add_edge(i.label, n.label, weigth=format(weight, '.2f'))
+                grph.add_edge(str(i.label), str(n.label),
+                              weigth=format(weight, '.2f'))
 
     # remove nodes and edges based on precise labels
     if remove_nodes is not None:
@@ -126,8 +118,8 @@ def create_nx_graph(energy_system=None, optimization_model=None,
     # remove nodes based on substrings
     if remove_nodes_with_substrings is not None:
         for i in remove_nodes_with_substrings:
-            remove_nodes = [v.label for v in energy_system.nodes
-                            if i in v.label]
+            remove_nodes = [str(v.label) for v in energy_system.nodes
+                            if i in str(v.label)]
             grph.remove_nodes_from(remove_nodes)
 
     if filename is not None:

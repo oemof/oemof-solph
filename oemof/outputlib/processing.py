@@ -154,7 +154,7 @@ def results(om):
     return result
 
 
-def convert_keys_to_strings(result):
+def convert_keys_to_strings(result, keep_none_type=False):
     """
     Convert the dictionary keys to strings.
 
@@ -162,10 +162,20 @@ def convert_keys_to_strings(result):
     converted into strings that represent the object labels
     e.g. results[('pp1','bus1')].
     """
-    converted = {
-        tuple([str(e) for e in k]) if isinstance(k, tuple) else str(k): v
-        for k, v in result.items()
-    }
+    if keep_none_type:
+        converted = {
+            tuple([str(e) if e is not None else None for e in k])
+            if isinstance(k, tuple)
+            else str(k) if k is not None else None: v
+            for k, v in result.items()
+        }
+    else:
+        converted = {
+            tuple(map(str, k))
+            if isinstance(k, tuple)
+            else str(k): v
+            for k, v in result.items()
+        }
     return converted
 
 
@@ -227,6 +237,8 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
         com_data = {'scalars': {}, 'sequences': {}}
 
         exclusions = ('__', '_', 'registry', 'inputs', 'outputs',
+                      'register',
+                      'Label', 'from_object', 'input', 'output',
                       'constraint_group')
         attrs = [i for i in dir(com)
                  if not (callable(i) or i.startswith(exclusions))]
@@ -255,6 +267,11 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
             if isinstance(attr_value, str):
                 com_data['scalars'][a] = attr_value
                 continue
+
+            # If the label is a tuple it is iterable, therefore it should be
+            # converted to a string. Otherwise it will be a sequence.
+            if a == 'label':
+                attr_value = str(attr_value)
 
             # check if attribute is iterable
             # see: https://stackoverflow.com/questions/1952464/
@@ -316,18 +333,9 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     for com_key in components:
         component = components[com_key] if get_flows else com_key
         component_data = detect_scalars_and_sequences(component)
-        key = com_key if get_flows else (com_key, None)
-        data[key] = component_data
+        comkey = com_key if get_flows else (com_key, None)
+        data[comkey] = component_data
     return data
-
-
-def param_results(system, exclude_none=True):
-    warnings.simplefilter('always', DeprecationWarning)
-    msg = ("The function 'param_results' has been renamed to"
-           "'parameter_as_dict'.\nPleas use the new function name to avoid"
-           "problems in the future.")
-    warnings.warn(msg, DeprecationWarning)
-    return parameter_as_dict(system, exclude_none=exclude_none)
 
 
 def parameter_as_dict(system, exclude_none=True):

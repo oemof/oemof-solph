@@ -27,15 +27,14 @@ setup(name='oemof',
       namespace_package=['oemof'],
       long_description=read('README.rst'),
       packages=find_packages(),
-      install_requires=['dill <= 0.2.8.5',
-                        'numpy >= 1.7.0, < 1.16',
-                        'pandas >= 0.18.0, < 0.24',
-                        'pyomo >= 4.4.0, < 5.6',
-                        'networkx < 2.3'],
+      install_requires=['blinker < 2.0',
+                        'dill < 0.3',
+                        'numpy >= 1.7.0, < 1.17',
+                        'pandas >= 0.18.0, < 0.25',
+                        'pyomo >= 4.4.0, < 5.7',
+                        'networkx < 2.4'],
       extras_require={'datapackage': ['datapackage']},
       entry_points={
           'console_scripts': [
-              'oemof_installation_test = '
-              'oemof.tools.console_scripts:check_oemof_installation',
-              'test_oemof = '
-              'oemof.tools.console_scripts:test_oemof']})
+              'oemof_installation_test = ' +
+              'oemof.tools.console_scripts:check_oemof_installation']})

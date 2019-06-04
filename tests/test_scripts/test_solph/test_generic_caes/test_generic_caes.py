@@ -90,29 +90,31 @@ def test_gen_caes():
     # create result object
     results = processing.results(om)
 
-    data = views.node(results, 'caes')['sequences'].sum(axis=0).to_dict()
+    data = views.node(
+        results, 'caes', keep_none_type=True
+    )['sequences'].sum(axis=0).to_dict()
 
     test_dict = {
-        (('caes', 'None'), 'cav_level'): 25658.82964382,
-        (('caes', 'None'), 'exp_p'): 5020.801997000007,
-        (('caes', 'None'), 'exp_q_fuel_in'): 5170.880360999999,
-        (('caes', 'None'), 'tes_e_out'): 0.0,
-        (('caes', 'None'), 'exp_st'): 226.0,
+        (('caes', None), 'cav_level'): 25658.82964382,
+        (('caes', None), 'exp_p'): 5020.801997000007,
+        (('caes', None), 'exp_q_fuel_in'): 5170.880360999999,
+        (('caes', None), 'tes_e_out'): 0.0,
+        (('caes', None), 'exp_st'): 226.0,
         (('bgas', 'caes'), 'flow'): 5170.880360999999,
-        (('caes', 'None'), 'cav_e_out'): 1877.5972265299995,
-        (('caes', 'None'), 'exp_p_max'): 17512.352336,
-        (('caes', 'None'), 'cmp_q_waste'): 2499.9125993000007,
-        (('caes', 'None'), 'cmp_p'): 2907.7271520000004,
-        (('caes', 'None'), 'exp_q_add_in'): 0.0,
-        (('caes', 'None'), 'cmp_st'): 37.0,
-        (('caes', 'None'), 'cmp_q_out_sum'): 2499.9125993000007,
-        (('caes', 'None'), 'tes_level'): 0.0,
-        (('caes', 'None'), 'tes_e_in'): 0.0,
-        (('caes', 'None'), 'exp_q_in_sum'): 5170.880360999999,
-        (('caes', 'None'), 'cmp_p_max'): 22320.76334300001,
+        (('caes', None), 'cav_e_out'): 1877.5972265299995,
+        (('caes', None), 'exp_p_max'): 17512.352336,
+        (('caes', None), 'cmp_q_waste'): 2499.9125993000007,
+        (('caes', None), 'cmp_p'): 2907.7271520000004,
+        (('caes', None), 'exp_q_add_in'): 0.0,
+        (('caes', None), 'cmp_st'): 37.0,
+        (('caes', None), 'cmp_q_out_sum'): 2499.9125993000007,
+        (('caes', None), 'tes_level'): 0.0,
+        (('caes', None), 'tes_e_in'): 0.0,
+        (('caes', None), 'exp_q_in_sum'): 5170.880360999999,
+        (('caes', None), 'cmp_p_max'): 22320.76334300001,
         (('caes', 'bel_sink'), 'flow'): 5020.801997000007,
         (('bel_source', 'caes'), 'flow'): 2907.7271520000004,
-        (('caes', 'None'), 'cav_e_in'): 1877.597226}
+        (('caes', None), 'cav_e_in'): 1877.597226}
 
     for key in test_dict.keys():
         eq_(int(round(data[key])), int(round(test_dict[key])))

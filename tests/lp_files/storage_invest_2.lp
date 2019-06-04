@@ -53,9 +53,14 @@ c_u_InvestmentFlow_max(storage2_electricityBus_2)_:
 +1 flow(storage2_electricityBus_2)
 <= 0
 
-c_e_GenericInvestmentStorageBlock_balance(storage2_0)_:
+c_e_GenericInvestmentStorageBlock_init_cap_fix(storage2)_:
++1 GenericInvestmentStorageBlock_init_cap(storage2)
+-0.5 GenericInvestmentStorageBlock_invest(storage2)
+= 0
+
+c_e_GenericInvestmentStorageBlock_balance_first(storage2)_:
 +1 GenericInvestmentStorageBlock_capacity(storage2_0)
--1 GenericInvestmentStorageBlock_capacity(storage2_2)
+-1 GenericInvestmentStorageBlock_init_cap(storage2)
 -1 flow(electricityBus_storage2_0)
 +1 flow(storage2_electricityBus_0)
 = 0
@@ -74,9 +79,9 @@ c_e_GenericInvestmentStorageBlock_balance(storage2_2)_:
 +1 flow(storage2_electricityBus_2)
 = 0
 
-c_e_GenericInvestmentStorageBlock_initial_capacity(storage2)_:
+c_e_GenericInvestmentStorageBlock_balanced_cstr(storage2)_:
 +1 GenericInvestmentStorageBlock_capacity(storage2_2)
--0.5 GenericInvestmentStorageBlock_invest(storage2)
+-1 GenericInvestmentStorageBlock_init_cap(storage2)
 = 0
 
 c_u_GenericInvestmentStorageBlock_max_capacity(storage2_0)_:
@@ -110,4 +115,5 @@ bounds
    0 <= GenericInvestmentStorageBlock_capacity(storage2_1) <= +inf
    0 <= GenericInvestmentStorageBlock_capacity(storage2_2) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage2) <= +inf
+   0 <= GenericInvestmentStorageBlock_init_cap(storage2) <= +inf
 end

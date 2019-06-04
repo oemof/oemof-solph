@@ -109,10 +109,10 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     # Investment storage
     solph.components.GenericStorage(
         label=Label('storage', 'electricity', 'battery'),
-        nominal_capacity=204685,
+        nominal_storage_capacity=204685,
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_capacity=1/6,
         invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
@@ -170,9 +170,9 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     # Problem results
     eq_(int(meta['problem']['Lower bound']), 37819254)
     eq_(int(meta['problem']['Upper bound']), 37819254)
-    eq_(meta['problem']['Number of variables'], 280)
-    eq_(meta['problem']['Number of constraints'], 162)
-    eq_(meta['problem']['Number of nonzeros'], 519)
+    eq_(meta['problem']['Number of variables'], 281)
+    eq_(meta['problem']['Number of constraints'], 163)
+    eq_(meta['problem']['Number of nonzeros'], 116)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 

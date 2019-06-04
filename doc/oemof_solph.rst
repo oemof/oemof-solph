@@ -75,7 +75,7 @@ It is also possible to assign the bus to a variable and add it afterwards. In th
 
     my_bus1 = solph.Bus()
     my_bus2 = solph.Bus()
-    my_energysystem.add(bgas, bel)
+    my_energysystem.add(my_bus1, my_bus2)
 
 Therefore it is also possible to add lists or dictionaries with components but you have to dissolve them.
 
@@ -376,9 +376,9 @@ flow is zero (conversion_factor_single_flow).
         inputs={b_gas: solph.Flow(nominal_value=10e10)},
         outputs={b_el: solph.Flow(), b_th: solph.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
-        conversion_factor_single_flow={b_el: 0.5})
+        conversion_factor_full_condensation={b_el: 0.5})
 
-The key of the parameter *'conversion_factor_single_flow'* will indicate the
+The key of the parameter *'conversion_factor_full_condensation'* will indicate the
 main flow. In the example above, the flow to the Bus *'b_el'* is the main flow
 and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows
 how the variable chp (right) schedules it's electrical and thermal power
@@ -396,10 +396,15 @@ example in the `oemof example repository
 
 .. _oemof_solph_components_generic_caes_label:
 
-GenericCAES (component)
+GenericCAES (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
+The following constraints describe the CAES:
+
+.. include:: ../oemof/solph/custom.py
+  :start-after: _GenericCAES-equations:
+  :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
 
@@ -409,9 +414,102 @@ Compressed Air Energy Storage (CAES).
 GenericCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-With the GenericCHP class combined heat and power plants can be modelled with more details.
+With the GenericCHP class it is possible to model different types of CHP plants (combined cycle extraction turbines,
+back pressure turbines and motoric CHP), which use different ranges of operation, as shown in the figure below.
+
+.. 	image:: _files/GenericCHP.svg
+   :scale: 10 %
+   :alt: scheme of GenericCHP operation range
+   :align: center
+
+Combined cycle extraction turbines: The minimal and maximal electric power without district heating
+(red dots in the figure) define maximum load and minimum load of the plant. Beta defines electrical power loss through
+heat extraction. The minimal thermal condenser load to cooling water and the share of flue gas losses
+at maximal heat extraction determine the right boundary of the operation range.
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='combined_cycle_extraction_turbine',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.19 for p in range(0, periods)])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[200 for p in range(0, periods)],
+            P_min_woDH=[80 for p in range(0, periods)],
+            Eta_el_max_woDH=[0.53 for p in range(0, periods)],
+            Eta_el_min_woDH=[0.43 for p in range(0, periods)])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[30 for p in range(0, periods)])},
+        Beta=[0.19 for p in range(0, periods)],
+        back_pressure=False)
+
+For modeling a back pressure CHP, the attribute `back_pressure` has to be set to True.
+The ratio of power and heat production in a back pressure plant is fixed, therefore the operation range
+is just a line (see figure). Again, the `P_min_woDH`  and `P_max_woDH`, the efficiencies at these points and the share of flue
+gas losses at maximal heat extraction have to be specified. In this case “without district heating” is not to be taken
+literally since an operation without heat production is not possible. It is advised to set `Beta` to zero, so the minimal and
+maximal electric power without district heating are the same as in the operation point (see figure). The minimal
+thermal condenser load to cooling water has to be zero, because there is no condenser besides the district heating unit.
+
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='back_pressure_turbine',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.19 for p in range(0, periods)])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[200 for p in range(0, periods)],
+            P_min_woDH=[80 for p in range(0, periods)],
+            Eta_el_max_woDH=[0.53 for p in range(0, periods)],
+            Eta_el_min_woDH=[0.43 for p in range(0, periods)])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[0 for p in range(0, periods)])},
+        Beta=[0 for p in range(0, periods)],
+        back_pressure=True)
+
+A motoric chp has no condenser, so `Q_CW_min` is zero. Electrical power does not depend on the amount of heat used
+so `Beta` is zero. The minimal and maximal electric power (without district heating) and the efficiencies at these
+points are needed, whereas the use of electrical power without using thermal energy is not possible.
+With `Beta=0` there is no difference between these points and the electrical output in the operation range.
+As a consequence of the functionality of a motoric CHP, share of flue gas losses at maximal heat extraction but also
+at minimal heat extraction have to be specified.
+
+
+.. code-block:: python
+
+    solph.components.GenericCHP(
+        label='motoric_chp',
+        fuel_input={bgas: solph.Flow(
+            H_L_FG_share_max=[0.18 for p in range(0, periods)],
+            H_L_FG_share_min=[0.41 for p in range(0, periods)])},
+        electrical_output={bel: solph.Flow(
+            P_max_woDH=[200 for p in range(0, periods)],
+            P_min_woDH=[100 for p in range(0, periods)],
+            Eta_el_max_woDH=[0.44 for p in range(0, periods)],
+            Eta_el_min_woDH=[0.40 for p in range(0, periods)])},
+        heat_output={bth: solph.Flow(
+            Q_CW_min=[0 for p in range(0, periods)])},
+        Beta=[0 for p in range(0, periods)],
+        back_pressure=False)
+
+Modeling different types of plants means telling the component to use different constraints. Constraint 1 to 9
+are active in all three cases. Constraint 10 depends on the attribute back_pressure. If true, the constraint is
+an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
+setting the attribute `H_L_FG_share_min`.
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations1-10:
+  :end-before: **For the attribute**
+
+If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations11:
+  :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
+
 
 .. _oemof_solph_components_generic_storage_label:
 
@@ -419,9 +517,9 @@ GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
-The *nominal_capacity* of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the *nominal_value* in the Flow objects.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class.
+The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
+To limit the input and output flows, you can define the ``nominal_storage_capacity`` in the Flow objects.
+Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined.
 
 .. code-block:: python
 
@@ -429,9 +527,33 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         label='storage',
         inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
         outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
-        capacity_loss=0.001, nominal_capacity=50,
+        loss_rate=0.001, nominal_storage_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+For initialising the state of charge before the first time step (time step zero) the parameter ``initial_storage_level`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
+Additionally the parameter ``balanced`` (default value: ``True``) sets the relation of the state of charge of time step zero and the last time step.
+If ``balanced=True``, the state of charge in the last time step is equal to initial value in time step zero.
+Use ``balanced=False`` with caution as energy might be added to or taken from the energy system due to different states of charge in time step zero and the last time step.
+Generally, with these two parameters four configurations are possible, which might result in different solutions of the same optimization model:
+
+    *	``initial_storage_level=None``, ``balanced=True`` (default setting): The state of charge in time step zero is a result of the optimization. The state of charge of the last time step is equal to time step zero. Thus, the storage is not violating the energy conservation by adding or taking energy from the system due to different states of charge at the beginning and at the end of the optimization period.
+    *	``initial_storage_level=0.5``, ``balanced=True``: The state of charge in time step zero is fixed to 0.5 (50 % charged). The state of charge in the last time step is also constrained by 0.5 due to the coupling parameter ``balanced`` set to ``True``.
+    *	``initial_storage_level=None``, ``balanced=False``: Both, the state of charge in time step zero and the last time step are a result of the optimization and not coupled.
+    *	``initial_storage_level=0.5``, ``balanced=False``: The state of charge in time step zero is constrained by a given value. The state of charge of the last time step is a result of the optimization.
+
+The following code block shows an example of the storage parametrization for the second configuration:
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='storage',
+        inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
+        outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
+        loss_rate=0.001, nominal_storage_capacity=50,
+        initial_storage_level=0.5, balanced=True,
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
+
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
 
 Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -461,7 +583,7 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
         label='PHES',
         inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
         outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
-        capacity_loss=0.001, 
+        loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
 
@@ -473,8 +595,8 @@ The following example describes a battery with flows coupled to the capacity of 
         label='battery',
         inputs={b_el: solph.Flow()},
         outputs={b_el: solph.Flow()},
-        capacity_loss=0.001, 
-        nominal_capacity=50,
+        loss_rate=0.001,
+        nominal_storage_capacity=50,
         inflow_conversion_factor=0.98,
          outflow_conversion_factor=0.8,
         invest_relation_input_capacity = 1/6,
@@ -485,8 +607,78 @@ The following example describes a battery with flows coupled to the capacity of 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
 
-.. _oemof_solph_custom_electrical_line_label:
+OffsetTransformer (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The `OffsetTransformer` object makes it possible to create a Transformer with different efficiencies in part load condition.
+For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load.
+The following example illustrates how to define an OffsetTransformer for given information for the output:
+
+.. code-block:: python
+
+    eta_min = 0.5       # efficiency at minimal operation point
+    eta_max = 0.8       # efficiency at nominal operation point
+    P_out_min = 20      # absolute minimal output power
+    P_out_max = 100     # absolute nominal output power
+
+    # calculate limits of input power flow
+    P_in_min = P_out_min / eta_min
+    P_in_max = P_out_max / eta_max
+
+    # calculate coefficients of input-output line equation
+    c1 = (P_out_max-P_out_min)/(P_in_max-P_in_min)
+    c0 = P_out_max - c1*P_in_max
+
+    # define OffsetTransformer
+    solph.custom.OffsetTransformer(
+        label='boiler',
+        inputs={bfuel: solph.Flow(
+            nominal_value=P_in_max,
+            max=1,
+            min=P_in_min/P_in_max,
+            nonconvex=solph.NonConvex())},
+        outputs={bth: solph.Flow()},
+        coefficients = [c0, c1])
+
+This example represents a boiler, which is supplied by fuel and generates heat.
+It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
+The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
+Note that the nonconvex flow has to be defined for the input flow.
+By using the OffsetTransformer a linear relation of in- and output power with a power dependent efficiency is generated.
+The following figures illustrate the relations:
+
+.. 	image:: _files/OffsetTransformer_power_relation.svg
+   :width: 70 %
+   :alt: OffsetTransformer_power_relation.svg
+   :align: center
+
+Now, it becomes clear, why this object has been named `OffsetTransformer`. The
+linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
+the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
+part of the solution space and the boiler is allowed to switch off:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _OffsetTransformer-equations:
+  :end-before: """
+
+The following figures shows the efficiency dependent on the output power,
+which results in a nonlinear relation:
+
+.. math::
+
+    \eta = C_1 \cdot P_{out}(t) / (P_{out}(t) - C_0)
+
+.. 	image:: _files/OffsetTransformer_efficiency.svg
+   :width: 70 %
+   :alt: OffsetTransformer_efficiency.svg
+   :align: center
+
+The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+
+.. note:: See the :py:class:`~oemof.solph.components.OffsetTransformer` class for all parameters and the mathematical background.
+
+
+.. _oemof_solph_custom_electrical_line_label:
 
 ElectricalLine (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -596,6 +788,7 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30,
+                            min=0.5,
                             nonconvex=NonConvex()),
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
@@ -611,7 +804,6 @@ block class :py:class:`~oemof.solph.blocks.NonConvex`.
 .. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
-
 
 
 Adding additional constraints

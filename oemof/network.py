@@ -12,126 +12,68 @@ available from its original location oemof/oemof/network.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from collections import MutableMapping as MM
+from collections import (namedtuple as NT, Mapping, MutableMapping as MM,
+                         UserDict as UD)
 from contextlib import contextmanager
 from functools import total_ordering
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
+
+# TODO:
+#
+#   * Only allow setting a Node's label if `_delay_registration_` is active
+#     and/or the node is not yet registered.
+#   * Only allow setting an Edge's input/output if it is None
+#   * Document the `register` method. Maybe also document the
+#     `_delay_registration_` attribute and make it official. This could also be
+#     a good chance to finally use `blinker` to put an event on
+#     `_delay_registration_` for deletion/assignment to trigger registration.
+#     I always had the hunch that using blinker could help to straighten out
+#     that delayed auto registration hack via partial functions. Maybe this
+#     could be a good starting point for this.
+#   * Finally get rid of `Entity`.
+#
 
 
 class Inputs(MM):
     """ A special helper to map `n1.inputs[n2]` to `n2.outputs[n1]`.
     """
-    def __init__(self, flows, target):
-        self.flows = flows
+    def __init__(self, target):
         self.target = target
 
     def __getitem__(self, key):
-        return self.flows.__getitem__((key, self.target))
+        return key.outputs.__getitem__(self.target)
 
     def __delitem__(self, key):
-        return self.flows.__delitem__((key, self.target))
+        return key.outputs.__delitem__(self.target)
 
     def __setitem__(self, key, value):
-        return self.flows.__setitem__((key, self.target), value)
+        return key.outputs.__setitem__(self.target, value)
 
     def __iter__(self):
-        return self.flows._in_edges.get(self.target, ()).__iter__()
+        return iter(self.target._in_edges)
 
     def __len__(self):
-        return self.flows._in_edges.get(self.target, ()).__len__()
+        return self.target._in_edges.__len__()
+
+    def __repr__(self):
+        return repr("<{0.__module__}.{0.__name__}: {1!r}>"
+                    .format(type(self), dict(self)))
 
 
-class Outputs(MM):
+class Outputs(UD):
     """ Helper that intercepts modifications to update `Inputs` symmetrically.
     """
-    def __init__(self, flows, source):
-        self.flows = flows
+    def __init__(self, source):
         self.source = source
-
-    def __getitem__(self, key):
-        return self.flows.__getitem__((self.source, key))
+        super().__init__()
 
     def __delitem__(self, key):
-        return self.flows.__delitem__((self.source, key))
+        key._in_edges.remove(self.source)
+        return super().__delitem__(key)
 
     def __setitem__(self, key, value):
-        return self.flows.__setitem__((self.source, key), value)
-
-    def __iter__(self):
-        return self.flows._out_edges.get(self.source, ()).__iter__()
-
-    def __len__(self):
-        return self.flows._out_edges.get(self.source, ()).__len__()
-
-
-class _Edges(MM):
-    """ Internal utility class keeping track of known edges.
-
-    As this is currently quite dirty and hackish, it should be treated as an
-    internal implementation detail with an unstable interface. Maye it can be
-    converted to a fully fledged useful :python:`Edge` class later on, but for
-    now it simply hides most of the dirty secrets of the :class:`Node` class.
-
-    """
-    _in_edges = WeKeDi()
-    _out_edges = WeKeDi()
-    # TODO: Either figure out how to use weak references here, or convert the
-    #       whole graph datastructure to normal dictionaries.
-    #       Background: I had to stop wrestling with the garbage collector,
-    #                   because python doesn't allow weak references to tuples
-    #                   and I couldn't figure out a way to key edges in a way
-    #                   that the endpoints of the edge get garbage collected
-    #                   once no other references to them exist anymore.
-    #       I guess the best way would be to use normal dictionarier, stop
-    #       using a global variable for all edges and put a member variable
-    #       for all it's edges on an energy system.
-    _flows = {}
-
-    def __delitem__(self, key):
-        source, target = key
-
-        # TODO: Refactor this to not have duplicate code.
-        self._in_edges[target].remove(source)
-        if not self._in_edges[target]:
-          del self._in_edges[target]
-
-        self._out_edges[source].remove(target)
-        if not self._out_edges[source]:
-          del self._out_edges[source]
-
-        del self._flows[key]
-
-    def __getitem__(self, key):
-        return self._flows.__getitem__(key)
-
-    def __setitem__(self, key, value):
-        source, target = key
-        # TODO: Refactor this to remove duplicate code.
-        self._in_edges[target] = self._in_edges.get(target, WeSe())
-        self._in_edges[target].add(source)
-
-        self._out_edges[source] = self._out_edges.get(source, WeSe())
-        self._out_edges[source].add(target)
-
-        self._flows.__setitem__(key, value)
-
-    def __call__(self, source=None, target=None):
-        if ((source is None) and (target is None)):
-            return None
-        if (source is None):
-            return Inputs(self, target)
-        if (target is None):
-            return Outputs(self, source)
-        return self._flows[source, target]
-
-    def __iter__(self):
-        return self._flows.__iter__()
-
-    def __len__(self):
-        return self._flows.__len__()
-
-
-flow = _Edges()
+        key._in_edges.add(self.source)
+        return super().__setitem__(key, value)
 
 
 @total_ordering
@@ -141,7 +83,8 @@ class Node:
     Abstract superclass of the two general types of nodes of an energy system
     graph, collecting attributes and operations common to all types of nodes.
     Users should neither instantiate nor subclass this, but use
-    :class:`Component`, :class:`Bus` or one of their subclasses instead.
+    :class:`Component`, :class:`Bus`, :class:`Edge` or one of their subclasses
+    instead.
 
     .. role:: python(code)
       :language: python
@@ -162,10 +105,6 @@ class Node:
     outputs: list or dict, optional
         Either a list of this nodes' output nodes or a dictionary mapping
         output nodes to corresponding outflows (i.e. output values).
-    flow: function, optional
-        A function taking this node and a target node as a parameter (i.e.
-        something of the form :python:`def f(self, target)`), returning the
-        flow originating from this node into :python:`target`.
 
     Attributes
     ----------
@@ -175,63 +114,91 @@ class Node:
         information.
     """
 
-    # TODO: Doing this _state/__getstate__/__setstate__ dance is
-    #       necessary to fix issues #186 and #203. But there must be
-    #       some more elegant solution. So in the long run, either this,
-    #       or dump/restore should be refactored so that storing the
-    #       initialization arguments is not necessary.
-    #       The culprit seems to be that inputs/outputs are actually
-    #       stored in the `_Edge` class and pickle can't make that jump.
-    #       But more sophisticated research and minimal test cases are
-    #       needed to confirm that.
-
     registry = None
-    __slots__ = ["__weakref__", "_label", "_inputs", "_state"]
+    __slots__ = ["_label", "_in_edges", "_inputs", "_outputs"]
 
     def __init__(self, *args, **kwargs):
-        self.__setstate__((args, kwargs))
-        if __class__.registry is not None:
-            __class__.registry.add(self)
-
-    def __getstate__(self):
-        return self._state
-
-    def __setstate__(self, state):
-        self._state = state
-        args, kwargs = state
+        args = list(args)
+        args.reverse
+        self._inputs = Inputs(self)
+        self._outputs = Outputs(self)
         for optional in ['label']:
             if optional in kwargs:
+                if args:
+                    raise(TypeError((
+                        "{}.__init__()\n"
+                        "  got multiple values for argument '{}'")
+                        .format(type(self), optional)))
                 setattr(self, '_' + optional, kwargs[optional])
+            else:
+                if args:
+                    setattr(self, '_' + optional, args.pop())
+        self._in_edges = set()
         for i in kwargs.get('inputs', {}):
-            assert isinstance(i, Node), \
-                   "Input {} of {} not a Node, but a {}."\
-                   .format(i, self, type(i))
+            assert isinstance(i, Node), (
+                    "\n\nInput\n\n  {!r}\n\nof\n\n  {!r}\n\n"
+                    "not an instance of Node, but of {}."
+                    ).format(i, self, type(i))
+            self._in_edges.add(i)
             try:
-                flow[i, self] = kwargs['inputs'].get(i)
+                flow = kwargs['inputs'].get(i)
             except AttributeError:
-                flow[i, self] = None
+                flow = None
+            edge = globals()['Edge'].from_object(flow)
+            edge.input=i
+            edge.output=self
         for o in kwargs.get('outputs', {}):
-            assert isinstance(o, Node), \
-                   "Output {} of {} not a Node, but a {}."\
-                   .format(o, self, type(o))
+            assert isinstance(o, Node), (
+                    "\n\nOutput\n\n  {!r}\n\nof\n\n  {!r}\n\n"
+                    "not an instance of Node, but of {}."
+                    ).format(o, self, type(o))
             try:
-                flow[self, o] = kwargs['outputs'].get(o)
+                flow = kwargs['outputs'].get(o)
             except AttributeError:
-                flow[self, o] = None
+                flow = None
+            edge = globals()['Edge'].from_object(flow)
+            edge.input = self
+            edge.output = o
+
+        self.register()
+        """
+        This could be slightly more efficient than the loops above, but doesn't
+        play well with the assertions:
+
+        inputs = kwargs.get('inputs', {})
+        self.in_edges = {
+                Edge(input=i, output=self,
+                    flow=None if not isinstance(inputs, MM) else inputs[i])
+                for i in inputs}
+
+        outputs = kwargs.get('outputs', {})
+        self.out_edges = {
+                Edge(input=self, output=o,
+                    flow=None if not isinstance(outputs, MM) else outputs[o])
+                for o in outputs}
+        self.edges = self.in_edges.union(self.out_edges)
+        """
+
+    def register(self):
+        if (    __class__.registry is not None and
+                not getattr(self, "_delay_registration_", False)):
+            __class__.registry.add(self)
 
     def __eq__(self, other):
         return id(self) == id(other)
 
     def __lt__(self, other):
-        if other is None:
-            return False
-        return self.label < other.label
+        return str(self) < str(other)
 
     def __hash__(self):
         return hash(self.label)
 
     def __str__(self):
         return str(self.label)
+
+    def __repr__(self):
+        return repr("<{0.__module__}.{0.__name__}: {1!r}>"
+                    .format(type(self), self.label))
 
     @property
     def label(self):
@@ -243,21 +210,122 @@ class Node:
         return (self._label if hasattr(self, "_label")
                 else "<{} #0x{:x}>".format(type(self).__name__, id(self)))
 
+    @label.setter
+    def label(self, label):
+        self._label = label
+
     @property
     def inputs(self):
-        """ dict :
-        Dictionary mapping input :class:`Nodes <Node>` :obj:`n` to flows from
-        :obj:`n` into :obj:`self`.
+        """ dict:
+        Dictionary mapping input :class:`Nodes <Node>` :obj:`n` to
+        :class:`Edge`s from :obj:`n` into :obj:`self`.
+        If :obj:`self` is an :class:`Edge`, returns a dict containing the
+        :class:`Edge`'s single input node as the key and the flow as the value.
         """
-        return Inputs(flow, self)
+        return self._inputs
 
     @property
     def outputs(self):
-        """ dict :
-        Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to flows from
-        :obj:`self` into :obj:`n`.
+        """ dict:
+        Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to
+        :class:`Edges` from :obj:`self` into :obj:`n`.
+        If :obj:`self` is an :class:`Edge`, returns a dict containing the
+        :class:`Edge`'s single output node as the key and the flow as the value.
         """
-        return Outputs(flow, self)
+        return self._outputs
+
+
+EdgeLabel = NT("EdgeLabel", ['input', 'output'])
+class Edge(Node):
+    """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
+
+    :class:`Edge`s connect a single non-:class:`Edge` Node with another. They
+    are directed and have a (sequence of) value(s) attached to them so they can
+    be used to represent a flow from a source/an input to a target/an output.
+
+    Parameters
+    ----------
+    input, output: :class:`Bus` or :class:`Component`, optional
+    flow, values: object, optional
+        The (list of) object(s) representing the values flowing from this
+        edge's input into its output. Note that these two names are aliases of
+        each other, so `flow` and `values` are mutually exclusive.
+
+    Note that all of these parameters are also set as attributes with the same
+    name.
+    """
+    Label = EdgeLabel
+    def __init__(self, input=None, output=None, flow=None, values=None,
+            **kwargs):
+        if flow is not None and values is not None:
+            raise ValueError(
+                    "\n\n`Edge`'s `flow` and `values` keyword arguments are "
+                    "aliases of each other,\nso they're mutually exclusive.\n"
+                    "You supplied:\n" +
+                    "    `flow`  : {}\n".format(flow) +
+                    "    `values`: {}\n".format(values) +
+                    "Choose one.")
+        if input is None or output is None:
+            self._delay_registration_ = True
+        super().__init__(label=Edge.Label(input, output))
+        self.values = values if values is not None else flow
+        if input is not None and output is not None:
+            input.outputs[output] = self
+
+    @classmethod
+    def from_object(klass, o):
+        """ Creates an `Edge` instance from a single object.
+
+        This method inspects its argument and does something different
+        depending on various cases:
+
+          * If `o` is an instance of `Edge`, `o` is returned unchanged.
+          * If `o` is a `Mapping`, the instance is created by calling
+            `klass(**o)`,
+          * In all other cases, `o` will be used as the `values` keyword
+            argument to `Edge`s constructor.
+        """
+        if isinstance(o, Edge):
+            return o
+        elif isinstance(o, Mapping):
+            return klass(**o)
+        else:
+            return Edge(values=o)
+
+    @property
+    def flow(self):
+        return self.values
+
+    @flow.setter
+    def flow(self, values):
+        self.values = values
+
+    @property
+    def input(self):
+        return self.label.input
+
+    @input.setter
+    def input(self, i):
+        old_input = self.input
+        self.label = Edge.Label(i, self.label.output)
+        if old_input is None and i is not None and self.output is not None:
+            del self._delay_registration_
+            self.register()
+            i.outputs[self.output] = self
+
+    @property
+    def output(self):
+        return self.label.output
+
+    @output.setter
+    def output(self, o):
+        old_output = self.output
+        self.label = Edge.Label(self.label.input, o)
+        if old_output is None and o is not None and self.input is not None:
+            del self._delay_registration_
+            if __class__.registry is not None:
+                __class__.registry.add(self)
+            o.inputs[self.input] = self
 
 
 class Bus(Node):
@@ -356,16 +424,19 @@ def registry_changed_to(r):
     """ Override registry during execution of a block and restore it afterwards.
     """
     backup = Node.registry
-    Node.registry = None
+    Node.registry = r
     yield
     Node.registry = backup
 
 
-def temporarily_modifies_registry(function):
-    """ Backup registry before and restore it after execution of `function`.
+def temporarily_modifies_registry(f):
+    """ Decorator that disables `Node` registration during `f`'s execution.
+
+    It does so by setting `Node.registry` to `None` while `f` is executing, so
+    `f` can freely set `Node.registry` to something else. The registration's
+    original value is restored afterwards.
     """
     def result(*xs, **ks):
-        with registry_disabled():
+        with registry_changed_to(None):
             return f(*xs, **ks)
     return result
-

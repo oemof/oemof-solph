@@ -11,12 +11,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from traceback import format_exception_only as feo
 from nose.tools import assert_raises, eq_, ok_
-import warnings
 
 from oemof.energy_system import EnergySystem as ES
-from oemof.network import Bus, Node, Transformer
-from oemof import graph
-from oemof.solph import Model
+from oemof.network import (Bus, Edge, Node, Transformer, registry_changed_to,
+                           temporarily_modifies_registry)
 
 
 class Node_Tests:
@@ -111,12 +109,12 @@ class Node_Tests:
         flow = object()
         old = Node(label="A reused label")
         bus = Bus(label="bus", inputs={old: flow})
-        eq_(bus.inputs[old], flow,
+        eq_(bus.inputs[old].flow, flow,
             ("\n  Expected: {}" +
-             "\n  Got     : {} instead").format(flow, bus.inputs[old]))
-        eq_(old.outputs[bus], flow,
+             "\n  Got     : {} instead").format(flow, bus.inputs[old].flow))
+        eq_(old.outputs[bus].flow, flow,
             ("\n  Expected: {}" +
-             "\n  Got     : {} instead").format(flow, old.outputs[bus]))
+             "\n  Got     : {} instead").format(flow, old.outputs[bus].flow))
         new = Node(label="A reused label")
         eq_(new.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
@@ -134,13 +132,13 @@ class Node_Tests:
                 node.outputs,
                 dict(node.outputs)))
         node.outputs[bus] = flow
-        eq_(node.outputs[bus], flow,
-            ("\n  Expected {} as `node.outputs[bus]`." +
-             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
         eq_(node.outputs, {bus: flow},
             ("\n  Expected {} as `node.outputs`." +
              "\n  Got    : {} (== {}) instead").format(
                 {bus: flow}, node.outputs,dict(node.outputs)))
+        eq_(node.outputs[bus], flow,
+            ("\n  Expected {} as `node.outputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.outputs[bus]))
         del node.outputs[bus]
         eq_(node.outputs, {},
             ("\n  Expected an empty dictionary of outputs." +
@@ -161,13 +159,13 @@ class Node_Tests:
                 node.inputs,
                 dict(node.inputs)))
         node.inputs[bus] = flow
-        eq_(node.inputs[bus], flow,
-            ("\n  Expected {} as `node.inputs[bus]`." +
-             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
         eq_(node.inputs, {bus: flow},
             ("\n  Expected {} as `node.inputs`." +
              "\n  Got    : {} (== {}) instead").format(
                 {bus: flow}, node.inputs,dict(node.inputs)))
+        eq_(node.inputs[bus], flow,
+            ("\n  Expected {} as `node.inputs[bus]`." +
+             "\n  Got    : {} instead").format(flow, node.inputs[bus]))
         del node.inputs[bus]
         eq_(node.inputs, {},
             ("\n  Expected an empty dictionary of inputs." +
@@ -197,10 +195,10 @@ class Node_Tests:
         n1n2 = "n1n2"
 
         n2.inputs.update({n1: n1n2})
-        eq_(n2.inputs[n1], n1n2)
         eq_(n2.inputs, {n1: n1n2})
-        eq_(n1.outputs[n2], n1n2)
+        eq_(n2.inputs[n1], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+        eq_(n1.outputs[n2], n1n2)
 
     def test_updating_outputs(self):
         n1 = Node("N1")
@@ -208,10 +206,105 @@ class Node_Tests:
         n1n2 = "n1n2"
 
         n1.outputs.update({n2: n1n2})
-        eq_(n2.inputs[n1], n1n2)
         eq_(n2.inputs, {n1: n1n2})
-        eq_(n1.outputs[n2], n1n2)
+        eq_(n2.inputs[n1], n1n2)
         eq_(n1.outputs, {n2: n1n2})
+        eq_(n1.outputs[n2], n1n2)
+
+    def test_error_for_duplicate_label_argument(self):
+        """ `Node.__init__` should fail if positional and keyword args collide.
+        """
+        with assert_raises(TypeError):
+            Node("Positional Label", label="Keyword Label")
+
+    def test_node_input_output_type_assertions(self):
+        """ `Node`s should only accept `Node` instances as input/output targets.
+        """
+        with assert_raises(AssertionError):
+            Node('A node with an output', outputs={'Not a Node': 'A Flow'})
+            Node('A node with an input', inputs={'Not a Node': 'A Flow'})
+
+    def test_node_label_without_private_attribute(self):
+        """ A `Node` with no explicit `label` doesn't have a `_label` attribute.
+        """
+        n = Node()
+        with assert_raises(AttributeError):
+            n._label
+
+    def test_node_label_if_its_not_explicitly_specified(self):
+        """ If not explicitly given, a `Node`'s label is based on its `id`.
+        """
+        n = Node()
+        ok_("0x{:x}>".format(id(n)) in n.label)
+
+
+class Edge_Tests:
+
+    def setup(self):
+        Node.registry = None
+
+    def test_edge_construction_side_effects(self):
+        """ Constructing an `Edge` should affect it's input/output `Node`s.
+
+        When constructing an `Edge`, the `inputs` and `outputs` of its output
+        and input `Node`s should be set appropriately.
+        """
+        source = Node(label='source')
+        target = Node(label='target')
+        edge = Edge(input=source, output=target)
+        ok_(target in source.outputs,
+            "{} not in {} after constructing {}."
+            .format(target, source.outputs, edge))
+        ok_(source in target.inputs,
+            "{} not in {} after constructing {}."
+            .format(source, target.outputs, edge))
+
+    def test_label_as_positional_argument(self):
+        o = object()
+        n = Node(o)
+        ok_(n.label is o, (
+                "Setting `label` as positional parameter argument failed."
+                "\n  Expected: {!r}"
+                "\n  Got     : {!r}")
+                .format(o, n.label))
+
+    def test_edge_failure_for_colliding_arguments(self):
+        """ `Edge` initialisation fails when colliding arguments are supplied.
+        """
+        with assert_raises(ValueError):
+            Edge(flow=object(), values=object())
+
+    def test_alternative_edge_construction_from_mapping(self):
+        """ `Edge.from_object` treats mappings as keyword arguments.
+        """
+        i, o, f = (Node("input"), Node("output"), "flow")
+        with assert_raises(ValueError):
+            Edge.from_object({"flow": i, "values": o})
+        edge = Edge.from_object({"input": i, "output": o, "flow": f})
+        eq_(edge.input, i)
+        eq_(edge.output, o)
+        eq_(edge.values, f)
+        eq_(edge.flow, f)
+
+    def test_flow_setter(self):
+        """ `Edge.flow`'s setter relays to `values`.
+        """
+        e = Edge(values="initial values")
+        eq_(e.flow, "initial values")
+        eq_(e.values, "initial values")
+        e.flow = "new values set via `e.flow`"
+        eq_(e.flow, "new values set via `e.flow`")
+        eq_(e.values, "new values set via `e.flow`")
+
+    def test_delayed_registration_when_setting_input(self):
+        """`Edge` registration gets delayed until input and output are set.
+        """
+        i, o = (Node("input"), Node("output"))
+        with registry_changed_to(ES()):
+            e = Edge(output=o)
+            ok_(not e in Node.registry.groups.values())
+            e.input = i
+            ok_(e in Node.registry.groups.values())
 
 
 class EnergySystem_Nodes_Integration_Tests:
@@ -225,12 +318,15 @@ class EnergySystem_Nodes_Integration_Tests:
         b1 = Bus(label='<B1>')
         eq_(self.es.entities[0], b1)
         b2 = Bus(label='<B2>')
-        Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
-        ok_(isinstance(self.es.entities[2], Transformer))
+        eq_(self.es.entities[1], b2)
+        t1 = Transformer(label='<TF1>', inputs=[b1], outputs=[b2])
+        ok_(t1 in self.es.entities)
 
-
-def test_depreciated_graph_call():
-    es = ES()
-    om = Model(energysystem=es)
-    warnings.filterwarnings('ignore', category=FutureWarning)
-    graph.create_nx_graph(optimization_model=om)
+    def test_registry_modification_decorator(self):
+        n = Node("registered")
+        ok_("registered" in self.es.groups)
+        @temporarily_modifies_registry
+        def create_a_node():
+            n = Node("not registered")
+        create_a_node()
+        ok_("not registered" not in self.es.groups)
