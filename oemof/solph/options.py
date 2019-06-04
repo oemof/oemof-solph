@@ -39,11 +39,11 @@ class NonConvex:
     """
     Parameters
     ----------
-    startup_costs : numeric
+    startup_costs : numeric (sequence or scalar)
         Costs associated with a start of the flow (representing a unit).
-    shutdown_costs : numeric
+    shutdown_costs : numeric (sequence or scalar)
         Costs associated with the shutdown of the flow (representing a unit).
-    activity_costs : numeric
+    activity_costs : numeric (sequence or scalar)
         Costs associated with the active operation of the flow, independently
         from the actual output.
     minimum_uptime : numeric (1 or positive integer)
@@ -54,6 +54,10 @@ class NonConvex:
         Minimum time a flow is forced to zero after shutting down.
         Be aware that minimum up and downtimes can contradict each
         other and may to infeasible problems.
+    maximum_startups : numeric (0 or positive integer)
+        Maximum number of start-ups.
+    maximum_shutdowns : numeric (0 or positive integer)
+        Maximum number of shutdowns.
     initial_status : numeric (0 or 1)
         Integer value indicating the status of the flow in the first time step
         (0 = off, 1 = on). For minimum up and downtimes, the initial status
@@ -65,7 +69,8 @@ class NonConvex:
         six timesteps is defined in addition to a four timestep minimum uptime.
     """
     def __init__(self, **kwargs):
-        scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status']
+        scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status',
+                   'maximum_startups', 'maximum_shutdowns']
         sequences = ['startup_costs', 'shutdown_costs', 'activity_costs']
         defaults = {'initial_status': 0}
 

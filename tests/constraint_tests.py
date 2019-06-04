@@ -610,6 +610,26 @@ class Constraint_Tests:
                 nonconvex=solph.NonConvex(activity_costs=2))})
         self.compare_lp_files('activity_costs.lp')
 
+    def test_maximum_startups(self):
+        """Testing maximum_startups attribute for nonconvex flows."""
+        bus_t = solph.Bus(label='Bus_C')
+        solph.Source(
+            label='cheap_plant_maximum_startups',
+            outputs={bus_t: solph.Flow(
+                nominal_value=10, min=0.5, max=1.0, variable_costs=10,
+                nonconvex=solph.NonConvex(maximum_startups=2))})
+        self.compare_lp_files('maximum_startups.lp')
+
+    def test_maximum_shutdowns(self):
+        """Testing maximum_shutdowns attribute for nonconvex flows."""
+        bus_t = solph.Bus(label='Bus_C')
+        solph.Source(
+            label='cheap_plant_maximum_shutdowns',
+            outputs={bus_t: solph.Flow(
+                nominal_value=10, min=0.5, max=1.0, variable_costs=10,
+                nonconvex=solph.NonConvex(maximum_shutdowns=2))})
+        self.compare_lp_files('maximum_shutdowns.lp')
+
     def test_offsettransformer(self):
         """Constraint test of a OffsetTransformer.
         """
