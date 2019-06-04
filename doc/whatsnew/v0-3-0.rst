@@ -110,4 +110,5 @@ Contributors
 * Uwe Krien
 * Johannes Röder
 * Patrik Schönfeldt
+* Simon Hilpert
 * Stephan Günther
