@@ -30,6 +30,10 @@ New features
   See the `storage documentation <https://oemof.readthedocs.io/en/stable/
   oemof_solph.html#genericstorage-component>`_ for more details.
 
+* `NonConvexFlow <oemof.solph.blocks.NonConvexFlow>` can now have
+  `activity_costs`, `maximum_startups`, and `maximum_shutdowns`.
+  This helps, to model e.g. terms of maintannace contracts for small CHP plants.
+
 * Namedtuples and tuples as labels work now without problems. This makes it
   much easier to find objects and results in large energy systems
   (`Issue #507 <https://github.com/oemof/oemof/issues/507>`_).
