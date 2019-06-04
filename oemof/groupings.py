@@ -17,6 +17,8 @@ except ImportError:
                              MutableMapping as MuMa)
 from itertools import chain, filterfalse
 
+from oemof.network import Edge
+
 
 class Grouping:
     """
@@ -247,7 +249,11 @@ class Flows(Nodes):
         return set(flows)
 
     def __call__(self, n, d):
-        flows = set(chain(n.outputs.values(), n.inputs.values()))
+        flows = (
+            {n}
+            if isinstance(n, Edge)
+            else set(chain(n.outputs.values(), n.inputs.values()))
+        )
         super().__call__(flows, d)
 
 
@@ -267,9 +273,16 @@ class FlowsWithNodes(Nodes):
         return set(tuples)
 
     def __call__(self, n, d):
-        tuples = set(chain(
-            ((n, t, f) for (t, f) in n.outputs.items()),
-            ((s, n, f) for (s, f) in n.inputs.items())))
+        tuples = (
+            {(n.input, n.output, n)}
+            if isinstance(n, Edge)
+            else set(
+                chain(
+                    ((n, t, f) for (t, f) in n.outputs.items()),
+                    ((s, n, f) for (s, f) in n.inputs.items()),
+                )
+            )
+        )
         super().__call__(tuples, d)
 
 
