@@ -34,6 +34,13 @@ New features
   as classical graph theoretic edges, reified as nodes with an in- and
   outdegree of one.
 
+* `Energy systems <oemof.energy_system.EnergySystem>` now support blinker_
+  signals. The first supported signal gets emitted, whenever a `node
+  <oemof.network.node>` is `added <oemof.energy_system.EnergySystem.add>` to an
+  `energy system <oemof.energy_system.EnergySystem>`.
+
+  _blinker: https://pythonhosted.org/blinker/
+
 New components
 ##############
 
