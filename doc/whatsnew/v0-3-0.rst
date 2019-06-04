@@ -96,13 +96,15 @@ Testing
 Contributors
 ############
 
-* Uwe Krien
+(alphabetical order)
+
+* ajimenezUCLA
+* FranziPl
 * Johannes Röder
+* Jakob Wolf
+* Jann Launer
+* Lluis Millet
 * Patrik Schönfeldt
 * Simon Hilpert
 * Stephan Günther
-* Jann Launer
-* Jakob Wolf
-* FranziPl
-* Lluis Millet
-* ajimenezUCLA
+* Uwe Krien
