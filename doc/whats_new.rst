@@ -8,6 +8,7 @@ These are new features and improvements of note in each release
     :local:
     :backlinks: top
 
+.. include::  whatsnew/v0-3-1.rst
 .. include::  whatsnew/v0-3-0.rst
 .. include::  whatsnew/v0-2-3.rst
 .. include::  whatsnew/v0-2-2.rst
