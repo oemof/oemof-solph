@@ -13,6 +13,7 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
+from pprint import pformat
 
 from nose.tools import ok_, eq_
 import pandas as pd
@@ -146,6 +147,39 @@ class EnergySystem_Tests:
         eq_(ES.groups["A Subset"], subset)
         eq_(ES.groups["everything"], everything)
 
+    def test_grouping_laziness(self):
+        """ Energy system `groups` should be fully lazy.
+
+        `Node`s added to an energy system should only be tested for and put
+        into their respective groups right before the `groups` property of an
+        energy system is accessed.
+        """
+        group = "Group"
+        g = Nodes(key=group, filter=lambda n: getattr(n, "group", False))
+        self.es = es.EnergySystem(groupings=[g])
+        buses = [Bus("Grouped"), Bus("Ungrouped one"), Bus("Ungrouped two")]
+        self.es.add(buses[0])
+        buses[0].group = True
+        self.es.add(*buses[1:])
+        ok_(
+            group in self.es.groups,
+            "\nExpected to find\n\n  `{!r}`\n\nin `es.groups`.\nGot:\n\n  `{}`"
+            .format(
+                group,
+                "\n   ".join(pformat(set(self.es.groups.keys())).split("\n")),
+            ),
+        )
+        ok_(
+            buses[0] in self.es.groups[group],
+            "\nExpected\n\n  `{}`\n\nin `es.groups['{}']`:\n\n  `{}`"
+            .format(
+                "\n   ".join(pformat(buses[0]).split("\n")),
+                group,
+                "\n   ".join(pformat(self.es.groups[group]).split("\n"))
+            ),
+        )
+
+
     @temporarily_modifies_registry
     def test_constant_group_keys(self):
         """ Callable keys passed in as `constant_key` should not be called.
@@ -186,3 +220,25 @@ class EnergySystem_Tests:
         eq_(ES.groups[key], set(((bus, node, flows[0]),
                                  (node, bus, flows[1]))))
 
+    def test_that_node_additions_are_signalled(self):
+        """When a node gets `add`ed, a corresponding signal should be emitted."""
+        node = Node(label="Node")
+
+        def subscriber(sender, **kwargs):
+            ok_(sender is node)
+            ok_(kwargs['EnergySystem'] is self.es)
+            subscriber.called = True
+        subscriber.called = False
+
+        es.EnergySystem.signals[es.EnergySystem.add].connect(
+            subscriber, sender=node
+        )
+        self.es.add(node)
+        ok_(
+            subscriber.called,
+            (
+                "\nExpected `subscriber.called` to be `True`.\n"
+                "Got {}.\n"
+                "Probable reason: `subscriber` didn't get called."
+            ).format(subscriber.called),
+        )

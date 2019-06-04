@@ -9,6 +9,7 @@ available from its original location oemof/tests/regression_tests.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+from pprint import pformat
 import logging
 
 from nose.tools import eq_, ok_
@@ -17,9 +18,11 @@ import unittest
 import pandas as pd
 
 from oemof.energy_system import EnergySystem as ES
-from oemof.network import Bus
-from oemof.solph import (Flow, Model as OM, Sink, Source as FS)
+from oemof.network import Bus, Edge
+from oemof.solph import Flow, Investment, Model as OM, Sink, Source as FS
+from oemof.solph.blocks import InvestmentFlow as IF
 from oemof.solph.components import GenericStorage as Storage
+from oemof.solph.groupings import investment_flow_grouping
 import oemof
 
 
@@ -34,7 +37,45 @@ class TestSolphAndItsResults:
         self.failed = False
 
         tix = pd.period_range('1970-01-01', periods=1, freq='H')
-        self.es = ES(timeindex=tix)
+        self.es = ES(timeindex=tix, groupings=[investment_flow_grouping])
+
+    def test_issue_576(self):
+        buses = [Bus("B1"), Bus("B2"), Bus("B3")]
+        self.es.add(*buses)
+        edge = Edge(input=buses[0], output=buses[1])
+        self.es.add(edge)
+        edge.investment = Investment(1)
+        ok_(
+            IF in self.es.groups,
+            "\nExpected to find\n\n  `{}`\n\nin `es.groups`.\nGot:\n\n  `{}`"
+            .format(
+                IF,
+                "\n   ".join(pformat(set(self.es.groups.keys())).split("\n")),
+            ),
+        )
+        triple = (buses[0], buses[1], edge)
+        ok_(
+            triple in self.es.groups[IF],
+            "\nExpected\n\n  `{}`\n\nin `es.groups[{}]`:\n\n  `{}`"
+            .format(
+                "\n   ".join(pformat(triple).split("\n")),
+                IF,
+                "\n   ".join(pformat(self.es.groups[IF]).split("\n"))
+            ),
+        )
+        edge = Edge(input=buses[1], output=buses[2])
+        edge.investment = Investment(2)
+        self.es.add(edge)
+        triple = (buses[1], buses[2], edge)
+        ok_(
+            triple in self.es.groups[IF],
+            "\nExpected\n\n  `{}`\n\nin `es.groups[{}]`:\n\n  `{}`"
+            .format(
+                "\n   ".join(pformat(triple).split("\n")),
+                IF,
+                "\n   ".join(pformat(self.es.groups[IF]).split("\n"))
+            ),
+        )
 
     # TODO: Fix this test so that it works with the new solph and can be
     #       re-enabled.

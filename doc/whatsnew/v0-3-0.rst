@@ -34,6 +34,28 @@ New features
   much easier to find objects and results in large energy systems
   (`Issue #507 <https://github.com/oemof/oemof/issues/507>`_).
 
+* Groups are now fully lazy. This means that groups are only computed
+  when they are accessed. Previously, whenever nodes where added to an
+  energy system, groups where computed for all but the most recently
+  added node. This node was then only grouped upon addition of another
+  node or upon access of the groups property.
+
+* There is now an explicit `Edge <oemof.network.Edge>` class. This means
+  that an energy system now consists of `Buses <oemof.network.Bus>`,
+  `Components <oemof.network.Component>` and `Edges <oemof.network.Edge>`.
+  For implementation reasons, `Edges <oemof.network.Edge>` are still
+  `Nodes <oemof.network.Node>`. If you know a bit of graph theory and
+  this seems strange to you, think of these `Edges <oemof.network.Edge>`
+  as classical graph theoretic edges, reified as nodes with an in- and
+  outdegree of one.
+
+* `Energy systems <oemof.energy_system.EnergySystem>` now support blinker_
+  signals. The first supported signal gets emitted, whenever a `node
+  <oemof.network.node>` is `added <oemof.energy_system.EnergySystem.add>` to an
+  `energy system <oemof.energy_system.EnergySystem>`.
+
+  _blinker: https://pythonhosted.org/blinker/
+
 New components
 ##############
 
@@ -80,3 +102,4 @@ Contributors
 * Uwe Krien
 * Johannes Röder
 * Patrik Schönfeldt
+* Stephan Günther
