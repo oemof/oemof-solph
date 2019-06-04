@@ -153,7 +153,7 @@ def test_results_with_actual_dump():
     eq_(meta['problem']['Upper bound'], 4.231675777e+17)
     eq_(meta['problem']['Number of variables'], 2805)
     eq_(meta['problem']['Number of constraints'], 2806)
-    eq_(meta['problem']['Number of nonzeros'], 7608)
+    eq_(meta['problem']['Number of nonzeros'], 1197)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 
@@ -184,6 +184,10 @@ def test_results_with_old_dump():
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
                 filename='es_dump_test_2_3dev.oemof')
+    # Note: This internal attribute is new in v.0.3.0, so the dump doesn't
+    #       contain it for obvious reasons. Setting it manually to the correct
+    #       value prevents the test from erroring.
+    energysystem._first_ungrouped_node_index_ = len(energysystem.nodes)
     results = energysystem.results['main']
 
     electricity_bus = views.node(results, 'electricity')
