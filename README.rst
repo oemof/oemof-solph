@@ -6,6 +6,8 @@
     :target: https://oemof.readthedocs.io/en/stable/
 .. image:: https://badge.fury.io/py/oemof.svg
     :target: https://badge.fury.io/py/oemof
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
+    :target: https://doi.org/10.5281/zenodo.596235
 
 Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented toolbox to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
 
@@ -79,7 +81,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 Citing oemof
 ============
 
-We use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
+The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
 
 
 License
