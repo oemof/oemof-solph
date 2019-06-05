@@ -152,6 +152,19 @@ class GenericStorage(network.Transformer):
         if self._invest_group is True:
             self._check_invest_attributes()
 
+        # Check for old parameter names.
+        rename_parameters = [
+            ('nominal_capacity', 'nominal_storage_capacity'),
+            ('initial_capacity', 'initial_storage_level'),
+            ('capacity_loss', 'loss_rate'),
+            ('capacity_min', 'min_storage_level'),
+            ('capacity_max', 'max_storage_level')]
+        for parameter in rename_parameters:
+            if kwargs.get(parameter[0]) is not None:
+                msg = "The attribute '{0}' has been renamed to '{1}'.".format(
+                    parameter[0], parameter[1])
+                raise AttributeError(msg)
+
     def _set_flows(self):
         for flow in self.inputs.values():
             if (self.invest_relation_input_capacity is not None and
