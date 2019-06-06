@@ -1,5 +1,5 @@
 v0.3.1 (September ??, 2019)
-++++++++++++++++++++++++++
++++++++++++++++++++++++++++
 
 
 API changes
@@ -10,7 +10,8 @@ API changes
 New features
 ############
 
-* something
+* Allow generic limits for integral over weighted flows.
+  (This is a generalised version of <solph.constraints.emission_limit>.)
 
 New components
 ##############
@@ -45,4 +46,4 @@ Other changes
 Contributors
 ############
 
-* something
+* Patrik Schönfeldt

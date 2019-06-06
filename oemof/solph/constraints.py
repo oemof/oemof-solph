@@ -41,17 +41,34 @@ def investment_limit(model, limit=None):
 
 
 def emission_limit(om, flows=None, limit=None):
-    """Set a global limit for emissions. The emission attribute has to be added
+    """
+    Short handle for generic_integral_limit() with keyword="emission_factor".
+
+    Note
+    ----
+    Flow objects required an attribute "emission_factor"!
+
+    """
+    generic_integral_limit(om,
+                           keyword='emission_factor',
+                           flows=flows,
+                           limit=limit)
+
+
+def generic_integral_limit(om, keyword, flows=None, limit=None):
+    """Set a global limit for flows weighted by attribute called keyword.
+    The attribute named by keyword has to be added
     to every flow you want to take into account.
 
-    .. math:: \sum_{F_E} \sum_{T} flow(i,o,t) \cdot emission_factor(i,o,t)
-               \cdot \tau \leq limit
+    .. math:: \sum_{F_E} \sum_{T} P(i,o,t) \cdot w(i,o,t)
+               \cdot \tau \leq M
 
-    With `F_E` being the set of flows considered for the emission limit and
-    `T` being the set of timestepsself.
+
+    With `F_I` being the set of flows considered for the integral limit and
+    `T` being the set of time steps.
 
     Total total emissions after optimization can be retrieved calling the
-    :attr:`om.oemof.solph.Model.total_emissions()`.
+    :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
 
     Parameters
     ----------
@@ -62,36 +79,39 @@ def emission_limit(om, flows=None, limit=None):
         Keys are (source, target) objects of the Flow. If no dictionary is
         given all flows containing the 'emission_factor' attribute will be
         used.
+    keyword : attribute to consider
     limit : numeric
         Absolute emission limit for the energy system.
 
     Note
     ----
-    Flow objects required an emission attribute!
+    Flow objects required an attribute named like keyword!
 
     """
-
     if flows is None:
         flows = {}
         for (i, o) in om.flows:
-            if hasattr(om.flows[i, o], 'emission_factor'):
+            if hasattr(om.flows[i, o], keyword):
                 flows[(i, o)] = om.flows[i, o]
 
     else:
         for (i, o) in flows:
-            if not hasattr(flows[i, o], 'emission_factor'):
+            if not hasattr(flows[i, o], keyword):
                 raise AttributeError(
                     ('Flow with source: {0} and target: {1} '
                      'has no attribute emission_factor.').format(i.label,
                                                                  o.label))
 
-    om.total_emissions =  po.Expression(
-        expr=sum(om.flow[inflow, outflow, t] * om.timeincrement[t] *
-                 flows[inflow, outflow].emission_factor
-                 for (inflow, outflow) in flows
-                 for t in om.TIMESTEPS))
+    limit_name = "integral_limit_"+keyword
 
-    om.emission_limit = po.Constraint(expr=om.total_emissions <= limit)
+    setattr(om, limit_name, po.Expression(
+        expr=sum(om.flow[inflow, outflow, t] * om.timeincrement[t] *
+                 getattr(flows[inflow, outflow], keyword)
+                 for (inflow, outflow) in flows
+                 for t in om.TIMESTEPS)))
+
+    setattr(om, limit_name+"_constraint", po.Constraint(
+        expr=(getattr(om, limit_name) <= limit)))
 
     return om
 
