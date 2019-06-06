@@ -59,6 +59,58 @@ def test_generic_storage_3():
         inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
 
+def test_generic_storage_with_old_parameters():
+    bel = solph.Bus()
+    with tools.assert_raises_regexp(
+            AttributeError,
+            ("The attribute 'initial_capacity' has been renamed to "
+             "'initial_storage_level'.")):
+        solph.components.GenericStorage(
+            label='storage5',
+            nominal_storage_capacity=45,
+            inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
+            outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)},
+            initial_capacity=0)
+    with tools.assert_raises_regexp(
+            AttributeError,
+            "The attribute 'capacity_loss' has been renamed to 'loss_rate'"):
+        solph.components.GenericStorage(
+            label='storage6',
+            nominal_storage_capacity=45,
+            inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
+            outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)},
+            capacity_loss=0)
+    with tools.assert_raises_regexp(
+            AttributeError,
+            ("The attribute 'capacity_min' has been renamed to"
+             " 'min_storage_level'")):
+        solph.components.GenericStorage(
+            label='storage6',
+            nominal_storage_capacity=45,
+            inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
+            outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)},
+            capacity_min=0)
+    with tools.assert_raises_regexp(
+            AttributeError,
+            ("The attribute 'capacity_max' has been renamed to"
+             " 'max_storage_level'")):
+        solph.components.GenericStorage(
+            label='storage7',
+            nominal_storage_capacity=45,
+            inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
+            outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)},
+            capacity_max=0)
+    with tools.assert_raises_regexp(
+            AttributeError,
+            ("The attribute 'nominal_capacity' has been renamed to"
+             " 'nominal_storage_capacity'")):
+        solph.components.GenericStorage(
+            label='storage7',
+            nominal_capacity=45,
+            inputs={bel: solph.Flow(nominal_value=23, variable_costs=10e10)},
+            outputs={bel: solph.Flow(nominal_value=7.5, variable_costs=10e10)})
+
+
 # ********* OffsetTransformer *********
 
 def test_offsettransformer_wrong_flow_type():
