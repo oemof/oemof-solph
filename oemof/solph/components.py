@@ -161,11 +161,23 @@ class GenericStorage(network.Transformer):
             ('capacity_loss', 'loss_rate'),
             ('capacity_min', 'min_storage_level'),
             ('capacity_max', 'max_storage_level')]
-        for parameter in renamed_parameters:
-            if kwargs.get(parameter[0]) is not None:
-                msg = "The attribute '{0}' has been renamed to '{1}'.".format(
-                    parameter[0], parameter[1])
-                raise AttributeError(msg)
+        messages = [
+            "`{0}` to `{1}`".format(old_name, new_name)
+            for old_name, new_name in renamed_parameters
+            if old_name in kwargs
+        ]
+        if messages:
+            message = (
+                "The following attributes have been renamed from v0.2 to v0.3:"
+                "\n\n  {}\n\n"
+                "You are using the old names as parameters, thus setting "
+                "deprecated\n"
+                "attributes, which is not what you might have intended.\n"
+                "Use the new names, or, if you know what you're doing, set "
+                "these\n"
+                "attributes explicitly after construction instead."
+            )
+            raise AttributeError(message.format("\n  ".join(messages)))
 
     def _set_flows(self):
         for flow in self.inputs.values():
