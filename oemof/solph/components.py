@@ -155,13 +155,13 @@ class GenericStorage(network.Transformer):
         # Check for old parameter names. This is a temporary fix and should
         # be removed once a general solution is found.
         # TODO: https://github.com/oemof/oemof/issues/560
-        rename_parameters = [
+        renamed_parameters = [
             ('nominal_capacity', 'nominal_storage_capacity'),
             ('initial_capacity', 'initial_storage_level'),
             ('capacity_loss', 'loss_rate'),
             ('capacity_min', 'min_storage_level'),
             ('capacity_max', 'max_storage_level')]
-        for parameter in rename_parameters:
+        for parameter in renamed_parameters:
             if kwargs.get(parameter[0]) is not None:
                 msg = "The attribute '{0}' has been renamed to '{1}'.".format(
                     parameter[0], parameter[1])
