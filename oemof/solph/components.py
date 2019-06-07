@@ -153,7 +153,7 @@ class GenericStorage(network.Transformer):
             self._check_invest_attributes()
 
         # Check for old parameter names. This is a temporary fix and should
-        # be removed once a general solution is found
+        # be removed once a general solution is found.
         # Todo: https://github.com/oemof/oemof/issues/560
         rename_parameters = [
             ('nominal_capacity', 'nominal_storage_capacity'),
