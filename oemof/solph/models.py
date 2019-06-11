@@ -51,6 +51,8 @@ class BaseModel(po.ConcreteModel):
         Energy system of the model.
     meta : pyomo.opt.results.results_.SolverResults or None
         Solver results.
+    dual : ... or None
+    rc : ... or None
 
     """
     CONSTRAINT_GROUPS = []
@@ -88,6 +90,8 @@ class BaseModel(po.ConcreteModel):
         self.flows = self.es.flows()
 
         self.solver_results = None
+        self.dual = None
+        self.rc = None
 
         if kwargs.get("auto_construct", True):
             self._construct()
@@ -197,8 +201,8 @@ class BaseModel(po.ConcreteModel):
         solver_results = opt.solve(self, **solve_kwargs)
 
         status = solver_results["Solver"][0]["Status"].key
-        termination_condition = \
-            solver_results["Solver"][0]["Termination condition"].key
+        termination_condition = (
+            solver_results["Solver"][0]["Termination condition"].key)
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
