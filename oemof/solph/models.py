@@ -87,6 +87,8 @@ class BaseModel(po.ConcreteModel):
 
         self.flows = self.es.flows()
 
+        self.solver_results = None
+
         if kwargs.get("auto_construct", True):
             self._construct()
 
