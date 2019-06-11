@@ -194,28 +194,28 @@ class BaseModel(po.ConcreteModel):
         for k in solver_cmdline_options:
             options[k] = solver_cmdline_options[k]
 
-        results = opt.solve(self, **solve_kwargs)
+        solver_results = opt.solve(self, **solve_kwargs)
 
-        status = results["Solver"][0]["Status"].key
+        status = solver_results["Solver"][0]["Status"].key
         termination_condition = \
-            results["Solver"][0]["Termination condition"].key
+            solver_results["Solver"][0]["Termination condition"].key
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
-            self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
-            self.es.results = results
-            self.solver_results = results
+            self.solutions.load_from(solver_results)
+            # storage solver_results in result dictionary of energy system
+            self.es.results = solver_results
+            self.solver_results = solver_results
         else:
-            # storage results in result dictionary of energy system
+            # storage solver_results in result dictionary of energy system
             msg = ("Optimization ended with status {0} and termination "
                    "condition {1}")
             logging.warning(msg.format(status, termination_condition))
-            self.solutions.load_from(results)
-            self.es.results = results
-            self.solver_results = results
+            self.solutions.load_from(solver_results)
+            self.es.results = solver_results
+            self.solver_results = solver_results
 
-        return results
+        return solver_results
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
