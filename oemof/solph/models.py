@@ -205,7 +205,7 @@ class BaseModel(po.ConcreteModel):
             self.solutions.load_from(results)
             # storage results in result dictionary of energy system
             self.es.results = results
-            self.es.results = results
+            self.solver_results = results
         else:
             # storage results in result dictionary of energy system
             msg = ("Optimization ended with status {0} and termination "
@@ -213,6 +213,7 @@ class BaseModel(po.ConcreteModel):
             logging.warning(msg.format(status, termination_condition))
             self.solutions.load_from(results)
             self.es.results = results
+            self.solver_results = results
 
         return results
 
