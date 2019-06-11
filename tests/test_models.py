@@ -62,5 +62,5 @@ def test_infeasable_model():
         es.add(solph.Sink(inputs={bel: solph.Flow(nominal_value=5, actual_value=[1], fixed=True)}))
         es.add(solph.Source(outputs={bel: solph.Flow(nominal_value=4, variable_costs=5)}))
         m = solph.models.Model(es, timeincrement=1)
-        m.solve(solver='glpk')
+        m.solve(solver='cbc')
         outputlib.processing.meta_results(m)
