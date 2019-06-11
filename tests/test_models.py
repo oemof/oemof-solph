@@ -17,7 +17,6 @@ from nose.tools import eq_, raises
 def test_timeincrement_with_valid_timeindex():
     datetimeindex = pd.date_range('1/1/2012', periods=1, freq='H')
     es = solph.EnergySystem(timeindex=datetimeindex)
-    print(es.timeindex.freq)
     m = solph.models.BaseModel(es)
     eq_(m.timeincrement[0], 1)
     eq_(es.timeindex.freq.nanos / 3.6e12, 1)
