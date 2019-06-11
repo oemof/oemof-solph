@@ -156,9 +156,7 @@ class BaseModel(po.ConcreteModel):
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
         """
-        result = processing.results(self)
-
-        return result
+        return processing.results(self)
 
     def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
