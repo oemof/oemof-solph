@@ -39,6 +39,19 @@ class BaseModel(po.ConcreteModel):
         and use methods `_add_parent_block_sets`,
         `_add_parent_block_variables`, `_add_blocks`, `_add_objective`
 
+    Attributes:
+    -----------
+    timeincrement : sequence
+        Time increments.
+    flows : list
+        Flows of the model.
+    name : str
+        Name of the model.
+    es : solph.EnergySystem
+        Energy system of the model.
+    meta : pyomo.opt.results.results_.SolverResults or None
+        Solver results.
+
     """
     CONSTRAINT_GROUPS = []
 
