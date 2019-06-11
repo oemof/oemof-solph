@@ -3,7 +3,7 @@ v0.3.1 (June 11, 2019)
 
 
 Other changes
-###########
+#############
 
 * The API of the GenericStorage changed. Due to the open structure of solph
   the old parameters are still accepted. Therefore users may not notice that
