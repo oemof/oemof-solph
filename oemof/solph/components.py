@@ -214,7 +214,8 @@ class GenericStorage(network.Transformer):
 
 
 class GenericStorageBlock(SimpleBlock):
-    r"""Storage without an :class:`.Investment` object.
+    r"""
+    Storage without an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
@@ -259,35 +260,34 @@ class GenericStorageBlock(SimpleBlock):
           invest\_relation\_input\_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-
-    =========================== ======================= =========
-    symbol                      explanation             attribute
-    =========================== ======================= =========
-    :math:`E(t)`                energy currently stored :py:obj:`capacity`
-    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`
-                                the energy storage
-    :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
-                                initial time step
-    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
-    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
-    :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
-                                (e.g. leakage) per time
-    :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
-    :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
-    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
-                                (i.e. efficiency)
-                                when storing energy
-    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
-                                (i.e. efficiency)
-                                taking stored energy
-    :math:`\tau(t)`             length of the time step
-    =========================== ======================= =========
+    ==================== ====================================== ==== =======================
+    symbol               attribute                              type explanation
+    ==================== ====================================== ==== =======================
+    :math:`E(t)`         :py:obj:`capacity`                     V    energy currently stored
+    :math:`E_{nom}`      :py:obj:`nominal_storage_capacity`     P    nominal capacity of
+                                                                     the energy storage
+    :math:`c(-1)`        :py:obj:`initial_storage_level`        P    state before
+                                                                     initial time step
+    :math:`c_{min}(t)`   :py:obj:`min_storage_level[t]`         P    minimum allowed storage
+    :math:`c_{max}(t)`   :py:obj:`max_storage_level[t]`         P    maximum allowed storage
+    :math:`\delta(t)`    :py:obj:`loss_rate[t]`                 P    fraction of lost energy
+                                                                     (e.g. leakage) per time
+    :math:`\dot{E}_i(t)` :py:obj:`flow[i, n, t]`                V    energy flowing in
+    :math:`\dot{E}_o(t)` :py:obj:`flow[n, o, t]`                V    energy flowing out
+    :math:`\eta_i(t)`    :py:obj:`inflow_conversion_factor[t]`  P    conversion factor
+                                                                     (i.e. efficiency)
+                                                                     when storing energy
+    :math:`\eta_o(t)`    :py:obj:`outflow_conversion_factor[t]` P    conversion factor when
+                                                                     (i.e. efficiency)
+                                                                     taking stored energy
+    :math:`\tau(t)`                                                  length of the time step
+    ==================== ====================================== ==== =======================
 
     **The following parts of the objective function are created:**
 
     Nothing added to the objective function.
-
 
     """
 
@@ -416,7 +416,8 @@ class GenericStorageBlock(SimpleBlock):
 
 
 class GenericInvestmentStorageBlock(SimpleBlock):
-    r"""Storage with an :class:`.Investment` object.
+    r"""
+    Storage with an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
@@ -499,7 +500,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
 
     The symbols are the same as in:class:`.GenericStorageBlock`.
-
 
     """
 
@@ -914,9 +914,9 @@ class GenericCHPBlock(SimpleBlock):
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    =============================== =============================== ==== =======================
+    =============================== =============================== ==== ========================
     math. symbol                    attribute                       type explanation
-    =============================== =============================== ==== =======================
+    =============================== =============================== ==== ========================
     :math:`\dot{H}_{F}`             :py:obj:`H_F[n,t]`              V    input of enthalpy
                                                                          through fuel input
     :math:`P_{el}`                  :py:obj:`P[n,t]`                V    provided
@@ -954,6 +954,7 @@ class GenericCHPBlock(SimpleBlock):
     =============================== =============================== ==== =======================
 
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1178,7 +1179,8 @@ class ExtractionTurbineCHP(solph_Transformer):
 
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
-    r"""Block for the linear relation of nodes with type
+    r"""
+    Block for the linear relation of nodes with type
     :class:`~oemof.solph.components.ExtractionTurbineCHP`
 
     **The following two constraints are created:**
@@ -1196,18 +1198,19 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                  {\eta_{th,maxExtr}(t)}
 
     where :math:`\beta` is defined as:
-    
+
          .. math::
             \beta(t) = \frac{\eta_{el,woExtr}(t) - \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 
     where the first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
-    output flows relate to each other, and the symbols used are defined as
-    follows (with Variables (V) and Parameters (P)):
+    output flows relate to each other.
 
-    ========================= ==================================================== ==== =========
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
+
+    ========================= ==================================================== ==== ========================
     symbol                    attribute                                            type explanation
-    ========================= ==================================================== ==== =========
+    ========================= ==================================================== ==== ========================
     :math:`\dot H_{Fuel}`     :py:obj:`flow[i, n, t]`                              V    fuel input flow
 
     :math:`P_{el}`            :py:obj:`flow[n, main_output, t]`                    V    electric power
@@ -1222,8 +1225,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                                                                         with max heat extraction
     :math:`\eta_{th,maxExtr}` :py:obj:`conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
                                                                                         maximal heat extraction
-    ========================= ==================================================== ==== =========
-
+    ========================= ==================================================== ==== ========================
 
     """
 
@@ -1365,7 +1367,8 @@ class OffsetTransformer(network.Transformer):
 
 
 class OffsetTransformerBlock(SimpleBlock):
-    r"""Block for the relation of nodes with type
+    r"""
+    Block for the relation of nodes with type
     :class:`~oemof.solph.components.OffsetTransformer`
 
     **The following constraints are created:**
@@ -1376,20 +1379,20 @@ class OffsetTransformerBlock(SimpleBlock):
         &
         P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
 
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    .. csv-table:: Variables (V) and Parameters (P)
-        :header: "symbol", "attribute", "type", "explanation"
-        :widths: 1, 1, 1, 1
-
-        ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "Power of output"
-        ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","Power of input"
-        ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V","binary
-        status variable of nonconvex input flow "
-        ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear
-        coefficient 1 (slope)"
-        ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear
-        coefficient 0 (y-intersection)"
-
+    ================== =============================== ==== =======================
+    symbol             attribute                       type explanation
+    ================== =============================== ==== =======================
+    :math:`P_{out}(t)` :py:obj:`flow[n, o, t]`         V    power of output
+    :math:`P_{in}(t)`  :py:obj:`flow[i, n, t]`         V    power of input
+    :math:`Y(t)`       :py:obj:`status[i, n, t]`       V    binary status variable
+                                                            of nonconvex input flow
+    :math:`C_1(t)`     :py:obj:`coefficients[1][n, t]` P    linear coefficient 1
+                                                            (slope)
+    :math:`C_0(t)`     :py:obj:`coefficients[0][n, t]` P    linear coefficient 0
+                                                            (y-intersection)
+    ================== =============================== ==== =======================
 
     """
 
