@@ -9,6 +9,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pyomo.environ as po
+from oemof.solph.plumbing import sequence
 
 
 def investment_limit(model, limit=None):
@@ -106,7 +107,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
     setattr(om, limit_name, po.Expression(
         expr=sum(om.flow[inflow, outflow, t] * om.timeincrement[t] *
-                 getattr(flows[inflow, outflow], keyword)
+                 sequence(getattr(flows[inflow, outflow], keyword))[t]
                  for (inflow, outflow) in flows
                  for t in om.TIMESTEPS)))
 
