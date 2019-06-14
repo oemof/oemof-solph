@@ -68,8 +68,8 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     With `F_I` being the set of flows considered for the integral limit and
     `T` being the set of time steps.
 
-    Total total emissions after optimization can be retrieved calling the
-    :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
+    Total value of keyword attributes after optimization can be retrieved
+    calling the :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
 
     Parameters
     ----------
@@ -82,7 +82,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
         used.
     keyword : attribute to consider
     limit : numeric
-        Absolute emission limit for the energy system.
+        Absolute limit of keyword attribute for the energy system.
 
     Note
     ----
