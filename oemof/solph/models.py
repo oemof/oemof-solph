@@ -206,16 +206,12 @@ class BaseModel(po.ConcreteModel):
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
-            self.solutions.load_from(solver_results)
-            # storage solver_results in result dictionary of energy system
             self.es.results = solver_results
             self.solver_results = solver_results
         else:
-            # storage solver_results in result dictionary of energy system
             msg = ("Optimization ended with status {0} and termination "
                    "condition {1}")
             logging.warning(msg.format(status, termination_condition))
-            self.solutions.load_from(solver_results)
             self.es.results = solver_results
             self.solver_results = solver_results
 
