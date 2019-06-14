@@ -77,7 +77,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     flows : dict
         Dictionary holding the flows that should be considered in constraint.
         Keys are (source, target) objects of the Flow. If no dictionary is
-        given all flows containing the 'emission_factor' attribute will be
+        given all flows containing the keyword attribute will be
         used.
     keyword : attribute to consider
     limit : numeric
@@ -99,8 +99,8 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
             if not hasattr(flows[i, o], keyword):
                 raise AttributeError(
                     ('Flow with source: {0} and target: {1} '
-                     'has no attribute emission_factor.').format(i.label,
-                                                                 o.label))
+                     'has no attribute {2}.').format(
+                        i.label, o.label, keyword))
 
     limit_name = "integral_limit_"+keyword
 
