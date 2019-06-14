@@ -59,6 +59,36 @@ def test_generic_storage_3():
         inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
 
+def test_generic_storage_with_old_parameters():
+    deprecated = {
+        'nominal_capacity': 45,
+        'initial_capacity': 0,
+        'capacity_loss': 0,
+        'capacity_min': 0,
+        'capacity_max': 0,
+    }
+    # Make sure an `AttributeError` is raised if we supply all deprecated
+    # parameters.
+    with tools.assert_raises(AttributeError) as caught:
+        solph.components.GenericStorage(
+            label='`GenericStorage` with all deprecated parameters',
+            **deprecated
+        )
+    for parameter in deprecated:
+        # Make sure every parameter used is mentioned in the exception's
+        # message.
+        assert parameter in str(caught.exception)
+        # Make sure an `AttributeError` is raised for each deprecated parameter.
+        tools.assert_raises(
+            AttributeError,
+            solph.components.GenericStorage,
+            **{
+                "label": "`GenericStorage` with `{}`".format(parameter),
+                parameter: deprecated[parameter],
+            }
+        )
+
+
 # ********* OffsetTransformer *********
 
 def test_offsettransformer_wrong_flow_type():

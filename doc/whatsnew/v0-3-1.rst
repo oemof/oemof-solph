@@ -1,49 +1,19 @@
-v0.3.1 (September ??, 2019)
-+++++++++++++++++++++++++++
+v0.3.1 (June 11, 2019)
+++++++++++++++++++++++++++
 
-
-API changes
-###########
-
-* something
-
-New features
-############
-
-* Allow generic limits for integral over weighted flows.
-  (This is a generalised version of <solph.constraints.emission_limit>.)
-
-New components
-##############
-
-* something
-
-Documentation
-#############
-
-* something
-
-Known issues
-############
-
-* something
-
-Bug fixes
-#########
-
-* something
-
-Testing
-#######
-
-* something
 
 Other changes
 #############
 
-* something
+* The API of the GenericStorage changed. Due to the open structure of solph
+  the old parameters are still accepted. Therefore users may not notice that
+  the default value is used instead of the given value after an update from
+  v0.2.x to v0.3.x. With this version an error is raised. We work on a
+  structure to avoid such problems in the future.
 
 Contributors
 ############
 
 * Patrik Schönfeldt
+* Stephan Günther
+* Uwe Krien
