@@ -498,9 +498,9 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='source1', outputs={bel: solph.Flow(
-            nominal_value=100, emission_factor=0.5)})
+            nominal_value=100, emission_factor=[0.5, -1.0, 2.0])})
         solph.Source(label='source2', outputs={bel: solph.Flow(
-            nominal_value=100, emission_factor=0.8)})
+            nominal_value=100, emission_factor=3.5)})
 
         # Should be ignored because the emission attribute is not defined.
         solph.Source(label='source3', outputs={bel: solph.Flow(
