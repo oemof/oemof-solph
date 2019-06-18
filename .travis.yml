@@ -1,12 +1,12 @@
 language: python
 
+dist: xenial
+
 matrix:
   include:
     - python: 3.5
     - python: 3.6
     - python: 3.7
-
-dist: xenial
 
 # command to install dependencies
 addons:
@@ -14,8 +14,8 @@ addons:
     - coinor-cbc
 
 install:
-  - pip install .[datapackage]
-  - pip install coveralls
+  - pip install --user .[datapackage]
+  - pip install --user coveralls
 
 # command to run tests
 script:
