@@ -61,13 +61,6 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     The attribute named by keyword has to be added
     to every flow you want to take into account.
 
-    .. math:: \sum_{F_E} \sum_{T} P(i,o,t) \cdot w(i,o,t)
-               \cdot \tau \leq M
-
-
-    With `F_I` being the set of flows considered for the integral limit and
-    `T` being the set of time steps.
-
     Total value of keyword attributes after optimization can be retrieved
     calling the :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
 
@@ -90,8 +83,12 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
     **Constraint:**
 
-    .. math::
-        \sum_n \sum_t w_n(t) \cdot P_n(t) \cdot \tau(t) \le L \\
+    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(t) \cdot w_i(t)
+               \cdot \tau(t) \leq M
+
+
+    With `F_I` being the set of flows considered for the integral limit and
+    `T` being the set of time steps.
 
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
