@@ -11,7 +11,8 @@ matrix:
 # command to install dependencies
 addons:
   apt:
-    - coinor-cbc
+    packages:
+      - coinor-cbc
 
 install:
   - pip install --user .[datapackage]
