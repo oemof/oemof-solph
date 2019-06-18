@@ -16,7 +16,7 @@ def investment_limit(model, limit=None):
     """ Set an absolute limit for the total investment costs of an investment
     optimization problem:
 
-    .. math:: \sum_{investment\_costs} \leq limit
+    .. math:: \sum_{investment\_costs} \leq limit\\
 
     Parameters
     ----------
