@@ -13,11 +13,11 @@ addons:
   apt:
     packages:
       - coinor-cbc
-      - python3-sphinx
 
 install:
   - pip install .[datapackage]
   - pip install coveralls
+  - pip install sphinx
 
 # command to run tests
 script:
