@@ -5,12 +5,13 @@ matrix:
     - python: 3.5
     - python: 3.6
     - python: 3.7
-      dist: xenial
-      sudo: true
+
+dist: xenial
 
 # command to install dependencies
-before_install:
-  - sudo apt-get install coinor-cbc
+addons:
+  apt:
+    - coinor-cbc
 
 install:
   - pip install .[datapackage]
