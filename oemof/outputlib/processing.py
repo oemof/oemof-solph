@@ -18,7 +18,6 @@ from oemof.network import Node
 from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var
-from pyomo.core.base.constraint import Constraint
 
 
 def get_tuple(x):
@@ -151,13 +150,6 @@ def results(om):
                     'sequences': df, 'scalars': pd.Series()}
             else:
                 result[(bus, None)]['sequences']['duals'] = duals
-
-    constraints = set(
-        [i._component() for i in om.component_data_objects(Constraint)])
-
-    for constraint in constraints:
-        result[constraint, None] = {
-            k: om.dual[v] for k, v in constraint.iteritems()}
 
     return result
 
