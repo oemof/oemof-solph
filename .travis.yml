@@ -15,8 +15,8 @@ addons:
       - coinor-cbc
 
 install:
-  - pip install --user .[datapackage]
-  - pip install --user coveralls
+  - pip install .[datapackage]
+  - pip install coveralls
 
 # command to run tests
 script:
