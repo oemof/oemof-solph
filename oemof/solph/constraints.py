@@ -41,7 +41,7 @@ def investment_limit(model, limit=None):
     return model
 
 
-def emission_limit(om, flows=None, limit=None):
+def emission_limit(model, flows=None, limit=None):
     """
     Short handle for generic_integral_limit() with keyword="emission_factor".
 
@@ -50,23 +50,24 @@ def emission_limit(om, flows=None, limit=None):
     Flow objects required an attribute "emission_factor"!
 
     """
-    generic_integral_limit(om,
+    generic_integral_limit(model,
                            keyword='emission_factor',
                            flows=flows,
                            limit=limit)
 
 
-def generic_integral_limit(om, keyword, flows=None, limit=None):
-    """Set a global limit for flows weighted by attribute called keyword.
+def generic_integral_limit(model, keyword, flows=None, limit=None):
+    r"""
+    Set a global limit for flows weighted by attribute called keyword.
     The attribute named by keyword has to be added
     to every flow you want to take into account.
 
     Total value of keyword attributes after optimization can be retrieved
-    calling the :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
+    calling the :attr:`oemof.solph.Model.integral_limit_${keyword}()`.
 
     Parameters
     ----------
-    om : oemof.solph.Model
+    model : oemof.solph.Model
         Model to which constraints are added.
     flows : dict
         Dictionary holding the flows that should be considered in constraint.
@@ -100,13 +101,14 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
     :math:`\tau(t)`  P    width of time step :math:`t`
     :math:`L`        P    global limit given by keyword `limit`
+    ================ ==== =====================================================
 
     """
     if flows is None:
         flows = {}
-        for (i, o) in om.flows:
-            if hasattr(om.flows[i, o], keyword):
-                flows[(i, o)] = om.flows[i, o]
+        for (i, o) in model.flows:
+            if hasattr(model.flows[i, o], keyword):
+                flows[(i, o)] = model.flows[i, o]
 
     else:
         for (i, o) in flows:
@@ -118,17 +120,17 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
     limit_name = "integral_limit_"+keyword
 
-    setattr(om, limit_name, po.Expression(
-        expr=sum(om.flow[inflow, outflow, t]
-                 * om.timeincrement[t]
+    setattr(model, limit_name, po.Expression(
+        expr=sum(model.flow[inflow, outflow, t]
+                 * model.timeincrement[t]
                  * sequence(getattr(flows[inflow, outflow], keyword))[t]
                  for (inflow, outflow) in flows
-                 for t in om.TIMESTEPS)))
+                 for t in model.TIMESTEPS)))
 
-    setattr(om, limit_name+"_constraint", po.Constraint(
-        expr=(getattr(om, limit_name) <= limit)))
+    setattr(model, limit_name + "_constraint", po.Constraint(
+        expr=(getattr(model, limit_name) <= limit)))
 
-    return om
+    return model
 
 
 def equate_variables(model, var1, var2, factor1=1, name=None):
