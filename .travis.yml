@@ -18,6 +18,7 @@ install:
   - pip install .[datapackage]
   - pip install coveralls
   - pip install sphinx
+  - pip install sphinx-rtd-theme
 
 # command to run tests
 script:
