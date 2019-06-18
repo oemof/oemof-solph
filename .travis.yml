@@ -21,6 +21,7 @@ install:
 # command to run tests
 script:
   - nosetests --with-doctest --with-coverage -c nose.cfg
+  - ./tests/build_doc.sh
 
 after_success:
   - coveralls
