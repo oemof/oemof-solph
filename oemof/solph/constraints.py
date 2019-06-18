@@ -88,6 +88,22 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     ----
     Flow objects required an attribute named like keyword!
 
+    **Constraint:**
+
+    .. math::
+        \sum_n \sum_t w_n(t) \cdot P_n(t) \cdot \tau(t) \le L \\
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    ================ ==== =====================================================
+    math. symbol     type explanation
+    ================ ==== =====================================================
+    :math:`P_n(t)`   V    power flow :math:`n` at time step :math:`t`
+    :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
+    :math:`\tau(t)`  P    width of time step :math:`t`
+    :math:`L`        P    global limit given by keyword `limit`
+
     """
     if flows is None:
         flows = {}
@@ -106,8 +122,9 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     limit_name = "integral_limit_"+keyword
 
     setattr(om, limit_name, po.Expression(
-        expr=sum(om.flow[inflow, outflow, t] * om.timeincrement[t] *
-                 sequence(getattr(flows[inflow, outflow], keyword))[t]
+        expr=sum(om.flow[inflow, outflow, t]
+                 * om.timeincrement[t]
+                 * sequence(getattr(flows[inflow, outflow], keyword))[t]
                  for (inflow, outflow) in flows
                  for t in om.TIMESTEPS)))
 
