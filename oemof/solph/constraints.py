@@ -41,6 +41,74 @@ def investment_limit(model, limit=None):
     return model
 
 
+def generic_investment_limit(model, keyword, limit=None):
+    """Set a global limit for investment flows weighted by an attribute called
+    keyword. The attribute named by keyword has to be added to every Investment
+    attribute of the flow you want to take into account.
+
+    Total value of keyword attributes after optimization can be retrieved
+    calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which constraints are added.
+    keyword : attribute to consider
+        All flows with Investment attribute containing the keyword will be
+        used.
+    limit : numeric
+        Global limit of keyword attribute for the energy system.
+
+    Note
+    ----
+    The Investment attribute of the considered (Investment-)flows requires an
+    attribute named like keyword!
+
+    **Constraint:**
+
+    .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
+
+
+    With `IF` being the set of InvestmentFlows considered for the integral
+    limit.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    .. csv-table::
+        :header: "symbol", "attribute", "type", "explanation"
+        :widths: 1, 1, 1, 1
+
+        ":math:`P_{i}`", ":py:obj:`InvestmentFlow.invest[i, o]`", "V", "
+        installed capacity of investment flow"
+        ":math:`w_i`", ":py:obj:`keyword`", "P", "weight given to investment
+        flow named according to `keyword`"
+        ":math:`limit`", ":py:obj:`limit`", "P", "global limit given by
+        keyword `limit`"
+
+
+    """
+
+    invest_flows = {}
+
+    for (i, o) in model.flows:
+        if hasattr(model.flows[i, o].investment, keyword):
+            invest_flows[(i, o)] = model.flows[i, o].investment
+
+    limit_name = "invest_limit_" + keyword
+
+    setattr(model, limit_name, po.Expression(
+        expr=sum(model.InvestmentFlow.invest[inflow, outflow] *
+                 getattr(invest_flows[inflow, outflow], keyword)
+                 for (inflow, outflow) in invest_flows
+                 )))
+
+    setattr(model, limit_name + "_constraint", po.Constraint(
+        expr=(getattr(model, limit_name) <= limit)))
+
+    return model
+
+
 def emission_limit(om, flows=None, limit=None):
     """
     Short handle for generic_integral_limit() with keyword="emission_factor".
