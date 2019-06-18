@@ -13,6 +13,8 @@ addons:
   apt:
     packages:
       - coinor-cbc
+      - texlive-latex-base
+      - dvipng
 
 install:
   - pip install .[datapackage]
