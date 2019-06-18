@@ -152,12 +152,12 @@ def results(om):
             else:
                 result[(bus, None)]['sequences']['duals'] = duals
 
-    constraints = set(
-        [i._component() for i in om.component_data_objects(Constraint)])
+        constraints = set(
+            [i._component() for i in om.component_data_objects(Constraint)])
 
-    for constraint in constraints:
-        result[constraint, None] = {
-            k: om.dual[v] for k, v in constraint.iteritems()}
+        for constraint in constraints:
+            result[constraint, None] = {
+                k: om.dual[v] for k, v in constraint.iteritems()}
 
     return result
 
