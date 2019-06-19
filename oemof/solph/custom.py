@@ -809,10 +809,6 @@ class PiecewiseLinearTransformer(Transformer):
         List containing the domain breakpoints, i.e. the breakpoints for the
         incoming flow.
 
-    out_breakpoints : list
-        List containing the range breakpoints, i.e. the breakpoints for the
-        outgoing flow.
-
     conversion_function : func
         The function describing the relation between incoming flow and outgoing
         flow which is to be approximated.
@@ -835,7 +831,6 @@ class PiecewiseLinearTransformer(Transformer):
     ...    variable_costs=1)},
     ...    outputs={b_el: solph.Flow()},
     ...    in_breakpoints=[0.,0.25,0.75,1.],
-    ...    out_breakpoints=[0.,0.25,0.75,1.],
     ...    conversion_function=lambda x: x**2,
     ...    pw_repn='CC')
 
@@ -846,7 +841,6 @@ class PiecewiseLinearTransformer(Transformer):
         super().__init__(*args, **kwargs)
 
         self.in_breakpoints = list(kwargs.get('in_breakpoints'))
-        self.out_breakpoints = kwargs.get('out_breakpoints')
         self.conversion_function = kwargs.get('conversion_function')
         self.pw_repn = kwargs.get('pw_repn')
 
@@ -906,8 +900,8 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         # bounds are min/max of breakpoints
         lower_bound_in = {n: min(n.in_breakpoints) for n in group}
         upper_bound_in = {n: max(n.in_breakpoints) for n in group}
-        lower_bound_out = {n: min(n.out_breakpoints) for n in group}
-        upper_bound_out = {n: max(n.out_breakpoints) for n in group}
+        lower_bound_out = {n: n.conversion_function(bound) for (n, bound) in lower_bound_in.items()}
+        upper_bound_out = {n: n.conversion_function(bound) for (n, bound) in upper_bound_in.items()}
 
         def get_inflow_bounds(model, n, t):
             return (lower_bound_in[n], upper_bound_in[n])
