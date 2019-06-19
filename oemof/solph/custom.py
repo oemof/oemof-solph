@@ -830,7 +830,7 @@ class PiecewiseLinearTransformer(Transformer):
     ...    nominal_value=100,
     ...    variable_costs=1)},
     ...    outputs={b_el: solph.Flow()},
-    ...    in_breakpoints=[0.,0.25,0.75,1.],
+    ...    in_breakpoints=[0,25,50,75,100],
     ...    conversion_function=lambda x: x**2,
     ...    pw_repn='CC')
 
