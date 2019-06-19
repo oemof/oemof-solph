@@ -845,8 +845,8 @@ class PiecewiseLinearTransformer(Transformer):
         self.pw_repn = kwargs.get('pw_repn')
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
-            raise ValueError("Component `PiecewiseLinearTransformer` cannot have" +
-                             "more than 1 input and 1 output!")
+            raise ValueError('Component `PiecewiseLinearTransformer` cannot have ' +
+                             'more than 1 input and 1 output!')
 
         nominal_value = [a.nominal_value for a in self.inputs.values()][0]
         if max(self.in_breakpoints) < nominal_value:
