@@ -64,7 +64,9 @@ def generic_investment_limit(model, keyword, limit=None):
     The Investment attribute of the considered (Investment-)flows requires an
     attribute named like keyword!
 
-    **Constraint:**
+
+    Constraint
+    ----------
 
     .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
 
