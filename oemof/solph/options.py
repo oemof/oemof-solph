@@ -28,11 +28,22 @@ class Investment:
 
     """
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
-                 existing=0):
+                 existing=0, offset=0):
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
         self.existing = existing
+        self.offset = offset
+
+        self._check_invest_attributes()
+
+    def _check_invest_attributes(self):
+        if self.existing and self.offset is not None:
+            e1 = ("Values for 'offset' and 'existing' are given in"
+                  " investement attributes. \n'existing' will be ignored and a "
+                  "nonconvex Investement with the offset value will be "
+                  "applied.")
+            raise AttributeError(e1)
 
 
 class NonConvex:
