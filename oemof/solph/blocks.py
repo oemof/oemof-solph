@@ -353,7 +353,7 @@ class InvestmentFlow(SimpleBlock):
 
         self.NONCONVEXINVESTFLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
-                        if g[2].investment.offset is not None])
+                        if g[2].investment.nonconvex is True])
 
         # ######################### VARIABLES #################################
 
@@ -367,7 +367,7 @@ class InvestmentFlow(SimpleBlock):
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flows[i, o].investment.minimum <= self.invest[i, o])
             else:
                 expr = (m.flows[i, o].investment.minimum *
@@ -379,7 +379,7 @@ class InvestmentFlow(SimpleBlock):
         def _max_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (self.invest[i, o] <= m.flows[i, o].investment.maximum)
             else:
                 expr = (self.invest[i, o] <=
@@ -394,7 +394,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint to fix flow variable
             of investment flow to (normed) actual value
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flow[i, o, t] == (
                         (m.flows[i, o].investment.existing + self.invest[i, o]) *
                         m.flows[i, o].actual_value[t]))
@@ -409,7 +409,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting an upper bound of flow
             variable in investment case.
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flow[i, o, t] <= (
                     (m.flows[i, o].investment.existing + self.invest[i, o]) *
                      m.flows[i, o].max[t]))
@@ -424,7 +424,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting a lower bound on flow
             variable in investment case.
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flow[i, o, t] >= (
                     (m.flows[i, o].investment.existing + self.invest[i, o]) *
                      m.flows[i, o].min[t]))
@@ -439,7 +439,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                             for t in m.TIMESTEPS) <=
                         m.flows[i, o].summed_max * (
@@ -456,7 +456,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
-            if m.flows[i, o].investment.offset is None:
+            if not m.flows[i, o].investment.nonconvex:
                 expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                             for t in m.TIMESTEPS) >=
                         ((m.flows[i, o].investment.existing + self.invest[i, o]) *
@@ -482,7 +482,7 @@ class InvestmentFlow(SimpleBlock):
 
         for i, o in self.FLOWS:
             if m.flows[i, o].investment.ep_costs is not None:
-                if m.flows[i, o].investment.offset is None:
+                if not m.flows[i, o].investment.nonconvex:
 
                     investment_costs += (self.invest[i, o] *
                                          m.flows[i, o].investment.ep_costs)
