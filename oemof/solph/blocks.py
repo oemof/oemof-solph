@@ -383,7 +383,7 @@ class InvestmentFlow(SimpleBlock):
                 expr = (self.invest[i, o] <= m.flows[i, o].investment.maximum)
             else:
                 expr = (self.invest[i, o] <=
-                        m.flows[i, o].investment.maximum * self.status[i, o])
+                        m.flows[i, o].investment.maximum)
 
             return expr
         self.maximum_rule = Constraint(self.FLOWS, rule=_max_invest_rule)
