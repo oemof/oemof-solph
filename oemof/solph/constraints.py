@@ -131,6 +131,54 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     return om
 
 
+def limit_active_flow_count(model, keyword, flows=None,
+                            lower_limit=None, upper_limit=None):
+    """
+    :param model:
+    :param keyword:
+    :param flows:
+    :param lower_limit: integer number of
+    :param upper_limit: integer number of
+    :return:
+    """
+
+    if flows is None:
+        flows = {}
+        for (i, o) in model.FLOWS:
+            if hasattr(model.flows[i, o], keyword):
+                flows[(i, o)] = model.flows[i, o]
+
+    else:
+        for (i, o) in flows:
+            if not hasattr(flows[i, o], keyword):
+                raise AttributeError(
+                    ('Flow with source: {0} and target: {1} '
+                     'has no attribute {2}.').format(
+                        i.label, o.label, keyword))
+
+    # number of concurrent active flows
+    attrname_count = keyword + "_count"
+    setattr(model, attrname_count, po.Var(model.TIMESTEPS))
+
+    for t in model.TIMESTEPS:
+        getattr(model, attrname_count)[t].setlb(lower_limit)
+        getattr(model, attrname_count)[t].setub(upper_limit)
+
+    def _flow_count_rule(m):
+        for ts in m.TIMESTEPS:
+            # FIXME: this should sum the status, not the flow itself
+            lhs = sum(m.flow[fi, fo, ts] for fi, fo in flows)
+            rhs = getattr(model, attrname_count)[ts]
+            expr = (lhs == rhs)
+            if expr is not True:
+                m.foobar.add(ts, expr)
+
+    model.foobar = po.Constraint(model.TIMESTEPS, noruleinit=True)
+    model.foobar_build = po.BuildAction(rule=_flow_count_rule)
+
+    return model
+
+
 def equate_variables(model, var1, var2, factor1=1, name=None):
     r"""
     Adds a constraint to the given model that set two variables to equal
