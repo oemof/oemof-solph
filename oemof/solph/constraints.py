@@ -134,17 +134,19 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 def limit_active_flow_count(model, keyword, flows=None,
                             lower_limit=None, upper_limit=None):
     """
-    :param model:
-    :param keyword:
-    :param flows:
-    :param lower_limit: integer number of
-    :param upper_limit: integer number of
-    :return:
+    :param model: oemof.solph.Model
+        Model to which constraints are added.
+    :param keyword: string
+        attribute to consider
+    :param flows: list of flows [(in, out)], have to be NonConvex
+    :param lower_limit: number (integer)
+    :param upper_limit: number (integer)
+    :return: the updated model
     """
 
     if flows is None:
         flows = {}
-        for (i, o) in model.FLOWS:
+        for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
             if hasattr(model.flows[i, o], keyword):
                 flows[(i, o)] = model.flows[i, o]
 
@@ -164,17 +166,21 @@ def limit_active_flow_count(model, keyword, flows=None,
         getattr(model, attrname_count)[t].setlb(lower_limit)
         getattr(model, attrname_count)[t].setub(upper_limit)
 
+    attrname_constraint = attrname_count + "_constraint"
+
     def _flow_count_rule(m):
         for ts in m.TIMESTEPS:
-            # FIXME: this should sum the status, not the flow itself
-            lhs = sum(m.flow[fi, fo, ts] for fi, fo in flows)
+            lhs = sum(m.NonConvexFlow.status[fi, fo, ts]
+                      for fi, fo in flows)
             rhs = getattr(model, attrname_count)[ts]
             expr = (lhs == rhs)
             if expr is not True:
-                m.foobar.add(ts, expr)
+                getattr(m, attrname_constraint).add(ts, expr)
 
-    model.foobar = po.Constraint(model.TIMESTEPS, noruleinit=True)
-    model.foobar_build = po.BuildAction(rule=_flow_count_rule)
+    setattr(model, attrname_constraint,
+            po.Constraint(model.TIMESTEPS, noruleinit=True))
+    setattr(model, attrname_constraint+"_build",
+            po.BuildAction(rule=_flow_count_rule))
 
     return model
 
