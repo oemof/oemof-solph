@@ -536,9 +536,10 @@ class Constraint_Tests:
         om = self.get_om()
 
         # one of the two flows has to be active
-        solph.constraints.limit_active_flow_count(om, "emission_factor",
-                                                  lower_limit=1,
-                                                  upper_limit=2)
+        solph.constraints.limit_active_flow_count_by_keyword(om,
+                                                             "emission_factor",
+                                                             lower_limit=1,
+                                                             upper_limit=2)
 
         self.compare_lp_files('flow_count_limit.lp', my_om=om)
 

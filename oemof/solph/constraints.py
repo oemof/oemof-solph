@@ -131,35 +131,21 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     return om
 
 
-def limit_active_flow_count(model, keyword, flows=None,
+def limit_active_flow_count(model, constraint_name, flows,
                             lower_limit=None, upper_limit=None):
     """
     :param model: oemof.solph.Model
         Model to which constraints are added.
-    :param keyword: string
-        attribute to consider
+    :param constraint_name: string
+        name for the constraint
     :param flows: list of flows [(in, out)], have to be NonConvex
     :param lower_limit: number (integer)
     :param upper_limit: number (integer)
     :return: the updated model
     """
 
-    if flows is None:
-        flows = {}
-        for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
-            if hasattr(model.flows[i, o], keyword):
-                flows[(i, o)] = model.flows[i, o]
-
-    else:
-        for (i, o) in flows:
-            if not hasattr(flows[i, o], keyword):
-                raise AttributeError(
-                    ('Flow with source: {0} and target: {1} '
-                     'has no attribute {2}.').format(
-                        i.label, o.label, keyword))
-
     # number of concurrent active flows
-    attrname_count = keyword + "_count"
+    attrname_count = constraint_name + "_count"
     setattr(model, attrname_count, po.Var(model.TIMESTEPS))
 
     for t in model.TIMESTEPS:
@@ -183,6 +169,25 @@ def limit_active_flow_count(model, keyword, flows=None,
             po.BuildAction(rule=_flow_count_rule))
 
     return model
+
+
+def limit_active_flow_count_by_keyword(model, keyword,
+                                       lower_limit=None, upper_limit=None):
+    """
+    :param model: oemof.solph.Model
+        Model to which constraints are added.
+    :param keyword: keyword to consider (in NonConvexFlows)
+    :param lower_limit: number (integer)
+    :param upper_limit: number (integer)
+    :return: the updated model
+    """
+    flows = {}
+    for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
+        if hasattr(model.flows[i, o], keyword):
+            flows[(i, o)] = model.flows[i, o]
+
+    return limit_active_flow_count(model, keyword, flows=flows,
+                                   lower_limit=lower_limit, upper_limit=upper_limit)
 
 
 def equate_variables(model, var1, var2, factor1=1, name=None):
