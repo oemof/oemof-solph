@@ -334,18 +334,9 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     for com_key in components:
         component = components[com_key] if get_flows else com_key
         component_data = detect_scalars_and_sequences(component)
-        ckey = com_key if get_flows else (com_key, None)
-        data[ckey] = component_data
+        comkey = com_key if get_flows else (com_key, None)
+        data[comkey] = component_data
     return data
-
-
-def param_results(system, exclude_none=True):
-    warnings.simplefilter('always', DeprecationWarning)
-    msg = ("The function 'param_results' has been renamed to"
-           "'parameter_as_dict'.\nPleas use the new function name to avoid"
-           "problems in the future.")
-    warnings.warn(msg, DeprecationWarning)
-    return parameter_as_dict(system, exclude_none=exclude_none)
 
 
 def parameter_as_dict(system, exclude_none=True):

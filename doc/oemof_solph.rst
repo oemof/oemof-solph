@@ -396,10 +396,15 @@ example in the `oemof example repository
 
 .. _oemof_solph_components_generic_caes_label:
 
-GenericCAES (component)
+GenericCAES (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
+The following constraints describe the CAES:
+
+.. include:: ../oemof/solph/custom.py
+  :start-after: _GenericCAES-equations:
+  :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
 
@@ -494,7 +499,13 @@ an equality, if not it is a less or equal. Constraint 11 is only needed for mode
 setting the attribute `H_L_FG_share_min`.
 
 .. include:: ../oemof/solph/components.py
-  :start-after: _GenericCHP-equations:
+  :start-after: _GenericCHP-equations1-10:
+  :end-before: **For the attribute**
+
+If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _GenericCHP-equations11:
   :end-before: """
 
 .. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
@@ -506,9 +517,9 @@ GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
-The *nominal_capacity* of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the *nominal_value* in the Flow objects.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined. For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class.
+The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
+To limit the input and output flows, you can define the ``nominal_storage_capacity`` in the Flow objects.
+Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined.
 
 .. code-block:: python
 
@@ -516,9 +527,33 @@ Furthermore, an efficiency for loading, unloading and a capacity loss per time i
         label='storage',
         inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
         outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
-        capacity_loss=0.001, nominal_capacity=50,
+        loss_rate=0.001, nominal_storage_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+For initialising the state of charge before the first time step (time step zero) the parameter ``initial_storage_level`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
+Additionally the parameter ``balanced`` (default value: ``True``) sets the relation of the state of charge of time step zero and the last time step.
+If ``balanced=True``, the state of charge in the last time step is equal to initial value in time step zero.
+Use ``balanced=False`` with caution as energy might be added to or taken from the energy system due to different states of charge in time step zero and the last time step.
+Generally, with these two parameters four configurations are possible, which might result in different solutions of the same optimization model:
+
+    *	``initial_storage_level=None``, ``balanced=True`` (default setting): The state of charge in time step zero is a result of the optimization. The state of charge of the last time step is equal to time step zero. Thus, the storage is not violating the energy conservation by adding or taking energy from the system due to different states of charge at the beginning and at the end of the optimization period.
+    *	``initial_storage_level=0.5``, ``balanced=True``: The state of charge in time step zero is fixed to 0.5 (50 % charged). The state of charge in the last time step is also constrained by 0.5 due to the coupling parameter ``balanced`` set to ``True``.
+    *	``initial_storage_level=None``, ``balanced=False``: Both, the state of charge in time step zero and the last time step are a result of the optimization and not coupled.
+    *	``initial_storage_level=0.5``, ``balanced=False``: The state of charge in time step zero is constrained by a given value. The state of charge of the last time step is a result of the optimization.
+
+The following code block shows an example of the storage parametrization for the second configuration:
+
+.. code-block:: python
+
+    solph.GenericStorage(
+        label='storage',
+        inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
+        outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
+        loss_rate=0.001, nominal_storage_capacity=50,
+        initial_storage_level=0.5, balanced=True,
+        inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
+
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
 
 Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -548,7 +583,7 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
         label='PHES',
         inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
         outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
-        capacity_loss=0.001, 
+        loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
 
@@ -560,8 +595,8 @@ The following example describes a battery with flows coupled to the capacity of 
         label='battery',
         inputs={b_el: solph.Flow()},
         outputs={b_el: solph.Flow()},
-        capacity_loss=0.001, 
-        nominal_capacity=50,
+        loss_rate=0.001,
+        nominal_storage_capacity=50,
         inflow_conversion_factor=0.98,
          outflow_conversion_factor=0.8,
         invest_relation_input_capacity = 1/6,
@@ -572,8 +607,78 @@ The following example describes a battery with flows coupled to the capacity of 
 .. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
 
 
-.. _oemof_solph_custom_electrical_line_label:
+OffsetTransformer (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The `OffsetTransformer` object makes it possible to create a Transformer with different efficiencies in part load condition.
+For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load.
+The following example illustrates how to define an OffsetTransformer for given information for the output:
+
+.. code-block:: python
+
+    eta_min = 0.5       # efficiency at minimal operation point
+    eta_max = 0.8       # efficiency at nominal operation point
+    P_out_min = 20      # absolute minimal output power
+    P_out_max = 100     # absolute nominal output power
+
+    # calculate limits of input power flow
+    P_in_min = P_out_min / eta_min
+    P_in_max = P_out_max / eta_max
+
+    # calculate coefficients of input-output line equation
+    c1 = (P_out_max-P_out_min)/(P_in_max-P_in_min)
+    c0 = P_out_max - c1*P_in_max
+
+    # define OffsetTransformer
+    solph.custom.OffsetTransformer(
+        label='boiler',
+        inputs={bfuel: solph.Flow(
+            nominal_value=P_in_max,
+            max=1,
+            min=P_in_min/P_in_max,
+            nonconvex=solph.NonConvex())},
+        outputs={bth: solph.Flow()},
+        coefficients = [c0, c1])
+
+This example represents a boiler, which is supplied by fuel and generates heat.
+It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
+The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
+Note that the nonconvex flow has to be defined for the input flow.
+By using the OffsetTransformer a linear relation of in- and output power with a power dependent efficiency is generated.
+The following figures illustrate the relations:
+
+.. 	image:: _files/OffsetTransformer_power_relation.svg
+   :width: 70 %
+   :alt: OffsetTransformer_power_relation.svg
+   :align: center
+
+Now, it becomes clear, why this object has been named `OffsetTransformer`. The
+linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
+the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
+part of the solution space and the boiler is allowed to switch off:
+
+.. include:: ../oemof/solph/components.py
+  :start-after: _OffsetTransformer-equations:
+  :end-before: """
+
+The following figures shows the efficiency dependent on the output power,
+which results in a nonlinear relation:
+
+.. math::
+
+    \eta = C_1 \cdot P_{out}(t) / (P_{out}(t) - C_0)
+
+.. 	image:: _files/OffsetTransformer_efficiency.svg
+   :width: 70 %
+   :alt: OffsetTransformer_efficiency.svg
+   :align: center
+
+The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+
+.. note:: See the :py:class:`~oemof.solph.components.OffsetTransformer` class for all parameters and the mathematical background.
+
+
+.. _oemof_solph_custom_electrical_line_label:
 
 ElectricalLine (custom)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -699,7 +804,6 @@ block class :py:class:`~oemof.solph.blocks.NonConvex`.
 .. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
-
 
 
 Adding additional constraints

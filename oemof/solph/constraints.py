@@ -9,6 +9,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pyomo.environ as po
+from oemof.solph.plumbing import sequence
 
 
 def investment_limit(model, limit=None):
@@ -41,8 +42,27 @@ def investment_limit(model, limit=None):
 
 
 def emission_limit(om, flows=None, limit=None):
-    """Set a global limit for emissions. The emission attribute has to be added
+    """
+    Short handle for generic_integral_limit() with keyword="emission_factor".
+
+    Note
+    ----
+    Flow objects required an attribute "emission_factor"!
+
+    """
+    generic_integral_limit(om,
+                           keyword='emission_factor',
+                           flows=flows,
+                           limit=limit)
+
+
+def generic_integral_limit(om, keyword, flows=None, limit=None):
+    """Set a global limit for flows weighted by attribute called keyword.
+    The attribute named by keyword has to be added
     to every flow you want to take into account.
+
+    Total value of keyword attributes after optimization can be retrieved
+    calling the :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
 
     Parameters
     ----------
@@ -51,36 +71,62 @@ def emission_limit(om, flows=None, limit=None):
     flows : dict
         Dictionary holding the flows that should be considered in constraint.
         Keys are (source, target) objects of the Flow. If no dictionary is
-        given all flows containing the 'emission' attribute will be used.
+        given all flows containing the keyword attribute will be
+        used.
+    keyword : attribute to consider
     limit : numeric
-        Absolute emission limit.
+        Absolute limit of keyword attribute for the energy system.
 
     Note
     ----
-    Flow objects required an emission attribute!
+    Flow objects required an attribute named like keyword!
+
+    **Constraint:**
+
+    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(t) \cdot w_i(t)
+               \cdot \tau(t) \leq M
+
+
+    With `F_I` being the set of flows considered for the integral limit and
+    `T` being the set of time steps.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    ================ ==== =====================================================
+    math. symbol     type explanation
+    ================ ==== =====================================================
+    :math:`P_n(t)`   V    power flow :math:`n` at time step :math:`t`
+    :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
+    :math:`\tau(t)`  P    width of time step :math:`t`
+    :math:`L`        P    global limit given by keyword `limit`
 
     """
-
     if flows is None:
         flows = {}
         for (i, o) in om.flows:
-            if hasattr(om.flows[i, o], 'emission'):
+            if hasattr(om.flows[i, o], keyword):
                 flows[(i, o)] = om.flows[i, o]
 
     else:
         for (i, o) in flows:
-            if not hasattr(flows[i, o], 'emission'):
-                raise ValueError(('Flow with source: {0} and target: {1} '
-                                 'has no attribute emission.').format(i.label,
-                                                                      o.label))
+            if not hasattr(flows[i, o], keyword):
+                raise AttributeError(
+                    ('Flow with source: {0} and target: {1} '
+                     'has no attribute {2}.').format(
+                        i.label, o.label, keyword))
 
-    def emission_rule(m):
-        return (sum(m.flow[inflow, outflow, t] * m.timeincrement[t] *
-                    flows[inflow, outflow].emission
-                for (inflow, outflow) in flows
-                for t in m.TIMESTEPS) <= limit)
+    limit_name = "integral_limit_"+keyword
 
-    om.emission_limit = po.Constraint(rule=emission_rule)
+    setattr(om, limit_name, po.Expression(
+        expr=sum(om.flow[inflow, outflow, t]
+                 * om.timeincrement[t]
+                 * sequence(getattr(flows[inflow, outflow], keyword))[t]
+                 for (inflow, outflow) in flows
+                 for t in om.TIMESTEPS)))
+
+    setattr(om, limit_name+"_constraint", po.Constraint(
+        expr=(getattr(om, limit_name) <= limit)))
 
     return om
 

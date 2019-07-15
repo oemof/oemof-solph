@@ -97,7 +97,7 @@ def test_optimise_storage_size(filename="storage_investment.csv",
         label='storage',
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
-        capacity_loss=0.00, initial_capacity=0,
+        loss_rate=0.00, initial_storage_level=0,
         invest_relation_input_capacity=1/6,
         invest_relation_output_capacity=1/6,
         inflow_conversion_factor=1, outflow_conversion_factor=0.8,
@@ -151,9 +151,9 @@ def test_results_with_actual_dump():
     # Problem results
     eq_(meta['problem']['Lower bound'], 4.231675777e+17)
     eq_(meta['problem']['Upper bound'], 4.231675777e+17)
-    eq_(meta['problem']['Number of variables'], 2804)
-    eq_(meta['problem']['Number of constraints'], 2805)
-    eq_(meta['problem']['Number of nonzeros'], 7606)
+    eq_(meta['problem']['Number of variables'], 2805)
+    eq_(meta['problem']['Number of constraints'], 2806)
+    eq_(meta['problem']['Number of nonzeros'], 1197)
     eq_(meta['problem']['Number of objectives'], 1)
     eq_(str(meta['problem']['Sense']), 'minimize')
 
@@ -184,6 +184,10 @@ def test_results_with_old_dump():
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
                 filename='es_dump_test_2_3dev.oemof')
+    # Note: This internal attribute is new in v.0.3.0, so the dump doesn't
+    #       contain it for obvious reasons. Setting it manually to the correct
+    #       value prevents the test from erroring.
+    energysystem._first_ungrouped_node_index_ = len(energysystem.nodes)
     results = energysystem.results['main']
 
     electricity_bus = views.node(results, 'electricity')

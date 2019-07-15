@@ -74,7 +74,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 Citing oemof
 ============
 
-We use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
+The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
 
 
 License

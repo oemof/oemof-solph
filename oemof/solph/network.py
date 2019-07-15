@@ -163,8 +163,9 @@ class Flow(on.Edge):
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
                     }
+        keys = [k for k in kwargs if k != 'label']
 
-        for attribute in set(scalars + sequences + dictionaries + list(kwargs)):
+        for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
