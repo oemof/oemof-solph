@@ -563,3 +563,20 @@ class Constraint_Tests:
                 nominal_value=10, min=0.5, max=1.0, variable_costs=10,
                 nonconvex=solph.NonConvex(activity_costs=2))})
         self.compare_lp_files('activity_costs.lp')
+
+    def test_piecewise_linear_transformer_cc(self):
+        """Testing PiecewiseLinearTransformer using CC formulation."""
+        bgas = solph.Bus(label='gasBus')
+        bel = solph.Bus(label='electricityBus')
+
+        solph.custom.PiecewiseLinearTransformer(
+            label='pwltf',
+            inputs={bgas: solph.Flow(
+                nominal_value=100,
+                variable_costs=1)},
+            outputs={bel: solph.Flow()},
+            in_breakpoints=[0, 25, 50, 75, 100],
+            conversion_function=lambda x: x**2,
+            pw_repn='CC')
+
+        self.compare_lp_files('piecewise_linear_transformer_cc.lp')
