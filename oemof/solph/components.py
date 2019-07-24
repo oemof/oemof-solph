@@ -65,6 +65,9 @@ class GenericStorage(network.Transformer):
     loss_rate : numeric (sequence or scalar)
         The relative loss of the storage capacity from between two consecutive
         timesteps.
+    loss_constant : numeric (sequence or scalar)
+        A constant loss of the storage level between two consecutive
+        timesteps.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -133,6 +136,7 @@ class GenericStorage(network.Transformer):
         self.initial_storage_level = kwargs.get('initial_storage_level')
         self.balanced = kwargs.get('balanced', True)
         self.loss_rate = solph_sequence(kwargs.get('loss_rate', 0))
+        self.loss_constant = solph_sequence(kwargs.get('loss_constant', 0))
         self.inflow_conversion_factor = solph_sequence(
             kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
@@ -360,6 +364,7 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
                 1 - n.loss_rate[0])
+            expr += n.loss_constant[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -377,6 +382,7 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t-1] * (
                 1 - n.loss_rate[t])
+            expr += n.loss_constant[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -583,6 +589,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
                     1 - n.loss_rate[0])
+            expr += n.loss_constant[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -601,6 +608,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t - 1] * (
                     1 - n.loss_rate[t])
+            expr += n.loss_constant[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
