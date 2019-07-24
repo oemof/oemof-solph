@@ -614,7 +614,6 @@ class Constraint_Tests:
         """Testing PiecewiseLinearTransformer using CC formulation."""
         bgas = solph.Bus(label='gasBus')
         bel = solph.Bus(label='electricityBus')
-
         solph.custom.PiecewiseLinearTransformer(
             label='pwltf',
             inputs={bgas: solph.Flow(
@@ -624,8 +623,22 @@ class Constraint_Tests:
             in_breakpoints=[0, 25, 50, 75, 100],
             conversion_function=lambda x: x**2,
             pw_repn='CC')
-
         self.compare_lp_files('piecewise_linear_transformer_cc.lp')
+
+    def test_piecewise_linear_transformer_dcc(self):
+        """Testing PiecewiseLinearTransformer using DCC formulation."""
+        bgas = solph.Bus(label='gasBus')
+        bel = solph.Bus(label='electricityBus')
+        solph.custom.PiecewiseLinearTransformer(
+            label='pwltf',
+            inputs={bgas: solph.Flow(
+                nominal_value=100,
+                variable_costs=1)},
+            outputs={bel: solph.Flow()},
+            in_breakpoints=[0, 25, 50, 75, 100],
+            conversion_function=lambda x: x**2,
+            pw_repn='DCC')
+        self.compare_lp_files('piecewise_linear_transformer_dcc.lp')
 
     def test_maximum_startups(self):
         """Testing maximum_startups attribute for nonconvex flows."""
