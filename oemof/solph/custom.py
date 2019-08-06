@@ -17,7 +17,8 @@ from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Param,
 import logging
 
 from oemof.solph.network import Bus, Transformer
-from oemof.solph.plumbing import sequence, attribute_dict
+from oemof.solph import sequence as solph_sequence
+from oemof.solph.plumbing import attribute_dict
 
 
 class ElectricalBus(Bus):
@@ -68,7 +69,7 @@ class ElectricalLine(Transformer):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.reactance = sequence(kwargs.get('reactance', 0.00001))
+        self.reactance = solph_sequence(kwargs.get('reactance', 0.00001))
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError("Component ElectricLine must not have more than \
@@ -257,7 +258,7 @@ class Link(Transformer):
                              2 inputs and 2 outputs!")
 
         self.conversion_factors = {
-            k: sequence(v)
+            k: solph_sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
     def constraint_group(self):
@@ -341,31 +342,31 @@ class GenericCAES2(Transformer):
         self.outputs.update(kwargs.get('electrical_output'))
 
         # set required model parameters
-        self.cas_C_st = sequence(kwargs.get('cas_C_st'))
-        self.cas_Pi_min = sequence(kwargs.get('cas_Pi_min'))
-        self.cas_Pi_o_max = sequence(kwargs.get('cas_Pi_o_max'))
-        self.cas_Pi_o_0 = sequence(kwargs.get('cas_Pi_o_0'))
-        self.cas_v0 = sequence(kwargs.get('cas_v0'))
-        self.cas_p0 = sequence(kwargs.get('cas_p0'))
-        self.cas_R = sequence(kwargs.get('cas_R'))
-        self.cas_T0 = sequence(kwargs.get('cas_T0'))
-        self.cas_T = sequence(kwargs.get('cas_T'))
-        self.cmp_a = sequence(kwargs.get('cmp_a'))
-        self.cmp_b = sequence(kwargs.get('cmp_b'))
-        self.cmp_c = sequence(kwargs.get('cmp_c'))
-        self.cmp_d = sequence(kwargs.get('cmp_d'))
-        self.cmp_e = sequence(kwargs.get('cmp_e'))
-        self.cmp_eta = sequence(kwargs.get('cmp_eta'))
-        self.cmp_P_inst = sequence(kwargs.get('cmp_P_inst'))
-        self.cmp_P_max = sequence(kwargs.get('cmp_P_max'))
-        self.cmp_P_min = sequence(kwargs.get('cmp_P_min'))
-        self.exp_a = sequence(kwargs.get('exp_a'))
-        self.exp_b = sequence(kwargs.get('exp_b'))
-        self.exp_c = sequence(kwargs.get('exp_c'))
-        self.exp_d = sequence(kwargs.get('exp_d'))
-        self.exp_P_inst = sequence(kwargs.get('exp_P_inst'))
-        self.exp_P_max = sequence(kwargs.get('exp_P_max'))
-        self.exp_P_min = sequence(kwargs.get('exp_P_min'))
+        self.cas_C_st = solph_sequence(kwargs.get('cas_C_st'))
+        self.cas_Pi_min = solph_sequence(kwargs.get('cas_Pi_min'))
+        self.cas_Pi_o_max = solph_sequence(kwargs.get('cas_Pi_o_max'))
+        self.cas_Pi_o_0 = solph_sequence(kwargs.get('cas_Pi_o_0'))
+        self.cas_v0 = solph_sequence(kwargs.get('cas_v0'))
+        self.cas_p0 = solph_sequence(kwargs.get('cas_p0'))
+        self.cas_R = solph_sequence(kwargs.get('cas_R'))
+        self.cas_T0 = solph_sequence(kwargs.get('cas_T0'))
+        self.cas_T = solph_sequence(kwargs.get('cas_T'))
+        self.cmp_a = solph_sequence(kwargs.get('cmp_a'))
+        self.cmp_b = solph_sequence(kwargs.get('cmp_b'))
+        self.cmp_c = solph_sequence(kwargs.get('cmp_c'))
+        self.cmp_d = solph_sequence(kwargs.get('cmp_d'))
+        self.cmp_e = solph_sequence(kwargs.get('cmp_e'))
+        self.cmp_eta = solph_sequence(kwargs.get('cmp_eta'))
+        self.cmp_P_inst = solph_sequence(kwargs.get('cmp_P_inst'))
+        self.cmp_P_max = solph_sequence(kwargs.get('cmp_P_max'))
+        self.cmp_P_min = solph_sequence(kwargs.get('cmp_P_min'))
+        self.exp_a = solph_sequence(kwargs.get('exp_a'))
+        self.exp_b = solph_sequence(kwargs.get('exp_b'))
+        self.exp_c = solph_sequence(kwargs.get('exp_c'))
+        self.exp_d = solph_sequence(kwargs.get('exp_d'))
+        self.exp_P_inst = solph_sequence(kwargs.get('exp_P_inst'))
+        self.exp_P_max = solph_sequence(kwargs.get('exp_P_max'))
+        self.exp_P_min = solph_sequence(kwargs.get('exp_P_min'))
 
     def constraint_group(self):
         return GenericCAESBlock2
@@ -657,7 +658,7 @@ class GenericCAESBlock2(SimpleBlock):
 
         def exp_area1_rule(block, n, t):
             """Relationship between power and power."""
-            return(self.exp_m[n, t] == self.exp_a[n, t] * self.exp_P[n, t] +
+            return(self.exp_m[n, t] == self.exp_a[n, t] * self.exp_P[n, t] +  # + b * pi
                    self.exp_b[n, t] * self.exp_y[n, t])
         self.exp_area1_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=exp_area1_rule)
