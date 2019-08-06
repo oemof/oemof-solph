@@ -658,7 +658,7 @@ class GenericCAESBlock2(SimpleBlock):
 
         def exp_area1_rule(block, n, t):
             """Relationship between power and power."""
-            return(self.exp_m[n, t] == self.exp_a[n, t] * self.exp_P[n, t] +  # + b * pi
+            return(self.exp_m[n, t] == self.exp_a[n, t] * self.exp_P[n, t] +
                    self.exp_b[n, t] * self.exp_y[n, t])
         self.exp_area1_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=exp_area1_rule)
