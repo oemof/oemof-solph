@@ -131,7 +131,7 @@ def attribute_dict(node_timestep_set=None, attribute=None):
 
     Examples
     --------
-    >>> attribute_dict([(n, 1), (n, 2)], 'cmp_P_inst')
+    >>> attribute_dict([(n, 1), (n, 2)], 'cmp_P_inst') # doctest: +SKIP
     {(n, 1): 20, (n, 2): 20}
     """
     attribute_dict = {(node, timestep):
