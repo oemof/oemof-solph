@@ -962,8 +962,8 @@ class GenericCHPBlock(SimpleBlock):
             """Set P_woDH depending on H_F."""
             expr = 0
             expr += - self.H_F[n, t]
-            expr += n.alphas[0][t] * self.Y[n, t]
-            expr += n.alphas[1][t] * self.P_woDH[n, t]
+            expr += self.alpha1[n, t] * self.Y[n, t]
+            expr += self.alpha1[n, t] * self.P_woDH[n, t]
             return expr == 0
         self.H_F_1 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_1_rule)
@@ -972,8 +972,9 @@ class GenericCHPBlock(SimpleBlock):
             """Determine relation between H_F, P and Q."""
             expr = 0
             expr += - self.H_F[n, t]
-            expr += n.alphas[0][t] * self.Y[n, t]
-            expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
+            expr += self.alpha1[n, t] * self.Y[n, t]
+            expr += self.alpha2[n, t] * (
+                self.P[n, t] + self.Beta[n, t] * self.Q[n, t])
             return expr == 0
         self.H_F_2 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_2_rule)
@@ -983,8 +984,7 @@ class GenericCHPBlock(SimpleBlock):
             expr = 0
             expr += self.H_F[n, t]
             expr += - self.Y[n, t] * \
-                (list(n.electrical_output.values())[0].P_max_woDH[t] /
-                 list(n.electrical_output.values())[0].Eta_el_max_woDH[t])
+                (self.P_max_woDH[n, t] / self.Eta_el_max_woDH[n, t])
             return expr <= 0
         self.H_F_3 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_3_rule)
@@ -994,8 +994,7 @@ class GenericCHPBlock(SimpleBlock):
             expr = 0
             expr += self.H_F[n, t]
             expr += - self.Y[n, t] * \
-                (list(n.electrical_output.values())[0].P_min_woDH[t] /
-                 list(n.electrical_output.values())[0].Eta_el_min_woDH[t])
+                (self.P_min_woDH[n, t] / self.Eta_el_min_woDH[n, t])
             return expr >= 0
         self.H_F_4 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
@@ -1004,8 +1003,7 @@ class GenericCHPBlock(SimpleBlock):
             """Set max. flue gas loss as share fuel flow share."""
             expr = 0
             expr += - self.H_L_FG_max[n, t]
-            expr += self.H_F[n, t] * \
-                list(n.fuel_input.values())[0].H_L_FG_share_max[t]
+            expr += self.H_F[n, t] * self.H_L_FG_share_max[n, t]
             return expr == 0
         self.H_L_FG_max_def = Constraint(self.NODES, m.TIMESTEPS,
                                          rule=_H_L_FG_max_rule)
@@ -1014,8 +1012,7 @@ class GenericCHPBlock(SimpleBlock):
             """Set maximum Q depending on fuel and electrical flow."""
             expr = 0
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_max[n, t]
-            expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
-            expr += - self.H_F[n, t]
+            expr += self.Q_CW_min[n, t] * self.Y[n, t] - self.H_F[n, t]
             # back-pressure characteristics or one-segment model
             if n.back_pressure is True:
                 return expr == 0
@@ -1031,8 +1028,7 @@ class GenericCHPBlock(SimpleBlock):
             """
             expr = 0
             expr += - self.H_L_FG_min[n, t]
-            expr += self.H_F[n, t] * \
-                list(n.fuel_input.values())[0].H_L_FG_share_min[t]
+            expr += self.H_F[n, t] * self.H_L_FG_share_min[n, t]
             return expr == 0
         self.H_L_FG_min_def = Constraint(self.NODESICE, m.TIMESTEPS,
                                          rule=_H_L_FG_min_rule)
@@ -1044,8 +1040,7 @@ class GenericCHPBlock(SimpleBlock):
             """
             expr = 0
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
-            expr += list(n.heat_output.values())[0].Q_CW_min[t] \
-                * self.Y[n, t]
+            expr += self.Q_CW_min[n, t] * self.Y[n, t]
             expr += - self.H_F[n, t]
             return expr >= 0
         self.Q_min_res = Constraint(self.NODESICE, m.TIMESTEPS,
