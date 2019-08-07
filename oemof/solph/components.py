@@ -355,14 +355,21 @@ class GenericStorageBlock(SimpleBlock):
         self.capacity_upper_bound = Constraint(
             self.NODES, m.TIMESTEPS, rule=capacity_upper_bound_rule)
 
-        # set the initial capacity of the storage
+        # Set the initial and end capacity of the storage
         for n in group:
             if n.initial_capacity is not None:
-                self.capacity[n, m.TIMESTEPS[-1]] = (n.initial_capacity *
-                                                     n.nominal_capacity)
+                # first timestep (initial)
+                self.capacity[n, m.TIMESTEPS[1]] = (
+                    self.initial_capacity[n, 0].value *
+                    self.nominal_capacity[n, 0].value)
+                self.capacity[n, m.TIMESTEPS[1]].fix()
+                # last timestep (end)
+                self.capacity[n, m.TIMESTEPS[-1]] = (
+                    self.initial_capacity[n, 0].value *
+                    self.nominal_capacity[n, 0].value)
                 self.capacity[n, m.TIMESTEPS[-1]].fix()
 
-        # storage balance constraint
+        # Storage balance constraint
         def _storage_balance_rule(block, n, t):
             """Rule definition for the storage balance of every storage n and
             timestep t
