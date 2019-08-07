@@ -131,8 +131,10 @@ def attribute_dict(node_timestep_set=None, attribute=None):
 
     Examples
     --------
-    >>> attribute_dict([(n, 1), (n, 2)], 'cmp_P_inst') # doctest: +SKIP
-    {(n, 1): 20, (n, 2): 20}
+    >>> my_set =  [(n1, 1), (n1, 2), ... , (n2, 1), (n2, 2)] # doctest: +SKIP
+    >>> my_attribute = 'cmp_P_inst' # doctest: +SKIP
+    >>> attribute_dict(my_set, my_attribute) # doctest: +SKIP
+    {(n, 1): 20, (n1, 2): 20, ... , (n2, 1): 47, (n2, 2): 11}
     """
     attribute_dict = {(node, timestep):
                       sequence(getattr(node, attribute))[timestep]
