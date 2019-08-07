@@ -754,9 +754,27 @@ class GenericCHP(network.Transformer):
         fuel_bus = list(self.fuel_input.keys())[0]
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
-
         self.outputs.update(kwargs.get('electrical_output'))
         self.outputs.update(kwargs.get('heat_output'))
+
+        # @TODO: check if params such as fuel input are passed directly
+        # realign attributes which are mapped onto flows
+        self.P_max_woDH = list(
+            self.electrical_output.values())[0].P_max_woDH
+        self.Eta_el_max_woDH = list(
+            self.electrical_output.values())[0].Eta_el_max_woDH
+        self.P_min_woDH = list(
+            self.electrical_output.values())[0].P_min_woDH
+        self.Eta_el_min_woDH = list(
+            self.electrical_output.values())[0].Eta_el_min_woDH
+        self.H_L_FG_share_max = list(
+            self.fuel_input.values())[0].H_L_FG_share_max
+        self.Q_CW_min = list(
+            self.heat_output.values())[0].Q_CW_min
+        # the min flue gas share is set for combustion engines only
+        if hasattr(list(self.fuel_input.values())[0], 'H_L_FG_share_min'):
+            self.H_L_FG_share_min = list(
+                self.fuel_input.values())[0].H_L_FG_share_min
 
     def _calculate_alphas(self):
         """
@@ -839,19 +857,27 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
-        self.GENERICCHPS = Set(initialize=[n for n in group])
+        self.NODES = Set(
+            initialize=[node for node in group], ordered=True)
+        self.NODESTIMESTEPS = Set(
+            initialize=self.NODES*m.TIMESTEPS, ordered=True)
 
-        # variables
-        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.H_L_FG_max = Var(self.GENERICCHPS, m.TIMESTEPS,
+        # # Define parameters
+        # self.cas_C_st = Param(
+        #     self.NODES, m.TIMESTEPS, mutable=True,
+        #     initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_C_st'))
+
+        # Define variables
+        self.H_F = Var(self.NODES, m.TIMESTEPS, within=NonNegativeReals)
+        self.H_L_FG_max = Var(self.NODES, m.TIMESTEPS,
                               within=NonNegativeReals)
-        self.H_L_FG_min = Var(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_L_FG_min = Var(self.NODES, m.TIMESTEPS,
                               within=NonNegativeReals)
-        self.P_woDH = Var(self.GENERICCHPS, m.TIMESTEPS,
+        self.P_woDH = Var(self.NODES, m.TIMESTEPS,
                           within=NonNegativeReals)
-        self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.Q = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
-        self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
+        self.P = Var(self.NODES, m.TIMESTEPS, within=NonNegativeReals)
+        self.Q = Var(self.NODES, m.TIMESTEPS, within=NonNegativeReals)
+        self.Y = Var(self.NODES, m.TIMESTEPS, within=Binary)
 
         # constraint rules
         def _H_flow_rule(block, n, t):
@@ -860,7 +886,7 @@ class GenericCHPBlock(SimpleBlock):
             expr += self.H_F[n, t]
             expr += - m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
-        self.H_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_flow = Constraint(self.NODES, m.TIMESTEPS,
                                  rule=_H_flow_rule)
 
         def _Q_flow_rule(block, n, t):
@@ -869,7 +895,7 @@ class GenericCHPBlock(SimpleBlock):
             expr += self.Q[n, t]
             expr += - m.flow[n, list(n.heat_output.keys())[0], t]
             return expr == 0
-        self.Q_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.Q_flow = Constraint(self.NODES, m.TIMESTEPS,
                                  rule=_Q_flow_rule)
 
         def _P_flow_rule(block, n, t):
@@ -878,7 +904,7 @@ class GenericCHPBlock(SimpleBlock):
             expr += self.P[n, t]
             expr += - m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
-        self.P_flow = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.P_flow = Constraint(self.NODES, m.TIMESTEPS,
                                  rule=_P_flow_rule)
 
         def _H_F_1_rule(block, n, t):
@@ -888,7 +914,7 @@ class GenericCHPBlock(SimpleBlock):
             expr += n.alphas[0][t] * self.Y[n, t]
             expr += n.alphas[1][t] * self.P_woDH[n, t]
             return expr == 0
-        self.H_F_1 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_F_1 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_1_rule)
 
         def _H_F_2_rule(block, n, t):
@@ -898,7 +924,7 @@ class GenericCHPBlock(SimpleBlock):
             expr += n.alphas[0][t] * self.Y[n, t]
             expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
             return expr == 0
-        self.H_F_2 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_F_2 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_2_rule)
 
         def _H_F_3_rule(block, n, t):
@@ -909,7 +935,7 @@ class GenericCHPBlock(SimpleBlock):
                 (list(n.electrical_output.values())[0].P_max_woDH[t] /
                  list(n.electrical_output.values())[0].Eta_el_max_woDH[t])
             return expr <= 0
-        self.H_F_3 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_F_3 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_3_rule)
 
         def _H_F_4_rule(block, n, t):
@@ -920,7 +946,7 @@ class GenericCHPBlock(SimpleBlock):
                 (list(n.electrical_output.values())[0].P_min_woDH[t] /
                  list(n.electrical_output.values())[0].Eta_el_min_woDH[t])
             return expr >= 0
-        self.H_F_4 = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_F_4 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_4_rule)
 
         def _H_L_FG_max_rule(block, n, t):
@@ -930,7 +956,7 @@ class GenericCHPBlock(SimpleBlock):
             expr += self.H_F[n, t] * \
                 list(n.fuel_input.values())[0].H_L_FG_share_max[t]
             return expr == 0
-        self.H_L_FG_max_def = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_L_FG_max_def = Constraint(self.NODES, m.TIMESTEPS,
                                          rule=_H_L_FG_max_rule)
 
         def _Q_max_res_rule(block, n, t):
@@ -944,7 +970,7 @@ class GenericCHPBlock(SimpleBlock):
                 return expr == 0
             else:
                 return expr <= 0
-        self.Q_max_res = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.Q_max_res = Constraint(self.NODES, m.TIMESTEPS,
                                     rule=_Q_max_res_rule)
 
         def _H_L_FG_min_rule(block, n, t):
@@ -959,7 +985,7 @@ class GenericCHPBlock(SimpleBlock):
                 return expr == 0
             else:
                 return Constraint.Skip
-        self.H_L_FG_min_def = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.H_L_FG_min_def = Constraint(self.NODES, m.TIMESTEPS,
                                          rule=_H_L_FG_min_rule)
 
         def _Q_min_res_rule(block, n, t):
@@ -975,7 +1001,7 @@ class GenericCHPBlock(SimpleBlock):
                 return expr >= 0
             else:
                 return Constraint.Skip
-        self.Q_min_res = Constraint(self.GENERICCHPS, m.TIMESTEPS,
+        self.Q_min_res = Constraint(self.NODES, m.TIMESTEPS,
                                     rule=_Q_min_res_rule)
 
     def _objective_expression(self):
