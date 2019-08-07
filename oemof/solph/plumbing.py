@@ -120,6 +120,10 @@ def attribute_dict(node_timestep_set=None, attribute=None):
     respective node within a list comprehension and initialize it over
     all timesteps within the two-dimensional set.
 
+    Note that the attribute must be subscriptable in order to deal with scalars
+    and sequences similarly and thus must be converted to a subscriptable data
+    type i.e. here a `solph_sequence`.
+
     Parameters
     ----------
     node_timestep_set: set with tuples of nodes and timesteps (n, t)
@@ -130,6 +134,7 @@ def attribute_dict(node_timestep_set=None, attribute=None):
     >>> attribute_dict([(n, 1), (n, 2)], 'cmp_P_inst')
     {(n, 1): 20, (n, 2): 20}
     """
-    attribute_dict = {(node, timestep): getattr(node, attribute)[timestep]
+    attribute_dict = {(node, timestep):
+                      sequence(getattr(node, attribute))[timestep]
                       for (node, timestep) in node_timestep_set}
     return attribute_dict

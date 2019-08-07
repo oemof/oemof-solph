@@ -14,13 +14,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import numpy as np
 import warnings
 from pyomo.core.base.block import SimpleBlock
-from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           Expression, BuildAction)
+from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Param,
+                           Constraint, Expression, BuildAction)
 
 from oemof import network
 from oemof.solph import Transformer as solph_Transformer
 from oemof.solph import sequence as solph_sequence
 from oemof.solph import Investment
+from oemof.solph.plumbing import attribute_dict
 
 
 class GenericStorage(network.Transformer):
@@ -300,10 +301,37 @@ class GenericStorageBlock(SimpleBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        self.STORAGES = Set(initialize=[n for n in group])
-
-        self.STORAGES_WITH_INVEST_FLOW_REL = Set(initialize=[
+        # Declare sets
+        self.NODES = Set(initialize=[n for n in group], ordered=True)
+        self.NODESTIMESTEPS = Set(
+            initialize=self.NODES*m.TIMESTEPS, ordered=True)
+        self.NODES_WITH_INVEST_FLOW_REL = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
+
+        # Declare parameters
+        self.nominal_capacity = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'nominal_capacity'))
+        self.capacity_min = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'capacity_min'))
+        self.capacity_max = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'capacity_max'))
+        self.initial_capacity = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'initial_capacity'))
+        self.capacity_loss = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'capacity_loss'))
+        self.inflow_conversion_factor = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(
+                self.NODESTIMESTEPS, 'inflow_conversion_factor'))
+        self.outflow_conversion_factor = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(
+                self.NODESTIMESTEPS, 'outflow_conversion_factor'))
 
         def _storage_capacity_bound_rule(block, n, t):
             """Rule definition for bounds of capacity variable of storage n
@@ -312,7 +340,7 @@ class GenericStorageBlock(SimpleBlock):
             bounds = (n.nominal_capacity * n.capacity_min[t],
                       n.nominal_capacity * n.capacity_max[t])
             return bounds
-        self.capacity = Var(self.STORAGES, m.TIMESTEPS,
+        self.capacity = Var(self.NODES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
         # set the initial capacity of the storage
@@ -336,7 +364,7 @@ class GenericStorageBlock(SimpleBlock):
             expr += (m.flow[n, o[n], t] /
                      n.outflow_conversion_factor[t]) * m.timeincrement[t]
             return expr == 0
-        self.balance = Constraint(self.STORAGES, m.TIMESTEPS,
+        self.balance = Constraint(self.NODES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
 
         def _power_coupled(block, n):
@@ -350,7 +378,7 @@ class GenericStorageBlock(SimpleBlock):
                      m.flows[i[n], n].investment.existing))
             return expr
         self.power_coupled = Constraint(
-                self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled)
+                self.NODES_WITH_INVEST_FLOW_REL, rule=_power_coupled)
 
     def _objective_expression(self):
         r"""Objective expression for storages with no investment.
@@ -372,10 +400,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     INVESTSTORAGES
         A set with all storages containing an Investment object.
     INVEST_REL_CAP_IN
-        A set with all storages containing an Investment object with coupled 
+        A set with all storages containing an Investment object with coupled
         investment of input power and storage capacity
     INVEST_REL_CAP_OUT
-        A set with all storages containing an Investment object with coupled 
+        A set with all storages containing an Investment object with coupled
         investment of output power and storage capacity
     INVEST_REL_IN_OUT
         A set with all storages containing an Investment object with coupled
@@ -473,10 +501,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
         self.INVEST_REL_CAP_IN = Set(initialize=[
             n for n in group if n.invest_relation_input_capacity is not None])
-    
+
         self.INVEST_REL_CAP_OUT = Set(initialize=[
             n for n in group if n.invest_relation_output_capacity is not None])
-    
+
         self.INVEST_REL_IN_OUT = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
 
@@ -530,7 +558,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             return expr
         self.initial_capacity = Constraint(
             self.INITIAL_CAPACITY, rule=_initial_capacity_invest_rule)
-        
+
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
             and output power
@@ -1023,7 +1051,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                  {\eta_{th,maxExtr}}
 
     where :math:`\beta` is defined as:
-    
+
          .. math::
             \beta = \frac{\eta_{el,woExtr} - \eta_{el,maxExtr}}{\eta_{th,maxExtr}}
 
@@ -1031,26 +1059,26 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     flow and the two output flows, the second equation stems from how the two
     output flows relate to each other, and the symbols used are defined as
     follows:
-    
+
 
     ========================= ======================== =========
     symbol                    explanation              attribute
     ========================= ======================== =========
     :math:`\dot H_{Fuel}`     fuel input flow          :py:obj:`flow(inflow, n, t)` is the *flow* from :py:obj:`inflow`
                                                        node to the node :math:`n` at timestep :math:`t`
-    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the  
+    :math:`P_{el}`            electric power           :py:obj:`flow(n, main_output, t)` is the *flow* from the
                                                        node :math:`n` to the :py:obj:`main_output` node at timestep :math:`t`
-    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the 
+    :math:`\dot Q_{th}`       thermal output           :py:obj:`flow(n, tapped_output, t)` is the *flow* from the
                                                        node :math:`n` to the :py:obj:`tapped_output` node at timestep :math:`t`
     :math:`\beta`             power loss index         :py:obj:`main_flow_loss_index` at node :math:`n` at timestep :math:`t`
                                                        as defined above
-    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n` 
+    :math:`\eta_{el,woExtr}`  electric efficiency      :py:obj:`conversion_factor_full_condensation` at node :math:`n`
                               without heat extraction  at timestep :math:`t`
     :math:`\eta_{el,maxExtr}` electric efficiency      :py:obj:`conversion_factors` for the :py:obj:`main_output` at
                               with max heat extraction node :math:`n` at timestep :math:`t`
-    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output` 
+    :math:`\eta_{th,maxExtr}` thermal efficiency with  :py:obj:`conversion_factors` for the :py:obj:`tapped_output`
                               maximal heat extraction  at node :math:`n` at timestep :math:`t`
-    ========================= ======================== =========		
+    ========================= ======================== =========
 
 
     """
