@@ -310,11 +310,20 @@ class Model(BaseModel):
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
                 self.FLOWSTIMESTEPS, self.flows, 'min'))
+        self.actual_value = po.Param(
+            self.FLOWS, self.TIMESTEPS, mutable=True,
+            initialize=flow_param_dict(
+                self.FLOWSTIMESTEPS, self.flows, 'actual_value'))
 
         # Define variables
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 
+        # This should better be converted into constraints which are applied
+        # to subsets of flows!?
+
+        # are other parameters depending on flow nominal values?
+        # what about min/max?
         for (o, i) in self.FLOWS:
             for t in self.TIMESTEPS:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
@@ -337,3 +346,11 @@ class Model(BaseModel):
                         self.flow[o, i, t].setlb(
                             self.flows[o, i].min[t] *
                             self.flows[o, i].nominal_value)
+
+        # UNIDIRECTIONAL_FLOWS: existiert schon
+        # All flows: if self.flows[o, i].nominal_value is not None
+        # Pre-optimized flows: self.flows[o, i].actual_value[t] is not None
+        # Fixed flows:
+        # self.flows[o, i].actual_value[t] is not None
+        # if self.flows[o, i].fixed
+        # NonConvexFlow: self.flows[o, i].nonconvex
