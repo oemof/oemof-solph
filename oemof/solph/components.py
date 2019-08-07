@@ -822,6 +822,20 @@ class GenericCHP(network.Transformer):
             self._calculate_alphas()
         return self._alphas
 
+    @property
+    def alpha1(self):
+        """Compute or return the _alphas attribute."""
+        if self._alphas is None:
+            self._calculate_alphas()
+        return self._alphas[0]
+
+    @property
+    def alpha2(self):
+        """Compute or return the _alphas attribute."""
+        if self._alphas is None:
+            self._calculate_alphas()
+        return self._alphas[1]
+
     def constraint_group(self):
         return GenericCHPBlock
 
@@ -861,11 +875,45 @@ class GenericCHPBlock(SimpleBlock):
             initialize=[node for node in group], ordered=True)
         self.NODESTIMESTEPS = Set(
             initialize=self.NODES*m.TIMESTEPS, ordered=True)
+        self.NODESFG = Set(
+            initialize=[node for node in group
+                        if hasattr(node, 'H_L_FG_share_min')], ordered=True)
+        self.NODESFGTIMESTEPS = Set(
+            initialize=self.NODESFG*m.TIMESTEPS, ordered=True)
 
-        # # Define parameters
-        # self.cas_C_st = Param(
-        #     self.NODES, m.TIMESTEPS, mutable=True,
-        #     initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_C_st'))
+        # Define parameters
+        self.alpha1 = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'alpha1'))
+        self.alpha2 = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'alpha2'))
+        self.Beta = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'Beta'))
+        self.P_max_woDH = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'P_max_woDH'))
+        self.Eta_el_max_woDH = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'Eta_el_max_woDH'))
+        self.P_min_woDH = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'P_min_woDH'))
+        self.Eta_el_min_woDH = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'Eta_el_min_woDH'))
+        self.H_L_FG_share_max = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'H_L_FG_share_max'))
+        self.Q_CW_min = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(self.NODESTIMESTEPS, 'Q_CW_min'))
+        # the min flue gas share is set for combustion engines only
+        self.H_L_FG_share_min = Param(
+            self.NODESFG, m.TIMESTEPS, mutable=True,
+            initialize=attribute_dict(
+                self.NODESFGTIMESTEPS, 'H_L_FG_share_min'))
 
         # Define variables
         self.H_F = Var(self.NODES, m.TIMESTEPS, within=NonNegativeReals)
@@ -988,6 +1036,7 @@ class GenericCHPBlock(SimpleBlock):
         self.H_L_FG_min_def = Constraint(self.NODES, m.TIMESTEPS,
                                          rule=_H_L_FG_min_rule)
 
+        # split this into two constraints i.e. for NODES/NODESFG
         def _Q_min_res_rule(block, n, t):
             """Set minimum Q depending on fuel and eletrical flow."""
             # minimum restriction for heat flows e.g. for motoric CHPs
