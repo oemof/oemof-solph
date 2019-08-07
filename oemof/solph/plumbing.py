@@ -114,6 +114,12 @@ class _Sequence(UserList):
 def attribute_dict(node_timestep_set=None, attribute=None):
     """Create double indexed attribute dictionary.
 
+    This is used to initialize (mutable) parameters over a two-dimensional
+    set of nodes and timesteps. See `custom.GenericCAESBlock2` for usage.
+    A node attribute name is passed in order to get its value for the
+    respective node within a list comprehension and initialize it over
+    all timesteps within the two-dimensional set.
+
     Parameters
     ----------
     node_timestep_set: set with tuples of nodes and timesteps (n, t)
