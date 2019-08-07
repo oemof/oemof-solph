@@ -816,13 +816,6 @@ class GenericCHP(network.Transformer):
         self._alphas = alphas
 
     @property
-    def alphas(self):
-        """Compute or return the _alphas attribute."""
-        if self._alphas is None:
-            self._calculate_alphas()
-        return self._alphas
-
-    @property
     def alpha1(self):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
