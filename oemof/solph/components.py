@@ -369,19 +369,17 @@ class GenericStorageBlock(SimpleBlock):
                     self.nominal_capacity[n, 0].value)
                 self.capacity[n, m.TIMESTEPS[-1]].fix()
 
-        # Storage balance constraint
+        # Define storage balance constraint
         def _storage_balance_rule(block, n, t):
-            """Rule definition for the storage balance of every storage n and
-            timestep t
-            """
+            """Rule definition for the storage balance of every storage."""
             expr = 0
-            expr += block.capacity[n, t]
-            expr += - block.capacity[n, m.previous_timesteps[t]] * (
-                1 - n.capacity_loss[t])
+            expr += self.capacity[n, t]
+            expr += - self.capacity[n, m.previous_timesteps[t]] * (
+                1 - self.capacity_loss[n, t])
             expr += (- m.flow[i[n], n, t] *
-                     n.inflow_conversion_factor[t]) * m.timeincrement[t]
+                     self.inflow_conversion_factor[n, t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
-                     n.outflow_conversion_factor[t]) * m.timeincrement[t]
+                     self.outflow_conversion_factor[n, t]) * m.timeincrement[t]
             return expr == 0
         self.balance = Constraint(self.NODES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
