@@ -871,15 +871,18 @@ class GenericCHPBlock(SimpleBlock):
         if group is None:
             return None
 
+        # Create sets
         self.NODES = Set(
             initialize=[node for node in group], ordered=True)
         self.NODESTIMESTEPS = Set(
             initialize=self.NODES*m.TIMESTEPS, ordered=True)
-        self.NODESFG = Set(
+        # Subset for internal combustion engines
+        # (the min flue gas share is set for combustion engines only)
+        self.NODESICE = Set(
             initialize=[node for node in group
                         if hasattr(node, 'H_L_FG_share_min')], ordered=True)
-        self.NODESFGTIMESTEPS = Set(
-            initialize=self.NODESFG*m.TIMESTEPS, ordered=True)
+        self.NODESICETIMESTEPS = Set(
+            initialize=self.NODESICE*m.TIMESTEPS, ordered=True)
 
         # Define parameters
         self.alpha1 = Param(
@@ -911,9 +914,9 @@ class GenericCHPBlock(SimpleBlock):
             initialize=attribute_dict(self.NODESTIMESTEPS, 'Q_CW_min'))
         # the min flue gas share is set for combustion engines only
         self.H_L_FG_share_min = Param(
-            self.NODESFG, m.TIMESTEPS, mutable=True,
+            self.NODESICE, m.TIMESTEPS, mutable=True,
             initialize=attribute_dict(
-                self.NODESFGTIMESTEPS, 'H_L_FG_share_min'))
+                self.NODESICETIMESTEPS, 'H_L_FG_share_min'))
 
         # Define variables
         self.H_F = Var(self.NODES, m.TIMESTEPS, within=NonNegativeReals)
@@ -1022,35 +1025,30 @@ class GenericCHPBlock(SimpleBlock):
                                     rule=_Q_max_res_rule)
 
         def _H_L_FG_min_rule(block, n, t):
-            """Set min. flue gas loss as fuel flow share."""
-            # minimum flue gas losses e.g. for motoric CHPs
-            if getattr(list(n.fuel_input.values())[0],
-                       'H_L_FG_share_min', None):
-                expr = 0
-                expr += - self.H_L_FG_min[n, t]
-                expr += self.H_F[n, t] * \
-                    list(n.fuel_input.values())[0].H_L_FG_share_min[t]
-                return expr == 0
-            else:
-                return Constraint.Skip
-        self.H_L_FG_min_def = Constraint(self.NODES, m.TIMESTEPS,
+            """Set min. flue gas loss as fuel flow share.
+
+            Minimum flue gas losses for internal combustion engines.
+            """
+            expr = 0
+            expr += - self.H_L_FG_min[n, t]
+            expr += self.H_F[n, t] * \
+                list(n.fuel_input.values())[0].H_L_FG_share_min[t]
+            return expr == 0
+        self.H_L_FG_min_def = Constraint(self.NODESICE, m.TIMESTEPS,
                                          rule=_H_L_FG_min_rule)
 
-        # split this into two constraints i.e. for NODES/NODESFG
         def _Q_min_res_rule(block, n, t):
-            """Set minimum Q depending on fuel and eletrical flow."""
-            # minimum restriction for heat flows e.g. for motoric CHPs
-            if getattr(list(n.fuel_input.values())[0],
-                       'H_L_FG_share_min', None):
-                expr = 0
-                expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
-                expr += list(n.heat_output.values())[0].Q_CW_min[t] \
-                    * self.Y[n, t]
-                expr += - self.H_F[n, t]
-                return expr >= 0
-            else:
-                return Constraint.Skip
-        self.Q_min_res = Constraint(self.NODES, m.TIMESTEPS,
+            """Set minimum Q depending on fuel and eletrical flow.
+
+            Minimum restriction for internal combustion engines.
+            """
+            expr = 0
+            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
+            expr += list(n.heat_output.values())[0].Q_CW_min[t] \
+                * self.Y[n, t]
+            expr += - self.H_F[n, t]
+            return expr >= 0
+        self.Q_min_res = Constraint(self.NODESICE, m.TIMESTEPS,
                                     rule=_Q_min_res_rule)
 
     def _objective_expression(self):
