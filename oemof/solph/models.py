@@ -302,7 +302,16 @@ class Model(BaseModel):
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
                 self.FLOWSTIMESTEPS, self.flows, 'nominal_value'))
+        self.max = po.Param(
+            self.FLOWS, self.TIMESTEPS, mutable=True,
+            initialize=flow_param_dict(
+                self.FLOWSTIMESTEPS, self.flows, 'max'))
+        self.min = po.Param(
+            self.FLOWS, self.TIMESTEPS, mutable=True,
+            initialize=flow_param_dict(
+                self.FLOWSTIMESTEPS, self.flows, 'min'))
 
+        # Define variables
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 

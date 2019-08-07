@@ -152,7 +152,8 @@ def flow_param_dict(flow_timestep_set=None, flows=None, attribute=None):
     Parameters
     ----------
     flow_timestep_set: set with tuples of flow nodes and timesteps (n1, n2, t)
-    flows: flow object container of `EnergySystem` class.
+    flows: flow object container of `EnergySystem` class
+    attribute: string with node attribute name
 
     Examples
     --------
@@ -162,9 +163,9 @@ def flow_param_dict(flow_timestep_set=None, flows=None, attribute=None):
     {(n1, n2, 1): 20, (n1, n2, 2): 20, ... , (n3, n4, 1): 47, (n3, n4, 2): 11}
     """
     flow_param_dict = {
-        (n1, n2, t): flows[n1, n2].nominal_value
+        (n1, n2, t): getattr(flows[n1, n2], attribute, None)
         for n1, n2, t in flow_timestep_set
-        if flows[n1, n2].nominal_value is not None
+        if getattr(flows[n1, n2], attribute, None) is not None
     }
 
     return flow_param_dict
