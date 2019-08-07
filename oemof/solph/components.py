@@ -21,7 +21,7 @@ from oemof import network
 from oemof.solph import Transformer as solph_Transformer
 from oemof.solph import sequence as solph_sequence
 from oemof.solph import Investment
-from oemof.solph.plumbing import attribute_dict
+from oemof.solph.plumbing import node_param_dict
 
 
 class GenericStorage(network.Transformer):
@@ -311,26 +311,26 @@ class GenericStorageBlock(SimpleBlock):
         # Declare parameters
         self.nominal_capacity = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'nominal_capacity'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'nominal_capacity'))
         self.capacity_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'capacity_min'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'capacity_min'))
         self.capacity_max = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'capacity_max'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'capacity_max'))
         self.initial_capacity = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'initial_capacity'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'initial_capacity'))
         self.capacity_loss = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'capacity_loss'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'capacity_loss'))
         self.inflow_conversion_factor = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(
+            initialize=node_param_dict(
                 self.NODESTIMESTEPS, 'inflow_conversion_factor'))
         self.outflow_conversion_factor = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(
+            initialize=node_param_dict(
                 self.NODESTIMESTEPS, 'outflow_conversion_factor'))
 
         # Declare variables
@@ -880,35 +880,35 @@ class GenericCHPBlock(SimpleBlock):
         # Define parameters
         self.alpha1 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'alpha1'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'alpha1'))
         self.alpha2 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'alpha2'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'alpha2'))
         self.Beta = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'Beta'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'Beta'))
         self.P_max_woDH = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'P_max_woDH'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'P_max_woDH'))
         self.Eta_el_max_woDH = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'Eta_el_max_woDH'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'Eta_el_max_woDH'))
         self.P_min_woDH = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'P_min_woDH'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'P_min_woDH'))
         self.Eta_el_min_woDH = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'Eta_el_min_woDH'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'Eta_el_min_woDH'))
         self.H_L_FG_share_max = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'H_L_FG_share_max'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'H_L_FG_share_max'))
         self.Q_CW_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'Q_CW_min'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'Q_CW_min'))
         # the min flue gas share is set for combustion engines only
         self.H_L_FG_share_min = Param(
             self.NODESICE, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(
+            initialize=node_param_dict(
                 self.NODESICETIMESTEPS, 'H_L_FG_share_min'))
 
         # Define variables

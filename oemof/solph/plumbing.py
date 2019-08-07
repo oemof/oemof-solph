@@ -111,8 +111,8 @@ class _Sequence(UserList):
             return repeat(self.default, self.highest_index + 1)
 
 
-def attribute_dict(node_timestep_set=None, attribute=None):
-    """Create double indexed attribute dictionary.
+def node_param_dict(node_timestep_set=None, attribute=None):
+    """Create double indexed attribute dictionary for nodes.
 
     This is used to initialize (mutable) parameters over a two-dimensional
     set of nodes and timesteps. See `custom.GenericCAESBlock2` for usage.
@@ -133,10 +133,38 @@ def attribute_dict(node_timestep_set=None, attribute=None):
     --------
     >>> my_set =  [(n1, 1), (n1, 2), ... , (n2, 1), (n2, 2)] # doctest: +SKIP
     >>> my_attribute = 'cmp_P_inst' # doctest: +SKIP
-    >>> attribute_dict(my_set, my_attribute) # doctest: +SKIP
+    >>> node_param_dict(my_set, my_attribute) # doctest: +SKIP
     {(n, 1): 20, (n1, 2): 20, ... , (n2, 1): 47, (n2, 2): 11}
     """
-    attribute_dict = {(node, timestep):
-                      sequence(getattr(node, attribute))[timestep]
-                      for (node, timestep) in node_timestep_set}
-    return attribute_dict
+    node_param_dict = {((node, timestep)):
+                       sequence(getattr(node, attribute))[timestep]
+                       for (node, timestep) in node_timestep_set}
+    return node_param_dict
+
+
+def flow_param_dict(flow_timestep_set=None, flows=None, attribute=None):
+    """Create double indexed attribute dictionary for flows.
+
+    This is used to initialize (mutable) parameters over a three-dimensional
+    set of two flows and respective timesteps and works similarly as
+    `node_param_dict`.
+
+    Parameters
+    ----------
+    flow_timestep_set: set with tuples of flow nodes and timesteps (n1, n2, t)
+    flows: flow object container of `EnergySystem` class.
+
+    Examples
+    --------
+    >>> my_set = [(n1, n2, 1), (n1, n2, 2), ... , (n3, n4, 1), (n3, n4, 2)] # doctest: +SKIP
+    >>> my_attribute = 'nominal_value' # doctest: +SKIP
+    >>> flow_param_dict(my_set, es.flows, my_attribute) # doctest: +SKIP
+    {(n1, n2, 1): 20, (n1, n2, 2): 20, ... , (n3, n4, 1): 47, (n3, n4, 2): 11}
+    """
+    flow_param_dict = {
+        (n1, n2, t): flows[n1, n2].nominal_value
+        for n1, n2, t in flow_timestep_set
+        if flows[n1, n2].nominal_value is not None
+    }
+
+    return flow_param_dict

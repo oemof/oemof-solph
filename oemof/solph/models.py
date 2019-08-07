@@ -14,6 +14,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
+from oemof.solph.plumbing import flow_param_dict
 import logging
 
 
@@ -290,9 +291,18 @@ class Model(BaseModel):
                         hasattr(v, 'bidirectional')],
             ordered=True, dimen=2, within=self.FLOWS)
 
+        self.FLOWSTIMESTEPS = po.Set(
+            initialize=self.FLOWS*self.TIMESTEPS, ordered=True)
+
     def _add_parent_block_variables(self):
         """
         """
+        # Define parameters
+        self.nominal_value = po.Param(
+            self.FLOWS, self.TIMESTEPS, mutable=True,
+            initialize=flow_param_dict(
+                self.FLOWSTIMESTEPS, self.flows, 'nominal_value'))
+
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 

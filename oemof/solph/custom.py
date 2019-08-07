@@ -18,7 +18,7 @@ import logging
 
 from oemof.solph.network import Bus, Transformer
 from oemof.solph import sequence as solph_sequence
-from oemof.solph.plumbing import attribute_dict
+from oemof.solph.plumbing import node_param_dict
 
 
 class ElectricalBus(Bus):
@@ -415,79 +415,79 @@ class GenericCAESBlock2(SimpleBlock):
         # Declare parameters
         self.cas_C_st = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_C_st'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_C_st'))
         self.cas_Pi_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_min'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_Pi_min'))
         self.cas_Pi_o_max = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_o_max'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_Pi_o_max'))
         self.cas_Pi_o_0 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_Pi_o_0'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_Pi_o_0'))
         self.cas_v0 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_v0'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_v0'))
         self.cas_p0 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_p0'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_p0'))
         self.cas_R = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_R'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_R'))
         self.cas_T0 = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_T0'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_T0'))
         self.cas_T = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cas_T'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cas_T'))
         self.cmp_a = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_a'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_a'))
         self.cmp_b = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_b'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_b'))
         self.cmp_c = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_c'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_c'))
         self.cmp_d = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_d'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_d'))
         self.cmp_e = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_e'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_e'))
         self.cmp_eta = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_eta'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_eta'))
         self.cmp_P_inst = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_P_inst'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_P_inst'))
         self.cmp_P_max = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_P_max'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_P_max'))
         self.cmp_P_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'cmp_P_min'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'cmp_P_min'))
         self.exp_a = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_a'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_a'))
         self.exp_b = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_b'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_b'))
         self.exp_c = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_c'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_c'))
         self.exp_d = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_d'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_d'))
         self.exp_P_inst = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_inst'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_P_inst'))
         self.exp_P_max = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_max'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_P_max'))
         self.exp_P_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=attribute_dict(self.NODESTIMESTEPS, 'exp_P_min'))
+            initialize=node_param_dict(self.NODESTIMESTEPS, 'exp_P_min'))
 
         # Declare variables
         self.cmp_P = Var(self.NODES, m.TIMESTEPS)
