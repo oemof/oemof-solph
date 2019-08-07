@@ -333,15 +333,27 @@ class GenericStorageBlock(SimpleBlock):
             initialize=attribute_dict(
                 self.NODESTIMESTEPS, 'outflow_conversion_factor'))
 
-        def _storage_capacity_bound_rule(block, n, t):
-            """Rule definition for bounds of capacity variable of storage n
-            in timestep t
-            """
-            bounds = (n.nominal_capacity * n.capacity_min[t],
-                      n.nominal_capacity * n.capacity_max[t])
-            return bounds
-        self.capacity = Var(self.NODES, m.TIMESTEPS,
-                            bounds=_storage_capacity_bound_rule)
+        # Declare variables
+        self.capacity = Var(self.NODES, m.TIMESTEPS)
+
+        # Set bounds for decision variables
+        def capacity_lower_bound_rule(block, n, t):
+            """Rule definition for lower bounds of storage capacity."""
+            expr = 0
+            expr += self.capacity[n, t]
+            expr += -self.nominal_capacity[n, t] * self.capacity_min[n, t]
+            return expr >= 0
+        self.capacity_lower_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=capacity_lower_bound_rule)
+
+        def capacity_upper_bound_rule(block, n, t):
+            """Rule definition for upper bounds of storage capacity."""
+            expr = 0
+            expr += self.capacity[n, t]
+            expr += -self.nominal_capacity[n, t] * self.capacity_max[n, t]
+            return expr <= 0
+        self.capacity_upper_bound = Constraint(
+            self.NODES, m.TIMESTEPS, rule=capacity_upper_bound_rule)
 
         # set the initial capacity of the storage
         for n in group:
