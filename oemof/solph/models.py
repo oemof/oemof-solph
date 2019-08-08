@@ -281,15 +281,44 @@ class Model(BaseModel):
         self.FLOWS = po.Set(initialize=self.flows.keys(),
                             ordered=True, dimen=2)
 
-        self.BIDIRECTIONAL_FLOWS = po.Set(initialize=[
-            k for (k, v) in self.flows.items() if hasattr(v, 'bidirectional')],
-                                          ordered=True, dimen=2,
-                                          within=self.FLOWS)
+        self.BIDIRECTIONAL_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items()
+                        if hasattr(v, 'bidirectional')],
+            ordered=True, dimen=2, within=self.FLOWS)
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items() if not
                         hasattr(v, 'bidirectional')],
             ordered=True, dimen=2, within=self.FLOWS)
+
+        self.NOTNONE_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items()
+                        if getattr(v, 'nominal_value')
+                        is not None],
+            ordered=True, dimen=2)
+
+        self.PRE_OPTIMIZED_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items()
+                        if getattr(v, 'actual_value') is not None],
+            ordered=True, dimen=2)
+
+        self.FIXED_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items()
+                        if (getattr(v, 'actual_value') is not None and
+                            getattr(v, 'fixed', False))],
+            ordered=True, dimen=2)
+
+        self.NONCONVEX_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items()
+                        if getattr(v, 'nonconvex', False)],
+            ordered=True, dimen=2)
+
+        # Notnone flows: if self.flows[o, i].nominal_value is not None
+        # Pre-optimized flows: self.flows[o, i].actual_value[t] is not None
+        # Fixed flows:
+        # self.flows[o, i].actual_value[t] is not None
+        # if self.flows[o, i].fixed
+        # NonConvexFlow: self.flows[o, i].nonconvex
 
         self.FLOWSTIMESTEPS = po.Set(
             initialize=self.FLOWS*self.TIMESTEPS, ordered=True)
