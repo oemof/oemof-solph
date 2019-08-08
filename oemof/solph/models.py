@@ -293,8 +293,7 @@ class Model(BaseModel):
 
         self.NOTNONE_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if getattr(v, 'max', None)
-                        and getattr(v, 'max', None)],
+                        if getattr(v, 'nominal_value', None) is not None],
             ordered=True, dimen=2)
 
         self.PRE_OPTIMIZED_FLOWS = po.Set(
@@ -373,15 +372,6 @@ class Model(BaseModel):
                             self.flows[o, i].min[t] *
                             self.flows[o, i].nominal_value)
 
-        # # #print(self.nominal_value.pprint())
-        # print('###############################')
-        # print(self.max.pprint())
-        for (o, i) in self.NOTNONE_FLOWS:
-            print('NODE', o, i)
-            print('MAX', self.max[o, i, 0].value)
-            print('NV', self.nominal_value[o, i, 0].value)
-            print('######')
-
         # Set bounds NOTNONE_FLOWS
         def not_none_upper_bound_rule(block, o, i, t):
             """Rule definition for bounds of compression power."""
@@ -391,3 +381,20 @@ class Model(BaseModel):
             return expr <= 0
         self.notnone_upper_bound = po.Constraint(
             self.NOTNONE_FLOWS, self.TIMESTEPS, rule=not_none_upper_bound_rule)
+
+        # print('###############################')
+        # print(self.max.pprint())
+        import pprint
+        print('####################### NOTNONE_FLOWS (SET)')
+        nodes1 = {(o, i): [getattr(self.flows[(o, i)], 'max')[0],
+                           getattr(self.flows[(o, i)], 'nominal_value')]
+                  for (o, i) in self.NOTNONE_FLOWS}
+        pprint.pprint(nodes1)
+        print(len(nodes1))
+        print('####################### NOTNONE_FLOWS (LOOP)')
+        nodes2 = {(o, i): [getattr(self.flows[(o, i)], 'max')[0],
+                           getattr(self.flows[(o, i)], 'nominal_value')]
+                  for (o, i) in self.FLOWS
+                  if self.flows[o, i].nominal_value is not None}
+        pprint.pprint(nodes2)
+        print(len(nodes2))
