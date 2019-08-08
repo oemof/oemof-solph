@@ -293,8 +293,8 @@ class Model(BaseModel):
 
         self.NOTNONE_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if getattr(v, 'nominal_value')
-                        is not None],
+                        if getattr(v, 'max', None)
+                        and getattr(v, 'max', None)],
             ordered=True, dimen=2)
 
         self.PRE_OPTIMIZED_FLOWS = po.Set(
@@ -334,7 +334,7 @@ class Model(BaseModel):
         self.max = po.Param(
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
-                self.FLOWSTIMESTEPS, self.flows, 'max'))
+                self.FLOWSTIMESTEPS, self.flows, 'max', 1))
         self.min = po.Param(
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
@@ -348,9 +348,6 @@ class Model(BaseModel):
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 
-        # This should better be converted into constraints which are applied
-        # to subsets of flows!?
-
         # are other parameters depending on flow nominal values?
         # what about min/max?
         for (o, i) in self.FLOWS:
@@ -358,8 +355,8 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     self.flow[o, i, t].setlb(0)
                 if self.flows[o, i].nominal_value is not None:
-                    self.flow[o, i, t].setub(self.flows[o, i].max[t] *
-                                             self.flows[o, i].nominal_value)
+                    # self.flow[o, i, t].setub(self.flows[o, i].max[t] *
+                    #                          self.flows[o, i].nominal_value)
 
                     if self.flows[o, i].actual_value[t] is not None:
                         # pre- optimized value of flow variable
@@ -376,10 +373,21 @@ class Model(BaseModel):
                             self.flows[o, i].min[t] *
                             self.flows[o, i].nominal_value)
 
-        # UNIDIRECTIONAL_FLOWS: existiert schon
-        # All flows: if self.flows[o, i].nominal_value is not None
-        # Pre-optimized flows: self.flows[o, i].actual_value[t] is not None
-        # Fixed flows:
-        # self.flows[o, i].actual_value[t] is not None
-        # if self.flows[o, i].fixed
-        # NonConvexFlow: self.flows[o, i].nonconvex
+        # # #print(self.nominal_value.pprint())
+        # print('###############################')
+        # print(self.max.pprint())
+        for (o, i) in self.NOTNONE_FLOWS:
+            print('NODE', o, i)
+            print('MAX', self.max[o, i, 0].value)
+            print('NV', self.nominal_value[o, i, 0].value)
+            print('######')
+
+        # Set bounds NOTNONE_FLOWS
+        def not_none_upper_bound_rule(block, o, i, t):
+            """Rule definition for bounds of compression power."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            expr += -self.max[o, i, t] * self.nominal_value[o, i, t]
+            return expr <= 0
+        self.notnone_upper_bound = po.Constraint(
+            self.NOTNONE_FLOWS, self.TIMESTEPS, rule=not_none_upper_bound_rule)
