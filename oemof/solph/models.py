@@ -299,13 +299,13 @@ class Model(BaseModel):
         self.PRE_OPTIMIZED_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
                         if (getattr(v, 'nominal_value', None) is not None and
-                            hasattr(v, 'actual_value'))],
+                            sequence(getattr(v, 'actual_value'))[0] is not None)],
             ordered=True, dimen=2)
 
         self.FIXED_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
                         if (getattr(v, 'nominal_value', None) is not None and
-                            hasattr(v, 'actual_value') and
+                            sequence(getattr(v, 'actual_value'))[0] is not None and
                             getattr(v, 'fixed'))],
             ordered=True, dimen=2)
 
@@ -316,6 +316,9 @@ class Model(BaseModel):
 
         self.FLOWSTIMESTEPS = po.Set(
             initialize=self.FLOWS*self.TIMESTEPS, ordered=True)
+
+        self.PRE_OPTIMIZED_FLOWS_TIMESTEPS = po.Set(
+            initialize=self.PRE_OPTIMIZED_FLOWS*self.TIMESTEPS, ordered=True)
 
     def _add_parent_block_variables(self):
         """
@@ -334,13 +337,23 @@ class Model(BaseModel):
             initialize=flow_param_dict(
                 self.FLOWSTIMESTEPS, self.flows, 'min'))
         self.actual_value = po.Param(
-            self.FLOWS, self.TIMESTEPS, mutable=True,
+            self.PRE_OPTIMIZED_FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
-                self.FLOWSTIMESTEPS, self.flows, 'actual_value'))
+                self.PRE_OPTIMIZED_FLOWS_TIMESTEPS, self.flows,
+                'actual_value'))
+
+        import pprint
+        print('###############################')
+        pprint.pprint([f for f in self.PRE_OPTIMIZED_FLOWS])
+        print('###############################')
+        fp = flow_param_dict(
+            self.PRE_OPTIMIZED_FLOWS_TIMESTEPS, self.flows, 'actual_value')
+        pprint.pprint(fp)
+        print('###############################')
+        print(self.actual_value.pprint())
 
         # Define variables
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
-                           within=po.Reals)
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         # # are other parameters depending on flow nominal values?
         # # what about min/max?
@@ -388,12 +401,12 @@ class Model(BaseModel):
             self.NOTNONE_FLOWS, self.TIMESTEPS,
             rule=flows_not_none_upper_bound_rule)
 
-        # Set values PRE_OPTIMIZED_FLOWS
+        # Set values for PRE_OPTIMIZED_FLOWS
         def flows_pre_optimized_value_rule(block, o, i, t):
-            """Rule definition for value of PRE_OPTIMIZED_FLOWS."""
+            """Rule definition for value of FIXED_FLOWS."""
             expr = 0
             expr += self.flow[o, i, t]
-            expr += -(self.actual_value[o, i, t] * self.nominal_value[o, i, t])
+            expr += -self.actual_value[o, i, t] * self.nominal_value[o, i, t]
             return expr == 0
         self.flows_pre_optimized_value = po.Constraint(
             self.PRE_OPTIMIZED_FLOWS, self.TIMESTEPS,
@@ -420,13 +433,6 @@ class Model(BaseModel):
         self.flows_nonconvex_lower_bound = po.Constraint(
             self.NONCONVEX_FLOWS, self.TIMESTEPS,
             rule=flows_nonconvex_lower_bound_rule)
-        #
-        print('###############################')
-        import pprint
-        fp = flow_param_dict(self.FLOWSTIMESTEPS, self.flows, 'actual_value')
-        pprint.pprint(fp)
-        #print(self.actual_value.pprint())
-
 
         # import pprint
         # print('####################### NOTNONE_FLOWS (SET)')

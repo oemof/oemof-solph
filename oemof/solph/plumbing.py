@@ -11,6 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from collections import abc, UserList
 from itertools import repeat
+from pyomo.environ import Set
 
 
 def sequence(sequence_or_scalar):
@@ -143,26 +144,7 @@ def node_param_dict(node_timestep_set=None, attribute=None):
 
 
 def flow_param_dict(flow_timestep_set=None, flows=None, attribute=None):
-    """Create double indexed attribute dictionary for flows.
-
-    This is used to initialize (mutable) parameters over a three-dimensional
-    set of two flows and respective timesteps and works similarly as
-    `node_param_dict`.
-
-    Parameters
-    ----------
-    flow_timestep_set: set with tuples of flow nodes and timesteps (n1, n2, t)
-    flows: flow object container of `EnergySystem` class
-    attribute: string with node attribute name
-    attribute_default: default value for attribute if not set
-
-    Examples
-    --------
-    >>> my_set = [(n1, n2, 1), (n1, n2, 2), ... , (n3, n4, 1), (n3, n4, 2)] # doctest: +SKIP
-    >>> my_attribute = 'nominal_value' # doctest: +SKIP
-    >>> flow_param_dict(my_set, es.flows, my_attribute) # doctest: +SKIP
-    {(n1, n2, 1): 20, (n1, n2, 2): 20, ... , (n3, n4, 1): 47, (n3, n4, 2): 11}
-    """
+    """Create double indexed attribute dictionary for flows."""
     flow_param_dict = {
         (n1, n2, t): sequence(getattr(flows[n1, n2], attribute))[t]
         for n1, n2, t in flow_timestep_set
