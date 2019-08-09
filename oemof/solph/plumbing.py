@@ -168,7 +168,7 @@ def flow_param_dict(flow_timestep_set=None, flows=None,
         (n1, n2, t): (
             sequence(getattr(flows[n1, n2], attribute))[t] if
             getattr(flows[n1, n2], attribute) else
-            sequence(getattr(flows[n1, n2], attribute, attribute_default))[t]
+            sequence(attribute_default)[t]
         )
         for n1, n2, t in flow_timestep_set
     }
