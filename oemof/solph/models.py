@@ -293,18 +293,18 @@ class Model(BaseModel):
 
         self.NOTNONE_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if hasattr(v, 'nominal_value')],
+                        if getattr(v, 'nominal_value', None) is not None],
             ordered=True, dimen=2)
 
         self.PRE_OPTIMIZED_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if (hasattr(v, 'nominal_value') and
+                        if (getattr(v, 'nominal_value', None) is not None and
                             hasattr(v, 'actual_value'))],
             ordered=True, dimen=2)
 
         self.FIXED_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if (hasattr(v, 'nominal_value') and
+                        if (getattr(v, 'nominal_value', None) is not None and
                             hasattr(v, 'actual_value') and
                             getattr(v, 'fixed'))],
             ordered=True, dimen=2)
@@ -324,105 +324,110 @@ class Model(BaseModel):
         self.nominal_value = po.Param(
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
-                self.FLOWSTIMESTEPS, self.flows, 'nominal_value', 4711))
+                self.FLOWSTIMESTEPS, self.flows, 'nominal_value'))
         self.max = po.Param(
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
-                self.FLOWSTIMESTEPS, self.flows, 'max', 1))
+                self.FLOWSTIMESTEPS, self.flows, 'max'))
         self.min = po.Param(
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
-                self.FLOWSTIMESTEPS, self.flows, 'min', 0))
+                self.FLOWSTIMESTEPS, self.flows, 'min'))
         self.actual_value = po.Param(
             self.FLOWS, self.TIMESTEPS, mutable=True,
             initialize=flow_param_dict(
-                self.FLOWSTIMESTEPS, self.flows, 'actual_value', 1))
+                self.FLOWSTIMESTEPS, self.flows, 'actual_value'))
 
         # Define variables
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
                            within=po.Reals)
 
-        # are other parameters depending on flow nominal values?
-        # what about min/max?
-        for (o, i) in self.FLOWS:
-            for t in self.TIMESTEPS:
-                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    self.flow[o, i, t].setlb(0)
-                if self.flows[o, i].nominal_value is not None:
-                    self.flow[o, i, t].setub(self.flows[o, i].max[t] *
-                                             self.flows[o, i].nominal_value)
-                    if self.flows[o, i].actual_value[t] is not None:
-                        # pre- optimized value of flow variable
-                        self.flow[o, i, t].value = (
-                            self.flows[o, i].actual_value[t] *
-                            self.flows[o, i].nominal_value)
-
-                        # fix variable if flow is fixed
-                        if self.flows[o, i].fixed:
-                            self.flow[o, i, t].fix()
-
-                    if not self.flows[o, i].nonconvex:
-                        # lower bound of flow variable
-                        self.flow[o, i, t].setlb(
-                            self.flows[o, i].min[t] *
-                            self.flows[o, i].nominal_value)
-
-        # # Set lower bound for UNIDIRECTIONAL_FLOWS
-        # def flows_unidirectional_lower_bound_rule(block, o, i, t):
-        #     """Rule definition for bounds of NOTNONE_FLOWS."""
-        #     expr = 0
-        #     expr += self.flow[o, i, t]
-        #     return expr >= 0
-        # self.flows_unidirectional_lower_bound = po.Constraint(
-        #     self.UNIDIRECTIONAL_FLOWS, self.TIMESTEPS,
-        #     rule=flows_unidirectional_lower_bound_rule)
+        # # are other parameters depending on flow nominal values?
+        # # what about min/max?
+        # for (o, i) in self.FLOWS:
+        #     for t in self.TIMESTEPS:
+        #         if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+        #             self.flow[o, i, t].setlb(0)
+        #         if self.flows[o, i].nominal_value is not None:
+        #             self.flow[o, i, t].setub(self.flows[o, i].max[t] *
+        #                                      self.flows[o, i].nominal_value)
+        #             if self.flows[o, i].actual_value[t] is not None:
+        #                 # pre- optimized value of flow variable
+        #                 self.flow[o, i, t].value = (
+        #                     self.flows[o, i].actual_value[t] *
+        #                     self.flows[o, i].nominal_value)
         #
-        # # Set bounds NOTNONE_FLOWS
-        # def flows_not_none_upper_bound_rule(block, o, i, t):
-        #     """Rule definition for bounds of NOTNONE_FLOWS."""
-        #     expr = 0
-        #     expr += self.flow[o, i, t]
-        #     expr += -self.max[o, i, t] * self.nominal_value[o, i, t]
-        #     return expr <= 0
-        # self.flows_notnone_upper_bound = po.Constraint(
-        #     self.NOTNONE_FLOWS, self.TIMESTEPS,
-        #     rule=flows_not_none_upper_bound_rule)
+        #                 # fix variable if flow is fixed
+        #                 if self.flows[o, i].fixed:
+        #                     self.flow[o, i, t].fix()
         #
-        # # Set values PRE_OPTIMIZED_FLOWS
-        # def flows_pre_optimized_value_rule(block, o, i, t):
-        #     """Rule definition for value of PRE_OPTIMIZED_FLOWS."""
-        #     expr = 0
-        #     expr += self.flow[o, i, t]
-        #     expr += -(self.actual_value[o, i, t] * self.nominal_value[o, i, t])
-        #     return expr == 0
-        # self.flows_pre_optimized_value = po.Constraint(
-        #     self.PRE_OPTIMIZED_FLOWS, self.TIMESTEPS,
-        #     rule=flows_pre_optimized_value_rule)
-        #
-        # # Set values FIXED_FLOWS
-        # def flows_fixed_value_rule(block, o, i, t):
-        #     """Rule definition for value of FIXED_FLOWS."""
-        #     expr = 0
-        #     expr += self.flow[o, i, t]
-        #     expr += -self.actual_value[o, i, t] * self.nominal_value[o, i, t]
-        #     return expr == 0
-        # self.flows_fixed_value = po.Constraint(
-        #     self.FIXED_FLOWS, self.TIMESTEPS,
-        #     rule=flows_fixed_value_rule)
-        #
-        # # Set lower bound for UNIDIRECTIONAL_FLOWS
-        # def flows_nonconvex_lower_bound_rule(block, o, i, t):
-        #     """Rule definition for bounds of NONCONVEX_FLOWS."""
-        #     expr = 0
-        #     expr += self.flow[o, i, t]
-        #     expr += -self.min[o, i, t] * self.nominal_value[o, i, t]
-        #     return expr >= 0
-        # self.flows_nonconvex_lower_bound = po.Constraint(
-        #     self.NONCONVEX_FLOWS, self.TIMESTEPS,
-        #     rule=flows_nonconvex_lower_bound_rule)
+        #             if not self.flows[o, i].nonconvex:
+        #                 # lower bound of flow variable
+        #                 self.flow[o, i, t].setlb(
+        #                     self.flows[o, i].min[t] *
+        #                     self.flows[o, i].nominal_value)
 
-        # print('###############################')
-        # print(self.max.pprint())
+        # Set lower bound for UNIDIRECTIONAL_FLOWS
+        def flows_unidirectional_lower_bound_rule(block, o, i, t):
+            """Rule definition for bounds of NOTNONE_FLOWS."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            return expr >= 0
+        self.flows_unidirectional_lower_bound = po.Constraint(
+            self.UNIDIRECTIONAL_FLOWS, self.TIMESTEPS,
+            rule=flows_unidirectional_lower_bound_rule)
+
+        # Set bounds NOTNONE_FLOWS
+        def flows_not_none_upper_bound_rule(block, o, i, t):
+            """Rule definition for bounds of NOTNONE_FLOWS."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            expr += -self.max[o, i, t] * self.nominal_value[o, i, t]
+            return expr <= 0
+        self.flows_notnone_upper_bound = po.Constraint(
+            self.NOTNONE_FLOWS, self.TIMESTEPS,
+            rule=flows_not_none_upper_bound_rule)
+
+        # Set values PRE_OPTIMIZED_FLOWS
+        def flows_pre_optimized_value_rule(block, o, i, t):
+            """Rule definition for value of PRE_OPTIMIZED_FLOWS."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            expr += -(self.actual_value[o, i, t] * self.nominal_value[o, i, t])
+            return expr == 0
+        self.flows_pre_optimized_value = po.Constraint(
+            self.PRE_OPTIMIZED_FLOWS, self.TIMESTEPS,
+            rule=flows_pre_optimized_value_rule)
+
+        # Set values FIXED_FLOWS
+        def flows_fixed_value_rule(block, o, i, t):
+            """Rule definition for value of FIXED_FLOWS."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            expr += -self.actual_value[o, i, t] * self.nominal_value[o, i, t]
+            return expr == 0
+        self.flows_fixed_value = po.Constraint(
+            self.FIXED_FLOWS, self.TIMESTEPS,
+            rule=flows_fixed_value_rule)
+
+        # Set lower bound for UNIDIRECTIONAL_FLOWS
+        def flows_nonconvex_lower_bound_rule(block, o, i, t):
+            """Rule definition for bounds of NONCONVEX_FLOWS."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            expr += -self.min[o, i, t] * self.nominal_value[o, i, t]
+            return expr >= 0
+        self.flows_nonconvex_lower_bound = po.Constraint(
+            self.NONCONVEX_FLOWS, self.TIMESTEPS,
+            rule=flows_nonconvex_lower_bound_rule)
+        #
+        print('###############################')
+        import pprint
+        fp = flow_param_dict(self.FLOWSTIMESTEPS, self.flows, 'actual_value')
+        pprint.pprint(fp)
+        #print(self.actual_value.pprint())
+
+
         # import pprint
         # print('####################### NOTNONE_FLOWS (SET)')
         # nodes1 = {(o, i): [getattr(self.flows[(o, i)], 'max')[0],

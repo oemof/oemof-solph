@@ -142,8 +142,7 @@ def node_param_dict(node_timestep_set=None, attribute=None):
     return node_param_dict
 
 
-def flow_param_dict(flow_timestep_set=None, flows=None,
-                    attribute=None, attribute_default=None):
+def flow_param_dict(flow_timestep_set=None, flows=None, attribute=None):
     """Create double indexed attribute dictionary for flows.
 
     This is used to initialize (mutable) parameters over a three-dimensional
@@ -165,12 +164,9 @@ def flow_param_dict(flow_timestep_set=None, flows=None,
     {(n1, n2, 1): 20, (n1, n2, 2): 20, ... , (n3, n4, 1): 47, (n3, n4, 2): 11}
     """
     flow_param_dict = {
-        (n1, n2, t): (
-            sequence(getattr(flows[n1, n2], attribute))[t] if
-            getattr(flows[n1, n2], attribute) else
-            sequence(attribute_default)[t]
-        )
+        (n1, n2, t): sequence(getattr(flows[n1, n2], attribute))[t]
         for n1, n2, t in flow_timestep_set
+        if sequence(getattr(flows[n1, n2], attribute))[t] is not None
     }
 
     return flow_param_dict
