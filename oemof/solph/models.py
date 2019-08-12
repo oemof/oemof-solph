@@ -293,25 +293,28 @@ class Model(BaseModel):
 
         self.NOTNONE_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if getattr(v, 'nominal_value', None) is not None],
+                        if (getattr(v, 'nominal_value', None) is not None and
+                            sequence(getattr(v, 'actual_value'))[0] is None)],
             ordered=True, dimen=2)
 
         self.PRE_OPTIMIZED_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
                         if (getattr(v, 'nominal_value', None) is not None and
-                            sequence(getattr(v, 'actual_value'))[0] is not None)],
+                            sequence(getattr(v, 'actual_value'))[0]
+                            is not None)],
             ordered=True, dimen=2)
 
         self.FIXED_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
                         if (getattr(v, 'nominal_value', None) is not None and
-                            sequence(getattr(v, 'actual_value'))[0] is not None and
-                            getattr(v, 'fixed'))],
+                            sequence(getattr(v, 'actual_value'))[0]
+                            is not None and
+                            getattr(v, 'fixed') is True)],
             ordered=True, dimen=2)
 
-        self.NONCONVEX_FLOWS = po.Set(
+        self.NOTNONCONVEX_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items()
-                        if getattr(v, 'nonconvex', False)],
+                        if getattr(v, 'nonconvex', False) is False],
             ordered=True, dimen=2)
 
         self.FLOWSTIMESTEPS = po.Set(
@@ -342,43 +345,8 @@ class Model(BaseModel):
                 self.PRE_OPTIMIZED_FLOWS_TIMESTEPS, self.flows,
                 'actual_value'))
 
-        import pprint
-        print('###############################')
-        pprint.pprint([f for f in self.PRE_OPTIMIZED_FLOWS])
-        print('###############################')
-        fp = flow_param_dict(
-            self.PRE_OPTIMIZED_FLOWS_TIMESTEPS, self.flows, 'actual_value')
-        pprint.pprint(fp)
-        print('###############################')
-        print(self.actual_value.pprint())
-
         # Define variables
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
-
-        # # are other parameters depending on flow nominal values?
-        # # what about min/max?
-        # for (o, i) in self.FLOWS:
-        #     for t in self.TIMESTEPS:
-        #         if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-        #             self.flow[o, i, t].setlb(0)
-        #         if self.flows[o, i].nominal_value is not None:
-        #             self.flow[o, i, t].setub(self.flows[o, i].max[t] *
-        #                                      self.flows[o, i].nominal_value)
-        #             if self.flows[o, i].actual_value[t] is not None:
-        #                 # pre- optimized value of flow variable
-        #                 self.flow[o, i, t].value = (
-        #                     self.flows[o, i].actual_value[t] *
-        #                     self.flows[o, i].nominal_value)
-        #
-        #                 # fix variable if flow is fixed
-        #                 if self.flows[o, i].fixed:
-        #                     self.flow[o, i, t].fix()
-        #
-        #             if not self.flows[o, i].nonconvex:
-        #                 # lower bound of flow variable
-        #                 self.flow[o, i, t].setlb(
-        #                     self.flows[o, i].min[t] *
-        #                     self.flows[o, i].nominal_value)
 
         # Set lower bound for UNIDIRECTIONAL_FLOWS
         def flows_unidirectional_lower_bound_rule(block, o, i, t):
@@ -407,7 +375,7 @@ class Model(BaseModel):
             expr = 0
             expr += self.flow[o, i, t]
             expr += -self.actual_value[o, i, t] * self.nominal_value[o, i, t]
-            return expr == 0
+            return expr <= 0
         self.flows_pre_optimized_value = po.Constraint(
             self.PRE_OPTIMIZED_FLOWS, self.TIMESTEPS,
             rule=flows_pre_optimized_value_rule)
@@ -424,27 +392,12 @@ class Model(BaseModel):
             rule=flows_fixed_value_rule)
 
         # Set lower bound for UNIDIRECTIONAL_FLOWS
-        def flows_nonconvex_lower_bound_rule(block, o, i, t):
+        def flows_notnonconvex_lower_bound_rule(block, o, i, t):
             """Rule definition for bounds of NONCONVEX_FLOWS."""
             expr = 0
             expr += self.flow[o, i, t]
             expr += -self.min[o, i, t] * self.nominal_value[o, i, t]
             return expr >= 0
-        self.flows_nonconvex_lower_bound = po.Constraint(
-            self.NONCONVEX_FLOWS, self.TIMESTEPS,
-            rule=flows_nonconvex_lower_bound_rule)
-
-        # import pprint
-        # print('####################### NOTNONE_FLOWS (SET)')
-        # nodes1 = {(o, i): [getattr(self.flows[(o, i)], 'max')[0],
-        #                    getattr(self.flows[(o, i)], 'nominal_value')]
-        #           for (o, i) in self.NOTNONE_FLOWS}
-        # pprint.pprint(nodes1)
-        # print(len(nodes1))
-        # print('####################### NOTNONE_FLOWS (LOOP)')
-        # nodes2 = {(o, i): [getattr(self.flows[(o, i)], 'max')[0],
-        #                    getattr(self.flows[(o, i)], 'nominal_value')]
-        #           for (o, i) in self.FLOWS
-        #           if self.flows[o, i].nominal_value is not None}
-        # pprint.pprint(nodes2)
-        # print(len(nodes2))
+        self.flows_notnonconvex_lower_bound = po.Constraint(
+            self.NOTNONCONVEX_FLOWS, self.TIMESTEPS,
+            rule=flows_notnonconvex_lower_bound_rule)
