@@ -112,7 +112,8 @@ class _Sequence(UserList):
             return repeat(self.default, self.highest_index + 1)
 
 
-def node_param_dict(node_timestep_set=None, attribute=None):
+def node_param_dict(node_timestep_set=None, attribute=None,
+                    attribute_index=None):
     """Create double indexed attribute dictionary for nodes.
 
     This is used to initialize (mutable) parameters over a two-dimensional
@@ -137,9 +138,16 @@ def node_param_dict(node_timestep_set=None, attribute=None):
     >>> node_param_dict(my_set, my_attribute) # doctest: +SKIP
     {(n, 1): 20, (n1, 2): 20, ... , (n2, 1): 47, (n2, 2): 11}
     """
-    node_param_dict = {((node, timestep)):
-                       sequence(getattr(node, attribute))[timestep]
-                       for (node, timestep) in node_timestep_set}
+    if attribute_index is not None:
+        node_param_dict = {((node, timestep)):
+                           sequence(getattr(
+                                node, attribute)[attribute_index])[timestep]
+                           for (node, timestep) in node_timestep_set}
+    else:
+        node_param_dict = {((node, timestep)):
+                           sequence(getattr(node, attribute))[timestep]
+                           for (node, timestep) in node_timestep_set}
+
     return node_param_dict
 
 
