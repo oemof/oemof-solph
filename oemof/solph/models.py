@@ -348,6 +348,31 @@ class Model(BaseModel):
         # Define variables
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
+        # # # are other parameters depending on flow nominal values?
+        # # what about min/max?
+        # for (o, i) in self.FLOWS:
+        #     for t in self.TIMESTEPS:
+        #         if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+        #             self.flow[o, i, t].setlb(0)
+        #         if self.flows[o, i].nominal_value is not None:
+        #             self.flow[o, i, t].setub(self.flows[o, i].max[t] *
+        #                                      self.flows[o, i].nominal_value)
+        #             if self.flows[o, i].actual_value[t] is not None:
+        #                 # pre- optimized value of flow variable
+        #                 self.flow[o, i, t].value = (
+        #                     self.flows[o, i].actual_value[t] *
+        #                     self.flows[o, i].nominal_value)
+        #
+        #                 # fix variable if flow is fixed
+        #                 if self.flows[o, i].fixed:
+        #                     self.flow[o, i, t].fix()
+        #
+        #             if not self.flows[o, i].nonconvex:
+        #                 # lower bound of flow variable
+        #                 self.flow[o, i, t].setlb(
+        #                     self.flows[o, i].min[t] *
+        #                     self.flows[o, i].nominal_value)
+
         # Set lower bound for UNIDIRECTIONAL_FLOWS
         def flows_unidirectional_lower_bound_rule(block, o, i, t):
             """Rule definition for bounds of NOTNONE_FLOWS."""

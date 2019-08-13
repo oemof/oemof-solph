@@ -729,7 +729,7 @@ class NonConvexFlow(SimpleBlock):
             """Rule definition for MILP minimum flow constraints.
             """
             expr = (self.status[i, o, t] *
-                    m.flows[i, o].min[t] * m.flows[i, o].nominal_value <=
+                    m.min[i, o, t] * m.nominal_value[i, o, t] <=
                     m.flow[i, o, t])
             return expr
         self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
@@ -739,7 +739,7 @@ class NonConvexFlow(SimpleBlock):
             """Rule definition for MILP maximum flow constraints.
             """
             expr = (self.status[i, o, t] *
-                    m.flows[i, o].max[t] * m.flows[i, o].nominal_value >=
+                    m.max[i, o, t] * m.nominal_value[i, o, t] >=
                     m.flow[i, o, t])
             return expr
         self.max = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
