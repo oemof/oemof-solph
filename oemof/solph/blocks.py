@@ -11,7 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
-                        NonNegativeReals, Binary, NonNegativeIntegers)
+                        NonNegativeReals, Binary, NonNegativeIntegers, Param)
 from pyomo.core.base.block import SimpleBlock
 
 
