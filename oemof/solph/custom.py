@@ -1154,21 +1154,22 @@ class OffsetTransformerBlock(SimpleBlock):
             initialize=self.NODES*m.TIMESTEPS, ordered=True)
 
         # Declare parameters
+        self.m = Param(
+            self.NODES, m.TIMESTEPS, mutable=True,
+            initialize=node_param_dict(
+                self.NODESTIMESTEPS, 'coefficients', 1))
         self.b = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=node_param_dict(
                 self.NODESTIMESTEPS, 'coefficients', 0))
 
-        print(self.b.pprint())
-
         def _relation_rule(block, n, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += - m.flow[n, list(n.outputs.keys())[0], t]
-            expr += m.flow[list(n.inputs.keys())[0], n, t] * \
-                n.coefficients[1][t]
-            expr += m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t] * \
-                n.coefficients[0][t]
+            expr += -m.flow[n, list(n.outputs.keys())[0], t]
+            expr += m.flow[list(n.inputs.keys())[0], n, t] * self.m[n, t]
+            expr += (m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t] *
+                     self.b[n, t])
             return expr == 0
         self.relation = Constraint(self.NODES, m.TIMESTEPS,
                                    rule=_relation_rule)
