@@ -630,15 +630,21 @@ class GenericCAESBlock2(SimpleBlock):
 
         def cas_pi_tmin_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
-            return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
-                   self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
+            if t == min(m.TIMESTEPS):
+                return(self.cas_Pi_o[n, min(m.TIMESTEPS)] ==
+                       self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
+            else:
+                return Constraint.Skip
         self.cas_pi_tmin_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=cas_pi_tmin_rule)
 
         def cas_pi_tmax_rule(block, n, t):
             """Cavern level in first and last timestep are set equal."""
-            return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
-                   self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
+            if t == max(m.TIMESTEPS):
+                return(self.cas_Pi_o[n, max(m.TIMESTEPS)] ==
+                       self.cas_Pi_o_0[n, t] * self.cas_Pi_o_max[n, t])
+            else:
+                return Constraint.Skip
         self.cas_pi_tmax_constr = Constraint(
             self.NODES, m.TIMESTEPS, rule=cas_pi_tmax_rule)
 

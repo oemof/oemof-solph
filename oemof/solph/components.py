@@ -311,7 +311,8 @@ class GenericStorageBlock(SimpleBlock):
         # Declare parameters
         self.nominal_capacity = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=node_param_dict(self.NODESTIMESTEPS, 'nominal_capacity'))
+            initialize=node_param_dict(
+                self.NODESTIMESTEPS, 'nominal_capacity'))
         self.capacity_min = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=node_param_dict(self.NODESTIMESTEPS, 'capacity_min'))
@@ -320,7 +321,8 @@ class GenericStorageBlock(SimpleBlock):
             initialize=node_param_dict(self.NODESTIMESTEPS, 'capacity_max'))
         self.initial_capacity = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
-            initialize=node_param_dict(self.NODESTIMESTEPS, 'initial_capacity'))
+            initialize=node_param_dict(
+                self.NODESTIMESTEPS, 'initial_capacity'))
         self.capacity_loss = Param(
             self.NODES, m.TIMESTEPS, mutable=True,
             initialize=node_param_dict(self.NODESTIMESTEPS, 'capacity_loss'))
@@ -355,34 +357,57 @@ class GenericStorageBlock(SimpleBlock):
         self.capacity_upper_bound = Constraint(
             self.NODES, m.TIMESTEPS, rule=capacity_upper_bound_rule)
 
-        # Set the initial and end capacity of the storage
-        for n in group:
-            if n.initial_capacity is not None:
-                # first timestep (initial)
-                self.capacity[n, m.TIMESTEPS[1]] = (
-                    self.initial_capacity[n, 0].value *
-                    self.nominal_capacity[n, 0].value)
-                self.capacity[n, m.TIMESTEPS[1]].fix()
-                # last timestep (end)
-                self.capacity[n, m.TIMESTEPS[-1]] = (
-                    self.initial_capacity[n, 0].value *
-                    self.nominal_capacity[n, 0].value)
-                self.capacity[n, m.TIMESTEPS[-1]].fix()
-
-        # Define storage balance constraint
+        # Define storage balance constraints
         def _storage_balance_rule(block, n, t):
-            """Rule definition for the storage balance of every storage."""
-            expr = 0
-            expr += self.capacity[n, t]
-            expr += - self.capacity[n, m.previous_timesteps[t]] * (
-                1 - self.capacity_loss[n, t])
-            expr += (- m.flow[i[n], n, t] *
-                     self.inflow_conversion_factor[n, t]) * m.timeincrement[t]
-            expr += (m.flow[n, o[n], t] /
-                     self.outflow_conversion_factor[n, t]) * m.timeincrement[t]
-            return expr == 0
+            """Rule definition for the storage balance of every storage.
+
+            Holds for all timesteps but the first in order to deal with
+            initial and final filling levels.
+            """
+            if t > min(m.TIMESTEPS):
+                expr = 0
+                expr += self.capacity[n, t]
+                expr += -(self.capacity[n, m.previous_timesteps[t]] * (
+                          1 - self.capacity_loss[n, t]))
+                expr += ((- m.flow[i[n], n, t] *
+                         self.inflow_conversion_factor[n, t]) *
+                         m.timeincrement[t])
+                expr += ((m.flow[n, o[n], t] /
+                         self.outflow_conversion_factor[n, t]) *
+                         m.timeincrement[t])
+                return expr == 0
+            else:
+                return Constraint.Skip
         self.balance = Constraint(self.NODES, m.TIMESTEPS,
                                   rule=_storage_balance_rule)
+
+        def _storage_balance_tmin_rule(block, n, t):
+            """Rule definition for the storage balance of every storage.
+
+            Set storage level in first and last timestep equal.
+            """
+            if t == min(m.TIMESTEPS):
+                return(self.capacity[n, min(m.TIMESTEPS)] ==
+                       self.initial_capacity[n, 0] *
+                       self.nominal_capacity[n, 0])
+            else:
+                return Constraint.Skip
+        self.storage_balance_tmin_constr = Constraint(
+            self.NODES, m.TIMESTEPS, rule=_storage_balance_tmin_rule)
+
+        def _storage_balance_tmax_rule(block, n, t):
+            """Rule definition for the storage balance of every storage.
+
+            Set storage level in first and last timestep equal.
+            """
+            if t == max(m.TIMESTEPS):
+                return(self.capacity[n, max(m.TIMESTEPS)] ==
+                       self.initial_capacity[n, 0] *
+                       self.nominal_capacity[n, 0])
+            else:
+                return Constraint.Skip
+        self.storage_balance_tmax_constr = Constraint(
+            self.NODES, m.TIMESTEPS, rule=_storage_balance_tmax_rule)
 
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
