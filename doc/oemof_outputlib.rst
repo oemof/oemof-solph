@@ -52,9 +52,8 @@ sections.
 
 General approach
 ----------------
-As stated above after processing you will get a dictionary with all result
-data. At the first try, the keys of the dictionary might seem to have rather
-complex structure, but very useful as well.
+As stated above, after processing you will get a dictionary with all result
+data.
 If you want to access your results directly via labels, you
 can continue with :ref:`oplref3`. For a systematic analysis list comprehensions
 are the easiest way of filtering and analysing your results.
@@ -118,7 +117,7 @@ Easy access
 
 The outputlib provides some functions which will help you to access your
 results directly via labels, which is helpful especially for small energy
-system.
+systems.
 So, if you want to address objects by their label, you can convert the results
 dictionary such that the keys are changed to strings given by the labels:
 
