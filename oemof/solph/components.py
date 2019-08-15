@@ -784,22 +784,22 @@ class GenericCHP(network.Transformer):
 
         # @TODO: check if params such as fuel input are passed directly
         # realign attributes which are mapped onto flows
-        self.P_max_woDH = list(
-            self.electrical_output.values())[0].P_max_woDH
-        self.Eta_el_max_woDH = list(
-            self.electrical_output.values())[0].Eta_el_max_woDH
-        self.P_min_woDH = list(
-            self.electrical_output.values())[0].P_min_woDH
-        self.Eta_el_min_woDH = list(
-            self.electrical_output.values())[0].Eta_el_min_woDH
-        self.H_L_FG_share_max = list(
-            self.fuel_input.values())[0].H_L_FG_share_max
-        self.Q_CW_min = list(
-            self.heat_output.values())[0].Q_CW_min
+        self.P_max_woDH = solph_sequence(list(
+            self.electrical_output.values())[0].P_max_woDH)
+        self.Eta_el_max_woDH = solph_sequence(list(
+            self.electrical_output.values())[0].Eta_el_max_woDH)
+        self.P_min_woDH = solph_sequence(list(
+            self.electrical_output.values())[0].P_min_woDH)
+        self.Eta_el_min_woDH = solph_sequence(list(
+            self.electrical_output.values())[0].Eta_el_min_woDH)
+        self.H_L_FG_share_max = solph_sequence(list(
+            self.fuel_input.values())[0].H_L_FG_share_max)
+        self.Q_CW_min = solph_sequence(list(
+            self.heat_output.values())[0].Q_CW_min)
         # the min flue gas share is set for combustion engines only
         if hasattr(list(self.fuel_input.values())[0], 'H_L_FG_share_min'):
-            self.H_L_FG_share_min = list(
-                self.fuel_input.values())[0].H_L_FG_share_min
+            self.H_L_FG_share_min = solph_sequence(list(
+                self.fuel_input.values())[0].H_L_FG_share_min)
 
     def _calculate_alphas(self):
         """
@@ -845,14 +845,14 @@ class GenericCHP(network.Transformer):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-        return self._alphas[0]
+        return solph_sequence(self._alphas[0])
 
     @property
     def alpha2(self):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-        return self._alphas[1]
+        return solph_sequence(self._alphas[1])
 
     def constraint_group(self):
         return GenericCHPBlock
