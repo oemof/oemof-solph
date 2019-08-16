@@ -784,22 +784,22 @@ class GenericCHP(network.Transformer):
 
         # @TODO: check if params such as fuel input are passed directly
         # realign attributes which are mapped onto flows
-        self.P_max_woDH = solph_sequence(list(
-            self.electrical_output.values())[0].P_max_woDH)
-        self.Eta_el_max_woDH = solph_sequence(list(
-            self.electrical_output.values())[0].Eta_el_max_woDH)
-        self.P_min_woDH = solph_sequence(list(
-            self.electrical_output.values())[0].P_min_woDH)
-        self.Eta_el_min_woDH = solph_sequence(list(
-            self.electrical_output.values())[0].Eta_el_min_woDH)
-        self.H_L_FG_share_max = solph_sequence(list(
-            self.fuel_input.values())[0].H_L_FG_share_max)
-        self.Q_CW_min = solph_sequence(list(
-            self.heat_output.values())[0].Q_CW_min)
+        self.P_max_woDH = list(
+            self.electrical_output.values())[0].P_max_woDH
+        self.Eta_el_max_woDH = list(
+            self.electrical_output.values())[0].Eta_el_max_woDH
+        self.P_min_woDH = list(
+            self.electrical_output.values())[0].P_min_woDH
+        self.Eta_el_min_woDH = list(
+            self.electrical_output.values())[0].Eta_el_min_woDH
+        self.H_L_FG_share_max = list(
+            self.fuel_input.values())[0].H_L_FG_share_max
+        self.Q_CW_min = list(
+            self.heat_output.values())[0].Q_CW_min
         # the min flue gas share is set for combustion engines only
         if hasattr(list(self.fuel_input.values())[0], 'H_L_FG_share_min'):
-            self.H_L_FG_share_min = solph_sequence(list(
-                self.fuel_input.values())[0].H_L_FG_share_min)
+            self.H_L_FG_share_min = list(
+                self.fuel_input.values())[0].H_L_FG_share_min
 
     def _calculate_alphas(self):
         """
@@ -808,8 +808,6 @@ class GenericCHP(network.Transformer):
         A system of linear equations is created from passed capacities and
         efficiencies and solved to calculate both coefficients.
         """
-        alphas = [[], []]
-
         eb = list(self.electrical_output.keys())[0]
 
         attrs = [self.electrical_output[eb].P_min_woDH,
@@ -817,26 +815,39 @@ class GenericCHP(network.Transformer):
                  self.electrical_output[eb].P_max_woDH,
                  self.electrical_output[eb].Eta_el_max_woDH]
 
-        length = [len(a) for a in attrs if not isinstance(a, (int, float))]
+        length = [(len(a)) if not isinstance(a, (int, float)) else 1
+                  for a in attrs]
+
         max_length = max(length)
 
-        if all(len(a) == max_length for a in attrs):
-            if max_length == 0:
-                max_length += 1  # increment dimension for scalars from 0 to 1
-            for i in range(0, max_length):
-                A = np.array([[1, self.electrical_output[eb].P_min_woDH[i]],
-                              [1, self.electrical_output[eb].P_max_woDH[i]]])
-                b = np.array([self.electrical_output[eb].P_min_woDH[i] /
-                              self.electrical_output[eb].Eta_el_min_woDH[i],
-                              self.electrical_output[eb].P_max_woDH[i] /
-                              self.electrical_output[eb].Eta_el_max_woDH[i]])
-                x = np.linalg.solve(A, b)
-                alphas[0].append(x[0])
-                alphas[1].append(x[1])
+        if max_length != 1:
+            if all(len(a) == max_length for a in attrs):
+                for i in range(0, max_length):
+                    A = np.array(
+                        [[1, self.electrical_output[eb].P_min_woDH[i]],
+                         [1, self.electrical_output[eb].P_max_woDH[i]]])
+                    b = np.array(
+                        [self.electrical_output[eb].P_min_woDH[i] /
+                         self.electrical_output[eb].Eta_el_min_woDH[i],
+                         self.electrical_output[eb].P_max_woDH[i] /
+                         self.electrical_output[eb].Eta_el_max_woDH[i]])
+                    x = np.linalg.solve(A, b)
+                    alphas = [[], []]
+                    alphas[0].append(x[0])
+                    alphas[1].append(x[1])
+            else:
+                error_message = ('Attributes to calculate alphas ' +
+                                 'must be of same dimension.')
+                raise ValueError(error_message)
         else:
-            error_message = ('Attributes to calculate alphas ' +
-                             'must be of same dimension.')
-            raise ValueError(error_message)
+            A = np.array([[1, self.electrical_output[eb].P_min_woDH],
+                          [1, self.electrical_output[eb].P_max_woDH]])
+            b = np.array([self.electrical_output[eb].P_min_woDH /
+                          self.electrical_output[eb].Eta_el_min_woDH,
+                          self.electrical_output[eb].P_max_woDH /
+                          self.electrical_output[eb].Eta_el_max_woDH])
+            x = np.linalg.solve(A, b)
+            alphas = [x for x in x]
 
         self._alphas = alphas
 
@@ -845,14 +856,14 @@ class GenericCHP(network.Transformer):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-        return solph_sequence(self._alphas[0])
+        return self._alphas[0]
 
     @property
     def alpha2(self):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-        return solph_sequence(self._alphas[1])
+        return self._alphas[1]
 
     def constraint_group(self):
         return GenericCHPBlock
