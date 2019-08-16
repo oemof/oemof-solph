@@ -856,14 +856,14 @@ class GenericCHP(network.Transformer):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-        return self._alphas[0]
+        return solph_sequence(self._alphas[0])
 
     @property
     def alpha2(self):
         """Compute or return the _alphas attribute."""
         if self._alphas is None:
             self._calculate_alphas()
-        return self._alphas[1]
+        return solph_sequence(self._alphas[1])
 
     def constraint_group(self):
         return GenericCHPBlock
