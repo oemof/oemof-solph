@@ -992,7 +992,7 @@ class GenericCHPBlock(SimpleBlock):
             expr = 0
             expr += - self.H_F[n, t]
             expr += self.alpha1[n, t] * self.Y[n, t]
-            expr += self.alpha1[n, t] * self.P_woDH[n, t]
+            expr += self.alpha2[n, t] * self.P_woDH[n, t]
             return expr == 0
         self.H_F_1 = Constraint(self.NODES, m.TIMESTEPS,
                                 rule=_H_F_1_rule)
