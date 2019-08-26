@@ -124,10 +124,16 @@ def results(om):
         try:
             df_dict[k].index = om.es.timeindex
         except ValueError as e:
-            msg = ("\nFlow: {0}-{1}. This could be caused by NaN-values in"
-                   " your input data.")
-            raise type(e)(str(e) + msg.format(k[0].label, k[1].label)
-                          ).with_traceback(sys.exc_info()[2])
+            msg = ("\n{2}: {0}-{1}. This could be caused by"
+                   " different dimensions or NaN-values in your input data.")
+            if k[1] is not None:
+                raise type(e)(str(e) + msg.format(k[0].label, k[1].label,
+                                                  'Flow')
+                              ).with_traceback(sys.exc_info()[2])
+            else:
+                raise type(e)(str(e) + msg.format(k[0].label, 'None',
+                                                  'Component')
+                              ).with_traceback(sys.exc_info()[2])
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
