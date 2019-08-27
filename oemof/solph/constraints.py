@@ -132,8 +132,14 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
 
 def limit_active_flow_count(model, constraint_name, flows,
-                            lower_limit=None, upper_limit=None):
+                            lower_limit=0, upper_limit=None):
     """
+    Set limits (lower and/or upper) for the number of concurrently
+    active NonConvex flows. The flows are given as a list.
+
+    Total actual counts after optimization can be retrieved
+    calling the :attr:`om.oemof.solph.Model.$(constraint_name)_count()`.
+
     :param model: oemof.solph.Model
         Model to which constraints are added.
     :param constraint_name: string
@@ -172,8 +178,12 @@ def limit_active_flow_count(model, constraint_name, flows,
 
 
 def limit_active_flow_count_by_keyword(model, keyword,
-                                       lower_limit=None, upper_limit=None):
+                                       lower_limit=0, upper_limit=None):
     """
+    This wrapper for limit_active_flow_count allows to set limits
+    to the count of concurrently active flows by using a keyword
+    instead of a list. The constraint will be named $(keyword)_count.
+
     :param model: oemof.solph.Model
         Model to which constraints are added.
     :param keyword: keyword to consider (in NonConvexFlows)
