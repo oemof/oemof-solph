@@ -13,6 +13,8 @@ New features
 * Allow generic limits for integral over weighted flows.
   (This is a generalised version of <solph.constraints.emission_limit>.)
 * Allow time-dependent weights for integrated weighted limit.
+* Allow to limit count of concurrently active flows in group of flows.
+  (Flows have to be NonConvex, the limit can be an upper or lower one.)
 
 New components
 ##############
