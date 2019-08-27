@@ -181,13 +181,15 @@ def limit_active_flow_count_by_keyword(model, keyword,
     :param upper_limit: number (integer)
     :return: the updated model
     """
-    flows = {}
+    flows = []
     for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
         if hasattr(model.flows[i, o], keyword):
-            flows[(i, o)] = model.flows[i, o]
+            flows.append((i, o))
 
-    return limit_active_flow_count(model, keyword, flows=flows,
-                                   lower_limit=lower_limit, upper_limit=upper_limit)
+    return limit_active_flow_count(model, keyword,
+                                   flows=flows,
+                                   lower_limit=lower_limit,
+                                   upper_limit=upper_limit)
 
 
 def equate_variables(model, var1, var2, factor1=1, name=None):
