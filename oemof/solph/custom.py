@@ -882,14 +882,13 @@ class SinkDSM(Sink):
             The load-shift of the component must be compensated in a predefined delay-time (3h by default).
             DSM capacity can either be a fixed value or an hourly time series.
     **shift_interval: int
-        only used in "potential" and "combined":
+        only used in "interval" :
 
         interval in between which total DSM  must be fully compensated (default = 24h )
     **delay_time: int
-        only used in "delay" and "combined":
+        only used in "delay":
 
-        the time after which the load shift must be
-        fully compensated
+        the time after which the load shift must be fully compensated
 
     Notes
     -----
