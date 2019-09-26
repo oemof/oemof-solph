@@ -19,6 +19,7 @@ New components
 
 * custom component: SinkDSM.
     Demand Side Management component which modifies input demand.
+        <solph.custom.SinkDSM>
 
 * something
 
