@@ -991,7 +991,7 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
         #  ************* VARIABLES *****************************
 
-        def dsm_capacity_bound_rule():
+        def dsm_capacity_bound_rule(block):
             """Rule definition for bounds(capacity) of DSM - Variable [g] in timestep t"""
             for t in m.TIMESTEPS:
                 for g in group:
