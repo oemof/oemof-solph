@@ -898,12 +898,14 @@ class SinkDSM(Sink):
 
     * This component is still under development.
 
-    * The interval always starts at the first timestep
+    * The interval always starts at the first timestep = 0.
 
-    * Based on the formulation given in a paper by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
+    * delay method based on the formulation given in a paper by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
       On the representation of demand-side management in power system models,
       in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037, accessed 17.09.2019, pp. 842-843.
 
+    * in 'delay' method: delay time might be extended artificially if DSM-capacity isnt fully used.
+      see oemof/Issue: #622 for more information
 
     """
 
@@ -933,8 +935,8 @@ class SinkDSM(Sink):
 
 
 class SinkDSMIntervalBlock(SimpleBlock):
-    r"""Block for the linear relation of a DSM component and an electrical bus.
-    Load shift must be compensated during one day (24h).
+    r"""Block for the linear relation of a DSM component and an electrical bus using 'interval' method.
+    Load shift must be compensated during a specific interval, starting at timestep 0 (default=24h).
 
 
     **The following constraints are created for method = 'potential':**
@@ -963,6 +965,7 @@ class SinkDSMIntervalBlock(SimpleBlock):
             ":math:`demand_{t}`     ",":py:obj:`demand[t]`          ", "P", "electrical demand"
             ":math:`C_{t}^{do}`     ",":py:obj:`c_do[tt]`           ", "P", "DSM down shift capacity"
             ":math:`C_{t}^{up}`     ",":py:obj:`c_up[tt]`           ", "P", "DSM up shift capacity"
+
 
 
     """
@@ -1059,8 +1062,8 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
 
 class SinkDSMDelayBlock(SimpleBlock):
-    r"""Block for the linear relation of a DSM component and an electrical bus
-
+    r"""Block for the linear relation of a DSM component and an electrical bus using delay-method
+        Load shift must be compensated during the delay time (default = 3h).
 
     **The following constraints are created for method = 'delay':**
 

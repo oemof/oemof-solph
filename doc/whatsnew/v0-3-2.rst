@@ -17,6 +17,9 @@ New features
 New components
 ##############
 
+* custom component: SinkDSM.
+    Demand Side Management component which modifies input demand.
+
 * something
 
 Documentation
@@ -49,3 +52,4 @@ Contributors
 
 * Johannes Röder
 * Patrik Schönfeldt
+* Julian Endres
