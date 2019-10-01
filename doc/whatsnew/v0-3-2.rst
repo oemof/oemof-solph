@@ -10,7 +10,9 @@ API changes
 New features
 ############
 
-* something
+* Allow generic limits for integral over weighted flows.
+  (This is a generalised version of <solph.constraints.emission_limit>.)
+* Allow time-dependent weights for integrated weighted limit.
 
 New components
 ##############
@@ -46,4 +48,6 @@ Other changes
 Contributors
 ############
 
+* Johannes Röder
+* Patrik Schönfeldt
 * Uwe Krien
