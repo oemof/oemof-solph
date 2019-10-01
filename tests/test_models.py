@@ -14,6 +14,7 @@ from oemof import solph
 from oemof import outputlib
 from nose.tools import eq_, raises
 from nose import tools
+import warnings
 
 
 def test_timeincrement_with_valid_timeindex():
@@ -57,13 +58,15 @@ def test_optimal_solution():
 
 def test_infeasible_model():
     with tools.assert_raises_regexp(ValueError, ''):
-        es = solph.EnergySystem(timeindex=[1])
-        bel = solph.Bus(label='bus')
-        es.add(bel)
-        es.add(solph.Sink(inputs={bel: solph.Flow(
-            nominal_value=5, actual_value=[1], fixed=True)}))
-        es.add(solph.Source(outputs={bel: solph.Flow(
-            nominal_value=4, variable_costs=5)}))
-        m = solph.models.Model(es, timeincrement=1)
-        m.solve(solver='cbc')
-        outputlib.processing.meta_results(m)
+        with warnings.catch_warnings(record=True) as w:
+            es = solph.EnergySystem(timeindex=[1])
+            bel = solph.Bus(label='bus')
+            es.add(bel)
+            es.add(solph.Sink(inputs={bel: solph.Flow(
+                nominal_value=5, actual_value=[1], fixed=True)}))
+            es.add(solph.Source(outputs={bel: solph.Flow(
+                nominal_value=4, variable_costs=5)}))
+            m = solph.models.Model(es, timeincrement=1)
+            m.solve(solver='cbc')
+            assert "Optimization ended with status" in str(w[0].message)
+            outputlib.processing.meta_results(m)

@@ -14,6 +14,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
+import warnings
 import logging
 
 
@@ -211,7 +212,8 @@ class BaseModel(po.ConcreteModel):
         else:
             msg = ("Optimization ended with status {0} and termination "
                    "condition {1}")
-            logging.warning(msg.format(status, termination_condition))
+            warnings.warn(msg.format(status, termination_condition),
+                          UserWarning)
             self.es.results = solver_results
             self.solver_results = solver_results
 
