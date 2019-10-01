@@ -42,10 +42,12 @@ Testing
 Other changes
 #############
 
-* something
+* The BaseModel has been revised (test, docstring, warnings, internal naming)
+  (`PR #605 <https://github.com/oemof/oemof/issues/605>`_)
 
 Contributors
 ############
 
 * Johannes Röder
 * Patrik Schönfeldt
+* Uwe Krien
