@@ -981,7 +981,7 @@ class SinkDSMIntervalBlock(SimpleBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`DSM_{t}^{updown}` ",":py:obj:`dsm_up_down[g, tt]` ", "V", "DSM up/down shift"
-            ":math:`/dot{E}_{t}`       ",":py:obj:`flow[g.inflow, g,t]`", "V", "Energy flowing in from electrical bus"
+            ":math:`\dot{E}_{t}`       ",":py:obj:`flow[g.inflow, g,t]`", "V", "Energy flowing in from electrical bus"
             ":math:`demand_{t}`     ",":py:obj:`demand[t]`          ", "P", "Electrical demand series"
             ":math:`E_{t}^{do}`     ",":py:obj:`capacity_do[tt]`           ", "P", "Capacity DSM down shift capacity"
             ":math:`E_{t}^{up}`     ",":py:obj:`capacity_up[tt]`           ", "P", "Capacity DSM up shift "
@@ -1133,7 +1133,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
             ":math:`DSM_{t}^{up}` ", ":py:obj:`dsm_do[g,t,tt]`",  "V",    "DSM up shift (additional load)"
             ":math:`DSM_{t,tt}^{do}` ",  ":py:obj:`dsm_up[g,t]`", "V",   "DSM down shift (less load)"
-            ":math:`/dot{E}_{t}` ",         ":py:obj:`flow[g,t]`",  "V",   "Energy flowing in from electrical bus"
+            ":math:`\dot{E}_{t}` ",         ":py:obj:`flow[g,t]`",  "V",   "Energy flowing in from electrical bus"
             ":math:`L`",                ":py:obj:`delay_time`", "P",   "Delay time for load shift"
             ":math:`demand_{t}` ",       ":py:obj:`demand[t]`",  "P",   "Electrical demand series"
             ":math:`E_{t}^{do}` ",       ":py:obj:`capacity_do[tt]`",   "P",   "Capacity DSM down shift "
