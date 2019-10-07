@@ -122,6 +122,42 @@ class GenericStorage(network.Transformer):
     ...     invest_relation_output_capacity=1/6,
     ...     inflow_conversion_factor=1,
     ...     outflow_conversion_factor=0.8)
+    
+    
+    Der OffsetInvestmentStorage (OIF)
+    
+    Der OIF beinhaltet alle Variablen, die auch der InvestmentFlow vorsieht.
+    
+    offset      offset der Investitionsfunktion 
+    
+    slope       Steigerung der Kosten pro kW bei einer normalen Investition
+                ohne offset entspricht dies den ep_costs
+                
+    minimum     beschreibt die minimale Anlagengroesse bsp. 15 
+                --> es wird entweder 0 oder eine speichergroesse >= 15 installiert
+
+    potenzial   beschreibt das maximale Potenzial einer Technologie 
+    
+    fuer bereits existierende Anlagen muss eine eigene Komponente initialisiert
+    werden, diese koennen nicht wie bisher ueber 'existing' eingepflegt werden
+                 
+
+    The OIF contains all variables, which are used in the InvestmentFlow. 
+
+
+    'minimum'    the smallest possible facility; for example: 15 
+                --> the installed storage capacity will be 0 or >= 15 
+    
+    'potenzial' The maximum capacity potential of the technology
+    
+    'offset'    offset value for the investment 
+                
+    'slope'     slope of the linear investment funktion, for a normal 
+                Investment calculation without offset this means ep_costs
+                
+     already existing facilities have to be implemented with a own component
+     it is not possible to integrate them with 'exixting'
+
     """
 
     def __init__(self, *args,
@@ -146,6 +182,23 @@ class GenericStorage(network.Transformer):
             'invest_relation_input_capacity')
         self.invest_relation_output_capacity = kwargs.get(
             'invest_relation_output_capacity')
+        
+    ###################### new variables ################################    
+    # slope, offset, potenzial und minimum wurden hinzugefuegt, um einen 'offset Investor' zu realisieren 
+    # slope, offset, potenzial und minimum were added to implement the 'offset Investor'		
+
+        
+
+        self.offset = kwargs.get('offset', 0)
+        self.slope = kwargs.get('slope', 0)
+        self.potenzial = kwargs.get('potenzial', 100000000000)
+        self.minimum = kwargs.get('minimum', 0)
+        
+        
+    ##################### new variables end ########################
+        
+   
+        
         self._invest_group = isinstance(self.investment, Investment)
 
         # Check attributes for the investment mode.
@@ -500,7 +553,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     The symbols are the same as in:class:`.GenericStorageBlock`.
 
-
     """
 
     CONSTRAINT_GROUP = True
@@ -567,6 +619,24 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                     n.investment.existing + block.invest[n])
         self.init_cap_fix = Constraint(self.INVESTSTORAGES_INIT_CAP,
                                        rule=_inv_storage_init_cap_fix_rule)
+
+
+        '''
+        Um einen Nullinvest moeglich zu machen muss eine Statusvariable fuer den
+        Invest erzeugt werden, da ansonsten der offset immer investiert wuerde
+        
+        To make a investment of 0 possible it is necessary to generate a status
+        variable for the invest. Otherwise the offset would always be investet 
+        '''
+       
+        self.INVESTSTATUS = Set(initialize=[n for n in group])
+        self.INVESTMAX = Set(initialize=[n for n in group])
+        self.INVESTMIN = Set(initialize=[n for n in group])
+        
+        self.investstatus = Var(self.INVESTSTATUS, within=Binary)
+        
+        
+
 
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
@@ -676,6 +746,63 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.min_capacity = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS,
             rule=_min_capacity_invest_rule)
+        
+        
+        
+       ############################# new code #############################  
+       
+        def potential_limit(block, n):
+            """ Hier wird das potential auf den vorgegebenen Maximalwert begrenzt
+                Weiterhin wird der investstatus mit dem invest verknuepft
+                
+                nur bei einem offset Investment aktiv
+                
+                Here the potential is limited to the specified maximum value.
+                The investment status is linked to the investment status.
+                
+                only aktive with an offset investment
+            """
+            if n.offset is not 0:
+                expr = 0
+            
+                x = self.invest[n] 
+           
+                z = n.potenzial * (self.investstatus[n])
+
+                expr += (z-x)
+                return expr >= 0
+            else:
+                return (self.invest[n]>=0)
+            
+        self.limit_max = Constraint(
+            self.INVESTMAX, rule=potential_limit) 
+        
+        
+        def smallest_facility(block, n):
+            """ Hier wird das der vorgegebene Minimalwert fuer den invest 
+                eingebunden
+                nur bei einem offset Investment aktiv
+                
+                Here the invests specified minimum value is implemented
+                
+                only aktive with an offset investment
+            """
+            if n.offset is not 0:
+                expr = 0
+            
+                x = self.invest[n] 
+           
+                z = n.minimum * (self.investstatus[n])
+
+                expr += (x-z)
+                return expr >= 0
+            else:
+                return (self.invest[n]>= 0)
+            
+        self.limit_min = Constraint(
+            self.INVESTMIN, rule=smallest_facility) 
+        ######################### end of new code ###########################       
+        
 
     def _objective_expression(self):
         """Objective expression with fixed and investement costs."""
@@ -683,13 +810,37 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             return 0
 
         investment_costs = 0
+        
+        #################### changed code ###########################
+        
+        for n in self.INVESTSTORAGES:
+            
+            #Mit dieser Gleichung wird der Offset investor realisiert
+            
+            #With this equation the offset investor is realized
+            
+            if n.offset is 0:
+                
+                investment_costs += self.invest[n] * n.investment.ep_costs
+            else:
+                
+                investment_costs += ((self.invest[n] * n.slope) + (n.offset * self.investstatus[n]))
+           
+            '''
+            # dieser Kommentar beinhaltet die originale Version des Codes 
+            # fuer _objective_expression
+            
+            # this comment contains the original version of the code for
+            # _objective_expression
+            
+
 
         for n in self.INVESTSTORAGES:
             if n.investment.ep_costs is not None:
                 investment_costs += self.invest[n] * n.investment.ep_costs
             else:
                 raise ValueError("Missing value for investment costs!")
-
+           ''' 
         self.investment_costs = Expression(expr=investment_costs)
 
         return investment_costs
