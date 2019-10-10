@@ -11,7 +11,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import pandas as pd
 from oemof import solph
+from oemof import outputlib
 from nose.tools import eq_, raises
+from nose import tools
+import warnings
 
 
 def test_timeincrement_with_valid_timeindex():
@@ -38,3 +41,32 @@ def test_timeincrement_list():
     es = solph.EnergySystem(timeindex=4)
     m = solph.models.BaseModel(es, timeincrement=[0, 1, 2, 3])
     eq_(m.timeincrement[3], 3)
+
+
+def test_optimal_solution():
+    es = solph.EnergySystem(timeindex=[1])
+    bel = solph.Bus(label='bus')
+    es.add(bel)
+    es.add(solph.Sink(inputs={bel: solph.Flow(
+        nominal_value=5, actual_value=[1], fixed=True)}))
+    es.add(solph.Source(outputs={bel: solph.Flow(variable_costs=5)}))
+    m = solph.models.Model(es, timeincrement=1)
+    m.solve('cbc')
+    m.results()
+    outputlib.processing.meta_results(m)
+
+
+def test_infeasible_model():
+    with tools.assert_raises_regexp(ValueError, ''):
+        with warnings.catch_warnings(record=True) as w:
+            es = solph.EnergySystem(timeindex=[1])
+            bel = solph.Bus(label='bus')
+            es.add(bel)
+            es.add(solph.Sink(inputs={bel: solph.Flow(
+                nominal_value=5, actual_value=[1], fixed=True)}))
+            es.add(solph.Source(outputs={bel: solph.Flow(
+                nominal_value=4, variable_costs=5)}))
+            m = solph.models.Model(es, timeincrement=1)
+            m.solve(solver='cbc')
+            assert "Optimization ended with status" in str(w[0].message)
+            outputlib.processing.meta_results(m)

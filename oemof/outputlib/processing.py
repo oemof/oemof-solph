@@ -140,7 +140,7 @@ def results(om):
             raise IndexError(error_message)
 
     # add dual variables for bus constraints
-    if hasattr(om, 'dual'):
+    if om.dual is not None:
         grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
