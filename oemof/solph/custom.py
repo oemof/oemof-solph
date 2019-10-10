@@ -866,7 +866,7 @@ class SinkDSM(Sink):
         demand defines the original demand
     capacity_up: int or array
         maximum DSM capacity that may be increased
-    capacity_do: int or array
+    capacity_down: int or array
         maximum DSM capacity that may be reduced
     method: 'interval' , 'delay'
 
@@ -922,11 +922,12 @@ class SinkDSM(Sink):
 
     """
 
-    def __init__(self, demand, capacity_up, capacity_do, method, *args, **kwargs):
+    def __init__(self, demand, capacity_up, capacity_down, method,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.capacity_up = sequence(capacity_up)
-        self.capacity_do = sequence(capacity_do)
+        self.capacity_down = sequence(capacity_down)
         self.demand = sequence(demand)
         self.method = method
         self.shift_interval = kwargs.get('shift_interval', None)
@@ -946,8 +947,9 @@ class SinkDSM(Sink):
                                  ' is a mandatory parameter')
             return SinkDSMIntervalBlock
         else:
-            raise ValueError('The method selection must be one of the following set: '
-                             '"{}"'.format('","'.join(possible_methods)))
+            raise ValueError(
+                'The "method" must be one of the following set: '
+                '"{}"'.format('" or "'.join(possible_methods)))
 
 ###########################################################################
 #                      Interval Method
@@ -983,7 +985,7 @@ class SinkDSMIntervalBlock(SimpleBlock):
             ":math:`DSM_{t}^{updown}` ",":py:obj:`dsm_up_down[g, tt]` ", "V", "DSM up/down shift"
             ":math:`\dot{E}_{t}`       ",":py:obj:`flow[g.inflow, g,t]`", "V", "Energy flowing in from electrical bus"
             ":math:`demand_{t}`     ",":py:obj:`demand[t]`          ", "P", "Electrical demand series"
-            ":math:`E_{t}^{do}`     ",":py:obj:`capacity_do[tt]`           ", "P", "Capacity DSM down shift capacity"
+            ":math:`E_{t}^{do}`     ",":py:obj:`capacity_down[tt]`           ", "P", "Capacity DSM down shift capacity"
             ":math:`E_{t}^{up}`     ",":py:obj:`capacity_up[tt]`           ", "P", "Capacity DSM up shift "
 
 
@@ -1016,7 +1018,7 @@ class SinkDSMIntervalBlock(SimpleBlock):
             in timestep t"""
             for t in m.TIMESTEPS:
                 for g in group:
-                    bounds = (-g.capacity_do[t], g.capacity_up[t])
+                    bounds = (-g.capacity_down[t], g.capacity_up[t])
                     return bounds
 
         # Variable load shift down (MWh)
@@ -1060,27 +1062,31 @@ class SinkDSMIntervalBlock(SimpleBlock):
             for t in m.TIMESTEPS:
                 for g in group:
 
-                    shft_intvl = g.shift_interval
+                    interval = g.shift_interval
 
                     # full interval
-                    if (t // shft_intvl) < (m.TIMESTEPS._bounds[1] // shft_intvl):
+                    if (t // interval) < (m.TIMESTEPS._bounds[1] // interval):
                         # DSM up/down
                         lhs = sum(self.dsm_up_down[g, tt]
-                                  for tt in range((t // shft_intvl) * shft_intvl,
-                                                  (t // shft_intvl + 1) * shft_intvl, 1))
+                                  for tt in range((t // interval) * interval,
+                                                  (t // interval + 1) *
+                                                  interval, 1))
                         # value
                         rhs = 0
                         # add constraint
+
                         block.dsm_sum_constraint.add((g, t), (lhs == rhs))
 
                     # incomplete interval
                     else:
                         # DSM up/down
                         lhs = sum(self.dsm_up_down[g, tt]
-                                  for tt in range((t // shft_intvl) * shft_intvl,
-                                                  m.TIMESTEPS._bounds[1] + 1, 1))
+                                  for tt in range((t // interval) * interval,
+                                                  m.TIMESTEPS._bounds[1] +
+                                                  1, 1))
                         # value
                         rhs = 0
+
                         # add constraint
                         block.dsm_sum_constraint.add((g, t), (lhs == rhs))
 
@@ -1136,7 +1142,7 @@ class SinkDSMDelayBlock(SimpleBlock):
             ":math:`\dot{E}_{t}` ",         ":py:obj:`flow[g,t]`",  "V",   "Energy flowing in from electrical bus"
             ":math:`L`",                ":py:obj:`delay_time`", "P",   "Delay time for load shift"
             ":math:`demand_{t}` ",       ":py:obj:`demand[t]`",  "P",   "Electrical demand series"
-            ":math:`E_{t}^{do}` ",       ":py:obj:`capacity_do[tt]`",   "P",   "Capacity DSM down shift "
+            ":math:`E_{t}^{do}` ",       ":py:obj:`capacity_down[tt]`",   "P",   "Capacity DSM down shift "
             ":math:`E_{t}^{up}` ",        ":py:obj:`capacity_up[tt]`",   "P",   "Capacity DSM up shift"
 
 
@@ -1193,6 +1199,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         rhs = g.demand[t] + self.dsm_up[g, t] - sum(
                             self.dsm_do[g, tt, t]
                             for tt in range(t + g.delay_time + 1))
+
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
@@ -1207,6 +1214,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                             self.dsm_do[g, tt, t]
                             for tt in range(t - g.delay_time,
                                             t + g.delay_time + 1))
+
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
@@ -1219,6 +1227,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                             self.dsm_do[g, tt, t]
                             for tt in range(t - g.delay_time,
                                             m.TIMESTEPS._bounds[1] + 1))
+
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
@@ -1247,6 +1256,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM down
                         rhs = sum(self.dsm_do[g, t, tt]
                                   for tt in range(t + g.delay_time + 1))
+
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
@@ -1260,6 +1270,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         rhs = sum(self.dsm_do[g, t, tt]
                                   for tt in range(t - g.delay_time,
                                                   t + g.delay_time + 1))
+
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
@@ -1272,6 +1283,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         rhs = sum(self.dsm_do[g, t, tt]
                                   for tt in range(t - g.delay_time,
                                                   m.TIMESTEPS._bounds[1] + 1))
+
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
@@ -1294,6 +1306,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
                     rhs = g.capacity_up[t]
+
                     # add constraint
                     block.dsm_up_constraint.add((g, t), (lhs <= rhs))
 
@@ -1319,7 +1332,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                         lhs = sum(self.dsm_do[g, t, tt]
                                   for t in range(tt + g.delay_time + 1))
                         # Capacity DSM down
-                        rhs = g.capacity_do[tt]
+                        rhs = g.capacity_down[tt]
+
                         # add constraint
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
@@ -1332,7 +1346,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                                   for t in range(tt - g.delay_time,
                                                  tt + g.delay_time + 1))
                         # Capacity DSM down
-                        rhs = g.capacity_do[tt]
+                        rhs = g.capacity_down[tt]
+
                         # add constraint
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
@@ -1344,7 +1359,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                                   for t in range(tt - g.delay_time,
                                                  m.TIMESTEPS._bounds[1] + 1))
                         # Capacity DSM down
-                        rhs = g.capacity_do[tt]
+                        rhs = g.capacity_down[tt]
+
                         # add constraint
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
@@ -1373,7 +1389,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                             self.dsm_do[g, t, tt]
                             for t in range(tt + g.delay_time + 1))
                         # max capacity at tt
-                        rhs = max(g.capacity_up[tt], g.capacity_do[tt])
+                        rhs = max(g.capacity_up[tt], g.capacity_down[tt])
+
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
@@ -1386,7 +1403,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                             for t in range(tt - g.delay_time,
                                            tt + g.delay_time + 1))
                         # max capacity at tt
-                        rhs = max(g.capacity_up[tt], g.capacity_do[tt])
+                        rhs = max(g.capacity_up[tt], g.capacity_down[tt])
+
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
@@ -1398,7 +1416,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                             for t in range(tt - g.delay_time,
                                            m.TIMESTEPS._bounds[1] + 1))
                         # max capacity at tt
-                        rhs = max(g.capacity_up[tt], g.capacity_do[tt])
+                        rhs = max(g.capacity_up[tt], g.capacity_down[tt])
+
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
