@@ -41,9 +41,8 @@ class Investment:
     def _check_invest_attributes(self):
         if (self.existing > 0) and (self.nonconvex == True):
             e1 = ("Values for 'offset' and 'existing' are given in"
-                  " investement attributes. \n'existing' will be ignored and a"
-                  " nonconvex Investement with the offset value will be "
-                  "applied.")
+                  " investement attributes. \n These two options cannot be "
+                  "considered at the same time.")
             raise AttributeError(e1)
 
 
