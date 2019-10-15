@@ -862,8 +862,8 @@ class SinkDSM(Sink):
 
     Parameters
     ----------
-    demand: int or array
-        demand defines the original demand
+    demand: numeric
+        original electrical demand
     capacity_up: int or array
         maximum DSM capacity that may be increased
     capacity_down: int or array
@@ -1325,7 +1325,7 @@ class SinkDSMDelayBlock(SimpleBlock):
             for tt in m.TIMESTEPS:
                 for g in group:
 
-                    # first times steps: 0 + delay time
+                    # first times steps: 0 + delay
                     if tt <= g.delay_time:
 
                         # DSM down
