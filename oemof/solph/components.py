@@ -252,7 +252,7 @@ class GenericStorageBlock(SimpleBlock):
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
-            (1 - \delta(t))) - \gamma(t) \\
+            (1 - \delta(t))) - \gamma(t) \cdot E_{nom} \\
             &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -277,8 +277,10 @@ class GenericStorageBlock(SimpleBlock):
     :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
     :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
                                 (e.g. leakage) per time
-    :math:`\gamma(t)`           constant loss of energy :py:obj:`loss_constant[t]`
-                                (e.g. leakage) per time
+    :math:`\gamma(t)`           fixed loss of energy as :py:obj:`fixed_losses[t]`
+                                share of
+                                :math:`E_{nom}` per
+                                time
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
     :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
