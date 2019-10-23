@@ -42,6 +42,7 @@ Testing
 Other changes
 #############
 
+* The license hase been changed from GPLv3 to the MIT license
 * The BaseModel has been revised (test, docstring, warnings, internal naming)
   (`PR #605 <https://github.com/oemof/oemof/issues/605>`_)
 
