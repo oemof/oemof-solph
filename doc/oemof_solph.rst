@@ -596,7 +596,6 @@ The following example describes a battery with flows coupled to the capacity of 
         inputs={b_el: solph.Flow()},
         outputs={b_el: solph.Flow()},
         loss_rate=0.001,
-        nominal_storage_capacity=50,
         inflow_conversion_factor=0.98,
          outflow_conversion_factor=0.8,
         invest_relation_input_capacity = 1/6,
