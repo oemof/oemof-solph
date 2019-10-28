@@ -33,6 +33,7 @@ setup(name='oemof',
                         'pandas >= 0.18.0, < 0.26',
                         'pyomo >= 4.4.0, < 5.7',
                         'networkx < 3.0'],
+      extras_require={'dev': ['nose', 'sphinx', 'sphinx_rtd_theme']},
       entry_points={
           'console_scripts': [
               'oemof_installation_test = ' +
