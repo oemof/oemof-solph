@@ -33,7 +33,6 @@ setup(name='oemof',
                         'pandas >= 0.18.0, < 0.25',
                         'pyomo >= 4.4.0, < 5.7',
                         'networkx < 2.4'],
-      extras_require={'datapackage': ['datapackage']},
       entry_points={
           'console_scripts': [
               'oemof_installation_test = ' +
