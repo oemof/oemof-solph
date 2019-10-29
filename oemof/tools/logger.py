@@ -10,8 +10,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import os
-import logging
-from logging import handlers
+from logging import (INFO, DEBUG, getLogger, Formatter, StreamHandler,
+                     handlers, debug, info)
 import sys
 from oemof.tools import helpers
 import oemof
@@ -19,7 +19,7 @@ import oemof
 
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,
                    screen_format=None, file_datefmt=None, screen_datefmt=None,
-                   screen_level=logging.INFO, file_level=logging.DEBUG,
+                   screen_level=INFO, file_level=DEBUG,
                    log_version=True, log_path=True, timed_rotating=None):
 
     r"""Initialise customisable logger.
@@ -87,26 +87,26 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
 
     file = os.path.join(logpath, logfile)
 
-    log = logging.getLogger('')
+    log = getLogger('')
 
     # Remove existing handlers to avoid interference.
     log.handlers = []
-    log.setLevel(logging.DEBUG)
+    log.setLevel(DEBUG)
 
     if file_format is None:
         file_format = (
             "%(asctime)s - %(levelname)s - %(module)s - %(message)s")
-    file_formatter = logging.Formatter(file_format, file_datefmt)
+    file_formatter = Formatter(file_format, file_datefmt)
 
     if screen_format is None:
         screen_format = "%(asctime)s-%(levelname)s-%(message)s"
     if screen_datefmt is None:
         screen_datefmt = "%H:%M:%S"
-    screen_formatter = logging.Formatter(screen_format, screen_datefmt)
+    screen_formatter = Formatter(screen_format, screen_datefmt)
 
-    tmp_formatter = logging.Formatter("%(message)s")
+    tmp_formatter = Formatter("%(message)s")
 
-    ch = logging.StreamHandler(sys.stdout)
+    ch = StreamHandler(sys.stdout)
     ch.setFormatter(screen_formatter)
     ch.setLevel(screen_level)
     log.addHandler(ch)
@@ -123,13 +123,13 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     fh.setLevel(file_level)
     log.addHandler(fh)
 
-    logging.debug("******************************************************")
+    debug("******************************************************")
     fh.setFormatter(file_formatter)
     if log_path:
-        logging.info("Path for logging: {0}".format(file))
+        info("Path for logging: {0}".format(file))
 
     if log_version:
-        logging.info("Used oemof version: {0}".format(get_version()))
+        info("Used oemof version: {0}".format(get_version()))
     return file
 
 
