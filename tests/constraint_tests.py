@@ -648,7 +648,8 @@ class Constraint_Tests:
 
         self.compare_lp_files('offsettransformer.lp')
 
-    def test_dsm_modules(self):
+    def test_dsm_module_delay(self):
+        """Constraint test of Sink-DSM with method=delay"""
 
         b_elec = solph.Bus(label='bus_elec')
         solph.custom.SinkDSM(
@@ -658,7 +659,21 @@ class Constraint_Tests:
             capacity_up=[0.5] * 3,
             capacity_down=[0.5] * 3,
             method='delay',
-            delay_time=1,
-            shift_interval=2,
-            )
-        self.compare_lp_files('dsm_basic.lp')
+            delay_time=1
+        )
+        self.compare_lp_files('dsm_module_delay.lp')
+
+    def test_dsm_module_interval(self):
+        """Constraint test of Sink-DSM with method=interval"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow(variable_costs=1)},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            method='interval',
+            shift_interval=2
+        )
+        self.compare_lp_files('dsm_module_interval.lp')
