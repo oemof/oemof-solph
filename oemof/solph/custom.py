@@ -934,7 +934,6 @@ class SinkDSM(Sink):
         self.method = method
         self.shift_interval = kwargs.get('shift_interval', None)
         self.delay_time = kwargs.get('delay_time', None)
-        self.recovery_time = kwargs.get('recovery_time', False)
 
     def constraint_group(self):
         possible_methods = ['delay', 'interval']
