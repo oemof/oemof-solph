@@ -884,14 +884,14 @@ class SinkDSM(Sink):
             Zerrahn & Schill (DIW).T he load-shift of the component must be
             compensated in a predefined delay-time (**delay_time is mandatory).
             DSM capacity can either be a fixed value or an hourly time series.
-    **shift_interval: int
+    shift_interval: int
 
-        only mandatory in method = 'interval' :
+        only used in method = 'interval', can be  None if not used :
 
         interval in between which total DSM  must be fully compensated
-    **delay_time: int
+    delay_time: int
 
-        only mandatory in method =  'delay':
+        only used in method =  'delay', can be  None if not used :
 
         the time after which the load shift must be fully compensated
 
@@ -925,15 +925,15 @@ class SinkDSM(Sink):
     """
 
     def __init__(self, demand, capacity_up, capacity_down, method,
-                 *args, **kwargs):
+                 shift_interval, delay_time, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.capacity_up = sequence(capacity_up)
         self.capacity_down = sequence(capacity_down)
         self.demand = sequence(demand)
         self.method = method
-        self.shift_interval = kwargs.get('shift_interval', None)
-        self.delay_time = kwargs.get('delay_time', None)
+        self.shift_interval = shift_interval
+        self.delay_time = delay_time
 
     def constraint_group(self):
         possible_methods = ['delay', 'interval']
