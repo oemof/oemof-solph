@@ -16,7 +16,6 @@ from collections import (namedtuple as NT, Mapping, MutableMapping as MM,
                          UserDict as UD)
 from contextlib import contextmanager
 from functools import total_ordering
-from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 # TODO:
 #

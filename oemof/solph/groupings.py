@@ -19,7 +19,6 @@ available from its original location oemof/oemof/solph/groupings.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from oemof.solph.network import Bus, Transformer
 from oemof.solph import blocks
 import oemof.groupings as groupings
 
