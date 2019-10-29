@@ -932,6 +932,7 @@ class SinkDSM(Sink):
         self.method = method
         self.shift_interval = kwargs.get('shift_interval', None)
         self.delay_time = kwargs.get('delay_time', None)
+        self.recovery_time = kwargs.get('recovery_time', False)
 
     def constraint_group(self):
         possible_methods = ['delay', 'interval']
@@ -982,11 +983,16 @@ class SinkDSMIntervalBlock(SimpleBlock):
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{updown}` ",":py:obj:`dsm_up_down[g, tt]` ", "V", "DSM up/down shift"
-            ":math:`\dot{E}_{t}`       ",":py:obj:`flow[g.inflow, g,t]`", "V", "Energy flowing in from electrical bus"
-            ":math:`demand_{t}`     ",":py:obj:`demand[t]`          ", "P", "Electrical demand series"
-            ":math:`E_{t}^{do}`     ",":py:obj:`capacity_down[tt]`           ", "P", "Capacity DSM down shift capacity"
-            ":math:`E_{t}^{up}`     ",":py:obj:`capacity_up[tt]`           ", "P", "Capacity DSM up shift "
+            ":math:`DSM_{t}^{updown}` ",":py:obj:`dsm_up_down[g, tt]` ",
+             "V", "DSM up/down shift"
+            ":math:`\dot{E}_{t}`       ",":py:obj:`flow[g.inflow, g,t]`",
+             "V", "Energy flowing in from electrical bus"
+            ":math:`demand_{t}`     ",":py:obj:`demand[t]`          ",
+             "P", "Electrical demand series"
+            ":math:`E_{t}^{do}`     ",":py:obj:`capacity_down[tt]`           ",
+             "P", "Capacity DSM down shift capacity"
+            ":math:`E_{t}^{up}`     ",":py:obj:`capacity_up[tt]`           ",
+             "P", "Capacity DSM up shift "
 
 
 
@@ -1137,13 +1143,20 @@ class SinkDSMDelayBlock(SimpleBlock):
 
 
 
-            ":math:`DSM_{t}^{up}` ", ":py:obj:`dsm_do[g,t,tt]`",  "V",    "DSM up shift (additional load)"
-            ":math:`DSM_{t,tt}^{do}` ",  ":py:obj:`dsm_up[g,t]`", "V",   "DSM down shift (less load)"
-            ":math:`\dot{E}_{t}` ",         ":py:obj:`flow[g,t]`",  "V",   "Energy flowing in from electrical bus"
-            ":math:`L`",                ":py:obj:`delay_time`", "P",   "Delay time for load shift"
-            ":math:`demand_{t}` ",       ":py:obj:`demand[t]`",  "P",   "Electrical demand series"
-            ":math:`E_{t}^{do}` ",       ":py:obj:`capacity_down[tt]`",   "P",   "Capacity DSM down shift "
-            ":math:`E_{t}^{up}` ",        ":py:obj:`capacity_up[tt]`",   "P",   "Capacity DSM up shift"
+            ":math:`DSM_{t}^{up}` ", ":py:obj:`dsm_do[g,t,tt]`",
+              "V",    "DSM up shift (additional load)"
+            ":math:`DSM_{t,tt}^{do}` ",  ":py:obj:`dsm_up[g,t]`",
+             "V",   "DSM down shift (less load)"
+            ":math:`\dot{E}_{t}` ",         ":py:obj:`flow[g,t]`",
+              "V",   "Energy flowing in from electrical bus"
+            ":math:`L`",                ":py:obj:`delay_time`",
+             "P",   "Delay time for load shift"
+            ":math:`demand_{t}` ",       ":py:obj:`demand[t]`",
+              "P",   "Electrical demand series"
+            ":math:`E_{t}^{do}` ",       ":py:obj:`capacity_down[tt]`",
+               "P",   "Capacity DSM down shift "
+            ":math:`E_{t}^{up}` ",        ":py:obj:`capacity_up[tt]`",
+               "P",   "Capacity DSM up shift"
 
 
 
@@ -1288,7 +1301,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
         self.dsm_updo_constraint = Constraint(group, m.TIMESTEPS,
-                                             noruleinit=True)
+                                              noruleinit=True)
         self.dsm_updo_constraint_build = BuildAction(
             rule=dsm_up_down_constraint_rule)
 
@@ -1423,3 +1436,93 @@ class SinkDSMDelayBlock(SimpleBlock):
 
         self.C2_constraint = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.C2_constraint_build = BuildAction(rule=c2_constraint_rule)
+
+        # Equation 11
+        def recovery_constraint_rule(block):
+            """
+            Equation 11 by Zerrahn, Schill:
+            A recovery time is introduced to account for the fact that there
+            may be some restrictions before the next load shift may take place.
+            Rule is only applicable if a recovery time is defined.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    # 16.08.2019, JK: No need to build constraint if no recovery
+                    # time is defined. Not quite sure, where to place this if condition
+                    # since there should be no empty constraints.
+                    # -> I'm planning to check different positions here...
+                    # if hasattr(g, 'recovery_time'):
+                    #if g.recovery_time:
+
+                    if t <= g.delay_time:
+                        # DSM up
+                        lhs = sum(self.dsm_up[g, tt] for tt in
+                                  range(
+                                      t + g.delay_time + g.recovery_time + 1))
+
+                        # max energy shift over shifting process
+                        rhs = sum(g.capacity_up[tt] for tt in
+                                  range(t + g.delay_time + 1))
+                        # rhs = g.c_up[t] * g.delay_time
+                        # add constraint
+                        block.recovery_constraint.add((g, t), (lhs <= rhs))
+
+                    # main use case
+                    elif g.delay_time < t <= m.TIMESTEPS._bounds[
+                        1] - g.delay_time - g.recovery_time:
+
+                        # DSM up
+                        lhs = sum(self.dsm_up[g, tt] for tt in
+                                  range(t - g.delay_time,
+                                        t + g.delay_time + g.recovery_time + 1))
+                        # max energy shift over shifting process
+                        rhs = sum(g.capacity_up[tt] for tt in
+                                  range(t - g.delay_time,
+                                        t + g.delay_time + 1))
+                        # rhs = g.c_up[t] * g.delay_time
+                        # add constraint
+                        block.recovery_constraint.add((g, t), (lhs <= rhs))
+
+                    # end - delaytime
+                    elif m.TIMESTEPS._bounds[
+                        1] - g.delay_time - g.recovery_time < t <= \
+                            m.TIMESTEPS._bounds[1] - g.delay_time:
+
+                        # DSM up
+                        lhs = sum(self.dsm_up[g, tt] for tt in
+                                  range(t - g.delay_time,
+                                        t + g.delay_time + 1))
+                        # max energy shift over shifting process
+                        rhs = sum(g.capacity_up[tt] for tt in
+                                  range(t - g.delay_time,
+                                        m.TIMESTEPS._bounds[
+                                            1] - g.delay_time))
+                        # rhs = g.c_up[t] * g.delay_time
+                        # add constraint
+                        block.recovery_constraint.add((g, t), (lhs <= rhs))
+
+
+                    # last time steps: end
+                    else:
+
+                        # DSM up
+                        lhs = sum(self.dsm_up[g, tt] for tt in
+                                  range(t - g.delay_time,
+                                        m.TIMESTEPS._bounds[
+                                            1] + 1))  # + g.recovery_time))
+                        # max energy shift over shifting process
+                        rhs = sum(g.capacity_up[tt] for tt in
+                                  range(t - g.delay_time,
+                                        m.TIMESTEPS._bounds[1] + 1))
+                        # rhs = g.c_up[t] * g.delay_time
+                        # add constraint
+                        block.recovery_constraint.add((g, t), (lhs <= rhs))
+
+        for n in group:
+            if n.recovery_time:
+                self.recovery_constraint = Constraint(group, m.TIMESTEPS,
+                                                  noruleinit=True)
+                self.recovery_constraint_build = BuildAction(
+                    rule=recovery_constraint_rule)
