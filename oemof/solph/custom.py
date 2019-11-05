@@ -925,8 +925,8 @@ class SinkDSM(Sink):
     """
 
     def __init__(self, demand, capacity_up, capacity_down, method,
-                 shift_interval, delay_time, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+                 shift_interval=None, delay_time=None, **kwargs):
+        super().__init__(**kwargs)
 
         self.capacity_up = sequence(capacity_up)
         self.capacity_down = sequence(capacity_down)
