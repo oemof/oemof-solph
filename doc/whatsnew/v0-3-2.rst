@@ -17,6 +17,10 @@ New features
 New components
 ##############
 
+* custom component: SinkDSM.
+    Demand Side Management component which modifies input demand.
+        <solph.custom.SinkDSM>
+
 * something
 
 Documentation
@@ -51,4 +55,5 @@ Contributors
 
 * Johannes Röder
 * Patrik Schönfeldt
+* Julian Endres
 * Uwe Krien

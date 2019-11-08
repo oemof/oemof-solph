@@ -11,13 +11,18 @@ available from its original location oemof/oemof/solph/custom.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           BuildAction)
+                           BuildAction, Reals)
 import logging
 
-from oemof.solph.network import Bus, Transformer, Flow
+from oemof.solph.network import Bus, Transformer, Flow, Sink
 from oemof.solph.plumbing import sequence
+
+
+
+
 
 
 class ElectricalBus(Bus):
@@ -839,3 +844,592 @@ class GenericCAESBlock(SimpleBlock):
             return (self.tes_level[n, t] <= n.params['tes_level_max'])
         self.tes_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
+
+
+########################################################################
+
+# ----------------------- DSM Component --------------------------------
+class SinkDSM(Sink):
+    r"""
+    Module for creating a Demand Side Management component.
+
+    Based on the paper by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
+    On the representation of demand-side management in power system models,
+    in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
+    accessed 17.09.2019, pp. 842-843.
+
+    A special sink component which modifies the input demand series.
+
+    Parameters
+    ----------
+    demand: numeric
+        original electrical demand
+    capacity_up: int or array
+        maximum DSM capacity that may be increased
+    capacity_down: int or array
+        maximum DSM capacity that may be reduced
+    method: 'interval' , 'delay'
+
+        interval :
+
+            Simple model in which the load shift must be compensated in a
+            predefined fixed interval(**shift_interval is mandatory).
+            Foundation of this optimisation should be a potential analysis
+            of the DSM capacity during each interval. With this,
+            the boundaries for the DSM variable are set.
+
+        delay :
+
+            Sophisticated model based on the formulation by
+            Zerrahn & Schill (DIW).T he load-shift of the component must be
+            compensated in a predefined delay-time (**delay_time is mandatory).
+            DSM capacity can either be a fixed value or an hourly time series.
+    shift_interval: int
+
+        only used in method = 'interval', can be  None if not used :
+
+        interval in between which total DSM  must be fully compensated
+    delay_time: int
+
+        only used in method =  'delay', can be  None if not used :
+
+        the time after which the load shift must be fully compensated
+
+    Notes
+    -----
+
+    The following sets, variables, constraints and objective parts are created
+    :py:class:`~oemof.solph.custom.SinkDSMIntervalBlock` or
+    :py:class:`~oemof.solph.custom.SinkDSMDelayBlock
+    * This component is still under development.
+
+    * As many constraints and dependencies are created in method 'delay',
+    the calculation time increases significantly with large 'delay_time'
+    values as well as with long observation periods.
+
+    * The interval method creates only one real variable,
+    while the delay method creates two non-negative-real variables.
+
+    * The interval always starts at the first timestep = 0.
+
+    * delay method based on the formulation given in a paper
+    by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
+    On the representation of demand-side management in power system models,
+    in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
+    accessed 17.09.2019, pp. 842-843.
+
+    * in 'delay' method: delay time might be extended artificially
+    if DSM-capacity isn't used to it's full extend.
+    see oemof/Issue: #622 for more information
+
+    """
+
+    def __init__(self, demand, capacity_up, capacity_down, method,
+                 shift_interval=None, delay_time=None, **kwargs):
+        super().__init__(**kwargs)
+
+        self.capacity_up = sequence(capacity_up)
+        self.capacity_down = sequence(capacity_down)
+        self.demand = sequence(demand)
+        self.method = method
+        self.shift_interval = shift_interval
+        self.delay_time = delay_time
+
+    def constraint_group(self):
+        possible_methods = ['delay', 'interval']
+
+        if self.method == possible_methods[0]:
+            if self.delay_time is None:
+                raise ValueError('Please define: **delay_time'
+                                 'is a mandatory parameter')
+            return SinkDSMDelayBlock
+        elif self.method == possible_methods[1]:
+            if self.shift_interval is None:
+                raise ValueError('Please define: **shift_interval'
+                                 ' is a mandatory parameter')
+            return SinkDSMIntervalBlock
+        else:
+            raise ValueError(
+                'The "method" must be one of the following set: '
+                '"{}"'.format('" or "'.join(possible_methods)))
+
+###########################################################################
+#                      Interval Method
+
+
+class SinkDSMIntervalBlock(SimpleBlock):
+    r"""Block for the linear relation of a DSM component and an electrical
+    bus using 'interval' method. Load shift must be compensated during a
+    specific interval, starting at timestep 0.
+
+
+    **The following constraints are created for method = 'potential':**
+
+    .. _SinkDSMInterval-equations:
+
+    .. math::
+        &
+        (1) \quad  E_{t}^{do} < DSM_{t}^{updown} < E_{t}^{up} \quad \forall t\\
+        &
+        (2) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{updown} \quad \forall t\\
+        &
+        (3) \quad  \sum_{t=0}^{24} DSM_{t}^{updown} = 0 \quad \forall t \\
+        &
+
+
+
+    **Table: Symbols and attribute names of variables and parameters**
+
+        .. csv-table:: Variables (V) and Parameters (P)
+            :header: "symbol", "attribute", "type", "explanation"
+            :widths: 1, 1, 1, 1
+
+            ":math:`DSM_{t}^{updown}` ",":py:obj:
+            `dsm_up_down[g, tt]` ","V", "DSM up/down shift"
+            ":math:`\dot{E}_{t}`",":py:obj:`
+            flow[g.inflow, g,t]`","V", "Energy flowing in from electrical bus"
+            ":math:`demand_{t}`",":py:obj:`
+            demand[t]`","P", "Electrical demand series"
+            ":math:`E_{t}^{do}`",":py:obj:`
+            capacity_down[tt]`","P", "Capacity DSM down shift capacity"
+            ":math:`E_{t}^{up}`",":py:obj:`
+            capacity_up[tt]`","P", "Capacity DSM up shift "
+
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        # for all DSM components get inflow from bus_elec
+        for n in group:
+            n.inflow = list(n.inputs)[0]
+
+        #  ************* SETS *********************************
+
+        # Set of DSM Components
+        self.dsm = Set(initialize=[n for n in group])
+
+        #  ************* VARIABLES *****************************
+
+        def dsm_capacity_bound_rule(block):
+            """Rule definition for bounds(capacity) of DSM - Variable [g]
+            in timestep t"""
+            for t in m.TIMESTEPS:
+                for g in group:
+                    bounds = (-g.capacity_down[t], g.capacity_up[t])
+                    return bounds
+
+        # Variable load shift down (MWh)
+        self.dsm_up_down = Var(self.dsm, m.TIMESTEPS,
+                               initialize=0,
+                               within=Reals,
+                               bounds=dsm_capacity_bound_rule)
+
+        #  ************* CONSTRAINTS *****************************
+
+        # Demand Production Relation
+        def _input_output_relation_rule(block):
+            """
+            Relation between input data and pyomo variables.
+            The actual demand after DSM.
+            Generator Production == Demand_el +- DSM
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+                    # Generator loads directly from bus
+                    lhs = m.flow[g.inflow, g, t]
+
+                    # Demand +- DSM
+                    rhs = g.demand[t] + self.dsm_up_down[g, t]
+
+                    # add constraint
+                    block.input_output_relation.add((g, t), (lhs == rhs))
+
+        self.input_output_relation = Constraint(group, m.TIMESTEPS,
+                                                noruleinit=True)
+        self.input_output_relation_build = BuildAction(
+            rule=_input_output_relation_rule)
+
+        # DSM Compensation
+        def dsm_sum_constraint_rule(block):
+            """
+            Relation to compensate the total amount of positive
+            and negative DSM in between the shift_interval.
+            2 Cases: A full interval is optimised or an incomplete one.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    interval = g.shift_interval
+
+                    # full interval
+                    if (t // interval) < (m.TIMESTEPS._bounds[1] // interval):
+                        # DSM up/down
+                        lhs = sum(self.dsm_up_down[g, tt]
+                                  for tt in range((t // interval) * interval,
+                                                  (t // interval + 1) *
+                                                  interval, 1))
+                        # value
+                        rhs = 0
+                        # add constraint
+
+                        block.dsm_sum_constraint.add((g, t), (lhs == rhs))
+
+                    # incomplete interval
+                    else:
+                        # DSM up/down
+                        lhs = sum(self.dsm_up_down[g, tt]
+                                  for tt in range((t // interval) * interval,
+                                                  m.TIMESTEPS._bounds[1] +
+                                                  1, 1))
+                        # value
+                        rhs = 0
+
+                        # add constraint
+                        block.dsm_sum_constraint.add((g, t), (lhs == rhs))
+
+        self.dsm_sum_constraint = Constraint(group, m.TIMESTEPS,
+                                             noruleinit=True)
+        self.dsm_sum_constraint_build = BuildAction(
+            rule=dsm_sum_constraint_rule)
+
+
+#############################################################################
+#                      Delay Method
+
+class SinkDSMDelayBlock(SimpleBlock):
+    r"""Block for the linear relation of a DSM component and an electrical
+    bus using delay-method.Load shift must be compensated during the delay time
+
+    **The following constraints are created for method = 'delay':**
+
+    .. _SinkDSMDelay-equations:
+
+    .. math::
+
+
+        &
+        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} -
+        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \quad \forall t \\
+        &
+        (2) \quad DSM_{t}^{up} = \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
+        \quad \forall t \\
+        &
+        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \\
+        &
+        (4) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}  \leq E_{t}^{do}
+        \quad \forall tt \\
+        &
+        (5) \quad DSM_{tt}^{up}  + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}
+        \leq max \{ E_{t}^{up}, E_{t}^{do} \}\quad \forall tt \\
+        &
+
+
+
+   **Table: Symbols and attribute names of variables and parameters**
+
+
+        .. csv-table:: Variables (V) and Parameters (P)
+            :header: "symbol", "attribute", "type", "explanation"
+            :widths: 1, 1, 1, 1
+
+
+
+            ":math:`DSM_{t}^{up}` ",":py:obj:`
+            dsm_do[g,t,tt]`", "V","DSM up shift (additional load)"
+            ":math:`DSM_{t,tt}^{do}` ",":py:obj:`
+            dsm_up[g,t]`","V","DSM down shift (less load)"
+            ":math:`\dot{E}_{t}` ",":py:obj:`
+            flow[g,t]`","V","Energy flowing in from electrical bus"
+            ":math:`L`",":py:obj:`
+            delay_time`","P", "Delay time for load shift"
+            ":math:`demand_{t}` ",":py:obj:`
+            demand[t]`","P","Electrical demand series"
+            ":math:`E_{t}^{do}` ",":py:obj:`
+            capacity_down[tt]`","P","Capacity DSM down shift "
+            ":math:`E_{t}^{up}` ", ":py:obj:`
+            capacity_up[tt]`", "P","Capacity DSM up shift"
+
+
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        # for all DSM components get inflow from bus_elec
+        for n in group:
+            n.inflow = list(n.inputs)[0]
+
+        #  ************* SETS *********************************
+
+        # Set of DSM Components
+        self.dsm = Set(initialize=[g for g in group])
+
+        #  ************* VARIABLES *****************************
+
+        # Variable load shift down
+        self.dsm_do = Var(self.dsm, m.TIMESTEPS, m.TIMESTEPS, initialize=0,
+                          within=NonNegativeReals)
+
+        # Variable load shift up
+        self.dsm_up = Var(self.dsm, m.TIMESTEPS, initialize=0,
+                          within=NonNegativeReals)
+
+        #  ************* CONSTRAINTS *****************************
+
+        # Demand Production Relation
+        def _input_output_relation_rule(block):
+            """
+            Relation between input data and pyomo variables. The actual demand
+            after DSM. Generator Production == Demand +- DSM
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    # first time steps: 0 + delay time
+                    if t <= g.delay_time:
+
+                        # Generator loads from bus
+                        lhs = m.flow[g.inflow, g, t]
+                        # Demand +- DSM
+                        rhs = g.demand[t] + self.dsm_up[g, t] - sum(
+                            self.dsm_do[g, tt, t]
+                            for tt in range(t + g.delay_time + 1))
+
+                        # add constraint
+                        block.input_output_relation.add((g, t), (lhs == rhs))
+
+                    # main use case
+                    elif g.delay_time < t <=\
+                            m.TIMESTEPS._bounds[1] - g.delay_time:
+
+                        # Generator loads from bus
+                        lhs = m.flow[g.inflow, g, t]
+                        # Demand +- DSM
+                        rhs = g.demand[t] + self.dsm_up[g, t] - sum(
+                            self.dsm_do[g, tt, t]
+                            for tt in range(t - g.delay_time,
+                                            t + g.delay_time + 1))
+
+                        # add constraint
+                        block.input_output_relation.add((g, t), (lhs == rhs))
+
+                    # last time steps: end - delay time
+                    else:
+                        # Generator loads from bus
+                        lhs = m.flow[g.inflow, g, t]
+                        # Demand +- DSM
+                        rhs = g.demand[t] + self.dsm_up[g, t] - sum(
+                            self.dsm_do[g, tt, t]
+                            for tt in range(t - g.delay_time,
+                                            m.TIMESTEPS._bounds[1] + 1))
+
+                        # add constraint
+                        block.input_output_relation.add((g, t), (lhs == rhs))
+
+        self.input_output_relation = Constraint(group, m.TIMESTEPS,
+                                                noruleinit=True)
+        self.input_output_relation_build = BuildAction(
+            rule=_input_output_relation_rule)
+
+        # Equation 7
+        def dsm_up_down_constraint_rule(block):
+            """
+            Equation 7 by Zerrahn, Schill:
+            Every upward load shift has to be compensated by downward load
+            shifts in a defined time frame. Slightly modified equations for
+            the first and last time steps due to variable initialization.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    # first time steps: 0 + delay time
+                    if t <= g.delay_time:
+
+                        # DSM up
+                        lhs = self.dsm_up[g, t]
+                        # DSM down
+                        rhs = sum(self.dsm_do[g, t, tt]
+                                  for tt in range(t + g.delay_time + 1))
+
+                        # add constraint
+                        block.dsm_updo_constraint.add((g, t), (lhs == rhs))
+
+                    # main use case
+                    elif g.delay_time < t <=\
+                            m.TIMESTEPS._bounds[1] - g.delay_time:
+
+                        # DSM up
+                        lhs = self.dsm_up[g, t]
+                        # DSM down
+                        rhs = sum(self.dsm_do[g, t, tt]
+                                  for tt in range(t - g.delay_time,
+                                                  t + g.delay_time + 1))
+
+                        # add constraint
+                        block.dsm_updo_constraint.add((g, t), (lhs == rhs))
+
+                    # last time steps: end - delay time
+                    else:
+
+                        # DSM up
+                        lhs = self.dsm_up[g, t]
+                        # DSM down
+                        rhs = sum(self.dsm_do[g, t, tt]
+                                  for tt in range(t - g.delay_time,
+                                                  m.TIMESTEPS._bounds[1] + 1))
+
+                        # add constraint
+                        block.dsm_updo_constraint.add((g, t), (lhs == rhs))
+
+        self.dsm_updo_constraint = Constraint(group, m.TIMESTEPS,
+                                              noruleinit=True)
+        self.dsm_updo_constraint_build = BuildAction(
+            rule=dsm_up_down_constraint_rule)
+
+        # Equation 8
+        def dsm_up_constraint_rule(block):
+            """
+            Equation 8 by Zerrahn, Schill:
+            Realised upward load shift at time t has to be smaller than
+            upward DSM capacity at time t.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+                    # DSM up
+                    lhs = self.dsm_up[g, t]
+                    # Capacity dsm_up
+                    rhs = g.capacity_up[t]
+
+                    # add constraint
+                    block.dsm_up_constraint.add((g, t), (lhs <= rhs))
+
+        self.dsm_up_constraint = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
+        self.dsm_up_constraint_build = BuildAction(rule=dsm_up_constraint_rule)
+
+        # Equation 9
+        def dsm_do_constraint_rule(block):
+            """
+            Equation 9 by Zerrahn, Schill:
+            Realised downward load shift at time t has to be smaller than
+            downward DSM capacity at time t.
+            """
+
+            for tt in m.TIMESTEPS:
+                for g in group:
+
+                    # first times steps: 0 + delay
+                    if tt <= g.delay_time:
+
+                        # DSM down
+                        lhs = sum(self.dsm_do[g, t, tt]
+                                  for t in range(tt + g.delay_time + 1))
+                        # Capacity DSM down
+                        rhs = g.capacity_down[tt]
+
+                        # add constraint
+                        block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
+
+                    # main use case
+                    elif g.delay_time < tt <=\
+                            m.TIMESTEPS._bounds[1] - g.delay_time:
+
+                        # DSM down
+                        lhs = sum(self.dsm_do[g, t, tt]
+                                  for t in range(tt - g.delay_time,
+                                                 tt + g.delay_time + 1))
+                        # Capacity DSM down
+                        rhs = g.capacity_down[tt]
+
+                        # add constraint
+                        block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
+
+                    # last time steps: end - delay time
+                    else:
+
+                        # DSM down
+                        lhs = sum(self.dsm_do[g, t, tt]
+                                  for t in range(tt - g.delay_time,
+                                                 m.TIMESTEPS._bounds[1] + 1))
+                        # Capacity DSM down
+                        rhs = g.capacity_down[tt]
+
+                        # add constraint
+                        block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
+
+        self.dsm_do_constraint = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
+        self.dsm_do_constraint_build = BuildAction(
+            rule=dsm_do_constraint_rule)
+
+        # Equation 10
+        def c2_constraint_rule(block):
+            """
+            Equation 10 by Zerrahn, Schill:
+            The realised DSM up or down at time T has to be smaller than
+            the maximum downward or upward capacity at time T. Therefore in
+            total each DSM unit can only be shifted up OR down.
+            """
+
+            for tt in m.TIMESTEPS:
+                for g in group:
+
+                    # first times steps: 0 + delay time
+                    if tt <= g.delay_time:
+
+                        # DSM up/down
+                        lhs = self.dsm_up[g, tt] + sum(
+                            self.dsm_do[g, t, tt]
+                            for t in range(tt + g.delay_time + 1))
+                        # max capacity at tt
+                        rhs = max(g.capacity_up[tt], g.capacity_down[tt])
+
+                        # add constraint
+                        block.C2_constraint.add((g, tt), (lhs <= rhs))
+
+                    elif g.delay_time < tt <=\
+                            m.TIMESTEPS._bounds[1] - g.delay_time:
+
+                        # DSM up/down
+                        lhs = self.dsm_up[g, tt] + sum(
+                            self.dsm_do[g, t, tt]
+                            for t in range(tt - g.delay_time,
+                                           tt + g.delay_time + 1))
+                        # max capacity at tt
+                        rhs = max(g.capacity_up[tt], g.capacity_down[tt])
+
+                        # add constraint
+                        block.C2_constraint.add((g, tt), (lhs <= rhs))
+
+                    else:
+
+                        # DSM up/down
+                        lhs = self.dsm_up[g, tt] + sum(
+                            self.dsm_do[g, t, tt]
+                            for t in range(tt - g.delay_time,
+                                           m.TIMESTEPS._bounds[1] + 1))
+                        # max capacity at tt
+                        rhs = max(g.capacity_up[tt], g.capacity_down[tt])
+
+                        # add constraint
+                        block.C2_constraint.add((g, tt), (lhs <= rhs))
+
+        self.C2_constraint = Constraint(group, m.TIMESTEPS, noruleinit=True)
+        self.C2_constraint_build = BuildAction(rule=c2_constraint_rule)
