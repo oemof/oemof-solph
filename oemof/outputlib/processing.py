@@ -12,7 +12,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pandas as pd
-import warnings
 import sys
 from oemof.network import Node
 from oemof.tools.helpers import flatten

@@ -14,7 +14,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           Expression, BuildAction, Reals)
+                           BuildAction, Reals)
 import logging
 
 from oemof.solph.network import Bus, Transformer, Flow, Sink

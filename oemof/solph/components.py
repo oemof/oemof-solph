@@ -12,7 +12,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import numpy as np
-import warnings
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
