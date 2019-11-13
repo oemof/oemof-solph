@@ -30,21 +30,21 @@ c_e_GenericStorageBlock_balance_first(storage_no_invest)_:
 +1 GenericStorageBlock_capacity(storage_no_invest_0)
 -0.96999999999999997 flow(electricityBus_storage_no_invest_0)
 +1.1627906976744187 flow(storage_no_invest_electricityBus_0)
-= 34800
+= 33800
 
 c_e_GenericStorageBlock_balance(storage_no_invest_1)_:
 -0.87 GenericStorageBlock_capacity(storage_no_invest_0)
 +1 GenericStorageBlock_capacity(storage_no_invest_1)
 -0.96999999999999997 flow(electricityBus_storage_no_invest_1)
 +1.1627906976744187 flow(storage_no_invest_electricityBus_1)
-= 0
+= -1000
 
 c_e_GenericStorageBlock_balance(storage_no_invest_2)_:
 -0.87 GenericStorageBlock_capacity(storage_no_invest_1)
 +1 GenericStorageBlock_capacity(storage_no_invest_2)
 -0.96999999999999997 flow(electricityBus_storage_no_invest_2)
 +1.1627906976744187 flow(storage_no_invest_electricityBus_2)
-= 0
+= -1000
 
 c_e_GenericStorageBlock_balanced_cstr(storage_no_invest)_:
 +1 GenericStorageBlock_capacity(storage_no_invest_2)

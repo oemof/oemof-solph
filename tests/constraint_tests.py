@@ -225,6 +225,7 @@ class Constraint_Tests:
             outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
             nominal_storage_capacity=10e4,
             loss_rate=0.13,
+            fixed_losses=0.01,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             initial_storage_level=0.4)
@@ -243,6 +244,7 @@ class Constraint_Tests:
             outputs={bel: solph.Flow(variable_costs=24)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
+            fixed_losses=0.01,
             max_storage_level=0.9,
             min_storage_level=0.1,
             invest_relation_input_capacity=1/6,
