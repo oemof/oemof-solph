@@ -45,7 +45,7 @@ class GenericStorage(network.Transformer):
 
         .. math:: output\_invest =
                   capacity\_invest \cdot invest\_relation\_output\_capacity
-
+s
     invest_relation_input_output : numeric or None
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
@@ -277,7 +277,7 @@ class GenericStorageBlock(SimpleBlock):
     :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
     :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
                                 as share of
-                                :math:`E[t]`
+                                :math:`E(t)`
                                 per timestep
     :math:`\gamma(t)`           fixed loss of energy as :py:obj:`fixed_losses[t]`
                                 share of
