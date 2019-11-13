@@ -45,7 +45,7 @@ class GenericStorage(network.Transformer):
 
         .. math:: output\_invest =
                   capacity\_invest \cdot invest\_relation\_output\_capacity
-s
+
     invest_relation_input_output : numeric or None
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
