@@ -276,11 +276,13 @@ class GenericStorageBlock(SimpleBlock):
     :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
     :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
     :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
-                                (e.g. leakage) per time
+                                as share of
+                                :math:`E[t]`
+                                per timestep
     :math:`\gamma(t)`           fixed loss of energy as :py:obj:`fixed_losses[t]`
                                 share of
                                 :math:`E_{nom}` per
-                                time
+                                timestep
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
     :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
