@@ -314,47 +314,6 @@ class InvestmentFlow(SimpleBlock):
     and their value after optimization by
     :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
     investment costs with :attr:`*.investment_costs` etc.
-    
-    Der OffsetInvestmentFlow (OIF)
-    
-    Der OIF beinhaltet alle Variablen, die auch der InvestmentFlow vorsieht,
-    legiglich die ep_costs sind ohne Funktion. Zusaetzlich sind noch folgende 
-    Variablen vorgesehen
-    
-    offset      offset der Investitionsfunktion 
-    
-    slope       Steigerung der Kosten pro kW entspricht den ep_costs
-                
-    invmin      beschreibt die minimale Anlagenleistung 
-                bsp. 15 
-                --> es wird entweder 0 oder eine Leistung >= 15 installiert
-                
-    invmax      beschreibt das maximale Potenzial einer Technologie 
-    
-    fuer bereits existierende Anlagen muss eine eigene Komponente initialisiert
-    werden, diese koennen nicht wie bisher ueber 'existing' eingepflegt werden
-                 
-
-    The OIF contains all variables, which are used in the InvestmentFlow. 
-    Only the ep_costs are unused. Addtionally there are the four follwing 
-    variables, to describe the OIF's behavior
-
-
-    'invmin'    the smallest possible facility; for example: 15 
-                --> the installed power will be 0 or >= 15 
-                
-    
-    'invmax'    The maximum power potential of the technology
-    
-    'offset'    offset value for the investment 
-                
-    'slope'     slope of the linear investment funktion, like the ep_costs
-                in a normal investment calculation
-                
-     already existing facilities have to be implemented with a own component
-     it is not possible to integrate them with 'exixting'
-   
-    
     """
 
     def __init__(self, *args, **kwargs):
@@ -392,45 +351,57 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if (
                 g[2].min[0] != 0 or len(g[2].min) > 1)])
 
-    
-        # #################### new #####################
-        '''
-        Um einen Nullinvest moeglich zu machen muss eine Statusvariable fuer den
-        Invest erzeugt werden, da ansonsten der offset immer investiert wuerde
-        
-        To make a investment of 0 possible it is necessary to generate a status
-        variable for the invest. Otherwise the offset would always be investet 
-        '''    
-        
-        self.FLOW_INVESTSTATUS = Set(initialize=[(g[0], g[1]) for g in group])
-        self.FLOW_INVESTMAX = Set(initialize=[(g[0], g[1]) for g in group])
-        self.FLOW_INVESTMIN = Set(initialize=[(g[0], g[1]) for g in group])
-        
-        self.instat = Var(self.FLOW_INVESTSTATUS, within = Binary)         
-        
-        
-    
-        # ######################### VARIABLES #################################
-        def _investvar_bound_rule(block, i, o):
-            """Rule definition for bounds of invest variable.
-            """
-            return (m.flows[i, o].investment.minimum,
-                    m.flows[i, o].investment.maximum)
-        # create variable bounded for flows with investement attribute
-        self.invest = Var(self.FLOWS, within=NonNegativeReals,
-                          bounds=_investvar_bound_rule)
+        self.NONCONVEXINVESTFLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group
+                        if g[2].investment.nonconvex is True])
 
+        # ######################### VARIABLES #################################
+
+        # create variable bounded for flows with investement attribute
+        self.invest = Var(self.FLOWS, within=NonNegativeReals)
+
+        if self.NONCONVEXINVESTFLOWS:
+            self.status = Var(self.FLOWS, within=Binary)
         # ######################### CONSTRAINTS ###############################
 
-        # TODO: Add gradient constraints
+        def _min_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment
+            """
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (m.flows[i, o].investment.minimum <= self.invest[i, o])
+            else:
+                expr = (m.flows[i, o].investment.minimum *
+                        self.status[i, o] <= self.invest[i, o])
+            return expr
+        self.minimum_rule = Constraint(self.FLOWS, rule=_min_invest_rule)
+
+
+        def _max_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment
+            """
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (self.invest[i, o] <= m.flows[i, o].investment.maximum)
+            else:
+                expr = (self.invest[i, o] <=
+                        m.flows[i, o].investment.maximum * self.status[i, o])
+
+            return expr
+        self.maximum_rule = Constraint(self.FLOWS, rule=_max_invest_rule)
+
+
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
             of investment flow to (normed) actual value
             """
-            return (m.flow[i, o, t] == (
-                (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].actual_value[t]))
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (m.flow[i, o, t] == (
+                        (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                        m.flows[i, o].actual_value[t]))
+            else:
+                expr = (m.flow[i, o, t] == ((self.invest[i, o]) *
+                        m.flows[i, o].actual_value[t]))
+            return expr
         self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
                                 rule=_investflow_fixed_rule)
 
@@ -438,9 +409,13 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting an upper bound of flow
             variable in investment case.
             """
-            expr = (m.flow[i, o, t] <= (
-                (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].max[t]))
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (m.flow[i, o, t] <= (
+                    (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                     m.flows[i, o].max[t]))
+            else:
+                expr = (m.flow[i, o, t] <= ((self.invest[i, o]) *
+                        m.flows[i, o].max[t]))
             return expr
         self.max = Constraint(self.FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
@@ -449,9 +424,13 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting a lower bound on flow
             variable in investment case.
             """
-            expr = (m.flow[i, o, t] >= (
-                (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].min[t]))
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (m.flow[i, o, t] >= (
+                    (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                     m.flows[i, o].min[t]))
+            else:
+                expr = (m.flow[i, o, t] >= ((self.invest[i, o]) *
+                        m.flows[i, o].min[t]))
             return expr
         self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                               rule=_min_investflow_rule)
@@ -460,10 +439,15 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
-            expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
-                        for t in m.TIMESTEPS) <=
-                    m.flows[i, o].summed_max * (
-                        self.invest[i, o] + m.flows[i, o].investment.existing))
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
+                            for t in m.TIMESTEPS) <=
+                        m.flows[i, o].summed_max * (
+                            self.invest[i, o] + m.flows[i, o].investment.existing))
+            else:
+                expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
+                            for t in m.TIMESTEPS)
+                        <= m.flows[i, o].summed_max * (self.invest[i, o]))
             return expr
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS,
                                      rule=_summed_max_investflow_rule)
@@ -472,76 +456,18 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
-            expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
-                        for t in m.TIMESTEPS) >=
-                    ((m.flows[i, o].investment.existing + self.invest[i, o]) *
-                     m.flows[i, o].summed_min))
+            if not m.flows[i, o].investment.nonconvex:
+                expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
+                            for t in m.TIMESTEPS) >=
+                        ((m.flows[i, o].investment.existing + self.invest[i, o]) *
+                         m.flows[i, o].summed_min))
+            else:
+                expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
+                            for t in m.TIMESTEPS) >=
+                        ((self.invest[i, o]) * m.flows[i, o].summed_min))
             return expr
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
-
-
-
-        ############################# new code #############################
-        
-            
-        def potential_limit(block, i, o):
-            """ Hier wird das Potenzial auf den vorgegebenen Maximalwert begrenzt
-                Weiterhin wird der investstatus mit dem invest verknuepft
-                
-                Wird nur bei einer OIF Rechnung aktiv
-                
-                
-                Limit the potential to the specified value and connect the 
-                investment status to the investment
-                
-                Only active with an OIF calculation
-            """
-            if m.flows[i, o].offset is not 0:
-                    expr = 0
-            
-                    x = (self.invest[i, o]) / (m.flows[i, o].invmax)
-            
-                    z = (1-self.instat[i, o])
-
-                    expr += (z-x)
-                    return expr >= 0
-            else: 
-                    return (self.invest[i, o]>=0)
-            
-        self.lim_max = Constraint(   
-            self.FLOW_INVESTMAX, rule=potential_limit) 
-        
-        
-        def smallest_fac(block, i, o):
-            """ Hier wird das der vorgegebene Minimalwert fuer den invest 
-                eingebunden
-                
-                Wird nur bei einer OIF Rechnung aktiv
-                
-                
-                Set the smallest possible facility to the specified invmin
-                
-                Only active with an OIF calculation
-            """
-            
-            if m.flows[i, o].offset is not 0:
-                    expr = 0
-            
-                    x = self.invest[i, o]
-           
-                    z = m.flows[i, o].invmin * (1-self.instat[i, o])
-
-                    expr += (x-z)
-                    return expr >= 0
-            else: 
-                    return (self.invest[i, o]>=0)          
-        self.lim_min = Constraint(
-            self.FLOW_INVESTMIN, rule=smallest_fac) 
-                
-        
-        ######################### end of new code ###########################
-
 
     def _objective_expression(self):
         r""" Objective expression for flows with investment attribute of type
@@ -555,24 +481,18 @@ class InvestmentFlow(SimpleBlock):
         investment_costs = 0
 
         for i, o in self.FLOWS:
-            
-            #investment_costs += ((self.invest[i, o] * m.flows[i, o].slope) + (m.flows[i, o].offset * self.instat[i, o]))
+            if m.flows[i, o].investment.ep_costs is not None:
+                if not m.flows[i, o].investment.nonconvex:
 
-
-            # if the attribute ep_costs is set to a value, which is not 0
-            # a normal oemof investment calculation is executed
-            # if there are no ep_costs specified, an OffsetInvestment will be
-            # calculated
-            if m.flows[i, o].offset is not 0:
-                
-                investment_costs += ((self.invest[i, o] * m.flows[i, o].slope) + m.flows[i, o].offset - (m.flows[i, o].offset * self.instat[i, o]))
- 
-                
+                    investment_costs += (self.invest[i, o] *
+                                         m.flows[i, o].investment.ep_costs)
+                else:
+                    investment_costs += (self.invest[i, o] *
+                                         m.flows[i, o].investment.ep_costs
+                                         + self.status[i, o] *
+                                         m.flows[i, o].investment.offset)
             else:
-                
-                investment_costs += (self.invest[i, o] *
-                                     m.flows[i, o].investment.ep_costs)  
-            
+                raise ValueError("Missing value for investment costs!")
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
