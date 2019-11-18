@@ -10,11 +10,7 @@ available from its original location oemof/tests/test_installation.py
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-import os
-import sys
 import logging
-
-import nose
 
 from oemof import solph
 import pandas as pd

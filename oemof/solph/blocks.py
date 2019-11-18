@@ -59,13 +59,15 @@ class Flow(SimpleBlock):
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
-    Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
+    Negative gradient constraint
+    :attr:`om.Flow.negative_gradient_constr[i, o]`:
       .. math:: flow(i, o, t-1) - flow(i, o, t) \geq \
         negative\_gradient(i, o, t), \\
         \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
         \forall t \in \textrm{TIMESTEPS}.
 
-    Positive gradient constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
+    Positive gradient constraint
+    :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
             positive\__gradient(i, o, t), \\
             \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
@@ -375,7 +377,6 @@ class InvestmentFlow(SimpleBlock):
             return expr
         self.minimum_rule = Constraint(self.FLOWS, rule=_min_invest_rule)
 
-
         def _max_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
             """
@@ -388,15 +389,14 @@ class InvestmentFlow(SimpleBlock):
             return expr
         self.maximum_rule = Constraint(self.FLOWS, rule=_max_invest_rule)
 
-
-
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
             of investment flow to (normed) actual value
             """
             if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flow[i, o, t] == (
-                        (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                        (m.flows[i, o].investment.existing +
+                         self.invest[i, o]) *
                         m.flows[i, o].actual_value[t]))
             else:
                 expr = (m.flow[i, o, t] == ((self.invest[i, o]) *
@@ -412,7 +412,7 @@ class InvestmentFlow(SimpleBlock):
             if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flow[i, o, t] <= (
                     (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                     m.flows[i, o].max[t]))
+                    m.flows[i, o].max[t]))
             else:
                 expr = (m.flow[i, o, t] <= ((self.invest[i, o]) *
                         m.flows[i, o].max[t]))
@@ -427,7 +427,7 @@ class InvestmentFlow(SimpleBlock):
             if not m.flows[i, o].investment.nonconvex:
                 expr = (m.flow[i, o, t] >= (
                     (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                     m.flows[i, o].min[t]))
+                    m.flows[i, o].min[t]))
             else:
                 expr = (m.flow[i, o, t] >= ((self.invest[i, o]) *
                         m.flows[i, o].min[t]))
@@ -443,7 +443,8 @@ class InvestmentFlow(SimpleBlock):
                 expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                             for t in m.TIMESTEPS) <=
                         m.flows[i, o].summed_max * (
-                            self.invest[i, o] + m.flows[i, o].investment.existing))
+                            self.invest[i, o] +
+                            m.flows[i, o].investment.existing))
             else:
                 expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                             for t in m.TIMESTEPS)
@@ -459,7 +460,8 @@ class InvestmentFlow(SimpleBlock):
             if not m.flows[i, o].investment.nonconvex:
                 expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                             for t in m.TIMESTEPS) >=
-                        ((m.flows[i, o].investment.existing + self.invest[i, o]) *
+                        ((m.flows[i, o].investment.existing +
+                          self.invest[i, o]) *
                          m.flows[i, o].summed_min))
             else:
                 expr = (sum(m.flow[i, o, t] * m.timeincrement[t]

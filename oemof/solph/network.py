@@ -144,6 +144,30 @@ class Flow(on.Edge):
     >>> f1.max[1]
     0.99
 
+    ################ new parameters ##############################
+
+    
+    offset      offset der Investitionsfunktion 
+    
+    slope       Steigerung der Kosten pro kW entspricht den ep_costs
+                
+    invmin      beschreibt die minimale Anlagenleistung 
+                bsp. 15 
+                --> es wird entweder 0 oder eine Leistung >= 15 installiert
+                
+    invmax      beschreibt das maximale Potenzial einer Technologie 
+ 
+
+    'invmin'    the smallest possible facility; for example: 15 
+                --> the installed power will be 0 or >= 15 
+    
+    'invmax'    The maximum power potential of the technology
+    
+    'offset'    offset value for the investment 
+                
+    'slope'     slope of the linear investment funktion, like the ep_costs
+                in a normal investment calculation
+                
     """
 
     def __init__(self, **kwargs):
@@ -156,12 +180,20 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer', 'fixed']
+                   'investment', 'nonconvex', 'integer', 'fixed',
+                   'offset',
+                   'slope',
+                   'invmin',
+                   'invmax']
         sequences = ['actual_value', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
+                    'offset': 0,
+                    'solpe' : 0,
+                    'invmin' : 0,
+                    'invmax' : 10000000,
                     }
         keys = [k for k in kwargs if k != 'label']
 
@@ -203,18 +235,19 @@ class Bus(on.Bus):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
 
-
     def constraint_group(self):
         if self.balanced:
             return blocks.Bus
         else:
             return None
 
+
 class Sink(on.Sink):
     """An object with one input flow.
     """
     def constraint_group(self):
         pass
+
 
 class Source(on.Source):
     """An object with one output flow.
@@ -285,7 +318,6 @@ class Transformer(on.Transformer):
 
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
-
 
     def constraint_group(self):
         return blocks.Transformer

@@ -17,6 +17,10 @@ New features
 New components
 ##############
 
+* custom component: SinkDSM.
+    Demand Side Management component which modifies input demand.
+        <solph.custom.SinkDSM>
+
 * something
 
 Documentation
@@ -42,10 +46,14 @@ Testing
 Other changes
 #############
 
-* something
+* The license hase been changed from GPLv3 to the MIT license
+* The BaseModel has been revised (test, docstring, warnings, internal naming)
+  (`PR #605 <https://github.com/oemof/oemof/issues/605>`_)
 
 Contributors
 ############
 
 * Johannes Röder
 * Patrik Schönfeldt
+* Julian Endres
+* Uwe Krien
