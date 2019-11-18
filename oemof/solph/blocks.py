@@ -314,6 +314,47 @@ class InvestmentFlow(SimpleBlock):
     and their value after optimization by
     :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
     investment costs with :attr:`*.investment_costs` etc.
+    
+    Der OffsetInvestmentFlow (OIF)
+    
+    Der OIF beinhaltet alle Variablen, die auch der InvestmentFlow vorsieht,
+    legiglich die ep_costs sind ohne Funktion. Zusaetzlich sind noch folgende 
+    Variablen vorgesehen
+    
+    offset      offset der Investitionsfunktion 
+    
+    slope       Steigerung der Kosten pro kW entspricht den ep_costs
+                
+    invmin      beschreibt die minimale Anlagenleistung 
+                bsp. 15 
+                --> es wird entweder 0 oder eine Leistung >= 15 installiert
+                
+    invmax      beschreibt das maximale Potenzial einer Technologie 
+    
+    fuer bereits existierende Anlagen muss eine eigene Komponente initialisiert
+    werden, diese koennen nicht wie bisher ueber 'existing' eingepflegt werden
+                 
+
+    The OIF contains all variables, which are used in the InvestmentFlow. 
+    Only the ep_costs are unused. Addtionally there are the four follwing 
+    variables, to describe the OIF's behavior
+
+
+    'invmin'    the smallest possible facility; for example: 15 
+                --> the installed power will be 0 or >= 15 
+                
+    
+    'invmax'    The maximum power potential of the technology
+    
+    'offset'    offset value for the investment 
+                
+    'slope'     slope of the linear investment funktion, like the ep_costs
+                in a normal investment calculation
+                
+     already existing facilities have to be implemented with a own component
+     it is not possible to integrate them with 'exixting'
+   
+    
     """
 
     def __init__(self, *args, **kwargs):
@@ -351,6 +392,24 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if (
                 g[2].min[0] != 0 or len(g[2].min) > 1)])
 
+    
+        # #################### new #####################
+        '''
+        Um einen Nullinvest moeglich zu machen muss eine Statusvariable fuer den
+        Invest erzeugt werden, da ansonsten der offset immer investiert wuerde
+        
+        To make a investment of 0 possible it is necessary to generate a status
+        variable for the invest. Otherwise the offset would always be investet 
+        '''    
+        
+        self.FLOW_INVESTSTATUS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.FLOW_INVESTMAX = Set(initialize=[(g[0], g[1]) for g in group])
+        self.FLOW_INVESTMIN = Set(initialize=[(g[0], g[1]) for g in group])
+        
+        self.instat = Var(self.FLOW_INVESTSTATUS, within = Binary)         
+        
+        
+    
         # ######################### VARIABLES #################################
         def _investvar_bound_rule(block, i, o):
             """Rule definition for bounds of invest variable.
@@ -421,6 +480,69 @@ class InvestmentFlow(SimpleBlock):
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
                                      rule=_summed_min_investflow_rule)
 
+
+
+        ############################# new code #############################
+        
+            
+        def potential_limit(block, i, o):
+            """ Hier wird das Potenzial auf den vorgegebenen Maximalwert begrenzt
+                Weiterhin wird der investstatus mit dem invest verknuepft
+                
+                Wird nur bei einer OIF Rechnung aktiv
+                
+                
+                Limit the potential to the specified value and connect the 
+                investment status to the investment
+                
+                Only active with an OIF calculation
+            """
+            if m.flows[i, o].offset is not 0:
+                    expr = 0
+            
+                    x = (self.invest[i, o]) / (m.flows[i, o].invmax)
+            
+                    z = (1-self.instat[i, o])
+
+                    expr += (z-x)
+                    return expr >= 0
+            else: 
+                    return (self.invest[i, o]>=0)
+            
+        self.lim_max = Constraint(   
+            self.FLOW_INVESTMAX, rule=potential_limit) 
+        
+        
+        def smallest_fac(block, i, o):
+            """ Hier wird das der vorgegebene Minimalwert fuer den invest 
+                eingebunden
+                
+                Wird nur bei einer OIF Rechnung aktiv
+                
+                
+                Set the smallest possible facility to the specified invmin
+                
+                Only active with an OIF calculation
+            """
+            
+            if m.flows[i, o].offset is not 0:
+                    expr = 0
+            
+                    x = self.invest[i, o]
+           
+                    z = m.flows[i, o].invmin * (1-self.instat[i, o])
+
+                    expr += (x-z)
+                    return expr >= 0
+            else: 
+                    return (self.invest[i, o]>=0)          
+        self.lim_min = Constraint(
+            self.FLOW_INVESTMIN, rule=smallest_fac) 
+                
+        
+        ######################### end of new code ###########################
+
+
     def _objective_expression(self):
         r""" Objective expression for flows with investment attribute of type
         class:`.Investment`. The returned costs are fixed, variable and
@@ -433,11 +555,24 @@ class InvestmentFlow(SimpleBlock):
         investment_costs = 0
 
         for i, o in self.FLOWS:
-            if m.flows[i, o].investment.ep_costs is not None:
-                investment_costs += (self.invest[i, o] *
-                                     m.flows[i, o].investment.ep_costs)
+            
+            #investment_costs += ((self.invest[i, o] * m.flows[i, o].slope) + (m.flows[i, o].offset * self.instat[i, o]))
+
+
+            # if the attribute ep_costs is set to a value, which is not 0
+            # a normal oemof investment calculation is executed
+            # if there are no ep_costs specified, an OffsetInvestment will be
+            # calculated
+            if m.flows[i, o].offset is not 0:
+                
+                investment_costs += ((self.invest[i, o] * m.flows[i, o].slope) + m.flows[i, o].offset - (m.flows[i, o].offset * self.instat[i, o]))
+ 
+                
             else:
-                raise ValueError("Missing value for investment costs!")
+                
+                investment_costs += (self.invest[i, o] *
+                                     m.flows[i, o].investment.ep_costs)  
+            
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
