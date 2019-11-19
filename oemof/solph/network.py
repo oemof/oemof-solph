@@ -180,21 +180,12 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer', 'fixed',
-                   'offset',
-                   'slope',
-                   'invmin',
-                   'invmax']
+                   'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
-                    'negative_gradient': {'ub': None, 'costs': 0},
-                    'offset': 0,
-                    'solpe' : 0,
-                    'invmin' : 0,
-                    'invmax' : 10000000,
-                    }
+                    'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
 
         for attribute in set(scalars + sequences + dictionaries + keys):
