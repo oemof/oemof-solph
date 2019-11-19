@@ -143,31 +143,6 @@ class Flow(on.Edge):
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
     0.99
-
-    ################ new parameters ##############################
-
-    
-    offset      offset der Investitionsfunktion 
-    
-    slope       Steigerung der Kosten pro kW entspricht den ep_costs
-                
-    invmin      beschreibt die minimale Anlagenleistung 
-                bsp. 15 
-                --> es wird entweder 0 oder eine Leistung >= 15 installiert
-                
-    invmax      beschreibt das maximale Potenzial einer Technologie 
- 
-
-    'invmin'    the smallest possible facility; for example: 15 
-                --> the installed power will be 0 or >= 15 
-    
-    'invmax'    The maximum power potential of the technology
-    
-    'offset'    offset value for the investment 
-                
-    'slope'     slope of the linear investment funktion, like the ep_costs
-                in a normal investment calculation
-                
     """
 
     def __init__(self, **kwargs):
