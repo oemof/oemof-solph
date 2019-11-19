@@ -366,7 +366,7 @@ class InvestmentFlow(SimpleBlock):
             if (i, o) in self.CONVEX_INVESTFLOWS:
                 return (m.flows[i, o].investment.minimum,
                         m.flows[i, o].investment.maximum)
-            if (i, o) in self.NON_CONVEX_INVESTFLOWS:
+            elif (i, o) in self.NON_CONVEX_INVESTFLOWS:
                 return 0, m.flows[i, o].investment.maximum
 
         # create invest variable for a investment flow
@@ -374,14 +374,14 @@ class InvestmentFlow(SimpleBlock):
                           bounds=_investvar_bound_rule)
 
         # create status variable for a non-convex investment flow
-        self.status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
+        self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
         # ######################### CONSTRAINTS ###############################
 
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
             """
             expr = (m.flows[i, o].investment.minimum *
-                    self.status[i, o] <= self.invest[i, o])
+                    self.invest_status[i, o] <= self.invest[i, o])
             return expr
         self.minimum_rule = Constraint(
             self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
@@ -390,7 +390,7 @@ class InvestmentFlow(SimpleBlock):
             """Rule definition for applying a minimum investment
             """
             expr = (self.invest[i, o] <=
-                    m.flows[i, o].investment.maximum * self.status[i, o])
+                    m.flows[i, o].investment.maximum * self.invest_status[i, o])
             return expr
         self.maximum_rule = Constraint(
             self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)
@@ -473,8 +473,8 @@ class InvestmentFlow(SimpleBlock):
                         self.invest[i, o] * m.flows[i, o].investment.ep_costs)
                 elif (i, o) in self.NON_CONVEX_INVESTFLOWS:
                     investment_costs += (
-                        self.invest[i, o] * m.flows[i, o].investment.ep_costs +
-                        self.status[i, o] * m.flows[i, o].investment.offset)
+                            self.invest[i, o] * m.flows[i, o].investment.ep_costs +
+                            self.invest_status[i, o] * m.flows[i, o].investment.offset)
             else:
                 raise ValueError(
                     "Missing value for investment costs in flow {0}".format(
