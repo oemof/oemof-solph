@@ -85,8 +85,21 @@ def test_generic_storage_with_old_parameters():
             **{
                 "label": "`GenericStorage` with `{}`".format(parameter),
                 parameter: deprecated[parameter],
-            }
-        )
+            })
+
+
+def test_generic_storage_with_non_convex_investment():
+    """No NonConvexFlow for Inflow defined."""
+    with tools.assert_raises_regexp(
+            AttributeError, "Values for 'offset' and 'existing' are given"):
+        bel = solph.Bus()
+        solph.components.GenericStorage(
+            label='storage4',
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            investment=solph.Investment(nonconvex=True, existing=5))
 
 
 # ********* OffsetTransformer *********
