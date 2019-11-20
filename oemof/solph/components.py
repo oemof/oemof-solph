@@ -717,19 +717,13 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         investment_costs = 0
 
-        for n in self.INVESTSTORAGES:
-            if n.investment.ep_costs is not None:
-                if n in self.CONVEX_INVESTSTORAGES:
-                    investment_costs += (
-                        self.invest[n] * n.investment.ep_costs)
-                elif n in self.NON_CONVEX_INVESTSTORAGES:
-                    investment_costs += (
-                            self.invest[n] * n.investment.ep_costs +
-                            self.invest_status[n] * n.investment.offset)
-            else:
-                raise ValueError(
-                    "Missing value for investment costs in storage {0}".format(
-                        n))
+        for n in self.CONVEX_INVESTSTORAGES:
+            investment_costs += (
+                self.invest[n] * n.investment.ep_costs)
+        for n in self.NON_CONVEX_INVESTSTORAGES:
+            investment_costs += (
+                    self.invest[n] * n.investment.ep_costs +
+                    self.invest_status[n] * n.investment.offset)
         self.investment_costs = Expression(expr=investment_costs)
 
         return investment_costs
