@@ -473,8 +473,10 @@ class InvestmentFlow(SimpleBlock):
                         self.invest[i, o] * m.flows[i, o].investment.ep_costs)
                 elif (i, o) in self.NON_CONVEX_INVESTFLOWS:
                     investment_costs += (
-                            self.invest[i, o] * m.flows[i, o].investment.ep_costs +
-                            self.invest_status[i, o] * m.flows[i, o].investment.offset)
+                            self.invest[i, o] *
+                            m.flows[i, o].investment.ep_costs +
+                            self.invest_status[i, o] *
+                            m.flows[i, o].investment.offset)
             else:
                 raise ValueError(
                     "Missing value for investment costs in flow {0}".format(

@@ -78,7 +78,7 @@ def test_generic_storage_with_old_parameters():
         # Make sure every parameter used is mentioned in the exception's
         # message.
         assert parameter in str(caught.exception)
-        # Make sure an `AttributeError` is raised for each deprecated parameter.
+        # Make sure an `AttributeError` is raised for each deprecated parameter
         tools.assert_raises(
             AttributeError,
             solph.components.GenericStorage,
