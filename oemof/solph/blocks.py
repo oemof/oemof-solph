@@ -253,14 +253,14 @@ class InvestmentFlow(SimpleBlock):
     FIXED_FLOWS
         A set of flow with the attribute :attr:`fixed` set to `True`
     SUMMED_MAX_FLOWS
-        A subset of set INVESTFLOWS with flows with the attribute :attr:`summed_max`
-        being not None.
+        A subset of set INVESTFLOWS with flows with the attribute
+        :attr:`summed_max` being not None.
     SUMMED_MIN_FLOWS
         A subset of set INVESTFLOWS with flows with the attribute
         :attr:`summed_min` being not None.
     MIN_FLOWS
-        A subset of INVESTFLOWS with flows having set a value of not None in the
-        first timestep.
+        A subset of INVESTFLOWS with flows having set a value of not None in
+        the first timestep.
 
     **The following variables are created:**
 
@@ -389,8 +389,8 @@ class InvestmentFlow(SimpleBlock):
         def _max_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
             """
-            expr = (self.invest[i, o] <=
-                    m.flows[i, o].investment.maximum * self.invest_status[i, o])
+            expr = self.invest[i, o] <= (
+                m.flows[i, o].investment.maximum * self.invest_status[i, o])
             return expr
         self.maximum_rule = Constraint(
             self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)

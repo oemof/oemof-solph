@@ -688,7 +688,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.min_capacity = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS,
             rule=_min_capacity_invest_rule)
-       
+
         def maximum_invest_limit(block, n):
             """
             Constraint for the maximal investment in non convex investment
@@ -700,13 +700,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             self.NON_CONVEX_INVESTSTORAGES, rule=maximum_invest_limit)
 
         def smallest_invest(block, n):
-            """ Hier wird das der vorgegebene Minimalwert fuer den invest 
-                eingebunden
-                nur bei einem offset Investment aktiv
-                
-                Here the invests specified minimum value is implemented
-                
-                only aktive with an offset investment
+            """
+            Constraint for the minimal investment in non convex investment
+            storage if the invest is greater than 0. So the invest variable
+            can be either 0 or greater than the minimum.
             """
             return self.invest[n] - (n.investment.minimum *
                                      self.invest_status[n]) >= 0
