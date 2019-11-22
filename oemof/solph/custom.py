@@ -1022,19 +1022,13 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
         #  ************* VARIABLES *****************************
 
-        def dsm_capacity_bound_rule(block):
-            """Rule definition for bounds(capacity) of DSM - Variable [g]
-            in timestep t"""
-            for t in m.TIMESTEPS:
-                for g in group:
-                    bounds = (-g.capacity_down[t], g.capacity_up[t])
-                    return bounds
+        # Variable load shift down
+        self.dsm_do = Var(self.dsm, m.TIMESTEPS, initialize=0,
+                          within=NonNegativeReals)
 
-        # Variable load shift down (MWh)
-        self.dsm_up_down = Var(self.dsm, m.TIMESTEPS,
-                               initialize=0,
-                               within=Reals,
-                               bounds=dsm_capacity_bound_rule)
+        # Variable load shift up
+        self.dsm_up = Var(self.dsm, m.TIMESTEPS, initialize=0,
+                          within=NonNegativeReals)
 
         #  ************* CONSTRAINTS *****************************
 
@@ -1050,8 +1044,8 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # Generator loads directly from bus
                     lhs = m.flow[g.inflow, g, t]
 
-                    # Demand +- DSM
-                    rhs = g.demand[t] + self.dsm_up_down[g, t]
+                    # Demand + DSM_up - DSM_down
+                    rhs = g.demand[t] + self.dsm_up[g, t] - self.dsm_do[g, t]
 
                     # add constraint
                     block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1060,6 +1054,48 @@ class SinkDSMIntervalBlock(SimpleBlock):
                                                 noruleinit=True)
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule)
+
+        # Upper bounds relation
+        def dsm_up_constraint_rule(block):
+            """
+            Realised upward load shift at time t has to be smaller than
+            upward DSM capacity at time t.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+                    # DSM up
+                    lhs = self.dsm_up[g, t]
+                    # Capacity dsm_up
+                    rhs = g.capacity_up[t]
+
+                    # add constraint
+                    block.dsm_up_constraint.add((g, t), (lhs <= rhs))
+
+        self.dsm_up_constraint = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
+        self.dsm_up_constraint_build = BuildAction(rule=dsm_up_constraint_rule)
+
+        # Upper bounds relation
+        def dsm_down_constraint_rule(block):
+            """
+            Realised downward load shift at time t has to be smaller than
+            downward DSM capacity at time t.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+                    # DSM down
+                    lhs = self.dsm_do[g, t]
+                    # Capacity dsm_down
+                    rhs = g.capacity_down[t]
+
+                    # add constraint
+                    block.dsm_down_constraint.add((g, t), (lhs <= rhs))
+
+        self.dsm_down_constraint = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
+        self.dsm_down_constraint_build = BuildAction(rule=dsm_down_constraint_rule)
 
         # DSM Compensation
         def dsm_sum_constraint_rule(block):
@@ -1076,12 +1112,15 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # full interval
                     if (t // interval) < (m.TIMESTEPS._bounds[1] // interval):
                         # DSM up/down
-                        lhs = sum(self.dsm_up_down[g, tt]
+                        lhs = sum(self.dsm_up[g, tt]
                                   for tt in range((t // interval) * interval,
                                                   (t // interval + 1) *
                                                   interval, 1))
                         # value
-                        rhs = 0
+                        rhs = sum(self.dsm_do[g, tt]
+                                  for tt in range((t // interval) * interval,
+                                                  (t // interval + 1) *
+                                                  interval, 1))
                         # add constraint
 
                         block.dsm_sum_constraint.add((g, t), (lhs == rhs))
@@ -1089,12 +1128,15 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # incomplete interval
                     else:
                         # DSM up/down
-                        lhs = sum(self.dsm_up_down[g, tt]
+                        lhs = sum(self.dsm_up[g, tt]
                                   for tt in range((t // interval) * interval,
                                                   m.TIMESTEPS._bounds[1] +
                                                   1, 1))
                         # value
-                        rhs = 0
+                        rhs = sum(self.dsm_do[g, tt]
+                                  for tt in range((t // interval) * interval,
+                                                  m.TIMESTEPS._bounds[1] +
+                                                  1, 1))
 
                         # add constraint
                         block.dsm_sum_constraint.add((g, t), (lhs == rhs))
