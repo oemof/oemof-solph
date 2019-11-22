@@ -57,3 +57,4 @@ Contributors
 * Patrik Schönfeldt
 * Julian Endres
 * Uwe Krien
+* Guido Pleßmann
