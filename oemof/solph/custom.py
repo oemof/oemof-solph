@@ -1097,55 +1097,39 @@ class SinkDSMIntervalBlock(SimpleBlock):
                                             noruleinit=True)
         self.dsm_down_constraint_build = BuildAction(rule=dsm_down_constraint_rule)
 
-        # DSM Compensation
         def dsm_sum_constraint_rule(block):
             """
             Relation to compensate the total amount of positive
             and negative DSM in between the shift_interval.
-            2 Cases: A full interval is optimised or an incomplete one.
+            This constraint is building balance in full intervals starting
+            with index 0. The last interval might not be full.
             """
-            for t in m.TIMESTEPS:
-                for g in group:
 
-                    interval = g.shift_interval
+            for g in group:
+                intervals = range(m.TIMESTEPS.value_list[0],
+                                  m.TIMESTEPS.value_list[-1],
+                                  g.shift_interval)
 
-                    # full interval
-                    if (t // interval) < (m.TIMESTEPS._bounds[1] // interval):
-                        # DSM up/down
-                        lhs = sum(self.dsm_up[g, tt]
-                                  for tt in range((t // interval) * interval,
-                                                  (t // interval + 1) *
-                                                  interval, 1))
-                        # value
-                        rhs = sum(self.dsm_do[g, tt]
-                                  for tt in range((t // interval) * interval,
-                                                  (t // interval + 1) *
-                                                  interval, 1))
-                        # add constraint
-
-                        block.dsm_sum_constraint.add((g, t), (lhs == rhs))
-
-                    # incomplete interval
+                for interval in intervals:
+                    if (interval + g.shift_interval - 1) > m.TIMESTEPS.value_list[-1]:
+                        timesteps = range(interval, m.TIMESTEPS.value_list[-1] + 1)
                     else:
-                        # DSM up/down
-                        lhs = sum(self.dsm_up[g, tt]
-                                  for tt in range((t // interval) * interval,
-                                                  m.TIMESTEPS._bounds[1] +
-                                                  1, 1))
-                        # value
-                        rhs = sum(self.dsm_do[g, tt]
-                                  for tt in range((t // interval) * interval,
-                                                  m.TIMESTEPS._bounds[1] +
-                                                  1, 1))
+                        timesteps = range(interval, interval + g.shift_interval)
 
-                        # add constraint
-                        block.dsm_sum_constraint.add((g, t), (lhs == rhs))
+                    # DSM up/down
+                    lhs = sum(self.dsm_up[g, tt]
+                              for tt in timesteps)
+                    # value
+                    rhs = sum(self.dsm_do[g, tt]
+                              for tt in timesteps)
+
+                    # add constraint
+                    block.dsm_sum_constraint.add((g, interval), (lhs == rhs))
 
         self.dsm_sum_constraint = Constraint(group, m.TIMESTEPS,
                                              noruleinit=True)
         self.dsm_sum_constraint_build = BuildAction(
             rule=dsm_sum_constraint_rule)
-
 
 #############################################################################
 #                      Delay Method
