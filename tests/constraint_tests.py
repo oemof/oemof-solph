@@ -671,8 +671,8 @@ class Constraint_Tests:
             label='demand_dsm',
             inputs={b_elec: solph.Flow(variable_costs=1)},
             demand=[1] * 3,
-            capacity_up=[0.5] * 3,
-            capacity_down=[0.5] * 3,
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.5, 0.4, 0.5],
             method='interval',
             shift_interval=2
         )

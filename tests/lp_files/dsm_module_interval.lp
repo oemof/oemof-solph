@@ -57,6 +57,6 @@ bounds
    0 <= flow(bus_elec_demand_dsm_1) <= +inf
    0 <= flow(bus_elec_demand_dsm_2) <= +inf
    -0.5 <= SinkDSMIntervalBlock_dsm_up_down(demand_dsm_0) <= 0.5
-   -0.5 <= SinkDSMIntervalBlock_dsm_up_down(demand_dsm_1) <= 0.5
+   -0.4 <= SinkDSMIntervalBlock_dsm_up_down(demand_dsm_1) <= 0.4
    -0.5 <= SinkDSMIntervalBlock_dsm_up_down(demand_dsm_2) <= 0.5
 end
