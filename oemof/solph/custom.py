@@ -969,11 +969,13 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad  E_{t}^{do} < DSM_{t}^{updown} < E_{t}^{up} \quad \forall t\\
+        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}  \quad \forall t\\
         &
-        (2) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{updown} \quad \forall t\\
+        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t\\
         &
-        (3) \quad  \sum_{t=0}^{24} DSM_{t}^{updown} = 0 \quad \forall t \\
+        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \\
+        &
+        (4) \quad  \sum_{t=0}^{23} DSM_{t}^{up} = \sum_{t=0}^{23} DSM_{t}^{do} \quad \forall t \\
         &
 
 
@@ -984,8 +986,10 @@ class SinkDSMIntervalBlock(SimpleBlock):
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{updown}` ",":py:obj:
-            `dsm_up_down[g, tt]` ","V", "DSM up/down shift"
+            ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.capacity_up` ","V", "DSM
+            up shift"
+            ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.capacity_down` ","V","DSM
+            down shift"
             ":math:`\dot{E}_{t}`",":py:obj:`
             flow[g.inflow, g,t]`","V", "Energy flowing in from electrical bus"
             ":math:`demand_{t}`",":py:obj:`
