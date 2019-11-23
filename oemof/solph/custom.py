@@ -851,14 +851,17 @@ class GenericCAESBlock(SimpleBlock):
 # ----------------------- DSM Component --------------------------------
 class SinkDSM(Sink):
     r"""
-    Module for creating a Demand Side Management component.
+    Demand Side Management implemented as Sink with flexibility potential.
 
     Based on the paper by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
-    On the representation of demand-side management in power system models,
+    `On the representation of demand-side management in power system models
+    <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
     in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
     accessed 17.09.2019, pp. 842-843.
 
-    A special sink component which modifies the input demand series.
+    SinkDSM adds additional constraints that allow to shift energy in certain
+    time window constrained by :attr:`~capacity_up` and
+    :attr:`~capacity_down`.
 
     Parameters
     ----------
@@ -869,31 +872,35 @@ class SinkDSM(Sink):
     capacity_down: int or array
         maximum DSM capacity that may be reduced
     method: 'interval' , 'delay'
+        Choose one of the DSM modelling approaches. Read notes about which
+        parameters to be applied for which approach.
 
         interval :
 
             Simple model in which the load shift must be compensated in a
-            predefined fixed interval(**shift_interval is mandatory).
-            Foundation of this optimisation should be a potential analysis
-            of the DSM capacity during each interval. With this,
-            the boundaries for the DSM variable are set.
+            predefined fixed interval(:attr:`~shift_interval` is mandatory).
+            Within time windows of the length :attr:`~shift_interval` DSM
+            up and down shifts are balanced. See
+            :class:`~SinkDSMIntervalBlock` for details.
 
         delay :
 
             Sophisticated model based on the formulation by
-            Zerrahn & Schill (DIW).T he load-shift of the component must be
-            compensated in a predefined delay-time (**delay_time is mandatory).
-            DSM capacity can either be a fixed value or an hourly time series.
+            Zerrahn & Schill (2015). The load-shift of the component must be
+            compensated in a predefined delay-time (:attr:`~delay_time` is
+            mandatory).
+            For details see :class:`~SinkDSMDelayBlock`.
     shift_interval: int
-
-        only used in method = 'interval', can be  None if not used :
-
-        interval in between which total DSM  must be fully compensated
+        Only used when :attr:`~method` is set to 'interval'. Otherwise, can be
+        None.
+        It's the interval in which between :math:`DSM_{t}^{up}` and
+        :math:`DSM_{t}^{down}` have to be compensated.
     delay_time: int
-
-        only used in method =  'delay', can be  None if not used :
-
-        the time after which the load shift must be fully compensated
+        Only used when :attr:`~method` is set to 'delay'. Otherwise, can be
+        None.
+        Length of symmetrical time windows around :math:`t` in which
+        :math:`DSM_{t}^{up}` and :math:`DSM_{t,tt}^{down}` have to be
+        compensated.
     cost_dsm_up : :obj:`int`
         Cost per unit of DSM activity that increases the demand
     cost_dsm_down : :obj:`int`
@@ -902,29 +909,16 @@ class SinkDSM(Sink):
     Notes
     -----
 
-    The following sets, variables, constraints and objective parts are created
-    :py:class:`~oemof.solph.custom.SinkDSMIntervalBlock` or
-    :py:class:`~oemof.solph.custom.SinkDSMDelayBlock
     * This component is still under development.
-
     * As many constraints and dependencies are created in method 'delay',
-    the calculation time increases significantly with large 'delay_time'
-    values as well as with long observation periods.
-
-    * The interval method creates only one real variable,
-    while the delay method creates two non-negative-real variables.
-
-    * The interval always starts at the first timestep = 0.
-
-    * delay method based on the formulation given in a paper
-    by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
-    On the representation of demand-side management in power system models,
-    in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
-    accessed 17.09.2019, pp. 842-843.
-
-    * in 'delay' method: delay time might be extended artificially
-    if DSM-capacity isn't used to it's full extend.
-    see oemof/Issue: #622 for more information
+      computational cost might be high with a large 'delay_time' and with model
+      of high temporal resolution
+    * Using :attr:`~method` 'delay' might result in demand shifts that exceed
+      the specified delay time by activating up and down simultaneously in
+      the time steps between to DSM events.
+    * It's not recommended to assign cost to the flow that connects
+      :class:`~SinkDSM` with a bus. Instead, use :attr:`~SinkDSM.cost_dsm_up` or
+      :attr:`~cost_dsm_down`
 
     """
 
@@ -962,26 +956,24 @@ class SinkDSM(Sink):
 
 
 class SinkDSMIntervalBlock(SimpleBlock):
-    r"""Block for the linear relation of a DSM component and an electrical
-    bus using 'interval' method. Load shift must be compensated during a
-    specific interval, starting at timestep 0.
+    r"""Constraints for SinkDSM with "interval" method
 
-
-    **The following constraints are created for method = 'potential':**
+    **The following constraints are created for method = 'interval':**
 
     .. _SinkDSMInterval-equations:
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}  \quad \forall t\\
+        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}  \quad \forall t \in \mathbb{T}\\
         &
-        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t\\
+        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in \mathbb{T}\\
         &
-        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \\
+        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in \mathbb{T}\\
         &
-        (4) \quad  \sum_{t=0}^{23} DSM_{t}^{up} = \sum_{t=0}^{23} DSM_{t}^{do} \quad \forall t \\
+        (4) \quad  \sum_{t=tt}^{t=tt+\tau} DSM_{t}^{up} = \sum_{t=tt}^{t=tt+\tau}
+        DSM_{t}^{do} \quad \forall tt \in \{x \mid \exists k
+        \in \mathbb{T}: k \mod \tau = 0\} \\
         &
-
 
 
     **Table: Symbols and attribute names of variables and parameters**
@@ -994,14 +986,17 @@ class SinkDSMIntervalBlock(SimpleBlock):
             up shift"
             ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.capacity_down` ","V","DSM
             down shift"
-            ":math:`\dot{E}_{t}`",":py:obj:`
-            flow[g.inflow, g,t]`","V", "Energy flowing in from electrical bus"
-            ":math:`demand_{t}`",":py:obj:`
-            demand[t]`","P", "Electrical demand series"
-            ":math:`E_{t}^{do}`",":py:obj:`
-            capacity_down[tt]`","P", "Capacity DSM down shift capacity"
-            ":math:`E_{t}^{up}`",":py:obj:`
-            capacity_up[tt]`","P", "Capacity DSM up shift "
+            ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from electrical bus"
+            ":math:`demand_{t}`",":attr:`demand[t]`","P", "Electrical demand
+            series"
+            ":math:`E_{t}^{do}`",":attr:`capacity_down[tt]`","P", "Capacity
+            DSM down shift capacity"
+            ":math:`E_{t}^{up}`",":attr:`capacity_up[tt]`","P", "Capacity
+            DSM up shift "
+            ":math:`\tau` ",":attr:`~SinkDSM.shift_interval` ","P", "Shift
+            interval"
+            ":math:`\mathbb{T}` "," ","P", "Time steps"
 
     """
     CONSTRAINT_GROUP = True
@@ -1153,8 +1148,7 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
 
 class SinkDSMDelayBlock(SimpleBlock):
-    r"""Block for the linear relation of a DSM component and an electrical
-    bus using delay-method.Load shift must be compensated during the delay time
+    r"""Constraints for SinkDSM with "delay" method
 
     **The following constraints are created for method = 'delay':**
 
@@ -1165,18 +1159,18 @@ class SinkDSMDelayBlock(SimpleBlock):
 
         &
         (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} -
-        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \quad \forall t \\
+        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \quad \forall t \in \mathbb{T} \\
         &
         (2) \quad DSM_{t}^{up} = \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
-        \quad \forall t \\
+        \quad \forall t \in \mathbb{T} \\
         &
-        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \\
+        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \in \mathbb{T} \\
         &
-        (4) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}  \leq E_{t}^{do}
-        \quad \forall tt \\
+        (4) \quad \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \leq E_{t}^{do}
+        \quad \forall t \in \mathbb{T} \\
         &
-        (5) \quad DSM_{tt}^{up}  + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}
-        \leq max \{ E_{t}^{up}, E_{t}^{do} \}\quad \forall tt \\
+        (5) \quad DSM_{t}^{up}  + \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
+        \leq max \{ E_{t}^{up}, E_{t}^{do} \}\quad \forall t \in \mathbb{T} \\
         &
 
 
@@ -1190,20 +1184,21 @@ class SinkDSMDelayBlock(SimpleBlock):
 
 
 
-            ":math:`DSM_{t}^{up}` ",":py:obj:`
-            dsm_do[g,t,tt]`", "V","DSM up shift (additional load)"
-            ":math:`DSM_{t,tt}^{do}` ",":py:obj:`
-            dsm_up[g,t]`","V","DSM down shift (less load)"
-            ":math:`\dot{E}_{t}` ",":py:obj:`
-            flow[g,t]`","V","Energy flowing in from electrical bus"
-            ":math:`L`",":py:obj:`
-            delay_time`","P", "Delay time for load shift"
-            ":math:`demand_{t}` ",":py:obj:`
-            demand[t]`","P","Electrical demand series"
-            ":math:`E_{t}^{do}` ",":py:obj:`
-            capacity_down[tt]`","P","Capacity DSM down shift "
-            ":math:`E_{t}^{up}` ", ":py:obj:`
-            capacity_up[tt]`", "P","Capacity DSM up shift"
+            ":math:`DSM_{t}^{up}` ",":attr:`dsm_do[g,t,tt]`", "V","DSM up
+            shift (additional load)"
+            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_up[g,t]`","V","DSM down
+            shift (less load)"
+            ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
+            flowing in from electrical bus"
+            ":math:`L`",":attr:`delay_time`","P", "Delay time for
+            load shift"
+            ":math:`demand_{t}` ",":attr:`demand[t]`","P","Electrical
+            demand series"
+            ":math:`E_{t}^{do}` ",":attr:`capacity_down[tt]`","P","Capacity
+            DSM down shift "
+            ":math:`E_{t}^{up}` ", ":attr:`capacity_up[tt]`", "P","Capacity
+            DSM up shift"
+            ":math:`\mathbb{T}` "," ","P", "Time steps"
 
 
     """
