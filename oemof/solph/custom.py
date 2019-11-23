@@ -14,7 +14,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           BuildAction, Reals)
+                           BuildAction, Reals, Expression)
 import logging
 
 from oemof.solph.network import Bus, Transformer, Flow, Sink
@@ -894,6 +894,10 @@ class SinkDSM(Sink):
         only used in method =  'delay', can be  None if not used :
 
         the time after which the load shift must be fully compensated
+    cost_dsm_up : :obj:`int`
+        Cost per unit of DSM activity that increases the demand
+    cost_dsm_down : :obj:`int`
+        Cost per unit of DSM activity that decreases the demand
 
     Notes
     -----
@@ -925,7 +929,8 @@ class SinkDSM(Sink):
     """
 
     def __init__(self, demand, capacity_up, capacity_down, method,
-                 shift_interval=None, delay_time=None, **kwargs):
+                 shift_interval=None, delay_time=None, cost_dsm_up=0,
+                 cost_dsm_down=0, **kwargs):
         super().__init__(**kwargs)
 
         self.capacity_up = sequence(capacity_up)
@@ -934,6 +939,8 @@ class SinkDSM(Sink):
         self.method = method
         self.shift_interval = shift_interval
         self.delay_time = delay_time
+        self.cost_dsm_up = cost_dsm_up
+        self.cost_dsm_down = cost_dsm_down
 
     def constraint_group(self):
         possible_methods = ['delay', 'interval']
@@ -952,9 +959,6 @@ class SinkDSM(Sink):
             raise ValueError(
                 'The "method" must be one of the following set: '
                 '"{}"'.format('" or "'.join(possible_methods)))
-
-###########################################################################
-#                      Interval Method
 
 
 class SinkDSMIntervalBlock(SimpleBlock):
@@ -1131,8 +1135,22 @@ class SinkDSMIntervalBlock(SimpleBlock):
         self.dsm_sum_constraint_build = BuildAction(
             rule=dsm_sum_constraint_rule)
 
-#############################################################################
-#                      Delay Method
+    def _objective_expression(self):
+        """Adding cost terms for DSM activity to obj. function"""
+
+        m = self.parent_block()
+
+        dsm_cost = 0
+
+        for t in m.TIMESTEPS:
+            for g in self.dsm:
+                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
+                dsm_cost += self.dsm_do[g, t] * g.cost_dsm_down
+
+        self.cost = Expression(expr=dsm_cost)
+
+        return self.cost
+
 
 class SinkDSMDelayBlock(SimpleBlock):
     r"""Block for the linear relation of a DSM component and an electrical
@@ -1463,3 +1481,20 @@ class SinkDSMDelayBlock(SimpleBlock):
 
         self.C2_constraint = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.C2_constraint_build = BuildAction(rule=c2_constraint_rule)
+
+    def _objective_expression(self):
+        """Adding cost terms for DSM activity to obj. function"""
+
+        m = self.parent_block()
+
+        dsm_cost = 0
+
+        for t in m.TIMESTEPS:
+            for g in self.dsm:
+                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
+                dsm_cost += sum(self.dsm_do[g, t, tt] for tt in m.TIMESTEPS
+                                ) * g.cost_dsm_down
+
+        self.cost = Expression(expr=dsm_cost)
+
+        return self.cost

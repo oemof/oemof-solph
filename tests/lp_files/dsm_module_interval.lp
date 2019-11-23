@@ -2,9 +2,9 @@
 
 min 
 objective:
-+1 flow(bus_elec_demand_dsm_0)
-+1 flow(bus_elec_demand_dsm_1)
-+1 flow(bus_elec_demand_dsm_2)
++2 SinkDSMIntervalBlock_dsm_do(demand_dsm_0)
++2 SinkDSMIntervalBlock_dsm_do(demand_dsm_1)
++2 SinkDSMIntervalBlock_dsm_do(demand_dsm_2)
 
 s.t.
 
@@ -69,7 +69,7 @@ c_e_SinkDSMIntervalBlock_dsm_sum_constraint(demand_dsm_0)_:
 +1 SinkDSMIntervalBlock_dsm_up(demand_dsm_1)
 = 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds
