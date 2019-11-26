@@ -970,9 +970,8 @@ class SinkDSMIntervalBlock(SimpleBlock):
         &
         (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in \mathbb{T}\\
         &
-        (4) \quad  \sum_{t=tt}^{t=tt+\tau} DSM_{t}^{up} = \sum_{t=tt}^{t=tt+\tau}
-        DSM_{t}^{do} \quad \forall tt \in \{x \mid \exists k
-        \in \mathbb{T}: k \mod \tau = 0\} \\
+        (4) \quad  \sum_{t=t_s}^{t=t_s+\tau} DSM_{t}^{up} = \sum_{t=t_s}^{t=t_s+\tau}
+        DSM_{t}^{do} \quad \forall t_s \in \{k \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
 
 
