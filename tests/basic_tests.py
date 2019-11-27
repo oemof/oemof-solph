@@ -186,7 +186,7 @@ class TestsEnergySystem:
         without having to worry about `Grouping`s trying to call them. This
         test makes sure that the parameter is handled correctly.
         """
-        everything: Callable[[], str] = lambda: "everything"
+        everything = lambda: "everything"
         collect_everything = Nodes(constant_key=everything)
         ensys = es.EnergySystem(groupings=[collect_everything])
         Node.registry = ensys
