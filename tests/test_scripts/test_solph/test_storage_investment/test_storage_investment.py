@@ -36,7 +36,7 @@ SPDX-License-Identifier: MIT
 
 from pickle import UnpicklingError
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from oemof.tools import economics
 

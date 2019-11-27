@@ -8,6 +8,7 @@ available from its original location oemof/tests/basic_tests.py
 
 SPDX-License-Identifier: MIT
 """
+from typing import Callable
 
 try:
     from collections.abc import Iterable
@@ -25,13 +26,11 @@ from oemof.network import Bus as NewBus, Node, temporarily_modifies_registry
 from oemof.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
 
 
-class EnergySystem_Tests:
+class TestsEnergySystem:
 
     @classmethod
-    def setUpClass(self):
-        self.timeindex = pd.date_range('1/1/2012', periods=5, freq='H')
-
-        #timesteps=range(len(time_index)))
+    def setUpClass(cls):
+        cls.timeindex = pd.date_range('1/1/2012', periods=5, freq='H')
 
     def setup(self):
         self.es = es.EnergySystem()
@@ -49,8 +48,8 @@ class EnergySystem_Tests:
 
     def test_entity_grouping_on_construction(self):
         bus = Bus(label="test bus")
-        ES = es.EnergySystem(entities=[bus])
-        ok_(ES.groups[bus.label] is bus)
+        ensys = es.EnergySystem(entities=[bus])
+        ok_(ensys.groups[bus.label] is bus)
 
     def test_that_nodes_is_a_proper_alias_for_entities(self):
         b1, b2 = Bus(label="B1"), Bus(label="B2")
@@ -59,20 +58,21 @@ class EnergySystem_Tests:
         self.es.nodes = empty
         ok_(self.es.entities is empty)
 
-    def test_that_None_is_not_a_valid_group(self):
+    def test_that_none_is_not_a_valid_group(self):
         def by_uid(n):
             if "Not in 'Group'" in n.uid:
                 return None
             else:
                 return "Group"
-        ES = es.EnergySystem(groupings=[by_uid])
+
+        ensys = es.EnergySystem(groupings=[by_uid])
 
         ungrouped = [Entity(uid="Not in 'Group': {}".format(i))
                      for i in range(10)]
         grouped = [Entity(uid="In 'Group': {}".format(i))
                    for i in range(10)]
-        ok_(None not in ES.groups)
-        for g in ES.groups.values():
+        ok_(None not in ensys.groups)
+        for g in ensys.groups.values():
             for e in ungrouped:
                 if isinstance(g, Iterable) and not isinstance(g, str):
                     ok_(e not in g)
@@ -87,34 +87,33 @@ class EnergySystem_Tests:
             g2 = n.label[0:3]
             return [g1, g2]
 
-        ES = es.EnergySystem(groupings=[assign_to_multiple_groups_in_one_go])
-        Node.registry = ES
-        nodes = [ Node(label=("Foo: " if i % 2 == 0 else "Bar: ") +
-                              "{}".format(i) +
-                              ("A" if i < 5 else "B"))
-                     for i in range(10)]
+        ensy = es.EnergySystem(groupings=[assign_to_multiple_groups_in_one_go])
+        Node.registry = ensy
+        [Node(label=("Foo: " if i % 2 == 0 else "Bar: ") +
+              "{}".format(i) + ("A" if i < 5 else "B")) for i in
+         range(10)]
         for group in ["Foo", "Bar", "A", "B"]:
-            eq_(len(ES.groups[group]), 5,
+            eq_(len(ensy.groups[group]), 5,
                 ("\n  Failed testing length of group '{}'." +
                  "\n  Expected: 5" +
                  "\n  Got     : {}" +
-                 "\n  Group   : {}" ).format(
-                     group, len(ES.groups[group]),
-                     sorted([e.label for e in ES.groups[group]])))
+                 "\n  Group   : {}").format(
+                    group, len(ensy.groups[group]),
+                    sorted([e.label for e in ensy.groups[group]])))
 
     def test_grouping_filter_parameter(self):
-        g1 = Grouping( key=lambda e: "The Special One",
-                       filter=lambda e: "special" in str(e))
-        g2 = Nodes( key=lambda e: "A Subset",
-                    filter=lambda e: "subset" in str(e))
-        ES = es.EnergySystem(groupings=[g1, g2])
+        g1 = Grouping(key=lambda e: "The Special One",
+                      filter=lambda e: "special" in str(e))
+        g2 = Nodes(key=lambda e: "A Subset",
+                   filter=lambda e: "subset" in str(e))
+        ensys = es.EnergySystem(groupings=[g1, g2])
         special = Node(label="special")
         subset = set(Node(label="subset: {}".format(i)) for i in range(10))
         others = set(Node(label="other: {}".format(i)) for i in range(10))
-        ES.add(special, *subset)
-        ES.add(*others)
-        eq_(ES.groups["The Special One"], special)
-        eq_(ES.groups["A Subset"], subset)
+        ensys.add(special, *subset)
+        ensys.add(*others)
+        eq_(ensys.groups["The Special One"], special)
+        eq_(ensys.groups["A Subset"], subset)
 
     def test_proper_filtering(self):
         """ `Grouping.filter` should not be "all or nothing".
@@ -124,28 +123,28 @@ class EnergySystem_Tests:
         retained.
         This test makes sure that the bug doesn't resurface again.
         """
-        g = Nodes( key="group", value=lambda _: set((1, 2, 3, 4)),
-                   filter=lambda x: x % 2 == 0)
-        ES = es.EnergySystem(groupings=[g])
+        g = Nodes(key="group", value=lambda _: {1, 2, 3, 4},
+                  filter=lambda x: x % 2 == 0)
+        ensys = es.EnergySystem(groupings=[g])
         special = Node(label="object")
-        ES.add(special)
-        eq_(ES.groups["group"], set((2, 4)))
+        ensys.add(special)
+        eq_(ensys.groups["group"], {2, 4})
 
     def test_non_callable_group_keys(self):
         collect_everything = Nodes(key="everything")
-        g1 = Grouping( key="The Special One",
-                       filter=lambda e: "special" in e.label)
+        g1 = Grouping(key="The Special One",
+                      filter=lambda e: "special" in e.label)
         g2 = Nodes(key="A Subset", filter=lambda e: "subset" in e.label)
-        ES = es.EnergySystem(groupings=[g1, g2, collect_everything])
+        ensys = es.EnergySystem(groupings=[g1, g2, collect_everything])
         special = Node(label="special")
         subset = set(Node(label="subset: {}".format(i)) for i in range(2))
         others = set(Node(label="other: {}".format(i)) for i in range(2))
         everything = subset.union(others)
         everything.add(special)
-        ES.add(*everything)
-        eq_(ES.groups["The Special One"], special)
-        eq_(ES.groups["A Subset"], subset)
-        eq_(ES.groups["everything"], everything)
+        ensys.add(*everything)
+        eq_(ensys.groups["The Special One"], special)
+        eq_(ensys.groups["A Subset"], subset)
+        eq_(ensys.groups["everything"], everything)
 
     def test_grouping_laziness(self):
         """ Energy system `groups` should be fully lazy.
@@ -179,7 +178,6 @@ class EnergySystem_Tests:
             ),
         )
 
-
     @temporarily_modifies_registry
     def test_constant_group_keys(self):
         """ Callable keys passed in as `constant_key` should not be called.
@@ -188,46 +186,47 @@ class EnergySystem_Tests:
         without having to worry about `Grouping`s trying to call them. This
         test makes sure that the parameter is handled correctly.
         """
-        everything = lambda: "everything"
+        everything: Callable[[], str] = lambda: "everything"
         collect_everything = Nodes(constant_key=everything)
-        ES = es.EnergySystem(groupings=[collect_everything])
-        Node.registry = ES
+        ensys = es.EnergySystem(groupings=[collect_everything])
+        Node.registry = ensys
         node = Node(label="A Node")
-        ok_("everything" not in ES.groups)
-        ok_(everything in ES.groups)
-        eq_(ES.groups[everything], set([node]))
+        ok_("everything" not in ensys.groups)
+        ok_(everything in ensys.groups)
+        eq_(ensys.groups[everything], {node})
 
     @temporarily_modifies_registry
-    def test_Flows(self):
+    def test_flows(self):
         key = object()
-        ES = es.EnergySystem(groupings=[Flows(key)])
-        Node.registry = ES
+        ensys = es.EnergySystem(groupings=[Flows(key)])
+        Node.registry = ensys
+        flows = (object(), object())
+        bus = NewBus(label="A Bus")
+        Node(label="A Node", inputs={bus: flows[0]}, outputs={bus: flows[1]})
+        eq_(ensys.groups[key], set(flows))
+
+    @temporarily_modifies_registry
+    def test_flows_with_nodes(self):
+        key = object()
+        ensys = es.EnergySystem(groupings=[FWNs(key)])
+        Node.registry = ensys
         flows = (object(), object())
         bus = NewBus(label="A Bus")
         node = Node(label="A Node",
                     inputs={bus: flows[0]}, outputs={bus: flows[1]})
-        eq_(ES.groups[key], set(flows))
-
-    @temporarily_modifies_registry
-    def test_FlowsWithNodes(self):
-        key = object()
-        ES = es.EnergySystem(groupings=[FWNs(key)])
-        Node.registry = ES
-        flows = (object(), object())
-        bus = NewBus(label="A Bus")
-        node = Node(label="A Node",
-                    inputs={bus: flows[0]}, outputs={bus: flows[1]})
-        eq_(ES.groups[key], set(((bus, node, flows[0]),
-                                 (node, bus, flows[1]))))
+        eq_(ensys.groups[key], {(bus, node, flows[0]), (node, bus, flows[1])})
 
     def test_that_node_additions_are_signalled(self):
-        """When a node gets `add`ed, a corresponding signal should be emitted."""
+        """
+        When a node gets `add`ed, a corresponding signal should be emitted.
+        """
         node = Node(label="Node")
 
         def subscriber(sender, **kwargs):
             ok_(sender is node)
             ok_(kwargs['EnergySystem'] is self.es)
             subscriber.called = True
+
         subscriber.called = False
 
         es.EnergySystem.signals[es.EnergySystem.add].connect(

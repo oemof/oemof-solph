@@ -44,7 +44,7 @@ class BaseModel(po.ConcreteModel):
     -----------
     timeincrement : sequence
         Time increments.
-    flows : list
+    flows : dict
         Flows of the model.
     name : str
         Name of the model.

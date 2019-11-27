@@ -203,18 +203,19 @@ class Bus(on.Bus):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
 
-
     def constraint_group(self):
         if self.balanced:
             return blocks.Bus
         else:
             return None
 
+
 class Sink(on.Sink):
     """An object with one input flow.
     """
     def constraint_group(self):
         pass
+
 
 class Source(on.Source):
     """An object with one output flow.
@@ -285,7 +286,6 @@ class Transformer(on.Transformer):
 
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
-
 
     def constraint_group(self):
         return blocks.Transformer

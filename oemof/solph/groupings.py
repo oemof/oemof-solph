@@ -19,7 +19,6 @@ available from its original location oemof/oemof/solph/groupings.py
 SPDX-License-Identifier: MIT
 """
 
-from oemof.solph.network import Bus, Transformer
 from oemof.solph import blocks
 import oemof.groupings as groupings
 
@@ -53,8 +52,10 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     cg = getattr(node, "constraint_group", fallback)
     return cg()
 
+
 standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow)
+
 
 def _investment_grouping(stf):
     if hasattr(stf[2], 'investment'):
@@ -63,10 +64,12 @@ def _investment_grouping(stf):
     else:
         return False
 
+
 investment_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.InvestmentFlow,
     # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
     filter=_investment_grouping)
+
 
 def _nonconvex_grouping(stf):
     if hasattr(stf[2], 'nonconvex'):
@@ -74,6 +77,7 @@ def _nonconvex_grouping(stf):
             return True
     else:
         return False
+
 
 nonconvex_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.NonConvexFlow,

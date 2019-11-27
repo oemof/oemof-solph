@@ -12,14 +12,13 @@ SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_
-import pandas as pd
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
 from oemof.outputlib import processing, views
 from oemof.network import Node
 
 
-def test_dispatch_one_time_step(solver='cbc', periods=1):
+def test_dispatch_one_time_step(solver='cbc'):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################

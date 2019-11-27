@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           Expression, BuildAction)
+                           BuildAction)
 import logging
 
 from oemof.solph.network import Bus, Transformer, Flow
@@ -154,7 +154,7 @@ class ElectricalLineBlock(SimpleBlock):
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
         self.voltage_angle = Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
-                                    bounds=_voltage_angle_bounds)
+                                 bounds=_voltage_angle_bounds)
 
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
             # TODO: Make this robust to select the same slack bus for
