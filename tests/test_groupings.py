@@ -2,6 +2,12 @@
 
 Most parts of the `groupings` module are tested via other tests, but certain
 code paths don't get covered by those, which is what this module is for.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/tests/tests_groupings.py
+
+SPDX-License-Identifier: MIT
 """
 
 from types import MappingProxyType as MPT
