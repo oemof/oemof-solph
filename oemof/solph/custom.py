@@ -906,10 +906,12 @@ class SinkDSM(Sink):
     cost_dsm_down : :obj:`int`
         Cost per unit of DSM activity that decreases the demand
 
-    Notes
-    -----
+    Note
+    ----
 
-    * This component is still under development.
+    * This component is a candidate component. It's implemented as a custom 
+      component for users that like to use and test the component at early 
+      stage. Please report issues to improve the component.
     * As many constraints and dependencies are created in method 'delay',
       computational cost might be high with a large 'delay_time' and with model
       of high temporal resolution
