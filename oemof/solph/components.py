@@ -67,7 +67,7 @@ class GenericStorage(network.Transformer):
         timesteps.
     fixed_losses : numeric (sequence or scalar)
         Losses as share of nominal storage capacity between two consecutive
-        timesteps independent of storage capacity.
+        timesteps independent of state of charge.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
