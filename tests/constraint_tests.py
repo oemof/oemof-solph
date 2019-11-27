@@ -648,7 +648,6 @@ class Constraint_Tests:
 
         self.compare_lp_files('offsettransformer.lp')
 
-
     def test_dsm_module_delay(self):
         """Constraint test of Sink-DSM with method=delay"""
 

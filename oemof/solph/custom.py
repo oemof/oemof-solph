@@ -911,8 +911,8 @@ class SinkDSM(Sink):
       the specified delay time by activating up and down simultaneously in
       the time steps between to DSM events.
     * It's not recommended to assign cost to the flow that connects
-      :class:`~SinkDSM` with a bus. Instead, use :attr:`~SinkDSM.cost_dsm_up` or
-      :attr:`~cost_dsm_down`
+      :class:`~SinkDSM` with a bus. Instead, use :attr:`~SinkDSM.cost_dsm_up`
+      or :attr:`~cost_dsm_down`
 
     """
 
@@ -958,14 +958,18 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}  \quad \forall t \in \mathbb{T}\\
+        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}
+        \quad \forall t \in \mathbb{T}\\
         &
-        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in \mathbb{T}\\
+        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
+        \mathbb{T}\\
         &
-        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in \mathbb{T}\\
+        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in
+        \mathbb{T}\\
         &
-        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} = \sum_{t=t_s}^{t_s+\tau}
-        DSM_{t}^{do} \quad \forall t_s \in \{k \in \mathbb{T} \mid k \mod \tau = 0\} \\
+        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} =
+        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
+        \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
 
 
@@ -1086,8 +1090,9 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     block.dsm_down_constraint.add((g, t), (lhs <= rhs))
 
         self.dsm_down_constraint = Constraint(group, m.TIMESTEPS,
-                                            noruleinit=True)
-        self.dsm_down_constraint_build = BuildAction(rule=dsm_down_constraint_rule)
+                                              noruleinit=True)
+        self.dsm_down_constraint_build = BuildAction(
+            rule=dsm_down_constraint_rule)
 
         def dsm_sum_constraint_rule(block):
             """
@@ -1103,10 +1108,13 @@ class SinkDSMIntervalBlock(SimpleBlock):
                                   g.shift_interval)
 
                 for interval in intervals:
-                    if (interval + g.shift_interval - 1) > m.TIMESTEPS.value_list[-1]:
-                        timesteps = range(interval, m.TIMESTEPS.value_list[-1] + 1)
+                    if (interval + g.shift_interval - 1) \
+                            > m.TIMESTEPS.value_list[-1]:
+                        timesteps = range(interval,
+                                          m.TIMESTEPS.value_list[-1] + 1)
                     else:
-                        timesteps = range(interval, interval + g.shift_interval)
+                        timesteps = range(interval, interval +
+                                          g.shift_interval)
 
                     # DSM up/down
                     lhs = sum(self.dsm_up[g, tt]
@@ -1157,7 +1165,8 @@ class SinkDSMDelayBlock(SimpleBlock):
         (2) \quad DSM_{t}^{up} = \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
         \quad \forall t \in \mathbb{T} \\
         &
-        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \in \mathbb{T} \\
+        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \in
+        \mathbb{T} \\
         &
         (4) \quad \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \leq E_{t}^{do}
         \quad \forall t \in \mathbb{T} \\
