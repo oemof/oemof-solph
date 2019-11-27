@@ -328,8 +328,17 @@ class GenericStorageBlock(SimpleBlock):
             """Rule definition for bounds of capacity variable of storage n
             in timestep t
             """
-            bounds = (n.nominal_storage_capacity * n.min_storage_level[t],
-                      n.nominal_storage_capacity * n.max_storage_level[t])
+            try:
+                bounds = (n.nominal_storage_capacity * n.min_storage_level[t],
+                          n.nominal_storage_capacity * n.max_storage_level[t])
+            except IndexError:
+                msg = (
+                    "Minimum/maximum storage level has a different length than"
+                    " the time steps. It is possible to define a list-like "
+                    "element or a scalar. A list-like element must have the "
+                    "same length as the number of time steps."
+                    "\nNumber of time steps: {0}.\nComponent: {1}")
+                raise ValueError(msg.format(len(m.TIMESTEPS), n.label))
             return bounds
         self.capacity = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
