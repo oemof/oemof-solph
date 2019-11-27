@@ -65,7 +65,6 @@ c_u_GenericInvestmentStorageBlock_init_cap_limit(storage1)_:
 c_e_GenericInvestmentStorageBlock_balance_first(storage1)_:
 +1 GenericInvestmentStorageBlock_capacity(storage1_0)
 -0.87 GenericInvestmentStorageBlock_init_cap(storage1)
-+0.01 GenericInvestmentStorageBlock_invest(storage1)
 -0.96999999999999997 flow(electricityBus_storage1_0)
 +1.1627906976744187 flow(storage1_electricityBus_0)
 = 0
@@ -73,7 +72,6 @@ c_e_GenericInvestmentStorageBlock_balance_first(storage1)_:
 c_e_GenericInvestmentStorageBlock_balance(storage1_1)_:
 -0.87 GenericInvestmentStorageBlock_capacity(storage1_0)
 +1 GenericInvestmentStorageBlock_capacity(storage1_1)
-+0.01 GenericInvestmentStorageBlock_invest(storage1)
 -0.96999999999999997 flow(electricityBus_storage1_1)
 +1.1627906976744187 flow(storage1_electricityBus_1)
 = 0
@@ -81,7 +79,6 @@ c_e_GenericInvestmentStorageBlock_balance(storage1_1)_:
 c_e_GenericInvestmentStorageBlock_balance(storage1_2)_:
 -0.87 GenericInvestmentStorageBlock_capacity(storage1_1)
 +1 GenericInvestmentStorageBlock_capacity(storage1_2)
-+0.01 GenericInvestmentStorageBlock_invest(storage1)
 -0.96999999999999997 flow(electricityBus_storage1_2)
 +1.1627906976744187 flow(storage1_electricityBus_2)
 = 0
