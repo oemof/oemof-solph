@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           BuildAction)
+                           BuildAction, Expression)
 import logging
 
 from oemof.solph.network import Bus, Transformer, Flow, Sink
