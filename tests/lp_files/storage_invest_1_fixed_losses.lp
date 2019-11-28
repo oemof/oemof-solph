@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +145 GenericInvestmentStorageBlock_invest(storage1)
 +56 flow(electricityBus_storage1_0)
@@ -68,7 +68,7 @@ c_e_GenericInvestmentStorageBlock_balance_first(storage1)_:
 +0.01 GenericInvestmentStorageBlock_invest(storage1)
 -0.96999999999999997 flow(electricityBus_storage1_0)
 +1.1627906976744187 flow(storage1_electricityBus_0)
-= 0
+= -3
 
 c_e_GenericInvestmentStorageBlock_balance(storage1_1)_:
 -0.87 GenericInvestmentStorageBlock_capacity(storage1_0)
@@ -76,7 +76,7 @@ c_e_GenericInvestmentStorageBlock_balance(storage1_1)_:
 +0.01 GenericInvestmentStorageBlock_invest(storage1)
 -0.96999999999999997 flow(electricityBus_storage1_1)
 +1.1627906976744187 flow(storage1_electricityBus_1)
-= 0
+= -3
 
 c_e_GenericInvestmentStorageBlock_balance(storage1_2)_:
 -0.87 GenericInvestmentStorageBlock_capacity(storage1_1)
@@ -84,7 +84,7 @@ c_e_GenericInvestmentStorageBlock_balance(storage1_2)_:
 +0.01 GenericInvestmentStorageBlock_invest(storage1)
 -0.96999999999999997 flow(electricityBus_storage1_2)
 +1.1627906976744187 flow(storage1_electricityBus_2)
-= 0
+= -3
 
 c_e_GenericInvestmentStorageBlock_balanced_cstr(storage1)_:
 +1 GenericInvestmentStorageBlock_capacity(storage1_2)
@@ -131,7 +131,7 @@ c_u_GenericInvestmentStorageBlock_min_capacity(storage1_2)_:
 +0.10000000000000001 GenericInvestmentStorageBlock_invest(storage1)
 <= 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds
