@@ -8,18 +8,17 @@ by the contributors recorded in the version control history of the file,
 available from its original location
 oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_
-import pandas as pd
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
 from oemof.outputlib import processing, views
 from oemof.network import Node
 
 
-def test_dispatch_one_time_step(solver='cbc', periods=1):
+def test_dispatch_one_time_step(solver='cbc'):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################

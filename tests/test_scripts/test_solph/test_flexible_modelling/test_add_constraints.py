@@ -11,7 +11,7 @@ by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_scripts/test_solph/
 test_flexible_modelling/test_add_constraints.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from nose.tools import ok_
@@ -83,13 +83,13 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     # add the sub-model to the oemof Model instance
     om.add_component('MyBlock', myblock)
 
-    def _inflow_share_rule(m, s, e, t):
+    def _inflow_share_rule(m, si, e, ti):
         """pyomo rule definition: Here we can use all objects from the block or
         the om object, in this case we don't need anything from the block
         except the newly defined set MYFLOWS.
         """
-        expr = (om.flow[s, e, t] >= om.flows[s, e].outflow_share[t] *
-                sum(om.flow[i, o, t] for (i, o) in om.FLOWS if o == e))
+        expr = (om.flow[si, e, ti] >= om.flows[si, e].outflow_share[ti] *
+                sum(om.flow[i, o, ti] for (i, o) in om.FLOWS if o == e))
         return expr
 
     myblock.inflow_share = po.Constraint(myblock.MYFLOWS, om.TIMESTEPS,

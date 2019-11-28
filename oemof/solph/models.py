@@ -5,7 +5,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/models.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 import pyomo.environ as po
@@ -44,7 +44,7 @@ class BaseModel(po.ConcreteModel):
     -----------
     timeincrement : sequence
         Time increments.
-    flows : list
+    flows : dict
         Flows of the model.
     name : str
         Name of the model.
