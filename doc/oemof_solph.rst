@@ -780,7 +780,12 @@ Yielding the following results
    :align: center
 
 
-.. note:: See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical background.
+.. note:: 
+   * This component is a candidate component. It's implemented as a custom
+     component for users that like to use and test the component at early
+     stage. Please report issues to improve the component.
+   * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
+     background.
 
 
 .. _investment_mode_label:
