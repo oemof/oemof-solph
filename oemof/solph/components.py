@@ -65,9 +65,12 @@ class GenericStorage(network.Transformer):
     loss_rate : numeric (sequence or scalar)
         The relative loss of the storage capacity between two consecutive
         timesteps.
-    fixed_losses : numeric (sequence or scalar)
-        Losses as share of nominal storage capacity between two consecutive
-        timesteps independent of state of charge.
+    fixed_losses_relative : numeric (sequence or scalar)
+        Losses independent of state of charge between two consecutive
+        timesteps relative to nominal storage capacity.
+    fixed_losses_absolute : numeric (sequence or scalar)
+        Losses independent of state of charge and independent of
+        nominal storage capacity between two consecutive timesteps.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -136,7 +139,8 @@ class GenericStorage(network.Transformer):
         self.initial_storage_level = kwargs.get('initial_storage_level')
         self.balanced = kwargs.get('balanced', True)
         self.loss_rate = solph_sequence(kwargs.get('loss_rate', 0))
-        self.fixed_losses = solph_sequence(kwargs.get('fixed_losses', 0))
+        self.fixed_losses_relative = solph_sequence(kwargs.get('fixed_losses_relative', 0))
+        self.fixed_losses_absolute = solph_sequence(kwargs.get('fixed_losses_absolute', 0))
         self.inflow_conversion_factor = solph_sequence(
             kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
@@ -252,7 +256,9 @@ class GenericStorageBlock(SimpleBlock):
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
-            (1 - \delta(t))) - \gamma(t) \cdot E_{nom} \\
+            (1 - \beta(t)) \\
+            &- \gamma(t)\cdot E_{nom} \\
+            &- \delta(t) \\
             &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -275,13 +281,16 @@ class GenericStorageBlock(SimpleBlock):
                                 initial time step
     :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
     :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
-    :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
+    :math:`\beta(t)`            fraction of lost energy :py:obj:`loss_rate[t]`
                                 as share of
                                 :math:`E(t)`
                                 per timestep
-    :math:`\gamma(t)`           fixed loss of energy as :py:obj:`fixed_losses[t]`
-                                share of
+    :math:`\gamma(t)`           fixed loss of energy    :py:obj:`fixed_losses_relative[t]`
+                                relative to
                                 :math:`E_{nom}` per
+                                timestep
+    :math:`\delta(t)`           absolute fixed loss     :py:obj:`fixed_losses_absolute[t]`
+                                of energy per
                                 timestep
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
@@ -370,7 +379,8 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
                 1 - n.loss_rate[0])
-            expr += n.fixed_losses[0] * n.nominal_storage_capacity
+            expr += n.fixed_losses_relative[0] * n.nominal_storage_capacity
+            expr += n.fixed_losses_absolute[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -388,7 +398,8 @@ class GenericStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t-1] * (
                 1 - n.loss_rate[t])
-            expr += n.fixed_losses[t] * n.nominal_storage_capacity
+            expr += n.fixed_losses_relative[t] * n.nominal_storage_capacity
+            expr += n.fixed_losses_absolute[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -595,7 +606,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
                     1 - n.loss_rate[0])
-            expr += n.fixed_losses[0] * (n.investment.existing + self.invest[n])
+            expr += n.fixed_losses_relative[0] * (n.investment.existing + self.invest[n])
+            expr += n.fixed_losses_absolute[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -614,7 +626,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t - 1] * (
                     1 - n.loss_rate[t])
-            expr += n.fixed_losses[t] * (n.investment.existing + self.invest[n])
+            expr += n.fixed_losses_relative[t] * (n.investment.existing + self.invest[n])
+            expr += n.fixed_losses_absolute[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
