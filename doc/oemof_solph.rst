@@ -208,6 +208,8 @@ Solph components
  * :ref:`oemof_solph_components_generic_storage_label`
  * :ref:`oemof_solph_custom_electrical_line_label`
  * :ref:`oemof_solph_custom_link_label`
+ * :ref:`oemof_solph_custom_sinkdsm_label`
+
 
 .. _oemof_solph_components_sink_label:
 
@@ -555,6 +557,7 @@ The following code block shows an example of the storage parametrization for the
 
 For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
 
+
 Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -695,6 +698,93 @@ Link (custom)
 Link.
 
 .. note:: See the :py:class:`~oemof.solph.custom.Link` class for all parameters and the mathematical background.
+
+
+.. _oemof_solph_custom_sinkdsm_label:
+
+
+SinkDSM (custom)
+^^^^^^^^^^^^^^^^
+
+:class:`~oemof.solph.custom.SinkDSM` can used to represent flexibility in a demand time series.
+Elasticity of the demand is described by upper (:attr:`~oemof.solph.custom.SinkDSM.capacity_up`) and lower (:attr:`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
+Upwards shifted demand is then balanced with downwards shifted demand.
+
+At the moment, :class:`~oemof.solph.custom.SinkDSM` provides two method how the Demand-Side Management (DSM) flexibility is represented in constraints
+
+* "delay": Implementation of the DSM modeling method proposed by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
+  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDelayBlock`
+* "interval": Is a fairly simple approach. Within a defined windows of time steps, demand can be shifted within the defined bounds of elasticity.
+  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.SinkDSMIntervalBlock`
+
+Cost can be associated to either demand up shifts or demand down shifts.
+
+This small example of PV, grid and SinkDSM shows how to use the component
+
+.. code-block:: python
+
+    # Create some data
+    pv_day = [(-(1 / 6 * x ** 2) + 6) / 6 for x in range(-6, 7)]
+    pv_ts = [0] * 6 + pv_day + [0] * 6
+    data_dict = {"demand_el": [3] * len(pv_ts),
+                 "pv": pv_ts,
+                 "Cap_up": [0.5] * len(pv_ts),
+                 "Cap_do": [0.5] * len(pv_ts)}
+    data = pd.DataFrame.from_dict(data_dict)
+
+    # Do timestamp stuff
+    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='H')
+    data['timestamp'] = datetimeindex
+    data.set_index('timestamp', inplace=True)
+
+    # Create Energy System
+    es = solph.EnergySystem(timeindex=datetimeindex)
+    Node.registry = es
+
+    # Create bus representing electricity grid
+    b_elec = solph.Bus(label='Electricity bus')
+
+    # Create a back supply
+    grid = solph.Source(label='Grid',
+                        outputs={
+                            b_elec: solph.Flow(
+                                nominal_value=10000,
+                                variable_costs=50)}
+                        )
+
+    # PV supply from time series
+    s_wind = solph.Source(label='wind',
+                          outputs={
+                              b_elec: solph.Flow(
+                                  actual_value=data['pv'],
+                                  fixed=True,
+                                  nominal_value=3.5)}
+                          )
+
+    # Create DSM Sink
+    demand_dsm = solph.custom.SinkDSM(label='DSM',
+                                      inputs={b_elec: solph.Flow()},
+                                      capacity_up=data['Cap_up'],
+                                      capacity_down=data['Cap_do'],
+                                      delay_time=6,
+                                      demand=data['demand_el'],
+                                      method="delay",
+                                      cost_dsm_down=5)
+
+Yielding the following results
+
+..  image:: _files/Plot_delay_2013-01-01.svg
+   :width: 85 %
+   :alt: Plot_delay_2013-01-01.svg
+   :align: center
+
+
+.. note:: 
+   * This component is a candidate component. It's implemented as a custom
+     component for users that like to use and test the component at early
+     stage. Please report issues to improve the component.
+   * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
+     background.
 
 
 .. _investment_mode_label:
