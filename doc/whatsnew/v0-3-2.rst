@@ -2,11 +2,6 @@ v0.3.2 (September ??, 2019)
 +++++++++++++++++++++++++++
 
 
-API changes
-###########
-
-* something
-
 New features
 ############
 
@@ -17,27 +12,16 @@ New features
 New components
 ##############
 
-* something
+* Demand side managed sink. This newly introduced component is internally
+  tested but not completly reviewed. Use with care and report bugs if necessary.
+  Further information can be found in the `documentation
+  <https://oemof.readthedocs.io/en/v0.3/oemof_solph.html#sinkdsm-custom>`_.
 
 Documentation
 #############
 
-* something
-
-Known issues
-############
-
-* something
-
-Bug fixes
-#########
-
-* something
-
-Testing
-#######
-
-* something
+* Revision of the `outputlib documentation
+  <https://oemof.readthedocs.io/en/stable/oemof_outputlib.html>`_.
 
 Other changes
 #############
@@ -45,10 +29,13 @@ Other changes
 * The license hase been changed from GPLv3 to the MIT license
 * The BaseModel has been revised (test, docstring, warnings, internal naming)
   (`PR #605 <https://github.com/oemof/oemof/issues/605>`_)
+* Style revision to meet pep8 and other pep rules.
 
 Contributors
 ############
 
+* Guido Plessmann
 * Johannes Röder
+* Julian Endres
 * Patrik Schönfeldt
 * Uwe Krien
