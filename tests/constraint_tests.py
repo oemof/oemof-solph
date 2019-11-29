@@ -6,7 +6,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/constraint_tests.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from difflib import unified_diff
@@ -24,17 +24,17 @@ import oemof.solph as solph
 logging.disable(logging.INFO)
 
 
-class Constraint_Tests:
+class TestsConstraint:
 
     @classmethod
-    def setup_class(self):
-        self.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',
-                                            re.DOTALL | re.MULTILINE)
+    def setup_class(cls):
+        cls.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',
+                                           re.DOTALL | re.MULTILINE)
 
-        self.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
+        cls.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
-        self.tmppath = helpers.extend_basic_path('tmp')
-        logging.info(self.tmppath)
+        cls.tmppath = helpers.extend_basic_path('tmp')
+        logging.info(cls.tmppath)
 
     def setup(self):
         self.energysystem = solph.EnergySystem(groupings=solph.GROUPINGS,
@@ -98,8 +98,9 @@ class Constraint_Tests:
                             lines[n] = (
                                 '-'
                                 if lines[n] and lines[n][0] == '+'
-                                else '+' if lines[n]
-                                         else lines[n]) + lines[n][1:]
+                                else '+'
+                                if lines[n]
+                                else lines[n]) + lines[n][1:]
                         lines[end] = '= ' + lines[end][3:]
                     return lines
 
@@ -498,9 +499,9 @@ class Constraint_Tests:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='source1', outputs={bel: solph.Flow(
-            nominal_value=100, emission_factor=0.5)})
+            nominal_value=100, emission_factor=[0.5, -1.0, 2.0])})
         solph.Source(label='source2', outputs={bel: solph.Flow(
-            nominal_value=100, emission_factor=0.8)})
+            nominal_value=100, emission_factor=3.5)})
 
         # Should be ignored because the emission attribute is not defined.
         solph.Source(label='source3', outputs={bel: solph.Flow(
@@ -647,3 +648,35 @@ class Constraint_Tests:
             coefficients=[-17, 0.9])
 
         self.compare_lp_files('offsettransformer.lp')
+
+    def test_dsm_module_delay(self):
+        """Constraint test of Sink-DSM with method=delay"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            method='delay',
+            delay_time=1,
+            cost_dsm_down=2,
+        )
+        self.compare_lp_files('dsm_module_delay.lp')
+
+    def test_dsm_module_interval(self):
+        """Constraint test of Sink-DSM with method=interval"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.5, 0.4, 0.5],
+            method='interval',
+            shift_interval=2,
+            cost_dsm_down=2,
+        )
+        self.compare_lp_files('dsm_module_interval.lp')

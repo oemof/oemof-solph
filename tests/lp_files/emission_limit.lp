@@ -6,13 +6,13 @@ objective:
 
 s.t.
 
-c_u_emission_limit_:
+c_u_integral_limit_emission_factor_constraint_:
 +0.5 flow(source1_electricityBus_0)
-+0.5 flow(source1_electricityBus_1)
-+0.5 flow(source1_electricityBus_2)
-+0.80000000000000004 flow(source2_electricityBus_0)
-+0.80000000000000004 flow(source2_electricityBus_1)
-+0.80000000000000004 flow(source2_electricityBus_2)
+-1 flow(source1_electricityBus_1)
++2 flow(source1_electricityBus_2)
++3.5 flow(source2_electricityBus_0)
++3.5 flow(source2_electricityBus_1)
++3.5 flow(source2_electricityBus_2)
 <= 777
 
 c_e_Bus_balance(electricityBus_0)_:
