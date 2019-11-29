@@ -11,18 +11,13 @@ available from its original location oemof/oemof/solph/custom.py
 SPDX-License-Identifier: MIT
 """
 
-
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           BuildAction, Reals)
+                           BuildAction, Expression)
 import logging
 
 from oemof.solph.network import Bus, Transformer, Flow, Sink
 from oemof.solph.plumbing import sequence
-
-
-
-
 
 
 class ElectricalBus(Bus):
@@ -159,7 +154,7 @@ class ElectricalLineBlock(SimpleBlock):
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
         self.voltage_angle = Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
-                                    bounds=_voltage_angle_bounds)
+                                 bounds=_voltage_angle_bounds)
 
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
             # TODO: Make this robust to select the same slack bus for
@@ -846,19 +841,19 @@ class GenericCAESBlock(SimpleBlock):
             self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
 
 
-########################################################################
-
-# ----------------------- DSM Component --------------------------------
 class SinkDSM(Sink):
     r"""
-    Module for creating a Demand Side Management component.
+    Demand Side Management implemented as Sink with flexibility potential.
 
     Based on the paper by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
-    On the representation of demand-side management in power system models,
+    `On the representation of demand-side management in power system models
+    <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
     in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
     accessed 17.09.2019, pp. 842-843.
 
-    A special sink component which modifies the input demand series.
+    SinkDSM adds additional constraints that allow to shift energy in certain
+    time window constrained by :attr:`~capacity_up` and
+    :attr:`~capacity_down`.
 
     Parameters
     ----------
@@ -869,63 +864,61 @@ class SinkDSM(Sink):
     capacity_down: int or array
         maximum DSM capacity that may be reduced
     method: 'interval' , 'delay'
+        Choose one of the DSM modelling approaches. Read notes about which
+        parameters to be applied for which approach.
 
         interval :
 
             Simple model in which the load shift must be compensated in a
-            predefined fixed interval(**shift_interval is mandatory).
-            Foundation of this optimisation should be a potential analysis
-            of the DSM capacity during each interval. With this,
-            the boundaries for the DSM variable are set.
+            predefined fixed interval (:attr:`~shift_interval` is mandatory).
+            Within time windows of the length :attr:`~shift_interval` DSM
+            up and down shifts are balanced. See
+            :class:`~SinkDSMIntervalBlock` for details.
 
         delay :
 
             Sophisticated model based on the formulation by
-            Zerrahn & Schill (DIW).T he load-shift of the component must be
-            compensated in a predefined delay-time (**delay_time is mandatory).
-            DSM capacity can either be a fixed value or an hourly time series.
+            Zerrahn & Schill (2015). The load-shift of the component must be
+            compensated in a predefined delay-time (:attr:`~delay_time` is
+            mandatory).
+            For details see :class:`~SinkDSMDelayBlock`.
     shift_interval: int
-
-        only used in method = 'interval', can be  None if not used :
-
-        interval in between which total DSM  must be fully compensated
+        Only used when :attr:`~method` is set to 'interval'. Otherwise, can be
+        None.
+        It's the interval in which between :math:`DSM_{t}^{up}` and
+        :math:`DSM_{t}^{down}` have to be compensated.
     delay_time: int
+        Only used when :attr:`~method` is set to 'delay'. Otherwise, can be
+        None.
+        Length of symmetrical time windows around :math:`t` in which
+        :math:`DSM_{t}^{up}` and :math:`DSM_{t,tt}^{down}` have to be
+        compensated.
+    cost_dsm_up : :obj:`int`
+        Cost per unit of DSM activity that increases the demand
+    cost_dsm_down : :obj:`int`
+        Cost per unit of DSM activity that decreases the demand
 
-        only used in method =  'delay', can be  None if not used :
+    Note
+    ----
 
-        the time after which the load shift must be fully compensated
-
-    Notes
-    -----
-
-    The following sets, variables, constraints and objective parts are created
-    :py:class:`~oemof.solph.custom.SinkDSMIntervalBlock` or
-    :py:class:`~oemof.solph.custom.SinkDSMDelayBlock
-    * This component is still under development.
-
+    * This component is a candidate component. It's implemented as a custom
+      component for users that like to use and test the component at early
+      stage. Please report issues to improve the component.
     * As many constraints and dependencies are created in method 'delay',
-    the calculation time increases significantly with large 'delay_time'
-    values as well as with long observation periods.
-
-    * The interval method creates only one real variable,
-    while the delay method creates two non-negative-real variables.
-
-    * The interval always starts at the first timestep = 0.
-
-    * delay method based on the formulation given in a paper
-    by Zerrahn, Alexander and Schill, Wolf-Peter (2015):
-    On the representation of demand-side management in power system models,
-    in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
-    accessed 17.09.2019, pp. 842-843.
-
-    * in 'delay' method: delay time might be extended artificially
-    if DSM-capacity isn't used to it's full extend.
-    see oemof/Issue: #622 for more information
+      computational cost might be high with a large 'delay_time' and with model
+      of high temporal resolution
+    * Using :attr:`~method` 'delay' might result in demand shifts that exceed
+      the specified delay time by activating up and down simultaneously in
+      the time steps between to DSM events.
+    * It's not recommended to assign cost to the flow that connects
+      :class:`~SinkDSM` with a bus. Instead, use :attr:`~SinkDSM.cost_dsm_up`
+      or :attr:`~cost_dsm_down`
 
     """
 
     def __init__(self, demand, capacity_up, capacity_down, method,
-                 shift_interval=None, delay_time=None, **kwargs):
+                 shift_interval=None, delay_time=None, cost_dsm_up=0,
+                 cost_dsm_down=0, **kwargs):
         super().__init__(**kwargs)
 
         self.capacity_up = sequence(capacity_up)
@@ -934,6 +927,8 @@ class SinkDSM(Sink):
         self.method = method
         self.shift_interval = shift_interval
         self.delay_time = delay_time
+        self.cost_dsm_up = cost_dsm_up
+        self.cost_dsm_down = cost_dsm_down
 
     def constraint_group(self):
         possible_methods = ['delay', 'interval']
@@ -953,29 +948,29 @@ class SinkDSM(Sink):
                 'The "method" must be one of the following set: '
                 '"{}"'.format('" or "'.join(possible_methods)))
 
-###########################################################################
-#                      Interval Method
-
 
 class SinkDSMIntervalBlock(SimpleBlock):
-    r"""Block for the linear relation of a DSM component and an electrical
-    bus using 'interval' method. Load shift must be compensated during a
-    specific interval, starting at timestep 0.
+    r"""Constraints for SinkDSM with "interval" method
 
-
-    **The following constraints are created for method = 'potential':**
+    **The following constraints are created for method = 'interval':**
 
     .. _SinkDSMInterval-equations:
 
     .. math::
         &
-        (1) \quad  E_{t}^{do} < DSM_{t}^{updown} < E_{t}^{up} \quad \forall t\\
+        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}
+        \quad \forall t \in \mathbb{T}\\
         &
-        (2) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{updown} \quad \forall t\\
+        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
+        \mathbb{T}\\
         &
-        (3) \quad  \sum_{t=0}^{24} DSM_{t}^{updown} = 0 \quad \forall t \\
+        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in
+        \mathbb{T}\\
         &
-
+        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} =
+        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
+        \in \mathbb{T} \mid k \mod \tau = 0\} \\
+        &
 
 
     **Table: Symbols and attribute names of variables and parameters**
@@ -984,16 +979,21 @@ class SinkDSMIntervalBlock(SimpleBlock):
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{updown}` ",":py:obj:
-            `dsm_up_down[g, tt]` ","V", "DSM up/down shift"
-            ":math:`\dot{E}_{t}`",":py:obj:`
-            flow[g.inflow, g,t]`","V", "Energy flowing in from electrical bus"
-            ":math:`demand_{t}`",":py:obj:`
-            demand[t]`","P", "Electrical demand series"
-            ":math:`E_{t}^{do}`",":py:obj:`
-            capacity_down[tt]`","P", "Capacity DSM down shift capacity"
-            ":math:`E_{t}^{up}`",":py:obj:`
-            capacity_up[tt]`","P", "Capacity DSM up shift "
+            ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.capacity_up` ","V", "DSM
+            up shift"
+            ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.capacity_down` ","V","DSM
+            down shift"
+            ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from electrical bus"
+            ":math:`demand_{t}`",":attr:`demand[t]`","P", "Electrical demand
+            series"
+            ":math:`E_{t}^{do}`",":attr:`capacity_down[tt]`","P", "Capacity
+            DSM down shift capacity"
+            ":math:`E_{t}^{up}`",":attr:`capacity_up[tt]`","P", "Capacity
+            DSM up shift "
+            ":math:`\tau` ",":attr:`~SinkDSM.shift_interval` ","P", "Shift
+            interval"
+            ":math:`\mathbb{T}` "," ","P", "Time steps"
 
     """
     CONSTRAINT_GROUP = True
@@ -1018,19 +1018,13 @@ class SinkDSMIntervalBlock(SimpleBlock):
 
         #  ************* VARIABLES *****************************
 
-        def dsm_capacity_bound_rule(block):
-            """Rule definition for bounds(capacity) of DSM - Variable [g]
-            in timestep t"""
-            for t in m.TIMESTEPS:
-                for g in group:
-                    bounds = (-g.capacity_down[t], g.capacity_up[t])
-                    return bounds
+        # Variable load shift down
+        self.dsm_do = Var(self.dsm, m.TIMESTEPS, initialize=0,
+                          within=NonNegativeReals)
 
-        # Variable load shift down (MWh)
-        self.dsm_up_down = Var(self.dsm, m.TIMESTEPS,
-                               initialize=0,
-                               within=Reals,
-                               bounds=dsm_capacity_bound_rule)
+        # Variable load shift up
+        self.dsm_up = Var(self.dsm, m.TIMESTEPS, initialize=0,
+                          within=NonNegativeReals)
 
         #  ************* CONSTRAINTS *****************************
 
@@ -1046,8 +1040,8 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # Generator loads directly from bus
                     lhs = m.flow[g.inflow, g, t]
 
-                    # Demand +- DSM
-                    rhs = g.demand[t] + self.dsm_up_down[g, t]
+                    # Demand + DSM_up - DSM_down
+                    rhs = g.demand[t] + self.dsm_up[g, t] - self.dsm_do[g, t]
 
                     # add constraint
                     block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1057,56 +1051,105 @@ class SinkDSMIntervalBlock(SimpleBlock):
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule)
 
-        # DSM Compensation
+        # Upper bounds relation
+        def dsm_up_constraint_rule(block):
+            """
+            Realised upward load shift at time t has to be smaller than
+            upward DSM capacity at time t.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+                    # DSM up
+                    lhs = self.dsm_up[g, t]
+                    # Capacity dsm_up
+                    rhs = g.capacity_up[t]
+
+                    # add constraint
+                    block.dsm_up_constraint.add((g, t), (lhs <= rhs))
+
+        self.dsm_up_constraint = Constraint(group, m.TIMESTEPS,
+                                            noruleinit=True)
+        self.dsm_up_constraint_build = BuildAction(rule=dsm_up_constraint_rule)
+
+        # Upper bounds relation
+        def dsm_down_constraint_rule(block):
+            """
+            Realised downward load shift at time t has to be smaller than
+            downward DSM capacity at time t.
+            """
+
+            for t in m.TIMESTEPS:
+                for g in group:
+                    # DSM down
+                    lhs = self.dsm_do[g, t]
+                    # Capacity dsm_down
+                    rhs = g.capacity_down[t]
+
+                    # add constraint
+                    block.dsm_down_constraint.add((g, t), (lhs <= rhs))
+
+        self.dsm_down_constraint = Constraint(group, m.TIMESTEPS,
+                                              noruleinit=True)
+        self.dsm_down_constraint_build = BuildAction(
+            rule=dsm_down_constraint_rule)
+
         def dsm_sum_constraint_rule(block):
             """
             Relation to compensate the total amount of positive
             and negative DSM in between the shift_interval.
-            2 Cases: A full interval is optimised or an incomplete one.
+            This constraint is building balance in full intervals starting
+            with index 0. The last interval might not be full.
             """
-            for t in m.TIMESTEPS:
-                for g in group:
 
-                    interval = g.shift_interval
+            for g in group:
+                intervals = range(m.TIMESTEPS.value_list[0],
+                                  m.TIMESTEPS.value_list[-1],
+                                  g.shift_interval)
 
-                    # full interval
-                    if (t // interval) < (m.TIMESTEPS._bounds[1] // interval):
-                        # DSM up/down
-                        lhs = sum(self.dsm_up_down[g, tt]
-                                  for tt in range((t // interval) * interval,
-                                                  (t // interval + 1) *
-                                                  interval, 1))
-                        # value
-                        rhs = 0
-                        # add constraint
-
-                        block.dsm_sum_constraint.add((g, t), (lhs == rhs))
-
-                    # incomplete interval
+                for interval in intervals:
+                    if (interval + g.shift_interval - 1) \
+                            > m.TIMESTEPS.value_list[-1]:
+                        timesteps = range(interval,
+                                          m.TIMESTEPS.value_list[-1] + 1)
                     else:
-                        # DSM up/down
-                        lhs = sum(self.dsm_up_down[g, tt]
-                                  for tt in range((t // interval) * interval,
-                                                  m.TIMESTEPS._bounds[1] +
-                                                  1, 1))
-                        # value
-                        rhs = 0
+                        timesteps = range(interval, interval +
+                                          g.shift_interval)
 
-                        # add constraint
-                        block.dsm_sum_constraint.add((g, t), (lhs == rhs))
+                    # DSM up/down
+                    lhs = sum(self.dsm_up[g, tt]
+                              for tt in timesteps)
+                    # value
+                    rhs = sum(self.dsm_do[g, tt]
+                              for tt in timesteps)
+
+                    # add constraint
+                    block.dsm_sum_constraint.add((g, interval), (lhs == rhs))
 
         self.dsm_sum_constraint = Constraint(group, m.TIMESTEPS,
                                              noruleinit=True)
         self.dsm_sum_constraint_build = BuildAction(
             rule=dsm_sum_constraint_rule)
 
+    def _objective_expression(self):
+        """Adding cost terms for DSM activity to obj. function"""
 
-#############################################################################
-#                      Delay Method
+        m = self.parent_block()
+
+        dsm_cost = 0
+
+        for t in m.TIMESTEPS:
+            for g in self.dsm:
+                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
+                dsm_cost += self.dsm_do[g, t] * g.cost_dsm_down
+
+        self.cost = Expression(expr=dsm_cost)
+
+        return self.cost
+
 
 class SinkDSMDelayBlock(SimpleBlock):
-    r"""Block for the linear relation of a DSM component and an electrical
-    bus using delay-method.Load shift must be compensated during the delay time
+    r"""Constraints for SinkDSM with "delay" method
 
     **The following constraints are created for method = 'delay':**
 
@@ -1117,18 +1160,19 @@ class SinkDSMDelayBlock(SimpleBlock):
 
         &
         (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} -
-        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \quad \forall t \\
+        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \quad \forall t \in \mathbb{T} \\
         &
         (2) \quad DSM_{t}^{up} = \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
-        \quad \forall t \\
+        \quad \forall t \in \mathbb{T} \\
         &
-        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \\
+        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \in
+        \mathbb{T} \\
         &
-        (4) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}  \leq E_{t}^{do}
-        \quad \forall tt \\
+        (4) \quad \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \leq E_{t}^{do}
+        \quad \forall t \in \mathbb{T} \\
         &
-        (5) \quad DSM_{tt}^{up}  + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}
-        \leq max \{ E_{t}^{up}, E_{t}^{do} \}\quad \forall tt \\
+        (5) \quad DSM_{t}^{up}  + \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
+        \leq max \{ E_{t}^{up}, E_{t}^{do} \}\quad \forall t \in \mathbb{T} \\
         &
 
 
@@ -1142,20 +1186,21 @@ class SinkDSMDelayBlock(SimpleBlock):
 
 
 
-            ":math:`DSM_{t}^{up}` ",":py:obj:`
-            dsm_do[g,t,tt]`", "V","DSM up shift (additional load)"
-            ":math:`DSM_{t,tt}^{do}` ",":py:obj:`
-            dsm_up[g,t]`","V","DSM down shift (less load)"
-            ":math:`\dot{E}_{t}` ",":py:obj:`
-            flow[g,t]`","V","Energy flowing in from electrical bus"
-            ":math:`L`",":py:obj:`
-            delay_time`","P", "Delay time for load shift"
-            ":math:`demand_{t}` ",":py:obj:`
-            demand[t]`","P","Electrical demand series"
-            ":math:`E_{t}^{do}` ",":py:obj:`
-            capacity_down[tt]`","P","Capacity DSM down shift "
-            ":math:`E_{t}^{up}` ", ":py:obj:`
-            capacity_up[tt]`", "P","Capacity DSM up shift"
+            ":math:`DSM_{t}^{up}` ",":attr:`dsm_do[g,t,tt]`", "V","DSM up
+            shift (additional load)"
+            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_up[g,t]`","V","DSM down
+            shift (less load)"
+            ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
+            flowing in from electrical bus"
+            ":math:`L`",":attr:`delay_time`","P", "Delay time for
+            load shift"
+            ":math:`demand_{t}` ",":attr:`demand[t]`","P","Electrical
+            demand series"
+            ":math:`E_{t}^{do}` ",":attr:`capacity_down[tt]`","P","Capacity
+            DSM down shift "
+            ":math:`E_{t}^{up}` ", ":attr:`capacity_up[tt]`", "P","Capacity
+            DSM up shift"
+            ":math:`\mathbb{T}` "," ","P", "Time steps"
 
 
     """
@@ -1433,3 +1478,20 @@ class SinkDSMDelayBlock(SimpleBlock):
 
         self.C2_constraint = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.C2_constraint_build = BuildAction(rule=c2_constraint_rule)
+
+    def _objective_expression(self):
+        """Adding cost terms for DSM activity to obj. function"""
+
+        m = self.parent_block()
+
+        dsm_cost = 0
+
+        for t in m.TIMESTEPS:
+            for g in self.dsm:
+                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
+                dsm_cost += sum(self.dsm_do[g, t, tt] for tt in m.TIMESTEPS
+                                ) * g.cost_dsm_down
+
+        self.cost = Expression(expr=dsm_cost)
+
+        return self.cost

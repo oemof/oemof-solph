@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_, assert_raises, ok_
-from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -20,7 +19,7 @@ from oemof.outputlib import processing
 from oemof.outputlib import views
 
 
-class Parameter_Result_Tests:
+class TestParameterResult:
     @classmethod
     def setUpClass(cls):
         cls.period = 24
