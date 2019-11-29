@@ -12,10 +12,9 @@ New features
 New components
 ##############
 
-* Demand side managed sink. This newly introduced component is internally
-  tested but not completly reviewed. Use with care and report bugs if necessary.
-  Further information can be found in the `documentation
-  <https://oemof.readthedocs.io/en/v0.3/oemof_solph.html#sinkdsm-custom>`_.
+* Custom component: :class:`~oemof.solph.custom.SinkDSM`.
+  Demand Side Management component that allows to represent flexibile demand.
+  How the component is used is shown in :ref:`oemof_solph_custom_sinkdsm_label`.
 
 Documentation
 #############
