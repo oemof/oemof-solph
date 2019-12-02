@@ -210,7 +210,7 @@ class GenericStorage(network.Transformer):
                   "with three constraints. Set one invest relation to 'None'.")
             raise AttributeError(e2)
         if (self.investment and
-                self.fixed_losses_absolute != 0 and
+                self.fixed_losses_absolute != solph_sequence(0) and
                 self.investment.existing == 0 and
                 self.investment.minimum == 0):
             e3 = ("With fixed_losses_absolute > 0, either investment.existing "
