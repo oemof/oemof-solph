@@ -209,6 +209,13 @@ class GenericStorage(network.Transformer):
             e2 = ("Overdetermined. Three investment object will be coupled"
                   "with three constraints. Set one invest relation to 'None'.")
             raise AttributeError(e2)
+        if (self.investment and
+                self.fixed_losses_absolute != 0 and
+                self.investment.existing == 0 and
+                self.investment.minimum == 0):
+            e3 = ("With fixed_losses_absolute > 0, either investment.existing "
+                  "or investment.minimum has to be non-zero.")
+            raise AttributeError(e3)
 
         self._set_flows()
 
