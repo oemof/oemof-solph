@@ -131,7 +131,7 @@ See :ref:`oemof_solph_components_label` for a list of all components.
 Optimise your energy system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The typical optimisation of an energy system in solph is the dispatch optimisation, which means that the use of the sources is optimised to satisfy the demand at least costs.
+The typical optimization of an energy system in solph is the dispatch optimization, which means that the use of the sources is optimised to satisfy the demand at least costs.
 Therefore, variable cost can be defined for all components. The cost for gas should be defined in the gas source while the variable costs of the gas power plant are caused by operating material.
 You can deviate from this scheme but you should keep it consistent to make it understandable for others.
 
@@ -141,7 +141,7 @@ Furthermore, it is possible to optimise the capacity of different components (se
 
 .. code-block:: python
 
-    # set up a simple least cost optimisation
+    # set up a simple least cost optimization
     om = solph.Model(my_energysystem)
 
     # solve the energy model using the CBC solver
@@ -151,7 +151,7 @@ If you want to analyse the lp-file to see all equations and bounds you can write
 
 .. code-block:: python
 
-    # set up a simple least cost optimisation
+    # set up a simple least cost optimization
     om = solph.Model(my_energysystem)
 
     # write the lp file for debugging or other reasons
@@ -266,7 +266,7 @@ Transformer (basic)
 
 An instance of the Transformer class can represent a node with multiple input and output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis, a cooling device or a heat pump.
 The efficiency has to be constant within one time step to get a linear transformation.
-You can define a different efficiency for every time step (e.g. the thermal powerplant efficiency according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
+You can define a different efficiency for every time step (e.g. the thermal powerplant efficiency according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimization.
 
 A condensing power plant can be defined by a transformer with one input (fuel) and one output (electricity).
 
@@ -366,7 +366,7 @@ flow of fuel, there is a line of operation points, whose slope is defined by
 For now :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances are
 restricted to one input and two output flows. The class allows the definition
 of a different efficiency for every time step but the corresponding series has
-to be predefined as a parameter for the optimisation. In contrast to the
+to be predefined as a parameter for the optimization. In contrast to the
 :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
 defined. For the main flow you can define a conversion factor if the second
 flow is zero (conversion_factor_single_flow).
@@ -792,7 +792,7 @@ Yielding the following results
 Using the investment mode
 -------------------------
 
-As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
+As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimization based on marginal costs. Solph also provides a combined dispatch and investment optimization.
 Based on investment costs you can compare the usage of existing components against building up new capacity.
 The annual savings by building up new capacity must therefore compensate the annuity of the investment costs (the time period does not have to be one year but depends on your Datetime index).
 

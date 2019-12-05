@@ -8,7 +8,7 @@ For version 0.2.0, the outputlib has been refactored. Tools for plotting optimiz
 results that were part of the outputlib in earlier versions are no longer part of this module
 as the requirements to plotting functions greatly depend on individial requirements.
 
-Basic functions for plotting of optimisation results are now found in
+Basic functions for plotting of optimization results are now found in
 a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`_. 
 
 The main purpose of the outputlib is to collect and organise results.

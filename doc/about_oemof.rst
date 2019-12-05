@@ -15,7 +15,7 @@ The idea of an open framework
 
 The Open Energy System Modelling Framework has been developed for the modelling and analysis of energy supply systems considering power and heat as well as prospectively mobility.
 
-Oemof has been implemented in Python and uses several Python packages for scientific applications (e.g. mathematical optimisation, network analysis, data analysis), optionally in combination with a PostgreSQL/PostGIS database.
+Oemof has been implemented in Python and uses several Python packages for scientific applications (e.g. mathematical optimization, network analysis, data analysis), optionally in combination with a PostgreSQL/PostGIS database.
 It offers a toolbox of various features needed to build energy system models in high temporal and spatial resolution.
 For instance, the wind energy feed-in in a model region can be modelled based on weather data, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
 
