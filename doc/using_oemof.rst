@@ -65,7 +65,7 @@ The formulation of the energy system is based on the oemof-network library but c
 
 oemof-outputlib
 ===============
-The :ref:`oemof_outputlib_label` library is part of the oemof installation. It collects the results of an optimisation in a dictionary holding scalar variables and `pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html#pandas.DataFrame>`_ for time dependend output. This makes it easy to process or plot the results using the capabilities of the pandas library.
+The :ref:`oemof_outputlib_label` library is part of the oemof installation. It collects the results of an optimization in a dictionary holding scalar variables and `pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html#pandas.DataFrame>`_ for time dependend output. This makes it easy to process or plot the results using the capabilities of the pandas library.
 
 The following code collects the results in a pandas DataFrame and selects the data
 for a specific component, in this case 'heat'.
