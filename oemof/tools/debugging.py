@@ -9,3 +9,18 @@ available from its original location oemof/oemof/tools/economics.py
 SPDX-License-Identifier: MIT
 """
 
+
+class SuspiciousUsageWarning(UserWarning):
+    """
+    Warn the user about potentially dangerous usage.
+
+    It is not necessarily wrong but could lead to an unwanted behaviour if you
+    do not know what you are doing. If you know what you are doing you can
+    easily switch off the warnings.
+
+    Examples
+    --------
+    >>> import warnings
+    >>> warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
+    """
+    pass
