@@ -361,10 +361,10 @@ class Transformer(Component):
         if not self.inputs:
             raise debugging.SuspiciousUsageWarning(
                 "`Transformer` constructed without `inputs`.\n")
-        # if not self.outputs:
-        #     raise debugging.SuspiciousUsageWarning(
-        #         "`Transformer` constructed without `outputs`.\n"
-        #     )
+        if not self.outputs:
+            raise debugging.SuspiciousUsageWarning(
+                "`Transformer` constructed without `outputs`.\n"
+            )
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
