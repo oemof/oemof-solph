@@ -341,7 +341,9 @@ class Sink(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.inputs:
-            debugging.SuspiciousUsageWarning("Wrong!")
+            raise debugging.SuspiciousUsageWarning(
+                "`Sink` constructed without `inputs`."
+            )
 
 
 class Source(Component):
