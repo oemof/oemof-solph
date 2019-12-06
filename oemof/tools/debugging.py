@@ -14,9 +14,11 @@ class SuspiciousUsageWarning(UserWarning):
     """
     Warn the user about potentially dangerous usage.
 
-    It is not necessarily wrong but could lead to an unwanted behaviour if you
-    do not know what you are doing. If you know what you are doing you can
-    easily switch off the warnings.
+    Some ways of using `oemof` are not necessarily wrong but could lead to
+    hard to find bugs if you done accidentally instead of intentionally. We
+    use these warnings, and you can do too ;), in your code to warn users about
+    these cases. If you know what you are doing and these warnings point you to
+    things you are doing intentionally, you can easily switch them off.
 
     Examples
     --------
