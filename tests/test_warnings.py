@@ -19,7 +19,7 @@ def test_that_the_sink_warnings_actually_get_raised():
     """
     msg = "`Sink` constructed without `inputs`."
     with assert_raises_regexp(SuspiciousUsageWarning, msg):
-        network.Sink(imputs={"Look out!": "A typo!"})
+        network.Sink(outputs={"Look out!": "A typo!"})
 
 
 def test_that_the_source_warnings_actually_get_raised():
@@ -27,7 +27,7 @@ def test_that_the_source_warnings_actually_get_raised():
     """
     msg = "`Source` constructed without `outputs`."
     with assert_raises_regexp(SuspiciousUsageWarning, msg):
-        network.Source(output={"Look out!": "A typo!"})
+        network.Source(inputs={"Look out!": "A typo!"})
 
 
 def test_that_the_transformer_warnings_actually_get_raised():
