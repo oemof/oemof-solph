@@ -16,6 +16,7 @@ from collections import (namedtuple as NT, Mapping, MutableMapping as MM,
                          UserDict as UD)
 from contextlib import contextmanager
 from functools import total_ordering
+from oemof.tools import debugging
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 # TODO:
@@ -337,7 +338,10 @@ class Component(Node):
 
 
 class Sink(Component):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.inputs:
+            debugging.SuspiciousUsageWarning("Wrong!")
 
 
 class Source(Component):
