@@ -347,11 +347,24 @@ class Sink(Component):
 
 
 class Source(Component):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.outputs:
+            raise debugging.SuspiciousUsageWarning(
+                "`Source` constructed without `outputs`."
+            )
 
 
 class Transformer(Component):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.inputs:
+            raise debugging.SuspiciousUsageWarning(
+                "`Transformer` constructed without `inputs`.\n")
+        # if not self.outputs:
+        #     raise debugging.SuspiciousUsageWarning(
+        #         "`Transformer` constructed without `outputs`.\n"
+        #     )
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
@@ -446,3 +459,6 @@ def temporarily_modifies_registry(f):
         with registry_changed_to(None):
             return f(*xs, **ks)
     return result
+
+#
+# Transformer()

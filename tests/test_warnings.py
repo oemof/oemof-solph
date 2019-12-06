@@ -19,6 +19,22 @@ def test_that_the_sink_warnings_actually_get_raised():
     """ Sink doesn't warn about potentially erroneous usage.
     """
     with assert_raises(
-        SuspiciousUsageWarning, msg="Sink constructed without `inputs`."
+        SuspiciousUsageWarning, msg="Sink constructed fas `inputs`."
     ):
         network.Sink(imputs={"Look out!": "A typo!"})
+
+
+def test_that_the_source_warnings_actually_get_raised():
+    """ Source doesn't warn about potentially erroneous usage.
+    """
+    with assert_raises(SuspiciousUsageWarning):
+        network.Source(output={"Look out!": "A typo!"})
+
+
+def test_that_the_transformer_warnings_actually_get_raised():
+    """ Transformer doesn't warn about potentially erroneous usage.
+    """
+    with assert_raises(SuspiciousUsageWarning):
+        network.Transformer(outpts={"Look out!": "No inputs!"})
+    with assert_raises(SuspiciousUsageWarning):
+        network.Transformer(inpts={"Look out!": "No outputs!"})
