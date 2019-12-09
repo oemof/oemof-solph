@@ -44,6 +44,9 @@ class Flow(SimpleBlock):
     INTEGER_FLOWS
         A set of flows wher the attribute :attr:`integer` is True (forces flow
         to only take integer values)
+    PENALTY_FLOWS
+        A set of flows with :attr:`schedule` not None (forces flow to this
+        schedule)
 
     **The following constraints are build:**
 
@@ -120,6 +123,10 @@ class Flow(SimpleBlock):
         self.INTEGER_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
                         if g[2].integer])
+
+        self.PENALTY_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group if g[2].schedule[0] is not None]
+        )
         # ######################### Variables  ################################
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
@@ -130,6 +137,13 @@ class Flow(SimpleBlock):
 
         self.integer_flow = Var(self.INTEGER_FLOWS,
                                 m.TIMESTEPS, within=NonNegativeIntegers)
+        
+        self.slack_pos = Var(self.PENALTY_FLOWS,
+                                m.TIMESTEPS, within=NonNegativeReals)
+
+        self.slack_neg = Var(self.PENALTY_FLOWS,
+                                m.TIMESTEPS, within=NonNegativeReals)
+
         # set upper bound of gradient variable
         for i, o, f in group:
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
@@ -209,6 +223,20 @@ class Flow(SimpleBlock):
         self.integer_flow_constr = Constraint(self.INTEGER_FLOWS, m.TIMESTEPS,
                                               rule=_integer_flow_rule)
 
+        def _schedule_rule(model):
+            for inp, out in self.PENALTY_FLOWS:
+                for ts in m.TIMESTEPS:
+                    if m.flows[inp, out].schedule[ts] is not None:
+                        lhs = (m.flow[inp, out, ts] + self.slack_pos[inp, out, ts] -
+                                self.slack_neg[inp, out, ts])
+                        rhs = m.flows[inp, out].schedule[ts]
+                        self.schedule_constr.add((inp, out, ts),
+                                                    lhs == rhs)
+        self.schedule_constr = Constraint(
+            self.PENALTY_FLOWS, m.TIMESTEPS, noruleinit=True)
+        self.schedule_build = BuildAction(
+            rule=_schedule_rule)
+
     def _objective_expression(self):
         r""" Objective expression for all standard flows with fixed costs
         and variable costs.
@@ -217,6 +245,7 @@ class Flow(SimpleBlock):
 
         variable_costs = 0
         gradient_costs = 0
+        penalty_costs = 0
 
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
@@ -236,7 +265,13 @@ class Flow(SimpleBlock):
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
-        return variable_costs + gradient_costs
+            if m.flows[i, o].schedule[0] is not None:
+                for t in m.TIMESTEPS:
+                    penalty_costs += (self.slack_pos[i, o, t] * 
+                                      m.flows[i, o].penalty_pos[t])
+                    penalty_costs += (self.slack_neg[i, o, t] * 
+                                      m.flows[i, o].penalty_neg[t])
+        return variable_costs + gradient_costs + penalty_costs
 
 
 class InvestmentFlow(SimpleBlock):

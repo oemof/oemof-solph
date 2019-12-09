@@ -117,7 +117,17 @@ class Flow(on.Edge):
         :class:`Flow <oemof.solph.blocks.Flow>`.
         Note: at the moment this does not work if the investment attribute is
         set .
-
+    schedule : numeric (sequence or scalar)
+        Schedule for the flow. Flow has to follow the schedule, otherwise a
+        penalty term will be activated. If array-like, values can be None
+        for flexible, non-fixed flow during the certain timestep.  Used in
+        combination with the :attr:`penalty`.
+    penalty : numeric
+        The penalty parameter of the penalty term describes the costs
+        associated with one unit of the flow when not following the schedule.
+        If this is set the costs will be added to the objective expression
+        of the optimization problem. Used in combination with the
+        :attr:`schedule`.
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -157,11 +167,13 @@ class Flow(on.Edge):
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+        sequences = ['actual_value', 'variable_costs', 'min', 'max', 'schedule',
+                     'penalty_neg', 'penalty_pos']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
+                    'penalty_neg': 0, 'penalty_pos': 0, 'schedule': None
                     }
         keys = [k for k in kwargs if k != 'label']
 
@@ -188,6 +200,11 @@ class Flow(on.Edge):
         if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
+        if (len(self.schedule) != 0) and not \
+            (self.penalty_pos[0] and self.penalty_neg[0]):
+            raise ValueError("The penalty and schedule attribute need "
+                             "to be used in combination. \n Please set "
+                             "the schedule attribute of the flow.")
 
 
 class Bus(on.Bus):
