@@ -105,7 +105,6 @@ class Parameter_Result_Tests:
                 }
             ).sort_index()
         )
-        print(param_results[(b_el2, demand)]['sequences'])
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
