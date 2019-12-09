@@ -100,13 +100,17 @@ class Parameter_Result_Tests:
                     'positive_gradient_costs': 0,
                     'variable_costs': 0,
                     'label': str(b_el2.outputs[demand].label),
+                    'penalty_pos': 0,
+                    'penalty_neg': 0,
                 }
             ).sort_index()
         )
+        print(param_results[(b_el2, demand)]['sequences'])
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
-                {'actual_value': self.demand_values}
+                {'actual_value': self.demand_values,
+                }
             ), check_like=True
         )
 
@@ -133,6 +137,9 @@ class Parameter_Result_Tests:
             'flow': None,
             'values': None,
             'label': str(b_el2.outputs[demand].label),
+            'penalty_pos': 0,
+            'penalty_neg': 0,
+            'schedule': None,
         }
         assert_series_equal(
             param_results[(b_el2, demand)]['scalars'].sort_index(),
@@ -142,7 +149,7 @@ class Parameter_Result_Tests:
             'actual_value': self.demand_values,
         }
         default_sequences = [
-            'actual_value'
+            'actual_value',
         ]
         for attr in default_sequences:
             if attr not in sequences_attributes:
