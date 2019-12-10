@@ -108,8 +108,7 @@ class Parameter_Result_Tests:
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
-                {'actual_value': self.demand_values,
-                }
+                {'actual_value': self.demand_values}
             ), check_like=True
         )
 

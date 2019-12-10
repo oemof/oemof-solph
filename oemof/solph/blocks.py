@@ -29,7 +29,7 @@ class Flow(SimpleBlock):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     slack_pos :
-        Difference of a flow to schedule in consecutive timesteps if flow 
+        Difference of a flow to schedule in consecutive timesteps if flow
         has deficit to schedule. Indexed by SCHEDULE_FLOWS, TIMESTEPS.
 
     slack_neg :
@@ -92,7 +92,7 @@ class Flow(SimpleBlock):
 
     If :attr:`variable_costs` are set by the user:
         .. math::
-            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t) 
+            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
     The expression can be accessed by :attr:`om.Flow.variable_costs` and
     their value after optimization by :meth:`om.Flow.variable_costs()` .
@@ -146,11 +146,9 @@ class Flow(SimpleBlock):
 
         self.SCHEDULE_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if (
-                        len(g[2].schedule) != 0 or
-                        (len(g[2].schedule) == 0 and 
-                        g[2].schedule[0] is not None)
-                        )]
-        )
+                            len(g[2].schedule) != 0 or
+                            (len(g[2].schedule) == 0 and
+                             g[2].schedule[0] is not None))])
         # ######################### Variables  ################################
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
@@ -161,12 +159,12 @@ class Flow(SimpleBlock):
 
         self.integer_flow = Var(self.INTEGER_FLOWS,
                                 m.TIMESTEPS, within=NonNegativeIntegers)
-        
+
         self.slack_pos = Var(self.SCHEDULE_FLOWS,
-                                m.TIMESTEPS, within=NonNegativeReals)
+                             m.TIMESTEPS, within=NonNegativeReals)
 
         self.slack_neg = Var(self.SCHEDULE_FLOWS,
-                                m.TIMESTEPS, within=NonNegativeReals)
+                             m.TIMESTEPS, within=NonNegativeReals)
 
         # set upper bound of gradient variable
         for i, o, f in group:
@@ -252,10 +250,10 @@ class Flow(SimpleBlock):
                 for ts in m.TIMESTEPS:
                     if m.flows[inp, out].schedule[ts] is not None:
                         lhs = (m.flow[inp, out, ts] + self.slack_pos[inp, out, ts] -
-                                self.slack_neg[inp, out, ts])
+                               self.slack_neg[inp, out, ts])
                         rhs = m.flows[inp, out].schedule[ts]
                         self.schedule_constr.add((inp, out, ts),
-                                                    lhs == rhs)
+                                                 lhs == rhs)
         self.schedule_constr = Constraint(
             self.SCHEDULE_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.schedule_build = BuildAction(
@@ -290,15 +288,13 @@ class Flow(SimpleBlock):
                                            'costs'])
 
             schedule = m.flows[i, o].schedule
-            if (
-                len(schedule) > 1 or
-                (len(schedule) == 0 and 
-                schedule[0] is not None)
-                ):
+            if (len(schedule) > 1 or
+                (len(schedule) == 0 and
+                 schedule[0] is not None)):
                 for t in m.TIMESTEPS:
-                    penalty_costs += (self.slack_pos[i, o, t] * 
+                    penalty_costs += (self.slack_pos[i, o, t] *
                                       m.flows[i, o].penalty_pos[t])
-                    penalty_costs += (self.slack_neg[i, o, t] * 
+                    penalty_costs += (self.slack_neg[i, o, t] *
                                       m.flows[i, o].penalty_neg[t])
         return variable_costs + gradient_costs + penalty_costs
 
