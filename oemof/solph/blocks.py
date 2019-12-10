@@ -249,7 +249,8 @@ class Flow(SimpleBlock):
             for inp, out in self.SCHEDULE_FLOWS:
                 for ts in m.TIMESTEPS:
                     if m.flows[inp, out].schedule[ts] is not None:
-                        lhs = (m.flow[inp, out, ts] + self.slack_pos[inp, out, ts] -
+                        lhs = (m.flow[inp, out, ts] +
+                               self.slack_pos[inp, out, ts] -
                                self.slack_neg[inp, out, ts])
                         rhs = m.flows[inp, out].schedule[ts]
                         self.schedule_constr.add((inp, out, ts),
