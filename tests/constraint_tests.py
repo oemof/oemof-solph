@@ -677,3 +677,21 @@ class Constraint_Tests:
             shift_interval=2
         )
         self.compare_lp_files('dsm_module_interval.lp')
+
+    def test_flow_schedule(self):
+        """Contraint test of scheduled flows
+        """
+        b_gas = solph.Bus(label='bus_gas')
+        b_th = solph.Bus(label='bus_th_penalty')
+
+        schedule = [None, 300, 50]
+        solph.Transformer(
+            label="boiler_penalty",
+            inputs={b_gas: solph.Flow()},
+            outputs={b_th: solph.Flow(nominal_value=200, variable_costs=0,
+                                              penalty_pos = [0,999,999],
+                                              penalty_neg = 999,
+                                              schedule=schedule)},
+            conversion_factors={b_th: 1}
+        )
+        self.compare_lp_files('flow_schedule.lp')
