@@ -207,8 +207,11 @@ class Flow(on.Edge):
         if self.investment and self.nonconvex:
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
-        if (len(self.schedule) != 0) and not \
-            (self.penalty_pos[0] and self.penalty_neg[0]):
+        if (
+            len(self.schedule) != 0 and 
+            ((len(self.penalty_pos) == 0 and self.penalty_pos[0]) or
+             (len(self.penalty_neg) == 0 and self.penalty_neg[0]))
+            ):
             raise ValueError("The penalty and schedule attribute need "
                              "to be used in combination. \n Please set "
                              "the schedule attribute of the flow.")
