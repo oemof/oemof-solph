@@ -31,12 +31,12 @@ by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_scripts/test_solph/
 test_storage_investment/test_storage_investment.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from pickle import UnpicklingError
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from oemof.tools import economics
 
