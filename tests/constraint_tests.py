@@ -340,7 +340,7 @@ class Constraint_Tests:
                 ep_costs=145, minimum=100, maximum=200))
 
         self.compare_lp_files('storage_invest_minimum.lp')
-        
+
     def test_storage_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label='electricityBus')
@@ -353,9 +353,9 @@ class Constraint_Tests:
             initial_storage_level=None,
             balanced=False,
             invest_relation_input_capacity=1,
-            invest_relation_output_capacity=1)    
+            invest_relation_output_capacity=1)
         self.compare_lp_files('storage_unbalanced.lp')
-    
+
     def test_storage_invest_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label='electricityBus')
@@ -689,9 +689,9 @@ class Constraint_Tests:
             label="boiler_penalty",
             inputs={b_gas: solph.Flow()},
             outputs={b_th: solph.Flow(nominal_value=200, variable_costs=0,
-                                              penalty_pos = [0,999,999],
-                                              penalty_neg = 999,
-                                              schedule=schedule)},
+                                      penalty_pos=[0, 800, 900],
+                                      penalty_neg=999,
+                                      schedule=schedule)},
             conversion_factors={b_th: 1}
         )
         self.compare_lp_files('flow_schedule.lp')

@@ -5,8 +5,8 @@ objective:
 +999 Flow_slack_neg(boiler_penalty_bus_th_penalty_0)
 +999 Flow_slack_neg(boiler_penalty_bus_th_penalty_1)
 +999 Flow_slack_neg(boiler_penalty_bus_th_penalty_2)
-+999 Flow_slack_pos(boiler_penalty_bus_th_penalty_1)
-+999 Flow_slack_pos(boiler_penalty_bus_th_penalty_2)
++800 Flow_slack_pos(boiler_penalty_bus_th_penalty_1)
++900 Flow_slack_pos(boiler_penalty_bus_th_penalty_2)
 
 s.t.
 
