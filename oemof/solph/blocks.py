@@ -29,11 +29,11 @@ class Flow(SimpleBlock):
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
     slack_pos :
-        Difference of a flow in consecutive timesteps if flow exceeds
-        schedule. Indexed by SCHEDULE_FLOWS, TIMESTEPS.
+        Difference of a flow to schedule in consecutive timesteps if flow 
+        has deficit to schedule. Indexed by SCHEDULE_FLOWS, TIMESTEPS.
 
     slack_neg :
-        Deficit of flow compared to schedule. Indexed by SCHEDULE_FLOWS,
+        Excees of flow compared to schedule. Indexed by SCHEDULE_FLOWS,
         TIMESTEPS.
 
     **The following sets are created:** (-> see basic sets at
