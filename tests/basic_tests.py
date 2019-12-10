@@ -18,7 +18,6 @@ from nose.tools import ok_, eq_
 import pandas as pd
 
 from oemof import energy_system as es
-from oemof.network import Entity
 from oemof.network import Bus, Transformer
 from oemof.network import Bus as NewBus, Node, temporarily_modifies_registry
 from oemof.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
@@ -56,6 +55,7 @@ class TestsEnergySystem:
         self.es.nodes = empty
         ok_(self.es.entities is empty)
 
+
     def test_that_none_is_not_a_valid_group(self):
         def by_uid(n):
             if "Not in 'Group'" in n.uid:
@@ -77,6 +77,7 @@ class TestsEnergySystem:
             for e in grouped:
                 if isinstance(g, Iterable) and not isinstance(g, str):
                     ok_(e in g)
+
 
     @temporarily_modifies_registry
     def test_defining_multiple_groupings_with_one_function(self):
