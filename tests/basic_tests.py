@@ -65,10 +65,10 @@ class TestsEnergySystem:
 
         ensys = es.EnergySystem(groupings=[by_uid])
 
-        ungrouped = [Entity(uid="Not in 'Group': {}".format(i))
-                     for i in range(10)]
-        grouped = [Entity(uid="In 'Group': {}".format(i))
-                   for i in range(10)]
+       # ungrouped = [Entity(uid="Not in 'Group': {}".format(i))
+       #              for i in range(10)]
+       # grouped = [Entity(uid="In 'Group': {}".format(i))
+       #            for i in range(10)]
         ok_(None not in ensys.groups)
         for g in ensys.groups.values():
             for e in ungrouped:
