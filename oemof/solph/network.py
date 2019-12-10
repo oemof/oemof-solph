@@ -209,8 +209,8 @@ class Flow(on.Edge):
                              "nonconvex flows!")
         if (
             len(self.schedule) != 0 and 
-            ((len(self.penalty_pos) == 0 and self.penalty_pos[0]) or
-             (len(self.penalty_neg) == 0 and self.penalty_neg[0]))
+            ((len(self.penalty_pos) == 0 and not self.penalty_pos[0]) or
+             (len(self.penalty_neg) == 0 and not self.penalty_neg[0]))
             ):
             raise ValueError("The penalty and schedule attribute need "
                              "to be used in combination. \n Please set "
