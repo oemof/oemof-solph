@@ -28,6 +28,14 @@ class Flow(SimpleBlock):
         Difference of a flow in consecutive timesteps if flow is increased
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
+    slack_pos :
+        Difference of a flow in consecutive timesteps if flow exceeds
+        schedule. Indexed by SCHEDULE_FLOWS, TIMESTEPS.
+
+    slack_neg :
+        Deficit of flow compared to schedule. Indexed by SCHEDULE_FLOWS,
+        TIMESTEPS.
+
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
@@ -42,10 +50,10 @@ class Flow(SimpleBlock):
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
     INTEGER_FLOWS
-        A set of flows wher the attribute :attr:`integer` is True (forces flow
+        A set of flows where the attribute :attr:`integer` is True (forces flow
         to only take integer values)
-    PENALTY_FLOWS
-        A set of flows with :attr:`schedule` not None (forces flow to this
+    SCHEDULE_FLOWS
+        A set of flows with :attr:`schedule` not None (forces flow to follow
         schedule)
 
     **The following constraints are build:**
@@ -74,16 +82,28 @@ class Flow(SimpleBlock):
             \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
             \forall t \in \textrm{TIMESTEPS}.
 
+    Schedule constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
+        .. math:: flow(i, o, t) + slack_pos(i, o, t) - \
+            slack_neg(i, o, t) = schedule(i, o, t) \\
+            \forall (i, o) \in \textrm{SCHEDULE\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
+
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
         .. math::
-            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
+            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t) 
 
     The expression can be accessed by :attr:`om.Flow.variable_costs` and
     their value after optimization by :meth:`om.Flow.variable_costs()` .
 
+    If :attr:`schedule`, :attr:`penalty_pos` and :attr:`penalty_neg` are
+    set by the user:
+        .. math:: \sum_{(i,o)} \sum_t penalty_pos(i, o, t) \cdot \
+            slack_pos(i, o, t)  + penalty_neg(i, o, t) \cdot \
+            slack_neg(i, o, t)
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -124,7 +144,7 @@ class Flow(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group
                         if g[2].integer])
 
-        self.PENALTY_FLOWS = Set(
+        self.SCHEDULE_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].schedule[0] is not None]
         )
         # ######################### Variables  ################################
@@ -138,10 +158,10 @@ class Flow(SimpleBlock):
         self.integer_flow = Var(self.INTEGER_FLOWS,
                                 m.TIMESTEPS, within=NonNegativeIntegers)
         
-        self.slack_pos = Var(self.PENALTY_FLOWS,
+        self.slack_pos = Var(self.SCHEDULE_FLOWS,
                                 m.TIMESTEPS, within=NonNegativeReals)
 
-        self.slack_neg = Var(self.PENALTY_FLOWS,
+        self.slack_neg = Var(self.SCHEDULE_FLOWS,
                                 m.TIMESTEPS, within=NonNegativeReals)
 
         # set upper bound of gradient variable
@@ -224,7 +244,7 @@ class Flow(SimpleBlock):
                                               rule=_integer_flow_rule)
 
         def _schedule_rule(model):
-            for inp, out in self.PENALTY_FLOWS:
+            for inp, out in self.SCHEDULE_FLOWS:
                 for ts in m.TIMESTEPS:
                     if m.flows[inp, out].schedule[ts] is not None:
                         lhs = (m.flow[inp, out, ts] + self.slack_pos[inp, out, ts] -
@@ -233,7 +253,7 @@ class Flow(SimpleBlock):
                         self.schedule_constr.add((inp, out, ts),
                                                     lhs == rhs)
         self.schedule_constr = Constraint(
-            self.PENALTY_FLOWS, m.TIMESTEPS, noruleinit=True)
+            self.SCHEDULE_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.schedule_build = BuildAction(
             rule=_schedule_rule)
 

@@ -121,13 +121,20 @@ class Flow(on.Edge):
         Schedule for the flow. Flow has to follow the schedule, otherwise a
         penalty term will be activated. If array-like, values can be None
         for flexible, non-fixed flow during the certain timestep.  Used in
-        combination with the :attr:`penalty`.
-    penalty : numeric
-        The penalty parameter of the penalty term describes the costs
-        associated with one unit of the flow when not following the schedule.
+        combination with :attr:`penalty_pos` and :attr:`penalty_neg`.
+    penalty_pos : numeric (sequence or scalar)
+        A penalty parameter of the penalty term which describes the costs
+        associated with one unit of the flow when flow exceeds the schedule.
         If this is set the costs will be added to the objective expression
         of the optimization problem. Used in combination with the
-        :attr:`schedule`.
+        :attr:`schedule` and :attr:`penalty_neg`
+    penalty_neg: numeric (sequence or scalar)
+        A penalty parameter of the penalty term which describes the costs
+        associated with one unit of the flow when flow has a deficit compared
+        to the schedule. If this is set the costs will be added to the
+        objective expression of the optimization problem. Used in combination
+        with the :attr:`schedule` and :attr:`penalty_pos`
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
