@@ -124,16 +124,16 @@ class Flow(on.Edge):
         combination with :attr:`penalty_pos` and :attr:`penalty_neg`.
     penalty_pos : numeric (sequence or scalar)
         A penalty parameter of the penalty term which describes the costs
-        associated with one unit of the flow when flow exceeds the schedule.
-        If this is set the costs will be added to the objective expression
-        of the optimization problem. Used in combination with the
+        associated with one unit of the exceeded flow when flow exceeds the
+        schedule. If this is set the costs will be added to the objective
+        expression of the optimization problem. Used in combination with the
         :attr:`schedule` and :attr:`penalty_neg`
     penalty_neg: numeric (sequence or scalar)
         A penalty parameter of the penalty term which describes the costs
-        associated with one unit of the flow when flow has a deficit compared
-        to the schedule. If this is set the costs will be added to the
-        objective expression of the optimization problem. Used in combination
-        with the :attr:`schedule` and :attr:`penalty_pos`
+        associated with one unit of deficit of the flow compared to the
+        schedule. If this is set the costs will be added to the objective
+        expression of the optimization problem. Used in combination with
+        the :attr:`schedule` and :attr:`penalty_pos`
 
     Notes
     -----
