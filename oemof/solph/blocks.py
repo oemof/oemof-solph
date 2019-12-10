@@ -145,7 +145,11 @@ class Flow(SimpleBlock):
                         if g[2].integer])
 
         self.SCHEDULE_FLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].schedule[0] is not None]
+            initialize=[(g[0], g[1]) for g in group if (
+                        len(g[2].schedule) != 0 or
+                        (len(g[2].schedule) == 0 and 
+                        g[2].schedule[0] is not None)
+                        )]
         )
         # ######################### Variables  ################################
 
@@ -285,7 +289,12 @@ class Flow(SimpleBlock):
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
-            if m.flows[i, o].schedule[0] is not None:
+            schedule = m.flows[i, o].schedule
+            if (
+                len(schedule) > 1 or
+                (len(schedule) == 0 and 
+                schedule[0] is not None)
+                ):
                 for t in m.TIMESTEPS:
                     penalty_costs += (self.slack_pos[i, o, t] * 
                                       m.flows[i, o].penalty_pos[t])
