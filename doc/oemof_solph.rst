@@ -4,7 +4,7 @@
 oemof-solph
 ~~~~~~~~~~~
 
-Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The packages is based on pyomo. To create an energy system model the :ref:`oemof_network_label` is used and extended by components such as storages. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
+Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The package is based on pyomo. To create an energy system model, the :ref:`oemof_network_label` is used and extended by components such as storages. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
 
 .. contents::
     :depth: 2
@@ -15,10 +15,10 @@ Solph is an oemof-package, designed to create and solve linear or mixed-integer 
 How can I use solph?
 --------------------
 
-To use solph you have to install oemof and at least one solver, which can be used together with pyomo. See `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
+To use solph, you have to install oemof and at least one solver, which can be used together with pyomo. See `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_.
 You can test it by executing one of the existing examples. Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
 
-Once the example work you are close to your first energy model.
+Once the example works, you are close to your first energy model.
 
 Set up an energy system
 ^^^^^^^^^^^^^^^^^^^^^^^
