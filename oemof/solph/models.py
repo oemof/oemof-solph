@@ -383,9 +383,9 @@ class Model(BaseModel):
             self.UNIDIRECTIONAL_FLOWS, self.TIMESTEPS,
             rule=flows_unidirectional_lower_bound_rule)
 
-        # Set bounds NOTNONE_FLOWS
+        # Set upper bounds for NOTNONE_FLOWS
         def flows_not_none_upper_bound_rule(block, o, i, t):
-            """Rule definition for bounds of NOTNONE_FLOWS."""
+            """Rule definition for upper bounds of NOTNONE_FLOWS."""
             expr = 0
             expr += self.flow[o, i, t]
             expr += -self.max[o, i, t] * self.nominal_value[o, i, t]
@@ -393,6 +393,17 @@ class Model(BaseModel):
         self.flows_notnone_upper_bound = po.Constraint(
             self.NOTNONE_FLOWS, self.TIMESTEPS,
             rule=flows_not_none_upper_bound_rule)
+
+        # Set lower bounds for NOTNONE_FLOWS
+        def flows_not_none_lower_bound_rule(block, o, i, t):
+            """Rule definition for lower bounds of NOTNONE_FLOWS."""
+            expr = 0
+            expr += self.flow[o, i, t]
+            expr += -self.min[o, i, t] * self.nominal_value[o, i, t]
+            return expr >= 0
+        self.flows_notnone_lower_bound = po.Constraint(
+            self.NOTNONE_FLOWS, self.TIMESTEPS,
+            rule=flows_not_none_lower_bound_rule)
 
         # Set values for PRE_OPTIMIZED_FLOWS
         def flows_pre_optimized_value_rule(block, o, i, t):
@@ -405,7 +416,7 @@ class Model(BaseModel):
             self.PRE_OPTIMIZED_FLOWS, self.TIMESTEPS,
             rule=flows_pre_optimized_value_rule)
 
-        # Set values FIXED_FLOWS
+        # Set values for FIXED_FLOWS
         def flows_fixed_value_rule(block, o, i, t):
             """Rule definition for value of FIXED_FLOWS."""
             expr = 0
@@ -416,7 +427,7 @@ class Model(BaseModel):
             self.FIXED_FLOWS, self.TIMESTEPS,
             rule=flows_fixed_value_rule)
 
-        # Set lower bound for UNIDIRECTIONAL_FLOWS
+        # Set lower bound for NONCONVEX_FLOWS
         def flows_notnonconvex_lower_bound_rule(block, o, i, t):
             """Rule definition for bounds of NONCONVEX_FLOWS."""
             expr = 0
