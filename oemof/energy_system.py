@@ -140,7 +140,8 @@ class EnergySystem:
 
         self.timeincrement = sequence(kwargs.get('timeincrement', None))
         if self.timeincrement[0] is None:
-            if self.timeindex.freq is not None:
+            if (hasattr(self.timeindex, 'freq') and
+                    self.timeindex.freq is not None):
                 self.timeincrement = sequence(
                     self.timeindex.freq.nanos / 3.6e12)
             else:
