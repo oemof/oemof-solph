@@ -19,6 +19,7 @@ import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 from oemof.network import Bus
+from oemof.solph.plumbing import sequence
 
 
 class EnergySystem:
@@ -36,7 +37,9 @@ class EnergySystem:
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
     timeindex : pandas.datetimeindex
-        Define the time range and increment for the energy system.
+        Define the time range for the energy system.
+    timeincrement : numeric (sequence)
+        Define the timeincrement for the energy system
     groupings : list
         The elements of this list are used to construct :class:`Groupings
         <oemof.core.energy_system.Grouping>` or they are used directly if they
@@ -133,6 +136,8 @@ class EnergySystem:
 
         self.timeindex = kwargs.get('timeindex')
 
+        self.timeincrement = sequence(kwargs.get('timeincrement', None))
+
         self.temporal = kwargs.get('temporal')
 
         self.add(*kwargs.get('entities', ()))
@@ -151,7 +156,7 @@ class EnergySystem:
             (
                 g(n, gs)
                 for g in self._groupings
-                for n in self.nodes[self._first_ungrouped_node_index_ :]
+                for n in self.nodes[self._first_ungrouped_node_index_:]
             ),
             maxlen=0,
         )
