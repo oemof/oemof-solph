@@ -154,7 +154,8 @@ class BaseModel(po.ConcreteModel):
             if len(set(self.es.timeindex)) != len(self.es.timeindex):
                 raise IndexError("No equal DatetimeIndex allowed!")
             timeindex = self.es.timeindex.to_series()
-            timeincrement = timeindex.diff().dropna()
+            timeindex_sorted = timeindex.sort_values()
+            timeincrement = timeindex_sorted.diff().dropna()
             timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
             timeincrement_hourly = list(timeincrement_sec.map(
                                         lambda x: x/3600))
