@@ -7,7 +7,8 @@ available from its original location oemof/oemof/solph/models.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
-
+import datetime as dt
+import pandas as pd
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -31,7 +32,7 @@ class BaseModel(po.ConcreteModel):
         Defaults to :const:`Model.CONSTRAINTS`
     objective_weighting : array like (optional)
         Weights used for temporal objective function
-        expressions. If nothing is passed `timeincrement` will be used which 
+        expressions. If nothing is passed `timeincrement` will be used which
         is calculated from the freq length of the energy system timeindex .
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
@@ -65,18 +66,16 @@ class BaseModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(kwargs.get('timeincrement', None))
+        self.timeincrement = sequence(kwargs.get('timeincrement',
+                                      self.es.timeincrement))
 
         if self.timeincrement[0] is None:
-            try:
+            if self.es.timeindex.freq is not None:
                 self.timeincrement = sequence(
                     self.es.timeindex.freq.nanos / 3.6e12)
-            except AttributeError:
-                msg = ("No valid time increment found. Please pass a valid "
-                       "timeincremet parameter or pass an EnergySystem with "
-                       "a valid time index. Please note that a valid time"
-                       "index need to have a 'freq' attribute.")
-                raise AttributeError(msg)
+            else:
+                self.timeincrement = self._calculate_timeincrement()
+            self.es.timeincrement = self.timeincrement
 
         self.objective_weighting = kwargs.get('objective_weighting',
                                               self.timeincrement)
@@ -148,6 +147,23 @@ class BaseModel(po.ConcreteModel):
                 expr += block._objective_expression()
 
         self.objective = po.Objective(sense=sense, expr=expr)
+
+    def _calculate_timeincrement(self):
+        """Calculates timeincrement for nonequidistant timesteps in `timeindex`
+        """
+        if isinstance(self.es.timeindex, pd.DatetimeIndex):
+            if len(set(self.es.timeindex)) != len(self.es.timeindex):
+                raise IndexError("No equal DatetimeIndex allowed!")
+            timeindex = self.es.timeindex.to_series()
+            timeincrement = timeindex.diff().dropna()
+            timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
+            timeincrement_hourly = list(timeincrement_sec.map(
+                                        lambda x: x/3600))
+            timeincrement_hourly.append(1)
+            timeincrement = sequence(timeincrement_hourly)
+            return timeincrement
+        else:
+            raise TypeError("'timeindex' must be of type 'DatetimeIndex'.")
 
     def receive_duals(self):
         """ Method sets solver suffix to extract information about dual
