@@ -162,7 +162,8 @@ class BaseModel(po.ConcreteModel):
             timeincrement = sequence(timeincrement_hourly)
             return timeincrement
         else:
-            raise AttributeError("'timeindex' must be of type 'DatetimeIndex'.")
+            raise AttributeError(
+                "'timeindex' must be of type 'DatetimeIndex'.")
 
     def receive_duals(self):
         """ Method sets solver suffix to extract information about dual

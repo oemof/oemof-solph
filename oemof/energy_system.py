@@ -142,7 +142,6 @@ class EnergySystem:
 
         self.add(*kwargs.get('entities', ()))
 
-
     def add(self, *nodes):
         """Add :class:`nodes <oemof.network.Node>` to this energy system."""
         self.nodes.extend(nodes)
