@@ -15,7 +15,9 @@ import logging
 import os
 
 import blinker
+import datetime as dt
 import dill as pickle
+import pandas as pd
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 from oemof.network import Bus
@@ -137,10 +139,34 @@ class EnergySystem:
         self.timeindex = kwargs.get('timeindex')
 
         self.timeincrement = sequence(kwargs.get('timeincrement', None))
-
+        if self.timeincrement[0] is None:
+            if self.timeindex.freq is not None:
+                self.timeincrement = sequence(
+                    self.timeindex.freq.nanos / 3.6e12)
+            else:
+                self.timeincrement = self._calculate_timeincrement()
+            self.timeincrement = self.timeincrement
+        print(self.timeincrement)
         self.temporal = kwargs.get('temporal')
 
         self.add(*kwargs.get('entities', ()))
+
+    def _calculate_timeincrement(self):
+        """Calculates timeincrement for nonequidistant timesteps in `timeindex`
+        """
+        if isinstance(self.timeindex, pd.DatetimeIndex):
+            if len(set(self.timeindex)) != len(self.timeindex):
+                raise IndexError("No equal DatetimeIndex allowed!")
+            timeindex = self.timeindex.to_series()
+            timeincrement = timeindex.diff().dropna()
+            timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
+            timeincrement_hourly = list(timeincrement_sec.map(
+                                        lambda x: x/3600))
+            timeincrement_hourly.append(1)
+            timeincrement = sequence(timeincrement_hourly)
+            return timeincrement
+        else:
+            raise TypeError("'timeindex' must be of type 'DatetimeIndex'.")
 
     def add(self, *nodes):
         """Add :class:`nodes <oemof.network.Node>` to this energy system."""

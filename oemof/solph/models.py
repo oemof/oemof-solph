@@ -7,8 +7,6 @@ available from its original location oemof/oemof/solph/models.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
-import datetime as dt
-import pandas as pd
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -68,14 +66,6 @@ class BaseModel(po.ConcreteModel):
         self.es = energysystem
         self.timeincrement = sequence(kwargs.get('timeincrement',
                                       self.es.timeincrement))
-
-        if self.timeincrement[0] is None:
-            if self.es.timeindex.freq is not None:
-                self.timeincrement = sequence(
-                    self.es.timeindex.freq.nanos / 3.6e12)
-            else:
-                self.timeincrement = self._calculate_timeincrement()
-            self.es.timeincrement = self.timeincrement
 
         self.objective_weighting = kwargs.get('objective_weighting',
                                               self.timeincrement)
@@ -147,23 +137,6 @@ class BaseModel(po.ConcreteModel):
                 expr += block._objective_expression()
 
         self.objective = po.Objective(sense=sense, expr=expr)
-
-    def _calculate_timeincrement(self):
-        """Calculates timeincrement for nonequidistant timesteps in `timeindex`
-        """
-        if isinstance(self.es.timeindex, pd.DatetimeIndex):
-            if len(set(self.es.timeindex)) != len(self.es.timeindex):
-                raise IndexError("No equal DatetimeIndex allowed!")
-            timeindex = self.es.timeindex.to_series()
-            timeincrement = timeindex.diff().dropna()
-            timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
-            timeincrement_hourly = list(timeincrement_sec.map(
-                                        lambda x: x/3600))
-            timeincrement_hourly.append(1)
-            timeincrement = sequence(timeincrement_hourly)
-            return timeincrement
-        else:
-            raise TypeError("'timeindex' must be of type 'DatetimeIndex'.")
 
     def receive_duals(self):
         """ Method sets solver suffix to extract information about dual
