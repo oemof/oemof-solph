@@ -19,7 +19,6 @@ import dill as pickle
 
 from oemof.groupings import DEFAULT as BY_UID, Grouping, Nodes
 from oemof.network import Bus
-from oemof.solph.plumbing import sequence
 
 
 class EnergySystem:
@@ -136,7 +135,7 @@ class EnergySystem:
 
         self.timeindex = kwargs.get('timeindex')
 
-        self.timeincrement = sequence(kwargs.get('timeincrement', None))
+        self.timeincrement = kwargs.get('timeincrement', None)
 
         self.temporal = kwargs.get('temporal')
 
