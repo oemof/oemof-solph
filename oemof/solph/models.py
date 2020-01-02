@@ -394,16 +394,17 @@ class Model(BaseModel):
             self.NOTNONE_FLOWS, self.TIMESTEPS,
             rule=flows_not_none_upper_bound_rule)
 
-        # Set lower bounds for NOTNONE_FLOWS
-        def flows_not_none_lower_bound_rule(block, o, i, t):
-            """Rule definition for lower bounds of NOTNONE_FLOWS."""
-            expr = 0
-            expr += self.flow[o, i, t]
-            expr += -self.min[o, i, t] * self.nominal_value[o, i, t]
-            return expr >= 0
-        self.flows_notnone_lower_bound = po.Constraint(
-            self.NOTNONE_FLOWS, self.TIMESTEPS,
-            rule=flows_not_none_lower_bound_rule)
+        # THIS FORCES OffsetTransformer objects to run above min-load!
+        # # Set lower bounds for NOTNONE_FLOWS
+        # def flows_not_none_lower_bound_rule(block, o, i, t):
+        #     """Rule definition for lower bounds of NOTNONE_FLOWS."""
+        #     expr = 0
+        #     expr += self.flow[o, i, t]
+        #     expr += -self.min[o, i, t] * self.nominal_value[o, i, t]
+        #     return expr >= 0
+        # self.flows_notnone_lower_bound = po.Constraint(
+        #     self.NOTNONE_FLOWS, self.TIMESTEPS,
+        #     rule=flows_not_none_lower_bound_rule)
 
         # Set values for PRE_OPTIMIZED_FLOWS
         def flows_pre_optimized_value_rule(block, o, i, t):
