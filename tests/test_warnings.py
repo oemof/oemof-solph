@@ -9,7 +9,6 @@ available from its original location oemof/tests/tool_tests.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import assert_raises_regexp
 import warnings
 from oemof import network
 from oemof.tools.debugging import SuspiciousUsageWarning
@@ -24,6 +23,17 @@ def test_that_the_sink_warnings_actually_get_raised():
         network.Sink(outputs={look_out: "A typo!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
+
+
+def test_filtered_warning():
+    """ Sink doesn't warn about potentially erroneous usage.
+    """
+    warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
+    look_out = network.Bus()
+    with warnings.catch_warnings(record=True) as w:
+        network.Sink(outputs={look_out: "A typo!"})
+        assert len(w) == 0
+    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
 
 
 def test_that_the_source_warnings_actually_get_raised():
