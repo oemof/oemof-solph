@@ -18,6 +18,7 @@ from oemof.tools.debugging import SuspiciousUsageWarning
 def test_that_the_sink_warnings_actually_get_raised():
     """ Sink doesn't warn about potentially erroneous usage.
     """
+    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
     look_out = network.Bus()
     msg = "`Sink` constructed without `inputs`."
     with warnings.catch_warnings(record=True) as w:
