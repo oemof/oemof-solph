@@ -17,6 +17,7 @@ from collections import (namedtuple as NT, Mapping, MutableMapping as MM,
 from contextlib import contextmanager
 from functools import total_ordering
 from oemof.tools import debugging
+from warnings import warn
 from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
 
 # TODO:
@@ -341,8 +342,9 @@ class Sink(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.inputs:
-            raise debugging.SuspiciousUsageWarning(
-                "`Sink` constructed without `inputs`."
+            warn(
+                "`Sink` constructed without `inputs`.",
+                debugging.SuspiciousUsageWarning,
             )
 
 
@@ -350,8 +352,9 @@ class Source(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.outputs:
-            raise debugging.SuspiciousUsageWarning(
-                "`Source` constructed without `outputs`."
+            warn(
+                "`Source` constructed without `outputs`.",
+                debugging.SuspiciousUsageWarning,
             )
 
 
@@ -359,11 +362,14 @@ class Transformer(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.inputs:
-            raise debugging.SuspiciousUsageWarning(
-                "`Transformer` constructed without `inputs`.\n")
+            warn(
+                "`Transformer` constructed without `inputs`.\n",
+                debugging.SuspiciousUsageWarning,
+            )
         if not self.outputs:
-            raise debugging.SuspiciousUsageWarning(
-                "`Transformer` constructed without `outputs`.\n"
+            warn(
+                "`Transformer` constructed without `outputs`.\n",
+                debugging.SuspiciousUsageWarning
             )
 
 
