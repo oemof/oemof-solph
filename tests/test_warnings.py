@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from nose.tools import eq_, ok_, with_setup
 import warnings
-from oemof import network
+from oemof import network, solph
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 
@@ -51,6 +51,18 @@ def test_that_the_source_warnings_actually_get_raised():
     msg = "`Source` constructed without `outputs`."
     with warnings.catch_warnings(record=True) as w:
         network.Source(inputs={look_out: "A typo!"})
+        ok_(len(w) == 1)
+        eq_(msg, str(w[-1].message))
+        
+
+@with_setup(setup_func)
+def test_that_the_solph_source_warnings_actually_get_raised():
+    """ Source doesn't warn about potentially erroneous usage.
+    """
+    look_out = network.Bus()
+    msg = "`Source` constructed without `outputs`."
+    with warnings.catch_warnings(record=True) as w:
+        solph.Source(inputs={look_out: "A typo!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
 
