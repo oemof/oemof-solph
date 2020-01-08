@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from functools import total_ordering
 from oemof.tools import debugging
 from warnings import warn
-from weakref import WeakKeyDictionary as WeKeDi, WeakSet as WeSe
+
 
 # TODO:
 #
@@ -182,7 +182,7 @@ class Node:
         """
 
     def register(self):
-        if (    __class__.registry is not None and
+        if (__class__.registry is not None and
                 not getattr(self, "_delay_registration_", False)):
             __class__.registry.add(self)
 
@@ -238,6 +238,8 @@ class Node:
 
 
 EdgeLabel = NT("EdgeLabel", ['input', 'output'])
+
+
 class Edge(Node):
     """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
 
@@ -257,8 +259,9 @@ class Edge(Node):
     name.
     """
     Label = EdgeLabel
+
     def __init__(self, input=None, output=None, flow=None, values=None,
-            **kwargs):
+                 **kwargs):
         if flow is not None and values is not None:
             raise ValueError(
                     "\n\n`Edge`'s `flow` and `values` keyword arguments are "
@@ -275,7 +278,7 @@ class Edge(Node):
             input.outputs[output] = self
 
     @classmethod
-    def from_object(klass, o):
+    def from_object(cls, o):
         """ Creates an `Edge` instance from a single object.
 
         This method inspects its argument and does something different
@@ -283,14 +286,14 @@ class Edge(Node):
 
           * If `o` is an instance of `Edge`, `o` is returned unchanged.
           * If `o` is a `Mapping`, the instance is created by calling
-            `klass(**o)`,
+            `cls(**o)`,
           * In all other cases, `o` will be used as the `values` keyword
             argument to `Edge`s constructor.
         """
         if isinstance(o, Edge):
             return o
         elif isinstance(o, Mapping):
-            return klass(**o)
+            return cls(**o)
         else:
             return Edge(values=o)
 
@@ -342,35 +345,27 @@ class Sink(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.inputs:
-            warn(
-                "`Sink` constructed without `inputs`.",
-                debugging.SuspiciousUsageWarning,
-            )
+            msg = "`Sink` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
 
 class Source(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.outputs:
-            warn(
-                "`Source` constructed without `outputs`.",
-                debugging.SuspiciousUsageWarning,
-            )
+            msg = "`Source` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
 
 class Transformer(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.inputs:
-            warn(
-                "`Transformer` constructed without `inputs`.\n",
-                debugging.SuspiciousUsageWarning,
-            )
+            msg = "`Transformer` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
         if not self.outputs:
-            warn(
-                "`Transformer` constructed without `outputs`.\n",
-                debugging.SuspiciousUsageWarning
-            )
+            msg = "`Transformer` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
@@ -465,6 +460,3 @@ def temporarily_modifies_registry(f):
         with registry_changed_to(None):
             return f(*xs, **ks)
     return result
-
-#
-# Transformer()

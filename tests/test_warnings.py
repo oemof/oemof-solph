@@ -25,9 +25,9 @@ def test_that_the_sink_warnings_actually_get_raised():
     """ Sink doesn't warn about potentially erroneous usage.
     """
     look_out = network.Bus()
-    msg = "`Sink` constructed without `inputs`."
+    msg = "`Sink` 'test_sink' constructed without `inputs`."
     with warnings.catch_warnings(record=True) as w:
-        network.Sink(outputs={look_out: "A typo!"})
+        network.Sink(label='test_sink', outputs={look_out: "A typo!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
 
@@ -48,9 +48,9 @@ def test_that_the_source_warnings_actually_get_raised():
     """ Source doesn't warn about potentially erroneous usage.
     """
     look_out = network.Bus()
-    msg = "`Source` constructed without `outputs`."
+    msg = "`Source` 'test_source' constructed without `outputs`."
     with warnings.catch_warnings(record=True) as w:
-        network.Source(inputs={look_out: "A typo!"})
+        network.Source(label='test_source', inputs={look_out: "A typo!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
         
@@ -60,9 +60,9 @@ def test_that_the_solph_source_warnings_actually_get_raised():
     """ Source doesn't warn about potentially erroneous usage.
     """
     look_out = network.Bus()
-    msg = "`Source` constructed without `outputs`."
+    msg = "`Source` 'solph_sink' constructed without `outputs`."
     with warnings.catch_warnings(record=True) as w:
-        solph.Source(inputs={look_out: "A typo!"})
+        solph.Source(label="solph_sink", inputs={look_out: "A typo!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
 
@@ -72,13 +72,14 @@ def test_that_the_transformer_warnings_actually_get_raised():
     """ Transformer doesn't warn about potentially erroneous usage.
     """
     look_out = network.Bus()
-    msg = "`Transformer` constructed without `inputs`.\n"
+    msg = "`Transformer` 'no input' constructed without `inputs`."
     with warnings.catch_warnings(record=True) as w:
-        network.Transformer(outputs={look_out: "No inputs!"})
+        network.Transformer(label='no input', outputs={look_out: "No inputs!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
-    msg = "`Transformer` constructed without `outputs`.\n"
+    msg = "`Transformer` 'no output' constructed without `outputs`."
     with warnings.catch_warnings(record=True) as w:
-        network.Transformer(inputs={look_out: "No outputs!"})
+        network.Transformer(label='no output',
+                            inputs={look_out: "No outputs!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
