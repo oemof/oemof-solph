@@ -203,27 +203,8 @@ class EnergySystem:
         if filename is None:
             filename = 'es_dump.oemof'
 
-        try:
-            self.__dict__ = pickle.load(
-                    open(os.path.join(dpath, filename), "rb"))
-        except UnpicklingError as e:
-            if str(e) == "state is not a dictionary":
-                raise UnpicklingError(
-                        "\n  "
-                        "Seems like you're trying to load an energy system "
-                        "dumped with an older\n  "
-                        "oemof version. Unfortunetaly we made changes which "
-                        "broke this from\n  "
-                        "v0.2.2 (more specifically commit `bec669b`) to its "
-                        "successor.\n  "
-                        "If you really need this functionality, please file "
-                        "a bug entitled\n\n    "
-                        '"Pickle customization removal breaks '
-                        '`EnergySystem.restore`"\n\n  '
-                        "at\n\n    "
-                        "https://github.com/oemof/oemof/issues\n\n  "
-                        "or comment on it if it already exists.")
-            raise e
+        self.__dict__ = pickle.load(
+                open(os.path.join(dpath, filename), "rb"))
 
         msg = ('Attributes restored from: {0}'.format(os.path.join(
             dpath, filename)))
