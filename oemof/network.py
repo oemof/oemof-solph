@@ -232,7 +232,8 @@ class Node:
         Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to
         :class:`Edges` from :obj:`self` into :obj:`n`.
         If :obj:`self` is an :class:`Edge`, returns a dict containing the
-        :class:`Edge`'s single output node as the key and the flow as the value.
+        :class:`Edge`'s single output node as the key and the flow as the
+        value.
         """
         return self._outputs
 
@@ -241,7 +242,9 @@ EdgeLabel = NT("EdgeLabel", ['input', 'output'])
 
 
 class Edge(Node):
-    """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
+    """
+    :class:`Bus`es/:class:`Component`s are always connected by an
+    :class:`Edge`.
 
     :class:`Edge`s connect a single non-:class:`Edge` Node with another. They
     are directed and have a (sequence of) value(s) attached to them so they can
@@ -441,7 +444,8 @@ class Entity:
 
 @contextmanager
 def registry_changed_to(r):
-    """ Override registry during execution of a block and restore it afterwards.
+    """
+    Override registry during execution of a block and restore it afterwards.
     """
     backup = Node.registry
     Node.registry = r
