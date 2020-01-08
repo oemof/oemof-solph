@@ -53,7 +53,7 @@ def test_that_the_source_warnings_actually_get_raised():
         network.Source(label='test_source', inputs={look_out: "A typo!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
-        
+
 
 @with_setup(setup_func)
 def test_that_the_solph_source_warnings_actually_get_raised():
