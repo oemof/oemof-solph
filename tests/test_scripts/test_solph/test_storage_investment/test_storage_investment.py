@@ -34,7 +34,7 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-from pickle import UnpicklingError
+from unittest import skipIf
 
 from nose.tools import eq_, ok_
 
@@ -46,6 +46,7 @@ from oemof.outputlib import processing, views
 
 import logging
 import os
+import sys
 import pandas as pd
 
 PP_GAS = None
@@ -161,11 +162,12 @@ def test_results_with_actual_dump():
     eq_(round(meta['objective']), 423167578261115584)
 
 
+@skipIf(sys.version_info >= (3, 8),
+        "A dump created with python 3.7 does not work with 3.8")
 def test_results_with_old_dump():
     """
     Test again with a stored dump created with v0.3.2dev (896a6d50)
     """
-
     energysystem = solph.EnergySystem()
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
