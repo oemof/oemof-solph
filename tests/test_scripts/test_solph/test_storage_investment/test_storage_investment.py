@@ -36,7 +36,7 @@ SPDX-License-Identifier: MIT
 
 from unittest import skip
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from oemof.tools import economics
 
@@ -46,7 +46,6 @@ from oemof.outputlib import processing, views
 
 import logging
 import os
-import sys
 import pandas as pd
 
 PP_GAS = None
@@ -210,4 +209,3 @@ def test_solph_transformer_attributes_before_dump_and_after_restore():
 
     # Compare attributes before dump and after restore
     eq_(trsf_attr_before_dump, trsf_attr_after_restore)
-

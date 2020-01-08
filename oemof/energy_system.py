@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 """
 
 from collections import deque
-from pickle import UnpicklingError
 import logging
 import os
 
