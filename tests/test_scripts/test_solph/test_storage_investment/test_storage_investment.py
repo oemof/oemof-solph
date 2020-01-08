@@ -34,7 +34,7 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-from unittest import skipIf
+from unittest import skip
 
 from nose.tools import eq_, ok_
 
@@ -162,8 +162,9 @@ def test_results_with_actual_dump():
     eq_(round(meta['objective']), 423167578261115584)
 
 
-@skipIf(sys.version_info >= (3, 8),
-        "A dump created with python 3.7 does not work with 3.8")
+@skip("Opening an old dump may fail due to different python versions or"
+      " version of other packages. We can try to reactivate the test with"
+      " v0.4.0.")
 def test_results_with_old_dump():
     """
     Test again with a stored dump created with v0.3.2dev (896a6d50)
@@ -172,10 +173,7 @@ def test_results_with_old_dump():
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
                 filename='es_dump_test_3_2dev.oemof')
-    # Note: This internal attribute is new in v.0.3.0, so the dump doesn't
-    #       contain it for obvious reasons. Setting it manually to the correct
-    #       value prevents the test from erroring.
-    energysystem._first_ungrouped_node_index_ = len(energysystem.nodes)
+
     results = energysystem.results['main']
 
     electricity_bus = views.node(results, 'electricity')
