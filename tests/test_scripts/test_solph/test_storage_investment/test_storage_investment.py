@@ -163,27 +163,13 @@ def test_results_with_actual_dump():
 
 def test_results_with_old_dump():
     """
-    Test again with a stored dump created with v0.2.1dev (896a6d50)
+    Test again with a stored dump created with v0.3.2dev (896a6d50)
     """
-    energysystem = solph.EnergySystem()
-    error = None
-    try:
-        energysystem.restore(
-                dpath=os.path.dirname(os.path.realpath(__file__)),
-                filename='es_dump_test_2_1dev.oemof')
-    except UnpicklingError as e:
-        error = e
 
-    # Just making sure, the right error is raised. If the error message
-    # changes, the test has to be changed accordingly.
-    eq_(len(str(error)), 431)
-
-    # **************************************************
-    # Test again with a stored dump created with v0.2.3dev (896a6d50)
     energysystem = solph.EnergySystem()
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
-                filename='es_dump_test_2_3dev.oemof')
+                filename='es_dump_test_3_2dev.oemof')
     # Note: This internal attribute is new in v.0.3.0, so the dump doesn't
     #       contain it for obvious reasons. Setting it manually to the correct
     #       value prevents the test from erroring.
