@@ -60,6 +60,7 @@ def flatten(d, parent_key='', sep='_'):
             items.append((new_key, v))
     return dict(items)
 
+
 def calculate_timeincrement(timeindex):
     """
     Calculates timeincrement for `timeindex`
