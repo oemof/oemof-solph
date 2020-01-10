@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import pandas as pd
 from oemof import solph
 from oemof import outputlib
+from oemof.tools.helpers import calculate_timeincrement
 from nose.tools import eq_, raises
 from nose import tools
 import warnings
@@ -49,9 +50,8 @@ def test_nonequ_timeincrement():
         '1/1/2019 03:00:00', periods=2, freq='30min')
     timeindex_2h = pd.date_range('1/1/2019 04:00:00', periods=2, freq='2H')
     timeindex = timeindex_hourly.append([timeindex_30mins, timeindex_2h])
-    es = solph.EnergySystem(timeindex=timeindex)
-    m = solph.models.BaseModel(es)
-    eq_(m.timeincrement, solph.sequence([1.0, 2.0, 0.5, 0.5, 2.0, 1.0]))
+    timeincrement = calculate_timeincrement(timeindex=timeindex)
+    eq_(timeincrement, solph.sequence([1.0, 2.0, 0.5, 0.5, 2.0, 1.0]))
 
 
 @raises(IndexError)
@@ -59,8 +59,7 @@ def test_nonequ_duplicate_timeindex():
     timeindex_hourly = pd.date_range('1/1/2019', periods=2, freq='H')
     timeindex_45mins = pd.date_range('1/1/2019', periods=2, freq='45min')
     timeindex = timeindex_hourly.append([timeindex_45mins])
-    es = solph.EnergySystem(timeindex=timeindex)
-    m = solph.models.BaseModel(es)
+    calculate_timeincrement(timeindex=timeindex)
 
 
 def test_optimal_solution():

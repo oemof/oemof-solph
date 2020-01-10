@@ -10,9 +10,11 @@ available from its original location oemof/oemof/tools/helpers.py
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
-
+import datetime as dt
 import os
+import pandas as pd
 from collections import MutableMapping
+from ..solph.plumbing import sequence
 
 
 def get_basic_path():
@@ -57,3 +59,23 @@ def flatten(d, parent_key='', sep='_'):
         else:
             items.append((new_key, v))
     return dict(items)
+
+def calculate_timeincrement(timeindex):
+    """
+    Calculates timeincrement for `timeindex`
+    """
+    if isinstance(timeindex, pd.DatetimeIndex):
+        if len(set(timeindex)) != len(timeindex):
+            raise IndexError("No equal DatetimeIndex allowed!")
+        timeindex = timeindex.to_series()
+        timeindex_sorted = timeindex.sort_values()
+        timeincrement = timeindex_sorted.diff().dropna()
+        timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
+        timeincrement_hourly = list(timeincrement_sec.map(
+                                    lambda x: x/3600))
+        timeincrement_hourly.append(1.0)
+        timeincrement = sequence(timeincrement_hourly)
+        return timeincrement
+    else:
+        raise AttributeError(
+            "'timeindex' must be of type 'DatetimeIndex'.")

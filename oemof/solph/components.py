@@ -62,8 +62,7 @@ class GenericStorage(network.Transformer):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (sequence or scalar)
-        The relative loss of the storage capacity from between two consecutive
-        timesteps.
+        The relative loss of the storage capacity per timeunit.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -358,7 +357,7 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
-                1 - n.loss_rate[0])
+                (1 - n.loss_rate[0]) ** m.timeincrement[0])
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -375,7 +374,7 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t-1] * (
-                1 - n.loss_rate[t])
+                (1 - n.loss_rate[t]) ** m.timeincrement[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -581,7 +580,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
-                    1 - n.loss_rate[0])
+                    (1 - n.loss_rate[0]) ** m.timeincrement[0])
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -599,7 +598,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t - 1] * (
-                    1 - n.loss_rate[t])
+                    (1 - n.loss_rate[t]) ** m.timeincrement[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
