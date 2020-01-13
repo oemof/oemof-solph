@@ -28,11 +28,11 @@ class Flow(SimpleBlock):
         Difference of a flow in consecutive timesteps if flow is increased
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
-    slack_pos :
+    schedule_slack_pos :
         Difference of a flow to schedule in consecutive timesteps if flow
         has deficit to schedule. Indexed by SCHEDULE_FLOWS, TIMESTEPS.
 
-    slack_neg :
+    schedule_slack_neg :
         Excees of flow compared to schedule. Indexed by SCHEDULE_FLOWS,
         TIMESTEPS.
 
@@ -83,8 +83,8 @@ class Flow(SimpleBlock):
             \forall t \in \textrm{TIMESTEPS}.
 
     Schedule constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
-        .. math:: flow(i, o, t) + slack_pos(i, o, t) - \
-            slack_neg(i, o, t) = schedule(i, o, t) \\
+        .. math:: flow(i, o, t) + schedule_slack_pos(i, o, t) - \
+            schedule_slack_neg(i, o, t) = schedule(i, o, t) \\
             \forall (i, o) \in \textrm{SCHEDULE\_FLOWS}, \\
             \forall t \in \textrm{TIMESTEPS}.
 
@@ -100,8 +100,8 @@ class Flow(SimpleBlock):
     If :attr:`schedule`, :attr:`penalty_pos` and :attr:`penalty_neg` are
     set by the user:
         .. math:: \sum_{(i,o)} \sum_t penalty_pos(i, o, t) \cdot \
-            slack_pos(i, o, t)  + penalty_neg(i, o, t) \cdot \
-            slack_neg(i, o, t)
+            schedule_slack_pos(i, o, t)  + penalty_neg(i, o, t) \cdot \
+            schedule_slack_neg(i, o, t)
     """
 
     def __init__(self, *args, **kwargs):
@@ -160,10 +160,10 @@ class Flow(SimpleBlock):
         self.integer_flow = Var(self.INTEGER_FLOWS,
                                 m.TIMESTEPS, within=NonNegativeIntegers)
 
-        self.slack_pos = Var(self.SCHEDULE_FLOWS,
+        self.schedule_slack_pos = Var(self.SCHEDULE_FLOWS,
                              m.TIMESTEPS, within=NonNegativeReals)
 
-        self.slack_neg = Var(self.SCHEDULE_FLOWS,
+        self.schedule_slack_neg = Var(self.SCHEDULE_FLOWS,
                              m.TIMESTEPS, within=NonNegativeReals)
 
         # set upper bound of gradient variable
@@ -250,11 +250,13 @@ class Flow(SimpleBlock):
                 for ts in m.TIMESTEPS:
                     if m.flows[inp, out].schedule[ts] is not None:
                         lhs = (m.flow[inp, out, ts] +
-                               self.slack_pos[inp, out, ts] -
-                               self.slack_neg[inp, out, ts])
+                               self.schedule_slack_pos[inp, out, ts] -
+                               self.schedule_slack_neg[inp, out, ts])
                         rhs = m.flows[inp, out].schedule[ts]
                         self.schedule_constr.add((inp, out, ts),
                                                  lhs == rhs)
+                    else:
+                        print("UHU")
         self.schedule_constr = Constraint(
             self.SCHEDULE_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.schedule_build = BuildAction(
@@ -293,9 +295,9 @@ class Flow(SimpleBlock):
                 (len(schedule) == 0 and
                  schedule[0] is not None)):
                 for t in m.TIMESTEPS:
-                    penalty_costs += (self.slack_pos[i, o, t] *
+                    penalty_costs += (self.schedule_slack_pos[i, o, t] *
                                       m.flows[i, o].penalty_pos[t])
-                    penalty_costs += (self.slack_neg[i, o, t] *
+                    penalty_costs += (self.schedule_slack_neg[i, o, t] *
                                       m.flows[i, o].penalty_neg[t])
         return variable_costs + gradient_costs + penalty_costs
 
