@@ -2,11 +2,11 @@
 
 min
 objective:
-+999 Flow_slack_neg(boiler_penalty_bus_th_penalty_0)
-+999 Flow_slack_neg(boiler_penalty_bus_th_penalty_1)
-+999 Flow_slack_neg(boiler_penalty_bus_th_penalty_2)
-+800 Flow_slack_pos(boiler_penalty_bus_th_penalty_1)
-+900 Flow_slack_pos(boiler_penalty_bus_th_penalty_2)
++999 Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_0)
++999 Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_1)
++999 Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_2)
++800 Flow_schedule_slack_pos(boiler_penalty_bus_th_penalty_1)
++900 Flow_schedule_slack_pos(boiler_penalty_bus_th_penalty_2)
 
 s.t.
 
@@ -50,14 +50,14 @@ c_e_Transformer_relation(boiler_penalty_bus_gas_bus_th_penalty_2)_:
 = 0
 
 c_e_Flow_schedule_constr(boiler_penalty_bus_th_penalty_1)_:
--1 Flow_slack_neg(boiler_penalty_bus_th_penalty_1)
-+1 Flow_slack_pos(boiler_penalty_bus_th_penalty_1)
+-1 Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_1)
++1 Flow_schedule_slack_pos(boiler_penalty_bus_th_penalty_1)
 +1 flow(boiler_penalty_bus_th_penalty_1)
 = 300
 
 c_e_Flow_schedule_constr(boiler_penalty_bus_th_penalty_2)_:
--1 Flow_slack_neg(boiler_penalty_bus_th_penalty_2)
-+1 Flow_slack_pos(boiler_penalty_bus_th_penalty_2)
+-1 Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_2)
++1 Flow_schedule_slack_pos(boiler_penalty_bus_th_penalty_2)
 +1 flow(boiler_penalty_bus_th_penalty_2)
 = 50
 
@@ -71,9 +71,9 @@ bounds
    0 <= flow(bus_gas_boiler_penalty_0) <= +inf
    0 <= flow(bus_gas_boiler_penalty_1) <= +inf
    0 <= flow(bus_gas_boiler_penalty_2) <= +inf
-   0 <= Flow_slack_pos(boiler_penalty_bus_th_penalty_1) <= +inf
-   0 <= Flow_slack_pos(boiler_penalty_bus_th_penalty_2) <= +inf
-   0 <= Flow_slack_neg(boiler_penalty_bus_th_penalty_0) <= +inf
-   0 <= Flow_slack_neg(boiler_penalty_bus_th_penalty_1) <= +inf
-   0 <= Flow_slack_neg(boiler_penalty_bus_th_penalty_2) <= +inf
+   0 <= Flow_schedule_slack_pos(boiler_penalty_bus_th_penalty_1) <= +inf
+   0 <= Flow_schedule_slack_pos(boiler_penalty_bus_th_penalty_2) <= +inf
+   0 <= Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_0) <= +inf
+   0 <= Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_1) <= +inf
+   0 <= Flow_schedule_slack_neg(boiler_penalty_bus_th_penalty_2) <= +inf
 end
