@@ -256,7 +256,6 @@ class Flow(SimpleBlock):
                         self.schedule_constr.add((inp, out, ts),
                                                  lhs == rhs)
                     else:
-                        print("UHU")
         self.schedule_constr = Constraint(
             self.SCHEDULE_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.schedule_build = BuildAction(
