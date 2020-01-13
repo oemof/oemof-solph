@@ -62,6 +62,12 @@ def test_nonequ_duplicate_timeindex():
     calculate_timeincrement(timeindex=timeindex)
 
 
+@raises(AttributeError)
+def test_nonequ_with_non_valid_timeindex():
+    timeindex = 5
+    calculate_timeincrement(timeindex=timeindex)
+
+
 def test_optimal_solution():
     es = solph.EnergySystem(timeindex=[1])
     bel = solph.Bus(label='bus')
