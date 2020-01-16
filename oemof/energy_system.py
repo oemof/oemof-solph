@@ -36,7 +36,8 @@ class EnergySystem:
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
     timeindex : pandas.datetimeindex
-        Define the time range for the energy system.
+        Defines the time range and, if equidistant, the timeindex for the energy
+        system
     timeincrement : numeric (sequence)
         Define the timeincrement for the energy system
     groupings : list
