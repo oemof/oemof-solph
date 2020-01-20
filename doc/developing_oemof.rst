@@ -217,3 +217,9 @@ Documentation
 The general implementation-independent documentation such as installation guide, flow charts, and mathematical models is done via ReStructuredText (rst). The files can be found in the folder */oemof/doc*. For further information on restructured text see: http://docutils.sourceforge.net/rst.html.
 
 
+How to become a member of oemof
+-------------------------------
+
+And last but not least, `here <https://github.com/oemof/organisation/issues/26>`_
+you will find all information about how to become a member of the oemof organisation and of developer teams.
+
