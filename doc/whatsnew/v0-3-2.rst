@@ -8,8 +8,6 @@ New features
 * Allow generic limits for integral over weighted flows.
   (This is a generalised version of <solph.constraints.emission_limit>.)
 * Allow time-dependent weights for integrated weighted limit.
-* Allow to limit count of concurrently active flows in group of flows.
-  (Flows have to be NonConvex, the limit can be an upper or lower one.)
 
 New components
 ##############
@@ -27,7 +25,7 @@ Documentation
 Other changes
 #############
 
-* The license hase been changed from GPLv3 to the MIT license
+* The license has been changed from GPLv3 to the MIT license
 * The BaseModel has been revised (test, docstring, warnings, internal naming)
   (`PR #605 <https://github.com/oemof/oemof/issues/605>`_)
 * Style revision to meet pep8 and other pep rules.

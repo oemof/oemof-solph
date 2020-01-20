@@ -5,7 +5,8 @@ v0.3.3 (January 12, 2020)
 API changes
 ###########
 
-* something
+* Allow to limit count of concurrently active flows in group of flows.
+  (Flows have to be NonConvex, the limit can be an upper or lower one.)
 
 New features
 ############
@@ -46,3 +47,4 @@ Contributors
 ############
 
 * Uwe Krien
+* Patrik Schönfeldt

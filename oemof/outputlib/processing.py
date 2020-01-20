@@ -33,6 +33,11 @@ def get_tuple(x):
         elif issubclass(type(i), Node):
             return i,
 
+    # for standalone variables, x is used as identifying tuple
+    if isinstance(x, tuple):
+        return x
+
+
 
 def get_timestep(x):
     """
@@ -42,7 +47,7 @@ def get_timestep(x):
     is fetched as the last element. For time-independent data (scalars)
     zero ist returned.
     """
-    if x is None or all(issubclass(type(n), Node) for n in x):
+    if all(issubclass(type(n), Node) for n in x):
         return 0
     else:
         return x[-1]
@@ -54,7 +59,7 @@ def remove_timestep(x):
 
     The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
     """
-    if x is None or all(issubclass(type(n), Node) for n in x):
+    if all(issubclass(type(n), Node) for n in x):
         return x
     else:
         return x[:-1]
