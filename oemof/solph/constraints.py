@@ -232,4 +232,3 @@ def shared_limit(model, quantity, limit_name,
             po.BuildAction(rule=_weighted_sum_rule))
 
     return model
-
