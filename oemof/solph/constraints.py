@@ -151,20 +151,19 @@ def limit_active_flow_count(model, constraint_name, flows,
     """
 
     # number of concurrent active flows
-    attrname_count = constraint_name + "_count"
-    setattr(model, attrname_count, po.Var(model.TIMESTEPS))
+    setattr(model, constraint_name, po.Var(model.TIMESTEPS))
 
     for t in model.TIMESTEPS:
-        getattr(model, attrname_count)[t].setlb(lower_limit)
-        getattr(model, attrname_count)[t].setub(upper_limit)
+        getattr(model, constraint_name)[t].setlb(lower_limit)
+        getattr(model, constraint_name)[t].setub(upper_limit)
 
-    attrname_constraint = attrname_count + "_constraint"
+    attrname_constraint = constraint_name + "_constraint"
 
     def _flow_count_rule(m):
         for ts in m.TIMESTEPS:
             lhs = sum(m.NonConvexFlow.status[fi, fo, ts]
                       for fi, fo in flows)
-            rhs = getattr(model, attrname_count)[ts]
+            rhs = getattr(model, constraint_name)[ts]
             expr = (lhs == rhs)
             if expr is not True:
                 getattr(m, attrname_constraint).add(ts, expr)
