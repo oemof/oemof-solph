@@ -33,6 +33,10 @@ def get_tuple(x):
         elif issubclass(type(i), Node):
             return i,
 
+    # for standalone variables, x is used as identifying tuple
+    if isinstance(x, tuple):
+        return x
+
 
 def get_timestep(x):
     """
