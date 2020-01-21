@@ -194,3 +194,42 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     def equate_variables_rule(m):
         return var1 * factor1 == var2
     setattr(model, name, po.Constraint(rule=equate_variables_rule))
+
+
+def shared_limit(model, quantity, limit_name,
+                 components, weights, lower_limit=0, upper_limit=None):
+    r"""
+    Adds a constraint to the given model that set two variables to equal
+    adaptable by a factor.
+
+    **The following constraints are build:**
+
+      .. math::
+        l_\mathrm{low} \le \sum v_i(t) \times w_i(t) \le l_\mathrm{up}
+        \forall t
+    """
+
+    setattr(model, limit_name, po.Var(model.TIMESTEPS))
+
+    for t in model.TIMESTEPS:
+        getattr(model, limit_name)[t].setlb(lower_limit)
+        getattr(model, limit_name)[t].setub(upper_limit)
+
+    weighted_sum_constraint = limit_name + "_constraint"
+
+    def _weighted_sum_rule(m):
+        for ts in m.TIMESTEPS:
+            lhs = sum(quantity[c, ts] * w
+                      for c, w in zip(components, weights))
+            rhs = getattr(model, limit_name)[ts]
+            expr = (lhs == rhs)
+            if expr is not True:
+                getattr(m, weighted_sum_constraint).add(ts, expr)
+
+    setattr(model, weighted_sum_constraint,
+            po.Constraint(model.TIMESTEPS, noruleinit=True))
+    setattr(model, weighted_sum_constraint+"_build",
+            po.BuildAction(rule=_weighted_sum_rule))
+
+    return model
+
