@@ -74,7 +74,7 @@ def calculate_timeincrement(timeindex):
         timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
         timeincrement_hourly = list(timeincrement_sec.map(
                                     lambda x: x/3600))
-        timeincrement_hourly.append(1.0)
+        timeincrement_hourly.insert(0, 1.0)
         timeincrement = sequence(timeincrement_hourly)
         return timeincrement
     else:
