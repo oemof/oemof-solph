@@ -78,19 +78,14 @@ def calculate_timeincrement(timeindex, fill_value=None):
         if len(set(timeindex)) != len(timeindex):
             raise IndexError("No equal DatetimeIndex allowed!")
         timeindex = timeindex.to_series()
-        print("###### TIMEINDEX ######")
-        print(timeindex)
         timeindex_sorted = timeindex.sort_values()
-        print(timeindex_sorted)
         if fill_value:
             timeincrement = timeindex_sorted.diff().fillna(value=fill_value)
         else:
             timeincrement = timeindex_sorted.diff().fillna(method='bfill')
-        print(timeincrement)
         timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
         timeincrement_hourly = list(timeincrement_sec.map(
                                     lambda x: x/3600))
-        print(timeincrement_hourly)
         timeincrement = sequence(timeincrement_hourly)
         return timeincrement
     else:
