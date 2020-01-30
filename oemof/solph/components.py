@@ -246,7 +246,7 @@ class GenericStorageBlock(SimpleBlock):
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
-            (1 - \delta(t))^{\tau(t)/(1 h)} \\
+            (1 - \delta(t))^{\tau(t)/(t_u)} \\
             &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -280,6 +280,10 @@ class GenericStorageBlock(SimpleBlock):
                                 (i.e. efficiency)
                                 taking stored energy
     :math:`\tau(t)`             length of the time step
+    :math:`t_u`                 time unit of loss rate
+                                :math:`\delta(t)` and
+                                timeincrement
+                                :math:`\tau(t)`
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**

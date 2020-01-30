@@ -10,7 +10,11 @@ API changes
 New features
 ############
 
-* something
+* Allows having a non equidistant timeindex. By adding the
+    calculate_timeincrement function to tools/helpers.py a non
+    equidistant timeincrement can be calculated. The EnergySystem
+    will now be defined by the timeindex and the calculated
+    timeincrement.
 
 New components
 ##############
@@ -40,9 +44,10 @@ Testing
 Other changes
 #############
 
-* something
+* The ``loss_rate`` of :class:`~oemof.solph.components.GenericStorage`
+    is now defined per time increment.
 
 Contributors
 ############
 
-* something
+* Caterina Köhl
