@@ -85,8 +85,19 @@ feedinlib
 =========
 The `feedinlib <https://github.com/oemof/feedinlib>`_ library is not part of the oemof installation and has to be installed separately using pypi. It serves as an interface between Open Data weather data and libraries to calculate feedin timeseries for fluctuating renewable energy sources. 
 
-It is currently under revision (see `here <https://github.com/oemof/feedinlib/issues/29>`_ for further information). To begin with it will provide an interface to the `pvlib <https://github.com/pvlib/pvlib-python>`_ and `windpowerlib <https://github.com/wind-python/windpowerlib>`_ and functions to download MERRA2 weather data and `open_FRED weather data <https://openfredproject.wordpress.com>`_.
-See `documentation of the feedinlib <http://feedinlib.readthedocs.io/en/stable/>`_ for a full description of the library.
+So far the feedinlib provides interfaces to download *open_FRED* and
+`ERA5`_ weather data. *open_FRED* is a local reanalysis weather data set
+that provides weather data for Germany (and bounding box). *ERA5* is a
+global reanalysis weather data set that provides weather data for the
+whole world. The weather data can be used to calculate the electrical
+output of PV and wind power plants. At the moment the feedinlib provides
+interfaces to the `pvlib`_ and the `windpowerlib`_. Furthermore,
+technical parameters for many PV modules and inverters, as well as wind
+turbines, are made available and can be easily used for calculations.
+
+.. _ERA5: https://confluence.ecmwf.int/display/CKB/ERA5+data+documentation
+.. _pvlib: https://github.com/pvlib/pvlib-python
+.. _windpowerlib: https://github.com/wind-python/windpowerlib
 
 demandlib
 =========
