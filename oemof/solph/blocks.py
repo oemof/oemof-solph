@@ -97,10 +97,10 @@ class Flow(SimpleBlock):
     The expression can be accessed by :attr:`om.Flow.variable_costs` and
     their value after optimization by :meth:`om.Flow.variable_costs()` .
 
-    If :attr:`schedule`, :attr:`penalty_pos` and :attr:`penalty_neg` are
+    If :attr:`schedule`, :attr:`schedule_cost_pos` and :attr:`schedule_cost_neg` are
     set by the user:
-        .. math:: \sum_{(i,o)} \sum_t penalty_pos(i, o, t) \cdot \
-            schedule_slack_pos(i, o, t)  + penalty_neg(i, o, t) \cdot \
+        .. math:: \sum_{(i,o)} \sum_t schedule_cost_pos(i, o, t) \cdot \
+            schedule_slack_pos(i, o, t)  + schedule_cost_neg(i, o, t) \cdot \
             schedule_slack_neg(i, o, t)
     """
 
@@ -161,10 +161,10 @@ class Flow(SimpleBlock):
                                 m.TIMESTEPS, within=NonNegativeIntegers)
 
         self.schedule_slack_pos = Var(self.SCHEDULE_FLOWS,
-                             m.TIMESTEPS, within=NonNegativeReals)
+                                      m.TIMESTEPS, within=NonNegativeReals)
 
         self.schedule_slack_neg = Var(self.SCHEDULE_FLOWS,
-                             m.TIMESTEPS, within=NonNegativeReals)
+                                      m.TIMESTEPS, within=NonNegativeReals)
 
         # set upper bound of gradient variable
         for i, o, f in group:
@@ -294,9 +294,9 @@ class Flow(SimpleBlock):
                  schedule[0] is not None)):
                 for t in m.TIMESTEPS:
                     penalty_costs += (self.schedule_slack_pos[i, o, t] *
-                                      m.flows[i, o].penalty_pos[t])
+                                      m.flows[i, o].schedule_cost_pos[t])
                     penalty_costs += (self.schedule_slack_neg[i, o, t] *
-                                      m.flows[i, o].penalty_neg[t])
+                                      m.flows[i, o].schedule_cost_neg[t])
         return variable_costs + gradient_costs + penalty_costs
 
 

@@ -692,8 +692,8 @@ class TestsConstraint:
             label="boiler_penalty",
             inputs={b_gas: solph.Flow()},
             outputs={b_th: solph.Flow(nominal_value=200, variable_costs=0,
-                                      penalty_pos=[0, 800, 900],
-                                      penalty_neg=999,
+                                      schedule_cost_pos=[0, 800, 900],
+                                      schedule_cost_neg=999,
                                       schedule=schedule)},
             conversion_factors={b_th: 1}
         )

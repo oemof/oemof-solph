@@ -121,19 +121,20 @@ class Flow(on.Edge):
         Schedule for the flow. Flow has to follow the schedule, otherwise a
         penalty term will be activated. If array-like, values can be None
         for flexible, non-fixed flow during the certain timestep.  Used in
-        combination with :attr:`penalty_pos` and :attr:`penalty_neg`.
-    penalty_pos : numeric (sequence or scalar)
+        combination with :attr:`schedule_cost_pos` and
+        :attr:`schedule_cost_neg`.
+    schedule_cost_pos : numeric (sequence or scalar)
         A penalty parameter of the penalty term which describes the costs
         associated with one unit of deficit of the flow compared to the
         schedule. If this is set the costs will be added to the objective
         expression of the optimization problem. Used in combination with the
-        :attr:`schedule` and :attr:`penalty_neg`
-    penalty_neg: numeric (sequence or scalar)
+        :attr:`schedule` and :attr:`schedule_cost_neg`
+    schedule_cost_neg: numeric (sequence or scalar)
         A penalty parameter of the penalty term which describes the costs
         associated with one unit of the exceeded flow when flow exceeds the
         schedule. If this is set the costs will be added to the objective
         expression of the optimization problem. Used in combination with
-        the :attr:`schedule` and :attr:`penalty_pos`
+        the :attr:`schedule` and :attr:`schedule_cost_pos`
 
     Notes
     -----
@@ -175,12 +176,12 @@ class Flow(on.Edge):
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['actual_value', 'variable_costs', 'min', 'max',
-                     'schedule', 'penalty_neg', 'penalty_pos']
+                     'schedule', 'schedule_cost_neg', 'schedule_cost_pos']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0},
-                    'penalty_neg': 0, 'penalty_pos': 0, 'schedule': None
+                    'schedule_cost_neg': 0, 'schedule_cost_pos': 0,
                     }
         keys = [k for k in kwargs if k != 'label']
 
@@ -209,8 +210,10 @@ class Flow(on.Edge):
                              "nonconvex flows!")
         if (
             len(self.schedule) != 0 and
-            ((len(self.penalty_pos) == 0 and not self.penalty_pos[0]) or
-             (len(self.penalty_neg) == 0 and not self.penalty_neg[0]))):
+            ((len(self.schedule_cost_pos) == 0 and
+              not self.schedule_cost_pos[0]) or
+             (len(self.schedule_cost_neg) == 0 and
+              not self.schedule_cost_neg[0]))):
             raise ValueError("The penalty and schedule attribute need "
                              "to be used in combination. \n Please set "
                              "the schedule attribute of the flow.")
