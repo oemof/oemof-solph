@@ -1250,7 +1250,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     :math:`\beta`             :py:obj:`main_flow_loss_index[n, t]`                 P    power loss index
 
-    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation [n, t]` P    electric efficiency
+    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation[n, t]`  P    electric efficiency
                                                                                         without heat extraction
     :math:`\eta_{el,maxExtr}` :py:obj:`conversion_factors[main_output][n, t]`      P    electric efficiency
                                                                                         with max heat extraction
