@@ -346,7 +346,7 @@ The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
 the application example for the component is a flexible combined heat and power
 (chp) plant. Of course, an instance of this class can represent also another
 component with one input and two output flows and a flexible ratio between
-these flows, leading to the following constraints:
+these flows, with the following constraints:
 
 .. include:: ../oemof/solph/components.py
   :start-after: _ETCHP-equations:
@@ -356,20 +356,21 @@ These constraints are applied in addition those of a standard
 :class:`~oemof.solph.network.Transformer`. The constraints limit the range of
 the possible operation points, like the following picture shows. For a certain
 flow of fuel, there is a line of operation points, whose slope is defined by
-:math:`\beta`. The second constrain limits the decrease of electrical power.
+:math:`\beta` (in some contexts also referred to as :math:`C_v`).
+The second constraint limits the decrease of electrical power.
 
 .. 	image:: _files/ExtractionTurbine_range_of_operation.svg
    :width: 70 %
    :alt: variable_chp_plot.svg
    :align: center
    
-For now :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances are
-restricted to one input and two output flows. The class allows the definition
-of a different efficiency for every time step but the corresponding series has
-to be predefined as a parameter for the optimisation. In contrast to the
+For now, :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances must
+have one input and two output flows. The class allows the definition
+of a different efficiency for every time step that can be passed as a series
+of parameters that are fixed before the optimisation. In contrast to the
 :class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
-defined. For the main flow you can define a conversion factor if the second
-flow is zero (conversion_factor_single_flow).
+defined. For the main flow you can define a separate conversion factor that
+applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
 .. code-block:: python
 
@@ -380,12 +381,12 @@ flow is zero (conversion_factor_single_flow).
         conversion_factors={b_el: 0.3, b_th: 0.5},
         conversion_factor_full_condensation={b_el: 0.5})
 
-The key of the parameter *'conversion_factor_full_condensation'* will indicate the
-main flow. In the example above, the flow to the Bus *'b_el'* is the main flow
-and the flow to the Bus *'b_th'* is the tapped flow. The following plot shows
-how the variable chp (right) schedules it's electrical and thermal power
-production in contrast to a fixed chp (left). The plot is the output of an
-example in the `oemof example repository
+The key of the parameter *'conversion_factor_full_condensation'* defines which
+of the two flows is the main flow. In the example above, the flow to the Bus
+*'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow.
+The following plot shows how the variable chp (right) schedules it's electrical
+and thermal power production in contrast to a fixed chp (left). The plot is the
+output of an example in the `oemof example repository
 <https://github.com/oemof/oemof_examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
