@@ -146,9 +146,9 @@ In order to use solph you need to install a solver. There are various commercial
 
 You do not have to install both solvers. Oemof recommends the CBC (Coin-or branch and cut) solver. But sometimes its worth comparing the results of different solvers (e.g. GLPK).
 
- 1. Downloaded CBC from here (`64 <http://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <http://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
- 2. Download GLPK from `here (64/32 bit) <https://sourceforge.net/projects/winglpk/https://sourceforge.net/projects/winglpk/>`_
- 3. Unpacked CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
+ 1. Download CBC (`64 <http://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <http://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
+ 2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
+ 3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
  5. Restart Windows
 
