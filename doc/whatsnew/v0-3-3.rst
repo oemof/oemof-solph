@@ -1,0 +1,48 @@
+v0.3.3 (January 12, 2020)
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+* something
+
+New features
+############
+
+* something.
+
+New components
+##############
+
+* something
+
+Documentation
+#############
+
+* something
+
+Known issues
+############
+
+* something
+
+Bug fixes
+#########
+
+* something
+
+Testing
+#######
+
+* something
+
+Other changes
+#############
+
+* something
+
+Contributors
+############
+
+* Uwe Krien

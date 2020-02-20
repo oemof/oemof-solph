@@ -9,7 +9,7 @@ by the contributors recorded in the version control history of the file,
 available from its original location
 oemof/tests/test_scripts/test_solph/test_generic_caes/test_generic_caes.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_
@@ -36,16 +36,16 @@ def test_gen_caes():
     # resources
     bgas = solph.Bus(label='bgas')
 
-    rgas = solph.Source(label='rgas', outputs={
+    solph.Source(label='rgas', outputs={
         bgas: solph.Flow(variable_costs=20)})
 
     # power
     bel_source = solph.Bus(label='bel_source')
-    source_el = solph.Source(label='source_el', outputs={
+    solph.Source(label='source_el', outputs={
         bel_source: solph.Flow(variable_costs=data['price_el_source'])})
 
     bel_sink = solph.Bus(label='bel_sink')
-    sink_el = solph.Sink(label='sink_el', inputs={
+    solph.Sink(label='sink_el', inputs={
         bel_sink: solph.Flow(variable_costs=data['price_el_sink'])})
 
     # dictionary with parameters for a specific CAES plant
@@ -74,7 +74,7 @@ def test_gen_caes():
     }
 
     # generic compressed air energy storage (caes) plant
-    caes = solph.custom.GenericCAES(
+    solph.custom.GenericCAES(
         label='caes',
         electrical_input={bel_source: solph.Flow()},
         fuel_input={bgas: solph.Flow()},

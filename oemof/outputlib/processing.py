@@ -8,7 +8,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/outputlib/processing.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 import pandas as pd
@@ -141,7 +141,7 @@ def results(om):
             raise IndexError(error_message)
 
     # add dual variables for bus constraints
-    if hasattr(om, 'dual'):
+    if om.dual is not None:
         grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]

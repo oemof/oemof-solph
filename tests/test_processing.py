@@ -6,11 +6,10 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_processing.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_, assert_raises, ok_
-from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -20,7 +19,7 @@ from oemof.outputlib import processing
 from oemof.outputlib import views
 
 
-class Parameter_Result_Tests:
+class TestParameterResult:
     @classmethod
     def setUpClass(cls):
         cls.period = 24
@@ -168,6 +167,8 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
+                'fixed_losses_absolute': 0,
+                'fixed_losses_relative': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
                 'max_storage_level': 1,
@@ -197,6 +198,8 @@ class Parameter_Result_Tests:
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
                 'label': 'storage',
+                'fixed_losses_absolute': 0,
+                'fixed_losses_relative': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
                 'max_storage_level': 1,

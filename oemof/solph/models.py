@@ -5,7 +5,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/models.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 import pyomo.environ as po
@@ -14,6 +14,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
 from oemof.outputlib import processing
+import warnings
 import logging
 
 
@@ -38,6 +39,21 @@ class BaseModel(po.ConcreteModel):
         building process set this value to False
         and use methods `_add_parent_block_sets`,
         `_add_parent_block_variables`, `_add_blocks`, `_add_objective`
+
+    Attributes:
+    -----------
+    timeincrement : sequence
+        Time increments.
+    flows : dict
+        Flows of the model.
+    name : str
+        Name of the model.
+    es : solph.EnergySystem
+        Energy system of the model.
+    meta : pyomo.opt.results.results_.SolverResults or None
+        Solver results.
+    dual : ... or None
+    rc : ... or None
 
     """
     CONSTRAINT_GROUPS = []
@@ -73,6 +89,10 @@ class BaseModel(po.ConcreteModel):
                                     i not in self._constraint_groups]
 
         self.flows = self.es.flows()
+
+        self.solver_results = None
+        self.dual = None
+        self.rc = None
 
         if kwargs.get("auto_construct", True):
             self._construct()
@@ -143,9 +163,7 @@ class BaseModel(po.ConcreteModel):
     def results(self):
         """ Returns a nested dictionary of the results of this optimization
         """
-        result = processing.results(self)
-
-        return result
+        return processing.results(self)
 
     def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
@@ -181,37 +199,25 @@ class BaseModel(po.ConcreteModel):
         for k in solver_cmdline_options:
             options[k] = solver_cmdline_options[k]
 
-        results = opt.solve(self, **solve_kwargs)
+        solver_results = opt.solve(self, **solve_kwargs)
 
-        status = results["Solver"][0]["Status"].key
-        termination_condition = \
-            results["Solver"][0]["Termination condition"].key
+        status = solver_results["Solver"][0]["Status"].key
+        termination_condition = (
+            solver_results["Solver"][0]["Termination condition"].key)
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
-            self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
-            self.es.results = results
-        elif status == "ok" and termination_condition == "unknown":
-            logging.warning("Optimization with unknown termination condition."
-                            " Writing output anyway...")
-            self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
-            self.es.results = results
-        elif status == "warning" and termination_condition == "other":
-            logging.warning("Optimization might be sub-optimal."
-                            " Writing output anyway...")
-            self.solutions.load_from(results)
-            # storage results in result dictionary of energy system
-            self.es.results = results
+            self.es.results = solver_results
+            self.solver_results = solver_results
         else:
-            # storage results in result dictionary of energy system
-            self.es.results = results
-            logging.error(
-                "Optimization failed with status %s and terminal condition %s"
-                % (status, termination_condition))
+            msg = ("Optimization ended with status {0} and termination "
+                   "condition {1}")
+            warnings.warn(msg.format(status, termination_condition),
+                          UserWarning)
+            self.es.results = solver_results
+            self.solver_results = solver_results
 
-        return results
+        return solver_results
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""

@@ -6,7 +6,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/constraint_tests.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from difflib import unified_diff
@@ -24,17 +24,17 @@ import oemof.solph as solph
 logging.disable(logging.INFO)
 
 
-class Constraint_Tests:
+class TestsConstraint:
 
     @classmethod
-    def setup_class(self):
-        self.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',
-                                            re.DOTALL | re.MULTILINE)
+    def setup_class(cls):
+        cls.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',
+                                           re.DOTALL | re.MULTILINE)
 
-        self.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
+        cls.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
-        self.tmppath = helpers.extend_basic_path('tmp')
-        logging.info(self.tmppath)
+        cls.tmppath = helpers.extend_basic_path('tmp')
+        logging.info(cls.tmppath)
 
     def setup(self):
         self.energysystem = solph.EnergySystem(groupings=solph.GROUPINGS,
@@ -98,8 +98,9 @@ class Constraint_Tests:
                             lines[n] = (
                                 '-'
                                 if lines[n] and lines[n][0] == '+'
-                                else '+' if lines[n]
-                                         else lines[n]) + lines[n][1:]
+                                else '+'
+                                if lines[n]
+                                else lines[n]) + lines[n][1:]
                         lines[end] = '= ' + lines[end][3:]
                     return lines
 
@@ -371,6 +372,49 @@ class Constraint_Tests:
             invest_relation_output_capacity=1,
             investment=solph.Investment(ep_costs=145))
         self.compare_lp_files('storage_invest_unbalanced.lp')
+
+    def test_storage_fixed_losses(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage_no_invest',
+            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
+            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
+            nominal_storage_capacity=1e5,
+            loss_rate=0.13,
+            fixed_losses_relative=0.01,
+            fixed_losses_absolute=3,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            initial_storage_level=0.4)
+
+        self.compare_lp_files('storage_fixed_losses.lp')
+
+    def test_storage_invest_1_fixed_losses(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage1',
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            fixed_losses_relative=0.01,
+            fixed_losses_absolute=3,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            investment=solph.Investment(ep_costs=145, maximum=234))
+
+        self.compare_lp_files('storage_invest_1_fixed_losses.lp')
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
@@ -678,3 +722,34 @@ class Constraint_Tests:
 
         self.compare_lp_files('offsettransformer.lp')
 
+    def test_dsm_module_delay(self):
+        """Constraint test of Sink-DSM with method=delay"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            method='delay',
+            delay_time=1,
+            cost_dsm_down=2,
+        )
+        self.compare_lp_files('dsm_module_delay.lp')
+
+    def test_dsm_module_interval(self):
+        """Constraint test of Sink-DSM with method=interval"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.5, 0.4, 0.5],
+            method='interval',
+            shift_interval=2,
+            cost_dsm_down=2,
+        )
+        self.compare_lp_files('dsm_module_interval.lp')
