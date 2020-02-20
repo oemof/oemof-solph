@@ -18,6 +18,5 @@ doc/_build/
 dist/*
 oemof.egg-info/*
 oemof_base.egg-info/*
-build/*
 
 

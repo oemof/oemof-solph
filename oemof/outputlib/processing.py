@@ -8,10 +8,11 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/outputlib/processing.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import pandas as pd
+import warnings
 import sys
 from oemof.network import Node
 from oemof.tools.helpers import flatten
@@ -140,7 +141,7 @@ def results(om):
             raise IndexError(error_message)
 
     # add dual variables for bus constraints
-    if om.dual is not None:
+    if hasattr(om, 'dual'):
         grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]

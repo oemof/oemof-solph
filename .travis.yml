@@ -6,14 +6,14 @@ matrix:
     - python: 3.6
     - python: 3.7
       dist: xenial
+      sudo: true
 
-addons:
-  apt:
-    packages:
-      - coinor-cbc
+# command to install dependencies
+before_install:
+  - sudo apt-get install coinor-cbc
 
 install:
-  - pip install .
+  - pip install .[datapackage]
   - pip install coveralls
 
 # command to run tests
@@ -22,4 +22,3 @@ script:
 
 after_success:
   - coveralls
-

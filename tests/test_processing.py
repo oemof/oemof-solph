@@ -6,10 +6,11 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_processing.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from nose.tools import eq_, assert_raises, ok_
+from warnings import catch_warnings
 import pandas
 from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
@@ -19,7 +20,7 @@ from oemof.outputlib import processing
 from oemof.outputlib import views
 
 
-class TestParameterResult:
+class Parameter_Result_Tests:
     @classmethod
     def setUpClass(cls):
         cls.period = 24

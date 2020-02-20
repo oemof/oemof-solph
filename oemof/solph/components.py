@@ -8,10 +8,11 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/components.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import numpy as np
+import warnings
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
@@ -62,7 +63,8 @@ class GenericStorage(network.Transformer):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (sequence or scalar)
-        The relative loss of the storage capacity per timeunit.
+        The relative loss of the storage capacity from between two consecutive
+        timesteps.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -246,7 +248,7 @@ class GenericStorageBlock(SimpleBlock):
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
-            (1 - \delta(t))^{\tau(t)/(t_u)} \\
+            (1 - \delta(t))) \\
             &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -280,10 +282,6 @@ class GenericStorageBlock(SimpleBlock):
                                 (i.e. efficiency)
                                 taking stored energy
     :math:`\tau(t)`             length of the time step
-    :math:`t_u`                 time unit of loss rate
-                                :math:`\delta(t)` and
-                                timeincrement
-                                :math:`\tau(t)`
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
@@ -361,7 +359,7 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
-                (1 - n.loss_rate[0]) ** m.timeincrement[0])
+                1 - n.loss_rate[0])
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -378,7 +376,7 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t-1] * (
-                (1 - n.loss_rate[t]) ** m.timeincrement[t])
+                1 - n.loss_rate[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -584,7 +582,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
-                    (1 - n.loss_rate[0]) ** m.timeincrement[0])
+                    1 - n.loss_rate[0])
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -602,7 +600,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t - 1] * (
-                    (1 - n.loss_rate[t]) ** m.timeincrement[t])
+                    1 - n.loss_rate[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -1198,7 +1196,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                  {\eta_{th,maxExtr}(t)}
 
     where :math:`\beta` is defined as:
-
+    
          .. math::
             \beta(t) = \frac{\eta_{el,woExtr}(t) - \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 

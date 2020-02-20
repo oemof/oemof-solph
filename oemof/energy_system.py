@@ -6,7 +6,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/energy_system.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from collections import deque
@@ -36,10 +36,7 @@ class EnergySystem:
         Stored in the :attr:`entities` attribute.
         Defaults to `[]` if not supplied.
     timeindex : pandas.datetimeindex
-        Defines the time range and, if equidistant, the timeindex for the energy
-        system
-    timeincrement : numeric (sequence)
-        Define the timeincrement for the energy system
+        Define the time range and increment for the energy system.
     groupings : list
         The elements of this list are used to construct :class:`Groupings
         <oemof.core.energy_system.Grouping>` or they are used directly if they
@@ -136,8 +133,6 @@ class EnergySystem:
 
         self.timeindex = kwargs.get('timeindex')
 
-        self.timeincrement = kwargs.get('timeincrement', None)
-
         self.temporal = kwargs.get('temporal')
 
         self.add(*kwargs.get('entities', ()))
@@ -156,7 +151,7 @@ class EnergySystem:
             (
                 g(n, gs)
                 for g in self._groupings
-                for n in self.nodes[self._first_ungrouped_node_index_:]
+                for n in self.nodes[self._first_ungrouped_node_index_ :]
             ),
             maxlen=0,
         )

@@ -7,10 +7,14 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_installation.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import os
+import sys
 import logging
+
+import nose
 
 from oemof import solph
 import pandas as pd

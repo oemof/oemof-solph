@@ -1,6 +1,11 @@
-v0.3.2 (November 29, 2019)
+v0.3.2 (September ??, 2019)
 +++++++++++++++++++++++++++
 
+
+API changes
+###########
+
+* something
 
 New features
 ############
@@ -12,29 +17,35 @@ New features
 New components
 ##############
 
-* Custom component: :class:`~oemof.solph.custom.SinkDSM`.
-  Demand Side Management component that allows to represent flexibile demand.
-  How the component is used is shown in :ref:`oemof_solph_custom_sinkdsm_label`.
+* something
 
 Documentation
 #############
 
-* Revision of the `outputlib documentation
-  <https://oemof.readthedocs.io/en/stable/oemof_outputlib.html>`_.
+* something
+
+Known issues
+############
+
+* something
+
+Bug fixes
+#########
+
+* something
+
+Testing
+#######
+
+* something
 
 Other changes
 #############
 
-* The license hase been changed from GPLv3 to the MIT license
-* The BaseModel has been revised (test, docstring, warnings, internal naming)
-  (`PR #605 <https://github.com/oemof/oemof/issues/605>`_)
-* Style revision to meet pep8 and other pep rules.
+* something
 
 Contributors
 ############
 
-* Guido Plessmann
 * Johannes Röder
-* Julian Endres
 * Patrik Schönfeldt
-* Uwe Krien

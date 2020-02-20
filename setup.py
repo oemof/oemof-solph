@@ -5,7 +5,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/setup.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from setuptools import find_packages, setup
@@ -26,16 +26,14 @@ setup(name='oemof',
       url='https://oemof.org/',
       namespace_package=['oemof'],
       long_description=read('README.rst'),
-      long_description_content_type='text/x-rst',
       packages=find_packages(),
-      license='MIT',
       install_requires=['blinker < 2.0',
-                        'dill < 0.4',
-                        'numpy >= 1.7.0, < 1.18',
-                        'pandas >= 0.18.0, < 0.26',
+                        'dill < 0.3',
+                        'numpy >= 1.7.0, < 1.17',
+                        'pandas >= 0.18.0, < 0.25',
                         'pyomo >= 4.4.0, < 5.7',
-                        'networkx < 3.0'],
-      extras_require={'dev': ['nose', 'sphinx', 'sphinx_rtd_theme']},
+                        'networkx < 2.4'],
+      extras_require={'datapackage': ['datapackage']},
       entry_points={
           'console_scripts': [
               'oemof_installation_test = ' +

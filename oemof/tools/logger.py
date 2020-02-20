@@ -6,12 +6,12 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/tools/logger.py
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import os
-from logging import (INFO, DEBUG, getLogger, Formatter, StreamHandler,
-                     handlers, debug, info)
+import logging
+from logging import handlers
 import sys
 from oemof.tools import helpers
 import oemof
@@ -19,7 +19,7 @@ import oemof
 
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,
                    screen_format=None, file_datefmt=None, screen_datefmt=None,
-                   screen_level=INFO, file_level=DEBUG,
+                   screen_level=logging.INFO, file_level=logging.DEBUG,
                    log_version=True, log_path=True, timed_rotating=None):
 
     r"""Initialise customisable logger.
@@ -87,26 +87,26 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
 
     file = os.path.join(logpath, logfile)
 
-    log = getLogger('')
+    log = logging.getLogger('')
 
     # Remove existing handlers to avoid interference.
     log.handlers = []
-    log.setLevel(DEBUG)
+    log.setLevel(logging.DEBUG)
 
     if file_format is None:
         file_format = (
             "%(asctime)s - %(levelname)s - %(module)s - %(message)s")
-    file_formatter = Formatter(file_format, file_datefmt)
+    file_formatter = logging.Formatter(file_format, file_datefmt)
 
     if screen_format is None:
         screen_format = "%(asctime)s-%(levelname)s-%(message)s"
     if screen_datefmt is None:
         screen_datefmt = "%H:%M:%S"
-    screen_formatter = Formatter(screen_format, screen_datefmt)
+    screen_formatter = logging.Formatter(screen_format, screen_datefmt)
 
-    tmp_formatter = Formatter("%(message)s")
+    tmp_formatter = logging.Formatter("%(message)s")
 
-    ch = StreamHandler(sys.stdout)
+    ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(screen_formatter)
     ch.setLevel(screen_level)
     log.addHandler(ch)
@@ -123,13 +123,13 @@ def define_logging(logpath=None, logfile='oemof.log', file_format=None,
     fh.setLevel(file_level)
     log.addHandler(fh)
 
-    debug("******************************************************")
+    logging.debug("******************************************************")
     fh.setFormatter(file_formatter)
     if log_path:
-        info("Path for logging: {0}".format(file))
+        logging.info("Path for logging: {0}".format(file))
 
     if log_version:
-        info("Used oemof version: {0}".format(get_version()))
+        logging.info("Used oemof version: {0}".format(get_version()))
     return file
 
 
