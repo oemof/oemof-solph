@@ -195,7 +195,7 @@ class Link(Transformer):
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
         Keys are the connected tuples (input, output) bus objects.
-        The dictionary values can either be a scalar or a sequence with length
+        The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
 
     Note: This component is experimental. Use it with care.
