@@ -18,7 +18,7 @@ from oemof.network import Node
 from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var
-
+from pyomo.core.base.piecewise import _PiecewiseData
 
 def get_tuple(x):
     """
@@ -74,9 +74,21 @@ def create_dataframe(om):
         block_vars.append(bv.parent_component())
     block_vars = list(set(block_vars))
 
-    # write them into a dict with tuples as keys
-    var_dict = {(str(bv).split('.')[0], str(bv).split('.')[-1], i): bv[i].value
-                for bv in block_vars for i in getattr(bv, '_index')}
+    var_dict = {}
+    for bv in block_vars:
+        if isinstance(bv.parent_block(), _PiecewiseData):
+            for i in getattr(bv, '_index'):
+                key = (
+                    str(bv.parent_block()).split('.')[0],
+                    str(bv).split('.')[-1] + '_' + str(i),
+                    bv[i].parent_block().index())
+                value = bv[i].value
+                var_dict[key] = value
+        else:
+            for i in getattr(bv, '_index'):
+                key = (str(bv).split('.')[0], str(bv).split('.')[-1], i)
+                value = bv[i].value
+                var_dict[key] = value
 
     # use this to create a pandas dataframe
     df = pd.DataFrame(list(var_dict.items()), columns=['pyomo_tuple', 'value'])
