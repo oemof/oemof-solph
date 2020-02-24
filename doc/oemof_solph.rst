@@ -352,12 +352,13 @@ these flows, with the following constraints:
   :start-after: _ETCHP-equations:
   :end-before: """
 
-These constraints are applied in addition those of a standard
+These constraints are applied in addition to those of a standard
 :class:`~oemof.solph.network.Transformer`. The constraints limit the range of
 the possible operation points, like the following picture shows. For a certain
 flow of fuel, there is a line of operation points, whose slope is defined by
-:math:`\beta` (in some contexts also referred to as :math:`C_v`).
-The second constraint limits the decrease of electrical power.
+the power loss factor :math:`\beta` (in some contexts also referred to as
+:math:`C_v`). The second constraint limits the decrease of electrical power and
+incorporates the backpressure coefficient :math:`C_b`.
 
 .. 	image:: _files/ExtractionTurbine_range_of_operation.svg
    :width: 70 %

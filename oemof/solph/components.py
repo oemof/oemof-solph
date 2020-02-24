@@ -1225,7 +1225,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
                  {\eta_{el,woExtr}(t)} \\
             &
-            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b =
+               \dot Q_{th}(t) \cdot
                \frac{\eta_{el,maxExtr}(t)}
                  {\eta_{th,maxExtr}(t)}
 
