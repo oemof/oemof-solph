@@ -58,7 +58,7 @@ class GenericStorage(network.Transformer):
 
     initial_storage_level : numeric
         The content of the storage in the first time step of optimization.
-    balanced : boolian
+    balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
