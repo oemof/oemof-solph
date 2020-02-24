@@ -400,21 +400,6 @@ output of an example in the `oemof example repository
 
 .. _oemof_solph_components_generic_caes_label:
 
-GenericCAES (custom)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Compressed Air Energy Storage (CAES).
-The following constraints describe the CAES:
-
-.. include:: ../oemof/solph/custom.py
-  :start-after: _GenericCAES-equations:
-  :end-before: """
-
-.. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
-
-.. _oemof_solph_components_generic_chp_label:
-
-
 GenericCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -693,6 +678,20 @@ Electrical line.
 
 
 .. _oemof_solph_custom_link_label:
+
+GenericCAES (custom)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Compressed Air Energy Storage (CAES).
+The following constraints describe the CAES:
+
+.. include:: ../oemof/solph/custom.py
+  :start-after: _GenericCAES-equations:
+  :end-before: """
+
+.. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
+
+.. _oemof_solph_components_generic_chp_label:
 
 Link (custom)
 ^^^^^^^^^^^^^
