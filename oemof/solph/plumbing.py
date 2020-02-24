@@ -20,7 +20,7 @@ def sequence(iterable_or_scalar):
 
     Parameters
     ----------
-    iterable_or_scalar : array-like, None, int, float
+    iterable_or_scalar : iterable, None, int, float
 
     Examples
     --------
