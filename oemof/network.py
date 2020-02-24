@@ -235,6 +235,8 @@ class Node:
 
 
 EdgeLabel = NT("EdgeLabel", ['input', 'output'])
+
+
 class Edge(Node):
     """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
 
