@@ -178,6 +178,9 @@ class Flow(on.Edge):
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
 
+        if len(self.fix) > 0:
+            self.fixed = True
+
         # Checking for impossible attribute combinations
         if self.fixed and self.fix[0] is None:
             raise ValueError("Cannot fix flow value to None.\n Please "
