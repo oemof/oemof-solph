@@ -62,15 +62,15 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
 
     # create simple sink object for electrical demand for each electrical bus
     solph.Sink(label=('demand', 'elec1'), inputs={bel: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+        fix=data['demand_el'], fixed=True, nominal_value=1)})
     solph.Sink(label=('demand', 'elec2'), inputs={bel2: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+        fix=data['demand_el'], fixed=True, nominal_value=1)})
 
     # create simple sink object for heat demand for each thermal bus
     solph.Sink(label=('demand', 'therm1'), inputs={bth: solph.Flow(
-        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+        fix=data['demand_th'], fixed=True, nominal_value=741000)})
     solph.Sink(label=('demand', 'therm2'), inputs={bth2: solph.Flow(
-        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+        fix=data['demand_th'], fixed=True, nominal_value=741000)})
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
     solph.Transformer(

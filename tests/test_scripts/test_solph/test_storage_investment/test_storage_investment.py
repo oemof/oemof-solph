@@ -72,17 +72,17 @@ def test_optimise_storage_size(filename="storage_investment.csv",
     solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
 
     solph.Sink(label='demand', inputs={bel: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+        fix=data['demand_el'], fixed=True, nominal_value=1)})
 
     # Sources
     solph.Source(label='rgas', outputs={bgas: solph.Flow(
         nominal_value=194397000 * 400 / 8760, summed_max=1)})
 
     solph.Source(label='wind', outputs={bel: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
+        fix=data['wind'], nominal_value=1000000, fixed=True)})
 
     solph.Source(label='pv', outputs={bel: solph.Flow(
-        actual_value=data['pv'], nominal_value=582000, fixed=True)})
+        fix=data['pv'], nominal_value=582000, fixed=True)})
 
     # Transformer
     PP_GAS = solph.Transformer(

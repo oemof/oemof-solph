@@ -367,11 +367,11 @@ class InvestmentFlow(SimpleBlock):
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
-            of investment flow to (normed) actual value
+            of investment flow to (normed) fix
             """
             return (m.flow[i, o, t] == (
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].actual_value[t]))
+                 m.flows[i, o].fix[t]))
         self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
                                 rule=_investflow_fixed_rule)
 

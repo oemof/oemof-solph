@@ -48,7 +48,7 @@ def create_nx_graph(energy_system=None, remove_nodes=None, filename=None,
     >>> bel2 = Bus(label='bel2')
     >>> demand_el = Sink(label='demand_el',
     ...                  inputs = {bel1: Flow(nominal_value=85,
-    ...                            actual_value=[0.5, 0.25, 0.75],
+    ...                            fix=[0.5, 0.25, 0.75],
     ...                            fixed=True)})
     >>> pp_gas = Transformer(label=('pp', 'gas'),
     ...                            inputs={b_gas: Flow()},

@@ -44,11 +44,11 @@ def test_connect_invest():
 
     # create fixed source object representing wind power plants
     solph.Source(label='wind', outputs={bel1: solph.Flow(
-        actual_value=data['wind'], nominal_value=1000000, fixed=True)})
+        fix=data['wind'], nominal_value=1000000, fixed=True)})
 
     # create simple sink object representing the electrical demand
     solph.Sink(label='demand', inputs={bel1: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+        fix=data['demand_el'], fixed=True, nominal_value=1)})
 
     storage = solph.components.GenericStorage(
         label='storage',

@@ -70,7 +70,7 @@ class TestParameterResult:
             inputs={
                 b_el2: Flow(
                     nominal_value=1,
-                    actual_value=cls.demand_values,
+                    fix=cls.demand_values,
                     fixed=True
                 )
             }
@@ -105,7 +105,7 @@ class TestParameterResult:
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
-                {'actual_value': self.demand_values}
+                {'fix': self.demand_values}
             ), check_like=True
         )
 
@@ -138,10 +138,10 @@ class TestParameterResult:
             pandas.Series(scalar_attributes).sort_index()
         )
         sequences_attributes = {
-            'actual_value': self.demand_values,
+            'fix': self.demand_values,
         }
         default_sequences = [
-            'actual_value'
+            'fix'
         ]
         for attr in default_sequences:
             if attr not in sequences_attributes:

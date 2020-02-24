@@ -50,21 +50,21 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     # sources
     ep_wind = economics.annuity(capex=1000, n=20, wacc=0.05)
     wind = Source(label='wind', outputs={bel: Flow(
-                    actual_value=data['wind'], fixed=True,
+                    fix=data['wind'], fixed=True,
                     investment=Investment(ep_costs=ep_wind, existing=100))})
 
     ep_pv = economics.annuity(capex=1500, n=20, wacc=0.05)
     pv = Source(label='pv', outputs={bel: Flow(
-                    actual_value=data['pv'], fixed=True,
+                    fix=data['pv'], fixed=True,
                     investment=Investment(ep_costs=ep_pv, existing=80))})
 
     # demands (electricity/heat)
     demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
-                     actual_value=data['demand_el'], fixed=True)})
+                     fix=data['demand_el'], fixed=True)})
 
     demand_th = Sink(label='demand_therm',
                      inputs={bth: Flow(nominal_value=40,
-                                       actual_value=data['demand_th'],
+                                       fix=data['demand_th'],
                                        fixed=True)})
 
     # power plants
