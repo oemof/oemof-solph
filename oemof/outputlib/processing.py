@@ -86,7 +86,10 @@ def create_dataframe(om):
                 var_dict[key] = value
         else:
             for i in getattr(bv, '_index'):
-                key = (str(bv).split('.')[0], str(bv).split('.')[-1], i)
+                key = (
+                    str(bv).split('.')[0],
+                    str(bv).split('.')[-1],
+                    i)
                 value = bv[i].value
                 var_dict[key] = value
 
