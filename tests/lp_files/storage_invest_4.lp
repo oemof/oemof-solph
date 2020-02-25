@@ -27,44 +27,44 @@ c_u_GenericInvestmentStorageBlock_init_cap_limit(storage4)_:
 <= 0
 
 c_e_GenericInvestmentStorageBlock_balance_first(storage4)_:
-+1 GenericInvestmentStorageBlock_capacity(storage4_0)
 -1 GenericInvestmentStorageBlock_init_cap(storage4)
++1 GenericInvestmentStorageBlock_storage_content(storage4_0)
 -1 flow(electricityBus_storage4_0)
 +1 flow(storage4_electricityBus_0)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage4_1)_:
--1 GenericInvestmentStorageBlock_capacity(storage4_0)
-+1 GenericInvestmentStorageBlock_capacity(storage4_1)
+-1 GenericInvestmentStorageBlock_storage_content(storage4_0)
++1 GenericInvestmentStorageBlock_storage_content(storage4_1)
 -1 flow(electricityBus_storage4_1)
 +1 flow(storage4_electricityBus_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage4_2)_:
--1 GenericInvestmentStorageBlock_capacity(storage4_1)
-+1 GenericInvestmentStorageBlock_capacity(storage4_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage4_1)
++1 GenericInvestmentStorageBlock_storage_content(storage4_2)
 -1 flow(electricityBus_storage4_2)
 +1 flow(storage4_electricityBus_2)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balanced_cstr(storage4)_:
-+1 GenericInvestmentStorageBlock_capacity(storage4_2)
 -1 GenericInvestmentStorageBlock_init_cap(storage4)
++1 GenericInvestmentStorageBlock_storage_content(storage4_2)
 = 0
 
 c_u_GenericInvestmentStorageBlock_max_capacity(storage4_0)_:
-+1 GenericInvestmentStorageBlock_capacity(storage4_0)
 -1 GenericInvestmentStorageBlock_invest(storage4)
++1 GenericInvestmentStorageBlock_storage_content(storage4_0)
 <= 0
 
 c_u_GenericInvestmentStorageBlock_max_capacity(storage4_1)_:
-+1 GenericInvestmentStorageBlock_capacity(storage4_1)
 -1 GenericInvestmentStorageBlock_invest(storage4)
++1 GenericInvestmentStorageBlock_storage_content(storage4_1)
 <= 0
 
 c_u_GenericInvestmentStorageBlock_max_capacity(storage4_2)_:
-+1 GenericInvestmentStorageBlock_capacity(storage4_2)
 -1 GenericInvestmentStorageBlock_invest(storage4)
++1 GenericInvestmentStorageBlock_storage_content(storage4_2)
 <= 0
 
 c_e_ONE_VAR_CONSTANT: 
@@ -77,9 +77,9 @@ bounds
    0 <= flow(storage4_electricityBus_0) <= 100
    0 <= flow(storage4_electricityBus_1) <= 100
    0 <= flow(storage4_electricityBus_2) <= 100
-   0 <= GenericInvestmentStorageBlock_capacity(storage4_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_capacity(storage4_1) <= +inf
-   0 <= GenericInvestmentStorageBlock_capacity(storage4_2) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage4_0) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage4_1) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage4_2) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage4) <= 500
    0 <= GenericInvestmentStorageBlock_init_cap(storage4) <= +inf
 end
