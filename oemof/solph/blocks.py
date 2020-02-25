@@ -341,6 +341,9 @@ class InvestmentFlow(SimpleBlock):
         self.FIXED_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].fixed])
 
+        self.NON_FIXED_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group if not g[2].fixed])
+
         self.SUMMED_MAX_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None])
 
@@ -357,7 +360,7 @@ class InvestmentFlow(SimpleBlock):
             """
             return (m.flows[i, o].investment.minimum,
                     m.flows[i, o].investment.maximum)
-        # create variable bounded for flows with investement attribute
+        # create variable bounded for flows with investment attribute
         self.invest = Var(self.FLOWS, within=NonNegativeReals,
                           bounds=_investvar_bound_rule)
 
@@ -383,7 +386,7 @@ class InvestmentFlow(SimpleBlock):
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
                  m.flows[i, o].max[t]))
             return expr
-        self.max = Constraint(self.FLOWS, m.TIMESTEPS,
+        self.max = Constraint(self.NON_FIXED_FLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
