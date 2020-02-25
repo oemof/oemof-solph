@@ -62,7 +62,7 @@ class GenericStorage(network.Transformer):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (sequence or scalar)
-        The relative loss of the storage capacity per timeunit.
+        The relative loss of the storage content per timeunit.
     inflow_conversion_factor : numeric (sequence or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -231,16 +231,16 @@ class GenericStorageBlock(SimpleBlock):
 
     **The following variables are created:**
 
-    capacity
-        Capacity (level) for every storage and timestep. The value for the
-        capacity at the beginning is set by the parameter `initial_capacity` or
-        not set if `initial_capacity` is None.
+    storage_content
+        Storage content for every storage and timestep. The value for the
+        storage content at the beginning is set by the parameter `initial_storage_level`
+        or not set if `initial_storage_level` is None.
         The variable of storage s and timestep t can be accessed by:
-        `om.Storage.capacity[s, t]`
+        `om.Storage.storage_content[s, t]`
 
     **The following constraints are created:**
 
-    Set last time step to the initial capacity if :attr:`balanced == True`
+    Set storage_content of last time step to one at t=0 if :attr:`balanced == True`
         .. math::
             E(t_{last}) = &E(-1)
 
@@ -262,7 +262,7 @@ class GenericStorageBlock(SimpleBlock):
     =========================== ======================= =========
     symbol                      explanation             attribute
     =========================== ======================= =========
-    :math:`E(t)`                energy currently stored :py:obj:`capacity`
+    :math:`E(t)`                energy currently stored :py:obj:`storage_content`
     :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`
                                 the energy storage
     :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
@@ -333,7 +333,7 @@ class GenericStorageBlock(SimpleBlock):
             bounds = (n.nominal_storage_capacity * n.min_storage_level[t],
                       n.nominal_storage_capacity * n.max_storage_level[t])
             return bounds
-        self.capacity = Var(self.STORAGES, m.TIMESTEPS,
+        self.storage_content = Var(self.STORAGES, m.TIMESTEPS,
                             bounds=_storage_capacity_bound_rule)
 
         def _storage_init_capacity_bound_rule(block, n):
@@ -342,7 +342,7 @@ class GenericStorageBlock(SimpleBlock):
         self.init_cap = Var(self.STORAGES, within=NonNegativeReals,
                             bounds=_storage_init_capacity_bound_rule)
 
-        # set the initial capacity of the storage
+        # set the initial storage content
         for n in group:
             if n.initial_storage_level is not None:
                 self.init_cap[n] = (n.initial_storage_level *
@@ -359,7 +359,7 @@ class GenericStorageBlock(SimpleBlock):
             the first timestep.
             """
             expr = 0
-            expr += block.capacity[n, 0]
+            expr += block.storage_content[n, 0]
             expr += - block.init_cap[n] * (
                 (1 - n.loss_rate[0]) ** m.timeincrement[0])
             expr += (- m.flow[i[n], n, 0] *
@@ -376,8 +376,8 @@ class GenericStorageBlock(SimpleBlock):
             every timestep but the first (t > 0)
             """
             expr = 0
-            expr += block.capacity[n, t]
-            expr += - block.capacity[n, t-1] * (
+            expr += block.storage_content[n, t]
+            expr += - block.storage_content[n, t-1] * (
                 (1 - n.loss_rate[t]) ** m.timeincrement[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
@@ -388,8 +388,10 @@ class GenericStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
         def _balanced_storage_rule(block, n):
-            """capacity of last time step == initial capacity if balanced"""
-            return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+            """storage content of last time step == initial storage content
+            if balanced
+            """
+            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_cap[n]
         self.balanced_cstr = Constraint(self.STORAGES_BALANCED,
                                       rule=_balanced_storage_rule)
 
@@ -444,8 +446,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     **The following variables are created:**
 
-    capacity :attr:`om.InvestmentStorage.capacity[n, t]`
-        Level of the storage (indexed by STORAGES and TIMESTEPS)
+    storage_content :attr:`om.InvestmentStorage.storage_content[n, t]`
+        Current storage content (indexed by STORAGES and TIMESTEPS)
 
     invest :attr:`om.InvestmentStorage.invest[n, t]`
         Nominal capacity of the storage (indexed by STORAGES)
@@ -457,7 +459,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         Same as for :class:`.GenericStorageBlock`.
 
 
-    Initial capacity of :class:`.network.Storage`
+    Initial storage content of :class:`.network.Storage`
         .. math::
           E(n, -1) = invest(n) \cdot c(n, -1), \\
           \forall n \in \textrm{INITIAL\_STORAGE\_LEVEL}.
@@ -477,7 +479,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           (InvestmentFlow.invest(n, target(n)) + existing) *
           invest\_relation\_input_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
-
+    # TODO:
     Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
         .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
@@ -487,7 +489,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
-
+    # end TODO.
 
     **The following parts of the objective function are created:**
 
@@ -547,7 +549,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 [n.min_storage_level[t] for t in m.TIMESTEPS]) > 0])
 
         # ######################### Variables  ################################
-        self.capacity = Var(self.INVESTSTORAGES, m.TIMESTEPS,
+        self.storage_content = Var(self.INVESTSTORAGES, m.TIMESTEPS,
                             within=NonNegativeReals)
 
         def _storage_investvar_bound_rule(block, n):
@@ -582,7 +584,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             timestep t
             """
             expr = 0
-            expr += block.capacity[n, 0]
+            expr += block.storage_content[n, 0]
             expr += - block.init_cap[n] * (
                     (1 - n.loss_rate[0]) ** m.timeincrement[0])
             expr += (- m.flow[i[n], n, 0] *
@@ -600,8 +602,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             timestep t
             """
             expr = 0
-            expr += block.capacity[n, t]
-            expr += - block.capacity[n, t - 1] * (
+            expr += block.storage_content[n, t]
+            expr += - block.storage_content[n, t - 1] * (
                     (1 - n.loss_rate[t]) ** m.timeincrement[t])
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
@@ -613,7 +615,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
         def _balanced_storage_rule(block, n):
-            return block.capacity[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_cap[n]
         self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
                                       rule=_balanced_storage_rule)
 
@@ -660,7 +662,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _max_capacity_invest_rule(block, n, t):
             """Rule definition for upper bound constraint for the storage cap.
             """
-            expr = (self.capacity[n, t] <=
+            expr = (self.storage_content[n, t] <=
                     (n.investment.existing + self.invest[n]) *
                     n.max_storage_level[t])
             return expr
@@ -670,7 +672,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _min_capacity_invest_rule(block, n, t):
             """Rule definition of lower bound constraint for the storage cap.
             """
-            expr = (self.capacity[n, t] >=
+            expr = (self.storage_content[n, t] >=
                     (n.investment.existing + self.invest[n]) *
                     n.min_storage_level[t])
             return expr
