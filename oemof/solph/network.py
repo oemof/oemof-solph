@@ -165,15 +165,23 @@ class Flow(on.Edge):
                     }
         keys = [k for k in kwargs if k != 'label']
 
+        if 'fixed_costs' in keys:
+            raise AttributeError(
+                "The `fixed_costs` attribute has been removed"
+                " with v0.2!")
+
+        if 'actual_value' in keys:
+            raise AttributeError(
+                "The `actual_value` attribute has been renamed"
+                " to `fix` with v0.4. The attribute `fixed` is"
+                " set to True automatically when passing `fix`.")
+
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
-            elif 'fixed_costs' in attribute:
-                raise AttributeError(
-                         "The `fixed_costs` attribute has been removed"
-                         " with v0.2!")
+
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
