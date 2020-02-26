@@ -250,8 +250,12 @@ class InvestmentFlow(SimpleBlock):
     INVESTFLOWS
         A set of flows with the attribute :attr:`invest` of type
         :class:`.options.Investment`.
+    CONVEX_INVESTFLOWS
+        A subset of flows with the attribute :attr:`nonconvex` set to `False`.
+    NON_CONVEX_INVESTFLOWS
+        A subset of flows with the attribute :attr:`nonconvex` set to `True`.
     FIXED_FLOWS
-        A set of flow with the attribute :attr:`fixed` set to `True`
+        A set of flow with the attribute :attr:`fixed` set to `True`.
     SUMMED_MAX_FLOWS
         A subset of set INVESTFLOWS with flows with the attribute
         :attr:`summed_max` being not None.
@@ -266,7 +270,11 @@ class InvestmentFlow(SimpleBlock):
 
     invest :attr:`om.InvestmentFlow.invest[i, o]`
         Value of the investment variable i.e. equivalent to the nominal
-        value of the flows after optimization (indexed by INVESTFLOWS)
+        value of the flows after optimization (indexed by INVESTFLOWS).
+
+    invest_status :attr:`om.InvestmentFlow.invest_status[i, o]`
+        Binary variable for the status of the investment status, if
+        :attr:`nonconvex` is `True` (indexed by NON_CONVEX_INVESTFLOWS).
 
     **The following constraints are build:**
 
@@ -277,11 +285,18 @@ class InvestmentFlow(SimpleBlock):
           \forall (i, o) \in \textrm{FIXED\_INVESTFLOWS}, \\
           \forall t \in \textrm{TIMESTEPS}.
 
-    Lower bound (min) constraint for invest flows
+    Lower bound (min) constraint for (convex) invest flows (:attr:`nonconvex` = `False` )
       :attr:`om.InvestmentFlow.min[i, o, t]`
         .. math::
              flow(i, o, t) \geq min(i, o, t) \cdot invest(i, o), \\
-             \forall (i, o) \in \textrm{MIN\_INVESTFLOWS}, \\
+             \forall (i, o) \in \textrm{CONVEX\_INVESTFLOWS}, \\
+             \forall t \in \textrm{TIMESTEPS}.
+
+    Lower bound (min) constraint for nonconvex invest flows (:attr:`nonconvex` = `True` )
+      :attr:`om.InvestmentFlow.min[i, o, t]`
+        .. math::
+             flow(i, o, t) \geq min(i, o, t) \cdot invest(i, o), \\
+             \forall (i, o) \in \textrm{NON\_CONVEX\_INVESTFLOWS}, \\
              \forall t \in \textrm{TIMESTEPS}.
 
     Upper bound (max) constraint for invest flows
