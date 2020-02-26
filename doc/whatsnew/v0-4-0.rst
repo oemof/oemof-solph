@@ -46,8 +46,12 @@ Other changes
 
 * The ``loss_rate`` of :class:`~oemof.solph.components.GenericStorage`
     is now defined per time increment.
+* The parameters' data type in the docstrings is changed from
+  `numeric (sequence or scalar)` to `numeric (iterable or scalar)`
+  (`Issue #673 <https://github.com/oemof/oemof/issues/673>`_).
 
 Contributors
 ############
 
 * Caterina Köhl
+* Jonathan Amme
