@@ -138,7 +138,7 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     storage = es.groups['storage_electricity_battery']
     storage_node = views.node(results, storage)
     my_results['max_load'] = storage_node['sequences'].max()[
-        ((storage, None), 'capacity')]
+        ((storage, None), 'storage_content')]
     commodity_bus = views.node(results, 'bus_natural_gas_None')
 
     gas_usage = commodity_bus['sequences'][
