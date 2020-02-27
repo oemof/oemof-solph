@@ -244,93 +244,135 @@ class Flow(SimpleBlock):
 class InvestmentFlow(SimpleBlock):
     r"""Block for all flows with :attr:`investment` being not None.
 
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    INVESTFLOWS
-        A set of flows with the attribute :attr:`invest` of type
-        :class:`.options.Investment`.
-    CONVEX_INVESTFLOWS
-        A subset of flows with the attribute :attr:`nonconvex` set to `False`.
-    NON_CONVEX_INVESTFLOWS
-        A subset of flows with the attribute :attr:`nonconvex` set to `True`.
-    FIXED_FLOWS
-        A set of flow with the attribute :attr:`fixed` set to `True`.
-    SUMMED_MAX_FLOWS
-        A subset of set INVESTFLOWS with flows with the attribute
-        :attr:`summed_max` being not None.
-    SUMMED_MIN_FLOWS
-        A subset of set INVESTFLOWS with flows with the attribute
-        :attr:`summed_min` being not None.
-    MIN_FLOWS
-        A subset of INVESTFLOWS with flows having set a value of not None in
-        the first timestep.
-
     **The following variables are created:**
 
-    invest :attr:`om.InvestmentFlow.invest[i, o]`
+    * :math:`F_{invest}`  :attr:`om.InvestmentFlow.invest[i, o]`
+
         Value of the investment variable i.e. equivalent to the nominal
-        value of the flows after optimization (indexed by INVESTFLOWS).
+        value of the flows after optimization.
 
-    invest_status :attr:`om.InvestmentFlow.invest_status[i, o]`
+    * :math:`b_{invest}`  :attr:`om.InvestmentFlow.invest_status[i, o]`
+
         Binary variable for the status of the investment status, if
-        :attr:`nonconvex` is `True` (indexed by NON_CONVEX_INVESTFLOWS).
+        :attr:`nonconvex` is `True`.
 
-    **The following constraints are build:**
 
-    Actual value constraint for fixed invest
-      flows :attr:`om.InvestmentFlow.fixed[i, o, t]`
+    **The following constraints are created:**
+
+    All investment flows are indexed by the starting and ending node (i,o),
+    which is omitted for the sake of convenience.
+    Depending on the attributes, different constraints are created.
+    The following constraint is created for all investment flows:\
+
+            Upper bound constraint for investment flows:
+
         .. math::
-          flow(i, o, t) = actual\_value(i, o, t) \cdot invest(i, o), \\
-          \forall (i, o) \in \textrm{FIXED\_INVESTFLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            F(t) \le ( F_{invest} + F_{exist} ) \cdot f_{max}(t)
 
-    Lower bound (min) constraint for (convex) invest flows (:attr:`nonconvex` = `False` )
-      :attr:`om.InvestmentFlow.min[i, o, t]`
-        .. math::
-             flow(i, o, t) \geq min(i, o, t) \cdot invest(i, o), \\
-             \forall (i, o) \in \textrm{CONVEX\_INVESTFLOWS}, \\
-             \forall t \in \textrm{TIMESTEPS}.
+    Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
+    of the decision variable :math:`F_{invest}` are different:\
 
-    Lower bound (min) constraint for nonconvex invest flows (:attr:`nonconvex` = `True` )
-      :attr:`om.InvestmentFlow.min[i, o, t]`
-        .. math::
-             flow(i, o, t) \geq min(i, o, t) \cdot invest(i, o), \\
-             \forall (i, o) \in \textrm{NON\_CONVEX\_INVESTFLOWS}, \\
-             \forall t \in \textrm{TIMESTEPS}.
+        :attr:`nonconvex = False`
 
-    Upper bound (max) constraint for invest flows
-      :attr:`om.InvestmentFlow.max[i, o, t]`
         .. math::
-             flow(i, o, t) \leq max(i, o, t) \cdot invest(i, o), \\
-             \forall (i, o) \in \textrm{INVESTFLOWS}, \\
-             \forall t \in \textrm{TIMESTEPS}.
+            F_{invest, min} \le F_{invest} \le F_{invest, max}
 
-    Flow max sum for invest flow
-      :attr:`om.InvestmentFlow.summed_max[i, o]`
-        .. math::
-            \sum_t flow(i, o, t) \cdot \tau \leq summed\_max(i, o) \
-            \cdot invest(i, o) \\
-            \forall (i, o) \in \textrm{SUMMED\_MAX\_INVESTFLOWS}.
+        :attr:`nonconvex = True`
 
-    Flow min sum for invest flow :attr:`om.InvestmentFlow.summed_min[i, o]`
         .. math::
-            \sum_t flow(i, o, t) \cdot \tau \geq summed\_min(i, o) \
-            \cdot invest(i, o) \\
-            \forall (i, o) \in \textrm{SUMMED\_MIN\_INVESTFLOWS}.
+            &
+            F_{invest, min} \cdot b_{invest} \le F_{invest}\\
+            &
+            F_{invest} \le F_{invest, max} \cdot b_{invest}\\
+
+    For all investment flows (independent of the attribute :attr:`nonconvex`),
+    the following additional constraints are created, if the appropriate
+    attribute of the :class:`.solph.Flow` is set:
+
+        :attr:`fixed=True`
+
+            Actual value constraint for investments with fixed time series.
+
+        .. math::
+            F(t) = ( F_{invest} + F_{exist} ) \cdot f_{actual}(t)
+
+        :attr:`min != 0`
+
+            Lower bound for the flow values depending on flow capacity.
+
+        .. math::
+            F(t) \geq ( F_{invest} + F_{exist} ) \cdot f_{min}(t)
+
+        :attr:`summed_max not None`
+
+            Upper bound for the sum of all flow values (e.g. maximum full load
+            hours)
+
+        .. math::
+            \sum_t F(t) \cdot \tau \leq ( F_{invest} + F_{exist} )
+            \cdot f_{sum, min}
+
+        :attr:`summed_min not None`
+
+            Lower bound for the sum of all flow values (e.g. minimum full load
+            hours)
+
+        .. math::
+            \sum_t F(t) \cdot \tau \geq ( F_{invest} + F_{exist} )
+            \cdot f_{sum, min}
+
+    Note
+    ----
+    In case of a nonconvex investment flow (:attr:`nonconvex=True`),
+    the existing flow capacity :math:`F_{exist}` needs to be zero.
+    At least, it is not tested yet, whether this works out, or makes any sense
+    at all.
 
 
     **The following parts of the objective function are created:**
 
-    Equivalent periodical costs (epc) expression
-      :attr:`om.InvestmentFlow.investment_costs`:
-        .. math::
-            \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
+    The part of the objective function added by the investment flows
+    also depends on whether a convex or nonconvex
+    investment flow is selected:
 
-    The expression can be accessed by :attr:`om.InvestmentFlow.variable_costs`
-    and their value after optimization by
-    :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
-    investment costs with :attr:`*.investment_costs` etc.
+        :attr:`nonconvex = False`
+
+            .. math::
+                C_{invest} = \sum_{(i,o)} F_{invest} \cdot c_{invest,var}
+
+        :attr:`nonconvex = True`
+
+            .. math::
+                C_{invest} = \sum_{(i, o)} F_{invest} \cdot c_{invest,var}
+                + c_{invest,fix} \cdot b_{invest}\\
+
+
+    .. csv-table:: List of Variables
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`F(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
+        ":math:`F_{invest}`", ":py:obj:`om.InvestmentFlow.invest[i, o]`", "Capacity of flow / Maximum flow value"
+        ":math:`b_{invest}`", ":py:obj:`om.InvestmentFlow.invest_status[i, o]`", "binary
+        status of investment flow for nonconvex investments"
+        ":math:`C_{invest}`", ":py:obj:`om...`", "Total costs of all investment flows"
+
+    .. csv-table:: List of Parameters
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`F_{exist}`", ":py:obj:`flow[n, o, t]`", ""
+        ":math:`F_{invest,min}`", "", ""
+        ":math:`F_{invest,max}`", "", ""
+        ":math:`c_{invest,var}`", "", ""
+        ":math:`c_{invest,fix}`", "", ""
+        ":math:`f_{actual}`", "", ""
+        ":math:`f_{max}`", "", ""
+        ":math:`f_{min}`", "", ""
+        ":math:`f_{sum,max}`", "", ""
+        ":math:`f_{sum,min}`", "", ""
+        ":math:`\tau`", "", ""
+
     """
 
     def __init__(self, *args, **kwargs):
