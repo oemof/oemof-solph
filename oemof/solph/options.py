@@ -5,7 +5,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/options.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from oemof.solph.plumbing import sequence
@@ -50,11 +50,11 @@ class NonConvex:
     """
     Parameters
     ----------
-    startup_costs : numeric (sequence or scalar)
+    startup_costs : numeric (iterable or scalar)
         Costs associated with a start of the flow (representing a unit).
-    shutdown_costs : numeric (sequence or scalar)
+    shutdown_costs : numeric (iterable or scalar)
         Costs associated with the shutdown of the flow (representing a unit).
-    activity_costs : numeric (sequence or scalar)
+    activity_costs : numeric (iterable or scalar)
         Costs associated with the active operation of the flow, independently
         from the actual output.
     minimum_uptime : numeric (1 or positive integer)

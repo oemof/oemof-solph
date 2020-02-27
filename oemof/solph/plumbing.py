@@ -6,21 +6,21 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/plumbing.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from collections import abc, UserList
 from itertools import repeat
 
 
-def sequence(sequence_or_scalar):
-    """ Tests if an object is sequence (except string) or scalar and returns
-    a the original sequence if object is a sequence and a 'emulated' sequence
+def sequence(iterable_or_scalar):
+    """ Tests if an object is iterable (except string) or scalar and returns
+    a the original sequence if object is an iterable and a 'emulated' sequence
     object of class _Sequence if object is a scalar or string.
 
     Parameters
     ----------
-    sequence_or_scalar : array-like, None, int, float
+    iterable_or_scalar : iterable, None, int, float
 
     Examples
     --------
@@ -37,11 +37,11 @@ def sequence(sequence_or_scalar):
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
-    if (isinstance(sequence_or_scalar, abc.Iterable) and not
-            isinstance(sequence_or_scalar, str)):
-        return sequence_or_scalar
+    if (isinstance(iterable_or_scalar, abc.Iterable) and not
+            isinstance(iterable_or_scalar, str)):
+        return iterable_or_scalar
     else:
-        return _Sequence(default=sequence_or_scalar)
+        return _Sequence(default=iterable_or_scalar)
 
 
 class _Sequence(UserList):
