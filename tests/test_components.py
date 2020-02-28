@@ -104,6 +104,20 @@ def test_generic_storage_with_non_convex_investment():
                                         maximum=25))
 
 
+def test_generic_storage_with_non_convex_invest_maximum():
+    """No NonConvexFlow for Inflow defined."""
+    with tools.assert_raises_regexp(
+            AttributeError, "Please provide an maximum investment value"):
+        bel = solph.Bus()
+        solph.components.GenericStorage(
+            label='storage6',
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            investment=solph.Investment(nonconvex=True))
+
+
 # ********* OffsetTransformer *********
 
 def test_offsettransformer_wrong_flow_type():
