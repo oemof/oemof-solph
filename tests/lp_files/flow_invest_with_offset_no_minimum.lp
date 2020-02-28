@@ -28,7 +28,7 @@ c_l_InvestmentFlow_minimum_rule(electricityBus_source_nonconvex_invest)_:
 
 c_u_InvestmentFlow_maximum_rule(electricityBus_source_nonconvex_invest)_:
 +1 InvestmentFlow_invest(electricityBus_source_nonconvex_invest)
--inf InvestmentFlow_invest_status(electricityBus_source_nonconvex_invest)
+-1234 InvestmentFlow_invest_status(electricityBus_source_nonconvex_invest)
 <= 0
 
 c_u_InvestmentFlow_max(electricityBus_source_nonconvex_invest_0)_:
@@ -60,7 +60,7 @@ bounds
    0 <= flow(electricityBus_source_nonconvex_invest_0) <= +inf
    0 <= flow(electricityBus_source_nonconvex_invest_1) <= +inf
    0 <= flow(electricityBus_source_nonconvex_invest_2) <= +inf
-   0 <= InvestmentFlow_invest(electricityBus_source_nonconvex_invest) <= +inf
+   0 <= InvestmentFlow_invest(electricityBus_source_nonconvex_invest) <= 1234
    0 <= InvestmentFlow_invest_status(electricityBus_source_nonconvex_invest) <= 1
 binary
   InvestmentFlow_invest_status(electricityBus_source_nonconvex_invest)
