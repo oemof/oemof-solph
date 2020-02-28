@@ -100,7 +100,8 @@ def test_generic_storage_with_non_convex_investment():
             outputs={bel: solph.Flow()},
             invest_relation_input_capacity=1/6,
             invest_relation_output_capacity=1/6,
-            investment=solph.Investment(nonconvex=True, existing=5))
+            investment=solph.Investment(nonconvex=True, existing=5,
+                                        maximum=25))
 
 
 # ********* OffsetTransformer *********
