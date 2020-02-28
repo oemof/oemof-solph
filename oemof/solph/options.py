@@ -46,6 +46,7 @@ class Investment:
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
+        self._check_invest_attributes_offset()
 
     def _check_invest_attributes(self):
         if (self.existing != 0) and (self.nonconvex is True):
@@ -63,6 +64,12 @@ class Investment:
                   " limit might lead to numeric issues, so that no investment"
                   " is done, although it is the optimal solution!")
             raise AttributeError(e2)
+
+    def _check_invest_attributes_offset(self):
+        if (self.offset != 0) and (self.nonconvex is False):
+            e3 = ("If `nonconvex` is `False`, the `offset` parameter will be"
+                  " ignored.")
+            raise AttributeError(e3)
 
 
 class NonConvex:
