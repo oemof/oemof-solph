@@ -727,6 +727,25 @@ class TestsConstraint:
 
         self.compare_lp_files('storage_invest_with_offset.lp')
 
+    def test_nonconvex_invest_storage_all_nonconvex(self):
+        """All invest variables are free and nonconvex."""
+        b1 = solph.Bus(label='bus1')
+
+        solph.components.GenericStorage(
+            label='storage_all_nonconvex',
+            inputs={b1: solph.Flow(investment=solph.Investment(
+                nonconvex=True, minimum=5, offset=10, maximum=30,
+                ep_costs=10))},
+            outputs={b1: solph.Flow(
+                investment=solph.Investment(
+                    nonconvex=True, minimum=8, offset=15, ep_costs=10,
+                    maximum=20))},
+            investment=solph.Investment(
+                nonconvex=True, ep_costs=20, offset=30, minimum=20,
+                maximum=100))
+
+        self.compare_lp_files('storage_invest_all_nonconvex.lp')
+
     def test_nonconvex_invest_sink_without_offset(self):
         """ Non convex invest flow without offset, with minimum.
         """
