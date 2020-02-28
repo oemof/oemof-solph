@@ -723,7 +723,7 @@ class TestsConstraint:
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             investment=solph.Investment(ep_costs=145, minimum=19, offset=5,
-                                        nonconvex=True))
+                                        nonconvex=True, maximum=1454))
 
         self.compare_lp_files('storage_invest_with_offset.lp')
 

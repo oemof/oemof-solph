@@ -131,7 +131,7 @@ c_u_GenericInvestmentStorageBlock_min_capacity(storagenon_convex_2)_:
 
 c_l_GenericInvestmentStorageBlock_limit_max(storagenon_convex)_:
 -1 GenericInvestmentStorageBlock_invest(storagenon_convex)
-+inf GenericInvestmentStorageBlock_invest_status(storagenon_convex)
++1454 GenericInvestmentStorageBlock_invest_status(storagenon_convex)
 >= 0
 
 c_l_GenericInvestmentStorageBlock_limit_min(storagenon_convex)_:
@@ -154,7 +154,7 @@ bounds
    0 <= GenericInvestmentStorageBlock_capacity(storagenon_convex_0) <= +inf
    0 <= GenericInvestmentStorageBlock_capacity(storagenon_convex_1) <= +inf
    0 <= GenericInvestmentStorageBlock_capacity(storagenon_convex_2) <= +inf
-   0 <= GenericInvestmentStorageBlock_invest(storagenon_convex) <= +inf
+   0 <= GenericInvestmentStorageBlock_invest(storagenon_convex) <= 1454
    0 <= GenericInvestmentStorageBlock_init_cap(storagenon_convex) <= +inf
    0 <= GenericInvestmentStorageBlock_invest_status(storagenon_convex) <= 1
 binary
