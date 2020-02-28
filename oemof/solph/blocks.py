@@ -242,7 +242,9 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
-    r"""Block for all flows with :attr:`investment` being not None.
+    r"""Block for all flows with :attr:`Investment` being not None.
+    See :class:`oemof.solph.options.Investment` for all parameters of the
+    Investment class.
 
     **The following variables are created:**
 
@@ -259,12 +261,13 @@ class InvestmentFlow(SimpleBlock):
 
     **The following constraints are created:**
 
-    All investment flows are indexed by the starting and ending node (i,o),
-    which is omitted for the sake of convenience.
+    All investment flows are indexed by the starting and ending node
+    :py:obj:`[i, o]`, which is omitted in the following equations
+    for the sake of convenience.
     Depending on the attributes, different constraints are created.
     The following constraint is created for all investment flows:\
 
-            Upper bound constraint for investment flows:
+            Upper bound for the flow value
 
         .. math::
             F(t) \le ( F_{invest} + F_{exist} ) \cdot f_{max}(t)
@@ -291,14 +294,14 @@ class InvestmentFlow(SimpleBlock):
 
         :attr:`fixed=True`
 
-            Actual value constraint for investments with fixed time series.
+            Actual value constraint for investments with fixed flow values
 
         .. math::
             F(t) = ( F_{invest} + F_{exist} ) \cdot f_{actual}(t)
 
         :attr:`min != 0`
 
-            Lower bound for the flow values depending on flow capacity.
+            Lower bound for the flow values
 
         .. math::
             F(t) \geq ( F_{invest} + F_{exist} ) \cdot f_{min}(t)
@@ -320,13 +323,6 @@ class InvestmentFlow(SimpleBlock):
         .. math::
             \sum_t F(t) \cdot \tau \geq ( F_{invest} + F_{exist} )
             \cdot f_{sum, min}
-
-    Note
-    ----
-    In case of a nonconvex investment flow (:attr:`nonconvex=True`),
-    the existing flow capacity :math:`F_{exist}` needs to be zero.
-    At least, it is not tested yet, whether this works out, or makes any sense
-    at all.
 
 
     **The following parts of the objective function are created:**
@@ -352,26 +348,50 @@ class InvestmentFlow(SimpleBlock):
         :widths: 1, 1, 1
 
         ":math:`F(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
-        ":math:`F_{invest}`", ":py:obj:`om.InvestmentFlow.invest[i, o]`", "Capacity of flow / Maximum flow value"
-        ":math:`b_{invest}`", ":py:obj:`om.InvestmentFlow.invest_status[i, o]`", "binary
-        status of investment flow for nonconvex investments"
-        ":math:`C_{invest}`", ":py:obj:`om...`", "Total costs of all investment flows"
+        ":math:`F_{invest}`", ":py:obj:`invest[i, o]`", "Capacity of flow / Maximum flow value"
+        ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status of investment flow (nonconvex only)"
+        ":math:`C_{invest}`", ":py:obj:`investment_costs`", "Total costs of all investment flows"
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
         :widths: 1, 1, 1
 
-        ":math:`F_{exist}`", ":py:obj:`flow[n, o, t]`", ""
-        ":math:`F_{invest,min}`", "", ""
-        ":math:`F_{invest,max}`", "", ""
-        ":math:`c_{invest,var}`", "", ""
-        ":math:`c_{invest,fix}`", "", ""
-        ":math:`f_{actual}`", "", ""
-        ":math:`f_{max}`", "", ""
-        ":math:`f_{min}`", "", ""
-        ":math:`f_{sum,max}`", "", ""
-        ":math:`f_{sum,min}`", "", ""
-        ":math:`\tau`", "", ""
+        ":math:`F_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "
+        Existing flow capacity"
+        ":math:`F_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
+        Minimum investment value"
+        ":math:`F_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
+        Maximum investment value"
+        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
+        ", "Variable investment costs"
+        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
+        Fix investment costs"
+        ":math:`f_{actual}`", ":py:obj:`flows[i, o].actual_value[t]`", "Normed
+        fixed value for the flow variable"
+        ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
+        value of the flow"
+        ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
+        value of the flow"
+        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Normed
+        maximum value of summed flow values"
+        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Normed
+        minimum value of summed flow values"
+        ":math:`\tau`", ":py:obj:`timeincrement[t]`", "Time step width for each
+        time step"
+
+    Note
+    ----
+    In case of a nonconvex investment flow (:attr:`nonconvex=True`),
+    the existing flow capacity :math:`F_{exist}` needs to be zero.
+    At least, it is not tested yet, whether this works out, or makes any sense
+    at all.
+
+    Note
+    ----
+
+    See also :class:`oemof.solph.network.Flow`,
+    :class:`oemof.solph.blocks.Flow` and
+    :class:`oemof.solph.options.Investment`
 
     """
 
