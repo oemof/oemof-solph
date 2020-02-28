@@ -312,7 +312,7 @@ class InvestmentFlow(SimpleBlock):
             hours)
 
         .. math::
-            \sum_t F(t) \cdot \tau \leq ( F_{invest} + F_{exist} )
+            \sum_t F(t) \cdot \tau(t) \leq ( F_{invest} + F_{exist} )
             \cdot f_{sum, min}
 
         :attr:`summed_min not None`
@@ -321,7 +321,7 @@ class InvestmentFlow(SimpleBlock):
             hours)
 
         .. math::
-            \sum_t F(t) \cdot \tau \geq ( F_{invest} + F_{exist} )
+            \sum_t F(t) \cdot \tau(t) \geq ( F_{invest} + F_{exist} )
             \cdot f_{sum, min}
 
 
@@ -376,7 +376,7 @@ class InvestmentFlow(SimpleBlock):
         maximum value of summed flow values"
         ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Normed
         minimum value of summed flow values"
-        ":math:`\tau`", ":py:obj:`timeincrement[t]`", "Time step width for each
+        ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for each
         time step"
 
     Note
