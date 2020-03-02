@@ -15,24 +15,29 @@ class Investment:
     """
     Parameters
     ----------
-    maximum : float
+    maximum : float, :math:`F_{invest,max}`
         Maximum of the additional invested capacity
-    minimum : float
+    minimum : float, :math:`F_{invest,min}`
         Minimum of the additional invested capacity. If `nonconvex` is `True`,
         `minimum` defines the threshold for the invested capacity.
-    ep_costs : float
+    ep_costs : float, :math:`c_{invest,var}`
         Equivalent periodical costs for the investment per flow capacity.
-    existing : float
+    existing : float, :math:`F_{exist}`
         Existing / installed capacity. The invested capacity is added on top
         of this value. Not applicable if `nonconvex` is set to `True`.
     nonconvex : bool
         If `True`, a binary variable for the status of the investment is
-        created. This enables additional fix investment costs independent of
-        the invested flow capacity. Therefore, use the `offset`
+        created. This enables additional fix investment costs (*offset*)
+        independent of the invested flow capacity. Therefore, use the `offset`
         parameter.
-    offset : float
+    offset : float, :math:`c_{invest,fix}`
         Additional fix investment costs. Only applicable if `nonconvex` is set
         to `True`.
+
+
+    For the variables, constraints and parts of the objective function, which
+    are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
+    :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
 
     """
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
