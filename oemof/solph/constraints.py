@@ -172,9 +172,9 @@ def limit_active_flow_count(model, constraint_name, flows,
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    ================== ==== =====================================================
+    ================== ==== ===================================================
     math. symbol       type explanation
-    ================== ==== =====================================================
+    ================== ==== ===================================================
     :math:`X_n(t)`     V    status (0 or 1) of the flow :math:`n`
                             at time step :math:`t`
     :math:`N_{X,min}`  P    lower_limit
