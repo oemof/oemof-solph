@@ -133,21 +133,52 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
 def limit_active_flow_count(model, constraint_name, flows,
                             lower_limit=0, upper_limit=None):
-    """
+    r"""
     Set limits (lower and/or upper) for the number of concurrently
     active NonConvex flows. The flows are given as a list.
 
     Total actual counts after optimization can be retrieved
     calling the :attr:`om.oemof.solph.Model.$(constraint_name)_count()`.
 
-    :param model: oemof.solph.Model
-        Model to which constraints are added.
-    :param constraint_name: string
+    Parameters
+    ----------
+    model: oemof.solph.Model
+        Model to which constraints are added
+    constraint_name: string
         name for the constraint
-    :param flows: list of flows [(in, out)], have to be NonConvex
-    :param lower_limit: number (integer)
-    :param upper_limit: number (integer)
-    :return: the updated model
+    flows: list of flows
+        flows (have to be NonConvex) in the format [(in, out)]
+    lower_limit: integer
+        minimum number of active flows in the list
+    upper_limit: integer
+        maximum number of active flows in the list
+
+    Returns
+    -------
+    the updated model
+
+    Note
+    ----
+    Flow objects required to be NonConvex
+
+    **Constraint:**
+
+    .. math:: N_{X,min} \le \sum_{n \in F} X_n(t)
+                        \le N_{X,max} \forall t \in T
+
+    With `F` being the set of considered flows and
+    `T` being the set of time steps.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    ================== ==== =====================================================
+    math. symbol       type explanation
+    ================== ==== =====================================================
+    :math:`X_n(t)`     V    status (0 or 1) of the flow :math:`n`
+                            at time step :math:`t`
+    :math:`N_{X,min}`  P    lower_limit
+    :math:`N_{X,max}`  P    lower_limit
     """
 
     # number of concurrent active flows
@@ -178,17 +209,30 @@ def limit_active_flow_count(model, constraint_name, flows,
 
 def limit_active_flow_count_by_keyword(model, keyword,
                                        lower_limit=0, upper_limit=None):
-    """
+    r"""
     This wrapper for limit_active_flow_count allows to set limits
     to the count of concurrently active flows by using a keyword
     instead of a list. The constraint will be named $(keyword)_count.
 
-    :param model: oemof.solph.Model
-        Model to which constraints are added.
-    :param keyword: keyword to consider (in NonConvexFlows)
-    :param lower_limit: number (integer)
-    :param upper_limit: number (integer)
-    :return: the updated model
+    Parameters
+    ----------
+    model: oemof.solph.Model
+        Model to which constraints are added
+    keyword: string
+        keyword to consider (searches all NonConvexFlows)
+    lower_limit: integer
+        minimum number of active flows having the keyword
+    upper_limit: integer
+        maximum number of active flows having the keyword
+
+    Returns
+    -------
+    the updated model
+
+    See Also
+    --------
+    limit_active_flow_count(model, constraint_name, flows,
+                            lower_limit=0, upper_limit=None)
     """
     flows = []
     for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
