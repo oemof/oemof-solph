@@ -17,7 +17,7 @@ New features
     timeincrement.
 
 * Allows non-convex investments for flows and storages.
-    With this feature, a fix investment costs, which do not dependent on the
+    With this feature, fix investment costs, which do not dependent on the
     nominal capacity, can be considered.
 
 New components
