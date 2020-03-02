@@ -21,7 +21,7 @@ New components
 Documentation
 #############
 
-* something
+* Improved documentation of ExtractionTurbineCHP
 
 Known issues
 ############
@@ -48,3 +48,4 @@ Contributors
 
 * Uwe Krien
 * Patrik Schönfeldt
+* Jann Launer

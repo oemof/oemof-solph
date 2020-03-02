@@ -1225,7 +1225,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
                  {\eta_{el,woExtr}(t)} \\
             &
-            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b =
+               \dot Q_{th}(t) \cdot
                \frac{\eta_{el,maxExtr}(t)}
                  {\eta_{th,maxExtr}(t)}
 
@@ -1250,7 +1251,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     :math:`\beta`             :py:obj:`main_flow_loss_index[n, t]`                 P    power loss index
 
-    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation [n, t]` P    electric efficiency
+    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation[n, t]`  P    electric efficiency
                                                                                         without heat extraction
     :math:`\eta_{el,maxExtr}` :py:obj:`conversion_factors[main_output][n, t]`      P    electric efficiency
                                                                                         with max heat extraction
