@@ -10,7 +10,7 @@ API changes
 New features
 ############
 
-* something.
+* :class:`~oemof.solph.GenericStorage` can now have "fixed_losses", that are independent from storage content.
 
 New components
 ##############
