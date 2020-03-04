@@ -51,7 +51,7 @@ class Flow(on.Edge):
 
     Keyword arguments are used to set the attributes of this flow. Parameters
     which are handled specially are noted below.
-    For the case where a parameter can be either a scalar or a sequence, a
+    For the case where a parameter can be either a scalar or an iterable, a
     scalar value will be converted to a sequence containing the scalar value at
     every index. This sequence is then stored under the paramter's key.
 
@@ -61,12 +61,12 @@ class Flow(on.Edge):
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
-    max : numeric (sequence or scalar)
+    max : numeric (iterable or scalar)
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
-    min : numeric (sequence or scalar)
+    min : numeric (iterable or scalar)
         Nominal minimum value of the flow (see :attr:`max`).
-    actual_value : numeric (sequence or scalar)
+    actual_value : numeric (iterable or scalar)
         Specific value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
         set to :obj:`True` the flow variable will be fixed to :py:`actual_value
@@ -74,7 +74,7 @@ class Flow(on.Edge):
     positive_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
 
-         * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
+         * :py:`'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (:py:`flow[t-1] < flow[t]`) of
            two consecutive flow values.
          * :py:`'costs``: numeric (scalar or None), the gradient cost per
@@ -84,7 +84,7 @@ class Flow(on.Edge):
 
         A dictionary containing the following two keys:
 
-          * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
+          * :py:`'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (:py:`flow[t-1] > flow[t]`) of
             two consecutive flow values.
           * :py:`'costs``: numeric (scalar or None), the gradient cost per
@@ -95,7 +95,7 @@ class Flow(on.Edge):
         with the nominal_value to get the absolute limit.
     summed_min : numeric
         see above
-    variable_costs : numeric (sequence or scalar)
+    variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
@@ -232,7 +232,7 @@ class Transformer(on.Transformer):
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
         Keys are the connected bus objects.
-        The dictionary values can either be a scalar or a sequence with length
+        The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
 
     Examples

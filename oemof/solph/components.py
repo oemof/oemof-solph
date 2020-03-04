@@ -58,21 +58,21 @@ class GenericStorage(network.Transformer):
 
     initial_storage_level : numeric
         The content of the storage in the first time step of optimization.
-    balanced : boolian
+    balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
-    loss_rate : numeric (sequence or scalar)
-        The relative loss of the storage content per timeunit.
-    inflow_conversion_factor : numeric (sequence or scalar)
+    loss_rate : numeric (iterable or scalar)
+        The relative loss of the storage capacity per timeunit.
+    inflow_conversion_factor : numeric (iterable or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
-    outflow_conversion_factor : numeric (sequence or scalar)
+    outflow_conversion_factor : numeric (iterable or scalar)
         see: inflow_conversion_factor
-    min_storage_level : numeric (sequence or scalar)
+    min_storage_level : numeric (iterable or scalar)
         The minimum storaged energy of the storage as fraction of the
         nominal storage capacity (between 0 and 1).
         To set different values in every time step use a sequence.
-    max_storage_level : numeric (sequence or scalar)
+    max_storage_level : numeric (iterable or scalar)
         see: min_storage_level
     investment : :class:`oemof.solph.options.Investment` object
         Object indicating if a nominal_value of the flow is determined by
