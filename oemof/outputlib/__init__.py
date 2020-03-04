@@ -1,2 +1,2 @@
-from oemof.outputlib import processing
-from oemof.outputlib import views
+from . import processing
+from . import views

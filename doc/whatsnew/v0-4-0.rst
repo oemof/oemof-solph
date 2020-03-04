@@ -1,4 +1,4 @@
-v0.4.0 (January ??, 2020)
+v0.4.0 (April ??, 2020)
 +++++++++++++++++++++++++++
 
 
@@ -29,7 +29,7 @@ New components
 Documentation
 #############
 
-* something
+* Improved documentation of ExtractionTurbineCHP
 
 Known issues
 ############
@@ -60,4 +60,5 @@ Contributors
 
 * Caterina Köhl
 * Jonathan Amme
+* Uwe Krien
 * Jann Launer

@@ -63,6 +63,12 @@ class GenericStorage(network.Transformer):
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
         The relative loss of the storage content per time unit.
+    fixed_losses_relative : numeric (iterable or scalar)
+        Losses independent of state of charge between two consecutive
+        timesteps relative to nominal storage capacity.
+    fixed_losses_absolute : numeric (iterable or scalar)
+        Losses independent of state of charge and independent of
+        nominal storage capacity between two consecutive timesteps.
     inflow_conversion_factor : numeric (iterable or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -131,6 +137,10 @@ class GenericStorage(network.Transformer):
         self.initial_storage_level = kwargs.get('initial_storage_level')
         self.balanced = kwargs.get('balanced', True)
         self.loss_rate = solph_sequence(kwargs.get('loss_rate', 0))
+        self.fixed_losses_relative = solph_sequence(
+            kwargs.get('fixed_losses_relative', 0))
+        self.fixed_losses_absolute = solph_sequence(
+            kwargs.get('fixed_losses_absolute', 0))
         self.inflow_conversion_factor = solph_sequence(
             kwargs.get('inflow_conversion_factor', 1))
         self.outflow_conversion_factor = solph_sequence(
@@ -199,6 +209,13 @@ class GenericStorage(network.Transformer):
             e2 = ("Overdetermined. Three investment object will be coupled"
                   "with three constraints. Set one invest relation to 'None'.")
             raise AttributeError(e2)
+        if (self.investment and
+                sum(solph_sequence(self.fixed_losses_absolute)) != 0 and
+                self.investment.existing == 0 and
+                self.investment.minimum == 0):
+            e3 = ("With fixed_losses_absolute > 0, either investment.existing "
+                  "or investment.minimum has to be non-zero.")
+            raise AttributeError(e3)
 
         self._set_flows()
 
@@ -246,7 +263,9 @@ class GenericStorageBlock(SimpleBlock):
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
-            (1 - \delta(t))^{\tau(t)/(t_u)} \\
+            (1 - \beta(t)) ^{\tau(t)/(t_u)} \\
+            &- \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)}\\
+            &- \delta(t) \cdot {\tau(t)/(t_u)}\\
             &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -269,8 +288,17 @@ class GenericStorageBlock(SimpleBlock):
                                 initial time step
     :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
     :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
-    :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
-                                (e.g. leakage) per time
+    :math:`\beta(t)`            fraction of lost energy :py:obj:`loss_rate[t]`
+                                as share of
+                                :math:`E(t)`
+                                per time unit
+    :math:`\gamma(t)`           fixed loss of energy    :py:obj:`fixed_losses_relative[t]`
+                                relative to
+                                :math:`E_{nom}` per
+                                time unit
+    :math:`\delta(t)`           absolute fixed loss     :py:obj:`fixed_losses_absolute[t]`
+                                of energy per
+                                time unit
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
     :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
@@ -279,8 +307,10 @@ class GenericStorageBlock(SimpleBlock):
     :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
-    :math:`\tau(t)`             length of the time step
-    :math:`t_u`                 time unit of loss rate
+    :math:`\tau(t)`             duration of time step
+    :math:`t_u`                 time unit of losses
+                                :math:`\beta(t)`,
+                                :math:`\gamma(t)`
                                 :math:`\delta(t)` and
                                 timeincrement
                                 :math:`\tau(t)`
@@ -361,7 +391,10 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.storage_content[n, 0]
             expr += - block.init_content[n] * (
-                (1 - n.loss_rate[0]) ** m.timeincrement[0])
+                1 - n.loss_rate[0]) ** m.timeincrement[0]
+            expr += (n.fixed_losses_relative[0] * n.nominal_storage_capacity *
+                     m.timeincrement[0])
+            expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -378,7 +411,10 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.storage_content[n, t]
             expr += - block.storage_content[n, t-1] * (
-                (1 - n.loss_rate[t]) ** m.timeincrement[t])
+                1 - n.loss_rate[t]) ** m.timeincrement[t]
+            expr += (n.fixed_losses_relative[t] * n.nominal_storage_capacity *
+                     m.timeincrement[t])
+            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -585,7 +621,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.storage_content[n, 0]
             expr += - block.init_content[n] * (
-                    (1 - n.loss_rate[0]) ** m.timeincrement[0])
+                    1 - n.loss_rate[0]) ** m.timeincrement[0]
+            expr += (n.fixed_losses_relative[0] *
+                     (n.investment.existing + self.invest[n]) *
+                     m.timeincrement[0])
+            expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -603,7 +643,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.storage_content[n, t]
             expr += - block.storage_content[n, t - 1] * (
-                    (1 - n.loss_rate[t]) ** m.timeincrement[t])
+                    1 - n.loss_rate[t]) ** m.timeincrement[t]
+            expr += (n.fixed_losses_relative[t] *
+                     (n.investment.existing + self.invest[n]) *
+                     m.timeincrement[t])
+            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -1198,7 +1242,8 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
                  {\eta_{el,woExtr}(t)} \\
             &
-            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b =
+               \dot Q_{th}(t) \cdot
                \frac{\eta_{el,maxExtr}(t)}
                  {\eta_{th,maxExtr}(t)}
 
@@ -1223,7 +1268,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     :math:`\beta`             :py:obj:`main_flow_loss_index[n, t]`                 P    power loss index
 
-    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation [n, t]` P    electric efficiency
+    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation[n, t]`  P    electric efficiency
                                                                                         without heat extraction
     :math:`\eta_{el,maxExtr}` :py:obj:`conversion_factors[main_output][n, t]`      P    electric efficiency
                                                                                         with max heat extraction
