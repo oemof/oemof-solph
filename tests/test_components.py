@@ -96,17 +96,16 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
     value is set an AttributeError is raised because this may result in storage
     with zero capacity but fixed losses.
     """
-    msg = ("If an investment object is defined the invest variable replaces"
-           " the nominal_storage_capacity.")
+    msg = ("With fixed_losses_absolute > 0, either investment.existing or"
+           " investment.minimum has to be non-zero.")
     with tools.assert_raises_regexp(AttributeError, msg):
         bel = solph.Bus()
         solph.components.GenericStorage(
             label='storage4',
-            nominal_storage_capacity=45,
             inputs={bel: solph.Flow()},
             outputs={bel: solph.Flow()},
-            investment=solph.Investment(ep_costs=23),
-            fixed_losses_absolute=5,
+            investment=solph.Investment(ep_costs=23, minimum=0, existing=0),
+            fixed_losses_absolute=[0, 0, 4],
             )
 
 
