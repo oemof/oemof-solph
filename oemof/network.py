@@ -347,28 +347,16 @@ class Component(Node):
 class Sink(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.inputs:
-            msg = "`Sink` '{0}' constructed without `inputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
 
 class Source(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.outputs:
-            msg = "`Source` '{0}' constructed without `outputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
 
 class Transformer(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.inputs:
-            msg = "`Transformer` '{0}' constructed without `inputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
-        if not self.outputs:
-            msg = "`Transformer` '{0}' constructed without `outputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
