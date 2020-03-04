@@ -20,6 +20,19 @@ class SuspiciousUsageWarning(UserWarning):
     these cases. If you know what you are doing and these warnings point you to
     things you are doing intentionally, you can easily switch them off.
 
+        # switch on SuspiciousUsageWarning
+        warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+        # raise an error instead of a warning
+        warnings.filterwarnings("error", category=SuspiciousUsageWarning)
+
+        # switch off SuspiciousUsageWarning
+        warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
+
+    For more information about the handling of warnings see the
+    `warnings section <https://docs.python.org/3/library/warnings.html>`_ in
+    the python documentaion.
+
     Examples
     --------
     >>> import warnings
