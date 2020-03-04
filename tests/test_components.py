@@ -90,6 +90,26 @@ def test_generic_storage_with_old_parameters():
         )
 
 
+def test_generic_storage_with_invest_and_fixed_losses_absolute():
+    """
+    Storage with fixed losses in the investment mode but no minimum or existing
+    value is set an AttributeError is raised because this may result in storage
+    with zero capacity but fixed losses.
+    """
+    msg = ("If an investment object is defined the invest variable replaces"
+           " the nominal_storage_capacity.")
+    with tools.assert_raises_regexp(AttributeError, msg):
+        bel = solph.Bus()
+        solph.components.GenericStorage(
+            label='storage4',
+            nominal_storage_capacity=45,
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
+            investment=solph.Investment(ep_costs=23),
+            fixed_losses_absolute=5,
+            )
+
+
 # ********* OffsetTransformer *********
 
 def test_offsettransformer_wrong_flow_type():
