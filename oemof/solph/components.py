@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 """
 
 import numpy as np
-import warnings
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
@@ -59,28 +58,27 @@ class GenericStorage(network.Transformer):
 
     initial_storage_level : numeric
         The content of the storage in the first time step of optimization.
-    balanced : boolian
+    balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
-    loss_rate : numeric (sequence or scalar)
-        The relative loss of the storage capacity between two consecutive
-        timesteps.
-    fixed_losses_relative : numeric (sequence or scalar)
+    loss_rate : numeric (iterable or scalar)
+        The relative loss of the storage capacity per timeunit.
+    fixed_losses_relative : numeric (iterable or scalar)
         Losses independent of state of charge between two consecutive
         timesteps relative to nominal storage capacity.
-    fixed_losses_absolute : numeric (sequence or scalar)
+    fixed_losses_absolute : numeric (iterable or scalar)
         Losses independent of state of charge and independent of
         nominal storage capacity between two consecutive timesteps.
-    inflow_conversion_factor : numeric (sequence or scalar)
+    inflow_conversion_factor : numeric (iterable or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
-    outflow_conversion_factor : numeric (sequence or scalar)
+    outflow_conversion_factor : numeric (iterable or scalar)
         see: inflow_conversion_factor
-    min_storage_level : numeric (sequence or scalar)
+    min_storage_level : numeric (iterable or scalar)
         The minimum storaged energy of the storage as fraction of the
         nominal storage capacity (between 0 and 1).
         To set different values in every time step use a sequence.
-    max_storage_level : numeric (sequence or scalar)
+    max_storage_level : numeric (iterable or scalar)
         see: min_storage_level
     investment : :class:`oemof.solph.options.Investment` object
         Object indicating if a nominal_value of the flow is determined by
@@ -263,9 +261,9 @@ class GenericStorageBlock(SimpleBlock):
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
-            (1 - \beta(t)) \\
-            &- \gamma(t)\cdot E_{nom} \\
-            &- \delta(t) \\
+            (1 - \beta(t)) ^{\tau(t)/(t_u)} \\
+            &- \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)}\\
+            &- \delta(t) \cdot {\tau(t)/(t_u)}\\
             &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -291,14 +289,14 @@ class GenericStorageBlock(SimpleBlock):
     :math:`\beta(t)`            fraction of lost energy :py:obj:`loss_rate[t]`
                                 as share of
                                 :math:`E(t)`
-                                per timestep
+                                per time unit
     :math:`\gamma(t)`           fixed loss of energy    :py:obj:`fixed_losses_relative[t]`
                                 relative to
                                 :math:`E_{nom}` per
-                                timestep
+                                time unit
     :math:`\delta(t)`           absolute fixed loss     :py:obj:`fixed_losses_absolute[t]`
                                 of energy per
-                                timestep
+                                time unit
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
     :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
@@ -307,7 +305,13 @@ class GenericStorageBlock(SimpleBlock):
     :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
-    :math:`\tau(t)`             length of the time step
+    :math:`\tau(t)`             duration of time step
+    :math:`t_u`                 time unit of losses
+				:math:`\beta(t)`,
+				:math:`\gamma(t)`
+                                :math:`\delta(t)` and
+                                timeincrement
+                                :math:`\tau(t)`
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
@@ -385,9 +389,9 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
-                1 - n.loss_rate[0])
-            expr += n.fixed_losses_relative[0] * n.nominal_storage_capacity
-            expr += n.fixed_losses_absolute[0]
+                1 - n.loss_rate[0]) ** m.timeincrement[0]
+            expr += n.fixed_losses_relative[0] * n.nominal_storage_capacity * m.timeincrement[0]
+            expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -404,9 +408,9 @@ class GenericStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t-1] * (
-                1 - n.loss_rate[t])
-            expr += n.fixed_losses_relative[t] * n.nominal_storage_capacity
-            expr += n.fixed_losses_absolute[t]
+                1 - n.loss_rate[t]) ** m.timeincrement[t]
+            expr += n.fixed_losses_relative[t] * n.nominal_storage_capacity * m.timeincrement[t]
+            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -612,9 +616,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, 0]
             expr += - block.init_cap[n] * (
-                    1 - n.loss_rate[0])
-            expr += n.fixed_losses_relative[0] * (n.investment.existing + self.invest[n])
-            expr += n.fixed_losses_absolute[0]
+                    1 - n.loss_rate[0]) ** m.timeincrement[0]
+            expr += n.fixed_losses_relative[0] * (n.investment.existing + self.invest[n]) * m.timeincrement[0]
+            expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
             expr += (m.flow[n, o[n], 0] /
@@ -632,9 +636,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             expr = 0
             expr += block.capacity[n, t]
             expr += - block.capacity[n, t - 1] * (
-                    1 - n.loss_rate[t])
-            expr += n.fixed_losses_relative[t] * (n.investment.existing + self.invest[n])
-            expr += n.fixed_losses_absolute[t]
+                    1 - n.loss_rate[t]) ** m.timeincrement[t]
+            expr += n.fixed_losses_relative[t] * (n.investment.existing + self.invest[n]) * m.timeincrement[t]
+            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (- m.flow[i[n], n, t] *
                      n.inflow_conversion_factor[t]) * m.timeincrement[t]
             expr += (m.flow[n, o[n], t] /
@@ -1231,7 +1235,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                  {\eta_{th,maxExtr}(t)}
 
     where :math:`\beta` is defined as:
-    
+
          .. math::
             \beta(t) = \frac{\eta_{el,woExtr}(t) - \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 

@@ -7,7 +7,6 @@ available from its original location oemof/oemof/solph/models.py
 
 SPDX-License-Identifier: MIT
 """
-
 import pyomo.environ as po
 from pyomo.opt import SolverFactory
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -31,7 +30,7 @@ class BaseModel(po.ConcreteModel):
         Defaults to :const:`Model.CONSTRAINTS`
     objective_weighting : array like (optional)
         Weights used for temporal objective function
-        expressions. If nothing is passed `timeincrement` will be used which 
+        expressions. If nothing is passed `timeincrement` will be used which
         is calculated from the freq length of the energy system timeindex .
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
@@ -65,8 +64,8 @@ class BaseModel(po.ConcreteModel):
 
         self.name = kwargs.get('name', type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(kwargs.get('timeincrement', None))
-
+        self.timeincrement = sequence(kwargs.get('timeincrement',
+                                      self.es.timeincrement))
         if self.timeincrement[0] is None:
             try:
                 self.timeincrement = sequence(

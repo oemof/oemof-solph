@@ -1,5 +1,5 @@
-v0.3.3 (January 12, 2020)
-++++++++++++++++++++++++++
+v0.4.0 (April ??, 2020)
++++++++++++++++++++++++++++
 
 
 API changes
@@ -10,7 +10,11 @@ API changes
 New features
 ############
 
-* something.
+* Allows having a non equidistant timeindex. By adding the
+    calculate_timeincrement function to tools/helpers.py a non
+    equidistant timeincrement can be calculated. The EnergySystem
+    will now be defined by the timeindex and the calculated
+    timeincrement.
 
 New components
 ##############
@@ -40,10 +44,16 @@ Testing
 Other changes
 #############
 
-* something
+* The ``loss_rate`` of :class:`~oemof.solph.components.GenericStorage`
+    is now defined per time increment.
+* The parameters' data type in the docstrings is changed from
+  `numeric (sequence or scalar)` to `numeric (iterable or scalar)`
+  (`Issue #673 <https://github.com/oemof/oemof/issues/673>`_).
 
 Contributors
 ############
 
+* Caterina Köhl
+* Jonathan Amme
 * Uwe Krien
 * Jann Launer
