@@ -253,9 +253,9 @@ class TestParameterResult:
 
     def test_node_weight_by_type(self):
         results = processing.results(self.om)
-        capacity = views.node_weight_by_type(
+        storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage)
-        eq_(int(float(capacity.sum()) * pow(10, 6)) / pow(10, 6),
+        eq_(round(float(storage_content.sum()), 6),
             1437.500003)
 
     def test_output_by_type_view(self):
