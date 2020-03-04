@@ -62,7 +62,7 @@ class GenericStorage(network.Transformer):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage capacity per timeunit.
+        The relative loss of the storage content per time unit.
     inflow_conversion_factor : numeric (iterable or scalar)
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
