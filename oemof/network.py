@@ -281,7 +281,7 @@ class Edge(Node):
             input.outputs[output] = self
 
     @classmethod
-    def from_object(klass, o):
+    def from_object(cls, o):
         """ Creates an `Edge` instance from a single object.
 
         This method inspects its argument and does something different
@@ -289,14 +289,14 @@ class Edge(Node):
 
           * If `o` is an instance of `Edge`, `o` is returned unchanged.
           * If `o` is a `Mapping`, the instance is created by calling
-            `klass(**o)`,
+            `cls(**o)`,
           * In all other cases, `o` will be used as the `values` keyword
             argument to `Edge`s constructor.
         """
         if isinstance(o, Edge):
             return o
         elif isinstance(o, Mapping):
-            return klass(**o)
+            return cls(**o)
         else:
             return Edge(values=o)
 
