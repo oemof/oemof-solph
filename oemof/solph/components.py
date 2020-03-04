@@ -479,7 +479,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           (InvestmentFlow.invest(n, target(n)) + existing) *
           invest\_relation\_input_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
-    # TODO:
+
     Maximum storage content.
         .. math:: E(n, t) \leq invest(n) \cdot c_{max}(n, t), \\
             \forall n \in \textrm{INVESTSTORAGES,} \\
@@ -489,7 +489,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
-    # end TODO.
 
     **The following parts of the objective function are created:**
 
