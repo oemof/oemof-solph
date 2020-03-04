@@ -326,28 +326,28 @@ class GenericStorageBlock(SimpleBlock):
 
         #  ************* VARIABLES *****************************
 
-        def _storage_capacity_bound_rule(block, n, t):
-            """Rule definition for bounds of capacity variable of storage n
-            in timestep t
+        def _storage_content_bound_rule(block, n, t):
+            """Rule definition for bounds of storage_content variable of
+            storage n in timestep t
             """
             bounds = (n.nominal_storage_capacity * n.min_storage_level[t],
                       n.nominal_storage_capacity * n.max_storage_level[t])
             return bounds
         self.storage_content = Var(self.STORAGES, m.TIMESTEPS,
-                            bounds=_storage_capacity_bound_rule)
+                            bounds=_storage_content_bound_rule)
 
-        def _storage_init_capacity_bound_rule(block, n):
+        def _storage_init_content_bound_rule(block, n):
             return 0, n.nominal_storage_capacity
 
-        self.init_cap = Var(self.STORAGES, within=NonNegativeReals,
-                            bounds=_storage_init_capacity_bound_rule)
+        self.init_content = Var(self.STORAGES, within=NonNegativeReals,
+                            bounds=_storage_init_content_bound_rule)
 
         # set the initial storage content
         for n in group:
             if n.initial_storage_level is not None:
-                self.init_cap[n] = (n.initial_storage_level *
+                self.init_content[n] = (n.initial_storage_level *
                                     n.nominal_storage_capacity)
-                self.init_cap[n].fix()
+                self.init_content[n].fix()
 
         #  ************* Constraints ***************************
 
@@ -360,7 +360,7 @@ class GenericStorageBlock(SimpleBlock):
             """
             expr = 0
             expr += block.storage_content[n, 0]
-            expr += - block.init_cap[n] * (
+            expr += - block.init_content[n] * (
                 (1 - n.loss_rate[0]) ** m.timeincrement[0])
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
@@ -391,7 +391,7 @@ class GenericStorageBlock(SimpleBlock):
             """storage content of last time step == initial storage content
             if balanced
             """
-            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_content[n]
         self.balanced_cstr = Constraint(self.STORAGES_BALANCED,
                                       rule=_balanced_storage_rule)
 
@@ -480,12 +480,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           invest\_relation\_input_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
     # TODO:
-    Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
-            \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
+    Maximum storage content.
+        .. math:: E(n, t) \leq invest(n) \cdot c_{max}(n, t), \\
+            \forall n \in \textrm{INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
 
-    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+    Minimum storage content.
         .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
@@ -526,10 +526,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.INVESTSTORAGES_BALANCED = Set(initialize=[
             n for n in group if n.balanced is True])
 
-        self.INVESTSTORAGES_NO_INIT_CAP = Set(initialize=[
+        self.INVESTSTORAGES_NO_INIT_CONTENT = Set(initialize=[
             n for n in group if n.initial_storage_level is None])
 
-        self.INVESTSTORAGES_INIT_CAP = Set(initialize=[
+        self.INVESTSTORAGES_INIT_CONTENT = Set(initialize=[
             n for n in group if n.initial_storage_level is not None])
 
         self.INVEST_REL_CAP_IN = Set(initialize=[
@@ -541,7 +541,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.INVEST_REL_IN_OUT = Set(initialize=[
             n for n in group if n.invest_relation_input_output is not None])
 
-        # The capacity is set as a non-negative variable, therefore it makes no
+        # The storage content is a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
         # for all time steps.
         self.MIN_INVESTSTORAGES = Set(
@@ -559,18 +559,18 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.invest = Var(self.INVESTSTORAGES, within=NonNegativeReals,
                           bounds=_storage_investvar_bound_rule)
 
-        self.init_cap = Var(self.INVESTSTORAGES, within=NonNegativeReals)
+        self.init_content = Var(self.INVESTSTORAGES, within=NonNegativeReals)
 
-        def _inv_storage_init_cap_max_rule(block, n):
-            return block.init_cap[n] <= n.investment.existing + block.invest[n]
-        self.init_cap_limit = Constraint(self.INVESTSTORAGES_NO_INIT_CAP,
-                                         rule=_inv_storage_init_cap_max_rule)
+        def _inv_storage_init_content_max_rule(block, n):
+            return block.init_content[n] <= n.investment.existing + block.invest[n]
+        self.init_content_limit = Constraint(self.INVESTSTORAGES_NO_INIT_CONTENT,
+                                         rule=_inv_storage_init_content_max_rule)
 
-        def _inv_storage_init_cap_fix_rule(block, n):
-            return block.init_cap[n] == n.initial_storage_level * (
+        def _inv_storage_init_content_fix_rule(block, n):
+            return block.init_content[n] == n.initial_storage_level * (
                     n.investment.existing + block.invest[n])
-        self.init_cap_fix = Constraint(self.INVESTSTORAGES_INIT_CAP,
-                                       rule=_inv_storage_init_cap_fix_rule)
+        self.init_content_fix = Constraint(self.INVESTSTORAGES_INIT_CONTENT,
+                                       rule=_inv_storage_init_content_fix_rule)
 
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
@@ -585,7 +585,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             expr = 0
             expr += block.storage_content[n, 0]
-            expr += - block.init_cap[n] * (
+            expr += - block.init_content[n] * (
                     (1 - n.loss_rate[0]) ** m.timeincrement[0])
             expr += (- m.flow[i[n], n, 0] *
                      n.inflow_conversion_factor[0]) * m.timeincrement[0]
@@ -615,7 +615,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
         def _balanced_storage_rule(block, n):
-            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_content[n]
         self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
                                       rule=_balanced_storage_rule)
 
@@ -659,27 +659,31 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             self.INVEST_REL_CAP_OUT,
             rule=_storage_capacity_outflow_invest_rule)
 
-        def _max_capacity_invest_rule(block, n, t):
-            """Rule definition for upper bound constraint for the storage cap.
+        def _max_storage_content_invest_rule(block, n, t):
+            """Rule definition for upper bound constraint for the
+            storage content.
             """
             expr = (self.storage_content[n, t] <=
                     (n.investment.existing + self.invest[n]) *
                     n.max_storage_level[t])
             return expr
-        self.max_capacity = Constraint(
-            self.INVESTSTORAGES, m.TIMESTEPS, rule=_max_capacity_invest_rule)
+        self.max_storage_content = Constraint(
+            self.INVESTSTORAGES, m.TIMESTEPS,
+            rule=_max_storage_content_invest_rule
+        )
 
-        def _min_capacity_invest_rule(block, n, t):
-            """Rule definition of lower bound constraint for the storage cap.
+        def _min_storage_content_invest_rule(block, n, t):
+            """Rule definition of lower bound constraint for the
+            storage content.
             """
             expr = (self.storage_content[n, t] >=
                     (n.investment.existing + self.invest[n]) *
                     n.min_storage_level[t])
             return expr
-        # Set the lower bound of the storage capacity if the attribute exists
-        self.min_capacity = Constraint(
+        # Set the lower bound of the storage content if the attribute exists
+        self.min_storage_content = Constraint(
             self.MIN_INVESTSTORAGES, m.TIMESTEPS,
-            rule=_min_capacity_invest_rule)
+            rule=_min_storage_content_invest_rule)
 
     def _objective_expression(self):
         """Objective expression with fixed and investement costs."""

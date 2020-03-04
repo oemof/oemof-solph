@@ -22,7 +22,7 @@ c_e_Bus_balance(electricityBus_2)_:
 = 0
 
 c_e_GenericStorageBlock_balance_first(storage1)_:
--1 GenericStorageBlock_init_cap(storage1)
+-1 GenericStorageBlock_init_content(storage1)
 +1 GenericStorageBlock_storage_content(storage1_0)
 -1 flow(electricityBus_storage1_0)
 +1 flow(storage1_electricityBus_0)
@@ -55,5 +55,5 @@ bounds
    0 <= GenericStorageBlock_storage_content(storage1_0) <= 1111
    0 <= GenericStorageBlock_storage_content(storage1_1) <= 1111
    0 <= GenericStorageBlock_storage_content(storage1_2) <= 1111
-   0 <= GenericStorageBlock_init_cap(storage1) <= 1111
+   0 <= GenericStorageBlock_init_content(storage1) <= 1111
 end

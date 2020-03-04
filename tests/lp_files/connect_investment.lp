@@ -99,13 +99,13 @@ c_u_InvestmentFlow_max(storage_constraint_Bus1_2)_:
 +1 flow(storage_constraint_Bus1_2)
 <= 0
 
-c_u_GenericInvestmentStorageBlock_init_cap_limit(storage_constraint)_:
-+1 GenericInvestmentStorageBlock_init_cap(storage_constraint)
+c_u_GenericInvestmentStorageBlock_init_content_limit(storage_constraint)_:
++1 GenericInvestmentStorageBlock_init_content(storage_constraint)
 -1 GenericInvestmentStorageBlock_invest(storage_constraint)
 <= 0
 
 c_e_GenericInvestmentStorageBlock_balance_first(storage_constraint)_:
--1 GenericInvestmentStorageBlock_init_cap(storage_constraint)
+-1 GenericInvestmentStorageBlock_init_content(storage_constraint)
 +1 GenericInvestmentStorageBlock_storage_content(storage_constraint_0)
 -1 flow(Bus1_storage_constraint_0)
 +1 flow(storage_constraint_Bus1_0)
@@ -126,7 +126,7 @@ c_e_GenericInvestmentStorageBlock_balance(storage_constraint_2)_:
 = 0
 
 c_e_GenericInvestmentStorageBlock_balanced_cstr(storage_constraint)_:
--1 GenericInvestmentStorageBlock_init_cap(storage_constraint)
+-1 GenericInvestmentStorageBlock_init_content(storage_constraint)
 +1 GenericInvestmentStorageBlock_storage_content(storage_constraint_2)
 = 0
 
@@ -140,17 +140,17 @@ c_e_GenericInvestmentStorageBlock_storage_capacity_outflow(storage_constraint)_:
 +1 InvestmentFlow_invest(storage_constraint_Bus1)
 = 0
 
-c_u_GenericInvestmentStorageBlock_max_capacity(storage_constraint_0)_:
+c_u_GenericInvestmentStorageBlock_max_storage_content(storage_constraint_0)_:
 -1 GenericInvestmentStorageBlock_invest(storage_constraint)
 +1 GenericInvestmentStorageBlock_storage_content(storage_constraint_0)
 <= 0
 
-c_u_GenericInvestmentStorageBlock_max_capacity(storage_constraint_1)_:
+c_u_GenericInvestmentStorageBlock_max_storage_content(storage_constraint_1)_:
 -1 GenericInvestmentStorageBlock_invest(storage_constraint)
 +1 GenericInvestmentStorageBlock_storage_content(storage_constraint_1)
 <= 0
 
-c_u_GenericInvestmentStorageBlock_max_capacity(storage_constraint_2)_:
+c_u_GenericInvestmentStorageBlock_max_storage_content(storage_constraint_2)_:
 -1 GenericInvestmentStorageBlock_invest(storage_constraint)
 +1 GenericInvestmentStorageBlock_storage_content(storage_constraint_2)
 <= 0
@@ -179,5 +179,5 @@ bounds
    0 <= GenericInvestmentStorageBlock_storage_content(storage_constraint_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_constraint_2) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage_constraint) <= +inf
-   0 <= GenericInvestmentStorageBlock_init_cap(storage_constraint) <= +inf
+   0 <= GenericInvestmentStorageBlock_init_content(storage_constraint) <= +inf
 end
