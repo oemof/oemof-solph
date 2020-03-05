@@ -74,4 +74,4 @@ annoying. Therefore, it is possible to control the appearance of this warning.
 
 For more information about the handling of warnings see the
 `warnings section <https://docs.python.org/3/library/warnings.html>`_ in the
-python documentaion.
+python documentation.
