@@ -20,6 +20,23 @@ You can test it by executing one of the existing examples. Be aware that the exa
 
 Once the example work you are close to your first energy model.
 
+
+Handling of Warnings
+^^^^^^^^^^^^^^^^^^^^
+
+The solph library is designed to be as generic as possible to make it possible
+to use it in different use cases. This concept makes it difficult to raise
+Error or Warnings because sometimes untypical combinations of parameters are
+allowed even though they might be wrong in over 99% of the use cases.
+
+Therefore, a SuspiciousUsageWarning was introduced. This warning will warn you
+if you do something untypical. If you are sure that you know what you are doing
+you can switch the warning off.
+
+See :ref:`oemof_tools_debugging_suspicioususagewarningsolph_label` for more
+information.
+
+
 Set up an energy system
 ^^^^^^^^^^^^^^^^^^^^^^^
 

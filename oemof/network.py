@@ -17,6 +17,7 @@ from collections import (namedtuple as NT, Mapping, MutableMapping as MM,
 from contextlib import contextmanager
 from functools import total_ordering
 
+
 # TODO:
 #
 #   * Only allow setting a Node's label if `_delay_registration_` is active
@@ -179,7 +180,7 @@ class Node:
         """
 
     def register(self):
-        if (    __class__.registry is not None and
+        if (__class__.registry is not None and
                 not getattr(self, "_delay_registration_", False)):
             __class__.registry.add(self)
 
@@ -229,7 +230,8 @@ class Node:
         Dictionary mapping output :class:`Nodes <Node>` :obj:`n` to
         :class:`Edges` from :obj:`self` into :obj:`n`.
         If :obj:`self` is an :class:`Edge`, returns a dict containing the
-        :class:`Edge`'s single output node as the key and the flow as the value.
+        :class:`Edge`'s single output node as the key and the flow as the
+        value.
         """
         return self._outputs
 
@@ -238,7 +240,9 @@ EdgeLabel = NT("EdgeLabel", ['input', 'output'])
 
 
 class Edge(Node):
-    """ :class:`Bus`es/:class:`Component`s are always connected by an :class:`Edge`.
+    """
+    :class:`Bus`es/:class:`Component`s are always connected by an
+    :class:`Edge`.
 
     :class:`Edge`s connect a single non-:class:`Edge` Node with another. They
     are directed and have a (sequence of) value(s) attached to them so they can
@@ -256,8 +260,9 @@ class Edge(Node):
     name.
     """
     Label = EdgeLabel
+
     def __init__(self, input=None, output=None, flow=None, values=None,
-            **kwargs):
+                 **kwargs):
         if flow is not None and values is not None:
             raise ValueError(
                     "\n\n`Edge`'s `flow` and `values` keyword arguments are "
@@ -274,7 +279,7 @@ class Edge(Node):
             input.outputs[output] = self
 
     @classmethod
-    def from_object(klass, o):
+    def from_object(cls, o):
         """ Creates an `Edge` instance from a single object.
 
         This method inspects its argument and does something different
@@ -282,14 +287,14 @@ class Edge(Node):
 
           * If `o` is an instance of `Edge`, `o` is returned unchanged.
           * If `o` is a `Mapping`, the instance is created by calling
-            `klass(**o)`,
+            `cls(**o)`,
           * In all other cases, `o` will be used as the `values` keyword
             argument to `Edge`s constructor.
         """
         if isinstance(o, Edge):
             return o
         elif isinstance(o, Mapping):
-            return klass(**o)
+            return cls(**o)
         else:
             return Edge(values=o)
 
@@ -338,15 +343,18 @@ class Component(Node):
 
 
 class Sink(Component):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class Source(Component):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class Transformer(Component):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 # TODO: Adhere to PEP 0257 by listing the exported classes with a short
@@ -422,7 +430,8 @@ class Entity:
 
 @contextmanager
 def registry_changed_to(r):
-    """ Override registry during execution of a block and restore it afterwards.
+    """
+    Override registry during execution of a block and restore it afterwards.
     """
     backup = Node.registry
     Node.registry = r
