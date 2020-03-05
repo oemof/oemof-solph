@@ -507,7 +507,7 @@ GenericStorage (component)
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the ``nominal_storage_capacity`` in the Flow objects.
+To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a loss rate can be defined.
 
 .. code-block:: python
