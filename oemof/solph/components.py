@@ -334,7 +334,7 @@ class GenericStorageBlock(SimpleBlock):
                       n.nominal_storage_capacity * n.max_storage_level[t])
             return bounds
         self.storage_content = Var(self.STORAGES, m.TIMESTEPS,
-                            bounds=_storage_capacity_bound_rule)
+                                   bounds=_storage_capacity_bound_rule)
 
         def _storage_init_capacity_bound_rule(block, n):
             return 0, n.nominal_storage_capacity
@@ -391,9 +391,10 @@ class GenericStorageBlock(SimpleBlock):
             """storage content of last time step == initial storage content
             if balanced
             """
-            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_cap[n]
+            return (block.storage_content[n, m.TIMESTEPS[-1]]
+                    == block.init_cap[n])
         self.balanced_cstr = Constraint(self.STORAGES_BALANCED,
-                                      rule=_balanced_storage_rule)
+                                        rule=_balanced_storage_rule)
 
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
@@ -550,7 +551,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         # ######################### Variables  ################################
         self.storage_content = Var(self.INVESTSTORAGES, m.TIMESTEPS,
-                            within=NonNegativeReals)
+                                   within=NonNegativeReals)
 
         def _storage_investvar_bound_rule(block, n):
             """Rule definition to bound the invested storage capacity `invest`.
@@ -617,7 +618,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _balanced_storage_rule(block, n):
             return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_cap[n]
         self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
-                                      rule=_balanced_storage_rule)
+                                        rule=_balanced_storage_rule)
 
         def _power_coupled(block, n):
             """Rule definition for constraint to connect the input power
