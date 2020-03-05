@@ -80,6 +80,6 @@ def test_that_the_transformer_warnings_actually_get_raised():
     msg = "`Transformer` 'no output' constructed without `outputs`."
     with warnings.catch_warnings(record=True) as w:
         solph.Transformer(label='no output',
-                            inputs={look_out: "No outputs!"})
+                          inputs={look_out: "No outputs!"})
         ok_(len(w) == 1)
         eq_(msg, str(w[-1].message))
