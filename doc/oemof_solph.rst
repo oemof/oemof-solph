@@ -33,21 +33,8 @@ Therefore, a SuspiciousUsageWarning was introduced. This warning will warn you
 if you do something untypical. If you are sure that you know what you are doing
 you can switch the warning off.
 
-
-.. code-block:: python
-
-    # switch on SuspiciousUsageWarning
-    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
-
-    # raise an error instead of a warning
-    warnings.filterwarnings("error", category=SuspiciousUsageWarning)
-
-    # switch off SuspiciousUsageWarning
-    warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
-
-For more information about the handling of warnings see the
-`warnings section <https://docs.python.org/3/library/warnings.html>`_ in the
-python documentaion.
+See :ref:`oemof_tools_debugging_suspicioususagewarningsolph_label` for more
+information.
 
 
 Set up an energy system
