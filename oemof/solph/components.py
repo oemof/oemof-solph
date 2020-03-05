@@ -370,7 +370,7 @@ class GenericStorageBlock(SimpleBlock):
             return 0, n.nominal_storage_capacity
 
         self.init_content = Var(self.STORAGES, within=NonNegativeReals,
-                            bounds=_storage_init_content_bound_rule)
+                                bounds=_storage_init_content_bound_rule)
 
         # set the initial storage content
         for n in group:
@@ -598,15 +598,18 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.init_content = Var(self.INVESTSTORAGES, within=NonNegativeReals)
 
         def _inv_storage_init_content_max_rule(block, n):
-            return block.init_content[n] <= n.investment.existing + block.invest[n]
-        self.init_content_limit = Constraint(self.INVESTSTORAGES_NO_INIT_CONTENT,
-                                         rule=_inv_storage_init_content_max_rule)
+            return (block.init_content[n]
+                    <= n.investment.existing + block.invest[n])
+        self.init_content_limit = Constraint(
+            self.INVESTSTORAGES_NO_INIT_CONTENT,
+            rule=_inv_storage_init_content_max_rule)
 
         def _inv_storage_init_content_fix_rule(block, n):
             return block.init_content[n] == n.initial_storage_level * (
                     n.investment.existing + block.invest[n])
-        self.init_content_fix = Constraint(self.INVESTSTORAGES_INIT_CONTENT,
-                                       rule=_inv_storage_init_content_fix_rule)
+        self.init_content_fix = Constraint(
+            self.INVESTSTORAGES_INIT_CONTENT,
+            rule=_inv_storage_init_content_fix_rule)
 
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
@@ -659,7 +662,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                   rule=_storage_balance_rule)
 
         def _balanced_storage_rule(block, n):
-            return block.storage_content[n, m.TIMESTEPS[-1]] == block.init_content[n]
+            return (block.storage_content[n, m.TIMESTEPS[-1]]
+                    == block.init_content[n])
         self.balanced_cstr = Constraint(self.INVESTSTORAGES_BALANCED,
                                         rule=_balanced_storage_rule)
 
