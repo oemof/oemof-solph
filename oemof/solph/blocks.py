@@ -278,12 +278,12 @@ class InvestmentFlow(SimpleBlock):
     Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
     of the decision variable :math:`F_{invest}` are different:\
 
-        :attr:`nonconvex = False`
+        * :attr:`nonconvex = False`
 
         .. math::
             F_{invest, min} \le F_{invest} \le F_{invest, max}
 
-        :attr:`nonconvex = True`
+        * :attr:`nonconvex = True`
 
         .. math::
             &
@@ -295,21 +295,21 @@ class InvestmentFlow(SimpleBlock):
     the following additional constraints are created, if the appropriate
     attribute of the :class:`.solph.Flow` is set:
 
-        :attr:`fixed=True`
+        * :attr:`fixed=True`
 
             Actual value constraint for investments with fixed flow values
 
         .. math::
             F(t) = ( F_{invest} + F_{exist} ) \cdot f_{actual}(t)
 
-        :attr:`min != 0`
+        * :attr:`min != 0`
 
             Lower bound for the flow values
 
         .. math::
             F(t) \geq ( F_{invest} + F_{exist} ) \cdot f_{min}(t)
 
-        :attr:`summed_max not None`
+        * :attr:`summed_max not None`
 
             Upper bound for the sum of all flow values (e.g. maximum full load
             hours)
@@ -318,7 +318,7 @@ class InvestmentFlow(SimpleBlock):
             \sum_t F(t) \cdot \tau(t) \leq ( F_{invest} + F_{exist} )
             \cdot f_{sum, min}
 
-        :attr:`summed_min not None`
+        * :attr:`summed_min not None`
 
             Lower bound for the sum of all flow values (e.g. minimum full load
             hours)
@@ -334,12 +334,12 @@ class InvestmentFlow(SimpleBlock):
     also depends on whether a convex or nonconvex
     investment flow is selected:
 
-        :attr:`nonconvex = False`
+        * :attr:`nonconvex = False`
 
             .. math::
                 C_{invest} = F_{invest} \cdot c_{invest,var}
 
-        :attr:`nonconvex = True`
+        * :attr:`nonconvex = True`
 
             .. math::
                 C_{invest} = F_{invest} \cdot c_{invest,var}
