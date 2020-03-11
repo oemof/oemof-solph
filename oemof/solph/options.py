@@ -15,14 +15,14 @@ class Investment:
     """
     Parameters
     ----------
-    maximum : float, :math:`F_{invest,max}`
+    maximum : float
         Maximum of the additional invested capacity
-    minimum : float, :math:`F_{invest,min}`
+    minimum : float
         Minimum of the additional invested capacity. If `nonconvex` is `True`,
         `minimum` defines the threshold for the invested capacity.
-    ep_costs : float, :math:`c_{invest,var}`
+    ep_costs : float
         Equivalent periodical costs for the investment per flow capacity.
-    existing : float, :math:`F_{exist}`
+    existing : float
         Existing / installed capacity. The invested capacity is added on top
         of this value. Not applicable if `nonconvex` is set to `True`.
     nonconvex : bool
@@ -30,7 +30,7 @@ class Investment:
         created. This enables additional fix investment costs (*offset*)
         independent of the invested flow capacity. Therefore, use the `offset`
         parameter.
-    offset : float, :math:`c_{invest,fix}`
+    offset : float
         Additional fix investment costs. Only applicable if `nonconvex` is set
         to `True`.
 
