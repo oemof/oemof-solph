@@ -598,7 +598,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         ":math:`E(t)`", ":attr:`capacity[n, t]`", "Actual storage content (absolute storage level)"
         ":math:`E_{invest}`", ":attr:`invest[n, t]`", "Nominal capacity of the storage"
         ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity (before timestep 0)"
-        ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable for the status of the investment status"
+        ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable for the status of investment"
         ":math:`\dot{E}_{in,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "Nominal value of inflow (Investmentflow)"
         ":math:`\dot{E}_{out,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "Nominal value of outflow (Investmentflow)"
 
