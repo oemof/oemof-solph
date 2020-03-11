@@ -454,72 +454,95 @@ class GenericStorageBlock(SimpleBlock):
 
 
 class GenericInvestmentStorageBlock(SimpleBlock):
-    r"""Storage with an :class:`.Investment` object.
-
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    INVESTSTORAGES
-        A set with all storages containing an Investment object.
-    INVEST_REL_CAP_IN
-        A set with all storages containing an Investment object with coupled
-        investment of input power and storage capacity
-    INVEST_REL_CAP_OUT
-        A set with all storages containing an Investment object with coupled
-        investment of output power and storage capacity
-    INVEST_REL_IN_OUT
-        A set with all storages containing an Investment object with coupled
-        investment of input and output power
-    INITIAL_STORAGE_LEVEL
-        A subset of the set INVESTSTORAGES where elements of the set have an
-        initial_storage_level attribute.
-    MIN_INVESTSTORAGES
-        A subset of INVESTSTORAGES where elements of the set have an
-        min_storage_level attribute greater than zero for at least one
-        time step.
+    r"""Block for all storages with :attr:`Investment` being not None.
+    See :class:`oemof.solph.options.Investment` for all parameters of the
+    Investment class.
 
     **The following variables are created:**
 
-    capacity :attr:`om.InvestmentStorage.capacity[n, t]`
-        Level of the storage (indexed by STORAGES and TIMESTEPS)
+    * :attr:`om.InvestmentStorage.capacity[n, t]` - :math:`E(t)`
 
-    invest :attr:`om.InvestmentStorage.invest[n, t]`
-        Nominal capacity of the storage (indexed by STORAGES)
+        Energy currently stored / Level of the storage.
 
+    * :attr:`om.InvestmentStorage.invest[n, t]` - :math:`E_{invest}`
+
+        Nominal capacity of the storage.
 
     **The following constraints are build:**
 
-    Storage balance
-        Same as for :class:`.GenericStorageBlock`.
+    All investment storages are indexed by :py:obj:`[n]`, which is omitted
+    in the following equations for the sake of convenience.
 
+    The following constraints are created for all investment storages:
 
-    Initial capacity of :class:`.network.Storage`
+        Storage balance
+
+            Same as for :class:`.GenericStorageBlock`.
+
+    Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
+    of the decision variable :math:`E_{invest}` are different:\
+
+        :attr:`nonconvex = False`
+
         .. math::
-          E(n, -1) = invest(n) \cdot c(n, -1), \\
-          \forall n \in \textrm{INITIAL\_STORAGE\_LEVEL}.
+            E_{invest, min} \le E_{invest} \le E_{invest, max}
 
-    Connect the invest variables of the storage and the input flow.
+        :attr:`nonconvex = True`
+
+        .. math::
+            &
+            E_{invest, min} \cdot b_{invest} \le E_{invest}\\
+            &
+            E_{invest} \le E_{invest, max} \cdot b_{invest}\\
+
+    The following constraints are created depending on the values of the
+    attributes:
+
+        :attr:`initial_storage_level != None`
+
+            A initial value for the storage content is given
+
+        .. math::
+               E(-1) = (E_{invest} + E_{exist}) \cdot c(-1)
+
+        :attr:`balanced=True`
+
+            The energy content of storage of the first and the last timestep
+            are set equal
+
+        .. math::
+            E(-1) = E(t_{last})
+
+
+        Further constraints :attr:`not sure yet`
+
+            Connect the invest variables of the storage and the input flow
+
         .. math:: InvestmentFlow.invest(source(n), n) + existing =
           (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
           \forall n \in \textrm{INVEST\_REL\_CAP\_IN}
 
-    Connect the invest variables of the storage and the output flow.
+            Connect the invest variables of the storage and the output flow
+
         .. math:: InvestmentFlow.invest(n, target(n)) + existing =
           (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
           \forall n \in \textrm{INVEST\_REL\_CAP\_OUT}
 
-    Connect the invest variables of the input and the output flow.
+            Connect the invest variables of the input and the output flow
+
         .. math:: InvestmentFlow.invest(source(n), n) + existing ==
           (InvestmentFlow.invest(n, target(n)) + existing) *
           invest\_relation\_input_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
-    Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
+            Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
+
         .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
 
-    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+            Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+
         .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
             \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
             \forall t \in \textrm{TIMESTEPS}.
@@ -527,14 +550,24 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    Equivalent periodical costs (investment costs):
-        .. math::
-            \sum_n invest(n) \cdot ep\_costs(n)
+    The part of the objective function added by the investment storages
+    also depends on whether a convex or nonconvex
+    investment option is selected:
+
+        :attr:`nonconvex = False`
+
+            .. math::
+                C_{invest} = E_{invest} \cdot c_{invest,var}
+
+        :attr:`nonconvex = True`
+
+            .. math::
+                C_{invest} = E_{invest} \cdot c_{invest,var}
+                + c_{invest,fix} \cdot b_{invest}\\
 
     The expression can be accessed by
     :attr:`om.InvestStorages.investment_costs` and their value after
     optimization by :meth:`om.InvestStorages.investment_costs()` .
-
 
     The symbols are the same as in:class:`.GenericStorageBlock`.
 
