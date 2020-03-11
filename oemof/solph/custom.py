@@ -18,6 +18,7 @@ import logging
 
 from oemof.solph.network import Bus, Transformer, Flow, Sink
 from oemof.solph.plumbing import sequence
+from oemof.network import Transformer as NetworkTransformer
 
 
 class ElectricalBus(Bus):
@@ -305,7 +306,7 @@ class LinkBlock(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class GenericCAES(Transformer):
+class GenericCAES(NetworkTransformer):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 

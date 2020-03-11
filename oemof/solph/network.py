@@ -18,6 +18,8 @@ import oemof.network as on
 import oemof.energy_system as es
 from oemof.solph.plumbing import sequence
 from oemof.solph import blocks
+from oemof.tools import debugging
+from warnings import warn
 
 
 class EnergySystem(es.EnergySystem):
@@ -211,6 +213,12 @@ class Bus(on.Bus):
 class Sink(on.Sink):
     """An object with one input flow.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.inputs:
+            msg = "`Sink` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
     def constraint_group(self):
         pass
 
@@ -218,6 +226,12 @@ class Sink(on.Sink):
 class Source(on.Source):
     """An object with one output flow.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.outputs:
+            msg = "`Source` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
     def constraint_group(self):
         pass
 
@@ -273,6 +287,13 @@ class Transformer(on.Transformer):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if not self.inputs:
+            msg = "`Transformer` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        if not self.outputs:
+            msg = "`Transformer` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
 
         self.conversion_factors = {
             k: sequence(v)

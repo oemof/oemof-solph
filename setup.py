@@ -21,7 +21,7 @@ def read(fname):
 setup(name='oemof',
       version=oemof.__version__,
       author='oemof developer group',
-      author_email='oemof@rl-institut.de',
+      author_email='contact@oemof.org',
       description='The open energy modelling framework',
       url='https://oemof.org/',
       namespace_package=['oemof'],

@@ -373,6 +373,49 @@ class TestsConstraint:
             investment=solph.Investment(ep_costs=145))
         self.compare_lp_files('storage_invest_unbalanced.lp')
 
+    def test_storage_fixed_losses(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage_no_invest',
+            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
+            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
+            nominal_storage_capacity=1e5,
+            loss_rate=0.13,
+            fixed_losses_relative=0.01,
+            fixed_losses_absolute=3,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            initial_storage_level=0.4)
+
+        self.compare_lp_files('storage_fixed_losses.lp')
+
+    def test_storage_invest_1_fixed_losses(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage1',
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            fixed_losses_relative=0.01,
+            fixed_losses_absolute=3,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            investment=solph.Investment(ep_costs=145, maximum=234))
+
+        self.compare_lp_files('storage_invest_1_fixed_losses.lp')
+
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment.
         """

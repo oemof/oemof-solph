@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 from nose.tools import eq_
 import os
 import pandas as pd
-import oemof.solph as solph
+from oemof.solph import EnergySystem, Bus, Source, Sink, Flow, custom, Model
 from oemof.network import Node
 from oemof.outputlib import processing, views
 
@@ -30,23 +30,23 @@ def test_gen_caes():
 
     # create an energy system
     idx = pd.date_range('1/1/2017', periods=periods, freq='H')
-    es = solph.EnergySystem(timeindex=idx)
+    es = EnergySystem(timeindex=idx)
     Node.registry = es
 
     # resources
-    bgas = solph.Bus(label='bgas')
+    bgas = Bus(label='bgas')
 
-    solph.Source(label='rgas', outputs={
-        bgas: solph.Flow(variable_costs=20)})
+    Source(label='rgas', outputs={
+        bgas: Flow(variable_costs=20)})
 
     # power
-    bel_source = solph.Bus(label='bel_source')
-    solph.Source(label='source_el', outputs={
-        bel_source: solph.Flow(variable_costs=data['price_el_source'])})
+    bel_source = Bus(label='bel_source')
+    Source(label='source_el', outputs={
+        bel_source: Flow(variable_costs=data['price_el_source'])})
 
-    bel_sink = solph.Bus(label='bel_sink')
-    solph.Sink(label='sink_el', inputs={
-        bel_sink: solph.Flow(variable_costs=data['price_el_sink'])})
+    bel_sink = Bus(label='bel_sink')
+    Sink(label='sink_el', inputs={
+        bel_sink: Flow(variable_costs=data['price_el_sink'])})
 
     # dictionary with parameters for a specific CAES plant
     # based on thermal modelling and linearization techniques
@@ -74,15 +74,15 @@ def test_gen_caes():
     }
 
     # generic compressed air energy storage (caes) plant
-    solph.custom.GenericCAES(
+    custom.GenericCAES(
         label='caes',
-        electrical_input={bel_source: solph.Flow()},
-        fuel_input={bgas: solph.Flow()},
-        electrical_output={bel_sink: solph.Flow()},
+        electrical_input={bel_source: Flow()},
+        fuel_input={bgas: Flow()},
+        electrical_output={bel_sink: Flow()},
         params=concept, fixed_costs=0)
 
     # create an optimization problem and solve it
-    om = solph.Model(es)
+    om = Model(es)
 
     # solve model
     om.solve(solver='cbc')
