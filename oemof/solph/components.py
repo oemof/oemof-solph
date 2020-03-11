@@ -458,36 +458,48 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     See :class:`oemof.solph.options.Investment` for all parameters of the
     Investment class.
 
-    **The following variables are created:**
+    **Variables**
 
-    * :attr:`om.InvestmentStorage.capacity[n, t]` - :math:`E(t)`
+    The following variables are created as attributes of
+    :attr:`om.InvestmentStorage`:
 
-        Energy currently stored / Level of the storage.
+    * :attr:`capacity[n, t]` - :math:`E(t)`
 
-    * :attr:`om.InvestmentStorage.invest[n, t]` - :math:`E_{invest}`
+        Energy currently stored / Absolute level of storaged energy.
+
+    * :attr:`invest[n, t]` - :math:`E_{invest}`
 
         Nominal capacity of the storage.
 
-    **The following constraints are build:**
+    * :attr:`init_cap[n]` - :math:`E(-1)`
 
-    All investment storages are indexed by :py:obj:`[n]`, which is omitted
+        Initial storage capacity (before timestep 0).
+
+    * :attr:`invest_status[i, o]` - :math:`b_{invest}`
+
+        Binary variable for the status of the investment status, if
+        :attr:`nonconvex` is `True`.
+
+    **Constraints**
+
+    All investment storages are indexed by :py:obj:`n`, which is omitted
     in the following equations for the sake of convenience.
 
     The following constraints are created for all investment storages:
 
-        Storage balance
+            Storage balance
 
-            Same as for :class:`.GenericStorageBlock`.
+                Same as for :class:`.GenericStorageBlock`
 
-    Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
+    Depending on the attribute :attr:`nonconvex`, the constraints for the bounds
     of the decision variable :math:`E_{invest}` are different:\
 
-        :attr:`nonconvex = False`
+        * :attr:`nonconvex = False`
 
         .. math::
             E_{invest, min} \le E_{invest} \le E_{invest, max}
 
-        :attr:`nonconvex = True`
+        * :attr:`nonconvex = True`
 
         .. math::
             &
@@ -495,57 +507,67 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             &
             E_{invest} \le E_{invest, max} \cdot b_{invest}\\
 
-    The following constraints are created depending on the values of the
-    attributes:
+    The following constraints are created depending on the attributes of
+    the :class:`.components.GenericStorage`:
 
-        :attr:`initial_storage_level != None`
+        * :attr:`initial_storage_level is None`
 
-            A initial value for the storage content is given
+            Constraint for a variable initial storage level:
+
+        .. math::
+               E(-1) \le E_{invest} + E_{exist}
+
+        * :attr:`initial_storage_level is not None`
+
+            An initial value for the storage content is given:
 
         .. math::
                E(-1) = (E_{invest} + E_{exist}) \cdot c(-1)
 
-        :attr:`balanced=True`
+        * :attr:`balanced=True`
 
             The energy content of storage of the first and the last timestep
-            are set equal
+            are set equal:
 
         .. math::
             E(-1) = E(t_{last})
 
+        * :attr:`invest_relation_input_capacity is not None`
 
-        Further constraints :attr:`not sure yet`
+            Connect the invest variables of the storage and the input flow:
 
-            Connect the invest variables of the storage and the input flow
+        .. math::
+            \dot{E}_{in,invest} + \dot{E}_{in,exist} =
+            (E_{invest} + E_{exist}) \cdot r_{cap,in}
 
-        .. math:: InvestmentFlow.invest(source(n), n) + existing =
-          (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
-          \forall n \in \textrm{INVEST\_REL\_CAP\_IN}
+        * :attr:`invest_relation_output_capacity is not None`
 
-            Connect the invest variables of the storage and the output flow
+            Connect the invest variables of the storage and the output flow:
 
-        .. math:: InvestmentFlow.invest(n, target(n)) + existing =
-          (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
-          \forall n \in \textrm{INVEST\_REL\_CAP\_OUT}
+        .. math::
+            \dot{E}_{out,invest} + \dot{E}_{out,exist} =
+            (E_{invest} + E_{exist}) \cdot r_{cap,out}
 
-            Connect the invest variables of the input and the output flow
+        * :attr:`invest_relation_input_output is not None`
 
-        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
-          (InvestmentFlow.invest(n, target(n)) + existing) *
-          invest\_relation\_input_output(n) \\
-          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+            Connect the invest variables of the input and the output flow:
 
-            Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
+        .. math::
+            \dot{E}_{in,invest} + \dot{E}_{in,exist} =
+            (\dot{E}_{out,invest} + \dot{E}_{out,exist}) \cdot r_{in,out}
 
-        .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
-            \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
-            \forall t \in \textrm{TIMESTEPS}.
+        * :attr:`max_storage_level`
 
-            Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
+            Rule for upper bound constraint for the storage content:
 
-        .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
-            \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
-            \forall t \in \textrm{TIMESTEPS}.
+        .. math::
+            E(t) \leq E_{invest} \cdot f_{max}(t)
+
+        * :attr:`min_storage_level`
+
+            Rule for lower bound constraint for the storage content:
+
+        .. math:: E(t) \geq E_{invest} \cdot f_{min}(t)
 
 
     **The following parts of the objective function are created:**
@@ -554,22 +576,49 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     also depends on whether a convex or nonconvex
     investment option is selected:
 
-        :attr:`nonconvex = False`
+        * :attr:`nonconvex = False`
 
             .. math::
-                C_{invest} = E_{invest} \cdot c_{invest,var}
+                E_{invest} \cdot c_{invest,var}
 
-        :attr:`nonconvex = True`
+        * :attr:`nonconvex = True`
 
             .. math::
-                C_{invest} = E_{invest} \cdot c_{invest,var}
+                E_{invest} \cdot c_{invest,var}
                 + c_{invest,fix} \cdot b_{invest}\\
 
     The expression can be accessed by
     :attr:`om.InvestStorages.investment_costs` and their value after
     optimization by :meth:`om.InvestStorages.investment_costs()` .
 
-    The symbols are the same as in:class:`.GenericStorageBlock`.
+    .. csv-table:: List of Variables
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`E(t)`", ":attr:`capacity[n, t]`", "Actual storage content (absolute storage level)"
+        ":math:`E_{invest}`", ":attr:`invest[n, t]`", "Nominal capacity of the storage"
+        ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity (before timestep 0)"
+        ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable for the status of the investment status"
+        ":math:`\dot{E}_{in,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "Nominal value of inflow (Investmentflow)"
+        ":math:`\dot{E}_{out,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "Nominal value of outflow (Investmentflow)"
+
+    .. csv-table:: List of Parameters
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`E_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "Existing storage capacity"
+        ":math:`E_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "Minimum investment value"
+        ":math:`E_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "Maximum investment value"
+        ":math:`c(-1)`", ":py:obj:`initial_storage_level`", "Initial relativ storage content (before timestep 0)"
+        ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum value of storage content"
+        ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum value of storage content"
+        ":math:`\dot{E}_{in,exist}`", ":py:obj:`flows[i[n], n].investment.existing`", "Existing inflow capacity"
+        ":math:`\dot{E}_{out,exist}`", ":py:obj:`flows[n, o[n]].investment.existing`", "Existing outlfow capacity"
+        ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "Relation of storage capacity and nominal inflow"
+        ":math:`r_{cap,out}`", ":attr:`invest_relation_output_capacity`", "Relation of storage capacity and nominal outflow"
+        ":math:`r_{in,out}`", ":attr:`invest_relation_input_output`", "Relation of nominal in- and outflow"
+        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`", "Variable investment costs"
+        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "Fix investment costs"
 
     """
 
