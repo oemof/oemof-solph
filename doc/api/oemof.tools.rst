@@ -37,7 +37,7 @@ oemof.tools.logger module
     :show-inheritance:
 
 oemof.tools.debugging module
--------------------------
+----------------------------
 
 .. automodule:: oemof.tools.debugging
     :members:
