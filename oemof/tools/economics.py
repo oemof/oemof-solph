@@ -28,9 +28,9 @@ def annuity(capex, n, wacc, u=None, cost_decrease=0):
         \text{annuity} = \text{capex} \cdot
                   \frac{(\text{wacc} \cdot (1+\text{wacc})^n)}
                   {((1 + \text{wacc})^n - 1)} \cdot \left(
-                  \frac{1 - \left( \frac{(1-cost\_decrease)}
+                  \frac{1 - \left( \frac{(1-\text{cost\_decrease})}
                   {(1+\text{wacc})} \right)^n}
-                  {1 - \left( \frac{(1-cost\_decrease)}{(1+\text{wacc})}
+                  {1 - \left(\frac{(1-\text{cost\_decrease})}{(1+\text{wacc})}
                   \right)^u} \right)
 
     Parameters
