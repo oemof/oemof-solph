@@ -243,8 +243,11 @@ class Flow(SimpleBlock):
 
 class InvestmentFlow(SimpleBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
+
     See :class:`oemof.solph.options.Investment` for all parameters of the
     Investment class.
+
+    See :class:`oemof.solph.network.Flow` for all parameters of the Flow class.
 
     **The following variables are created:**
 
