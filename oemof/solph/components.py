@@ -561,13 +561,13 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             Rule for upper bound constraint for the storage content:
 
         .. math::
-            E(t) \leq E_{invest} \cdot f_{max}(t)
+            E(t) \leq E_{invest} \cdot c_{max}(t)
 
         * :attr:`min_storage_level`
 
             Rule for lower bound constraint for the storage content:
 
-        .. math:: E(t) \geq E_{invest} \cdot f_{min}(t)
+        .. math:: E(t) \geq E_{invest} \cdot c_{min}(t)
 
 
     **The following parts of the objective function are created:**
@@ -610,8 +610,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         ":math:`E_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "Minimum investment value"
         ":math:`E_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "Maximum investment value"
         ":math:`c(-1)`", ":py:obj:`initial_storage_level`", "Initial relativ storage content (before timestep 0)"
-        ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum value of storage content"
-        ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum value of storage content"
+        ":math:`c_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum value of storage content"
+        ":math:`c_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum value of storage content"
         ":math:`\dot{E}_{in,exist}`", ":py:obj:`flows[i[n], n].investment.existing`", "Existing inflow capacity"
         ":math:`\dot{E}_{out,exist}`", ":py:obj:`flows[n, o[n]].investment.existing`", "Existing outlfow capacity"
         ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "Relation of storage capacity and nominal inflow"
