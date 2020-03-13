@@ -28,24 +28,24 @@ class GenericStorage(network.Transformer):
 
     Parameters
     ----------
-    nominal_storage_capacity : numeric
+    nominal_storage_capacity : numeric, :math:`E_{nom}`
         Absolute nominal capacity of the storage
 
-    invest_relation_input_capacity : numeric or None
+    invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage.
 
         .. math:: input\_invest =
                   capacity\_invest \cdot invest\_relation\_input\_capacity
 
-    invest_relation_output_capacity : numeric or None
+    invest_relation_output_capacity : numeric or None, :math:`r_{cap,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the storage.
 
         .. math:: output\_invest =
                   capacity\_invest \cdot invest\_relation\_output\_capacity
 
-    invest_relation_input_output : numeric or None
+    invest_relation_input_output : numeric or None, :math:`r_{in,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
         flow investments to each other.
@@ -56,29 +56,29 @@ class GenericStorage(network.Transformer):
         .. math:: input\_invest =
                   output\_invest \cdot invest\_relation\_input\_output
 
-    initial_storage_level : numeric
+    initial_storage_level : numeric, :math:`c(-1)`
         The content of the storage in the first time step of optimization.
     balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
-    loss_rate : numeric (iterable or scalar)
+    loss_rate : numeric (iterable or scalar), :math:`\beta(t)`
         The relative loss of the storage capacity per timeunit.
-    fixed_losses_relative : numeric (iterable or scalar)
+    fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
         Losses independent of state of charge between two consecutive
         timesteps relative to nominal storage capacity.
-    fixed_losses_absolute : numeric (iterable or scalar)
+    fixed_losses_absolute : numeric (iterable or scalar), :math:`\delta(t)`
         Losses independent of state of charge and independent of
         nominal storage capacity between two consecutive timesteps.
-    inflow_conversion_factor : numeric (iterable or scalar)
+    inflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_i(t)`
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
-    outflow_conversion_factor : numeric (iterable or scalar)
+    outflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_o(t)`
         see: inflow_conversion_factor
-    min_storage_level : numeric (iterable or scalar)
+    min_storage_level : numeric (iterable or scalar), :math:`c_{min}(t)`
         The minimum storaged energy of the storage as fraction of the
         nominal storage capacity (between 0 and 1).
         To set different values in every time step use a sequence.
-    max_storage_level : numeric (iterable or scalar)
+    max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
         see: min_storage_level
     investment : :class:`oemof.solph.options.Investment` object
         Object indicating if a nominal_value of the flow is determined by
