@@ -33,17 +33,13 @@ class GenericStorage(network.Transformer):
 
     invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
-        investment variable of the storage.
-
-        .. math:: \dot{E}_{in,invest} =
-                  E_{invest} \cdot r_{cap,in}
+        investment variable of the storage:
+        :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
 
     invest_relation_output_capacity : numeric or None, :math:`r_{cap,out}`
         Ratio between the investment variable of the output Flow and the
-        investment variable of the storage.
-
-        .. math:: \dot{E}_{out,invest} =
-                  E_{invest} \cdot r_{cap,out}
+        investment variable of the storage:
+        :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
 
     invest_relation_input_output : numeric or None, :math:`r_{in,out}`
         Ratio between the investment variable of the output Flow and the
@@ -51,17 +47,15 @@ class GenericStorage(network.Transformer):
         flow investments to each other.
         Values < 1 set the input flow lower than the output and > 1 will
         set the input flow higher than the output flow. If None no relation
-        will be set.
-
-        .. math:: \dot{E}_{in,invest} =
-                  \dot{E}_{out,invest} \cdot r_{in,out}
+        will be set:
+        :math:`\dot{E}_{in,invest} = \dot{E}_{out,invest} \cdot r_{in,out}`
 
     initial_storage_level : numeric, :math:`c(-1)`
         The content of the storage in the first time step of optimization.
     balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
-    loss_rate : numeric (iterable or scalar), :math:`\beta(t)`
+    loss_rate : numeric (iterable or scalar)
         The relative loss of the storage capacity per timeunit.
     fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
         Losses independent of state of charge between two consecutive
