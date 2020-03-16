@@ -11,25 +11,27 @@ SPDX-License-Identifier: MIT
 
 
 def annuity(capex, n, wacc, u=None, cost_decrease=0):
-    """Calculates the annuity of an initial investment 'capex', considering the
-    cost of capital 'wacc' during a project horizon 'n'
+    r"""Calculates the annuity of an initial investment 'capex', considering
+    the cost of capital 'wacc' during a project horizon 'n'
 
     In case of a single initial investment, the employed formula reads:
 
     .. math::
-    annuity = capex \cdot \frac{(wacc \cdot (1+wacc)^n)}
-              {((1 + wacc)^n - 1)}
+        \text{annuity} = \text{capex} \cdot
+            \frac{(\text{wacc} \cdot (1+\text{wacc})^n)}
+            {((1 + \text{wacc})^n - 1)}
 
     In case of repeated investments (due to replacements) at fixed intervals
     'u', the formula yields:
 
     .. math::
-    annuity = capex \cdot \frac{(wacc \cdot (1+wacc)^n)}
-              {((1 + wacc)^n - 1)} \cdot \left(
-              \frac{1 - \left( \frac{(1-cost\_decrease)}
-              {(1+wacc)} \right)^n}
-              {1 - \left( \frac{(1-cost\_decrease)}{(1+wacc)}
-              \right)^u} \right)
+        \text{annuity} = \text{capex} \cdot
+                  \frac{(\text{wacc} \cdot (1+\text{wacc})^n)}
+                  {((1 + \text{wacc})^n - 1)} \cdot \left(
+                  \frac{1 - \left( \frac{(1-\text{cost\_decrease})}
+                  {(1+\text{wacc})} \right)^n}
+                  {1 - \left(\frac{(1-\text{cost\_decrease})}{(1+\text{wacc})}
+                  \right)^u} \right)
 
     Parameters
     ----------
