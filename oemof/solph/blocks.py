@@ -252,7 +252,7 @@ class InvestmentFlow(SimpleBlock):
 
     **Variables**
 
-    All *InvestmentFlows* are indexed by a starting and ending node
+    All *InvestmentFlow* are indexed by a starting and ending node
     :math:`(i, o)`, which is omitted in the following for the sake
     of convenience. The following variables are created:
 
@@ -355,13 +355,40 @@ class InvestmentFlow(SimpleBlock):
     The total value of all costs of all *InvestmentFlow* can be retrieved
     calling :attr:`om.InvestmentFlow.investment_costs.expr()`.
 
-    .. csv-table:: List of Variables
+    .. csv-table:: List of Variables (in csv table syntax)
         :header: "symbol", "attribute", "explanation"
         :widths: 1, 1, 1
 
         ":math:`P(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
-        ":math:`P_{invest}`", ":py:obj:`invest[i, o]`", "Invested flow capacity, (additional) nominal capacity"
-        ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status of investment flow"
+        ":math:`P_{invest}`", ":py:obj:`invest[i, o]`", "Invested flow
+        capacity"
+        ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status
+        of investment"
+
+    List of Variables (in rst table syntax):
+
+    ===================  =============================  =========
+    symbol               attribute                      explanation
+    ===================  =============================  =========
+    :math:`P(t)`         :py:obj:`flow[n, o, t]`         Actual flow value
+
+    :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
+
+    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
+
+    ===================  =============================  =========
+
+    Grid table style:
+
+    +--------------------+-------------------------------+-----------------------------+
+    | symbol             | attribute                     | explanation                 |
+    +====================+===============================+=============================+
+    | :math:`P(t)`       | :py:obj:`flow[n, o, t]`       | Actual flow value           |
+    +--------------------+-------------------------------+-----------------------------+
+    | :math:`P_{invest}` | :py:obj:`invest[i, o]`        | Invested flow capacity      |
+    +--------------------+-------------------------------+-----------------------------+
+    | :math:`b_{invest}` | :py:obj:`invest_status[i, o]` | Binary status of investment |
+    +--------------------+-------------------------------+-----------------------------+
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
