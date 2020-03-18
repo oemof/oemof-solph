@@ -475,7 +475,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     * :math:`E_{invest}`
 
-        Nominal (invested) capacity of the storage.
+        Invested (nominal) capacity of the storage.
 
     * :math:`E(-1)`
 
@@ -607,11 +607,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         ":math:`P_i(t)`", ":attr:`flow[i[n], n, t]`", "Inflow of the storage"
         ":math:`P_o(t)`", ":attr:`flow[n, o[n], t]`", "Outlfow of the storage"
         ":math:`E(t)`", ":attr:`capacity[n, t]`", "Actual storage content (absolute storage level)"
-        ":math:`E_{invest}`", ":attr:`invest[n, t]`", "Nominal capacity of the storage"
+        ":math:`E_{invest}`", ":attr:`invest[n, t]`", "Invested (nominal) capacity of the storage"
         ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity (before timestep 0)"
         ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable for the status of investment"
-        ":math:`P_{i,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "Nominal value of inflow (Investmentflow)"
-        ":math:`P_{o,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "Nominal value of outflow (Investmentflow)"
+        ":math:`P_{i,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "Invested (nominal) inflow (Investmentflow)"
+        ":math:`P_{o,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "Invested (nominal) outflow (Investmentflow)"
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
