@@ -348,6 +348,8 @@ class InvestmentFlow(SimpleBlock):
                 C_{invest} = F_{invest} \cdot c_{invest,var}
                 + c_{invest,fix} \cdot b_{invest}\\
 
+    The total value of all costs of investment flows ca be retrieved calling
+    `om.InvestmentFlow.investment_costs.expr()`.
 
     .. csv-table:: List of Variables
         :header: "symbol", "attribute", "explanation"
