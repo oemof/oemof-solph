@@ -606,37 +606,62 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         ":math:`P_i(t)`", ":attr:`flow[i[n], n, t]`", "Inflow of the storage"
         ":math:`P_o(t)`", ":attr:`flow[n, o[n], t]`", "Outlfow of the storage"
-        ":math:`E(t)`", ":attr:`capacity[n, t]`", "Actual storage content (absolute storage level)"
-        ":math:`E_{invest}`", ":attr:`invest[n, t]`", "Invested (nominal) capacity of the storage"
-        ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity (before timestep 0)"
-        ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable for the status of investment"
-        ":math:`P_{i,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "Invested (nominal) inflow (Investmentflow)"
-        ":math:`P_{o,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "Invested (nominal) outflow (Investmentflow)"
+        ":math:`E(t)`", ":attr:`capacity[n, t]`", "Actual storage content
+        (absolute storage level)"
+        ":math:`E_{invest}`", ":attr:`invest[n, t]`", "Invested (nominal)
+        capacity of the storage"
+        ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity
+        (before timestep 0)"
+        ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable
+        for the status of investment"
+        ":math:`P_{i,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "
+        Invested (nominal) inflow (Investmentflow)"
+        ":math:`P_{o,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "
+        Invested (nominal) outflow (Investmentflow)"
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
         :widths: 1, 1, 1
 
-        ":math:`E_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "Existing storage capacity"
-        ":math:`E_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "Minimum investment value"
-        ":math:`E_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "Maximum investment value"
-        ":math:`P_{i,exist}`", ":py:obj:`flows[i[n], n].investment.existing`", "Existing inflow capacity"
-        ":math:`P_{o,exist}`", ":py:obj:`flows[n, o[n]].investment.existing`", "Existing outlfow capacity"
-        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`", "Variable investment costs"
-        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "Fix investment costs"
-        ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "Relation of storage capacity and nominal inflow"
-        ":math:`r_{cap,out}`", ":attr:`invest_relation_output_capacity`", "Relation of storage capacity and nominal outflow"
-        ":math:`r_{in,out}`", ":attr:`invest_relation_input_output`", "Relation of nominal in- and outflow"
-        ":math:`\beta(t)`", ":py:obj:`loss_rate[t]`", "Fraction of lost energy as share of :math:`E(t)` per time unit"
-        ":math:`\gamma(t)`", ":py:obj:`fixed_losses_relative[t]`", "Fixed loss of energy relative to :math:`E_{invest} + E_{exist}` per time unit"
-        ":math:`\delta(t)`", ":py:obj:`fixed_losses_absolute[t]`", "Absolute fixed loss of energy per time unit"
-        ":math:`\eta_i(t)`", ":py:obj:`inflow_conversion_factor[t]`", "Conversion factor (i.e. efficiency) when storing energy"
-        ":math:`\eta_o(t)`", ":py:obj:`outflow_conversion_factor[t]`", "Conversion factor when (i.e. efficiency) taking stored energy"
-        ":math:`c(-1)`", ":py:obj:`initial_storage_level`", "Initial relativ storage content (before timestep 0)"
-        ":math:`c_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum value of storage content"
-        ":math:`c_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum value of storage content"
+        ":math:`E_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "
+        Existing storage capacity"
+        ":math:`E_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
+        Minimum investment value"
+        ":math:`E_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
+        Maximum investment value"
+        ":math:`P_{i,exist}`", ":py:obj:`flows[i[n], n].investment.existing`
+        ", "Existing inflow capacity"
+        ":math:`P_{o,exist}`", ":py:obj:`flows[n, o[n]].investment.existing`
+        ", "Existing outlfow capacity"
+        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
+        ", "Variable investment costs"
+        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
+        Fix investment costs"
+        ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "
+        Relation of storage capacity and nominal inflow"
+        ":math:`r_{cap,out}`", ":attr:`invest_relation_output_capacity`", "
+        Relation of storage capacity and nominal outflow"
+        ":math:`r_{in,out}`", ":attr:`invest_relation_input_output`", "
+        Relation of nominal in- and outflow"
+        ":math:`\beta(t)`", ":py:obj:`loss_rate[t]`", "Fraction of lost energy
+        as share of :math:`E(t)` per time unit"
+        ":math:`\gamma(t)`", ":py:obj:`fixed_losses_relative[t]`", "Fixed loss
+        of energy relative to :math:`E_{invest} + E_{exist}` per time unit"
+        ":math:`\delta(t)`", ":py:obj:`fixed_losses_absolute[t]`", "Absolute
+        fixed loss of energy per time unit"
+        ":math:`\eta_i(t)`", ":py:obj:`inflow_conversion_factor[t]`", "
+        Conversion factor (i.e. efficiency) when storing energy"
+        ":math:`\eta_o(t)`", ":py:obj:`outflow_conversion_factor[t]`", "
+        Conversion factor when (i.e. efficiency) taking stored energy"
+        ":math:`c(-1)`", ":py:obj:`initial_storage_level`", "Initial relativ
+        storage content (before timestep 0)"
+        ":math:`c_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
+        value of storage content"
+        ":math:`c_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
+        value of storage content"
         ":math:`\tau(t)`", "", "Duration of time step"
-        ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`, :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
+        ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`,
+        :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
 
     """
 
