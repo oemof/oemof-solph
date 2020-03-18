@@ -353,7 +353,7 @@ class InvestmentFlow(SimpleBlock):
                 + c_{invest,fix} \cdot b_{invest}\\
 
     The total value of all costs of all *InvestmentFlow* can be retrieved
-    calling :attr:`om.InvestmentFlow.investment_costs.expr()`.
+    calling :meth:`om.InvestmentFlow.investment_costs.expr()`.
 
     .. csv-table:: List of Variables (in csv table syntax)
         :header: "symbol", "attribute", "explanation"
