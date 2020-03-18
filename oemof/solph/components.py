@@ -632,11 +632,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         ":math:`\delta(t)`", ":py:obj:`fixed_losses_absolute[t]`", "Absolute fixed loss of energy per time unit"
         ":math:`\eta_i(t)`", ":py:obj:`inflow_conversion_factor[t]`", "Conversion factor (i.e. efficiency) when storing energy"
         ":math:`\eta_o(t)`", ":py:obj:`outflow_conversion_factor[t]`", "Conversion factor when (i.e. efficiency) taking stored energy"
-        ":math:`\tau(t)`", "", "Duration of time step"
-        ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`, :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
         ":math:`c(-1)`", ":py:obj:`initial_storage_level`", "Initial relativ storage content (before timestep 0)"
         ":math:`c_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum value of storage content"
         ":math:`c_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum value of storage content"
+        ":math:`\tau(t)`", "", "Duration of time step"
+        ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`, :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
 
     """
 
