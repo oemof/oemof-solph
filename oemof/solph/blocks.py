@@ -261,10 +261,6 @@ class InvestmentFlow(SimpleBlock):
         Binary variable for the status of the investment status, if
         :attr:`nonconvex` is `True`.
 
-    * :attr:`investment_costs` - :math:`C_{invest}`
-
-        Costs of investment.
-
     **The following constraints are created:**
 
     All investment flows are indexed by the starting and ending node
@@ -340,16 +336,16 @@ class InvestmentFlow(SimpleBlock):
         * :attr:`nonconvex = False`
 
             .. math::
-                C_{invest} = F_{invest} \cdot c_{invest,var}
+                F_{invest} \cdot c_{invest,var}
 
         * :attr:`nonconvex = True`
 
             .. math::
-                C_{invest} = F_{invest} \cdot c_{invest,var}
+                F_{invest} \cdot c_{invest,var}
                 + c_{invest,fix} \cdot b_{invest}\\
 
     The total value of all costs of investment flows ca be retrieved calling
-    `om.InvestmentFlow.investment_costs.expr()`.
+    :attr:`om.InvestmentFlow.investment_costs.expr()`.
 
     .. csv-table:: List of Variables
         :header: "symbol", "attribute", "explanation"
@@ -358,7 +354,6 @@ class InvestmentFlow(SimpleBlock):
         ":math:`F(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
         ":math:`F_{invest}`", ":py:obj:`invest[i, o]`", "Capacity of flow / Maximum flow value"
         ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status of investment flow (nonconvex only)"
-        ":math:`C_{invest}`", ":py:obj:`investment_costs`", "Costs of investment"
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
