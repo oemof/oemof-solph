@@ -251,21 +251,26 @@ class InvestmentFlow(SimpleBlock):
 
     **The following variables are created:**
 
-    * :attr:`invest[i, o]` - :math:`F_{invest}`
+    All investment flows are indexed by a starting and ending node
+    :math:`(i, o)`, which is omitted in the following for the sake
+    of convenience.
+
+    * :math:`F(t)`
+
+        Actual flow value (created in :class:`oemof.solph.models.BaseModel`)
+
+    * :math:`F_{invest}`
 
         Value of the investment variable i.e. equivalent to the nominal
         value of the flows after optimization.
 
-    * :attr:`invest_status[i, o]` - :math:`b_{invest}`
+    * :math:`b_{invest}`
 
         Binary variable for the status of the investment status, if
         :attr:`nonconvex` is `True`.
 
     **The following constraints are created:**
 
-    All investment flows are indexed by the starting and ending node
-    :py:obj:`[i, o]`, which is omitted in the following equations
-    for the sake of convenience.
     Depending on the attributes, different constraints are created.
     The following constraint is created for all investment flows:\
 
@@ -344,8 +349,8 @@ class InvestmentFlow(SimpleBlock):
                 F_{invest} \cdot c_{invest,var}
                 + c_{invest,fix} \cdot b_{invest}\\
 
-    The total value of all costs of investment flows ca be retrieved calling
-    :attr:`om.InvestmentFlow.investment_costs.expr()`.
+    The total value of all costs of all investment flows can be retrieved
+    calling :attr:`om.InvestmentFlow.investment_costs.expr()`.
 
     .. csv-table:: List of Variables
         :header: "symbol", "attribute", "explanation"
