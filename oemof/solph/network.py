@@ -67,9 +67,9 @@ class Flow(on.Edge):
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
-        Nominal minimum value of the flow (see :attr:`max`).
+        Normed minimum value of the flow (see :attr:`max`).
     actual_value : numeric (iterable or scalar), :math:`f_{actual}`
-        Specific value for the flow variable. Will be multiplied with the
+        Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
         set to :obj:`True` the flow variable will be fixed to :py:`actual_value
         * nominal_value`, i.e. this value is set exogenous.
