@@ -410,10 +410,10 @@ class InvestmentFlow(SimpleBlock):
         value of the flow"
         ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
         value of the flow"
-        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Normed
-        maximum of summed flow values (maximum full load hours)"
-        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Normed
-        minimum of summed flow values (minimum full load hours)"
+        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Specific
+        maximum of summed flow values (per installed capacity)"
+        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Specific
+        minimum of summed flow values (per installed capacity)"
         ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
         each time step"
 
