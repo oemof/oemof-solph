@@ -276,29 +276,29 @@ class GenericStorageBlock(SimpleBlock):
     symbol                      explanation             attribute
     =========================== ======================= =========
     :math:`E(t)`                energy currently stored :py:obj:`capacity`
-    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`  # noqa: F401
+    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`
                                 the energy storage
-    :math:`c(-1)`               state before            :py:obj:`initial_storage_level`  # noqa: F401
+    :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
                                 initial time step
-    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`  # noqa: F401
-    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`  # noqa: F401
+    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
+    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
     :math:`\beta(t)`            fraction of lost energy :py:obj:`loss_rate[t]`
                                 as share of
                                 :math:`E(t)`
                                 per time unit
-    :math:`\gamma(t)`           fixed loss of energy    :py:obj:`fixed_losses_relative[t]`  # noqa: F401
+    :math:`\gamma(t)`           fixed loss of energy    :py:obj:`fixed_losses_relative[t]`
                                 relative to
                                 :math:`E_{nom}` per
                                 time unit
-    :math:`\delta(t)`           absolute fixed loss     :py:obj:`fixed_losses_absolute[t]`  # noqa: F401
+    :math:`\delta(t)`           absolute fixed loss     :py:obj:`fixed_losses_absolute[t]`
                                 of energy per
                                 time unit
     :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
-    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`  # noqa: F401
+    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 when storing energy
-    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`  # noqa: F401
+    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
     :math:`\tau(t)`             duration of time step
@@ -315,7 +315,7 @@ class GenericStorageBlock(SimpleBlock):
     Nothing added to the objective function.
 
 
-    """
+    """  # noqa: F401
 
     CONSTRAINT_GROUP = True
 
@@ -1118,7 +1118,7 @@ class GenericCHPBlock(SimpleBlock):
         (11)\qquad P_{el}(t) + \dot{Q}(t) + \dot{H}_{L,FG,min}(t) +
         \dot{Q}_{CW, min}(t) \cdot Y(t) \geq \dot{H}_F(t)\\[10pt]
 
-    The symbols used are defined as follows (with Variables (V) and Parameters (P)):  # noqa: F401
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
     =============================== =============================== ==== =======================
     math. symbol                    attribute                       type explanation
@@ -1159,7 +1159,7 @@ class GenericCHPBlock(SimpleBlock):
                                                                          flow w/o distr. heating
     =============================== =============================== ==== =======================
 
-    """
+    """  # noqa: F401
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1413,7 +1413,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     output flows relate to each other, and the symbols used are defined as
     follows (with Variables (V) and Parameters (P)):
 
-    ========================= ==================================================== ==== =========   # noqa: F401
+    ========================= ==================================================== ==== =========
     symbol                    attribute                                            type explanation
     ========================= ==================================================== ==== =========
     :math:`\dot H_{Fuel}`     :py:obj:`flow[i, n, t]`                              V    fuel input flow
@@ -1432,8 +1432,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                                                                         maximal heat extraction
     ========================= ==================================================== ==== =========
 
-
-    """
+    """   # noqa: F401
 
     CONSTRAINT_GROUP = True
 
