@@ -203,10 +203,10 @@ class Flow(SimpleBlock):
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
-        def _integer_flow_rule(block, i, o, t):
+        def _integer_flow_rule(block, ii, oi, ti):
             """Force flow variable to NonNegativeInteger values.
             """
-            return self.integer_flow[i, o, t] == m.flow[i, o, t]
+            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, ti]
 
         self.integer_flow_constr = Constraint(self.INTEGER_FLOWS, m.TIMESTEPS,
                                               rule=_integer_flow_rule)
@@ -223,7 +223,8 @@ class Flow(SimpleBlock):
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 for t in m.TIMESTEPS:
-                    variable_costs += (m.flow[i, o, t] * m.objective_weighting[t] *
+                    variable_costs += (m.flow[i, o, t] *
+                                       m.objective_weighting[t] *
                                        m.flows[i, o].variable_costs[t])
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
@@ -374,7 +375,7 @@ class InvestmentFlow(SimpleBlock):
 
     :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
 
-    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
+    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment  # noqa: F401
 
     ===================  =============================  =========
 
@@ -624,21 +625,21 @@ class Bus(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {}
-        O = {}
+        ins = {}
+        outs = {}
         for n in group:
-            I[n] = [i for i in n.inputs]
-            O[n] = [o for o in n.outputs]
+            ins[n] = [i for i in n.inputs]
+            outs[n] = [o for o in n.outputs]
 
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
-                for n in group:
-                    lhs = sum(m.flow[i, n, t] for i in I[n])
-                    rhs = sum(m.flow[n, o, t] for o in O[n])
+                for g in group:
+                    lhs = sum(m.flow[i, g, t] for i in ins[g])
+                    rhs = sum(m.flow[g, o, t] for o in outs[g])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
-                        block.balance.add((n, t), expr)
+                        block.balance.add((g, t), expr)
         self.balance = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
