@@ -88,8 +88,49 @@ def test_generic_storage_with_old_parameters():
             **{
                 "label": "`GenericStorage` with `{}`".format(parameter),
                 parameter: deprecated[parameter],
-            }
-        )
+            })
+
+
+def test_generic_storage_with_non_convex_investment():
+    """Tests error if `offset` and `existing` attribute are given."""
+    with tools.assert_raises_regexp(
+            AttributeError, "Values for 'offset' and 'existing' are given"):
+        bel = Bus()
+        components.GenericStorage(
+            label='storage4',
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            investment=Investment(nonconvex=True, existing=5, maximum=25))
+
+
+def test_generic_storage_with_non_convex_invest_maximum():
+    """No investment maximum at nonconvex investment."""
+    with tools.assert_raises_regexp(
+            AttributeError, "Please provide an maximum investment value"):
+        bel = Bus()
+        components.GenericStorage(
+            label='storage6',
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            investment=Investment(nonconvex=True))
+
+
+def test_generic_storage_with_convex_invest_offset():
+    """Offset value is given and nonconvex is False."""
+    with tools.assert_raises_regexp(
+            AttributeError, "If `nonconvex` is `False`, the `offset`"):
+        bel = Bus()
+        components.GenericStorage(
+            label='storage6',
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            investment=Investment(offset=10))
 
 
 def test_generic_storage_with_invest_and_fixed_losses_absolute():

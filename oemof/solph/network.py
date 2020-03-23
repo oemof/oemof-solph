@@ -59,17 +59,17 @@ class Flow(on.Edge):
 
     Parameters
     ----------
-    nominal_value : numeric
+    nominal_value : numeric, :math:`P_{nom}`
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
-    max : numeric (iterable or scalar)
+    max : numeric (iterable or scalar), :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
-    min : numeric (iterable or scalar)
-        Nominal minimum value of the flow (see :attr:`max`).
-    actual_value : numeric (iterable or scalar)
-        Specific value for the flow variable. Will be multiplied with the
+    min : numeric (iterable or scalar), :math:`f_{min}`
+        Normed minimum value of the flow (see :attr:`max`).
+    actual_value : numeric (iterable or scalar), :math:`f_{actual}`
+        Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
         set to :obj:`True` the flow variable will be fixed to :py:`actual_value
         * nominal_value`, i.e. this value is set exogenous.
@@ -92,10 +92,10 @@ class Flow(on.Edge):
           * :py:`'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    summed_max : numeric
+    summed_max : numeric, :math:`f_{sum,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
-    summed_min : numeric
+    summed_min : numeric, :math:`f_{sum,min}`
         see above
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
@@ -145,7 +145,6 @@ class Flow(on.Edge):
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
     0.99
-
     """
 
     def __init__(self, **kwargs):
@@ -163,8 +162,7 @@ class Flow(on.Edge):
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
-                    'negative_gradient': {'ub': None, 'costs': 0},
-                    }
+                    'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
 
         for attribute in set(scalars + sequences + dictionaries + keys):

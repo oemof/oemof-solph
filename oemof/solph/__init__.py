@@ -4,3 +4,5 @@ from .models import Model
 from .groupings import GROUPINGS
 from .options import Investment, NonConvex
 from .plumbing import sequence
+from .components import (GenericStorage, GenericCHP, ExtractionTurbineCHP,
+                         OffsetTransformer)

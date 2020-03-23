@@ -723,3 +723,101 @@ class TestsConstraint:
             cost_dsm_down=2,
         )
         self.compare_lp_files('dsm_module_interval.lp')
+
+    def test_nonconvex_investment_storage_without_offset(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storage_non_convex',
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            investment=solph.Investment(ep_costs=141, maximum=244, minimum=12,
+                                        nonconvex=True))
+
+        self.compare_lp_files('storage_invest_without_offset.lp')
+
+    def test_nonconvex_investment_storage_with_offset(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.components.GenericStorage(
+            label='storagenon_convex',
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            investment=solph.Investment(ep_costs=145, minimum=19, offset=5,
+                                        nonconvex=True, maximum=1454))
+
+        self.compare_lp_files('storage_invest_with_offset.lp')
+
+    def test_nonconvex_invest_storage_all_nonconvex(self):
+        """All invest variables are free and nonconvex."""
+        b1 = solph.Bus(label='bus1')
+
+        solph.components.GenericStorage(
+            label='storage_all_nonconvex',
+            inputs={b1: solph.Flow(investment=solph.Investment(
+                nonconvex=True, minimum=5, offset=10, maximum=30,
+                ep_costs=10))},
+            outputs={b1: solph.Flow(
+                investment=solph.Investment(
+                    nonconvex=True, minimum=8, offset=15, ep_costs=10,
+                    maximum=20))},
+            investment=solph.Investment(
+                nonconvex=True, ep_costs=20, offset=30, minimum=20,
+                maximum=100))
+
+        self.compare_lp_files('storage_invest_all_nonconvex.lp')
+
+    def test_nonconvex_invest_sink_without_offset(self):
+        """ Non convex invest flow without offset, with minimum.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Sink(label='sink_nonconvex_invest', inputs={bel: solph.Flow(
+            summed_max=2.3, variable_costs=25, max=0.8,
+            investment=solph.Investment(ep_costs=500, minimum=15,
+                                        nonconvex=True, maximum=172))})
+        self.compare_lp_files('flow_invest_without_offset.lp')
+
+    def test_nonconvex_invest_source_with_offset(self):
+        """ Non convex invest flow with offset, with minimum.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='source_nonconvex_invest', inputs={bel: solph.Flow(
+            summed_max=2.3, variable_costs=25, max=0.8,
+            investment=solph.Investment(ep_costs=500, minimum=15, maximum=20,
+                                        offset=34, nonconvex=True))})
+        self.compare_lp_files('flow_invest_with_offset.lp')
+
+    def test_nonconvex_invest_source_with_offset_no_minimum(self):
+        """ Non convex invest flow with offset, without minimum.
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='source_nonconvex_invest', inputs={bel: solph.Flow(
+            summed_max=2.3, variable_costs=25, max=0.8,
+            investment=solph.Investment(ep_costs=500, maximum=1234,
+                                        offset=34, nonconvex=True))})
+        self.compare_lp_files('flow_invest_with_offset_no_minimum.lp')
