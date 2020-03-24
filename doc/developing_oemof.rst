@@ -220,6 +220,7 @@ The general implementation-independent documentation such as installation guide,
 How to become a member of oemof
 -------------------------------
 
-And last but not least, `here <https://github.com/oemof/organisation/issues/26>`_
-you will find all information about how to become a member of the oemof organisation and of developer teams.
+And last but not least,
+`here you will find <https://github.com/oemof/organisation/issues/26>`_
+all information about how to become a member of the oemof organisation and of developer teams.
 

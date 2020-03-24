@@ -28,8 +28,7 @@ class Flow(SimpleBlock):
         Difference of a flow in consecutive timesteps if flow is increased
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
+    **The following sets are created:** (-> see basic sets at :class:`.Model` )
 
     SUMMED_MAX_FLOWS
         A set of flows with the attribute :attr:`summed_max` being not None.
@@ -42,7 +41,7 @@ class Flow(SimpleBlock):
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
     INTEGER_FLOWS
-        A set of flows wher the attribute :attr:`integer` is True (forces flow
+        A set of flows where the attribute :attr:`integer` is True (forces flow
         to only take integer values)
 
     **The following constraints are build:**
@@ -60,24 +59,25 @@ class Flow(SimpleBlock):
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
     Negative gradient constraint
-    :attr:`om.Flow.negative_gradient_constr[i, o]`:
-      .. math:: flow(i, o, t-1) - flow(i, o, t) \geq \
-        negative\_gradient(i, o, t), \\
-        \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-        \forall t \in \textrm{TIMESTEPS}.
+      :attr:`om.Flow.negative_gradient_constr[i, o]`:
+        .. math::
+          flow(i, o, t-1) - flow(i, o, t) \geq \
+          negative\_gradient(i, o, t), \\
+          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
     Positive gradient constraint
-    :attr:`om.Flow.positive_gradient_constr[i, o]`:
+      :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
-            positive\__gradient(i, o, t), \\
-            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-            \forall t \in \textrm{TIMESTEPS}.
+          positive\__gradient(i, o, t), \\
+          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
-        .. math::
-            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
+      .. math::
+          \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
     The expression can be accessed by :attr:`om.Flow.variable_costs` and
     their value after optimization by :meth:`om.Flow.variable_costs()` .
@@ -732,7 +732,7 @@ class NonConvexFlow(SimpleBlock):
     STARTUPFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`maximum_startups` or :attr:`startup_costs`
-         being not None.
+        being not None.
     MAXSTARTUPFLOWS
         A subset of set STARTUPFLOWS with the attribute
         :attr:`maximum_startups` being not None.
@@ -787,7 +787,7 @@ class NonConvexFlow(SimpleBlock):
             \forall (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
-    :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+      :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{start}(i,o)
@@ -801,7 +801,7 @@ class NonConvexFlow(SimpleBlock):
             \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
-    :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+      :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{shutdown}(i,o)
