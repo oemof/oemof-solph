@@ -559,6 +559,25 @@ The following code block shows an example of the storage parametrization for the
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+If you want to view the temporal course of the state of charge of your storage
+after the optimisation, you need to check the ``storage_content`` in the results:
+
+.. code-block:: python
+
+    results = oemof.outputlib.processing.results(om)
+    column_name = (('your_storage_label', 'None'), 'storage_content')
+    SC = views.node(results, 'your_storage_label')['sequences'][column_name]
+
+The ``storage_content`` is the absolute value of the current stored energy.
+By calling:
+
+.. code-block:: python
+
+    views.node(results, 'your_storage_label')['scalars']
+
+you get the results of the scalar values of your storage, e.g. the initial
+storage content before time step zero (``init_content``).
+
 For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
 
 
