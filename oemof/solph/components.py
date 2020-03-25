@@ -51,7 +51,8 @@ class GenericStorage(network.Transformer):
         :math:`\dot{E}_{in,invest} = \dot{E}_{out,invest} \cdot r_{in,out}`
 
     initial_storage_level : numeric, :math:`c(-1)`
-        The content of the storage in the first time step of optimization.
+        The relative storage content in the timestep before the first
+        time step of optimization (between 0 and 1).
     balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
@@ -69,7 +70,7 @@ class GenericStorage(network.Transformer):
     outflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_o(t)`
         see: inflow_conversion_factor
     min_storage_level : numeric (iterable or scalar), :math:`c_{min}(t)`
-        The minimum storaged energy of the storage as fraction of the
+        The normed minimum storage content as fraction of the
         nominal storage capacity (between 0 and 1).
         To set different values in every time step use a sequence.
     max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
