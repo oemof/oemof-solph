@@ -48,3 +48,30 @@ By default down to INFO all messages are written on the screen and down to DEBUG
 You can also change the behaviour of the file handling (TimedRotatingFileHandler) by passing a dictionary with your own options (timed_rotating).
 
 See the API-doc of :py:func:`~oemof.tools.logger.define_logging` for all details.
+
+Debugging
+---------
+
+.. _oemof_tools_debugging_suspicioususagewarningsolph_label:
+
+SuspiciousUsageWarning
+~~~~~~~~~~~~~~~~~~~~~~
+
+The SuspiciousUsageWarning can help to find untypical usage of oemof's
+libraries. However, if you know what you are doing such warnings might be
+annoying. Therefore, it is possible to control the appearance of this warning.
+
+.. code-block:: python
+
+    # switch on SuspiciousUsageWarning
+    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+    # raise an error instead of a warning
+    warnings.filterwarnings("error", category=SuspiciousUsageWarning)
+
+    # switch off SuspiciousUsageWarning
+    warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
+
+For more information about the handling of warnings see the
+`warnings section <https://docs.python.org/3/library/warnings.html>`_ in the
+python documentation.

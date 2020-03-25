@@ -36,6 +36,14 @@ oemof.tools.logger module
     :undoc-members:
     :show-inheritance:
 
+oemof.tools.debugging module
+----------------------------
+
+.. automodule:: oemof.tools.debugging
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

@@ -57,7 +57,7 @@ def emission_limit(om, flows=None, limit=None):
 
 
 def generic_integral_limit(om, keyword, flows=None, limit=None):
-    """Set a global limit for flows weighted by attribute called keyword.
+    r"""Set a global limit for flows weighted by attribute called keyword.
     The attribute named by keyword has to be added
     to every flow you want to take into account.
 
@@ -100,6 +100,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
     :math:`\tau(t)`  P    width of time step :math:`t`
     :math:`L`        P    global limit given by keyword `limit`
+    ================ ==== =====================================================
 
     """
     if flows is None:

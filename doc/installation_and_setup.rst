@@ -160,20 +160,31 @@ Other commercial solvers like Gurobi or Cplex can be used as well. Have a look a
 Mac OSX
 =======
 
-Installation guidelines for Mac OS are still incomplete and not tested. As we do not have Mac users we could not test the following approaches, but they should work. If you are a Mac user please help us to improve this installation guide. Have look at the installation guide of Linux or Windows to get an idea what to do.
+Having Python 3 installed
+------------------------------
+If you have Python3 already installed, you can follow the installation instructions for Linux to install oemof.
 
-You can download python here: https://www.python.org/downloads/mac-osx/. For information on the installation process and on how to install python packages see here: https://docs.python.org/3/using/mac.html.
+Install Python 3
+------------------------------
+If you are using brew you can simply run
 
-Virtualenv: http://sourabhbajaj.com/mac-setup/Python/README.html
+.. code:: console
 
-Anaconda: https://www.continuum.io/downloads#osx
+  brew install python3
+  
+Otherwise please refer to https://www.python.org/downloads/mac-osx/ for installation instructions.
 
-You have to install a solver if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful.
+Mac Solver
+--------------
+So far only the CBC solver was tested on a Mac. If you are a Mac user and are using other Solvers successfully please help us to improve this installation guide.
+
+Please follow the installation instructions on the respective homepages for details.
 
 CBC-solver: https://projects.coin-or.org/Cbc
 
 GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
+If you install the CBC solver via brew (highly recommended), it should work without additional configuration.
 
 .. _check_installation_label:
 

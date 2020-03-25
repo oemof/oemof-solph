@@ -21,6 +21,10 @@ New features
     will now be defined by the timeindex and the calculated
     timeincrement.
 
+* Allows non-convex investments for flows and storages.
+    With this feature, fix investment costs, which do not dependent on the
+    nominal capacity, can be considered.
+
 New components
 ##############
 
@@ -61,4 +65,6 @@ Contributors
 * Caterina Köhl
 * Jonathan Amme
 * Uwe Krien
+* Johannes Röder
 * Jann Launer
+* Daniel Rank

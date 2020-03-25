@@ -20,6 +20,23 @@ You can test it by executing one of the existing examples. Be aware that the exa
 
 Once the example work you are close to your first energy model.
 
+
+Handling of Warnings
+^^^^^^^^^^^^^^^^^^^^
+
+The solph library is designed to be as generic as possible to make it possible
+to use it in different use cases. This concept makes it difficult to raise
+Error or Warnings because sometimes untypical combinations of parameters are
+allowed even though they might be wrong in over 99% of the use cases.
+
+Therefore, a SuspiciousUsageWarning was introduced. This warning will warn you
+if you do something untypical. If you are sure that you know what you are doing
+you can switch the warning off.
+
+See :ref:`oemof_tools_debugging_suspicioususagewarningsolph_label` for more
+information.
+
+
 Set up an energy system
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -851,6 +868,63 @@ would look like this:
 
     from oemof.tools import economics
     epc = economics.annuity(1000, 20, 0.05)
+
+So far, the investment costs and the installed capacity are mathematically a
+line through origin. But what if there is a minimum threshold for doing an
+investment, e.g. you cannot buy gas turbines lower than a certain
+nominal power, or, the marginal costs of bigger plants
+decrease.
+Therefore, you can use the parameter *nonconvex* and *offset* of the
+investment class. Both, work with investment in flows and storages. Here is an
+example of an transformer:
+
+.. code-block:: python
+
+    trafo = solph.Transformer(
+        label='transformer_nonconvex',
+        inputs={bus_0: solph.Flow()},
+        outputs={bus_1: solph.Flow(
+            investment=solph.Investment(
+                ep_costs=4,
+                maximum=100,
+                minimum=20,
+                nonconvex=True,
+                offset=400))},
+        conversion_factors={bus_1: 0.9})
+
+In this examples, it is assumed, that independent of the size of the
+transformer, there are always fix investment costs of 400 (€).
+The minimum investment size is 20 (kW)
+and the costs per installed unit are 4 (€/kW). With this
+option, you could theoretically approximate every cost function you want. But
+be aware that for every nonconvex investment flow or storage you are using,
+an additional binary variable is created. This might boost your computing time
+into the limitless.
+
+The following figures illustrates the use of the nonconvex investment flow.
+Here, :math:`c_{invest,fix}` is the *offset* value and :math:`c_{invest,var}` is
+the *ep_costs* value:
+
+.. 	image:: _files/nonconvex_invest_investcosts_power.svg
+   :width: 70 %
+   :alt: nonconvex_invest_investcosts_power.svg
+   :align: center
+
+In case of a convex investment (which is the default setting
+`nonconvex=Flase`), the *minimum* attribute leads to a forced investment,
+whereas in the nonconvex case, the investment can become zero as well.
+
+The calculation of the specific costs per kilowatt installed capacity results
+in the following relation for convex and nonconvex investments:
+
+.. 	image:: _files/nonconvex_invest_specific_costs.svg
+   :width: 70 %
+   :alt: nonconvex_invest_specific_costs.svg
+   :align: center
+
+See :py:class:`~oemof.solph.blocks.InvestmentFlow` and
+:py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` for all the
+mathematical background, like variables and constraints, which are used.
 
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.
 
