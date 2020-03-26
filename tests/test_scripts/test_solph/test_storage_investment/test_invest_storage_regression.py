@@ -11,7 +11,8 @@ SPDX-License-Identifier: MIT
 
 import oemof.solph as solph
 from oemof.network import Node
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
+from oemof.solph import processing
 
 import logging
 import pandas as pd

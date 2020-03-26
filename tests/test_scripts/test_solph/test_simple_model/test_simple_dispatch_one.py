@@ -14,7 +14,8 @@ SPDX-License-Identifier: MIT
 from nose.tools import eq_
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
+from oemof.solph import processing
 from oemof.network import Node
 
 

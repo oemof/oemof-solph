@@ -19,7 +19,8 @@ import pandas as pd
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem, Investment)
 from oemof.tools import economics
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
+from oemof.solph import processing
 from oemof.network import Node
 
 

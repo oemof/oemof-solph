@@ -1,3 +1,5 @@
+__version__ = "0.4.0.dev0"
+
 from .network import (Sink, Source, Transformer, Bus, Flow,
                       EnergySystem)
 from .models import Model

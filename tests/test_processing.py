@@ -15,7 +15,7 @@ from pandas.util.testing import assert_series_equal, assert_frame_equal
 from oemof.solph import (
     EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
 from oemof.solph.components import GenericStorage
-from oemof.outputlib import processing
+from oemof.solph import processing
 from oemof.outputlib import views
 
 

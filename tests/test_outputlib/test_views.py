@@ -1,7 +1,8 @@
 
 from nose.tools import eq_, raises
 from . import optimization_model, energysystem
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
+from oemof.solph import processing
 
 
 class Filter_Test():

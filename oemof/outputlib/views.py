@@ -14,7 +14,7 @@ from collections import OrderedDict
 import logging
 import pandas as pd
 from enum import Enum
-from oemof.outputlib.processing import convert_keys_to_strings
+from oemof.solph.processing import convert_keys_to_strings
 
 
 NONE_REPLACEMENT_STR = '_NONE_'

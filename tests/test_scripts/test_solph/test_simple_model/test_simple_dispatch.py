@@ -18,7 +18,8 @@ import os
 import pandas as pd
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
+from oemof.solph import processing
 
 
 def test_dispatch_example(solver='cbc', periods=24*5):

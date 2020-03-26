@@ -14,7 +14,7 @@ import datetime as dt
 import os
 import pandas as pd
 from collections import MutableMapping
-from ..solph.plumbing import sequence
+from oemof.solph.plumbing import sequence
 
 
 def get_basic_path():

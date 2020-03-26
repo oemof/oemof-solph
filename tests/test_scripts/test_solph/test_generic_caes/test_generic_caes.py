@@ -15,9 +15,10 @@ SPDX-License-Identifier: MIT
 from nose.tools import eq_
 import os
 import pandas as pd
-from oemof.solph import EnergySystem, Bus, Source, Sink, Flow, custom, Model
+from oemof.solph import EnergySystem, Bus, Source, Sink, Flow, custom, \
+    Model, processing
 from oemof.network import Node
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
 
 
 def test_gen_caes():

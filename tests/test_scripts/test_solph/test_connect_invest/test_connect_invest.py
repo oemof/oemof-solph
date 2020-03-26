@@ -12,7 +12,8 @@ SPDX-License-Identifier: MIT
 
 from nose.tools import eq_
 import oemof.solph as solph
-from oemof.outputlib import processing, views
+from oemof.outputlib import views
+from oemof.solph import processing
 
 import logging
 import os
