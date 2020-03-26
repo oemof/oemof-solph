@@ -1,0 +1,88 @@
+Metadata-Version: 1.2
+Name: oemof.solph
+Version: 0.4.0.dev0
+Summary: A model generator for energy system modelling and optimisation.
+Home-page: https://github.com/oemof/oemof.solph
+Author: oemof developer group
+Author-email: contact@oemof.org
+License: MIT
+Project-URL: Documentation, https://oemofsolph.readthedocs.io/
+Project-URL: Changelog, https://oemofsolph.readthedocs.io/en/latest/changelog.html
+Project-URL: Issue Tracker, https://github.com/uvchik/oemof.solph/issues
+Description: ========
+        Overview
+        ========
+
+
+
+        A model generator for energy system modelling and optimisation.
+
+        * Free software: MIT license
+
+        Installation
+        ============
+
+        ::
+
+            pip install oemof.solph
+
+        You can also install the in-development version with::
+
+            pip install https://github.com/oemof/oemof.solph/archive/master.zip
+
+
+        Documentation
+        =============
+
+
+        https://oemof-solph.readthedocs.io/
+
+
+        Development
+        ===========
+
+        To run the all tests run::
+
+            tox
+
+        Note, to combine the coverage data from all the tox environments run:
+
+        .. list-table::
+            :widths: 10 90
+            :stub-columns: 1
+
+            - - Windows
+              - ::
+
+                    set PYTEST_ADDOPTS=--cov-append
+                    tox
+
+            - - Other
+              - ::
+
+                    PYTEST_ADDOPTS=--cov-append tox
+
+
+        Changelog
+        =========
+
+        0.4.0.dev0 (2020-04-04)
+        -----------------------
+
+        * First release on PyPI.
+
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Unix
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Utilities
+Requires-Python: >=3.6
