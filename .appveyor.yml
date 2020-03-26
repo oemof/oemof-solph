@@ -86,7 +86,7 @@ install:
   - '%PYTHON_HOME%\Scripts\pip --version'
   - '%PYTHON_HOME%\Scripts\tox --version'
   - ps: (new-object net.webclient).DownloadFile('https://osf.io/rmfb7/download', 'my_test_solver.exe')
-  - ps: msiexec /i my_test_solver.exe /quiet /qn /norestart /log install.log PROPERTY1=value1 PROPERTY2=value2
+  - ps: exec /i my_test_solver.exe /quiet /qn /norestart /log install.log PROPERTY1=value1 PROPERTY2=value2
 
 test_script:
   - cmd /E:ON /V:ON /C .\ci\appveyor-with-compiler.cmd %PYTHON_HOME%\Scripts\tox
