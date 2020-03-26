@@ -5,6 +5,12 @@ env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
+
+addons:
+ apt:
+   packages:
+     - coinor-cbc 
+
 matrix:
   include:
     - python: '3.6'
