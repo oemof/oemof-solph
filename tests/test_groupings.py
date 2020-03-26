@@ -14,7 +14,7 @@ from types import MappingProxyType as MaProTy
 
 from nose.tools import assert_raises, eq_
 
-from oemof.groupings import Grouping
+from oemof.network.groupings import Grouping
 
 
 def test_initialization_argument_checks():

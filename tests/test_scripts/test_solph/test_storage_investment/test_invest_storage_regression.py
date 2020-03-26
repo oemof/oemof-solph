@@ -10,8 +10,8 @@ SPDX-License-Identifier: MIT
 """
 
 import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import views
+from oemof.network.network import Node
+from oemof.network import views
 from oemof.solph import processing
 
 import logging

@@ -19,7 +19,7 @@ import pandas as pd
 
 from oemof import outputlib
 
-from oemof.network import Node
+from oemof.network.network import Node
 import oemof.solph as solph
 
 

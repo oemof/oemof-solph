@@ -16,7 +16,7 @@ from oemof.solph import (
     EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
 from oemof.solph.components import GenericStorage
 from oemof.solph import processing
-from oemof.outputlib import views
+from oemof.network import views
 
 
 class TestParameterResult:

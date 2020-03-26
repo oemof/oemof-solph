@@ -17,11 +17,11 @@ from pprint import pformat
 from nose.tools import ok_, eq_
 import pandas as pd
 
-from oemof import energy_system as es
-from oemof.network import Entity
-from oemof.network import Bus, Transformer
-from oemof.network import Bus as NewBus, Node, temporarily_modifies_registry
-from oemof.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
+from oemof.network import energy_system as es
+from oemof.network.network import Entity
+from oemof.network.network import Bus, Transformer
+from oemof.network.network import Bus as NewBus, Node, temporarily_modifies_registry
+from oemof.network.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
 
 
 class TestsEnergySystem:

@@ -16,8 +16,8 @@ from nose.tools import eq_
 import os
 import pandas as pd
 import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import views
+from oemof.network.network import Node
+from oemof.network import views
 from oemof.solph import processing
 
 

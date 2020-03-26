@@ -14,8 +14,8 @@ available from its original location oemof/oemof/solph/network.py
 SPDX-License-Identifier: MIT
 """
 
-import oemof.network as on
-import oemof.energy_system as es
+import oemof.network.network as on
+import oemof.network.energy_system as es
 from oemof.solph.plumbing import sequence
 from oemof.solph import blocks
 from oemof.tools import debugging

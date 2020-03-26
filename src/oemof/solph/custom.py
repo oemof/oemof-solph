@@ -18,7 +18,7 @@ import logging
 
 from oemof.solph.network import Bus, Transformer, Flow, Sink
 from oemof.solph.plumbing import sequence
-from oemof.network import Transformer as NetworkTransformer
+from oemof.network.network import Transformer as NetworkTransformer
 
 
 class ElectricalBus(Bus):

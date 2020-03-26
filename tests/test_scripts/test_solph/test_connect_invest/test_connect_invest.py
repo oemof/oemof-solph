@@ -12,13 +12,13 @@ SPDX-License-Identifier: MIT
 
 from nose.tools import eq_
 import oemof.solph as solph
-from oemof.outputlib import views
+from oemof.network import views
 from oemof.solph import processing
 
 import logging
 import os
 import pandas as pd
-from oemof.network import Node
+from oemof.network.network import Node
 
 
 def test_connect_invest():

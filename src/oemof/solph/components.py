@@ -16,7 +16,7 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
                            Expression, BuildAction)
 
-from oemof import network
+from oemof.network import network
 from oemof.solph import Transformer as solph_Transformer
 from oemof.solph import sequence as solph_sequence
 from oemof.solph import Investment

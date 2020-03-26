@@ -37,13 +37,13 @@ setup(
         ),
         re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
     ),
-    long_description_content_type='text/x-rst',
+    long_description_content_type="text/x-rst",
     author="oemof developer group",
     author_email="contact@oemof.org",
     url="https://oemof.org",
     packages=["oemof"] + ["oemof." + p for p in find_packages("src/oemof")],
     package_dir={"": "src"},
-    namespace_package=['oemof'],
+    namespace_package=["oemof"],
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
     include_package_data=True,
     zip_safe=False,
@@ -62,10 +62,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
-        # uncomment if you test on these interpreters:
-        # 'Programming Language :: Python :: Implementation :: IronPython',
-        # 'Programming Language :: Python :: Implementation :: Jython',
-        # 'Programming Language :: Python :: Implementation :: Stackless',
         "Topic :: Utilities",
     ],
     project_urls={
@@ -80,19 +76,19 @@ setup(
     ],
     python_requires=">=3.6",
     install_requires=[
-        'blinker,
-        'dill,
-        'numpy,
-        'pandas,
-        'pyomo >= 4.4.0, < 6.0',
-        'networkx,
+        "blinker",
+        "dill",
+        "numpy",
+        "pandas",
+        "pyomo >= 4.4.0, < 6.0",
+        "networkx",
+        "reegis@https://github.com/reegis/reegis/archive/master.zip",
     ],
-    extras_require={
-        'dev': ['nose', 'sphinx', 'sphinx_rtd_theme']
-    },
-    
+    extras_require={"dev": ["nose", "sphinx", "sphinx_rtd_theme"]},
     entry_points={
-          'console_scripts': [
-              'oemof_installation_test = ' +
-              'oemof.tools.console_scripts:check_oemof_installation']})
+        "console_scripts": [
+            "oemof_installation_test = "
+            + "oemof.tools.console_scripts:check_oemof_installation"
+        ]
+    },
 )

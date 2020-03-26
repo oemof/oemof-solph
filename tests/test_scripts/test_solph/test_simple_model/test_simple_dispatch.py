@@ -18,7 +18,7 @@ import os
 import pandas as pd
 from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
                          EnergySystem)
-from oemof.outputlib import views
+from oemof.network import views
 from oemof.solph import processing
 
 

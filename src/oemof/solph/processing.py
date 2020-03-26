@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 import pandas as pd
 import sys
-from oemof.network import Node
+from oemof.network.network import Node
 from oemof.tools.helpers import flatten
 from itertools import groupby
 from pyomo.core.base.var import Var

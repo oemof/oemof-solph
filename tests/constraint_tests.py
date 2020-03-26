@@ -17,7 +17,7 @@ import re
 from nose.tools import eq_, assert_raises
 import pandas as pd
 
-from oemof.network import Node
+from oemof.network.network import Node
 from oemof.tools import helpers
 import oemof.solph as solph
 

@@ -17,8 +17,8 @@ import os
 import pandas as pd
 from oemof.solph import EnergySystem, Bus, Source, Sink, Flow, custom, \
     Model, processing
-from oemof.network import Node
-from oemof.outputlib import views
+from oemof.network.network import Node
+from oemof.network import views
 
 
 def test_gen_caes():
