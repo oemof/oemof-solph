@@ -9,7 +9,7 @@ env:
 addons:
  apt:
    packages:
-     - coinor-cbc 
+     - coinor-cbc
 
 matrix:
   include:
@@ -25,17 +25,17 @@ matrix:
     - env:
         - TOXENV=py36-nocov
       python: '3.6'
-    - os: osx
-      language: generic
-      env:
-        - TOXENV=py37-cover
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOXENV=py37-cover
     - env:
         - TOXENV=py37-cover,codecov,coveralls
       python: '3.7'
-    - os: osx
-      language: generic
-      env:
-        - TOXENV=py37-nocov
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOXENV=py37-nocov
     - env:
         - TOXENV=py37-nocov
       python: '3.7'

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import subprocess
 from os.path import abspath
 from os.path import dirname
 from os.path import exists
@@ -64,7 +65,7 @@ def main():
 
     tox_environments = {}
     for (alias, conf) in matrix.from_file(join(base_path, "setup.cfg")).items():
-        python = conf["python_versions"]
+        # python = conf["python_versions"]
         deps = conf["dependencies"]
         tox_environments[alias] = {
             "deps": deps.split(),
