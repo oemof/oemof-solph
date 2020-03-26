@@ -82,7 +82,8 @@ setup(
         "pandas",
         "pyomo >= 4.4.0, < 6.0",
         "networkx",
-        "reegis@https://github.com/reegis/reegis/archive/master.zip",
+        "oemof.network@https://github.com/oemof/oemof.network/archive/uvchik-test-branch.zip",
+        
     ],
     extras_require={"dev": ["nose", "sphinx", "sphinx_rtd_theme"]},
     entry_points={

@@ -13,7 +13,7 @@ import os
 
 from nose.tools import ok_, assert_raises_regexp
 
-from oemof.tools import logger
+from src.oemof.tools import logger
 from oemof.tools import helpers
 from oemof.tools import economics
 
