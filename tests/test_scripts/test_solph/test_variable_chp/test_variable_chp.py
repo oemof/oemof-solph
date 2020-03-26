@@ -17,10 +17,9 @@ import logging
 import os
 import pandas as pd
 
-from oemof import outputlib
-
 from oemof.network.network import Node
-import oemof.solph as solph
+from oemof.network import views
+from oemof import solph
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
@@ -99,10 +98,10 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     logging.info('Solve the optimization problem')
     om.solve(solver=solver)
 
-    optimisation_results = outputlib.processing.results(om)
-    parameter = outputlib.processing.parameter_as_dict(energysystem)
+    optimisation_results = solph.processing.results(om)
+    parameter = solph.processing.parameter_as_dict(energysystem)
 
-    myresults = outputlib.views.node(optimisation_results,
+    myresults = views.node(optimisation_results,
                                      "('natural', 'gas')")
     sumresults = myresults['sequences'].sum(axis=0)
     maxresults = myresults['sequences'].max(axis=0)
@@ -133,4 +132,4 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
           ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
 
     # objective function
-    eq_(round(outputlib.processing.meta_results(om)['objective']), 326661590)
+    eq_(round(solph.processing.meta_results(om)['objective']), 326661590)

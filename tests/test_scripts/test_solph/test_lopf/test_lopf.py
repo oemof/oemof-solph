@@ -16,10 +16,9 @@ from nose.tools import eq_
 import logging
 import pandas as pd
 
-from oemof import outputlib
-
-import oemof.solph as solph
-from oemof.solph import custom
+from oemof.solph import (custom, EnergySystem, Investment, Flow, Source, Sink,
+                         Model, processing)
+from oemof.network import views
 
 
 def test_lopf(solver="cbc"):
@@ -27,7 +26,7 @@ def test_lopf(solver="cbc"):
 
     # create time index for 192 hours in May.
     date_time_index = pd.date_range("5/5/2012", periods=1, freq="H")
-    es = solph.EnergySystem(timeindex=date_time_index)
+    es = EnergySystem(timeindex=date_time_index)
 
     ##########################################################################
     # Create oemof.solph objects
@@ -48,7 +47,7 @@ def test_lopf(solver="cbc"):
             input=b_el0,
             output=b_el1,
             reactance=0.0001,
-            investment=solph.Investment(ep_costs=10),
+            investment=Investment(ep_costs=10),
             min=-1,
             max=1,
         )
@@ -77,24 +76,24 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        solph.Source(
+        Source(
             label="gen_0",
-            outputs={b_el0: solph.Flow(nominal_value=100, variable_costs=50)},
+            outputs={b_el0: Flow(nominal_value=100, variable_costs=50)},
         )
     )
 
     es.add(
-        solph.Source(
+        Source(
             label="gen_1",
-            outputs={b_el1: solph.Flow(nominal_value=100, variable_costs=25)},
+            outputs={b_el1: Flow(nominal_value=100, variable_costs=25)},
         )
     )
 
     es.add(
-        solph.Sink(
+        Sink(
             label="load",
             inputs={
-                b_el2: solph.Flow(
+                b_el2: Flow(
                     nominal_value=100, actual_value=1, fixed=True
                 )
             },
@@ -106,14 +105,14 @@ def test_lopf(solver="cbc"):
     ##########################################################################
 
     logging.info("Creating optimisation model")
-    om = solph.Model(es)
+    om = Model(es)
 
     logging.info("Running lopf on 3-Node exmaple system")
     om.solve(solver=solver)
 
-    results = outputlib.processing.results(om)
+    results = processing.results(om)
 
-    generators = outputlib.views.node_output_by_type(results, solph.Source)
+    generators = views.node_output_by_type(results, Source)
 
     generators_test_results = {
         (es.groups["gen_0"], es.groups["b_0"], "flow"): 20,
@@ -142,4 +141,4 @@ def test_lopf(solver="cbc"):
     )
 
     # objective function
-    eq_(round(outputlib.processing.meta_results(om)["objective"]), 3200)
+    eq_(round(processing.meta_results(om)["objective"]), 3200)

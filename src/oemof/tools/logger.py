@@ -13,7 +13,7 @@ import os
 from logging import (INFO, DEBUG, getLogger, Formatter, StreamHandler,
                      handlers, debug, info)
 import sys
-from oemof.tools import helpers
+from oemof.solph import helpers
 import oemof
 
 

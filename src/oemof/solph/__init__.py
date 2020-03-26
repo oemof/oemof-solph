@@ -8,3 +8,6 @@ from .options import Investment, NonConvex
 from .plumbing import sequence
 from .components import (GenericStorage, GenericCHP, ExtractionTurbineCHP,
                          OffsetTransformer)
+from .processing import results, parameter_as_dict
+from . import constraints
+from . import custom

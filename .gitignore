@@ -17,7 +17,8 @@
 doc/_build/
 dist/*
 oemof.egg-info/*
-oemof_base.egg-info/*
+*.egg-info/*
+src/*.egg-info/*
 build/*
-
-
+.tox/*
+.coverage

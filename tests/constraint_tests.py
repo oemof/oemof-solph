@@ -18,8 +18,8 @@ from nose.tools import eq_, assert_raises
 import pandas as pd
 
 from oemof.network.network import Node
-from oemof.tools import helpers
-import oemof.solph as solph
+# from oemof.solph.helpers import extend_basic_path
+from oemof import solph
 
 logging.disable(logging.INFO)
 
@@ -33,7 +33,7 @@ class TestsConstraint:
 
         cls.date_time_index = pd.date_range('1/1/2012', periods=3, freq='H')
 
-        cls.tmppath = helpers.extend_basic_path('tmp')
+        cls.tmppath = solph.helpers.extend_basic_path('tmp')
         logging.info(cls.tmppath)
 
     def setup(self):
