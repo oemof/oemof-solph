@@ -9,13 +9,12 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-import oemof.solph as solph
-from oemof.network.network import Node
-from oemof.network import views
-from oemof.solph import processing
-
 import logging
+
 import pandas as pd
+from oemof import solph
+from oemof.network import views
+from oemof.network.network import Node
 
 
 def test_regression_investment_storage(solver='cbc'):
@@ -66,7 +65,7 @@ def test_regression_investment_storage(solver='cbc'):
     om.solve(solver=solver)
 
     # Results
-    results = processing.results(om)
+    results = solph.processing.results(om)
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()

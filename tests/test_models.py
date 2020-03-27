@@ -9,12 +9,15 @@ available from its original location oemof/tests/basic_tests.py
 SPDX-License-Identifier: MIT
 """
 
-import pandas as pd
-from oemof import solph
-from oemof.solph.helpers import calculate_timeincrement
-from nose.tools import eq_, raises
-from nose import tools
 import warnings
+
+import pandas as pd
+from nose import tools
+from nose.tools import eq_
+from nose.tools import raises
+from oemof import solph
+
+from oemof.solph.helpers import calculate_timeincrement
 
 
 def test_timeincrement_with_valid_timeindex():

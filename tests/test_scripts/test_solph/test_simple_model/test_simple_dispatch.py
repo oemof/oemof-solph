@@ -13,12 +13,19 @@ oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import os
+
 import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
-                         EnergySystem)
+from nose.tools import eq_
 from oemof.network import views
+
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
 from oemof.solph import processing
 
 

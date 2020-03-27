@@ -9,14 +9,23 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_, assert_raises, ok_
 import pandas
-from pandas.util.testing import assert_series_equal, assert_frame_equal
-from oemof.solph import (
-    EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
-from oemof.solph.components import GenericStorage
-from oemof.solph import processing
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
 from oemof.network import views
+from pandas.util.testing import assert_frame_equal
+from pandas.util.testing import assert_series_equal
+
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph.components import GenericStorage
 
 
 class TestParameterResult:

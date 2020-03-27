@@ -14,14 +14,19 @@ except ImportError:
     from collections import Iterable
 from pprint import pformat
 
-from nose.tools import ok_, eq_
 import pandas as pd
-
+from nose.tools import eq_
+from nose.tools import ok_
 from oemof.network import energy_system as es
+from oemof.network.groupings import Flows
+from oemof.network.groupings import FlowsWithNodes as FWNs
+from oemof.network.groupings import Grouping
+from oemof.network.groupings import Nodes
+from oemof.network.network import Bus
 from oemof.network.network import Entity
-from oemof.network.network import Bus, Transformer
-from oemof.network.network import Bus as NewBus, Node, temporarily_modifies_registry
-from oemof.network.groupings import Grouping, Nodes, Flows, FlowsWithNodes as FWNs
+from oemof.network.network import Node
+from oemof.network.network import Transformer
+from oemof.network.network import temporarily_modifies_registry
 
 
 class TestsEnergySystem:
@@ -184,7 +189,7 @@ class TestsEnergySystem:
         without having to worry about `Grouping`s trying to call them. This
         test makes sure that the parameter is handled correctly.
         """
-        everything = lambda: "everything"
+        def everything(): return "everything"
         collect_everything = Nodes(constant_key=everything)
         ensys = es.EnergySystem(groupings=[collect_everything])
         Node.registry = ensys
@@ -199,7 +204,7 @@ class TestsEnergySystem:
         ensys = es.EnergySystem(groupings=[Flows(key)])
         Node.registry = ensys
         flows = (object(), object())
-        bus = NewBus(label="A Bus")
+        bus = Bus(label="A Bus")
         Node(label="A Node", inputs={bus: flows[0]}, outputs={bus: flows[1]})
         eq_(ensys.groups[key], set(flows))
 
@@ -209,7 +214,7 @@ class TestsEnergySystem:
         ensys = es.EnergySystem(groupings=[FWNs(key)])
         Node.registry = ensys
         flows = (object(), object())
-        bus = NewBus(label="A Bus")
+        bus = Bus(label="A Bus")
         node = Node(label="A Node",
                     inputs={bus: flows[0]}, outputs={bus: flows[1]})
         eq_(ensys.groups[key], {(bus, node, flows[0]), (node, bus, flows[1])})

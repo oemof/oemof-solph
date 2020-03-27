@@ -9,11 +9,12 @@ SPDX-License-Identifier: MIT
 """
 
 import pyomo.environ as po
+
 from oemof.solph.plumbing import sequence
 
 
 def investment_limit(model, limit=None):
-    """ Set an absolute limit for the total investment costs of an investment
+    r""" Set an absolute limit for the total investment costs of an investment
     optimization problem:
 
     .. math:: \sum_{investment\_costs} \leq limit
@@ -42,7 +43,7 @@ def investment_limit(model, limit=None):
 
 
 def emission_limit(om, flows=None, limit=None):
-    """
+    r"""
     Short handle for generic_integral_limit() with keyword="emission_factor".
 
     Note

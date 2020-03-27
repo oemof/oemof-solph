@@ -12,13 +12,20 @@ oemof/tests/test_scripts/test_solph/test_variable_chp/test_variable_chp.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import logging
-import pandas as pd
 
-from oemof.solph import (custom, EnergySystem, Investment, Flow, Source, Sink,
-                         Model, processing)
+import pandas as pd
+from nose.tools import eq_
 from oemof.network import views
+
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import custom
+from oemof.solph import processing
 
 
 def test_lopf(solver="cbc"):

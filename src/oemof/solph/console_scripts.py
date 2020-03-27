@@ -12,8 +12,8 @@ SPDX-License-Identifier: MIT
 
 import logging
 
-from oemof import solph
 import pandas as pd
+from oemof import solph
 
 
 def check_oemof_installation(silent=False):

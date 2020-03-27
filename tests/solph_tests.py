@@ -10,12 +10,12 @@ SPDX-License-Identifier: MIT
 """
 
 from nose.tools import ok_
-
 from oemof.network.energy_system import EnergySystem as EnSys
 from oemof.network.network import Node
-from oemof.solph.blocks import InvestmentFlow as InvFlow
-from oemof.solph import Investment
+
 import oemof.solph as solph
+from oemof.solph import Investment
+from oemof.solph.blocks import InvestmentFlow as InvFlow
 
 
 class TestsGrouping:

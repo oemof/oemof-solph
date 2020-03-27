@@ -12,8 +12,10 @@ SPDX-License-Identifier: MIT
 """
 import datetime as dt
 import os
-import pandas as pd
 from collections import MutableMapping
+
+import pandas as pd
+
 from oemof.solph.plumbing import sequence
 
 

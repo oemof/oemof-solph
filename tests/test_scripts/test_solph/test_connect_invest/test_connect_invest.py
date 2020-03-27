@@ -10,16 +10,25 @@ oemof/tests/test_scripts/test_solph/test_connect_invest/test_connect_invest.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
-from oemof.network import views
-from oemof.solph import (processing, EnergySystem, Bus, Sink, Source, Flow,
-                         components, Transformer, Investment, constraints,
-                         Model)
-
 import logging
 import os
+
 import pandas as pd
+from nose.tools import eq_
 from oemof.network import network
+from oemof.network import views
+
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
+from oemof.solph import components
+from oemof.solph import constraints
+from oemof.solph import processing
 
 
 def test_connect_invest():
@@ -27,7 +36,7 @@ def test_connect_invest():
 
     energysystem = EnergySystem(timeindex=date_time_index)
     network.Node.registry = energysystem
-    
+
     # Read data file
     full_filename = os.path.join(os.path.dirname(__file__),
                                  'connect_invest.csv')

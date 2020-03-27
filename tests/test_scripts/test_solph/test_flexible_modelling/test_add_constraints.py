@@ -14,13 +14,19 @@ test_flexible_modelling/test_add_constraints.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import ok_
 import logging
-import pyomo.environ as po
+
 import pandas as pd
+import pyomo.environ as po
+from nose.tools import ok_
 from oemof.network.network import Node
-from oemof.solph import (Sink, Transformer, Bus, Flow,
-                         Model, EnergySystem)
+
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
 
 
 def test_add_constraints_example(solver='cbc', nologg=False):

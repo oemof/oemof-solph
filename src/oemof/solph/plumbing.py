@@ -9,7 +9,8 @@ available from its original location oemof/oemof/solph/plumbing.py
 SPDX-License-Identifier: MIT
 """
 
-from collections import abc, UserList
+from collections import UserList
+from collections import abc
 from itertools import repeat
 
 

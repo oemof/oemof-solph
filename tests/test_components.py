@@ -10,12 +10,18 @@ SPDX-License-Identifier: MIT
 """
 
 import warnings
+
 from nose import tools
-from oemof.solph import Bus, components, Flow, Investment, NonConvex
 from oemof.tools.debugging import SuspiciousUsageWarning
 
+from oemof.solph import Bus
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import NonConvex
+from oemof.solph import components
 
 # ********* GenericStorage *********
+
 
 @tools.raises(AttributeError)
 def test_generic_storage_1():

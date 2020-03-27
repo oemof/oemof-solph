@@ -9,17 +9,16 @@ available from its original location oemof/tests/constraint_tests.py
 SPDX-License-Identifier: MIT
 """
 
-from difflib import unified_diff
 import logging
 import os.path as ospath
 import re
+from difflib import unified_diff
 
-from nose.tools import eq_, assert_raises
 import pandas as pd
-
-from oemof.network.network import Node
-# from oemof.solph.helpers import extend_basic_path
+from nose.tools import assert_raises
+from nose.tools import eq_
 from oemof import solph
+from oemof.network.network import Node
 
 logging.disable(logging.INFO)
 
@@ -341,7 +340,7 @@ class TestsConstraint:
                 ep_costs=145, minimum=100, maximum=200))
 
         self.compare_lp_files('storage_invest_minimum.lp')
-        
+
     def test_storage_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label='electricityBus')
@@ -354,9 +353,9 @@ class TestsConstraint:
             initial_storage_level=None,
             balanced=False,
             invest_relation_input_capacity=1,
-            invest_relation_output_capacity=1)    
+            invest_relation_output_capacity=1)
         self.compare_lp_files('storage_unbalanced.lp')
-    
+
     def test_storage_invest_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label='electricityBus')

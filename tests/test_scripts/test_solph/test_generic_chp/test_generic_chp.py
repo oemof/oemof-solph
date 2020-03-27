@@ -12,12 +12,14 @@ oemof/tests/test_scripts/test_solph/test_generic_chp/test_generic_chp.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import os
+
 import pandas as pd
-import oemof.solph as solph
-from oemof.network.network import Node
+from nose.tools import eq_
 from oemof.network import views
+from oemof.network.network import Node
+
+import oemof.solph as solph
 from oemof.solph import processing
 
 

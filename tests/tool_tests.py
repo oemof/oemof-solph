@@ -11,11 +11,12 @@ SPDX-License-Identifier: MIT
 
 import os
 
-from nose.tools import ok_, assert_raises_regexp
-
-from src.oemof.tools import logger
-from oemof.solph import helpers
+from nose.tools import assert_raises_regexp
+from nose.tools import ok_
 from oemof.tools import economics
+from src.oemof.tools import logger
+
+from oemof.solph import helpers
 
 
 def test_helpers():

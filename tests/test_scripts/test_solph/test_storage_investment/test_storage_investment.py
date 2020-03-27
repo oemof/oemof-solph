@@ -34,20 +34,18 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-from unittest import skip
-
-from nose.tools import eq_
-
-from oemof.tools import economics
-
-import oemof.solph as solph
-from oemof.network.network import Node
-from oemof.network import views
-from oemof.solph import processing
-
 import logging
 import os
+from unittest import skip
+
 import pandas as pd
+from nose.tools import eq_
+from oemof import solph
+from oemof.network import views
+from oemof.network.network import Node
+from oemof.tools import economics
+
+from oemof.solph import processing
 
 PP_GAS = None
 

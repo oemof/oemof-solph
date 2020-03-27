@@ -11,12 +11,14 @@ available from its original location oemof/oemof/outputlib/processing.py
 SPDX-License-Identifier: MIT
 """
 
-import pandas as pd
 import sys
-from oemof.network.network import Node
-from oemof.solph.helpers import flatten
 from itertools import groupby
+
+import pandas as pd
+from oemof.network.network import Node
 from pyomo.core.base.var import Var
+
+from oemof.solph.helpers import flatten
 
 
 def get_tuple(x):

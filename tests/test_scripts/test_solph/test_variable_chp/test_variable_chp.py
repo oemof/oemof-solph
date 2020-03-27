@@ -12,14 +12,14 @@ oemof/tests/test_scripts/test_solph/test_variable_chp/test_variable_chp.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import logging
 import os
-import pandas as pd
 
-from oemof.network.network import Node
-from oemof.network import views
+import pandas as pd
+from nose.tools import eq_
 from oemof import solph
+from oemof.network import views
+from oemof.network.network import Node
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
@@ -101,8 +101,7 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     optimisation_results = solph.processing.results(om)
     parameter = solph.processing.parameter_as_dict(energysystem)
 
-    myresults = views.node(optimisation_results,
-                                     "('natural', 'gas')")
+    myresults = views.node(optimisation_results, "('natural', 'gas')")
     sumresults = myresults['sequences'].sum(axis=0)
     maxresults = myresults['sequences'].max(axis=0)
 
@@ -129,7 +128,7 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
         ['scalars']['label'], "('fixed_chp', 'gas')")
     eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
-          ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
+        ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
 
     # objective function
     eq_(round(solph.processing.meta_results(om)['objective']), 326661590)

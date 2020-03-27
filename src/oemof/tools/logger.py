@@ -10,11 +10,19 @@ SPDX-License-Identifier: MIT
 """
 
 import os
-from logging import (INFO, DEBUG, getLogger, Formatter, StreamHandler,
-                     handlers, debug, info)
 import sys
-from oemof.solph import helpers
+from logging import DEBUG
+from logging import INFO
+from logging import Formatter
+from logging import StreamHandler
+from logging import debug
+from logging import getLogger
+from logging import handlers
+from logging import info
+
 import oemof
+
+from oemof.solph import helpers
 
 
 def define_logging(logpath=None, logfile='oemof.log', file_format=None,

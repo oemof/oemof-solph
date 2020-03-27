@@ -34,17 +34,17 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
-from collections import namedtuple
-
-import oemof.solph as solph
-from oemof.network.network import Node
-from oemof.network import views
-from oemof.solph import processing
-
 import logging
 import os
+from collections import namedtuple
+
 import pandas as pd
+from nose.tools import eq_
+from oemof.network import views
+from oemof.network.network import Node
+
+import oemof.solph as solph
+from oemof.solph import processing
 
 
 class Label(namedtuple('solph_label', ['tag1', 'tag2', 'tag3'])):

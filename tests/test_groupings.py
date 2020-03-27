@@ -12,8 +12,8 @@ SPDX-License-Identifier: MIT
 
 from types import MappingProxyType as MaProTy
 
-from nose.tools import assert_raises, eq_
-
+from nose.tools import assert_raises
+from nose.tools import eq_
 from oemof.network.groupings import Grouping
 
 
