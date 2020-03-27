@@ -82,9 +82,10 @@ setup(
         "pandas",
         "pyomo >= 4.4.0, < 6.0",
         "networkx",
+        ("oemof.tools@https://github.com/oemof/oemof.tools/archive/master.zip"
+         ),
         ("oemof.network@https://github.com/oemof/oemof.network/archive/"
          "uvchik-test-branch.zip"),
-        "oemof.tools@https://github.com/oemof/oemof-tools/archive/master.zip"
     ],
     extras_require={"dev": ["nose", "sphinx", "sphinx_rtd_theme", ],
                     "dummy": ["oemof"]},
