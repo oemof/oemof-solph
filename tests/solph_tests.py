@@ -9,11 +9,14 @@ available from its original location oemof/tests/solph_tests.py
 SPDX-License-Identifier: MIT
 """
 
+import os
+
 from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
 from oemof.network.network import Node
 
 import oemof.solph as solph
+from oemof.solph.helpers import extend_basic_path
 from oemof.solph import Investment
 from oemof.solph.blocks import InvestmentFlow as InvFlow
 
@@ -50,3 +53,11 @@ class TestsGrouping:
         ok_(self.es.groups.get(InvFlow),
             ("Expected InvestmentFlow group to be nonempty.\n" +
              "Got: {}").format(self.es.groups.get(InvFlow)))
+
+
+def test_helpers():
+    ok_(os.path.isdir(os.path.join(os.path.expanduser('~'), '.oemof')))
+    new_dir = extend_basic_path('test_xf67456_dir')
+    ok_(os.path.isdir(new_dir))
+    os.rmdir(new_dir)
+    ok_(not os.path.isdir(new_dir))

@@ -84,6 +84,7 @@ setup(
         "networkx",
         ("oemof.network@https://github.com/oemof/oemof.network/archive/"
          "uvchik-test-branch.zip"),
+        "oemof.tools@https://github.com/oemof/oemof-tools/archive/master.zip"
     ],
     extras_require={"dev": ["nose", "sphinx", "sphinx_rtd_theme", ],
                     "dummy": ["oemof"]},
