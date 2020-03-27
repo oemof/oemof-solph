@@ -22,9 +22,9 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph import Investment
-from oemof.solph import Transformer as solph_Transformer
-from oemof.solph import sequence as solph_sequence
+from oemof.solph.network import Transformer as solph_Transformer
+from oemof.solph.options import Investment
+from oemof.solph.plumbing import sequence as solph_sequence
 
 
 class GenericStorage(network.Transformer):
