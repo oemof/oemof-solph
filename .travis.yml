@@ -38,7 +38,7 @@ matrix:
         - TOXENV=py38-nocov
       python: '3.8'
   allow_failures:
-    -   python: '3.6'
+    - python: '3.6'
       env:
         - TOXENV=docs
     - os: osx
