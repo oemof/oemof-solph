@@ -16,9 +16,6 @@ matrix:
     - python: '3.6'
       env:
         - TOXENV=check
-    - python: '3.6'
-      env:
-        - TOXENV=docs
     - env:
         - TOXENV=py36-cover,codecov,coveralls
       python: '3.6'
