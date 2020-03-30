@@ -43,7 +43,6 @@ setup(
     url="https://oemof.org",
     packages=["oemof"] + ["oemof." + p for p in find_packages("src/oemof")],
     package_dir={"": "src"},
-    namespace_package=["oemof"],
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
     include_package_data=True,
     zip_safe=False,
