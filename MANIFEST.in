@@ -15,6 +15,7 @@ include LICENSE
 include README.rst
 include *.md
 include VERSION
+include pytest.ini
 
 include tox.ini .travis.yml .appveyor.yml .readthedocs.yml
 
