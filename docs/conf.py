@@ -14,19 +14,19 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
 ]
-source_suffix = ".rst"
-master_doc = "index"
-project = "oemof.solph"
-year = "2014-2020"
-author = "Uwe Krien"
-copyright = "{0}, {1}".format(year, author)
-version = release = "0.4.0.dev0"
+source_suffix = '.rst'
+master_doc = 'index'
+project = 'oemof-solph'
+year = '2014-2020'
+author = 'oemof developer group'
+copyright = '{0}, {1}'.format(year, author)
+version = release = '0.4.0.dev0'
 
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    "issue": ("https://github.com/oemof/oemof.solph/issues/%s", "#"),
-    "pr": ("https://github.com/oemof/oemof.solph/pull/%s", "PR #"),
+    'issue': ('https://github.com/oemof/oemof-solph/issues/%s', '#'),
+    'pr': ('https://github.com/oemof/oemof-solph/pull/%s', 'PR #'),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"

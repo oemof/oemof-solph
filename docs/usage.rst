@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use oemof.solph in a project::
+To use oemof-solph in a project::
 
-	import oemof.solph
+	import oemof-solph

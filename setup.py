@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 
 setup(
-    name="oemof.solph",
+    name="oemof-solph",
     version="0.4.0.dev0",
     license="MIT",
     description=(

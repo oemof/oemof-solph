@@ -2,4 +2,4 @@
 Authors
 =======
 
-* Uwe Krien
+* oemof developer group - https://oemof.org

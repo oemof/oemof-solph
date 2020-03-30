@@ -24,7 +24,6 @@ logging.disable(logging.INFO)
 
 
 class TestsConstraint:
-
     @classmethod
     def setup_class(cls):
         cls.objective_pattern = re.compile(r'^objective.*(?=s\.t\.)',

@@ -12,7 +12,7 @@ environment:
       PYTHON_ARCH: '32'
 {% for env, config in tox_environments|dictsort %}
 {% if env.startswith(('py2', 'py3')) %}
-    - TOXENV: {{ env }}{% if config.cover %},codecov,coveralls{% endif %}{{ "" }}
+    - TOXENV: {{ env }},codecov,coveralls{{ "" }}
       TOXPYTHON: C:\Python{{ env[2:4] }}\python.exe
       PYTHON_HOME: C:\Python{{ env[2:4] }}
       PYTHON_VERSION: '{{ env[2] }}.{{ env[3] }}'
@@ -20,7 +20,7 @@ environment:
 {% if 'nocov' in env %}
       WHEEL_PATH: .tox/dist
 {% endif %}
-    - TOXENV: {{ env }}{% if config.cover %},codecov,coveralls{% endif %}{{ "" }}
+    - TOXENV: {{ env }},codecov,coveralls{{ "" }}
       TOXPYTHON: C:\Python{{ env[2:4] }}-x64\python.exe
       PYTHON_HOME: C:\Python{{ env[2:4] }}-x64
       PYTHON_VERSION: '{{ env[2] }}.{{ env[3] }}'

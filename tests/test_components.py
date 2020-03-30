@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 """
 
 import warnings
+import pytest
 
 from nose import tools
 from oemof.tools.debugging import SuspiciousUsageWarning
@@ -99,8 +100,9 @@ def test_generic_storage_with_old_parameters():
 
 def test_generic_storage_with_non_convex_investment():
     """Tests error if `offset` and `existing` attribute are given."""
-    with tools.assert_raises_regexp(
-            AttributeError, "Values for 'offset' and 'existing' are given"):
+    with pytest.raises(
+            AttributeError,
+            match=r"Values for 'offset' and 'existing' are given"):
         bel = Bus()
         components.GenericStorage(
             label='storage4',
@@ -113,8 +115,9 @@ def test_generic_storage_with_non_convex_investment():
 
 def test_generic_storage_with_non_convex_invest_maximum():
     """No investment maximum at nonconvex investment."""
-    with tools.assert_raises_regexp(
-            AttributeError, "Please provide an maximum investment value"):
+    with pytest.raises(
+            AttributeError,
+            match=r"Please provide an maximum investment value"):
         bel = Bus()
         components.GenericStorage(
             label='storage6',
@@ -127,8 +130,8 @@ def test_generic_storage_with_non_convex_invest_maximum():
 
 def test_generic_storage_with_convex_invest_offset():
     """Offset value is given and nonconvex is False."""
-    with tools.assert_raises_regexp(
-            AttributeError, "If `nonconvex` is `False`, the `offset`"):
+    with pytest.raises(
+            AttributeError, match=r"If `nonconvex` is `False`, the `offset`"):
         bel = Bus()
         components.GenericStorage(
             label='storage6',
@@ -145,9 +148,9 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
     value is set an AttributeError is raised because this may result in storage
     with zero capacity but fixed losses.
     """
-    msg = ("With fixed_losses_absolute > 0, either investment.existing or"
+    msg = (r"With fixed_losses_absolute > 0, either investment.existing or"
            " investment.minimum has to be non-zero.")
-    with tools.assert_raises_regexp(AttributeError, msg):
+    with pytest.raises(AttributeError, match=msg):
         bel = Bus()
         components.GenericStorage(
             label='storage4',
@@ -162,8 +165,8 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
 
 def test_offsettransformer_wrong_flow_type():
     """No NonConvexFlow for Inflow defined."""
-    with tools.assert_raises_regexp(
-            TypeError, 'Input flows must be of type NonConvexFlow!'):
+    with pytest.raises(
+            TypeError, match=r'Input flows must be of type NonConvexFlow!'):
         bgas = Bus(label='gasBus')
         components.OffsetTransformer(
             label='gasboiler',
@@ -172,18 +175,18 @@ def test_offsettransformer_wrong_flow_type():
 
 
 def test_offsettransformer_not_enough_coefficients():
-    with tools.assert_raises_regexp(
+    with pytest.raises(
             ValueError,
-            'Two coefficients or coefficient series have to be given.'):
+            match=r'Two coefficients or coefficient series have to be given.'):
         components.OffsetTransformer(
             label='of1',
             coefficients=([1, 4, 7]))
 
 
 def test_offsettransformer_too_many_coefficients():
-    with tools.assert_raises_regexp(
+    with pytest.raises(
             ValueError,
-            'Two coefficients or coefficient series have to be given.'):
+            match=r'Two coefficients or coefficient series have to be given.'):
         components.OffsetTransformer(
             label='of2',
             coefficients=(1, 4, 7))
@@ -196,8 +199,8 @@ def test_offsettransformer_empty():
 
 def test_offsettransformer__too_many_input_flows():
     """Too many Input Flows defined."""
-    with tools.assert_raises_regexp(
-            ValueError, 'OffsetTransformer` must not have more than 1'):
+    with pytest.raises(ValueError,
+                       match=r"OffsetTransformer` must not have more than 1"):
         bgas = Bus(label='GasBus')
         bcoal = Bus(label='CoalBus')
         components.OffsetTransformer(
@@ -215,8 +218,8 @@ def test_offsettransformer__too_many_input_flows():
 
 def test_offsettransformer_too_many_output_flows():
     """Too many Output Flows defined."""
-    with tools.assert_raises_regexp(
-            ValueError, 'OffsetTransformer` must not have more than 1'):
+    with pytest.raises(
+            ValueError, match='OffsetTransformer` must not have more than 1'):
         bm1 = Bus(label='my_offset_Bus1')
         bm2 = Bus(label='my_offset_Bus2')
 

@@ -1,10 +1,12 @@
 [paths]
-source = src
+source =
+   src
+   */site-packages
 
 [run]
 branch = true
 source =
-    src
+    oemof-solph
     tests
 parallel = true
 omit =
