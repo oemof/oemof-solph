@@ -30,7 +30,7 @@ from oemof.solph.components import GenericStorage
 
 class TestParameterResult:
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
