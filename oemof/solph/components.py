@@ -57,7 +57,7 @@ class GenericStorage(network.Transformer):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage content per timeunit.
+        The relative loss of the storage content per time unit.
     fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
         Losses independent of state of charge between two consecutive
         timesteps relative to nominal storage capacity.
