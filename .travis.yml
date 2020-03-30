@@ -23,8 +23,8 @@ matrix:
         - TOXENV=py37-nocov
       python: '3.7'
     - env:
-        - TOXENV=py38-cover,codecov,coveralls
-      python: '3.8'
+        - TOXENV=py37-cover,codecov,coveralls
+      python: '3.7'
     - env:
         - TOXENV=py38-nocov
       python: '3.8'
