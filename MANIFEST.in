@@ -15,7 +15,6 @@ include LICENSE
 include README.rst
 include *.md
 include VERSION
-include nose.cfg
 
 include tox.ini .travis.yml .appveyor.yml .readthedocs.yml
 

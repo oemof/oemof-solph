@@ -86,7 +86,7 @@ setup(
         ("oemof.network@https://github.com/oemof/oemof.network/archive/"
          "uvchik-test-branch.zip"),
     ],
-    extras_require={"dev": ["nose", "sphinx", "sphinx_rtd_theme", ],
+    extras_require={"dev": ["pytest", "sphinx", "sphinx_rtd_theme", ],
                     "dummy": ["oemof"]},
     entry_points={
         "console_scripts": [
