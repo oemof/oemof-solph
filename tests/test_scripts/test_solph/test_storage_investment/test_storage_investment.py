@@ -43,9 +43,8 @@ from nose.tools import eq_
 from oemof import solph
 from oemof.network import views
 from oemof.network.network import Node
-from oemof.tools import economics
-
 from oemof.solph import processing
+from oemof.tools import economics
 
 PP_GAS = None
 

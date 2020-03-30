@@ -16,7 +16,6 @@ from nose import tools
 from nose.tools import eq_
 from nose.tools import raises
 from oemof import solph
-
 from oemof.solph.helpers import calculate_timeincrement
 
 

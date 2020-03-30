@@ -16,9 +16,8 @@ from itertools import groupby
 
 import pandas as pd
 from oemof.network.network import Node
-from pyomo.core.base.var import Var
-
 from oemof.solph.helpers import flatten
+from pyomo.core.base.var import Var
 
 
 def get_tuple(x):

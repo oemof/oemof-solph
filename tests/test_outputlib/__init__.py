@@ -2,7 +2,6 @@
 import os
 
 import pandas as pd
-
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow

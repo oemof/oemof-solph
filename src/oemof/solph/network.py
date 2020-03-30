@@ -18,10 +18,9 @@ from warnings import warn
 
 import oemof.network.energy_system as es
 import oemof.network.network as on
-from oemof.tools import debugging
-
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
+from oemof.tools import debugging
 
 
 class EnergySystem(es.EnergySystem):

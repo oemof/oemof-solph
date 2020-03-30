@@ -11,11 +11,10 @@ SPDX-License-Identifier: MIT
 
 import os
 
+import oemof.solph as solph
 from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
 from oemof.network.network import Node
-
-import oemof.solph as solph
 from oemof.solph import Investment
 from oemof.solph.blocks import InvestmentFlow as InvFlow
 from oemof.solph.helpers import extend_basic_path

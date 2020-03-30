@@ -14,7 +14,6 @@ SPDX-License-Identifier: MIT
 from nose.tools import eq_
 from oemof.network import views
 from oemof.network.network import Node
-
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow

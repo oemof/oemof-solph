@@ -20,7 +20,6 @@ import pandas as pd
 import pyomo.environ as po
 from nose.tools import ok_
 from oemof.network.network import Node
-
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow

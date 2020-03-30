@@ -13,6 +13,9 @@ SPDX-License-Identifier: MIT
 
 import numpy as np
 from oemof.network import network
+from oemof.solph.network import Transformer as solph_Transformer
+from oemof.solph.options import Investment
+from oemof.solph.plumbing import sequence as solph_sequence
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -21,10 +24,6 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
-
-from oemof.solph.network import Transformer as solph_Transformer
-from oemof.solph.options import Investment
-from oemof.solph.plumbing import sequence as solph_sequence
 
 
 class GenericStorage(network.Transformer):
