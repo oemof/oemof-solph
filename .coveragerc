@@ -6,11 +6,9 @@ source =
 [run]
 branch = true
 source =
-    oemof-solph
-    tests
+    src/oemof/solph
 parallel = true
-omit =
-    *custom*
+omit = *custom*
 
 [report]
 show_missing = true
