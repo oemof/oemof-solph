@@ -1,8 +1,8 @@
 import doctest
 
 from nose import run
-from nose.tools import eq_
 from nose.suite import LazySuite
+from nose.tools import eq_
 
 from oemof.solph import components
 from oemof.solph import constraints
