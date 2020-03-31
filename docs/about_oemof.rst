@@ -8,7 +8,7 @@ This overview has been developed to make oemof easy to use and develop. It descr
     :depth: 1
     :local:
     :backlinks: top
-    
+
 
 The idea of an open framework
 ==============================
@@ -19,14 +19,12 @@ Oemof has been implemented in Python and uses several Python packages for scient
 It offers a toolbox of various features needed to build energy system models in high temporal and spatial resolution.
 For instance, the wind energy feed-in in a model region can be modelled based on weather data, the CO2-minimal operation of biomass power plants can be calculated or the future energy supply of Europe can be simulated.
 
-The framework consists of different libraries. For the communication between these libraries different interfaces are provided. 
+The framework consists of different libraries. For the communication between these libraries different interfaces are provided.
 The oemof libraries and their modules are used to build what we call an 'application' (app) which depicts a concrete energy system model or a subprocess of this model.
 Generally, applications can be developed highly individually by the use of one or more libraries depending on the scope and purpose.
 The following image illustrates the typical application building process.
 
 .. 	image:: _files/framework_concept.svg
-   :height: 475px
-   :width: 1052 px
    :scale: 30 %
    :alt: The idea of Open Energy System Modelling Framework (oemof)
    :align: center
@@ -36,12 +34,12 @@ Furthermore, single components of applications can be substituted easily if diff
 This allows for individual application development and provides all degrees of freedom to the developer
 which is particularly relevant in environments such as scientific work groups that often work spatially distributed.
 
-Among other applications, the apps 'renpassG!S' and 'reegis' are currently developed based on the framework. 
-'renpassG!S' enables the simulation of a future European energy system with a high spatial and temporal resolution. 
+Among other applications, the apps 'renpassG!S' and 'reegis' are currently developed based on the framework.
+'renpassG!S' enables the simulation of a future European energy system with a high spatial and temporal resolution.
 Different expansion pathways of conventional power plants, renewable energies and net infrastructure can be considered.
 The app 'reegis' provides a simulation of a regional heat and power supply system.
-Another application is 'HESYSOPT' which has been desined to simulate combined heat and power systems with MILP on the component level. 
-These three examples show that the modular approach of the framework allows applications with very different objectives. 
+Another application is 'HESYSOPT' which has been desined to simulate combined heat and power systems with MILP on the component level.
+These three examples show that the modular approach of the framework allows applications with very different objectives.
 
 Application Examples
 ==============================
@@ -50,7 +48,7 @@ Some applications are publicly available and continuously developed.
 Examples and a screenshot gallery can be found on `oemof's official homepage <https://oemof.org/>`_.
 
 
-Why are we developing oemof? 
+Why are we developing oemof?
 ==============================
 
 Energy system models often do not have publicly accessible source code and freely available data and are poorly documented.
@@ -78,10 +76,10 @@ Why should I contribute?
 
  * You do not want to start at the very beginning. - You are not the first one, who wants to set up a energy system model. So why not start with existing code?
  * You want your code to be more stable. - If other people use your code, they may find bugs or will have ideas to improve it.
- * Tired of 'write-only-code'. - Developing as part of a framework encourages you to document sufficiently, so that after years you may still understand your own code. 
+ * Tired of 'write-only-code'. - Developing as part of a framework encourages you to document sufficiently, so that after years you may still understand your own code.
  * You want to talk to other people when you are deadlocked. - People are even more willing to help, if they are interested in what you are doing because they can use it afterwards.
  * You want your code to be seen and used. We try to make oemof more and more visible to the modelling community. Together it will be easier to increase the awareness of this framework and therefore for your contribution.
- 
+
 We know, sometimes it is difficult to start on an existing concept. It will take some time to understand it and you will need extra time to document your own stuff.
 But once you understand the libraries you will get lots of interesting features, always with the option to fit them to your own needs.
 

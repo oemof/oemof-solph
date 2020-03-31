@@ -13,8 +13,8 @@ API changes
   Transformer class. The new class has n inputs and n outputs. Please note that
   the definition of the conversion factors (for N1) has changed. See the new
   docstring of :class:`~oemof.solph.network.Transformer` class to avoid errors
-  (`Issue #351 <https://github.com/oemof/oemof/issues/351>`_).
-* The :class:`oemof.solph.network.Storage` class has been renamed and moved to 
+  (`Issue #351 <https://github.com/oemof/oemof-solph/issues/351>`_).
+* The :class:`oemof.solph.network.Storage` class has been renamed and moved to
   :class:`oemof.solph.components.GenericStorage`.
 * As the example section has been moved to a new repository the `oemof_example`
   command was removed. Use `oemof_installation_test` to check your installation
@@ -36,7 +36,7 @@ API changes
   for more information on the usage.
 * The `fixed_costs` attribute of the  :class:`nodes <oemof.solph.network.Flow>`
   has been removed. See
-  (`Issue #407 <https://github.com/oemof/oemof/issues/407>`_) for more
+  (`Issue #407 <https://github.com/oemof/oemof-solph/issues/407>`_) for more
   information.
 * The classes :class:`DataFramePlot <outputlib.DataFramePlot>` and
   :class:`ResultsDataFrame <outputlib.ResultsDataFrame>` have been removed
@@ -122,7 +122,7 @@ Known issues
 ############
 * It is not possible to model one time step with oemof.solph. You have to model
   at least two timesteps
-  (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a
+  (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a
   comment if this bug affects you.
 
 Bug fixes

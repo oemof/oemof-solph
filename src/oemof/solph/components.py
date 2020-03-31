@@ -160,7 +160,7 @@ class GenericStorage(network.Transformer):
 
         # Check for old parameter names. This is a temporary fix and should
         # be removed once a general solution is found.
-        # TODO: https://github.com/oemof/oemof/issues/560
+        # TODO: https://github.com/oemof/oemof-solph/issues/560
         renamed_parameters = [
             ('nominal_capacity', 'nominal_storage_capacity'),
             ('initial_capacity', 'initial_storage_level'),

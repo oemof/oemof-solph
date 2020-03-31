@@ -4,9 +4,9 @@ v0.1.2 (March 27, 2017)
 New features
 ############
 
-* Revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof_base/issues/238>`_, `issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
-* Add option to choose solver when executing the examples (`issue #247 <https://github.com/oemof/oemof_base/issues/247>`_).
-* Add new transformer class: VariableFractionTransformer (child class of LinearTransformer). This class represents transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof/pull/248>`_)
+* Revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof-solph/issues/238>`_, `issue #247 <https://github.com/oemof/oemof-solph/issues/247>`_).
+* Add option to choose solver when executing the examples (`issue #247 <https://github.com/oemof/oemof-solph/issues/247>`_).
+* Add new transformer class: VariableFractionTransformer (child class of LinearTransformer). This class represents transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof-solph/pull/248>`_)
 * Add new transformer class: N1Transformer (counterpart of LinearTransformer). This class allows to have multiple inputflows that are converted into one output flow e.g. heat pumps or mixing-components.
 * Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
 * Add economics module to calculate investment annuities (more to come in future  versions)

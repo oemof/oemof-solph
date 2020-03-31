@@ -69,7 +69,7 @@ Basically, there are two types of *nodes* - *components* and *buses*. Every Comp
 
 All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
-An example of a simple energy system shows the usage of the nodes for 
+An example of a simple energy system shows the usage of the nodes for
 real world representations:
 
 .. 	image:: _files/oemof_solph_example.svg
@@ -365,7 +365,7 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: ../oemof/solph/components.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
@@ -381,7 +381,7 @@ incorporates the backpressure coefficient :math:`C_b`.
    :width: 70 %
    :alt: variable_chp_plot.svg
    :align: center
-   
+
 For now, :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances must
 have one input and two output flows. The class allows the definition
 of a different efficiency for every time step that can be passed as a series
@@ -504,13 +504,13 @@ are active in all three cases. Constraint 10 depends on the attribute back_press
 an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
 setting the attribute `H_L_FG_share_min`.
 
-.. include:: ../oemof/solph/components.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _GenericCHP-equations1-10:
   :end-before: **For the attribute**
 
 If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 
-.. include:: ../oemof/solph/components.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
@@ -569,17 +569,17 @@ Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds tw
 
     *	Invest into the flow parameters e.g. a turbine or a pump
     *	Invest into capacity of the storage  e.g. a basin or a battery cell
-    
-Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode. 
-    
-As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows 
-with the capacity of the storage. 
+
+Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode.
+
+As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows
+with the capacity of the storage.
 Three parameters are responsible for connecting the flows and the capacity of the storage:
 
     *	' `invest_relation_input_capacity` ' fixes the input flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be filled within one time-period.
     *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
-    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger. 
-    
+    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger.
+
 You should not set all 3 parameters at the same time, since it will lead to overdetermination.
 
 The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Both flows and the storage itself (representing: pump, turbine, basin) are free in their investment. You can set the parameters to `None` or delete them as `None` is the default value.
@@ -663,7 +663,7 @@ linear equation of in- and outflow does not hit the origin, but is offset. By mu
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../oemof/solph/components.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _OffsetTransformer-equations:
   :end-before: """
 
@@ -702,7 +702,7 @@ GenericCAES (custom)
 Compressed Air Energy Storage (CAES).
 The following constraints describe the CAES:
 
-.. include:: ../oemof/solph/custom.py
+.. include:: ../src/oemof/solph/custom.py
   :start-after: _GenericCAES-equations:
   :end-before: """
 
@@ -797,7 +797,7 @@ Yielding the following results
    :align: center
 
 
-.. note:: 
+.. note::
    * This component is a candidate component. It's implemented as a custom
      component for users that like to use and test the component at early
      stage. Please report issues to improve the component.
@@ -933,8 +933,8 @@ Mixed Integer (Linear) Problems
 -------------------------------
 
 Solph also allows you to model components with respect to more technical details
-such as a minimal power production. Therefore, the class 
-:py:class:`~oemof.solph.options.NonConvex` exists in the 
+such as a minimal power production. Therefore, the class
+:py:class:`~oemof.solph.options.NonConvex` exists in the
 :py:mod:`~oemof.solph.options` module.
 Note that the usage of this class is currently not compatible with the
 :py:class:`~oemof.solph.options.Investment` class.
@@ -957,12 +957,12 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
                  b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The NonConvex() object of the electrical output of the created LinearTransformer will create 
+The NonConvex() object of the electrical output of the created LinearTransformer will create
 a 'status' variable for the flow.
 This will be used to model for example minimal/maximal power production constraints if the
 attributes `min`/`max` of the flow are set. It will also be used to include start up constraints and costs
 if corresponding attributes of the class are provided. For more
-information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding 
+information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding
 block class :py:class:`~oemof.solph.blocks.NonConvex`.
 
 .. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So

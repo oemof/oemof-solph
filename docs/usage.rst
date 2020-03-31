@@ -4,7 +4,7 @@
 Using oemof
 #####################
 
-Oemof is a framework and even though it is in an early stage it already provides useful tools to model energy systems. To model an energy system you have to write your own application in which you combine the oemof libraries for you specific task. The `example section <https://github.com/oemof/oemof/tree/master/examples>`_ shows how an oemof application may look like. 
+Oemof is a framework and even though it is in an early stage it already provides useful tools to model energy systems. To model an energy system you have to write your own application in which you combine the oemof libraries for you specific task. The `example section <https://github.com/oemof/oemof-solph/tree/master/examples>`_ shows how an oemof application may look like.
 
 .. contents:: `Current oemof libraries`
     :depth: 1
@@ -20,7 +20,7 @@ The :ref:`oemof_network_label` library is part of the oemof installation. By now
    :scale: 30 %
    :alt: alternate text
    :align: center
-   
+
 The code of the example above:
 
 .. code-block:: python
@@ -30,7 +30,7 @@ The code of the example above:
 
     # create the energy system
     es = EnergySystem()
-    
+
     # create bus 1
     bus_1 = Bus(label="bus_1")
 
@@ -51,12 +51,12 @@ The code of the example above:
 
     # create and add transformer to energy system
     es.add(Transformer(label='transformer', inputs={bus_1: []}, outputs={bus_2: []}))
-    
-The network class is aimed to be very generic and might have some network analyse tools in the future. By now the network library is mainly used as the base for the solph library.  
+
+The network class is aimed to be very generic and might have some network analyse tools in the future. By now the network library is mainly used as the base for the solph library.
 
 oemof-solph
 ===========
-The :ref:`oemof_solph_label` library is part of the oemof installation. Solph is designed to create and solve linear or mixed-integer 
+The :ref:`oemof_solph_label` library is part of the oemof installation. Solph is designed to create and solve linear or mixed-integer
 linear optimization problems. It is based on optimization modelling language pyomo.
 
 To use solph at least one linear solver has to be installed on your system. See the `pyomo installation guide <https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html#Solvers>`_ to learn which solvers are supported. Solph is tested with the open source solver `cbc` and the `gurobi` solver (free for academic use). The open `glpk` solver recently showed some odd behaviour.
@@ -74,16 +74,16 @@ for a specific component, in this case 'heat'.
 
     results = outputlib.processing.results(om)
     heat = outputlib.views.node(results, 'heat')
-    
+
 To visualize results, either use `pandas own visualization functionality <http://pandas.pydata.org/pandas-docs/version/0.18.1/visualization.html>`_, matplotlib or the plot library of your
-choice. Some existing plot methods can be found in a separate repository 
+choice. Some existing plot methods can be found in a separate repository
 `oemof_visio <https://github.com/oemof/oemof_visio>`_
 which can be helpful when looking for a quick way to create a plot.
 
 
 feedinlib
 =========
-The `feedinlib <https://github.com/oemof/feedinlib>`_ library is not part of the oemof installation and has to be installed separately using pypi. It serves as an interface between Open Data weather data and libraries to calculate feedin timeseries for fluctuating renewable energy sources. 
+The `feedinlib <https://github.com/oemof/feedinlib>`_ library is not part of the oemof installation and has to be installed separately using pypi. It serves as an interface between Open Data weather data and libraries to calculate feedin timeseries for fluctuating renewable energy sources.
 
 It is currently under revision (see `here <https://github.com/oemof/feedinlib/issues/29>`_ for further information). To begin with it will provide an interface to the `pvlib <https://github.com/pvlib/pvlib-python>`_ and `windpowerlib <https://github.com/wind-python/windpowerlib>`_ and functions to download MERRA2 weather data and `open_FRED weather data <https://openfredproject.wordpress.com>`_.
 See `documentation of the feedinlib <http://feedinlib.readthedocs.io/en/stable/>`_ for a full description of the library.

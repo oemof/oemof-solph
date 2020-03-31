@@ -226,16 +226,16 @@ def node_input_by_type(results, node_type, droplevel=None):
     """ Gets all inputs for all nodes of the type `node_type` and returns
     a dataframe.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that inputs are selected
 
-    Usage
-    --------
-    import oemof.solph as solph
+    Notes
+    -----
+    from oemof import solph
     from oemof.outputlib import views
 
     # solve oemof solph model 'm'
@@ -260,15 +260,15 @@ def node_output_by_type(results, node_type, droplevel=None):
     """ Gets all outputs for all nodes of the type `node_type` and returns
     a dataframe.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that outputs are selected
 
-    Usage
-    --------
+    Notes
+    -----
     import oemof.solph as solph
     from oemof.outputlib import views
 

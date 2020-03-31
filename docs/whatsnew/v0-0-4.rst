@@ -4,8 +4,8 @@ v0.0.4 (March 03, 2016)
 New features
 ############
 
-* Revise the outputlib according to (`issue #54 <https://github.com/oemof/oemof_base/issues/54>`_)
-* Add postheating device to transport energy between two buses with different temperature levels (`issue #97 <https://github.com/oemof/oemof_base/issues/97>`_)
+* Revise the outputlib according to (`issue #54 <https://github.com/oemof/oemof-solph/issues/54>`_)
+* Add postheating device to transport energy between two buses with different temperature levels (`issue #97 <https://github.com/oemof/oemof-solph/issues/97>`_)
 * Better integration with pandas
 
 Documentation
@@ -14,7 +14,7 @@ Documentation
 * Update developer notes
 
 Testing
-####### 
+#######
 
 * Described testing procedures in developer notes
 * New constraint tests for heating buses
