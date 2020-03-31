@@ -61,12 +61,12 @@ Documentation
 Testing
 #######
 
- * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof-solph/issues/160>`_)
+ * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof-solph/pull/160>`_)
 
 Bug fixes
 #########
 
- * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof-solph/issues/201>`_)
+ * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof-solph/pull/201>`_)
  * More path fixes regarding installation via pip
 
 
@@ -74,7 +74,7 @@ Other changes
 #############
 
  * Travis CI will now check PR's automatically
- * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof-solph/issues/227>`_)
+ * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof-solph/pull/227>`_)
 
 
 Contributors

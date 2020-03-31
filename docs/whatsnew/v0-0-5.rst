@@ -7,10 +7,10 @@ New features
 * There's now a :class:`flexible transformer
   <oemof.core.network.entities.components.transformers.TwoInputsOneOutput>`
   with two inputs and one output.
-  (`Issue #116 <https://github.com/oemof/oemof-solph/issues/116>`_)
+  (`Issue #116 <https://github.com/oemof/oemof-solph/pull/116>`_)
 * You now have the option create special groups of entities in your energy
   system. The feature is not yet fully implemented, but simple use cases are
-  usable already. (`Issue #60 <https://github.com/oemof/oemof-solph/issues/60>`_)
+  usable already. (`Issue #60 <https://github.com/oemof/oemof-solph/pull/60>`_)
 
 Documentation
 #############
@@ -34,9 +34,9 @@ Bug fixes
 
 * Searching for oemof's configuration directory is now done in a platform
   independent manner.
-  (`Issue #122 <https://github.com/oemof/oemof-solph/issues/122>`_)
+  (`Issue #122 <https://github.com/oemof/oemof-solph/pull/122>`_)
 * Weeks no longer have more than seven days.
-  (`Issue #126 <https://github.com/oemof/oemof-solph/issues/126>`_)
+  (`Issue #126 <https://github.com/oemof/oemof-solph/pull/126>`_)
 
 
 Other changes

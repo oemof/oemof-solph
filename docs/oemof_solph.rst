@@ -405,7 +405,7 @@ of the two flows is the main flow. In the example above, the flow to the Bus
 The following plot shows how the variable chp (right) schedules it's electrical
 and thermal power production in contrast to a fixed chp (left). The plot is the
 output of an example in the `oemof example repository
-<https://github.com/oemof/oemof_examples>`_.
+<https://github.com/oemof/oemof-examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
@@ -559,7 +559,7 @@ The following code block shows an example of the storage parametrization for the
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof-examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -974,7 +974,7 @@ Adding additional constraints
 -----------------------------
 
 You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See `flexible_modelling in the example repository
-<https://github.com/oemof/oemof_examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
+<https://github.com/oemof/oemof-examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
 
 Some predefined additional constraints can be found in the
 :py:mod:`~oemof.solph.constraints` module.
@@ -1027,7 +1027,7 @@ The idea is to create different sheets within one spreadsheet file for different
 
 Once you have create your specific excel reader you can lower the entry barrier for other users. It is some sort of a GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-See the `example repository <https://github.com/oemof/oemof_examples>`_ for an excel reader example.
+See the `example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
 
 
 .. _solph_examples_label:
@@ -1035,4 +1035,4 @@ See the `example repository <https://github.com/oemof/oemof_examples>`_ for an e
 Solph Examples
 --------------
 
-See the `example repository <https://github.com/oemof/oemof_examples>`_ for various examples. The repository has sections for each major release.
+See the `example repository <https://github.com/oemof/oemof-examples>`_ for various examples. The repository has sections for each major release.
