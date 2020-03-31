@@ -16,19 +16,19 @@ matrix:
     - python: '3.6'
       env:
         - TOXENV=check
-    - python: '3.6'
-      env:
-        - TOXENV=docs
+#    - python: '3.6'
+#      env:
+#        - TOXENV=docs
     - env:
         - TOXENV=py36,codecov,coveralls
       python: '3.6'
     - env:
         - TOXENV=py37,codecov,coveralls
       python: '3.7'
-    - os: osx
-      language: generic
-      env:
-        - TOXENV=py37
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOXENV=py37
     - env:
         - TOXENV=py38,codecov,coveralls
       python: '3.8'
