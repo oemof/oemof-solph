@@ -7,7 +7,7 @@ API changes
 
 * The ``param_results`` function does not exist anymore. It has been renamed to
   ``parameter_as_dict`` (`Issue #537 <https://github.com/oemof/oemof-solph/
-  issues/537>`_).
+  pull/537>`_).
 
 * The storage API has been revised. Please check the
   `API documentation <https://oemof.readthedocs.io/en/stable/api/

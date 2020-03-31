@@ -294,8 +294,8 @@ def net_storage_flow(results, node_type):
     input edge and one output edge both with flows within the domain of
     non-negative reals.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class

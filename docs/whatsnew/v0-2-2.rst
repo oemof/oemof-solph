@@ -34,7 +34,7 @@ New features
   future (`Issue #480 <https://github.com/oemof/oemof-solph/pull/480>`_).
 
 * We now have experimental support for deserializing an energy system from a
-  tabular `data package <https://frictionlessdata.io/data-packages/>`_. Since
+  tabular `data package <https://specs.frictionlessdata.io/data-package/>`_. Since
   we have to extend the datapackage format a bit, the specification is not yet
   finalized and documentation as well as tests range from sparse to
   nonexistent. But anyone who wishes to help with the code is welcome to check
@@ -50,7 +50,7 @@ Documentation
 #############
 
 * The documentation of the storage
-  `storage component <http://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
+  `storage component <https://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
 * The documentation of the
   `Extraction Turbine <https://oemof.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
 
@@ -58,7 +58,7 @@ Known issues
 ############
 
 * It is not possible to model one time step with oemof.solph. You have to
-  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof-solph/pull/306>`_). Please leave a comment if this bug affects you.
+  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a comment if this bug affects you.
 
 Bug fixes
 #########

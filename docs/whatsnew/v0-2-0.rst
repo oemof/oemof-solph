@@ -7,7 +7,7 @@ API changes
 
 * The `NodesFromCSV` has been removed from the code base. An alternative excel
   (spreadsheet) reader is provided in the newly created
-  `excel example in the oemof_examples <https://github.com/oemof/oemof-examples/tree/master/examples/oemof_0.2/excel_reader>`_
+  `excel example in the oemof_examples <https://github.com/oemof/oemof-examples/tree/master/oemof_examples/oemof.solph/v0.2.x/excel_reader>`_
   repository.
 * LinearTransformer and LinearN1Transformer classes are now combined within one
   Transformer class. The new class has n inputs and n outputs. Please note that
@@ -122,7 +122,7 @@ Known issues
 ############
 * It is not possible to model one time step with oemof.solph. You have to model
   at least two timesteps
-  (`Issue #306 <https://github.com/oemof/oemof-solph/pull/306>`_). Please leave a
+  (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a
   comment if this bug affects you.
 
 Bug fixes
@@ -149,7 +149,7 @@ Other changes
   optimization results can now be found in the
   `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository.
   You can still find the "old" standard plots within the
-  `oemof_visio <https://github.com/oemof/oemof_visio>`_ repository as they are
+  `oemof_visio <https://github.com/oemof/oemof-visio>`_ repository as they are
   now maintained separately.
 * A `user forum <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ has
   been created to answer use questions.

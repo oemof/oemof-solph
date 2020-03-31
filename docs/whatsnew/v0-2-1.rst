@@ -50,7 +50,7 @@ Known issues
 
   * It is not possible to model one time step with oemof.solph. You have to
     model at least two timesteps
-    (`Issue #306 <https://github.com/oemof/oemof-solph/pull/306>`_). Please leave a
+    (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a
     comment if this bug affects you.
 
 
@@ -91,7 +91,7 @@ Other changes
   * Code of conduct was added.
     (`Issue #440 <https://github.com/oemof/oemof-solph/pull/440>`_)
   * Version of required packages is now limited to the most actual version
-    (`Issue #464 <https://github.com/oemof/oemof-solph/pull/464>`_)
+    (`Issue #464 <https://github.com/oemof/oemof-solph/issues/464>`_)
 
 
 Contributors
