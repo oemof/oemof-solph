@@ -22,20 +22,25 @@ As oemof is designed as a Python package it is mandatory to have Python 3 instal
 
 .. code:: console
 
-  pip install oemof
+  pip install oemof.solph
 
 To use pip you have to install the pypi package. Normally pypi is part of your virtual environment.
+
+You can also install the in-development version with::
+
+    pip install https://github.com/oemof/oemof-solph/archive/dev.zip
+
 
 Using Linux repositories to install Python
 ------------------------------------------
 
-Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it. 
-If you are using Ubuntu/Debian try executing the following code in your terminal: 
+Most Linux distributions will have Python 3 in their repository. Use the specific software management to install it.
+If you are using Ubuntu/Debian try executing the following code in your terminal:
 
 .. code:: console
 
   sudo apt-get install python3
-  
+
 You can also download different versions of Python via https://www.python.org/downloads/.
 
 Using Virtualenv (community driven)
@@ -73,13 +78,13 @@ Skip the steps you have already done. Check your architecture first (32/64 bit).
 
  4. In terminal type: :code:`pip install oemof`
  5. Install a :ref:`linux_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
- 
+
 .. _linux_solver_label:
 
 Solver
 ------
 
-In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
+In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof.
 
 There are two common OpenSource solvers available (CBC, GLPK), while oemof recommends CBC (Coin-or branch and cut). But sometimes its worth comparing the results of different solvers.
 
@@ -117,7 +122,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
  2. Install WinPython
  3. Open the 'WinPython Command Prompt' and type: :code:`pip install oemof`
  4. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
- 
+
 
 Using Anaconda
 ---------------------------------------
@@ -136,13 +141,13 @@ Skip the steps you have already done. Check your architecture first (32/64 bit)
 
  4. In 'Anaconda Prompt' type: :code:`pip install oemof`
  5. Install a :ref:`windows_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
- 
-.. _windows_solver_label: 
+
+.. _windows_solver_label:
 
 Windows Solver
 --------------
 
-In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof. 
+In order to use solph you need to install a solver. There are various commercial and open-source solvers that can be used with oemof.
 
 You do not have to install both solvers. Oemof recommends the CBC (Coin-or branch and cut) solver. But sometimes its worth comparing the results of different solvers (e.g. GLPK).
 
@@ -153,7 +158,7 @@ You do not have to install both solvers. Oemof recommends the CBC (Coin-or branc
  5. Restart Windows
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
- 
+
 Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/latest/>`_ to learn about which solvers are supported.
 
 
@@ -171,7 +176,7 @@ If you are using brew you can simply run
 .. code:: console
 
   brew install python3
-  
+
 Otherwise please refer to https://www.python.org/downloads/mac-osx/ for installation instructions.
 
 Mac Solver
@@ -188,10 +193,10 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 .. _check_installation_label:
 
-Run the installation_test file 
+Run the installation_test file
 ======================================
 
-  
+
 Test the installation and the installed solver:
 
 To test the whether the installation was successful simply run
@@ -199,9 +204,9 @@ To test the whether the installation was successful simply run
 .. code:: console
 
   oemof_installation_test
-  
-in your virtual environment. 
-If the installation was  successful, you will get: 
+
+in your virtual environment.
+If the installation was  successful, you will get:
 
 .. code:: console
 
@@ -216,4 +221,4 @@ If the installation was  successful, you will get:
 
 as an output.
 
- 
+

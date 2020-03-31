@@ -99,7 +99,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
 You can also install the in-development version with::
 
-    pip install https://github.com/oemof/oemof-solph/archive/master.zip
+    pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
 For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
 
