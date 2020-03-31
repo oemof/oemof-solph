@@ -123,15 +123,14 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
     This function filters nodes from results for special needs. At the moment,
     the following options are available:
 
-        * :attr:`NodeOption.All`/:py:`'all'`:
-            Returns all nodes
-        * :attr:`NodeOption.HasOutputs`/:py:`'has_outputs'`:
+        * :attr:`NodeOption.All`: `'all'`: Returns all nodes
+        * :attr:`NodeOption.HasOutputs`: `'has_outputs'`:
             Returns nodes with an output flow (eg. Transformer, Source)
-        * :attr:`NodeOption.HasInputs`/:py:`'has_inputs'`:
+        * :attr:`NodeOption.HasInputs`: `'has_inputs'`:
             Returns nodes with an input flow (eg. Transformer, Sink)
-        * :attr:`NodeOption.HasOnlyOutputs`/:py:`'has_only_outputs'`:
+        * :attr:`NodeOption.HasOnlyOutputs`: `'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
-        * :attr:`NodeOption.HasOnlyInputs`/:py:`'has_only_inputs'`:
+        * :attr:`NodeOption.HasOnlyInputs`: `'has_only_inputs'`:
             Returns nodes having only input flows (eg. Sink)
 
     Additionally, busses can be excluded by setting `exclude_busses` to

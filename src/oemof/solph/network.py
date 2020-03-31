@@ -72,25 +72,25 @@ class Flow(on.Edge):
     actual_value : numeric (iterable or scalar), :math:`f_{actual}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to :py:`actual_value
+        set to :obj:`True` the flow variable will be fixed to `actual_value
         * nominal_value`, i.e. this value is set exogenous.
-    positive_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
 
-         * :py:`'ub'`: numeric (iterable, scalar or None), the normed *upper
-           bound* on the positive difference (:py:`flow[t-1] < flow[t]`) of
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * :py:`'costs``: numeric (scalar or None), the gradient cost per
+         * `'costs``: numeric (scalar or None), the gradient cost per
            unit.
 
-    negative_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
 
         A dictionary containing the following two keys:
 
-          * :py:`'ub'`: numeric (iterable, scalar or None), the normed *upper
-            bound* on the negative difference (:py:`flow[t-1] > flow[t]`) of
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * :py:`'costs``: numeric (scalar or None), the gradient cost per
+          * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
     summed_max : numeric, :math:`f_{sum,max}`
