@@ -16,7 +16,7 @@ matrix:
     - python: '3.6'
       env:
         - TOXENV=check
-    - python: '3.6'
+    - python: '3.7'
       env:
         - TOXENV=docs
     - env:
