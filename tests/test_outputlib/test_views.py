@@ -1,14 +1,14 @@
 
 from nose.tools import eq_
 from nose.tools import raises
-from oemof.network import views
 from oemof.solph import processing
+from oemof.solph import views
 
 from . import energysystem
 from . import optimization_model
 
 
-class FilterTest:
+class TestFilterView:
     def setup(self):
         self.results = processing.results(optimization_model)
         self.param_results = processing.parameter_as_dict(optimization_model)

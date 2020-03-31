@@ -16,7 +16,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network import views
 from oemof.network.network import Node
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -26,6 +25,7 @@ from oemof.solph import Sink
 from oemof.solph import Source
 from oemof.solph import custom
 from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_gen_caes():

@@ -16,7 +16,6 @@ import os
 import pandas as pd
 from nose.tools import eq_
 from oemof.network import network
-from oemof.network import views
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -28,6 +27,7 @@ from oemof.solph import Transformer
 from oemof.solph import components
 from oemof.solph import constraints
 from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_connect_invest():

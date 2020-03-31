@@ -13,8 +13,8 @@ import logging
 
 import pandas as pd
 from oemof import solph
-from oemof.network import views
 from oemof.network.network import Node
+from oemof.solph import views
 
 
 def test_regression_investment_storage(solver='cbc'):

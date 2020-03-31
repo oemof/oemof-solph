@@ -41,9 +41,9 @@ from collections import namedtuple
 import oemof.solph as solph
 import pandas as pd
 from nose.tools import eq_
-from oemof.network import views
 from oemof.network.network import Node
 from oemof.solph import processing
+from oemof.solph import views
 
 
 class Label(namedtuple('solph_label', ['tag1', 'tag2', 'tag3'])):

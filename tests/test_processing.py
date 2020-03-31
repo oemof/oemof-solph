@@ -13,7 +13,6 @@ import pandas
 from nose.tools import assert_raises
 from nose.tools import eq_
 from nose.tools import ok_
-from oemof.network import views
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -22,6 +21,7 @@ from oemof.solph import Model
 from oemof.solph import Sink
 from oemof.solph import Transformer
 from oemof.solph import processing
+from oemof.solph import views
 from oemof.solph.components import GenericStorage
 from pandas.util.testing import assert_frame_equal
 from pandas.util.testing import assert_series_equal

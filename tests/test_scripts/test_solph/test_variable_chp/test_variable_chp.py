@@ -18,8 +18,8 @@ import os
 import pandas as pd
 from nose.tools import eq_
 from oemof import solph
-from oemof.network import views
 from oemof.network.network import Node
+from oemof.solph import views
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
