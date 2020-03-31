@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
-from nose import tools
 from oemof.solph import Bus
 from oemof.solph import Flow
 from oemof.solph import Investment
@@ -23,36 +22,36 @@ from oemof.tools.debugging import SuspiciousUsageWarning
 # ********* GenericStorage *********
 
 
-@tools.raises(AttributeError)
 def test_generic_storage_1():
     """Duplicate definition inflow."""
     bel = Bus()
-    components.GenericStorage(
-        label='storage1',
-        inputs={bel: Flow(variable_costs=10e10)},
-        outputs={bel: Flow(variable_costs=10e10)},
-        loss_rate=0.00, initial_storage_level=0,
-        invest_relation_input_output=1,
-        invest_relation_output_capacity=1,
-        invest_relation_input_capacity=1,
-        investment=Investment(),
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8)
+    with pytest.raises(AttributeError, match="Overdetermined."):
+        components.GenericStorage(
+            label='storage1',
+            inputs={bel: Flow(variable_costs=10e10)},
+            outputs={bel: Flow(variable_costs=10e10)},
+            loss_rate=0.00, initial_storage_level=0,
+            invest_relation_input_output=1,
+            invest_relation_output_capacity=1,
+            invest_relation_input_capacity=1,
+            investment=Investment(),
+            inflow_conversion_factor=1, outflow_conversion_factor=0.8)
 
 
-@tools.raises(AttributeError)
 def test_generic_storage_2():
     """Nominal value defined with investment model."""
     bel = Bus()
-    components.GenericStorage(
-        label='storage3',
-        nominal_storage_capacity=45,
-        inputs={bel: Flow(variable_costs=10e10)},
-        outputs={bel: Flow(variable_costs=10e10)},
-        loss_rate=0.00, initial_storage_level=0,
-        invest_relation_input_capacity=1/6,
-        invest_relation_output_capacity=1/6,
-        inflow_conversion_factor=1, outflow_conversion_factor=0.8,
-        investment=Investment(ep_costs=23))
+    with pytest.raises(AttributeError, match="If an investment object"):
+        components.GenericStorage(
+            label='storage3',
+            nominal_storage_capacity=45,
+            inputs={bel: Flow(variable_costs=10e10)},
+            outputs={bel: Flow(variable_costs=10e10)},
+            loss_rate=0.00, initial_storage_level=0,
+            invest_relation_input_capacity=1/6,
+            invest_relation_output_capacity=1/6,
+            inflow_conversion_factor=1, outflow_conversion_factor=0.8,
+            investment=Investment(ep_costs=23))
 
 
 def test_generic_storage_3():
@@ -77,7 +76,7 @@ def test_generic_storage_with_old_parameters():
     }
     # Make sure an `AttributeError` is raised if we supply all deprecated
     # parameters.
-    with tools.assert_raises(AttributeError) as caught:
+    with pytest.raises(AttributeError) as caught:
         components.GenericStorage(
             label='`GenericStorage` with all deprecated parameters',
             **deprecated
@@ -85,10 +84,10 @@ def test_generic_storage_with_old_parameters():
     for parameter in deprecated:
         # Make sure every parameter used is mentioned in the exception's
         # message.
-        assert parameter in str(caught.exception)
+        assert parameter in str(caught.value)
         # Make sure an `AttributeError` is raised for each deprecated
         # parameter.
-        tools.assert_raises(
+        pytest.raises(
             AttributeError,
             components.GenericStorage,
             **{
