@@ -40,8 +40,8 @@ Overview
     :alt: Coverage Status
     :target: https://codecov.io/github/oemof/oemof-solph
 
-.. |codacy| image:: https://img.shields.io/codacy/grade/CODECYTOKEN.svg
-    :target: https://www.codacy.com/app/oemof/oemof-solph
+.. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
+    :target: https://www.codacy.com/gh/oemof/oemof-solph?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=oemof/oemof-solph&amp;utm_campaign=Badge_Grade
     :alt: Codacy Code Quality Status
 
 .. |codeclimate| image:: https://codeclimate.com/github/oemof/oemof-solph/badges/gpa.svg
@@ -64,7 +64,7 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof-solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2/dev
     :alt: Commits since latest release
     :target: https://github.com/oemof/oemof-solph/compare/v0.3.2...dev
 
