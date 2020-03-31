@@ -87,8 +87,6 @@ Contribution is already possible on a low level by simply fixing typos in oemof'
     :local:
     :backlinks: top
 
-* Free software: MIT license
-
 Installation
 ============
 
@@ -97,17 +95,17 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
 ::
 
-    pip install oemof-solph
+    pip install oemof.solph
 
 You can also install the in-development version with::
 
-    pip install https://github.com/oemof/oemof.solph/archive/master.zip
+    pip install https://github.com/oemof/oemof-solph/archive/master.zip
 
 For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
-  
+
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
 
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.   
+If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.
 
 
 Documentation
@@ -123,19 +121,19 @@ To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 Structure of the oemof cosmos
 =============================
 
-Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
+Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us.
 
 
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an 
+The linkage of specific modules of the various packages is called an
 application (app) and depicts for example a concrete energy system model.
 You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
-Got further questions on using oemof? 
+Got further questions on using oemof?
 ======================================
 If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
@@ -143,7 +141,7 @@ Join the developers!
 ====================
 
 A warm welcome to all who want to join the developers and contribute to oemof. Information
-on the details and how to approach us can be found 
+on the details and how to approach us can be found
 `in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
@@ -159,8 +157,8 @@ Citing oemof
 The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
 
 
-License
-=======
+Free software: MIT license
+==========================
 
 Copyright (c) 2019 oemof developer group
 
@@ -206,3 +204,4 @@ Note, to combine the coverage data from all the tox environments run:
       - ::
 
             PYTEST_ADDOPTS=--cov-append tox
+
