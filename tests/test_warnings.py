@@ -9,9 +9,13 @@ available from its original location oemof/tests/tool_tests.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_, ok_, with_setup
 import warnings
-from oemof import network, solph
+
+from nose.tools import eq_
+from nose.tools import ok_
+from nose.tools import with_setup
+from oemof import solph
+from oemof.network import network
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 
