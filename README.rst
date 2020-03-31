@@ -20,23 +20,23 @@ Overview
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
 
-.. |travis| image:: https://api.travis-ci.org/oemof/oemof-solph.svg?branch=master
+.. |travis| image:: https://api.travis-ci.org/oemof/oemof-solph.svg?branch=dev
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/oemof/oemof-solph
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=master&svg=true
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/oemof/oemof-solph
 
-.. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=master
+.. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
     :alt: Requirements Status
-    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=master
+    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
 
-.. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=master&service=github
+.. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
     :target: https://coveralls.io/r/oemof/oemof-solph
 
-.. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/master/graphs/badge.svg?branch=master
+.. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
     :alt: Coverage Status
     :target: https://codecov.io/github/oemof/oemof-solph
 
@@ -64,12 +64,12 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof-solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.0.dev0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2.svg
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.4.0.dev0...master
+    :target: https://github.com/oemof/oemof-solph/compare/v0.3.2...dev
 
 
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/master.svg
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
