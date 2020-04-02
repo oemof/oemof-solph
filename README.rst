@@ -9,6 +9,29 @@
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :target: https://doi.org/10.5281/zenodo.596235
 
+.. raw:: html
+
+    <style> .red {color:red} </style>
+
+.. role:: red
+
+:red:`------------------------------------------------------------------------------------------------------------------`
+
+:red:`Restructuring of oemof`
++++++++++++++++++++++++++++++
+
+The solph library is one of the most used packages of oemof. It has been also one
+of the first libraries, so a lot of people use :red:`oemof` synonym for :red:`oemof.solph`.
+
+As there are more and more libraries we do need a clearer structure.
+
+If you are interested in the whole picture go to the `oemof repository <https://github.com/oemof/oemof>`_. You will find an
+overview over all packages.
+
+If you are searching for the model generator for linear energy models you should go to the `oemof.solph repository <https://github.com/oemof/oemof-solph/tree/dev>`_. The usage will be the same, you only have to install oemof.solph instead of oemof in the future.
+
+:red:`------------------------------------------------------------------------------------------------------------------`
+
 Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented toolbox to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
 
 With oemof we provide base packages for energy system modelling and optimisation.
