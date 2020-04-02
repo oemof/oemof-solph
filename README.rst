@@ -95,7 +95,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
 ::
 
-    pip install https://github.com/oemof/oemof.solph/archive/master.zip"
+    pip install https://github.com/oemof/oemof-solph/archive/master.zip"
 
 You can also install the in-development version with::
 
