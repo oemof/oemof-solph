@@ -26,7 +26,7 @@ Overview
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/oemof/oemof-solph
+    :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
 
 .. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
     :alt: Requirements Status
@@ -48,21 +48,21 @@ Overview
    :target: https://codeclimate.com/github/oemof/oemof-solph
    :alt: CodeClimate Quality Status
 
-.. |version| image:: https://img.shields.io/pypi/v/oemof-solph.svg
+.. |version| image:: https://img.shields.io/pypi/v/oemof.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/oemof-solph
+    :target: https://pypi.org/project/oemof
 
-.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof-solph.svg
+.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.svg
     :alt: PyPI Wheel
-    :target: https://pypi.org/project/oemof-solph
+    :target: https://pypi.org/project/oemof
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof-solph.svg
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.svg
     :alt: Supported versions
-    :target: https://pypi.org/project/oemof-solph
+    :target: https://pypi.org/project/oemof
 
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof-solph.svg
+.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof.svg
     :alt: Supported implementations
-    :target: https://pypi.org/project/oemof-solph
+    :target: https://pypi.org/project/oemof
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2/dev
     :alt: Commits since latest release
@@ -95,7 +95,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
 ::
 
-    pip install oemof.solph
+    pip install https://github.com/oemof/oemof.solph/archive/master.zip"
 
 You can also install the in-development version with::
 
