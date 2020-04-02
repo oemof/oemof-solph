@@ -9,19 +9,13 @@
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :target: https://doi.org/10.5281/zenodo.596235
 
-.. raw:: html
+`------------------------------------------------------------------------------------------------------------------`
 
-    <style> .red {color:red} </style>
-
-.. role:: red
-
-:red:`------------------------------------------------------------------------------------------------------------------`
-
-:red:`Restructuring of oemof`
-+++++++++++++++++++++++++++++
+`Restructuring of oemof`
+++++++++++++++++++++++++
 
 The solph library is one of the most used packages of oemof. It has been also one
-of the first libraries, so a lot of people use :red:`oemof` synonym for :red:`oemof.solph`.
+of the first libraries, so a lot of people use `oemof` synonym for `oemof.solph`.
 
 As there are more and more libraries we do need a clearer structure.
 
