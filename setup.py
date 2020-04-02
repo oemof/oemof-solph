@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 
 setup(
-    name="oemof-solph",
+    name="oemof.solph",
     version="0.4.0.dev0",
     license="MIT",
     description=(
@@ -81,7 +81,7 @@ setup(
         "pandas",
         "pyomo >= 4.4.0, < 6.0",
         "networkx",
-        ("oemof.tools@https://github.com/oemof/oemof.tools/archive/master.zip"
+        ("oemof.tools@https://github.com/oemof/oemof-tools/archive/master.zip"
          ),
         ("oemof.network@https://github.com/oemof/oemof.network/archive/"
          "uvchik-test-branch.zip"),
