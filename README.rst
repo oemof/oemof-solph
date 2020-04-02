@@ -24,7 +24,7 @@ overview over all packages.
 
 If you are searching for the model generator for linear energy models you should go to the `oemof.solph repository <https://github.com/oemof/oemof-solph/tree/dev>`_. The usage will be the same, you only have to install oemof.solph instead of oemof in the future.
 
-:red:`------------------------------------------------------------------------------------------------------------------`
+`------------------------------------------------------------------------------------------------------------------`
 
 Oemof stands for "Open Energy System Modelling Framework" and provides a free, open source and clearly documented toolbox to analyse energy supply systems. It is developed in Python and designed as a framework with a modular structure containing several packages which communicate through well defined interfaces.
 
