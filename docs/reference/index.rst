@@ -4,4 +4,4 @@ Reference
 .. toctree::
     :glob:
 
-    oemof-solph*
+    oemof.solph*

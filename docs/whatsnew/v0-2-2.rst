@@ -7,7 +7,7 @@ API changes
 
 * The storage API has been revised, even though it is still possible to use the
   old API. In that case a warning is raised
-  (`Issue #491 <https://github.com/oemof/oemof/issues/491>`_).
+  (`Issue #491 <https://github.com/oemof/oemof-solph/pull/491>`_).
 * The newly introduced parm_results are not results and therefore renamed to
   parameter_as_dict. The old name is still valid but raises a warning.
 
@@ -19,7 +19,7 @@ New features
   It will now be possible to run investment optimization based on already
   installed capacity of a component.
   Take a look on :ref:`investment_mode_label` for usage of this option.
-  (`Issue #489 <https://github.com/oemof/oemof/issues/489>`_).
+  (`Issue #489 <https://github.com/oemof/oemof-solph/pull/489>`_).
 
 * Investement variables for the capacity and the flows are now decoupled to
   enable more flexibility. It is possible to couple the flows to the capacity,
@@ -31,10 +31,10 @@ New features
   `nominal_value` of the Flow classes. The attributes
   `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` will be
   removed in v0.3.0. Please adapt your application to avoid problems in the
-  future (`Issue #480 <https://github.com/oemof/oemof/issues/480>`_).
+  future (`Issue #480 <https://github.com/oemof/oemof-solph/pull/480>`_).
 
 * We now have experimental support for deserializing an energy system from a
-  tabular `data package <https://frictionlessdata.io/data-packages/>`_. Since
+  tabular `data package <https://specs.frictionlessdata.io/data-package/>`_. Since
   we have to extend the datapackage format a bit, the specification is not yet
   finalized and documentation as well as tests range from sparse to
   nonexistent. But anyone who wishes to help with the code is welcome to check
@@ -50,15 +50,15 @@ Documentation
 #############
 
 * The documentation of the storage
-  `storage component <http://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
+  `storage component <https://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
 * The documentation of the
-  `Extraction Turbine <https://oemof.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
+  `Extraction Turbine <https://oemof-solph.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
 
 Known issues
 ############
 
 * It is not possible to model one time step with oemof.solph. You have to
-  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof/issues/306>`_). Please leave a comment if this bug affects you.
+  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a comment if this bug affects you.
 
 Bug fixes
 #########
@@ -70,7 +70,7 @@ Bug fixes
 * In the solph constraints module the emission constraint did not include the
   timeincrement from the model which has now be fixed.
 * The parameter_as_dict (former: param_results) do work with the views
-  functions now (`Issue #494 <https://github.com/oemof/oemof/issues/494>`_).
+  functions now (`Issue #494 <https://github.com/oemof/oemof-solph/pull/494>`_).
 
 Testing
 #######

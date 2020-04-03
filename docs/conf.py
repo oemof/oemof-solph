@@ -25,7 +25,7 @@ version = release = '0.4.0.dev0'
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    'issue': ('https://github.com/oemof/oemof-solph/issues/%s', '#'),
+    'issue': ('https://github.com/oemof/oemof-solph/pull/%s', '#'),
     'pr': ('https://github.com/oemof/oemof-solph/pull/%s', 'PR #'),
 }
 # on_rtd is whether we are on readthedocs.org

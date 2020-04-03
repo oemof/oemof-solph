@@ -50,19 +50,23 @@ Overview
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/oemof
+
+..    :target: https://pypi.org/project/oemof-solph
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.svg
     :alt: PyPI Wheel
-    :target: https://pypi.org/project/oemof
+
+..    :target: https://pypi.org/project/oemof
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.svg
     :alt: Supported versions
-    :target: https://pypi.org/project/oemof
+
+..    :target: https://pypi.org/project/oemof-solph
 
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof.svg
     :alt: Supported implementations
-    :target: https://pypi.org/project/oemof
+
+..     :target: https://pypi.org/project/oemof
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2/dev
     :alt: Commits since latest release
@@ -101,9 +105,9 @@ You can also install the in-development version with::
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
-For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
+For more details have a look at the `'Installation and setup' <http://oemof-solph.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
 
-The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <http://oemof.readthedocs.io/en/latest/using_oemof.html>`_ for more details about all oemof packages.
+The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <https://oemof.readthedocs.io/en/latest/>`_ for more details about all oemof packages.
 
 If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.
 
@@ -142,7 +146,7 @@ Join the developers!
 
 A warm welcome to all who want to join the developers and contribute to oemof. Information
 on the details and how to approach us can be found
-`in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
+`in the documentation <http://oemof-solph.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch

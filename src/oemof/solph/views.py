@@ -123,15 +123,14 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
     This function filters nodes from results for special needs. At the moment,
     the following options are available:
 
-        * :attr:`NodeOption.All`/:py:`'all'`:
-            Returns all nodes
-        * :attr:`NodeOption.HasOutputs`/:py:`'has_outputs'`:
+        * :attr:`NodeOption.All`: `'all'`: Returns all nodes
+        * :attr:`NodeOption.HasOutputs`: `'has_outputs'`:
             Returns nodes with an output flow (eg. Transformer, Source)
-        * :attr:`NodeOption.HasInputs`/:py:`'has_inputs'`:
+        * :attr:`NodeOption.HasInputs`: `'has_inputs'`:
             Returns nodes with an input flow (eg. Transformer, Sink)
-        * :attr:`NodeOption.HasOnlyOutputs`/:py:`'has_only_outputs'`:
+        * :attr:`NodeOption.HasOnlyOutputs`: `'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
-        * :attr:`NodeOption.HasOnlyInputs`/:py:`'has_only_inputs'`:
+        * :attr:`NodeOption.HasOnlyInputs`: `'has_only_inputs'`:
             Returns nodes having only input flows (eg. Sink)
 
     Additionally, busses can be excluded by setting `exclude_busses` to
@@ -227,16 +226,16 @@ def node_input_by_type(results, node_type, droplevel=None):
     """ Gets all inputs for all nodes of the type `node_type` and returns
     a dataframe.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that inputs are selected
 
-    Usage
-    --------
-    import oemof.solph as solph
+    Notes
+    -----
+    from oemof import solph
     from oemof.outputlib import views
 
     # solve oemof solph model 'm'
@@ -261,15 +260,15 @@ def node_output_by_type(results, node_type, droplevel=None):
     """ Gets all outputs for all nodes of the type `node_type` and returns
     a dataframe.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that outputs are selected
 
-    Usage
-    --------
+    Notes
+    -----
     import oemof.solph as solph
     from oemof.outputlib import views
 
@@ -295,8 +294,8 @@ def net_storage_flow(results, node_type):
     input edge and one output edge both with flows within the domain of
     non-negative reals.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
