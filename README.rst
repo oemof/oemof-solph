@@ -105,7 +105,7 @@ You can also install the in-development version with::
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
-For more details have a look at the `'Installation and setup' <http://oemof.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
+For more details have a look at the `'Installation and setup' <http://oemof-solph.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
 
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'See oemof' <http://oemof.readthedocs.io/>`_ for more details about all oemof packages.
 
@@ -133,7 +133,7 @@ Examples
 
 The linkage of specific modules of the various packages is called an
 application (app) and depicts for example a concrete energy system model.
-You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-https://github.com/oemof/oemof-examples/pullsexamples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
+You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 

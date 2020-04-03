@@ -92,7 +92,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
 
-Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
+Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
 
 Windows
