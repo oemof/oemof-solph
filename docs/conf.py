@@ -16,7 +16,7 @@ extensions = [
 ]
 source_suffix = '.rst'
 master_doc = 'index'
-project = 'oemof-solph'
+project = 'oemof.solph'
 year = '2014-2020'
 author = 'oemof developer group'
 copyright = '{0}, {1}'.format(year, author)
