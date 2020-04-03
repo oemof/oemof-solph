@@ -64,7 +64,7 @@ New features
   constraints or let us know what is needed in the future.
 * A module to create a networkx graph from your energy system or your
   optimisation model was added. You can use networkx to plot and analyse graphs.
-  See :ref:`oemof_graph_label` in the documentation for more information.
+  See the graph module in the documentation of oemof-network for more information.
 * It's now possible to modify a :class:`node's <oemof.network.Node>`
   :attr:`inputs <oemof.network.Node.inputs>` and
   :attr:`outputs <oemof.network.Node.outputs>` by inserting and removing
