@@ -700,6 +700,11 @@ Link.
 
 .. _investment_mode_label:
 
+District heating pipe (custom)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Coming soon ...
+
 Using the investment mode
 -------------------------
 
