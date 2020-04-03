@@ -48,7 +48,7 @@ Using Virtualenv (community driven)
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
- 1. Install virtualenv using the package management of your Linux distribution, pip install or install it from source (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation/>`_)
+ 1. Install virtualenv using the package management of your Linux distribution, pip install or install it from source (`see virtualenv documentation <https://virtualenv.pypa.io/en/latest/>`_)
  2. Open terminal to create and activate a virtual environment by typing:
 
     .. code-block:: console
@@ -66,7 +66,7 @@ Using Anaconda
 
 Skip the steps you have already done. Check your architecture first (32/64 bit).
 
- 1. Download latest `Anaconda (Linux) <https://www.continuum.io/downloads#linux>`_ for Python 3.x (64 or 32 bit)
+ 1. Download latest `Anaconda (Linux) <https://www.anaconda.com/distribution/#download-section>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
 
  3. Open terminal to create and activate a virtual environment by typing:
@@ -92,7 +92,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
 
-Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/latest/>`_ to learn about which solvers are supported.
+Other commercial solvers like Gurobi or Cplex can be used as well. Have a look at the `pyomo documentation <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
 
 Windows
@@ -129,7 +129,7 @@ Using Anaconda
 
 Skip the steps you have already done. Check your architecture first (32/64 bit)
 
- 1. Download latest `Anaconda <https://www.continuum.io/downloads#windows>`_ for Python 3.x (64 or 32 bit)
+ 1. Download latest `Anaconda <https://www.anaconda.com/distribution/#download-section>`_ for Python 3.x (64 or 32 bit)
  2. Install Anaconda
 
  3. Open 'Anaconda Prompt' to create and activate a virtual environment by typing:
@@ -151,7 +151,7 @@ In order to use solph you need to install a solver. There are various commercial
 
 You do not have to install both solvers. Oemof recommends the CBC (Coin-or branch and cut) solver. But sometimes its worth comparing the results of different solvers (e.g. GLPK).
 
- 1. Download CBC (`64 <http://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <http://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
+ 1. Download CBC (`64 <https://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <https://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
