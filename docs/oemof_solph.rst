@@ -67,7 +67,7 @@ After defining an instance of the EnergySystem class you have to add all nodes y
 
 Basically, there are two types of *nodes* - *components* and *buses*. Every Component has to be connected with one or more *buses*. The connection between a *component* and a *bus* is the *flow*.
 
-All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
+All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof-solph.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
 An example of a simple energy system shows the usage of the nodes for
 real world representations:
@@ -974,7 +974,7 @@ Adding additional constraints
 -----------------------------
 
 You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See `flexible_modelling in the example repository
-<https://github.com/oemof/oemof-examples/blob/master/examples/oemof_0.2/flexible_modelling/add_constraints.py>`_ to learn how to do it.
+<https://github.com/oemof/oemof-examples/blob/master/oemof_examples/oemof.solph/v0.3.x/flexible_modelling/add_constraints.py>`_ to learn how to do it.
 
 Some predefined additional constraints can be found in the
 :py:mod:`~oemof.solph.constraints` module.

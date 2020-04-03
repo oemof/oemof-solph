@@ -52,7 +52,7 @@ Documentation
 * The documentation of the storage
   `storage component <https://oemof.readthedocs.io/en/stable/oemof_solph.html#genericstorage-component>`_ has been improved.
 * The documentation of the
-  `Extraction Turbine <https://oemof.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
+  `Extraction Turbine <https://oemof-solph.readthedocs.io/en/latest/oemof_solph.html#extractionturbinechp-component>`_ has been improved.
 
 Known issues
 ############

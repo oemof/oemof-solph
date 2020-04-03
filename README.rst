@@ -50,19 +50,23 @@ Overview
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof-solph.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/oemof-solph
+
+..    :target: https://pypi.org/project/oemof-solph
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/oemof-solph.svg
     :alt: PyPI Wheel
-    :target: https://pypi.org/project/oemof-solph
+
+..    :target: https://pypi.org/project/oemof-solph
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof-solph.svg
     :alt: Supported versions
-    :target: https://pypi.org/project/oemof-solph
+
+..    :target: https://pypi.org/project/oemof-solph
 
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof-solph.svg
     :alt: Supported implementations
-    :target: https://pypi.org/project/oemof-solph
+
+..     :target: https://pypi.org/project/oemof-solph
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2/dev
     :alt: Commits since latest release
@@ -105,7 +109,7 @@ For more details have a look at the `'Installation and setup' <http://oemof.read
 
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'See oemof' <http://oemof.readthedocs.io/>`_ for more details about all oemof packages.
 
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.
+If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof-solph.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.
 
 
 Documentation
@@ -129,9 +133,9 @@ Examples
 
 The linkage of specific modules of the various packages is called an
 application (app) and depicts for example a concrete energy system model.
-You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
+You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-https://github.com/oemof/oemof-examples/pullsexamples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
 
-You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
 Got further questions on using oemof?
 ======================================
@@ -142,7 +146,7 @@ Join the developers!
 
 A warm welcome to all who want to join the developers and contribute to oemof. Information
 on the details and how to approach us can be found
-`in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
+`in the documentation <http://oemof-solph.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch
