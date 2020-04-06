@@ -1695,7 +1695,6 @@ class HeatPipelineBlock(SimpleBlock):
 
         def _heat_loss_rule(block, n, t):
             """Rule definition for heat loss constraint."""
-
             o = list(n.outputs.keys())[0]
 
             expr = 0
