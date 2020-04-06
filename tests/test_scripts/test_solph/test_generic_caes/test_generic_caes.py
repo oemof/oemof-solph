@@ -12,12 +12,20 @@ oemof/tests/test_scripts/test_solph/test_generic_caes/test_generic_caes.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import os
+
 import pandas as pd
-from oemof.solph import EnergySystem, Bus, Source, Sink, Flow, custom, Model
-from oemof.network import Node
-from oemof.outputlib import processing, views
+from nose.tools import eq_
+from oemof.network.network import Node
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import custom
+from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_gen_caes():

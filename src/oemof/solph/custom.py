@@ -11,14 +11,22 @@ available from its original location oemof/oemof/solph/custom.py
 SPDX-License-Identifier: MIT
 """
 
-from pyomo.core.base.block import SimpleBlock
-from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           BuildAction, Expression)
 import logging
 
-from oemof.solph.network import Bus, Transformer, Flow, Sink
+from oemof.network.network import Transformer as NetworkTransformer
+from oemof.solph.network import Bus
+from oemof.solph.network import Flow
+from oemof.solph.network import Sink
+from oemof.solph.network import Transformer
 from oemof.solph.plumbing import sequence
-from oemof.network import Transformer as NetworkTransformer
+from pyomo.core.base.block import SimpleBlock
+from pyomo.environ import Binary
+from pyomo.environ import BuildAction
+from pyomo.environ import Constraint
+from pyomo.environ import Expression
+from pyomo.environ import NonNegativeReals
+from pyomo.environ import Set
+from pyomo.environ import Var
 
 
 class ElectricalBus(Bus):
@@ -177,7 +185,7 @@ class ElectricalLineBlock(SimpleBlock):
                         rhs = 1 / n.reactance[t] * (
                             self.voltage_angle[n.input, t] -
                             self.voltage_angle[n.output, t])
-                    except:
+                    except ValueError:
                         raise ValueError("Error in constraint creation",
                                          "of node {}".format(n.label))
                     block.electrical_flow.add((n, t), (lhs == rhs))
@@ -515,45 +523,86 @@ class GenericCAESBlock(SimpleBlock):
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
 
-        ":math:`ST_{cmp}` ", ":py:obj:`cmp_st[n,t]` ", "V", "Status of compression"
+        ":math:`ST_{cmp}` ", ":py:obj:`cmp_st[n,t]` ", "V", "Status of
+        compression"
         ":math:`{P}_{cmp}` ", ":py:obj:`cmp_p[n,t]`", "V", "Compression power"
-        ":math:`{P}_{cmp\_max}`", ":py:obj:`cmp_p_max[n,t]`", "V", "Max. compression power"
-        ":math:`\dot{Q}_{cmp}` ", ":py:obj:`cmp_q_out_sum[n,t]`", "V", "Summed heat flow in compression"
-        ":math:`\dot{Q}_{cmp\_out}` ", ":py:obj:`cmp_q_waste[n,t]`", "V", "Waste heat flow from compression"
-        ":math:`ST_{exp}(t)`", ":py:obj:`exp_st[n,t]`", "V", "Status of expansion (binary)"
+        ":math:`{P}_{cmp\_max}`", ":py:obj:`cmp_p_max[n,t]`", "V", "Max.
+        compression power"
+        ":math:`\dot{Q}_{cmp}` ", ":py:obj:`cmp_q_out_sum[n,t]`", "V", "Summed
+         heat flow in compression"
+        ":math:`\dot{Q}_{cmp\_out}` ", ":py:obj:`cmp_q_waste[n,t]`", "V", "
+        Waste heat flow from compression"
+        ":math:`ST_{exp}(t)`", ":py:obj:`exp_st[n,t]`", "V", "Status of
+        expansion (binary)"
         ":math:`P_{exp}(t)`", ":py:obj:`exp_p[n,t]`", "V", "Expansion power"
-        ":math:`P_{exp\_max}(t)`", ":py:obj:`exp_p_max[n,t]`", "V", "Max. expansion power"
-        ":math:`\dot{Q}_{exp}(t)`", ":py:obj:`exp_q_in_sum[n,t]`", "V", "Summed heat flow in expansion"
-        ":math:`\dot{Q}_{exp\_in}(t)`", ":py:obj:`exp_q_fuel_in[n,t]`", "V", "Heat (external) flow into expansion"
-        ":math:`\dot{Q}_{exp\_add}(t)`", ":py:obj:`exp_q_add_in[n,t]`", "V", "Additional heat flow into expansion"
-        ":math:`CAV_{fil}(t)`", ":py:obj:`cav_level[n,t]`", "V", "Filling level if CAE"
-        ":math:`\dot{E}_{cas\_in}(t)`", ":py:obj:`cav_e_in[n,t]`", "V", "Exergy flow into CAS"
-        ":math:`\dot{E}_{cas\_out}(t)`", ":py:obj:`cav_e_out[n,t]`", "V", "Exergy flow from CAS"
-        ":math:`TES_{fil}(t)`", ":py:obj:`tes_level[n,t]`", "V", "Filling level of Thermal Energy Storage (TES)"
-        ":math:`\dot{Q}_{tes\_in}(t)`", ":py:obj:`tes_e_in[n,t]`", "V", "Heat flow into TES"
-        ":math:`\dot{Q}_{tes\_out}(t)`", ":py:obj:`tes_e_out[n,t]`", "V", "Heat flow from TES"
-        ":math:`b_{cmp\_max}`", ":py:obj:`cmp_p_max_b[n,t]`", "P", "Specific y-intersection"
-        ":math:`b_{cmp\_q}`", ":py:obj:`cmp_q_out_b[n,t]`", "P", "Specific y-intersection"
-        ":math:`b_{exp\_max}`", ":py:obj:`exp_p_max_b[n,t]`", "P", "Specific y-intersection"
-        ":math:`b_{exp\_q}`", ":py:obj:`exp_q_in_b[n,t]`", "P", "Specific y-intersection"
-        ":math:`b_{cas\_in}`", ":py:obj:`cav_e_in_b[n,t]`", "P", "Specific y-intersection"
-        ":math:`b_{cas\_out}`", ":py:obj:`cav_e_out_b[n,t]`", "P", "Specific y-intersection"
-        ":math:`m_{cmp\_max}`", ":py:obj:`cmp_p_max_m[n,t]`", "P", "Specific slope"
-        ":math:`m_{cmp\_q}`", ":py:obj:`cmp_q_out_m[n,t]`", "P", "Specific slope"
-        ":math:`m_{exp\_max}`", ":py:obj:`exp_p_max_m[n,t]`", "P", "Specific slope"
-        ":math:`m_{exp\_q}`", ":py:obj:`exp_q_in_m[n,t]`", "P", "Specific slope"
-        ":math:`m_{cas\_in}`", ":py:obj:`cav_e_in_m[n,t]`", "P", "Specific slope"
-        ":math:`m_{cas\_out}`", ":py:obj:`cav_e_out_m[n,t]`", "P", "Specific slope"
-        ":math:`P_{cmp\_min}`", ":py:obj:`cmp_p_min[n,t]`", "P", "Min. compression power"
-        ":math:`r_{cmp\_tes}`", ":py:obj:`cmp_q_tes_share[n,t]`", "P", "Ratio between waste heat flow and heat flow into TES"
-        ":math:`r_{exp\_tes}`", ":py:obj:`exp_q_tes_share[n,t]`", "P", "Ratio between external heat flow into expansion and heat flows from TES and additional source"
-        ":math:`\tau`", ":py:obj:`m.timeincrement[n,t]`", "P", "Time interval length"
-        ":math:`TES_{fil\_max}`", ":py:obj:`tes_level_max[n,t]`", "P", "Max. filling level of TES"
-        ":math:`CAS_{fil\_max}`", ":py:obj:`cav_level_max[n,t]`", "P", "Max. filling level of TES"
-        ":math:`\tau`", ":py:obj:`cav_eta_tmp[n,t]`", "P", "Temporal efficiency (loss factor to take intertemporal losses into account)"
-        ":math:`electrical\_input`", ":py:obj:`flow[list(n.electrical_input.keys())[0], n, t]`", "P", "Electr. power input into compression"
-        ":math:`electrical\_output`", ":py:obj:`flow[n, list(n.electrical_output.keys())[0], t]`", "P", "Electr. power output of expansion"
-        ":math:`fuel\_input`", ":py:obj:`flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input (external) into Expansion"
+        ":math:`P_{exp\_max}(t)`", ":py:obj:`exp_p_max[n,t]`", "V", "Max.
+        expansion power"
+        ":math:`\dot{Q}_{exp}(t)`", ":py:obj:`exp_q_in_sum[n,t]`", "V", "
+        Summed heat flow in expansion"
+        ":math:`\dot{Q}_{exp\_in}(t)`", ":py:obj:`exp_q_fuel_in[n,t]`", "V", "
+        Heat (external) flow into expansion"
+        ":math:`\dot{Q}_{exp\_add}(t)`", ":py:obj:`exp_q_add_in[n,t]`", "V", "
+        Additional heat flow into expansion"
+        ":math:`CAV_{fil}(t)`", ":py:obj:`cav_level[n,t]`", "V", "Filling level
+         if CAE"
+        ":math:`\dot{E}_{cas\_in}(t)`", ":py:obj:`cav_e_in[n,t]`", "V", "
+        Exergy flow into CAS"
+        ":math:`\dot{E}_{cas\_out}(t)`", ":py:obj:`cav_e_out[n,t]`", "V", "
+        Exergy flow from CAS"
+        ":math:`TES_{fil}(t)`", ":py:obj:`tes_level[n,t]`", "V", "Filling
+        level of Thermal Energy Storage (TES)"
+        ":math:`\dot{Q}_{tes\_in}(t)`", ":py:obj:`tes_e_in[n,t]`", "V", "Heat
+         flow into TES"
+        ":math:`\dot{Q}_{tes\_out}(t)`", ":py:obj:`tes_e_out[n,t]`", "V", "Heat
+         flow from TES"
+        ":math:`b_{cmp\_max}`", ":py:obj:`cmp_p_max_b[n,t]`", "P", "Specific
+         y-intersection"
+        ":math:`b_{cmp\_q}`", ":py:obj:`cmp_q_out_b[n,t]`", "P", "Specific
+        y-intersection"
+        ":math:`b_{exp\_max}`", ":py:obj:`exp_p_max_b[n,t]`", "P", "Specific
+        y-intersection"
+        ":math:`b_{exp\_q}`", ":py:obj:`exp_q_in_b[n,t]`", "P", "Specific
+        y-intersection"
+        ":math:`b_{cas\_in}`", ":py:obj:`cav_e_in_b[n,t]`", "P", "Specific
+        y-intersection"
+        ":math:`b_{cas\_out}`", ":py:obj:`cav_e_out_b[n,t]`", "P", "Specific
+        y-intersection"
+        ":math:`m_{cmp\_max}`", ":py:obj:`cmp_p_max_m[n,t]`", "P", "Specific
+         slope"
+        ":math:`m_{cmp\_q}`", ":py:obj:`cmp_q_out_m[n,t]`", "P", "Specific
+         slope"
+        ":math:`m_{exp\_max}`", ":py:obj:`exp_p_max_m[n,t]`", "P", "Specific
+         slope"
+        ":math:`m_{exp\_q}`", ":py:obj:`exp_q_in_m[n,t]`", "P", "Specific
+         slope"
+        ":math:`m_{cas\_in}`", ":py:obj:`cav_e_in_m[n,t]`", "P", "Specific
+         slope"
+        ":math:`m_{cas\_out}`", ":py:obj:`cav_e_out_m[n,t]`", "P", "Specific
+         slope"
+        ":math:`P_{cmp\_min}`", ":py:obj:`cmp_p_min[n,t]`", "P", "Min.
+        compression power"
+        ":math:`r_{cmp\_tes}`", ":py:obj:`cmp_q_tes_share[n,t]`", "P", "Ratio
+         between waste heat flow and heat flow into TES"
+        ":math:`r_{exp\_tes}`", ":py:obj:`exp_q_tes_share[n,t]`", "P", "Ratio
+         between external heat flow into expansion and heat flows from TES and
+          additional source"
+        ":math:`\tau`", ":py:obj:`m.timeincrement[n,t]`", "P", "Time interval
+         length"
+        ":math:`TES_{fil\_max}`", ":py:obj:`tes_level_max[n,t]`", "P", "Max.
+        filling level of TES"
+        ":math:`CAS_{fil\_max}`", ":py:obj:`cav_level_max[n,t]`", "P", "Max.
+         filling level of TES"
+        ":math:`\tau`", ":py:obj:`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
+         (loss factor to take intertemporal losses into account)"
+        ":math:`electrical\_input`", "
+        :py:obj:`flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        Electr. power input into compression"
+        ":math:`electrical\_output`", "
+        :py:obj:`flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        Electr. power output of expansion"
+        ":math:`fuel\_input`", "
+        :py:obj:`flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
+         (external) into Expansion"
 
     """
 
@@ -669,12 +718,12 @@ class GenericCAESBlock(SimpleBlock):
                         n.params['cmp_p_max_m'] * self.cav_level[n, t-1] +
                         n.params['cmp_p_max_b'])
             else:
-                return (self.cmp_p_max[n, t] == n.params['cmp_p_max_b'])
+                return self.cmp_p_max[n, t] == n.params['cmp_p_max_b']
         self.cmp_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_max_constr_rule)
 
         def cmp_p_max_area_constr_rule(block, n, t):
-            return (self.cmp_p[n, t] <= self.cmp_p_max[n, t])
+            return self.cmp_p[n, t] <= self.cmp_p_max[n, t]
         self.cmp_p_max_area_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_max_area_constr_rule)
 
@@ -730,13 +779,13 @@ class GenericCAESBlock(SimpleBlock):
                         n.params['exp_p_max_m'] * self.cav_level[n, t-1] +
                         n.params['exp_p_max_b'])
             else:
-                return (self.exp_p_max[n, t] == n.params['exp_p_max_b'])
+                return self.exp_p_max[n, t] == n.params['exp_p_max_b']
         self.exp_p_max_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_constr_rule)
 
         # (13)
         def exp_p_max_area_constr_rule(block, n, t):
-            return (self.exp_p[n, t] <= self.exp_p_max[n, t])
+            return self.exp_p[n, t] <= self.exp_p_max[n, t]
         self.exp_p_max_area_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_area_constr_rule)
 
@@ -818,7 +867,7 @@ class GenericCAESBlock(SimpleBlock):
 
         # (24) Cavern: Upper bound
         def cav_ub_constr_rule(block, n, t):
-            return (self.cav_level[n, t] <= n.params['cav_level_max'])
+            return self.cav_level[n, t] <= n.params['cav_level_max']
         self.cav_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule)
 
@@ -837,7 +886,7 @@ class GenericCAESBlock(SimpleBlock):
 
         # (27) TES: Upper bound
         def tes_ub_constr_rule(block, n, t):
-            return (self.tes_level[n, t] <= n.params['tes_level_max'])
+            return self.tes_level[n, t] <= n.params['tes_level_max']
         self.tes_ub_constr = Constraint(
             self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
 
@@ -1260,8 +1309,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif g.delay_time < t <=\
-                            m.TIMESTEPS._bounds[1] - g.delay_time:
+                    elif (g.delay_time < t <=
+                          m.TIMESTEPS._bounds[1] - g.delay_time):
 
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, t]
@@ -1317,8 +1366,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif g.delay_time < t <=\
-                            m.TIMESTEPS._bounds[1] - g.delay_time:
+                    elif g.delay_time < t <= (
+                            m.TIMESTEPS._bounds[1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t]
@@ -1394,8 +1443,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                     # main use case
-                    elif g.delay_time < tt <=\
-                            m.TIMESTEPS._bounds[1] - g.delay_time:
+                    elif g.delay_time < tt <= (
+                            m.TIMESTEPS._bounds[1] - g.delay_time):
 
                         # DSM down
                         lhs = sum(self.dsm_do[g, t, tt]
@@ -1450,8 +1499,8 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif g.delay_time < tt <=\
-                            m.TIMESTEPS._bounds[1] - g.delay_time:
+                    elif g.delay_time < tt <= (
+                            m.TIMESTEPS._bounds[1] - g.delay_time):
 
                         # DSM up/down
                         lhs = self.dsm_up[g, tt] + sum(

@@ -10,8 +10,14 @@ available from its original location oemof/oemof/solph/blocks.py
 SPDX-License-Identifier: MIT
 """
 
-from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
-                        NonNegativeReals, Binary, NonNegativeIntegers)
+from pyomo.core import Binary
+from pyomo.core import BuildAction
+from pyomo.core import Constraint
+from pyomo.core import Expression
+from pyomo.core import NonNegativeIntegers
+from pyomo.core import NonNegativeReals
+from pyomo.core import Set
+from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
 
@@ -375,7 +381,7 @@ class InvestmentFlow(SimpleBlock):
 
     :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
 
-    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment  # noqa: F401
+    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
 
     ===================  =============================  =========
 
@@ -427,13 +433,11 @@ class InvestmentFlow(SimpleBlock):
 
     Note
     ----
-
     See also :class:`oemof.solph.network.Flow`,
     :class:`oemof.solph.blocks.Flow` and
     :class:`oemof.solph.options.Investment`
 
-    """
-
+    """  # noqa: E501
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

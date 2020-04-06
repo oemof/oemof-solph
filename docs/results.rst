@@ -9,7 +9,7 @@ results that were part of the outputlib in earlier versions are no longer part o
 as the requirements to plotting functions greatly depend on individial requirements.
 
 Basic functions for plotting of optimisation results are now found in
-a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`_. 
+a separate repository `oemof_visio <https://github.com/oemof/oemof_visio>`_.
 
 The main purpose of the outputlib is to collect and organise results.
 It gives back the results as a python dictionary holding pandas Series for scalar values and pandas DataFrames for all nodes and flows between them. This way we can make use of the full power of the pandas package available to process the results.
@@ -125,27 +125,27 @@ dictionary such that the keys are changed to strings given by the labels:
 
     views.convert_keys_to_strings(results)
     print(results[('wind', 'bus_electricity')]['sequences']
-    
 
-Another option is to access data belonging to a grouping by the name of the grouping 
-(`note also this section on groupings <http://oemof.readthedocs.io/en/latest/oemof_solph.html#the-grouping-module-sets>`_.
-Given the label of an object, e.g. 'wind' you can access the grouping by its label 
+
+Another option is to access data belonging to a grouping by the name of the grouping
+(`note also this section on groupings <http://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
+Given the label of an object, e.g. 'wind' you can access the grouping by its label
 and use this to extract data from the results dictionary.
 
 .. code-block:: python
 
     node_wind = energysystem.groups['wind']
     print(results[(node_wind, bus_electricity)])
-    
 
-However, in many situations it might be convenient to use the views module to 
+
+However, in many situations it might be convenient to use the views module to
 collect information on a specific node. You can request all data related to a
 specific node by using either the node's variable name or its label:
- 
+
 .. code-block:: python
 
     data_wind = outputlib.views.node(results, 'wind')
-    
+
 
 A function for collecting and printing meta results, i.e. information on the objective function,
 the problem and the solver, is provided as well:

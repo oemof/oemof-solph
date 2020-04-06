@@ -14,12 +14,13 @@ available from its original location oemof/oemof/solph/network.py
 SPDX-License-Identifier: MIT
 """
 
-import oemof.network as on
-import oemof.energy_system as es
-from oemof.solph.plumbing import sequence
-from oemof.solph import blocks
-from oemof.tools import debugging
 from warnings import warn
+
+import oemof.network.energy_system as es
+import oemof.network.network as on
+from oemof.solph import blocks
+from oemof.solph.plumbing import sequence
+from oemof.tools import debugging
 
 
 class EnergySystem(es.EnergySystem):
@@ -71,25 +72,25 @@ class Flow(on.Edge):
     actual_value : numeric (iterable or scalar), :math:`f_{actual}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to :py:`actual_value
+        set to :obj:`True` the flow variable will be fixed to `actual_value
         * nominal_value`, i.e. this value is set exogenous.
-    positive_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
 
-         * :py:`'ub'`: numeric (iterable, scalar or None), the normed *upper
-           bound* on the positive difference (:py:`flow[t-1] < flow[t]`) of
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * :py:`'costs``: numeric (scalar or None), the gradient cost per
+         * `'costs``: numeric (scalar or None), the gradient cost per
            unit.
 
-    negative_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
 
         A dictionary containing the following two keys:
 
-          * :py:`'ub'`: numeric (iterable, scalar or None), the normed *upper
-            bound* on the negative difference (:py:`flow[t-1] > flow[t]`) of
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * :py:`'costs``: numeric (scalar or None), the gradient cost per
+          * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
     summed_max : numeric, :math:`f_{sum,max}`

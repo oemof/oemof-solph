@@ -12,14 +12,18 @@ SPDX-License-Identifier: MIT
 """
 
 import numpy as np
+from oemof.network import network
+from oemof.solph.network import Transformer as solph_Transformer
+from oemof.solph.options import Investment
+from oemof.solph.plumbing import sequence as solph_sequence
 from pyomo.core.base.block import SimpleBlock
-from pyomo.environ import (Binary, Set, NonNegativeReals, Var, Constraint,
-                           Expression, BuildAction)
-
-from oemof import network
-from oemof.solph import Transformer as solph_Transformer
-from oemof.solph import sequence as solph_sequence
-from oemof.solph import Investment
+from pyomo.environ import Binary
+from pyomo.environ import BuildAction
+from pyomo.environ import Constraint
+from pyomo.environ import Expression
+from pyomo.environ import NonNegativeReals
+from pyomo.environ import Set
+from pyomo.environ import Var
 
 
 class GenericStorage(network.Transformer):
@@ -157,7 +161,7 @@ class GenericStorage(network.Transformer):
 
         # Check for old parameter names. This is a temporary fix and should
         # be removed once a general solution is found.
-        # TODO: https://github.com/oemof/oemof/issues/560
+        # TODO: https://github.com/oemof/oemof-solph/issues/560
         renamed_parameters = [
             ('nominal_capacity', 'nominal_storage_capacity'),
             ('initial_capacity', 'initial_storage_level'),
@@ -316,7 +320,7 @@ class GenericStorageBlock(SimpleBlock):
     Nothing added to the objective function.
 
 
-    """  # noqa: F401
+    """  # noqa: E501
 
     CONSTRAINT_GROUP = True
 
@@ -1171,7 +1175,7 @@ class GenericCHPBlock(SimpleBlock):
                                                                          flow w/o distr. heating
     =============================== =============================== ==== =======================
 
-    """  # noqa: F401
+    """  # noqa: E501
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1444,7 +1448,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                                                                         maximal heat extraction
     ========================= ==================================================== ==== =========
 
-    """   # noqa: F401
+    """  # noqa: E501
 
     CONSTRAINT_GROUP = True
 

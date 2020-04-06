@@ -7,14 +7,15 @@ available from its original location oemof/oemof/solph/models.py
 
 SPDX-License-Identifier: MIT
 """
-import pyomo.environ as po
-from pyomo.opt import SolverFactory
-from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
-from oemof.solph import blocks
-from oemof.solph.plumbing import sequence
-from oemof.outputlib import processing
-import warnings
 import logging
+import warnings
+
+import pyomo.environ as po
+from oemof.solph import blocks
+from oemof.solph import processing
+from oemof.solph.plumbing import sequence
+from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
+from pyomo.opt import SolverFactory
 
 
 class BaseModel(po.ConcreteModel):

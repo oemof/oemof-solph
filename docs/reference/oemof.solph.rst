@@ -28,6 +28,14 @@ oemof.solph.constraints module
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.console\_scripts module
+-----------------------------------
+
+.. automodule:: oemof.solph.console_scripts
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 oemof.solph.custom module
 -------------------------
 
@@ -40,6 +48,14 @@ oemof.solph.groupings module
 ----------------------------
 
 .. automodule:: oemof.solph.groupings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.helpers module
+--------------------------
+
+.. automodule:: oemof.solph.helpers
     :members:
     :undoc-members:
     :show-inheritance:
@@ -76,11 +92,18 @@ oemof.solph.plumbing module
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.processing module
+---------------------------------
 
-Module contents
----------------
+.. automodule:: oemof.solph.processing
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. automodule:: oemof.solph
+oemof.solph.views module
+---------------------------------
+
+.. automodule:: oemof.solph.views
     :members:
     :undoc-members:
     :show-inheritance:

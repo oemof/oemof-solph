@@ -19,8 +19,8 @@ available from its original location oemof/oemof/solph/groupings.py
 SPDX-License-Identifier: MIT
 """
 
+import oemof.network.groupings as groupings
 from oemof.solph import blocks
-import oemof.groupings as groupings
 
 
 def constraint_grouping(node, fallback=lambda *xs, **ks: None):

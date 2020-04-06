@@ -1,0 +1,49 @@
+v0.3.3 (January 12, 2020)
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+* something
+
+New features
+############
+
+* :class:`~oemof.solph.GenericStorage` can now have "fixed_losses", that are independent from storage content.
+
+New components
+##############
+
+* something
+
+Documentation
+#############
+
+* Improved documentation of ExtractionTurbineCHP
+
+Known issues
+############
+
+* something
+
+Bug fixes
+#########
+
+* something
+
+Testing
+#######
+
+* something
+
+Other changes
+#############
+
+* something
+
+Contributors
+############
+
+* Uwe Krien
+* Jann Launer
