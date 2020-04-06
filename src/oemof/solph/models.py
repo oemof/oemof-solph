@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 
-import pyomo
 import pyomo.environ as po
 from oemof.solph import blocks
 from oemof.solph import processing
