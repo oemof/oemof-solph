@@ -1626,7 +1626,8 @@ class HeatPipeline(Transformer):
 
 
 class HeatPipelineBlock(SimpleBlock):
-    r"""Block representing a pipeline of a district heating system.
+    r"""
+    Block representing a pipeline of a district heating system.
     :class:`~oemof.solph.custom.HeatPipeline`
 
     **The following constraints are created:**
@@ -1693,9 +1694,8 @@ class HeatPipelineBlock(SimpleBlock):
                              within=NonNegativeReals)
 
         def _heat_loss_rule(block, n, t):
-            """Rule definition for constraint to connect the installed capacity
-            and the heat loss
-            """
+            """Rule definition for heat loss constraint."""
+
             o = list(n.outputs.keys())[0]
 
             expr = 0
@@ -1793,8 +1793,8 @@ class HeatPipelineInvestBlock(SimpleBlock):
                              within=NonNegativeReals)
 
         def _heat_loss_rule(block, n, t):
-            """Rule definition for heat loss constraint.
-            """
+            """Rule definition for heat loss constraint."""
+
             expr = 0
             expr += - block.heat_loss[n, t]
             expr += n.heat_loss_factor[t] * n.length * m.InvestmentFlow.invest[
