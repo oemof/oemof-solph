@@ -492,7 +492,8 @@ class GenericStorageBlock(SimpleBlock):
         )
 
         def _power_coupled(block, n):
-            """Rule definition for constraint to connect the input power
+            """
+            Rule definition for constraint to connect the input power
             and output power
             """
             expr = (
@@ -509,7 +510,8 @@ class GenericStorageBlock(SimpleBlock):
         )
 
     def _objective_expression(self):
-        r"""Objective expression for storages with no investment.
+        r"""
+        Objective expression for storages with no investment.
         Note: This adds nothing as variable costs are already
         added in the Block :class:`Flow`.
         """
@@ -520,7 +522,8 @@ class GenericStorageBlock(SimpleBlock):
 
 
 class GenericInvestmentStorageBlock(SimpleBlock):
-    r"""Block for all storages with :attr:`Investment` being not None.
+    r"""
+    Block for all storages with :attr:`Investment` being not None.
     See :class:`oemof.solph.options.Investment` for all parameters of the
     Investment class.
 
@@ -814,7 +817,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         def _storage_investvar_bound_rule(block, n):
-            """Rule definition to bound the invested storage capacity `invest`.
+            """
+            Rule definition to bound the invested storage capacity `invest`.
             """
             if n in self.CONVEX_INVESTSTORAGES:
                 return n.investment.minimum, n.investment.maximum
@@ -930,7 +934,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         def _power_coupled(block, n):
-            """Rule definition for constraint to connect the input power
+            """
+            Rule definition for constraint to connect the input power
             and output power
             """
             expr = (
@@ -947,7 +952,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         def _storage_capacity_inflow_invest_rule(block, n):
-            """Rule definition of constraint connecting the inflow
+            """
+            Rule definition of constraint connecting the inflow
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_storage_capacity__inflow_ratio
             """
@@ -966,7 +972,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         def _storage_capacity_outflow_invest_rule(block, n):
-            """Rule definition of constraint connecting outflow
+            """
+            Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_storage_capacity__outflow_ratio
             """
@@ -985,7 +992,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         def _max_storage_content_invest_rule(block, n, t):
-            """Rule definition for upper bound constraint for the
+            """
+            Rule definition for upper bound constraint for the
             storage content.
             """
             expr = (
@@ -1002,7 +1010,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         def _min_storage_content_invest_rule(block, n, t):
-            """Rule definition of lower bound constraint for the
+            """
+            Rule definition of lower bound constraint for the
             storage content.
             """
             expr = (
