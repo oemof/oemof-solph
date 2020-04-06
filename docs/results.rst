@@ -128,7 +128,7 @@ dictionary such that the keys are changed to strings given by the labels:
 
 
 Another option is to access data belonging to a grouping by the name of the grouping
-(`note also this section on groupings <http://oemof-solph.readthedocs.io/en/latest/oemof_solph.html#the-grouping-module-sets>`_.
+(`note also this section on groupings <http://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
 Given the label of an object, e.g. 'wind' you can access the grouping by its label
 and use this to extract data from the results dictionary.
 

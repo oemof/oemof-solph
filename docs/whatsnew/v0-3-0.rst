@@ -27,8 +27,8 @@ New features
 
 * The storage can be used unbalanced now, which means that the level at the end
   could be different to the level at the beginning of the modeled time period.
-  See the `storage documentation <https://oemof.readthedocs.io/en/stable/
-  oemof_solph.html#genericstorage-component>`_ for more details.
+  See the `storage documentation <https://oemof-solph.readthedocs.io/en/latest/
+  usage.html#genericstorage-component>`_ for more details.
 
 * `NonConvexFlow <oemof.solph.blocks.NonConvexFlow>` can now have
   `activity_costs`, `maximum_startups`, and `maximum_shutdowns`.
