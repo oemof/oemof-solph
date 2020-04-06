@@ -146,7 +146,7 @@ Join the developers!
 
 A warm welcome to all who want to join the developers and contribute to oemof. Information
 on the details and how to approach us can be found
-`in the documentation <http://oemof-solph.readthedocs.io/en/latest/developing_oemof.html>`_ .
+`in the documentation <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch
