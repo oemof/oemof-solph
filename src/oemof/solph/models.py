@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 
+import pyomo
 import pyomo.environ as po
 from oemof.solph import blocks
 from oemof.solph import processing
@@ -50,7 +51,7 @@ class BaseModel(po.ConcreteModel):
         Name of the model.
     es : solph.EnergySystem
         Energy system of the model.
-    meta : pyomo.opt.results.results_.SolverResults or None
+    meta : `pyomo.opt.results.results_.SolverResults` or None
         Solver results.
     dual : ... or None
     rc : ... or None
