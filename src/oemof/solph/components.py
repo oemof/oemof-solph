@@ -382,8 +382,9 @@ class GenericStorageBlock(SimpleBlock):
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
-            """Rule definition for bounds of storage_content variable of
-            storage n in timestep t
+            """
+            Rule definition for bounds of storage_content variable of
+            storage n in timestep t.
             """
             bounds = (
                 n.nominal_storage_capacity * n.min_storage_level[t],
@@ -418,7 +419,8 @@ class GenericStorageBlock(SimpleBlock):
 
         # storage balance constraint (first time step)
         def _storage_balance_first_rule(block, n):
-            """Rule definition for the storage balance of every storage n for
+            """
+            Rule definition for the storage balance of every storage n for
             the first timestep.
             """
             expr = 0
@@ -447,8 +449,9 @@ class GenericStorageBlock(SimpleBlock):
 
         # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
-            """Rule definition for the storage balance of every storage n and
-            every timestep but the first (t > 0)
+            """
+            Rule definition for the storage balance of every storage n and
+            every timestep but the first (t > 0).
             """
             expr = 0
             expr += block.storage_content[n, t]
@@ -475,8 +478,9 @@ class GenericStorageBlock(SimpleBlock):
         )
 
         def _balanced_storage_rule(block, n):
-            """storage content of last time step == initial storage content
-            if balanced
+            """
+            Storage content of last time step == initial storage content
+            if balanced.
             """
             return (
                 block.storage_content[n, m.TIMESTEPS[-1]]
