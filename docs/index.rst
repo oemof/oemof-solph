@@ -3,26 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+=================================
 Welcome to oemof's documentation!
-===================================
-
-Contents:
+=================================
 
 .. toctree::
    :maxdepth: 2
 
+   readme
    getting_started
-   about_oemof
    installation_and_setup
-   using_oemof
-   developing_oemof
-   whats_new
-   oemof_network
-   oemof_solph
-   oemof_outputlib
-   oemof_tools
-   api
-
+   usage
+   results
+   old_usage
+   reference/index
+   contributing
+   authors
+   changelog
 
 Indices and tables
 ==================

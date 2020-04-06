@@ -406,7 +406,7 @@ of the two flows is the main flow. In the example above, the flow to the Bus
 *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow.
 The following plot shows how the variable chp (right) schedules it's electrical
 and thermal power production in contrast to a fixed chp (left). The plot is the
-output of an example in the `oemof example repository
+output of an example in the `example repository
 <https://github.com/oemof/oemof-examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
@@ -580,7 +580,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof_examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof_examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -1048,7 +1048,7 @@ The idea is to create different sheets within one spreadsheet file for different
 
 Once you have create your specific excel reader you can lower the entry barrier for other users. It is some sort of a GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-See the `example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
+See `oemof's example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
 
 
 .. _solph_examples_label:
