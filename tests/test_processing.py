@@ -6,23 +6,30 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_processing.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_, assert_raises, ok_
-from warnings import catch_warnings
 import pandas
-from pandas.util.testing import assert_series_equal, assert_frame_equal
-from oemof.solph import (
-    EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from oemof.outputlib import processing
-from oemof.outputlib import views
+from pandas.util.testing import assert_frame_equal
+from pandas.util.testing import assert_series_equal
 
 
-class Parameter_Result_Tests:
+class TestParameterResult:
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
@@ -167,7 +174,11 @@ class Parameter_Result_Tests:
                 'investment_existing': 0,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_nonconvex': False,
+                'investment_offset': 0,
                 'label': 'storage',
+                'fixed_losses_absolute': 0,
+                'fixed_losses_relative': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
                 'max_storage_level': 1,
@@ -196,7 +207,11 @@ class Parameter_Result_Tests:
                 'investment_existing': 0,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_nonconvex': False,
+                'investment_offset': 0,
                 'label': 'storage',
+                'fixed_losses_absolute': 0,
+                'fixed_losses_relative': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
                 'max_storage_level': 1,

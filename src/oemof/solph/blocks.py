@@ -7,11 +7,17 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/blocks.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from pyomo.core import (Var, Set, Constraint, BuildAction, Expression,
-                        NonNegativeReals, Binary, NonNegativeIntegers)
+from pyomo.core import Binary
+from pyomo.core import BuildAction
+from pyomo.core import Constraint
+from pyomo.core import Expression
+from pyomo.core import NonNegativeIntegers
+from pyomo.core import NonNegativeReals
+from pyomo.core import Set
+from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
 
@@ -28,8 +34,7 @@ class Flow(SimpleBlock):
         Difference of a flow in consecutive timesteps if flow is increased
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
+    **The following sets are created:** (-> see basic sets at :class:`.Model` )
 
     SUMMED_MAX_FLOWS
         A set of flows with the attribute :attr:`summed_max` being not None.
@@ -42,7 +47,7 @@ class Flow(SimpleBlock):
         A set of flows with the attribute :attr:`positive_gradient` being not
         None
     INTEGER_FLOWS
-        A set of flows wher the attribute :attr:`integer` is True (forces flow
+        A set of flows where the attribute :attr:`integer` is True (forces flow
         to only take integer values)
 
     **The following constraints are build:**
@@ -59,23 +64,26 @@ class Flow(SimpleBlock):
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
-    Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
-      .. math:: flow(i, o, t-1) - flow(i, o, t) \geq \
-        negative\_gradient(i, o, t), \\
-        \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-        \forall t \in \textrm{TIMESTEPS}.
+    Negative gradient constraint
+      :attr:`om.Flow.negative_gradient_constr[i, o]`:
+        .. math::
+          flow(i, o, t-1) - flow(i, o, t) \geq \
+          negative\_gradient(i, o, t), \\
+          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
-    Positive gradient constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
+    Positive gradient constraint
+      :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
-            positive\__gradient(i, o, t), \\
-            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-            \forall t \in \textrm{TIMESTEPS}.
+          positive\__gradient(i, o, t), \\
+          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
-        .. math::
-            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
+      .. math::
+          \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
     The expression can be accessed by :attr:`om.Flow.variable_costs` and
     their value after optimization by :meth:`om.Flow.variable_costs()` .
@@ -201,10 +209,10 @@ class Flow(SimpleBlock):
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
-        def _integer_flow_rule(block, i, o, t):
+        def _integer_flow_rule(block, ii, oi, ti):
             """Force flow variable to NonNegativeInteger values.
             """
-            return self.integer_flow[i, o, t] == m.flow[i, o, t]
+            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, ti]
 
         self.integer_flow_constr = Constraint(self.INTEGER_FLOWS, m.TIMESTEPS,
                                               rule=_integer_flow_rule)
@@ -221,7 +229,8 @@ class Flow(SimpleBlock):
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 for t in m.TIMESTEPS:
-                    variable_costs += (m.flow[i, o, t] * m.objective_weighting[t] *
+                    variable_costs += (m.flow[i, o, t] *
+                                       m.objective_weighting[t] *
                                        m.flows[i, o].variable_costs[t])
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
@@ -240,82 +249,195 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
-    r"""Block for all flows with :attr:`investment` being not None.
+    r"""Block for all flows with :attr:`Investment` being not None.
 
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
+    See :class:`oemof.solph.options.Investment` for all parameters of the
+    *Investment* class.
 
-    FLOWS
-        A set of flows with the attribute :attr:`invest` of type
-        :class:`.options.Investment`.
-    FIXED_FLOWS
-        A set of flow with the attribute :attr:`fixed` set to `True`
-    SUMMED_MAX_FLOWS
-        A subset of set FLOWS with flows with the attribute :attr:`summed_max`
-        being not None.
-    SUMMED_MIN_FLOWS
-        A subset of set FLOWS with flows with the attribute
-        :attr:`summed_min` being not None.
-    MIN_FLOWS
-        A subset of FLOWS with flows having set a value of not None in the
-        first timestep.
+    See :class:`oemof.solph.network.Flow` for all parameters of the *Flow*
+    class.
 
-    **The following variables are created:**
+    **Variables**
 
-    invest :attr:`om.InvestmentFlow.invest[i, o]`
-        Value of the investment variable i.e. equivalent to the nominal
-        value of the flows after optimization (indexed by FLOWS)
+    All *InvestmentFlow* are indexed by a starting and ending node
+    :math:`(i, o)`, which is omitted in the following for the sake
+    of convenience. The following variables are created:
 
-    **The following constraints are build:**
+    * :math:`P(t)`
 
-    Actual value constraint for fixed invest
-      flows :attr:`om.InvestmentFlow.fixed[i, o, t]`
+        Actual flow value (created in :class:`oemof.solph.models.BaseModel`).
+
+    * :math:`P_{invest}`
+
+        Value of the investment variable, i.e. equivalent to the nominal
+        value of the flows after optimization.
+
+    * :math:`b_{invest}`
+
+        Binary variable for the status of the investment, if
+        :attr:`nonconvex` is `True`.
+
+    **Constraints**
+
+    Depending on the attributes of the *InvestmentFlow* and *Flow*, different
+    constraints are created. The following constraint is created for all
+    *InvestmentFlow*:\
+
+            Upper bound for the flow value
+
         .. math::
-          flow(i, o, t) = actual\_value(i, o, t) \cdot invest(i, o), \\
-          \forall (i, o) \in \textrm{FIXED\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            P(t) \le ( P_{invest} + P_{exist} ) \cdot f_{max}(t)
 
-    Lower bound (min) constraint for invest flows
-      :attr:`om.InvestmentFlow.min[i, o, t]`
+    Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
+    of the decision variable :math:`P_{invest}` are different:\
+
+        * :attr:`nonconvex = False`
+
         .. math::
-             flow(i, o, t) \geq min(i, o, t) \cdot invest(i, o), \\
-             \forall (i, o) \in \textrm{MIN\_FLOWS}, \\
-             \forall t \in \textrm{TIMESTEPS}.
+            P_{invest, min} \le P_{invest} \le P_{invest, max}
 
-    Upper bound (max) constraint for invest flows
-      :attr:`om.InvestmentFlow.max[i, o, t]`
+        * :attr:`nonconvex = True`
+
         .. math::
-             flow(i, o, t) \leq max(i, o, t) \cdot invest(i, o), \\
-             \forall (i, o) \in \textrm{FLOWS}, \\
-             \forall t \in \textrm{TIMESTEPS}.
+            &
+            P_{invest, min} \cdot b_{invest} \le P_{invest}\\
+            &
+            P_{invest} \le P_{invest, max} \cdot b_{invest}\\
 
-    Flow max sum for invest flow
-      :attr:`om.InvestmentFlow.summed_max[i, o]`
+    For all *InvestmentFlow* (independent of the attribute :attr:`nonconvex`),
+    the following additional constraints are created, if the appropriate
+    attribute of the *Flow* (see :class:`oemof.solph.network.Flow`) is set:
+
+        * :attr:`fixed=True`
+
+            Actual value constraint for investments with fixed flow values
+
         .. math::
-            \sum_t flow(i, o, t) \cdot \tau \leq summed\_max(i, o) \
-            \cdot invest(i, o) \\
-            \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
+            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{actual}(t)
 
-    Flow min sum for invest flow :attr:`om.InvestmentFlow.summed_min[i, o]`
+        * :attr:`min != 0`
+
+            Lower bound for the flow values
+
         .. math::
-            \sum_t flow(i, o, t) \cdot \tau \geq summed\_min(i, o) \
-            \cdot invest(i, o) \\
-            \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
+            P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
 
+        * :attr:`summed_max is not None`
 
-    **The following parts of the objective function are created:**
+            Upper bound for the sum of all flow values (e.g. maximum full load
+            hours)
 
-    Equivalent periodical costs (epc) expression
-      :attr:`om.InvestmentFlow.investment_costs`:
         .. math::
-            \sum_{i, o} invest(i, o) \cdot ep\_costs(i, o)
+            \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
+            \cdot f_{sum, min}
 
-    The expression can be accessed by :attr:`om.InvestmentFlow.variable_costs`
-    and their value after optimization by
-    :meth:`om.InvestmentFlow.variable_costs()` . This works similar for
-    investment costs with :attr:`*.investment_costs` etc.
-    """
+        * :attr:`summed_min is not None`
 
+            Lower bound for the sum of all flow values (e.g. minimum full load
+            hours)
+
+        .. math::
+            \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
+            \cdot f_{sum, min}
+
+
+    **Objective function**
+
+    The part of the objective function added by the *InvestmentFlow*
+    also depends on whether a convex or nonconvex
+    *InvestmentFlow* is selected. The following parts of the objective function
+    are created:
+
+        * :attr:`nonconvex = False`
+
+            .. math::
+                P_{invest} \cdot c_{invest,var}
+
+        * :attr:`nonconvex = True`
+
+            .. math::
+                P_{invest} \cdot c_{invest,var}
+                + c_{invest,fix} \cdot b_{invest}\\
+
+    The total value of all costs of all *InvestmentFlow* can be retrieved
+    calling :meth:`om.InvestmentFlow.investment_costs.expr()`.
+
+    .. csv-table:: List of Variables (in csv table syntax)
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`P(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
+        ":math:`P_{invest}`", ":py:obj:`invest[i, o]`", "Invested flow
+        capacity"
+        ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status
+        of investment"
+
+    List of Variables (in rst table syntax):
+
+    ===================  =============================  =========
+    symbol               attribute                      explanation
+    ===================  =============================  =========
+    :math:`P(t)`         :py:obj:`flow[n, o, t]`         Actual flow value
+
+    :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
+
+    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
+
+    ===================  =============================  =========
+
+    Grid table style:
+
+    +--------------------+-------------------------------+-----------------------------+
+    | symbol             | attribute                     | explanation                 |
+    +====================+===============================+=============================+
+    | :math:`P(t)`       | :py:obj:`flow[n, o, t]`       | Actual flow value           |
+    +--------------------+-------------------------------+-----------------------------+
+    | :math:`P_{invest}` | :py:obj:`invest[i, o]`        | Invested flow capacity      |
+    +--------------------+-------------------------------+-----------------------------+
+    | :math:`b_{invest}` | :py:obj:`invest_status[i, o]` | Binary status of investment |
+    +--------------------+-------------------------------+-----------------------------+
+
+    .. csv-table:: List of Parameters
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`P_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "
+        Existing flow capacity"
+        ":math:`P_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
+        Minimum investment capacity"
+        ":math:`P_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
+        Maximum investment capacity"
+        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
+        ", "Variable investment costs"
+        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
+        Fix investment costs"
+        ":math:`f_{actual}`", ":py:obj:`flows[i, o].actual_value[t]`", "Normed
+        fixed value for the flow variable"
+        ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
+        value of the flow"
+        ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
+        value of the flow"
+        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Specific
+        maximum of summed flow values (per installed capacity)"
+        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Specific
+        minimum of summed flow values (per installed capacity)"
+        ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
+        each time step"
+
+    Note
+    ----
+    In case of a nonconvex investment flow (:attr:`nonconvex=True`),
+    the existing flow capacity :math:`P_{exist}` needs to be zero.
+    At least, it is not tested yet, whether this works out, or makes any sense
+    at all.
+
+    Note
+    ----
+    See also :class:`oemof.solph.network.Flow`,
+    :class:`oemof.solph.blocks.Flow` and
+    :class:`oemof.solph.options.Investment`
+
+    """  # noqa: E501
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -336,18 +458,24 @@ class InvestmentFlow(SimpleBlock):
         m = self.parent_block()
 
         # ######################### SETS #####################################
-        self.FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.INVESTFLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
-        self.FIXED_FLOWS = Set(
+        self.CONVEX_INVESTFLOWS = Set(initialize=[
+            (g[0], g[1]) for g in group if g[2].investment.nonconvex is False])
+
+        self.NON_CONVEX_INVESTFLOWS = Set(initialize=[
+            (g[0], g[1]) for g in group if g[2].investment.nonconvex is True])
+
+        self.FIXED_INVESTFLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].fixed])
 
-        self.SUMMED_MAX_FLOWS = Set(initialize=[
+        self.SUMMED_MAX_INVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None])
 
-        self.SUMMED_MIN_FLOWS = Set(initialize=[
+        self.SUMMED_MIN_INVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
-        self.MIN_FLOWS = Set(initialize=[
+        self.MIN_INVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if (
                 g[2].min[0] != 0 or len(g[2].min) > 1)])
 
@@ -355,24 +483,48 @@ class InvestmentFlow(SimpleBlock):
         def _investvar_bound_rule(block, i, o):
             """Rule definition for bounds of invest variable.
             """
-            return (m.flows[i, o].investment.minimum,
-                    m.flows[i, o].investment.maximum)
-        # create variable bounded for flows with investement attribute
-        self.invest = Var(self.FLOWS, within=NonNegativeReals,
+            if (i, o) in self.CONVEX_INVESTFLOWS:
+                return (m.flows[i, o].investment.minimum,
+                        m.flows[i, o].investment.maximum)
+            elif (i, o) in self.NON_CONVEX_INVESTFLOWS:
+                return 0, m.flows[i, o].investment.maximum
+
+        # create invest variable for a investment flow
+        self.invest = Var(self.INVESTFLOWS, within=NonNegativeReals,
                           bounds=_investvar_bound_rule)
 
+        # create status variable for a non-convex investment flow
+        self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
         # ######################### CONSTRAINTS ###############################
 
-        # TODO: Add gradient constraints
+        def _min_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment
+            """
+            expr = (m.flows[i, o].investment.minimum *
+                    self.invest_status[i, o] <= self.invest[i, o])
+            return expr
+        self.minimum_rule = Constraint(
+            self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
+
+        def _max_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment
+            """
+            expr = self.invest[i, o] <= (
+                m.flows[i, o].investment.maximum * self.invest_status[i, o])
+            return expr
+        self.maximum_rule = Constraint(
+            self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
             of investment flow to (normed) actual value
             """
-            return (m.flow[i, o, t] == (
-                (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].actual_value[t]))
-        self.fixed = Constraint(self.FIXED_FLOWS, m.TIMESTEPS,
+            expr = (m.flow[i, o, t] == (
+                    (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                    m.flows[i, o].actual_value[t]))
+
+            return expr
+        self.fixed = Constraint(self.FIXED_INVESTFLOWS, m.TIMESTEPS,
                                 rule=_investflow_fixed_rule)
 
         def _max_investflow_rule(block, i, o, t):
@@ -381,9 +533,9 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (m.flow[i, o, t] <= (
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].max[t]))
+                m.flows[i, o].max[t]))
             return expr
-        self.max = Constraint(self.FLOWS, m.TIMESTEPS,
+        self.max = Constraint(self.INVESTFLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
@@ -392,9 +544,9 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (m.flow[i, o, t] >= (
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                 m.flows[i, o].min[t]))
+                m.flows[i, o].min[t]))
             return expr
-        self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
+        self.min = Constraint(self.MIN_INVESTFLOWS, m.TIMESTEPS,
                               rule=_min_investflow_rule)
 
         def _summed_max_investflow_rule(block, i, o):
@@ -404,9 +556,10 @@ class InvestmentFlow(SimpleBlock):
             expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                         for t in m.TIMESTEPS) <=
                     m.flows[i, o].summed_max * (
-                        self.invest[i, o] + m.flows[i, o].investment.existing))
+                        self.invest[i, o] +
+                        m.flows[i, o].investment.existing))
             return expr
-        self.summed_max = Constraint(self.SUMMED_MAX_FLOWS,
+        self.summed_max = Constraint(self.SUMMED_MAX_INVESTFLOWS,
                                      rule=_summed_max_investflow_rule)
 
         def _summed_min_investflow_rule(block, i, o):
@@ -415,10 +568,11 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (sum(m.flow[i, o, t] * m.timeincrement[t]
                         for t in m.TIMESTEPS) >=
-                    ((m.flows[i, o].investment.existing + self.invest[i, o]) *
+                    ((m.flows[i, o].investment.existing +
+                      self.invest[i, o]) *
                      m.flows[i, o].summed_min))
             return expr
-        self.summed_min = Constraint(self.SUMMED_MIN_FLOWS,
+        self.summed_min = Constraint(self.SUMMED_MIN_INVESTFLOWS,
                                      rule=_summed_min_investflow_rule)
 
     def _objective_expression(self):
@@ -426,18 +580,21 @@ class InvestmentFlow(SimpleBlock):
         class:`.Investment`. The returned costs are fixed, variable and
         investment costs.
         """
-        if not hasattr(self, 'FLOWS'):
+        if not hasattr(self, 'INVESTFLOWS'):
             return 0
 
         m = self.parent_block()
         investment_costs = 0
 
-        for i, o in self.FLOWS:
-            if m.flows[i, o].investment.ep_costs is not None:
-                investment_costs += (self.invest[i, o] *
-                                     m.flows[i, o].investment.ep_costs)
-            else:
-                raise ValueError("Missing value for investment costs!")
+        for i, o in self.CONVEX_INVESTFLOWS:
+            investment_costs += (
+                self.invest[i, o] * m.flows[i, o].investment.ep_costs)
+        for i, o in self.NON_CONVEX_INVESTFLOWS:
+            investment_costs += (
+                    self.invest[i, o] *
+                    m.flows[i, o].investment.ep_costs +
+                    self.invest_status[i, o] *
+                    m.flows[i, o].investment.offset)
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
@@ -472,21 +629,21 @@ class Bus(SimpleBlock):
 
         m = self.parent_block()
 
-        I = {}
-        O = {}
+        ins = {}
+        outs = {}
         for n in group:
-            I[n] = [i for i in n.inputs]
-            O[n] = [o for o in n.outputs]
+            ins[n] = [i for i in n.inputs]
+            outs[n] = [o for o in n.outputs]
 
         def _busbalance_rule(block):
             for t in m.TIMESTEPS:
-                for n in group:
-                    lhs = sum(m.flow[i, n, t] for i in I[n])
-                    rhs = sum(m.flow[n, o, t] for o in O[n])
+                for g in group:
+                    lhs = sum(m.flow[i, g, t] for i in ins[g])
+                    rhs = sum(m.flow[g, o, t] for o in outs[g])
                     expr = (lhs == rhs)
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
-                        block.balance.add((n, t), expr)
+                        block.balance.add((g, t), expr)
         self.balance = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
@@ -579,7 +736,7 @@ class NonConvexFlow(SimpleBlock):
     STARTUPFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         :attr:`maximum_startups` or :attr:`startup_costs`
-         being not None.
+        being not None.
     MAXSTARTUPFLOWS
         A subset of set STARTUPFLOWS with the attribute
         :attr:`maximum_startups` being not None.
@@ -634,7 +791,7 @@ class NonConvexFlow(SimpleBlock):
             \forall (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
-    :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+      :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{start}(i,o)
@@ -648,7 +805,7 @@ class NonConvexFlow(SimpleBlock):
             \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
-    :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+      :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{shutdown}(i,o)

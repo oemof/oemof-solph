@@ -6,21 +6,27 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_network_classes.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from traceback import format_exception_only as feo
-from nose.tools import assert_raises, eq_, ok_
 
-from oemof.energy_system import EnergySystem as ES
-from oemof.network import (Bus, Edge, Node, Transformer, registry_changed_to,
-                           temporarily_modifies_registry)
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
+from oemof.network.energy_system import EnergySystem as EnSys
+from oemof.network.network import Bus
+from oemof.network.network import Edge
+from oemof.network.network import Node
+from oemof.network.network import Transformer
+from oemof.network.network import registry_changed_to
+from oemof.network.network import temporarily_modifies_registry
 
 
-class Node_Tests:
+class TestsNode:
 
     def setup(self):
-        self.energysystem = ES()
+        self.energysystem = EnSys()
         Node.registry = self.energysystem
 
     def test_that_attributes_cannot_be_added(self):
@@ -48,6 +54,7 @@ class Node_Tests:
     def test_accessing_outputs_of_a_node_without_output_flows(self):
         n = Node()
         exception = None
+        outputs = None
         try:
             outputs = n.outputs
         except Exception as e:
@@ -64,6 +71,7 @@ class Node_Tests:
     def test_accessing_inputs_of_a_node_without_input_flows(self):
         n = Node()
         exception = None
+        inputs = None
         try:
             inputs = n.inputs
         except Exception as e:
@@ -81,7 +89,7 @@ class Node_Tests:
         n = Node()
         exception = None
         try:
-            values = n.outputs.values()
+            n.outputs.values()
         except AttributeError as e:
             exception = e
         ok_(exception is None,
@@ -135,7 +143,7 @@ class Node_Tests:
         eq_(node.outputs, {bus: flow},
             ("\n  Expected {} as `node.outputs`." +
              "\n  Got    : {} (== {}) instead").format(
-                {bus: flow}, node.outputs,dict(node.outputs)))
+                {bus: flow}, node.outputs, dict(node.outputs)))
         eq_(node.outputs[bus], flow,
             ("\n  Expected {} as `node.outputs[bus]`." +
              "\n  Got    : {} instead").format(flow, node.outputs[bus]))
@@ -162,7 +170,7 @@ class Node_Tests:
         eq_(node.inputs, {bus: flow},
             ("\n  Expected {} as `node.inputs`." +
              "\n  Got    : {} (== {}) instead").format(
-                {bus: flow}, node.inputs,dict(node.inputs)))
+                {bus: flow}, node.inputs, dict(node.inputs)))
         eq_(node.inputs[bus], flow,
             ("\n  Expected {} as `node.inputs[bus]`." +
              "\n  Got    : {} instead").format(flow, node.inputs[bus]))
@@ -218,14 +226,16 @@ class Node_Tests:
             Node("Positional Label", label="Keyword Label")
 
     def test_node_input_output_type_assertions(self):
-        """ `Node`s should only accept `Node` instances as input/output targets.
+        """
+        `Node`s should only accept `Node` instances as input/output targets.
         """
         with assert_raises(AssertionError):
             Node('A node with an output', outputs={'Not a Node': 'A Flow'})
             Node('A node with an input', inputs={'Not a Node': 'A Flow'})
 
     def test_node_label_without_private_attribute(self):
-        """ A `Node` with no explicit `label` doesn't have a `_label` attribute.
+        """
+        A `Node` with no explicit `label` doesn't have a `_label` attribute.
         """
         n = Node()
         with assert_raises(AttributeError):
@@ -238,7 +248,7 @@ class Node_Tests:
         ok_("0x{:x}>".format(id(n)) in n.label)
 
 
-class Edge_Tests:
+class TestsEdge:
 
     def setup(self):
         Node.registry = None
@@ -265,8 +275,7 @@ class Edge_Tests:
         ok_(n.label is o, (
                 "Setting `label` as positional parameter argument failed."
                 "\n  Expected: {!r}"
-                "\n  Got     : {!r}")
-                .format(o, n.label))
+                "\n  Got     : {!r}").format(o, n.label))
 
     def test_edge_failure_for_colliding_arguments(self):
         """ `Edge` initialisation fails when colliding arguments are supplied.
@@ -300,17 +309,17 @@ class Edge_Tests:
         """`Edge` registration gets delayed until input and output are set.
         """
         i, o = (Node("input"), Node("output"))
-        with registry_changed_to(ES()):
+        with registry_changed_to(EnSys()):
             e = Edge(output=o)
-            ok_(not e in Node.registry.groups.values())
+            ok_(e not in Node.registry.groups.values())
             e.input = i
             ok_(e in Node.registry.groups.values())
 
 
-class EnergySystem_Nodes_Integration_Tests:
+class TestsEnergySystemNodesIntegration:
 
     def setup(self):
-        self.es = ES()
+        self.es = EnSys()
         Node.registry = self.es
 
     def test_node_registration(self):
@@ -323,10 +332,10 @@ class EnergySystem_Nodes_Integration_Tests:
         ok_(t1 in self.es.entities)
 
     def test_registry_modification_decorator(self):
-        n = Node("registered")
+        Node("registered")
         ok_("registered" in self.es.groups)
         @temporarily_modifies_registry
         def create_a_node():
-            n = Node("not registered")
+            Node("not registered")
         create_a_node()
         ok_("not registered" not in self.es.groups)

@@ -6,7 +6,7 @@ Oemof stands for "Open Energy System Modelling Framework" and provides a free, o
 
 With oemof we provide base packages for energy system modelling and optimisation.
 
-Everybody is welcome to use and/or develop oemof. Read our :ref:`why_contribute_label` section.
+Everybody is welcome to use and/or develop oemof. Read more about the `benefits of contributing <https://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ .
 
 Contribution is already possible on a low level by simply fixing typos in oemof's documentation or rephrasing sections which are unclear. If you want to support us that way please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
 
@@ -33,27 +33,27 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
   pip install oemof
 
 For more details have a look at :ref:`installation_and_setup_label`. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
-  
+
 The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section :ref:`using_oemof_label` for more details about all oemof packages.
 
-If you want to use the latest features, you might want to install the **developer version**. See :ref:`developing_oemof_label` for more information. The developer version is not recommended for productive use.   
-  
+If you want to use the latest features, you might want to install the **developer version**. See `our developer section <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.
+
 Structure of the oemof cosmos
 =============================
 
-Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us. 
+Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us.
 
 
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an 
+The linkage of specific modules of the various packages is called an
 application (app) and depicts for example a concrete energy system model.
-You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
+You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
-Got further questions on using oemof? 
+Got further questions on using oemof?
 ======================================
 If you have questions regarding the use of oemof you can visit the forum at: https://forum.openmod-initiative.org/tags/c/qa/oemof and open a new thread if your questions hasn't been already answered.
 
@@ -61,8 +61,8 @@ Join the developers!
 ====================
 
 A warm welcome to all who want to join the developers and contribute to oemof. Information
-on the details and how to approach us can be found 
-`in the documentation <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
+on the details and how to approach us can be found
+`in the documentation <http://oemof-solph.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
 Keep in touch
@@ -80,17 +80,22 @@ The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https:/
 License
 =======
 
-Copyright (C) 2017 oemof developing group
+Copyright (c) 2019 oemof developer group
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see http://www.gnu.org/licenses/.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

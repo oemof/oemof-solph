@@ -5,7 +5,7 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/constraints.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 import pyomo.environ as po
@@ -13,7 +13,7 @@ from oemof.solph.plumbing import sequence
 
 
 def investment_limit(model, limit=None):
-    """ Set an absolute limit for the total investment costs of an investment
+    r""" Set an absolute limit for the total investment costs of an investment
     optimization problem:
 
     .. math:: \sum_{investment\_costs} \leq limit
@@ -42,7 +42,7 @@ def investment_limit(model, limit=None):
 
 
 def emission_limit(om, flows=None, limit=None):
-    """
+    r"""
     Short handle for generic_integral_limit() with keyword="emission_factor".
 
     Note
@@ -57,7 +57,7 @@ def emission_limit(om, flows=None, limit=None):
 
 
 def generic_integral_limit(om, keyword, flows=None, limit=None):
-    """Set a global limit for flows weighted by attribute called keyword.
+    r"""Set a global limit for flows weighted by attribute called keyword.
     The attribute named by keyword has to be added
     to every flow you want to take into account.
 
@@ -100,7 +100,24 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
     :math:`\tau(t)`  P    width of time step :math:`t`
     :math:`L`        P    global limit given by keyword `limit`
+    ================ ==== =====================================================
 
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
+    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> bel = solph.Bus(label='electricityBus')
+    >>> flow1 = solph.Flow(nominal_value=100, my_factor=0.8)
+    >>> flow2 = solph.Flow(nominal_value=50)
+    >>> src1 = solph.Source(label='source1', outputs={bel: flow1})
+    >>> src2 = solph.Source(label='source2', outputs={bel: flow2})
+    >>> energysystem.add(bel, src1, src2)
+    >>> model = solph.Model(energysystem)
+    >>> flow_with_keyword = {(src1, bel): flow1, }
+    >>> model = solph.constraints.generic_integral_limit(
+    ...     model, "my_factor", flow_with_keyword, limit=777)
     """
     if flows is None:
         flows = {}

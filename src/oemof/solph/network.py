@@ -11,13 +11,16 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/oemof/solph/network.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-import oemof.network as on
-import oemof.energy_system as es
-from oemof.solph.plumbing import sequence
+from warnings import warn
+
+import oemof.network.energy_system as es
+import oemof.network.network as on
 from oemof.solph import blocks
+from oemof.solph.plumbing import sequence
+from oemof.tools import debugging
 
 
 class EnergySystem(es.EnergySystem):
@@ -51,51 +54,51 @@ class Flow(on.Edge):
 
     Keyword arguments are used to set the attributes of this flow. Parameters
     which are handled specially are noted below.
-    For the case where a parameter can be either a scalar or a sequence, a
+    For the case where a parameter can be either a scalar or an iterable, a
     scalar value will be converted to a sequence containing the scalar value at
     every index. This sequence is then stored under the paramter's key.
 
     Parameters
     ----------
-    nominal_value : numeric
+    nominal_value : numeric, :math:`P_{nom}`
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
-    max : numeric (sequence or scalar)
+    max : numeric (iterable or scalar), :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
-    min : numeric (sequence or scalar)
-        Nominal minimum value of the flow (see :attr:`max`).
-    actual_value : numeric (sequence or scalar)
-        Specific value for the flow variable. Will be multiplied with the
+    min : numeric (iterable or scalar), :math:`f_{min}`
+        Normed minimum value of the flow (see :attr:`max`).
+    actual_value : numeric (iterable or scalar), :math:`f_{actual}`
+        Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to :py:`actual_value
+        set to :obj:`True` the flow variable will be fixed to `actual_value
         * nominal_value`, i.e. this value is set exogenous.
-    positive_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
 
-         * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
-           bound* on the positive difference (:py:`flow[t-1] < flow[t]`) of
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * :py:`'costs``: numeric (scalar or None), the gradient cost per
+         * `'costs``: numeric (scalar or None), the gradient cost per
            unit.
 
-    negative_gradient : :obj:`dict`, default: :py:`{'ub': None, 'costs': 0}`
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
 
         A dictionary containing the following two keys:
 
-          * :py:`'ub'`: numeric (sequence, scalar or None), the normed *upper
-            bound* on the negative difference (:py:`flow[t-1] > flow[t]`) of
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * :py:`'costs``: numeric (scalar or None), the gradient cost per
+          * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    summed_max : numeric
+    summed_max : numeric, :math:`f_{sum,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
-    summed_min : numeric
+    summed_min : numeric, :math:`f_{sum,min}`
         see above
-    variable_costs : numeric (sequence or scalar)
+    variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
@@ -143,7 +146,6 @@ class Flow(on.Edge):
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
     0.99
-
     """
 
     def __init__(self, **kwargs):
@@ -161,8 +163,7 @@ class Flow(on.Edge):
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
-                    'negative_gradient': {'ub': None, 'costs': 0},
-                    }
+                    'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
 
         for attribute in set(scalars + sequences + dictionaries + keys):
@@ -203,22 +204,35 @@ class Bus(on.Bus):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
 
-
     def constraint_group(self):
         if self.balanced:
             return blocks.Bus
         else:
             return None
 
+
 class Sink(on.Sink):
     """An object with one input flow.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.inputs:
+            msg = "`Sink` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
     def constraint_group(self):
         pass
+
 
 class Source(on.Source):
     """An object with one output flow.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.outputs:
+            msg = "`Source` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
     def constraint_group(self):
         pass
 
@@ -231,7 +245,7 @@ class Transformer(on.Transformer):
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
         Keys are the connected bus objects.
-        The dictionary values can either be a scalar or a sequence with length
+        The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
 
     Examples
@@ -275,6 +289,13 @@ class Transformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if not self.inputs:
+            msg = "`Transformer` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        if not self.outputs:
+            msg = "`Transformer` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
@@ -285,7 +306,6 @@ class Transformer(on.Transformer):
 
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
-
 
     def constraint_group(self):
         return blocks.Transformer
