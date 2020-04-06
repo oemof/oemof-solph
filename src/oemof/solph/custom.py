@@ -1549,7 +1549,8 @@ class SinkDSMDelayBlock(SimpleBlock):
 
 
 class HeatPipeline(Transformer):
-    r"""A HeatPipeline represent a Pipeline in a district heating system.
+    r"""
+    A HeatPipeline represent a Pipeline in a district heating system.
     This is done by a Transformer with a constant energy loss independent of
     actual power, but dependent on the nominal power and the length parameter.
     The HeatPipeline is a single-input-single-output transformer. Additionally,
@@ -1671,12 +1672,13 @@ class HeatPipelineBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`Heatpipe`
-        block.
+        """
+        Creates the linear constraint for the class:`HeatPipeline` block.
 
         Parameters
         ----------
         group : list
+            List containing HeatPipeline objects.
 
         """
         if group is None:
@@ -1722,7 +1724,8 @@ class HeatPipelineBlock(SimpleBlock):
 
 
 class HeatPipelineInvestBlock(SimpleBlock):
-    r"""Block representing a pipeline of a district heating system.
+    r"""
+    Block representing a pipeline of a district heating system.
     :class:`~oemof.solph.custom.HeatPipeline`
 
     **The following constraints are created:**
@@ -1768,12 +1771,13 @@ class HeatPipelineInvestBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`HeatPipeline`
-        block.
+        """
+        Creates the linear constraint for the class:`HeatPipelineInvest` block.
 
         Parameters
         ----------
         group : list
+            List containing HeatPipelineInvest objects.
 
         """
         if group is None:
@@ -1789,8 +1793,7 @@ class HeatPipelineInvestBlock(SimpleBlock):
                              within=NonNegativeReals)
 
         def _heat_loss_rule(block, n, t):
-            """Rule definition for constraint to connect the installed capacity
-            and the heat loss
+            """Rule definition for heat loss constraint.
             """
             expr = 0
             expr += - block.heat_loss[n, t]
