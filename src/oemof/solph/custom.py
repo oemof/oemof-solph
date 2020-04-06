@@ -1794,7 +1794,6 @@ class HeatPipelineInvestBlock(SimpleBlock):
 
         def _heat_loss_rule(block, n, t):
             """Rule definition for heat loss constraint."""
-
             expr = 0
             expr += - block.heat_loss[n, t]
             expr += n.heat_loss_factor[t] * n.length * m.InvestmentFlow.invest[
