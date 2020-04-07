@@ -308,7 +308,7 @@ class Flow(SimpleBlock):
 
 
 class InvestmentFlow(SimpleBlock):
-    r"""Block for all flows with :attr:`investment` being not None.
+    r"""Block for all flows with :attr:`Investment` being not None.
 
     See :class:`oemof.solph.options.Investment` for all parameters of the
     *Investment* class.
@@ -557,6 +557,25 @@ class InvestmentFlow(SimpleBlock):
         # ######################### CONSTRAINTS ###############################
 
         # TODO: Add gradient constraints
+
+
+        def _min_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment
+            """
+            expr = (m.flows[i, o].investment.minimum *
+                    self.invest_status[i, o] <= self.invest[i, o])
+            return expr
+        self.minimum_rule = Constraint(
+            self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
+
+        def _max_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment
+            """
+            expr = self.invest[i, o] <= (
+                m.flows[i, o].investment.maximum * self.invest_status[i, o])
+            return expr
+        self.maximum_rule = Constraint(
+            self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
