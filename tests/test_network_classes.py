@@ -10,11 +10,17 @@ SPDX-License-Identifier: MIT
 """
 
 from traceback import format_exception_only as feo
-from nose.tools import assert_raises, eq_, ok_
 
-from oemof.energy_system import EnergySystem as EnSys
-from oemof.network import (Bus, Edge, Node, Transformer, registry_changed_to,
-                           temporarily_modifies_registry)
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
+from oemof.network.energy_system import EnergySystem as EnSys
+from oemof.network.network import Bus
+from oemof.network.network import Edge
+from oemof.network.network import Node
+from oemof.network.network import Transformer
+from oemof.network.network import registry_changed_to
+from oemof.network.network import temporarily_modifies_registry
 
 
 class TestsNode:
