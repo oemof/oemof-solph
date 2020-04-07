@@ -723,8 +723,7 @@ class TestsConstraint:
         self.compare_lp_files('dsm_module_interval.lp')
 
     def test_flow_schedule(self):
-        """Contraint test of scheduled flows.
-        """
+        """Constraint test of scheduled flows."""
         b_gas = solph.Bus(label='bus_gas')
         b_th = solph.Bus(label='bus_th_penalty')
 
