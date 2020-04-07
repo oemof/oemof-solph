@@ -76,17 +76,20 @@ class Flow(SimpleBlock):
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
-    Negative gradient constraint :attr:`om.Flow.negative_gradient_constr[i, o]`:
-      .. math:: flow(i, o, t-1) - flow(i, o, t) \geq \
-        negative\_gradient(i, o, t), \\
-        \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-        \forall t \in \textrm{TIMESTEPS}.
+    Negative gradient constraint
+      :attr:`om.Flow.negative_gradient_constr[i, o]`:
+        .. math::
+          flow(i, o, t-1) - flow(i, o, t) \geq \
+          negative\_gradient(i, o, t), \\
+          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
-    Positive gradient constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
+    Positive gradient constraint
+      :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
-            positive\__gradient(i, o, t), \\
-            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-            \forall t \in \textrm{TIMESTEPS}.
+          positive\__gradient(i, o, t), \\
+          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+          \forall t \in \textrm{TIMESTEPS}.
 
     Schedule constraint :attr:`om.Flow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) + schedule_slack_pos(i, o, t) - \
@@ -97,8 +100,8 @@ class Flow(SimpleBlock):
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
-        .. math::
-            \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
+      .. math::
+          \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
     The expression can be accessed by :attr:`om.Flow.variable_costs` and
     their value after optimization by :meth:`om.Flow.variable_costs()` .
@@ -155,6 +158,7 @@ class Flow(SimpleBlock):
                             len(g[2].schedule) != 0 or
                             (len(g[2].schedule) == 0 and
                              g[2].schedule[0] is not None))])
+        
         # ######################### Variables  ################################
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
@@ -171,7 +175,7 @@ class Flow(SimpleBlock):
 
         self.schedule_slack_neg = Var(self.SCHEDULE_FLOWS,
                                       m.TIMESTEPS, within=NonNegativeReals)
-
+    
         # set upper bound of gradient variable
         for i, o, f in group:
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
@@ -294,7 +298,7 @@ class Flow(SimpleBlock):
                     gradient_costs += (self.negative_gradient[i, o, t] *
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
-
+                    
             schedule = m.flows[i, o].schedule
             if (len(schedule) > 1 or
                 (len(schedule) == 0 and
@@ -555,9 +559,7 @@ class InvestmentFlow(SimpleBlock):
         # create status variable for a non-convex investment flow
         self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
         # ######################### CONSTRAINTS ###############################
-
         # TODO: Add gradient constraints
-
 
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
