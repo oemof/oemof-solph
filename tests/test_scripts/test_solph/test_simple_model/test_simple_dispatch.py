@@ -10,15 +10,22 @@ by the contributors recorded in the version control history of the file,
 available from its original location
 oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import os
+
 import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
-                         EnergySystem)
-from oemof.outputlib import processing, views
+from nose.tools import eq_
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_dispatch_example(solver='cbc', periods=24*5):

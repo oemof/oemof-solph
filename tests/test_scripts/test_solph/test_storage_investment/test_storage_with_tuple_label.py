@@ -31,19 +31,19 @@ by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_scripts/test_solph/
 test_storage_investment/test_storage_investment.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
-
-from nose.tools import eq_
-from collections import namedtuple
-
-import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import processing, views
 
 import logging
 import os
+from collections import namedtuple
+
+import oemof.solph as solph
 import pandas as pd
+from nose.tools import eq_
+from oemof.network.network import Node
+from oemof.solph import processing
+from oemof.solph import views
 
 
 class Label(namedtuple('solph_label', ['tag1', 'tag2', 'tag3'])):
