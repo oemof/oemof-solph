@@ -406,7 +406,7 @@ of the two flows is the main flow. In the example above, the flow to the Bus
 *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow.
 The following plot shows how the variable chp (right) schedules it's electrical
 and thermal power production in contrast to a fixed chp (left). The plot is the
-output of an example in the `oemof example repository
+output of an example in the `example repository
 <https://github.com/oemof/oemof-examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
@@ -526,8 +526,8 @@ GenericStorage (component)
 
 In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the ``nominal_storage_capacity`` in the Flow objects.
-Furthermore, an efficiency for loading, unloading and a capacity loss per time increment can be defined.
+To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
+Furthermore, an efficiency for loading, unloading and a loss rate can be defined.
 
 .. code-block:: python
 
@@ -561,7 +561,27 @@ The following code block shows an example of the storage parametrization for the
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository <https://github.com/oemof/oemof-examples>`_.
+If you want to view the temporal course of the state of charge of your storage
+after the optimisation, you need to check the ``storage_content`` in the results:
+
+.. code-block:: python
+
+    from oemof.solph import processing, views
+    results = processing.results(om)
+    column_name = (('your_storage_label', 'None'), 'storage_content')
+    SC = views.node(results, 'your_storage_label')['sequences'][column_name]
+
+The ``storage_content`` is the absolute value of the current stored energy.
+By calling:
+
+.. code-block:: python
+
+    views.node(results, 'your_storage_label')['scalars']
+
+you get the results of the scalar values of your storage, e.g. the initial
+storage content before time step zero (``init_content``).
+
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof_examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -1029,7 +1049,7 @@ The idea is to create different sheets within one spreadsheet file for different
 
 Once you have create your specific excel reader you can lower the entry barrier for other users. It is some sort of a GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-See the `example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
+See `oemof's example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
 
 
 .. _solph_examples_label:

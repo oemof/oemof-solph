@@ -326,10 +326,10 @@ def net_storage_flow(results, node_type):
 
     df = convert_to_multiindex(group)
 
-    if 'capacity' not in df.columns.get_level_values(2).unique():
+    if 'storage_content' not in df.columns.get_level_values(2).unique():
         return None
 
-    x = df.xs('capacity', axis=1, level=2).columns.values
+    x = df.xs('storage_content', axis=1, level=2).columns.values
     labels = [s for s, t in x]
 
     dataframes = []

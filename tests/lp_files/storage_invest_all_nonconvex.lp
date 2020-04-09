@@ -76,50 +76,50 @@ c_u_InvestmentFlow_max(storage_all_nonconvex_bus1_2)_:
 +1 flow(storage_all_nonconvex_bus1_2)
 <= 0
 
-c_u_GenericInvestmentStorageBlock_init_cap_limit(storage_all_nonconvex)_:
-+1 GenericInvestmentStorageBlock_init_cap(storage_all_nonconvex)
+c_u_GenericInvestmentStorageBlock_init_content_limit(storage_all_nonconvex)_:
++1 GenericInvestmentStorageBlock_init_content(storage_all_nonconvex)
 -1 GenericInvestmentStorageBlock_invest(storage_all_nonconvex)
 <= 0
 
 c_e_GenericInvestmentStorageBlock_balance_first(storage_all_nonconvex)_:
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_0)
--1 GenericInvestmentStorageBlock_init_cap(storage_all_nonconvex)
+-1 GenericInvestmentStorageBlock_init_content(storage_all_nonconvex)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_0)
 -1 flow(bus1_storage_all_nonconvex_0)
 +1 flow(storage_all_nonconvex_bus1_0)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_all_nonconvex_1)_:
--1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_0)
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_1)
+-1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_0)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_1)
 -1 flow(bus1_storage_all_nonconvex_1)
 +1 flow(storage_all_nonconvex_bus1_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_all_nonconvex_2)_:
--1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_1)
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_1)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_2)
 -1 flow(bus1_storage_all_nonconvex_2)
 +1 flow(storage_all_nonconvex_bus1_2)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balanced_cstr(storage_all_nonconvex)_:
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_2)
--1 GenericInvestmentStorageBlock_init_cap(storage_all_nonconvex)
+-1 GenericInvestmentStorageBlock_init_content(storage_all_nonconvex)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_2)
 = 0
 
-c_u_GenericInvestmentStorageBlock_max_capacity(storage_all_nonconvex_0)_:
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_0)
+c_u_GenericInvestmentStorageBlock_max_storage_content(storage_all_nonconvex_0)_:
 -1 GenericInvestmentStorageBlock_invest(storage_all_nonconvex)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_0)
 <= 0
 
-c_u_GenericInvestmentStorageBlock_max_capacity(storage_all_nonconvex_1)_:
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_1)
+c_u_GenericInvestmentStorageBlock_max_storage_content(storage_all_nonconvex_1)_:
 -1 GenericInvestmentStorageBlock_invest(storage_all_nonconvex)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_1)
 <= 0
 
-c_u_GenericInvestmentStorageBlock_max_capacity(storage_all_nonconvex_2)_:
-+1 GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_2)
+c_u_GenericInvestmentStorageBlock_max_storage_content(storage_all_nonconvex_2)_:
 -1 GenericInvestmentStorageBlock_invest(storage_all_nonconvex)
++1 GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_2)
 <= 0
 
 c_l_GenericInvestmentStorageBlock_limit_max(storage_all_nonconvex)_:
@@ -146,11 +146,11 @@ bounds
    0 <= InvestmentFlow_invest(storage_all_nonconvex_bus1) <= 20
    0 <= InvestmentFlow_invest_status(bus1_storage_all_nonconvex) <= 1
    0 <= InvestmentFlow_invest_status(storage_all_nonconvex_bus1) <= 1
-   0 <= GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_1) <= +inf
-   0 <= GenericInvestmentStorageBlock_capacity(storage_all_nonconvex_2) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_0) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_1) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage_all_nonconvex_2) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage_all_nonconvex) <= 100
-   0 <= GenericInvestmentStorageBlock_init_cap(storage_all_nonconvex) <= +inf
+   0 <= GenericInvestmentStorageBlock_init_content(storage_all_nonconvex) <= +inf
    0 <= GenericInvestmentStorageBlock_invest_status(storage_all_nonconvex) <= 1
 binary
   InvestmentFlow_invest_status(bus1_storage_all_nonconvex)
