@@ -42,6 +42,7 @@ class Investment:
     """
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
                  existing=0, nonconvex=False, offset=0, **kwargs):
+      
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
