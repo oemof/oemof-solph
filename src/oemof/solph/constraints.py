@@ -42,7 +42,7 @@ def investment_limit(model, limit=None):
 
 
 def generic_investment_limit(model, keyword, limit=None):
-    """Set a global limit for investment flows weighted by an attribute called
+    r"""Set a global limit for investment flows weighted by an attribute called
     keyword. The attribute named by keyword has to be added to every Investment
     attribute of the flow you want to take into account.
     Total value of keyword attributes after optimization can be retrieved
