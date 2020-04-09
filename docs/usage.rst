@@ -567,7 +567,6 @@ after the optimisation, you need to check the ``storage_content`` in the results
 .. code-block:: python
 
     from oemof.solph import processing, views
-
     results = processing.results(om)
     column_name = (('your_storage_label', 'None'), 'storage_content')
     SC = views.node(results, 'your_storage_label')['sequences'][column_name]
