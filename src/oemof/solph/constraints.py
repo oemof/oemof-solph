@@ -47,6 +47,7 @@ def generic_investment_limit(model, keyword, limit=None):
     attribute of the flow you want to take into account.
     Total value of keyword attributes after optimization can be retrieved
     calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
+
     Parameters
     ----------
     model : oemof.solph.Model
@@ -56,17 +57,21 @@ def generic_investment_limit(model, keyword, limit=None):
         used.
     limit : numeric
         Global limit of keyword attribute for the energy system.
+
     Note
     ----
     The Investment attribute of the considered (Investment-)flows requires an
     attribute named like keyword!
+
     Constraint
     ----------
     .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
+
     With `IF` being the set of InvestmentFlows considered for the integral
     limit.
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
+    
     .. csv-table::
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
