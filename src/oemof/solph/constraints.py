@@ -71,7 +71,7 @@ def generic_investment_limit(model, keyword, limit=None):
     limit.
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
-    
+
     .. csv-table::
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
