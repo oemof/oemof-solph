@@ -39,3 +39,9 @@ def test_flow_classes():
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
     with assert_raises(AttributeError):
         solph.Flow(fixed_costs=34)
+    with assert_raises(ValueError):
+        solph.Flow(schedule=[54, 74, 90])
+    with assert_raises(ValueError):
+        solph.Flow(schedule=[54, 74, 90], schedule_cost_neg=1000)
+    with assert_raises(ValueError):
+        solph.Flow(schedule=[54, 74, 90], schedule_cost_pos=1000)
