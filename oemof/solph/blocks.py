@@ -144,11 +144,12 @@ class Flow(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group
                         if g[2].integer])
 
-        self.SCHEDULE_FLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if (
-                            len(g[2].schedule) != 0 or
-                            (len(g[2].schedule) == 0 and
-                             g[2].schedule[0] is not None))])
+        self.SCHEDULE_FLOWS = Set(initialize=[
+            (g[0], g[1]) for g in group if (
+                g[2].schedule[0] is not None or
+                any([g[2].schedule[i] is not None for i in range(
+                    0, len(g[2].schedule))]))])
+
         # ######################### Variables  ################################
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
