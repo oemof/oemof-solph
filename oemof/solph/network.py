@@ -207,8 +207,8 @@ class Flow(on.Edge):
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
         if (len(self.schedule) != 0 and
-            not hasattr(self, 'schedule_cost_neg') and
-            not hasattr(self, 'schedule_cost_pos')):
+            (self.schedule_cost_neg[0] is None or
+             self.schedule_cost_pos[0] is None)):
             raise ValueError("The schedule attribute and the associated costs "
                              "need to be used in combination. \n Please set "
                              "the `schedule_cost_neg` and `schedule_cost_pos` "
