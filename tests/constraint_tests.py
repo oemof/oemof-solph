@@ -677,3 +677,24 @@ class Constraint_Tests:
             shift_interval=2
         )
         self.compare_lp_files('dsm_module_interval.lp')
+
+
+    def test_nonequidistant_timeindex(self):
+        """Constraint test  of an energysystem with nonequidistant timeindex"""
+        idx2h = pd.date_range('1/1/2017', periods=3, freq='H')
+        idxh = pd.date_range("1/1/2017 04:00:00", periods=2, freq="2H")
+        idx30m = pd.date_range("1/1/2017 06:30:00", periods=3, freq="30min")
+        timeindex = idx2h.append([idxh, idx30m])
+        timeincrement = helpers.calculate_timeincrement(timeindex)
+        es = solph.EnergySystem(timeindex=timeindex,
+                                timeincrement=timeincrement)
+        b_gas = solph.Bus(label="gas")
+        b_th = solph.Bus(label = "heat")
+        boiler = solph.Transformer(
+            label="boiler",
+            inputs={b_gas: solph.Flow(variable_costs=100)},
+            outputs={b_th: solph.Flow(nominal_value=200)}
+        )
+        es.add(b_gas, b_th, boiler)
+        om = solph.Model(es)
+        self.compare_lp_files('nonequidistant_timeindex.lp', my_om=om)
