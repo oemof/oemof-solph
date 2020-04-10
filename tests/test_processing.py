@@ -99,8 +99,6 @@ class TestParameterResult:
                     'positive_gradient_costs': 0,
                     'variable_costs': 0,
                     'label': str(b_el2.outputs[demand].label),
-                    'schedule_cost_pos': 0,
-                    'schedule_cost_neg': 0,
                 }
             ).sort_index()
         )
@@ -134,8 +132,8 @@ class TestParameterResult:
             'flow': None,
             'values': None,
             'label': str(b_el2.outputs[demand].label),
-            'schedule_cost_pos': 0,
-            'schedule_cost_neg': 0,
+            'schedule_cost_pos': None,
+            'schedule_cost_neg': None,
             'schedule': None,
         }
         assert_series_equal(
