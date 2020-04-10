@@ -9,8 +9,10 @@ available from its original location oemof/tests/test_solph_network_classes.py
 SPDX-License-Identifier: MIT
 """
 
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
 from oemof import solph
-from nose.tools import assert_raises, eq_, ok_
 
 
 def test_transformer_class():

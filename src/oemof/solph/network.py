@@ -1,0 +1,338 @@
+# -*- coding: utf-8 -*-
+
+""" Classes used to model energy supply systems within solph.
+
+Classes are derived from oemof core network classes and adapted for specific
+optimization tasks. An energy system is modelled as a graph/network of nodes
+with very specific constraints on which types of nodes are allowed to be
+connected.
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location oemof/oemof/solph/network.py
+
+SPDX-License-Identifier: MIT
+"""
+
+from warnings import warn
+
+import oemof.network.energy_system as es
+import oemof.network.network as on
+from oemof.solph import blocks
+from oemof.solph.plumbing import sequence
+from oemof.tools import debugging
+
+
+class EnergySystem(es.EnergySystem):
+    """ A variant of :class:`EnergySystem
+    <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
+
+    In order to work in tandem with solph, instances of this class always use
+    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
+    supplied via the `groupings` keyword argument, :const:`solph.GROUPINGS
+    <oemof.solph.GROUPINGS>` is prepended to those.
+
+    If you know what you are doing and want to use solph without
+    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
+    :class:`core's EnergySystem <oemof.core.energy_system.EnergySystem>`
+    directly.
+    """
+
+    def __init__(self, **kwargs):
+        # Doing imports at runtime is generally frowned upon, but should work
+        # for now. See the TODO in :func:`constraint_grouping
+        # <oemof.solph.groupings.constraint_grouping>` for more information.
+        from oemof.solph.groupings import GROUPINGS
+
+        kwargs['groupings'] = (GROUPINGS + kwargs.get('groupings', []))
+
+        super().__init__(**kwargs)
+
+
+class Flow(on.Edge):
+    r""" Defines a flow between two nodes.
+
+    Keyword arguments are used to set the attributes of this flow. Parameters
+    which are handled specially are noted below.
+    For the case where a parameter can be either a scalar or an iterable, a
+    scalar value will be converted to a sequence containing the scalar value at
+    every index. This sequence is then stored under the paramter's key.
+
+    Parameters
+    ----------
+    nominal_value : numeric, :math:`P_{nom}`
+        The nominal value of the flow. If this value is set the corresponding
+        optimization variable of the flow object will be bounded by this value
+        multiplied with min(lower bound)/max(upper bound).
+    max : numeric (iterable or scalar), :math:`f_{max}`
+        Normed maximum value of the flow. The flow absolute maximum will be
+        calculated by multiplying :attr:`nominal_value` with :attr:`max`
+    min : numeric (iterable or scalar), :math:`f_{min}`
+        Normed minimum value of the flow (see :attr:`max`).
+    actual_value : numeric (iterable or scalar), :math:`f_{actual}`
+        Normed fixed value for the flow variable. Will be multiplied with the
+        :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
+        set to :obj:`True` the flow variable will be fixed to `actual_value
+        * nominal_value`, i.e. this value is set exogenous.
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
+           two consecutive flow values.
+         * `'costs``: numeric (scalar or None), the gradient cost per
+           unit.
+
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+
+        A dictionary containing the following two keys:
+
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
+            two consecutive flow values.
+          * `'costs``: numeric (scalar or None), the gradient cost per
+            unit.
+
+    summed_max : numeric, :math:`f_{sum,max}`
+        Specific maximum value summed over all timesteps. Will be multiplied
+        with the nominal_value to get the absolute limit.
+    summed_min : numeric, :math:`f_{sum,min}`
+        see above
+    variable_costs : numeric (iterable or scalar)
+        The costs associated with one unit of the flow. If this is set the
+        costs will be added to the objective expression of the optimization
+        problem.
+    fixed : boolean
+        Boolean value indicating if a flow is fixed during the optimization
+        problem to its ex-ante set value. Used in combination with the
+        :attr:`actual_value`.
+    investment : :class:`Investment <oemof.solph.options.Investment>`
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem. Note: This will refer all attributes to an
+        investment variable instead of to the nominal_value. The nominal_value
+        should not be set (or set to None) if an investment object is used.
+    nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
+        If a nonconvex flow object is added here, the flow constraints will
+        be altered significantly as the mathematical model for the flow
+        will be different, i.e. constraint etc. from
+        :class:`NonConvexFlow <oemof.solph.blocks.NonConvexFlow>`
+        will be used instead of
+        :class:`Flow <oemof.solph.blocks.Flow>`.
+        Note: at the moment this does not work if the investment attribute is
+        set .
+    schedule : numeric (sequence or scalar)
+        Schedule for the flow. Flow has to follow the schedule, otherwise a
+        penalty term will be activated. If array-like, values can be None
+        for flexible, non-fixed flow during the certain timestep.  Used in
+        combination with :attr:`schedule_cost_pos` and
+        :attr:`schedule_cost_neg`.
+    schedule_cost_pos : numeric (sequence or scalar)
+        A penalty parameter of the penalty term which describes the costs
+        associated with one unit of deficit of the flow compared to the
+        schedule. If this is set the costs will be added to the objective
+        expression of the optimization problem. Used in combination with the
+        :attr:`schedule` and :attr:`schedule_cost_neg`
+    schedule_cost_neg: numeric (sequence or scalar)
+        A penalty parameter of the penalty term which describes the costs
+        associated with one unit of the exceeded flow when flow exceeds the
+        schedule. If this is set the costs will be added to the objective
+        expression of the optimization problem. Used in combination with
+        the :attr:`schedule` and :attr:`schedule_cost_pos`
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Flow`
+     * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
+       Investment object is present)
+     * :py:class:`~oemof.solph.blocks.NonConvexFlow` (If
+        nonconvex  object is present, CAUTION: replaces
+        :py:class:`~oemof.solph.blocks.Flow` class and a MILP will be build)
+
+    Examples
+    --------
+    Creating a fixed flow object:
+
+    >>> f = Flow(actual_value=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f.variable_costs[2]
+    5
+    >>> f.actual_value[2]
+    4
+
+    Creating a flow object with time-depended lower and upper bounds:
+
+    >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
+    >>> f1.max[1]
+    0.99
+
+    """
+
+    def __init__(self, **kwargs):
+        # TODO: Check if we can inherit from pyomo.core.base.var _VarData
+        # then we need to create the var object with
+        # pyomo.core.base.IndexedVarWithDomain before any Flow is created.
+        # E.g. create the variable in the energy system and populate with
+        # information afterwards when creating objects.
+
+        super().__init__()
+
+        scalars = ['nominal_value', 'summed_max', 'summed_min',
+                   'investment', 'nonconvex', 'integer', 'fixed']
+        sequences = ['actual_value', 'variable_costs', 'min', 'max',
+                     'schedule', 'schedule_cost_neg', 'schedule_cost_pos']
+        dictionaries = ['positive_gradient', 'negative_gradient']
+        defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
+                    'positive_gradient': {'ub': None, 'costs': 0},
+                    'negative_gradient': {'ub': None, 'costs': 0}
+                    }
+        keys = [k for k in kwargs if k != 'label']
+        for attribute in set(scalars + sequences + dictionaries + keys):
+            value = kwargs.get(attribute, defaults.get(attribute))
+            if attribute in dictionaries:
+                setattr(self, attribute, {'ub': sequence(value['ub']),
+                                          'costs': value['costs']})
+            elif 'fixed_costs' in attribute:
+                raise AttributeError(
+                         "The `fixed_costs` attribute has been removed"
+                         " with v0.2!")
+            else:
+                setattr(self, attribute,
+                        sequence(value) if attribute in sequences else value)
+
+        # Checking for impossible attribute combinations
+        if self.fixed and self.actual_value[0] is None:
+            raise ValueError("Cannot fix flow value to None.\n Please "
+                             "set the actual_value attribute of the flow")
+        if self.investment and self.nominal_value is not None:
+            raise ValueError("Using the investment object the nominal_value"
+                             " has to be set to None.")
+        if self.investment and self.nonconvex:
+            raise ValueError("Investment flows cannot be combined with " +
+                             "nonconvex flows!")
+        if (len(self.schedule) != 0 and
+            (self.schedule_cost_neg[0] is None or
+             self.schedule_cost_pos[0] is None)):
+            raise ValueError("The schedule attribute and the associated costs "
+                             "need to be used in combination. \n Please set "
+                             "the `schedule_cost_neg` and `schedule_cost_pos` "
+                             "attributes of the flow.")
+
+
+class Bus(on.Bus):
+    """A balance object. Every node has to be connected to Bus.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Bus`
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.balanced = kwargs.get('balanced', True)
+
+    def constraint_group(self):
+        if self.balanced:
+            return blocks.Bus
+        else:
+            return None
+
+
+class Sink(on.Sink):
+    """An object with one input flow.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.inputs:
+            msg = "`Sink` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
+    def constraint_group(self):
+        pass
+
+
+class Source(on.Source):
+    """An object with one output flow.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.outputs:
+            msg = "`Source` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
+    def constraint_group(self):
+        pass
+
+
+class Transformer(on.Transformer):
+    """A linear Transformer object with n inputs and n outputs.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of each flow.
+        Keys are the connected bus objects.
+        The dictionary values can either be a scalar or an iterable with length
+        of time horizon for simulation.
+
+    Examples
+    --------
+    Defining an linear transformer:
+
+    >>> from oemof import solph
+    >>> bgas = solph.Bus(label='natural_gas')
+    >>> bcoal = solph.Bus(label='hard_coal')
+    >>> bel = solph.Bus(label='electricity')
+    >>> bheat = solph.Bus(label='heat')
+
+    >>> trsf = solph.Transformer(
+    ...    label='pp_gas_1',
+    ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5,
+    ...                        bgas: 0.8, bcoal: 0.2})
+    >>> print(sorted([x[1][5] for x in trsf.conversion_factors.items()]))
+    [0.2, 0.3, 0.5, 0.8]
+
+    >>> type(trsf)
+    <class 'oemof.solph.network.Transformer'>
+
+    >>> sorted([str(i) for i in trsf.inputs])
+    ['hard_coal', 'natural_gas']
+
+    >>> trsf_new = solph.Transformer(
+    ...    label='pp_gas_2',
+    ...    inputs={bgas: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5})
+    >>> trsf_new.conversion_factors[bgas][3]
+    1
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.blocks.Transformer`
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not self.inputs:
+            msg = "`Transformer` '{0}' constructed without `inputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        if not self.outputs:
+            msg = "`Transformer` '{0}' constructed without `outputs`."
+            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+
+        self.conversion_factors = {
+            k: sequence(v)
+            for k, v in kwargs.get('conversion_factors', {}).items()}
+
+        missing_conversion_factor_keys = (
+            (set(self.outputs) | set(self.inputs)) -
+            set(self.conversion_factors))
+
+        for cf in missing_conversion_factor_keys:
+            self.conversion_factors[cf] = sequence(1)
+
+    def constraint_group(self):
+        return blocks.Transformer
