@@ -14,7 +14,6 @@ import datetime as dt
 import os
 import pandas as pd
 from collections import MutableMapping
-from ..solph.plumbing import sequence
 
 
 def get_basic_path():
@@ -86,7 +85,7 @@ def calculate_timeincrement(timeindex, fill_value=None):
         timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
         timeincrement_hourly = list(timeincrement_sec.map(
                                     lambda x: x/3600))
-        timeincrement = sequence(timeincrement_hourly)
+        timeincrement = timeincrement_hourly
         return timeincrement
     else:
         raise AttributeError(
