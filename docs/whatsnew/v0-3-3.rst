@@ -1,0 +1,51 @@
+v0.3.3 (January 12, 2020)
+++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+* Allow to limit count of concurrently active flows in group of flows.
+  (Flows have to be NonConvex, the limit can be an upper or lower one.)
+
+New features
+############
+
+* :class:`~oemof.solph.GenericStorage` can now have "fixed_losses", that are independent from storage content.
+
+New components
+##############
+
+* something
+
+Documentation
+#############
+
+* Improved documentation of ExtractionTurbineCHP
+
+Known issues
+############
+
+* something
+
+Bug fixes
+#########
+
+* something
+
+Testing
+#######
+
+* something
+
+Other changes
+#############
+
+* something
+
+Contributors
+############
+
+* Uwe Krien
+* Patrik Schönfeldt
+* Jann Launer

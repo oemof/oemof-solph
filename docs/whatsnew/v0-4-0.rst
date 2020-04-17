@@ -1,0 +1,70 @@
+v0.4.0 (April ??, 2020)
++++++++++++++++++++++++++++
+
+
+API changes
+###########
+
+* The attribute :attr:`capacity` of the :class:`GenericStorage` describing the current
+  absolute stored energy/material/water etc. has been renamed to :attr:`storage_content`.
+  In the :class:`GenericStorageBlock` and :class:`GenericInvestmentStorageBlock`,
+  the attribute :attr:`init_cap` has been renamed :attr:`init_content`. This change is
+  intended to avoid confusion with :attr:`nominal_storage_capacity` or capacity in terms
+  of installed capacity.
+
+New features
+############
+
+* Allows having a non equidistant timeindex. By adding the
+    calculate_timeincrement function to tools/helpers.py a non
+    equidistant timeincrement can be calculated. The EnergySystem
+    will now be defined by the timeindex and the calculated
+    timeincrement.
+
+* Allows non-convex investments for flows and storages.
+    With this feature, fix investment costs, which do not dependent on the
+    nominal capacity, can be considered.
+
+New components
+##############
+
+* something
+
+Documentation
+#############
+
+* Improved documentation of ExtractionTurbineCHP
+
+Known issues
+############
+
+* something
+
+Bug fixes
+#########
+
+* something
+
+Testing
+#######
+
+* something
+
+Other changes
+#############
+
+* The ``loss_rate`` of :class:`~oemof.solph.components.GenericStorage`
+    is now defined per time increment.
+* The parameters' data type in the docstrings is changed from
+  `numeric (sequence or scalar)` to `numeric (iterable or scalar)`
+  (`Issue #673 <https://github.com/oemof/oemof-solph/issues/673>`_).
+
+Contributors
+############
+
+* Caterina Köhl
+* Jonathan Amme
+* Uwe Krien
+* Johannes Röder
+* Jann Launer
+* Daniel Rank
