@@ -11,6 +11,8 @@ API changes
   the attribute :attr:`init_cap` has been renamed :attr:`init_content`. This change is
   intended to avoid confusion with :attr:`nominal_storage_capacity` or capacity in terms
   of installed capacity.
+* Allow to limit count of concurrently active flows in group of flows.
+  (Flows have to be NonConvex, the limit can be an upper or lower one.)
 
 New features
 ############
@@ -68,3 +70,4 @@ Contributors
 * Johannes Röder
 * Jann Launer
 * Daniel Rank
+* Patrik Schönfeldt
