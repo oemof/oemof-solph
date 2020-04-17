@@ -38,7 +38,6 @@ def get_tuple(x):
         return x
 
 
-
 def get_timestep(x):
     """
     Get the timestep from oemof tuples.
