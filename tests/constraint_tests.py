@@ -554,6 +554,37 @@ class TestsConstraint:
 
         self.compare_lp_files('emission_limit.lp', my_om=om)
 
+    def test_flow_count_limit(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nonconvex=solph.NonConvex(),
+            nominal_value=100, emission_factor=[0.5, -1.0, 2.0])})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nonconvex=solph.NonConvex(),
+            nominal_value=100, emission_factor=3.5)})
+
+        # Should be ignored because emission_factor is not defined.
+        solph.Source(label='source3', outputs={bel: solph.Flow(
+            nonconvex=solph.NonConvex(), nominal_value=100)})
+
+        # Should be ignored because it is not NonConvex.
+        solph.Source(label='source4', outputs={bel: solph.Flow(
+            emission_factor=1.5,
+            min=0.3, nominal_value=100)})
+
+        om = self.get_om()
+
+        # one of the two flows has to be active
+        solph.constraints.limit_active_flow_count_by_keyword(om,
+                                                             "emission_factor",
+                                                             lower_limit=1,
+                                                             upper_limit=2)
+
+        self.compare_lp_files('flow_count_limit.lp', my_om=om)
+
     def test_flow_without_emission_for_emission_constraint(self):
         """
         """
