@@ -82,8 +82,7 @@ setup(
         "pyomo >= 4.4.0, < 6.0",
         "networkx",
         "oemof.tools",
-        ("oemof.network@https://github.com/oemof/oemof.network/archive/"
-         "uvchik-test-branch.zip"),
+        "oemof.network",
     ],
     extras_require={"dev": ["pytest", "sphinx", "sphinx_rtd_theme", ],
                     "dummy": ["oemof"]},
