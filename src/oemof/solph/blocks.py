@@ -308,12 +308,12 @@ class InvestmentFlow(SimpleBlock):
     the following additional constraints are created, if the appropriate
     attribute of the *Flow* (see :class:`oemof.solph.network.Flow`) is set:
 
-        * :attr:`fixed=True`
+        * :attr:`fix` is not None
 
             Actual value constraint for investments with fixed flow values
 
         .. math::
-            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{actual}(t)
+            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{fix}(t)
 
         * :attr:`min != 0`
 
@@ -467,10 +467,11 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if g[2].investment.nonconvex is True])
 
         self.FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fixed])
+            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not
+                        None])
 
         self.NON_FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if not g[2].fixed])
+            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None])
 
         self.SUMMED_MAX_INVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None])
