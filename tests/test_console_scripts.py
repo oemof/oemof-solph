@@ -8,9 +8,8 @@ available from its original location oemof/tests/test_processing.py
 
 SPDX-License-Identifier: MIT
 """
-import oemof.tools.console_scripts as console_scripts
+import oemof.solph.console_scripts as console_scripts
 
 
 def test_console_scripts():
     console_scripts.check_oemof_installation(silent=False)
-    pass

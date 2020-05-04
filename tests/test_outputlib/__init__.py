@@ -1,8 +1,14 @@
 
 import os
+
 import pandas as pd
-from oemof.solph import (
-    Bus, Sink, Source, Flow, Transformer, Model, EnergySystem)
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
 
 filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
 data = pd.read_csv(filename, sep=",")
@@ -26,7 +32,7 @@ wind = Source(
     label='wind',
     outputs={
         bel: Flow(
-            fix=data['wind'],
+            actual_value=data['wind'],
             nominal_value=66.3,
             fixed=True
         )
@@ -37,7 +43,7 @@ pv = Source(
     label='pv',
     outputs={
         bel: Flow(
-            fix=data['pv'],
+            actual_value=data['pv'],
             nominal_value=65.3,
             fixed=True
         )
@@ -50,7 +56,7 @@ demand_el = Sink(
     inputs={
         bel: Flow(
             nominal_value=85,
-            fix=data['demand_el'],
+            actual_value=data['demand_el'],
             fixed=True
         )
     }
@@ -61,7 +67,7 @@ demand_th = Sink(
     inputs={
         bth: Flow(
             nominal_value=40,
-            fix=data['demand_th'],
+            actual_value=data['demand_th'],
             fixed=True
         )
     }

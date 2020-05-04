@@ -13,12 +13,19 @@ oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import os
+
 import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
-                         EnergySystem)
-from oemof.outputlib import processing, views
+from nose.tools import eq_
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_dispatch_example(solver='cbc', periods=24*5):
@@ -45,19 +52,19 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     #                      outputs={bel: Flow(variable_costs=200)})
 
     # sources
-    wind = Source(label='wind', outputs={bel: Flow(fix=data['wind'],
+    wind = Source(label='wind', outputs={bel: Flow(actual_value=data['wind'],
                   nominal_value=66.3, fixed=True)})
 
-    pv = Source(label='pv', outputs={bel: Flow(fix=data['pv'],
+    pv = Source(label='pv', outputs={bel: Flow(actual_value=data['pv'],
                 nominal_value=65.3, fixed=True)})
 
     # demands (electricity/heat)
     demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
-                     fix=data['demand_el'], fixed=True)})
+                     actual_value=data['demand_el'], fixed=True)})
 
     demand_th = Sink(label='demand_therm',
                      inputs={bth: Flow(nominal_value=40,
-                                       fix=data['demand_th'],
+                                       actual_value=data['demand_th'],
                                        fixed=True)})
 
     # power plants
