@@ -81,7 +81,7 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
 
     solph.Sink(label=Label('sink', 'electricity', 'demand'),
                inputs={bel: solph.Flow(
-                   actual_value=data['demand_el'],
+                   fix=data['demand_el'],
                    fixed=True, nominal_value=1)})
 
     # Sources
@@ -91,12 +91,12 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
 
     solph.Source(label=Label('renewable', 'electricity', 'wind'),
                  outputs={bel: solph.Flow(
-                     actual_value=data['wind'],
+                     fix=data['wind'],
                      nominal_value=1000000, fixed=True)})
 
     solph.Source(label=Label('renewable', 'electricity', 'pv'),
                  outputs={bel: solph.Flow(
-                     actual_value=data['pv'], nominal_value=582000,
+                     fix=data['pv'], nominal_value=582000,
                      fixed=True)})
 
     # Transformer

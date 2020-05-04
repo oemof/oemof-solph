@@ -93,7 +93,7 @@ def test_optimal_solution():
     bel = solph.Bus(label='bus')
     es.add(bel)
     es.add(solph.Sink(inputs={bel: solph.Flow(
-        nominal_value=5, actual_value=[1], fixed=True)}))
+        nominal_value=5, fix=[1], fixed=True)}))
     es.add(solph.Source(outputs={bel: solph.Flow(variable_costs=5)}))
     m = solph.models.Model(es, timeincrement=1)
     m.solve('cbc')
@@ -108,7 +108,7 @@ def test_infeasible_model():
             bel = solph.Bus(label='bus')
             es.add(bel)
             es.add(solph.Sink(inputs={bel: solph.Flow(
-                nominal_value=5, actual_value=[1], fixed=True)}))
+                nominal_value=5, fix=[1], fixed=True)}))
             es.add(solph.Source(outputs={bel: solph.Flow(
                 nominal_value=4, variable_costs=5)}))
             m = solph.models.Model(es, timeincrement=1)

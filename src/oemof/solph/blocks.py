@@ -411,7 +411,7 @@ class InvestmentFlow(SimpleBlock):
         ", "Variable investment costs"
         ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
         Fix investment costs"
-        ":math:`f_{actual}`", ":py:obj:`flows[i, o].actual_value[t]`", "Normed
+        ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
         fixed value for the flow variable"
         ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
         value of the flow"
@@ -524,7 +524,7 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (m.flow[i, o, t] == (
                     (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                    m.flows[i, o].actual_value[t]))
+                    m.flows[i, o].fix[t]))
 
             return expr
         self.fixed = Constraint(self.FIXED_INVESTFLOWS, m.TIMESTEPS,

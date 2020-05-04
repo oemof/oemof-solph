@@ -69,10 +69,10 @@ class Flow(on.Edge):
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
-    actual_value : numeric (iterable or scalar), :math:`f_{actual}`
+    fix : numeric (iterable or scalar), :math:`f_{actual}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to `actual_value
+        set to :obj:`True` the flow variable will be fixed to `fix
         * nominal_value`, i.e. this value is set exogenous.
     positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
@@ -105,7 +105,7 @@ class Flow(on.Edge):
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
-        :attr:`actual_value`.
+        :attr:`fix`.
     investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
@@ -135,10 +135,10 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(actual_value=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f = Flow(fix=[10, 4, 4], fixed=True, variable_costs=5)
     >>> f.variable_costs[2]
     5
-    >>> f.actual_value[2]
+    >>> f.fix[2]
     4
 
     Creating a flow object with time-depended lower and upper bounds:
@@ -159,7 +159,7 @@ class Flow(on.Edge):
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+        sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},

@@ -310,10 +310,10 @@ class Model(BaseModel):
                     self.flow[o, i, t].setub(self.flows[o, i].max[t] *
                                              self.flows[o, i].nominal_value)
 
-                    if self.flows[o, i].actual_value[t] is not None:
+                    if self.flows[o, i].fix[t] is not None:
                         # pre- optimized value of flow variable
                         self.flow[o, i, t].value = (
-                            self.flows[o, i].actual_value[t] *
+                            self.flows[o, i].fix[t] *
                             self.flows[o, i].nominal_value)
                         # fix variable if flow is fixed
                         if self.flows[o, i].fixed:
