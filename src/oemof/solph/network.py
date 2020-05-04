@@ -161,7 +161,7 @@ class Flow(on.Edge):
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
-        defaults = {'min': 0, 'max': 1, 'variable_costs': 0,
+        defaults = {'fix': None, 'min': 0, 'max': 1, 'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
