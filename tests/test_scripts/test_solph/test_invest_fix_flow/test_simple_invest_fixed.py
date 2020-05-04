@@ -7,8 +7,7 @@ Data: example_data.csv
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
-available from its original location
-oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
+available from its original location.
 
 SPDX-License-Identifier: MIT
 """
@@ -29,7 +28,7 @@ from oemof.solph import views
 from oemof.tools import economics
 
 
-def test_dispatch_example(solver='cbc', periods=10):
+def test_dispatch_fix_example(solver='cbc', periods=10):
     """Invest in a flow with a `fix` sequence containing values > 1."""
     Node.registry = None
 
