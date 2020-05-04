@@ -177,6 +177,9 @@ class Flow(on.Edge):
                 " to `fix` with v0.4. The attribute `fixed` is"
                 " set to True automatically when passing `fix`.")
 
+        if 'bidirectional' in keys:
+            defaults['min'] = -1
+
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
