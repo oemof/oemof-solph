@@ -13,6 +13,7 @@ import warnings
 
 import pytest
 from oemof import solph
+from oemof.tools.debugging import SuspiciousUsageWarning
 
 
 class TestTransformerClass:
@@ -20,6 +21,11 @@ class TestTransformerClass:
     def setup_class(cls):
         """Setup default values"""
         cls.bus = solph.Bus()
+        warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
+
+    @classmethod
+    def teardown_class(cls):
+        warnings.filterwarnings("always", category=SuspiciousUsageWarning)
 
     def test_empty_transformer(self):
         transf = solph.Transformer()
