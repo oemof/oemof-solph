@@ -161,7 +161,7 @@ class Flow(on.Edge):
                    'investment', 'nonconvex', 'integer', 'fixed']
         sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
-        defaults = {'fix': None, 'min': 0, 'max': 1, 'variable_costs': 0,
+        defaults = {'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
@@ -177,8 +177,26 @@ class Flow(on.Edge):
                 " to `fix` with v0.4. The attribute `fixed` is"
                 " set to True automatically when passing `fix`.")
 
-        if 'bidirectional' in keys:
-            defaults['min'] = -1
+        if "fixed" in keys:
+            msg = ("The `fixed` attribute is deprecated.\nIf you have defined "
+                   "the `fix` attribute the flow variable will be fixed.\n"
+                   "The `fixed` attribute does not change anything.")
+            warn(msg, debugging.SuspiciousUsageWarning)
+
+        # It is not allowed to define min or max if fix is defined.
+        if kwargs.get("fix") is not None and (kwargs.get("min") is not None or
+                                              kwargs.get("max") is not None):
+            raise AttributeError(
+                "It is not allowed to define min/max if fix is defined.")
+
+        # Set default value for min and max
+        if kwargs.get("min") is None:
+            if 'bidirectional' in keys:
+                defaults["min"] = -1
+            else:
+                defaults["min"] = 0
+        if kwargs.get("max") is None:
+            defaults["max"] = 1
 
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
@@ -191,9 +209,6 @@ class Flow(on.Edge):
                         sequence(value) if attribute in sequences else value)
 
         # Checking for impossible attribute combinations
-        if self.fixed and self.fix[0] is None:
-            raise ValueError("Cannot fix flow value to None.\n Please "
-                             "set the fix attribute of the flow")
         if self.investment and self.nominal_value is not None:
             raise ValueError("Using the investment object the nominal_value"
                              " has to be set to None.")
