@@ -12,30 +12,40 @@ SPDX-License-Identifier: MIT
 from nose.tools import assert_raises
 from nose.tools import eq_
 from nose.tools import ok_
+import pytest
 from oemof import solph
 
 
-def test_transformer_class():
-    transf = solph.Transformer()
-    ok_(isinstance(transf.conversion_factors, dict))
-    eq_(len(transf.conversion_factors.keys()), 0)
-    bus = solph.Bus()
-    transf = solph.Transformer(inputs={bus: solph.Flow()})
-    eq_(transf.conversion_factors[bus][2], 1)
-    transf = solph.Transformer(inputs={bus: solph.Flow()},
-                               conversion_factors={bus: 2})
-    eq_(transf.conversion_factors[bus][6], 2)
-    transf = solph.Transformer(inputs={bus: solph.Flow()},
-                               conversion_factors={bus: [2]})
-    eq_(len(transf.conversion_factors[bus]), 1)
-    with assert_raises(IndexError):
-        eq_(transf.conversion_factors[bus][6], 2)
+class TestTransformerClass:
+    @classmethod
+    def setup_class(cls):
+        """Setup default values"""
+        cls.bus = solph.Bus()
 
+    def test_empty_transformer(self):
+        transf = solph.Transformer()
+        assert isinstance(transf.conversion_factors, dict)
+        assert len(transf.conversion_factors.keys()) == 0
 
-def test_flow_classes():
-    with assert_raises(ValueError):
-        solph.Flow(fixed=True)
-    with assert_raises(ValueError):
+    def test_default_conversion_factor(self):
+        transf = solph.Transformer(inputs={self.bus: solph.Flow()})
+        assert transf.conversion_factors[self.bus][2] == 1
+
+    def test_sequence_conversion_factor_from_scalar(self):
+        transf = solph.Transformer(inputs={self.bus: solph.Flow()},
+                                   conversion_factors={self.bus: 2})
+        assert transf.conversion_factors[self.bus][6] == 2
+
+    def test_sequence_conversion_factor_from_list_correct_length(self):
+        transf = solph.Transformer(inputs={self.bus: solph.Flow()},
+                                   conversion_factors={self.bus: [2]})
+        assert len(transf.conversion_factors[self.bus]) == 1
+
+    def test_sequence_conversion_factor_from_list_wrong_length(self):
+        transf = solph.Transformer(inputs={self.bus: solph.Flow()},
+                                   conversion_factors={self.bus: [2]})
+        with pytest.raises(IndexError):
+            self.a = transf.conversion_factors[self.bus][6]
         solph.Flow(investment=solph.Investment(), nominal_value=4)
     with assert_raises(ValueError):
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
