@@ -46,8 +46,21 @@ class TestTransformerClass:
                                    conversion_factors={self.bus: [2]})
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
+
+
+def test_wrong_combination_invest_and_nominal_value():
+    msg = "Using the investment object the nominal_value"
+    with pytest.raises(ValueError, match=msg):
         solph.Flow(investment=solph.Investment(), nominal_value=4)
-    with assert_raises(ValueError):
+
+
+def test_wrong_combination_of_options():
+    msg = "Investment flows cannot be combined with nonconvex flows!"
+    with pytest.raises(ValueError, match=msg):
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
-    with assert_raises(AttributeError):
+
+
+def test_error_of_deprecated_fixed_costs():
+    msg = "The `fixed_costs` attribute has been removed with v0.2!"
+    with pytest.raises(AttributeError, match=msg):
         solph.Flow(fixed_costs=34)
