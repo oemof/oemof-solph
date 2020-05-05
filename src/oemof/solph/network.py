@@ -135,7 +135,7 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(fix=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f = Flow(fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
@@ -158,7 +158,7 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer', 'fixed']
+                   'investment', 'nonconvex', 'integer']
         sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'variable_costs': 0,

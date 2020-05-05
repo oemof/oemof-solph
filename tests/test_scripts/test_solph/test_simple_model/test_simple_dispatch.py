@@ -53,19 +53,18 @@ def test_dispatch_example(solver='cbc', periods=24*5):
 
     # sources
     wind = Source(label='wind', outputs={bel: Flow(fix=data['wind'],
-                  nominal_value=66.3, fixed=True)})
+                  nominal_value=66.3)})
 
     pv = Source(label='pv', outputs={bel: Flow(fix=data['pv'],
-                nominal_value=65.3, fixed=True)})
+                nominal_value=65.3)})
 
     # demands (electricity/heat)
     demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
-                     fix=data['demand_el'], fixed=True)})
+                     fix=data['demand_el'])})
 
     demand_th = Sink(label='demand_therm',
                      inputs={bth: Flow(nominal_value=40,
-                                       fix=data['demand_th'],
-                                       fixed=True)})
+                                       fix=data['demand_th'])})
 
     # power plants
     pp_coal = Transformer(label='pp_coal',

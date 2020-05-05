@@ -27,7 +27,7 @@ def check_oemof_installation(silent=False):
     solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
     solph.Source(label='rgas', outputs={bgas: solph.Flow()})
     solph.Sink(label='demand', inputs={bel: solph.Flow(
-        fix=[10, 20, 30, 40, 50], fixed=True, nominal_value=1)})
+        fix=[10, 20, 30, 40, 50], nominal_value=1)})
     solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},

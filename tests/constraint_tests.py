@@ -168,7 +168,7 @@ class TestsConstraint:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            fix=[.43, .72, .29], nominal_value=10e5, fixed=True)})
+            fix=[.43, .72, .29], nominal_value=10e5)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(variable_costs=40)})
 
@@ -189,7 +189,7 @@ class TestsConstraint:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            fix=[12, 16, 14], nominal_value=1000000, fixed=True)})
+            fix=[12, 16, 14], nominal_value=1000000)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
@@ -209,7 +209,7 @@ class TestsConstraint:
             investment=solph.Investment(ep_costs=123))})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
-            fix=[.5, .8, .3], nominal_value=10e4, fixed=True)})
+            fix=[.5, .8, .3], nominal_value=10e4)})
 
         self.compare_lp_files('invest_source_fixed_sink.lp')
 

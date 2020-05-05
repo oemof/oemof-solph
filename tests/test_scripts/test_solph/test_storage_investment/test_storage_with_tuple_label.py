@@ -92,12 +92,12 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     solph.Source(label=Label('renewable', 'electricity', 'wind'),
                  outputs={bel: solph.Flow(
                      fix=data['wind'],
-                     nominal_value=1000000, fixed=True)})
+                     nominal_value=1000000)})
 
     solph.Source(label=Label('renewable', 'electricity', 'pv'),
                  outputs={bel: solph.Flow(
                      fix=data['pv'], nominal_value=582000,
-                     fixed=True)})
+                     )})
 
     # Transformer
     solph.Transformer(

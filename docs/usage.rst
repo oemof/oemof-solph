@@ -244,7 +244,7 @@ The parameter *'fixed=True'* means that the fix can not be changed by the solver
 .. code-block:: python
 
     solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
-        fix=my_demand_series, fixed=True, nominal_value=nominal_demand)})
+        fix=my_demand_series, nominal_value=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
@@ -274,7 +274,7 @@ Comparable to the demand series an *fix* in combination with *'fixed=True'* is u
             nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
     solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
-        fix=wind_power_feedin_series, nominal_value=1000000, fixed=True)})
+        fix=wind_power_feedin_series, nominal_value=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -859,7 +859,7 @@ turbines.
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
-        fix=wind_power_time_series, fixed=True,
+        fix=wind_power_time_series,
 	investment=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
@@ -869,7 +869,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
-        fix=wind_power_time_series, fixed=True,
+        fix=wind_power_time_series,
 	    investment=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})
