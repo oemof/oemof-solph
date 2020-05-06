@@ -196,6 +196,7 @@ def limit_active_flow_count(model, constraint_name, flows,
                             at time step :math:`t`
     :math:`N_{X,min}`  P    lower_limit
     :math:`N_{X,max}`  P    lower_limit
+    ================== ==== ===================================================
     """
 
     # number of concurrent active flows
