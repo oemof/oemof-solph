@@ -74,10 +74,8 @@ def create_dataframe(om):
     components or the timesteps.
     """
     # get all pyomo variables including their block
-    block_vars = []
-    for bv in om.component_data_objects(Var):
-        block_vars.append(bv.parent_component())
-    block_vars = list(set(block_vars))
+    block_vars = list(set([
+        bv.parent_component() for bv in om.component_data_objects(Var)]))
 
     var_dict = {}
     for bv in block_vars:
