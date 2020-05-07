@@ -79,26 +79,24 @@ def create_dataframe(om):
         block_vars.append(bv.parent_component())
     block_vars = list(set(block_vars))
 
-    var_dict = {
-        (str(bv).split(".")[0], str(bv).split(".")[-1], i): bv[i].value
-        for bv in block_vars
-        if not isinstance(bv.parent_block(), _PiecewiseData)
-        for i in getattr(bv, "_index")
-    }
-
-    if len(var_dict) < len(block_vars):
-        var_dict.update(
-            {
-                (
-                    str(bv.parent_block()).split(".")[0],
-                    str(bv).split(".")[-1] + "_" + str(i),
-                    bv[i].parent_block().index(),
-                ): bv[i].value
-                for bv in block_vars
-                if not isinstance(bv.parent_block(), _PiecewiseData)
-                for i in getattr(bv, "_index")
-            }
-        )
+    var_dict = {}
+    for bv in block_vars:
+        if isinstance(bv.parent_block(), _PiecewiseData):
+            for i in getattr(bv, '_index'):
+                key = (
+                    str(bv.parent_block()).split('.')[0],
+                    str(bv).split('.')[-1] + '_' + str(i),
+                    bv[i].parent_block().index())
+                value = bv[i].value
+                var_dict[key] = value
+        else:
+            for i in getattr(bv, '_index'):
+                key = (
+                    str(bv).split('.')[0],
+                    str(bv).split('.')[-1],
+                    i)
+                value = bv[i].value
+                var_dict[key] = value
 
     # use this to create a pandas dataframe
     df = pd.DataFrame(list(var_dict.items()), columns=['pyomo_tuple', 'value'])
