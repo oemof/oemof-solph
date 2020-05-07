@@ -9,19 +9,27 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_, assert_raises, ok_
 import pandas
-from pandas.util.testing import assert_series_equal, assert_frame_equal
-from oemof.solph import (
-    EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from oemof.outputlib import processing
-from oemof.outputlib import views
+from pandas.util.testing import assert_frame_equal
+from pandas.util.testing import assert_series_equal
 
 
 class TestParameterResult:
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
@@ -166,6 +174,8 @@ class TestParameterResult:
                 'investment_existing': 0,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_nonconvex': False,
+                'investment_offset': 0,
                 'label': 'storage',
                 'fixed_losses_absolute': 0,
                 'fixed_losses_relative': 0,
@@ -197,6 +207,8 @@ class TestParameterResult:
                 'investment_existing': 0,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_nonconvex': False,
+                'investment_offset': 0,
                 'label': 'storage',
                 'fixed_losses_absolute': 0,
                 'fixed_losses_relative': 0,
@@ -257,9 +269,9 @@ class TestParameterResult:
 
     def test_node_weight_by_type(self):
         results = processing.results(self.om)
-        capacity = views.node_weight_by_type(
+        storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage)
-        eq_(int(float(capacity.sum()) * pow(10, 6)) / pow(10, 6),
+        eq_(round(float(storage_content.sum()), 6),
             1437.500003)
 
     def test_output_by_type_view(self):

@@ -34,16 +34,16 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
+import logging
+import os
 from collections import namedtuple
 
 import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import processing, views
-
-import logging
-import os
 import pandas as pd
+from nose.tools import eq_
+from oemof.network.network import Node
+from oemof.solph import processing
+from oemof.solph import views
 
 
 class Label(namedtuple('solph_label', ['tag1', 'tag2', 'tag3'])):
@@ -138,7 +138,7 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     storage = es.groups['storage_electricity_battery']
     storage_node = views.node(results, storage)
     my_results['max_load'] = storage_node['sequences'].max()[
-        ((storage, None), 'capacity')]
+        ((storage, None), 'storage_content')]
     commodity_bus = views.node(results, 'bus_natural_gas_None')
 
     gas_usage = commodity_bus['sequences'][

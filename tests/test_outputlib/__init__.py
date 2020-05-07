@@ -1,8 +1,14 @@
 
 import os
+
 import pandas as pd
-from oemof.solph import (
-    Bus, Sink, Source, Flow, Transformer, Model, EnergySystem)
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
 
 filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
 data = pd.read_csv(filename, sep=",")
