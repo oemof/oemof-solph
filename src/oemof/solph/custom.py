@@ -27,6 +27,7 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
+from pyomo.environ import Piecewise
 
 
 class ElectricalBus(Bus):
