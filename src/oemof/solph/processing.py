@@ -17,8 +17,9 @@ from itertools import groupby
 import pandas as pd
 from oemof.network.network import Node
 from oemof.solph.helpers import flatten
-from pyomo.core.base.var import Var
 from pyomo.core.base.piecewise import _PiecewiseData
+from pyomo.core.base.var import Var
+
 
 def get_tuple(x):
     """
@@ -105,7 +106,7 @@ def create_dataframe(om):
     # on which dimension the variable/parameter has (scalar/sequence).
     # columns for the oemof tuple and timestep are created
     df['oemof_tuple'] = df['pyomo_tuple'].map(get_tuple)
-    df = df[df['oemof_tuple'].map(lambda x: x!=None)]
+    df = df[df['oemof_tuple'].map(lambda x: x is not None)]
     df['timestep'] = df['oemof_tuple'].map(get_timestep)
     df['oemof_tuple'] = df['oemof_tuple'].map(remove_timestep)
 

@@ -25,9 +25,9 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
+from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
-from pyomo.environ import Piecewise
 
 
 class ElectricalBus(Bus):
@@ -1563,7 +1563,8 @@ class PiecewiseLinearTransformer(Transformer):
         flow which is to be approximated.
 
     pw_repn : string
-        Choice of piecewise representation that is passed to pyomo.environ.Piecewise
+        Choice of piecewise representation that is passed to
+        pyomo.environ.Piecewise
 
     Examples
     --------
@@ -1594,8 +1595,9 @@ class PiecewiseLinearTransformer(Transformer):
         self.pw_repn = kwargs.get('pw_repn')
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
-            raise ValueError('Component `PiecewiseLinearTransformer` cannot have ' +
-                             'more than 1 input and 1 output!')
+            raise ValueError(
+                'Component `PiecewiseLinearTransformer` cannot have ' +
+                'more than 1 input and 1 output!')
 
         nominal_value = [a.nominal_value for a in self.inputs.values()][0]
         if max(self.in_breakpoints) < nominal_value:
@@ -1639,13 +1641,16 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         if all(x == pw_repns[0] for x in pw_repns):
             self.pw_repn = pw_repns[0]
         else:
-            print('Cannot different piecewise representations ', [n.pw_repn for n in group])
+            print('Cannot different piecewise representations ',
+                  [n.pw_repn for n in group])
 
         self.breakpoints = {}
+
         def build_breakpoints(block, n):
             for t in m.TIMESTEPS:
                 self.breakpoints[(n, t)] = n.in_breakpoints
-        self.breakpoint_build = BuildAction(self.PWLINEARTRANSFORMERS, rule=build_breakpoints)
+        self.breakpoint_build = BuildAction(self.PWLINEARTRANSFORMERS,
+                                            rule=build_breakpoints)
 
         def _conversion_function(block, n, t, x):
             expr = n.conversion_function(x)
@@ -1654,17 +1659,21 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         # bounds are min/max of breakpoints
         lower_bound_in = {n: min(n.in_breakpoints) for n in group}
         upper_bound_in = {n: max(n.in_breakpoints) for n in group}
-        lower_bound_out = {n: n.conversion_function(bound) for (n, bound) in lower_bound_in.items()}
-        upper_bound_out = {n: n.conversion_function(bound) for (n, bound) in upper_bound_in.items()}
+        lower_bound_out = {n: n.conversion_function(bound) for
+                           (n, bound) in lower_bound_in.items()}
+        upper_bound_out = {n: n.conversion_function(bound) for
+                           (n, bound) in upper_bound_in.items()}
 
         def get_inflow_bounds(model, n, t):
-            return (lower_bound_in[n], upper_bound_in[n])
+            return lower_bound_in[n], upper_bound_in[n]
 
         def get_outflow_bounds(model, n, t):
-            return (lower_bound_out[n], upper_bound_out[n])
+            return lower_bound_out[n], upper_bound_out[n]
 
-        self.inflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_inflow_bounds)
-        self.outflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_outflow_bounds)
+        self.inflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
+                          bounds=get_inflow_bounds)
+        self.outflow = Var(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
+                           bounds=get_outflow_bounds)
 
         def _in_equation(block, n, t):
             """Link binary input and output flow to component outflow."""
@@ -1674,7 +1683,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             return expr == 0
 
         self.equate_in = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
-                                   rule=_in_equation)
+                                    rule=_in_equation)
 
         def _out_equation(block, n, t):
             """Link binary input and output flow to component outflow."""
@@ -1684,7 +1693,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             return expr == 0
 
         self.equate_out = Constraint(self.PWLINEARTRANSFORMERS, m.TIMESTEPS,
-                                   rule=_out_equation)
+                                     rule=_out_equation)
 
         self.piecewise = Piecewise(self.PWLINEARTRANSFORMERS,
                                    m.TIMESTEPS,
@@ -1694,4 +1703,3 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
                                    pw_constr_type='EQ',
                                    pw_pts=self.breakpoints,
                                    f_rule=_conversion_function)
-
