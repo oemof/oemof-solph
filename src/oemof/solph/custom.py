@@ -1549,7 +1549,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
 
 class PiecewiseLinearTransformer(Transformer):
-    """ Component to model a transformer with one input and one output
+    """Component to model a transformer with one input and one output
     and an arbitrary piecewise linear conversion function.
 
     Parameters
@@ -1568,7 +1568,6 @@ class PiecewiseLinearTransformer(Transformer):
 
     Examples
     --------
-
     >>> import oemof.solph as solph
 
     >>> b_gas = Bus(label='biogas')
@@ -1629,6 +1628,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             List of oemof.solph.custom.PiecewiseLinearTransformer objects
             for which the relation of inputs and outputs is created
             e.g. group = [pwltf1, pwltf2, pwltf3, ...].
+        
         """
         if group is None:
             return None
