@@ -1628,7 +1628,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             List of oemof.solph.custom.PiecewiseLinearTransformer objects
             for which the relation of inputs and outputs is created
             e.g. group = [pwltf1, pwltf2, pwltf3, ...].
-        
+
         """
         if group is None:
             return None
