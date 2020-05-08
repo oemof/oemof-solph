@@ -47,7 +47,7 @@ def test_gen_chp():
                  outputs={bth: solph.Flow(variable_costs=1000)})
 
     solph.Sink(label='demand_th', inputs={bth: solph.Flow(
-               fixed=True, actual_value=data['demand_th'], nominal_value=200)})
+               fix=data['demand_th'], nominal_value=200)})
 
     # power
     bel = solph.Bus(label='bel')

@@ -151,7 +151,7 @@ def results(om):
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
-                    'sequences': df, 'scalars': pd.Series()}
+                    'sequences': df, 'scalars': pd.Series(dtype=float)}
             else:
                 result[(bus, None)]['sequences']['duals'] = duals
 

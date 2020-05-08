@@ -42,8 +42,7 @@ class TestsGrouping:
         b = solph.Bus(label='Bus')
 
         solph.Source(label='Source', outputs={b: solph.Flow(
-            actual_value=[12, 16, 14], nominal_value=1000000,
-            fixed=True)})
+            fix=[12, 16, 14], nominal_value=1000000)})
 
         solph.Sink(label='Sink', inputs={b: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,

@@ -69,10 +69,10 @@ class Flow(on.Edge):
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
-    actual_value : numeric (iterable or scalar), :math:`f_{actual}`
+    fix : numeric (iterable or scalar), :math:`f_{actual}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to `actual_value
+        set to :obj:`True` the flow variable will be fixed to `fix
         * nominal_value`, i.e. this value is set exogenous.
     positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
@@ -105,7 +105,7 @@ class Flow(on.Edge):
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
-        :attr:`actual_value`.
+        :attr:`fix`.
     investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
@@ -135,10 +135,10 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(actual_value=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f = Flow(fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
-    >>> f.actual_value[2]
+    >>> f.fix[2]
     4
 
     Creating a flow object with time-depended lower and upper bounds:
@@ -158,31 +158,57 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+                   'investment', 'nonconvex', 'integer']
+        sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
-        defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
+        defaults = {'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
+
+        if 'fixed_costs' in keys:
+            raise AttributeError(
+                "The `fixed_costs` attribute has been removed"
+                " with v0.2!")
+
+        if 'actual_value' in keys:
+            raise AttributeError(
+                "The `actual_value` attribute has been renamed"
+                " to `fix` with v0.4. The attribute `fixed` is"
+                " set to True automatically when passing `fix`.")
+
+        if "fixed" in keys:
+            msg = ("The `fixed` attribute is deprecated.\nIf you have defined "
+                   "the `fix` attribute the flow variable will be fixed.\n"
+                   "The `fixed` attribute does not change anything.")
+            warn(msg, debugging.SuspiciousUsageWarning)
+
+        # It is not allowed to define min or max if fix is defined.
+        if kwargs.get("fix") is not None and (kwargs.get("min") is not None or
+                                              kwargs.get("max") is not None):
+            raise AttributeError(
+                "It is not allowed to define min/max if fix is defined.")
+
+        # Set default value for min and max
+        if kwargs.get("min") is None:
+            if 'bidirectional' in keys:
+                defaults["min"] = -1
+            else:
+                defaults["min"] = 0
+        if kwargs.get("max") is None:
+            defaults["max"] = 1
 
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
-            elif 'fixed_costs' in attribute:
-                raise AttributeError(
-                         "The `fixed_costs` attribute has been removed"
-                         " with v0.2!")
+
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
 
         # Checking for impossible attribute combinations
-        if self.fixed and self.actual_value[0] is None:
-            raise ValueError("Cannot fix flow value to None.\n Please "
-                             "set the actual_value attribute of the flow")
         if self.investment and self.nominal_value is not None:
             raise ValueError("Using the investment object the nominal_value"
                              " has to be set to None.")
