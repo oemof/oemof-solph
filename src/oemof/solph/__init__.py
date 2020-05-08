@@ -19,5 +19,5 @@ from .options import NonConvex  # noqa: F401
 from .plumbing import sequence  # noqa: F401
 from .processing import parameter_as_dict  # noqa: F401
 from .processing import results  # noqa: F401
-from . import views
-from . import helpers
+from . import views  # noqa: F401
+from . import helpers  # noqa: F401
