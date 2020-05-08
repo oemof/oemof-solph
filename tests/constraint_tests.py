@@ -585,6 +585,33 @@ class TestsConstraint:
 
         self.compare_lp_files('flow_count_limit.lp', my_om=om)
 
+    def test_shared_limit(self):
+        """
+        """
+        b1 = solph.Bus(label='bus')
+
+        storage1 = solph.components.GenericStorage(
+            label="storage1",
+            nominal_storage_capacity=5,
+            inputs={b1: solph.Flow()},
+            outputs={b1: solph.Flow()})
+        storage2 = solph.components.GenericStorage(
+            label="storage2",
+            nominal_storage_capacity=5,
+            inputs={b1: solph.Flow()},
+            outputs={b1: solph.Flow()})
+
+        model = self.get_om()
+
+        components = [storage1, storage2]
+
+        solph.constraints.shared_limit(model,
+                                       model.GenericStorageBlock.storage_content,
+                                       "limit_storage", components,
+                                       [0.5, 1.25], upper_limit=7)
+
+        self.compare_lp_files('shared_limit.lp', my_om=model)
+
     def test_flow_without_emission_for_emission_constraint(self):
         """
         """
