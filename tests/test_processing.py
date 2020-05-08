@@ -23,8 +23,8 @@ from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from pandas.util.testing import assert_frame_equal
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_frame_equal
+from pandas.testing import assert_series_equal
 
 
 class TestParameterResult:
@@ -68,7 +68,6 @@ class TestParameterResult:
             invest_relation_output_capacity=1/6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            fixed_costs=35,
             investment=Investment(ep_costs=0.4),
         )
 
@@ -78,8 +77,7 @@ class TestParameterResult:
             inputs={
                 b_el2: Flow(
                     nominal_value=1,
-                    actual_value=cls.demand_values,
-                    fixed=True
+                    fix=cls.demand_values,
                 )
             }
         )
@@ -99,7 +97,6 @@ class TestParameterResult:
             param_results[(b_el2, demand)]['scalars'].sort_index(),
             pandas.Series(
                 {
-                    'fixed': True,
                     'nominal_value': 1,
                     'max': 1,
                     'min': 0,
@@ -113,7 +110,7 @@ class TestParameterResult:
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
-                {'actual_value': self.demand_values}
+                {'fix': self.demand_values}
             ), check_like=True
         )
 
@@ -123,7 +120,6 @@ class TestParameterResult:
         param_results = processing.parameter_as_dict(self.es,
                                                      exclude_none=False)
         scalar_attributes = {
-            'fixed': True,
             'integer': None,
             'investment': None,
             'nominal_value': 1,
@@ -146,10 +142,10 @@ class TestParameterResult:
             pandas.Series(scalar_attributes).sort_index()
         )
         sequences_attributes = {
-            'actual_value': self.demand_values,
+            'fix': self.demand_values,
         }
         default_sequences = [
-            'actual_value'
+            'fix'
         ]
         for attr in default_sequences:
             if attr not in sequences_attributes:

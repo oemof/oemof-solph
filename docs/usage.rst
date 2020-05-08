@@ -238,13 +238,13 @@ Sink (basic)
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
 The example shows the electricity demand of the electricity_bus defined above.
-The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
-The parameter *'fixed=True'* means that the actual_value can not be changed by the solver.
+The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
+Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be changed by the solver.
 
 .. code-block:: python
 
     solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
-        actual_value=my_demand_series, fixed=True, nominal_value=nominal_demand)})
+        fix=my_demand_series, nominal_value=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
@@ -264,7 +264,9 @@ A source can represent a pv-system, a wind power plant, an import of natural gas
 
 While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*).
 As we do have to pay for imported gas we should set variable costs.
-Comparable to the demand series an *actual_value* in combination with *'fixed=True'* is used to define the normalised output of a wind power plan. The *nominal_value* sets the installed capacity.
+Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
+Alternatively, you might use *max* to allow for easy curtailment.
+The *nominal_value* sets the installed capacity.
 
 .. code-block:: python
 
@@ -274,7 +276,7 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
             nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
     solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
-        actual_value=wind_power_feedin_series, nominal_value=1000000, fixed=True)})
+        fix=wind_power_feedin_series, nominal_value=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -796,8 +798,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     s_wind = solph.Source(label='wind',
                           outputs={
                               b_elec: solph.Flow(
-                                  actual_value=data['pv'],
-                                  fixed=True,
+                                  fix=data['pv'],
                                   nominal_value=3.5)}
                           )
 
@@ -859,7 +860,7 @@ turbines.
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
-        actual_value=wind_power_time_series, fixed=True,
+        fix=wind_power_time_series,
 	investment=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
@@ -869,7 +870,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
-        actual_value=wind_power_time_series, fixed=True,
+        fix=wind_power_time_series,
 	    investment=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})

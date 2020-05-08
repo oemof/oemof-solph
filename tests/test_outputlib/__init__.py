@@ -32,9 +32,8 @@ wind = Source(
     label='wind',
     outputs={
         bel: Flow(
-            actual_value=data['wind'],
+            fix=data['wind'],
             nominal_value=66.3,
-            fixed=True
         )
     }
 )
@@ -43,9 +42,8 @@ pv = Source(
     label='pv',
     outputs={
         bel: Flow(
-            actual_value=data['pv'],
+            fix=data['pv'],
             nominal_value=65.3,
-            fixed=True
         )
     }
 )
@@ -56,8 +54,7 @@ demand_el = Sink(
     inputs={
         bel: Flow(
             nominal_value=85,
-            actual_value=data['demand_el'],
-            fixed=True
+            fix=data['demand_el'],
         )
     }
 )
@@ -67,8 +64,7 @@ demand_th = Sink(
     inputs={
         bth: Flow(
             nominal_value=40,
-            actual_value=data['demand_th'],
-            fixed=True
+            fix=data['demand_th'],
         )
     }
 )

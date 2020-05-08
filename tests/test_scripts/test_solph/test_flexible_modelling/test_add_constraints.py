@@ -42,8 +42,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
 
     Sink(label="Sink",
          inputs={b_el: Flow(nominal_value=40,
-                            actual_value=[0.5, 0.4, 0.3, 1],
-                            fixed=True)})
+                            fix=[0.5, 0.4, 0.3, 1])})
     pp_oil = Transformer(label='pp_oil',
                          inputs={boil: Flow()},
                          outputs={b_el: Flow(nominal_value=50,

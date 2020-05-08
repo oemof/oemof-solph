@@ -17,6 +17,7 @@ include *.md
 include VERSION
 include pytest.ini
 
-include tox.ini .travis.yml .appveyor.yml .readthedocs.yml
+include tox.ini
+include *.yml
 
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
