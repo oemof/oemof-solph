@@ -13,6 +13,10 @@ API changes
   of installed capacity.
 * Allow to limit count of concurrently active flows in group of flows.
   (Flows have to be NonConvex, the limit can be an upper or lower one.)
+* New constraint `shared_limit` allows to restrict the weighted sum
+  of arbitrary variables to a corridor.
+  This can be used, e.g. to model shared space is used to store wood pallets
+  and logs with their respective energy density.
 
 New features
 ############
