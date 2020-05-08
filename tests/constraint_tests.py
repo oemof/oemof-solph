@@ -605,10 +605,11 @@ class TestsConstraint:
 
         components = [storage1, storage2]
 
-        solph.constraints.shared_limit(model,
-                                       model.GenericStorageBlock.storage_content,
-                                       "limit_storage", components,
-                                       [0.5, 1.25], upper_limit=7)
+        solph.constraints.shared_limit(
+            model,
+            model.GenericStorageBlock.storage_content,
+            "limit_storage", components,
+            [0.5, 1.25], upper_limit=7)
 
         self.compare_lp_files('shared_limit.lp', my_om=model)
 
