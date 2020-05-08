@@ -331,8 +331,8 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
 def shared_limit(model, quantity, limit_name,
                  components, weights, lower_limit=0, upper_limit=None):
     r"""
-    Adds a constraint to the given model that set two variables to equal
-    adaptable by a factor.
+    Adds a constraint to the given model that restricts
+    the weighted sum of variables to a corridor.
 
     **The following constraints are build:**
 
