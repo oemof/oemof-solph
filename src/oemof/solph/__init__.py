@@ -2,6 +2,8 @@ __version__ = "0.4.0.dev0"
 
 from . import constraints  # noqa: F401
 from . import custom  # noqa: F401
+from . import helpers  # noqa: F401
+from . import views  # noqa: F401
 from .components import ExtractionTurbineCHP  # noqa: F401
 from .components import GenericCHP  # noqa: F401
 from .components import GenericStorage  # noqa: F401
