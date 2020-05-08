@@ -238,8 +238,8 @@ Sink (basic)
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
 The example shows the electricity demand of the electricity_bus defined above.
-The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
-The parameter *'fixed=True'* means that the fix can not be changed by the solver.
+The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
+Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be changed by the solver.
 
 .. code-block:: python
 
@@ -264,7 +264,9 @@ A source can represent a pv-system, a wind power plant, an import of natural gas
 
 While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*).
 As we do have to pay for imported gas we should set variable costs.
-Comparable to the demand series an *fix* in combination with *'fixed=True'* is used to define the normalised output of a wind power plan. The *nominal_value* sets the installed capacity.
+Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
+Alternatively, you might use *max* to allow for easy curtailment.
+The *nominal_value* sets the installed capacity.
 
 .. code-block:: python
 
@@ -797,7 +799,6 @@ This small example of PV, grid and SinkDSM shows how to use the component
                           outputs={
                               b_elec: solph.Flow(
                                   fix=data['pv'],
-                                  fixed=True,
                                   nominal_value=3.5)}
                           )
 
