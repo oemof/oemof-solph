@@ -4,23 +4,26 @@ Overview
 
 .. start-badges
 
-.. list-table::
-    :stub-columns: 1
+**docs**
 
-    * - docs
-      - |docs|
-    * - tests
-      - | |travis| |appveyor| |requires|
-        | |coveralls| |codecov|
-        | |scrutinizer| |codacy| |codeclimate|
-    * - package
-      - | |version| |wheel| |supported-versions| |supported-implementations|
-        | |commits-since|
+|docs| |zenodo|
+
+**tests**
+
+|travis| |appveyor| |requires|
+|coveralls| |codecov|
+|scrutinizer| |codacy| |codeclimate|
+
+**package**
+
+|version| |wheel| |supported-versions| |supported-implementations|
+|commits-since|
+
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
 
-.. |travis| image:: https://api.travis-ci.org/oemof/oemof-solph.svg?branch=dev
+.. |travis| image:: https://travis-ci.org/oemof/oemof-solph.svg?branch=dev
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/oemof/oemof-solph
 
@@ -50,12 +53,10 @@ Overview
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.svg
     :alt: PyPI Package latest release
-
 ..    :target: https://pypi.org/project/oemof-solph
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.svg
     :alt: PyPI Wheel
-
 ..    :target: https://pypi.org/project/oemof
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.svg
@@ -77,7 +78,9 @@ Overview
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
-
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
+    :alt: DOI
+    :target: https://doi.org/10.5281/zenodo.596235
 .. end-badges
 
 A model generator for energy system modelling and optimisation.
@@ -99,33 +102,29 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
 ::
 
-    pip install https://github.com/oemof/oemof-solph/archive/master.zip"
+    pip install oemof.solph
 
-You can also install the in-development version with::
+If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use::
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
-For more details have a look at the `'Installation and setup' <http://oemof-solph.readthedocs.io/en/latest/installation_and_setup.html>`_ section. There is also a `YouTube tutorial <https://www.youtube.com/watch?v=eFvoM36_szM>`_ on how to install oemof under Windows.
-
-The packages **feedinlib**, **demandlib** and **oemof.db** have to be installed separately. See section `'Using oemof' <https://oemof.readthedocs.io/en/latest/>`_ for more details about all oemof packages.
-
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use.
+For more details have a look at the `'Installation and setup' <http://oemof-solph.readthedocs.io/en/latest/installation_and_setup.html>`_ section.
 
 
 Documentation
 =============
-
-
-https://oemof-solph.readthedocs.io/
-
-Full documentation can be found at `readthedocs <http://oemof.readthedocs.org>`_. Use the `project site <http://readthedocs.org/projects/oemof>`_ of readthedocs to choose the version of the documentation. Go to the `download page <http://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
+The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <http://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <http://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
 
 To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 
-Structure of the oemof cosmos
-=============================
+If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
-Oemof packages are organised in different levels. The basic oemof interfaces are defined by the core libraries (network). The next level contains libraries that depend on the core libraries but do not provide interfaces to other oemof libraries (solph, outputlib). The third level are libraries that do not depend on any oemof interface and therefore can be used as stand-alone application (demandlib, feedinlib). Together with some other recommended projects (pvlib, windpowerlib) the oemof cosmos provides a wealth of tools to model energy systems. If you want to become part of it, feel free to join us.
+Open energy modelling framework (oemof)
+=======================================
+
+The oemof.solph package is part of the
+`Open energy modelling framework (oemof) <https://github.com/oemof/oemof>`_.
+This an organisational framework to bundle tools for energy (system) modelling.
 
 
 Examples
@@ -137,15 +136,12 @@ You can find a large variety of helpful examples in `oemof's example repository 
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
-Got further questions on using oemof?
-======================================
-If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
 Join the developers!
 ====================
 
-A warm welcome to all who want to join the developers and contribute to oemof. Information
-on the details and how to approach us can be found
+A warm welcome to all who want to join the developers and contribute to
+oemof.solph. Information on the details and how to approach us can be found
 `in the documentation <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
 
@@ -158,7 +154,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 Citing oemof
 ============
 
-The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version. `Select the version you want to cite <https://doi.org/10.5281/zenodo.596235>`_.
+The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version. |zenodo|
 
 
 Free software: MIT license
