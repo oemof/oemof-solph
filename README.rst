@@ -25,7 +25,7 @@ Overview
 
 .. |travis| image:: https://travis-ci.org/oemof/oemof-solph.svg?branch=dev
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/oemof/oemof-solph/brancheshttps://travis-ci.org/github/oemof/oemof-solph/branches
+    :target: https://travis-ci.org/github/oemof/oemof-solph/branches
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
