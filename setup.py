@@ -23,6 +23,17 @@ def read(*names, **kwargs):
         return fh.read()
 
 
+long_description = (
+        "%s\n%s"
+        % (
+            re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
+                "", read("README.rst")
+            ),
+            re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
+        )
+    )
+
+
 setup(
     name="oemof.solph",
     version="0.4.0.b0",
@@ -30,13 +41,7 @@ setup(
     description=(
         "A model generator for energy system modelling and optimisation."
     ),
-    long_description="%s\n%s"
-    % (
-        re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
-            "", read("README.rst")
-        ),
-        re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
-    ),
+    long_description=long_description,
     long_description_content_type="text/x-rst",
     author="oemof developer group",
     author_email="contact@oemof.org",
