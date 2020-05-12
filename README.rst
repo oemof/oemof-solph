@@ -17,7 +17,7 @@ Overview
 **package**
 
 |version| |wheel| |supported-versions| |supported-implementations|
-|commits-since|
+|commits-since| |commits-since-stable|
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
@@ -70,6 +70,10 @@ Overview
 .. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.0b0/dev
     :alt: Commits since latest release
     :target: https://github.com/oemof/oemof-solph/compare/v0.4.0b0...dev
+
+.. |commits-since-stable| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2/dev
+    :alt: Commits since latest release
+    :target: https://github.com/oemof/oemof-solph/compare/v0.3.2...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: DOI
