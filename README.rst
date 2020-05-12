@@ -25,7 +25,7 @@ Overview
 
 .. |travis| image:: https://travis-ci.org/oemof/oemof-solph.svg?branch=dev
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/oemof/oemof-solph
+    :target: https://travis-ci.org/oemof/oemof-solph/brancheshttps://travis-ci.org/github/oemof/oemof-solph/branches
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
@@ -33,7 +33,7 @@ Overview
 
 .. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
     :alt: Requirements Status
-..    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
+    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
