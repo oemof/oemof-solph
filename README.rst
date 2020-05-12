@@ -73,14 +73,15 @@ Overview
     :alt: Commits since latest release
     :target: https://github.com/oemof/oemof-solph/compare/v0.3.2...dev
 
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
+    :alt: DOI
+    :target: https://doi.org/10.5281/zenodo.596235
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
-.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
-    :alt: DOI
-    :target: https://doi.org/10.5281/zenodo.596235
+
 .. end-badges
 
 A model generator for energy system modelling and optimisation.
@@ -154,7 +155,7 @@ You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 Citing oemof
 ============
 
-The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version. |zenodo|
+The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version.
 
 
 Free software: MIT license
