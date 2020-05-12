@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name="oemof.solph",
-    version="0.4.0.dev0",
+    version="0.4.0.b0",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
