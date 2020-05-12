@@ -33,7 +33,7 @@ Overview
 
 .. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
     :alt: Requirements Status
-    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
+..    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
@@ -53,19 +53,19 @@ Overview
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
-..    :target: https://pypi.org/project/oemof.solph
+    :target: https://pypi.org/project/oemof.solph
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.solph.svg
     :alt: PyPI Wheel
-..    :target: https://pypi.org/project/oemof.solph
+    :target: https://pypi.org/project/oemof.solph
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.solph.svg
     :alt: Supported versions
-..    :target: https://pypi.org/project/oemof.solph
+    :target: https://pypi.org/project/oemof.solph
 
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof.solph.svg
     :alt: Supported implementations
-..     :target: https://pypi.org/project/oemof.solph
+    :target: https://pypi.org/project/oemof.solph
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.0b0/dev
     :alt: Commits since latest release
