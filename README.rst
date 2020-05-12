@@ -51,27 +51,25 @@ Overview
    :target: https://codeclimate.com/github/oemof/oemof-solph
    :alt: CodeClimate Quality Status
 
-.. |version| image:: https://img.shields.io/pypi/v/oemof.svg
+.. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
-..    :target: https://pypi.org/project/oemof-solph
+..    :target: https://pypi.org/project/oemof.solph
 
-.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.svg
+.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.solph.svg
     :alt: PyPI Wheel
-..    :target: https://pypi.org/project/oemof
+..    :target: https://pypi.org/project/oemof.solph
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.svg
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.solph.svg
     :alt: Supported versions
+..    :target: https://pypi.org/project/oemof.solph
 
-..    :target: https://pypi.org/project/oemof-solph
-
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof.svg
+.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/oemof.solph.svg
     :alt: Supported implementations
+..     :target: https://pypi.org/project/oemof.solph
 
-..     :target: https://pypi.org/project/oemof
-
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.3.2/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.0b0/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.3.2...dev
+    :target: https://github.com/oemof/oemof-solph/compare/v0.4.0b0...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: DOI
