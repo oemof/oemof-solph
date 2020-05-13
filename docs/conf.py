@@ -52,6 +52,6 @@ linkcheck_ignore = [r"https://requires.io/.*"] + (
         r"https://github.com/oemof/oemof-solph/issues/*",
         r"https://github.com/oemof/oemof-solph/pull/*",
     ]
-    if not "TRAVIS" in os.environ
+    if "TRAVIS" not in os.environ
     else []
 )
