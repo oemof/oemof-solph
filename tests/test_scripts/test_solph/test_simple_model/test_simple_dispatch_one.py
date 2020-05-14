@@ -8,18 +8,23 @@ by the contributors recorded in the version control history of the file,
 available from its original location
 oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_
-import pandas as pd
-from oemof.solph import (Sink, Source, Transformer, Bus, Flow, Model,
-                         EnergySystem)
-from oemof.outputlib import processing, views
-from oemof.network import Node
+from oemof.network.network import Node
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph import views
 
 
-def test_dispatch_one_time_step(solver='cbc', periods=1):
+def test_dispatch_one_time_step(solver='cbc'):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################
@@ -37,16 +42,15 @@ def test_dispatch_one_time_step(solver='cbc', periods=1):
 
     # sources
     wind = Source(label='wind', outputs={bel: Flow(
-        actual_value=0.5, nominal_value=66.3, fixed=True)})
+        fix=0.5, nominal_value=66.3)})
 
     # demands (electricity/heat)
     demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
-                     actual_value=0.3, fixed=True)})
+                     fix=0.3)})
 
     demand_th = Sink(label='demand_therm',
                      inputs={bth: Flow(nominal_value=40,
-                                       actual_value=0.2,
-                                       fixed=True)})
+                                       fix=0.2)})
 
     # combined heat and power plant (chp)
     pp_chp = Transformer(label='pp_chp',

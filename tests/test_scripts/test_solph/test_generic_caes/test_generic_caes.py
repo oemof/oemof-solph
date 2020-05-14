@@ -9,15 +9,23 @@ by the contributors recorded in the version control history of the file,
 available from its original location
 oemof/tests/test_scripts/test_solph/test_generic_caes/test_generic_caes.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import os
+
 import pandas as pd
-import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import processing, views
+from nose.tools import eq_
+from oemof.network.network import Node
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import custom
+from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_gen_caes():
@@ -30,23 +38,23 @@ def test_gen_caes():
 
     # create an energy system
     idx = pd.date_range('1/1/2017', periods=periods, freq='H')
-    es = solph.EnergySystem(timeindex=idx)
+    es = EnergySystem(timeindex=idx)
     Node.registry = es
 
     # resources
-    bgas = solph.Bus(label='bgas')
+    bgas = Bus(label='bgas')
 
-    rgas = solph.Source(label='rgas', outputs={
-        bgas: solph.Flow(variable_costs=20)})
+    Source(label='rgas', outputs={
+        bgas: Flow(variable_costs=20)})
 
     # power
-    bel_source = solph.Bus(label='bel_source')
-    source_el = solph.Source(label='source_el', outputs={
-        bel_source: solph.Flow(variable_costs=data['price_el_source'])})
+    bel_source = Bus(label='bel_source')
+    Source(label='source_el', outputs={
+        bel_source: Flow(variable_costs=data['price_el_source'])})
 
-    bel_sink = solph.Bus(label='bel_sink')
-    sink_el = solph.Sink(label='sink_el', inputs={
-        bel_sink: solph.Flow(variable_costs=data['price_el_sink'])})
+    bel_sink = Bus(label='bel_sink')
+    Sink(label='sink_el', inputs={
+        bel_sink: Flow(variable_costs=data['price_el_sink'])})
 
     # dictionary with parameters for a specific CAES plant
     # based on thermal modelling and linearization techniques
@@ -74,15 +82,15 @@ def test_gen_caes():
     }
 
     # generic compressed air energy storage (caes) plant
-    caes = solph.custom.GenericCAES(
+    custom.GenericCAES(
         label='caes',
-        electrical_input={bel_source: solph.Flow()},
-        fuel_input={bgas: solph.Flow()},
-        electrical_output={bel_sink: solph.Flow()},
+        electrical_input={bel_source: Flow()},
+        fuel_input={bgas: Flow()},
+        electrical_output={bel_sink: Flow()},
         params=concept, fixed_costs=0)
 
     # create an optimization problem and solve it
-    om = solph.Model(es)
+    om = Model(es)
 
     # solve model
     om.solve(solver='cbc')

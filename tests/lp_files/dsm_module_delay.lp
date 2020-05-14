@@ -2,9 +2,15 @@
 
 min 
 objective:
-+1 flow(bus_elec_demand_dsm_0)
-+1 flow(bus_elec_demand_dsm_1)
-+1 flow(bus_elec_demand_dsm_2)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_0_0)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_0_1)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_0_2)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_1_0)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_1_1)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_1_2)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_2_0)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_2_1)
++2 SinkDSMDelayBlock_dsm_do(demand_dsm_2_2)
 
 s.t.
 
@@ -117,9 +123,11 @@ bounds
    0 <= flow(bus_elec_demand_dsm_2) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_0_0) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_0_1) <= +inf
+   0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_0_2) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_1_0) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_1_1) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_1_2) <= +inf
+   0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_2_0) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_2_1) <= +inf
    0 <= SinkDSMDelayBlock_dsm_do(demand_dsm_2_2) <= +inf
    0 <= SinkDSMDelayBlock_dsm_up(demand_dsm_0) <= +inf
