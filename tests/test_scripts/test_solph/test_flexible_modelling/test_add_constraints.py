@@ -11,16 +11,21 @@ by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_scripts/test_solph/
 test_flexible_modelling/test_add_constraints.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from nose.tools import ok_
 import logging
-import pyomo.environ as po
+
 import pandas as pd
-from oemof.network import Node
-from oemof.solph import (Sink, Transformer, Bus, Flow,
-                         Model, EnergySystem)
+import pyomo.environ as po
+from nose.tools import ok_
+from oemof.network.network import Node
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
 
 
 def test_add_constraints_example(solver='cbc', nologg=False):
@@ -37,8 +42,7 @@ def test_add_constraints_example(solver='cbc', nologg=False):
 
     Sink(label="Sink",
          inputs={b_el: Flow(nominal_value=40,
-                            actual_value=[0.5, 0.4, 0.3, 1],
-                            fixed=True)})
+                            fix=[0.5, 0.4, 0.3, 1])})
     pp_oil = Transformer(label='pp_oil',
                          inputs={boil: Flow()},
                          outputs={b_el: Flow(nominal_value=50,
@@ -83,13 +87,13 @@ def test_add_constraints_example(solver='cbc', nologg=False):
     # add the sub-model to the oemof Model instance
     om.add_component('MyBlock', myblock)
 
-    def _inflow_share_rule(m, s, e, t):
+    def _inflow_share_rule(m, si, e, ti):
         """pyomo rule definition: Here we can use all objects from the block or
         the om object, in this case we don't need anything from the block
         except the newly defined set MYFLOWS.
         """
-        expr = (om.flow[s, e, t] >= om.flows[s, e].outflow_share[t] *
-                sum(om.flow[i, o, t] for (i, o) in om.FLOWS if o == e))
+        expr = (om.flow[si, e, ti] >= om.flows[si, e].outflow_share[ti] *
+                sum(om.flow[i, o, ti] for (i, o) in om.FLOWS if o == e))
         return expr
 
     myblock.inflow_share = po.Constraint(myblock.MYFLOWS, om.TIMESTEPS,
