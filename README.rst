@@ -100,8 +100,8 @@ everything else is still the same.
 
    </strike>
 
-This will not work since v0.4.0: |strike_start| pip install oemof |strike_end|
-use ``pip install oemof.solph`` instead.
+So |strike_start| pip install oemof |strike_end| will not work since v0.4.0.
+Use ``pip install oemof.solph`` instead.
 
 Everybody is welcome to use and/or develop oemof.solph. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 
