@@ -88,6 +88,21 @@ Overview
 
 A model generator for energy system modelling and optimisation.
 
+The ``oemof.solph`` package is very often called just ``oemof`` as it was part of the
+oemof meta package. Now you need to install ``oemof.solph`` separately, but
+everything else is still the same.
+
+.. |strike_start| raw:: html
+
+   <strike>
+
+.. |strike_end| raw:: html
+
+   </strike>
+
+This will not work since v0.4.0: |strike_start| pip install oemof |strike_end|
+use ``pip install oemof.solph`` instead.
+
 Everybody is welcome to use and/or develop oemof.solph. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in oemof's documentation or rephrasing sections which are unclear. If you want to support us that way please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
