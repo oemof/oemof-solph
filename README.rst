@@ -92,16 +92,8 @@ The ``oemof.solph`` package is very often called just ``oemof`` as it was part o
 oemof meta package. Now you need to install ``oemof.solph`` separately, but
 everything else is still the same.
 
-.. |strike_start| raw:: html
-
-   <strike>
-
-.. |strike_end| raw:: html
-
-   </strike>
-
-So |strike_start| pip install oemof |strike_end| will not work since v0.4.0.
-Use ``pip install oemof.solph`` instead.
+Since v0.4.0. it is not possible to install just oemof, use
+``pip install oemof.solph`` instead.
 
 Everybody is welcome to use and/or develop oemof.solph. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
 

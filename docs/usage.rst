@@ -2,9 +2,9 @@
 
 .. _using_oemof_label:
 
-~~~~~~~~~~~
-oemof-solph
-~~~~~~~~~~~
+~~~~~
+Usage
+~~~~~
 
 Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The package is based on pyomo. To create an energy system model generic and specific components are available. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
 
@@ -1059,3 +1059,5 @@ Solph Examples
 --------------
 
 See the `example repository <https://github.com/oemof/oemof-examples>`_ for various examples. The repository has sections for each major release.
+
+.. include:: results.rst

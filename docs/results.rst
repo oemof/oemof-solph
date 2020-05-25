@@ -1,8 +1,7 @@
 .. _oemof_outputlib_label:
 
-#####################
-oemof-outputlib
-#####################
+Handling Results
+--------------------
 
 For version 0.2.0, the outputlib has been refactored. Tools for plotting optimization
 results that were part of the outputlib in earlier versions are no longer part of this module
@@ -33,7 +32,7 @@ write your own results processing functions.
 .. _oplref1:
 
 Collecting results
-------------------
+^^^^^^^^^^^^^^^^^^
 
 Collecting results can be done with the help of the processing module:
 
@@ -51,7 +50,7 @@ sections.
 .. _oplref2:
 
 General approach
-----------------
+^^^^^^^^^^^^^^^^
 As stated above, after processing you will get a dictionary with all result
 data.
 If you want to access your results directly via labels, you
@@ -113,7 +112,7 @@ Getting all labels of the starting node of your investment flows:
 .. _oplref3:
 
 Easy access
------------
+^^^^^^^^^^^
 
 The outputlib provides some functions which will help you to access your
 results directly via labels, which is helpful especially for small energy
