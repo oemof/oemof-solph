@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """ This example shows how to create an energysystem with oemof objects and
-solve it with the solph module. Results are plotted with outputlib.
+solve it with the solph module.
 
 Data: example_data.csv
 

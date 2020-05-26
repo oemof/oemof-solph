@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -
 
-"""Tests the processing module of the outputlib.
+"""Tests the processing module of solph.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
