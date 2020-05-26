@@ -413,4 +413,3 @@ def shared_limit(model, quantity, limit_name,
     setattr(model, weighted_sum_constraint+"_build",
             po.BuildAction(rule=_weighted_sum_rule))
 
-    return model
