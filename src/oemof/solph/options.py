@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
-"""Optional classes to be added to a network class.
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/options.py
+"""
+Optional classes to be added to a network class.
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: jmloenneberga
 
 SPDX-License-Identifier: MIT
+
 """
 
 from oemof.solph.plumbing import sequence

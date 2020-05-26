@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""Additional constraints to be used in an oemof energy model.
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/constraints.py
+"""
+Additional constraints to be used in an oemof energy model.
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
+
 """
 
 import pyomo.environ as po

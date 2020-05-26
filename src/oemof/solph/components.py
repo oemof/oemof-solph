@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -
 
-"""This module is designed to hold components with their classes and
+"""
+This module is designed to hold components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/components.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: FranziPl
+SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: FabianTU
+SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
+
 """
 
 import numpy as np

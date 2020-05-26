@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""This module can be used to check the installation.
+"""
+This module can be used to check the installation.
 This is not an illustrated example.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/tests/test_installation.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: jnnr
 
 SPDX-License-Identifier: MIT
+
 """
 
 import logging
