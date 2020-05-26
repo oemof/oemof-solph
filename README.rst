@@ -86,23 +86,35 @@ Overview
 
 .. end-badges
 
-A model generator for energy system modelling and optimisation.
-
-The ``oemof.solph`` package is very often called just ``oemof`` as it was part of the
-oemof meta package. Now you need to install ``oemof.solph`` separately, but
-everything else is still the same.
-
-Since v0.4.0. it is not possible to install just oemof, use
-``pip install oemof.solph`` instead.
-
-Everybody is welcome to use and/or develop oemof.solph. Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
-
-Contribution is already possible on a low level by simply fixing typos in oemof's documentation or rephrasing sections which are unclear. If you want to support us that way please fork the oemof repository to your own github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
 
 .. contents::
     :depth: 1
     :local:
     :backlinks: top
+
+
+Introduction
+============
+
+The oemof.solph package is part of the
+`Open energy modelling framework (oemof) <https://github.com/oemof/oemof>`_.
+This an organisational framework to bundle tools for energy (system) modelling.
+oemof-solph is a model generator for energy system modelling and optimisation.
+
+The ``oemof.solph`` package is very often called just ``oemof`` as it was part of the
+oemof meta package. Now you need to install ``oemof.solph`` separately, but
+everything else is still the same.
+Since v0.4.0. it is not possible to install just oemof, use
+``pip install oemof.solph`` instead.
+
+Everybody is welcome to use and/or develop oemof.solph.
+Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
+
+Contribution is already possible on a low level by simply fixing typos in
+oemof's documentation or rephrasing sections which are unclear.
+If you want to support us that way please fork the oemof repository to your own
+github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+
 
 Installation
 ============
@@ -287,13 +299,6 @@ The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powere
 To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 
 If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
-
-Open energy modelling framework (oemof)
-=======================================
-
-The oemof.solph package is part of the
-`Open energy modelling framework (oemof) <https://github.com/oemof/oemof>`_.
-This an organisational framework to bundle tools for energy (system) modelling.
 
 
 Examples
