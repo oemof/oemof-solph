@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""This is a collection of helper functions which work on their own and can be
+"""
+This is a collection of helper functions which work on their own and can be
 used by various classes. If there are too many helper-functions, they will
 be sorted in different modules.
 
