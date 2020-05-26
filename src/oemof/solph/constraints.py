@@ -408,8 +408,7 @@ def shared_limit(model, quantity, limit_name,
                       for c, w in zip(components, weights))
             rhs = getattr(model, limit_name)[ts]
             expr = (lhs == rhs)
-            if expr is not True:
-                getattr(m, weighted_sum_constraint).add(ts, expr)
+            getattr(m, weighted_sum_constraint).add(ts, expr)
 
     setattr(model, weighted_sum_constraint,
             po.Constraint(model.TIMESTEPS, noruleinit=True))
