@@ -339,6 +339,59 @@ def shared_limit(model, quantity, limit_name,
       .. math::
         l_\mathrm{low} \le \sum v_i(t) \times w_i(t) \le l_\mathrm{up}
         \forall t
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which the constraint is added.
+    limit_name : string
+        Name of the constraint to create
+    quantity : pyomo.core.base.var.IndexedVar
+        Shared Pyomo variable for all components of a type.
+    components : list of components
+        list of components of the same type
+    weights : list of numeric values
+        has to have the same length as the list of components
+    lower_limit : numeric
+        the lower limit
+    upper_limit : numeric
+        the lower limit
+
+    Examples
+    --------
+    The constraint can e.g. be used to define a common storage
+    that is shared between parties but that do not exchange
+    energy on balance sheet.
+    Thus, every party has their own bus and storage, respectively,
+    to model the energy flow. However, as the physical storage is shared,
+    it has a common limit.
+
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
+    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> b1 = solph.Bus(label="Party1Bus")
+    >>> b2 = solph.Bus(label="Party2Bus")
+    >>> storage1 = solph.components.GenericStorage(
+    ...     label="Party1Storage",
+    ...     nominal_storage_capacity=5,
+    ...     inputs={b1: solph.Flow()},
+    ...     outputs={b1: solph.Flow()})
+    >>> storage2 = solph.components.GenericStorage(
+    ...     label="Party2Storage",
+    ...     nominal_storage_capacity=5,
+    ...     inputs={b1: solph.Flow()},
+    ...     outputs={b1: solph.Flow()})
+    >>> energysystem.add(b1, b2, storage1, storage2)
+    >>> components = [storage1, storage2]
+    >>> model = solph.Model(energysystem)
+    >>> solph.constraints.shared_limit(
+    ...     model,
+    ...     model.GenericStorageBlock.storage_content,
+    ...     "limit_storage", components,
+    ...     [1, 1], upper_limit=5)
+
+
     """
 
     setattr(model, limit_name, po.Var(model.TIMESTEPS))
