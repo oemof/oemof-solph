@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Solph Optimization Models.
+"""
+Solph Optimization Models.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Groupings needed on an energy system for it to work with solph.
+"""
+Groupings needed on an energy system for it to work with solph.
 
 If you want to use solph on an energy system, you need to create it with these
 groupings specified like this:
