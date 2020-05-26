@@ -31,7 +31,7 @@ class BaseModel(po.ConcreteModel):
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINTS`
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed `timeincrement` will be used which
@@ -241,7 +241,7 @@ class Model(BaseModel):
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINTS`
 
     **The following basic sets are created**:
 

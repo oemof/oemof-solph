@@ -38,7 +38,7 @@ New features
   we have to extend the datapackage format a bit, the specification is not yet
   finalized and documentation as well as tests range from sparse to
   nonexistent. But anyone who wishes to help with the code is welcome to check
-  it out in the :mod:`datapackage <oemof.tools.datapackage>` module.
+  it out in the `datapackage <oemof.tools.datapackage>` module.
 
 
 New components
@@ -83,10 +83,10 @@ Testing
 Other changes
 #############
 
-* Subclasses of :class:`Node <oemof.network.Node>` are no longer optimized
+* Subclasses of `Node <oemof.network.Node>` are no longer optimized
   using `__slots__
   <https://docs.python.org/3/reference/datamodel.html#slots>`_.
-  The abstract parent class still defines :attr:`__slots__
+  The abstract parent class still defines `__slots__
   <oemof.network.Node.__slots__>` so that custom subclasses still have the
   option of using it.
 

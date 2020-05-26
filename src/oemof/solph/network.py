@@ -31,12 +31,12 @@ class EnergySystem(es.EnergySystem):
     <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
-    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
-    supplied via the `groupings` keyword argument, :const:`solph.GROUPINGS
+    `solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
+    supplied via the `groupings` keyword argument, `solph.GROUPINGS
     <oemof.solph.GROUPINGS>` is prepended to those.
 
     If you know what you are doing and want to use solph without
-    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
+    `solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
     :class:`core's EnergySystem <oemof.core.energy_system.EnergySystem>`
     directly.
     """

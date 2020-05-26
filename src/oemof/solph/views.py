@@ -137,7 +137,7 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
             Returns nodes having only input flows (eg. Sink)
 
     Additionally, busses can be excluded by setting `exclude_busses` to
-    :const:`True`.
+    `True`.
 
     Parameters
     ----------

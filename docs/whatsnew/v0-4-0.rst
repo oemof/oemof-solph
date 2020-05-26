@@ -5,11 +5,11 @@ v0.4.0 (April ??, 2020)
 API changes
 ###########
 
-* The attribute :attr:`capacity` of the :class:`GenericStorage` describing the current
-  absolute stored energy/material/water etc. has been renamed to :attr:`storage_content`.
-  In the :class:`GenericStorageBlock` and :class:`GenericInvestmentStorageBlock`,
-  the attribute :attr:`init_cap` has been renamed :attr:`init_content`. This change is
-  intended to avoid confusion with :attr:`nominal_storage_capacity` or capacity in terms
+* The attribute `capacity` of the `GenericStorage` describing the current
+  absolute stored energy/material/water etc. has been renamed to `storage_content`.
+  In the `GenericStorageBlock` and `GenericInvestmentStorageBlock`,
+  the attribute `init_cap` has been renamed `init_content`. This change is
+  intended to avoid confusion with `nominal_storage_capacity` or capacity in terms
   of installed capacity.
 * Allow to limit count of concurrently active flows in group of flows.
   (Flows have to be NonConvex, the limit can be an upper or lower one.)
@@ -55,7 +55,7 @@ Testing
 Other changes
 #############
 
-* The ``loss_rate`` of :class:`~oemof.solph.components.GenericStorage`
+* The ``loss_rate`` of `~oemof.solph.components.GenericStorage`
     is now defined per time increment.
 * The parameters' data type in the docstrings is changed from
   `numeric (sequence or scalar)` to `numeric (iterable or scalar)`

@@ -9,23 +9,23 @@ New features
  * Add a dump and restore method to the EnergySystem class to dump/restore its attributes (`issue #31 <https://github.com/oemof/oemof-solph/issues/31>`_)
  * Functionality for minimum up- and downtime constraints (oemof.solph.linear_mixed_integer_constraints module)
  * Add `relax` option to simulation class for calculation of linear relaxed mixed integer problems
- * Instances of :class:`EnergySystem <oemof.core.energy_system.EnergySystem>`
-   now keep track of :class:`Entities <oemof.core.network.Entity>` via the
-   :attr:`entities <oemof.core.energy_system.EnergySystem.entities>` attribute.
+ * Instances of `EnergySystem <oemof.core.energy_system.EnergySystem>`
+   now keep track of `Entities <oemof.core.network.Entity>` via the
+   `entities <oemof.core.energy_system.EnergySystem.entities>` attribute.
    (`issue #20 <https://github.com/oemof/oemof-solph/issues/20>`_)
  * There's now a standard way of working with the results obtained via a call
-   to :meth:`OptimizationModel#results
+   to `OptimizationModel#results
    <oemof.solph.optimization_model.OptimizationModel.results>`.
-   See its documentation, the documentation of :meth:`EnergySystem#optimize
+   See its documentation, the documentation of `EnergySystem#optimize
    <oemof.core.energy_system.EnergySystem.optimize>` and finally the discussion
    at `issue #33 <https://github.com/oemof/oemof-solph/issues/33>`_ for more
    information.
- * New class :class:`VariableEfficiencyCHP <oemof.core.network.entities.components.transformers.VariableEfficiencyCHP>`
+ * New class `VariableEfficiencyCHP <oemof.core.network.entities.components.transformers.VariableEfficiencyCHP>`
    to model combined heat and power units with variable electrical efficiency.
- * New methods for :class:`VariableEfficiencyCHP <oemof.core.network.entities.components.transformers.VariableEfficiencyCHP>` inside
+ * New methods for `VariableEfficiencyCHP <oemof.core.network.entities.components.transformers.VariableEfficiencyCHP>` inside
    the solph-module:
- * :meth:`MILP-constraint <oemof.solph.linear_mixed_integer_constraints.add_variable_linear_eta_relation>`
- * :meth:`Linear-constraint <oemof.solph.linear_constraints.add_eta_total_chp_relation>`
+ * `MILP-constraint <oemof.solph.linear_mixed_integer_constraints.add_variable_linear_eta_relation>`
+ * `Linear-constraint <oemof.solph.linear_constraints.add_eta_total_chp_relation>`
 
 Documentation
 #############
