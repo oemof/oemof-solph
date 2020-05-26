@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Optional classes to be added to a network class.
+"""Optional classes to be added to a network class.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

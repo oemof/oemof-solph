@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""
-This module is designed to hold custom components with their classes and
-associated individual constraints (blocks) and groupings. Therefore this
-module holds the class definition and the block directly located by each other.
+"""This module is designed to hold custom components with their classes and
+associated individual constraints (blocks) and groupings.
+
+Therefore this module holds the class definition and the block directly located
+by each other.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

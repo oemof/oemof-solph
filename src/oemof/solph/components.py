@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -
 
-"""
-This module is designed to hold components with their classes and
+"""This module is designed to hold components with their classes and
 associated individual constraints (blocks) and groupings. Therefore this
 module holds the class definition and the block directly located by each other.
 

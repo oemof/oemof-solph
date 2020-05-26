@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Creating sets, variables, constraints and parts of the objective function
+"""Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>

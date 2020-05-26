@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-This module can be used to check the installation.
+"""This module can be used to check the installation.
+
 This is not an illustrated example.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>

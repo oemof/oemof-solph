@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Modules for providing convenient views for solph results.
+"""Modules for providing convenient views for solph results.
 
 Information about the possible usage is provided within the examples.
 

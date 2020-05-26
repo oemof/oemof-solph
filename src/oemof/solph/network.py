@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Classes used to model energy supply systems within solph.
+"""Classes used to model energy supply systems within solph.
 
 Classes are derived from oemof core network classes and adapted for specific
 optimization tasks. An energy system is modelled as a graph/network of nodes

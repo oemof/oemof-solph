@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Additional constraints to be used in an oemof energy model.
+"""Additional constraints to be used in an oemof energy model.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
