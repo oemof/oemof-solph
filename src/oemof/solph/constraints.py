@@ -390,8 +390,6 @@ def shared_limit(model, quantity, limit_name,
     ...     model.GenericStorageBlock.storage_content,
     ...     "limit_storage", components,
     ...     [1, 1], upper_limit=5)
-
-
     """
 
     setattr(model, limit_name, po.Var(model.TIMESTEPS))
