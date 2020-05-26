@@ -386,10 +386,10 @@ def shared_limit(model, quantity, limit_name,
     >>> components = [storage1, storage2]
     >>> model = solph.Model(energysystem)
     >>> solph.constraints.shared_limit(
-    ...     model,
-    ...     model.GenericStorageBlock.storage_content,
-    ...     "limit_storage", components,
-    ...     [1, 1], upper_limit=5)
+    ...    model,
+    ...    model.GenericStorageBlock.storage_content,
+    ...    "limit_storage", components,
+    ...    [1, 1], upper_limit=5)
     """
 
     setattr(model, limit_name, po.Var(model.TIMESTEPS))
