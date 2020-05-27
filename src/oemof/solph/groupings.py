@@ -52,12 +52,14 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     cg = getattr(node, "constraint_group", fallback)
     return cg()
 
+
 def _standard_flow_grouping(stf):
     if hasattr(stf[2], 'investment'):
         if stf[2].investment is None:
             return True
     else:
         return False
+
 
 standard_flow_grouping = groupings.FlowsWithNodes(
     constant_key=blocks.Flow, filter=_standard_flow_grouping)

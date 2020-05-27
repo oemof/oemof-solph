@@ -522,7 +522,7 @@ class InvestmentFlow(SimpleBlock):
         self.invest = Var(self.INVESTFLOWS, within=NonNegativeReals,
                           bounds=_investvar_bound_rule)
 
-	self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
+        self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS,
                                      m.TIMESTEPS)
 
         self.negative_gradient = Var(self.NEGATIVE_GRADIENT_FLOWS,
@@ -679,17 +679,16 @@ class InvestmentFlow(SimpleBlock):
         gradient_costs = 0
         variable_costs = 0
 
-	for i, o in self.INVESTFLOWS:
+        for i, o in self.INVESTFLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 for t in m.TIMESTEPS:
-                    variable_costs += (m.flow[i, o, t] * m.timeincrement[t] *
+                    variable_costs += (m.flow[i, o, t] *
                                        m.flows[i, o].variable_costs[t])
 
             if (i, o) in self.POSITIVE_GRADIENT_FLOWS and \
                     m.flows[i, o].positive_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.positive_gradient[i, o, t] *
-                                       m.timeincrement[t] *
                                        m.flows[i, o].positive_gradient[
                                            'costs'])
 
@@ -697,7 +696,6 @@ class InvestmentFlow(SimpleBlock):
                     m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for t in m.TIMESTEPS:
                     gradient_costs += (self.negative_gradient[i, o, t] *
-                                       m.timeincrement[t] *
                                        m.flows[i, o].negative_gradient[
                                            'costs'])
 
