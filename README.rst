@@ -88,7 +88,7 @@ Overview
 
 
 .. contents::
-    :depth: 1
+    :depth: 2
     :local:
     :backlinks: top
 
@@ -165,7 +165,7 @@ Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_p
 
 To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
 
-Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
+Check the solver installation by executing the test_installation example (see the `Installation test` section).
 
 **Windows**
 
@@ -175,7 +175,7 @@ Check the solver installation by executing the test_installation example (see :r
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
  5. Restart Windows
 
-Check the solver installation by executing the test_installation example (see :ref:`check_installation_label` ).
+Check the solver installation by executing the test_installation example (see the `Installation test` section).
 
 
 **Mac OSX**
@@ -225,7 +225,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit).
        source your_env_name/bin/activate
 
  3. In terminal type: :code:`pip install oemof`
- 4. Install a :ref:`linux_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
+ 4. Install a solver if you want to use solph and execute the solph examples. See the `Installation test` section to check if the installation of the solver and oemof was successful
 
 Warning: If you have an older version of virtualenv you should update pip :code:`pip install --upgrade pip`.
 
@@ -244,7 +244,7 @@ Skip the steps you have already done. Check your architecture first (32/64 bit).
        source activate yourenvname
 
  4. In terminal type: :code:`pip install oemof`
- 5. Install a :ref:`linux_solver_label` if you want to use solph and execute the solph examples (See :ref:`check_installation_label` ) to check if the installation of the solver and oemof was successful
+ 5. Install a solver if you want to use solph and execute the solph examples. See the `Installation test` section to check if the installation of the solver and oemof was successful.
 
 **Windows**
 
@@ -273,15 +273,15 @@ If you are using brew you can simply run
 
   brew install python3
 
-Otherwise please refer to https://www.python.org/downloads/mac-osx/ for installation instructions.
+Otherwise please refer to `https://www.python.org/downloads/mac-osx/ <https://www.python.org/downloads/mac-osx/>`_ for installation instructions.
 
 
 .. _check_installation_label:
 
-Run the installation_test file
-------------------------------
+Installation test
+-----------------
 
-Test the installation and the installed solver:
+Test the installation and the installed solver by running the installation test file.
 
 To test the whether the installation was successful simply run
 
