@@ -3,20 +3,23 @@
 """
 This test contains a ExtractionTurbineCHP class.
 
+
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
+oemof/tests/test_scripts/test_solph/test_variable_chp/test_variable_chp.py
+
+SPDX-License-Identifier: MIT
 """
 
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
-
-from nose.tools import eq_
 import logging
 import os
+
 import pandas as pd
-
-from oemof import outputlib
-
-from oemof.network import Node
-import oemof.solph as solph
+from nose.tools import eq_
+from oemof import solph
+from oemof.network.network import Node
+from oemof.solph import views
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
@@ -38,45 +41,46 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     logging.info('Create oemof.solph objects')
 
     # create natural gas bus
-    bgas = solph.Bus(label="natural_gas")
+    bgas = solph.Bus(label=('natural', 'gas'))
 
     # create commodity object for gas resource
-    solph.Source(label='rgas', outputs={bgas: solph.Flow(variable_costs=50)})
+    solph.Source(label=('commodity', 'gas'),
+                 outputs={bgas: solph.Flow(variable_costs=50)})
 
     # create two electricity buses and two heat buses
-    bel = solph.Bus(label="electricity")
-    bel2 = solph.Bus(label="electricity_2")
-    bth = solph.Bus(label="heat")
-    bth2 = solph.Bus(label="heat_2")
+    bel = solph.Bus(label=('electricity', 1))
+    bel2 = solph.Bus(label=('electricity', 2))
+    bth = solph.Bus(label=('heat', 1))
+    bth2 = solph.Bus(label=('heat', 2))
 
     # create excess components for the elec/heat bus to allow overproduction
-    solph.Sink(label='excess_bth_2', inputs={bth2: solph.Flow()})
-    solph.Sink(label='excess_therm', inputs={bth: solph.Flow()})
-    solph.Sink(label='excess_bel_2', inputs={bel2: solph.Flow()})
-    solph.Sink(label='excess_elec', inputs={bel: solph.Flow()})
+    solph.Sink(label=('excess', 'bth_2'), inputs={bth2: solph.Flow()})
+    solph.Sink(label=('excess', 'bth_1'), inputs={bth: solph.Flow()})
+    solph.Sink(label=('excess', 'bel_2'), inputs={bel2: solph.Flow()})
+    solph.Sink(label=('excess', 'bel_1'), inputs={bel: solph.Flow()})
 
     # create simple sink object for electrical demand for each electrical bus
-    solph.Sink(label='demand_elec', inputs={bel: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
-    solph.Sink(label='demand_el_2', inputs={bel2: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+    solph.Sink(label=('demand', 'elec1'), inputs={bel: solph.Flow(
+        fix=data['demand_el'], nominal_value=1)})
+    solph.Sink(label=('demand', 'elec2'), inputs={bel2: solph.Flow(
+        fix=data['demand_el'], nominal_value=1)})
 
     # create simple sink object for heat demand for each thermal bus
-    solph.Sink(label='demand_therm', inputs={bth: solph.Flow(
-        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
-    solph.Sink(label='demand_th_2', inputs={bth2: solph.Flow(
-        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+    solph.Sink(label=('demand', 'therm1'), inputs={bth: solph.Flow(
+        fix=data['demand_th'], nominal_value=741000)})
+    solph.Sink(label=('demand', 'therm2'), inputs={bth2: solph.Flow(
+        fix=data['demand_th'], nominal_value=741000)})
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
     solph.Transformer(
-        label='fixed_chp_gas',
+        label=('fixed_chp', 'gas'),
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel2: solph.Flow(), bth2: solph.Flow()},
         conversion_factors={bel2: 0.3, bth2: 0.5})
 
     # create a fixed transformer to distribute to the heat and elec buses
     solph.components.ExtractionTurbineCHP(
-        label='variable_chp_gas',
+        label=('variable_chp', 'gas'),
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5},
@@ -94,29 +98,37 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     logging.info('Solve the optimization problem')
     om.solve(solver=solver)
 
-    optimisation_results = outputlib.processing.results(om)
+    optimisation_results = solph.processing.results(om)
+    parameter = solph.processing.parameter_as_dict(energysystem)
 
-    myresults = outputlib.views.node(optimisation_results, 'natural_gas')
+    myresults = views.node(optimisation_results, "('natural', 'gas')")
     sumresults = myresults['sequences'].sum(axis=0)
     maxresults = myresults['sequences'].max(axis=0)
 
     variable_chp_dict_sum = {
-        (('natural_gas', 'fixed_chp_gas'), 'flow'): 3710208,
-        (('natural_gas', 'variable_chp_gas'), 'flow'): 2823024,
-        (('rgas', 'natural_gas'), 'flow'): 6533232}
+        (("('natural', 'gas')", "('variable_chp', 'gas')"), 'flow'): 2823024,
+        (("('natural', 'gas')", "('fixed_chp', 'gas')"), 'flow'): 3710208,
+        (("('commodity', 'gas')", "('natural', 'gas')"), 'flow'): 6533232}
 
     variable_chp_dict_max = {
-        (('natural_gas', 'fixed_chp_gas'), 'flow'): 785934,
-        (('natural_gas', 'variable_chp_gas'), 'flow'): 630332,
-        (('rgas', 'natural_gas'), 'flow'): 1416266}
+        (("('natural', 'gas')", "('variable_chp', 'gas')"), 'flow'): 630332,
+        (("('natural', 'gas')", "('fixed_chp', 'gas')"), 'flow'): 785934,
+        (("('commodity', 'gas')", "('natural', 'gas')"), 'flow'): 1416266}
 
     for key in variable_chp_dict_max.keys():
         logging.debug("Test the maximum value of {0}".format(key))
-        eq_(int(round(maxresults[key])), int(round(variable_chp_dict_max[key])))
+        eq_(int(round(maxresults[key])),
+            int(round(variable_chp_dict_max[key])))
 
     for key in variable_chp_dict_sum.keys():
         logging.debug("Test the summed up value of {0}".format(key))
-        eq_(int(round(sumresults[key])), int(round(variable_chp_dict_sum[key])))
+        eq_(int(round(sumresults[key])),
+            int(round(variable_chp_dict_sum[key])))
+
+    eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
+        ['scalars']['label'], "('fixed_chp', 'gas')")
+    eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
+        ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
 
     # objective function
-    eq_(round(outputlib.processing.meta_results(om)['objective']), 326661590)
+    eq_(round(solph.processing.meta_results(om)['objective']), 326661590)

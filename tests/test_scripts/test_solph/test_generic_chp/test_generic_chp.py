@@ -3,21 +3,27 @@
 Example that illustrates how to use custom component `GenericCHP` can be used.
 
 In this case it is used to model a combined cycle extraction turbine.
-"""
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
-from nose.tools import eq_
+This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
+by the contributors recorded in the version control history of the file,
+available from its original location
+oemof/tests/test_scripts/test_solph/test_generic_chp/test_generic_chp.py
+
+SPDX-License-Identifier: MIT
+"""
+
 import os
-import pandas as pd
+
 import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import processing, views
+import pandas as pd
+from nose.tools import eq_
+from oemof.network.network import Node
+from oemof.solph import processing
+from oemof.solph import views
 
 
 def test_gen_chp():
     # read sequence data
-
     full_filename = os.path.join(os.path.dirname(__file__), 'ccet.csv')
     data = pd.read_csv(full_filename)
 
@@ -38,16 +44,16 @@ def test_gen_chp():
     bth = solph.Bus(label='bth')
 
     solph.Source(label='source_th',
-                             outputs={bth: solph.Flow(variable_costs=1000)})
+                 outputs={bth: solph.Flow(variable_costs=1000)})
 
-    solph.Sink(label='demand_th', inputs={bth: solph.Flow(fixed=True,
-                           actual_value=data['demand_th'], nominal_value=200)})
+    solph.Sink(label='demand_th', inputs={bth: solph.Flow(
+               fix=data['demand_th'], nominal_value=200)})
 
     # power
     bel = solph.Bus(label='bel')
 
     solph.Sink(label='demand_el', inputs={bel: solph.Flow(
-                           variable_costs=data['price_el'])})
+               variable_costs=data['price_el'])})
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
@@ -77,7 +83,7 @@ def test_gen_chp():
 
     test_dict = {
         (('bth', 'demand_th'), 'flow'): 20000.0,
-        (('combined_cycle_extraction_turbine', 'bth'), 'flow'): 14070.15215799997,
+        (('combined_cycle_extraction_turbine', 'bth'), 'flow'): 14070.15215799,
         (('source_th', 'bth'), 'flow'): 5929.8478649200015}
 
     for key in test_dict.keys():
