@@ -1,6 +1,11 @@
 import pandas as pd
-from oemof.solph import (Sink, Source, Bus, Flow, Model,
-                         EnergySystem, Investment)
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
 
 
 def test_gradient():
