@@ -115,6 +115,10 @@ oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof repository to your own
 github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
 
+You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
+but this will bring you quite a few mails and might be more interesting for developers.
+If you just want to get the latest news, like when is the next oemof meeting,
+you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 Documentation
 =============
@@ -301,7 +305,6 @@ If the installation was successful, you will get:
 
 as an output.
 
-
 Join the developers!
 ====================
 
@@ -309,18 +312,10 @@ A warm welcome to all who want to join the developers and contribute to
 oemof.solph. Information on the details and how to approach us can be found
 `in the documentation <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
 
-
-Keep in touch
-=============
-
-You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
-
-
 Citing
 ======
 
 The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version.
-
 
 License
 =======
@@ -345,7 +340,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
 .. _solph_examples_label:
 
 Examples
@@ -354,7 +348,8 @@ Examples
 The linkage of specific modules of the various packages is called an
 application (app) and depicts for example a concrete energy system model.
 You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone.
-The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure.
+The examples show optimisations of different energy systems and are supposed
+to help new users to understand the framework's structure.
 There is some elaboration on the examples in the respective repository.
 The repository has sections for each major release.
 
