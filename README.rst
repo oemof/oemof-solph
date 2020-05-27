@@ -305,8 +305,8 @@ If the installation was successful, you will get:
 
 as an output.
 
-Join the developers!
-====================
+Contributing
+============
 
 A warm welcome to all who want to join the developers and contribute to
 oemof.solph. Information on the details and how to approach us can be found
