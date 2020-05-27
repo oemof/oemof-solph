@@ -106,11 +106,11 @@ def test_dispatch_fix_example(solver='cbc', periods=10):
     assert comp_results[(('pv', 'b_el'), 'flow')] > 0
 
     test_results = {
-        (('pv', 'b_el'), 'flow'): 2150.5,
+        (('pv', 'b_el'), 'flow'): 2523,
         (('b_el', 'demand_elec'), 'flow'): 436.05,
-        (('b_el', 'excess_el'), 'flow'): 1714.45,
-        'pv_capacity': 467.5,
+        (('b_el', 'excess_el'), 'flow'): 2087,
+        'pv_capacity': 450,
     }
 
     for key in test_results.keys():
-        assert (int(round(comp_results[key])), int(round(test_results[key])))
+        assert int(round(comp_results[key])) == int(round(test_results[key]))
