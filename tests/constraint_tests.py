@@ -66,7 +66,7 @@ class TestsConstraint:
                                   filename)) as expected_file:
 
                 def chop_trailing_whitespace(lines):
-                    return [re.sub(r'\s*$', '', l) for l in lines]
+                    return [re.sub(r'\s*$', '', ln) for ln in lines]
 
                 def remove(pattern, lines):
                     if not pattern:

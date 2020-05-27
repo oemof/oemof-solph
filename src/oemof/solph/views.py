@@ -232,6 +232,7 @@ def node_input_by_type(results, node_type, droplevel=None):
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that inputs are selected
+    droplevel: list
 
     Notes
     -----
@@ -266,6 +267,7 @@ def node_output_by_type(results, node_type, droplevel=None):
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that outputs are selected
+    droplevel: list
 
     Notes
     -----
@@ -334,12 +336,12 @@ def net_storage_flow(results, node_type):
 
     dataframes = []
 
-    for l in labels:
+    for lb in labels:
         subset = df.groupby(
             lambda x1: (lambda fr, to, ty:
-                        'output' if (fr == l and ty == 'flow') else
-                        'input' if (to == l and ty == 'flow') else
-                        'level' if (fr == l and ty != 'flow') else
+                        'output' if (fr == lb and ty == 'flow') else
+                        'input' if (to == lb and ty == 'flow') else
+                        'level' if (fr == lb and ty != 'flow') else
                         None)(*x1),
             axis=1
         ).sum()
@@ -347,8 +349,8 @@ def net_storage_flow(results, node_type):
         subset['net_flow'] = subset['output'] - subset['input']
 
         subset.columns = pd.MultiIndex.from_product(
-                                [[l],
-                                 [o for o in l.outputs],
+                                [[lb],
+                                 [o for o in lb.outputs],
                                  subset.columns])
 
         dataframes.append(
