@@ -197,10 +197,10 @@ class Flow(SimpleBlock):
                     if ts > 0:
                         lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
                         rhs = self.positive_gradient[inp, out, ts]
-                        self.positive_gradient_constr.add((inp, out, ts),
-                                                          lhs <= rhs)
+                        self.positive_gradient_constr.add(
+                            (inp, out, ts), lhs <= rhs)
                     else:
-                        pass  # return(Constraint.Skip)
+                        pass
         self.positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
@@ -214,10 +214,10 @@ class Flow(SimpleBlock):
                     if ts > 0:
                         lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
                         rhs = self.negative_gradient[inp, out, ts]
-                        self.negative_gradient_constr.add((inp, out, ts),
-                                                          lhs <= rhs)
+                        self.negative_gradient_constr.add(
+                            (inp, out, ts), lhs <= rhs)
                     else:
-                        pass  # return(Constraint.Skip)
+                        pass
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
@@ -642,31 +642,34 @@ class InvestmentFlow(SimpleBlock):
         def _positive_gradient_flow_rule(model):
             """Rule definition for positive gradient constraint.
             """
-            for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                for t in m.TIMESTEPS:
-                    if t > 0:
-                        lhs = m.flow[i, o, t] - m.flow[i, o, t-1]
-                        rhs = self.positive_gradient[i, o, t]
-                        self.positive_gradient_constr.add((i, o, t),
-                                                          lhs <= rhs)
+            for inp, out in self.POSITIVE_GRADIENT_FLOWS:
+                for ts in m.TIMESTEPS:
+                    if ts > 0:
+                        lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
+                        rhs = self.positive_gradient[inp, out, ts]
+                        self.positive_gradient_constr.add(
+                            (inp, out, ts), lhs <= rhs)
+                    else:
+                        pass
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, noruleinit=True)
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule)
 
         def _negative_gradient_flow_rule(model):
             """Rule definition for negative gradient constraint.
             """
-            for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                for t in m.TIMESTEPS:
-                    if t > 0:
-                        lhs = m.flow[i, o, t-1] - m.flow[i, o, t]
-                        rhs = self.negative_gradient[i, o, t]
-                        self.negative_gradient_constr.add((i, o, t),
-                                                          lhs <= rhs)
-
+            for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
+                for ts in m.TIMESTEPS:
+                    if ts > 0:
+                        lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
+                        rhs = self.negative_gradient[inp, out, ts]
+                        self.negative_gradient_constr.add(
+                            (inp, out, ts), lhs <= rhs)
+                    else:
+                        pass
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, noruleinit=True)
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule)
 
