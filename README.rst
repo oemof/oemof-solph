@@ -115,7 +115,7 @@ oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof repository to your own
 github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
 
-You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
+Keep in touch! - You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 but this will bring you quite a few mails and might be more interesting for developers.
 If you just want to get the latest news, like when is the next oemof meeting,
 you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
