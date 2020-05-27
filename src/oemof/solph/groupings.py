@@ -54,11 +54,8 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
 
 
 def _standard_flow_grouping(stf):
-    if hasattr(stf[2], 'investment'):
-        if stf[2].investment is None:
-            return True
-    else:
-        return False
+    if stf[2].investment is None:
+        return True
 
 
 standard_flow_grouping = groupings.FlowsWithNodes(
@@ -66,11 +63,8 @@ standard_flow_grouping = groupings.FlowsWithNodes(
 
 
 def _investment_grouping(stf):
-    if hasattr(stf[2], 'investment'):
-        if stf[2].investment is not None:
-            return True
-    else:
-        return False
+    if stf[2].investment is not None:
+        return True
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(
@@ -80,11 +74,8 @@ investment_flow_grouping = groupings.FlowsWithNodes(
 
 
 def _nonconvex_grouping(stf):
-    if hasattr(stf[2], 'nonconvex'):
-        if stf[2].nonconvex is not None:
-            return True
-    else:
-        return False
+    if stf[2].nonconvex is not None:
+        return True
 
 
 nonconvex_flow_grouping = groupings.FlowsWithNodes(
