@@ -354,29 +354,3 @@ application (app) and depicts for example a concrete energy system model.
 You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone. The examples show optimisations of different energy systems and are supposed to help new users to understand the framework's structure. There is some elaboration on the examples in the respective repository.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
-
-
-Development
-===========
-
-To run the all tests run::
-
-    tox
-
-Note, to combine the coverage data from all the tox environments run:
-
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
-
-    - - Windows
-      - ::
-
-            set PYTEST_ADDOPTS=--cov-append
-            tox
-
-    - - Other
-      - ::
-
-            PYTEST_ADDOPTS=--cov-append tox
-
