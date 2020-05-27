@@ -326,14 +326,14 @@ Keep in touch
 You can become a watcher at our `github site <https://github.com/oemof/oemof>`_, but this will bring you quite a few mails and might be more interesting for developers. If you just want to get the latest news you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 
-Citing oemof
-============
+Citing
+======
 
 The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version.
 
 
-Free software: MIT license
-==========================
+License
+=======
 
 Copyright (c) 2019 oemof developer group
 
