@@ -9,8 +9,6 @@ def test_gradient():
     periods = 4
     datetimeindex = pd.date_range('1/1/2016', periods=periods, freq='H')
     energysystem = EnergySystem(timeindex=datetimeindex)
-    # filename = os.path.join(os.path.dirname(__file__), 'gradient_example.csv')
-    # data = pd.read_csv(filename, sep=",")
 
     bel = Bus(label='electricity')
 
