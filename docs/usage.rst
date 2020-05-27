@@ -1053,11 +1053,4 @@ Once you have create your specific excel reader you can lower the entry barrier 
 See `oemof's example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
 
 
-.. _solph_examples_label:
-
-Solph Examples
---------------
-
-See the `example repository <https://github.com/oemof/oemof-examples>`_ for various examples. The repository has sections for each major release.
-
 .. include:: results.rst
