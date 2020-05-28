@@ -42,8 +42,9 @@ def investment_limit(model, limit=None):
 
 
 def generic_investment_limit(model, keyword, limit=None):
-    r"""Set a global limit for investment flows weighted by an attribute called
-    keyword. The attribute named by keyword has to be added to every Investment
+    r"""Global limit for investment flows weighted by an attribute keyword.
+
+    The attribute named by keyword has to be added to every Investment
     attribute of the flow you want to take into account.
     Total value of keyword attributes after optimization can be retrieved
     calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
@@ -58,10 +59,6 @@ def generic_investment_limit(model, keyword, limit=None):
     limit : numeric
         Global limit of keyword attribute for the energy system.
 
-    Note
-    ----
-    The Investment attribute of the considered (Investment-)flows requires an
-    attribute named like keyword!
 
     Constraint
     ----------
@@ -69,19 +66,41 @@ def generic_investment_limit(model, keyword, limit=None):
 
     With `IF` being the set of InvestmentFlows considered for the integral
     limit.
+
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    .. csv-table::
-        :header: "symbol", "attribute", "type", "explanation"
-        :widths: 1, 1, 1, 1
-        ":math:`P_{i}`", ":py:obj:`InvestmentFlow.invest[i, o]`", "V", "
-        installed capacity of investment flow"
-        ":math:`w_i`", ":py:obj:`keyword`", "P", "weight given to investment
-        flow named according to `keyword`"
-        ":math:`limit`", ":py:obj:`limit`", "P", "global limit given by
-        keyword `limit`"
-    """
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+    | symbol        | attribute                             | type | explanation                                                  |
+    +===============+=======================================+======+==============================================================+
+    | :math:`P_{i}` | :py:obj:`InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`   | :py:obj:`keyword`                     | P    | weight given to investment flow named according to `keyword` |
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit` | :py:obj:`limit`                       | P    | global limit given by keyword `limit`                        |
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+
+    Note
+    ----
+    The Investment attribute of the considered (Investment-)flows requires an
+    attribute named like keyword!
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2020', periods=5, freq='H')
+    >>> es = solph.EnergySystem(timeindex=date_time_index)
+    >>> from oemof import solph
+    >>> bus = solph.Bus(label='bus_1')
+    >>> solph.Source(label='source_0', outputs={bus: solph.Flow(
+    ...     investment=solph.Investment(ep_costs=50, space=4))})
+    >>> solph.Source(label='source_1', outputs={bus: solph.Flow(
+    ...     investment=solph.Investment(ep_costs=100, space=1))})
+    >>> om = solph.Model(es)
+    >>> om = solph.constraints.generic_investment_limit(om, "space", limit=20)
+    >>> space_used = om.invest_limit_space()
+    """  # noqa: F401
 
     invest_flows = {}
 
