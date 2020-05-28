@@ -66,7 +66,7 @@ class TestsConstraint:
                                   filename)) as expected_file:
 
                 def chop_trailing_whitespace(lines):
-                    return [re.sub(r'\s*$', '', l) for l in lines]
+                    return [re.sub(r'\s*$', '', ln) for ln in lines]
 
                 def remove(pattern, lines):
                     if not pattern:
@@ -168,7 +168,7 @@ class TestsConstraint:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            actual_value=[.43, .72, .29], nominal_value=10e5, fixed=True)})
+            fix=[.43, .72, .29], nominal_value=10e5)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(variable_costs=40)})
 
@@ -189,7 +189,7 @@ class TestsConstraint:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            actual_value=[12, 16, 14], nominal_value=1000000, fixed=True)})
+            fix=[12, 16, 14], nominal_value=1000000)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
@@ -209,7 +209,7 @@ class TestsConstraint:
             investment=solph.Investment(ep_costs=123))})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
-            actual_value=[.5, .8, .3], nominal_value=10e4, fixed=True)})
+            fix=[.5, .8, .3], nominal_value=10e4)})
 
         self.compare_lp_files('invest_source_fixed_sink.lp')
 
@@ -553,6 +553,37 @@ class TestsConstraint:
         solph.constraints.emission_limit(om, limit=777)
 
         self.compare_lp_files('emission_limit.lp', my_om=om)
+
+    def test_flow_count_limit(self):
+        """
+        """
+        bel = solph.Bus(label='electricityBus')
+
+        solph.Source(label='source1', outputs={bel: solph.Flow(
+            nonconvex=solph.NonConvex(),
+            nominal_value=100, emission_factor=[0.5, -1.0, 2.0])})
+        solph.Source(label='source2', outputs={bel: solph.Flow(
+            nonconvex=solph.NonConvex(),
+            nominal_value=100, emission_factor=3.5)})
+
+        # Should be ignored because emission_factor is not defined.
+        solph.Source(label='source3', outputs={bel: solph.Flow(
+            nonconvex=solph.NonConvex(), nominal_value=100)})
+
+        # Should be ignored because it is not NonConvex.
+        solph.Source(label='source4', outputs={bel: solph.Flow(
+            emission_factor=1.5,
+            min=0.3, nominal_value=100)})
+
+        om = self.get_om()
+
+        # one of the two flows has to be active
+        solph.constraints.limit_active_flow_count_by_keyword(om,
+                                                             "emission_factor",
+                                                             lower_limit=1,
+                                                             upper_limit=2)
+
+        self.compare_lp_files('flow_count_limit.lp', my_om=om)
 
     def test_flow_without_emission_for_emission_constraint(self):
         """

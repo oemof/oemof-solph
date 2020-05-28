@@ -23,20 +23,25 @@ def read(*names, **kwargs):
         return fh.read()
 
 
+long_description = (
+        "%s\n%s"
+        % (
+            re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
+                "", read("README.rst")
+            ),
+            re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
+        )
+    )
+
+
 setup(
     name="oemof.solph",
-    version="0.4.0.dev0",
+    version="0.4.0.b0",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
     ),
-    long_description="%s\n%s"
-    % (
-        re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
-            "", read("README.rst")
-        ),
-        re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
-    ),
+    long_description=long_description,
     long_description_content_type="text/x-rst",
     author="oemof developer group",
     author_email="contact@oemof.org",
@@ -82,8 +87,7 @@ setup(
         "pyomo >= 4.4.0, < 6.0",
         "networkx",
         "oemof.tools",
-        ("oemof.network@https://github.com/oemof/oemof.network/archive/"
-         "uvchik-test-branch.zip"),
+        "oemof.network",
     ],
     extras_require={"dev": ["pytest", "sphinx", "sphinx_rtd_theme", ],
                     "dummy": ["oemof"]},

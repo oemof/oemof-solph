@@ -302,7 +302,7 @@ class LinkBlock(SimpleBlock):
                         except ValueError:
                             raise ValueError(
                                 "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {3}".format(
+                                "from: {0}, to: {1}, via: {2}".format(
                                     cidx[0], cidx[1], n))
                         block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
