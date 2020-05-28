@@ -1,8 +1,8 @@
 v0.0.5 (April 1, 2016)
-++++++++++++++++++++++++++
+----------------------
 
 New features
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * There's now a `flexible transformer
   <oemof.core.network.entities.components.transformers.TwoInputsOneOutput>`
@@ -13,7 +13,7 @@ New features
   usable already. (`Issue #60 <https://github.com/oemof/oemof-solph/issues/60>`_)
 
 Documentation
-#############
+^^^^^^^^^^^^^^^^^^^^
 
 * The documentation of the `electrical demand
   <oemof.demandlib.demand.electrical_demand>` class has been cleaned up.
@@ -22,7 +22,7 @@ Documentation
   navigation sidebar so much anymore.
 
 Testing
-#######
+^^^^^^^^^^^^^^^^^^^^
 
 * There's now a dedicated module/suite testing solph constraints.
 * This suite now has proper fixtures (i.e. `setup`/`teardown`
@@ -30,7 +30,7 @@ Testing
   run (which, previously, they where not).
 
 Bug fixes
-#########
+^^^^^^^^^^^^^^^^^^^^
 
 * Searching for oemof's configuration directory is now done in a platform
   independent manner.
@@ -40,7 +40,7 @@ Bug fixes
 
 
 Other changes
-#############
+^^^^^^^^^^^^^^^^^^^^
 
 * Oemof has a new dependency: `dill <https://pypi.org/project/dill>`_. It
   enables serialization of less common types and acts as a drop in replacement
@@ -49,7 +49,7 @@ Other changes
 
 
 Contributors
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * Uwe Krien
 * Stephan Günther

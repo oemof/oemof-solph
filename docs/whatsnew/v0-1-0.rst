@@ -1,5 +1,5 @@
 v0.1.0 (November 1, 2016)
-++++++++++++++++++++++++++
+-------------------------
 
 The framework provides the basis for a great range of different energy
 system model types, ranging from LP bottom-up (power and heat) economic dispatch
@@ -16,14 +16,14 @@ frameworks flexibility.
 
 
 API changes
-###########
+^^^^^^^^^^^^^^^^^^^^
 
  * The demandlib is no longer part of the oemof package. It has its own
    package now: (`demandlib <https://github.com/oemof/demandlib>`_)
 
 
 New features
-############
+^^^^^^^^^^^^^^^^^^^^
 
  * Solph's `EnergySystem <oemof.solph.network.EnergySystem>` now
    automatically uses solph's `GROUPINGS
@@ -53,32 +53,32 @@ New features
 
 
 Documentation
-#############
+^^^^^^^^^^^^^^^^^^^^
 
  * Complete revision of the documentation. We hope it is now more intuitive and easier to understand.
 
 
 Testing
-#######
+^^^^^^^^^^^^^^^^^^^^
 
  * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof-solph/pull/160>`_)
 
 Bug fixes
-#########
+^^^^^^^^^^^^^^^^^^^^
 
  * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof-solph/issues/201>`_)
  * More path fixes regarding installation via pip
 
 
 Other changes
-#############
+^^^^^^^^^^^^^^^^^^^^
 
  * Travis CI will now check PR's automatically
  * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof-solph/pull/227>`_)
 
 
 Contributors
-############
+^^^^^^^^^^^^^^^^^^^^
 
  * Stephan Günther
  * Simon Hilpert

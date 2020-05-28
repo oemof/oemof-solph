@@ -1,9 +1,9 @@
 v0.4.0 (April ??, 2020)
-+++++++++++++++++++++++++++
+-----------------------
 
 
 API changes
-###########
+^^^^^^^^^^^^^^^^^^^^
 
 * The attribute `capacity` of the `GenericStorage` describing the current
   absolute stored energy/material/water etc. has been renamed to `storage_content`.
@@ -15,7 +15,7 @@ API changes
   (Flows have to be NonConvex, the limit can be an upper or lower one.)
 
 New features
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * Allows having a non equidistant timeindex. By adding the
     calculate_timeincrement function to tools/helpers.py a non
@@ -28,32 +28,32 @@ New features
     nominal capacity, can be considered.
 
 New components
-##############
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Documentation
-#############
+^^^^^^^^^^^^^^^^^^^^
 
 * Improved documentation of ExtractionTurbineCHP
 
 Known issues
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Bug fixes
-#########
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Testing
-#######
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Other changes
-#############
+^^^^^^^^^^^^^^^^^^^^
 
 * The ``loss_rate`` of `~oemof.solph.components.GenericStorage`
     is now defined per time increment.
@@ -62,7 +62,7 @@ Other changes
   (`Issue #673 <https://github.com/oemof/oemof-solph/issues/673>`_).
 
 Contributors
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * Caterina Köhl
 * Jonathan Amme
