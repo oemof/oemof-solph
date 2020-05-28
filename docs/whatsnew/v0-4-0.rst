@@ -27,6 +27,10 @@ New features
     With this feature, fix investment costs, which do not dependent on the
     nominal capacity, can be considered.
 
+* Allows an generic limit for attribute weighted investment flows.
+    InvestmentFlow, which share other limited resources (e.g. space), can be
+    considered.
+
 New components
 ##############
 
