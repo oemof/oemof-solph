@@ -93,14 +93,14 @@ def generic_investment_limit(model, keyword, limit=None):
     >>> es = solph.EnergySystem(timeindex=date_time_index)
     >>> from oemof import solph
     >>> bus = solph.Bus(label='bus_1')
-    >>> solph.Source(label='source_0', outputs={bus: solph.Flow(
+    >>> src1 = solph.Source(label='source_0', outputs={bus: solph.Flow(
     ...     investment=solph.Investment(ep_costs=50, space=4))})
-    >>> solph.Source(label='source_1', outputs={bus: solph.Flow(
+    >>> src2 = solph.Source(label='source_1', outputs={bus: solph.Flow(
     ...     investment=solph.Investment(ep_costs=100, space=1))})
     >>> om = solph.Model(es)
     >>> om = solph.constraints.generic_investment_limit(om, "space", limit=20)
     >>> space_used = om.invest_limit_space()
-    """  # noqa: F401
+    """  # noqa: E501
 
     invest_flows = {}
 
