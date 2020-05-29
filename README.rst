@@ -129,6 +129,8 @@ To get the latest news visit and follow our `website <https://www.oemof.org>`_.
 If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
 
+.. _installation_label:
+
 Installation
 ============
 
