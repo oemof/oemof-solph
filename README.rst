@@ -108,7 +108,7 @@ Since v0.4.0. it is not possible to install just oemof, use
 ``pip install oemof.solph`` instead.
 
 Everybody is welcome to use and/or develop oemof.solph.
-Read our `'Why should I contribute' <http://oemof.readthedocs.io/en/latest/about_oemof.html#why-should-i-contribute>`_ section.
+Read our `contribution <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
