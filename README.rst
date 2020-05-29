@@ -232,6 +232,22 @@ Citing
 
 The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version.
 
+
+.. _solph_examples_label:
+
+Examples
+========
+
+The linkage of specific modules of the various packages is called an
+application (app) and depicts for example a concrete energy system model.
+You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-examples>`_ on github to download or clone.
+The examples show optimisations of different energy systems and are supposed
+to help new users to understand the framework's structure.
+There is some elaboration on the examples in the respective repository.
+The repository has sections for each major release.
+
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
+
 License
 =======
 
@@ -254,18 +270,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-.. _solph_examples_label:
-
-Examples
-========
-
-The linkage of specific modules of the various packages is called an
-application (app) and depicts for example a concrete energy system model.
-You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof_examples>`_ on github to download or clone.
-The examples show optimisations of different energy systems and are supposed
-to help new users to understand the framework's structure.
-There is some elaboration on the examples in the respective repository.
-The repository has sections for each major release.
-
-You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
