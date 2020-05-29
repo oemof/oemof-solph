@@ -115,6 +115,8 @@ oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof repository to your own
 github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
 
+If you have questions regarding the use of oemof you can visit the forum at `openmod-initiative.org <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ and open a new thread if your questions hasn't been already answered.
+
 Keep in touch! - You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 but this will bring you quite a few mails and might be more interesting for developers.
 If you just want to get the latest news, like when is the next oemof meeting,
@@ -123,8 +125,6 @@ you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 Documentation
 =============
 The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <http://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <http://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
-
-If you have questions regarding the use of oemof you can visit the forum at: `https://forum.openmod-initiative.org/tags/c/qa/oemof` and open a new thread if your questions hasn't been already answered.
 
 
 .. _installation_label:
