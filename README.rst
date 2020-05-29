@@ -283,14 +283,14 @@ Installation test
 
 Test the installation and the installed solver by running the installation test file.
 
-To test the whether the installation was successful simply run
+To test whether the installation was successful simply run
 
 .. code:: console
 
   oemof_installation_test
 
 in your virtual environment.
-If the installation was successful, you will get:
+If the installation was successful, you will receive something like this:
 
 .. code:: console
 
@@ -299,7 +299,7 @@ If the installation was successful, you will get:
     glpk: working
     cplex: not working
     cbc: working
-    gurobi: working
+    gurobi: not working
     *********
     oemof successfully installed.
 
