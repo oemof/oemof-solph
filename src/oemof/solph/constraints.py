@@ -42,7 +42,8 @@ def investment_limit(model, limit=None):
 
 
 def generic_investment_limit(model, keyword, limit=None):
-    r"""Global limit for investment flows weighted by an attribute keyword.
+    r"""
+    Global limit for investment flows weighted by an attribute keyword.
 
     The attribute named by keyword has to be added to every Investment
     attribute of the flow you want to take into account.
@@ -101,7 +102,6 @@ def generic_investment_limit(model, keyword, limit=None):
     >>> om = solph.constraints.generic_investment_limit(om, "space", limit=20)
     >>> space_used = om.invest_limit_space()
     """  # noqa: E501
-
     invest_flows = {}
 
     for (i, o) in model.flows:
