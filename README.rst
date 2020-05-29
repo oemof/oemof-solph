@@ -132,7 +132,7 @@ The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powere
 Installation
 ============
 
-If you have a working Python3 environment, use pypi to install the latest oemof version. Python >= 3.5 is recommended. Lower versions may work but are not tested.
+If you have a working Python3 environment, use pypi to install the latest oemof version. Python >= 3.6 is recommended. Lower versions may work but are not tested.
 
 
 ::
@@ -143,11 +143,9 @@ If you want to use the latest features, you might want to install the **develope
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
-For more details, also about how to install python, if you are new to python,
-have a look at the *Installing python3* section below.
 
 For running an oemof-solph optimisation model, you need to install a solver.
-Following you find guidelines for the installation process for different operation systems.
+Following you will find guidelines for the installation process for different operation systems.
 
 .. _windows_solver_label:
 .. _linux_solver_label:
@@ -161,11 +159,11 @@ But sometimes its worth comparing the results of different solvers.
 Other commercial solvers like Gurobi or Cplex can be used as well.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
+Check the solver installation by executing the test_installation example below (section `Installation test`).
+
 **Linux**
 
 To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
-
-Check the solver installation by executing the test_installation example (see the `Installation test` section).
 
 **Windows**
 
@@ -179,8 +177,6 @@ Check the solver installation by executing the test_installation example (see th
 
 
 **Mac OSX**
-
-So far only the CBC solver was tested on a Mac. If you are a Mac user and are using other Solvers successfully please help us to improve this installation guide.
 
 Please follow the installation instructions on the respective homepages for details.
 
@@ -196,15 +192,13 @@ If you install the CBC solver via brew (highly recommended), it should work with
 Installation test
 -----------------
 
-Test the installation and the installed solver by running the installation test file.
-
-To test whether the installation was successful simply run
+Test the installation and the installed solver by running the installation test
+in your virtual environment:
 
 .. code:: console
 
   oemof_installation_test
 
-in your virtual environment.
 If the installation was successful, you will receive something like this:
 
 .. code:: console
@@ -216,7 +210,7 @@ If the installation was successful, you will receive something like this:
     cbc: working
     gurobi: not working
     *********
-    oemof successfully installed.
+    oemof.solph successfully installed.
 
 as an output.
 
