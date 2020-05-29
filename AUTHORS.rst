@@ -3,6 +3,8 @@ Authors
 
 --**alphabetic order**--
 
+(`see full list on github <https://github.com/oemof/oemof-solph/graphs/contributors>`_)
+
 * Birgit Schachler
 * Brian Michael Lancien
 * Caroline Möller
