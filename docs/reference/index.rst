@@ -1,3 +1,5 @@
+.. _api_reference_label:
+
 API Reference
 =============
 

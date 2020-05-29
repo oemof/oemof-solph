@@ -8,6 +8,13 @@ User's guide
 
 Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The package is based on pyomo. To create an energy system model generic and specific components are available. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
 
+This User's guide provides a user-friendly introduction into oemof-solph,
+which includes small examples and nice illustrations.
+However, the functionality of oemof-solph go beyond the content of this User's guide section.
+So, if you want to know all details of a certain component or a function,
+please go the :ref:`api_reference_label`. There, you will find
+a detailed and complete description of all oemof-solph modules.
+
 .. contents::
     :depth: 2
     :local:
