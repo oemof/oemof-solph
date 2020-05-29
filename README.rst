@@ -144,7 +144,7 @@ If you want to use the latest features, you might want to install the **develope
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
 For more details, also about how to install python, if you are new to python,
-have a look at the *Link zu zukünftiger oemof/oemof* section.
+have a look at the *Installing python3* section below.
 
 For running an oemof-solph optimisation model, you need to install a solver.
 Following you find guidelines for the installation process for different operation systems.
