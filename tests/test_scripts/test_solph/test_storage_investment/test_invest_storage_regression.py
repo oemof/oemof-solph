@@ -9,12 +9,12 @@ test_storage_investment/test_storage_investment.py
 SPDX-License-Identifier: MIT
 """
 
-import oemof.solph as solph
-from oemof.network import Node
-from oemof.outputlib import processing, views
-
 import logging
+
 import pandas as pd
+from oemof import solph
+from oemof.network.network import Node
+from oemof.solph import views
 
 
 def test_regression_investment_storage(solver='cbc'):
@@ -33,7 +33,7 @@ def test_regression_investment_storage(solver='cbc'):
     bel = solph.Bus(label='electricity')
 
     solph.Sink(label='demand', inputs={bel: solph.Flow(
-        actual_value=[209643, 207497, 200108, 191892], fixed=True,
+        fix=[209643, 207497, 200108, 191892],
         nominal_value=1)})
 
     # Sources
@@ -65,7 +65,7 @@ def test_regression_investment_storage(solver='cbc'):
     om.solve(solver=solver)
 
     # Results
-    results = processing.results(om)
+    results = solph.processing.results(om)
 
     electricity_bus = views.node(results, 'electricity')
     my_results = electricity_bus['sequences'].sum(axis=0).to_dict()

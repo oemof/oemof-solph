@@ -1,0 +1,111 @@
+v0.4.0 (June 6, 2020)
+-----------------------
+
+
+API changes
+^^^^^^^^^^^^^^^^^^^^
+
+* New package name
+    For installation via pypi use ``pip install oemof.solph``.
+
+* Change the import of oemof-solph due to unbundling oemof solph
+    The import statements have changed, for example
+    ``from outputlib.views import processing`` --> ``from oemof.solph import processing``.
+    There are further changes for the modules ``views``, ``helpers``, ``economics``,
+    ``logger``, ``network``.
+
+* Rename GenericStorage attributes
+    The attribute ``capacity`` of the `GenericStorage` describing the current
+    absolute stored energy/material/water etc. has been renamed to ``storage_content``.
+    In the `GenericStorageBlock` and `GenericInvestmentStorageBlock`,
+    the attribute ``init_cap`` has been renamed ``init_content``. This change is
+    intended to avoid confusion with ``nominal_storage_capacity`` or capacity in terms
+    of installed capacity.
+
+* **Rename the flow attribute ``actual_value`` to ``fix`` and remove ``fixed``**
+
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* Allows having a non equidistant timeindex
+    By adding the calculate_timeincrement function to tools/helpers.py a non
+    equidistant timeincrement can be calculated. The EnergySystem
+    will now be defined by the timeindex and the calculated
+    timeincrement.
+
+* Allows non-convex investments for flows and storages.
+    With this feature, fix investment costs, which do not dependent on the
+    nominal capacity, can be considered.
+
+* Add user warnings for debugging.
+    A UserWarning is raised for untypical uses even though this kind of
+    usage is valid if you really know what you are doing.
+    This will help users to debug their code but can be turned of for
+    experienced users.
+
+* Add fixed losses to GenericStorage
+    `~oemof.solph.GenericStorage` can now have ``fixed_losses``,
+    that are independent from storage content.
+
+New components/constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Allows a generic limit for attribute weighted investment flows
+    InvestmentFlow, which share other limited resources (e.g. space), can be
+    considered.
+
+* Allow to limit count of concurrently active flows in group of flows
+    Flows have to be NonConvex, the limit can be an upper or lower one.
+
+* New constraint `shared_limit`
+    `Shared limit` allows to restrict the weighted sum
+    of arbitrary variables to a corridor.
+    This can be used, e.g. to model shared space is used to store wood pallets
+    and logs with their respective energy density.
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* **Restructure and clean-up documentation due to the unbundling**
+* **Improved documentation of ExtractionTurbineCHP**
+
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+
+* Results of one-time-step optimisation counterintuitive
+    If an optimisation with one time-step is performed, at the processing of the
+    results, the scalars of the results is stored in the dict of the sequences.
+    (See `Issue #693 <https://github.com/oemof/oemof-solph/issues/693>`_)
+
+
+Testing
+^^^^^^^^^^^^^^^^^^^^
+
+* Use ``tox`` for testing
+    Now, pep8 tests and build of documentation are tested.
+* **Skip github link checks when testing locally**
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+* Redefine ``loss_rate`` of `GenericStorage`
+    The ``loss_rate`` of `~oemof.solph.components.GenericStorage`
+    is now defined per time increment.
+* Change parameters' data type in the docstrings
+    The parameters' data type is changed from
+    `numeric (sequence or scalar)` to `numeric (iterable or scalar)`
+    (`Issue #673 <https://github.com/oemof/oemof-solph/issues/673>`_).
+* **Add python 3.8 support, remove python 3.5 support**
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Caterina Köhl
+* Jonathan Amme
+* Uwe Krien
+* Johannes Röder
+* Jann Launer
+* Daniel Rank
+* Patrik Schönfeldt
+* Stephan Günther

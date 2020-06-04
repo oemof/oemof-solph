@@ -1,0 +1,43 @@
+v0.1.2 (March 27, 2017)
+-----------------------
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* Revise examples - clearer naming, cleaner code, all examples work with cbc solver (`issue #238 <https://github.com/oemof/oemof-solph/pull/238>`_, `issue #247 <https://github.com/oemof/oemof-solph/pull/247>`_).
+* Add option to choose solver when executing the examples (`issue #247 <https://github.com/oemof/oemof-solph/pull/247>`_).
+* Add new transformer class: VariableFractionTransformer (child class of LinearTransformer). This class represents transformers with a variable fraction between its output flows. In contrast to the LinearTransformer by now it is restricted to two output flows.(`issue #248 <https://github.com/oemof/oemof-solph/pull/248>`_)
+* Add new transformer class: N1Transformer (counterpart of LinearTransformer). This class allows to have multiple inputflows that are converted into one output flow e.g. heat pumps or mixing-components.
+* Allow to set addtional flow attributes inside NodesFromCSV in solph inputlib
+* Add economics module to calculate investment annuities (more to come in future  versions)
+* Add module to store input data in multiple csv files and merge by preprocessing
+* Allow to slice all information around busses via a new method of the ResultsDataFrame
+* Add the option to save formatted balances around busses as single csv files via a new method of the ResultsDataFrame
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* Improve the installation guide.
+
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* Allow conversion factors as a sequence in the CSV reader
+
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+* Speed up constraint-building process by removing unnecessary method call
+* Clean up the code according to pep8 and pylint
+
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Cord Kaldemeyer
+* Guido Plessmann
+* Uwe Krien
+* Simon Hilpert
+* Stephan Günther

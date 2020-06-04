@@ -1,0 +1,4 @@
+v0.0.1 (November 25, 2015)
+--------------------------
+
+First release by the oemof developing group.

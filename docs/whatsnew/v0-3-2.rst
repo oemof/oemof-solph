@@ -1,0 +1,40 @@
+v0.3.2 (November 29, 2019)
+--------------------------
+
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* Allow generic limits for integral over weighted flows.
+  (This is a generalised version of <solph.constraints.emission_limit>.)
+* Allow time-dependent weights for integrated weighted limit.
+
+New components
+^^^^^^^^^^^^^^^^^^^^
+
+* Custom component: `~oemof.solph.custom.SinkDSM`.
+  Demand Side Management component that allows to represent flexibile demand.
+  How the component is used is shown in :ref:`oemof_solph_custom_sinkdsm_label`.
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* Revision of the `outputlib documentation
+  <https://oemof.readthedocs.io/en/stable/oemof_outputlib.html>`_.
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+* The license hase been changed from GPLv3 to the MIT license
+* The BaseModel has been revised (test, docstring, warnings, internal naming)
+  (`PR #605 <https://github.com/oemof/oemof-solph/pull/605>`_)
+* Style revision to meet pep8 and other pep rules.
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Guido Plessmann
+* Johannes Röder
+* Julian Endres
+* Patrik Schönfeldt
+* Uwe Krien
