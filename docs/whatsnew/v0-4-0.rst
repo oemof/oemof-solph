@@ -1,4 +1,4 @@
-v0.4.0 (April ??, 2020)
+v0.4.0 (June 6, 2020)
 -----------------------
 
 
@@ -7,18 +7,18 @@ API changes
 
 * Change the import of oemof-solph due to unbundling oemof solph.
   The import statements have changed, for example
-  `from outputlib.views import processing` --> `from oemof.solph import processing`.
-  There are further changes for the modules `views`, `helpers`, `economics`,
-  `logger`, `network`.
+  ``from outputlib.views import processing`` --> ``from oemof.solph import processing``.
+  There are further changes for the modules ``views``, ``helpers``, ``economics``,
+  ``logger``, ``network``.
 
-* The attribute `capacity` of the `GenericStorage` describing the current
-  absolute stored energy/material/water etc. has been renamed to `storage_content`.
+* The attribute ``capacity`` of the `GenericStorage` describing the current
+  absolute stored energy/material/water etc. has been renamed to ``storage_content``.
   In the `GenericStorageBlock` and `GenericInvestmentStorageBlock`,
-  the attribute `init_cap` has been renamed `init_content`. This change is
-  intended to avoid confusion with `nominal_storage_capacity` or capacity in terms
+  the attribute ``init_cap`` has been renamed ``init_content``. This change is
+  intended to avoid confusion with ``nominal_storage_capacity`` or capacity in terms
   of installed capacity.
 
-* Rename the flow attribute `actual_value` to `fix` and remove `fixed`.
+* Rename the flow attribute ``actual_value`` to ``fix`` and remove ``fixed``.
 
 * Allow to limit count of concurrently active flows in group of flows.
   (Flows have to be NonConvex, the limit can be an upper or lower one.)
@@ -41,10 +41,15 @@ New features
     With this feature, fix investment costs, which do not dependent on the
     nominal capacity, can be considered.
 
-* Add user warnings for debugging. A UserWarning is raised for
-  untypical uses even though this kind of usage is valid if you really
-  know what you are doing. This will help users to debug their code but
-  can be turned of for experienced users.
+* Add user warnings for debugging.
+    A UserWarning is raised for untypical uses even though this kind of
+    usage is valid if you really know what you are doing.
+    This will help users to debug their code but can be turned of for
+    experienced users.
+
+* Add fixed losses to GenericStorage
+    `~oemof.solph.GenericStorage` can now have ``fixed_losses``,
+    that are independent from storage content.
 
 New components
 ^^^^^^^^^^^^^^^^^^^^
