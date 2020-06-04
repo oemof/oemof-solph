@@ -83,7 +83,7 @@ Testing
 ^^^^^^^^^^^^^^^^^^^^
 
 * Use ``tox`` for testing
-    Now, pep8 tests and build of documentation is tested.
+    Now, pep8 tests and build of documentation are tested.
 * **Skip github link checks when testing locally**
 
 Other changes

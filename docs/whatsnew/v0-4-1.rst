@@ -1,5 +1,5 @@
-v0.3.3 (January 12, 2020)
--------------------------
+v0.4.1 (???, 2020)
+-----------------------
 
 
 API changes
@@ -7,22 +7,18 @@ API changes
 
 * something
 
+
 New features
-^^^^^^^^^^^^^^^^^^^^
-
-* `~oemof.solph.GenericStorage` can now have "fixed_losses", that are independent from storage content.
-
-New components
 ^^^^^^^^^^^^^^^^^^^^
 
 * something
 
+New components/constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* something
+
 Documentation
-^^^^^^^^^^^^^^^^^^^^
-
-* Improved documentation of ExtractionTurbineCHP
-
-Known issues
 ^^^^^^^^^^^^^^^^^^^^
 
 * something
@@ -31,6 +27,12 @@ Bug fixes
 ^^^^^^^^^^^^^^^^^^^^
 
 * something
+
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
 
 Testing
 ^^^^^^^^^^^^^^^^^^^^
@@ -45,5 +47,4 @@ Other changes
 Contributors
 ^^^^^^^^^^^^^^^^^^^^
 
-* Uwe Krien
-* Jann Launer
+* somebody
