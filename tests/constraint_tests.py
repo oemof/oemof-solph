@@ -545,6 +545,9 @@ class TestsConstraint:
         solph.Source(label='source_1', outputs={bus: solph.Flow(
             investment=solph.Investment(ep_costs=100, space=1))})
 
+        solph.Source(label='source_2', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=75))})
+
         om = self.get_om()
 
         om = solph.constraints.generic_investment_limit(om, "space", limit=20)
