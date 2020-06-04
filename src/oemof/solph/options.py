@@ -50,9 +50,7 @@ class Investment:
         self.nonconvex = nonconvex
         self.offset = offset
 
-        keys = [k for k in kwargs]
-
-        for attribute in set(keys):
+        for attribute in kwargs.keys():
             value = kwargs.get(attribute)
             setattr(self, attribute, value)
 
