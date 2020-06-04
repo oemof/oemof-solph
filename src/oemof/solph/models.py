@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Solph Optimization Models
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/models.py
+"""Solph Optimization Models.
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: gplssm
 
 SPDX-License-Identifier: MIT
+
 """
 import logging
 import warnings
@@ -28,7 +31,7 @@ class BaseModel(po.ConcreteModel):
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINTS`
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed `timeincrement` will be used which
@@ -238,7 +241,7 @@ class Model(BaseModel):
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINTS`
 
     **The following basic sets are created**:
 

@@ -4,11 +4,14 @@
 
 Information about the possible usage is provided within the examples.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/outputlib/views.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: henhuy
 
 SPDX-License-Identifier: MIT
+
 """
 import logging
 from collections import OrderedDict
@@ -134,7 +137,7 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
             Returns nodes having only input flows (eg. Sink)
 
     Additionally, busses can be excluded by setting `exclude_busses` to
-    :const:`True`.
+    `True`.
 
     Parameters
     ----------

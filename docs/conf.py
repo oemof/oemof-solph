@@ -47,6 +47,8 @@ napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
 
+exclude_patterns = ['_build', 'whatsnew/*']
+
 linkcheck_ignore = [r"https://requires.io/.*"] + (
     [
         r"https://github.com/oemof/oemof-solph/issues/*",
