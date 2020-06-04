@@ -112,7 +112,6 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> a = model.solve(solver="cbc")
     >>> int(round(model.invest_limit_space()))
     1500
-    
     """  # noqa: E501
     invest_flows = {}
 
