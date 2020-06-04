@@ -550,7 +550,7 @@ class TestsConstraint:
 
         om = self.get_om()
 
-        om = solph.constraints.generic_investment_limit(om, "space", limit=20)
+        om = solph.constraints.additional_investment_flow_limit(om, "space", limit=20)
 
         self.compare_lp_files('generic_invest_limit.lp', my_om=om)
 
