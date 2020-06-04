@@ -5,14 +5,24 @@ v0.4.0 (April ??, 2020)
 API changes
 ^^^^^^^^^^^^^^^^^^^^
 
+* Change the import of oemof-solph due to unbundling oemof solph.
+  The import statements have changed, for example
+  `from outputlib.views import processing` --> `from oemof.solph import processing`.
+  There are further changes for the modules `views`, `helpers`, `economics`,
+  `logger`, `network`.
+
 * The attribute `capacity` of the `GenericStorage` describing the current
   absolute stored energy/material/water etc. has been renamed to `storage_content`.
   In the `GenericStorageBlock` and `GenericInvestmentStorageBlock`,
   the attribute `init_cap` has been renamed `init_content`. This change is
   intended to avoid confusion with `nominal_storage_capacity` or capacity in terms
   of installed capacity.
+
+* Rename the flow attribute `actual_value` to `fix` and remove `fixed`.
+
 * Allow to limit count of concurrently active flows in group of flows.
   (Flows have to be NonConvex, the limit can be an upper or lower one.)
+
 * New constraint `shared_limit` allows to restrict the weighted sum
   of arbitrary variables to a corridor.
   This can be used, e.g. to model shared space is used to store wood pallets
@@ -30,6 +40,11 @@ New features
 * Allows non-convex investments for flows and storages.
     With this feature, fix investment costs, which do not dependent on the
     nominal capacity, can be considered.
+
+* Add user warnings for debugging. A UserWarning is raised for
+  untypical uses even though this kind of usage is valid if you really
+  know what you are doing. This will help users to debug their code but
+  can be turned of for experienced users.
 
 New components
 ^^^^^^^^^^^^^^^^^^^^
@@ -50,12 +65,13 @@ Known issues
 Bug fixes
 ^^^^^^^^^^^^^^^^^^^^
 
-* Skipping github link checks when testing locally
+* something
 
 Testing
 ^^^^^^^^^^^^^^^^^^^^
 
-* something
+* Skipping github link checks when testing locally
+* Fix travis sphinx build test
 
 Other changes
 ^^^^^^^^^^^^^^^^^^^^
@@ -65,6 +81,7 @@ Other changes
 * The parameters' data type in the docstrings is changed from
   `numeric (sequence or scalar)` to `numeric (iterable or scalar)`
   (`Issue #673 <https://github.com/oemof/oemof-solph/issues/673>`_).
+* Add python 3.8 support, remove python 3.5 support.
 
 Contributors
 ^^^^^^^^^^^^^^^^^^^^
