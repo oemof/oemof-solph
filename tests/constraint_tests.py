@@ -534,6 +534,27 @@ class TestsConstraint:
 
         self.compare_lp_files('variable_chp.lp')
 
+    def test_generic_invest_limit(self):
+        """
+        """
+        bus = solph.Bus(label='bus_1')
+
+        solph.Source(label='source_0', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=50, space=4))})
+
+        solph.Source(label='source_1', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=100, space=1))})
+
+        solph.Source(label='source_2', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=75))})
+
+        om = self.get_om()
+
+        om = solph.constraints.additional_investment_flow_limit(
+            om, "space", limit=20)
+
+        self.compare_lp_files('generic_invest_limit.lp', my_om=om)
+
     def test_emission_constraints(self):
         """
         """

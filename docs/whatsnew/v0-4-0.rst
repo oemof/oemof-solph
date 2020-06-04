@@ -51,10 +51,12 @@ New features
     `~oemof.solph.GenericStorage` can now have ``fixed_losses``,
     that are independent from storage content.
 
-New components
-^^^^^^^^^^^^^^^^^^^^
+New components/constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* something
+* Allows a generic limit for attribute weighted investment flows.
+    InvestmentFlow, which share other limited resources (e.g. space), can be
+    considered.
 
 Documentation
 ^^^^^^^^^^^^^^^^^^^^
