@@ -39,6 +39,7 @@ New components
 Documentation
 ^^^^^^^^^^^^^^^^^^^^
 
+* Restructure and clean-up documentation due to the unbundling
 * Improved documentation of ExtractionTurbineCHP
 
 Known issues
@@ -49,7 +50,7 @@ Known issues
 Bug fixes
 ^^^^^^^^^^^^^^^^^^^^
 
-* something
+* Skipping github link checks when testing locally
 
 Testing
 ^^^^^^^^^^^^^^^^^^^^
