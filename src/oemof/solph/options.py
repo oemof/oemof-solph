@@ -46,13 +46,18 @@ class Investment:
 
     """
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
-                 existing=0, nonconvex=False, offset=0):
+                 existing=0, nonconvex=False, offset=0, **kwargs):
+
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
         self.existing = existing
         self.nonconvex = nonconvex
         self.offset = offset
+
+        for attribute in kwargs.keys():
+            value = kwargs.get(attribute)
+            setattr(self, attribute, value)
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
