@@ -47,7 +47,7 @@ def investment_limit(model, limit=None):
 def additional_investment_flow_limit(model, keyword, limit=None):
     r"""
     Global limit for investment flows weighted by an attribute keyword.
-    
+
     This constraint is only valid for Flows not for components such as an
     investment storage.
 
