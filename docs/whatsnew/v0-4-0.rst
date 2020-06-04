@@ -65,7 +65,9 @@ Documentation
 Known issues
 ^^^^^^^^^^^^^^^^^^^^
 
-* something
+* If an optimisation with one time-step is performed, at the processing of the
+  results, the scalars of the results is stored in the dict of the sequences.
+  (See `Issue #693 <https://github.com/oemof/oemof-solph/issues/693>`_)
 
 Bug fixes
 ^^^^^^^^^^^^^^^^^^^^
