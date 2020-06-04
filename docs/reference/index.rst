@@ -1,5 +1,7 @@
-Reference
-=========
+.. _api_reference_label:
+
+API Reference
+=============
 
 .. toctree::
     :glob:
