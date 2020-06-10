@@ -81,8 +81,8 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
 
     solph.Sink(label=Label('sink', 'electricity', 'demand'),
                inputs={bel: solph.Flow(
-                   actual_value=data['demand_el'],
-                   fixed=True, nominal_value=1)})
+                   fix=data['demand_el'],
+                   nominal_value=1)})
 
     # Sources
     solph.Source(label=Label('source', 'natural_gas', 'commodity'),
@@ -91,13 +91,13 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
 
     solph.Source(label=Label('renewable', 'electricity', 'wind'),
                  outputs={bel: solph.Flow(
-                     actual_value=data['wind'],
-                     nominal_value=1000000, fixed=True)})
+                     fix=data['wind'],
+                     nominal_value=1000000)})
 
     solph.Source(label=Label('renewable', 'electricity', 'pv'),
                  outputs={bel: solph.Flow(
-                     actual_value=data['pv'], nominal_value=582000,
-                     fixed=True)})
+                     fix=data['pv'], nominal_value=582000,
+                     )})
 
     # Transformer
     solph.Transformer(
@@ -138,7 +138,7 @@ def test_tuples_as_labels_example(filename="storage_investment.csv",
     storage = es.groups['storage_electricity_battery']
     storage_node = views.node(results, storage)
     my_results['max_load'] = storage_node['sequences'].max()[
-        ((storage, None), 'capacity')]
+        ((storage, None), 'storage_content')]
     commodity_bus = views.node(results, 'bus_natural_gas_None')
 
     gas_usage = commodity_bus['sequences'][

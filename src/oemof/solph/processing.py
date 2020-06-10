@@ -33,6 +33,10 @@ def get_tuple(x):
         elif issubclass(type(i), Node):
             return i,
 
+    # for standalone variables, x is used as identifying tuple
+    if isinstance(x, tuple):
+        return x
+
 
 def get_timestep(x):
     """
@@ -147,7 +151,7 @@ def results(om):
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
-                    'sequences': df, 'scalars': pd.Series()}
+                    'sequences': df, 'scalars': pd.Series(dtype=float)}
             else:
                 result[(bus, None)]['sequences']['duals'] = duals
 

@@ -50,7 +50,7 @@ class BaseModel(po.ConcreteModel):
         Name of the model.
     es : solph.EnergySystem
         Energy system of the model.
-    meta : pyomo.opt.results.results_.SolverResults or None
+    meta : `pyomo.opt.results.results_.SolverResults` or None
         Solver results.
     dual : ... or None
     rc : ... or None
@@ -303,24 +303,28 @@ class Model(BaseModel):
                            within=po.Reals)
 
         for (o, i) in self.FLOWS:
-            for t in self.TIMESTEPS:
-                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    self.flow[o, i, t].setlb(0)
-                if self.flows[o, i].nominal_value is not None:
-                    self.flow[o, i, t].setub(self.flows[o, i].max[t] *
-                                             self.flows[o, i].nominal_value)
-
-                    if self.flows[o, i].actual_value[t] is not None:
-                        # pre- optimized value of flow variable
+            if self.flows[o, i].nominal_value is not None:
+                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
+                    for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
-                            self.flows[o, i].actual_value[t] *
+                            self.flows[o, i].fix[t] *
                             self.flows[o, i].nominal_value)
-                        # fix variable if flow is fixed
-                        if self.flows[o, i].fixed:
-                            self.flow[o, i, t].fix()
+                        self.flow[o, i, t].fix()
+                else:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].setub(
+                            self.flows[o, i].max[t] *
+                            self.flows[o, i].nominal_value)
 
                     if not self.flows[o, i].nonconvex:
-                        # lower bound of flow variable
-                        self.flow[o, i, t].setlb(
-                            self.flows[o, i].min[t] *
-                            self.flows[o, i].nominal_value)
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].setlb(
+                                self.flows[o, i].min[t] *
+                                self.flows[o, i].nominal_value)
+                    elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].setlb(0)
+            else:
+                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].setlb(0)

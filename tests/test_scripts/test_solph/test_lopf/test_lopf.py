@@ -100,7 +100,7 @@ def test_lopf(solver="cbc"):
             label="load",
             inputs={
                 b_el2: Flow(
-                    nominal_value=100, actual_value=1, fixed=True
+                    nominal_value=100, fix=1
                 )
             },
         )

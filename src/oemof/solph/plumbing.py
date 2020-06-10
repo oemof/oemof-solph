@@ -21,7 +21,7 @@ def sequence(iterable_or_scalar):
 
     Parameters
     ----------
-    iterable_or_scalar : iterable, None, int, float
+    iterable_or_scalar : iterable or None or int or float
 
     Examples
     --------

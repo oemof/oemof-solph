@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.4.0.dev0 (2020-04-04)
+0.4.0.b0 (2020-05-12)
 -----------------------
 
-* First release on PyPI.
+* First release of oemof.solph on PyPI.
