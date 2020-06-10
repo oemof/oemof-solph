@@ -164,7 +164,6 @@ class Flow(on.Edge):
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
     0.99
-
     """
 
     def __init__(self, **kwargs):
@@ -178,7 +177,8 @@ class Flow(on.Edge):
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'nonconvex', 'integer']
-        sequences = ['fix', 'variable_costs', 'min', 'max']
+        sequences = ['fix', 'variable_costs', 'min', 'max',
+                     'schedule', 'schedule_cost_neg', 'schedule_cost_pos']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
