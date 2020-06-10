@@ -861,7 +861,7 @@ class TestsConstraint:
         es = solph.EnergySystem(timeindex=timeindex,
                                 timeincrement=timeincrement)
         b_gas = solph.Bus(label="gas")
-        b_th = solph.Bus(label = "heat")
+        b_th = solph.Bus(label="heat")
         boiler = solph.Transformer(
             label="boiler",
             inputs={b_gas: solph.Flow(variable_costs=100)},
