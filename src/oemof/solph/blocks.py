@@ -278,7 +278,7 @@ class Flow(SimpleBlock):
 
         variable_costs = 0
         gradient_costs = 0
-        penalty_costs = 0
+        schedule_costs = 0
 
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
@@ -304,11 +304,11 @@ class Flow(SimpleBlock):
                 (len(schedule) == 0 and
                  schedule[0] is not None)):
                 for t in m.TIMESTEPS:
-                    penalty_costs += (self.schedule_slack_pos[i, o, t] *
-                                      m.flows[i, o].schedule_cost_pos[t])
-                    penalty_costs += (self.schedule_slack_neg[i, o, t] *
-                                      m.flows[i, o].schedule_cost_neg[t])
-        return variable_costs + gradient_costs + penalty_costs
+                    schedule_costs += (self.schedule_slack_pos[i, o, t] *
+                                       m.flows[i, o].schedule_cost_pos[t])
+                    schedule_costs += (self.schedule_slack_neg[i, o, t] *
+                                       m.flows[i, o].schedule_cost_neg[t])
+        return variable_costs + gradient_costs + schedule_costs
 
 
 class InvestmentFlow(SimpleBlock):
