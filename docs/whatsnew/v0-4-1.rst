@@ -2,48 +2,54 @@ v0.4.1 (???)
 ++++++++++++++++++++++++++
 
 
+v0.4.1 (???, 2020)
+-----------------------
+
+
 API changes
-###########
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
+
 New features
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * It is now possible to determine a schedule for a flow. Flow will be pushed
   to the schedule, if possible.
 
-New components
-##############
+New components/constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Documentation
-#############
-
-* something
-
-Known issues
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Bug fixes
-#########
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+
 Testing
-#######
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Other changes
-#############
+^^^^^^^^^^^^^^^^^^^^
 
 * something
 
 Contributors
-############
+^^^^^^^^^^^^^^^^^^^^
 
 * Caterina Köhl
