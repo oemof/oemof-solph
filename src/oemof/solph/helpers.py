@@ -15,7 +15,6 @@ import os
 from collections import MutableMapping
 
 import pandas as pd
-from oemof.solph.plumbing import sequence
 
 
 def get_basic_path():
