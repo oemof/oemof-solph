@@ -9,18 +9,17 @@ by the contributors recorded in the version control history of the file,
 available from its original location
 oemof/tests/test_scripts/test_solph/test_variable_chp/test_variable_chp.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
 import logging
 import os
+
 import pandas as pd
-
-from oemof import outputlib
-
-from oemof.network import Node
-import oemof.solph as solph
+from nose.tools import eq_
+from oemof import solph
+from oemof.network.network import Node
+from oemof.solph import views
 
 
 def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
@@ -62,15 +61,15 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
 
     # create simple sink object for electrical demand for each electrical bus
     solph.Sink(label=('demand', 'elec1'), inputs={bel: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+        fix=data['demand_el'], nominal_value=1)})
     solph.Sink(label=('demand', 'elec2'), inputs={bel2: solph.Flow(
-        actual_value=data['demand_el'], fixed=True, nominal_value=1)})
+        fix=data['demand_el'], nominal_value=1)})
 
     # create simple sink object for heat demand for each thermal bus
     solph.Sink(label=('demand', 'therm1'), inputs={bth: solph.Flow(
-        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+        fix=data['demand_th'], nominal_value=741000)})
     solph.Sink(label=('demand', 'therm2'), inputs={bth2: solph.Flow(
-        actual_value=data['demand_th'], fixed=True, nominal_value=741000)})
+        fix=data['demand_th'], nominal_value=741000)})
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
     solph.Transformer(
@@ -99,11 +98,10 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     logging.info('Solve the optimization problem')
     om.solve(solver=solver)
 
-    optimisation_results = outputlib.processing.results(om)
-    parameter = outputlib.processing.parameter_as_dict(energysystem)
+    optimisation_results = solph.processing.results(om)
+    parameter = solph.processing.parameter_as_dict(energysystem)
 
-    myresults = outputlib.views.node(optimisation_results,
-                                     "('natural', 'gas')")
+    myresults = views.node(optimisation_results, "('natural', 'gas')")
     sumresults = myresults['sequences'].sum(axis=0)
     maxresults = myresults['sequences'].max(axis=0)
 
@@ -130,7 +128,7 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
     eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
         ['scalars']['label'], "('fixed_chp', 'gas')")
     eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
-          ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
+        ['scalars']["conversion_factors_('electricity', 2)"], 0.3)
 
     # objective function
-    eq_(round(outputlib.processing.meta_results(om)['objective']), 326661590)
+    eq_(round(solph.processing.meta_results(om)['objective']), 326661590)

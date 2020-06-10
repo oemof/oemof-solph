@@ -6,23 +6,30 @@ This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_processing.py
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_, assert_raises, ok_
-from warnings import catch_warnings
 import pandas
-from pandas.util.testing import assert_series_equal, assert_frame_equal
-from oemof.solph import (
-    EnergySystem, Bus, Transformer, Flow, Investment, Sink, Model)
+from nose.tools import assert_raises
+from nose.tools import eq_
+from nose.tools import ok_
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
+from oemof.solph import processing
+from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from oemof.outputlib import processing
-from oemof.outputlib import views
+from pandas.testing import assert_frame_equal
+from pandas.testing import assert_series_equal
 
 
-class Parameter_Result_Tests:
+class TestParameterResult:
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
@@ -61,7 +68,6 @@ class Parameter_Result_Tests:
             invest_relation_output_capacity=1/6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            fixed_costs=35,
             investment=Investment(ep_costs=0.4),
         )
 
@@ -71,8 +77,7 @@ class Parameter_Result_Tests:
             inputs={
                 b_el2: Flow(
                     nominal_value=1,
-                    actual_value=cls.demand_values,
-                    fixed=True
+                    fix=cls.demand_values,
                 )
             }
         )
@@ -92,7 +97,6 @@ class Parameter_Result_Tests:
             param_results[(b_el2, demand)]['scalars'].sort_index(),
             pandas.Series(
                 {
-                    'fixed': True,
                     'nominal_value': 1,
                     'max': 1,
                     'min': 0,
@@ -106,7 +110,7 @@ class Parameter_Result_Tests:
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
-                {'actual_value': self.demand_values}
+                {'fix': self.demand_values}
             ), check_like=True
         )
 
@@ -116,7 +120,6 @@ class Parameter_Result_Tests:
         param_results = processing.parameter_as_dict(self.es,
                                                      exclude_none=False)
         scalar_attributes = {
-            'fixed': True,
             'integer': None,
             'investment': None,
             'nominal_value': 1,
@@ -139,10 +142,10 @@ class Parameter_Result_Tests:
             pandas.Series(scalar_attributes).sort_index()
         )
         sequences_attributes = {
-            'actual_value': self.demand_values,
+            'fix': self.demand_values,
         }
         default_sequences = [
-            'actual_value'
+            'fix'
         ]
         for attr in default_sequences:
             if attr not in sequences_attributes:
@@ -167,7 +170,11 @@ class Parameter_Result_Tests:
                 'investment_existing': 0,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_nonconvex': False,
+                'investment_offset': 0,
                 'label': 'storage',
+                'fixed_losses_absolute': 0,
+                'fixed_losses_relative': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
                 'max_storage_level': 1,
@@ -196,7 +203,11 @@ class Parameter_Result_Tests:
                 'investment_existing': 0,
                 'investment_maximum': float('inf'),
                 'investment_minimum': 0,
+                'investment_nonconvex': False,
+                'investment_offset': 0,
                 'label': 'storage',
+                'fixed_losses_absolute': 0,
+                'fixed_losses_relative': 0,
                 'inflow_conversion_factor': 1,
                 'loss_rate': 0,
                 'max_storage_level': 1,
@@ -254,9 +265,9 @@ class Parameter_Result_Tests:
 
     def test_node_weight_by_type(self):
         results = processing.results(self.om)
-        capacity = views.node_weight_by_type(
+        storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage)
-        eq_(int(float(capacity.sum()) * pow(10, 6)) / pow(10, 6),
+        eq_(round(float(storage_content.sum()), 6),
             1437.500003)
 
     def test_output_by_type_view(self):
