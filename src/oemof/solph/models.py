@@ -204,9 +204,14 @@ class BaseModel(po.ConcreteModel):
 
         solver_results = opt.solve(self, **solve_kwargs)
 
-        status = solver_results["Solver"][0]["Status"].key
-        termination_condition = (
-            solver_results["Solver"][0]["Termination condition"].key)
+        try: # for older versions of Pyomo
+            status = solver_results["Solver"][0]["Status"].key
+            termination_condition = (
+                solver_results["Solver"][0]["Termination condition"].key)
+        except AttributeError: # for newer versions of Pyomo
+            status = solver_results["Solver"][0]["Status"]
+            termination_condition = (
+                solver_results["Solver"][0]["Termination condition"])
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
