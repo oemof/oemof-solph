@@ -87,6 +87,7 @@ setup(
         "numpy",
         "pandas",
         "pyomo >= 4.4.0, < 5.7",
+        "pyutilib < 6.0.0"
         "networkx",
         "oemof.tools",
         "oemof.network",
