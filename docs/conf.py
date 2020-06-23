@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -26,8 +27,8 @@ version = release = '0.4.1.dev0'
 pygments_style = 'trac'
 templates_path = ['.']
 extlinks = {
-    'issue': ('https://github.com/oemof/oemof-tools/issues/%s', '#'),
-    'pr': ('https://github.com/oemof/oemof-tools/pull/%s', 'PR #'),
+    'issue': ('https://github.com/oemof/oemof-solph/issues/%s', '#'),
+    'pr': ('https://github.com/oemof/oemof-solph/pull/%s', 'PR #'),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
