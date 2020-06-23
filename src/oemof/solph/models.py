@@ -204,11 +204,11 @@ class BaseModel(po.ConcreteModel):
 
         solver_results = opt.solve(self, **solve_kwargs)
 
-        try: #  for older versions of Pyomo
+        try:  # for older versions of Pyomo
             status = solver_results["Solver"][0]["Status"].key
             termination_condition = (
                 solver_results["Solver"][0]["Termination condition"].key)
-        except AttributeError: #  for newer versions of Pyomo
+        except AttributeError:  # for newer versions of Pyomo
             status = solver_results["Solver"][0]["Status"]
             termination_condition = (
                 solver_results["Solver"][0]["Termination condition"])
