@@ -86,7 +86,7 @@ setup(
         "dill",
         "numpy",
         "pandas",
-        "pyomo >= 4.4.0, < 6.0",
+        "pyomo >= 5.7.0, < 6.0",
         "networkx",
         "oemof.tools",
         "oemof.network",
