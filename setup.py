@@ -38,7 +38,7 @@ long_description = "%s\n%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.4.1.dev0",
+    version="0.4.2.dev0",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
@@ -86,7 +86,7 @@ setup(
         "dill",
         "numpy",
         "pandas",
-        "pyomo >= 4.4.0, < 6.0",
+        "pyomo >= 5.7.0, < 6.0",
         "networkx",
         "oemof.tools",
         "oemof.network",
