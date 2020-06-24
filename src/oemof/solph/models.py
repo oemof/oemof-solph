@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: gplssm
+SPDX-FileCopyrightText: Patrik Schönfeldt
 
 SPDX-License-Identifier: MIT
 
@@ -204,9 +205,9 @@ class BaseModel(po.ConcreteModel):
 
         solver_results = opt.solve(self, **solve_kwargs)
 
-        status = solver_results["Solver"][0]["Status"].key
+        status = solver_results["Solver"][0]["Status"]
         termination_condition = (
-            solver_results["Solver"][0]["Termination condition"].key)
+            solver_results["Solver"][0]["Termination condition"])
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")

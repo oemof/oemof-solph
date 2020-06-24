@@ -1317,7 +1317,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
                     # main use case
                     elif (g.delay_time < t <=
-                          m.TIMESTEPS._bounds[1] - g.delay_time):
+                          m.TIMESTEPS[-1] - g.delay_time):
 
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, t]
@@ -1338,7 +1338,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         rhs = g.demand[t] + self.dsm_up[g, t] - sum(
                             self.dsm_do[g, tt, t]
                             for tt in range(t - g.delay_time,
-                                            m.TIMESTEPS._bounds[1] + 1))
+                                            m.TIMESTEPS[-1] + 1))
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1374,7 +1374,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
                     # main use case
                     elif g.delay_time < t <= (
-                            m.TIMESTEPS._bounds[1] - g.delay_time):
+                            m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t]
@@ -1394,7 +1394,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM down
                         rhs = sum(self.dsm_do[g, t, tt]
                                   for tt in range(t - g.delay_time,
-                                                  m.TIMESTEPS._bounds[1] + 1))
+                                                  m.TIMESTEPS[-1] + 1))
 
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
@@ -1451,7 +1451,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
                     # main use case
                     elif g.delay_time < tt <= (
-                            m.TIMESTEPS._bounds[1] - g.delay_time):
+                            m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM down
                         lhs = sum(self.dsm_do[g, t, tt]
@@ -1469,7 +1469,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM down
                         lhs = sum(self.dsm_do[g, t, tt]
                                   for t in range(tt - g.delay_time,
-                                                 m.TIMESTEPS._bounds[1] + 1))
+                                                 m.TIMESTEPS[-1] + 1))
                         # Capacity DSM down
                         rhs = g.capacity_down[tt]
 
@@ -1507,7 +1507,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
                     elif g.delay_time < tt <= (
-                            m.TIMESTEPS._bounds[1] - g.delay_time):
+                            m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = self.dsm_up[g, tt] + sum(
@@ -1526,7 +1526,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         lhs = self.dsm_up[g, tt] + sum(
                             self.dsm_do[g, t, tt]
                             for t in range(tt - g.delay_time,
-                                           m.TIMESTEPS._bounds[1] + 1))
+                                           m.TIMESTEPS[-1] + 1))
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt], g.capacity_down[tt])
 
