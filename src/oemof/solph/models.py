@@ -211,15 +211,13 @@ class BaseModel(po.ConcreteModel):
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
-            self.es.results = solver_results
-            self.solver_results = solver_results
         else:
             msg = ("Optimization ended with status {0} and termination "
                    "condition {1}")
             warnings.warn(msg.format(status, termination_condition),
                           UserWarning)
-            self.es.results = solver_results
-            self.solver_results = solver_results
+        self.es.results = solver_results
+        self.solver_results = solver_results
 
         return solver_results
 
