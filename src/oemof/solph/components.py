@@ -37,6 +37,8 @@ class GenericStorage(network.Node):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 
+    The GenericStorage is designed for one input and one output.
+
     Parameters
     ----------
     nominal_storage_capacity : numeric, :math:`E_{nom}`
