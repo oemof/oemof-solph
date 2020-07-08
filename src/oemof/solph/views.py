@@ -18,6 +18,7 @@ from collections import OrderedDict
 from enum import Enum
 
 import pandas as pd
+
 from oemof.solph.processing import convert_keys_to_strings
 
 NONE_REPLACEMENT_STR = '_NONE_'

@@ -1,6 +1,7 @@
 
 from nose.tools import eq_
 from nose.tools import raises
+
 from oemof.solph import processing
 from oemof.solph import views
 

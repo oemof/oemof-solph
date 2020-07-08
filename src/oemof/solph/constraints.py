@@ -11,7 +11,8 @@ SPDX-License-Identifier: MIT
 
 """
 
-import pyomo.environ as po
+from pyomo import environ as po
+
 from oemof.solph.plumbing import sequence
 
 

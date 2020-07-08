@@ -10,13 +10,14 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
-import os.path as ospath
 import re
 from difflib import unified_diff
+from os import path as ospath
 
 import pandas as pd
 from nose.tools import assert_raises
 from nose.tools import eq_
+
 from oemof import solph
 from oemof.network.network import Node
 
