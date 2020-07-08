@@ -159,6 +159,31 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
             )
 
 
+def test_generic_storage_without_inputs():
+    components.GenericStorage(
+        label='storage5')
+
+
+def test_generic_storage_too_many_inputs():
+    msg = r"Only one input flow allowed in the GenericStorage storage6"
+    bel1 = Bus()
+    bel2 = Bus()
+    with pytest.raises(AttributeError, match=msg):
+        components.GenericStorage(
+            label='storage6',
+            inputs={bel1: Flow(), bel2: Flow()})
+
+
+def test_generic_storage_too_many_outputs():
+    msg = r"Only one output flow allowed in the GenericStorage storage7"
+    bel1 = Bus()
+    bel2 = Bus()
+    with pytest.raises(AttributeError, match=msg):
+        components.GenericStorage(
+            label='storage7',
+            outputs={bel1: Flow(), bel2: Flow()})
+
+
 # ********* OffsetTransformer *********
 
 def test_offsettransformer_wrong_flow_type():
