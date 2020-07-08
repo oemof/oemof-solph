@@ -33,7 +33,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 
-class GenericStorage(network.Transformer):
+class GenericStorage(network.Node):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 
