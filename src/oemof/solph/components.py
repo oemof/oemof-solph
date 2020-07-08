@@ -168,6 +168,9 @@ class GenericStorage(network.Node):
         )
         self._invest_group = isinstance(self.investment, Investment)
 
+        # Check number of flows.
+        self._check_number_of_flows()
+
         # Check attributes for the investment mode.
         if self._invest_group is True:
             self._check_invest_attributes()
@@ -245,6 +248,13 @@ class GenericStorage(network.Node):
             raise AttributeError(e3)
 
         self._set_flows()
+
+    def _check_number_of_flows(self):
+        msg = "Only one {0} flow allowed in the GenericStorage {1}."
+        if len(self.inputs) > 1:
+            raise AttributeError(msg.format("input", self.label))
+        if len(self.outputs) > 1:
+            raise AttributeError(msg.format("output", self.label))
 
     def constraint_group(self):
         if self._invest_group is True:
