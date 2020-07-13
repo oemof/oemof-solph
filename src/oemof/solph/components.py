@@ -29,7 +29,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 from oemof.network import network
-from oemof.solph.network import Transformer as solph_Transformer
+from oemof.solph import network as solph_network
 from oemof.solph.options import Investment
 from oemof.solph.plumbing import sequence as solph_sequence
 
@@ -254,6 +254,8 @@ class GenericStorage(network.Node):
 
     def _check_number_of_flows(self):
         msg = "Only one {0} flow allowed in the GenericStorage {1}."
+        solph_network.check_node_object_for_missing_attribute(self, "inputs")
+        solph_network.check_node_object_for_missing_attribute(self, "outputs")
         if len(self.inputs) > 1:
             raise AttributeError(msg.format("input", self.label))
         if len(self.outputs) > 1:
@@ -1571,7 +1573,7 @@ class GenericCHPBlock(SimpleBlock):
         return 0
 
 
-class ExtractionTurbineCHP(solph_Transformer):
+class ExtractionTurbineCHP(solph_network.Transformer):
     r"""
     A CHP with an extraction turbine in a linear model. For more options see
     the :class:`~oemof.solph.components.GenericCHP` class.

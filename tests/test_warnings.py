@@ -87,3 +87,27 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
                           inputs={look_out: "No outputs!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
+
+
+def test_storage_without_outputs(warning_fixture):
+    """ GenericStorage doesn't warn correctly about missing outputs."""
+    look_out = network.Bus()
+    msg = ("Attribute <outputs> is missing in Node <storage without outputs>"
+           " of <class 'oemof.solph.components.GenericStorage'>.")
+    with warnings.catch_warnings(record=True) as w:
+        solph.GenericStorage(label='storage without outputs',
+                             inputs={look_out: "No outputs!"})
+        assert len(w) == 1
+        assert msg in str(w[-1].message)
+
+
+def test_storage_without_inputs(warning_fixture):
+    """ GenericStorage doesn't warn correctly about missing inputs."""
+    look_out = network.Bus()
+    msg = ("Attribute <inputs> is missing in Node <storage without inputs>"
+           " of <class 'oemof.solph.components.GenericStorage'>.")
+    with warnings.catch_warnings(record=True) as w:
+        solph.GenericStorage(label='storage without inputs',
+                             outputs={look_out: "No inputs!"})
+        assert len(w) == 1
+        assert msg in str(w[-1].message)
