@@ -339,6 +339,3 @@ def check_node_object_for_missing_attribute(obj, attribute):
                "disable the SuspiciousUsageWarning globally.")
         warn(msg.format(attribute, obj.label, type(obj)),
              debugging.SuspiciousUsageWarning)
-
-
-
