@@ -243,8 +243,8 @@ class TestParameterResult:
             self.es, exclude_none=True)
         bel1 = views.node(param_results, 'b_el1')
         assert (
-            bel1['scalars'][[(('b_el1', 'storage'), 'variable_costs')]].values,
-            3
+            bel1['scalars'][[(('b_el1', 'storage'), 'variable_costs')]].values
+            == 3
         )
 
         bel1_m = views.node(param_results, 'b_el1', multiindex=True)
