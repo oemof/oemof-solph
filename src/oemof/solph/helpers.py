@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
+
 """
 This is a collection of helper functions which work on their own and can be
 used by various classes. If there are too many helper-functions, they will
 be sorted in different modules.
 
-This file is part of project oemof (gith∏ub.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/tools/helpers.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Caroline Möller
+SPDX-FileCopyrightText: henhuy
+SPDX-FileCopyrightText: gplssm
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: elisapap
 
 SPDX-License-Identifier: MIT
+
 """
+
 import datetime as dt
 import os
 from collections import MutableMapping
