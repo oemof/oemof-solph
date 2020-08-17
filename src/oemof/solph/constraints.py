@@ -166,7 +166,8 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
         Keys are (source, target) objects of the Flow. If no dictionary is
         given all flows containing the keyword attribute will be
         used.
-    keyword : attribute to consider
+    keyword : string
+        attribute to consider
     limit : numeric
         Absolute limit of keyword attribute for the energy system.
 
