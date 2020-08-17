@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """Additional constraints to be used in an oemof energy model.
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/constraints.py
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
+
 """
 
 import pyomo.environ as po
@@ -37,6 +40,95 @@ def investment_limit(model, limit=None):
         return expr <= limit
 
     model.investment_limit = po.Constraint(rule=investment_rule)
+
+    return model
+
+
+def additional_investment_flow_limit(model, keyword, limit=None):
+    r"""
+    Global limit for investment flows weighted by an attribute keyword.
+
+    This constraint is only valid for Flows not for components such as an
+    investment storage.
+
+    The attribute named by keyword has to be added to every Investment
+    attribute of the flow you want to take into account.
+    Total value of keyword attributes after optimization can be retrieved
+    calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which constraints are added.
+    keyword : attribute to consider
+        All flows with Investment attribute containing the keyword will be
+        used.
+    limit : numeric
+        Global limit of keyword attribute for the energy system.
+
+
+    Constraint
+    ----------
+    .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
+
+    With `IF` being the set of InvestmentFlows considered for the integral
+    limit.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+    | symbol        | attribute                             | type | explanation                                                  |
+    +===============+=======================================+======+==============================================================+
+    | :math:`P_{i}` | :py:obj:`InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`   | :py:obj:`keyword`                     | P    | weight given to investment flow named according to `keyword` |
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit` | :py:obj:`limit`                       | P    | global limit given by keyword `limit`                        |
+    +---------------+---------------------------------------+------+--------------------------------------------------------------+
+
+    Note
+    ----
+    The Investment attribute of the considered (Investment-)flows requires an
+    attribute named like keyword!
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2020', periods=5, freq='H')
+    >>> es = solph.EnergySystem(timeindex=date_time_index)
+    >>> bus = solph.Bus(label='bus_1')
+    >>> sink = solph.Sink(label="sink", inputs={bus:
+    ...     solph.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
+    >>> src1 = solph.Source(label='source_0', outputs={bus: solph.Flow(
+    ...     investment=solph.Investment(ep_costs=50, space=4))})
+    >>> src2 = solph.Source(label='source_1', outputs={bus: solph.Flow(
+    ...     investment=solph.Investment(ep_costs=100, space=1))})
+    >>> es.add(bus, sink, src1, src2)
+    >>> model = solph.Model(es)
+    >>> model = solph.constraints.additional_investment_flow_limit(
+    ...     model, "space", limit=1500)
+    >>> a = model.solve(solver="cbc")
+    >>> int(round(model.invest_limit_space()))
+    1500
+    """  # noqa: E501
+    invest_flows = {}
+
+    for (i, o) in model.flows:
+        if hasattr(model.flows[i, o].investment, keyword):
+            invest_flows[(i, o)] = model.flows[i, o].investment
+
+    limit_name = "invest_limit_" + keyword
+
+    setattr(model, limit_name, po.Expression(
+        expr=sum(model.InvestmentFlow.invest[inflow, outflow] *
+                 getattr(invest_flows[inflow, outflow], keyword)
+                 for (inflow, outflow) in invest_flows
+                 )))
+
+    setattr(model, limit_name + "_constraint", po.Constraint(
+        expr=(getattr(model, limit_name) <= limit)))
 
     return model
 
@@ -73,7 +165,8 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
         Keys are (source, target) objects of the Flow. If no dictionary is
         given all flows containing the keyword attribute will be
         used.
-    keyword : attribute to consider
+    keyword : string
+        attribute to consider
     limit : numeric
         Absolute limit of keyword attribute for the energy system.
 
@@ -326,3 +419,89 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     def equate_variables_rule(m):
         return var1 * factor1 == var2
     setattr(model, name, po.Constraint(rule=equate_variables_rule))
+
+
+def shared_limit(model, quantity, limit_name,
+                 components, weights, lower_limit=0, upper_limit=None):
+    r"""
+    Adds a constraint to the given model that restricts
+    the weighted sum of variables to a corridor.
+
+    **The following constraints are build:**
+
+      .. math::
+        l_\mathrm{low} \le \sum v_i(t) \times w_i(t) \le l_\mathrm{up}
+        \forall t
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which the constraint is added.
+    limit_name : string
+        Name of the constraint to create
+    quantity : pyomo.core.base.var.IndexedVar
+        Shared Pyomo variable for all components of a type.
+    components : list of components
+        list of components of the same type
+    weights : list of numeric values
+        has to have the same length as the list of components
+    lower_limit : numeric
+        the lower limit
+    upper_limit : numeric
+        the lower limit
+
+    Examples
+    --------
+    The constraint can e.g. be used to define a common storage
+    that is shared between parties but that do not exchange
+    energy on balance sheet.
+    Thus, every party has their own bus and storage, respectively,
+    to model the energy flow. However, as the physical storage is shared,
+    it has a common limit.
+
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
+    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> b1 = solph.Bus(label="Party1Bus")
+    >>> b2 = solph.Bus(label="Party2Bus")
+    >>> storage1 = solph.components.GenericStorage(
+    ...     label="Party1Storage",
+    ...     nominal_storage_capacity=5,
+    ...     inputs={b1: solph.Flow()},
+    ...     outputs={b1: solph.Flow()})
+    >>> storage2 = solph.components.GenericStorage(
+    ...     label="Party2Storage",
+    ...     nominal_storage_capacity=5,
+    ...     inputs={b1: solph.Flow()},
+    ...     outputs={b1: solph.Flow()})
+    >>> energysystem.add(b1, b2, storage1, storage2)
+    >>> components = [storage1, storage2]
+    >>> model = solph.Model(energysystem)
+    >>> solph.constraints.shared_limit(
+    ...    model,
+    ...    model.GenericStorageBlock.storage_content,
+    ...    "limit_storage", components,
+    ...    [1, 1], upper_limit=5)
+    """
+
+    setattr(model, limit_name, po.Var(model.TIMESTEPS))
+
+    for t in model.TIMESTEPS:
+        getattr(model, limit_name)[t].setlb(lower_limit)
+        getattr(model, limit_name)[t].setub(upper_limit)
+
+    weighted_sum_constraint = limit_name + "_constraint"
+
+    def _weighted_sum_rule(m):
+        for ts in m.TIMESTEPS:
+            lhs = sum(quantity[c, ts] * w
+                      for c, w in zip(components, weights))
+            rhs = getattr(model, limit_name)[ts]
+            expr = (lhs == rhs)
+            getattr(m, weighted_sum_constraint).add(ts, expr)
+
+    setattr(model, weighted_sum_constraint,
+            po.Constraint(model.TIMESTEPS, noruleinit=True))
+    setattr(model, weighted_sum_constraint+"_build",
+            po.BuildAction(rule=_weighted_sum_rule))

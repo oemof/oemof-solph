@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Solph Optimization Models
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/models.py
+"""Solph Optimization Models.
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: gplssm
+SPDX-FileCopyrightText: Patrik Schönfeldt
 
 SPDX-License-Identifier: MIT
+
 """
 import logging
 import warnings
@@ -28,7 +32,7 @@ class BaseModel(po.ConcreteModel):
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINTS`
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed `timeincrement` will be used which
@@ -201,21 +205,19 @@ class BaseModel(po.ConcreteModel):
 
         solver_results = opt.solve(self, **solve_kwargs)
 
-        status = solver_results["Solver"][0]["Status"].key
+        status = solver_results["Solver"][0]["Status"]
         termination_condition = (
-            solver_results["Solver"][0]["Termination condition"].key)
+            solver_results["Solver"][0]["Termination condition"])
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
-            self.es.results = solver_results
-            self.solver_results = solver_results
         else:
             msg = ("Optimization ended with status {0} and termination "
                    "condition {1}")
             warnings.warn(msg.format(status, termination_condition),
                           UserWarning)
-            self.es.results = solver_results
-            self.solver_results = solver_results
+        self.es.results = solver_results
+        self.solver_results = solver_results
 
         return solver_results
 
@@ -238,7 +240,7 @@ class Model(BaseModel):
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to :const:`Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINTS`
 
     **The following basic sets are created**:
 
