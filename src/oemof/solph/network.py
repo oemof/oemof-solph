@@ -19,8 +19,8 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-import oemof.network.energy_system as es
-import oemof.network.network as on
+from oemof.network import energy_system as es
+from oemof.network import network as on
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
 from oemof.tools import debugging

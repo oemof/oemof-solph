@@ -13,6 +13,9 @@ import pandas
 from nose.tools import assert_raises
 from nose.tools import eq_
 from nose.tools import ok_
+from pandas.testing import assert_frame_equal
+from pandas.testing import assert_series_equal
+
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -23,8 +26,6 @@ from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from pandas.testing import assert_frame_equal
-from pandas.testing import assert_series_equal
 
 
 class TestParameterResult:

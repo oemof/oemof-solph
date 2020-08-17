@@ -14,9 +14,10 @@ SPDX-License-Identifier: MIT
 
 import os
 
-import oemof.solph as solph
 import pandas as pd
 from nose.tools import eq_
+
+from oemof import solph as solph
 from oemof.network.network import Node
 from oemof.solph import processing
 from oemof.solph import views

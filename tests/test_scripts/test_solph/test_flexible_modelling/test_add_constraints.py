@@ -17,8 +17,9 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-import pyomo.environ as po
 from nose.tools import ok_
+from pyomo import environ as po
+
 from oemof.network.network import Node
 from oemof.solph import Bus
 from oemof.solph import EnergySystem

@@ -20,12 +20,6 @@ SPDX-License-Identifier: MIT
 
 import logging
 
-from oemof.network.network import Transformer as NetworkTransformer
-from oemof.solph.network import Bus
-from oemof.solph.network import Flow
-from oemof.solph.network import Sink
-from oemof.solph.network import Transformer
-from oemof.solph.plumbing import sequence
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -34,6 +28,13 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
+
+from oemof.network.network import Transformer as NetworkTransformer
+from oemof.solph.network import Bus
+from oemof.solph.network import Flow
+from oemof.solph.network import Sink
+from oemof.solph.network import Transformer
+from oemof.solph.plumbing import sequence
 
 
 class ElectricalBus(Bus):

@@ -40,6 +40,7 @@ from unittest import skip
 
 import pandas as pd
 from nose.tools import eq_
+
 from oemof import solph
 from oemof.network.network import Node
 from oemof.solph import processing

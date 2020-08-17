@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
+
 from oemof import solph
 from oemof.tools.debugging import SuspiciousUsageWarning
 

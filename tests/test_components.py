@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
+
 from oemof.solph import Bus
 from oemof.solph import Flow
 from oemof.solph import Investment
