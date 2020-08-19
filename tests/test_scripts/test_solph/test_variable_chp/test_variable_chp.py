@@ -118,12 +118,12 @@ def test_variable_chp(filename="variable_chp.csv", solver='cbc'):
 
     for key in variable_chp_dict_max.keys():
         logging.debug("Test the maximum value of {0}".format(key))
-        eq_(int(round(maxresults[key])),
+        eq_(int(round(maxresults[[key]])),
             int(round(variable_chp_dict_max[key])))
 
     for key in variable_chp_dict_sum.keys():
         logging.debug("Test the summed up value of {0}".format(key))
-        eq_(int(round(sumresults[key])),
+        eq_(int(round(sumresults[[key]])),
             int(round(variable_chp_dict_sum[key])))
 
     eq_(parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)]
