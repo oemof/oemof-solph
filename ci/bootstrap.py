@@ -5,8 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import sys
 import subprocess
+import sys
 from os.path import abspath
 from os.path import dirname
 from os.path import exists
