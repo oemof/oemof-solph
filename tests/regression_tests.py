@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 """
 
 from nose.tools import ok_
+
 from oemof import solph
 
 
