@@ -901,7 +901,7 @@ class TestsConstraint:
         self.compare_lp_files('flow_invest_with_offset_no_minimum.lp')
 
     def test_nonequidistant_timeindex(self):
-        """Constraint test  of an energysystem with nonequidistant timeindex"""
+        """Constraint test of an energysystem with nonequidistant timeindex"""
         idx2h = pd.date_range('1/1/2017', periods=3, freq='H')
         idxh = pd.date_range('1/1/2017 04:00:00', periods=2, freq='2H')
         idx30m = pd.date_range('1/1/2017 06:30:00', periods=3, freq='30min')
