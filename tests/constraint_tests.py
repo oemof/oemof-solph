@@ -903,19 +903,20 @@ class TestsConstraint:
     def test_nonequidistant_timeindex(self):
         """Constraint test  of an energysystem with nonequidistant timeindex"""
         idx2h = pd.date_range('1/1/2017', periods=3, freq='H')
-        idxh = pd.date_range("1/1/2017 04:00:00", periods=2, freq="2H")
-        idx30m = pd.date_range("1/1/2017 06:30:00", periods=3, freq="30min")
-        timeindex = idx2h.append([idxh, idx30m])
-        timeincrement = helpers.calculate_timeincrement(timeindex)
+        idxh = pd.date_range('1/1/2017 04:00:00', periods=2, freq='2H')
+        idx30m = pd.date_range('1/1/2017 06:30:00', periods=3, freq='30min')
+        timeindex = idxh.append([idx2h, idx30m])
+        timeincrement = solph.helpers.calculate_timeincrement(timeindex)
         es = solph.EnergySystem(timeindex=timeindex,
                                 timeincrement=timeincrement)
-        b_gas = solph.Bus(label="gas")
-        b_th = solph.Bus(label="heat")
-        boiler = solph.Transformer(
-            label="boiler",
-            inputs={b_gas: solph.Flow(variable_costs=100)},
-            outputs={b_th: solph.Flow(nominal_value=200)}
-        )
-        es.add(b_gas, b_th, boiler)
+        b_th = solph.Bus(label='heat')
+        storage = solph.GenericStorage(
+            label='storage',
+            inputs={b_th: solph.Flow(nominal_value=100, variable_costs=56)},
+            outputs={b_th: solph.Flow(nominal_value=100, variable_costs=24)},
+            nominal_storage_capacity=300,
+            loss_rate=0.1,
+            initial_storage_level=1)
+        es.add(b_th, storage)
         om = solph.Model(es)
         self.compare_lp_files('nonequidistant_timeindex.lp', my_om=om)
