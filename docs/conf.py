@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -21,13 +22,13 @@ project = 'oemof.solph'
 year = '2014-2020'
 author = 'oemof-developer-group'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '0.4.0.b0'
+version = release = '0.4.2.dev0'
 
 pygments_style = 'trac'
 templates_path = ['.']
 extlinks = {
-    'issue': ('https://github.com/oemof/oemof-tools/issues/%s', '#'),
-    'pr': ('https://github.com/oemof/oemof-tools/pull/%s', 'PR #'),
+    'issue': ('https://github.com/oemof/oemof-solph/issues/%s', '#'),
+    'pr': ('https://github.com/oemof/oemof-solph/pull/%s', 'PR #'),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
@@ -39,7 +40,7 @@ html_use_smartypants = True
 html_last_updated_fmt = '%b %d, %Y'
 html_split_index = False
 html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
+    '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
 }
 html_short_title = '%s-%s' % (project, version)
 
@@ -47,4 +48,13 @@ napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
 
-linkcheck_ignore = [r"https://requires.io/.*"]
+exclude_patterns = ['_build', 'whatsnew/*']
+
+linkcheck_ignore = [r"https://requires.io/.*"] + (
+    [
+        r"https://github.com/oemof/oemof-solph/issues/*",
+        r"https://github.com/oemof/oemof-solph/pull/*",
+    ]
+    if "TRAVIS" not in os.environ
+    else []
+)

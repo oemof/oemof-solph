@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-""" list:  Groupings needed on an energy system for it to work with solph.
+
+"""Groupings needed on an energy system for it to work with solph.
 
 If you want to use solph on an energy system, you need to create it with these
 groupings specified like this:
@@ -11,15 +12,16 @@ groupings specified like this:
 
     energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
-
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/groupings.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
 
 SPDX-License-Identifier: MIT
+
 """
 
-import oemof.network.groupings as groupings
+from oemof.network import groupings as groupings
 from oemof.solph import blocks
 
 

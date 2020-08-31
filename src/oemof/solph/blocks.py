@@ -3,11 +3,16 @@
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/blocks.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Birgit Schachler
+SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: jmloenneberga
 
 SPDX-License-Identifier: MIT
+
 """
 
 from pyomo.core import Binary
