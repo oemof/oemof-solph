@@ -901,7 +901,7 @@ class TestsConstraint:
                                         offset=34, nonconvex=True))})
         self.compare_lp_files('flow_invest_with_offset_no_minimum.lp')
 
-    def test_nonequidistant_timeindex(self):
+    def test_nonequidistant_storage(self):
         """Constraint test of an energysystem with nonequidistant timeindex"""
         idx2h = pd.date_range('1/1/2017', periods=3, freq='H')
         idxh = pd.date_range('1/1/2017 04:00:00', periods=2, freq='2H')
@@ -910,7 +910,13 @@ class TestsConstraint:
         timeincrement = solph.helpers.calculate_timeincrement(timeindex)
         es = solph.EnergySystem(timeindex=timeindex,
                                 timeincrement=timeincrement)
+        b_gas = solph.Bus(label="gas")
         b_th = solph.Bus(label='heat')
+        boiler = solph.Transformer(
+            label="boiler",
+            inputs={b_gas: solph.Flow(variable_costs=100)},
+            outputs={b_th: solph.Flow(nominal_value=200)}
+        )
         storage = solph.GenericStorage(
             label='storage',
             inputs={b_th: solph.Flow(nominal_value=100, variable_costs=56)},
@@ -918,6 +924,6 @@ class TestsConstraint:
             nominal_storage_capacity=300,
             loss_rate=0.1,
             initial_storage_level=1)
-        es.add(b_th, storage)
+        es.add(b_gas, b_th, boiler, storage)
         om = solph.Model(es)
         self.compare_lp_files('nonequidistant_timeindex.lp', my_om=om)
