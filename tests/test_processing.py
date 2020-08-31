@@ -13,6 +13,9 @@ import pandas
 from nose.tools import assert_raises
 from nose.tools import eq_
 from nose.tools import ok_
+from pandas.testing import assert_frame_equal
+from pandas.testing import assert_series_equal
+
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -23,8 +26,6 @@ from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from pandas.testing import assert_frame_equal
-from pandas.testing import assert_series_equal
 
 
 class TestParameterResult:
@@ -241,10 +242,13 @@ class TestParameterResult:
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=True)
         bel1 = views.node(param_results, 'b_el1')
-        eq_(bel1['scalars'][(('b_el1', 'storage'), 'variable_costs')], 3)
+        assert (
+            bel1['scalars'][[(('b_el1', 'storage'), 'variable_costs')]].values
+            == 3
+        )
 
         bel1_m = views.node(param_results, 'b_el1', multiindex=True)
-        eq_(bel1_m['scalars'].loc[('b_el1', 'storage', 'variable_costs')], 3)
+        eq_(bel1_m['scalars'][('b_el1', 'storage', 'variable_costs')], 3)
 
     def test_multiindex_sequences(self):
         results = processing.results(self.om)

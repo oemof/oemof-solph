@@ -16,6 +16,7 @@ import logging
 
 import pandas as pd
 from nose.tools import eq_
+
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
 from oemof.solph import Investment

@@ -14,6 +14,7 @@ import warnings
 from nose.tools import eq_
 from nose.tools import ok_
 from nose.tools import with_setup
+
 from oemof import solph
 from oemof.network import network
 from oemof.tools.debugging import SuspiciousUsageWarning
