@@ -72,6 +72,16 @@ def test_error_of_deprecated_fixed_costs():
         solph.Flow(fixed_costs=34)
 
 
+def test_flow_with_fix_and_min_max():
+    msg = "It is not allowed to define min/max if fix is defined."
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(fix=[1, 3], min=[0, 5])
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(fix=[1, 3], max=[0, 5])
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(fix=[1, 3], max=[0, 5], min=[4, 9])
+
+
 def test_min_max_values_for_bidirectional_flow():
     a = solph.Flow(bidirectional=True)  # use default values
     b = solph.Flow(bidirectional=True, min=-0.9, max=0.9)
