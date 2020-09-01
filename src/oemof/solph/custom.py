@@ -29,11 +29,10 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.network.network import Transformer as NetworkTransformer
+from oemof.network import network as on
 from oemof.solph.network import Bus
 from oemof.solph.network import Flow
 from oemof.solph.network import Sink
-from oemof.solph.network import Transformer
 from oemof.solph.plumbing import sequence
 
 
@@ -204,7 +203,7 @@ class ElectricalLineBlock(SimpleBlock):
                                          rule=_voltage_angle_relation)
 
 
-class Link(Transformer):
+class Link(on.Transformer):
     """A Link object with 1...2 inputs and 1...2 outputs.
 
     Parameters
@@ -249,13 +248,16 @@ class Link(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if len(self.inputs) > 2 or len(self.outputs) > 2:
-            raise ValueError("Component `Link` must not have more than \
-                             2 inputs and 2 outputs!")
-
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
+
+        if (len(self.inputs) != 2
+                or len(self.outputs) != 2
+                or len(self.conversion_factors) != 2):
+            raise ValueError("Component `Link` must have exactly"
+                             + "2 inputs, 2 outputs, and 2"
+                             + "conversion factors.")
 
     def constraint_group(self):
         return LinkBlock
@@ -322,7 +324,7 @@ class LinkBlock(SimpleBlock):
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class GenericCAES(NetworkTransformer):
+class GenericCAES(on.Transformer):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
