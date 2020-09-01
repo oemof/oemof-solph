@@ -308,23 +308,19 @@ class LinkBlock(SimpleBlock):
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
-                for n, conversion in all_conversions.items():
-                    for cidx, c in conversion.items():
-                        try:
-                            expr = (m.flow[n, cidx[1], t] ==
-                                    c[t] * m.flow[cidx[0], n, t])
-                        except ValueError:
-                            raise ValueError(
-                                "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {2}".format(
-                                    cidx[0], cidx[1], n))
-                        block.relation.add((n, cidx[0], cidx[1], t), expr)
+                for n, cf in all_conversions.items():
+                    cf_keys = list(cf.keys())
+                    expr = (m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
+                            + m.flow[cf_keys[1][0], n, t] * cf[cf_keys[1]][t]
+                            ==
+                            m.flow[n, cf_keys[0][1], t]
+                            + m.flow[n, cf_keys[1][1], t])
+                    block.relation.add((n, t), expr)
 
         self.relation = Constraint(
-            [(n, cidx[0], cidx[1], t)
+            [(n, t)
              for t in m.TIMESTEPS
-             for n, conversion in all_conversions.items()
-             for cidx, c in conversion.items()], noruleinit=True)
+             for n, conversion in all_conversions.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
