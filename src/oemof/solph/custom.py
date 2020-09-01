@@ -252,12 +252,16 @@ class Link(on.Transformer):
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
-        if (len(self.inputs) != 2
-                or len(self.outputs) != 2
-                or len(self.conversion_factors) != 2):
-            raise ValueError("Component `Link` must have exactly"
-                             + "2 inputs, 2 outputs, and 2"
-                             + "conversion factors.")
+        wrong_args_message = "Component `Link` must have exactly" \
+                              + "2 inputs, 2 outputs, and 2" \
+                              + "conversion factors connecting these."
+        assert len(self.inputs) == 2, wrong_args_message
+        assert len(self.outputs) == 2, wrong_args_message
+        assert len(self.conversion_factors) == 2, wrong_args_message
+
+        cf_keys = list(self.conversion_factors.keys())
+        assert cf_keys[0][0] == cf_keys[1][1], wrong_args_message
+        assert cf_keys[0][1] == cf_keys[1][0], wrong_args_message
 
     def constraint_group(self):
         return LinkBlock
@@ -314,7 +318,7 @@ class LinkBlock(SimpleBlock):
                                 "Error in constraint creation",
                                 "from: {0}, to: {1}, via: {2}".format(
                                     cidx[0], cidx[1], n))
-                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+                        block.relation.add((n, cidx[0], cidx[1], t), expr)
 
         self.relation = Constraint(
             [(n, cidx[0], cidx[1], t)
