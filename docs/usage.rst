@@ -52,7 +52,7 @@ Set up an energy system
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
 
 To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function.
-The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
 
 .. code-block:: python
 
@@ -1081,7 +1081,7 @@ dictionary holding pandas Series for scalar values and pandas DataFrames for
 all nodes and flows between them. This way we can make use of the full power
 of the pandas package available to process the results.
 
-See the `pandas documentation <http://pandas.pydata.org/pandas-docs/stable/>`_
+See the `pandas documentation <https://pandas.pydata.org/pandas-docs/stable/>`_
 to learn how to `visualise
 <https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html>`_,
 `read or write
