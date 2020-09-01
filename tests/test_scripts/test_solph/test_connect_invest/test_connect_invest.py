@@ -102,11 +102,11 @@ def test_connect_invest():
     my_results['line12'] = float(views.node(results, 'line12')['scalars'])
     my_results['line21'] = float(views.node(results, 'line21')['scalars'])
     stor_res = views.node(results, 'storage')['scalars']
-    my_results['storage_in'] = stor_res[
-        (('electricity1', 'storage'), 'invest')]
-    my_results['storage'] = stor_res[(('storage', 'None'), 'invest')]
-    my_results['storage_out'] = stor_res[
-        (('storage', 'electricity1'), 'invest')]
+    my_results['storage_in'] = stor_res[[
+        (('electricity1', 'storage'), 'invest')]]
+    my_results['storage'] = stor_res[[(('storage', 'None'), 'invest')]]
+    my_results['storage_out'] = stor_res[[
+        (('storage', 'electricity1'), 'invest')]]
 
     connect_invest_dict = {
         'line12': 814705,

@@ -245,9 +245,7 @@ class Sink(on.Sink):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.inputs:
-            msg = "`Sink` '{0}' constructed without `inputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        check_node_object_for_missing_attribute(self, "inputs")
 
     def constraint_group(self):
         pass
@@ -258,9 +256,7 @@ class Source(on.Source):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.outputs:
-            msg = "`Source` '{0}' constructed without `outputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        check_node_object_for_missing_attribute(self, "outputs")
 
     def constraint_group(self):
         pass
@@ -318,12 +314,8 @@ class Transformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if not self.inputs:
-            msg = "`Transformer` '{0}' constructed without `inputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
-        if not self.outputs:
-            msg = "`Transformer` '{0}' constructed without `outputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        check_node_object_for_missing_attribute(self, "inputs")
+        check_node_object_for_missing_attribute(self, "outputs")
 
         self.conversion_factors = {
             k: sequence(v)
@@ -338,3 +330,12 @@ class Transformer(on.Transformer):
 
     def constraint_group(self):
         return blocks.Transformer
+
+
+def check_node_object_for_missing_attribute(obj, attribute):
+    if not getattr(obj, attribute):
+        msg = ("Attribute <{0}> is missing in Node <{1}> of {2}.\n"
+               "If this is intended and you know what you are doing you can"
+               "disable the SuspiciousUsageWarning globally.")
+        warn(msg.format(attribute, obj.label, type(obj)),
+             debugging.SuspiciousUsageWarning)
