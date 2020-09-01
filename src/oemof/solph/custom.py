@@ -253,8 +253,8 @@ class Link(on.Transformer):
             for k, v in kwargs.get('conversion_factors', {}).items()}
 
         wrong_args_message = "Component `Link` must have exactly" \
-                              + "2 inputs, 2 outputs, and 2" \
-                              + "conversion factors connecting these."
+                             + "2 inputs, 2 outputs, and 2" \
+                             + "conversion factors connecting these."
         assert len(self.inputs) == 2, wrong_args_message
         assert len(self.outputs) == 2, wrong_args_message
         assert len(self.conversion_factors) == 2, wrong_args_message
