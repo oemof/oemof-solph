@@ -568,7 +568,6 @@ class InvestmentFlow(SimpleBlock):
         # create status variable for a non-convex investment flow
         self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
         # ######################### CONSTRAINTS ###############################
-        # TODO: Add gradient constraints
 
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment
