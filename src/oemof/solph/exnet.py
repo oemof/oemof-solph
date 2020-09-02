@@ -19,8 +19,8 @@ class GasBus(Bus):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.slack=kwargs.get('slack', False)
-        self.p_max = kwargs.get('p_max', 1000)
-        self.p_min = kwargs.get('p_min', -1000)
+        self.p_max = kwargs.get('p_max', 1)
+        self.p_min = kwargs.get('p_min', -1)
 
 
 
