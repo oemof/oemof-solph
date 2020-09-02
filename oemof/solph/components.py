@@ -214,80 +214,53 @@ class GenericStorage(network.Transformer):
 
 
 class GenericStorageBlock(SimpleBlock):
-    r"""Storage without an :class:`.Investment` object.
-
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    STORAGES
-        A set with all :class:`.Storage` objects, which do not have an
-         attr:`investment` of type :class:`.Investment`.
-
-    STORAGES_BALANCED
-        A set of  all :class:`.Storage` objects, with 'balanced' attribute set
-        to True.
-
-    STORAGES_WITH_INVEST_FLOW_REL
-        A set with all :class:`.Storage` objects with two investment flows
-        coupled with the 'invest_relation_input_output' attribute.
+    r"""
+    Storage without an :class:`.Investment` object.
 
     **The following variables are created:**
 
-    capacity
-        Capacity (level) for every storage and timestep. The value for the
-        capacity at the beginning is set by the parameter `initial_capacity` or
-        not set if `initial_capacity` is None.
-        The variable of storage s and timestep t can be accessed by:
-        `om.Storage.capacity[s, t]`
+    capacity :attr:`om.Storage.capacity[n, t]`
+        Level of the storage (indexed by STORAGES and TIMESTEPS)
 
     **The following constraints are created:**
 
-    Set last time step to the initial capacity if :attr:`balanced == True`
+    .. _GS-equations1-2:
+
         .. math::
-            E(t_{last}) = &E(-1)
+            &
+            (1)E(t_{last}) = E(-1) \\
+            &
+            (2)E(t) = E(t-1) \cdot (1 - \delta(t))) - \frac{\dot{E}_o(t)}{\eta_o(t)} 
+            \cdot \tau(t) + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
 
-    Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: E(t) = &E(t-1) \cdot
-            (1 - \delta(t))) \\
-            &- \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t)
-            + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t)
+    where the first equation sets the capacity of the last time step to the
+    initial capacity if :attr:`balanced == True`, the second equation regulates
+    the storage capacity between time steps with :attr:`om.Storage.balance[n, t]`.
 
-    Connect the invest variables of the input and the output flow.
-        .. math::
-          InvestmentFlow.invest(source(n), n) + existing = \\
-          (InvestmentFlow.invest(n, target(n)) + existing) * \\
-          invest\_relation\_input\_output(n) \\
-          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-
-
-    =========================== ======================= =========
-    symbol                      explanation             attribute
-    =========================== ======================= =========
-    :math:`E(t)`                energy currently stored :py:obj:`capacity`
-    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`
-                                the energy storage
-    :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
-                                initial time step
-    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
-    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
-    :math:`\delta(t)`           fraction of lost energy :py:obj:`loss_rate[t]`
-                                (e.g. leakage) per time
-    :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
-    :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
-    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
-                                (i.e. efficiency)
-                                when storing energy
-    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
-                                (i.e. efficiency)
-                                taking stored energy
-    :math:`\tau(t)`             length of the time step
-    =========================== ======================= =========
-
-    **The following parts of the objective function are created:**
-
-    Nothing added to the objective function.
-
+    ==================== ======================================== ==== =======================
+    symbol               attribute                                type explanation
+    ==================== ======================================== ==== =======================
+    :math:`E(t)`         :py:obj:`capacity[n,t]`                  V    energy currently stored
+    :math:`E_{nom}`      :py:obj:`nominal_storage_capacity[n,t]`  P    nominal capacity of
+                                                                       the energy storage
+    :math:`c(-1)`        :py:obj:`initial_storage_level[n]`       P    state before
+                                                                       initial time step
+    :math:`c_{min}(t)`   :py:obj:`min_storage_level[n,t]`         P    minimum allowed storage
+    :math:`c_{max}(t)`   :py:obj:`max_storage_level[n,t]`         P    maximum allowed storage
+    :math:`\delta(t)`    :py:obj:`loss_rate[n,t]`                 P    fraction of lost energy
+                                                                       (e.g. leakage) per time
+    :math:`\dot{E}_i(t)` :py:obj:`flow[i,n,t]`                    V    energy flowing in
+    :math:`\dot{E}_o(t)` :py:obj:`flow[n,o,t]`                    V    energy flowing out
+    :math:`\eta_i(t)`    :py:obj:`inflow_conversion_factor[n,t]`  P    conversion factor
+                                                                       (i.e. efficiency)
+                                                                       when storing energy
+    :math:`\eta_o(t)`    :py:obj:`outflow_conversion_factor[n,t]` P    conversion factor when
+                                                                       (i.e. efficiency)
+                                                                       taking stored energy
+    :math:`\tau(t)`                                                    length of the time step
+    ==================== ======================================== ==== =======================
 
     """
 
@@ -416,76 +389,41 @@ class GenericStorageBlock(SimpleBlock):
 
 
 class GenericInvestmentStorageBlock(SimpleBlock):
-    r"""Storage with an :class:`.Investment` object.
-
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    INVESTSTORAGES
-        A set with all storages containing an Investment object.
-    INVEST_REL_CAP_IN
-        A set with all storages containing an Investment object with coupled
-        investment of input power and storage capacity
-    INVEST_REL_CAP_OUT
-        A set with all storages containing an Investment object with coupled
-        investment of output power and storage capacity
-    INVEST_REL_IN_OUT
-        A set with all storages containing an Investment object with coupled
-        investment of input and output power
-    INITIAL_STORAGE_LEVEL
-        A subset of the set INVESTSTORAGES where elements of the set have an
-        initial_storage_level attribute.
-    MIN_INVESTSTORAGES
-        A subset of INVESTSTORAGES where elements of the set have an
-        min_storage_level attribute greater than zero for at least one
-        time step.
+    r"""
+    Storage with an :class:`.Investment` object.
 
     **The following variables are created:**
 
-    capacity :attr:`om.InvestmentStorage.capacity[n, t]`
+    capacity :attr:`om.InvestmentStorage.capacity[n,t]`
         Level of the storage (indexed by STORAGES and TIMESTEPS)
 
-    invest :attr:`om.InvestmentStorage.invest[n, t]`
-        Nominal capacity of the storage (indexed by STORAGES)
+    invest :attr:`om.InvestmentStorage.invest[n,t]`
+        Nominal capacity of the storage (indexed by STORAGES and TIMESTEPS)
 
 
     **The following constraints are build:**
 
-    Storage balance
-        Same as for :class:`.GenericStorageBlock`.
+    .. _GIS-equations1-7:
 
-
-    Initial capacity of :class:`.network.Storage`
         .. math::
-          E(n, -1) = invest(n) \cdot c(n, -1), \\
-          \forall n \in \textrm{INITIAL\_STORAGE\_LEVEL}.
-
-    Connect the invest variables of the storage and the input flow.
-        .. math:: InvestmentFlow.invest(source(n), n) + existing =
-          (invest(n) + existing) * invest\_relation\_input\_capacity(n) \\
-          \forall n \in \textrm{INVEST\_REL\_CAP\_IN}
-
-    Connect the invest variables of the storage and the output flow.
-        .. math:: InvestmentFlow.invest(n, target(n)) + existing =
-          (invest(n) + existing) * invest\_relation\_output_capacity(n) \\
-          \forall n \in \textrm{INVEST\_REL\_CAP\_OUT}
-
-    Connect the invest variables of the input and the output flow.
-        .. math:: InvestmentFlow.invest(source(n), n) + existing ==
-          (InvestmentFlow.invest(n, target(n)) + existing) *
-          invest\_relation\_input_output(n) \\
-          \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
-
-    Maximal capacity :attr:`om.InvestmentStorage.max_capacity[n, t]`
-        .. math:: E(n, t) \leq invest(n) \cdot c_{min}(n, t), \\
-            \forall n \in \textrm{MAX\_INVESTSTORAGES,} \\
-            \forall t \in \textrm{TIMESTEPS}.
-
-    Minimal capacity :attr:`om.InvestmentStorage.min_capacity[n, t]`
-        .. math:: E(n, t) \geq invest(n) \cdot c_{min}(n, t), \\
-            \forall n \in \textrm{MIN\_INVESTSTORAGES,} \\
-            \forall t \in \textrm{TIMESTEPS}.
-
+            &
+            (1)E(t_{last}) = E(-1) \\
+            &
+            (2)E(-1) = invest \cdot c(-1) \\
+            &
+            (3)InvestmentFlow.invest(source) + existing = (invest + existing) \\
+            &* invest\_relation\_input\_capacity \\
+            &
+            (4)InvestmentFlow.invest(target) + existing = (invest + existing) \\
+            &* invest\_relation\_output\_capacity \\
+            &
+            (5)InvestmentFlow.invest(source) + existing = \\
+            &(InvestmentFlow.invest(target) + existing) * \\
+            &invest\_relation\_input\_output \\
+            &
+            (6)E(t) \leq invest \cdot c_{max}(t) \\
+            &
+            (7)E(t) \geq invest \cdot c_{min}(t) \\
 
     **The following parts of the objective function are created:**
 
@@ -495,11 +433,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
     The expression can be accessed by
     :attr:`om.InvestStorages.investment_costs` and their value after
-    optimization by :meth:`om.InvestStorages.investment_costs()` .
-
+    optimization by :meth:`om.InvestStorages.investment_costs()`.
 
     The symbols are the same as in:class:`.GenericStorageBlock`.
-
 
     """
 
@@ -914,9 +850,9 @@ class GenericCHPBlock(SimpleBlock):
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    =============================== =============================== ==== =======================
+    =============================== =============================== ==== ========================
     math. symbol                    attribute                       type explanation
-    =============================== =============================== ==== =======================
+    =============================== =============================== ==== ========================
     :math:`\dot{H}_{F}`             :py:obj:`H_F[n,t]`              V    input of enthalpy
                                                                          through fuel input
     :math:`P_{el}`                  :py:obj:`P[n,t]`                V    provided
@@ -954,6 +890,7 @@ class GenericCHPBlock(SimpleBlock):
     =============================== =============================== ==== =======================
 
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1178,7 +1115,8 @@ class ExtractionTurbineCHP(solph_Transformer):
 
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
-    r"""Block for the linear relation of nodes with type
+    r"""
+    Block for the linear relation of nodes with type
     :class:`~oemof.solph.components.ExtractionTurbineCHP`
 
     **The following two constraints are created:**
@@ -1196,18 +1134,19 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                  {\eta_{th,maxExtr}(t)}
 
     where :math:`\beta` is defined as:
-    
+
          .. math::
             \beta(t) = \frac{\eta_{el,woExtr}(t) - \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 
     where the first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
-    output flows relate to each other, and the symbols used are defined as
-    follows (with Variables (V) and Parameters (P)):
+    output flows relate to each other.
 
-    ========================= ==================================================== ==== =========
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
+
+    ========================= ==================================================== ==== ========================
     symbol                    attribute                                            type explanation
-    ========================= ==================================================== ==== =========
+    ========================= ==================================================== ==== ========================
     :math:`\dot H_{Fuel}`     :py:obj:`flow[i, n, t]`                              V    fuel input flow
 
     :math:`P_{el}`            :py:obj:`flow[n, main_output, t]`                    V    electric power
@@ -1222,8 +1161,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                                                                                         with max heat extraction
     :math:`\eta_{th,maxExtr}` :py:obj:`conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
                                                                                         maximal heat extraction
-    ========================= ==================================================== ==== =========
-
+    ========================= ==================================================== ==== ========================
 
     """
 
@@ -1365,31 +1303,32 @@ class OffsetTransformer(network.Transformer):
 
 
 class OffsetTransformerBlock(SimpleBlock):
-    r"""Block for the relation of nodes with type
+    r"""
+    Block for the relation of nodes with type
     :class:`~oemof.solph.components.OffsetTransformer`
 
     **The following constraints are created:**
 
-    .. _OffsetTransformer-equations:
+    .. _OffsetTransformer-equation:
 
     .. math::
         &
         P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
 
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    .. csv-table:: Variables (V) and Parameters (P)
-        :header: "symbol", "attribute", "type", "explanation"
-        :widths: 1, 1, 1, 1
-
-        ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "Power of output"
-        ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","Power of input"
-        ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V","binary
-        status variable of nonconvex input flow "
-        ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear
-        coefficient 1 (slope)"
-        ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear
-        coefficient 0 (y-intersection)"
-
+    ================== =============================== ==== =======================
+    symbol             attribute                       type explanation
+    ================== =============================== ==== =======================
+    :math:`P_{out}(t)` :py:obj:`flow[n, o, t]`         V    power of output
+    :math:`P_{in}(t)`  :py:obj:`flow[i, n, t]`         V    power of input
+    :math:`Y(t)`       :py:obj:`status[i, n, t]`       V    binary status variable
+                                                            of nonconvex input flow
+    :math:`C_1(t)`     :py:obj:`coefficients[1][n, t]` P    linear coefficient 1
+                                                            (slope)
+    :math:`C_0(t)`     :py:obj:`coefficients[0][n, t]` P    linear coefficient 0
+                                                            (y-intersection)
+    ================== =============================== ==== =======================
 
     """
 
