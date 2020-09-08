@@ -1,18 +1,11 @@
 import oemof.solph as solph
-from collections import namedtuple
 import oemof.solph.exnet as ex
 from oemof.outputlib import *
 import math
 import pandas as pd
 import time
-class Label(namedtuple('label', ['location','name', 'energy_carrier'])):
-    __slots__ = ()
-    def __str__(self):
-        return '_'.join(map(str, self._asdict().values()))
 
 datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
-
-
 
 es = solph.EnergySystem(timeindex=datetimeindex)
 input_list=[]
@@ -84,7 +77,7 @@ source_1=solph.Source(label='source_1',
 
 sink_1=solph.Sink(label='sink_1',
                   inputs={b_gas2: solph.Flow(nominal_value=100, actual_value=[1,1,0], fixed=True)})
-#
+
 sink_2=solph.Sink(label='sink_2',
                    inputs={b_gas3: solph.Flow(nominal_value=100, actual_value=[1,0,1], fixed=True)})
 
@@ -106,13 +99,3 @@ model = solph.Model(es)
 model.solve(solver='cbc')
 model.results()
 results = processing.results(model)
-
-
-locationssystem=[]
-locationssystem.append('C1')
-
-from oemof.analysing_toolbox_v1_8 import  *
-
-bk=blackbox(results, locationssystem, get_allpotentials=True)
-
-
