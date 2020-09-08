@@ -1,14 +1,8 @@
 import oemof.solph as solph
-from collections import namedtuple
 import oemof.solph.exnet as ex
 import pandas as pd
 from oemof.outputlib import *
 import math
-
-class Label(namedtuple('label', ['location','name', 'energy_carrier'])):
-    __slots__ = ()
-    def __str__(self):
-        return '_'.join(map(str, self._asdict().values()))
 
 datetimeindex = pd.date_range('1/1/2017', periods=3, freq='H')
 
@@ -100,11 +94,3 @@ model = solph.Model(es)
 model.solve(solver='cbc', solve_kwargs={'tee': True})
 model.results()
 results = processing.results(model)
-
-
-locationssystem=[]
-locationssystem.append('C1')
-
-from oemof.analysing_toolbox_v1_8 import  *
-
-bk=blackbox(results, locationssystem, get_allpotentials=True)
