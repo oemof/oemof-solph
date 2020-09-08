@@ -37,6 +37,26 @@ from oemof.solph.network import Transformer
 from oemof.solph.plumbing import sequence
 
 
+class GasBus(Bus):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.slack = kwargs.get('slack', False)
+        self.p_max = kwargs.get('p_max', 1)
+        self.p_min = kwargs.get('p_min', -1)
+
+
+class GasLine(Transformer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conv_factor = kwargs.get('conv_factor', 1)
+        self.K_1 = kwargs.get('K_1')
+        self.input_list = list(kwargs.get('input_list', []))
+        self.output_list = list(kwargs.get('output_list', []))
+
+    def constraint_group(self):
+        return GasLineBlock
+
+
 class ElectricalBus(Bus):
     r"""A electrical bus object. Every node has to be connected to Bus. This
     Bus is used in combination with ElectricalLine objects for linear optimal
