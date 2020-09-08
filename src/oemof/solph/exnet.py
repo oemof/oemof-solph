@@ -13,8 +13,7 @@ This example depends on an installation of oemof
 02.03.2020 - philipp.gradl@stud.unileoben.ac.at
 '''
 from oemof.solph.network import Bus, Transformer
-from pyomo.core import *
-
+from pyomo.core import Var, SimpleBlock, Set, Piecewise, Constraint
 
 class GasBus(Bus):
     def __init__(self, *args, **kwargs):
