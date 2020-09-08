@@ -103,8 +103,8 @@ class GasLineBlock(SimpleBlock):
         self.energy_flow_in = Constraint(self.GASLINE_PL,
                                          m.TIMESTEPS,
                                          rule=energy_flow_in)
-        
-        
+
+
 class Flow(SimpleBlock):
     r""" Flow block with definitions for standard flows.
 
