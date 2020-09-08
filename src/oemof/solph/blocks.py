@@ -23,6 +23,7 @@ from pyomo.core import NonNegativeIntegers
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
+from pyomo.core import Piecewise
 from pyomo.core.base.block import SimpleBlock
 
 
