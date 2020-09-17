@@ -16,6 +16,7 @@ import logging
 
 import pandas as pd
 from nose.tools import eq_
+
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
 from oemof.solph import Investment
@@ -100,7 +101,7 @@ def test_lopf(solver="cbc"):
             label="load",
             inputs={
                 b_el2: Flow(
-                    nominal_value=100, actual_value=1, fixed=True
+                    nominal_value=100, fix=1
                 )
             },
         )

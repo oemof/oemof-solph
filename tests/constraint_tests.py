@@ -10,13 +10,14 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
-import os.path as ospath
 import re
 from difflib import unified_diff
+from os import path as ospath
 
 import pandas as pd
 from nose.tools import assert_raises
 from nose.tools import eq_
+
 from oemof import solph
 from oemof.network.network import Node
 
@@ -66,7 +67,7 @@ class TestsConstraint:
                                   filename)) as expected_file:
 
                 def chop_trailing_whitespace(lines):
-                    return [re.sub(r'\s*$', '', l) for l in lines]
+                    return [re.sub(r'\s*$', '', ln) for ln in lines]
 
                 def remove(pattern, lines):
                     if not pattern:
@@ -168,7 +169,7 @@ class TestsConstraint:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            actual_value=[.43, .72, .29], nominal_value=10e5, fixed=True)})
+            fix=[.43, .72, .29], nominal_value=10e5)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(variable_costs=40)})
 
@@ -189,7 +190,7 @@ class TestsConstraint:
         bel = solph.Bus(label='electricityBus')
 
         solph.Source(label='wind', outputs={bel: solph.Flow(
-            actual_value=[12, 16, 14], nominal_value=1000000, fixed=True)})
+            fix=[12, 16, 14], nominal_value=1000000)})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
             summed_max=2.3, variable_costs=25, max=0.8,
@@ -209,7 +210,7 @@ class TestsConstraint:
             investment=solph.Investment(ep_costs=123))})
 
         solph.Sink(label='excess', inputs={bel: solph.Flow(
-            actual_value=[.5, .8, .3], nominal_value=10e4, fixed=True)})
+            fix=[.5, .8, .3], nominal_value=10e4)})
 
         self.compare_lp_files('invest_source_fixed_sink.lp')
 
@@ -534,6 +535,27 @@ class TestsConstraint:
 
         self.compare_lp_files('variable_chp.lp')
 
+    def test_generic_invest_limit(self):
+        """
+        """
+        bus = solph.Bus(label='bus_1')
+
+        solph.Source(label='source_0', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=50, space=4))})
+
+        solph.Source(label='source_1', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=100, space=1))})
+
+        solph.Source(label='source_2', outputs={bus: solph.Flow(
+            investment=solph.Investment(ep_costs=75))})
+
+        om = self.get_om()
+
+        om = solph.constraints.additional_investment_flow_limit(
+            om, "space", limit=20)
+
+        self.compare_lp_files('generic_invest_limit.lp', my_om=om)
+
     def test_emission_constraints(self):
         """
         """
@@ -584,6 +606,34 @@ class TestsConstraint:
                                                              upper_limit=2)
 
         self.compare_lp_files('flow_count_limit.lp', my_om=om)
+
+    def test_shared_limit(self):
+        """
+        """
+        b1 = solph.Bus(label='bus')
+
+        storage1 = solph.components.GenericStorage(
+            label="storage1",
+            nominal_storage_capacity=5,
+            inputs={b1: solph.Flow()},
+            outputs={b1: solph.Flow()})
+        storage2 = solph.components.GenericStorage(
+            label="storage2",
+            nominal_storage_capacity=5,
+            inputs={b1: solph.Flow()},
+            outputs={b1: solph.Flow()})
+
+        model = self.get_om()
+
+        components = [storage1, storage2]
+
+        solph.constraints.shared_limit(
+            model,
+            model.GenericStorageBlock.storage_content,
+            "limit_storage", components,
+            [0.5, 1.25], upper_limit=7)
+
+        self.compare_lp_files('shared_limit.lp', my_om=model)
 
     def test_flow_without_emission_for_emission_constraint(self):
         """

@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
+
 from oemof import solph
 from oemof.network.network import Node
 from oemof.solph import views
@@ -33,7 +34,7 @@ def test_regression_investment_storage(solver='cbc'):
     bel = solph.Bus(label='electricity')
 
     solph.Sink(label='demand', inputs={bel: solph.Flow(
-        actual_value=[209643, 207497, 200108, 191892], fixed=True,
+        fix=[209643, 207497, 200108, 191892],
         nominal_value=1)})
 
     # Sources

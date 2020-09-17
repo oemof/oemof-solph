@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_
+
 from oemof.network.network import Node
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -42,16 +43,15 @@ def test_dispatch_one_time_step(solver='cbc'):
 
     # sources
     wind = Source(label='wind', outputs={bel: Flow(
-        actual_value=0.5, nominal_value=66.3, fixed=True)})
+        fix=0.5, nominal_value=66.3)})
 
     # demands (electricity/heat)
     demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
-                     actual_value=0.3, fixed=True)})
+                     fix=0.3)})
 
     demand_th = Sink(label='demand_therm',
                      inputs={bth: Flow(nominal_value=40,
-                                       actual_value=0.2,
-                                       fixed=True)})
+                                       fix=0.2)})
 
     # combined heat and power plant (chp)
     pp_chp = Transformer(label='pp_chp',

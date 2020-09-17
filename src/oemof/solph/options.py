@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
 """Optional classes to be added to a network class.
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/options.py
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: jmloenneberga
 
 SPDX-License-Identifier: MIT
+
 """
 
 from oemof.solph.plumbing import sequence
@@ -41,13 +46,18 @@ class Investment:
 
     """
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
-                 existing=0, nonconvex=False, offset=0):
+                 existing=0, nonconvex=False, offset=0, **kwargs):
+
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
         self.existing = existing
         self.nonconvex = nonconvex
         self.offset = offset
+
+        for attribute in kwargs.keys():
+            value = kwargs.get(attribute)
+            setattr(self, attribute, value)
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()

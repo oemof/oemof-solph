@@ -11,11 +11,7 @@ Welcome to oemof's documentation!
    :maxdepth: 2
 
    readme
-   getting_started
-   installation_and_setup
    usage
-   results
-   old_usage
    reference/index
    contributing
    authors

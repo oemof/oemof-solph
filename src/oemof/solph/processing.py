@@ -4,20 +4,24 @@
 
 Information about the possible usage is provided within the examples.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/outputlib/processing.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: henhuy
 
 SPDX-License-Identifier: MIT
+
 """
 
 import sys
 from itertools import groupby
 
 import pandas as pd
+from pyomo.core.base.var import Var
+
 from oemof.network.network import Node
 from oemof.solph.helpers import flatten
-from pyomo.core.base.var import Var
 
 
 def get_tuple(x):
@@ -151,7 +155,7 @@ def results(om):
             df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
-                    'sequences': df, 'scalars': pd.Series()}
+                    'sequences': df, 'scalars': pd.Series(dtype=float)}
             else:
                 result[(bus, None)]['sequences']['duals'] = duals
 
