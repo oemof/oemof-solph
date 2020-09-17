@@ -1,8 +1,0 @@
-v0.0.7 (May 4, 2016)
-++++++++++++++++++++++++++
-
-Bug fixes
-#########
-
- * Exclude non working pyomo version
-

@@ -1,0 +1,110 @@
+v0.3.0 (June 5, 2019)
+----------------------
+
+
+API changes
+^^^^^^^^^^^^^^^^^^^^
+
+* The ``param_results`` function does not exist anymore. It has been renamed to
+  ``parameter_as_dict`` (`Issue #537 <https://github.com/oemof/oemof-solph/
+  pull/537>`_).
+
+* The storage API has been revised. Please check the
+  `API documentation <https://oemof.readthedocs.io/en/stable/api/
+  oemof.solph.html#oemof.solph.components.GenericStorage>`_ for all details.
+
+* The OffsetTransformer is now a regular oemof.solph component. It has been
+  tested and the documentation has been improved. So it has been move from
+  *custom* to *components*. Use oemof.solph.components.OffsetTransformer (
+  `Issue #522 <https://github.com/oemof/oemof-solph/pull/522>`_).
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* Now it is possible to model just one time step. This is important for time
+  step based models and all other models with an outer loop
+  (`Issue #519 <https://github.com/oemof/oemof-solph/pull/519>`_).
+
+* The storage can be used unbalanced now, which means that the level at the end
+  could be different to the level at the beginning of the modeled time period.
+  See the `storage documentation <https://oemof-solph.readthedocs.io/en/latest/
+  usage.html#genericstorage-component>`_ for more details.
+
+* `NonConvexFlow <oemof.solph.blocks.NonConvexFlow>` can now have
+  `activity_costs`, `maximum_startups`, and `maximum_shutdowns`.
+  This helps, to model e.g. terms of maintannace contracts for small CHP plants.
+
+* Namedtuples and tuples as labels work now without problems. This makes it
+  much easier to find objects and results in large energy systems
+  (`Issue #507 <https://github.com/oemof/oemof-solph/pull/507>`_).
+
+* Groups are now fully lazy. This means that groups are only computed
+  when they are accessed. Previously, whenever nodes where added to an
+  energy system, groups where computed for all but the most recently
+  added node. This node was then only grouped upon addition of another
+  node or upon access of the groups property.
+
+* There is now an explicit `Edge <oemof.network.Edge>` class. This means
+  that an energy system now consists of `Buses <oemof.network.Bus>`,
+  `Components <oemof.network.Component>` and `Edges <oemof.network.Edge>`.
+  For implementation reasons, `Edges <oemof.network.Edge>` are still
+  `Nodes <oemof.network.Node>`. If you know a bit of graph theory and
+  this seems strange to you, think of these `Edges <oemof.network.Edge>`
+  as classical graph theoretic edges, reified as nodes with an in- and
+  outdegree of one.
+
+* `Energy systems <oemof.energy_system.EnergySystem>` now support blinker_
+  signals. The first supported signal gets emitted, whenever a `node
+  <oemof.network.node>` is `added <oemof.energy_system.EnergySystem.add>` to an
+  `energy system <oemof.energy_system.EnergySystem>`.
+  (`blinker <https://pythonhosted.org/blinker/>`_)
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* The template for docstrings with equations (docstring of block classes) has
+  been improved.
+
+* A lot of improvements on the documentation
+
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* The timeincrement attribute of the model is not set to one anymore.
+  In earlier versions the timeincrement was set to one by default. This was a
+  problem if a wrong time index was passed. In that case the timeincrement
+  was set to one without a warning. Now an error is raised if no
+  timeincrement or valid time index is found
+  (`Issue #549 <https://github.com/oemof/oemof-solph/pull/549>`_).
+
+Testing
+^^^^^^^^^^^^^^^^^^^^
+
+* Automatic test coverage control was implemented. Now a PR will not be
+  accepted if it decreases the test coverage.
+* Test coverage was increased to over 90%. A badge was added to the
+  `oemof github page <https://github.com/oemof/oemof>`_ that shows the
+  actual test coverage.
+* Test coverage on the `groupings <oemof.groupings>` and `network
+  <oemof.network>` modules has significantly increased. These modules where
+  historically very weakly tested and are now approaching 90% and 95%
+  respectively with more tests being planned.
+
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+(alphabetical order)
+
+* ajimenezUCLA
+* FranziPl
+* Johannes Röder
+* Jakob Wolf
+* Jann Launer
+* Lluis Millet
+* Patrik Schönfeldt
+* Simon Hilpert
+* Stephan Günther
+* Uwe Krien
