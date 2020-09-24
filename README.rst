@@ -23,7 +23,7 @@ Overview
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
 
-.. |travis| image:: permanently to https://api.travis-ci.org/oemof/oemof-solph.svg?branch=de
+.. |travis| image:: https://api.travis-ci.org/oemof/oemof-solph.svg?branch=dev
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/github/oemof/oemof-solph/branches
 
