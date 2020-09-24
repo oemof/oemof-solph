@@ -220,7 +220,13 @@ oemof.solph. Information on the details and how to approach us can be found
 Citing
 ======
 
-The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version.
+For explicitly citing solph, you might want to refer to
+`DOI:10.1016/j.simpa.2020.100028 <https://doi.org/10.1016/j.simpa.2020.100028>`_,
+which gives an overview over the capabilities of solph.
+The core ideas of oemof as a whole are described in 
+`DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_
+(preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_).
+To allow citing specific versions, we use the zenodo project to get a DOI for each version.
 
 
 .. _solph_examples_label:
