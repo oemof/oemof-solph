@@ -29,11 +29,10 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.network.network import Transformer as NetworkTransformer
+from oemof.network import network as on
 from oemof.solph.network import Bus
 from oemof.solph.network import Flow
 from oemof.solph.network import Sink
-from oemof.solph.network import Transformer
 from oemof.solph.plumbing import sequence
 
 
@@ -204,7 +203,7 @@ class ElectricalLineBlock(SimpleBlock):
                                          rule=_voltage_angle_relation)
 
 
-class Link(Transformer):
+class Link(on.Transformer):
     """A Link object with 1...2 inputs and 1...2 outputs.
 
     Parameters
@@ -249,13 +248,20 @@ class Link(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if len(self.inputs) > 2 or len(self.outputs) > 2:
-            raise ValueError("Component `Link` must not have more than \
-                             2 inputs and 2 outputs!")
-
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
+
+        wrong_args_message = "Component `Link` must have exactly" \
+                             + "2 inputs, 2 outputs, and 2" \
+                             + "conversion factors connecting these."
+        assert len(self.inputs) == 2, wrong_args_message
+        assert len(self.outputs) == 2, wrong_args_message
+        assert len(self.conversion_factors) == 2, wrong_args_message
+
+        cf_keys = list(self.conversion_factors.keys())
+        assert cf_keys[0][0] == cf_keys[1][1], wrong_args_message
+        assert cf_keys[0][1] == cf_keys[1][0], wrong_args_message
 
     def constraint_group(self):
         return LinkBlock
@@ -302,27 +308,23 @@ class LinkBlock(SimpleBlock):
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
-                for n, conversion in all_conversions.items():
-                    for cidx, c in conversion.items():
-                        try:
-                            expr = (m.flow[n, cidx[1], t] ==
-                                    c[t] * m.flow[cidx[0], n, t])
-                        except ValueError:
-                            raise ValueError(
-                                "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {2}".format(
-                                    cidx[0], cidx[1], n))
-                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+                for n, cf in all_conversions.items():
+                    cf_keys = list(cf.keys())
+                    expr = (m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
+                            + m.flow[cf_keys[1][0], n, t] * cf[cf_keys[1]][t]
+                            ==
+                            m.flow[n, cf_keys[0][1], t]
+                            + m.flow[n, cf_keys[1][1], t])
+                    block.relation.add((n, t), expr)
 
         self.relation = Constraint(
-            [(n, cidx[0], cidx[1], t)
+            [(n, t)
              for t in m.TIMESTEPS
-             for n, conversion in all_conversions.items()
-             for cidx, c in conversion.items()], noruleinit=True)
+             for n, conversion in all_conversions.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
-class GenericCAES(NetworkTransformer):
+class GenericCAES(on.Transformer):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
