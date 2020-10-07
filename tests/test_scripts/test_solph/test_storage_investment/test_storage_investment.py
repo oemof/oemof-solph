@@ -160,9 +160,6 @@ def test_results_with_actual_dump():
     eq_(round(meta['objective']), 423167578261115584)
 
 
-@skip("Opening an old dump may fail due to different python versions or"
-      " version of other packages. We can try to reactivate the test with"
-      " v0.4.0.")
 def test_results_with_old_dump():
     """
     Test again with a stored dump created with v0.3.2dev (896a6d50)
@@ -170,7 +167,7 @@ def test_results_with_old_dump():
     energysystem = solph.EnergySystem()
     energysystem.restore(
                 dpath=os.path.dirname(os.path.realpath(__file__)),
-                filename='es_dump_test_3_2dev.oemof')
+                filename='es_dump_test_0_4_0.esys')
 
     results = energysystem.results['main']
 
