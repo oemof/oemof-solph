@@ -20,6 +20,15 @@ from oemof.solph import NonConvex
 from oemof.solph import components
 from oemof.tools.debugging import SuspiciousUsageWarning
 
+# ********* Flow *********
+
+
+def test_flow_typo_variable_cost():
+    msg = r"did you mean `variable_costs`"
+    with pytest.raises(AttributeError, match=msg):
+        Flow(variable_cost=42)
+
+
 # ********* GenericStorage *********
 
 

@@ -169,6 +169,11 @@ class Flow(on.Edge):
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
 
+        if 'variable_cost' in keys:
+            raise AttributeError(
+                "There is no `variable_cost` attribute,"
+                " did you mean `variable_costs`?")
+
         if 'fixed_costs' in keys:
             raise AttributeError(
                 "The `fixed_costs` attribute has been removed"
