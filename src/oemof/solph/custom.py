@@ -259,10 +259,6 @@ class Link(on.Transformer):
         assert len(self.outputs) == 2, wrong_args_message
         assert len(self.conversion_factors) == 2, wrong_args_message
 
-        cf_keys = list(self.conversion_factors.keys())
-        assert cf_keys[0][0] == cf_keys[1][1], wrong_args_message
-        assert cf_keys[0][1] == cf_keys[1][0], wrong_args_message
-
     def constraint_group(self):
         return LinkBlock
 
@@ -308,6 +304,27 @@ class LinkBlock(SimpleBlock):
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
+                for n, conversion in all_conversions.items():
+                    for cidx, c in conversion.items():
+                        try:
+                            expr = (m.flow[n, cidx[1], t] ==
+                                    c[t] * m.flow[cidx[0], n, t])
+                        except ValueError:
+                            raise ValueError(
+                                "Error in constraint creation",
+                                "from: {0}, to: {1}, via: {2}".format(
+                                    cidx[0], cidx[1], n))
+                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+
+        self.relation = Constraint(
+            [(n, cidx[0], cidx[1], t)
+             for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()
+             for cidx, c in conversion.items()], noruleinit=True)
+        self.relation_build = BuildAction(rule=_input_output_relation)
+
+        def _exclusive_direction_relation(block):
+            for t in m.TIMESTEPS:
                 for n, cf in all_conversions.items():
                     cf_keys = list(cf.keys())
                     expr = (m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
@@ -315,13 +332,14 @@ class LinkBlock(SimpleBlock):
                             ==
                             m.flow[n, cf_keys[0][1], t]
                             + m.flow[n, cf_keys[1][1], t])
-                    block.relation.add((n, t), expr)
+                    block.relation_exclusive_direction.add((n, t), expr)
 
-        self.relation = Constraint(
+        self.relation_exclusive_direction = Constraint(
             [(n, t)
              for t in m.TIMESTEPS
              for n, conversion in all_conversions.items()], noruleinit=True)
-        self.relation_build = BuildAction(rule=_input_output_relation)
+        self.relation_exclusive_direction_build = BuildAction(
+            rule=_exclusive_direction_relation)
 
 
 class GenericCAES(on.Transformer):
