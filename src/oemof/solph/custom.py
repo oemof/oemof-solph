@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 
 """This module is designed to hold custom components with their classes and
-associated individual constraints (blocks) and groupings. Therefore this
-module holds the class definition and the block directly located by each other.
+associated individual constraints (blocks) and groupings.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/custom.py
+Therefore this module holds the class definition and the block directly located
+by each other.
+
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: jakob-wo
+SPDX-FileCopyrightText: gplssm
 
 SPDX-License-Identifier: MIT
+
 """
 
 import logging
 
-from oemof.network.network import Transformer as NetworkTransformer
-from oemof.solph.network import Bus
-from oemof.solph.network import Flow
-from oemof.solph.network import Sink
-from oemof.solph.network import Transformer
-from oemof.solph.plumbing import sequence
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -28,6 +29,12 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
+
+from oemof.network import network as on
+from oemof.solph.network import Bus
+from oemof.solph.network import Flow
+from oemof.solph.network import Sink
+from oemof.solph.plumbing import sequence
 
 
 class ElectricalBus(Bus):
@@ -197,7 +204,7 @@ class ElectricalLineBlock(SimpleBlock):
                                          rule=_voltage_angle_relation)
 
 
-class Link(Transformer):
+class Link(on.Transformer):
     """A Link object with 1...2 inputs and 1...2 outputs.
 
     Parameters
@@ -242,13 +249,16 @@ class Link(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if len(self.inputs) > 2 or len(self.outputs) > 2:
-            raise ValueError("Component `Link` must not have more than \
-                             2 inputs and 2 outputs!")
-
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
+
+        wrong_args_message = "Component `Link` must have exactly" \
+                             + "2 inputs, 2 outputs, and 2" \
+                             + "conversion factors connecting these."
+        assert len(self.inputs) == 2, wrong_args_message
+        assert len(self.outputs) == 2, wrong_args_message
+        assert len(self.conversion_factors) == 2, wrong_args_message
 
     def constraint_group(self):
         return LinkBlock
@@ -303,7 +313,7 @@ class LinkBlock(SimpleBlock):
                         except ValueError:
                             raise ValueError(
                                 "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {3}".format(
+                                "from: {0}, to: {1}, via: {2}".format(
                                     cidx[0], cidx[1], n))
                         block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
@@ -314,8 +324,26 @@ class LinkBlock(SimpleBlock):
              for cidx, c in conversion.items()], noruleinit=True)
         self.relation_build = BuildAction(rule=_input_output_relation)
 
+        def _exclusive_direction_relation(block):
+            for t in m.TIMESTEPS:
+                for n, cf in all_conversions.items():
+                    cf_keys = list(cf.keys())
+                    expr = (m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
+                            + m.flow[cf_keys[1][0], n, t] * cf[cf_keys[1]][t]
+                            ==
+                            m.flow[n, cf_keys[0][1], t]
+                            + m.flow[n, cf_keys[1][1], t])
+                    block.relation_exclusive_direction.add((n, t), expr)
 
-class GenericCAES(NetworkTransformer):
+        self.relation_exclusive_direction = Constraint(
+            [(n, t)
+             for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()], noruleinit=True)
+        self.relation_exclusive_direction_build = BuildAction(
+            rule=_exclusive_direction_relation)
+
+
+class GenericCAES(on.Transformer):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
@@ -1311,7 +1339,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
                     # main use case
                     elif (g.delay_time < t <=
-                          m.TIMESTEPS._bounds[1] - g.delay_time):
+                          m.TIMESTEPS[-1] - g.delay_time):
 
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, t]
@@ -1332,7 +1360,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         rhs = g.demand[t] + self.dsm_up[g, t] - sum(
                             self.dsm_do[g, tt, t]
                             for tt in range(t - g.delay_time,
-                                            m.TIMESTEPS._bounds[1] + 1))
+                                            m.TIMESTEPS[-1] + 1))
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1368,7 +1396,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
                     # main use case
                     elif g.delay_time < t <= (
-                            m.TIMESTEPS._bounds[1] - g.delay_time):
+                            m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t]
@@ -1388,7 +1416,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM down
                         rhs = sum(self.dsm_do[g, t, tt]
                                   for tt in range(t - g.delay_time,
-                                                  m.TIMESTEPS._bounds[1] + 1))
+                                                  m.TIMESTEPS[-1] + 1))
 
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
@@ -1445,7 +1473,7 @@ class SinkDSMDelayBlock(SimpleBlock):
 
                     # main use case
                     elif g.delay_time < tt <= (
-                            m.TIMESTEPS._bounds[1] - g.delay_time):
+                            m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM down
                         lhs = sum(self.dsm_do[g, t, tt]
@@ -1463,7 +1491,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM down
                         lhs = sum(self.dsm_do[g, t, tt]
                                   for t in range(tt - g.delay_time,
-                                                 m.TIMESTEPS._bounds[1] + 1))
+                                                 m.TIMESTEPS[-1] + 1))
                         # Capacity DSM down
                         rhs = g.capacity_down[tt]
 
@@ -1501,7 +1529,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
                     elif g.delay_time < tt <= (
-                            m.TIMESTEPS._bounds[1] - g.delay_time):
+                            m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = self.dsm_up[g, tt] + sum(
@@ -1520,7 +1548,7 @@ class SinkDSMDelayBlock(SimpleBlock):
                         lhs = self.dsm_up[g, tt] + sum(
                             self.dsm_do[g, t, tt]
                             for t in range(tt - g.delay_time,
-                                           m.TIMESTEPS._bounds[1] + 1))
+                                           m.TIMESTEPS[-1] + 1))
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt], g.capacity_down[tt])
 

@@ -2,11 +2,13 @@
 
 """Plumbing stuff.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/plumbing.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: henhuy
 
 SPDX-License-Identifier: MIT
+
 """
 
 from collections import UserList
@@ -21,7 +23,7 @@ def sequence(iterable_or_scalar):
 
     Parameters
     ----------
-    iterable_or_scalar : iterable, None, int, float
+    iterable_or_scalar : iterable or None or int or float
 
     Examples
     --------

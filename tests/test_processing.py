@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -
 
-"""Tests the processing module of the outputlib.
+"""Tests the processing module of solph.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
@@ -13,6 +13,9 @@ import pandas
 from nose.tools import assert_raises
 from nose.tools import eq_
 from nose.tools import ok_
+from pandas.testing import assert_frame_equal
+from pandas.testing import assert_series_equal
+
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -23,8 +26,6 @@ from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.components import GenericStorage
-from pandas.util.testing import assert_frame_equal
-from pandas.util.testing import assert_series_equal
 
 
 class TestParameterResult:
@@ -68,7 +69,6 @@ class TestParameterResult:
             invest_relation_output_capacity=1/6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            fixed_costs=35,
             investment=Investment(ep_costs=0.4),
         )
 
@@ -78,8 +78,7 @@ class TestParameterResult:
             inputs={
                 b_el2: Flow(
                     nominal_value=1,
-                    actual_value=cls.demand_values,
-                    fixed=True
+                    fix=cls.demand_values,
                 )
             }
         )
@@ -99,7 +98,6 @@ class TestParameterResult:
             param_results[(b_el2, demand)]['scalars'].sort_index(),
             pandas.Series(
                 {
-                    'fixed': True,
                     'nominal_value': 1,
                     'max': 1,
                     'min': 0,
@@ -113,7 +111,7 @@ class TestParameterResult:
         assert_frame_equal(
             param_results[(b_el2, demand)]['sequences'],
             pandas.DataFrame(
-                {'actual_value': self.demand_values}
+                {'fix': self.demand_values}
             ), check_like=True
         )
 
@@ -123,7 +121,6 @@ class TestParameterResult:
         param_results = processing.parameter_as_dict(self.es,
                                                      exclude_none=False)
         scalar_attributes = {
-            'fixed': True,
             'integer': None,
             'investment': None,
             'nominal_value': 1,
@@ -146,10 +143,10 @@ class TestParameterResult:
             pandas.Series(scalar_attributes).sort_index()
         )
         sequences_attributes = {
-            'actual_value': self.demand_values,
+            'fix': self.demand_values,
         }
         default_sequences = [
-            'actual_value'
+            'fix'
         ]
         for attr in default_sequences:
             if attr not in sequences_attributes:
@@ -245,10 +242,13 @@ class TestParameterResult:
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=True)
         bel1 = views.node(param_results, 'b_el1')
-        eq_(bel1['scalars'][(('b_el1', 'storage'), 'variable_costs')], 3)
+        assert (
+            bel1['scalars'][[(('b_el1', 'storage'), 'variable_costs')]].values
+            == 3
+        )
 
         bel1_m = views.node(param_results, 'b_el1', multiindex=True)
-        eq_(bel1_m['scalars'].loc[('b_el1', 'storage', 'variable_costs')], 3)
+        eq_(bel1_m['scalars'][('b_el1', 'storage', 'variable_costs')], 3)
 
     def test_multiindex_sequences(self):
         results = processing.results(self.om)

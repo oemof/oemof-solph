@@ -4,17 +4,21 @@
 
 Information about the possible usage is provided within the examples.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/outputlib/views.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: henhuy
 
 SPDX-License-Identifier: MIT
+
 """
 import logging
 from collections import OrderedDict
 from enum import Enum
 
 import pandas as pd
+
 from oemof.solph.processing import convert_keys_to_strings
 
 NONE_REPLACEMENT_STR = '_NONE_'
@@ -134,7 +138,7 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
             Returns nodes having only input flows (eg. Sink)
 
     Additionally, busses can be excluded by setting `exclude_busses` to
-    :const:`True`.
+    `True`.
 
     Parameters
     ----------
@@ -232,6 +236,7 @@ def node_input_by_type(results, node_type, droplevel=None):
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that inputs are selected
+    droplevel: list
 
     Notes
     -----
@@ -266,6 +271,7 @@ def node_output_by_type(results, node_type, droplevel=None):
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that outputs are selected
+    droplevel: list
 
     Notes
     -----
@@ -334,12 +340,12 @@ def net_storage_flow(results, node_type):
 
     dataframes = []
 
-    for l in labels:
+    for lb in labels:
         subset = df.groupby(
             lambda x1: (lambda fr, to, ty:
-                        'output' if (fr == l and ty == 'flow') else
-                        'input' if (to == l and ty == 'flow') else
-                        'level' if (fr == l and ty != 'flow') else
+                        'output' if (fr == lb and ty == 'flow') else
+                        'input' if (to == lb and ty == 'flow') else
+                        'level' if (fr == lb and ty != 'flow') else
                         None)(*x1),
             axis=1
         ).sum()
@@ -347,8 +353,8 @@ def net_storage_flow(results, node_type):
         subset['net_flow'] = subset['output'] - subset['input']
 
         subset.columns = pd.MultiIndex.from_product(
-                                [[l],
-                                 [o for o in l.outputs],
+                                [[lb],
+                                 [o for o in lb.outputs],
                                  subset.columns])
 
         dataframes.append(

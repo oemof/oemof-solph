@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
 
-""" Classes used to model energy supply systems within solph.
+"""Classes used to model energy supply systems within solph.
 
 Classes are derived from oemof core network classes and adapted for specific
 optimization tasks. An energy system is modelled as a graph/network of nodes
 with very specific constraints on which types of nodes are allowed to be
 connected.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/network.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: Birgit Schachler
 
 SPDX-License-Identifier: MIT
+
 """
 
 from warnings import warn
 
-import oemof.network.energy_system as es
-import oemof.network.network as on
+from oemof.network import energy_system as es
+from oemof.network import network as on
 from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
 from oemof.tools import debugging
@@ -28,12 +31,12 @@ class EnergySystem(es.EnergySystem):
     <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
-    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
-    supplied via the `groupings` keyword argument, :const:`solph.GROUPINGS
+    `solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
+    supplied via the `groupings` keyword argument, `solph.GROUPINGS
     <oemof.solph.GROUPINGS>` is prepended to those.
 
     If you know what you are doing and want to use solph without
-    :const:`solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
+    `solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
     :class:`core's EnergySystem <oemof.core.energy_system.EnergySystem>`
     directly.
     """
@@ -69,10 +72,10 @@ class Flow(on.Edge):
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
-    actual_value : numeric (iterable or scalar), :math:`f_{actual}`
+    fix : numeric (iterable or scalar), :math:`f_{actual}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to `actual_value
+        set to :obj:`True` the flow variable will be fixed to `fix
         * nominal_value`, i.e. this value is set exogenous.
     positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
@@ -105,7 +108,7 @@ class Flow(on.Edge):
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
-        :attr:`actual_value`.
+        :attr:`fix`.
     investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
@@ -135,10 +138,10 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(actual_value=[10, 4, 4], fixed=True, variable_costs=5)
+    >>> f = Flow(fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
-    >>> f.actual_value[2]
+    >>> f.fix[2]
     4
 
     Creating a flow object with time-depended lower and upper bounds:
@@ -158,31 +161,57 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer', 'fixed']
-        sequences = ['actual_value', 'variable_costs', 'min', 'max']
+                   'investment', 'nonconvex', 'integer']
+        sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
-        defaults = {'fixed': False, 'min': 0, 'max': 1, 'variable_costs': 0,
+        defaults = {'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
+
+        if 'fixed_costs' in keys:
+            raise AttributeError(
+                "The `fixed_costs` attribute has been removed"
+                " with v0.2!")
+
+        if 'actual_value' in keys:
+            raise AttributeError(
+                "The `actual_value` attribute has been renamed"
+                " to `fix` with v0.4. The attribute `fixed` is"
+                " set to True automatically when passing `fix`.")
+
+        if "fixed" in keys:
+            msg = ("The `fixed` attribute is deprecated.\nIf you have defined "
+                   "the `fix` attribute the flow variable will be fixed.\n"
+                   "The `fixed` attribute does not change anything.")
+            warn(msg, debugging.SuspiciousUsageWarning)
+
+        # It is not allowed to define min or max if fix is defined.
+        if kwargs.get("fix") is not None and (kwargs.get("min") is not None or
+                                              kwargs.get("max") is not None):
+            raise AttributeError(
+                "It is not allowed to define min/max if fix is defined.")
+
+        # Set default value for min and max
+        if kwargs.get("min") is None:
+            if 'bidirectional' in keys:
+                defaults["min"] = -1
+            else:
+                defaults["min"] = 0
+        if kwargs.get("max") is None:
+            defaults["max"] = 1
 
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(self, attribute, {'ub': sequence(value['ub']),
                                           'costs': value['costs']})
-            elif 'fixed_costs' in attribute:
-                raise AttributeError(
-                         "The `fixed_costs` attribute has been removed"
-                         " with v0.2!")
+
             else:
                 setattr(self, attribute,
                         sequence(value) if attribute in sequences else value)
 
         # Checking for impossible attribute combinations
-        if self.fixed and self.actual_value[0] is None:
-            raise ValueError("Cannot fix flow value to None.\n Please "
-                             "set the actual_value attribute of the flow")
         if self.investment and self.nominal_value is not None:
             raise ValueError("Using the investment object the nominal_value"
                              " has to be set to None.")
@@ -216,9 +245,7 @@ class Sink(on.Sink):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.inputs:
-            msg = "`Sink` '{0}' constructed without `inputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        check_node_object_for_missing_attribute(self, "inputs")
 
     def constraint_group(self):
         pass
@@ -229,9 +256,7 @@ class Source(on.Source):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.outputs:
-            msg = "`Source` '{0}' constructed without `outputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        check_node_object_for_missing_attribute(self, "outputs")
 
     def constraint_group(self):
         pass
@@ -289,12 +314,8 @@ class Transformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if not self.inputs:
-            msg = "`Transformer` '{0}' constructed without `inputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
-        if not self.outputs:
-            msg = "`Transformer` '{0}' constructed without `outputs`."
-            warn(msg.format(self), debugging.SuspiciousUsageWarning)
+        check_node_object_for_missing_attribute(self, "inputs")
+        check_node_object_for_missing_attribute(self, "outputs")
 
         self.conversion_factors = {
             k: sequence(v)
@@ -309,3 +330,12 @@ class Transformer(on.Transformer):
 
     def constraint_group(self):
         return blocks.Transformer
+
+
+def check_node_object_for_missing_attribute(obj, attribute):
+    if not getattr(obj, attribute):
+        msg = ("Attribute <{0}> is missing in Node <{1}> of {2}.\n"
+               "If this is intended and you know what you are doing you can"
+               "disable the SuspiciousUsageWarning globally.")
+        warn(msg.format(attribute, obj.label, type(obj)),
+             debugging.SuspiciousUsageWarning)

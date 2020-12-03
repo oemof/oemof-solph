@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 
 """This module can be used to check the installation.
+
 This is not an illustrated example.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/tests/test_installation.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: jnnr
 
 SPDX-License-Identifier: MIT
+
 """
 
 import logging
 
 import pandas as pd
+
 from oemof import solph
 
 
@@ -27,7 +29,7 @@ def check_oemof_installation(silent=False):
     solph.Sink(label='excess_bel', inputs={bel: solph.Flow()})
     solph.Source(label='rgas', outputs={bgas: solph.Flow()})
     solph.Sink(label='demand', inputs={bel: solph.Flow(
-        actual_value=[10, 20, 30, 40, 50], fixed=True, nominal_value=1)})
+        fix=[10, 20, 30, 40, 50], nominal_value=1)})
     solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},

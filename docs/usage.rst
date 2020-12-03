@@ -2,11 +2,18 @@
 
 .. _using_oemof_label:
 
-~~~~~~~~~~~
-oemof-solph
-~~~~~~~~~~~
+~~~~~~~~~~~~
+User's guide
+~~~~~~~~~~~~
 
-Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The packages is based on pyomo. To create an energy system model generic and specific components are available. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
+Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The package is based on pyomo. To create an energy system model generic and specific components are available. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
+
+This User's guide provides a user-friendly introduction into oemof-solph,
+which includes small examples and nice illustrations.
+However, the functionality of oemof-solph go beyond the content of this User's guide section.
+So, if you want to know all details of a certain component or a function,
+please go the :ref:`api_reference_label`. There, you will find
+a detailed and complete description of all oemof-solph modules.
 
 .. contents::
     :depth: 2
@@ -17,8 +24,8 @@ Solph is an oemof-package, designed to create and solve linear or mixed-integer 
 How can I use solph?
 --------------------
 
-To use solph you have to install oemof and at least one solver, which can be used together with pyomo (e.g. CBC, GLPK, Gurobi, Cplex). See the `pyomo installation guide <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ for all supported solver.
-You can test it by executing one of the existing examples. Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
+To use solph you have to install oemof and at least one solver (see :ref:`installation_label`), which can be used together with pyomo (e.g. CBC, GLPK, Gurobi, Cplex). See the `pyomo installation guide <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ for all supported solver.
+You can test it by executing one of the existing examples (see :ref:`solph_examples_label`, or directly `oemof's example repository <https://github.com/oemof/oemof-examples>`__). Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
 
 Once the example work you are close to your first energy model.
 
@@ -45,7 +52,7 @@ Set up an energy system
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
 
 To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function.
-The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
 
 .. code-block:: python
 
@@ -69,7 +76,7 @@ After defining an instance of the EnergySystem class you have to add all nodes y
 
 Basically, there are two types of *nodes* - *components* and *buses*. Every Component has to be connected with one or more *buses*. The connection between a *component* and a *bus* is the *flow*.
 
-All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
+All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: https://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
 An example of a simple energy system shows the usage of the nodes for
 real world representations:
@@ -238,13 +245,13 @@ Sink (basic)
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
 The example shows the electricity demand of the electricity_bus defined above.
-The *'my_demand_series'* should be sequence of normalised values while the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
-The parameter *'fixed=True'* means that the actual_value can not be changed by the solver.
+The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
+Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be changed by the solver.
 
 .. code-block:: python
 
     solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
-        actual_value=my_demand_series, fixed=True, nominal_value=nominal_demand)})
+        fix=my_demand_series, nominal_value=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
@@ -264,7 +271,9 @@ A source can represent a pv-system, a wind power plant, an import of natural gas
 
 While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*).
 As we do have to pay for imported gas we should set variable costs.
-Comparable to the demand series an *actual_value* in combination with *'fixed=True'* is used to define the normalised output of a wind power plan. The *nominal_value* sets the installed capacity.
+Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
+Alternatively, you might use *max* to allow for easy curtailment.
+The *nominal_value* sets the installed capacity.
 
 .. code-block:: python
 
@@ -274,7 +283,7 @@ Comparable to the demand series an *actual_value* in combination with *'fixed=Tr
             nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
     solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
-        actual_value=wind_power_feedin_series, nominal_value=1000000, fixed=True)})
+        fix=wind_power_feedin_series, nominal_value=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -524,7 +533,8 @@ If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
+A component to model a storage with its basic characteristics. The
+GenericStorage is designed for one input and one output.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
 To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a loss rate can be defined.
@@ -581,7 +591,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof_examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -796,8 +806,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     s_wind = solph.Source(label='wind',
                           outputs={
                               b_elec: solph.Flow(
-                                  actual_value=data['pv'],
-                                  fixed=True,
+                                  fix=data['pv'],
                                   nominal_value=3.5)}
                           )
 
@@ -859,7 +868,7 @@ turbines.
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
-        actual_value=wind_power_time_series, fixed=True,
+        fix=wind_power_time_series,
 	investment=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
@@ -869,7 +878,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 .. code-block:: python
 
     solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
-        actual_value=wind_power_time_series, fixed=True,
+        fix=wind_power_time_series,
 	    investment=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})
@@ -1002,9 +1011,12 @@ Some predefined additional constraints can be found in the
 :py:mod:`~oemof.solph.constraints` module.
 
  * Emission limit for the model -> :func:`~.oemof.solph.constraints.emission_limit`
- * Coupling of two variables e.g. investment variables) with a factor ->
-   :func:`~.oemof.solph.constraints.equate_variables`
+ * Generic integral limit (general form of emission limit) -> :func:`~.oemof.solph.constraints.generic_integral_limit`
+ * Coupling of two variables e.g. investment variables) with a factor -> :func:`~.oemof.solph.constraints.equate_variables`
  * Overall investment limit -> :func:`~.oemof.solph.constraints.investment_limit`
+ * Generic investment limit -> :func:`~.oemof.solph.constraints.additional_investment_flow_limit`
+ * Limit active flow count -> :func:`~.oemof.solph.constraints.limit_active_flow_count`
+ * Limit active flow count by keyword -> :func:`~.oemof.solph.constraints.limit_active_flow_count_by_keyword`
 
 
 The Grouping module (Sets)
@@ -1052,9 +1064,171 @@ Once you have create your specific excel reader you can lower the entry barrier 
 See `oemof's example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
 
 
-.. _solph_examples_label:
+.. _oemof_outputlib_label:
 
-Solph Examples
---------------
+Handling Results
+--------------------
 
-See the `example repository <https://github.com/oemof/oemof-examples>`_ for various examples. The repository has sections for each major release.
+The main purpose of the processing module is to collect and organise results.
+The views module will provide some typical representations of the results.
+Plots are not part of solph, because plots are highly individual. However, the
+provided pandas.DataFrames are a good start for plots. Some basic functions
+for plotting of optimisation results can be found in the separate repository
+`oemof_visio <https://github.com/oemof/oemof-visio>`_.
+
+The ``processing.results`` function gives back the results as a python
+dictionary holding pandas Series for scalar values and pandas DataFrames for
+all nodes and flows between them. This way we can make use of the full power
+of the pandas package available to process the results.
+
+See the `pandas documentation <https://pandas.pydata.org/pandas-docs/stable/>`_
+to learn how to `visualise
+<https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html>`_,
+`read or write
+<https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html>`_ or how to
+`access parts of the DataFrame
+<https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html>`_ to
+process them.
+
+The results chapter consists of three parts:
+
+.. contents::
+    :depth: 1
+    :local:
+    :backlinks: top
+
+The first step is the processing of the results (:ref:`results_collect_results_label`)
+This is followed by basic examples of the general analysis of the results
+(:ref:`res_general_approach_label`) and finally the use of functionality already included in solph
+for providing a quick access to your results (:ref:`results_easy_access_label`).
+Especially for larger energy systems the general approach will help you to
+write your own results processing functions.
+
+.. _results_collect_results_label:
+
+Collecting results
+^^^^^^^^^^^^^^^^^^
+
+Collecting results can be done with the help of the processing module. A solved
+model is needed:
+
+.. code-block:: python
+
+    [...]
+    model.solve(solver=solver)
+    results = solph.processing.results(model)
+
+The scalars and sequences describe nodes (with keys like (node, None)) and
+flows between nodes (with keys like (node_1, node_2)). You can directly extract
+the data in the dictionary by using these keys, where "node" is the name of
+the object you want to address.
+Processing the results is the prerequisite for the examples in the following
+sections.
+
+.. _res_general_approach_label:
+
+General approach
+^^^^^^^^^^^^^^^^
+
+As stated above, after processing you will get a dictionary with all result
+data.
+If you want to access your results directly via labels, you
+can continue with :ref:`results_easy_access_label`. For a systematic analysis list comprehensions
+are the easiest way of filtering and analysing your results.
+
+The keys of the results dictionary are tuples containing two nodes. Since flows
+have a starting node and an ending node, you get a list of all flows by
+filtering the results using the following expression:
+
+.. code-block:: python
+
+    flows = [x for x in results.keys() if x[1] is not None]
+
+On the same way you can get a list of all nodes by applying:
+
+.. code-block:: python
+
+    nodes = [x for x in results.keys() if x[1] is None]
+
+Probably you will just get storages as nodes, if you have some in your energy
+system. Note, that just nodes containing decision variables are listed, e.g. a
+Source or a Transformer object does not have decision variables. These are in
+the flows from or to the nodes.
+
+All items within the results dictionary are dictionaries and have two items
+with 'scalars' and 'sequences' as keys:
+
+.. code-block:: python
+
+    for flow in flows:
+        print(flow)
+        print(results[flow]['scalars'])
+        print(results[flow]['sequences'])
+
+There many options of filtering the flows and nodes as you prefer.
+The following will give you all flows which are outputs of transformer:
+
+.. code-block:: python
+
+    flows_from_transformer = [x for x in flows if isinstance(
+        x[0], solph.Transformer)]
+
+You can filter your flows, if the label of in- or output contains a given
+string, e.g.:
+
+.. code-block:: python
+
+    flows_to_elec = [x for x in results.keys() if 'elec' in x[1].label]
+
+Getting all labels of the starting node of your investment flows:
+
+.. code-block:: python
+
+    flows_invest = [x[0].label for x in flows if hasattr(
+        results[x]['scalars'], 'invest')]
+
+
+.. _results_easy_access_label:
+
+Easy access
+^^^^^^^^^^^
+
+The solph package provides some functions which will help you to access your
+results directly via labels, which is helpful especially for small energy
+systems.
+So, if you want to address objects by their label, you can convert the results
+dictionary such that the keys are changed to strings given by the labels:
+
+.. code-block:: python
+
+    views.convert_keys_to_strings(results)
+    print(results[('wind', 'bus_electricity')]['sequences']
+
+
+Another option is to access data belonging to a grouping by the name of the grouping
+(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
+Given the label of an object, e.g. 'wind' you can access the grouping by its label
+and use this to extract data from the results dictionary.
+
+.. code-block:: python
+
+    node_wind = energysystem.groups['wind']
+    print(results[(node_wind, bus_electricity)])
+
+
+However, in many situations it might be convenient to use the views module to
+collect information on a specific node. You can request all data related to a
+specific node by using either the node's variable name or its label:
+
+.. code-block:: python
+
+    data_wind = solph.views.node(results, 'wind')
+
+
+A function for collecting and printing meta results, i.e. information on the objective function,
+the problem and the solver, is provided as well:
+
+.. code-block:: python
+
+    meta_results = solph.processing.meta_results(om)
+    pp.pprint(meta_results)

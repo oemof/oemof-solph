@@ -3,11 +3,16 @@
 """Creating sets, variables, constraints and parts of the objective function
 for the specified groups.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location oemof/oemof/solph/blocks.py
+SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Simon Hilpert
+SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Birgit Schachler
+SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: jmloenneberga
 
 SPDX-License-Identifier: MIT
+
 """
 
 from pyomo.core import Binary
@@ -308,12 +313,12 @@ class InvestmentFlow(SimpleBlock):
     the following additional constraints are created, if the appropriate
     attribute of the *Flow* (see :class:`oemof.solph.network.Flow`) is set:
 
-        * :attr:`fixed=True`
+        * :attr:`fix` is not None
 
             Actual value constraint for investments with fixed flow values
 
         .. math::
-            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{actual}(t)
+            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{fix}(t)
 
         * :attr:`min != 0`
 
@@ -411,7 +416,7 @@ class InvestmentFlow(SimpleBlock):
         ", "Variable investment costs"
         ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
         Fix investment costs"
-        ":math:`f_{actual}`", ":py:obj:`flows[i, o].actual_value[t]`", "Normed
+        ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
         fixed value for the flow variable"
         ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
         value of the flow"
@@ -467,7 +472,11 @@ class InvestmentFlow(SimpleBlock):
             (g[0], g[1]) for g in group if g[2].investment.nonconvex is True])
 
         self.FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fixed])
+            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not
+                        None])
+
+        self.NON_FIXED_INVESTFLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None])
 
         self.SUMMED_MAX_INVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None])
@@ -521,7 +530,7 @@ class InvestmentFlow(SimpleBlock):
             """
             expr = (m.flow[i, o, t] == (
                     (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                    m.flows[i, o].actual_value[t]))
+                    m.flows[i, o].fix[t]))
 
             return expr
         self.fixed = Constraint(self.FIXED_INVESTFLOWS, m.TIMESTEPS,
@@ -535,7 +544,7 @@ class InvestmentFlow(SimpleBlock):
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
                 m.flows[i, o].max[t]))
             return expr
-        self.max = Constraint(self.INVESTFLOWS, m.TIMESTEPS,
+        self.max = Constraint(self.NON_FIXED_INVESTFLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
 
         def _min_investflow_rule(block, i, o, t):
