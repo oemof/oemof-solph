@@ -1576,7 +1576,7 @@ class SinkDSMDelayBlock(SimpleBlock):
         return self.cost
 
 
-class PiecewiseLinearTransformer(Transformer):
+class PiecewiseLinearTransformer(on.Transformer):
     """Component to model a transformer with one input and one output
     and an arbitrary piecewise linear conversion function.
 
