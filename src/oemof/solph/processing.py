@@ -18,7 +18,7 @@ import sys
 from itertools import groupby
 
 import pandas as pd
-from pyomo.core.base.piecewise import _PiecewiseData
+from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
 from oemof.network.network import Node
@@ -83,7 +83,7 @@ def create_dataframe(om):
     var_dict = {}
     for bv in block_vars:
         # Drop the auxiliary variables introduced by pyomo's PIecewise
-        if not isinstance(bv.parent_block(), _PiecewiseData):
+        if not isinstance(bv.parent_block().parent_component(), IndexedPiecewise):
             for i in getattr(bv, '_index'):
                 key = (
                     str(bv).split('.')[0],
