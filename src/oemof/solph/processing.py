@@ -18,7 +18,6 @@ import sys
 from itertools import groupby
 
 import pandas as pd
-
 from oemof.network.network import Node
 from pyomo.core.base.var import Var
 
