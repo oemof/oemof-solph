@@ -82,6 +82,7 @@ def create_dataframe(om):
         bv.parent_component() for bv in om.component_data_objects(Var)]))
     var_dict = {}
     for bv in block_vars:
+        # Drop the auxiliary variables introduced by pyomo's PIecewise
         if not isinstance(bv.parent_block(), _PiecewiseData):
             for i in getattr(bv, '_index'):
                 key = (
