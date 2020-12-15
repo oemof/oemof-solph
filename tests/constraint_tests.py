@@ -17,9 +17,9 @@ from os import path as ospath
 import pandas as pd
 from nose.tools import assert_raises
 from nose.tools import eq_
+from oemof.network.network import Node
 
 from oemof import solph
-from oemof.network.network import Node
 
 logging.disable(logging.INFO)
 

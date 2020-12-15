@@ -15,8 +15,9 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-
 from oemof.network.network import Node
+from oemof.tools import economics
+
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -26,7 +27,6 @@ from oemof.solph import Sink
 from oemof.solph import Source
 from oemof.solph import processing
 from oemof.solph import views
-from oemof.tools import economics
 
 
 def test_dispatch_fix_example(solver='cbc', periods=10):

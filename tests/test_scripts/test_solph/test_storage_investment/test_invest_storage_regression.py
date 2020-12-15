@@ -12,9 +12,9 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
+from oemof.network.network import Node
 
 from oemof import solph
-from oemof.network.network import Node
 from oemof.solph import views
 
 
