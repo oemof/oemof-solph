@@ -35,7 +35,7 @@ def test_pwltf():
     b_el = Bus(label="electricity")
     demand_el = Sink(
         label="demand",
-        inputs={b_el: Flow(nominal_value=1, actual_value=demand, fixed=True)},
+        inputs={b_el: Flow(nominal_value=1, fix=demand)},
     )
 
     energysystem.add(b_gas, b_el, demand_el)
@@ -94,5 +94,4 @@ def test_pwltf():
         conv_func, in_breakpoints, df[("biogas", "pwltf")]["flow"].values
     )
     production_modeled = df[("pwltf", "electricity")]["flow"].values
-
     assert np.allclose(production_modeled, production_expected)

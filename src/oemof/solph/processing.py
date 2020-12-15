@@ -80,18 +80,10 @@ def create_dataframe(om):
     # get all pyomo variables including their block
     block_vars = list(set([
         bv.parent_component() for bv in om.component_data_objects(Var)]))
-
     var_dict = {}
     for bv in block_vars:
-        if isinstance(bv.parent_block(), _PiecewiseData):
-            for i in getattr(bv, '_index'):
-                key = (
-                    str(bv.parent_block()).split('.')[0],
-                    str(bv).split('.')[-1] + '_' + str(i),
-                    bv[i].parent_block().index())
-                value = bv[i].value
-                var_dict[key] = value
-        else:
+        # Drop the auxiliary variables introduced by pyomo's PIecewise
+        if not isinstance(bv.parent_block(), _PiecewiseData):
             for i in getattr(bv, '_index'):
                 key = (
                     str(bv).split('.')[0],
