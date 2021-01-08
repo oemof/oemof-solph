@@ -18,9 +18,9 @@ import logging
 
 import pandas as pd
 from nose.tools import ok_
+from oemof.network.network import Node
 from pyomo import environ as po
 
-from oemof.network.network import Node
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow

@@ -671,12 +671,26 @@ class Transformer(SimpleBlock):
 
     Linear relation :attr:`om.Transformer.relation[i,o,t]`
         .. math::
-            flow(i, n, t) / conversion\_factor(n, i, t) = \
-            flow(n, o, t) / conversion\_factor(n, o, t), \\
+            \P_{i,n}(t) \times \eta_{n,o}(t) = \
+            \P_{n,o}(t) \times \eta_{n,i}(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{TRANSFORMERS}, \\
             \forall i \in \textrm{INPUTS(n)}, \\
-            \forall o \in \textrm{OUTPUTS(n)}.
+            \forall o \in \textrm{OUTPUTS(n)},
+
+    ======================  ====================================  =============
+    symbol                  attribute                             explanation
+    ======================  ====================================  =============
+    :math:`P_{i,n}(t)`      :py:obj:`flow[i, n, t]`               Transformer
+                                                                  inflow
+
+    :math:`P_{n,o}(t)`      :py:obj:`flow[n, o, t]`               Transformer
+                                                                  outflow
+
+    :math:`\eta_{i,n}(t)`   :py:obj:`conversion_factor[i, n, t]`  Conversion
+                                                                  efficiency
+
+    ======================  ====================================  =============
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -716,10 +730,10 @@ class Transformer(SimpleBlock):
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
-                                lhs = (m.flow[i, n, t] /
-                                       n.conversion_factors[i][t])
-                                rhs = (m.flow[n, o, t] /
+                                lhs = (m.flow[i, n, t] *
                                        n.conversion_factors[o][t])
+                                rhs = (m.flow[n, o, t] *
+                                       n.conversion_factors[i][t])
                             except ValueError:
                                 raise ValueError(
                                     "Error in constraint creation",
