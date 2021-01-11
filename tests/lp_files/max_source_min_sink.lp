@@ -1,4 +1,4 @@
-\* Source Pyomo model name=OperationalModel *\
+\* Source Pyomo model name=Model *\
 
 min 
 objective:

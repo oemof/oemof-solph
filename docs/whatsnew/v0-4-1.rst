@@ -1,0 +1,21 @@
+v0.4.1 (June 24, 2020)
+-----------------------
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* Fixed incompatibility with recent Pyomo release (5.7)
+
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+
+* Results of one-time-step optimisation counterintuitive
+    If an optimisation with one time-step is performed, at the processing of the
+    results, the scalars of the results is stored in the dict of the sequences.
+    (See `Issue #693 <https://github.com/oemof/oemof-solph/issues/693>`_)
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Uwe Krien
+* Patrik Schönfeldt

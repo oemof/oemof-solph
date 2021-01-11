@@ -1,4 +1,4 @@
-\* Source Pyomo model name=OperationalModel *\
+\* Source Pyomo model name=Model *\
 
 min 
 objective:
@@ -6,7 +6,6 @@ objective:
 +25 flow(electricityBus_excess_0)
 +25 flow(electricityBus_excess_1)
 +25 flow(electricityBus_excess_2)
-+20000000 ONE_VAR_CONSTANT
 
 s.t.
 
@@ -25,24 +24,24 @@ c_e_Bus_balance(electricityBus_2)_:
 c_u_InvestmentFlow_max(electricityBus_excess_0)_:
 -0.80000000000000004 InvestmentFlow_invest(electricityBus_excess)
 +1 flow(electricityBus_excess_0)
-<= 0
+<= 40
 
 c_u_InvestmentFlow_max(electricityBus_excess_1)_:
 -0.80000000000000004 InvestmentFlow_invest(electricityBus_excess)
 +1 flow(electricityBus_excess_1)
-<= 0
+<= 40
 
 c_u_InvestmentFlow_max(electricityBus_excess_2)_:
 -0.80000000000000004 InvestmentFlow_invest(electricityBus_excess)
 +1 flow(electricityBus_excess_2)
-<= 0
+<= 40
 
 c_u_InvestmentFlow_summed_max(electricityBus_excess)_:
 -2.2999999999999998 InvestmentFlow_invest(electricityBus_excess)
 +1 flow(electricityBus_excess_0)
 +1 flow(electricityBus_excess_1)
 +1 flow(electricityBus_excess_2)
-<= 0
+<= 114.99999999999999
 
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0

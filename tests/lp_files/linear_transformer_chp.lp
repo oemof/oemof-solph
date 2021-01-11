@@ -1,6 +1,6 @@
-\* Source Pyomo model name=OperationalModel *\
+\* Source Pyomo model name=Model *\
 
-min 
+min
 objective:
 +50 flow(gasBus_CHPpowerplantGas_0)
 +50 flow(gasBus_CHPpowerplantGas_1)
@@ -44,37 +44,37 @@ c_e_Bus_balance(heatBus_2)_:
 +1 flow(CHPpowerplantGas_heatBus_2)
 = 0
 
-c_e_LinearTransformer_relation(CHPpowerplantGas_electricityBus_0)_:
+c_e_Transformer_relation(CHPpowerplantGas_gasBus_electricityBus_0)_:
 -1 flow(CHPpowerplantGas_electricityBus_0)
 +0.40000000000000002 flow(gasBus_CHPpowerplantGas_0)
 = 0
 
-c_e_LinearTransformer_relation(CHPpowerplantGas_electricityBus_1)_:
+c_e_Transformer_relation(CHPpowerplantGas_gasBus_electricityBus_1)_:
 -1 flow(CHPpowerplantGas_electricityBus_1)
 +0.40000000000000002 flow(gasBus_CHPpowerplantGas_1)
 = 0
 
-c_e_LinearTransformer_relation(CHPpowerplantGas_electricityBus_2)_:
+c_e_Transformer_relation(CHPpowerplantGas_gasBus_electricityBus_2)_:
 -1 flow(CHPpowerplantGas_electricityBus_2)
 +0.40000000000000002 flow(gasBus_CHPpowerplantGas_2)
 = 0
 
-c_e_LinearTransformer_relation(CHPpowerplantGas_heatBus_0)_:
+c_e_Transformer_relation(CHPpowerplantGas_gasBus_heatBus_0)_:
 -1 flow(CHPpowerplantGas_heatBus_0)
 +0.5 flow(gasBus_CHPpowerplantGas_0)
 = 0
 
-c_e_LinearTransformer_relation(CHPpowerplantGas_heatBus_1)_:
+c_e_Transformer_relation(CHPpowerplantGas_gasBus_heatBus_1)_:
 -1 flow(CHPpowerplantGas_heatBus_1)
 +0.5 flow(gasBus_CHPpowerplantGas_1)
 = 0
 
-c_e_LinearTransformer_relation(CHPpowerplantGas_heatBus_2)_:
+c_e_Transformer_relation(CHPpowerplantGas_gasBus_heatBus_2)_:
 -1 flow(CHPpowerplantGas_heatBus_2)
 +0.5 flow(gasBus_CHPpowerplantGas_2)
 = 0
 
-c_e_ONE_VAR_CONSTANT: 
+c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds

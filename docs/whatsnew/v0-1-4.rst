@@ -1,0 +1,18 @@
+v0.1.4 (March 28, 2017)
+-----------------------
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* fix examples (`issue #298 <https://github.com/oemof/oemof-solph/issues/298>`_)
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* Adapt installation guide.
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+ * Uwe Krien
+ * Stephan Günther
