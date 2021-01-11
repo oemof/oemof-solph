@@ -771,8 +771,8 @@ class TestsConstraint:
 
         self.compare_lp_files('offsettransformer.lp')
 
-    def test_dsm_module_delay(self):
-        """Constraint test of Sink-DSM with method=delay"""
+    def test_dsm_module_DIW(self):
+        """Constraint test of SinkDSM with approach=DLR"""
 
         b_elec = solph.Bus(label='bus_elec')
         solph.custom.SinkDSM(
@@ -781,14 +781,39 @@ class TestsConstraint:
             demand=[1] * 3,
             capacity_up=[0.5] * 3,
             capacity_down=[0.5] * 3,
-            method='delay',
+            approach='DIW',
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
             delay_time=1,
-            cost_dsm_down=2,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False
         )
-        self.compare_lp_files('dsm_module_delay.lp')
+        self.compare_lp_files('dsm_module_DIW.lp')
 
-    def test_dsm_module_interval(self):
-        """Constraint test of Sink-DSM with method=interval"""
+    def test_dsm_module_DLR(self):
+        """Constraint test of SinkDSM with approach=DLR"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            approach='DLR',
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False
+        )
+        self.compare_lp_files('dsm_module_DLR.lp')
+
+    def test_dsm_module_oemof(self):
+        """Constraint test of SinkDSM with approach=oemof"""
 
         b_elec = solph.Bus(label='bus_elec')
         solph.custom.SinkDSM(
@@ -797,11 +822,15 @@ class TestsConstraint:
             demand=[1] * 3,
             capacity_up=[0.5, 0.4, 0.5],
             capacity_down=[0.5, 0.4, 0.5],
-            method='interval',
+            approach='oemof',
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
             shift_interval=2,
-            cost_dsm_down=2,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False
         )
-        self.compare_lp_files('dsm_module_interval.lp')
+        self.compare_lp_files('dsm_module_oemof.lp')
 
     def test_nonconvex_investment_storage_without_offset(self):
         """All invest variables are coupled. The invest variables of the Flows
