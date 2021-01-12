@@ -331,3 +331,132 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
+
+
+class MultiPeriodModel(BaseModel):
+    """ An  energy system model for operational and investment
+    optimization with multi period investment possibility.
+
+    Parameters
+    ----------
+    energysystem : EnergySystem object
+        Object that holds the nodes of an oemof energy system graph
+    constraint_groups : list
+        Solph looks for these groups in the given energy system and uses them
+        to create the constraints of the optimization problem.
+        Defaults to `Model.CONSTRAINTS`
+
+    **The following basic sets are created**:
+
+    NODES :
+        A set with all nodes of the given energy system.
+
+    TIMESTEPS :
+        A set with all timesteps of the given time horizon.
+
+    TIMEINDEX :
+        A 2-dim set with all periods, timesteps.
+
+    PERIODS :
+        A set with all periods
+
+    FLOWS :
+        A 2 dimensional set with all flows. Index: `(source, target)`
+
+    **The following basic variables are created**:
+
+    flow
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
+        Note: Bounds of this variable are set depending on attributes of
+        the corresponding flow object.
+
+    """
+    CONSTRAINT_GROUPS = [blocks.Bus, blocks.Transformer,
+                         blocks.InvestmentFlow, blocks.Flow,
+                         blocks.NonConvexFlow]
+
+    def __init__(self, energysystem, **kwargs):
+        super().__init__(energysystem, **kwargs)
+
+    def _add_parent_block_sets(self):
+        """
+        """
+        # set with all nodes
+        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+
+        # pyomo set for timesteps of optimization problem
+        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
+                                ordered=True)
+
+        # periods equal to years (will probably be the standard use case)
+        periods = set(getattr(self.es.timeindex, 'year'))
+        d = dict(zip(periods, range(len(periods))))
+
+        # pyomo set for timesteps of optimization problem
+        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
+                                ordered=True)
+
+        self.TIMEINDEX = po.Set(
+            initialize=list(zip([d[p] for p in self.es.timeindex.year],
+                                range(len(self.es.timeindex)))),
+            ordered=True)
+
+        self.PERIODS = po.Set(initialize=range(len(periods)))
+
+        # TODO: Make this robust
+        self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS) /
+                                              len(self.PERIODS)))
+                                 for a in self.PERIODS}
+
+        # previous timesteps
+        previous_timesteps = [x - 1 for x in self.TIMESTEPS]
+        previous_timesteps[0] = self.TIMESTEPS.last()
+
+        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
+
+        # pyomo set for all flows in the energy system graph
+        self.FLOWS = po.Set(initialize=self.flows.keys(),
+                            ordered=True, dimen=2)
+
+        self.BIDIRECTIONAL_FLOWS = po.Set(initialize=[
+            k for (k, v) in self.flows.items() if hasattr(v, 'bidirectional')],
+            ordered=True, dimen=2,
+            within=self.FLOWS)
+
+        self.UNIDIRECTIONAL_FLOWS = po.Set(
+            initialize=[k for (k, v) in self.flows.items() if not
+            hasattr(v, 'bidirectional')],
+            ordered=True, dimen=2, within=self.FLOWS)
+
+    def _add_parent_block_variables(self):
+        """
+        """
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+                           within=po.Reals)
+
+        for (o, i) in self.FLOWS:
+            if self.flows[o, i].nominal_value is not None:
+                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].value = (
+                            self.flows[o, i].fix[t] *
+                            self.flows[o, i].nominal_value)
+                        self.flow[o, i, t].fix()
+                else:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].setub(
+                            self.flows[o, i].max[t] *
+                            self.flows[o, i].nominal_value)
+
+                    if not self.flows[o, i].nonconvex:
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].setlb(
+                                self.flows[o, i].min[t] *
+                                self.flows[o, i].nominal_value)
+                    elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].setlb(0)
+            else:
+                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].setlb(0)
