@@ -170,7 +170,7 @@ class ElectricalLineBlock(SimpleBlock):
 
         # create voltage angle variables
         self.ELECTRICAL_BUSES = Set(initialize=[n for n in m.es.nodes
-                                                if isinstance(n, ElectricalBus)])
+                                    if isinstance(n, ElectricalBus)])
 
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
@@ -1471,33 +1471,6 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
         \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
         \in \mathbb{T} \mid k \mod \tau = 0\} \\
-        &
-
-
-    **Table: Symbols and attribute names of variables and parameters**
-
-        .. csv-table:: Variables (V) and Parameters (P)
-            :header: "symbol", "attribute", "type", "explanation"
-            :widths: 1, 1, 1, 1
-
-            ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.dsm_up` ","V", "DSM
-            up shift"
-            ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.dsm_down` ","V","DSM
-            down shift"
-            ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
-            flowing in from electrical bus"
-            ":math:`demand_{t}`",":attr:`demand[t]`","P", "Electrical demand
-            series"
-            ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Capacity
-            DSM down shift capacity"
-            ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Capacity
-            DSM up shift "
-            ":math:`\tau`",":attr:`~SinkDSM.shift_interval`","P", "Shift
-            interval"
-            ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
-            load shifting processes"
-            ":math:`\mathbb{T}` "," ","P", "Time steps"
-
     """
     CONSTRAINT_GROUP = True
 
@@ -1714,8 +1687,9 @@ class SinkDSMDIWBlock(SimpleBlock):
 
             ":math:`DSM_{t}^{up}` ",":attr:`dsm_up[g,t]`", "V","DSM up
             shift (additional load) in hour t"
-            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V","DSM down
-            shift (less load) in hour tt to compensate for upwards shifts in hour t"
+            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V",
+            "DSM down shift (less load) in hour tt
+            to compensate for upwards shifts in hour t"
             ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
             flowing in from electrical bus"
             ":math:`L`",":attr:`delay_time`","P", "Delay time for
@@ -1727,8 +1701,9 @@ class SinkDSMDIWBlock(SimpleBlock):
             ":math:`E_{t}^{up}` ", ":attr:`capacity_up[t]`", "P","Capacity
             ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
             load shifting processes"
-            ":math:`\R`",":attr:`recovery_time_shift`","P", "Minimum time
-            between the end of one load shifting process and the start of another"
+            ":math:`\R`",":attr:`recovery_time_shift`","P",
+            "Minimum time between the end
+            of one load shifting process and the start of another"
             DSM up shift"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
 
@@ -2247,40 +2222,6 @@ class SinkDSMDIWInvestmentBlock(SinkDSMDIWBlock):
         &
         (6) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up} \leq E_{t}^{up} \cdot L
         \quad \forall t \in \mathbb{T} \\
-        &
-
-
-
-    **Table: Symbols and attribute names of variables and parameters**
-
-
-        .. csv-table:: Variables (V) and Parameters (P)
-            :header: "symbol", "attribute", "type", "explanation"
-            :widths: 1, 1, 1, 1
-
-
-
-            ":math:`DSM_{t}^{up}` ",":attr:`dsm_up[g,t]`", "V","DSM up
-            shift (additional load) in hour t"
-            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V","DSM down
-            shift (less load) in hour tt to compensate for upwards shifts in hour t"
-            ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
-            flowing in from electrical bus"
-            ":math:`L`",":attr:`delay_time`","P", "Delay time for
-            load shift"
-            ":math:`demand_{t}` ",":attr:`demand[t]`","P","Electrical
-            demand series"
-            ":math:`E_{t}^{do}` ",":attr:`capacity_down[t]`","P","Capacity
-            DSM down shift "
-            ":math:`E_{t}^{up}` ", ":attr:`capacity_up[t]`", "P","Capacity
-            ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
-            load shifting processes"
-            ":math:`\R`",":attr:`recovery_time_shift`","P", "Minimum time
-            between the end of one load shifting process and the start of another"
-            DSM up shift"
-            ":math:`\mathbb{T}` "," ","P", "Time steps"
-
-
     """
     CONSTRAINT_GROUP = True
 
@@ -4310,7 +4251,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
                         # maximum capacity eligibly for load shifting
                         rhs = (max(g.capacity_down[t] * g.flex_share_down,
-                                  g.capacity_up[t] * g.flex_share_up)
+                                   g.capacity_up[t] * g.flex_share_up)
                                * self.invest[g])
 
                         # add constraint
