@@ -87,6 +87,77 @@ class Investment:
             raise AttributeError(e3)
 
 
+class MultiPeriod:
+    """
+    Parameters
+    ----------
+    maximum : float, :math:`P_{invest,max}` or :math:`E_{invest,max}`
+        Maximum of the additional invested capacity
+    minimum : float, :math:`P_{invest,min}` or :math:`E_{invest,min}`
+        Minimum of the additional invested capacity. If `nonconvex` is `True`,
+        `minimum` defines the threshold for the invested capacity.
+    ep_costs : float, :math:`c_{invest,var}`
+        Equivalent periodical costs for the investment per flow capacity.
+    existing : float, :math:`P_{exist}` or :math:`E_{exist}`
+        Existing / installed capacity. The invested capacity is added on top
+        of this value. Not applicable if `nonconvex` is set to `True`.
+    nonconvex : bool
+        If `True`, a binary variable for the status of the investment is
+        created. This enables additional fix investment costs (*offset*)
+        independent of the invested flow capacity. Therefore, use the `offset`
+        parameter.
+    offset : float, :math:`c_{invest,fix}`
+        Additional fix investment costs. Only applicable if `nonconvex` is set
+        to `True`.
+
+
+    For the variables, constraints and parts of the objective function, which
+    are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
+    :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
+
+    """
+    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
+                 existing=0, nonconvex=False, offset=0, **kwargs):
+
+        self.maximum = maximum
+        self.minimum = minimum
+        self.ep_costs = ep_costs
+        self.existing = existing
+        self.nonconvex = nonconvex
+        self.offset = offset
+
+        for attribute in kwargs.keys():
+            value = kwargs.get(attribute)
+            setattr(self, attribute, value)
+
+        self._check_invest_attributes()
+        self._check_invest_attributes_maximum()
+        self._check_invest_attributes_offset()
+
+    def _check_invest_attributes(self):
+        if (self.existing != 0) and (self.nonconvex is True):
+            e1 = ("Values for 'offset' and 'existing' are given in"
+                  " investment attributes. \n These two options cannot be "
+                  "considered at the same time.")
+            raise AttributeError(e1)
+
+    def _check_invest_attributes_maximum(self):
+        if (self.maximum == float('+inf')) and (self.nonconvex is True):
+            e2 = ("Please provide an maximum investment value in case of"
+                  " nonconvex investment (nonconvex=True), which is in the"
+                  " expected magnitude."
+                  " \nVery high maximum values (> 10e8) as maximum investment"
+                  " limit might lead to numeric issues, so that no investment"
+                  " is done, although it is the optimal solution!")
+            raise AttributeError(e2)
+
+    def _check_invest_attributes_offset(self):
+        if (self.offset != 0) and (self.nonconvex is False):
+            e3 = ("If `nonconvex` is `False`, the `offset` parameter will be"
+                  " ignored.")
+            raise AttributeError(e3)
+
+
 class NonConvex:
     """
     Parameters

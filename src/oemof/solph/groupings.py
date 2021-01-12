@@ -74,6 +74,20 @@ investment_flow_grouping = groupings.FlowsWithNodes(
     filter=_investment_grouping)
 
 
+def _multiperiod_grouping(stf):
+    if hasattr(stf[2], 'multiperiod'):
+        if stf[2].multiperiod is not None:
+            return True
+    else:
+        return False
+
+
+multiperiod_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=blocks.MultiPeriodFlow,
+    # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
+    filter=_multiperiod_grouping)
+
+
 def _nonconvex_grouping(stf):
     if hasattr(stf[2], 'nonconvex'):
         if stf[2].nonconvex is not None:
@@ -88,4 +102,5 @@ nonconvex_flow_grouping = groupings.FlowsWithNodes(
 
 
 GROUPINGS = [constraint_grouping, investment_flow_grouping,
+             multiperiod_flow_grouping,
              standard_flow_grouping, nonconvex_flow_grouping]
