@@ -384,10 +384,6 @@ class MultiPeriodModel(BaseModel):
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
-        # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
-                                ordered=True)
-
         # periods equal to years (will probably be the standard use case)
         periods = set(getattr(self.es.timeindex, 'year'))
         d = dict(zip(periods, range(len(periods))))
@@ -403,7 +399,8 @@ class MultiPeriodModel(BaseModel):
 
         self.PERIODS = po.Set(initialize=range(len(periods)))
 
-        # TODO: Make this robust
+        # TODO: Make this robust -> number of timesteps per period
+        # Calculates an average if leap years are included
         self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS) /
                                               len(self.PERIODS)))
                                  for a in self.PERIODS}
@@ -431,32 +428,32 @@ class MultiPeriodModel(BaseModel):
     def _add_parent_block_variables(self):
         """
         """
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX,
                            within=po.Reals)
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t] *
                             self.flows[o, i].nominal_value)
-                        self.flow[o, i, t].fix()
+                        self.flow[o, i, p, t].fix()
                 else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t] *
                             self.flows[o, i].nominal_value)
 
                     if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t] *
                                 self.flows[o, i].nominal_value)
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setlb(0)
