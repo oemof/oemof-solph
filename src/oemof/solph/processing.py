@@ -19,6 +19,7 @@ from itertools import groupby
 
 import pandas as pd
 from oemof.network.network import Node
+from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
 from oemof.solph.helpers import flatten
@@ -77,14 +78,20 @@ def create_dataframe(om):
     components or the timesteps.
     """
     # get all pyomo variables including their block
-    block_vars = []
-    for bv in om.component_data_objects(Var):
-        block_vars.append(bv.parent_component())
-    block_vars = list(set(block_vars))
-
-    # write them into a dict with tuples as keys
-    var_dict = {(str(bv).split('.')[0], str(bv).split('.')[-1], i): bv[i].value
-                for bv in block_vars for i in getattr(bv, '_index')}
+    block_vars = list(set([
+        bv.parent_component() for bv in om.component_data_objects(Var)]))
+    var_dict = {}
+    for bv in block_vars:
+        # Drop the auxiliary variables introduced by pyomo's Piecewise
+        parent_component = bv.parent_block().parent_component()
+        if not isinstance(parent_component, IndexedPiecewise):
+            for i in getattr(bv, '_index'):
+                key = (
+                    str(bv).split('.')[0],
+                    str(bv).split('.')[-1],
+                    i)
+                value = bv[i].value
+                var_dict[key] = value
 
     # use this to create a pandas dataframe
     df = pd.DataFrame(list(var_dict.items()), columns=['pyomo_tuple', 'value'])
@@ -94,6 +101,7 @@ def create_dataframe(om):
     # on which dimension the variable/parameter has (scalar/sequence).
     # columns for the oemof tuple and timestep are created
     df['oemof_tuple'] = df['pyomo_tuple'].map(get_tuple)
+    df = df[df['oemof_tuple'].map(lambda x: x is not None)]
     df['timestep'] = df['oemof_tuple'].map(get_timestep)
     df['oemof_tuple'] = df['oemof_tuple'].map(remove_timestep)
 
