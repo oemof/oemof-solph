@@ -19,9 +19,9 @@ from itertools import groupby
 
 import pandas as pd
 from pyomo.core.base.piecewise import IndexedPiecewise
+from oemof.network.network import Node
 from pyomo.core.base.var import Var
 
-from oemof.network.network import Node
 from oemof.solph.helpers import flatten
 
 

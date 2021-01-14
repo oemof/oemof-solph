@@ -22,6 +22,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import groupings as groupings
+
 from oemof.solph import blocks
 
 
