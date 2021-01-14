@@ -12,8 +12,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import numpy as np
-import oemof.solph as solph
 import pandas as pd
+import oemof.solph as solph
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
