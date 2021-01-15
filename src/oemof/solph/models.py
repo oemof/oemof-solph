@@ -18,7 +18,9 @@ from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
-from oemof.solph import blocks
+# TODO: Change imports back!
+#from oemof.solph import blocks
+import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
 
@@ -371,9 +373,9 @@ class MultiPeriodModel(BaseModel):
         the corresponding flow object.
 
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.Transformer,
-                         blocks.InvestmentFlow, blocks.Flow,
-                         blocks.NonConvexFlow]
+    CONSTRAINT_GROUPS = [blocks.MultiPeriodBus, blocks.MultiPeriodTransformer,
+                         blocks.InvestmentFlow, #blocks.Flow,
+                         blocks.NonConvexFlow, blocks.MultiPeriodFlow]
 
     def __init__(self, energysystem, **kwargs):
         super().__init__(energysystem, **kwargs)
@@ -385,7 +387,7 @@ class MultiPeriodModel(BaseModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # periods equal to years (will probably be the standard use case)
-        periods = set(getattr(self.es.timeindex, 'year'))
+        periods = sorted(list(set(getattr(self.es.timeindex, 'year'))))
         d = dict(zip(periods, range(len(periods))))
 
         # pyomo set for timesteps of optimization problem
@@ -455,5 +457,5 @@ class MultiPeriodModel(BaseModel):
                             self.flow[o, i, p, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMEINDEX:
+                    for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setlb(0)
