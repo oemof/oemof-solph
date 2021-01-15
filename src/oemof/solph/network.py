@@ -23,7 +23,9 @@ from oemof.network import energy_system as es
 from oemof.network import network as on
 from oemof.tools import debugging
 
-from oemof.solph import blocks
+# TODO: Change imports back!
+#from oemof.solph import blocks
+import blocks
 from oemof.solph.plumbing import sequence
 
 
@@ -162,7 +164,7 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer']
+                   'investment', 'multiperiod', 'nonconvex', 'integer']
         sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'variable_costs': 0,
@@ -233,10 +235,13 @@ class Bus(on.Bus):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.balanced = kwargs.get('balanced', True)
+        self.multiperiod = kwargs.get('multiperiod', False)
 
     def constraint_group(self):
-        if self.balanced:
+        if self.balanced and not self.multiperiod:
             return blocks.Bus
+        if self.balanced and self.multiperiod:
+            return blocks.MultiPeriodBus
         else:
             return None
 
@@ -329,8 +334,19 @@ class Transformer(on.Transformer):
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
 
+        # Check outputs for multiperiod modeling
+        for v in self.outputs.values():
+            if hasattr(v, 'multiperiod'):
+                self.multiperiod = True
+                break
+            else:
+                self.multiperiod = False
+
     def constraint_group(self):
-        return blocks.Transformer
+        if not self.multiperiod:
+            return blocks.Transformer
+        else:
+            return blocks.MultiPeriodTransformer
 
 
 def check_node_object_for_missing_attribute(obj, attribute):
