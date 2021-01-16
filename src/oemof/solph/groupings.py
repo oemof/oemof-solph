@@ -23,7 +23,9 @@ SPDX-License-Identifier: MIT
 
 from oemof.network import groupings as groupings
 
-from oemof.solph import blocks
+# TODO: Change back imports!
+import blocks
+#from oemof.solph import blocks
 
 
 def constraint_grouping(node, fallback=lambda *xs, **ks: None):
