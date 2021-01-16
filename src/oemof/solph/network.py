@@ -117,6 +117,11 @@ class Flow(on.Edge):
         the optimization problem. Note: This will refer all attributes to an
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
+    multiperiod : :class:`MultiPeriod <oemof.solph.options.MultiPeriod>`
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem. Note: This will refer all attributes to an
+        multiperiod variable instead of to the nominal_value. The nominal_value
+        should not be set (or set to None) if a multiperiod object is used.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
@@ -164,7 +169,8 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'multiperiod', 'nonconvex', 'integer']
+                   'investment', 'multiperiod',
+                   'nonconvex', 'integer']
         sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'variable_costs': 0,
@@ -172,6 +178,7 @@ class Flow(on.Edge):
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
 
+        # TODO: Reinclude fixed_costs for multi period investment modeling
         if 'fixed_costs' in keys:
             raise AttributeError(
                 "The `fixed_costs` attribute has been removed"
@@ -337,10 +344,11 @@ class Transformer(on.Transformer):
         # Check outputs for multiperiod modeling
         for v in self.outputs.values():
             if hasattr(v, 'multiperiod'):
-                self.multiperiod = True
-                break
-            else:
-                self.multiperiod = False
+                if v.multiperiod == True:
+                    self.multiperiod = True
+                    break
+                else:
+                    self.multiperiod = False
 
     def constraint_group(self):
         if not self.multiperiod:
