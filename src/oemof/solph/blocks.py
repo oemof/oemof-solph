@@ -728,7 +728,7 @@ class MultiPeriodFlow(SimpleBlock):
         :widths: 1, 1, 1
 
         ":math:`P(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
-        ":math:`P_{invest}`", ":py:obj:`invest[i, o]`", "Invested flow
+        ":math:`P_{invest}`", ":py:obj:`invest[i, o, p]`", "Invested flow
         capacity"
         ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status
         of investment"
@@ -740,7 +740,7 @@ class MultiPeriodFlow(SimpleBlock):
     ===================  =============================  =========
     :math:`P(t)`         :py:obj:`flow[n, o, t]`         Actual flow value
 
-    :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
+    :math:`P_{invest}`   :py:obj:`invest[i, o, p]`       Invested flow capacity
 
     :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
 
@@ -753,7 +753,7 @@ class MultiPeriodFlow(SimpleBlock):
     +====================+===============================+=============================+
     | :math:`P(t)`       | :py:obj:`flow[n, o, t]`       | Actual flow value           |
     +--------------------+-------------------------------+-----------------------------+
-    | :math:`P_{invest}` | :py:obj:`invest[i, o]`        | Invested flow capacity      |
+    | :math:`P_{invest}` | :py:obj:`invest[i, o, p]`     | Invested flow capacity      |
     +--------------------+-------------------------------+-----------------------------+
     | :math:`b_{invest}` | :py:obj:`invest_status[i, o]` | Binary status of investment |
     +--------------------+-------------------------------+-----------------------------+
@@ -853,7 +853,7 @@ class MultiPeriodFlow(SimpleBlock):
         #   every period or be given as a sequence indexed by periods
         # - Overall investment limit: Should best be integrated as a summed
         #   maximum ...
-        def _investvar_bound_rule(block, i, o):
+        def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of invest variable.
             """
             if (i, o) in self.CONVEX_MULTIPERIODFLOWS:
@@ -905,7 +905,8 @@ class MultiPeriodFlow(SimpleBlock):
             of multiperiod flow to (normed) actual value
             """
             expr = (m.flow[i, o, p, t] == (
-                    (m.flows[i, o].multiperiod.existing + self.invest[i, o]) *
+                    (m.flows[i, o].multiperiod.existing
+                     + self.invest[i, o, p]) *
                     m.flows[i, o].fix[t]))
 
             return expr
@@ -917,7 +918,7 @@ class MultiPeriodFlow(SimpleBlock):
             variable in multiperiod case.
             """
             expr = (m.flow[i, o, p, t] <= (
-                (m.flows[i, o].multiperiod.existing + self.invest[i, o]) *
+                (m.flows[i, o].multiperiod.existing + self.invest[i, o, p]) *
                 m.flows[i, o].max[t]))
             return expr
         self.max = Constraint(self.NON_FIXED_MULTIPERIODFLOWS, m.TIMEINDEX,
@@ -928,7 +929,7 @@ class MultiPeriodFlow(SimpleBlock):
             variable in multiperiod case.
             """
             expr = (m.flow[i, o, p, t] >= (
-                (m.flows[i, o].multiperiod.existing + self.invest[i, o]) *
+                (m.flows[i, o].multiperiod.existing + self.invest[i, o, p]) *
                 m.flows[i, o].min[t]))
             return expr
         self.min = Constraint(self.MIN_MULTIPERIODFLOWS, m.TIMEINDEX,
@@ -941,7 +942,8 @@ class MultiPeriodFlow(SimpleBlock):
             expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
                         for p, t in m.TIMEINDEX) <=
                     m.flows[i, o].summed_max * (
-                        self.invest[i, o] +
+                        sum(self.invest[i, o, p]
+                            for p in m.PERIODS) +
                         m.flows[i, o].multiperiod.existing))
             return expr
         self.summed_max = Constraint(self.SUMMED_MAX_MULTIPERIODFLOWS,
@@ -954,7 +956,8 @@ class MultiPeriodFlow(SimpleBlock):
             expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
                         for p, t in m.TIMEINDEX) >=
                     ((m.flows[i, o].multiperiod.existing +
-                      self.invest[i, o]) *
+                      sum(self.invest[i, o, p]
+                          for p in m.PERIODS)) *
                      m.flows[i, o].summed_min))
             return expr
         self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODFLOWS,
