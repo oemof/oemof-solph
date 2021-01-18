@@ -87,7 +87,32 @@ class Investment:
             raise AttributeError(e3)
 
 
-class MultiPeriod:
+# class MultiPeriod:
+#     """
+#     Parameters
+#     ----------
+#     nonconvex : bool
+#         If `True`, a binary variable for the status of the investment is
+#         created. This enables additional fix investment costs (*offset*)
+#         independent of the invested flow capacity. Therefore, use the `offset`
+#         parameter.
+#
+#
+#     For the variables, constraints and parts of the objective function, which
+#     are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
+#     :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
+#
+#     """
+#     def __init__(self, nonconvex=False, **kwargs):
+#
+#         self.nonconvex = nonconvex
+#
+#         for attribute in kwargs.keys():
+#             value = kwargs.get(attribute)
+#             setattr(self, attribute, value)
+
+
+class MultiPeriodInvestment:
     """
     Parameters
     ----------

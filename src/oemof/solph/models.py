@@ -375,7 +375,8 @@ class MultiPeriodModel(BaseModel):
     """
     CONSTRAINT_GROUPS = [blocks.MultiPeriodBus, blocks.MultiPeriodTransformer,
                          blocks.InvestmentFlow, #blocks.Flow,
-                         blocks.NonConvexFlow, blocks.MultiPeriodFlow]
+                         blocks.NonConvexFlow, blocks.MultiPeriodFlow,
+                         blocks.MultiPeriodInvestmentFlow]
 
     def __init__(self, energysystem, **kwargs):
         super().__init__(energysystem, **kwargs)

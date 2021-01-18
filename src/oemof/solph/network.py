@@ -171,7 +171,7 @@ class Flow(on.Edge):
         super().__init__()
 
         scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'multiperiod',
+                   'investment', 'multiperiod', 'multiperiodinvestment',
                    'nonconvex', 'integer']
         sequences = ['fix', 'variable_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
