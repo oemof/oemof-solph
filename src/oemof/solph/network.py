@@ -345,8 +345,10 @@ class Transformer(on.Transformer):
 
         # Check outputs for multiperiod modeling
         for v in self.outputs.values():
-            if hasattr(v, 'multiperiod'):
-                if v.multiperiod is not None:
+            if (hasattr(v, 'multiperiod')
+                or hasattr(v, 'multiperiodinvestment')):
+                if (v.multiperiod is not None
+                    or v.multiperiodinvestment is not None):
                     self.multiperiod = True
                     break
                 else:
@@ -356,7 +358,6 @@ class Transformer(on.Transformer):
         if not self.multiperiod:
             return blocks.Transformer
         else:
-            print("Juti, bauen wir ma nen MultiPeriodTransformer!")
             return blocks.MultiPeriodTransformer
 
 
