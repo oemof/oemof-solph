@@ -157,12 +157,15 @@ pp_natgas_GT = network.Transformer(
         # investment=options.Investment(
         multiperiodinvestment=options.MultiPeriodInvestment(
             maximum=1000,
-            ep_costs=[0.5e6, 0.6e6, 0.8e6],
+            ep_costs=[0.6e6, 0.5e6, 0.8e6],
             existing=0,
+            lifetime=20,
             # overall_maximum=9
             # nonconvex=True,
+            # age=39,
+            # lifetime=40
         ),
-        # summed_max=8,
+        # summed_max=2,
         # min=0.1,
         # max=0.9,
         # fix=1,
