@@ -142,14 +142,17 @@ class MultiPeriodInvestment:
 
     """
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
-                 existing=0, nonconvex=False, offset=0, **kwargs):
+                 existing=0, nonconvex=False, offset=0,
+                 overall_maximum=None, overall_minimum=None, **kwargs):
 
-        self.maximum = maximum
-        self.minimum = minimum
-        self.ep_costs = ep_costs
+        self.maximum = sequence(maximum)
+        self.minimum = sequence(minimum)
+        self.ep_costs = sequence(ep_costs)
         self.existing = existing
         self.nonconvex = nonconvex
         self.offset = offset
+        self.overall_maximum = overall_maximum
+        self.overall_minimum = overall_minimum
 
         for attribute in kwargs.keys():
             value = kwargs.get(attribute)
