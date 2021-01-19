@@ -1,0 +1,188 @@
+"""
+Test for creating an MultiPeriod optimization model
+
+Create an energy system consisting of the following
+fleets
+- lignite
+- hardcoal
+- CCGT
+- GT
+- Wind
+
+In the first place, no storages are included
+"""
+
+import pandas as pd
+import logging
+
+import models
+import network
+import blocks
+import options
+import processing
+import views
+
+t_idx_1 = pd.date_range('1/1/2020', periods=3, freq='H')
+t_idx_2 = pd.date_range('1/1/2030', periods=3, freq='H')
+t_idx_3 = pd.date_range('1/1/2040', periods=3, freq='H')
+
+# timeindex = {'1': t_idx_1, '2': t_idx_2, '3': t_idx_3}
+
+# Create an overall timeindex
+t_idx_1_Series = pd.Series(index=t_idx_1)
+t_idx_2_Series = pd.Series(index=t_idx_2)
+t_idx_3_Series = pd.Series(index=t_idx_3)
+
+timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
+                       t_idx_3_Series]).index
+
+es = network.EnergySystem(timeindex=timeindex,
+                          timeincrement=[1] * len(timeindex))
+
+# Create buses
+bus_lignite = network.Bus(label='DE_bus_lignite',
+                          # balanced=True)
+                          balanced=True,
+                          multiperiod=True)
+bus_hardcoal = network.Bus(label='DE_bus_hardcoal',
+                           # balanced=True)
+                           balanced=True,
+                           multiperiod=True)
+bus_natgas = network.Bus(label='DE_bus_natgas',
+                         # balanced=True)
+                         balanced=True,
+                         multiperiod=True)
+bus_el = network.Bus(label='DE_bus_el',
+                     # balanced=True)
+                     balanced=True,
+                     multiperiod=True)
+
+# Create sources
+source_lignite = network.Source(
+    label='DE_source_lignite',
+    outputs={bus_lignite: network.Flow(
+        # variable_costs=5)})
+        variable_costs=5,
+        multiperiod=True)})
+source_hardcoal = network.Source(
+    label='DE_source_hardcoal',
+    outputs={bus_hardcoal: network.Flow(
+        # variable_costs=10)})
+        variable_costs=10,
+        multiperiod=True)})
+source_natgas = network.Source(
+    label='DE_source_natgas',
+    outputs={bus_natgas: network.Flow(
+        # variable_costs=20)})
+        variable_costs=20,
+        multiperiod=True)})
+source_wind = network.Source(
+    label='DE_source_wind',
+    outputs={bus_el: network.Flow(  # variable_costs=0)})
+        variable_costs=1000,
+        fix=[90] * len(timeindex),
+        nominal_value=1,
+        multiperiod=True)})
+source_shortage = network.Source(
+    label='DE_source_shortage',
+    outputs={bus_el: network.Flow(
+        variable_costs=1e10,
+        nominal_value=1e10,
+        multiperiod=True)})
+
+# Create sinks
+sink_el = network.Sink(
+    label='DE_sink_el',
+    inputs={bus_el: network.Flow(fix=[100] * len(timeindex),
+                                 nominal_value=1,
+                                 multiperiod=True)})
+sink_excess = network.Sink(
+    label='DE_sink_excess',
+    inputs={bus_el: network.Flow(
+        variable_costs=1e3,
+        nominal_value=1e10,
+        multiperiod=True)})
+
+# Create multiperiod transformers
+pp_lignite = network.Transformer(
+    label='DE_pp_lignite',
+    inputs={bus_lignite: network.Flow(multiperiod=True)},
+    outputs={bus_el: network.Flow(
+        # investment=options.Investment(
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=1000,
+            ep_costs=2e6,
+            existing=0
+        ),
+        # nominal_value=100,
+        variable_costs=1
+    )},
+    conversion_factors={bus_el: 0.38})
+
+pp_hardcoal = network.Transformer(
+    label='DE_pp_hardcoal',
+    inputs={bus_hardcoal: network.Flow(multiperiod=True)},
+    outputs={bus_el: network.Flow(
+        # investment=options.Investment(
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=1000,
+            ep_costs=1.6e6,
+            existing=0
+        ),
+        # nominal_value=100,
+        variable_costs=2
+    )},
+    conversion_factors={bus_el: 0.45})
+
+pp_natgas_CCGT = network.Transformer(
+    label='DE_pp_natgas_CCGT',
+    inputs={bus_natgas: network.Flow(multiperiod=True)},
+    outputs={bus_el: network.Flow(
+        # investment=options.Investment(
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=1000,
+            ep_costs=1e6,
+            existing=0,
+            # overall_minimum=2,
+        ),
+        # nominal_value=100,
+        variable_costs=3
+    )},
+    conversion_factors={bus_el: 0.6})
+
+pp_natgas_GT = network.Transformer(
+    label='DE_pp_natgas_GT',
+    inputs={bus_natgas: network.Flow(multiperiod=True)},
+    outputs={bus_el: network.Flow(
+        # investment=options.Investment(
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=1000,
+            ep_costs=[0.5e6, 0.6e6, 0.8e6],
+            existing=0,
+            # overall_maximum=9
+            # nonconvex=True,
+        ),
+        # summed_max=8,
+        # min=0.1,
+        # max=0.9,
+        # fix=1,
+        # nominal_value=100,
+        variable_costs=4
+    )},
+    conversion_factors={bus_el: 0.4})
+
+es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
+       source_shortage,
+       bus_lignite, bus_hardcoal, bus_natgas, bus_el,
+       pp_lignite, pp_hardcoal, pp_natgas_CCGT, pp_natgas_GT,
+       sink_el, sink_excess,
+       )
+
+test = models.MultiPeriodModel(es)
+test.pprint()
+
+test.solve(solver='gurobi', solve_kwargs={'tee': True})
+
+# es.results['main'] = processing.results(test)
+results = processing.results(test)
+bus_res = views.node(results, bus_el)['sequences']
