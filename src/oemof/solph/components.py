@@ -30,7 +30,9 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 from oemof.solph import network as solph_network
-from oemof.solph.options import Investment
+# TODO: Change back imports!
+#from oemof.solph.options import Investment
+from options import Investment
 from oemof.solph.plumbing import sequence as solph_sequence
 
 
@@ -170,6 +172,7 @@ class GenericStorage(network.Node):
             "invest_relation_output_capacity"
         )
         self._invest_group = isinstance(self.investment, Investment)
+        self.multiperiod = kwargs.get('multiperiod', False)
 
         # Check number of flows.
         self._check_number_of_flows()
@@ -262,10 +265,14 @@ class GenericStorage(network.Node):
             raise AttributeError(msg.format("output", self.label))
 
     def constraint_group(self):
-        if self._invest_group is True:
+        if self._invest_group is True and not self.multiperiod:
             return GenericInvestmentStorageBlock
-        else:
+        elif self._invest_group is True and self.multiperiod:
+            return GenericMultiPeriodInvestmentStorageBlock
+        elif self._invest_group is False and not self.multiperiod:
             return GenericStorageBlock
+        else:
+            return GenericMultiPeriodStorageBlock
 
 
 # Todo: accessed by
@@ -395,11 +402,12 @@ class GenericStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
-        self.STORAGES_WITH_INVEST_FLOW_REL = Set(
-            initialize=[
-                n for n in group if n.invest_relation_input_output is not None
-            ]
-        )
+        # Can / should this be removed?
+        # self.STORAGES_WITH_INVEST_FLOW_REL = Set(
+        #     initialize=[
+        #         n for n in group if n.invest_relation_input_output is not None
+        #     ]
+        # )
 
         #  ************* VARIABLES *****************************
 
@@ -513,23 +521,23 @@ class GenericStorageBlock(SimpleBlock):
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
         )
 
-        def _power_coupled(block, n):
-            """
-            Rule definition for constraint to connect the input power
-            and output power
-            """
-            expr = (
-                m.InvestmentFlow.invest[n, o[n]]
-                + m.flows[n, o[n]].investment.existing
-            ) * n.invest_relation_input_output == (
-                m.InvestmentFlow.invest[i[n], n]
-                + m.flows[i[n], n].investment.existing
-            )
-            return expr
-
-        self.power_coupled = Constraint(
-            self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled
-        )
+        # def _power_coupled(block, n):
+        #     """
+        #     Rule definition for constraint to connect the input power
+        #     and output power
+        #     """
+        #     expr = (
+        #         m.InvestmentFlow.invest[n, o[n]]
+        #         + m.flows[n, o[n]].investment.existing
+        #     ) * n.invest_relation_input_output == (
+        #         m.InvestmentFlow.invest[i[n], n]
+        #         + m.flows[i[n], n].investment.existing
+        #     )
+        #     return expr
+        #
+        # self.power_coupled = Constraint(
+        #     self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled
+        # )
 
     def _objective_expression(self):
         r"""
@@ -730,7 +738,7 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
+                -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
             ) * m.timeincrement[0]
             expr += (
                 m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
@@ -742,7 +750,7 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
         )
 
         # storage balance constraint (every time step but the first)
-        def _storage_balance_rule(block, n, t):
+        def _storage_balance_rule(block, n, p, t):
             """
             Rule definition for the storage balance of every storage n and
             every timestep but the first (t > 0).
@@ -760,10 +768,10 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
             return expr == 0
 
@@ -785,22 +793,25 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
         )
 
-        def _power_coupled(block, n):
+        # TODO: Check why exactly this is needed here
+        def _power_coupled(block, n, p):
             """
             Rule definition for constraint to connect the input power
             and output power
             """
             expr = (
-                m.InvestmentFlow.invest[n, o[n]]
-                + m.flows[n, o[n]].investment.existing
+                m.MuliPeriodInvestmentFlow.invest[n, o[n], p]
+                + m.flows[n, o[n]].multiperiodinvestment.existing
             ) * n.invest_relation_input_output == (
-                m.InvestmentFlow.invest[i[n], n]
-                + m.flows[i[n], n].investment.existing
+                m.MuliPeriodInvestmentFlow.invest[i[n], n, p]
+                + m.flows[i[n], n].multiperiodinvestment.existing
             )
             return expr
 
         self.power_coupled = Constraint(
-            self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled
+            self.STORAGES_WITH_INVEST_FLOW_REL,
+            m.PERIODS,
+            rule=_power_coupled
         )
 
     def _objective_expression(self):
