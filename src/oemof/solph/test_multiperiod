@@ -8,8 +8,7 @@ fleets
 - CCGT
 - GT
 - Wind
-
-In the first place, no storages are included
+- GenericStorage unit
 """
 
 import pandas as pd
@@ -17,7 +16,7 @@ import logging
 
 import models
 import network
-import blocks
+import components
 import options
 import processing
 import views
@@ -81,12 +80,15 @@ source_wind = network.Source(
     outputs={bus_el: network.Flow(  # variable_costs=0)})
         variable_costs=1000,
         fix=[90] * len(timeindex),
+        # fix=[110] + [90] * (len(timeindex) - 1),
+        # nominal_value=1)})
         nominal_value=1,
         multiperiod=True)})
 source_shortage = network.Source(
     label='DE_source_shortage',
     outputs={bus_el: network.Flow(
         variable_costs=1e10,
+        # nominal_value=1e10)})
         nominal_value=1e10,
         multiperiod=True)})
 
@@ -94,12 +96,14 @@ source_shortage = network.Source(
 sink_el = network.Sink(
     label='DE_sink_el',
     inputs={bus_el: network.Flow(fix=[100] * len(timeindex),
+                                 # nominal_value=1)})
                                  nominal_value=1,
                                  multiperiod=True)})
 sink_excess = network.Sink(
     label='DE_sink_excess',
     inputs={bus_el: network.Flow(
         variable_costs=1e3,
+        # nominal_value=1e10)})
         nominal_value=1e10,
         multiperiod=True)})
 
@@ -127,7 +131,9 @@ pp_hardcoal = network.Transformer(
         multiperiodinvestment=options.MultiPeriodInvestment(
             maximum=1000,
             ep_costs=1.6e6,
-            existing=0
+            existing=0,
+            lifetime=20,
+            age=0
         ),
         # nominal_value=100,
         variable_costs=2
@@ -145,7 +151,7 @@ pp_natgas_CCGT = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
-            # overall_minimum=2,
+        #     overall_minimum=2,
         ),
         # nominal_value=100,
         variable_costs=3
@@ -159,14 +165,15 @@ pp_natgas_GT = network.Transformer(
         # investment=options.Investment(
         multiperiodinvestment=options.MultiPeriodInvestment(
             maximum=1000,
+            # ep_costs=0.6e6,
             ep_costs=[0.6e6, 0.5e6, 0.8e6],
             existing=0,
             lifetime=20,
             age=0,
-            overall_maximum=9
-            # nonconvex=True,
-            # age=39,
-            # lifetime=40
+        #     overall_maximum=9
+        #     nonconvex=True,
+        #     age=39,
+        #     lifetime=40
         ),
         # summed_max=2,
         # min=0.1,
@@ -177,13 +184,57 @@ pp_natgas_GT = network.Transformer(
     )},
     conversion_factors={bus_el: 0.4})
 
+# storage_el = components.GenericStorage(
+#     label='DE_storage_el',
+#     inputs={bus_el: network.Flow(
+#         nominal_value=20,
+#         variable_costs=0,
+#         max=1,
+#         multiperiod=True
+#         # investment=options.Investment(
+#         # multiperiodinvestment=options.MultiPeriodInvestment(
+#         #     maximum=20,
+#         #     ep_costs=1000,
+#         #     existing=0)
+#     )},
+#     outputs={bus_el: network.Flow(
+#         nominal_value=20,
+#         variable_costs=0,
+#         max=1,
+#         multiperiod=True
+#         # investment=options.Investment(
+#         # multiperiodinvestment=options.MultiPeriodInvestment(
+#         #     maximum=20,
+#         #     ep_costs=1000,
+#         #     existing=0)
+#     )},
+#     nominal_storage_capacity=20,
+#     loss_rate=0,
+#     initial_storage_level=0,
+#     max_storage_level=1,
+#     min_storage_level=0,
+#     inflow_conversion_factor=0.9,
+#     outflow_conversion_factor=0.9,
+#     balanced=True,
+#     invest_relation_input_output=1,
+#     invest_relation_input_capacity=None,
+#     invest_relation_output_capacity=None,
+#     multiperiod=True
+# #     investment=options.Investment(
+# #     multiperiodinvestment=options.MultiPeriodInvestment(
+# #         maximum=20,
+# #         ep_costs=1000,
+# #         existing=0)
+# )
+
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        source_shortage,
        bus_lignite, bus_hardcoal, bus_natgas, bus_el,
        pp_lignite, pp_hardcoal, pp_natgas_CCGT, pp_natgas_GT,
-       sink_el, sink_excess,
+       sink_el, sink_excess, #storage_el,
        )
 
+# test = models.Model(es)
 test = models.MultiPeriodModel(es)
 test.pprint()
 
