@@ -1176,6 +1176,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                 for p in m.PERIODS:
                     age = m.flows[i, o].multiperiodinvestment.age
                     lifetime = m.flows[i, o].multiperiodinvestment.lifetime
+                    print(m.flows[i, o])
+                    print(age, lifetime)
                     if lifetime <= p:
                         expr = (self.old[i, o, p]
                                 == self.invest[i, o, p - lifetime])
@@ -1193,12 +1195,6 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.old_rule_build = BuildAction(
             rule=_old_capacity_rule)
 
-        # TODO: Decide on how to deal with unit lifetimes
-        # Option 1: Differentiate existing and new built units
-        # - Existing: cap_existing or 0
-        # - New built: new_built cap that has not exceeded its lifetime
-        # Option 2: Do not differentiate -> Check implementation from
-        # Hannes Giehl which seems usable!
         def _investflow_fixed_rule(block):
             """Rule definition of constraint to fix flow variable
             of multiperiodinvestment flow to (normed) actual value
@@ -1283,30 +1279,49 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODFLOWS,
                                      rule=_summed_min_investflow_rule)
 
-        def _overall_maximum_investflow_rule(block, i, o):
+        # Note: There are two different options to define an overall maximum:
+        # 1.) overall_max = limit for (net) installed capacity for each period
+        # 2.) overall max = sum of all (gross) investments occuring
+        def _overall_maximum_investflow_rule(block):
             """Rule definition for maximum overall investment
             in multiperiodinvestment case.
             """
-            expr = (sum(self.invest[i, o, p]
-                        for p in m.PERIODS) +
-                    m.flows[i, o].multiperiodinvestment.existing <=
-                    m.flows[i, o].multiperiodinvestment.overall_maximum)
-            return expr
+            # expr = (sum(self.invest[i, o, p]
+            #             for p in m.PERIODS) +
+            #         m.flows[i, o].multiperiodinvestment.existing <=
+            #         m.flows[i, o].multiperiodinvestment.overall_maximum)
+            # return expr
+            for i, o in self.OVERALL_MAXIMUM_MULTIPERIODFLOWS:
+                for p in m.PERIODS:
+                    expr = (self.total[i, o, p] <=
+                            m.flows[i, o].multiperiodinvestment.overall_maximum)
+                    self.overall_maximum.add((i, o, p), expr)
         self.overall_maximum = Constraint(
             self.OVERALL_MAXIMUM_MULTIPERIODFLOWS,
+            m.PERIODS,
+            noruleinit=True)
+        self.overall_maximum_build = BuildAction(
             rule=_overall_maximum_investflow_rule)
 
-        def _overall_minimum_investflow_rule(block, i, o):
+        def _overall_minimum_investflow_rule(block):
             """Rule definition for minimum overall investment
             in multiperiodinvestment case.
             """
-            expr = (m.flows[i, o].multiperiodinvestment.overall_minimum <=
-                    sum(self.invest[i, o, p]
-                        for p in m.PERIODS) +
-                    m.flows[i, o].multiperiodinvestment.existing)
-            return expr
+            # expr = (m.flows[i, o].multiperiodinvestment.overall_minimum <=
+            #         sum(self.invest[i, o, p]
+            #             for p in m.PERIODS) +
+            #         m.flows[i, o].multiperiodinvestment.existing)
+            # return expr
+            for i, o in self.OVERALL_MINIMUM_MULTIPERIODFLOWS:
+                for p in m.PERIODS:
+                    expr = (m.flows[i, o].multiperiodinvestment.overall_maximum
+                            <= self.total[i, o, p])
+                    self.overall_minimum.add((i, o, p), expr)
         self.overall_minimum = Constraint(
             self.OVERALL_MINIMUM_MULTIPERIODFLOWS,
+            m.PERIODS,
+            noruleinit=True)
+        self.overall_minimum_build = BuildAction(
             rule=_overall_minimum_investflow_rule)
 
     def _objective_expression(self):
