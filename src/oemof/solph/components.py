@@ -31,8 +31,8 @@ from pyomo.environ import Var
 
 from oemof.solph import network as solph_network
 # TODO: Change back imports!
-#from oemof.solph.options import Investment
-from options import Investment
+# from oemof.solph.options import Investment
+from options import Investment, MultiPeriodInvestment
 from oemof.solph.plumbing import sequence as solph_sequence
 
 
@@ -173,6 +173,9 @@ class GenericStorage(network.Node):
         )
         self._invest_group = isinstance(self.investment, Investment)
         self.multiperiod = kwargs.get('multiperiod', False)
+        self.multiperiodinvestment = kwargs.get('multiperiodinvestment')
+        self._multiperiodinvest_group = isinstance(
+            self.multiperiodinvestment, MultiPeriodInvestment)
 
         # Check number of flows.
         self._check_number_of_flows()
@@ -265,14 +268,20 @@ class GenericStorage(network.Node):
             raise AttributeError(msg.format("output", self.label))
 
     def constraint_group(self):
-        if self._invest_group is True and not self.multiperiod:
+        if self._invest_group is True:
             return GenericInvestmentStorageBlock
-        elif self._invest_group is True and self.multiperiod:
+        elif self._multiperiodinvest_group is True:
             return GenericMultiPeriodInvestmentStorageBlock
         elif self._invest_group is False and not self.multiperiod:
             return GenericStorageBlock
-        else:
+        elif self._multiperiodinvest_group is False and self.multiperiod:
             return GenericMultiPeriodStorageBlock
+        else:
+            e = (
+                "Infeasible combination of attributes\n"
+                "Won't return any constraints block for GenericStorage."
+            )
+            raise AttributeError(e)
 
 
 # Todo: accessed by
@@ -466,11 +475,11 @@ class GenericStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             expr += (
-                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -496,11 +505,11 @@ class GenericStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -738,11 +747,11 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             expr += (
-                m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -768,11 +777,11 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -1188,11 +1197,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             expr += (
-                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -1217,11 +1226,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -1244,12 +1253,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             and output power
             """
             expr = (
-                m.InvestmentFlow.invest[n, o[n]]
-                + m.flows[n, o[n]].investment.existing
-            ) * n.invest_relation_input_output == (
-                m.InvestmentFlow.invest[i[n], n]
-                + m.flows[i[n], n].investment.existing
-            )
+                       m.InvestmentFlow.invest[n, o[n]]
+                       + m.flows[n, o[n]].investment.existing
+                   ) * n.invest_relation_input_output == (
+                       m.InvestmentFlow.invest[i[n], n]
+                       + m.flows[i[n], n].investment.existing
+                   )
             return expr
 
         self.power_coupled = Constraint(
@@ -1339,8 +1348,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             storage.
             """
             return (
-                n.investment.maximum * self.invest_status[n] - self.invest[n]
-            ) >= 0
+                       n.investment.maximum * self.invest_status[n] - self.invest[n]
+                   ) >= 0
 
         self.limit_max = Constraint(
             self.NON_CONVEX_INVESTSTORAGES, rule=maximum_invest_limit
@@ -1613,29 +1622,31 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
 
         # ########################## SETS #####################################
 
-        self.INVESTSTORAGES = Set(initialize=[n for n in group])
+        self.MULTIPERIODINVESTSTORAGES = Set(initialize=[n for n in group])
 
-        self.CONVEX_INVESTSTORAGES = Set(
-            initialize=[n for n in group if n.investment.nonconvex is False]
+        self.CONVEX_MULTIPERIODINVESTSTORAGES = Set(
+            initialize=[n for n in group
+                        if n.multiperiodinvestment.nonconvex is False]
         )
 
-        self.NON_CONVEX_INVESTSTORAGES = Set(
-            initialize=[n for n in group if n.investment.nonconvex is True]
+        self.NON_CONVEX_MULTIPERIODINVESTSTORAGES = Set(
+            initialize=[n for n in group
+                        if n.multiperiodinvestment.nonconvex is True]
         )
 
-        self.INVESTSTORAGES_BALANCED = Set(
+        self.MULTIPERIODINVESTSTORAGES_BALANCED = Set(
             initialize=[n for n in group if n.balanced is True]
         )
 
-        self.INVESTSTORAGES_NO_INIT_CONTENT = Set(
-            initialize=[n for n in group if n.initial_storage_level is None]
-        )
-
-        self.INVESTSTORAGES_INIT_CONTENT = Set(
-            initialize=[
-                n for n in group if n.initial_storage_level is not None
-            ]
-        )
+        # self.MULTIPERIODINVESTSTORAGES_NO_INIT_CONTENT = Set(
+        #     initialize=[n for n in group if n.initial_storage_level is None]
+        # )
+        #
+        # self.MULTIPERIODINVESTSTORAGES_INIT_CONTENT = Set(
+        #     initialize=[
+        #         n for n in group if n.initial_storage_level is not None
+        #     ]
+        # )
 
         self.INVEST_REL_CAP_IN = Set(
             initialize=[
@@ -1662,7 +1673,7 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         # The storage content is a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
         # for all time steps.
-        self.MIN_INVESTSTORAGES = Set(
+        self.MIN_MULTIPERIODINVESTSTORAGES = Set(
             initialize=[
                 n
                 for n in group
@@ -1672,57 +1683,184 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
 
         # ######################### Variables  ################################
         self.storage_content = Var(
-            self.INVESTSTORAGES, m.TIMESTEPS, within=NonNegativeReals
+            self.MULTIPERIODINVESTSTORAGES, m.TIMESTEPS,
+            within=NonNegativeReals
         )
 
-        def _storage_investvar_bound_rule(block, n):
+        def _storage_investvar_bound_rule(block, n, p):
             """
             Rule definition to bound the invested storage capacity `invest`.
             """
-            if n in self.CONVEX_INVESTSTORAGES:
-                return n.investment.minimum, n.investment.maximum
-            elif n in self.NON_CONVEX_INVESTSTORAGES:
-                return 0, n.investment.maximum
+            if n in self.CONVEX_MULTIPERIODINVESTSTORAGES:
+                return (n.multiperiodinvestment.minimum[p],
+                        n.multiperiodinvestment.maximum[p])
+            elif n in self.NON_CONVEX_MULTIPERIODINVESTSTORAGES:
+                return 0, n.multiperiodinvestment.maximum[p]
 
         self.invest = Var(
-            self.INVESTSTORAGES,
+            self.MULTIPERIODINVESTSTORAGES,
+            m.PERIODS,
             within=NonNegativeReals,
             bounds=_storage_investvar_bound_rule,
         )
 
-        self.init_content = Var(self.INVESTSTORAGES, within=NonNegativeReals)
+        # An initial storage content doesn't make much sense
+        # for multiperiod investment models and thus will be dropped
+        # self.init_content = Var(self.MULTIPERIODINVESTSTORAGES,
+        #                         m.PERIODS,
+        #                         within=NonNegativeReals)
+
+        # Total capacity
+        self.total = Var(self.MULTIPERIODINVESTSTORAGES,
+                         m.PERIODS,
+                         within=NonNegativeReals)
+
+        # Old capacity to be decommissioned (due to lifetime)
+        self.old = Var(self.MULTIPERIODINVESTSTORAGES,
+                       m.PERIODS,
+                       within=NonNegativeReals)
 
         # create status variable for a non-convex investment storage
-        self.invest_status = Var(self.NON_CONVEX_INVESTSTORAGES, within=Binary)
+        self.invest_status = Var(self.NON_CONVEX_MULTIPERIODINVESTSTORAGES,
+                                 m.PERIODS,
+                                 within=Binary)
 
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+        # reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+        reduced_periods_timesteps = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
 
-        def _inv_storage_init_content_max_rule(block, n):
-            """Constraint for a variable initial storage capacity."""
-            return (
-                block.init_content[n]
-                <= n.investment.existing + block.invest[n]
-            )
+        # Handle unit lifetimes
+        def _total_storage_capacity_rule(block):
+            """Rule definition for determining total installed
+            capacity (taking decommissioning into account)
+            """
+            for n in self.MULTIPERIODINVESTSTORAGES:
+                for p in m.PERIODS:
+                    if p == 0:
+                        expr = (self.total[n, p]
+                                == self.invest[n, p]
+                                + n.multiperiodinvestment.existing)
+                        self.total_storage_rule.add((n, p), expr)
+                    else:
+                        expr = (self.total[n, p]
+                                == self.invest[n, p]
+                                + self.total[n, p - 1]
+                                - self.old[n, p])
+                        self.total_storage_rule.add((n, p), expr)
 
-        self.init_content_limit = Constraint(
-            self.INVESTSTORAGES_NO_INIT_CONTENT,
-            rule=_inv_storage_init_content_max_rule,
-        )
+        self.total_storage_rule = Constraint(self.MULTIPERIODINVESTSTORAGES,
+                                             m.PERIODS,
+                                             noruleinit=True)
+        self.total_storage_rule_build = BuildAction(
+            rule=_total_storage_capacity_rule)
 
-        def _inv_storage_init_content_fix_rule(block, n):
-            """Constraint for a fixed initial storage capacity."""
-            return block.init_content[n] == n.initial_storage_level * (
-                n.investment.existing + block.invest[n]
-            )
+        def _old_storage_capacity_rule(block):
+            """Rule definition for determining old capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for n in self.MULTIPERIODINVESTSTORAGES:
+                for p in m.PERIODS:
+                    age = n.multiperiodinvestment.age
+                    lifetime = n.multiperiodinvestment.lifetime
+                    if lifetime <= p:
+                        expr = (self.old[n, p]
+                                == self.invest[n, p - lifetime])
+                        self.old_storage_rule.add((n, p), expr)
+                    elif lifetime - age == p:
+                        expr = (self.old[n, p]
+                                == n.multiperiodinvestment.existing)
+                        self.old_storage_rule.add((n, p), expr)
+                    else:
+                        expr = (self.old[n, p]
+                                == 0)
+                        self.old_storage_rule.add((n, p), expr)
 
-        self.init_content_fix = Constraint(
-            self.INVESTSTORAGES_INIT_CONTENT,
-            rule=_inv_storage_init_content_fix_rule,
-        )
+        self.old_storage_rule = Constraint(self.MULTIPERIODINVESTSTORAGES,
+                                           m.PERIODS,
+                                           noruleinit=True)
+        self.old_storage_rule_build = BuildAction(
+            rule=_old_storage_capacity_rule)
+
+        # TODO: Check what constrs / vars do make sense and should be kept
+        # def _inv_storage_init_content_max_rule(block):
+        #     """Constraint for a variable initial storage capacity."""
+        #     for n in self.MULTIPERIODINVESTSTORAGES_NO_INIT_CONTENT:
+        #         for p in m.PERIODS:
+        #             expr = (
+        #                 block.init_content[n, p]
+        #                 <= block.total[n, p]
+        #                 # <= (n.multiperiodinvestment.existing
+        #                 # + block.invest[n, p])
+        #             )
+        #             self.init_content_limit.add((n, p), expr)
+        #
+        # self.init_content_limit = Constraint(
+        #     self.MULTIPERIODINVESTSTORAGES_NO_INIT_CONTENT,
+        #     m.PERIODS,
+        #     noruleinit=True)
+        # self.init_content_limit_build = BuildAction(
+        #     rule=_inv_storage_init_content_max_rule)
+        #
+        # # Note: For now holds for all periods, but shall only be applicable
+        # # if investments occur in period
+        # def _inv_storage_init_content_fix_rule(block):
+        #     """Constraint for a fixed initial storage capacity."""
+        #     for n in self.MULTIPERIODINVESTSTORAGES_INIT_CONTENT:
+        #         for p in m.PERIODS:
+        #             expr = (block.init_content[n, p] == n.initial_storage_level
+        #                     # * (n.multiperiodinvestment.existing
+        #                     # + block.invest[n, p]))
+        #                     * block.total[n, p])
+        #             self.init_content_fix.add((n, p), expr)
+        #
+        # self.init_content_fix = Constraint(
+        #     self.MULTIPERIODINVESTSTORAGES_INIT_CONTENT,
+        #     m.PERIODS,
+        #     noruleinit=True)
+        # self.init_content_fix_build = BuildAction(
+        #     rule=_inv_storage_init_content_fix_rule)
+
+        # Addition: Force storage level and initial content to zero as
+        # long as no investment occurred in storage
+        # def _init_content_no_investments(block, n):
+        #     """
+        #     Rule definition to force initial content to zero
+        #     as long as no investments have occurred
+        #     """
+        #     for p in m.PERIODS:
+        #         if self.total[n, p] == 0:
+        #             expr = block.init_content[n, p] == 0
+        #             self.init_content_noinv_rule.add((n, p), expr)
+        #         else:
+        #             pass
+        #
+        # self.init_content_noinv_rule = Constraint(
+        #     self.MULTIPERIODINVESTSTORAGES,
+        #     m.PERIODS,
+        #     noruleinit=True)
+        # self.init_content_noinv_rule_build = BuildAction(
+        #     rule=_init_content_no_investments)
+
+        # TODO: Check whether this enables infeasible states
+        def _storage_level_no_investments(block):
+            """
+            Rule definition to force storage level to zero
+            as long as no investments have occurred
+            """
+            for n in self.MULTIPERIODINVESTSTORAGES:
+                for p, t in m.TIMEINDEX:
+                    expr = block.storage_content[n, t] <= self.total[n, p]
+                    self.storage_level_noinv_rule.add((n, p, t), expr)
+
+        self.storage_level_noinv_rule = Constraint(
+            self.MULTIPERIODINVESTSTORAGES,
+            m.TIMEINDEX,
+            noruleinit=True)
+        self.storage_level_noinv_rule_build = BuildAction(
+            rule=_storage_level_no_investments)
 
         def _storage_balance_first_rule(block, n):
             """
@@ -1731,29 +1869,30 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             """
             expr = 0
             expr += block.storage_content[n, 0]
-            expr += (
-                -block.init_content[n]
-                * (1 - n.loss_rate[0]) ** m.timeincrement[0]
-            )
+            # expr += (
+            #     -block.init_content[n, 0]
+            #     * (1 - n.loss_rate[0]) ** m.timeincrement[0]
+            # )
             expr += (
                 n.fixed_losses_relative[0]
-                * (n.investment.existing + self.invest[n])
+                * (n.multiperiodinvestment.existing + self.invest[n, 0])
                 * m.timeincrement[0]
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             expr += (
-                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-            ) * m.timeincrement[0]
+                        m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
+                    ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
-            self.INVESTSTORAGES, rule=_storage_balance_first_rule
+            self.MULTIPERIODINVESTSTORAGES,
+            rule=_storage_balance_first_rule
         )
 
-        def _storage_balance_rule(block, n, t):
+        def _storage_balance_rule(block, n, p, t):
             """
             Rule definition for the storage balance of every storage n for the
             every time step but the first.
@@ -1766,169 +1905,217 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             )
             expr += (
                 n.fixed_losses_relative[t]
-                * (n.investment.existing + self.invest[n])
+                * (n.multiperiodinvestment.existing + self.invest[n, p])
                 * m.timeincrement[t]
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
-            self.INVESTSTORAGES, reduced_timesteps, rule=_storage_balance_rule
+            self.MULTIPERIODINVESTSTORAGES,
+            reduced_periods_timesteps, rule=_storage_balance_rule
         )
 
-        def _balanced_storage_rule(block, n):
-            return (
-                block.storage_content[n, m.TIMESTEPS[-1]]
-                == block.init_content[n]
-            )
+        def _balanced_storage_rule(block):
+            for n in self.MULTIPERIODINVESTSTORAGES_BALANCED:
+                age = n.multiperiodinvestment.age
+                lifetime = n.multiperiodinvestment.lifetime
+                for p, t in m.TIMEINDEX:
+                    if p >= lifetime - age:
+                        expr = (
+                            block.storage_content[n, t]
+                            # == block.init_content[n, p - (lifetime - age)]
+                            == 0
+                        )
+                        self.balanced_cstr.add((n, p, t), expr)
+                    else:
+                        pass
 
         self.balanced_cstr = Constraint(
-            self.INVESTSTORAGES_BALANCED, rule=_balanced_storage_rule
-        )
+            self.MULTIPERIODINVESTSTORAGES_BALANCED,
+            m.TIMEINDEX,
+            noruleinit=True)
+        self.balance_cstr_build = BuildAction(
+            rule=_balanced_storage_rule)
 
-        def _power_coupled(block, n):
+        def _power_coupled(block):
             """
             Rule definition for constraint to connect the input power
             and output power
             """
-            expr = (
-                m.InvestmentFlow.invest[n, o[n]]
-                + m.flows[n, o[n]].investment.existing
-            ) * n.invest_relation_input_output == (
-                m.InvestmentFlow.invest[i[n], n]
-                + m.flows[i[n], n].investment.existing
-            )
-            return expr
+            for n in self.INVEST_REL_IN_OUT:
+                for p in m.PERIODS:
+                    expr = (
+                               # m.MultiPeriodInvestmentFlow.invest[n, o[n], p]
+                               # + m.flows[n, o[n]].multiperiodinvestment.existing
+                               m.MultiPeriodInvestmentFlow.total[n, o[n], p]
+                           ) * n.invest_relation_input_output == (
+                               # m.MultiPeriodInvestmentFlow.invest[i[n], n, p]
+                               # + m.flows[i[n], n].multiperiodinvestment.existing
+                               m.MultiPeriodInvestmentFlow.total[i[n], n, p]
+                           )
+                    self.power_coupled.add((n, p), expr)
 
         self.power_coupled = Constraint(
-            self.INVEST_REL_IN_OUT, rule=_power_coupled
+            self.INVEST_REL_IN_OUT,
+            m.PERIODS,
+            noruleinit=True)
+        self.power_coupled_build = BuildAction(
+            rule=_power_coupled
         )
 
-        def _storage_capacity_inflow_invest_rule(block, n):
+        def _storage_capacity_inflow_invest_rule(block):
             """
             Rule definition of constraint connecting the inflow
             `InvestmentFlow.invest of storage with invested capacity `invest`
             by nominal_storage_capacity__inflow_ratio
             """
-            expr = (
-                (
-                    m.InvestmentFlow.invest[i[n], n]
-                    + m.flows[i[n], n].investment.existing
-                )
-                == (n.investment.existing + self.invest[n])
-                * n.invest_relation_input_capacity
-            )
-            return expr
+            for n in self.INVEST_REL_CAP_IN:
+                for p in m.PERIODS:
+                    expr = (
+                        (
+                            # m.MultiPeriodInvestmentFlow.invest[i[n], n, p]
+                            # + m.flows[i[n], n].multiperiodinvestment.existing
+                            m.MultiPeriodInvestmentFlow.total[i[n], n, p]
+                        )
+                        # == (n.multiperiodinvestment.existing + self.invest[n, p])
+                        == self.total[n, p]
+                        * n.invest_relation_input_capacity
+                    )
+                    self.storage_capacity_inflow.add((n, p), expr)
 
         self.storage_capacity_inflow = Constraint(
-            self.INVEST_REL_CAP_IN, rule=_storage_capacity_inflow_invest_rule
+            self.INVEST_REL_CAP_IN,
+            m.PERIODS,
+            noruleinit=True)
+        self.storage_capacity_inflow_build = BuildAction(
+            rule=_storage_capacity_inflow_invest_rule
         )
 
-        def _storage_capacity_outflow_invest_rule(block, n):
+        def _storage_capacity_outflow_invest_rule(block):
             """
             Rule definition of constraint connecting outflow
             `InvestmentFlow.invest` of storage and invested capacity `invest`
             by nominal_storage_capacity__outflow_ratio
             """
-            expr = (
-                (
-                    m.InvestmentFlow.invest[n, o[n]]
-                    + m.flows[n, o[n]].investment.existing
-                )
-                == (n.investment.existing + self.invest[n])
-                * n.invest_relation_output_capacity
-            )
-            return expr
+            for n in self.INVEST_REL_CAP_OUT:
+                for p in m.PERIODS:
+                    expr = (
+                        (
+                            # m.MultiPeriodInvestmentFlow.invest[n, o[n], p]
+                            # + m.flows[n, o[n]].multiperiodinvestment.existing
+                            m.MultiPeriodInvestmentFlow.total[n, o[n], p]
+                        )
+                        # == (n.multiperiodinvestment.existing + self.invest[n, p])
+                        == self.total[n, p]
+                        * n.invest_relation_output_capacity
+                    )
+                    self.storage_capacity_outflow.add((n, p), expr)
 
         self.storage_capacity_outflow = Constraint(
-            self.INVEST_REL_CAP_OUT, rule=_storage_capacity_outflow_invest_rule
-        )
+            self.INVEST_REL_CAP_OUT,
+            m.PERIODS,
+            noruleinit=True)
+        self.storage_capacity_outflow_build = BuildAction(
+            rule=_storage_capacity_outflow_invest_rule)
 
-        def _max_storage_content_invest_rule(block, n, t):
+        def _max_storage_content_invest_rule(block, n, p, t):
             """
             Rule definition for upper bound constraint for the
             storage content.
             """
             expr = (
                 self.storage_content[n, t]
-                <= (n.investment.existing + self.invest[n])
+                # <= (n.mulitperiodinvestment.existing + self.invest[n, p])
+                <= self.total[n, p]
                 * n.max_storage_level[t]
             )
             return expr
 
         self.max_storage_content = Constraint(
-            self.INVESTSTORAGES,
-            m.TIMESTEPS,
+            self.MULTIPERIODINVESTSTORAGES,
+            m.TIMEINDEX,
             rule=_max_storage_content_invest_rule,
         )
 
-        def _min_storage_content_invest_rule(block, n, t):
+        def _min_storage_content_invest_rule(block, n, p, t):
             """
             Rule definition of lower bound constraint for the
             storage content.
             """
             expr = (
                 self.storage_content[n, t]
-                >= (n.investment.existing + self.invest[n])
+                # >= (n.multiperiodinvestment.existing + self.invest[n, p])
+                >= n.total[n, p]
                 * n.min_storage_level[t]
             )
             return expr
 
         # Set the lower bound of the storage content if the attribute exists
         self.min_storage_content = Constraint(
-            self.MIN_INVESTSTORAGES,
-            m.TIMESTEPS,
+            self.MIN_MULTIPERIODINVESTSTORAGES,
+            m.TIMEINDEX,
             rule=_min_storage_content_invest_rule,
         )
 
-        def maximum_invest_limit(block, n):
+        def maximum_invest_limit(block, n, p):
             """
-            Constraint for the maximal investment in non convex investment
-            storage.
+            Constraint for the maximal investment in non convex
+            multiperiodinvestment storage.
             """
             return (
-                n.investment.maximum * self.invest_status[n] - self.invest[n]
-            ) >= 0
+                       n.multiperiodinvestment.maximum[p]
+                       * self.invest_status[n, p] - self.invest[n, p]
+                   ) >= 0
 
         self.limit_max = Constraint(
-            self.NON_CONVEX_INVESTSTORAGES, rule=maximum_invest_limit
+            self.NON_CONVEX_MULTIPERIODINVESTSTORAGES,
+            m.PERIODS,
+            rule=maximum_invest_limit
         )
 
-        def smallest_invest(block, n):
+        def smallest_invest(block, n, p):
             """
-            Constraint for the minimal investment in non convex investment
-            storage if the invest is greater than 0. So the invest variable
-            can be either 0 or greater than the minimum.
+            Constraint for the minimal investment in non convex
+            multiperiodinvestment storage if the invest is greater than 0.
+            So the invest variable can be either 0 or greater than the minimum.
             """
             return (
-                self.invest[n] - (n.investment.minimum * self.invest_status[n])
+                self.invest[n, p] - (n.multiperiodinvestment.minimum[p]
+                                     * self.invest_status[n, p])
                 >= 0
             )
 
         self.limit_min = Constraint(
-            self.NON_CONVEX_INVESTSTORAGES, rule=smallest_invest
+            self.NON_CONVEX_MULTIPERIODINVESTSTORAGES,
+            m.PERIODS,
+            rule=smallest_invest
         )
 
     def _objective_expression(self):
         """Objective expression with fixed and investement costs."""
-        if not hasattr(self, "INVESTSTORAGES"):
+        if not hasattr(self, "MULTIPERIODINVESTSTORAGES"):
             return 0
 
+        m = self.parent_block()
         investment_costs = 0
 
-        for n in self.CONVEX_INVESTSTORAGES:
-            investment_costs += self.invest[n] * n.investment.ep_costs
-        for n in self.NON_CONVEX_INVESTSTORAGES:
-            investment_costs += (
-                self.invest[n] * n.investment.ep_costs
-                + self.invest_status[n] * n.investment.offset
-            )
+        for n in self.CONVEX_MULTIPERIODINVESTSTORAGES:
+            for p in m.PERIODS:
+                investment_costs += (self.invest[n, p]
+                                     * n.multiperiodinvestment.ep_costs[p])
+        for n in self.NON_CONVEX_MULTIPERIODINVESTSTORAGES:
+            for p in m.PERIODS:
+                investment_costs += (
+                    self.invest[n, p] * n.multiperiodinvestment.ep_costs[p]
+                    + self.invest_status[n, p] * n.multiperiodinvestment.offset
+                )
         self.investment_costs = Expression(expr=investment_costs)
 
         return investment_costs
@@ -2569,10 +2756,10 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
                 for g in group:
                     lhs = m.flow[g.inflow, g, t]
                     rhs = (
-                        m.flow[g, g.main_output, t]
-                        + m.flow[g, g.tapped_output, t]
-                        * g.main_flow_loss_index[t]
-                    ) / g.conversion_factor_full_condensation_sq[t]
+                              m.flow[g, g.main_output, t]
+                              + m.flow[g, g.tapped_output, t]
+                              * g.main_flow_loss_index[t]
+                          ) / g.conversion_factor_full_condensation_sq[t]
                     block.input_output_relation.add((g, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(

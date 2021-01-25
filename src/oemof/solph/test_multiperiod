@@ -190,23 +190,28 @@ storage_el = components.GenericStorage(
         nominal_value=20,
         variable_costs=0,
         max=1,
-        multiperiod=True
+        # multiperiod=True
         # investment=options.Investment(
-        # multiperiodinvestment=options.MultiPeriodInvestment(
-        #     maximum=20,
-        #     ep_costs=1000,
-        #     existing=0)
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=20,
+            ep_costs=1000,
+            existing=0,
+            lifetime=20,
+            age=0)
     )},
     outputs={bus_el: network.Flow(
         nominal_value=20,
         variable_costs=0,
         max=1,
-        multiperiod=True
+        # multiperiod=True
         # investment=options.Investment(
-        # multiperiodinvestment=options.MultiPeriodInvestment(
-        #     maximum=20,
-        #     ep_costs=1000,
-        #     existing=0)
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=20,
+            ep_costs=1000,
+            existing=0,
+            lifetime=20,
+            age=0
+        )
     )},
     nominal_storage_capacity=20,
     loss_rate=0,
@@ -219,12 +224,14 @@ storage_el = components.GenericStorage(
     invest_relation_input_output=1,
     invest_relation_input_capacity=None,
     invest_relation_output_capacity=None,
-    multiperiod=True
+    # multiperiod=True,
 #     investment=options.Investment(
-#     multiperiodinvestment=options.MultiPeriodInvestment(
-#         maximum=20,
-#         ep_costs=1000,
-#         existing=0)
+    multiperiodinvestment=options.MultiPeriodInvestment(
+        maximum=20,
+        ep_costs=1000,
+        existing=0,
+        lifetime=20,
+        age=0)
 )
 
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
