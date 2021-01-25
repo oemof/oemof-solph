@@ -79,8 +79,8 @@ source_wind = network.Source(
     label='DE_source_wind',
     outputs={bus_el: network.Flow(  # variable_costs=0)})
         variable_costs=1000,
-        fix=[90] * len(timeindex),
-        # fix=[110] + [90] * (len(timeindex) - 1),
+        # fix=[90] * len(timeindex),
+        fix=[110] + [90] * (len(timeindex) - 1),
         # nominal_value=1)})
         nominal_value=1,
         multiperiod=True)})
@@ -184,54 +184,54 @@ pp_natgas_GT = network.Transformer(
     )},
     conversion_factors={bus_el: 0.4})
 
-# storage_el = components.GenericStorage(
-#     label='DE_storage_el',
-#     inputs={bus_el: network.Flow(
-#         nominal_value=20,
-#         variable_costs=0,
-#         max=1,
-#         multiperiod=True
-#         # investment=options.Investment(
-#         # multiperiodinvestment=options.MultiPeriodInvestment(
-#         #     maximum=20,
-#         #     ep_costs=1000,
-#         #     existing=0)
-#     )},
-#     outputs={bus_el: network.Flow(
-#         nominal_value=20,
-#         variable_costs=0,
-#         max=1,
-#         multiperiod=True
-#         # investment=options.Investment(
-#         # multiperiodinvestment=options.MultiPeriodInvestment(
-#         #     maximum=20,
-#         #     ep_costs=1000,
-#         #     existing=0)
-#     )},
-#     nominal_storage_capacity=20,
-#     loss_rate=0,
-#     initial_storage_level=0,
-#     max_storage_level=1,
-#     min_storage_level=0,
-#     inflow_conversion_factor=0.9,
-#     outflow_conversion_factor=0.9,
-#     balanced=True,
-#     invest_relation_input_output=1,
-#     invest_relation_input_capacity=None,
-#     invest_relation_output_capacity=None,
-#     multiperiod=True
-# #     investment=options.Investment(
-# #     multiperiodinvestment=options.MultiPeriodInvestment(
-# #         maximum=20,
-# #         ep_costs=1000,
-# #         existing=0)
-# )
+storage_el = components.GenericStorage(
+    label='DE_storage_el',
+    inputs={bus_el: network.Flow(
+        nominal_value=20,
+        variable_costs=0,
+        max=1,
+        multiperiod=True
+        # investment=options.Investment(
+        # multiperiodinvestment=options.MultiPeriodInvestment(
+        #     maximum=20,
+        #     ep_costs=1000,
+        #     existing=0)
+    )},
+    outputs={bus_el: network.Flow(
+        nominal_value=20,
+        variable_costs=0,
+        max=1,
+        multiperiod=True
+        # investment=options.Investment(
+        # multiperiodinvestment=options.MultiPeriodInvestment(
+        #     maximum=20,
+        #     ep_costs=1000,
+        #     existing=0)
+    )},
+    nominal_storage_capacity=20,
+    loss_rate=0,
+    initial_storage_level=0,
+    max_storage_level=1,
+    min_storage_level=0,
+    inflow_conversion_factor=1,
+    outflow_conversion_factor=1,
+    balanced=True,
+    invest_relation_input_output=1,
+    invest_relation_input_capacity=None,
+    invest_relation_output_capacity=None,
+    multiperiod=True
+#     investment=options.Investment(
+#     multiperiodinvestment=options.MultiPeriodInvestment(
+#         maximum=20,
+#         ep_costs=1000,
+#         existing=0)
+)
 
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        source_shortage,
        bus_lignite, bus_hardcoal, bus_natgas, bus_el,
        pp_lignite, pp_hardcoal, pp_natgas_CCGT, pp_natgas_GT,
-       sink_el, sink_excess, #storage_el,
+       sink_el, sink_excess, storage_el,
        )
 
 # test = models.Model(es)
@@ -239,6 +239,8 @@ test = models.MultiPeriodModel(es)
 test.pprint()
 
 test.solve(solver='gurobi', solve_kwargs={'tee': True})
+
+meta = processing.meta_results(test)
 
 # es.results['main'] = processing.results(test)
 results = processing.results(test)

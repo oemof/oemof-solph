@@ -1176,8 +1176,6 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                 for p in m.PERIODS:
                     age = m.flows[i, o].multiperiodinvestment.age
                     lifetime = m.flows[i, o].multiperiodinvestment.lifetime
-                    print(m.flows[i, o])
-                    print(age, lifetime)
                     if lifetime <= p:
                         expr = (self.old[i, o, p]
                                 == self.invest[i, o, p - lifetime])
