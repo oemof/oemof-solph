@@ -675,11 +675,11 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
-        self.STORAGES_WITH_INVEST_FLOW_REL = Set(
-            initialize=[
-                n for n in group if n.invest_relation_input_output is not None
-            ]
-        )
+        # self.STORAGES_WITH_INVEST_FLOW_REL = Set(
+        #     initialize=[
+        #         n for n in group if n.invest_relation_input_output is not None
+        #     ]
+        # )
 
         #  ************* VARIABLES *****************************
 
@@ -717,7 +717,7 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
 
         #  ************* Constraints ***************************
 
-        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
+        reduced_periods_timesteps = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
 
         # storage balance constraint (first time step)
         def _storage_balance_first_rule(block, n):
@@ -741,7 +741,7 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
                 -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
             ) * m.timeincrement[0]
             expr += (
-                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
+                m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
             ) * m.timeincrement[0]
             return expr == 0
 
@@ -776,7 +776,8 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             return expr == 0
 
         self.balance = Constraint(
-            self.STORAGES, reduced_timesteps, rule=_storage_balance_rule
+            self.STORAGES, reduced_periods_timesteps,
+            rule=_storage_balance_rule
         )
 
         def _balanced_storage_rule(block, n):
@@ -793,26 +794,25 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
         )
 
-        # TODO: Check why exactly this is needed here
-        def _power_coupled(block, n, p):
-            """
-            Rule definition for constraint to connect the input power
-            and output power
-            """
-            expr = (
-                m.MuliPeriodInvestmentFlow.invest[n, o[n], p]
-                + m.flows[n, o[n]].multiperiodinvestment.existing
-            ) * n.invest_relation_input_output == (
-                m.MuliPeriodInvestmentFlow.invest[i[n], n, p]
-                + m.flows[i[n], n].multiperiodinvestment.existing
-            )
-            return expr
-
-        self.power_coupled = Constraint(
-            self.STORAGES_WITH_INVEST_FLOW_REL,
-            m.PERIODS,
-            rule=_power_coupled
-        )
+        # def _power_coupled(block, n, p):
+        #     """
+        #     Rule definition for constraint to connect the input power
+        #     and output power
+        #     """
+        #     expr = (
+        #         m.MuliPeriodInvestmentFlow.invest[n, o[n], p]
+        #         + m.flows[n, o[n]].multiperiodinvestment.existing
+        #     ) * n.invest_relation_input_output == (
+        #         m.MuliPeriodInvestmentFlow.invest[i[n], n, p]
+        #         + m.flows[i[n], n].multiperiodinvestment.existing
+        #     )
+        #     return expr
+        #
+        # self.power_coupled = Constraint(
+        #     self.STORAGES_WITH_INVEST_FLOW_REL,
+        #     m.PERIODS,
+        #     rule=_power_coupled
+        # )
 
     def _objective_expression(self):
         r"""
