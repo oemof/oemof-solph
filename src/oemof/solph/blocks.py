@@ -1097,7 +1097,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.invest = Var(self.MULTIPERIODFLOWS,
                           m.PERIODS,
                           within=NonNegativeReals,
-                          bounds=(_investvar_bound_rule))
+                          bounds=_investvar_bound_rule)
 
         # Total capacity
         self.total = Var(self.MULTIPERIODFLOWS,
@@ -1173,16 +1173,17 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             to be decommissioned due to reaching its lifetime
             """
             for i, o in self.MULTIPERIODFLOWS:
+                age = m.flows[i, o].multiperiodinvestment.age
+                lifetime = m.flows[i, o].multiperiodinvestment.lifetime
                 for p in m.PERIODS:
-                    age = m.flows[i, o].multiperiodinvestment.age
-                    lifetime = m.flows[i, o].multiperiodinvestment.lifetime
                     if lifetime <= p:
                         expr = (self.old[i, o, p]
                                 == self.invest[i, o, p - lifetime])
                         self.old_rule.add((i, o, p), expr)
                     elif lifetime - age == p:
-                        expr = (self.old[i, o, p]
-                                == m.flows[i, o].multiperiodinvestment.existing)
+                        expr = (
+                            self.old[i, o, p]
+                            == m.flows[i, o].multiperiodinvestment.existing)
                         self.old_rule.add((i, o, p), expr)
                     else:
                         expr = (self.old[i, o, p]
