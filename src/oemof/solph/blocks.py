@@ -1314,7 +1314,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             # return expr
             for i, o in self.OVERALL_MINIMUM_MULTIPERIODFLOWS:
                 for p in m.PERIODS:
-                    expr = (m.flows[i, o].multiperiodinvestment.overall_maximum
+                    expr = (m.flows[i, o].multiperiodinvestment.overall_minimum
                             <= self.total[i, o, p])
                     self.overall_minimum.add((i, o, p), expr)
         self.overall_minimum = Constraint(
