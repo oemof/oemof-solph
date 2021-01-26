@@ -1,14 +1,16 @@
 """
 Test for creating an MultiPeriod optimization model
 
-Create an energy system consisting of the following
-fleets
+Create an energy system consisting of the following fleets
 - lignite
 - hardcoal
 - CCGT
 - GT
 - Wind
 - GenericStorage unit
+for Germany
+
+Add wind source and demand sink for FR and links for exchange.
 """
 
 import pandas as pd
@@ -17,6 +19,7 @@ import logging
 import models
 import network
 import components
+import custom
 import options
 import processing
 import views
@@ -55,6 +58,10 @@ bus_el = network.Bus(label='DE_bus_el',
                      # balanced=True)
                      balanced=True,
                      multiperiod=True)
+bus_el_FR = network.Bus(label='FR_bus_el',
+                     # balanced=True)
+                     balanced=True,
+                     multiperiod=True)
 
 # Create sources
 source_lignite = network.Source(
@@ -78,7 +85,7 @@ source_natgas = network.Source(
 source_wind = network.Source(
     label='DE_source_wind',
     outputs={bus_el: network.Flow(  # variable_costs=0)})
-        variable_costs=1000,
+        variable_costs=0,
         # fix=[90] * len(timeindex),
         fix=[110] + [90] * (len(timeindex) - 1),
         # nominal_value=1)})
@@ -87,6 +94,22 @@ source_wind = network.Source(
 source_shortage = network.Source(
     label='DE_source_shortage',
     outputs={bus_el: network.Flow(
+        variable_costs=1e10,
+        # nominal_value=1e10)})
+        nominal_value=1e10,
+        multiperiod=True)})
+
+source_wind_FR = network.Source(
+    label='FR_source_wind',
+    outputs={bus_el_FR: network.Flow(  # variable_costs=0)})
+        variable_costs=0,
+        fix=[45] * len(timeindex),
+        # nominal_value=1)})
+        nominal_value=1,
+        multiperiod=True)})
+source_shortage_FR = network.Source(
+    label='FR_source_shortage',
+    outputs={bus_el_FR: network.Flow(
         variable_costs=1e10,
         # nominal_value=1e10)})
         nominal_value=1e10,
@@ -106,6 +129,20 @@ sink_excess = network.Sink(
         # nominal_value=1e10)})
         nominal_value=1e10,
         multiperiod=True)})
+sink_excess_FR = network.Sink(
+    label='FR_sink_excess',
+    inputs={bus_el_FR: network.Flow(
+        variable_costs=1e3,
+        # nominal_value=1e10)})
+        nominal_value=1e10,
+        multiperiod=True)})
+
+sink_el_FR = network.Sink(
+    label='FR_sink_el',
+    inputs={bus_el_FR: network.Flow(fix=[50] * len(timeindex),
+                                 # nominal_value=1)})
+                                 nominal_value=1,
+                                 multiperiod=True)})
 
 # Create multiperiod transformers
 pp_lignite = network.Transformer(
@@ -170,10 +207,10 @@ pp_natgas_GT = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
-        #     overall_maximum=9
-        #     nonconvex=True,
-        #     age=39,
-        #     lifetime=40
+            # overall_maximum=9,
+            # nonconvex=True,
+            # age=39,
+            # lifetime=40
         ),
         # summed_max=2,
         # min=0.1,
@@ -187,20 +224,7 @@ pp_natgas_GT = network.Transformer(
 storage_el = components.GenericStorage(
     label='DE_storage_el',
     inputs={bus_el: network.Flow(
-        nominal_value=20,
-        variable_costs=0,
-        max=1,
-        # multiperiod=True
-        # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
-            maximum=20,
-            ep_costs=1000,
-            existing=0,
-            lifetime=20,
-            age=0)
-    )},
-    outputs={bus_el: network.Flow(
-        nominal_value=20,
+        # nominal_value=20,
         variable_costs=0,
         max=1,
         # multiperiod=True
@@ -211,9 +235,27 @@ storage_el = components.GenericStorage(
             existing=0,
             lifetime=20,
             age=0
+            # age=39,
+            # lifetime=40
         )
     )},
-    nominal_storage_capacity=20,
+    outputs={bus_el: network.Flow(
+        # nominal_value=20,
+        variable_costs=0,
+        max=1,
+        # multiperiod=True
+        # investment=options.Investment(
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=20,
+            ep_costs=1000,
+            existing=0,
+            lifetime=20,
+            age=0
+            # age=39,
+            # lifetime=40
+        )
+    )},
+    # nominal_storage_capacity=20,
     loss_rate=0,
     initial_storage_level=0,
     max_storage_level=1,
@@ -225,13 +267,45 @@ storage_el = components.GenericStorage(
     invest_relation_input_capacity=None,
     invest_relation_output_capacity=None,
     # multiperiod=True,
-#     investment=options.Investment(
+    # investment=options.Investment(
     multiperiodinvestment=options.MultiPeriodInvestment(
         maximum=20,
         ep_costs=1000,
         existing=0,
         lifetime=20,
-        age=0)
+        age=0,
+        # overall_maximum=9,
+        # overall_minimum=14,
+        # nonconvex=True,
+        # age=39,
+        # lifetime=40
+    )
+)
+
+link_DE_FR = custom.Link(
+    label='link_DE_FR',
+    inputs={
+        bus_el: network.Flow(
+            # nominal_value=10)},
+            nominal_value=10,
+            multiperiod=True),
+        bus_el_FR: network.Flow(
+            # nominal_value=10)},
+            nominal_value=10,
+            multiperiod=True)
+    },
+    outputs={
+        bus_el_FR: network.Flow(
+            multiperiod=True
+        ),
+        bus_el: network.Flow(
+            multiperiod=True
+        )
+    },
+    conversion_factors={
+        (bus_el, bus_el_FR): 0.999999,
+        (bus_el_FR, bus_el): 0.999999},
+    multiperiod=True
 )
 
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
@@ -239,6 +313,8 @@ es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        bus_lignite, bus_hardcoal, bus_natgas, bus_el,
        pp_lignite, pp_hardcoal, pp_natgas_CCGT, pp_natgas_GT,
        sink_el, sink_excess, storage_el,
+       source_wind_FR, source_shortage_FR,
+       bus_el_FR, sink_el_FR, sink_excess_FR, link_DE_FR,
        )
 
 # test = models.Model(es)

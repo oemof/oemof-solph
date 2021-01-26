@@ -258,6 +258,7 @@ class Link(on.Transformer):
         self.conversion_factors = {
             k: sequence(v)
             for k, v in kwargs.get('conversion_factors', {}).items()}
+        self.multiperiod = kwargs.get('multiperiod', False)
 
         wrong_args_message = "Component `Link` must have exactly" \
                              + "2 inputs, 2 outputs, and 2" \
@@ -267,7 +268,10 @@ class Link(on.Transformer):
         assert len(self.conversion_factors) == 2, wrong_args_message
 
     def constraint_group(self):
-        return LinkBlock
+        if not self.multiperiod:
+            return LinkBlock
+        else:
+            return MultiPeriodLinkBlock
 
 
 class LinkBlock(SimpleBlock):
@@ -344,6 +348,87 @@ class LinkBlock(SimpleBlock):
         self.relation_exclusive_direction = Constraint(
             [(n, t)
              for t in m.TIMESTEPS
+             for n, conversion in all_conversions.items()], noruleinit=True)
+        self.relation_exclusive_direction_build = BuildAction(
+            rule=_exclusive_direction_relation)
+
+
+class MultiPeriodLinkBlock(SimpleBlock):
+    r"""Block for the relation of nodes with type
+    :class:`~oemof.solph.custom.Link` with the :attr:`MultiPeriodInvestment`
+
+    Note: This component is experimental. Use it with care.
+
+    **The following constraints are created:**
+
+    TODO: Add description for constraints
+    TODO: Add tests
+
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """ Creates the relation for the class:`Link`.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.custom.Link objects for which
+            the relation of inputs and outputs is createdBuildAction
+            e.g. group = [link1, link2, link3, ...]. The components inside
+            the list need to hold an attribute `conversion_factors` of type
+            dict containing the conversion factors for all inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        all_conversions = {}
+        for n in group:
+            all_conversions[n] = {
+                k: v for k, v in n.conversion_factors.items()}
+
+        def _input_output_relation(block):
+            for p, t in m.TIMEINDEX:
+                for n, conversion in all_conversions.items():
+                    for cidx, c in conversion.items():
+                        try:
+                            expr = (m.flow[n, cidx[1], p, t] ==
+                                    c[t] * m.flow[cidx[0], n, p, t])
+                        except ValueError:
+                            raise ValueError(
+                                "Error in constraint creation",
+                                "from: {0}, to: {1}, via: {2}".format(
+                                    cidx[0], cidx[1], n))
+                        block.relation.add((n, cidx[0], cidx[1], p, t), (expr))
+
+        self.relation = Constraint(
+            [(n, cidx[0], cidx[1], p, t)
+             for p, t in m.TIMEINDEX
+             for n, conversion in all_conversions.items()
+             for cidx, c in conversion.items()], noruleinit=True)
+        self.relation_build = BuildAction(rule=_input_output_relation)
+
+        def _exclusive_direction_relation(block):
+            for p, t in m.TIMEINDEX:
+                for n, cf in all_conversions.items():
+                    cf_keys = list(cf.keys())
+                    expr = (m.flow[cf_keys[0][0], n, p, t]
+                            * cf[cf_keys[0]][t]
+                            + m.flow[cf_keys[1][0], n, p, t]
+                            * cf[cf_keys[1]][t]
+                            ==
+                            m.flow[n, cf_keys[0][1], p, t]
+                            + m.flow[n, cf_keys[1][1], p, t])
+                    block.relation_exclusive_direction.add((n, p, t), expr)
+
+        self.relation_exclusive_direction = Constraint(
+            [(n, p, t)
+             for p, t in m.TIMEINDEX
              for n, conversion in all_conversions.items()], noruleinit=True)
         self.relation_exclusive_direction_build = BuildAction(
             rule=_exclusive_direction_relation)
