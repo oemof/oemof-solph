@@ -1771,7 +1771,8 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                         self.old_storage_rule.add((n, p), expr)
                     elif lifetime - age == p:
                         expr = (self.old[n, p]
-                                == n.multiperiodinvestment.existing)
+                                == n.multiperiodinvestment.existing
+                                + self.invest[n, 0])
                         self.old_storage_rule.add((n, p), expr)
                     else:
                         expr = (self.old[n, p]

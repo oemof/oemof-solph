@@ -1183,7 +1183,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     elif lifetime - age == p:
                         expr = (
                             self.old[i, o, p]
-                            == m.flows[i, o].multiperiodinvestment.existing)
+                            == (m.flows[i, o].multiperiodinvestment.existing
+                                + self.invest[i, o, 0]))
                         self.old_rule.add((i, o, p), expr)
                     else:
                         expr = (self.old[i, o, p]
