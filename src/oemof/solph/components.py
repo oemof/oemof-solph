@@ -1681,6 +1681,20 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             ]
         )
 
+        self.OVERALL_MAXIMUM_MULTIPERIODINVESTSTORAGES = Set(
+            initialize=[
+                n for n in group
+                if n.multiperiodinvestment.overall_maximum is not None
+            ]
+        )
+
+        self.OVERALL_MINIMUM_MULTIPERIODINVESTSTORAGES = Set(
+            initialize=[
+                n for n in group
+                if n.multiperiodinvestment.overall_minimum is not None
+            ]
+        )
+
         # ######################### Variables  ################################
         self.storage_content = Var(
             self.MULTIPERIODINVESTSTORAGES, m.TIMESTEPS,
@@ -1705,7 +1719,7 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         )
 
         # An initial storage content doesn't make much sense
-        # for multiperiod investment models and thus will be dropped
+        # for multiperiod investment models and thus will not be used
         # self.init_content = Var(self.MULTIPERIODINVESTSTORAGES,
         #                         m.PERIODS,
         #                         within=NonNegativeReals)
@@ -2098,6 +2112,41 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             m.PERIODS,
             rule=smallest_invest
         )
+
+        # Note: There are two different options to define an overall maximum:
+        # 1.) overall_max = limit for (net) installed capacity for each period
+        # 2.) overall max = sum of all (gross) investments occurring
+        def _overall_storage_maximum_investflow_rule(block):
+            """Rule definition for maximum overall investment
+            in multiperiodinvestment case.
+            """
+            for n in self.OVERALL_MAXIMUM_MULTIPERIODINVESTSTORAGES:
+                for p in m.PERIODS:
+                    expr = (self.total[n, p] <=
+                            n.multiperiodinvestment.overall_maximum)
+                    self.overall_storage_maximum.add((n, p), expr)
+        self.overall_storage_maximum = Constraint(
+            self.OVERALL_MAXIMUM_MULTIPERIODINVESTSTORAGES,
+            m.PERIODS,
+            noruleinit=True)
+        self.overall_maximum_build = BuildAction(
+            rule=_overall_storage_maximum_investflow_rule)
+
+        def _overall_minimum_investflow_rule(block):
+            """Rule definition for minimum overall investment
+            in multiperiodinvestment case.
+            """
+            for n in self.OVERALL_MINIMUM_MULTIPERIODINVESTSTORAGES:
+                for p in m.PERIODS:
+                    expr = (n.multiperiodinvestment.overall_minimum
+                            <= self.total[n, p])
+                    self.overall_minimum.add((n, p), expr)
+        self.overall_minimum = Constraint(
+            self.OVERALL_MINIMUM_MULTIPERIODINVESTSTORAGES,
+            m.PERIODS,
+            noruleinit=True)
+        self.overall_minimum_build = BuildAction(
+            rule=_overall_minimum_investflow_rule)
 
     def _objective_expression(self):
         """Objective expression with fixed and investement costs."""

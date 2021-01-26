@@ -1303,6 +1303,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.overall_maximum_build = BuildAction(
             rule=_overall_maximum_investflow_rule)
 
+        # Note: Formulating forces total installed capacity for all periods
+        # to be greater or equal to the overall_minimum -> does not make sense
         def _overall_minimum_investflow_rule(block):
             """Rule definition for minimum overall investment
             in multiperiodinvestment case.
