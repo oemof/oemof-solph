@@ -1048,38 +1048,39 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         m = self.parent_block()
 
         # ######################### SETS #####################################
-        self.MULTIPERIODFLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.MULTIPERIODINVESTFLOWS = Set(initialize=[
+            (g[0], g[1]) for g in group])
 
-        self.CONVEX_MULTIPERIODFLOWS = Set(initialize=[
+        self.CONVEX_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group
             if g[2].multiperiodinvestment.nonconvex is False])
 
-        self.NON_CONVEX_MULTIPERIODFLOWS = Set(initialize=[
+        self.NON_CONVEX_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group
             if g[2].multiperiodinvestment.nonconvex is True])
 
-        self.FIXED_MULTIPERIODFLOWS = Set(
+        self.FIXED_MULTIPERIODINVESTFLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not
                         None])
 
-        self.NON_FIXED_MULTIPERIODFLOWS = Set(
+        self.NON_FIXED_MULTIPERIODINVESTFLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None])
 
-        self.SUMMED_MAX_MULTIPERIODFLOWS = Set(initialize=[
+        self.SUMMED_MAX_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None])
 
-        self.SUMMED_MIN_MULTIPERIODFLOWS = Set(initialize=[
+        self.SUMMED_MIN_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None])
 
-        self.MIN_MULTIPERIODFLOWS = Set(initialize=[
+        self.MIN_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if (
                 g[2].min[0] != 0 or len(g[2].min) > 1)])
 
-        self.OVERALL_MAXIMUM_MULTIPERIODFLOWS = Set(initialize=[
+        self.OVERALL_MAXIMUM_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group
             if g[2].multiperiodinvestment.overall_maximum is not None])
 
-        self.OVERALL_MINIMUM_MULTIPERIODFLOWS = Set(initialize=[
+        self.OVERALL_MINIMUM_MULTIPERIODINVESTFLOWS = Set(initialize=[
             (g[0], g[1]) for g in group
             if g[2].multiperiodinvestment.overall_minimum is not None])
 
@@ -1087,30 +1088,30 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of invest variable.
             """
-            if (i, o) in self.CONVEX_MULTIPERIODFLOWS:
+            if (i, o) in self.CONVEX_MULTIPERIODINVESTFLOWS:
                 return (m.flows[i, o].multiperiodinvestment.minimum[p],
                         m.flows[i, o].multiperiodinvestment.maximum[p])
-            elif (i, o) in self.NON_CONVEX_MULTIPERIODFLOWS:
+            elif (i, o) in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
                 return 0, m.flows[i, o].multiperiodinvestment.maximum[p]
 
         # create invest variable for a multiperiodinvestment flow
-        self.invest = Var(self.MULTIPERIODFLOWS,
+        self.invest = Var(self.MULTIPERIODINVESTFLOWS,
                           m.PERIODS,
                           within=NonNegativeReals,
                           bounds=_investvar_bound_rule)
 
         # Total capacity
-        self.total = Var(self.MULTIPERIODFLOWS,
-                          m.PERIODS,
-                          within=NonNegativeReals)
+        self.total = Var(self.MULTIPERIODINVESTFLOWS,
+                         m.PERIODS,
+                         within=NonNegativeReals)
 
         # Old capacity to be decommissioned (due to lifetime)
-        self.old = Var(self.MULTIPERIODFLOWS,
-                          m.PERIODS,
-                          within=NonNegativeReals)
+        self.old = Var(self.MULTIPERIODINVESTFLOWS,
+                       m.PERIODS,
+                       within=NonNegativeReals)
 
         # create status variable for a non-convex multiperiodinvestment flow
-        self.invest_status = Var(self.NON_CONVEX_MULTIPERIODFLOWS,
+        self.invest_status = Var(self.NON_CONVEX_MULTIPERIODINVESTFLOWS,
                                  m.PERIODS,
                                  within=Binary)
         # ######################### CONSTRAINTS ###############################
@@ -1118,14 +1119,14 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         def _min_invest_rule(block):
             """Rule definition for applying a minimum investment
             """
-            for i, o in self.NON_CONVEX_MULTIPERIODFLOWS:
+            for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
                     expr = (m.flows[i, o].multiperiodinvestment.minimum[p]
                             * self.invest_status[i, o, p]
                             <= self.invest[i, o, p])
                     self.minimum_rule.add((i, o, p), expr)
         self.minimum_rule = Constraint(
-            self.NON_CONVEX_MULTIPERIODFLOWS, m.PERIODS,
+            self.NON_CONVEX_MULTIPERIODINVESTFLOWS, m.PERIODS,
             noruleinit=True)
         self.minimum_rule_build = BuildAction(
             rule=_min_invest_rule)
@@ -1133,14 +1134,14 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         def _max_invest_rule(block):
             """Rule definition for applying a minimum investment
             """
-            for i, o in self.NON_CONVEX_MULTIPERIODFLOWS:
+            for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
                     expr = self.invest[i, o, p] <= (
                         m.flows[i, o].multiperiodinvestment.maximum[p]
                         * self.invest_status[i, o, p])
                     self.maximum_rule.add((i, o, p), expr)
         self.maximum_rule = Constraint(
-            self.NON_CONVEX_MULTIPERIODFLOWS, m.PERIODS,
+            self.NON_CONVEX_MULTIPERIODINVESTFLOWS, m.PERIODS,
             noruleinit=True)
         self.maximum_rule_build = BuildAction(
             rule=_max_invest_rule)
@@ -1150,7 +1151,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             """Rule definition for determining total installed
             capacity (taking decommissioning into account)
             """
-            for i, o in self.MULTIPERIODFLOWS:
+            for i, o in self.MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
                     if p == 0:
                         expr = (self.total[i, o, p]
@@ -1163,8 +1164,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                                 + self.total[i, o, p - 1]
                                 - self.old[i, o, p])
                         self.total_rule.add((i, o, p), expr)
-        self.total_rule = Constraint(self.MULTIPERIODFLOWS, m.PERIODS,
-                            noruleinit=True)
+        self.total_rule = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
+                                     noruleinit=True)
         self.total_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
@@ -1172,7 +1173,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             """Rule definition for determining old capacity
             to be decommissioned due to reaching its lifetime
             """
-            for i, o in self.MULTIPERIODFLOWS:
+            for i, o in self.MULTIPERIODINVESTFLOWS:
                 age = m.flows[i, o].multiperiodinvestment.age
                 lifetime = m.flows[i, o].multiperiodinvestment.lifetime
                 for p in m.PERIODS:
@@ -1190,8 +1191,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         expr = (self.old[i, o, p]
                                 == 0)
                         self.old_rule.add((i, o, p), expr)
-        self.old_rule = Constraint(self.MULTIPERIODFLOWS, m.PERIODS,
-                            noruleinit=True)
+        self.old_rule = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
+                                   noruleinit=True)
         self.old_rule_build = BuildAction(
             rule=_old_capacity_rule)
 
@@ -1199,7 +1200,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             """Rule definition of constraint to fix flow variable
             of multiperiodinvestment flow to (normed) actual value
             """
-            for i, o in self.FIXED_MULTIPERIODFLOWS:
+            for i, o in self.FIXED_MULTIPERIODINVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (m.flow[i, o, p, t] == (
                             # (m.flows[i, o].multiperiodinvestment.existing
@@ -1208,7 +1209,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                             self.total[i, o, p]
                             * m.flows[i, o].fix[t]))
                     self.fixed.add((i, o, p, t), expr)
-        self.fixed = Constraint(self.FIXED_MULTIPERIODFLOWS, m.TIMEINDEX,
+        self.fixed = Constraint(self.FIXED_MULTIPERIODINVESTFLOWS,
+                                m.TIMEINDEX,
                                 noruleinit=True)
         self.fixed_build = BuildAction(
             rule=_investflow_fixed_rule)
@@ -1217,7 +1219,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting an upper bound of flow
             variable in multiperiodinvestment case.
             """
-            for i, o in self.NON_FIXED_MULTIPERIODFLOWS:
+            for i, o in self.NON_FIXED_MULTIPERIODINVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (m.flow[i, o, p, t] <= (
                         # (m.flows[i, o].multiperiodinvestment.existing
@@ -1226,7 +1228,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         self.total[i, o, p]
                         * m.flows[i, o].max[t]))
                     self.max.add((i, o, p, t), expr)
-        self.max = Constraint(self.NON_FIXED_MULTIPERIODFLOWS, m.TIMEINDEX,
+        self.max = Constraint(self.NON_FIXED_MULTIPERIODINVESTFLOWS,
+                              m.TIMEINDEX,
                               noruleinit=True)
         self.max_build = BuildAction(
             rule=_max_investflow_rule)
@@ -1235,7 +1238,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             """Rule definition of constraint setting a lower bound on flow
             variable in multiperiodinvestment case.
             """
-            for i, o in self.MIN_MULTIPERIODFLOWS:
+            for i, o in self.MIN_MULTIPERIODINVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (m.flow[i, o, p, t] >= (
                         # (m.flows[i, o].multiperiodinvestment.existing
@@ -1244,7 +1247,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         self.total[i, o, p]
                         * m.flows[i, o].min[t]))
                     self.min.add((i, o, p, t), expr)
-        self.min = Constraint(self.MIN_MULTIPERIODFLOWS, m.TIMEINDEX,
+        self.min = Constraint(self.MIN_MULTIPERIODINVESTFLOWS, m.TIMEINDEX,
                               noruleinit=True)
         self.min_build = BuildAction(
             rule=_min_investflow_rule)
@@ -1261,7 +1264,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                      #        for p in m.PERIODS) +
                      #    m.flows[i, o].multiperiodinvestment.existing)))
             return expr
-        self.summed_max = Constraint(self.SUMMED_MAX_MULTIPERIODFLOWS,
+        self.summed_max = Constraint(self.SUMMED_MAX_MULTIPERIODINVESTFLOWS,
                                      rule=_summed_max_investflow_rule)
 
         def _summed_min_investflow_rule(block, i, o):
@@ -1276,7 +1279,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     (sum(self.total[i, o, p] for p in m.PERIODS)
                      * m.flows[i, o].summed_min))
             return expr
-        self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODFLOWS,
+        self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODINVESTFLOWS,
                                      rule=_summed_min_investflow_rule)
 
         # Note: There are two different options to define an overall maximum:
@@ -1291,13 +1294,15 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             #         m.flows[i, o].multiperiodinvestment.existing <=
             #         m.flows[i, o].multiperiodinvestment.overall_maximum)
             # return expr
-            for i, o in self.OVERALL_MAXIMUM_MULTIPERIODFLOWS:
+            for i, o in self.OVERALL_MAXIMUM_MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
-                    expr = (self.total[i, o, p] <=
-                            m.flows[i, o].multiperiodinvestment.overall_maximum)
+                    expr = (
+                        self.total[i, o, p] <=
+                        m.flows[i, o].multiperiodinvestment.overall_maximum
+                    )
                     self.overall_maximum.add((i, o, p), expr)
         self.overall_maximum = Constraint(
-            self.OVERALL_MAXIMUM_MULTIPERIODFLOWS,
+            self.OVERALL_MAXIMUM_MULTIPERIODINVESTFLOWS,
             m.PERIODS,
             noruleinit=True)
         self.overall_maximum_build = BuildAction(
@@ -1314,13 +1319,15 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             #             for p in m.PERIODS) +
             #         m.flows[i, o].multiperiodinvestment.existing)
             # return expr
-            for i, o in self.OVERALL_MINIMUM_MULTIPERIODFLOWS:
+            for i, o in self.OVERALL_MINIMUM_MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
-                    expr = (m.flows[i, o].multiperiodinvestment.overall_minimum
-                            <= self.total[i, o, p])
+                    expr = (
+                        m.flows[i, o].multiperiodinvestment.overall_minimum
+                        <= self.total[i, o, p]
+                    )
                     self.overall_minimum.add((i, o, p), expr)
         self.overall_minimum = Constraint(
-            self.OVERALL_MINIMUM_MULTIPERIODFLOWS,
+            self.OVERALL_MINIMUM_MULTIPERIODINVESTFLOWS,
             m.PERIODS,
             noruleinit=True)
         self.overall_minimum_build = BuildAction(
@@ -1331,24 +1338,30 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         attribute of type class:`.MultiPeriod`. The returned costs are fixed,
         variable and multiperiodinvestment costs.
         """
-        if not hasattr(self, 'MULTIPERIODFLOWS'):
+        if not hasattr(self, 'MULTIPERIODINVESTFLOWS'):
             return 0
 
         m = self.parent_block()
         investment_costs = 0
 
-        for i, o in self.CONVEX_MULTIPERIODFLOWS:
+        for i, o in self.CONVEX_MULTIPERIODINVESTFLOWS:
             for p in m.PERIODS:
                 investment_costs += (
                     self.invest[i, o, p]
-                    * m.flows[i, o].multiperiodinvestment.ep_costs[p])
-        for i, o in self.NON_CONVEX_MULTIPERIODFLOWS:
+                    * m.flows[i, o].multiperiodinvestment.ep_costs[p]
+                    * (m.flows[i, o].multiperiodinvestment.lifetime
+                       - m.flows[i, o].multiperiodinvestment.age)
+                )
+        for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
             for p in m.PERIODS:
                 investment_costs += (
-                        self.invest[i, o, p] *
-                        m.flows[i, o].multiperiodinvestment.ep_costs[p] +
-                        self.invest_status[i, o, p] *
-                        m.flows[i, o].multiperiodinvestment.offset)
+                    self.invest[i, o, p] *
+                    m.flows[i, o].multiperiodinvestment.ep_costs[p]
+                    * (m.flows[i, o].multiperiodinvestment.lifetime
+                       - m.flows[i, o].multiperiodinvestment.age)
+                    + self.invest_status[i, o, p] *
+                    m.flows[i, o].multiperiodinvestment.offset[p]
+                )
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs

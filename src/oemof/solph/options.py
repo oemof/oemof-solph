@@ -148,10 +148,13 @@ class MultiPeriodInvestment:
 
         self.maximum = sequence(maximum)
         self.minimum = sequence(minimum)
+        # ep_costs may vary between the years. Once an investment is made,
+        # the annuities are fixed for the remaining lifetime
         self.ep_costs = sequence(ep_costs)
         self.existing = existing
         self.nonconvex = nonconvex
-        self.offset = offset
+        # Offset has to be a sequence in order to account for discounting
+        self.offset = sequence(offset)
         self.overall_maximum = overall_maximum
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
@@ -183,7 +186,7 @@ class MultiPeriodInvestment:
             raise AttributeError(e2)
 
     def _check_invest_attributes_offset(self):
-        if (self.offset != 0) and (self.nonconvex is False):
+        if (self.offset[0] != 0) and (self.nonconvex is False):
             e3 = ("If `nonconvex` is `False`, the `offset` parameter will be"
                   " ignored.")
             raise AttributeError(e3)

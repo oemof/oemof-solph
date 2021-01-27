@@ -2158,13 +2158,21 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
 
         for n in self.CONVEX_MULTIPERIODINVESTSTORAGES:
             for p in m.PERIODS:
-                investment_costs += (self.invest[n, p]
-                                     * n.multiperiodinvestment.ep_costs[p])
+                investment_costs += (
+                    self.invest[n, p]
+                    * n.multiperiodinvestment.ep_costs[p]
+                    * (n.multiperiodinvestment.lifetime
+                       - n.multiperiodinvestment.age)
+                )
         for n in self.NON_CONVEX_MULTIPERIODINVESTSTORAGES:
             for p in m.PERIODS:
                 investment_costs += (
-                    self.invest[n, p] * n.multiperiodinvestment.ep_costs[p]
-                    + self.invest_status[n, p] * n.multiperiodinvestment.offset
+                    self.invest[n, p]
+                    * n.multiperiodinvestment.ep_costs[p]
+                    * (n.multiperiodinvestment.lifetime
+                       - n.multiperiodinvestment.age)
+                    + self.invest_status[n, p]
+                    * n.multiperiodinvestment.offset[p]
                 )
         self.investment_costs = Expression(expr=investment_costs)
 
