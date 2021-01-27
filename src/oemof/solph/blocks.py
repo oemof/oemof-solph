@@ -1344,23 +1344,40 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         m = self.parent_block()
         investment_costs = 0
 
+        amount_periods = len(m.PERIODS)
+
         for i, o in self.CONVEX_MULTIPERIODINVESTFLOWS:
+            lifetime = m.flows[i, o].multiperiodinvestment.lifetime
+            age = m.flows[i, o].multiperiodinvestment.age
+            interest = m.flows[i, o].multiperiodinvestment.discount_rate
+            discount_factor = [(1+interest) ** (-pp)
+                               for pp in range(0, amount_periods + lifetime)]
             for p in m.PERIODS:
                 investment_costs += (
-                    self.invest[i, o, p]
-                    * m.flows[i, o].multiperiodinvestment.ep_costs[p]
-                    * (m.flows[i, o].multiperiodinvestment.lifetime
-                       - m.flows[i, o].multiperiodinvestment.age)
+                    sum(
+                        self.invest[i, o, p]
+                        * m.flows[i, o].multiperiodinvestment.ep_costs[p]
+                        # * (m.flows[i, o].multiperiodinvestment.lifetime
+                        #    - m.flows[i, o].multiperiodinvestment.age)
+                        * discount_factor[pp]
+                        for pp in range(p, p + lifetime - age)
+                    )
                 )
+                print(len(range(p, p + lifetime - age)))
         for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
             for p in m.PERIODS:
                 investment_costs += (
-                    self.invest[i, o, p] *
-                    m.flows[i, o].multiperiodinvestment.ep_costs[p]
-                    * (m.flows[i, o].multiperiodinvestment.lifetime
-                       - m.flows[i, o].multiperiodinvestment.age)
+                    sum(
+                        self.invest[i, o, p]
+                        * m.flows[i, o].multiperiodinvestment.ep_costs[p]
+                        # * (m.flows[i, o].multiperiodinvestment.lifetime
+                        #    - m.flows[i, o].multiperiodinvestment.age)
+                        * discount_factor[pp]
+                        for pp in range(p, p + lifetime - age)
+                    )
                     + self.invest_status[i, o, p] *
                     m.flows[i, o].multiperiodinvestment.offset[p]
+                    * discount_factor[p]
                 )
 
         self.investment_costs = Expression(expr=investment_costs)

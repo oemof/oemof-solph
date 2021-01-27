@@ -2156,23 +2156,39 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         m = self.parent_block()
         investment_costs = 0
 
+        amount_periods = len(m.PERIODS)
+
         for n in self.CONVEX_MULTIPERIODINVESTSTORAGES:
+            lifetime = n.multiperiodinvestment.lifetime
+            age = n.multiperiodinvestment.age
+            interest = n.multiperiodinvestment.discount_rate
+            discount_factor = [(1+interest) ** (-pp)
+                               for pp in range(0, amount_periods + lifetime)]
             for p in m.PERIODS:
                 investment_costs += (
-                    self.invest[n, p]
-                    * n.multiperiodinvestment.ep_costs[p]
-                    * (n.multiperiodinvestment.lifetime
-                       - n.multiperiodinvestment.age)
+                    sum(
+                        self.invest[n, p]
+                        * n.multiperiodinvestment.ep_costs[p]
+                        # * (n.multiperiodinvestment.lifetime
+                        #    - n.multiperiodinvestment.age)
+                        * discount_factor[pp]
+                        for pp in range(p, p + lifetime - age)
+                    )
                 )
         for n in self.NON_CONVEX_MULTIPERIODINVESTSTORAGES:
             for p in m.PERIODS:
                 investment_costs += (
-                    self.invest[n, p]
-                    * n.multiperiodinvestment.ep_costs[p]
-                    * (n.multiperiodinvestment.lifetime
-                       - n.multiperiodinvestment.age)
+                    sum(
+                        self.invest[n, p]
+                        * n.multiperiodinvestment.ep_costs[p]
+                        # * (n.multiperiodinvestment.lifetime
+                        #    - n.multiperiodinvestment.age)
+                        * discount_factor[pp]
+                        for pp in range(p, p + lifetime - age)
+                    )
                     + self.invest_status[n, p]
                     * n.multiperiodinvestment.offset[p]
+                    * discount_factor[p]
                 )
         self.investment_costs = Expression(expr=investment_costs)
 

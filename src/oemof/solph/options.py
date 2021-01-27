@@ -144,7 +144,7 @@ class MultiPeriodInvestment:
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
                  existing=0, nonconvex=False, offset=0,
                  overall_maximum=None, overall_minimum=None,
-                 lifetime=0, age=0, **kwargs):
+                 lifetime=0, age=0, discount_rate=0, **kwargs):
 
         self.maximum = sequence(maximum)
         self.minimum = sequence(minimum)
@@ -159,6 +159,7 @@ class MultiPeriodInvestment:
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
+        self.discount_rate = discount_rate
 
         for attribute in kwargs.keys():
             value = kwargs.get(attribute)
