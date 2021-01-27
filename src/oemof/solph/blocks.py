@@ -1363,7 +1363,6 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         for pp in range(p, p + lifetime - age)
                     )
                 )
-                print(len(range(p, p + lifetime - age)))
         for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
             for p in m.PERIODS:
                 investment_costs += (
