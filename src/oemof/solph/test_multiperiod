@@ -118,14 +118,18 @@ source_shortage_FR = network.Source(
 # Create sinks
 sink_el = network.Sink(
     label='DE_sink_el',
-    inputs={bus_el: network.Flow(fix=[100] * len(timeindex),
-                                 # nominal_value=1)})
-                                 nominal_value=1,
-                                 multiperiod=True)})
+    inputs={bus_el: network.Flow(
+        fix = [80] * len(timeindex),
+        # fix=[100] * len(timeindex),
+        # nominal_value=1)})
+        nominal_value=1,
+        multiperiod=True)})
+
 sink_excess = network.Sink(
     label='DE_sink_excess',
     inputs={bus_el: network.Flow(
-        variable_costs=1e3,
+        # variable_costs=1e3,
+        variable_costs=1e10,
         # nominal_value=1e10)})
         nominal_value=1e10,
         multiperiod=True)})
@@ -147,13 +151,17 @@ sink_el_FR = network.Sink(
 # Create multiperiod transformers
 pp_lignite = network.Transformer(
     label='DE_pp_lignite',
-    inputs={bus_lignite: network.Flow(multiperiod=True)},
+    inputs={bus_lignite: network.Flow(#)},
+        multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
         multiperiodinvestment=options.MultiPeriodInvestment(
             maximum=1000,
             ep_costs=2e6,
-            existing=0
+            existing=0,
+            lifetime=20,
+            age=0,
+            discount_rate=0.02,
         ),
         # nominal_value=100,
         variable_costs=1
@@ -162,7 +170,8 @@ pp_lignite = network.Transformer(
 
 pp_hardcoal = network.Transformer(
     label='DE_pp_hardcoal',
-    inputs={bus_hardcoal: network.Flow(multiperiod=True)},
+    inputs={bus_hardcoal: network.Flow(#)},
+        multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
         multiperiodinvestment=options.MultiPeriodInvestment(
@@ -170,7 +179,8 @@ pp_hardcoal = network.Transformer(
             ep_costs=1.6e6,
             existing=0,
             lifetime=20,
-            age=0
+            age=0,
+            discount_rate=0.02,
         ),
         # nominal_value=100,
         variable_costs=2
@@ -179,7 +189,8 @@ pp_hardcoal = network.Transformer(
 
 pp_natgas_CCGT = network.Transformer(
     label='DE_pp_natgas_CCGT',
-    inputs={bus_natgas: network.Flow(multiperiod=True)},
+    inputs={bus_natgas: network.Flow(#)},
+        multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
         multiperiodinvestment=options.MultiPeriodInvestment(
@@ -188,6 +199,7 @@ pp_natgas_CCGT = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
+            discount_rate=0.02,
         #     overall_minimum=2,
         ),
         # nominal_value=100,
@@ -197,7 +209,8 @@ pp_natgas_CCGT = network.Transformer(
 
 pp_natgas_GT = network.Transformer(
     label='DE_pp_natgas_GT',
-    inputs={bus_natgas: network.Flow(multiperiod=True)},
+    inputs={bus_natgas: network.Flow(#)},
+        multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
         multiperiodinvestment=options.MultiPeriodInvestment(
@@ -207,6 +220,7 @@ pp_natgas_GT = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
+            discount_rate=0.02,
             # overall_maximum=9,
             # nonconvex=True,
             # age=39,
@@ -234,7 +248,8 @@ storage_el = components.GenericStorage(
             ep_costs=1000,
             existing=0,
             lifetime=20,
-            age=0
+            age=0,
+            discount_rate=0.02,
             # age=39,
             # lifetime=40
         )
@@ -250,7 +265,8 @@ storage_el = components.GenericStorage(
             ep_costs=1000,
             existing=0,
             lifetime=20,
-            age=0
+            age=0,
+            discount_rate=0.02,
             # age=39,
             # lifetime=40
         )
@@ -274,6 +290,7 @@ storage_el = components.GenericStorage(
         existing=0,
         lifetime=20,
         age=0,
+        discount_rate=0.02,
         # overall_maximum=9,
         # overall_minimum=14,
         # nonconvex=True,
@@ -308,6 +325,62 @@ link_DE_FR = custom.Link(
     multiperiod=True
 )
 
+approach='oemof'
+
+kwargs_all = {
+    'label': 'demand_dsm',
+    'inputs': {bus_el: network.Flow(
+        variable_costs=0,
+        multiperiod=True
+    )},
+    'demand': [1] * len(timeindex),
+    'capacity_up': [1] * len(timeindex),
+    'capacity_down': [1] * len(timeindex),
+    'delay_time': 4,
+    'shed_time': 2,
+    'recovery_time_shift': 0,
+    'recovery_time_shed': 24,
+    'cost_dsm_up': 0.01,
+    'cost_dsm_down_shift': 0.01,
+    'cost_dsm_down_shed': 1000,
+    'efficiency': 1.0,
+    'shed_eligibility': False,
+    'shift_eligibility': True,
+    'max_demand': 20,
+    'max_capacity_down': 10,
+    'max_capacity_up': 10,
+    'flex_share_down': None,
+    'flex_share_up': None,
+    'shift_time': 2}
+
+kwargs_dict = {
+    'oemof': {'shift_interval': 24},
+
+    'DIW': {},
+
+    'DLR': {'ActivateYearLimit': False,
+            'ActivateDayLimit': False,
+            'n_yearLimit_shift': None,
+            'n_yearLimit_shed': 10,
+            't_dayLimit': None,
+            'addition': True,
+            'fixes': True},
+}
+
+dsm_unit = custom.SinkDSM(
+    **kwargs_all,
+    approach=approach,
+    **kwargs_dict[approach],
+    multiperiodinvestment=options.MultiPeriodInvestment(
+    # investment=options.Investment(
+        existing=0,
+        maximum=20,
+        ep_costs=10,
+        lifetime=20,
+        age=18,
+        discount_rate=0.02
+    ))
+
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        source_shortage,
        bus_lignite, bus_hardcoal, bus_natgas, bus_el,
@@ -315,11 +388,12 @@ es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        sink_el, sink_excess, storage_el,
        source_wind_FR, source_shortage_FR,
        bus_el_FR, sink_el_FR, sink_excess_FR, link_DE_FR,
+       dsm_unit,
        )
 
 # test = models.Model(es)
 test = models.MultiPeriodModel(es)
-test.pprint()
+# test.pprint()
 
 test.solve(solver='gurobi', solve_kwargs={'tee': True})
 
