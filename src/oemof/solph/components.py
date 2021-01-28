@@ -2172,9 +2172,19 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                         # * (n.multiperiodinvestment.lifetime
                         #    - n.multiperiodinvestment.age)
                         * discount_factor[pp]
-                        for pp in range(p, p + lifetime - age)
+                        for pp in range(p, p + lifetime)
                     )
                 )
+
+            # Payments for old units - sunk costs or relevant?
+            # investment_costs += sum(
+            #     n.multiperiodinvestment.existing
+            #     * n.multiperiodinvestment.ep_costs[0]
+            #     # * (n.multiperiodinvestment.lifetime
+            #     #    - n.multiperiodinvestment.age)
+            #     * discount_factor[pp]
+            #     for pp in range(p, p + lifetime - age)
+            # )
         for n in self.NON_CONVEX_MULTIPERIODINVESTSTORAGES:
             for p in m.PERIODS:
                 investment_costs += (
@@ -2184,12 +2194,21 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                         # * (n.multiperiodinvestment.lifetime
                         #    - n.multiperiodinvestment.age)
                         * discount_factor[pp]
-                        for pp in range(p, p + lifetime - age)
+                        for pp in range(p, p + lifetime)
                     )
                     + self.invest_status[n, p]
                     * n.multiperiodinvestment.offset[p]
                     * discount_factor[p]
                 )
+            # Payments for old units - sunk costs or relevant?
+            # investment_costs += sum(
+            #     n.multiperiodinvestment.existing
+            #     * n.multiperiodinvestment.ep_costs[0]
+            #     # * (n.multiperiodinvestment.lifetime
+            #     #    - n.multiperiodinvestment.age)
+            #     * discount_factor[pp]
+            #     for pp in range(p, p + lifetime - age)
+            # )
         self.investment_costs = Expression(expr=investment_costs)
 
         return investment_costs

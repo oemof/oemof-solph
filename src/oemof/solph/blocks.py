@@ -1360,9 +1360,18 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         # * (m.flows[i, o].multiperiodinvestment.lifetime
                         #    - m.flows[i, o].multiperiodinvestment.age)
                         * discount_factor[pp]
-                        for pp in range(p, p + lifetime - age)
+                        for pp in range(p, p + lifetime)
                     )
                 )
+            # Payments for old units - sunk costs or relevant?
+            # investment_costs += sum(
+            #     m.flows[i, o].multiperiodinvestment.existing
+            #     * m.flows[i, o].multiperiodinvestment.ep_costs[0]
+            #     # * (m.flows[i, o].multiperiodinvestment.lifetime
+            #     #    - m.flows[i, o].multiperiodinvestment.age)
+            #     * discount_factor[pp]
+            #     for pp in range(p, p + lifetime - age)
+            # )
         for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
             for p in m.PERIODS:
                 investment_costs += (
@@ -1372,13 +1381,21 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         # * (m.flows[i, o].multiperiodinvestment.lifetime
                         #    - m.flows[i, o].multiperiodinvestment.age)
                         * discount_factor[pp]
-                        for pp in range(p, p + lifetime - age)
+                        for pp in range(p, p + lifetime)
                     )
                     + self.invest_status[i, o, p] *
                     m.flows[i, o].multiperiodinvestment.offset[p]
                     * discount_factor[p]
                 )
-
+            # Payments for old units - sunk costs or relevant?
+            # investment_costs += sum(
+            #     m.flows[i, o].multiperiodinvestment.existing
+            #     * m.flows[i, o].multiperiodinvestment.ep_costs[0]
+            #     # * (m.flows[i, o].multiperiodinvestment.lifetime
+            #     #    - m.flows[i, o].multiperiodinvestment.age)
+            #     * discount_factor[pp]
+            #     for pp in range(p, p + lifetime - age)
+            # )
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
 

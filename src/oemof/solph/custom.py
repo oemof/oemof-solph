@@ -2258,8 +2258,9 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
             interest = g.multiperiodinvestment.discount_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
-            for p in m.PERIODS:
-                if g.multiperiodinvestment.ep_costs is not None:
+
+            if g.multiperiodinvestment.ep_costs is not None:
+                for p in m.PERIODS:
                     investment_costs += (
                         sum(
                             self.invest[g, p]
@@ -2267,11 +2268,20 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                             # * (g.multiperiodinvestment.lifetime
                             #    - g.multiperiodinvestment.age)
                             * discount_factor[pp]
-                            for pp in range(p, p + lifetime - age)
+                            for pp in range(p, p + lifetime)
                         )
                     )
-                else:
-                    raise ValueError("Missing value for investment costs!")
+                # Payments for old units - sunk costs or relevant?
+                # investment_costs += sum(
+                #     g.multiperiodinvestment.existing
+                #     * g.multiperiodinvestment.ep_costs[0]
+                #     # * (g.multiperiodinvestment.lifetime
+                #     #    - g.multiperiodinvestment.age)
+                #     * discount_factor[pp]
+                #     for pp in range(p, p + lifetime - age)
+                # )
+            else:
+                raise ValueError("Missing value for investment costs!")
             for t in m.TIMESTEPS:
                 variable_costs += (self.dsm_up[g, t]
                                    * m.objective_weighting[t]
@@ -4630,8 +4640,9 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
             interest = g.multiperiodinvestment.discount_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
-            for p in m.PERIODS:
-                if g.multiperiodinvestment.ep_costs is not None:
+
+            if g.multiperiodinvestment.ep_costs is not None:
+                for p in m.PERIODS:
                     investment_costs += (
                         sum(
                             self.invest[g, p]
@@ -4639,11 +4650,20 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                             # * (g.multiperiodinvestment.lifetime
                             #    - g.multiperiodinvestment.age)
                             * discount_factor[pp]
-                            for pp in range(p, p + lifetime - age)
+                            for pp in range(p, p + lifetime)
                         )
                     )
-                else:
-                    raise ValueError("Missing value for investment costs!")
+                # Payments for old units - sunk costs or relevant?
+                # investment_costs += sum(
+                #     g.multiperiodinvestment.existing
+                #     * g.multiperiodinvestment.ep_costs[0]
+                #     # * (g.multiperiodinvestment.lifetime
+                #     #    - g.multiperiodinvestment.age)
+                #     * discount_factor[pp]
+                #     for pp in range(p, p + lifetime - age)
+                # )
+            else:
+                raise ValueError("Missing value for investment costs!")
 
             for t in m.TIMESTEPS:
                 variable_costs += (self.dsm_up[g, t]
@@ -7856,8 +7876,9 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
             interest = g.multiperiodinvestment.discount_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
-            for p in m.PERIODS:
-                if g.multiperiodinvestment.ep_costs is not None:
+
+            if g.multiperiodinvestment.ep_costs is not None:
+                for p in m.PERIODS:
                     investment_costs += (
                         sum(
                             self.invest[g, p]
@@ -7865,11 +7886,20 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                             # * (g.multiperiodinvestment.lifetime
                             #    - g.multiperiodinvestment.age)
                             * discount_factor[pp]
-                            for pp in range(p, p + lifetime - age)
+                            for pp in range(p, p + lifetime)
                         )
                     )
-                else:
-                    raise ValueError("Missing value for investment costs!")
+                # Payments for old units - sunk costs or relevant?
+                # investment_costs += sum(
+                #     g.multiperiodinvestment.existing
+                #     * g.multiperiodinvestment.ep_costs[0]
+                #     # * (g.multiperiodinvestment.lifetime
+                #     #    - g.multiperiodinvestment.age)
+                #     * discount_factor[pp]
+                #     for pp in range(p, p + lifetime - age)
+                # )
+            else:
+                raise ValueError("Missing value for investment costs!")
             for t in m.TIMESTEPS:
                 variable_costs += ((sum(self.dsm_up[g, h, t]
                                         + self.balance_dsm_do[g, h, t]
