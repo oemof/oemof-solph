@@ -209,13 +209,14 @@ def results(om):
                 sequences = pd.DataFrame(index=om.es.timeindex)
             # periods equal to years (will probably be the standard use case)
             periods = sorted(list(set(om.es.timeindex.year)))
-            d = dict(zip(range(len(periods)), periods))
+            d = dict(zip([(el, ) for el in range(len(periods))], periods))
             period_scalars = df_dict[k][period_cols].dropna()
             if period_scalars.empty:
                 period_scalars = pd.DataFrame(index=d.values())
             try:
                 sequences.index = om.es.timeindex
                 period_scalars.rename(index=d, inplace=True)
+                period_scalars.index.name = 'period'
                 result[k] = {'period_scalars': period_scalars,
                              'sequences': sequences}
             except IndexError:
