@@ -14,6 +14,7 @@ Add wind source and demand sink for FR and links for exchange.
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
 import logging
 
 import models
@@ -401,4 +402,29 @@ meta = processing.meta_results(test)
 
 # es.results['main'] = processing.results(test)
 results = processing.results(test)
-bus_res = views.node(results, bus_el)['sequences']
+
+# Show inflows and outflows from electricity bus
+bus_el_flow_res = views.node(results, bus_el)['sequences']
+# Collect all investment results
+invest_units = [bus_el, dsm_unit, storage_el]
+
+invest_res = {}
+
+for el in invest_units:
+    invest_res[el] = views.node(results, el)['scalars']
+
+invest_results = pd.concat(invest_res.values(), axis=0)
+invest_results.index = pd.MultiIndex.from_tuples(invest_results.index)
+invest_results.reset_index(inplace=True)
+invest_results.drop_duplicates(inplace=True)
+invest_results.rename(columns={'level_0': 'node', 'level_1': 'period'},
+                      inplace=True)
+invest_results = invest_results.pivot(index='period', columns='node')
+invest_results.columns = invest_results.columns.swaplevel()
+
+investments = invest_results.loc[:,
+              invest_results.columns.get_level_values(1) == 'invest']
+
+investments.plot(kind='bar')
+plt.title('Investments per period')
+plt.show()
