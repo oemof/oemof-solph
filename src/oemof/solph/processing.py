@@ -74,7 +74,7 @@ def get_timeindex(x):
     """
     Get the timeindex from oemof tuples for multiperiod models.
 
-    The timestep is removed from tuples of type `(n, n, int, int)`
+    The timestep is removed from tuples of type `(n, n, int, int)`,
     `(n, n, int)` and `(n, int)`.
     """
     for i, n in enumerate(x):
@@ -88,7 +88,8 @@ def remove_timeindex(x):
     """
     Remove the timestep from oemof tuples.
 
-    The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
+    The timestep is removed from tuples of type `(n, n, int, int)`,
+    `(n, n, int)` and `(n, int)`.
     """
     for i, n in enumerate(x):
         if isinstance(n, int):
@@ -123,18 +124,20 @@ def create_dataframe(om):
     # on which dimension the variable/parameter has (scalar/sequence).
     # columns for the oemof tuple and timestep are created
     df['oemof_tuple'] = df['pyomo_tuple'].map(get_tuple)
-    if not isinstance(om, models.MultiPeriodModel):
-        df['timestep'] = df['oemof_tuple'].map(get_timestep)
-        df['oemof_tuple'] = df['oemof_tuple'].map(remove_timestep)
-        # order the data by oemof tuple and timestep
-        df = df.sort_values(['oemof_tuple', 'timestep'],
-                            ascending=[True, True])
-    else:
-        df['timeindex'] = df['oemof_tuple'].map(get_timeindex)
-        df['oemof_tuple'] = df['oemof_tuple'].map(remove_timeindex)
-        # order the data by oemof tuple and timestep
-        df = df.sort_values(['oemof_tuple', 'timeindex'],
-                            ascending=[True, True])
+    time_col = 'timestep'
+    methods_dict = {'get': get_timestep,
+                    'remove': remove_timestep}
+
+    if isinstance(om, models.MultiPeriodModel):
+        time_col = 'timeindex'
+        methods_dict = {'get': get_timeindex,
+                        'remove': remove_timeindex}
+
+    df[time_col] = df['oemof_tuple'].map(methods_dict['get'])
+    df['oemof_tuple'] = df['oemof_tuple'].map(methods_dict['remove'])
+    # order the data by oemof tuple and timestep
+    df = df.sort_values(['oemof_tuple', time_col],
+                        ascending=[True, True])
 
     # drop empty decision variables
     df = df.dropna(subset=['value'])
@@ -173,10 +176,8 @@ def results(om):
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
     for k in df_dict:
-        print(k)
         df_dict[k].set_index(time_col, inplace=True)
         df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
-        print(df_dict[k])
         if not isinstance(om, models.MultiPeriodModel):
             try:
                 df_dict[k].index = om.es.timeindex
