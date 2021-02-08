@@ -16,7 +16,7 @@ New features
 New components/constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* something
+* Custom component: oemof.solph.custom.PiecewiseLinearTransformer. A transformer model with one input and one output and an arbitrary piecewise linear conversion function. On how to use the component, refer to the `test script <https://github.com/oemof/oemof-solph/blob/dev/tests/test_scripts/test_solph/test_piecewiselineartransformer/test_piecewiselineartransformer.py>`_ and `example <https://github.com/oemof/oemof-examples/blob/master/oemof_examples/oemof.solph/v0.4.x/piecewise/piecewise_linear_transformer.py>`_.
 
 Documentation
 ^^^^^^^^^^^^^^^^^^^^
@@ -46,4 +46,5 @@ Other changes
 Contributors
 ^^^^^^^^^^^^^^^^^^^^
 
-* something
+* Jann Launer
+* Stefan Schirmeister
