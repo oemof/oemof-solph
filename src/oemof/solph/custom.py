@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
+SPDX-FileCopyrightText: jnnr
 
 SPDX-License-Identifier: MIT
 
