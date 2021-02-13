@@ -255,7 +255,7 @@ class Flow(SimpleBlock):
 
 
 class MultiPeriodFlow(SimpleBlock):
-    r""" Flow block with definitions for standard flows.
+    r""" Block for all flows with :attr:`MultiPeriod` being not None.
 
     **The following variables are created**:
 
@@ -287,23 +287,23 @@ class MultiPeriodFlow(SimpleBlock):
 
     Flow max sum :attr:`om.Flow.summed_max[i, o]`
       .. math::
-        \sum_t flow(i, o, t) \cdot \tau
+        \sum_t flow(i, o, p, t) \cdot \tau
             \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
     Flow min sum :attr:`om.Flow.summed_min[i, o]`
       .. math::
-        \sum_t flow(i, o, t) \cdot \tau
+        \sum_t flow(i, o, p, t) \cdot \tau
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
     Negative gradient constraint
       :attr:`om.Flow.negative_gradient_constr[i, o]`:
         .. math::
-          flow(i, o, t-1) - flow(i, o, t) \geq \
+          flow(i, o, p, t-1) - flow(i, o, p, t) \geq \
           negative\_gradient(i, o, t), \\
           \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+          \forall p, t \in \textrm{TIMEINDEX}.
 
     Positive gradient constraint
       :attr:`om.Flow.positive_gradient_constr[i, o]`:
@@ -434,7 +434,7 @@ class MultiPeriodFlow(SimpleBlock):
                     if ts > 0:
                         lhs = (m.flow[inp, out, p, ts-1]
                                - m.flow[inp, out, p, ts])
-                        rhs = self.negative_gradient[inp, out, p, ts]
+                        rhs = self.negative_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, p, ts),
                                                           lhs <= rhs)
                     else:
