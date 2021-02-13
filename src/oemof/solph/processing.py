@@ -155,7 +155,8 @@ def results(om):
 
     Results from Pyomo are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
-    and flows.
+    and flows for a standard model. For a MultiPeriodModel, the investment
+    values are given in a DataFrame indexed by periods.
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
     and flows e.g. `results[n, n]['sequences']` for a standard model.
     """

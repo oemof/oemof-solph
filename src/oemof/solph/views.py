@@ -31,8 +31,9 @@ def node(results, node, multiindex=False, keep_none_type=False):
 
     Either a node or its label string can be passed.
     Results are written into a dictionary which is keyed by 'scalars'
-    resp. 'periods_scalars' for a MultiPeriodModel and
-    'sequences' holding respective data in a pandas Series and DataFrame.
+    (resp. 'periods_scalars' for a MultiPeriodModel) and
+    'sequences' holding respective data in a pandas Series (resp. DataFrame)
+    and DataFrame.
     """
     def replace_none(col_list, reverse=False):
         replacement = (
