@@ -74,6 +74,8 @@ def remove_timestep(x):
 def get_timeindex(x):
     """
     Get the timeindex from oemof tuples for multiperiod models.
+    Slice int values (timeindex, timesteps or periods) dependent on how
+    the variable is indexed.
 
     The timestep is removed from tuples of type `(n, n, int, int)`,
     `(n, n, int)` and `(n, int)`.
@@ -87,7 +89,8 @@ def get_timeindex(x):
 
 def remove_timeindex(x):
     """
-    Remove the timestep from oemof tuples.
+    Remove the timeindex from oemof tuples for mulitperiod models.
+    Slice up to integer values (node labels)
 
     The timestep is removed from tuples of type `(n, n, int, int)`,
     `(n, n, int)` and `(n, int)`.
@@ -105,7 +108,7 @@ def create_dataframe(om):
 
     Results from Pyomo are written into pandas DataFrame where separate columns
     are created for the variable index e.g. for tuples of the flows and
-    components or the timesteps.
+    components or the timesteps / timeindices.
     """
     # get all pyomo variables including their block
     block_vars = []
@@ -154,10 +157,11 @@ def results(om):
     a Series holds all scalar values and a dataframe all sequences for nodes
     and flows.
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
-    and flows e.g. `results[n, n]['sequences']`.
+    and flows e.g. `results[n, n]['sequences']` for a standard model.
     """
     df = create_dataframe(om)
     time_col = 'timestep'
+    scalars_col = 'scalars'
 
     if isinstance(om, models.MultiPeriodModel):
         # Note: timeindex differs dependent on variables!
@@ -167,6 +171,7 @@ def results(om):
                             if el not in period_indexed
                             and el not in period_timestep_indexed]
         time_col = 'timeindex'
+        scalars_col = 'period_scalars'
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {k if len(k) > 1 else (k[0], None):
@@ -191,7 +196,7 @@ def results(om):
                 condition = df_dict[k].isnull().any()
                 scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
                 sequences = df_dict[k].loc[:, ~condition]
-                result[k] = {'scalars': scalars, 'sequences': sequences}
+                result[k] = {scalars_col: scalars, 'sequences': sequences}
             except IndexError:
                 error_message = ('Cannot access index on result data. ' +
                                  'Did the optimization terminate' +
@@ -217,7 +222,7 @@ def results(om):
                 sequences.index = om.es.timeindex
                 period_scalars.rename(index=d, inplace=True)
                 period_scalars.index.name = 'period'
-                result[k] = {'period_scalars': period_scalars,
+                result[k] = {scalars_col: period_scalars,
                              'sequences': sequences}
             except IndexError:
                 error_message = ('Some indices seem to be not matching.\n'
@@ -226,15 +231,27 @@ def results(om):
 
     # add dual variables for bus constraints
     if om.dual is not None:
-        grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
-        for bus, timesteps in grouped:
-            duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
-            df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
-            if (bus, None) not in result.keys():
-                result[(bus, None)] = {
-                    'sequences': df, 'scalars': pd.Series(dtype=float)}
-            else:
-                result[(bus, None)]['sequences']['duals'] = duals
+        df = pd.DataFrame()
+
+        if not isinstance(om, models.MultiPeriodModel):
+            grouped = groupby(sorted(om.Bus.balance.iterkeys()),
+                              lambda p: p[0])
+            for bus, timesteps in grouped:
+                duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
+                df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
+        else:
+            grouped = groupby(sorted(om.MultiPeriodBus.balance.iterkeys()),
+                              lambda p: p[0])
+            for bus, timeindex in grouped:
+                duals = [om.dual[om.MultiPeriodBus.balance[bus, p, t]]
+                         for _, p, t in timeindex]
+                df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
+
+        if (bus, None) not in result.keys():
+            result[(bus, None)] = {
+                'sequences': df, scalars_col: pd.Series(dtype=float)}
+        else:
+            result[(bus, None)]['sequences']['duals'] = duals
 
     return result
 

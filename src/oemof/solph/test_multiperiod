@@ -204,7 +204,8 @@ pp_natgas_CCGT = network.Transformer(
         #     overall_minimum=2,
         ),
         # nominal_value=100,
-        variable_costs=3
+        variable_costs=3,
+        # fixed_cost=10
     )},
     conversion_factors={bus_el: 0.6})
 
@@ -395,6 +396,7 @@ es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
 # test = models.Model(es)
 test = models.MultiPeriodModel(es)
 # test.pprint()
+test.receive_duals()
 
 test.solve(solver='gurobi', solve_kwargs={'tee': True})
 
