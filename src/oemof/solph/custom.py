@@ -215,6 +215,8 @@ class ElectricalLineBlock(SimpleBlock):
 class Link(on.Transformer):
     """A Link object with 1...2 inputs and 1...2 outputs.
 
+    For a MultiPeriodModel, :attr:`multiperiod` has to be set to True.
+
     Parameters
     ----------
     conversion_factors : dict
@@ -358,7 +360,7 @@ class LinkBlock(SimpleBlock):
 
 class MultiPeriodLinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.custom.Link` with the :attr:`MultiPeriodInvestment`
+    :class:`~oemof.solph.custom.Link` with the :attr:`multiperiod`
 
     Note: This component is experimental. Use it with care.
 
@@ -1057,6 +1059,10 @@ class SinkDSM(Sink):
     SinkDSM adds additional constraints that allow to shift energy in certain
     time window constrained by :attr:`~capacity_up` and
     :attr:`~capacity_down`.
+
+    For a MultiPeriodModel, set :attr:`multiperiod` to True or define
+    :attr:`multiperiodinvestment` of type :class:`MultiPeriodInvestment
+    <oemof.solph.options.MultiPeriodInvestment>`.
 
     Parameters
     ----------
