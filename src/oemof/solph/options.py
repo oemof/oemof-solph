@@ -88,53 +88,51 @@ class Investment:
             raise AttributeError(e3)
 
 
-# class MultiPeriod:
-#     """
-#     Parameters
-#     ----------
-#     nonconvex : bool
-#         If `True`, a binary variable for the status of the investment is
-#         created. This enables additional fix investment costs (*offset*)
-#         independent of the invested flow capacity. Therefore, use the `offset`
-#         parameter.
-#
-#
-#     For the variables, constraints and parts of the objective function, which
-#     are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
-#     :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
-#
-#     """
-#     def __init__(self, nonconvex=False, **kwargs):
-#
-#         self.nonconvex = nonconvex
-#
-#         for attribute in kwargs.keys():
-#             value = kwargs.get(attribute)
-#             setattr(self, attribute, value)
-
-
 class MultiPeriodInvestment:
     """
     Parameters
     ----------
-    maximum : float, :math:`P_{invest,max}` or :math:`E_{invest,max}`
-        Maximum of the additional invested capacity
-    minimum : float, :math:`P_{invest,min}` or :math:`E_{invest,min}`
-        Minimum of the additional invested capacity. If `nonconvex` is `True`,
-        `minimum` defines the threshold for the invested capacity.
-    ep_costs : float, :math:`c_{invest,var}`
+    maximum : sequence of float, :math:`P_{invest,max}(p)`
+        or :math:`E_{invest,max}(p)`
+        Maximum of the additional invested capacity that can be installed in
+        the current period
+    minimum : sequence of float, :math:`P_{invest,min}(p)`
+        or :math:`E_{invest,min}(p)`
+        Minimum of the additional invested capacity that has at least to be
+        installed in the current period
+    ep_costs : sequence of float, :math:`c_{invest}(p)`
         Equivalent periodical costs for the investment per flow capacity.
+        Values may differ on a periodical basis and have to be given as
+        nominal investment expenditures. An annuity is calculated by the model
+        itself.
     existing : float, :math:`P_{exist}` or :math:`E_{exist}`
         Existing / installed capacity. The invested capacity is added on top
-        of this value. Not applicable if `nonconvex` is set to `True`.
+        of this value. Not applicable if `nonconvex` is set to `True`. Existing
+        capacity will be decommissioned when its lifetime is reached, in turn
+        accounting for a start age.
     nonconvex : bool
         If `True`, a binary variable for the status of the investment is
         created. This enables additional fix investment costs (*offset*)
         independent of the invested flow capacity. Therefore, use the `offset`
         parameter.
-    offset : float, :math:`c_{invest,fix}`
+    offset : float, :math:`c_{invest,fix}(p)`
         Additional fix investment costs. Only applicable if `nonconvex` is set
-        to `True`.
+        to `True`. Values may vary on a periodical basis.
+    overall_maximum : float, :math:`P_{overall_max}`
+        Overall amount of capacity that may not be exceeded by the total
+        installed capacity in every period. Note: Decommissionings due to unit
+        age are taken into account.
+    overall_minimum : float, :math:`P_{overall_min}`
+        An overall limit for the capacity to be installed in the last period
+        of the optimization timeframe
+    lifetime : int, :math:`lifetime`
+        The lifetime of a certain technology given in the number of periods
+        from investment to decommissioning
+    age : int, :math:`age`
+        The start age of a technology for period 0. To be used in combination
+        with :attr:`existing` > 0.
+    discount_rate : float
+        The discount rate for calculating a discount factor :math:`DF`
 
 
     For the variables, constraints and parts of the objective function, which
@@ -149,17 +147,16 @@ class MultiPeriodInvestment:
 
         self.maximum = sequence(maximum)
         self.minimum = sequence(minimum)
-        # ep_costs may vary between the years. Once an investment is made,
-        # the annuities are fixed for the remaining lifetime
         self.ep_costs = sequence(ep_costs)
         self.existing = existing
         self.nonconvex = nonconvex
-        # Offset has to be a sequence in order to account for discounting
         self.offset = sequence(offset)
         self.overall_maximum = overall_maximum
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
+        # TODO: Replace this with "central" discounting
+        #  i.e. discounting from a social planner point of view
         self.discount_rate = discount_rate
 
         for attribute in kwargs.keys():
