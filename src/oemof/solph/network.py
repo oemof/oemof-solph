@@ -121,10 +121,16 @@ class Flow(on.Edge):
         investment variable instead of to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
     multiperiod : :class:`MultiPeriod <oemof.solph.options.MultiPeriod>`
+        Object indicating if a multiperiod flow is needed to be created
+        for usage in a MultiPeriodModel
+    multiperiodivestment : :class:`MultiPeriodInvestment
+        <oemof.solph.options.MultiPeriodInvestment>`
         Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        multiperiod variable instead of to the nominal_value. The nominal_value
-        should not be set (or set to None) if a multiperiod object is used.
+        the multiperiod optimization problem through investments.
+        Note: This will refer all attributes to an multiperiodinvestment
+        variable instead of to the nominal_value. The nominal_value
+        should not be set (or set to None) if an multiperiodinvestment
+        object is used.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
@@ -236,10 +242,14 @@ class Flow(on.Edge):
 class Bus(on.Bus):
     """A balance object. Every node has to be connected to Bus.
 
+    If a MultiPeriodModel is created, :attr:`multiperiod`
+    has to be set to True.
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Bus`
+     * :py:class:`~oemof.solph.blocks.Bus` for a standard model
+     * :py:class:`~oemof.solph.blocks.MultiPeriodBus` for a MultiPeriodModel
 
     """
     def __init__(self, *args, **kwargs):
@@ -280,6 +290,12 @@ class Source(on.Source):
 
 class Transformer(on.Transformer):
     """A linear Transformer object with n inputs and n outputs.
+
+    For a MultiPeriodModel, the Flow output(s) should either have a
+    boolean attribute :attr:`multiperiod`, to indicate a transformer used in
+    the dispatch mode, or an attribute :attr:`multiperiodinvestment` of type
+    :class:`MultiPeriodInvestment <oemof.solph.options.MultiPeriodInvestment>`
+    for a transformer that will be invested in.
 
     Parameters
     ----------
@@ -325,7 +341,9 @@ class Transformer(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Transformer`
+     * :py:class:`~oemof.solph.blocks.Transformer` for a standard model
+     * :py:class:`~oemof.solph.blocks.MultiPeriodTransformer` for a
+     MultiPeriodModel
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
