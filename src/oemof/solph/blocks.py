@@ -1453,16 +1453,17 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     * ((1 + m.discount_rate) ** (-p))
                 )
         for i, o in self.MULTIPERIODINVESTFLOWS:
-            lifetime = m.flows[i, o].multiperiodinvestment.lifetime
-            for p in m.PERIODS:
-                fixed_costs += (
-                    sum(self.invest[i, o, p]
-                        * m.flows[i, o].multiperiodinvestment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(p, p + lifetime)
-                        )
-                    * ((1 + m.discount_rate) ** (-p))
-                )
+            if m.flows[i, o].multiperiodinvestment.fixed_costs[0] is not None:
+                lifetime = m.flows[i, o].multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        sum(self.invest[i, o, p]
+                            * m.flows[i, o].multiperiodinvestment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(p, p + lifetime)
+                            )
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
 
         self.costs = Expression(expr=investment_costs + fixed_costs)
         return investment_costs + fixed_costs

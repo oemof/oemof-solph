@@ -18,6 +18,7 @@ SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 import numpy as np
 from oemof.network import network
@@ -35,7 +36,8 @@ from oemof.solph import network as solph_network
 # from oemof.solph.options import Investment
 from options import Investment, MultiPeriodInvestment
 from oemof.solph.plumbing import sequence as solph_sequence
-
+from oemof.tools import economics
+from oemof.tools import debugging
 
 class GenericStorage(network.Node):
     r"""
@@ -162,6 +164,9 @@ class GenericStorage(network.Node):
         )
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
+        self.fixed_costs = solph_sequence(
+            kwargs.get('fixed_costs', 0)
+        )
         self.investment = kwargs.get("investment")
         self.invest_relation_input_output = kwargs.get(
             "invest_relation_input_output"
@@ -583,14 +588,15 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
 
     storage_content
         Storage content for every storage and timestep. The value for the
-        storage content at the beginning is set by the parameter `initial_storage_level`
-        or not set if `initial_storage_level` is None.
+        storage content at the beginning is set by the parameter
+        `initial_storage_level` or not set if `initial_storage_level` is None.
         The variable of storage s and timestep t can be accessed by:
         `om.Storage.storage_content[s, t]`
 
     **The following constraints are created:**
 
-    Set storage_content of last time step to one at t=0 if :attr:`balanced == True`
+    Set storage_content of last time step to one at t=0 if
+    :attr:`balanced == True`
         .. math::
             E(t_{last}) = &E(-1)
 
@@ -830,10 +836,23 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
         Note: This adds nothing as variable costs are already
         added in the Block :class:`Flow`.
         """
+        m = self.parent_block()
+
         if not hasattr(self, "STORAGES"):
             return 0
 
-        return 0
+        fixed_costs = 0
+
+        for n in self.STORAGES:
+            if n.fixed_costs[0] is not None:
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        n.nominal_storage_capacity
+                        * n.fixed_costs[p]
+                        * ((1 + m.discount_rate) ** -p)
+                    )
+
+        return fixed_costs
 
 
 class GenericInvestmentStorageBlock(SimpleBlock):
@@ -2156,63 +2175,71 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
 
         m = self.parent_block()
         investment_costs = 0
-
-        amount_periods = len(m.PERIODS)
+        fixed_costs = 0
 
         for n in self.CONVEX_MULTIPERIODINVESTSTORAGES:
             lifetime = n.multiperiodinvestment.lifetime
-            age = n.multiperiodinvestment.age
             interest = n.multiperiodinvestment.interest_rate
-            discount_factor = [(1+interest) ** (-pp)
-                               for pp in range(0, amount_periods + lifetime)]
+            if interest == 0:
+                msg = ("You did not specify an interest rate.\n"
+                       "It will be set equal to the discount_rate of {} "
+                       "of the model as a default.\nThis corresponds to a "
+                       "social planner point of view and does not reflect "
+                       "microeconomic interest requirements.")
+                warn(msg.format(m.discount_rate),
+                     debugging.SuspiciousUsageWarning)
+                interest = m.discount_rate
             for p in m.PERIODS:
+                annuity = economics.annuity(
+                    capex=n.multiperiodinvestment.ep_costs[p],
+                    n=lifetime,
+                    wacc=interest)
                 investment_costs += (
-                    sum(
-                        self.invest[n, p]
-                        * n.multiperiodinvestment.ep_costs[p]
-                        # * (n.multiperiodinvestment.lifetime
-                        #    - n.multiperiodinvestment.age)
-                        * discount_factor[pp]
-                        for pp in range(p, p + lifetime)
-                    )
+                    self.invest[n, p] * annuity * lifetime
+                    * ((1 + m.discount_rate) ** (-p))
                 )
 
-            # Payments for old units - sunk costs or relevant?
-            # investment_costs += sum(
-            #     n.multiperiodinvestment.existing
-            #     * n.multiperiodinvestment.ep_costs[0]
-            #     # * (n.multiperiodinvestment.lifetime
-            #     #    - n.multiperiodinvestment.age)
-            #     * discount_factor[pp]
-            #     for pp in range(p, p + lifetime - age)
-            # )
         for n in self.NON_CONVEX_MULTIPERIODINVESTSTORAGES:
             for p in m.PERIODS:
-                investment_costs += (
-                    sum(
-                        self.invest[n, p]
-                        * n.multiperiodinvestment.ep_costs[p]
-                        # * (n.multiperiodinvestment.lifetime
-                        #    - n.multiperiodinvestment.age)
-                        * discount_factor[pp]
-                        for pp in range(p, p + lifetime)
+                lifetime = n.multiperiodinvestment.lifetime
+                interest = n.multiperiodinvestment.interest_rate
+                if interest == 0:
+                    msg = ("You did not specify an interest rate.\n"
+                           "It will be set equal to the discount_rate of {} "
+                           "of the model as a default.\nThis corresponds to a "
+                           "social planner point of view and does not reflect "
+                           "microeconomic interest requirements.")
+                    warn(msg.format(m.discount_rate),
+                         debugging.SuspiciousUsageWarning)
+                    interest = m.discount_rate
+                for p in m.PERIODS:
+                    annuity = economics.annuity(
+                        capex=n.multiperiodinvestment.ep_costs[p],
+                        n=lifetime,
+                        wacc=interest)
+                    investment_costs += (
+                        (self.invest[n, p] * annuity * lifetime
+                         + self.invest_status[n, p] *
+                         n.multiperiodinvestment.offset[p])
+                        * ((1 + m.discount_rate) ** (-p))
                     )
-                    + self.invest_status[n, p]
-                    * n.multiperiodinvestment.offset[p]
-                    * discount_factor[p]
-                )
-            # Payments for old units - sunk costs or relevant?
-            # investment_costs += sum(
-            #     n.multiperiodinvestment.existing
-            #     * n.multiperiodinvestment.ep_costs[0]
-            #     # * (n.multiperiodinvestment.lifetime
-            #     #    - n.multiperiodinvestment.age)
-            #     * discount_factor[pp]
-            #     for pp in range(p, p + lifetime - age)
-            # )
-        self.investment_costs = Expression(expr=investment_costs)
 
-        return investment_costs
+        for n in self.MULTIPERIODINVESTSTORAGES:
+            if n.multiperiodinvestment.fixed_costs[0] is not None:
+                lifetime = n.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        sum(self.invest[n, p]
+                            * n.multiperiodinvestment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(p, p + lifetime)
+                            )
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.costs = Expression(expr=investment_costs + fixed_costs)
+
+        return investment_costs + fixed_costs
 
 
 class GenericCHP(network.Transformer):
