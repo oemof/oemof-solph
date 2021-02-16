@@ -111,6 +111,8 @@ class Flow(on.Edge):
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
+        Note: In a multiperiod model, nominal costs have to be used which may
+        vary on a periodical basis but do not vary within a period.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the

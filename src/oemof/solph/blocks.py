@@ -480,19 +480,22 @@ class MultiPeriodFlow(SimpleBlock):
                 for p, t in m.TIMEINDEX:
                     variable_costs += (m.flow[i, o, p, t] *
                                        m.objective_weighting[t] *
-                                       m.flows[i, o].variable_costs[t])
+                                       m.flows[i, o].variable_costs[p]
+                                       * ((1 + m.discount_rate) ** -p))
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
-                for t in m.TIMESTEPS:
+                for p, t in m.TIMEINDEX:
                     gradient_costs += (self.positive_gradient[i, o, t] *
                                        m.flows[i, o].positive_gradient[
-                                           'costs'])
+                                           'costs']
+                                       * ((1 + m.discount_rate) ** -p))
 
             if m.flows[i, o].negative_gradient['ub'][0] is not None:
-                for t in m.TIMESTEPS:
+                for p, t in m.TIMEINDEX:
                     gradient_costs += (self.negative_gradient[i, o, t] *
                                        m.flows[i, o].negative_gradient[
-                                           'costs'])
+                                           'costs']
+                                       * ((1 + m.discount_rate) ** -p))
 
         return variable_costs + gradient_costs
 
