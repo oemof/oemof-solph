@@ -1360,7 +1360,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         for i, o in self.CONVEX_MULTIPERIODINVESTFLOWS:
             lifetime = m.flows[i, o].multiperiodinvestment.lifetime
             age = m.flows[i, o].multiperiodinvestment.age
-            interest = m.flows[i, o].multiperiodinvestment.discount_rate
+            interest = m.flows[i, o].multiperiodinvestment.interest_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
             for p in m.PERIODS:

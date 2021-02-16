@@ -2261,7 +2261,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
         for g in self.multiperiodinvestdsm:
             lifetime = g.multiperiodinvestment.lifetime
             age = g.multiperiodinvestment.age
-            interest = g.multiperiodinvestment.discount_rate
+            interest = g.multiperiodinvestment.interest_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
 
@@ -4643,7 +4643,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
         for g in self.multiperiodinvestdsm:
             lifetime = g.multiperiodinvestment.lifetime
             age = g.multiperiodinvestment.age
-            interest = g.multiperiodinvestment.discount_rate
+            interest = g.multiperiodinvestment.interest_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
 
@@ -7879,7 +7879,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
         for g in self.MULTIPERIODINVESTDR:
             lifetime = g.multiperiodinvestment.lifetime
             age = g.multiperiodinvestment.age
-            interest = g.multiperiodinvestment.discount_rate
+            interest = g.multiperiodinvestment.interest_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
 

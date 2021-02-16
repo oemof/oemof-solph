@@ -2162,7 +2162,7 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         for n in self.CONVEX_MULTIPERIODINVESTSTORAGES:
             lifetime = n.multiperiodinvestment.lifetime
             age = n.multiperiodinvestment.age
-            interest = n.multiperiodinvestment.discount_rate
+            interest = n.multiperiodinvestment.interest_rate
             discount_factor = [(1+interest) ** (-pp)
                                for pp in range(0, amount_periods + lifetime)]
             for p in m.PERIODS:

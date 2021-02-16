@@ -162,7 +162,7 @@ pp_lignite = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
-            discount_rate=0.02,
+            interest_rate=0.02,
         ),
         # nominal_value=100,
         variable_costs=1
@@ -181,7 +181,7 @@ pp_hardcoal = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
-            discount_rate=0.02,
+            interest_rate=0.02,
         ),
         # nominal_value=100,
         variable_costs=2
@@ -200,7 +200,7 @@ pp_natgas_CCGT = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
-            discount_rate=0.02,
+            interest_rate=0.02,
         #     overall_minimum=2,
         ),
         # nominal_value=100,
@@ -222,7 +222,7 @@ pp_natgas_GT = network.Transformer(
             existing=0,
             lifetime=20,
             age=0,
-            discount_rate=0.02,
+            interest_rate=0.02,
             # overall_maximum=9,
             # nonconvex=True,
             # age=39,
@@ -251,7 +251,7 @@ storage_el = components.GenericStorage(
             existing=0,
             lifetime=20,
             age=0,
-            discount_rate=0.02,
+            interest_rate=0.02,
             # age=39,
             # lifetime=40
         )
@@ -268,7 +268,7 @@ storage_el = components.GenericStorage(
             existing=0,
             lifetime=20,
             age=0,
-            discount_rate=0.02,
+            interest_rate=0.02,
             # age=39,
             # lifetime=40
         )
@@ -292,7 +292,7 @@ storage_el = components.GenericStorage(
         existing=0,
         lifetime=20,
         age=0,
-        discount_rate=0.02,
+        interest_rate=0.02,
         # overall_maximum=9,
         # overall_minimum=14,
         # nonconvex=True,
@@ -380,7 +380,7 @@ dsm_unit = custom.SinkDSM(
         ep_costs=10,
         lifetime=20,
         age=18,
-        discount_rate=0.02
+        interest_rate=0.02
     ))
 
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,

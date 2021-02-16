@@ -131,8 +131,12 @@ class MultiPeriodInvestment:
     age : int, :math:`age`
         The start age of a technology for period 0. To be used in combination
         with :attr:`existing` > 0.
-    discount_rate : float
-        The discount rate for calculating a discount factor :math:`DF`
+    interest_rate : float
+        The interest rate for calculating an annuity (can either be set from
+        an microeconomic point of view, where it equals the interest an
+        investor wishes to earn, or from a social planner point of view,
+        where it equals the inflation rate used for discounting
+        nominal payments)
 
 
     For the variables, constraints and parts of the objective function, which
@@ -143,7 +147,7 @@ class MultiPeriodInvestment:
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
                  existing=0, nonconvex=False, offset=0,
                  overall_maximum=None, overall_minimum=None,
-                 lifetime=0, age=0, discount_rate=0, **kwargs):
+                 lifetime=0, age=0, interest_rate=0, **kwargs):
 
         self.maximum = sequence(maximum)
         self.minimum = sequence(minimum)
@@ -157,7 +161,7 @@ class MultiPeriodInvestment:
         self.age = age
         # TODO: Replace this with "central" discounting
         #  i.e. discounting from a social planner point of view
-        self.discount_rate = discount_rate
+        self.interest_rate = interest_rate
 
         for attribute in kwargs.keys():
             value = kwargs.get(attribute)
