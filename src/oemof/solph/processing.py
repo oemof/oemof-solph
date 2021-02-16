@@ -84,7 +84,7 @@ def get_timeindex(x):
         if isinstance(n, int):
             return x[i:]
     else:
-        return 0
+        return (0,)
 
 
 def remove_timeindex(x):
@@ -168,9 +168,12 @@ def results(om):
         # Note: timeindex differs dependent on variables!
         period_indexed = ['invest', 'total', 'old']
         period_timestep_indexed = ['flow']
+        # TODO: Take care of initial storage content instead of just ignoring
+        to_be_ignored = ['init_content']
         timestep_indexed = [el for el in df['variable_name'].unique()
                             if el not in period_indexed
-                            and el not in period_timestep_indexed]
+                            and el not in period_timestep_indexed
+                            and el not in to_be_ignored]
         time_col = 'timeindex'
         scalars_col = 'period_scalars'
 
