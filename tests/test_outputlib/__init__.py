@@ -111,10 +111,10 @@ pp_oil = Transformer(
     label='pp_oil',
     inputs={boil: Flow()},
     outputs={
-     bel: Flow(
-         nominal_value=5,
-         variable_costs=50
-     )
+        bel: Flow(
+            nominal_value=5,
+            variable_costs=50
+        )
     },
     conversion_factors={bel: 0.28}
 )
@@ -124,11 +124,11 @@ pp_chp = Transformer(
     label='pp_chp',
     inputs={bgas: Flow()},
     outputs={
-     bel: Flow(
-         nominal_value=30,
-         variable_costs=42
-     ),
-     bth: Flow(nominal_value=40)
+        bel: Flow(
+            nominal_value=30,
+            variable_costs=42
+        ),
+        bth: Flow(nominal_value=40)
     },
     conversion_factors={bel: 0.3, bth: 0.4}
 )
