@@ -36,7 +36,7 @@ def get_tuple(x):
         if isinstance(i, tuple):
             return i
         elif issubclass(type(i), Node):
-            return i,
+            return (i,)
 
     # for standalone variables, x is used as identifying tuple
     if isinstance(x, tuple):
