@@ -159,8 +159,6 @@ class MultiPeriodInvestment:
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
-        # TODO: Replace this with "central" discounting
-        #  i.e. discounting from a social planner point of view
         self.interest_rate = interest_rate
 
         for attribute in kwargs.keys():
