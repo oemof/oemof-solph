@@ -28,7 +28,7 @@ from oemof.solph.plumbing import sequence
 
 
 class EnergySystem(es.EnergySystem):
-    """ A variant of :class:`EnergySystem
+    """A variant of :class:`EnergySystem
     <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
 
     In order to work in tandem with solph, instances of this class always use
@@ -48,13 +48,13 @@ class EnergySystem(es.EnergySystem):
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from oemof.solph.groupings import GROUPINGS
 
-        kwargs['groupings'] = (GROUPINGS + kwargs.get('groupings', []))
+        kwargs["groupings"] = GROUPINGS + kwargs.get("groupings", [])
 
         super().__init__(**kwargs)
 
 
 class Flow(on.Edge):
-    r""" Defines a flow between two nodes.
+    r"""Defines a flow between two nodes.
 
     Keyword arguments are used to set the attributes of this flow. Parameters
     which are handled specially are noted below.
@@ -161,41 +161,54 @@ class Flow(on.Edge):
 
         super().__init__()
 
-        scalars = ['nominal_value', 'summed_max', 'summed_min',
-                   'investment', 'nonconvex', 'integer']
-        sequences = ['fix', 'variable_costs', 'min', 'max']
-        dictionaries = ['positive_gradient', 'negative_gradient']
-        defaults = {'variable_costs': 0,
-                    'positive_gradient': {'ub': None, 'costs': 0},
-                    'negative_gradient': {'ub': None, 'costs': 0}}
-        keys = [k for k in kwargs if k != 'label']
+        scalars = [
+            "nominal_value",
+            "summed_max",
+            "summed_min",
+            "investment",
+            "nonconvex",
+            "integer",
+        ]
+        sequences = ["fix", "variable_costs", "min", "max"]
+        dictionaries = ["positive_gradient", "negative_gradient"]
+        defaults = {
+            "variable_costs": 0,
+            "positive_gradient": {"ub": None, "costs": 0},
+            "negative_gradient": {"ub": None, "costs": 0},
+        }
+        keys = [k for k in kwargs if k != "label"]
 
-        if 'fixed_costs' in keys:
+        if "fixed_costs" in keys:
             raise AttributeError(
-                "The `fixed_costs` attribute has been removed"
-                " with v0.2!")
+                "The `fixed_costs` attribute has been removed" " with v0.2!"
+            )
 
-        if 'actual_value' in keys:
+        if "actual_value" in keys:
             raise AttributeError(
                 "The `actual_value` attribute has been renamed"
                 " to `fix` with v0.4. The attribute `fixed` is"
-                " set to True automatically when passing `fix`.")
+                " set to True automatically when passing `fix`."
+            )
 
         if "fixed" in keys:
-            msg = ("The `fixed` attribute is deprecated.\nIf you have defined "
-                   "the `fix` attribute the flow variable will be fixed.\n"
-                   "The `fixed` attribute does not change anything.")
+            msg = (
+                "The `fixed` attribute is deprecated.\nIf you have defined "
+                "the `fix` attribute the flow variable will be fixed.\n"
+                "The `fixed` attribute does not change anything."
+            )
             warn(msg, debugging.SuspiciousUsageWarning)
 
         # It is not allowed to define min or max if fix is defined.
-        if kwargs.get("fix") is not None and (kwargs.get("min") is not None or
-                                              kwargs.get("max") is not None):
+        if kwargs.get("fix") is not None and (
+            kwargs.get("min") is not None or kwargs.get("max") is not None
+        ):
             raise AttributeError(
-                "It is not allowed to define min/max if fix is defined.")
+                "It is not allowed to define min/max if fix is defined."
+            )
 
         # Set default value for min and max
         if kwargs.get("min") is None:
-            if 'bidirectional' in keys:
+            if "bidirectional" in keys:
                 defaults["min"] = -1
             else:
                 defaults["min"] = 0
@@ -205,20 +218,30 @@ class Flow(on.Edge):
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
-                setattr(self, attribute, {'ub': sequence(value['ub']),
-                                          'costs': value['costs']})
+                setattr(
+                    self,
+                    attribute,
+                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                )
 
             else:
-                setattr(self, attribute,
-                        sequence(value) if attribute in sequences else value)
+                setattr(
+                    self,
+                    attribute,
+                    sequence(value) if attribute in sequences else value,
+                )
 
         # Checking for impossible attribute combinations
         if self.investment and self.nominal_value is not None:
-            raise ValueError("Using the investment object the nominal_value"
-                             " has to be set to None.")
+            raise ValueError(
+                "Using the investment object the nominal_value"
+                " has to be set to None."
+            )
         if self.investment and self.nonconvex:
-            raise ValueError("Investment flows cannot be combined with " +
-                             "nonconvex flows!")
+            raise ValueError(
+                "Investment flows cannot be combined with "
+                + "nonconvex flows!"
+            )
 
 
 class Bus(on.Bus):
@@ -230,9 +253,10 @@ class Bus(on.Bus):
      * :py:class:`~oemof.solph.blocks.Bus`
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.balanced = kwargs.get('balanced', True)
+        self.balanced = kwargs.get("balanced", True)
 
     def constraint_group(self):
         if self.balanced:
@@ -242,8 +266,8 @@ class Bus(on.Bus):
 
 
 class Sink(on.Sink):
-    """An object with one input flow.
-    """
+    """An object with one input flow."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         check_node_object_for_missing_attribute(self, "inputs")
@@ -253,8 +277,8 @@ class Sink(on.Sink):
 
 
 class Source(on.Source):
-    """An object with one output flow.
-    """
+    """An object with one output flow."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         check_node_object_for_missing_attribute(self, "outputs")
@@ -312,6 +336,7 @@ class Transformer(on.Transformer):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.Transformer`
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -320,11 +345,12 @@ class Transformer(on.Transformer):
 
         self.conversion_factors = {
             k: sequence(v)
-            for k, v in kwargs.get('conversion_factors', {}).items()}
+            for k, v in kwargs.get("conversion_factors", {}).items()
+        }
 
         missing_conversion_factor_keys = (
-            (set(self.outputs) | set(self.inputs)) -
-            set(self.conversion_factors))
+            set(self.outputs) | set(self.inputs)
+        ) - set(self.conversion_factors)
 
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
@@ -335,8 +361,12 @@ class Transformer(on.Transformer):
 
 def check_node_object_for_missing_attribute(obj, attribute):
     if not getattr(obj, attribute):
-        msg = ("Attribute <{0}> is missing in Node <{1}> of {2}.\n"
-               "If this is intended and you know what you are doing you can"
-               "disable the SuspiciousUsageWarning globally.")
-        warn(msg.format(attribute, obj.label, type(obj)),
-             debugging.SuspiciousUsageWarning)
+        msg = (
+            "Attribute <{0}> is missing in Node <{1}> of {2}.\n"
+            "If this is intended and you know what you are doing you can"
+            "disable the SuspiciousUsageWarning globally."
+        )
+        warn(
+            msg.format(attribute, obj.label, type(obj)),
+            debugging.SuspiciousUsageWarning,
+        )

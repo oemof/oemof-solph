@@ -17,7 +17,7 @@ from itertools import repeat
 
 
 def sequence(iterable_or_scalar):
-    """ Tests if an object is iterable (except string) or scalar and returns
+    """Tests if an object is iterable (except string) or scalar and returns
     a the original sequence if object is an iterable and a 'emulated' sequence
     object of class _Sequence if object is a scalar or string.
 
@@ -40,15 +40,16 @@ def sequence(iterable_or_scalar):
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
-    if (isinstance(iterable_or_scalar, abc.Iterable) and not
-            isinstance(iterable_or_scalar, str)):
+    if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
+        iterable_or_scalar, str
+    ):
         return iterable_or_scalar
     else:
         return _Sequence(default=iterable_or_scalar)
 
 
 class _Sequence(UserList):
-    """ Emulates a list whose length is not known in advance.
+    """Emulates a list whose length is not known in advance.
 
     Parameters
     ----------
@@ -74,6 +75,7 @@ class _Sequence(UserList):
 
 
     """
+
     def __init__(self, *args, **kwargs):
         self.default = kwargs["default"]
         self.default_changed = False
