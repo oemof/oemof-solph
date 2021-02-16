@@ -388,7 +388,6 @@ class MultiPeriodModel(BaseModel):
     def __init__(self, energysystem, discount_rate=0.02, **kwargs):
         self.discount_rate = discount_rate
         super().__init__(energysystem, **kwargs)
-        print(discount_rate)
 
     def _add_parent_block_sets(self):
         """

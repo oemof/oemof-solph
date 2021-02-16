@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 from pyomo.core import Binary
 from pyomo.core import BuildAction
@@ -25,6 +26,9 @@ from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
+
+from oemof.tools import economics
+from oemof.tools import debugging
 
 
 class Flow(SimpleBlock):
@@ -95,6 +99,7 @@ class Flow(SimpleBlock):
     their value after optimization by :meth:`om.Flow.variable_costs()` .
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -117,11 +122,11 @@ class Flow(SimpleBlock):
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None and
-            g[2].nominal_value is not None])
+                                           g[2].nominal_value is not None])
 
         self.SUMMED_MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None and
-            g[2].nominal_value is not None])
+                                           g[2].nominal_value is not None])
 
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
@@ -166,6 +171,7 @@ class Flow(SimpleBlock):
                 rhs = (m.flows[inp, out].summed_max *
                        m.flows[inp, out].nominal_value)
                 self.summed_max.add((inp, out), lhs <= rhs)
+
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
         self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
 
@@ -178,6 +184,7 @@ class Flow(SimpleBlock):
                 rhs = (m.flows[inp, out].summed_min *
                        m.flows[inp, out].nominal_value)
                 self.summed_min.add((inp, out), lhs >= rhs)
+
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
@@ -187,12 +194,13 @@ class Flow(SimpleBlock):
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for ts in m.TIMESTEPS:
                     if ts > 0:
-                        lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts-1]
+                        lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts - 1]
                         rhs = self.positive_gradient[inp, out, ts]
                         self.positive_gradient_constr.add((inp, out, ts),
                                                           lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
+
         self.positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.positive_gradient_build = BuildAction(
@@ -204,12 +212,13 @@ class Flow(SimpleBlock):
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
                 for ts in m.TIMESTEPS:
                     if ts > 0:
-                        lhs = m.flow[inp, out, ts-1] - m.flow[inp, out, ts]
+                        lhs = m.flow[inp, out, ts - 1] - m.flow[inp, out, ts]
                         rhs = self.negative_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, ts),
                                                           lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
+
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True)
         self.negative_gradient_build = BuildAction(
@@ -322,6 +331,7 @@ class MultiPeriodFlow(SimpleBlock):
     their value after optimization by :meth:`om.Flow.variable_costs()` .
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -344,11 +354,11 @@ class MultiPeriodFlow(SimpleBlock):
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_max is not None and
-            g[2].nominal_value is not None])
+                                           g[2].nominal_value is not None])
 
         self.SUMMED_MIN_FLOWS = Set(initialize=[
             (g[0], g[1]) for g in group if g[2].summed_min is not None and
-            g[2].nominal_value is not None])
+                                           g[2].nominal_value is not None])
 
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
@@ -393,6 +403,7 @@ class MultiPeriodFlow(SimpleBlock):
                 rhs = (m.flows[inp, out].summed_max *
                        m.flows[inp, out].nominal_value)
                 self.summed_max.add((inp, out), lhs <= rhs)
+
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
         self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
 
@@ -405,6 +416,7 @@ class MultiPeriodFlow(SimpleBlock):
                 rhs = (m.flows[inp, out].summed_min *
                        m.flows[inp, out].nominal_value)
                 self.summed_min.add((inp, out), lhs >= rhs)
+
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
         self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
 
@@ -415,12 +427,13 @@ class MultiPeriodFlow(SimpleBlock):
                 for p, ts in m.TIMEINDEX:
                     if ts > 0:
                         lhs = (m.flow[inp, out, p, ts]
-                               - m.flow[inp, out, p, ts-1])
+                               - m.flow[inp, out, p, ts - 1])
                         rhs = self.positive_gradient[inp, out, ts]
                         self.positive_gradient_constr.add((inp, out, p, ts),
                                                           lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
+
         self.positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True)
         self.positive_gradient_build = BuildAction(
@@ -432,13 +445,14 @@ class MultiPeriodFlow(SimpleBlock):
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
                 for p, ts in m.TIMEINDEX:
                     if ts > 0:
-                        lhs = (m.flow[inp, out, p, ts-1]
+                        lhs = (m.flow[inp, out, p, ts - 1]
                                - m.flow[inp, out, p, ts])
                         rhs = self.negative_gradient[inp, out, ts]
                         self.negative_gradient_constr.add((inp, out, p, ts),
                                                           lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
+
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True)
         self.negative_gradient_build = BuildAction(
@@ -673,6 +687,7 @@ class InvestmentFlow(SimpleBlock):
     :class:`oemof.solph.options.Investment`
 
     """  # noqa: E501
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -734,6 +749,7 @@ class InvestmentFlow(SimpleBlock):
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
+
         # ######################### CONSTRAINTS ###############################
 
         def _min_invest_rule(block, i, o):
@@ -742,6 +758,7 @@ class InvestmentFlow(SimpleBlock):
             expr = (m.flows[i, o].investment.minimum *
                     self.invest_status[i, o] <= self.invest[i, o])
             return expr
+
         self.minimum_rule = Constraint(
             self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
 
@@ -751,6 +768,7 @@ class InvestmentFlow(SimpleBlock):
             expr = self.invest[i, o] <= (
                 m.flows[i, o].investment.maximum * self.invest_status[i, o])
             return expr
+
         self.maximum_rule = Constraint(
             self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)
 
@@ -759,10 +777,11 @@ class InvestmentFlow(SimpleBlock):
             of investment flow to (normed) actual value
             """
             expr = (m.flow[i, o, t] == (
-                    (m.flows[i, o].investment.existing + self.invest[i, o]) *
-                    m.flows[i, o].fix[t]))
+                (m.flows[i, o].investment.existing + self.invest[i, o]) *
+                m.flows[i, o].fix[t]))
 
             return expr
+
         self.fixed = Constraint(self.FIXED_INVESTFLOWS, m.TIMESTEPS,
                                 rule=_investflow_fixed_rule)
 
@@ -774,6 +793,7 @@ class InvestmentFlow(SimpleBlock):
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
                 m.flows[i, o].max[t]))
             return expr
+
         self.max = Constraint(self.NON_FIXED_INVESTFLOWS, m.TIMESTEPS,
                               rule=_max_investflow_rule)
 
@@ -785,6 +805,7 @@ class InvestmentFlow(SimpleBlock):
                 (m.flows[i, o].investment.existing + self.invest[i, o]) *
                 m.flows[i, o].min[t]))
             return expr
+
         self.min = Constraint(self.MIN_INVESTFLOWS, m.TIMESTEPS,
                               rule=_min_investflow_rule)
 
@@ -798,6 +819,7 @@ class InvestmentFlow(SimpleBlock):
                         self.invest[i, o] +
                         m.flows[i, o].investment.existing))
             return expr
+
         self.summed_max = Constraint(self.SUMMED_MAX_INVESTFLOWS,
                                      rule=_summed_max_investflow_rule)
 
@@ -811,6 +833,7 @@ class InvestmentFlow(SimpleBlock):
                       self.invest[i, o]) *
                      m.flows[i, o].summed_min))
             return expr
+
         self.summed_min = Constraint(self.SUMMED_MIN_INVESTFLOWS,
                                      rule=_summed_min_investflow_rule)
 
@@ -830,10 +853,10 @@ class InvestmentFlow(SimpleBlock):
                 self.invest[i, o] * m.flows[i, o].investment.ep_costs)
         for i, o in self.NON_CONVEX_INVESTFLOWS:
             investment_costs += (
-                    self.invest[i, o] *
-                    m.flows[i, o].investment.ep_costs +
-                    self.invest_status[i, o] *
-                    m.flows[i, o].investment.offset)
+                self.invest[i, o] *
+                m.flows[i, o].investment.ep_costs +
+                self.invest_status[i, o] *
+                m.flows[i, o].investment.offset)
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
@@ -1068,6 +1091,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
     :class:`oemof.solph.options.MultiPeriodInvestment`
 
     """  # noqa: E501
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1154,6 +1178,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.invest_status = Var(self.NON_CONVEX_MULTIPERIODINVESTFLOWS,
                                  m.PERIODS,
                                  within=Binary)
+
         # ######################### CONSTRAINTS ###############################
 
         def _min_invest_rule(block):
@@ -1165,6 +1190,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                             * self.invest_status[i, o, p]
                             <= self.invest[i, o, p])
                     self.minimum_rule.add((i, o, p), expr)
+
         self.minimum_rule = Constraint(
             self.NON_CONVEX_MULTIPERIODINVESTFLOWS, m.PERIODS,
             noruleinit=True)
@@ -1180,6 +1206,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         m.flows[i, o].multiperiodinvestment.maximum[p]
                         * self.invest_status[i, o, p])
                     self.maximum_rule.add((i, o, p), expr)
+
         self.maximum_rule = Constraint(
             self.NON_CONVEX_MULTIPERIODINVESTFLOWS, m.PERIODS,
             noruleinit=True)
@@ -1204,6 +1231,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                                 + self.total[i, o, p - 1]
                                 - self.old[i, o, p])
                         self.total_rule.add((i, o, p), expr)
+
         self.total_rule = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
                                      noruleinit=True)
         self.total_rule_build = BuildAction(
@@ -1231,6 +1259,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         expr = (self.old[i, o, p]
                                 == 0)
                         self.old_rule.add((i, o, p), expr)
+
         self.old_rule = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
@@ -1243,9 +1272,10 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             for i, o in self.FIXED_MULTIPERIODINVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (m.flow[i, o, p, t] == (
-                            self.total[i, o, p]
-                            * m.flows[i, o].fix[t]))
+                        self.total[i, o, p]
+                        * m.flows[i, o].fix[t]))
                     self.fixed.add((i, o, p, t), expr)
+
         self.fixed = Constraint(self.FIXED_MULTIPERIODINVESTFLOWS,
                                 m.TIMEINDEX,
                                 noruleinit=True)
@@ -1262,6 +1292,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         self.total[i, o, p]
                         * m.flows[i, o].max[t]))
                     self.max.add((i, o, p, t), expr)
+
         self.max = Constraint(self.NON_FIXED_MULTIPERIODINVESTFLOWS,
                               m.TIMEINDEX,
                               noruleinit=True)
@@ -1278,6 +1309,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         self.total[i, o, p]
                         * m.flows[i, o].min[t]))
                     self.min.add((i, o, p, t), expr)
+
         self.min = Constraint(self.MIN_MULTIPERIODINVESTFLOWS, m.TIMEINDEX,
                               noruleinit=True)
         self.min_build = BuildAction(
@@ -1290,8 +1322,9 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
                         for p, t in m.TIMEINDEX) <=
                     (m.flows[i, o].summed_max *
-                    sum(self.total[i, o, p] for p in m.PERIODS)))
+                     sum(self.total[i, o, p] for p in m.PERIODS)))
             return expr
+
         self.summed_max = Constraint(self.SUMMED_MAX_MULTIPERIODINVESTFLOWS,
                                      rule=_summed_max_investflow_rule)
 
@@ -1304,6 +1337,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     (sum(self.total[i, o, p] for p in m.PERIODS)
                      * m.flows[i, o].summed_min))
             return expr
+
         self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODINVESTFLOWS,
                                      rule=_summed_min_investflow_rule)
 
@@ -1323,6 +1357,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                         m.flows[i, o].multiperiodinvestment.overall_maximum
                     )
                     self.overall_maximum.add((i, o, p), expr)
+
         self.overall_maximum = Constraint(
             self.OVERALL_MAXIMUM_MULTIPERIODINVESTFLOWS,
             m.PERIODS,
@@ -1340,6 +1375,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                 <= self.total[i, o, m.PERIODS[-1]]
             )
             return expr
+
         self.overall_minimum = Constraint(
             self.OVERALL_MINIMUM_MULTIPERIODINVESTFLOWS,
             rule=_overall_minimum_investflow_rule)
@@ -1355,58 +1391,50 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         m = self.parent_block()
         investment_costs = 0
 
-        amount_periods = len(m.PERIODS)
-
         for i, o in self.CONVEX_MULTIPERIODINVESTFLOWS:
             lifetime = m.flows[i, o].multiperiodinvestment.lifetime
-            age = m.flows[i, o].multiperiodinvestment.age
             interest = m.flows[i, o].multiperiodinvestment.interest_rate
-            discount_factor = [(1+interest) ** (-pp)
-                               for pp in range(0, amount_periods + lifetime)]
+            if interest == 0:
+                msg = ("You did not specify an interest rate.\n"
+                       "It will be set equal to the discount_rate of {} "
+                       "of the model as a default.\nThis corresponds to a "
+                       "social planner point of view and does not reflect "
+                       "microeconomic interest requirements.")
+                warn(msg.format(m.discount_rate),
+                     debugging.SuspiciousUsageWarning)
+                interest = m.discount_rate
             for p in m.PERIODS:
+                annuity = economics.annuity(
+                    capex=m.flows[i, o].multiperiodinvestment.ep_costs[p],
+                    n=lifetime,
+                    wacc=interest)
                 investment_costs += (
-                    sum(
-                        self.invest[i, o, p]
-                        * m.flows[i, o].multiperiodinvestment.ep_costs[p]
-                        # * (m.flows[i, o].multiperiodinvestment.lifetime
-                        #    - m.flows[i, o].multiperiodinvestment.age)
-                        * discount_factor[pp]
-                        for pp in range(p, p + lifetime)
-                    )
+                    self.invest[i, o, p] * annuity * lifetime
+                    * ((1 + m.discount_rate) ** (-p))
                 )
-            # Payments for old units - sunk costs or relevant?
-            # investment_costs += sum(
-            #     m.flows[i, o].multiperiodinvestment.existing
-            #     * m.flows[i, o].multiperiodinvestment.ep_costs[0]
-            #     # * (m.flows[i, o].multiperiodinvestment.lifetime
-            #     #    - m.flows[i, o].multiperiodinvestment.age)
-            #     * discount_factor[pp]
-            #     for pp in range(p, p + lifetime - age)
-            # )
         for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
+            lifetime = m.flows[i, o].multiperiodinvestment.lifetime
+            interest = m.flows[i, o].multiperiodinvestment.interest_rate
+            if interest == 0:
+                msg = ("You did not specify an interest rate.\n"
+                       "It will be set equal to the discount_rate of {} "
+                       "of the model as a default.\nThis corresponds to a "
+                       "social planner point of view and does not reflect "
+                       "microeconomic interest requirements.")
+                warn(msg.format(m.discount_rate),
+                     debugging.SuspiciousUsageWarning)
+                interest = m.discount_rate
             for p in m.PERIODS:
+                annuity = economics.annuity(
+                    capex=m.flows[i, o].multiperiodinvestment.ep_costs[p],
+                    n=lifetime,
+                    wacc=interest)
                 investment_costs += (
-                    sum(
-                        self.invest[i, o, p]
-                        * m.flows[i, o].multiperiodinvestment.ep_costs[p]
-                        # * (m.flows[i, o].multiperiodinvestment.lifetime
-                        #    - m.flows[i, o].multiperiodinvestment.age)
-                        * discount_factor[pp]
-                        for pp in range(p, p + lifetime)
-                    )
-                    + self.invest_status[i, o, p] *
-                    m.flows[i, o].multiperiodinvestment.offset[p]
-                    * discount_factor[p]
+                    (self.invest[i, o, p] * annuity * lifetime
+                     + self.invest_status[i, o, p] *
+                     m.flows[i, o].multiperiodinvestment.offset[p])
+                    * ((1 + m.discount_rate) ** (-p))
                 )
-            # Payments for old units - sunk costs or relevant?
-            # investment_costs += sum(
-            #     m.flows[i, o].multiperiodinvestment.existing
-            #     * m.flows[i, o].multiperiodinvestment.ep_costs[0]
-            #     # * (m.flows[i, o].multiperiodinvestment.lifetime
-            #     #    - m.flows[i, o].multiperiodinvestment.age)
-            #     * discount_factor[pp]
-            #     for pp in range(p, p + lifetime - age)
-            # )
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
 
@@ -1423,6 +1451,7 @@ class Bus(SimpleBlock):
         \forall n \in \textrm{BUSES},
         \forall t \in \textrm{TIMESTEPS}.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1455,6 +1484,7 @@ class Bus(SimpleBlock):
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
                         block.balance.add((g, t), expr)
+
         self.balance = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
@@ -1471,6 +1501,7 @@ class MultiPeriodBus(SimpleBlock):
         \forall n \in \textrm{MULTIPERIODBUSES},
         \forall p, t \in \textrm{TIMEINDEX}.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1503,6 +1534,7 @@ class MultiPeriodBus(SimpleBlock):
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
                         block.balance.add((g, p, t), expr)
+
         self.balance = Constraint(group, m.TIMEINDEX, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
 
@@ -1542,6 +1574,7 @@ class Transformer(SimpleBlock):
 
     ======================  ====================================  =============
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1590,6 +1623,7 @@ class Transformer(SimpleBlock):
                                     "source: {0}, target: {1}".format(
                                         n.label, o.label))
                             block.relation.add((n, i, o, t), (lhs == rhs))
+
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
@@ -1629,6 +1663,7 @@ class MultiPeriodTransformer(SimpleBlock):
 
     ======================  ====================================  =============
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1677,6 +1712,7 @@ class MultiPeriodTransformer(SimpleBlock):
                                     "source: {0}, target: {1}".format(
                                         n.label, o.label))
                             block.relation.add((n, i, o, p, t), (lhs == rhs))
+
         self.relation_build = BuildAction(rule=_input_output_relation)
 
 
@@ -1821,6 +1857,7 @@ class NonConvexFlow(SimpleBlock):
                 \cdot activity\_costs(i, o)
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1844,28 +1881,28 @@ class NonConvexFlow(SimpleBlock):
         self.MIN_FLOWS = Set(initialize=[(g[0], g[1]) for g in group
                                          if g[2].min[0] is not None])
         self.STARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                if g[2].nonconvex.startup_costs[0]
-                                is not None
-                                or g[2].nonconvex.maximum_startups
-                                is not None])
+                                            if g[2].nonconvex.startup_costs[0]
+                                            is not None
+                                            or g[2].nonconvex.maximum_startups
+                                            is not None])
         self.MAXSTARTUPFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                   if g[2].nonconvex.maximum_startups
-                                   is not None])
+                                               if g[2].nonconvex.maximum_startups
+                                               is not None])
         self.SHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                 if g[2].nonconvex.shutdown_costs[0]
-                                 is not None
-                                 or g[2].nonconvex.maximum_shutdowns
-                                 is not None])
+                                             if g[2].nonconvex.shutdown_costs[0]
+                                             is not None
+                                             or g[2].nonconvex.maximum_shutdowns
+                                             is not None])
         self.MAXSHUTDOWNFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                    if g[2].nonconvex.maximum_shutdowns
-                                    is not None])
+                                                if g[2].nonconvex.maximum_shutdowns
+                                                is not None])
         self.MINUPTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                  if g[2].nonconvex.minimum_uptime
-                                  is not None])
+                                              if g[2].nonconvex.minimum_uptime
+                                              is not None])
 
         self.MINDOWNTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                    if g[2].nonconvex.minimum_downtime
-                                    is not None])
+                                                if g[2].nonconvex.minimum_downtime
+                                                is not None])
 
         self.ACTIVITYCOSTFLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
@@ -1887,6 +1924,7 @@ class NonConvexFlow(SimpleBlock):
                     m.flows[i, o].min[t] * m.flows[i, o].nominal_value <=
                     m.flow[i, o, t])
             return expr
+
         self.min = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                               rule=_minimum_flow_rule)
 
@@ -1897,6 +1935,7 @@ class NonConvexFlow(SimpleBlock):
                     m.flows[i, o].max[t] * m.flows[i, o].nominal_value >=
                     m.flow[i, o, t])
             return expr
+
         self.max = Constraint(self.MIN_FLOWS, m.TIMESTEPS,
                               rule=_maximum_flow_rule)
 
@@ -1905,11 +1944,12 @@ class NonConvexFlow(SimpleBlock):
             """
             if t > m.TIMESTEPS[1]:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
-                        self.status[i, o, t-1])
+                        self.status[i, o, t - 1])
             else:
                 expr = (self.startup[i, o, t] >= self.status[i, o, t] -
                         m.flows[i, o].nonconvex.initial_status)
             return expr
+
         self.startup_constr = Constraint(self.STARTUPFLOWS, m.TIMESTEPS,
                                          rule=_startup_rule)
 
@@ -1918,6 +1958,7 @@ class NonConvexFlow(SimpleBlock):
             """
             lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
             return lhs <= m.flows[i, o].nonconvex.maximum_startups
+
         self.max_startup_constr = Constraint(self.MAXSTARTUPFLOWS,
                                              rule=_max_startup_rule)
 
@@ -1925,13 +1966,14 @@ class NonConvexFlow(SimpleBlock):
             """Rule definition for shutdown constraints of nonconvex flows.
             """
             if t > m.TIMESTEPS[1]:
-                expr = (self.shutdown[i, o, t] >= self.status[i, o, t-1] -
+                expr = (self.shutdown[i, o, t] >= self.status[i, o, t - 1] -
                         self.status[i, o, t])
             else:
                 expr = (self.shutdown[i, o, t] >=
                         m.flows[i, o].nonconvex.initial_status -
                         self.status[i, o, t])
             return expr
+
         self.shutdown_constr = Constraint(self.SHUTDOWNFLOWS, m.TIMESTEPS,
                                           rule=_shutdown_rule)
 
@@ -1940,45 +1982,48 @@ class NonConvexFlow(SimpleBlock):
             """
             lhs = sum(self.shutdown[i, o, t] for t in m.TIMESTEPS)
             return lhs <= m.flows[i, o].nonconvex.maximum_shutdowns
+
         self.max_shutdown_constr = Constraint(self.MAXSHUTDOWNFLOWS,
                                               rule=_max_shutdown_rule)
 
         def _min_uptime_rule(block, i, o, t):
             """Rule definition for min-uptime constraints of nonconvex flows.
             """
-            if m.flows[i, o].nonconvex.max_up_down <= t\
-                    <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down:
+            if m.flows[i, o].nonconvex.max_up_down <= t \
+                <= m.TIMESTEPS[-1] - m.flows[i, o].nonconvex.max_up_down:
                 expr = 0
-                expr += ((self.status[i, o, t]-self.status[i, o, t-1]) *
+                expr += ((self.status[i, o, t] - self.status[i, o, t - 1]) *
                          m.flows[i, o].nonconvex.minimum_uptime)
-                expr += -sum(self.status[i, o, t+u] for u in range(0,
-                             m.flows[i, o].nonconvex.minimum_uptime))
+                expr += -sum(self.status[i, o, t + u] for u in range(0,
+                                                                     m.flows[i, o].nonconvex.minimum_uptime))
                 return expr <= 0
             else:
                 expr = 0
                 expr += self.status[i, o, t]
                 expr += -m.flows[i, o].nonconvex.initial_status
                 return expr == 0
+
         self.min_uptime_constr = Constraint(
             self.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule)
 
         def _min_downtime_rule(block, i, o, t):
             """Rule definition for min-downtime constraints of nonconvex flows.
             """
-            if m.flows[i, o].nonconvex.max_up_down <= t\
-                    <= m.TIMESTEPS[-1]-m.flows[i, o].nonconvex.max_up_down:
+            if m.flows[i, o].nonconvex.max_up_down <= t \
+                <= m.TIMESTEPS[-1] - m.flows[i, o].nonconvex.max_up_down:
                 expr = 0
-                expr += ((self.status[i, o, t-1]-self.status[i, o, t]) *
+                expr += ((self.status[i, o, t - 1] - self.status[i, o, t]) *
                          m.flows[i, o].nonconvex.minimum_downtime)
                 expr += - m.flows[i, o].nonconvex.minimum_downtime
-                expr += sum(self.status[i, o, t+d] for d in range(0,
-                            m.flows[i, o].nonconvex.minimum_downtime))
+                expr += sum(self.status[i, o, t + d] for d in range(0,
+                                                                    m.flows[i, o].nonconvex.minimum_downtime))
                 return expr <= 0
             else:
                 expr = 0
                 expr += self.status[i, o, t]
                 expr += -m.flows[i, o].nonconvex.initial_status
                 return expr == 0
+
         self.min_downtime_constr = Constraint(
             self.MINDOWNTIMEFLOWS, m.TIMESTEPS, rule=_min_downtime_rule)
 
