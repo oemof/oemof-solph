@@ -469,11 +469,16 @@ class MultiPeriodFlow(SimpleBlock):
     def _objective_expression(self):
         r""" Objective expression for all standard flows with fixed costs
         and variable costs.
+
+        Note that fixed costs for dispatch only plants are not
+        decision-relevant, i.e. do not influence the model choices. They
+        are only added to the objective function value.
         """
         m = self.parent_block()
 
         variable_costs = 0
         gradient_costs = 0
+        fixed_costs = 0
 
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
@@ -497,7 +502,14 @@ class MultiPeriodFlow(SimpleBlock):
                                            'costs']
                                        * ((1 + m.discount_rate) ** -p))
 
-        return variable_costs + gradient_costs
+            if (m.flows[i, o].fixed_costs[0] is not None
+                and m.flows[i, o].nominal_value is not None):
+                for p in m.PERIODS:
+                    fixed_costs += (m.flows[i, o].nominal_value *
+                                    m.flows[i, o].fixed_costs[p]
+                                    * ((1 + m.discount_rate) ** -p))
+
+        return variable_costs + gradient_costs + fixed_costs
 
 
 class InvestmentFlow(SimpleBlock):
@@ -1392,7 +1404,9 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             return 0
 
         m = self.parent_block()
+        costs = 0
         investment_costs = 0
+        fixed_costs = 0
 
         for i, o in self.CONVEX_MULTIPERIODINVESTFLOWS:
             lifetime = m.flows[i, o].multiperiodinvestment.lifetime
@@ -1438,8 +1452,20 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                      m.flows[i, o].multiperiodinvestment.offset[p])
                     * ((1 + m.discount_rate) ** (-p))
                 )
-        self.investment_costs = Expression(expr=investment_costs)
-        return investment_costs
+        for i, o in self.MULTIPERIODINVESTFLOWS:
+            lifetime = m.flows[i, o].multiperiodinvestment.lifetime
+            for p in m.PERIODS:
+                fixed_costs += (
+                    sum(self.invest[i, o, p]
+                        * m.flows[i, o].multiperiodinvestment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(p, p + lifetime)
+                        )
+                    * ((1 + m.discount_rate) ** (-p))
+                )
+
+        self.costs = Expression(expr=investment_costs + fixed_costs)
+        return investment_costs + fixed_costs
 
 
 class Bus(SimpleBlock):

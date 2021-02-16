@@ -137,6 +137,10 @@ class MultiPeriodInvestment:
         investor wishes to earn, or from a social planner point of view,
         where it equals the inflation rate used for discounting
         nominal payments)
+    fixed_costs : sequence of float, :math:`c_{fixed}(p)`
+        Fixed costs for the investment per flow capacity.
+        Values may differ on a periodical basis and have to be given as
+        nominal values. Values are discounted by the model itself.
 
 
     For the variables, constraints and parts of the objective function, which
@@ -147,7 +151,8 @@ class MultiPeriodInvestment:
     def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
                  existing=0, nonconvex=False, offset=0,
                  overall_maximum=None, overall_minimum=None,
-                 lifetime=0, age=0, interest_rate=0, **kwargs):
+                 lifetime=0, age=0, interest_rate=0, fixed_costs=None,
+                 **kwargs):
 
         self.maximum = sequence(maximum)
         self.minimum = sequence(minimum)
@@ -160,6 +165,7 @@ class MultiPeriodInvestment:
         self.lifetime = lifetime
         self.age = age
         self.interest_rate = interest_rate
+        self.fixed_costs = sequence(fixed_costs)
 
         for attribute in kwargs.keys():
             value = kwargs.get(attribute)

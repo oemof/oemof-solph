@@ -182,18 +182,22 @@ class Flow(on.Edge):
         scalars = ['nominal_value', 'summed_max', 'summed_min',
                    'investment', 'multiperiod', 'multiperiodinvestment',
                    'nonconvex', 'integer']
-        sequences = ['fix', 'variable_costs', 'min', 'max']
+        sequences = ['fix', 'variable_costs', 'fixed_costs', 'min', 'max']
         dictionaries = ['positive_gradient', 'negative_gradient']
         defaults = {'variable_costs': 0,
                     'positive_gradient': {'ub': None, 'costs': 0},
                     'negative_gradient': {'ub': None, 'costs': 0}}
         keys = [k for k in kwargs if k != 'label']
 
-        # TODO: Reinclude fixed_costs for multi period investment modeling
         if 'fixed_costs' in keys:
-            raise AttributeError(
-                "The `fixed_costs` attribute has been removed"
-                " with v0.2!")
+            # raise AttributeError(
+            #     "The `fixed_costs` attribute has been removed"
+            #     " with v0.2!")
+            msg = ("Be aware that the fixed costs attribute is only\n"
+                   "meant to be used for MultiPeriodModels.\n"
+                   "It has been decided to remove the `fixed_costs` "
+                   "attribute with v0.2 for regular uses!")
+            warn(msg, debugging.SuspiciousUsageWarning)
 
         if 'actual_value' in keys:
             raise AttributeError(
