@@ -18,6 +18,7 @@ SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 import logging
 import itertools
@@ -37,10 +38,14 @@ from oemof.solph.network import Bus
 from oemof.solph.network import Flow
 from oemof.solph.network import Sink
 from oemof.solph.plumbing import sequence
+from oemof.tools import economics
+from oemof.tools import debugging
 
 # TODO: Change back imports!
 from options import Investment, MultiPeriodInvestment
-#from oemof.solph.options import Investment, MultiPeriodInvestment
+
+
+# from oemof.solph.options import Investment, MultiPeriodInvestment
 
 
 class ElectricalBus(Bus):
@@ -1747,14 +1752,16 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
 
         dsm_cost = 0
 
-        for t in m.TIMESTEPS:
+        for p, t in m.TIMEINDEX:
             for g in self.multiperioddsm:
                 dsm_cost += (self.dsm_up[g, t]
                              * m.objective_weighting[t]
-                             * g.cost_dsm_up[t])
+                             * g.cost_dsm_up[p]
+                             * ((1 + m.discount_rate) ** -p))
                 dsm_cost += (self.dsm_do_shift[g, t]
                              * m.objective_weighting[t]
-                             * g.cost_dsm_down_shift[t])
+                             * g.cost_dsm_down_shift[p]
+                             * ((1 + m.discount_rate) ** -p))
 
         self.cost = Expression(expr=dsm_cost)
 
@@ -2111,6 +2118,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                                 + self.total[g, p - 1]
                                 - self.old[g, p])
                         self.total_rule.add((g, p), expr)
+
         self.total_rule = Constraint(group, m.PERIODS,
                                      noruleinit=True)
         self.total_rule_build = BuildAction(
@@ -2138,6 +2146,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                         expr = (self.old[g, p]
                                 == 0)
                         self.old_rule.add((g, p), expr)
+
         self.old_rule = Constraint(group, m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
@@ -2256,45 +2265,39 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
         investment_costs = 0
         variable_costs = 0
 
-        amount_periods = len(m.PERIODS)
-
         for g in self.multiperiodinvestdsm:
-            lifetime = g.multiperiodinvestment.lifetime
-            age = g.multiperiodinvestment.age
-            interest = g.multiperiodinvestment.interest_rate
-            discount_factor = [(1+interest) ** (-pp)
-                               for pp in range(0, amount_periods + lifetime)]
-
             if g.multiperiodinvestment.ep_costs is not None:
+                lifetime = g.multiperiodinvestment.lifetime
+                interest = g.multiperiodinvestment.interest_rate
+                if interest == 0:
+                    msg = ("You did not specify an interest rate.\n"
+                           "It will be set equal to the discount_rate of {} "
+                           "of the model as a default.\nThis corresponds to a "
+                           "social planner point of view and does not reflect "
+                           "microeconomic interest requirements.")
+                    warn(msg.format(m.discount_rate),
+                         debugging.SuspiciousUsageWarning)
+                    interest = m.discount_rate
                 for p in m.PERIODS:
+                    annuity = economics.annuity(
+                        capex=g.multiperiodinvestment.ep_costs[p],
+                        n=lifetime,
+                        wacc=interest)
                     investment_costs += (
-                        sum(
-                            self.invest[g, p]
-                            * g.multiperiodinvestment.ep_costs[p]
-                            # * (g.multiperiodinvestment.lifetime
-                            #    - g.multiperiodinvestment.age)
-                            * discount_factor[pp]
-                            for pp in range(p, p + lifetime)
-                        )
+                        self.invest[g, p] * annuity * lifetime
+                        * ((1 + m.discount_rate) ** (-p))
                     )
-                # Payments for old units - sunk costs or relevant?
-                # investment_costs += sum(
-                #     g.multiperiodinvestment.existing
-                #     * g.multiperiodinvestment.ep_costs[0]
-                #     # * (g.multiperiodinvestment.lifetime
-                #     #    - g.multiperiodinvestment.age)
-                #     * discount_factor[pp]
-                #     for pp in range(p, p + lifetime - age)
-                # )
             else:
                 raise ValueError("Missing value for investment costs!")
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 variable_costs += (self.dsm_up[g, t]
                                    * m.objective_weighting[t]
-                                   * g.cost_dsm_up[t])
+                                   * g.cost_dsm_up[p]
+                                   * ((1 + m.discount_rate) ** -p))
                 variable_costs += (self.dsm_do_shift[g, t]
                                    * m.objective_weighting[t]
-                                   * g.cost_dsm_down_shift[t])
+                                   * g.cost_dsm_down_shift[p]
+                                   * ((1 + m.discount_rate) ** -p))
 
         self.cost = Expression(expr=investment_costs + variable_costs)
 
@@ -3393,17 +3396,19 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
 
         dsm_cost = 0
 
-        for t in m.TIMESTEPS:
+        for p, t in m.TIMEINDEX:
             for g in self.multiperioddsm:
                 dsm_cost += (self.dsm_up[g, t]
                              * m.objective_weighting[t]
-                             * g.cost_dsm_up[t])
+                             * g.cost_dsm_up[p]
+                             * ((1 + m.discount_rate) ** -p))
                 dsm_cost += ((sum(self.dsm_do_shift[g, t, tt]
                                   for tt in m.TIMESTEPS)
-                              * g.cost_dsm_down_shift[t]
+                              * g.cost_dsm_down_shift[p]
                               + self.dsm_do_shed[g, t]
-                              * g.cost_dsm_down_shed)
-                             * m.objective_weighting[t])
+                              * g.cost_dsm_down_shed[p])
+                             * m.objective_weighting[t]
+                             * ((1 + m.discount_rate) ** -p))
 
         self.cost = Expression(expr=dsm_cost)
 
@@ -4140,6 +4145,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                                 + self.total[g, p - 1]
                                 - self.old[g, p])
                         self.total_rule.add((g, p), expr)
+
         self.total_rule = Constraint(group, m.PERIODS,
                                      noruleinit=True)
         self.total_rule_build = BuildAction(
@@ -4167,6 +4173,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         expr = (self.old[g, p]
                                 == 0)
                         self.old_rule.add((g, p), expr)
+
         self.old_rule = Constraint(group, m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
@@ -4638,49 +4645,43 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
         investment_costs = 0
         variable_costs = 0
 
-        amount_periods = len(m.PERIODS)
-
         for g in self.multiperiodinvestdsm:
-            lifetime = g.multiperiodinvestment.lifetime
-            age = g.multiperiodinvestment.age
-            interest = g.multiperiodinvestment.interest_rate
-            discount_factor = [(1+interest) ** (-pp)
-                               for pp in range(0, amount_periods + lifetime)]
-
             if g.multiperiodinvestment.ep_costs is not None:
+                lifetime = g.multiperiodinvestment.lifetime
+                interest = g.multiperiodinvestment.interest_rate
+                if interest == 0:
+                    msg = ("You did not specify an interest rate.\n"
+                           "It will be set equal to the discount_rate of {} "
+                           "of the model as a default.\nThis corresponds to a "
+                           "social planner point of view and does not reflect "
+                           "microeconomic interest requirements.")
+                    warn(msg.format(m.discount_rate),
+                         debugging.SuspiciousUsageWarning)
+                    interest = m.discount_rate
                 for p in m.PERIODS:
+                    annuity = economics.annuity(
+                        capex=g.multiperiodinvestment.ep_costs[p],
+                        n=lifetime,
+                        wacc=interest)
                     investment_costs += (
-                        sum(
-                            self.invest[g, p]
-                            * g.multiperiodinvestment.ep_costs[p]
-                            # * (g.multiperiodinvestment.lifetime
-                            #    - g.multiperiodinvestment.age)
-                            * discount_factor[pp]
-                            for pp in range(p, p + lifetime)
-                        )
+                        self.invest[g, p] * annuity * lifetime
+                        * ((1 + m.discount_rate) ** (-p))
                     )
-                # Payments for old units - sunk costs or relevant?
-                # investment_costs += sum(
-                #     g.multiperiodinvestment.existing
-                #     * g.multiperiodinvestment.ep_costs[0]
-                #     # * (g.multiperiodinvestment.lifetime
-                #     #    - g.multiperiodinvestment.age)
-                #     * discount_factor[pp]
-                #     for pp in range(p, p + lifetime - age)
-                # )
             else:
                 raise ValueError("Missing value for investment costs!")
 
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 variable_costs += (self.dsm_up[g, t]
                                    * m.objective_weighting[t]
-                                   * g.cost_dsm_up[t])
+                                   * g.cost_dsm_up[p]
+                                   * ((1 + m.discount_rate) ** -p))
                 variable_costs += ((sum(self.dsm_do_shift[g, t, tt]
                                         for tt in m.TIMESTEPS)
-                                    * g.cost_dsm_down_shift[t]
+                                    * g.cost_dsm_down_shift[p]
                                     + self.dsm_do_shed[g, t]
-                                    * g.cost_dsm_down_shed[t])
-                                   * m.objective_weighting[t])
+                                    * g.cost_dsm_down_shed[p])
+                                   * m.objective_weighting[t]
+                                   * ((1 + m.discount_rate) ** -p))
 
         self.cost = Expression(expr=investment_costs + variable_costs)
 
@@ -5449,7 +5450,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                                  + self.balance_dsm_up[g, h, t]
                                  for h in g.delay_time)
                              * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t]
+                             + self.dsm_do_shed[g, t]
                              * g.cost_dsm_down_shed[t])
                             * m.objective_weighting[t])
 
@@ -5582,9 +5583,9 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         self.H = Set(initialize=unique_H)
 
         self.MULTIPERIODDR_H = Set(within=self.MULTIPERIODDR * self.H,
-                        initialize=[(dr, h)
-                                    for dr in map_MULTIPERIODDR_H
-                                    for h in map_MULTIPERIODDR_H[dr]])
+                                   initialize=[(dr, h)
+                                               for dr in map_MULTIPERIODDR_H
+                                               for h in map_MULTIPERIODDR_H[dr]])
 
         #  ************* VARIABLES *****************************
 
@@ -6218,20 +6219,22 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         dr_cost = 0
 
-        for t in m.TIMESTEPS:
+        for p, t in m.TIMEINDEX:
             for g in self.MULTIPERIODDR:
                 dr_cost += ((sum(self.dsm_up[g, h, t]
                                  + self.balance_dsm_do[g, h, t]
                                  for h in g.delay_time)
-                             * g.cost_dsm_up[t])
-                            * m.objective_weighting[t])
+                             * g.cost_dsm_up[p])
+                            * m.objective_weighting[t]
+                            * ((1 + m.discount_rate) ** -p))
                 dr_cost += ((sum(self.dsm_do_shift[g, h, t]
                                  + self.balance_dsm_up[g, h, t]
                                  for h in g.delay_time)
-                             * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t]
-                             * g.cost_dsm_down_shed[t])
-                            * m.objective_weighting[t])
+                             * g.cost_dsm_down_shift[p]
+                             + self.dsm_do_shed[g, t]
+                             * g.cost_dsm_down_shed[p])
+                            * m.objective_weighting[t]
+                            * ((1 + m.discount_rate) ** -p))
 
         self.cost = Expression(expr=dr_cost)
 
@@ -6981,7 +6984,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
                         # maximum capacity eligibly for load shifting
                         rhs = (max(g.capacity_down[t] * g.flex_share_down,
-                                  g.capacity_up[t] * g.flex_share_up)
+                                   g.capacity_up[t] * g.flex_share_up)
                                * self.invest[g])
 
                         # add constraint
@@ -7182,7 +7185,6 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                        m.PERIODS,
                        within=NonNegativeReals)
 
-
         # Variable load shift down (capacity)
         self.dsm_do_shift = Var(self.MULTIPERIODINVESTDR_H,
                                 m.TIMESTEPS, initialize=0,
@@ -7238,6 +7240,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                                 + self.total[g, p - 1]
                                 - self.old[g, p])
                         self.total_rule.add((g, p), expr)
+
         self.total_rule = Constraint(group, m.PERIODS,
                                      noruleinit=True)
         self.total_rule_build = BuildAction(
@@ -7265,6 +7268,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         expr = (self.old[g, p]
                                 == 0)
                         self.old_rule.add((g, p), expr)
+
         self.old_rule = Constraint(group, m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
@@ -7851,7 +7855,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
                         # maximum capacity eligibly for load shifting
                         rhs = (max(g.capacity_down[t] * g.flex_share_down,
-                                  g.capacity_up[t] * g.flex_share_up)
+                                   g.capacity_up[t] * g.flex_share_up)
                                * self.total[g, p])
 
                         # add constraint
@@ -7874,51 +7878,45 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
         investment_costs = 0
         variable_costs = 0
 
-        amount_periods = len(m.PERIODS)
-
         for g in self.MULTIPERIODINVESTDR:
-            lifetime = g.multiperiodinvestment.lifetime
-            age = g.multiperiodinvestment.age
-            interest = g.multiperiodinvestment.interest_rate
-            discount_factor = [(1+interest) ** (-pp)
-                               for pp in range(0, amount_periods + lifetime)]
-
             if g.multiperiodinvestment.ep_costs is not None:
+                lifetime = g.multiperiodinvestment.lifetime
+                interest = g.multiperiodinvestment.interest_rate
+                if interest == 0:
+                    msg = ("You did not specify an interest rate.\n"
+                           "It will be set equal to the discount_rate of {} "
+                           "of the model as a default.\nThis corresponds to a "
+                           "social planner point of view and does not reflect "
+                           "microeconomic interest requirements.")
+                    warn(msg.format(m.discount_rate),
+                         debugging.SuspiciousUsageWarning)
+                    interest = m.discount_rate
                 for p in m.PERIODS:
+                    annuity = economics.annuity(
+                        capex=g.multiperiodinvestment.ep_costs[p],
+                        n=lifetime,
+                        wacc=interest)
                     investment_costs += (
-                        sum(
-                            self.invest[g, p]
-                            * g.multiperiodinvestment.ep_costs[p]
-                            # * (g.multiperiodinvestment.lifetime
-                            #    - g.multiperiodinvestment.age)
-                            * discount_factor[pp]
-                            for pp in range(p, p + lifetime)
-                        )
+                        self.invest[g, p] * annuity * lifetime
+                        * ((1 + m.discount_rate) ** (-p))
                     )
-                # Payments for old units - sunk costs or relevant?
-                # investment_costs += sum(
-                #     g.multiperiodinvestment.existing
-                #     * g.multiperiodinvestment.ep_costs[0]
-                #     # * (g.multiperiodinvestment.lifetime
-                #     #    - g.multiperiodinvestment.age)
-                #     * discount_factor[pp]
-                #     for pp in range(p, p + lifetime - age)
-                # )
             else:
                 raise ValueError("Missing value for investment costs!")
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 variable_costs += ((sum(self.dsm_up[g, h, t]
                                         + self.balance_dsm_do[g, h, t]
                                         for h in g.delay_time)
-                                    * g.cost_dsm_up[t])
-                                   * m.objective_weighting[t])
+                                    * g.cost_dsm_up[p])
+                                   * m.objective_weighting[t]
+                                   * ((1 + m.discount_rate) ** -p))
                 variable_costs += ((sum(self.dsm_do_shift[g, h, t]
                                         + self.balance_dsm_up[g, h, t]
                                         for h in g.delay_time)
-                                    * g.cost_dsm_down_shift[t]
+                                    * g.cost_dsm_down_shift[p]
                                     + self.dsm_do_shed[g, t]
-                                    * g.cost_dsm_down_shed[t])
-                                   * m.objective_weighting[t])
+                                    * g.cost_dsm_down_shed[p])
+                                   * m.objective_weighting[t]
+                                   * ((1 + m.discount_rate) ** -p))
 
         self.cost = Expression(expr=investment_costs + variable_costs)
         return self.cost
