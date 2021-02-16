@@ -1153,7 +1153,9 @@ class NonConvexFlow(SimpleBlock):
         )
 
         def _min_uptime_rule(block, i, o, t):
-            """Rule definition for min-uptime constraints of nonconvex flows."""
+            """
+            Rule definition for min-uptime constraints of nonconvex flows.
+            """
             if (
                 m.flows[i, o].nonconvex.max_up_down
                 <= t
@@ -1179,7 +1181,9 @@ class NonConvexFlow(SimpleBlock):
         )
 
         def _min_downtime_rule(block, i, o, t):
-            """Rule definition for min-downtime constraints of nonconvex flows."""
+            """
+            Rule definition for min-downtime constraints of nonconvex flows.
+            """
             if (
                 m.flows[i, o].nonconvex.max_up_down
                 <= t

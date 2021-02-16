@@ -555,7 +555,9 @@ class TestsConstraint:
         self.compare_lp_files("transformer_invest_with_existing.lp")
 
     def test_linear_transformer_chp(self):
-        """Constraint test of a Transformer without Investment (two outputs)."""
+        """
+        Constraint test of a Transformer without Investment (two outputs).
+        """
         bgas = solph.Bus(label="gasBus")
         bheat = solph.Bus(label="heatBus")
         bel = solph.Bus(label="electricityBus")
