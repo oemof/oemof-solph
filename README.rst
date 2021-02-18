@@ -1,23 +1,20 @@
-========
-Overview
-========
+|tox-pytest| |tox-checks| |appveyor| |requires| |coveralls| |codecov|
 
-.. start-badges
-
-**docs**
-
-|docs| |zenodo|
-
-**tests**
-
-|appveyor| |requires|
-|coveralls| |codecov|
-|scrutinizer| |codacy| |codeclimate|
-
-**package**
+|scrutinizer| |codacy| |codeclimate| |docs| |requires| |packaging|
 
 |version| |wheel| |supported-versions| |supported-implementations|
-|commits-since|
+|commits-since| |zenodo|
+
+------------------------------
+
+.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?master
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
+
+.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?master
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
+
+.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?master
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
@@ -75,8 +72,15 @@ Overview
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+.. image:: https://raw.githubusercontent.com/oemof/oemof-solph/master/docs/_logo/logo_oemof_solph_big.svg
+    :target: https://github.com/reegis/deflex
+    :width: 600pt
 
-.. end-badges
+===========
+oemof.solph
+===========
+
+**A model generator for energy system modelling and optimisation (LP/MILP)**
 
 
 .. contents::
@@ -210,8 +214,10 @@ Contributing
 ============
 
 A warm welcome to all who want to join the developers and contribute to
-oemof.solph. Information on the details and how to approach us can be found
-`in the documentation <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
+oemof.solph.
+
+Information on the details and how to approach us can be found
+`in the oemof documentation <https://oemof.readthedocs.io/en/latest/contributing.html>`_ .
 
 Citing
 ======
