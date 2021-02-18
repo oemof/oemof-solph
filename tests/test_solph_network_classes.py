@@ -12,9 +12,9 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
+from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
-from oemof.tools.debugging import SuspiciousUsageWarning
 
 
 class TestTransformerClass:
@@ -38,18 +38,21 @@ class TestTransformerClass:
         assert transf.conversion_factors[self.bus][2] == 1
 
     def test_sequence_conversion_factor_from_scalar(self):
-        transf = solph.Transformer(inputs={self.bus: solph.Flow()},
-                                   conversion_factors={self.bus: 2})
+        transf = solph.Transformer(
+            inputs={self.bus: solph.Flow()}, conversion_factors={self.bus: 2}
+        )
         assert transf.conversion_factors[self.bus][6] == 2
 
     def test_sequence_conversion_factor_from_list_correct_length(self):
-        transf = solph.Transformer(inputs={self.bus: solph.Flow()},
-                                   conversion_factors={self.bus: [2]})
+        transf = solph.Transformer(
+            inputs={self.bus: solph.Flow()}, conversion_factors={self.bus: [2]}
+        )
         assert len(transf.conversion_factors[self.bus]) == 1
 
     def test_sequence_conversion_factor_from_list_wrong_length(self):
-        transf = solph.Transformer(inputs={self.bus: solph.Flow()},
-                                   conversion_factors={self.bus: [2]})
+        transf = solph.Transformer(
+            inputs={self.bus: solph.Flow()}, conversion_factors={self.bus: [2]}
+        )
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
 
@@ -101,9 +104,11 @@ def test_deprecated_actual_value():
 
 def test_warning_fixed_still_used():
     """If fixed attribute is still used, a warning is raised."""
-    msg = ("The `fixed` attribute is deprecated.\nIf you have defined "
-           "the `fix` attribute the flow variable will be fixed.\n"
-           "The `fixed` attribute does not change anything.")
+    msg = (
+        "The `fixed` attribute is deprecated.\nIf you have defined "
+        "the `fix` attribute the flow variable will be fixed.\n"
+        "The `fixed` attribute does not change anything."
+    )
     with warnings.catch_warnings(record=True) as w:
         solph.Flow(fixed=True)
         assert len(w) != 0
