@@ -72,7 +72,7 @@
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
-.. image:: https://raw.githubusercontent.com/oemof/oemof-solph/master/docs/_logo/logo_oemof_solph_big.svg
+.. image:: https://raw.githubusercontent.com/oemof/oemof-solph/docs/improve-readme/docs/_logo/logo_oemof_solph_big.svg
     :target: https://github.com/reegis/deflex
     :width: 600pt
 
