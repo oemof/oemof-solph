@@ -10,7 +10,7 @@ Overview
 
 **tests**
 
-|travis| |appveyor| |requires|
+|appveyor| |requires|
 |coveralls| |codecov|
 |scrutinizer| |codacy| |codeclimate|
 
@@ -22,10 +22,6 @@ Overview
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
-
-.. |travis| image:: https://api.travis-ci.org/oemof/oemof-solph.svg?branch=dev
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/github/oemof/oemof-solph/branches
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
@@ -223,7 +219,7 @@ Citing
 For explicitly citing solph, you might want to refer to
 `DOI:10.1016/j.simpa.2020.100028 <https://doi.org/10.1016/j.simpa.2020.100028>`_,
 which gives an overview over the capabilities of solph.
-The core ideas of oemof as a whole are described in 
+The core ideas of oemof as a whole are described in
 `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_
 (preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_).
 To allow citing specific versions, we use the zenodo project to get a DOI for each version.
