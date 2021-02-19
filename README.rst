@@ -104,7 +104,7 @@ Since v0.4.0. it is not possible to install just oemof, use
 ``pip install oemof.solph`` instead.
 
 Everybody is welcome to use and/or develop oemof.solph.
-Read our `contribution <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ section.
+Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
@@ -135,7 +135,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
     pip install oemof.solph
 
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use::
+If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
