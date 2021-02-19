@@ -67,9 +67,8 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     limit : numeric
         Global limit of keyword attribute for the energy system.
 
+    **Constraint**
 
-    Constraint
-    ----------
     .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
